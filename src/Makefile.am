@@ -54,7 +54,6 @@ libmuffin_la_SOURCES =				\
 	compositor/meta-shadow-factory.c	\
 	compositor/meta-shadow-factory-private.h	\
 	compositor/meta-shaped-texture.c	\
-	compositor/meta-shaped-texture.h	\
 	compositor/meta-texture-rectangle.c	\
 	compositor/meta-texture-rectangle.h	\
 	compositor/meta-texture-tower.c		\
@@ -175,6 +174,7 @@ libmuffininclude_base_headers =		\
 	meta/main.h				\
 	meta/meta-background-actor.h		\
 	meta/meta-plugin.h			\
+	meta/meta-shaped-texture.h		\
 	meta/meta-shadow-factory.h		\
 	meta/meta-window-actor.h		\
 	meta/prefs.h				\
