@@ -2639,7 +2639,6 @@ control_rect (MetaFrameControl control,
   return rect;
 }
 
-#define RESIZE_EXTENDS 15
 #define TOP_RESIZE_HEIGHT 4
 static MetaFrameControl
 get_control (MetaFrames *frames,
@@ -2728,8 +2727,8 @@ get_control (MetaFrames *frames,
    * in case of overlap.
    */
 
-  if (y >= (fgeom.height - fgeom.borders.total.bottom - RESIZE_EXTENDS) &&
-      x >= (fgeom.width - fgeom.borders.total.right - RESIZE_EXTENDS))
+  if (y >= (fgeom.height - fgeom.borders.total.bottom) &&
+      x >= (fgeom.width - fgeom.borders.total.right))
     {
       if (has_vert && has_horiz)
         return META_FRAME_CONTROL_RESIZE_SE;
@@ -2738,8 +2737,8 @@ get_control (MetaFrames *frames,
       else if (has_horiz)
         return META_FRAME_CONTROL_RESIZE_E;
     }
-  else if (y >= (fgeom.height - fgeom.borders.total.bottom - RESIZE_EXTENDS) &&
-           x <= (fgeom.borders.total.left + RESIZE_EXTENDS))
+  else if (y >= (fgeom.height - fgeom.borders.total.bottom) &&
+           x <= fgeom.borders.total.left)
     {
       if (has_vert && has_horiz)
         return META_FRAME_CONTROL_RESIZE_SW;
@@ -2748,8 +2747,8 @@ get_control (MetaFrames *frames,
       else if (has_horiz)
         return META_FRAME_CONTROL_RESIZE_W;
     }
-  else if (y < (fgeom.borders.invisible.top + RESIZE_EXTENDS) &&
-           x <= (fgeom.borders.total.left + RESIZE_EXTENDS) && has_north_resize)
+  else if (y < (fgeom.borders.invisible.top) &&
+           x <= fgeom.borders.total.left && has_north_resize)
     {
       if (has_vert && has_horiz)
         return META_FRAME_CONTROL_RESIZE_NW;
@@ -2758,8 +2757,8 @@ get_control (MetaFrames *frames,
       else if (has_horiz)
         return META_FRAME_CONTROL_RESIZE_W;
     }
-  else if (y < (fgeom.borders.invisible.top + RESIZE_EXTENDS) &&
-           x >= (fgeom.width - fgeom.borders.total.right - RESIZE_EXTENDS) && has_north_resize)
+  else if (y < (fgeom.borders.invisible.top) &&
+           x >= fgeom.width - fgeom.borders.total.right && has_north_resize)
     {
       if (has_vert && has_horiz)
         return META_FRAME_CONTROL_RESIZE_NE;
@@ -2773,17 +2772,17 @@ get_control (MetaFrames *frames,
       if (has_vert && has_north_resize)
         return META_FRAME_CONTROL_RESIZE_N;
     }
-  else if (y >= (fgeom.height - fgeom.borders.total.bottom - RESIZE_EXTENDS))
+  else if (y >= (fgeom.height - fgeom.borders.total.bottom))
     {
       if (has_vert)
         return META_FRAME_CONTROL_RESIZE_S;
     }
-  else if (x <= fgeom.borders.total.left + RESIZE_EXTENDS)
+  else if (x <= fgeom.borders.total.left)
     {
       if (has_horiz)
         return META_FRAME_CONTROL_RESIZE_W;
     }
-  else if (x >= (fgeom.width - fgeom.borders.total.right - RESIZE_EXTENDS))
+  else if (x >= (fgeom.width - fgeom.borders.total.right))
     {
       if (has_horiz)
         return META_FRAME_CONTROL_RESIZE_E;
