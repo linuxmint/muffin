@@ -27,8 +27,6 @@ INCLUDES=								\
 	-DGETTEXT_PACKAGE=\"$(GETTEXT_PACKAGE)\"
 
 muffin_built_sources = \
-	muffin-marshal.h \
-	muffin-marshal.c \
 	muffin-enum-types.h \
 	muffin-enum-types.c
 
@@ -307,32 +305,11 @@ EXTRA_DIST=$(desktopfiles_files) 	\
 	libmuffin.pc.in \
 	muffin-plugins.pc.in  \
 	muffin-enum-types.h.in \
-	muffin-enum-types.c.in \
-	muffin-marshal.list
+	muffin-enum-types.c.in
 
 BUILT_SOURCES += $(muffin_built_sources)
-MUFFIN_STAMP_FILES = stamp-muffin-marshal.h stamp-muffin-enum-types.h
+MUFFIN_STAMP_FILES = stamp-muffin-enum-types.h
 CLEANFILES += $(MUFFIN_STAMP_FILES)
-
-muffin-marshal.h: stamp-muffin-marshal.h
-	@true
-stamp-muffin-marshal.h: Makefile muffin-marshal.list
-	$(AM_V_GEN) $(GLIB_GENMARSHAL) \
-		--prefix=_muffin_marshal \
-		--header \
-	$(srcdir)/muffin-marshal.list > xgen-tmh && \
-	(cmp -s xgen-tmh muffin-marshal.h || cp -f xgen-tmh muffin-marshal.h) && \
-	rm -f xgen-tmh && \
-	echo timestamp > $(@F)
-
-muffin-marshal.c: Makefile muffin-marshal.list
-	 $(AM_V_GEN) (echo "#include \"muffin-marshal.h\"" ; \
-	 $(GLIB_GENMARSHAL) \
-		--prefix=_muffin_marshal \
-		--body \
-	 $(srcdir)/muffin-marshal.list ) > xgen-tmc && \
-	cp -f xgen-tmc muffin-marshal.c && \
-	rm -f xgen-tmc
 
 muffin-enum-types.h: stamp-muffin-enum-types.h Makefile
 	@true
