@@ -267,7 +267,7 @@ gsettings_SCHEMAS = org.cinnamon.muffin.gschema.xml
 @GSETTINGS_RULES@
 
 convertdir = $(datadir)/GConf/gsettings
-convert_DATA=$(srcdir)/muffin-schemas.convert
+convert_DATA = muffin-schemas.convert
 
 IMAGES=stock_maximize.png stock_minimize.png stock_delete.png
 VARIABLES=stock_maximize_data $(srcdir)/stock_maximize.png \
@@ -297,6 +297,7 @@ EXTRA_DIST=$(desktopfiles_files) 	\
 	$(desktopfiles_in_files)	\
 	$(wmproperties_in_files)	\
 	org.cinnamon.muffin.gschema.xml.in \
+	muffin-schemas.convert \
 	libmuffin.pc.in \
 	muffin-plugins.pc.in  \
 	muffin-enum-types.h.in \
