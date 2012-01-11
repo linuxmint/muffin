@@ -1,0 +1,31 @@
+# List of source files containing translatable strings.
+# Please keep this file sorted alphabetically.
+src/compositor/compositor.c
+src/core/all-keybindings.h
+src/core/bell.c
+src/core/core.c
+src/core/delete.c
+src/core/display.c
+src/core/errors.c
+src/core/keybindings.c
+src/core/main.c
+src/core/muffin.c
+src/core/prefs.c
+src/core/screen.c
+src/core/session.c
+src/core/util.c
+src/core/window.c
+src/core/window-props.c
+src/core/xprops.c
+src/muffin.desktop.in
+src/muffin-wm.desktop.in
+src/muffin.schemas.in
+src/tools/muffin-message.c
+src/ui/frames.c
+src/ui/menu.c
+src/ui/metaaccellabel.c
+src/ui/resizepopup.c
+src/ui/theme.c
+src/ui/theme-parser.c
+src/ui/theme-viewer.c
+

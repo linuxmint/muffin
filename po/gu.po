@@ -1,0 +1,1896 @@
+# translation of gu.po to Gujarati
+# Ankit Patel <ankit644@yahoo.com>, 2005, 2006.
+# Ankit Patel <ankit@redhat.com>, 2007, 2009.
+# Sweta Kothari <swkothar@redhat.com>, 2011.
+msgid ""
+msgstr ""
+"Project-Id-Version: gu\n"
+"Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?product=muffin&component=general\n"
+"POT-Creation-Date: 2011-01-04 16:55+0000\n"
+"PO-Revision-Date: 2011-02-18 14:16+0530\n"
+"Last-Translator: Sweta Kothari <swkothar@redhat.com>\n"
+"Language-Team: Gujarati\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: KBabel 1.11.4\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n"
+"\n"
+"\n"
+"\n"
+"\n"
+"\n"
+"\n"
+"\n"
+"\n"
+"\n"
+"\n"
+"\n"
+"\n"
+
+#: ../src/core/bell.c:302
+msgid "Bell event"
+msgstr ""
+
+#: ../src/core/core.c:157
+#, c-format
+msgid "Unknown window information request: %d"
+msgstr "અજ્ઞાત વિન્ડો જાણકારી અરજી: %d"
+
+#. Translators: %s is a window title
+#: ../src/core/delete.c:94
+#, c-format
+#| msgid "\"%s\" is not responding."
+msgid "<tt>%s</tt> is not responding."
+msgstr "<tt>%s</tt> જવાબ આપતું નથી."
+
+#: ../src/core/delete.c:99
+msgid ""
+"You may choose to wait a short while for it to continue or force the "
+"application to quit entirely."
+msgstr ""
+"તેને ચાલુ રાખવા માટે અથવા કાર્યક્રમને સંપૂર્ણપણે બંધ થઈ જવા માટે તમે થોડો સમય રાહ જોવાનું "
+"પસંદ કરી શકશો."
+
+#: ../src/core/delete.c:108
+msgid "_Wait"
+msgstr "રાહ જુઓ (_W)"
+
+#: ../src/core/delete.c:108
+msgid "_Force Quit"
+msgstr "જબરદસ્તી બહાર કાઢો (_F)"
+
+#: ../src/core/display.c:365
+#, c-format
+msgid "Missing %s extension required for compositing"
+msgstr "કમ્પોઝીટીંગ માટે ગુમ થયેલ %s એક્સટેન્સન જરૂરી"
+
+#: ../src/core/display.c:431
+#, c-format
+msgid "Failed to open X Window System display '%s'\n"
+msgstr "X વિન્ડો સિસ્ટમ ડિસ્પ્લે '%s' ને ખોલવામાં નિષ્ફળ\n"
+
+#: ../src/core/keybindings.c:742
+#, c-format
+msgid ""
+"Some other program is already using the key %s with modifiers %x as a "
+"binding\n"
+msgstr "કોઈ બીજો કાર્યક્રમ પહેલેથીજ કી %s ને બદલનાર %x સાથે જોડાણ તરીકે વાપરી રહ્યુ છે\n"
+
+#. Displayed when a keybinding which is
+#. * supposed to launch a program fails.
+#.
+#: ../src/core/keybindings.c:2442
+#, c-format
+msgid ""
+"There was an error running <tt>%s</tt>:\n"
+"\n"
+"%s"
+msgstr ""
+"<tt>%s</tt> ચલાવતી વખતે ભૂલ હતી:\n"
+"\n"
+"%s"
+
+#: ../src/core/keybindings.c:2532
+#, c-format
+msgid "No command %d has been defined.\n"
+msgstr "કોઈ આદેશ %d વ્યાખ્યાયિત કરાયો નથી.\n"
+
+#: ../src/core/keybindings.c:3544
+#, c-format
+msgid "No terminal command has been defined.\n"
+msgstr "કોઈ ટર્મિનલ આદેશ વ્યાખ્યાયિત નથી.\n"
+
+#: ../src/core/main.c:130
+#, c-format
+#| msgid ""
+#| "metacity %s\n"
+#| "Copyright (C) 2001-2008 Havoc Pennington, Red Hat, Inc., and others\n"
+#| "This is free software; see the source for copying conditions.\n"
+#| "There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A "
+#| "PARTICULAR PURPOSE.\n"
+msgid ""
+"muffin %s\n"
+"Copyright (C) 2001-%d Havoc Pennington, Red Hat, Inc., and others\n"
+"This is free software; see the source for copying conditions.\n"
+"There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A "
+"PARTICULAR PURPOSE.\n"
+msgstr ""
+"muffin %s\n"
+"Copyright (C) 2001-%d Havoc Pennington, Red Hat, Inc., and others\n"
+"This is free software; see the source for copying conditions.\n"
+"There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A "
+"PARTICULAR PURPOSE.\n"
+
+#: ../src/core/main.c:261
+msgid "Disable connection to session manager"
+msgstr "સત્ર વ્યવસ્થાપકનું જોડાણ નિષ્ક્રિય કરો"
+
+#: ../src/core/main.c:267
+#| msgid "Replace the running window manager with Metacity"
+msgid "Replace the running window manager with Muffin"
+msgstr "Muffin સાથે ચાલતા વિન્ડો સંચાલકને બદલો"
+
+#: ../src/core/main.c:273
+msgid "Specify session management ID"
+msgstr "સત્ર વ્યવસ્થાપન ID સ્પષ્ટ કરો"
+
+#: ../src/core/main.c:278
+msgid "X Display to use"
+msgstr "વાપરવા માટેનું X ડિસ્પ્લે"
+
+#: ../src/core/main.c:284
+msgid "Initialize session from savefile"
+msgstr "સંગ્રહાયેલ ફાઈલમાંથી સત્રનો પ્રારંભ કરો"
+
+#: ../src/core/main.c:290
+msgid "Print version"
+msgstr "છાપન આવૃત્તિ"
+
+#: ../src/core/main.c:296
+msgid "Make X calls synchronous"
+msgstr "X કોલ સુમેળ રીતે કરો"
+
+#: ../src/core/main.c:302
+msgid "Don't make fullscreen windows that are maximized and have no decorations"
+msgstr ""
+
+#: ../src/core/main.c:308
+msgid "Comma-separated list of compositor plugins"
+msgstr ""
+
+#: ../src/core/main.c:314
+msgid "Whether window popup/frame should be shown when cycling windows."
+msgstr ""
+
+#: ../src/core/main.c:321
+msgid "Internal argument for GObject introspection"
+msgstr ""
+
+#: ../src/core/main.c:648
+#, c-format
+msgid "Failed to scan themes directory: %s\n"
+msgstr "થીમની ડિરેક્ટરી જોવામાં નિષ્ફળ: %s\n"
+
+#: ../src/core/main.c:664
+#, c-format
+msgid "Could not find a theme! Be sure %s exists and contains the usual themes.\n"
+msgstr "થીમ શોધી શકાઈ નહિં! ખાતરી કરો કે %s અસ્તિત્વ ધરાવે છે અને તેમાં સામાન્ય થીમ છે.\n"
+
+#: ../src/core/main.c:725
+#, c-format
+msgid "Failed to restart: %s\n"
+msgstr "ફરીથી શરુ કરવામાં નિષ્ફળ: %s\n"
+
+#.
+#. * We found it, but it was invalid.  Complain.
+#. *
+#. * FIXME: This replicates the original behaviour, but in the future
+#. * we might consider reverting invalid keys to their original values.
+#. * (We know the old value, so we can look up a suitable string in
+#. * the symtab.)
+#. *
+#. * (Empty comment follows so the translators don't see this.)
+#.
+#.
+#: ../src/core/prefs.c:541 ../src/core/prefs.c:702
+#, c-format
+msgid "GConf key '%s' is set to an invalid value\n"
+msgstr "જીકોન્ફ કી '%s' એ અયોગ્ય કિંમતમાં ગોઠવાયેલી છે\n"
+
+#: ../src/core/prefs.c:628 ../src/core/prefs.c:871
+#, c-format
+msgid "%d stored in GConf key %s is out of range %d to %d\n"
+msgstr "%d એ GConf કી %s માં સંગ્રહાયેલ છે જે વિસ્તાર %d થી %d ની બહાર છે\n"
+
+#: ../src/core/prefs.c:672 ../src/core/prefs.c:749 ../src/core/prefs.c:797
+#: ../src/core/prefs.c:861 ../src/core/prefs.c:1336 ../src/core/prefs.c:1352
+#: ../src/core/prefs.c:1369 ../src/core/prefs.c:1385
+#, c-format
+msgid "GConf key \"%s\" is set to an invalid type\n"
+msgstr "જીકોન્ફ કી \"%s\" એ અયોગ્ય પ્રકારમાં ગોઠવાયેલી છે\n"
+
+#: ../src/core/prefs.c:1215
+#, c-format
+msgid "GConf key %s is already in use and can't be used to override %s\n"
+msgstr ""
+
+#: ../src/core/prefs.c:1274
+#, c-format
+msgid "Can't override GConf key, %s not found\n"
+msgstr ""
+
+#: ../src/core/prefs.c:1476
+msgid ""
+"Workarounds for broken applications disabled. Some applications may not "
+"behave properly.\n"
+msgstr ""
+"બગડેલા કાર્યક્રમો માટે આસપાસના કાર્યો નિષ્ક્રિય કરેલા છે. કદાચ કેટલાક કાર્યક્રમો યોગ્ય "
+"રીતે નહિ વર્તતા હોય.\n"
+
+#: ../src/core/prefs.c:1553
+#, c-format
+msgid "Could not parse font description \"%s\" from GConf key %s\n"
+msgstr "\"%s\" ફોન્ટના વર્ણનને જીકોન્ફ કી %s માંથી પદચ્છેદ કરી શકાતા નથી\n"
+
+#: ../src/core/prefs.c:1615
+#, c-format
+msgid ""
+"\"%s\" found in configuration database is not a valid value for mouse button "
+"modifier\n"
+msgstr "માઉસ બટનની કિંમત બદલવા માટે રુપરેખાના ડેટાબેઝમાંથી મળેલ કિંમત \"%s\" એ યોગ્ય નથી\n"
+
+#: ../src/core/prefs.c:2045
+#, c-format
+msgid "Error setting number of workspaces to %d: %s\n"
+msgstr "કામ કરવાની જગ્યાની સંખ્યા %d નક્કી કરવામાં ભૂલ થઈ: %s\n"
+
+#: ../src/core/prefs.c:2229 ../src/core/prefs.c:2731
+#, c-format
+msgid "Workspace %d"
+msgstr "કામ કરવાની જગ્યા %d"
+
+#: ../src/core/prefs.c:2261 ../src/core/prefs.c:2439
+#, c-format
+msgid ""
+"\"%s\" found in configuration database is not a valid value for keybinding "
+"\"%s\"\n"
+msgstr "કી જોડાણ \"%s\" માટે રુપરેખાના ડેટાબેઝ \"%s\" માં મળેલ કિંમત યોગ્ય નથી\n"
+
+#: ../src/core/prefs.c:2812
+#, c-format
+msgid "Error setting name for workspace %d to \"%s\": %s\n"
+msgstr "કામ કરવાની જગ્યા %d ને \"%s\" નું નામ બદલવામાં ભૂલ થઈ: %s\n"
+
+#: ../src/core/prefs.c:3028
+#, c-format
+#| msgid "Error setting compositor status: %s\n"
+msgid "Error setting clutter plugin list: %s\n"
+msgstr "ક્લટર પ્લગઇન યાદીને સુયોજિત કરી રહ્યા હોય ત્યારે ભૂલ: %s\n"
+
+#: ../src/core/prefs.c:3072
+#, fuzzy, c-format
+#| msgid "Error setting compositor status: %s\n"
+msgid "Error setting live hidden windows status status: %s\n"
+msgstr "કમ્પોઝીટર પરિસ્થિતિ સુયોજીત કરવામાં ભૂલ: %s\n"
+
+#: ../src/core/prefs.c:3100
+#, fuzzy, c-format
+#| msgid "Error setting compositor status: %s\n"
+msgid "Error setting no tab popup status: %s\n"
+msgstr "કમ્પોઝીટર પરિસ્થિતિ સુયોજીત કરવામાં ભૂલ: %s\n"
+
+#: ../src/core/screen.c:577
+#, c-format
+msgid "Screen %d on display '%s' is invalid\n"
+msgstr "સ્ક્રીન %d કે જે ડિસ્પ્લે '%s' પર છે એ અયોગ્ય છે\n"
+
+#: ../src/core/screen.c:593
+#, c-format
+msgid ""
+"Screen %d on display \"%s\" already has a window manager; try using the --"
+"replace option to replace the current window manager.\n"
+msgstr ""
+"સ્ક્રીન %d કે જે ડિસ્પ્લે \"%s\" પર છે ત્યાં પહેલેથીજ વિન્ડો વ્યવસ્થાપક છે, --replace "
+"વિક્લ્પનો ઉપયોગ કરીને વિન્ડો વ્યવસ્થાપકને બદલવાનો પ્રયત્ન કરો.\n"
+
+#: ../src/core/screen.c:620
+#, c-format
+msgid "Could not acquire window manager selection on screen %d display \"%s\"\n"
+msgstr "સ્ક્રીન %d કે જે ડિસ્પ્લે \"%s\" પર છે તે વિન્ડો વ્યવસ્થાપકની પસંદગીને મેળવી શકાતી નથી\n"
+
+#: ../src/core/screen.c:675
+#, c-format
+msgid "Screen %d on display \"%s\" already has a window manager\n"
+msgstr "સ્ક્રીન %d કે જે ડિસ્પ્લે \"%s\" પર છે ત્યાં પહેલેથીજ વિન્ડો વ્યવસ્થાપક છે\n"
+
+#: ../src/core/screen.c:860
+#, c-format
+msgid "Could not release screen %d on display \"%s\"\n"
+msgstr "સ્ક્રીન %d કે જે ડિસ્પ્લે \"%s\" પર છે તેને દૂર કરી શકાતી નથી\n"
+
+#: ../src/core/session.c:856 ../src/core/session.c:863
+#, c-format
+msgid "Could not create directory '%s': %s\n"
+msgstr "ડિરેક્ટરી '%s' બનાવી શકાતી નથી: %s\n"
+
+#: ../src/core/session.c:873
+#, c-format
+msgid "Could not open session file '%s' for writing: %s\n"
+msgstr "સત્રની ફાઈલ '%s' ને લખવા માટે ખોલી શકાતી નથી: %s\n"
+
+#: ../src/core/session.c:1014
+#, c-format
+msgid "Error writing session file '%s': %s\n"
+msgstr "સત્રની ફાઈલ '%s' ને લખવામાં ભૂલ: %s\n"
+
+#: ../src/core/session.c:1019
+#, c-format
+msgid "Error closing session file '%s': %s\n"
+msgstr "સત્રની ફાઈલ '%s' ને બંધ કરવામાં ભૂલ: %s\n"
+
+#: ../src/core/session.c:1149
+#, c-format
+msgid "Failed to parse saved session file: %s\n"
+msgstr "સંગ્રહિત સત્રની ફાઈલ ને પદચ્છેદ કરવામાં ભૂલ: %s\n"
+
+#: ../src/core/session.c:1198
+#, fuzzy, c-format
+#| msgid "<metacity_session> attribute seen but we already have the session ID"
+msgid "<muffin_session> attribute seen but we already have the session ID"
+msgstr "<metacity_session> લક્ષણ દેખાય છે પરંતુ આપણી પાસે પહેલેથી જ સત્ર ID છે"
+
+#: ../src/core/session.c:1211 ../src/core/session.c:1286
+#: ../src/core/session.c:1318 ../src/core/session.c:1390
+#: ../src/core/session.c:1450
+#, c-format
+msgid "Unknown attribute %s on <%s> element"
+msgstr "અજ્ઞાત લક્ષણ %s એ ઘટક <%s> પર"
+
+#: ../src/core/session.c:1228
+#, c-format
+msgid "nested <window> tag"
+msgstr "પુનરાવર્તિત <window> નિશાની"
+
+#: ../src/core/session.c:1470
+#, c-format
+msgid "Unknown element %s"
+msgstr "અજાણી વસ્તુ %s"
+
+#: ../src/core/session.c:1822
+#, fuzzy
+#| msgid ""
+#| "These windows do not support \"save current setup\" and will have to be "
+#| "restarted manually next time you log in."
+msgid ""
+"These windows do not support &quot;save current setup&quot; and will have to "
+"be restarted manually next time you log in."
+msgstr ""
+"આ બધી વિન્ડો \"વર્તમાન સુયોજનનો સંગ્રહ કરો\" ને આધાર આપતી નથી અને બીજી વખત તમે પ્રવેશ "
+"કરો ત્યારે જાતે જ ફરી શરુ કરવું પડશે."
+
+#: ../src/core/util.c:111
+#, c-format
+msgid "Failed to open debug log: %s\n"
+msgstr "ભૂલ શોધવા માટેનું નોંધપત્ર ખોલવામાં નિષ્ફળ: %s\n"
+
+#: ../src/core/util.c:121
+#, c-format
+msgid "Failed to fdopen() log file %s: %s\n"
+msgstr "fdopen() નોંધપત્ર ફાઈલ %s ખોલવામાં નિષ્ફળ: %s\n"
+
+#: ../src/core/util.c:127
+#, c-format
+msgid "Opened log file %s\n"
+msgstr "પ્રવેશ ફાઈલ %s ખૂલેલી છે\n"
+
+#: ../src/core/util.c:146 ../src/tools/muffin-message.c:179
+#, fuzzy, c-format
+#| msgid "Metacity was compiled without support for verbose mode\n"
+msgid "Muffin was compiled without support for verbose mode\n"
+msgstr "મેટાસીટીને વર્ણનિય પદ્ધતિના આધાર વગર કમ્પાઈલ કરાયુ હતુ\n"
+
+#: ../src/core/util.c:286
+msgid "Window manager: "
+msgstr "વિન્ડો વ્યવસ્થાપક: "
+
+#: ../src/core/util.c:434
+msgid "Bug in window manager: "
+msgstr "વિન્ડો વ્યવસ્થાપકમાં ભૂલ: "
+
+#: ../src/core/util.c:467
+msgid "Window manager warning: "
+msgstr "વિન્ડો વ્યવસ્થાપકની ચેતવણી: "
+
+#: ../src/core/util.c:495
+msgid "Window manager error: "
+msgstr "વિન્ડો વ્યવસ્થાપકની ભૂલ: "
+
+#. Translators: This is the title used on dialog boxes
+#. eof all-keybindings.h
+#: ../src/core/util.c:616 ../src/muffin.desktop.in.h:1
+#: ../src/muffin-wm.desktop.in.h:1
+msgid "Muffin"
+msgstr "Muffin"
+
+#. first time through
+#: ../src/core/window.c:6472
+#, c-format
+msgid ""
+"Window %s sets SM_CLIENT_ID on itself, instead of on the WM_CLIENT_LEADER "
+"window as specified in the ICCCM.\n"
+msgstr ""
+"ICCCM માં સ્પષ્ટ કરેલ WM_CLIENT_LEADER વિન્ડોની %s જગ્યાએ વિન્ડોએ તેની જાતે જ "
+"SM_CLIENT_ID ગોઠવ્યું.\n"
+
+#. We ignore mwm_has_resize_func because WM_NORMAL_HINTS is the
+#. * authoritative source for that info. Some apps such as mplayer or
+#. * xine disable resize via MWM but not WM_NORMAL_HINTS, but that
+#. * leads to e.g. us not fullscreening their windows.  Apps that set
+#. * MWM but not WM_NORMAL_HINTS are basically broken. We complain
+#. * about these apps but make them work.
+#.
+#: ../src/core/window.c:7135
+#, c-format
+msgid ""
+"Window %s sets an MWM hint indicating it isn't resizable, but sets min size %"
+"d x %d and max size %d x %d; this doesn't make much sense.\n"
+msgstr ""
+"વિન્ડો %s એ MWM સંકેત ગોઠવ્યો કે જે તેનું માપ બદલી શકાતુ નથી એમ સૂચવે છે, પરંતુ ન્યૂનત્તમ માપ %"
+"d x %d અને મહત્તમ માપ %d x %d ગોઠવાયેલુ છે; તેનો કોઈ ખાસ અર્થ નીકળતો નથી.\n"
+
+#: ../src/core/window-props.c:309
+#, c-format
+msgid "Application set a bogus _NET_WM_PID %lu\n"
+msgstr "કાર્યક્રમ એ ખોટું _NET_WM_PID %lu સુયોજિત કર્યું છે\n"
+
+#: ../src/core/window-props.c:426
+#, c-format
+msgid "%s (on %s)"
+msgstr "%s (%s પર)"
+
+#: ../src/core/window-props.c:1478
+#, c-format
+msgid "Invalid WM_TRANSIENT_FOR window 0x%lx specified for %s.\n"
+msgstr "અયોગ્ય WM_TRANSIENT_FOR વિન્ડો 0x%lx એ %s માટે સ્પષ્ટ થયેલ છે.\n"
+
+#: ../src/core/xprops.c:155
+#, c-format
+msgid ""
+"Window 0x%lx has property %s\n"
+"that was expected to have type %s format %d\n"
+"and actually has type %s format %d n_items %d.\n"
+"This is most likely an application bug, not a window manager bug.\n"
+"The window has title=\"%s\" class=\"%s\" name=\"%s\"\n"
+msgstr ""
+"વિન્ડો 0x%lx પાસે ગુણધર્મ %s છે\n"
+"જેના માટે પ્રકાર %s માળખું %d હોવુ જોઈએ\n"
+"અને વાસ્તવમાં તેને પ્રકાર %s માળખું %d n_items %d છે.\n"
+"આ મોટે ભાગે કાર્યક્રમની ભૂલ હોવી જોઈએ, નહિ કે વિન્ડો વ્યવસ્થાપકની ભૂલ.\n"
+"વિન્ડોને શીર્ષક=\"%s\" વર્ગ=\"%s\" નામ=\"%s\"\n"
+
+#: ../src/core/xprops.c:411
+#, c-format
+msgid "Property %s on window 0x%lx contained invalid UTF-8\n"
+msgstr "ગુણધર્મ %s વિન્ડો 0x%lx પર અયોગ્ય UTF-8 ધરાવે છે\n"
+
+#: ../src/core/xprops.c:494
+#, c-format
+msgid "Property %s on window 0x%lx contained invalid UTF-8 for item %d in the list\n"
+msgstr "ગુણધર્મ %s વિન્ડો 0x%lx પર યાદીમાં %d વસ્તુ પર અયોગ્ય UTF-8 ધરાવે છે\n"
+
+#: ../src/include/all-keybindings.h:88
+msgid "Switch to workspace 1"
+msgstr "કામ કરવાની જગ્યા ૧ માં જાઓ"
+
+#: ../src/include/all-keybindings.h:90
+msgid "Switch to workspace 2"
+msgstr "કામ કરવાની જગ્યા ૨ માં જાઓ"
+
+#: ../src/include/all-keybindings.h:92
+msgid "Switch to workspace 3"
+msgstr "કામ કરવાની જગ્યા ૩ માં જાઓ"
+
+#: ../src/include/all-keybindings.h:94
+msgid "Switch to workspace 4"
+msgstr "કામ કરવાની જગ્યા ૪ માં જાઓ"
+
+#: ../src/include/all-keybindings.h:96
+msgid "Switch to workspace 5"
+msgstr "કામ કરવાની જગ્યા ૫ માં જાઓ"
+
+#: ../src/include/all-keybindings.h:98
+msgid "Switch to workspace 6"
+msgstr "કામ કરવાની જગ્યા ૬ માં જાઓ"
+
+#: ../src/include/all-keybindings.h:100
+msgid "Switch to workspace 7"
+msgstr "કામ કરવાની જગ્યા ૭ માં જાઓ"
+
+#: ../src/include/all-keybindings.h:102
+msgid "Switch to workspace 8"
+msgstr "કામ કરવાની જગ્યા ૮ માં જાઓ"
+
+#: ../src/include/all-keybindings.h:104
+msgid "Switch to workspace 9"
+msgstr "કામ કરવાની જગ્યા ૯ માં જાઓ"
+
+#: ../src/include/all-keybindings.h:106
+msgid "Switch to workspace 10"
+msgstr "કામ કરવાની જગ્યા ૧૦ માં જાઓ"
+
+#: ../src/include/all-keybindings.h:108
+msgid "Switch to workspace 11"
+msgstr "કામ કરવાની જગ્યા ૧૧ માં જાઓ"
+
+#: ../src/include/all-keybindings.h:110
+msgid "Switch to workspace 12"
+msgstr "કામ કરવાની જગ્યા ૧૨ માં જાઓ"
+
+#: ../src/include/all-keybindings.h:122
+msgid "Switch to workspace on the left of the current workspace"
+msgstr "વર્તમાન કામ કરવાની જગ્યાની ડાબી બાજુની કામ કરવાની જગ્યામાં બદલાવ"
+
+#: ../src/include/all-keybindings.h:126
+msgid "Switch to workspace on the right of the current workspace"
+msgstr "વર્તમાન કામ કરવાની જગ્યાની જમણી બાજુની કામ કરવાની જગ્યામાં બદલાવ"
+
+#: ../src/include/all-keybindings.h:130
+msgid "Switch to workspace above the current workspace"
+msgstr "વર્તમાન કામ કરવાની જગ્યાની ઉપરની કામ કરવાની જગ્યામાં બદલાવ"
+
+#: ../src/include/all-keybindings.h:134
+msgid "Switch to workspace below the current workspace"
+msgstr "વર્તમાન કામ કરવાની જગ્યાની નીચેની કામ કરવાની જગ્યામાં બદલાવ"
+
+#: ../src/include/all-keybindings.h:150
+msgid "Move between windows of an application, using a popup window"
+msgstr "કાર્યક્રમની વિન્ડોમાં ખસો, પોપઅપ વિન્ડોની મદદથી"
+
+#: ../src/include/all-keybindings.h:153
+msgid "Move backward between windows of an application, using a popup window"
+msgstr "કાર્યક્રમની વિન્ડો વચ્ચે પાછળ ખસો, પોપઅપ વિન્ડોની મદદથી"
+
+#: ../src/include/all-keybindings.h:157
+msgid "Move between windows, using a popup window"
+msgstr "વિન્ડો વચ્ચે ખસો, પોપઅપ વિન્ડોની મદદથી"
+
+#: ../src/include/all-keybindings.h:160
+msgid "Move backward between windows, using a popup window"
+msgstr "વિન્ડો વચ્ચે પાછળ ખસો, પોપઅપ વિન્ડોની મદદથી"
+
+#: ../src/include/all-keybindings.h:163
+msgid "Move between panels and the desktop, using a popup window"
+msgstr "પેનલો અને ડેસ્કટોપ વચ્ચે ખસો, પોપઅપ વિન્ડોની મદદથી"
+
+#: ../src/include/all-keybindings.h:166
+msgid "Move backward between panels and the desktop, using a popup window"
+msgstr "પેનલો અને ડેસ્કટોપ વચ્ચે પાછળ ખસો, પોપઅપ વિન્ડોની મદદથી"
+
+#: ../src/include/all-keybindings.h:171
+msgid "Move between windows of an application immediately"
+msgstr "કાર્યક્રમની વિન્ડો વચ્ચે તુરંત જ ખસેડો"
+
+#: ../src/include/all-keybindings.h:174
+msgid "Move backward between windows of an application immediately"
+msgstr "કાર્યક્રમની વિન્ડો વચ્ચે તુરંત જ પાછળ ખસો"
+
+#: ../src/include/all-keybindings.h:177
+msgid "Move between windows immediately"
+msgstr "તરત જ બધી વિન્ડો વચ્ચે ખસો"
+
+#: ../src/include/all-keybindings.h:180
+msgid "Move backward between windows immediately"
+msgstr "વિન્ડો વચ્ચે પાછળ તરત જ ખસો"
+
+#: ../src/include/all-keybindings.h:183
+msgid "Move between panels and the desktop immediately"
+msgstr "તરત જ પેનલ તથા ડેસ્કટોપ વચ્ચે ખસો"
+
+#: ../src/include/all-keybindings.h:186
+msgid "Move backward between panels and the desktop immediately"
+msgstr "તરત જ પેનલ તથા ડેસ્કટોપ વચ્ચે પાછા ફરો"
+
+#: ../src/include/all-keybindings.h:203
+msgid "Hide all normal windows and set focus to the desktop"
+msgstr "બધી સામાન્ય વિન્ડો છુપાવો અને ડેસ્કટોપને ફોકસ સુયોજીત કરો"
+
+#: ../src/include/all-keybindings.h:206
+msgid "Show the panel's main menu"
+msgstr "પેનલનું મુખ્ય મેનુ બતાવો"
+
+#: ../src/include/all-keybindings.h:209
+msgid "Show the panel's \"Run Application\" dialog box"
+msgstr "પેનલનો \"કાર્યક્રમ ચલાવો\" સંવાદ બોક્સ બતાવો"
+
+#: ../src/include/all-keybindings.h:211
+msgid "Start or stop recording the session"
+msgstr "સત્રનું રેકોર્ડ કરવાનું શરૂ અથવા બંધ કરો"
+
+#: ../src/include/all-keybindings.h:252
+msgid "Take a screenshot"
+msgstr "ફોટો લો"
+
+#: ../src/include/all-keybindings.h:254
+msgid "Take a screenshot of a window"
+msgstr "વિન્ડોનો ફોટો લો"
+
+#: ../src/include/all-keybindings.h:256
+msgid "Run a terminal"
+msgstr "ટર્મિનલમાં ચલાવો"
+
+#: ../src/include/all-keybindings.h:271
+msgid "Activate the window menu"
+msgstr "વિન્ડો મેનુ સક્રિય કરો"
+
+#: ../src/include/all-keybindings.h:274
+msgid "Toggle fullscreen mode"
+msgstr "આખી સ્ક્રીન કરવાની સ્થિતિમાં ફેરબદલી"
+
+#: ../src/include/all-keybindings.h:276
+msgid "Toggle maximization state"
+msgstr "મહત્તમ કરવાની સ્થિતિમાં ફેરબદલી"
+
+#: ../src/include/all-keybindings.h:278
+msgid "Toggle whether a window will always be visible over other windows"
+msgstr "શું વિન્ડો હંમેશા અન્ય વિન્ડો ઉપર દેખાતી રહેશે તે બદલો"
+
+#: ../src/include/all-keybindings.h:280
+msgid "Maximize window"
+msgstr "વિન્ડોને મહત્તમ સ્થિતિમાં લાવો"
+
+#: ../src/include/all-keybindings.h:282
+msgid "Restore window"
+msgstr "વિન્ડો પુનઃસંગ્રહિત કરો"
+
+#: ../src/include/all-keybindings.h:284
+msgid "Toggle shaded state"
+msgstr "છાયાંકિત કરવાની સ્થિતિમાં ફેરબદલી"
+
+#: ../src/include/all-keybindings.h:286
+msgid "Minimize window"
+msgstr "વિન્ડોને ન્યૂનત્તમ સ્થિતિમાં લાવો"
+
+#: ../src/include/all-keybindings.h:288
+msgid "Close window"
+msgstr "વિન્ડો બંધ કરો"
+
+#: ../src/include/all-keybindings.h:290
+msgid "Move window"
+msgstr "વિન્ડોને ખસાડો"
+
+#: ../src/include/all-keybindings.h:292
+msgid "Resize window"
+msgstr "વિન્ડોનુ માપ બદલો"
+
+#: ../src/include/all-keybindings.h:295
+msgid "Toggle whether window is on all workspaces or just one"
+msgstr "શું વિન્ડો એ બધી કામ કરવાની જગ્યાઓ ઉપર છે કે ખાલી એક પર છે તે બદલો"
+
+#: ../src/include/all-keybindings.h:299
+msgid "Move window to workspace 1"
+msgstr "વિન્ડોને કામ કરવાની જગ્યા ૧ માં લઈ જાઓ"
+
+#: ../src/include/all-keybindings.h:302
+msgid "Move window to workspace 2"
+msgstr "વિન્ડોને કામ કરવાની જગ્યા ૨ માં લઈ જાઓ"
+
+#: ../src/include/all-keybindings.h:305
+msgid "Move window to workspace 3"
+msgstr "વિન્ડોને કામ કરવાની જગ્યા ૩ માં લઈ જાઓ"
+
+#: ../src/include/all-keybindings.h:308
+msgid "Move window to workspace 4"
+msgstr "વિન્ડોને કામ કરવાની જગ્યા ૪ માં લઈ જાઓ"
+
+#: ../src/include/all-keybindings.h:311
+msgid "Move window to workspace 5"
+msgstr "વિન્ડોને કામ કરવાની જગ્યા ૫ માં લઈ જાઓ"
+
+#: ../src/include/all-keybindings.h:314
+msgid "Move window to workspace 6"
+msgstr "વિન્ડોને કામ કરવાની જગ્યા ૬ માં લઈ જાઓ"
+
+#: ../src/include/all-keybindings.h:317
+msgid "Move window to workspace 7"
+msgstr "વિન્ડોને કામ કરવાની જગ્યા ૭ માં લઈ જાઓ"
+
+#: ../src/include/all-keybindings.h:320
+msgid "Move window to workspace 8"
+msgstr "વિન્ડોને કામ કરવાની જગ્યા ૮ માં લઈ જાઓ"
+
+#: ../src/include/all-keybindings.h:323
+msgid "Move window to workspace 9"
+msgstr "વિન્ડોને કામ કરવાની જગ્યા ૯ માં લઈ જાઓ"
+
+#: ../src/include/all-keybindings.h:326
+msgid "Move window to workspace 10"
+msgstr "વિન્ડોને કામ કરવાની જગ્યા ૧૦ માં લઈ જાઓ"
+
+#: ../src/include/all-keybindings.h:329
+msgid "Move window to workspace 11"
+msgstr "વિન્ડોને કામ કરવાની જગ્યા ૧૧ માં લઈ જાઓ"
+
+#: ../src/include/all-keybindings.h:332
+msgid "Move window to workspace 12"
+msgstr "વિન્ડોને કામ કરવાની જગ્યા ૧૨ માં લઈ જાઓ"
+
+#: ../src/include/all-keybindings.h:344
+msgid "Move window one workspace to the left"
+msgstr "વિન્ડોને ડાબી બાજુની કામ કરવાની જગ્યામાં લાવો"
+
+#: ../src/include/all-keybindings.h:347
+msgid "Move window one workspace to the right"
+msgstr "વિન્ડોને જમણી બાજુની કામ કરવાની જગ્યામાં લાવો"
+
+#: ../src/include/all-keybindings.h:350
+msgid "Move window one workspace up"
+msgstr "વિન્ડોને ઉપરની બાજુની કામ કરવાની જગ્યામાં લાવો"
+
+#: ../src/include/all-keybindings.h:353
+msgid "Move window one workspace down"
+msgstr "વિન્ડોને નીચેની કામ કરવાની જગ્ચામાં લાવો"
+
+#: ../src/include/all-keybindings.h:356
+msgid "Raise window if it's covered by another window, otherwise lower it"
+msgstr "જો વિન્ડો અન્ય વિન્ડો દ્વારા આવરાયેલ હોય, અથવા તેની નીચે હોય તો તેને વધારો"
+
+#: ../src/include/all-keybindings.h:358
+msgid "Raise window above other windows"
+msgstr "વિન્ડોને બીજી બધી વિન્ડોની ઉપર લાવો"
+
+#: ../src/include/all-keybindings.h:360
+msgid "Lower window below other windows"
+msgstr "બીજી વિન્ડો નીચેની વિન્ડોને નાની કરો"
+
+#: ../src/include/all-keybindings.h:364
+msgid "Maximize window vertically"
+msgstr "વિન્ડોને ઉભી દિશામાં મોટી કરો"
+
+#: ../src/include/all-keybindings.h:368
+msgid "Maximize window horizontally"
+msgstr "વિન્ડોને આડી દિશામાં મોટી કરો"
+
+#: ../src/include/all-keybindings.h:372
+msgid "Move window to north-west (top left) corner"
+msgstr "વિન્ડોને ઉત્તર-પશ્ચિમ (ટોચે ડાબે) ખૂણે ખસેડો"
+
+#: ../src/include/all-keybindings.h:375
+msgid "Move window to north-east (top right) corner"
+msgstr "વિન્ડોને ઉત્તર-પૂર્વ (ટોચે જમણે) ખૂણે ખસેડો"
+
+#: ../src/include/all-keybindings.h:378
+msgid "Move window to south-west (bottom left) corner"
+msgstr "વિન્ડોને દક્ષિણ-પશ્ચિમ (તળિયે ડાબે) ખૂણે ખસેડો"
+
+#: ../src/include/all-keybindings.h:381
+msgid "Move window to south-east (bottom right) corner"
+msgstr "વિન્ડોને દક્ષિણ-પૂર્વ (તળિયે જમણે) ખૂણે ખસેડો"
+
+#: ../src/include/all-keybindings.h:385
+msgid "Move window to north (top) side of screen"
+msgstr "વિન્ડોને સ્ક્રીનની ઉત્તર (ટોચ) બાજુએ ખસેડો"
+
+#: ../src/include/all-keybindings.h:388
+msgid "Move window to south (bottom) side of screen"
+msgstr "વિન્ડોને સ્ક્રીનની દક્ષિણ (તળિયે) બાજુએ ખસેડો"
+
+#: ../src/include/all-keybindings.h:391
+msgid "Move window to east (right) side of screen"
+msgstr "વિન્ડોને સ્ક્રીનની પૂર્વ (જમણી) બાજુએ ખસેડો"
+
+#: ../src/include/all-keybindings.h:394
+msgid "Move window to west (left) side of screen"
+msgstr "વિન્ડોને સ્ક્રીનની પશ્ચિમ (ડાબી) બાજુએ ખસેડો"
+
+#: ../src/include/all-keybindings.h:397
+msgid "Move window to center of screen"
+msgstr "વિન્ડોને સ્ક્રીનના કેન્દ્રમાં ખસેડો"
+
+#: ../src/muffin.schemas.in.h:1
+msgid "Attach modal dialogs"
+msgstr "નમુના સંવાદોને જોડો"
+
+#: ../src/muffin.schemas.in.h:2
+msgid "Clutter Plugins"
+msgstr "ક્લટર પ્લગઇન"
+
+#: ../src/muffin.schemas.in.h:3
+msgid ""
+"Determines whether hidden windows (i.e., minimized windows and windows on "
+"other workspaces than the current one) should be kept alive."
+msgstr ""
+
+#: ../src/muffin.schemas.in.h:4
+msgid "Live Hidden Windows"
+msgstr "છુપાયેલ વિન્ડોને જીવંત કરો"
+
+#: ../src/muffin.schemas.in.h:5
+#, fuzzy
+#| msgid "Modifier to use for modified window click actions"
+msgid "Modifier to use for extended window management operations"
+msgstr "બદલેલી વિન્ડોની ક્લિક ક્રિયાઓ માટે વાપરવાનું બદલનાર"
+
+#: ../src/muffin.schemas.in.h:6
+msgid "Plugins to load for the Clutter-based compositing manager."
+msgstr ""
+
+#: ../src/muffin.schemas.in.h:7
+msgid ""
+"This key will initiate the \"overlay\", which is a combination window "
+"overview and application launching system. The default is intended to be the "
+"\"Windows key\" on PC hardware. It's expected that this binding either the "
+"default or set to the empty string."
+msgstr ""
+
+#: ../src/muffin.schemas.in.h:8
+msgid ""
+"When true, instead of having independent titlebars, modal dialogs appear "
+"attached to the titlebar of the parent window and are moved together with "
+"the parent window."
+msgstr ""
+
+#: ../src/tools/muffin-message.c:151
+#, c-format
+msgid "Usage: %s\n"
+msgstr "વપરાશ: %s\n"
+
+#: ../src/ui/frames.c:1104
+msgid "Close Window"
+msgstr "વિન્ડો બંધ કરો"
+
+#: ../src/ui/frames.c:1107
+msgid "Window Menu"
+msgstr "વિન્ડોનું મેનુ"
+
+#: ../src/ui/frames.c:1110
+msgid "Minimize Window"
+msgstr "વિન્ડોને ન્યૂનત્તમ સ્થિતિમાં લાવો"
+
+#: ../src/ui/frames.c:1113
+msgid "Maximize Window"
+msgstr "વિન્ડોને મહત્તમ સ્થિતિમાં લાવો"
+
+#: ../src/ui/frames.c:1116
+msgid "Restore Window"
+msgstr "વિન્ડો પુનઃસંગ્રહો"
+
+#: ../src/ui/frames.c:1119
+msgid "Roll Up Window"
+msgstr "વિન્ડો વીંટી લો"
+
+#: ../src/ui/frames.c:1122
+msgid "Unroll Window"
+msgstr "વિન્ડોનું વીંટેલુ પાછુ લો"
+
+#: ../src/ui/frames.c:1125
+msgid "Keep Window On Top"
+msgstr "વિન્ડોને ટોચે રાખો"
+
+#: ../src/ui/frames.c:1128
+msgid "Remove Window From Top"
+msgstr "વિન્ડોને ટોચથી દૂર કરો"
+
+#: ../src/ui/frames.c:1131
+msgid "Always On Visible Workspace"
+msgstr "હંમેશા દૃશ્ય કામ કરવાની જગ્યા પર"
+
+#: ../src/ui/frames.c:1134
+msgid "Put Window On Only One Workspace"
+msgstr "વિન્ડોને માત્ર એક કાર્યસ્થળ પર મૂકો"
+
+#. Translators: Translate this string the same way as you do in libwnck!
+#: ../src/ui/menu.c:69
+msgid "Mi_nimize"
+msgstr "ન્યૂનત્તમ કરો (_n)"
+
+#. Translators: Translate this string the same way as you do in libwnck!
+#: ../src/ui/menu.c:71
+msgid "Ma_ximize"
+msgstr "મહત્તમ કરો (_x)"
+
+#. Translators: Translate this string the same way as you do in libwnck!
+#: ../src/ui/menu.c:73
+msgid "Unma_ximize"
+msgstr "મહત્તમમાંથી પાછુ લાવો (_x)"
+
+#. Translators: Translate this string the same way as you do in libwnck!
+#: ../src/ui/menu.c:75
+msgid "Roll _Up"
+msgstr "વીંટી લો (_U)"
+
+#. Translators: Translate this string the same way as you do in libwnck!
+#: ../src/ui/menu.c:77
+msgid "_Unroll"
+msgstr "ખોલી કાઢો (_U)"
+
+#. Translators: Translate this string the same way as you do in libwnck!
+#: ../src/ui/menu.c:79
+msgid "_Move"
+msgstr "ખસેડો (_M)"
+
+#. Translators: Translate this string the same way as you do in libwnck!
+#: ../src/ui/menu.c:81
+msgid "_Resize"
+msgstr "માપ બદલો (_R)"
+
+#. Translators: Translate this string the same way as you do in libwnck!
+#: ../src/ui/menu.c:83
+msgid "Move Titlebar On_screen"
+msgstr "શીર્ષકપટ્ટી સ્ક્રીન પર ખસેડો (_s)"
+
+#. separator
+#. Translators: Translate this string the same way as you do in libwnck!
+#: ../src/ui/menu.c:86 ../src/ui/menu.c:88
+msgid "Always on _Top"
+msgstr "હંમેશા ટોચ પર (_T)"
+
+#. Translators: Translate this string the same way as you do in libwnck!
+#: ../src/ui/menu.c:90
+msgid "_Always on Visible Workspace"
+msgstr "હંમેશા દ્રશ્ય કામ કરવાની જગ્યા પર (_A)"
+
+#. Translators: Translate this string the same way as you do in libwnck!
+#: ../src/ui/menu.c:92
+msgid "_Only on This Workspace"
+msgstr "માત્ર આ કામ કરવાની જગ્યા પર (_O)"
+
+#. Translators: Translate this string the same way as you do in libwnck!
+#: ../src/ui/menu.c:94
+msgid "Move to Workspace _Left"
+msgstr "ડાબી કામ કરવાની જગ્યામાં ખસો (_L)"
+
+#. Translators: Translate this string the same way as you do in libwnck!
+#: ../src/ui/menu.c:96
+msgid "Move to Workspace R_ight"
+msgstr "જમણી કામ કરવાની જગ્યામાં ખસો (_i)"
+
+#. Translators: Translate this string the same way as you do in libwnck!
+#: ../src/ui/menu.c:98
+msgid "Move to Workspace _Up"
+msgstr "ઉપરની કામ કરવાની જગ્યામાં ખસો (_U)"
+
+#. Translators: Translate this string the same way as you do in libwnck!
+#: ../src/ui/menu.c:100
+msgid "Move to Workspace _Down"
+msgstr "ઉપરની કામ કરવાની જગ્યામાં ખસો (_D)"
+
+#. separator
+#. Translators: Translate this string the same way as you do in libwnck!
+#: ../src/ui/menu.c:104
+msgid "_Close"
+msgstr "બંધ કરો (_C)"
+
+#: ../src/ui/menu.c:204
+#, c-format
+msgid "Workspace %d%n"
+msgstr "કામ કરવાની જગ્યા %d%n"
+
+#: ../src/ui/menu.c:214
+#, c-format
+msgid "Workspace 1_0"
+msgstr "કામ કરવાની જગ્યા ૧_૦"
+
+#: ../src/ui/menu.c:216
+#, c-format
+msgid "Workspace %s%d"
+msgstr "કામ કરવાની જગ્યા %s%d"
+
+#: ../src/ui/menu.c:397
+msgid "Move to Another _Workspace"
+msgstr "બીજી કામ કરવાની જગ્યામાં ખસેડો"
+
+#. This is the text that should appear next to menu accelerators
+#. * that use the shift key. If the text on this key isn't typically
+#. * translated on keyboards used for your language, don't translate
+#. * this.
+#.
+#: ../src/ui/metaaccellabel.c:77
+msgid "Shift"
+msgstr "Shift"
+
+#. This is the text that should appear next to menu accelerators
+#. * that use the control key. If the text on this key isn't typically
+#. * translated on keyboards used for your language, don't translate
+#. * this.
+#.
+#: ../src/ui/metaaccellabel.c:83
+msgid "Ctrl"
+msgstr "Ctrl"
+
+#. This is the text that should appear next to menu accelerators
+#. * that use the alt key. If the text on this key isn't typically
+#. * translated on keyboards used for your language, don't translate
+#. * this.
+#.
+#: ../src/ui/metaaccellabel.c:89
+msgid "Alt"
+msgstr "Alt"
+
+#. This is the text that should appear next to menu accelerators
+#. * that use the meta key. If the text on this key isn't typically
+#. * translated on keyboards used for your language, don't translate
+#. * this.
+#.
+#: ../src/ui/metaaccellabel.c:95
+msgid "Meta"
+msgstr "Meta"
+
+#. This is the text that should appear next to menu accelerators
+#. * that use the super key. If the text on this key isn't typically
+#. * translated on keyboards used for your language, don't translate
+#. * this.
+#.
+#: ../src/ui/metaaccellabel.c:101
+msgid "Super"
+msgstr "Super"
+
+#. This is the text that should appear next to menu accelerators
+#. * that use the hyper key. If the text on this key isn't typically
+#. * translated on keyboards used for your language, don't translate
+#. * this.
+#.
+#: ../src/ui/metaaccellabel.c:107
+msgid "Hyper"
+msgstr "Hyper"
+
+#. This is the text that should appear next to menu accelerators
+#. * that use the mod2 key. If the text on this key isn't typically
+#. * translated on keyboards used for your language, don't translate
+#. * this.
+#.
+#: ../src/ui/metaaccellabel.c:113
+msgid "Mod2"
+msgstr "Mod2"
+
+#. This is the text that should appear next to menu accelerators
+#. * that use the mod3 key. If the text on this key isn't typically
+#. * translated on keyboards used for your language, don't translate
+#. * this.
+#.
+#: ../src/ui/metaaccellabel.c:119
+msgid "Mod3"
+msgstr "Mod3"
+
+#. This is the text that should appear next to menu accelerators
+#. * that use the mod4 key. If the text on this key isn't typically
+#. * translated on keyboards used for your language, don't translate
+#. * this.
+#.
+#: ../src/ui/metaaccellabel.c:125
+msgid "Mod4"
+msgstr "Mod4"
+
+#. This is the text that should appear next to menu accelerators
+#. * that use the mod5 key. If the text on this key isn't typically
+#. * translated on keyboards used for your language, don't translate
+#. * this.
+#.
+#: ../src/ui/metaaccellabel.c:131
+msgid "Mod5"
+msgstr "Mod5"
+
+#. Translators: This represents the size of a window.  The first number is
+#. * the width of the window and the second is the height.
+#.
+#: ../src/ui/resizepopup.c:113
+#, c-format
+msgid "%d x %d"
+msgstr "%d x %d"
+
+#: ../src/ui/theme.c:255
+msgid "top"
+msgstr "ઉપર"
+
+#: ../src/ui/theme.c:257
+msgid "bottom"
+msgstr "નીચે"
+
+#: ../src/ui/theme.c:259
+msgid "left"
+msgstr "ડાબે"
+
+#: ../src/ui/theme.c:261
+msgid "right"
+msgstr "જમણે"
+
+#: ../src/ui/theme.c:288
+#, c-format
+msgid "frame geometry does not specify \"%s\" dimension"
+msgstr "ચોકઠાની ભૂમિતિ માપ \"%s\" સ્પષ્ટ કરતી નથી"
+
+#: ../src/ui/theme.c:307
+#, c-format
+msgid "frame geometry does not specify dimension \"%s\" for border \"%s\""
+msgstr "ચોકઠાની ભૂમિતિ કિનારી \"%s\" માટે માપ \"%s\" સ્પષ્ટ કરતી નથી"
+
+#: ../src/ui/theme.c:344
+#, c-format
+msgid "Button aspect ratio %g is not reasonable"
+msgstr "બટન માટે ધારેલુ પ્રમાણ %g એ વ્યવસ્થિત નથી"
+
+#: ../src/ui/theme.c:356
+#, c-format
+msgid "Frame geometry does not specify size of buttons"
+msgstr "ચોકઠાની ભૂમિતિ બટનોનું માપ સ્પષ્ટ કરતી નથી"
+
+#: ../src/ui/theme.c:1022
+#, c-format
+msgid "Gradients should have at least two colors"
+msgstr "ઢાળમાં ઓછામાં ઓછા બે રંગ હોવા જોઈએ"
+
+#: ../src/ui/theme.c:1160
+#, c-format
+msgid ""
+"GTK color specification must have the state in brackets, e.g. gtk:fg[NORMAL] "
+"where NORMAL is the state; could not parse \"%s\""
+msgstr ""
+"GTK રંગના સ્પષ્ટીકરણમાં કૌંસમાં સ્થિતિ હોવી જોઈએ દા.ત. gtk:fg[NORMAL] જ્યાં NORMAL "
+"સ્થિતિ છે; \"%s\" નો પદચ્છેદ કરી શકાય નહિં"
+
+#: ../src/ui/theme.c:1174
+#, c-format
+msgid ""
+"GTK color specification must have a close bracket after the state, e.g. gtk:"
+"fg[NORMAL] where NORMAL is the state; could not parse \"%s\""
+msgstr ""
+"GTK રંગના સ્પષ્ટીકરણમાં સ્થિતિ પછી કૌંસ બંધ થવો જોઈએ દા.ત. gtk:fg[NORMAL] જ્યાં "
+"NORMAL સ્થિતિ છે; \"%s\" નો પદચ્છેદ કરી શકાય નહિં"
+
+#: ../src/ui/theme.c:1185
+#, c-format
+msgid "Did not understand state \"%s\" in color specification"
+msgstr "રંગના સ્પષ્ટીકરણમાં સ્થિતિ \"%s\" સમજી શકાઈ નહિં"
+
+#: ../src/ui/theme.c:1198
+#, c-format
+msgid "Did not understand color component \"%s\" in color specification"
+msgstr "રંગના સ્પષ્ટીકરણમાં રંગની વસ્તુ \"%s\" સમજી શકાયો નહિં"
+
+#: ../src/ui/theme.c:1228
+#, c-format
+msgid ""
+"Blend format is \"blend/bg_color/fg_color/alpha\", \"%s\" does not fit the "
+"format"
+msgstr "\"blend/bg_color/fg_color/alpha\" એ મિશ્રિત માળખું છે, \"%s\" માળખામાં બેસતું નથી "
+
+#: ../src/ui/theme.c:1239
+#, c-format
+msgid "Could not parse alpha value \"%s\" in blended color"
+msgstr "મિશ્રિત રંગમાં આલ્ફાની કિંમત \"%s\" નું પદચ્છેદ કરી શકાતુ નથી"
+
+#: ../src/ui/theme.c:1249
+#, c-format
+msgid "Alpha value \"%s\" in blended color is not between 0.0 and 1.0"
+msgstr "મિશ્રિત રંગમાં આલ્ફાની કિંમત \"%s\" ૦.૦ અને ૧.૦ ની વચ્ચે નથી"
+
+#: ../src/ui/theme.c:1296
+#, c-format
+msgid "Shade format is \"shade/base_color/factor\", \"%s\" does not fit the format"
+msgstr "છાયાનું માળખું \"shade/base_color/factor\" છે, \"%s\" માળખામાં બેસતુ નથી"
+
+#: ../src/ui/theme.c:1307
+#, c-format
+msgid "Could not parse shade factor \"%s\" in shaded color"
+msgstr "છાયાંકિત રંગમાં છાયાનો અવયવ \"%s\" નું પદચ્છેદ કરી શકાતુ નથી"
+
+#: ../src/ui/theme.c:1317
+#, c-format
+msgid "Shade factor \"%s\" in shaded color is negative"
+msgstr "છાયાનો અવયવ \"%s\" છાયાના રંગમાં ઋણ છે"
+
+#: ../src/ui/theme.c:1346
+#, c-format
+msgid "Could not parse color \"%s\""
+msgstr "રંગ \"%s\" નુ પદચ્છેદ કરી શકાતુ નથી"
+
+#: ../src/ui/theme.c:1604
+#, c-format
+msgid "Coordinate expression contains character '%s' which is not allowed"
+msgstr "યામાક્ષ સમીકરણ અક્ષર '%s' ધરાવે છે જે સ્વીકાર્ય નથી"
+
+#: ../src/ui/theme.c:1631
+#, c-format
+msgid ""
+"Coordinate expression contains floating point number '%s' which could not be "
+"parsed"
+msgstr "યામાક્ષ સમીકરણ અપૂર્ણાંક સંખ્યા '%s' ધરાવે છે જેનું પદચ્છેદ કરી શકાતું નથી"
+
+#: ../src/ui/theme.c:1645
+#, c-format
+msgid "Coordinate expression contains integer '%s' which could not be parsed"
+msgstr "યામાક્ષ સમીકરણ પૂર્ણાંક સંખ્યા '%s' ધરાવે છે જેનું પદચ્છેદ કરી શકાતું નથી"
+
+#: ../src/ui/theme.c:1767
+#, c-format
+msgid ""
+"Coordinate expression contained unknown operator at the start of this text: "
+"\"%s\""
+msgstr "યામાક્ષ સમીકરણમાં આ લખાણની શરુઆતમાં અજાણ્યા કારકો ધરાવે છે: \"%s\""
+
+#: ../src/ui/theme.c:1824
+#, c-format
+msgid "Coordinate expression was empty or not understood"
+msgstr "યામાક્ષ સમીકરણ ખાલી છે અથવા સમજી શકાય એવું નથી"
+
+#: ../src/ui/theme.c:1935 ../src/ui/theme.c:1945 ../src/ui/theme.c:1979
+#, c-format
+msgid "Coordinate expression results in division by zero"
+msgstr "યામાક્ષ સમીકરણ શૂન્ય વડે ભાગાકારમાં પરિણમશે"
+
+#: ../src/ui/theme.c:1987
+#, c-format
+msgid "Coordinate expression tries to use mod operator on a floating-point number"
+msgstr "યામાક્ષ સમીકરણ અપૂર્ણાંક સંખ્યાની ઉપર શેષ કારકનો ઉપયોગ કરવાનો પ્રયત્ન કરે છે"
+
+#: ../src/ui/theme.c:2043
+#, c-format
+msgid "Coordinate expression has an operator \"%s\" where an operand was expected"
+msgstr "યામાક્ષ સમીકરણ માટે \"%s\" કારક છે જેના માટે ઓપરન્ડ હોવા જોઈએ"
+
+#: ../src/ui/theme.c:2052
+#, c-format
+msgid "Coordinate expression had an operand where an operator was expected"
+msgstr "યામાક્ષ સમીકરણમાં ઓપરન્ડ છે જ્યાં કારક હોવુ જોઈતું હતું"
+
+#: ../src/ui/theme.c:2060
+#, c-format
+msgid "Coordinate expression ended with an operator instead of an operand"
+msgstr "યામાક્ષ સમીકરણનો અંત ઓપરન્ડની જગ્યાએ કારકથી થાય છે"
+
+#: ../src/ui/theme.c:2070
+#, c-format
+msgid ""
+"Coordinate expression has operator \"%c\" following operator \"%c\" with no "
+"operand in between"
+msgstr "યામાક્ષ સમીકરણમાં \"%c\" કારક પછી તરત જ \"%c\" કારક છે જેમની વચ્ચે કોઈ ઓપરન્ડ નથી"
+
+#: ../src/ui/theme.c:2221 ../src/ui/theme.c:2266
+#, c-format
+msgid "Coordinate expression had unknown variable or constant \"%s\""
+msgstr "યામાક્ષ સમીકરણમાં અજાણ્યો ચલ કે અચલ \"%s\" છે"
+
+#: ../src/ui/theme.c:2320
+#, c-format
+msgid "Coordinate expression parser overflowed its buffer."
+msgstr "યામાક્ષ સમીકરણ પદચ્છેદકે તેનું બફર ઓવરફ્લો કરી નાંખ્યું."
+
+#: ../src/ui/theme.c:2349
+#, c-format
+msgid "Coordinate expression had a close parenthesis with no open parenthesis"
+msgstr "યામાક્ષ સમીકરણ પાસે ખુલ્લા કૌંસની વગર જ બંધ કૌંસ છે"
+
+#: ../src/ui/theme.c:2413
+#, c-format
+msgid "Coordinate expression had an open parenthesis with no close parenthesis"
+msgstr "યામાક્ષ સમીકરણ પાસે બંધ કૌંસની વગર જ ખુલ્લો કૌંસ હતો"
+
+#: ../src/ui/theme.c:2424
+#, c-format
+msgid "Coordinate expression doesn't seem to have any operators or operands"
+msgstr "યામાક્ષ સમીકરણમાં કોઈ કારક કે ઓપરન્ડ હોય તેવુ લાગતુ નથી"
+
+#: ../src/ui/theme.c:2634 ../src/ui/theme.c:2654 ../src/ui/theme.c:2674
+#, c-format
+msgid "Theme contained an expression that resulted in an error: %s\n"
+msgstr "થીમે સમાવેલ સમીકરણને કારણે ભૂલમાં પરિણમ્યું: %s\n"
+
+#: ../src/ui/theme.c:4264
+#, c-format
+msgid ""
+"<button function=\"%s\" state=\"%s\" draw_ops=\"whatever\"/> must be "
+"specified for this frame style"
+msgstr ""
+"આ માળખાની શૈલી માટે <button function=\"%s\" state=\"%s\" draw_ops=\"whatever\"/"
+"> સ્પષ્ટ કરેલી હોવી જરુરી છે"
+
+#: ../src/ui/theme.c:4753 ../src/ui/theme.c:4778
+#, c-format
+msgid "Missing <frame state=\"%s\" resize=\"%s\" focus=\"%s\" style=\"whatever\"/>"
+msgstr "<frame state=\"%s\" resize=\"%s\" focus=\"%s\" style=\"whatever\"/> ખોવાય છે"
+
+#: ../src/ui/theme.c:4826
+#, c-format
+msgid "Failed to load theme \"%s\": %s\n"
+msgstr "થીમ \"%s\" લાવવામાં નિષ્ફળ: %s\n"
+
+#: ../src/ui/theme.c:4962 ../src/ui/theme.c:4969 ../src/ui/theme.c:4976
+#: ../src/ui/theme.c:4983 ../src/ui/theme.c:4990
+#, c-format
+msgid "No <%s> set for theme \"%s\""
+msgstr "કોઈ <%s> ગોઠવણ થીમ \"%s\" માટે નથી"
+
+#: ../src/ui/theme.c:4998
+#, c-format
+msgid ""
+"No frame style set for window type \"%s\" in theme \"%s\", add a <window "
+"type=\"%s\" style_set=\"whatever\"/> element"
+msgstr ""
+"થીમ \"%s\" માં વિન્ડોના પ્રકાર \"%s\" માટે કોઈ માળખાની શૈલી ગોઠવાયેલી નથી, <window "
+"type=\"%s\" style_set=\"whatever\"/> વસ્તુ ઊમેરો"
+
+#: ../src/ui/theme.c:5435 ../src/ui/theme.c:5497 ../src/ui/theme.c:5560
+#, c-format
+msgid "User-defined constants must begin with a capital letter; \"%s\" does not"
+msgstr "વપરાશકર્તા દ્વારા વ્યાખ્યાયિત અચલો મોટા અક્ષરથી જ શરુ થવા જોઈએ; \"%s\" નહિં"
+
+#: ../src/ui/theme.c:5443 ../src/ui/theme.c:5505 ../src/ui/theme.c:5568
+#, c-format
+msgid "Constant \"%s\" has already been defined"
+msgstr "અચલ \"%s\" પહેલેથી જ વ્યાખ્યાયિત છે"
+
+#. Translators: This means that an attribute which should have been found
+#. * on an XML element was not in fact found.
+#.
+#: ../src/ui/theme-parser.c:236
+#, c-format
+msgid "No \"%s\" attribute on element <%s>"
+msgstr "કોઈ \"%s\" લક્ષણ ઘટક <%s> પર નથી"
+
+#: ../src/ui/theme-parser.c:265 ../src/ui/theme-parser.c:283
+#, c-format
+msgid "Line %d character %d: %s"
+msgstr "લીટી %d અક્ષર %d: %s"
+
+#: ../src/ui/theme-parser.c:479
+#, c-format
+msgid "Attribute \"%s\" repeated twice on the same <%s> element"
+msgstr "લક્ષણ \"%s\" સરખી <%s> વસ્તુઓ પર બે વખત પુનરાવરર્તિત થાય છે"
+
+#: ../src/ui/theme-parser.c:503 ../src/ui/theme-parser.c:552
+#, c-format
+msgid "Attribute \"%s\" is invalid on <%s> element in this context"
+msgstr "લક્ષણ \"%s\" આ સંદર્ભ માટે <%s> વસ્તુ પર અયોગ્ય છે"
+
+#: ../src/ui/theme-parser.c:594
+#, c-format
+msgid "Could not parse \"%s\" as an integer"
+msgstr "\"%s\" ને પૂર્ણાંક તરીકે પદચ્છેદ કરી શકાયુ નહિ"
+
+#: ../src/ui/theme-parser.c:603 ../src/ui/theme-parser.c:658
+#, c-format
+msgid "Did not understand trailing characters \"%s\" in string \"%s\""
+msgstr "શબ્દમાળા \"%s\" માં પૂંછડિયા અક્ષરો \"%s\" સમજી શકાયા નહિં"
+
+#: ../src/ui/theme-parser.c:613
+#, c-format
+msgid "Integer %ld must be positive"
+msgstr "પૂર્ણાંક %ld ધન હોવું જોઈએ"
+
+#: ../src/ui/theme-parser.c:621
+#, c-format
+msgid "Integer %ld is too large, current max is %d"
+msgstr "પૂર્ણાંક %ld બહુ મોટો છે, વર્તમાન મહત્તમ %d છે"
+
+#: ../src/ui/theme-parser.c:649 ../src/ui/theme-parser.c:765
+#, c-format
+msgid "Could not parse \"%s\" as a floating point number"
+msgstr "\"%s\" ને અપૂર્ણાંક સંખ્યા તરીકે પદચ્છેદ કરી શકાયો નહિં"
+
+#: ../src/ui/theme-parser.c:680 ../src/ui/theme-parser.c:708
+#, c-format
+msgid "Boolean values must be \"true\" or \"false\" not \"%s\""
+msgstr "બુલિયન કિંમતો \"ખરુ\" અથવા \"ખોટુ\" હોવી જોઈએ નહિં કે \"%s\""
+
+#: ../src/ui/theme-parser.c:735
+#, c-format
+msgid "Angle must be between 0.0 and 360.0, was %g\n"
+msgstr "ખૂણો ૦.૦ અને ૩૬૦.૦ ની વચ્ચે હોવો જોઈએ, જે %g હતો\n"
+
+#: ../src/ui/theme-parser.c:798
+#, c-format
+msgid "Alpha must be between 0.0 (invisible) and 1.0 (fully opaque), was %g\n"
+msgstr "ખૂણો ૦.૦ (અદ્રશ્ય) અને ૧.૦ (પૂર્ણ અપારદર્શક) ની વચ્ચે હોવો જોઈએ, જે %g હતો\n"
+
+#: ../src/ui/theme-parser.c:863
+#, c-format
+msgid ""
+"Invalid title scale \"%s\" (must be one of xx-small,x-small,small,medium,"
+"large,x-large,xx-large)\n"
+msgstr ""
+"શીર્ષક \"%s\" નું અયોગ્ય માપ (આમાંથી જ એક હોવું જોઈએ- xx-small,x-small,small,medium,"
+"large,x-large,xx-large)\n"
+
+#: ../src/ui/theme-parser.c:1019 ../src/ui/theme-parser.c:1082
+#: ../src/ui/theme-parser.c:1116 ../src/ui/theme-parser.c:1219
+#, c-format
+msgid "<%s> name \"%s\" used a second time"
+msgstr "<%s> નામ \"%s\" નો બીજી વાર ઉપયોગ થયો"
+
+#: ../src/ui/theme-parser.c:1031 ../src/ui/theme-parser.c:1128
+#: ../src/ui/theme-parser.c:1231
+#, c-format
+msgid "<%s> parent \"%s\" has not been defined"
+msgstr "<%s> પિતૃ \"%s\" વ્યાખ્યાયિત નથી"
+
+#: ../src/ui/theme-parser.c:1141
+#, c-format
+msgid "<%s> geometry \"%s\" has not been defined"
+msgstr "<%s> ભૂમિતિ \"%s\" વ્યાખ્યાયિત નથી"
+
+#: ../src/ui/theme-parser.c:1154
+#, c-format
+msgid "<%s> must specify either a geometry or a parent that has a geometry"
+msgstr "<%s> ને ભૂમિતિ અથવા પિતૃ કે જેની પાસે ભૂમિતિ હોય તે સ્પષ્ટ કરવો જ પડે છે"
+
+#: ../src/ui/theme-parser.c:1196
+msgid "You must specify a background for an alpha value to be meaningful"
+msgstr "આલ્ફા કિંમત ઉપયોગી હોય તે માટે તમારે પાશ્વભાગ સ્પષ્ટ કરવો જ પડશે"
+
+#: ../src/ui/theme-parser.c:1264
+#, c-format
+msgid "Unknown type \"%s\" on <%s> element"
+msgstr "<%s> વસ્તુ પર અજાણ્યો પ્રકાર \"%s\""
+
+#: ../src/ui/theme-parser.c:1275
+#, c-format
+msgid "Unknown style_set \"%s\" on <%s> element"
+msgstr "<%s> વસ્તુ પર અજાણી શૈલીની ગોઠવણી \"%s\""
+
+#: ../src/ui/theme-parser.c:1283
+#, c-format
+msgid "Window type \"%s\" has already been assigned a style set"
+msgstr "વિન્ડોના પ્રકાર \"%s\" માટે પહેલેથી જ શૈલીની ગોઠવણીની નિમણૂક કરેલી છે"
+
+#: ../src/ui/theme-parser.c:1313 ../src/ui/theme-parser.c:1377
+#: ../src/ui/theme-parser.c:1603 ../src/ui/theme-parser.c:2838
+#: ../src/ui/theme-parser.c:2884 ../src/ui/theme-parser.c:3032
+#: ../src/ui/theme-parser.c:3224 ../src/ui/theme-parser.c:3262
+#: ../src/ui/theme-parser.c:3300 ../src/ui/theme-parser.c:3338
+#, c-format
+msgid "Element <%s> is not allowed below <%s>"
+msgstr "વસ્તુ <%s> એ <%s> ની નીચે સ્વીકૃત નથી"
+
+#: ../src/ui/theme-parser.c:1427 ../src/ui/theme-parser.c:1441
+#: ../src/ui/theme-parser.c:1486
+msgid ""
+"Cannot specify both \"button_width\"/\"button_height\" and \"aspect_ratio\" "
+"for buttons"
+msgstr ""
+"બટનો માટે \"button_width\"/\"button_height\" અને \"aspect_ratio\" બંને સ્પષ્ટ કરી "
+"શકતા નથી"
+
+#: ../src/ui/theme-parser.c:1450
+#, c-format
+msgid "Distance \"%s\" is unknown"
+msgstr "અંતર \"%s\" અજાણ છે"
+
+#: ../src/ui/theme-parser.c:1495
+#, c-format
+msgid "Aspect ratio \"%s\" is unknown"
+msgstr "ધારેલુ પ્રમાણ \"%s\" અજાણ છે"
+
+#: ../src/ui/theme-parser.c:1557
+#, c-format
+msgid "Border \"%s\" is unknown"
+msgstr "કિનારી \"%s\" અજાણી છે"
+
+#: ../src/ui/theme-parser.c:1868
+#, c-format
+msgid "No \"start_angle\" or \"from\" attribute on element <%s>"
+msgstr "ઘટક <%s> પર કોઈ \"start_angle\" અથવા \"from\" લક્ષણ નથી"
+
+#: ../src/ui/theme-parser.c:1875
+#, c-format
+msgid "No \"extent_angle\" or \"to\" attribute on element <%s>"
+msgstr "ઘટક <%s> પર કોઈ \"extent_angle\" અથવા \"to\" લક્ષણ નથી"
+
+#: ../src/ui/theme-parser.c:2115
+#, c-format
+msgid "Did not understand value \"%s\" for type of gradient"
+msgstr "ઢાળના પ્રકાર માટે કિંમત \"%s\" ને સમજી શકાતી નથી"
+
+#: ../src/ui/theme-parser.c:2193 ../src/ui/theme-parser.c:2568
+#, c-format
+msgid "Did not understand fill type \"%s\" for <%s> element"
+msgstr "વસ્તુ <%s> માટે ફિલનો પ્રકાર \"%s\" સમજી શકાતો નથી"
+
+#: ../src/ui/theme-parser.c:2360 ../src/ui/theme-parser.c:2443
+#: ../src/ui/theme-parser.c:2506
+#, c-format
+msgid "Did not understand state \"%s\" for <%s> element"
+msgstr "સ્થિતિ \"%s\" વસ્તુ <%s> માટે સમજી શકાતી નથી"
+
+#: ../src/ui/theme-parser.c:2370 ../src/ui/theme-parser.c:2453
+#, c-format
+msgid "Did not understand shadow \"%s\" for <%s> element"
+msgstr "છાયા \"%s\" વસ્તુ <%s> માટે સમજી શકાતી નથી"
+
+#: ../src/ui/theme-parser.c:2380
+#, c-format
+msgid "Did not understand arrow \"%s\" for <%s> element"
+msgstr "તીર \"%s\" વસ્તુ <%s> માટે સમજી શકાતુ નથી"
+
+#: ../src/ui/theme-parser.c:2694 ../src/ui/theme-parser.c:2790
+#, c-format
+msgid "No <draw_ops> called \"%s\" has been defined"
+msgstr "કોઈ <draw_ops> બોલાવાયેલ \"%s\" વ્યાખ્યાયિત નથી"
+
+#: ../src/ui/theme-parser.c:2706 ../src/ui/theme-parser.c:2802
+#, c-format
+msgid "Including draw_ops \"%s\" here would create a circular reference"
+msgstr "draw_ops ની સાથે \"%s\" વર્તુળાકાર નિર્દેશ બની જશે"
+
+#: ../src/ui/theme-parser.c:2917
+#, c-format
+msgid "Unknown position \"%s\" for frame piece"
+msgstr "તકતીના ટુકડા માટે અજાણી સ્થિતિ \"%s\" છે"
+
+#: ../src/ui/theme-parser.c:2925
+#, c-format
+msgid "Frame style already has a piece at position %s"
+msgstr "તકતીની શૈલી પાસે પહેલેથી જ સ્થિતિ %s પાસે ટુકડો છે"
+
+#: ../src/ui/theme-parser.c:2942 ../src/ui/theme-parser.c:3017
+#, c-format
+msgid "No <draw_ops> with the name \"%s\" has been defined"
+msgstr "કોઈ પણ <draw_ops> નામ \"%s\" સાથે વ્યાખ્યાયિત નથી"
+
+#: ../src/ui/theme-parser.c:2971
+#, c-format
+msgid "Unknown function \"%s\" for button"
+msgstr "\"%s\" એ બટન માટે અજાણ્યું વિધેય છે"
+
+#: ../src/ui/theme-parser.c:2980
+#, c-format
+msgid "Button function \"%s\" does not exist in this version (%d, need %d)"
+msgstr "બટન વિધેય \"%s\" આ આવૃત્તિમાં અસ્તિત્વમાં નથી (%d, %d જરૂર)"
+
+#: ../src/ui/theme-parser.c:2992
+#, c-format
+msgid "Unknown state \"%s\" for button"
+msgstr "\"%s\" એ બટન માટે અજાણી સ્થિતિ છે"
+
+#: ../src/ui/theme-parser.c:3000
+#, c-format
+msgid "Frame style already has a button for function %s state %s"
+msgstr "વિધેય %s ની સ્થિતિ %s માટેના ચોકઠાની શૈલી પાસે પહેલેથી જ બટન છે"
+
+#: ../src/ui/theme-parser.c:3071
+#, c-format
+msgid "\"%s\" is not a valid value for focus attribute"
+msgstr "પ્રકાશન લક્ષણ માટે \"%s\" એ યોગ્ય કિંમત નથી"
+
+#: ../src/ui/theme-parser.c:3080
+#, c-format
+msgid "\"%s\" is not a valid value for state attribute"
+msgstr "સ્થિતિ લક્ષણ માટે \"%s\" એ યોગ્ય કિંમત નથી"
+
+#: ../src/ui/theme-parser.c:3090
+#, c-format
+msgid "A style called \"%s\" has not been defined"
+msgstr "શૈલી જે \"%s\" તરીકે ઓળખાય છે તે હજુ સુધી વ્યાખ્યાયિત થઈ નથી"
+
+#: ../src/ui/theme-parser.c:3111 ../src/ui/theme-parser.c:3134
+#, c-format
+msgid "\"%s\" is not a valid value for resize attribute"
+msgstr "માપ બદલવાના લક્ષણ માટે \"%s\" એ યોગ્ય કિંમત નથી"
+
+#: ../src/ui/theme-parser.c:3145
+#, c-format
+msgid ""
+"Should not have \"resize\" attribute on <%s> element for maximized/shaded "
+"states"
+msgstr "મહત્તમ/છાયાંકિત સ્થિતિઓ માટે <%s> વસ્તુ પર \"માપ બદલો\" એવું કોઈ લક્ષણ નથી"
+
+#: ../src/ui/theme-parser.c:3159
+#, c-format
+msgid "Should not have \"resize\" attribute on <%s> element for maximized states"
+msgstr "મહત્તમ સ્થિતિઓ માટે ઘટક <%s> પર \"resize\" એવું કોઈ લક્ષણ નથી"
+
+#: ../src/ui/theme-parser.c:3173 ../src/ui/theme-parser.c:3195
+#, c-format
+msgid "Style has already been specified for state %s resize %s focus %s"
+msgstr "સ્થિતિ %s માપ બદલનાર %s પ્રકાશન %s માટે પહેલેથી જ શૈલી સ્પષ્ટ કરાયેલી છે"
+
+#: ../src/ui/theme-parser.c:3184 ../src/ui/theme-parser.c:3206
+#, c-format
+msgid "Style has already been specified for state %s focus %s"
+msgstr "સ્થિતિ %s પ્રકાશન %s માટે પહેલેથી જ શૈલી સ્પષ્ટ કરાયેલી છે"
+
+#: ../src/ui/theme-parser.c:3245
+msgid ""
+"Can't have a two draw_ops for a <piece> element (theme specified a draw_ops "
+"attribute and also a <draw_ops> element, or specified two elements)"
+msgstr ""
+"<piece> વસ્તુ માટે બે draw_ops ના હોઈ શકે (થીમે draw_ops લક્ષણ તથા <draw_ops> વસ્તુ "
+"પણ સ્પષ્ટ કર્યો, અથવા બંને વસ્તુઓ સ્પષ્ટ કર્યા)"
+
+#: ../src/ui/theme-parser.c:3283
+msgid ""
+"Can't have a two draw_ops for a <button> element (theme specified a draw_ops "
+"attribute and also a <draw_ops> element, or specified two elements)"
+msgstr ""
+"<button> વસ્તુ માટે બે draw_ops ના હોઈ શકે (થીમે draw_ops લક્ષણ તથા <draw_ops> વસ્તુ "
+"પણ સ્પષ્ટ કર્યો, અથવા બંને વસ્તુઓ સ્પષ્ટ કર્યા)"
+
+#: ../src/ui/theme-parser.c:3321
+msgid ""
+"Can't have a two draw_ops for a <menu_icon> element (theme specified a "
+"draw_ops attribute and also a <draw_ops> element, or specified two elements)"
+msgstr ""
+"<menu_icon> વસ્તુ માટે બે draw_ops ના હોઈ શકે (થીમે draw_ops લક્ષણ તથા <draw_ops> "
+"વસ્તુ પણ સ્પષ્ટ કર્યો, અથવા બંને વસ્તુઓ સ્પષ્ટ કર્યા)"
+
+#: ../src/ui/theme-parser.c:3385
+#, c-format
+msgid "Bad version specification '%s'"
+msgstr ""
+
+#: ../src/ui/theme-parser.c:3458
+msgid ""
+"\"version\" attribute cannot be used in metacity-theme-1.xml or metacity-"
+"theme-2.xml"
+msgstr ""
+
+#: ../src/ui/theme-parser.c:3481
+#, c-format
+msgid "Theme requires version %s but latest supported theme version is %d.%d"
+msgstr ""
+
+#: ../src/ui/theme-parser.c:3513
+#, c-format
+msgid "Outermost element in theme must be <metacity_theme> not <%s>"
+msgstr "થીમની સૌથી બહારની વસ્તુ <metacity_theme> જ હોવો જોઈએ નહિં કે <%s>"
+
+#: ../src/ui/theme-parser.c:3533
+#, c-format
+msgid "Element <%s> is not allowed inside a name/author/date/description element"
+msgstr "વસ્તુ <%s> name/author/date/description ની અંદર સ્વીકાર્ય નથી"
+
+#: ../src/ui/theme-parser.c:3538
+#, c-format
+msgid "Element <%s> is not allowed inside a <constant> element"
+msgstr "વસ્તુ <%s> એ <constant> વસ્તુની અંદર સ્વીકાર્ય નથી"
+
+#: ../src/ui/theme-parser.c:3550
+#, c-format
+msgid "Element <%s> is not allowed inside a distance/border/aspect_ratio element"
+msgstr "વસ્તુ <%s> એ distance/border/aspect_ratio વસ્તુની અંદર સ્વીકાર્ય નથી"
+
+#: ../src/ui/theme-parser.c:3572
+#, c-format
+msgid "Element <%s> is not allowed inside a draw operation element"
+msgstr "વસ્તુ <%s> એ દોરવાની પ્રક્રિયાના વસ્તુની અંદર સ્વીકાર્ય નથી"
+
+#: ../src/ui/theme-parser.c:3582 ../src/ui/theme-parser.c:3612
+#: ../src/ui/theme-parser.c:3617 ../src/ui/theme-parser.c:3622
+#, c-format
+msgid "Element <%s> is not allowed inside a <%s> element"
+msgstr "વસ્તુ <%s> એ <%s> વસ્તુની અંદર સ્વીકાર્ય નથી"
+
+#: ../src/ui/theme-parser.c:3850
+msgid "No draw_ops provided for frame piece"
+msgstr "ચોકઠાના ટુકડા માટે કોઈ draw_ops આપેલ નથી"
+
+#: ../src/ui/theme-parser.c:3865
+msgid "No draw_ops provided for button"
+msgstr "બટન માટે કોઈ draw_ops આપેલ નથી"
+
+#: ../src/ui/theme-parser.c:3919
+#, c-format
+msgid "No text is allowed inside element <%s>"
+msgstr "કોઈ લખાણ વસ્તુ <%s> ની અંદર સ્વીકાર્ય નથી"
+
+#: ../src/ui/theme-parser.c:3977 ../src/ui/theme-parser.c:3989
+#: ../src/ui/theme-parser.c:4001 ../src/ui/theme-parser.c:4013
+#: ../src/ui/theme-parser.c:4025
+#, fuzzy, c-format
+#| msgid "<name> specified twice for this theme"
+msgid "<%s> specified twice for this theme"
+msgstr "આ થીમ માટે <name> બે વખત સ્પષ્ટ કરેલ છે"
+
+#: ../src/ui/theme-parser.c:4299
+#, c-format
+msgid "Failed to find a valid file for theme %s\n"
+msgstr "થીમ %s માટે માન્ય ફાઈલ શોધવામાં નિષ્ફળ\n"
+
+#: ../src/ui/theme-viewer.c:98
+#| msgid "/_Windows"
+msgid "_Windows"
+msgstr "વિન્ડો (_W)"
+
+#: ../src/ui/theme-viewer.c:99
+#| msgid "Dialog Box"
+msgid "_Dialog"
+msgstr "સંવાદ (_D)"
+
+#: ../src/ui/theme-viewer.c:100
+#| msgid "Modal Dialog Box"
+msgid "_Modal dialog"
+msgstr "નમુના સંવાદ (_M)"
+
+#: ../src/ui/theme-viewer.c:101
+#| msgid "/Windows/_Utility"
+msgid "_Utility"
+msgstr "ઉપયોગિતા (_U)"
+
+#: ../src/ui/theme-viewer.c:102
+#| msgid "/Windows/_Splashscreen"
+msgid "_Splashscreen"
+msgstr "ઝબૂક સ્ક્રીન (_S)"
+
+#: ../src/ui/theme-viewer.c:103
+#| msgid "/Windows/_Top dock"
+msgid "_Top dock"
+msgstr "ઉપરનો ડોક (_T)"
+
+#: ../src/ui/theme-viewer.c:104
+#| msgid "/Windows/_Bottom dock"
+msgid "_Bottom dock"
+msgstr "નીચલો ડોક (_B)"
+
+#: ../src/ui/theme-viewer.c:105
+#| msgid "/Windows/_Left dock"
+msgid "_Left dock"
+msgstr "ડાબુ ડોક (_L)"
+
+#: ../src/ui/theme-viewer.c:106
+#| msgid "/Windows/_Right dock"
+msgid "_Right dock"
+msgstr "જમણું ડોક (_R)"
+
+#: ../src/ui/theme-viewer.c:107
+#| msgid "/Windows/_All docks"
+msgid "_All docks"
+msgstr "બધા ડોક (_A)"
+
+#: ../src/ui/theme-viewer.c:108
+#| msgid "Desktop"
+msgid "Des_ktop"
+msgstr "ડેસ્કટોપ (_k)"
+
+#: ../src/ui/theme-viewer.c:114
+msgid "Open another one of these windows"
+msgstr "આ બધી વિન્ડોમાંથી બીજી વિન્ડો ખોલો"
+
+#: ../src/ui/theme-viewer.c:116
+msgid "This is a demo button with an 'open' icon"
+msgstr "આ ડેમો બટન 'ખોલો' ચિહ્ન સાથે છે"
+
+#: ../src/ui/theme-viewer.c:118
+msgid "This is a demo button with a 'quit' icon"
+msgstr "આ ડેમો બટન 'બહાર નીકળો' ચિહ્ન સાથે છે"
+
+#: ../src/ui/theme-viewer.c:252
+msgid "This is a sample message in a sample dialog"
+msgstr "આ નમબના સંવાદમાં સરળ સંદેશો છે"
+
+#: ../src/ui/theme-viewer.c:335
+#, c-format
+msgid "Fake menu item %d\n"
+msgstr "ખોટી મેનુ વસ્તુ %d\n"
+
+#: ../src/ui/theme-viewer.c:369
+msgid "Border-only window"
+msgstr "વિન્ડો માટે માત્ર કિનારી"
+
+#: ../src/ui/theme-viewer.c:371
+msgid "Bar"
+msgstr "પટ્ટી"
+
+#: ../src/ui/theme-viewer.c:388
+msgid "Normal Application Window"
+msgstr "કાર્યક્રમની સામાન્ય વિન્ડો"
+
+#: ../src/ui/theme-viewer.c:392
+msgid "Dialog Box"
+msgstr "સંવાદ પેટી"
+
+#: ../src/ui/theme-viewer.c:396
+msgid "Modal Dialog Box"
+msgstr "નમુના સંવાદ પેટી"
+
+#: ../src/ui/theme-viewer.c:400
+msgid "Utility Palette"
+msgstr "ઉપયોગિતા પેલેટ"
+
+#: ../src/ui/theme-viewer.c:404
+msgid "Torn-off Menu"
+msgstr "કાઢી નાખેલ મેનુ"
+
+#: ../src/ui/theme-viewer.c:408
+msgid "Border"
+msgstr "કિનારી"
+
+#: ../src/ui/theme-viewer.c:412
+#| msgid "Modal Dialog Box"
+msgid "Attached Modal Dialog"
+msgstr "જોડાયેલ નમુના સંવાદ"
+
+#: ../src/ui/theme-viewer.c:743
+#, c-format
+msgid "Button layout test %d"
+msgstr "બટનના દેખાવની ચકાસણી %d"
+
+#: ../src/ui/theme-viewer.c:772
+#, c-format
+msgid "%g milliseconds to draw one window frame"
+msgstr "એક વિન્ડોનું ચોકઠુ દોરવા માટે %g મિલિસેકન્ડો"
+
+#: ../src/ui/theme-viewer.c:816
+#, c-format
+msgid "Usage: metacity-theme-viewer [THEMENAME]\n"
+msgstr "વપરાશઃ  મેટાસીટી-થીમ-દર્શક [થીમનુ નામ]\n"
+
+#: ../src/ui/theme-viewer.c:823
+#, c-format
+msgid "Error loading theme: %s\n"
+msgstr "થીમ લાવવામાં ભૂલ: %s\n"
+
+#: ../src/ui/theme-viewer.c:829
+#, c-format
+msgid "Loaded theme \"%s\" in %g seconds\n"
+msgstr "લવાયેલ થીમ \"%s\" %g સેકન્ડોમાં\n"
+
+#: ../src/ui/theme-viewer.c:872
+msgid "Normal Title Font"
+msgstr "સામાન્ય શીર્ષક ફોન્ટ"
+
+#: ../src/ui/theme-viewer.c:878
+msgid "Small Title Font"
+msgstr "નાના શીર્ષક ફોન્ટ"
+
+#: ../src/ui/theme-viewer.c:884
+msgid "Large Title Font"
+msgstr "મોટા શીર્ષક ફોન્ટ"
+
+#: ../src/ui/theme-viewer.c:889
+msgid "Button Layouts"
+msgstr "બટનના દેખાવો"
+
+#: ../src/ui/theme-viewer.c:894
+msgid "Benchmark"
+msgstr "બેન્ચમાર્ક"
+
+#: ../src/ui/theme-viewer.c:941
+msgid "Window Title Goes Here"
+msgstr "વિન્ડોનુ શીર્ષક અંહિ જાય છે"
+
+#: ../src/ui/theme-viewer.c:1047
+#, c-format
+msgid ""
+"Drew %d frames in %g client-side seconds (%g milliseconds per frame) and %g "
+"seconds wall clock time including X server resources (%g milliseconds per "
+"frame)\n"
+msgstr ""
+"ડ્રિયુ %d ચોકઠાંઓ %g ક્લાઈન્ટ બાજુની સેકન્ડો (%g મિલિસેકન્ડો પ્રતિ ચોકઠાએ) અને %g દિવાલ "
+"ઘડિયાળના સમયની સેકન્ડો X સર્વર સ્રોતોને સમાવીને (%g મિલિસેકન્ડો પ્રતિ ચોકઠાએ)\n"
+
+#: ../src/ui/theme-viewer.c:1266
+msgid "position expression test returned TRUE but set error"
+msgstr "જગ્યા સમીકરણ ચકાસણી સાચુ મોકલશે પરંતુ ભૂલ સુયોજિત કરશે"
+
+#: ../src/ui/theme-viewer.c:1268
+msgid "position expression test returned FALSE but didn't set error"
+msgstr "જગ્યા સમીકરણ ચકાસણી બૂલ મોકલશે પરંતુ ભૂલ સુયોજિત કરતું નથી"
+
+#: ../src/ui/theme-viewer.c:1272
+msgid "Error was expected but none given"
+msgstr "ભૂલ થવાની સંભાવના હતી પરંતુ કંઈ અપાયુ નથી"
+
+#: ../src/ui/theme-viewer.c:1274
+#, c-format
+msgid "Error %d was expected but %d given"
+msgstr "ભૂલ %d થવાની સંભાવના હતી પરંતુ %d અપાયુ"
+
+#: ../src/ui/theme-viewer.c:1280
+#, c-format
+msgid "Error not expected but one was returned: %s"
+msgstr "ભૂલ થવાની સંભાવના હતી પરંતુ એક મોકલાયુ હતું: %s"
+
+#: ../src/ui/theme-viewer.c:1284
+#, c-format
+msgid "x value was %d, %d was expected"
+msgstr "x કિંમત %d હતી, %d ની ઈચ્છા હતી"
+
+#: ../src/ui/theme-viewer.c:1287
+#, c-format
+msgid "y value was %d, %d was expected"
+msgstr "y કિંમત %d હતી, %d ની ઈચ્છા હતી"
+
+#: ../src/ui/theme-viewer.c:1352
+#, c-format
+msgid "%d coordinate expressions parsed in %g seconds (%g seconds average)\n"
+msgstr "%d યામાક્ષ સમીકરણ %g સેકન્ડોમાં પદચ્છેદ થયુ (સરેરાશ %g સેકન્ડો)\n"
+

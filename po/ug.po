@@ -1,0 +1,2005 @@
+# Uyghur translation for muffin.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# Gheyret Kenji<gheyret@yahoo.com>,2010.
+# Sahran <sahran.ug@gmail.com>, 2010.
+# Zeper <zeper@msn.com>, 2010.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: muffin\n"
+"Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
+"product=muffin&keywords=I18N+L10N&component=general\n"
+"POT-Creation-Date: 2011-08-27 17:13+0000\n"
+"PO-Revision-Date: 2011-08-08 16:52+0600\n"
+"Last-Translator: Sahran <sahran.ug@gmail.com>\n"
+"Language-Team: Uyghur Computer Science Association <UKIJ@yahoogroups.com>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#. This probably means that a non-WM compositor like xcompmgr is running;
+#. * we have no way to get it to exit
+#: ../src/compositor/compositor.c:487
+#, c-format
+msgid ""
+"Another compositing manager is already running on screen %i on display \"%s"
+"\"."
+msgstr ""
+"كۆرسەتكۈچ \"%2$s\" نىڭدىكى ئېكران %1$d دا بۆلەك باشقۇرغۇچ ئىجرا قىلىنىۋاتىدۇ."
+
+#: ../src/core/all-keybindings.h:88
+msgid "Switch to workspace 1"
+msgstr "1-خىزمەت رايونىغا ئالماش"
+
+#: ../src/core/all-keybindings.h:90
+msgid "Switch to workspace 2"
+msgstr "2-خىزمەت رايونىغا ئالماش"
+
+#: ../src/core/all-keybindings.h:92
+msgid "Switch to workspace 3"
+msgstr "3-خىزمەت رايونىغا ئالماش"
+
+#: ../src/core/all-keybindings.h:94
+msgid "Switch to workspace 4"
+msgstr "4-خىزمەت رايونىغا ئالماش"
+
+#: ../src/core/all-keybindings.h:96
+msgid "Switch to workspace 5"
+msgstr "5-خىزمەت رايونىغا ئالماش"
+
+#: ../src/core/all-keybindings.h:98
+msgid "Switch to workspace 6"
+msgstr "6-خىزمەت رايونىغا ئالماش"
+
+#: ../src/core/all-keybindings.h:100
+msgid "Switch to workspace 7"
+msgstr "7-خىزمەت رايونىغا ئالماش"
+
+#: ../src/core/all-keybindings.h:102
+msgid "Switch to workspace 8"
+msgstr "8-خىزمەت رايونىغا ئالماش"
+
+#: ../src/core/all-keybindings.h:104
+msgid "Switch to workspace 9"
+msgstr "9-خىزمەت رايونىغا ئالماش"
+
+#: ../src/core/all-keybindings.h:106
+msgid "Switch to workspace 10"
+msgstr "10-خىزمەت رايونىغا ئالماش"
+
+#: ../src/core/all-keybindings.h:108
+msgid "Switch to workspace 11"
+msgstr "11- خىزمەت رايونىغا ئالماش"
+
+#: ../src/core/all-keybindings.h:110
+msgid "Switch to workspace 12"
+msgstr "12-  خىزمەت رايونىغا ئالماش"
+
+#: ../src/core/all-keybindings.h:122
+msgid "Switch to workspace on the left of the current workspace"
+msgstr "سولدىكى خىزمەت رايونىغا ئالمىشىدۇ"
+
+#: ../src/core/all-keybindings.h:126
+msgid "Switch to workspace on the right of the current workspace"
+msgstr "ئوڭدىكى خىزمەت مۇھىتىغا ئالمىشىدۇ"
+
+#: ../src/core/all-keybindings.h:130
+msgid "Switch to workspace above the current workspace"
+msgstr "ئۇستىكى خىزمەت مۇھىتىغا ئالمىشىدۇ"
+
+#: ../src/core/all-keybindings.h:134
+msgid "Switch to workspace below the current workspace"
+msgstr "ئاستىدىكى خىزمەت مۇھىتىغا ئالمىشىدۇ"
+
+#: ../src/core/all-keybindings.h:150
+msgid "Move between windows of an application, using a popup window"
+msgstr ""
+"قوللىنىشچان پىروگرامما كۆزنىكى ئارىسىدا يۆتكىلىپ، قاڭقىش كۆزنىكى ئىشلىتىدۇ"
+
+#: ../src/core/all-keybindings.h:153
+msgid "Move backward between windows of an application, using a popup window"
+msgstr ""
+"قوللىنىشچان پىروگرامما كۆزنىكى ئارىسىدا ئەكسىچە يۆتكىلىپ، قاڭقىش كۆزنىكى "
+"ئىشلىتىدۇ"
+
+#: ../src/core/all-keybindings.h:157
+msgid "Move between windows, using a popup window"
+msgstr "كۆزنەك ئارىسىدا يۆتكىلىپ، قاڭقىش كۆزنىكى ئىشلىتىدۇ"
+
+#: ../src/core/all-keybindings.h:160
+msgid "Move backward between windows, using a popup window"
+msgstr "كۆزنەك ئارىسىدا ئەكسىچە يۆتكىلىپ، قاڭقىش كۆزنىكى ئىشلىتىدۇ"
+
+#: ../src/core/all-keybindings.h:163
+msgid "Move between panels and the desktop, using a popup window"
+msgstr "تاختا ۋە ئۈستەلئۈستى ئارىسىدا يۆتكىلىپ، قاڭقىش كۆزنىكى ئىشلىتىدۇ"
+
+#: ../src/core/all-keybindings.h:166
+msgid "Move backward between panels and the desktop, using a popup window"
+msgstr ""
+"تاختا ۋە ئۈستەلئۈستى ئارىسىدا ئەكسىچە يۆتكىلىپ، قاڭقىش كۆزنىكى ئىشلىتىدۇ"
+
+#: ../src/core/all-keybindings.h:171
+msgid "Move between windows of an application immediately"
+msgstr "پروگراممىنىڭ كۆزنەكلىرى ئارىسىدا دەرھال يۆتكىلىدۇ"
+
+#: ../src/core/all-keybindings.h:174
+msgid "Move backward between windows of an application immediately"
+msgstr ""
+"قوللىنىشچان پروگراممىنىڭ كۆزنىكى ئارىسىدا ئەكسىچە دەرھال تەتۈر يۆتكىلىدۇ"
+
+#: ../src/core/all-keybindings.h:177
+msgid "Move between windows immediately"
+msgstr "كۆزنەك ئارىسىدا دەرھال يۆتكىلىدۇ"
+
+#: ../src/core/all-keybindings.h:180
+msgid "Move backward between windows immediately"
+msgstr "كۆزنەك ئارىسىدا ئەكسىچە دەرھال يۆتكىلىدۇ"
+
+#: ../src/core/all-keybindings.h:183
+msgid "Move between panels and the desktop immediately"
+msgstr "تاختايلار ۋە ئۈستەلئۈستى ئارىسىدا دەرھال يۆتكىلىش"
+
+#: ../src/core/all-keybindings.h:186
+msgid "Move backward between panels and the desktop immediately"
+msgstr "تاختايلار ۋە ئۈستەلئۈستى ئارىسىدا دەرھال تەتۈر يۆتكىلىش"
+
+#: ../src/core/all-keybindings.h:203
+msgid "Hide all normal windows and set focus to the desktop"
+msgstr "ھەممە كۆزنەكنى يوشۇرۇپ فوكۇسنى ئۈستەلئۈستىگە توغرىلا"
+
+#: ../src/core/all-keybindings.h:206
+msgid "Show the panel's main menu"
+msgstr "تاختاينىڭ ئاساسىي تىزىملىكى كۆرسىتىدۇ"
+
+#: ../src/core/all-keybindings.h:209
+msgid "Show the panel's \"Run Application\" dialog box"
+msgstr "تاختاينىڭ «پروگرامما ئىجرا قىل» سۆزلەشكۈسىنى كۆرسىتىدۇ"
+
+#: ../src/core/all-keybindings.h:211
+msgid "Start or stop recording the session"
+msgstr "مەزكۇر ئەڭگىمەنى خاتىرىلەشنى توختىتىدۇ ياكى باشلايدۇ"
+
+#: ../src/core/all-keybindings.h:252
+msgid "Take a screenshot"
+msgstr "ئېكران كەسمىسى تۇت"
+
+#: ../src/core/all-keybindings.h:254
+msgid "Take a screenshot of a window"
+msgstr "كۆزنەكنىڭ كۆرۈنۈشىنى رەسىمگە ئالىدۇ"
+
+#: ../src/core/all-keybindings.h:256
+msgid "Run a terminal"
+msgstr "تېرمىنالنى ئىجرا قىل"
+
+#: ../src/core/all-keybindings.h:271
+msgid "Activate the window menu"
+msgstr "كۆزنەك تىزىملىكىنى ئاكتىپلاۋاتىدۇ"
+
+#: ../src/core/all-keybindings.h:274
+msgid "Toggle fullscreen mode"
+msgstr "پۈتۈن ئېكران شەكلىگە ئالماش"
+
+#: ../src/core/all-keybindings.h:276
+msgid "Toggle maximization state"
+msgstr "ئەڭ چوڭ ھالەتكە ئالماش"
+
+#: ../src/core/all-keybindings.h:278
+msgid "Toggle whether a window will always be visible over other windows"
+msgstr ""
+"كۆزنەك ھەمىشە باشقا ھەممە كۆزنەكلەرنىڭ ئۈستىدە تۇرۇشنى ئالماشتۇرامدۇ يوق"
+
+#: ../src/core/all-keybindings.h:280
+msgid "Maximize window"
+msgstr "كۆزنەكنى چوڭايت"
+
+#: ../src/core/all-keybindings.h:282
+msgid "Restore window"
+msgstr "كۆزنەكنى ئەسلىگە كەلتۈر"
+
+#: ../src/core/all-keybindings.h:284
+msgid "Toggle shaded state"
+msgstr "سايىلىك ھالەتكە ئالماش"
+
+#: ../src/core/all-keybindings.h:286
+msgid "Minimize window"
+msgstr "كۆزنەكنى كىچىكلەت"
+
+#: ../src/core/all-keybindings.h:288
+msgid "Close window"
+msgstr "كۆزنەك ياپ"
+
+#: ../src/core/all-keybindings.h:290
+msgid "Move window"
+msgstr "كۆزنەكنى يۆتكە"
+
+#: ../src/core/all-keybindings.h:292
+msgid "Resize window"
+msgstr "كۆزنەك چوڭلۇقىنى ئۆزگەرت"
+
+#: ../src/core/all-keybindings.h:295
+msgid "Toggle whether window is on all workspaces or just one"
+msgstr "كۆزنەك ھەممە ياكى پەقەت بىرلا خىزمەت رايونىدا ئالمىشىدۇ"
+
+#: ../src/core/all-keybindings.h:299
+msgid "Move window to workspace 1"
+msgstr "كۆزنەكنى 1-خىزمەت رايونىغا يۆتكە"
+
+#: ../src/core/all-keybindings.h:302
+msgid "Move window to workspace 2"
+msgstr "كۆزنەكنى 2-خىزمەت رايونىغا يۆتكە"
+
+#: ../src/core/all-keybindings.h:305
+msgid "Move window to workspace 3"
+msgstr "كۆزنەكنى 3-خىزمەت رايونىغا يۆتكە"
+
+#: ../src/core/all-keybindings.h:308
+msgid "Move window to workspace 4"
+msgstr "كۆزنەكنى 4-خىزمەت رايونىغا يۆتكە"
+
+#: ../src/core/all-keybindings.h:311
+msgid "Move window to workspace 5"
+msgstr "كۆزنەكنى 5-خىزمەت رايونىغا يۆتكە"
+
+#: ../src/core/all-keybindings.h:314
+msgid "Move window to workspace 6"
+msgstr "كۆزنەكنى 6-خىزمەت رايونىغا يۆتكە"
+
+#: ../src/core/all-keybindings.h:317
+msgid "Move window to workspace 7"
+msgstr "كۆزنەكنى 7-خىزمەت رايونىغا يۆتكە"
+
+#: ../src/core/all-keybindings.h:320
+msgid "Move window to workspace 8"
+msgstr "كۆزنەكنى 8-خىزمەت رايونىغا يۆتكە"
+
+#: ../src/core/all-keybindings.h:323
+msgid "Move window to workspace 9"
+msgstr "كۆزنەكنى 9-خىزمەت رايونىغا يۆتكە"
+
+#: ../src/core/all-keybindings.h:326
+msgid "Move window to workspace 10"
+msgstr "كۆزنەكنى 10-خىزمەت رايونىغا يۆتكە"
+
+#: ../src/core/all-keybindings.h:329
+msgid "Move window to workspace 11"
+msgstr "كۆزنەكنى 11- خىزمەت رايونىغا يۆتكە"
+
+#: ../src/core/all-keybindings.h:332
+msgid "Move window to workspace 12"
+msgstr "كۆزنەكنى 12- خىزمەت رايونىغا يۆتكە"
+
+#: ../src/core/all-keybindings.h:344
+msgid "Move window one workspace to the left"
+msgstr "كۆزنەكنى سولدىكى خىزمەت رايونىغا يۆتكە"
+
+#: ../src/core/all-keybindings.h:347
+msgid "Move window one workspace to the right"
+msgstr "كۆزنەكنى ئوڭدىكى خىزمەت رايونىغا يۆتكە"
+
+#: ../src/core/all-keybindings.h:350
+msgid "Move window one workspace up"
+msgstr "كۆزنەكنى يۇقىرىدىكى خىزمەت رايونىغا يۆتكە"
+
+#: ../src/core/all-keybindings.h:353
+msgid "Move window one workspace down"
+msgstr "كۆزنەكنى تۆۋەندىكى خىزمەت رايونىغا يۆتكە"
+
+#: ../src/core/all-keybindings.h:356
+msgid "Raise window if it's covered by another window, otherwise lower it"
+msgstr ""
+"ئەگەر كۆزنەك باشقا كۆزنەك تەرىپىدىن توسۇلسا ئۇنداقتا ئۇنى ئۆرلەت بولمىسا "
+"ئۇنى تۆۋەنلەت"
+
+#: ../src/core/all-keybindings.h:358
+msgid "Raise window above other windows"
+msgstr "كۆزنەكنى باشقا كۆزنەكنىڭ ئۈستىگە ئۆرلەت"
+
+#: ../src/core/all-keybindings.h:360
+msgid "Lower window below other windows"
+msgstr "كۆزنەكنى باشقا كۆزنەكنىڭ ئاستىغا تۆۋەنلەت"
+
+#: ../src/core/all-keybindings.h:364
+msgid "Maximize window vertically"
+msgstr "كۆزنەكنى بويىغا چوڭايت"
+
+#: ../src/core/all-keybindings.h:368
+msgid "Maximize window horizontally"
+msgstr "كۆزنەكنى توغرىسىغا چوڭايت"
+
+#: ../src/core/all-keybindings.h:372
+msgid "Move window to north-west (top left) corner"
+msgstr "كۆزنەكنى ئېكراننىڭ غەربى-شىمالى(سول يۇقىرى)غا يۆتكە"
+
+#: ../src/core/all-keybindings.h:375
+msgid "Move window to north-east (top right) corner"
+msgstr "كۆزنەكنى ئېكراننىڭ شەرقى-شىمالى(ئوڭ يۇقىرى)غا يۆتكە"
+
+#: ../src/core/all-keybindings.h:378
+msgid "Move window to south-west (bottom left) corner"
+msgstr "كۆزنەكنى ئېكراننىڭ غەربى-جەنۇبى(سول پەسكە)غا يۆتكە"
+
+#: ../src/core/all-keybindings.h:381
+msgid "Move window to south-east (bottom right) corner"
+msgstr "كۆزنەكنى ئېكراننىڭ غەربى-شىمالى(سول يۇقىرى)غا يۆتكە"
+
+#: ../src/core/all-keybindings.h:385
+msgid "Move window to north (top) side of screen"
+msgstr "كۆزنەكنى ئېكراننىڭ شىمالى(ئۇستى)غا يۆتكە"
+
+#: ../src/core/all-keybindings.h:388
+msgid "Move window to south (bottom) side of screen"
+msgstr "كۆزنەكنى ئېكراننىڭ جەنۇبى(ئاستى)غا يۆتكە"
+
+#: ../src/core/all-keybindings.h:391
+msgid "Move window to east (right) side of screen"
+msgstr "كۆزنەكنى ئېكراننىڭ شەرقى(ئوڭ تەرەپ)گە يۆتكە"
+
+#: ../src/core/all-keybindings.h:394
+msgid "Move window to west (left) side of screen"
+msgstr "كۆزنەكنى ئېكراننىڭ غەربى(سول تەرەپ)گە يۆتكە"
+
+#: ../src/core/all-keybindings.h:397
+msgid "Move window to center of screen"
+msgstr "كۆزنەكنى ئېكراننىڭ مەركىزىگە يۆتكەيدۇ"
+
+#: ../src/core/bell.c:310
+msgid "Bell event"
+msgstr "قوڭغۇراق ھادىسىسى"
+
+#: ../src/core/core.c:157
+#, c-format
+msgid "Unknown window information request: %d"
+msgstr "نامەلۇم كۆزنەك ئۇچۇرى ئىلتىماسى：%d"
+
+#: ../src/core/delete.c:111
+#, c-format
+msgid "<tt>%s</tt> is not responding."
+msgstr "<tt>%s</tt> جاۋاب قايتۇرمايۋاتىدۇ."
+
+#: ../src/core/delete.c:114
+msgid "Application is not responding."
+msgstr "پىروگراممىدا ئىنكاس يوق."
+
+#: ../src/core/delete.c:119
+msgid ""
+"You may choose to wait a short while for it to continue or force the "
+"application to quit entirely."
+msgstr "سەل كۈتۈشنى ياكى پروگراممىنى مەجبۇرى چېكىندۈرۈشنى تاللىسىڭىز بولىدۇ."
+
+#: ../src/core/delete.c:126
+msgid "_Wait"
+msgstr "كۈت(_W)"
+
+#: ../src/core/delete.c:126
+msgid "_Force Quit"
+msgstr "مەجبۇرى چېكىن(_F)"
+
+#: ../src/core/display.c:365
+#, c-format
+msgid "Missing %s extension required for compositing"
+msgstr "ئارىلاش كۆزنەك باشقۇرغۇچ ئېھتىياجلىق كېڭەيتىلمە كەم：%s"
+
+#: ../src/core/display.c:431
+#, c-format
+msgid "Failed to open X Window System display '%s'\n"
+msgstr "X Window System نى ئېچىپ كۆرسەتكىلى بولمىدى“%s”\n"
+
+#: ../src/core/keybindings.c:759
+#, c-format
+msgid ""
+"Some other program is already using the key %s with modifiers %x as a "
+"binding\n"
+msgstr ""
+"مەلۇم باشقا پروگرامما  %s كۇنۇپكىسى بىلەن تۈزەش كۇنۇپكىسى  %x نى بىللە "
+"ئىشلىتىشنىڭ بىرىكمىسى\n"
+
+#. Displayed when a keybinding which is
+#. * supposed to launch a program fails.
+#.
+#: ../src/core/keybindings.c:2523
+#, c-format
+msgid ""
+"There was an error running <tt>%s</tt>:\n"
+"\n"
+"%s"
+msgstr ""
+"<tt>%s</tt> نى ئىجرا قىلىۋاتقاندا خاتالىق كۆرۈلدى:\n"
+"\n"
+"%s"
+
+#: ../src/core/keybindings.c:2613
+#, c-format
+msgid "No command %d has been defined.\n"
+msgstr "بۇيرۇق %d بېكىتىلمىگەن.\n"
+
+#: ../src/core/keybindings.c:3625
+#, c-format
+msgid "No terminal command has been defined.\n"
+msgstr "تېرمىنال بۇيرۇققا ئېنىقلىما بېرىلمىگەن .\n"
+
+#: ../src/core/main.c:206
+msgid "Disable connection to session manager"
+msgstr "ئەڭگىمە باشقۇرغۇچقا باغلىنىشنى چەكلە"
+
+#: ../src/core/main.c:212
+msgid "Replace the running window manager"
+msgstr "ئىجرا قىلىنىۋاتقان كۆزنەك باشقۇرغۇچنى ئالماشتۇر"
+
+#: ../src/core/main.c:218
+msgid "Specify session management ID"
+msgstr "ئەڭگىمە باشقۇرغۇ ID سېنى بەلگىلە"
+
+#: ../src/core/main.c:223
+msgid "X Display to use"
+msgstr "ئىشلىتىدىغان  X  نى كۆرسىتىش"
+
+#: ../src/core/main.c:229
+msgid "Initialize session from savefile"
+msgstr "ساقلانغان ھۆججەتتىن ئەڭگىمەنى دەسلەپلەشتۈرۈش"
+
+#: ../src/core/main.c:235
+msgid "Make X calls synchronous"
+msgstr "X نى قەدەمداش قىلىپ ئىشلەت"
+
+#: ../src/core/main.c:504
+#, c-format
+msgid "Failed to scan themes directory: %s\n"
+msgstr "تېما مۇندەرىجىسىنى ئىزدەش مەغلۇپ بولدى：%s\n"
+
+#: ../src/core/main.c:520
+#, c-format
+msgid ""
+"Could not find a theme! Be sure %s exists and contains the usual themes.\n"
+msgstr ""
+"بىرەر تېما تېپىلمىدى. %s نىڭ مەۋجۇتلۇقى ھەم ئىشلىتىشكە بولىدىغان تېمىنى ئۆز "
+"ئىچىگە ئالغانلىقىنى جەزملەڭ.\n"
+
+#: ../src/core/muffin.c:42
+#, c-format
+msgid ""
+"muffin %s\n"
+"Copyright (C) 2001-%d Havoc Pennington, Red Hat, Inc., and others\n"
+"This is free software; see the source for copying conditions.\n"
+"There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A "
+"PARTICULAR PURPOSE.\n"
+msgstr ""
+"muffin %s\n"
+"نەشر ھوقۇقى (C) 2001-%d Havoc Pennington, Red Hat, Inc., ۋە باشقىلارغا تەۋە\n"
+"بۇ ھەقسىز دېتال؛ كۆچۈرۈش شەرتلىرىنى مەنبە كودىدىن كۆرۈڭ.\n"
+"مەيلى قانداق مەقسەتتە ئىشلەتمەڭ، ھېچقانداق كاپالەت يوق؛\n"
+
+#: ../src/core/muffin.c:56
+msgid "Print version"
+msgstr "نەشرىنى باس"
+
+#: ../src/core/muffin.c:62
+msgid "Comma-separated list of compositor plugins"
+msgstr "پەش بىلەن ئايرىلغان تىزىم ۋە بىرىكمە رەڭلىگۈچ قىستۇرمىلىرى"
+
+#.
+#. * We found it, but it was invalid.  Complain.
+#. *
+#. * FIXME: This replicates the original behaviour, but in the future
+#. * we might consider reverting invalid keys to their original values.
+#. * (We know the old value, so we can look up a suitable string in
+#. * the symtab.)
+#. *
+#. * (Empty comment follows so the translators don't see this.)
+#.
+#.
+#: ../src/core/prefs.c:550 ../src/core/prefs.c:711
+#, c-format
+msgid "GConf key '%s' is set to an invalid value\n"
+msgstr ""
+"GConf  نىڭ ئاچقۇچ سۆزى“%s”  ئۈنۈمسىز  \n"
+" قىلىپ تەڭشەلگەن\n"
+
+#: ../src/core/prefs.c:637 ../src/core/prefs.c:880
+#, c-format
+msgid "%d stored in GConf key %s is out of range %d to %d\n"
+msgstr ""
+"GConf نىڭ %2$s  ئاچقۇچىنىڭ قىممىتى %1$d نىڭ دائىرىسى %3$d〜%4$d نىڭ ئىچىدە "
+"ئەمەس\n"
+
+#: ../src/core/prefs.c:681 ../src/core/prefs.c:758 ../src/core/prefs.c:806
+#: ../src/core/prefs.c:870 ../src/core/prefs.c:1331 ../src/core/prefs.c:1347
+#: ../src/core/prefs.c:1364 ../src/core/prefs.c:1380
+#, c-format
+msgid "GConf key \"%s\" is set to an invalid type\n"
+msgstr ""
+"GConf  نىڭ ئاچقۇچلۇق سۆزى “%s” ئۈنۈمسىز تىپتىكى \n"
+" قىلىپ تەڭشەلگەن\n"
+
+#: ../src/core/prefs.c:1210
+#, c-format
+msgid "GConf key %s is already in use and can't be used to override %s\n"
+msgstr ""
+"GConf ئاچقۇچى %s ئىشلىتىلىۋاتىدۇ، شۇڭا %s نى قاپلاشقا ئىشلەتكىلى بولمايدۇ\n"
+
+#: ../src/core/prefs.c:1269
+#, c-format
+msgid "Can't override GConf key, %s not found\n"
+msgstr "GConf ئاچقۇچىنى قاپلىغىلى بولمىدى، %s تېپىلمىدى\n"
+
+#: ../src/core/prefs.c:1454
+msgid ""
+"Workarounds for broken applications disabled. Some applications may not "
+"behave properly.\n"
+msgstr ""
+"بۇزۇلغان پروگراممىلارنى تۈزىتىش-ياخشىلاش قوزغىتىلمىغان. بەزى پروگراممىلار "
+"نورمال ئىشلىمەسلىكى مۇمكىن.\n"
+
+#: ../src/core/prefs.c:1531
+#, c-format
+msgid "Could not parse font description \"%s\" from GConf key %s\n"
+msgstr ""
+"خەت نۇسخىسىنىڭ چۈشەندۈرۈلۈشىنى ئانالىز قىلغىلى بولمىدى “%s” ( GConf دىكى "
+"ئاچقۇچلۇق سۆز  %s )\n"
+
+#: ../src/core/prefs.c:1593
+#, c-format
+msgid ""
+"\"%s\" found in configuration database is not a valid value for mouse button "
+"modifier\n"
+msgstr ""
+"سەپلىمە سانداندىن تېپىلغان “%s” چاشقىنەك كۇنۇپكىسى سۈپەتلىگۈچىسى ئۈچۈن  "
+"ئۈنۈملۈك قىممەت \n"
+" ئەمەس\n"
+
+#: ../src/core/prefs.c:2028
+#, c-format
+msgid "Error setting number of workspaces to %d: %s\n"
+msgstr "خىزمەت رايونى سانىنى %d قىلىپ تەڭشەشتە كۆرۈلگەن خاتالىق ：%s\n"
+
+#: ../src/core/prefs.c:2212 ../src/core/prefs.c:2714
+#, c-format
+msgid "Workspace %d"
+msgstr "خىزمەت بوشلۇقى %d"
+
+#: ../src/core/prefs.c:2244 ../src/core/prefs.c:2422
+#, c-format
+msgid ""
+"\"%s\" found in configuration database is not a valid value for keybinding "
+"\"%s\"\n"
+msgstr ""
+"سەپلىمە ساندانىدىن تېپىلغان \"%s\"، \"%s\" كۇنۇپكا باغلانمىسىنىڭ ئىناۋەتلىك "
+"قىممىتى ئەمەس\n"
+
+#: ../src/core/prefs.c:2795
+#, c-format
+msgid "Error setting name for workspace %d to \"%s\": %s\n"
+msgstr "خىزمەت مۇھىتى %d  غا \"%s\"  دەپ ئائىت قويۇشتا خاتالىق كۆرۈلدى: %s\n"
+
+#: ../src/core/prefs.c:3009
+#, c-format
+msgid "Error setting live hidden windows status status: %s\n"
+msgstr ""
+"شۇئان يوشۇرۇنىدىغان كۆزنەك ھالىتىنى تەڭشەۋاتقاندا خاتالىق كۆرۈلدى: %s\n"
+
+#: ../src/core/prefs.c:3044
+#, c-format
+msgid "Error setting no tab popup status: %s\n"
+msgstr "بەتكۈچ يوق قاڭقىش ھالىتىنى تەڭشەۋەتقاندا خاتالىق كۆرۈلدى: %s\n"
+
+#: ../src/core/screen.c:663
+#, c-format
+msgid "Screen %d on display '%s' is invalid\n"
+msgstr "“%2$s” دىكى %1$d ئېكراننى كۆرسىتىش ئۈنۈمسىز\n"
+
+#: ../src/core/screen.c:679
+#, c-format
+msgid ""
+"Screen %d on display \"%s\" already has a window manager; try using the --"
+"replace option to replace the current window manager.\n"
+msgstr ""
+"كۆرسەتكۈچ «%2$s» دىكى ئېكران %1$d نىڭ كۆزنەك باشقۇرغۇچىسى بار؛ ھازىرقى كۆزنەك "
+"باشقۇرغۇچنى ئالماشتۇرۇش ئۈچۈن --replace تاللانمىسىنى ئىشلىتىپ كۆرۈپ بېقىڭ.\n"
+
+#: ../src/core/screen.c:706
+#, c-format
+msgid ""
+"Could not acquire window manager selection on screen %d display \"%s\"\n"
+msgstr ""
+"كۆرسەتكۈچ \"%2$s\" نىڭدىكى ئېكران %1$d دا كۆزنەك باشقۇرغۇنىڭ تاللانمىسىنى "
+"ئالغىلى بولمىدى\n"
+
+#: ../src/core/screen.c:761
+#, c-format
+msgid "Screen %d on display \"%s\" already has a window manager\n"
+msgstr ""
+"“%2$s” دىكى %1$d ئېكراندا بىر كۆزنەك باشقۇرغۇچ  \n"
+" بار\n"
+
+#: ../src/core/screen.c:946
+#, c-format
+msgid "Could not release screen %d on display \"%s\"\n"
+msgstr ""
+"“%2$s” دىكى %1$d\n"
+"  ئېكراننى بوشاتقىلى بولمىدى\n"
+
+#: ../src/core/session.c:843 ../src/core/session.c:850
+#, c-format
+msgid "Could not create directory '%s': %s\n"
+msgstr "“%s” مۇندەرىجىنى قۇرغىلى بولمىدى ：%s\n"
+
+#: ../src/core/session.c:860
+#, c-format
+msgid "Could not open session file '%s' for writing: %s\n"
+msgstr "ئەڭگىمە ھۆججىتى“%s”نى ئېچىپ تۆۋەندىكىنى يازغىلى بولمىدى：%s\n"
+
+#: ../src/core/session.c:1001
+#, c-format
+msgid "Error writing session file '%s': %s\n"
+msgstr "ئەڭگىمە ھۆججىتى “%s”نى يېزىشتا خاتالىق كۆرۈلدى：%s\n"
+
+#: ../src/core/session.c:1006
+#, c-format
+msgid "Error closing session file '%s': %s\n"
+msgstr "ئەڭگىمە ھۆججىتى“%s”نى تاقاشتا خاتالىق كۆرۈلدى：%s\n"
+
+#: ../src/core/session.c:1136
+#, c-format
+msgid "Failed to parse saved session file: %s\n"
+msgstr "ئىزاھلاپ ساقلىغىلى بولمايدىغان ئەڭگىمە ھۆججىتى：%s\n"
+
+#: ../src/core/session.c:1185
+#, c-format
+msgid "<muffin_session> attribute seen but we already have the session ID"
+msgstr ""
+"<muffin_session> دېگەن خاسلىق بايقالدى، بىراق بىزدە ئەڭگىمە ID سى بار ئىدى."
+
+#: ../src/core/session.c:1198 ../src/core/session.c:1273
+#: ../src/core/session.c:1305 ../src/core/session.c:1377
+#: ../src/core/session.c:1437
+#, c-format
+msgid "Unknown attribute %s on <%s> element"
+msgstr "<%2$s> ئېلېمېنتتا نامەلۇم خاسلىق %1$s بار"
+
+#: ../src/core/session.c:1215
+#, c-format
+msgid "nested <window> tag"
+msgstr "<window> بىلەن گىرەلىشىش بەلگىسى"
+
+#: ../src/core/session.c:1457
+#, c-format
+msgid "Unknown element %s"
+msgstr "يوچۇن ئېلېمېنت %s"
+
+#: ../src/core/session.c:1809
+msgid ""
+"These windows do not support &quot;save current setup&quot; and will have to "
+"be restarted manually next time you log in."
+msgstr ""
+"بۇ كۆزنەكلەردە «ھازىرقى تەڭشەكنى ساقلاش» ئىقتىدارىنى ئىشلەتكىلى بولمايدۇ. "
+"كېيىن تىزىمغا كىرگەندە يەنە قوزغىتىڭ."
+
+#: ../src/core/util.c:111
+#, c-format
+msgid "Failed to open debug log: %s\n"
+msgstr "تەڭشەلگەن خاتىرىنى ئاچقىلى بولمىدى：%s\n"
+
+#: ../src/core/util.c:121
+#, c-format
+msgid "Failed to fdopen() log file %s: %s\n"
+msgstr "خاتىرە ھۆججىتى %s غا  fdopen()  مەشغۇلاتى قىلغىلى بولمىدى：%s\n"
+
+#: ../src/core/util.c:127
+#, c-format
+msgid "Opened log file %s\n"
+msgstr "ئاچقان خاتىرە ھۆججىتى %s\n"
+
+#: ../src/core/util.c:146 ../src/tools/muffin-message.c:149
+#, c-format
+msgid "Muffin was compiled without support for verbose mode\n"
+msgstr "Muffin تەرجىمە-تەھرىرلىگەندە تەپسىلات قوللاش ھالىتى قوشۇلمىغان\n"
+
+#: ../src/core/util.c:286
+msgid "Window manager: "
+msgstr "كۆزنەك باشقۇرغۇچ： "
+
+#: ../src/core/util.c:434
+msgid "Bug in window manager: "
+msgstr "كۆزنەك باشقۇرغۇچتىكى خاتالىق： "
+
+#: ../src/core/util.c:467
+msgid "Window manager warning: "
+msgstr "كۆزنەك باشقۇرغۇچ سىگنالى： "
+
+#: ../src/core/util.c:495
+msgid "Window manager error: "
+msgstr "كۆزنەك باشقۇرغۇچ خاتالىقى： "
+
+#. Translators: This is the title used on dialog boxes
+#: ../src/core/util.c:632 ../src/muffin.desktop.in.h:1
+#: ../src/muffin-wm.desktop.in.h:1
+msgid "Muffin"
+msgstr "Muffin"
+
+#. first time through
+#: ../src/core/window.c:7019
+#, c-format
+msgid ""
+"Window %s sets SM_CLIENT_ID on itself, instead of on the WM_CLIENT_LEADER "
+"window as specified in the ICCCM.\n"
+msgstr ""
+"%s كۆزنەك ئۆزىدە SM_CLIENT_ID نى تەڭشەيدۇ، ICCCM دا بەلگىلەنگەندەك، "
+"WM_CLIENT_LEADER كۆزنەكتە تەڭشەيدۇ\n"
+
+#. We ignore mwm_has_resize_func because WM_NORMAL_HINTS is the
+#. * authoritative source for that info. Some apps such as mplayer or
+#. * xine disable resize via MWM but not WM_NORMAL_HINTS, but that
+#. * leads to e.g. us not fullscreening their windows.  Apps that set
+#. * MWM but not WM_NORMAL_HINTS are basically broken. We complain
+#. * about these apps but make them work.
+#.
+#: ../src/core/window.c:7682
+#, c-format
+msgid ""
+"Window %s sets an MWM hint indicating it isn't resizable, but sets min size %"
+"d x %d and max size %d x %d; this doesn't make much sense.\n"
+msgstr ""
+"%s كۆزنەك MWM ئەسكەرتىشىدىن بىرنى تەڭشىدى، ئۇنىڭ چوڭلۇقىنى تەڭشىگىلى "
+"بولمايدىغانلىقىنى ئىپادىلەيدۇ ئەمما تەڭشەلگەن ئەڭ كىچىك چوڭلۇقى %dx%d، ئەڭ "
+"چوڭ چوڭلۇقى %dx%d؛ بۇنىڭ ھېچقانداق مەنىسى يوق.\n"
+
+#: ../src/core/window-props.c:309
+#, c-format
+msgid "Application set a bogus _NET_WM_PID %lu\n"
+msgstr ""
+"پروگرامما بىر ساختا _NET_WM_PID %lu\n"
+" نى تەڭشىدى\n"
+
+#: ../src/core/window-props.c:426
+#, c-format
+msgid "%s (on %s)"
+msgstr "%s (ھەققىدە  %s)"
+
+#: ../src/core/window-props.c:1481
+#, c-format
+msgid "Invalid WM_TRANSIENT_FOR window 0x%lx specified for %s.\n"
+msgstr ""
+"%2$s  گە بەلگىلەنگەن ئۈنۈمسىز WM_TRANSIENT_FOR كۆزنەك 0x%1$lx بولىدۇ.\n"
+
+#: ../src/core/window-props.c:1492
+#, c-format
+msgid "WM_TRANSIENT_FOR window 0x%lx for %s would create loop.\n"
+msgstr "%2$s نىڭ WM_TRANSIENT_FOR كۆزنەك0x%1$lx دەۋرىيلىك قۇرۇشى مۇمكىن.\n"
+
+#: ../src/core/xprops.c:155
+#, c-format
+msgid ""
+"Window 0x%lx has property %s\n"
+"that was expected to have type %s format %d\n"
+"and actually has type %s format %d n_items %d.\n"
+"This is most likely an application bug, not a window manager bug.\n"
+"The window has title=\"%s\" class=\"%s\" name=\"%s\"\n"
+msgstr ""
+"0x%lx كۆزنەكنىڭ خاسلىقى %s\n"
+"نىڭ ئۈمىد قىلىنغان تىپى%s پىچىمى %d\n"
+"ئەمما ئەمەلىي تىپى %s، پىچىمى %d، n_items %d\n"
+"بۇ بەلكىم قوللىنىشچان پىروگراممىنىڭ خاتالىقى بولۇشى مۇمكىن، كۆزنەك "
+"باشقۇرغۇچنىڭ خاتالىقى ئەمەس.\n"
+"كۆزنەكنىڭ ماۋزۇسى \"%s\"، خىلى \"%s\"، ئاتى \"%s\"\n"
+
+#: ../src/core/xprops.c:411
+#, c-format
+msgid "Property %s on window 0x%lx contained invalid UTF-8\n"
+msgstr "خاسلىق %s (كۆزنەك 0x%lx) دا ئىناۋەتسىز UTF-8 بار\n"
+
+#: ../src/core/xprops.c:494
+#, c-format
+msgid ""
+"Property %s on window 0x%lx contained invalid UTF-8 for item %d in the list\n"
+msgstr ""
+"خاسلىق %s (كۆزنەك 0x%lx) دىكى تىزىم تۇرى %d نىڭ تەركىبىدە ئىناۋەتسىز UTF-8 "
+"بار\n"
+
+#: ../src/muffin.schemas.in.h:1
+msgid "Attach modal dialogs"
+msgstr "قوشۇلغان مودېل سۆزلەشكۈ"
+
+#: ../src/muffin.schemas.in.h:2
+msgid ""
+"Determines whether hidden windows (i.e., minimized windows and windows on "
+"other workspaces than the current one) should be kept alive."
+msgstr ""
+"يوشۇرۇن كۆزنەك (مەسىلەن، كىچىكلىتىلگەن ۋە باشقا خىزمەت رايونىدىكى كۆزنەك)نىڭ "
+"ھالىتىنى ساقلاش ياكى ساقلىماسلىقنى جەزملەيدۇ."
+
+#: ../src/muffin.schemas.in.h:3
+msgid ""
+"Determines whether workspace switching should happen for windows on all "
+"monitors or only for windows on the primary monitor."
+msgstr ""
+"خىزمەت رايونى ئالماشتۇرۇشنىڭ ھەممە ئېكراندىكى كۆزنەككىمۇ ياكى ئاساسىي "
+"ئېكرانغىلا قارىتىلغانلىقىنى جەزملەيدۇ."
+
+#: ../src/muffin.schemas.in.h:4
+msgid "Draggable border width"
+msgstr ""
+
+#: ../src/muffin.schemas.in.h:5
+msgid "Live Hidden Windows"
+msgstr "شۇئان يوشۇرۇنىدىغان كۆزنەكلەر"
+
+#: ../src/muffin.schemas.in.h:6
+msgid "Modifier to use for extended window management operations"
+msgstr "كېڭەيتىلگەن كۆزنەك باشقۇرۇش مەشغۇلاتىغا ئىشلىتىلىدىغان ئۆزگەرتىش"
+
+#: ../src/muffin.schemas.in.h:7
+msgid ""
+"The amount of total draggable borders. If the theme's visible borders are "
+"not enough, invisible borders will be added to meet this value."
+msgstr ""
+
+#: ../src/muffin.schemas.in.h:8
+msgid ""
+"This key will initiate the \"overlay\", which is a combination window "
+"overview and application launching system. The default is intended to be the "
+"\"Windows key\" on PC hardware. It's expected that this binding either the "
+"default or set to the empty string."
+msgstr ""
+"بۇ كۇنۇپكا كۆرسەتكەن «قاپلا» بىر خىل ئارىلاش كۆزنەك چۈشەندۈرۈشى ۋە "
+"قوللىنىشچان پىروگرامما ئىجرا قىلىنىدىغان سىستېمىنى كۆرسىتىدۇ. كۆڭۈلدىكى "
+"ئەھۋالدا يەككە كومپيۇتېردىكى \"Windows key\" كۇنۇپكىسىنى ئىشلىتىشنى تەلەپ "
+"قىلىدۇ. بەلكىم كۆڭۈلدىكى ياكى بوش تىزىقنى ئىشلىتىدۇ."
+
+#: ../src/muffin.schemas.in.h:9
+msgid ""
+"When true, instead of having independent titlebars, modal dialogs appear "
+"attached to the titlebar of the parent window and are moved together with "
+"the parent window."
+msgstr ""
+"true بولغاندا مودېل سۆزلەشكۈ ئاتا كۆزنەكنىڭ ماۋزۇ بالداققا يېپىشىپ كۆرۈنىدۇ "
+"ھەمدە ئاتا كۆزنەككە ئەگىشىپ يۆتكىلىدۇ، ئايرىم ماۋزۇ بالدىقى بولمايدۇ."
+
+#: ../src/muffin.schemas.in.h:10
+msgid "Workspaces only on primary"
+msgstr "ئاساسىي كۆزەتكۈچتىكى خىزمەت رايونىغىلا"
+
+#: ../src/tools/muffin-message.c:123
+#, c-format
+msgid "Usage: %s\n"
+msgstr "ئىشلىتىش ئۇسۇلى：%s\n"
+
+#: ../src/ui/frames.c:1157
+msgid "Close Window"
+msgstr "كۆزنەك ياپ"
+
+#: ../src/ui/frames.c:1160
+msgid "Window Menu"
+msgstr "كۆزنەك تىزىملىكى"
+
+#: ../src/ui/frames.c:1163
+msgid "Minimize Window"
+msgstr "كۆزنەكنى كىچىكلەت"
+
+#: ../src/ui/frames.c:1166
+msgid "Maximize Window"
+msgstr "كۆزنەكنى چوڭايت"
+
+#: ../src/ui/frames.c:1169
+msgid "Restore Window"
+msgstr "كۆزنەكنى ئەسلىگە كەلتۈر"
+
+#: ../src/ui/frames.c:1172
+msgid "Roll Up Window"
+msgstr "كۆزنەكنى تۈر"
+
+#: ../src/ui/frames.c:1175
+msgid "Unroll Window"
+msgstr "كۆزنەكنى تۈرمە"
+
+#: ../src/ui/frames.c:1178
+msgid "Keep Window On Top"
+msgstr "كۆزنەكنى چوققىلاشنى ساقلا"
+
+#: ../src/ui/frames.c:1181
+msgid "Remove Window From Top"
+msgstr "كۆزنەكنى چوققىلاشنى بىكار قىلىش"
+
+#: ../src/ui/frames.c:1184
+msgid "Always On Visible Workspace"
+msgstr "خىزمەت رايونىدا ئىزچىل كۆرۈنسۇن"
+
+#: ../src/ui/frames.c:1187
+msgid "Put Window On Only One Workspace"
+msgstr "بىر خىزمەت رايونىغا ئورۇنلاشتۇرۇش"
+
+#. Translators: Translate this string the same way as you do in libwnck!
+#: ../src/ui/menu.c:69
+msgid "Mi_nimize"
+msgstr "كىچىكلەت(_N)"
+
+#. Translators: Translate this string the same way as you do in libwnck!
+#: ../src/ui/menu.c:71
+msgid "Ma_ximize"
+msgstr "چوڭايت(_X)"
+
+#. Translators: Translate this string the same way as you do in libwnck!
+#: ../src/ui/menu.c:73
+msgid "Unma_ximize"
+msgstr "چوڭايتما(_X)"
+
+#. Translators: Translate this string the same way as you do in libwnck!
+#: ../src/ui/menu.c:75
+msgid "Roll _Up"
+msgstr "تۈر(_U)"
+
+#. Translators: Translate this string the same way as you do in libwnck!
+#: ../src/ui/menu.c:77
+msgid "_Unroll"
+msgstr "ياي(_U)"
+
+#. Translators: Translate this string the same way as you do in libwnck!
+#: ../src/ui/menu.c:79
+msgid "_Move"
+msgstr "يۆتكە(_M)"
+
+#. Translators: Translate this string the same way as you do in libwnck!
+#: ../src/ui/menu.c:81
+msgid "_Resize"
+msgstr "چوڭلۇقىنى ئۆزگەرت(_R)"
+
+#. Translators: Translate this string the same way as you do in libwnck!
+#: ../src/ui/menu.c:83
+msgid "Move Titlebar On_screen"
+msgstr "تېما ئىستونىنى ئېكرانغا يۆتكەش (_S)"
+
+#. separator
+#. Translators: Translate this string the same way as you do in libwnck!
+#: ../src/ui/menu.c:86 ../src/ui/menu.c:88
+msgid "Always on _Top"
+msgstr "ھەمىشە چوققىدا (_T)"
+
+#. Translators: Translate this string the same way as you do in libwnck!
+#: ../src/ui/menu.c:90
+msgid "_Always on Visible Workspace"
+msgstr "ھەمىشە كۆرۈنىدىغان خىزمەت بوشلۇقىدا(_A)"
+
+#. Translators: Translate this string the same way as you do in libwnck!
+#: ../src/ui/menu.c:92
+msgid "_Only on This Workspace"
+msgstr "مۇشۇ خىزمەت بوشلۇقىدىلا(_O)"
+
+#. Translators: Translate this string the same way as you do in libwnck!
+#: ../src/ui/menu.c:94
+msgid "Move to Workspace _Left"
+msgstr "سولدىكى خىزمەت بوشلۇقىغا يۆتكە(_L)"
+
+#. Translators: Translate this string the same way as you do in libwnck!
+#: ../src/ui/menu.c:96
+msgid "Move to Workspace R_ight"
+msgstr "ئوڭدىكى خىزمەت بوشلۇقىغا يۆتكە(_I)"
+
+#. Translators: Translate this string the same way as you do in libwnck!
+#: ../src/ui/menu.c:98
+msgid "Move to Workspace _Up"
+msgstr "ئۈستىدىكى خىزمەت بوشلۇقىغا يۆتكە(_U)"
+
+#. Translators: Translate this string the same way as you do in libwnck!
+#: ../src/ui/menu.c:100
+msgid "Move to Workspace _Down"
+msgstr "ئاستىدىكى خىزمەت بوشلۇقىغا يۆتكە(_D)"
+
+#. separator
+#. Translators: Translate this string the same way as you do in libwnck!
+#: ../src/ui/menu.c:104
+msgid "_Close"
+msgstr "ياپ(_C)"
+
+#: ../src/ui/menu.c:204
+#, c-format
+msgid "Workspace %d%n"
+msgstr "خىزمەت مۇھىتى %d%n"
+
+#: ../src/ui/menu.c:214
+#, c-format
+msgid "Workspace 1_0"
+msgstr "خىزمەت بوشلۇقى  1_0"
+
+#: ../src/ui/menu.c:216
+#, c-format
+msgid "Workspace %s%d"
+msgstr "خىزمەت بوشلۇقى  %s%d"
+
+#: ../src/ui/menu.c:397
+msgid "Move to Another _Workspace"
+msgstr "باشقا خىزمەت بوشلۇقىغا يۆتكە(_W)"
+
+#. This is the text that should appear next to menu accelerators
+#. * that use the shift key. If the text on this key isn't typically
+#. * translated on keyboards used for your language, don't translate
+#. * this.
+#.
+#: ../src/ui/metaaccellabel.c:77
+msgid "Shift"
+msgstr "Shift"
+
+#. This is the text that should appear next to menu accelerators
+#. * that use the control key. If the text on this key isn't typically
+#. * translated on keyboards used for your language, don't translate
+#. * this.
+#.
+#: ../src/ui/metaaccellabel.c:83
+msgid "Ctrl"
+msgstr "Ctrl"
+
+#. This is the text that should appear next to menu accelerators
+#. * that use the alt key. If the text on this key isn't typically
+#. * translated on keyboards used for your language, don't translate
+#. * this.
+#.
+#: ../src/ui/metaaccellabel.c:89
+msgid "Alt"
+msgstr "Alt"
+
+#. This is the text that should appear next to menu accelerators
+#. * that use the meta key. If the text on this key isn't typically
+#. * translated on keyboards used for your language, don't translate
+#. * this.
+#.
+#: ../src/ui/metaaccellabel.c:95
+msgid "Meta"
+msgstr "Meta"
+
+#. This is the text that should appear next to menu accelerators
+#. * that use the super key. If the text on this key isn't typically
+#. * translated on keyboards used for your language, don't translate
+#. * this.
+#.
+#: ../src/ui/metaaccellabel.c:101
+msgid "Super"
+msgstr "Super"
+
+#. This is the text that should appear next to menu accelerators
+#. * that use the hyper key. If the text on this key isn't typically
+#. * translated on keyboards used for your language, don't translate
+#. * this.
+#.
+#: ../src/ui/metaaccellabel.c:107
+msgid "Hyper"
+msgstr "Hyper"
+
+#. This is the text that should appear next to menu accelerators
+#. * that use the mod2 key. If the text on this key isn't typically
+#. * translated on keyboards used for your language, don't translate
+#. * this.
+#.
+#: ../src/ui/metaaccellabel.c:113
+msgid "Mod2"
+msgstr "Mod2"
+
+#. This is the text that should appear next to menu accelerators
+#. * that use the mod3 key. If the text on this key isn't typically
+#. * translated on keyboards used for your language, don't translate
+#. * this.
+#.
+#: ../src/ui/metaaccellabel.c:119
+msgid "Mod3"
+msgstr "Mod3"
+
+#. This is the text that should appear next to menu accelerators
+#. * that use the mod4 key. If the text on this key isn't typically
+#. * translated on keyboards used for your language, don't translate
+#. * this.
+#.
+#: ../src/ui/metaaccellabel.c:125
+msgid "Mod4"
+msgstr "Mod4"
+
+#. This is the text that should appear next to menu accelerators
+#. * that use the mod5 key. If the text on this key isn't typically
+#. * translated on keyboards used for your language, don't translate
+#. * this.
+#.
+#: ../src/ui/metaaccellabel.c:131
+msgid "Mod5"
+msgstr "Mod5"
+
+#. Translators: This represents the size of a window.  The first number is
+#. * the width of the window and the second is the height.
+#.
+#: ../src/ui/resizepopup.c:113
+#, c-format
+msgid "%d x %d"
+msgstr "%d x %d"
+
+#: ../src/ui/theme.c:253
+msgid "top"
+msgstr "چوققا"
+
+#: ../src/ui/theme.c:255
+msgid "bottom"
+msgstr "ئاستى"
+
+#: ../src/ui/theme.c:257
+msgid "left"
+msgstr "سول"
+
+#: ../src/ui/theme.c:259
+msgid "right"
+msgstr "ئوڭ"
+
+#: ../src/ui/theme.c:286
+#, c-format
+msgid "frame geometry does not specify \"%s\" dimension"
+msgstr "كاندۇك گىيومېتىرىك جايلاشتۇرۇش \"%s\" نىڭ چوڭلۇقىنى بەلگىلىمىگەن"
+
+#: ../src/ui/theme.c:305
+#, c-format
+msgid "frame geometry does not specify dimension \"%s\" for border \"%s\""
+msgstr ""
+"كاندۇك گىيومېتىرىك جايلاشتۇرۇش \"%s\" نىڭ چوڭلۇقىنى بەلگىلىمىگەن(\"%s\" "
+"گىرۋىكىگە بەلگىلەنگەن)"
+
+#: ../src/ui/theme.c:342
+#, c-format
+msgid "Button aspect ratio %g is not reasonable"
+msgstr "كۇنۇپكا ئۇزۇنلۇق كەڭلىك نىسبىتى  %g غا ماس كەلمەيدۇ"
+
+#: ../src/ui/theme.c:354
+#, c-format
+msgid "Frame geometry does not specify size of buttons"
+msgstr "كاندۇك گىيومېتىرىك جايلاشتۇرۇشتا تۈگمە چوڭلۇقى بەلگىلەنمىگەن"
+
+#: ../src/ui/theme.c:1060
+#, c-format
+msgid "Gradients should have at least two colors"
+msgstr "تەدرىجىي ئۆزگىرىشتە ئاز دېگەندە ئىككى خىل رەڭ بولۇش كېرەك"
+
+#: ../src/ui/theme.c:1212
+#, c-format
+msgid ""
+"GTK custom color specification must have color name and fallback in "
+"parentheses, e.g. gtk:custom(foo,bar); could not parse \"%s\""
+msgstr ""
+"GTK رەڭ ئۆلچىمىدە ھالەتتىن كېيىن چوقۇم رەڭ ئاتى ۋە زاپاس بولۇشى لازىم، "
+"مەسىلەن، gtk:custom(foo,bar) ھالەت؛ \"%s\" نى تەھلىل قىلالمايدۇ"
+
+#: ../src/ui/theme.c:1228
+#, c-format
+msgid ""
+"Invalid character '%c' in color_name parameter of gtk:custom, only A-Za-z0-9-"
+"_ are valid"
+msgstr ""
+"gtk:custom نىڭ color_name پارامېتىرىدىكى ئىناۋەتسىز ھەرپ '%c'، پەقەت A-Za-z0-"
+"9-_  نىلا ئىشلەتكىلى بولىدۇ"
+
+#: ../src/ui/theme.c:1242
+#, c-format
+msgid ""
+"Gtk:custom format is \"gtk:custom(color_name,fallback)\", \"%s\" does not "
+"fit the format"
+msgstr ""
+"Gtk:custom نىڭ پىچىمى \"gtk:custom(color_name,fallback)\" بولۇپ، \"%s\" "
+"پىچىمغا توغرا كەلمەيدۇ"
+
+#: ../src/ui/theme.c:1287
+#, c-format
+msgid ""
+"GTK color specification must have the state in brackets, e.g. gtk:fg[NORMAL] "
+"where NORMAL is the state; could not parse \"%s\""
+msgstr ""
+"GTK رەڭ ئۆلچىمىدە ھالەت چوقۇم ئوتتۇرا تىرناققا ئېلىنىشى لازىم، مەسىلەن، gtk:"
+"fg[NORMAL] بۇنىڭدىكى NORMAL ھالەت؛ \"%s\" نى تەھلىل قىلالمايدۇ"
+
+#: ../src/ui/theme.c:1301
+#, c-format
+msgid ""
+"GTK color specification must have a close bracket after the state, e.g. gtk:"
+"fg[NORMAL] where NORMAL is the state; could not parse \"%s\""
+msgstr ""
+"GTK رەڭ ئۆلچىمىدە ھالەتتىن كېيىن چوقۇم ئوتتۇرا تىرناق يېپىلىشى لازىم، "
+"مەسىلەن، gtk:fg[NORMAL] بۇنىڭدىكى NORMAL ھالەت؛ \"%s\" نى تەھلىل قىلالمايدۇ"
+
+#: ../src/ui/theme.c:1312
+#, c-format
+msgid "Did not understand state \"%s\" in color specification"
+msgstr "رەڭ بەلگىلىمىسىدىكى «%s» ھالەتنى چۈشەنگىلى بولمىدى"
+
+#: ../src/ui/theme.c:1325
+#, c-format
+msgid "Did not understand color component \"%s\" in color specification"
+msgstr "رەڭ بەلگىلىمىسىدىكى «%s» رەڭ بۆلىكىنى چۈشەنگىلى بولمىدى"
+
+#: ../src/ui/theme.c:1355
+#, c-format
+msgid ""
+"Blend format is \"blend/bg_color/fg_color/alpha\", \"%s\" does not fit the "
+"format"
+msgstr ""
+"بىرىكمە رەڭنىڭ فورماتى \"blend/bg_color/fg_color/alpha\"،  \"%s\" بۇ "
+"فورماتقا ماس كەلمىدى"
+
+#: ../src/ui/theme.c:1366
+#, c-format
+msgid "Could not parse alpha value \"%s\" in blended color"
+msgstr "بىرىكمە رەڭدىكى ئالفا قىممىتى \"%s\" نى تەھلىل قىلغىلى بولمىدى"
+
+#: ../src/ui/theme.c:1376
+#, c-format
+msgid "Alpha value \"%s\" in blended color is not between 0.0 and 1.0"
+msgstr ""
+"بىرىكمە رەڭنىڭ ئالفا قىممىتى \"%s\" نىڭ دائىرىسى  0.0 ~1.0 ئىچىدە ئەمەس"
+
+#: ../src/ui/theme.c:1423
+#, c-format
+msgid ""
+"Shade format is \"shade/base_color/factor\", \"%s\" does not fit the format"
+msgstr "سايە پىچىمى \"shade/base_color/factor\"، \"%s\" پىچىمغا توغرا كەلمەيدۇ"
+
+#: ../src/ui/theme.c:1434
+#, c-format
+msgid "Could not parse shade factor \"%s\" in shaded color"
+msgstr "سايە رەڭگىدىكى سايە فاكتور «%s»نى تەھلىل قىلغىلى بولمىدى"
+
+#: ../src/ui/theme.c:1444
+#, c-format
+msgid "Shade factor \"%s\" in shaded color is negative"
+msgstr "سايە رەڭگىدىكى سايە فاكتور “%s” مەنپىي سان"
+
+#: ../src/ui/theme.c:1473
+#, c-format
+msgid "Could not parse color \"%s\""
+msgstr "رەڭنى تەھلىل قىلغىلى بولمىدى“%s”"
+
+#: ../src/ui/theme.c:1784
+#, c-format
+msgid "Coordinate expression contains character '%s' which is not allowed"
+msgstr "كوئوردېنات ئىپادىسىنىڭ تەركىبىدە رۇخسەت قىلىنمىغان تېكىست '%s' بار"
+
+#: ../src/ui/theme.c:1811
+#, c-format
+msgid ""
+"Coordinate expression contains floating point number '%s' which could not be "
+"parsed"
+msgstr ""
+"كوئوردېنات ئىپادىسىنىڭ تەركىبىدە تەھلىل قىلغىلى بولمايدىغان كەسىر سان '%s' "
+"بار"
+
+#: ../src/ui/theme.c:1825
+#, c-format
+msgid "Coordinate expression contains integer '%s' which could not be parsed"
+msgstr ""
+"كوئوردېنات ئىپادىسىنىڭ تەركىبىدە تەھلىل قىلغىلى بولمايدىغان پۈتۈن سان '%s' "
+"بار"
+
+#: ../src/ui/theme.c:1947
+#, c-format
+msgid ""
+"Coordinate expression contained unknown operator at the start of this text: "
+"\"%s\""
+msgstr "كوئوردېنات ئىپادىسىنىڭ بېشىدا نامەلۇم ئەمەل بار: «%s»"
+
+#: ../src/ui/theme.c:2004
+#, c-format
+msgid "Coordinate expression was empty or not understood"
+msgstr "كوئوردېناتنىڭ ئىپادىلەش شەكلى قۇرۇق ياكى چۈشىنىكسىز"
+
+#: ../src/ui/theme.c:2115 ../src/ui/theme.c:2125 ../src/ui/theme.c:2159
+#, c-format
+msgid "Coordinate expression results in division by zero"
+msgstr "كوئوردېناتنىڭ ئىپادىلەش شەكلى 0 نى بۆلگۈچ قىلغان"
+
+#: ../src/ui/theme.c:2167
+#, c-format
+msgid ""
+"Coordinate expression tries to use mod operator on a floating-point number"
+msgstr "كوئوردېنات ئىپادىسى كەسىر سانغا mod ئەمىلىنى ئىشلەتمەكچى"
+
+#: ../src/ui/theme.c:2223
+#, c-format
+msgid ""
+"Coordinate expression has an operator \"%s\" where an operand was expected"
+msgstr ""
+"كوئوردېنات ئىپادىسىنىڭ تەركىبىدە سان كېلىدىغان يەردە ئەمەل \"%s\" بار ئىكەن"
+
+#: ../src/ui/theme.c:2232
+#, c-format
+msgid "Coordinate expression had an operand where an operator was expected"
+msgstr "كوئوردېنات ئىپادىسىنىڭ تەركىبىدە ئەمەل كېلىدىغان يەردە سان بار ئىكەن"
+
+#: ../src/ui/theme.c:2240
+#, c-format
+msgid "Coordinate expression ended with an operator instead of an operand"
+msgstr "كوئوردېنات ئىپادىسى سان بىلەن ئاياغلاشماي ئەمەل بىلەن ئاياغلاشقان"
+
+#: ../src/ui/theme.c:2250
+#, c-format
+msgid ""
+"Coordinate expression has operator \"%c\" following operator \"%c\" with no "
+"operand in between"
+msgstr ""
+"كوئوردېنات ئىپادىسىنىڭ تەركىبىدە ئەمەل \"%2$c\" نىڭ ئارقىسىدىن ئەمەل \"%1$c"
+"\" كېلىپتۇ، ئارىلىقتا سان يوق ئىكەن"
+
+#: ../src/ui/theme.c:2401 ../src/ui/theme.c:2446
+#, c-format
+msgid "Coordinate expression had unknown variable or constant \"%s\""
+msgstr ""
+"كوئوردېنات ئىپادىسىنىڭ تەركىبىدە نامەلۇم ئۆزگەرگۈچى ياكى تۇراقلىق سان \"%s\" "
+"بار ئىكەن"
+
+#: ../src/ui/theme.c:2500
+#, c-format
+msgid "Coordinate expression parser overflowed its buffer."
+msgstr "كوئوردېنات ئىپادىسىنى تەھلىل قىلىۋاتقاندا يىغلەك تېشىپ كەتتى."
+
+#: ../src/ui/theme.c:2529
+#, c-format
+msgid "Coordinate expression had a close parenthesis with no open parenthesis"
+msgstr ""
+"كوئوردېنات ئىپادىسىنىڭ تەركىبىدىكى يېپىلغان تىرناققا ماس كېلىدىغان ئېچىلغان "
+"تىرناق يوق"
+
+#: ../src/ui/theme.c:2593
+#, c-format
+msgid "Coordinate expression had an open parenthesis with no close parenthesis"
+msgstr ""
+"كوئوردېنات ئىپادىسىنىڭ تەركىبىدىكى ئېچىلغان تىرناققا ماس كېلىدىغان يېپىلغان "
+"تىرناق يوق"
+
+#: ../src/ui/theme.c:2604
+#, c-format
+msgid "Coordinate expression doesn't seem to have any operators or operands"
+msgstr "كوئوردېنات ئىپادىسىنىڭ تەركىبىدە ئەمەل(قوشۇش، ئېلىش...) ياكى سان يوق"
+
+#: ../src/ui/theme.c:2816 ../src/ui/theme.c:2836 ../src/ui/theme.c:2856
+#, c-format
+msgid "Theme contained an expression that resulted in an error: %s\n"
+msgstr "تېما تەركىبىدە خاتالىق چىقىرىدىغان ئىپادە بار: %s\n"
+
+#: ../src/ui/theme.c:4527
+#, c-format
+msgid ""
+"<button function=\"%s\" state=\"%s\" draw_ops=\"whatever\"/> must be "
+"specified for this frame style"
+msgstr ""
+"<button function=\"%s\" state=\"%s\" draw_ops=\"whatever\"/>بۇ كۆزنەكنىڭ "
+"ئۇسلۇبى ئۈچۈن بەلگىلىنىشى زۆرۈر"
+
+#: ../src/ui/theme.c:5060 ../src/ui/theme.c:5085
+#, c-format
+msgid ""
+"Missing <frame state=\"%s\" resize=\"%s\" focus=\"%s\" style=\"whatever\"/>"
+msgstr ""
+"<frame state=\"%s\" resize=\"%s\" focus=\"%s\" style=\"whatever\"/> يوق"
+
+#: ../src/ui/theme.c:5133
+#, c-format
+msgid "Failed to load theme \"%s\": %s\n"
+msgstr "تېما “%s”  نى كىرگۈزگىلى بولمىدى：%s\n"
+
+#: ../src/ui/theme.c:5269 ../src/ui/theme.c:5276 ../src/ui/theme.c:5283
+#: ../src/ui/theme.c:5290 ../src/ui/theme.c:5297
+#, c-format
+msgid "No <%s> set for theme \"%s\""
+msgstr "ئۇسلۇب \"%1$s\" نىڭ <%2$s> ئى بەلگىلەنمىگەن"
+
+#: ../src/ui/theme.c:5305
+#, c-format
+msgid ""
+"No frame style set for window type \"%s\" in theme \"%s\", add a <window "
+"type=\"%s\" style_set=\"whatever\"/> element"
+msgstr ""
+"كۆزنەك تىپى \"%s\" (\"%s\" تېمىدا)غا كاندۇك كۆزنەك تەڭشەلمىگەن، بىر <window "
+"type=\"%s\" style_set=\"whatever\"/> ئېلېمېنتى قوشۇڭ"
+
+#: ../src/ui/theme.c:5744 ../src/ui/theme.c:5806 ../src/ui/theme.c:5869
+#, c-format
+msgid ""
+"User-defined constants must begin with a capital letter; \"%s\" does not"
+msgstr ""
+"ئىشلەتكۈچى بەلگىلىگەن تۇراقلىق مىقدار چوقۇم چوڭ ھەرپ بىلەن باشلانسۇن؛ «%s» "
+"بولمايدۇ"
+
+#: ../src/ui/theme.c:5752 ../src/ui/theme.c:5814 ../src/ui/theme.c:5877
+#, c-format
+msgid "Constant \"%s\" has already been defined"
+msgstr "تۇراقلىق سان “%s” غا ئېنىقلىما بېرىلگەن"
+
+#. Translators: This means that an attribute which should have been found
+#. * on an XML element was not in fact found.
+#.
+#: ../src/ui/theme-parser.c:236
+#, c-format
+msgid "No \"%s\" attribute on element <%s>"
+msgstr "<%2$s> دېگەن ئېلېمېنتنىڭ \"%1$s\" دەيدىغان خاسلىقى يوق"
+
+#: ../src/ui/theme-parser.c:265 ../src/ui/theme-parser.c:283
+#, c-format
+msgid "Line %d character %d: %s"
+msgstr "%d قۇردىكى %d ھېرىپ بەلگە:  %s"
+
+#: ../src/ui/theme-parser.c:479
+#, c-format
+msgid "Attribute \"%s\" repeated twice on the same <%s> element"
+msgstr "خاسلىق \"%s\" ئوخشاش بىر <%s> ئېلېمېنتتا ئىككى قېتىم تەكرارلاندى"
+
+#: ../src/ui/theme-parser.c:503 ../src/ui/theme-parser.c:552
+#, c-format
+msgid "Attribute \"%s\" is invalid on <%s> element in this context"
+msgstr "بۇ تىل مۇھىتىدا \"%s\" خاسلىق <%s> ئېلېمېنتقا نىسبەتەن ئىناۋەتسىز"
+
+#: ../src/ui/theme-parser.c:594
+#, c-format
+msgid "Could not parse \"%s\" as an integer"
+msgstr "“%s” نى پۈتۈنلىگىلى بولمىدى"
+
+#: ../src/ui/theme-parser.c:603 ../src/ui/theme-parser.c:658
+#, c-format
+msgid "Did not understand trailing characters \"%s\" in string \"%s\""
+msgstr "چۈشىنىكسىز ئاخىرلاشتۇرغۇچى بەلگە “%s” ( ھېرىپ بەلگە تىزىقى “%s” دا)"
+
+#: ../src/ui/theme-parser.c:613
+#, c-format
+msgid "Integer %ld must be positive"
+msgstr "پۈتۈن سان %ld چوقۇم مۇسبەت سان بولسۇن"
+
+#: ../src/ui/theme-parser.c:621
+#, c-format
+msgid "Integer %ld is too large, current max is %d"
+msgstr "پۈتۈن سان %ld بەك چوڭ، نۆۋەتتىكى ئەڭ چوڭ قىممەت %d"
+
+#: ../src/ui/theme-parser.c:649 ../src/ui/theme-parser.c:765
+#, c-format
+msgid "Could not parse \"%s\" as a floating point number"
+msgstr "“%s” نى ھەرىكەتچان نۇقتا قىلغىلى بولمىدى"
+
+#: ../src/ui/theme-parser.c:680 ../src/ui/theme-parser.c:708
+#, c-format
+msgid "Boolean values must be \"true\" or \"false\" not \"%s\""
+msgstr "Bool قىممىتى «راست» ياكى «يالغان» بولسۇن، “%s” بولسا بولمايدۇ"
+
+#: ../src/ui/theme-parser.c:735
+#, c-format
+msgid "Angle must be between 0.0 and 360.0, was %g\n"
+msgstr "بۇلۇڭ قىممىتى 0.0 دىن 360.0 غىچە بولسۇن، ھازىرقىسى %g\n"
+
+#: ../src/ui/theme-parser.c:798
+#, c-format
+msgid "Alpha must be between 0.0 (invisible) and 1.0 (fully opaque), was %g\n"
+msgstr ""
+"Alpha قىممىتى 0.0   (كۆرۈنمەيدۇ) دىن 360.0 (سۈزۈك ئەمەس)غىچە بولسۇن، "
+"ھازىرقىسى %g\n"
+
+#: ../src/ui/theme-parser.c:863
+#, c-format
+msgid ""
+"Invalid title scale \"%s\" (must be one of xx-small,x-small,small,medium,"
+"large,x-large,xx-large)\n"
+msgstr ""
+"ئۈنۈمسىز ماۋزۇ نىسبىتى  “%s” ( چوقۇم xx-small、x-small、small、medium、"
+"large、x-large、xx-large لارنىڭ بىرى بۆلىشى كېرەك)\n"
+
+#: ../src/ui/theme-parser.c:1019 ../src/ui/theme-parser.c:1082
+#: ../src/ui/theme-parser.c:1116 ../src/ui/theme-parser.c:1219
+#, c-format
+msgid "<%s> name \"%s\" used a second time"
+msgstr "<%s> قايتا ئىشلىتىلدى، نامى “%s”"
+
+#: ../src/ui/theme-parser.c:1031 ../src/ui/theme-parser.c:1128
+#: ../src/ui/theme-parser.c:1231
+#, c-format
+msgid "<%s> parent \"%s\" has not been defined"
+msgstr "<%s> ئاتا \"%s\" بەلگىلەنمىگەن"
+
+#: ../src/ui/theme-parser.c:1141
+#, c-format
+msgid "<%s> geometry \"%s\" has not been defined"
+msgstr "<%s> نىڭ گېئومېتىرىيىلىك ئورۇنلاشتۇرۇلۇشى “%s” غا ئېنىقلىما بېرىلمىگەن"
+
+#: ../src/ui/theme-parser.c:1154
+#, c-format
+msgid "<%s> must specify either a geometry or a parent that has a geometry"
+msgstr ""
+"<%s> بىر گېيومېتىرىيىلىك ئورۇنلاشتۇرۇش ياكى گېيومېتىرىيىلىك ئورۇنلاشتۇرۇشى "
+"بار ئاتا دەرىجىدىن بىرنى بەلگىلەش زۆرۈر"
+
+#: ../src/ui/theme-parser.c:1196
+msgid "You must specify a background for an alpha value to be meaningful"
+msgstr "alpha قىممىتىنىڭ مەنىسى بولۇشى ئۈچۈن، چوقۇم تەگلىك بەلگىلىشىڭىز لازىم"
+
+#: ../src/ui/theme-parser.c:1264
+#, c-format
+msgid "Unknown type \"%s\" on <%s> element"
+msgstr "<%2$s> ئېلېمېنتتا نامەلۇم تىپ \"%1$s\" بار"
+
+#: ../src/ui/theme-parser.c:1275
+#, c-format
+msgid "Unknown style_set \"%s\" on <%s> element"
+msgstr "<%2$s> ئېلېمېنتتا نامەلۇم style_set \"%1$s\" بار"
+
+#: ../src/ui/theme-parser.c:1283
+#, c-format
+msgid "Window type \"%s\" has already been assigned a style set"
+msgstr "كۆزنەك تىپى «%s» ئاللىقاچان ئۇسلۇب توپىغا بېرىلىپ بولغان"
+
+#: ../src/ui/theme-parser.c:1313 ../src/ui/theme-parser.c:1377
+#: ../src/ui/theme-parser.c:1603 ../src/ui/theme-parser.c:2838
+#: ../src/ui/theme-parser.c:2884 ../src/ui/theme-parser.c:3034
+#: ../src/ui/theme-parser.c:3273 ../src/ui/theme-parser.c:3311
+#: ../src/ui/theme-parser.c:3349 ../src/ui/theme-parser.c:3387
+#, c-format
+msgid "Element <%s> is not allowed below <%s>"
+msgstr "<%s> ئېلېمېنت <%s> ئاستىدا بولۇشقا يول قويۇلمايدۇ"
+
+#: ../src/ui/theme-parser.c:1427 ../src/ui/theme-parser.c:1441
+#: ../src/ui/theme-parser.c:1486
+msgid ""
+"Cannot specify both \"button_width\"/\"button_height\" and \"aspect_ratio\" "
+"for buttons"
+msgstr ""
+"بىر قانچە توپچىغا \"button_width\"/\"button_height\" ۋە \"aspect_ratio\" "
+"دېگەن ئىككى خاسلىقنى قوشۇشقا بولمايدۇ"
+
+#: ../src/ui/theme-parser.c:1450
+#, c-format
+msgid "Distance \"%s\" is unknown"
+msgstr "ئارىلىق “%s”  نامەلۇم"
+
+#: ../src/ui/theme-parser.c:1495
+#, c-format
+msgid "Aspect ratio \"%s\" is unknown"
+msgstr "تەرەپلەر نىسبىتى \"%s\" نامەلۇم"
+
+#: ../src/ui/theme-parser.c:1557
+#, c-format
+msgid "Border \"%s\" is unknown"
+msgstr "گىرۋەك \"%s\" نامەلۇم"
+
+#: ../src/ui/theme-parser.c:1868
+#, c-format
+msgid "No \"start_angle\" or \"from\" attribute on element <%s>"
+msgstr "ئېلېمېنت <%s> نىڭ \"start_angle\" ياكى \"from\" دەيدىغان خاسلىقى يوق"
+
+#: ../src/ui/theme-parser.c:1875
+#, c-format
+msgid "No \"extent_angle\" or \"to\" attribute on element <%s>"
+msgstr "ئېلېمېنت <%s> نىڭ \"extent_angle\" ياكى \"to\" دەيدىغان خاسلىقى يوق"
+
+#: ../src/ui/theme-parser.c:2115
+#, c-format
+msgid "Did not understand value \"%s\" for type of gradient"
+msgstr "كونۇسلۇق دەرىجىسىنىڭ تىپىنى چۈشەنگىلى  بولمايدىغان قىممەت “%s”"
+
+#: ../src/ui/theme-parser.c:2193 ../src/ui/theme-parser.c:2568
+#, c-format
+msgid "Did not understand fill type \"%s\" for <%s> element"
+msgstr "<%2$s>ئېلېمېنتتىكى تولدۇرۇش تىپى \"%1$s\" نى چۈشەنگىلى بولمىدى"
+
+#: ../src/ui/theme-parser.c:2360 ../src/ui/theme-parser.c:2443
+#: ../src/ui/theme-parser.c:2506
+#, c-format
+msgid "Did not understand state \"%s\" for <%s> element"
+msgstr "<%2$s> ئېلېمېنتتىكى  ھالەت \"%1$s\" نى چۈشەنگىلى بولمىدى"
+
+#: ../src/ui/theme-parser.c:2370 ../src/ui/theme-parser.c:2453
+#, c-format
+msgid "Did not understand shadow \"%s\" for <%s> element"
+msgstr "<%2$s> ئېلېمېنتتىكى سايە \"%1$s\" نى چۈشەنگىلى بولمىدى"
+
+#: ../src/ui/theme-parser.c:2380
+#, c-format
+msgid "Did not understand arrow \"%s\" for <%s> element"
+msgstr "<%2$s> ئېلېمېنتتىكى ياق ئوق بەلگىسى \"%1$s\" نى چۈشەنگىلى بولمىدى"
+
+#: ../src/ui/theme-parser.c:2694 ../src/ui/theme-parser.c:2790
+#, c-format
+msgid "No <draw_ops> called \"%s\" has been defined"
+msgstr "\"%s\" دېگەن <draw_ops> بېكىتىلمىگەن"
+
+#: ../src/ui/theme-parser.c:2706 ../src/ui/theme-parser.c:2802
+#, c-format
+msgid "Including draw_ops \"%s\" here would create a circular reference"
+msgstr "بۇ جاي draw_ops \"%s\" نى ئۆز ئىچىگە ئالسا بىر دەۋرىي نەقىل قۇرۇلىدۇ"
+
+#: ../src/ui/theme-parser.c:2917
+#, c-format
+msgid "Unknown position \"%s\" for frame piece"
+msgstr "كاندۇك ئورنى  “%s” نامەلۇم"
+
+#: ../src/ui/theme-parser.c:2925
+#, c-format
+msgid "Frame style already has a piece at position %s"
+msgstr "%s ئورۇندا بىر بۆلەك كاندۇك ئۇسلۇبى بار"
+
+#: ../src/ui/theme-parser.c:2942 ../src/ui/theme-parser.c:3019
+#, c-format
+msgid "No <draw_ops> with the name \"%s\" has been defined"
+msgstr "ئاتى  \"%s\" بولغان <draw_ops> بېكىتىلمىگەن"
+
+#: ../src/ui/theme-parser.c:2972
+#, c-format
+msgid "Unknown function \"%s\" for button"
+msgstr "كۇنۇپكىنىڭ فۇنكسىيىسى  “%s” نامەلۇم"
+
+#: ../src/ui/theme-parser.c:2982
+#, c-format
+msgid "Button function \"%s\" does not exist in this version (%d, need %d)"
+msgstr "بۇ نەشرىدە \"%s\" دېگەن توپچىنىڭ ئىقتىدارى يوق (ھازىر %d،  زۆرۈر %d)"
+
+#: ../src/ui/theme-parser.c:2994
+#, c-format
+msgid "Unknown state \"%s\" for button"
+msgstr "توپچىنىڭ ھالىتى \"%s\" نامەلۇم"
+
+#: ../src/ui/theme-parser.c:3002
+#, c-format
+msgid "Frame style already has a button for function %s state %s"
+msgstr "كاندۇك ئۇسلۇبىنىڭ %s فونكسىيە، %s ھالىتى بولغان تۈگمە بار"
+
+#: ../src/ui/theme-parser.c:3073
+#, c-format
+msgid "\"%s\" is not a valid value for focus attribute"
+msgstr "\"%s\" توغرا بولغان فوكۇس خاسلىق قىممىتى ئەمەس"
+
+#: ../src/ui/theme-parser.c:3082
+#, c-format
+msgid "\"%s\" is not a valid value for state attribute"
+msgstr "\"%s\" توغرا بولغان ھالەت خاسلىق قىممىتى ئەمەس"
+
+#: ../src/ui/theme-parser.c:3092
+#, c-format
+msgid "A style called \"%s\" has not been defined"
+msgstr "\"%s\" دېگەن ئۇسلۇب بېكىتىلمىگەن"
+
+#: ../src/ui/theme-parser.c:3113 ../src/ui/theme-parser.c:3136
+#, c-format
+msgid "\"%s\" is not a valid value for resize attribute"
+msgstr "\"%s\" توغرا بولغان resize خاسلىق قىممىتى ئەمەس"
+
+#: ../src/ui/theme-parser.c:3147
+#, c-format
+msgid ""
+"Should not have \"resize\" attribute on <%s> element for maximized/shaded "
+"states"
+msgstr ""
+"ئەڭ چوڭ ياكى سايىلىك ھالەتكە نىسبەتەن ئېلېمېنت <%s> دا \"resize\" خاسلىقى "
+"بولسا بولمايدۇ"
+
+#: ../src/ui/theme-parser.c:3161
+#, c-format
+msgid ""
+"Should not have \"resize\" attribute on <%s> element for maximized states"
+msgstr ""
+"ئەڭ چوڭ ھالەتكە نىسبەتەن ئېلېمېنت <%s> دا \"resize\" خاسلىقى بولسا بولمايدۇ"
+
+#: ../src/ui/theme-parser.c:3175 ../src/ui/theme-parser.c:3222
+#, c-format
+msgid "Style has already been specified for state %s resize %s focus %s"
+msgstr "%s ھالىتى، %s چوڭلۇقى، %s فوكۇسى ئۈچۈن ئۇسلۇب بەلگىلەندى"
+
+#: ../src/ui/theme-parser.c:3186 ../src/ui/theme-parser.c:3197
+#: ../src/ui/theme-parser.c:3208 ../src/ui/theme-parser.c:3233
+#: ../src/ui/theme-parser.c:3244 ../src/ui/theme-parser.c:3255
+#, c-format
+msgid "Style has already been specified for state %s focus %s"
+msgstr "%s ھالىتى، %s فوكۇسى ئۈچۈن ئۇسلۇپ بەلگىلەندى"
+
+#: ../src/ui/theme-parser.c:3294
+msgid ""
+"Can't have a two draw_ops for a <piece> element (theme specified a draw_ops "
+"attribute and also a <draw_ops> element, or specified two elements)"
+msgstr ""
+"<piece> ئېلېمېنتىدا draw_ops بولسا بولمايدۇ (ئۇسۇلۇپتا draw_ops خاسلىق بىلەن "
+"<draw_ops> ئېلېمېنتى كۆرسىتىلگەن،  ياكى ئىككى دانە ئېلېمېنت كۆرسىتىلگەن)"
+
+#: ../src/ui/theme-parser.c:3332
+msgid ""
+"Can't have a two draw_ops for a <button> element (theme specified a draw_ops "
+"attribute and also a <draw_ops> element, or specified two elements)"
+msgstr ""
+"<button> ئېلېمېنتىدا draw_ops بولسا بولمايدۇ (ئۇسۇلۇپتا draw_ops خاسلىق "
+"بىلەن <draw_ops> ئېلېمېنتى كۆرسىتىلگەن،  ياكى ئىككى دانە ئېلېمېنت "
+"كۆرسىتىلگەن)"
+
+#: ../src/ui/theme-parser.c:3370
+msgid ""
+"Can't have a two draw_ops for a <menu_icon> element (theme specified a "
+"draw_ops attribute and also a <draw_ops> element, or specified two elements)"
+msgstr ""
+"<menu_icon> ئېلېمېنتىدا draw_ops بولسا بولمايدۇ (ئۇسۇلۇپتا draw_ops خاسلىق "
+"بىلەن <draw_ops> ئېلېمېنتى كۆرسىتىلگەن،  ياكى ئىككى دانە ئېلېمېنت "
+"كۆرسىتىلگەن)"
+
+#: ../src/ui/theme-parser.c:3434
+#, c-format
+msgid "Bad version specification '%s'"
+msgstr "نەشر بەلگىلىمىسى «%s» توغرا ئەمەس"
+
+#: ../src/ui/theme-parser.c:3507
+msgid ""
+"\"version\" attribute cannot be used in metacity-theme-1.xml or metacity-"
+"theme-2.xml"
+msgstr ""
+"\"version\" خاسلىقىنى metacity-theme-1.xml ياكى metacity-theme-2.xml دا "
+"ئىشلەتكىلى بولمايدۇ"
+
+#: ../src/ui/theme-parser.c:3530
+#, c-format
+msgid "Theme requires version %s but latest supported theme version is %d.%d"
+msgstr "تېما تەلەپ قىلىدىغان نەشرى %s ئەمما قوللايدىغان تېما نەشرى %d.%d"
+
+#: ../src/ui/theme-parser.c:3562
+#, c-format
+msgid "Outermost element in theme must be <metacity_theme> not <%s>"
+msgstr ""
+"ئۇسلۇبنىڭ ئەڭ سىرتىدىكى ئېلېمېنت چوقۇم <metacity_theme> بولۇشى كېرەك، <%s> "
+"بولسا بولمايدۇ"
+
+#: ../src/ui/theme-parser.c:3582
+#, c-format
+msgid ""
+"Element <%s> is not allowed inside a name/author/date/description element"
+msgstr ""
+"ئېلېمېنت <%s> نى ئېلېمېنت name/author/date/description لارنىڭ ئارىسىدا "
+"ئىشلىتىشكە بولمايدۇ"
+
+#: ../src/ui/theme-parser.c:3587
+#, c-format
+msgid "Element <%s> is not allowed inside a <constant> element"
+msgstr "ئېلېمېنت <%s> نى ئېلېمېنت <constant> نىڭ ئارىسىدا ئىشلىتىشكە بولمايدۇ"
+
+#: ../src/ui/theme-parser.c:3599
+#, c-format
+msgid ""
+"Element <%s> is not allowed inside a distance/border/aspect_ratio element"
+msgstr ""
+"ئېلېمېنت <%s> نى ئېلېمېنت distance/border/aspect_ratio لارنىڭ ئارىسىدا "
+"ئىشلىتىشكە بولمايدۇ"
+
+#: ../src/ui/theme-parser.c:3621
+#, c-format
+msgid "Element <%s> is not allowed inside a draw operation element"
+msgstr ""
+"ئېلېمېنت <%s> نى سىزىش مەشغۇلاتى ئېلىپ بارىدىغان ئېلېمېنتنىڭ ئارىسىدا "
+"ئىشلىتىشكە بولمايدۇ"
+
+#: ../src/ui/theme-parser.c:3631 ../src/ui/theme-parser.c:3661
+#: ../src/ui/theme-parser.c:3666 ../src/ui/theme-parser.c:3671
+#, c-format
+msgid "Element <%s> is not allowed inside a <%s> element"
+msgstr "ئېلېمېنت <%s> نى ئېلېمېنت <%s> نىڭ ئارىسىدا ئىشلىتىشكە بولمايدۇ"
+
+#: ../src/ui/theme-parser.c:3899
+msgid "No draw_ops provided for frame piece"
+msgstr "كاندۇكقا draw_ops تەمىنلەنمىگەن"
+
+#: ../src/ui/theme-parser.c:3914
+msgid "No draw_ops provided for button"
+msgstr "كۇنۇپكىغا draw_ops تەمىنلەنمىگەن"
+
+#: ../src/ui/theme-parser.c:3968
+#, c-format
+msgid "No text is allowed inside element <%s>"
+msgstr "ئېلېمېنت <%s> نىڭ ئىچىدە تېكىست بولسا بولمايدۇ"
+
+#: ../src/ui/theme-parser.c:4026 ../src/ui/theme-parser.c:4038
+#: ../src/ui/theme-parser.c:4050 ../src/ui/theme-parser.c:4062
+#: ../src/ui/theme-parser.c:4074
+#, c-format
+msgid "<%s> specified twice for this theme"
+msgstr "<%s> بۇ ئۇسلۇب ئۈچۈن ئىككى قېتىم بەلگىلەنگەن"
+
+#: ../src/ui/theme-parser.c:4348
+#, c-format
+msgid "Failed to find a valid file for theme %s\n"
+msgstr "تېما %s نىڭ ئۈنۈملۈك ھۆججەتلىرىنى تاپالمىدى\n"
+
+#: ../src/ui/theme-viewer.c:99
+msgid "_Windows"
+msgstr "كۆزنەك(_W)"
+
+#: ../src/ui/theme-viewer.c:100
+msgid "_Dialog"
+msgstr "سۆزلەشكۈ(_D)"
+
+#: ../src/ui/theme-viewer.c:101
+msgid "_Modal dialog"
+msgstr "Modal لىق سۆزلەشكۈ(_M)"
+
+#: ../src/ui/theme-viewer.c:102
+msgid "_Utility"
+msgstr "قورال(_U)"
+
+#: ../src/ui/theme-viewer.c:103
+msgid "_Splashscreen"
+msgstr "قوزغىلىش ئېكرانى(_S)"
+
+#: ../src/ui/theme-viewer.c:104
+msgid "_Top dock"
+msgstr "ئۈستىدە توختات(_T)"
+
+#: ../src/ui/theme-viewer.c:105
+msgid "_Bottom dock"
+msgstr "ئاستىدا توختات(_B)"
+
+#: ../src/ui/theme-viewer.c:106
+msgid "_Left dock"
+msgstr "سولدا توختات(_L)"
+
+#: ../src/ui/theme-viewer.c:107
+msgid "_Right dock"
+msgstr "ئوڭغا توختات(_R)"
+
+#: ../src/ui/theme-viewer.c:108
+msgid "_All docks"
+msgstr "ھەممە توختاش نۇقتىسى(_A)"
+
+#: ../src/ui/theme-viewer.c:109
+msgid "Des_ktop"
+msgstr "ئۈستەلئۈستى(_K)"
+
+#: ../src/ui/theme-viewer.c:115
+msgid "Open another one of these windows"
+msgstr "بۇ كۆزنەكلەرنىڭ ئىچىدىكى بىرەرىنى ئاچىدۇ"
+
+#: ../src/ui/theme-viewer.c:117
+msgid "This is a demo button with an 'open' icon"
+msgstr "بۇ 'ئاچ' سىنبەلگىسى بار ئۈلگە(demo) توپچىسى"
+
+#: ../src/ui/theme-viewer.c:119
+msgid "This is a demo button with a 'quit' icon"
+msgstr "بۇ 'ئاخىرلاشتۇر' سىنبەلگىسى بار ئۈلگە(demo) توپچىسى"
+
+#: ../src/ui/theme-viewer.c:253
+msgid "This is a sample message in a sample dialog"
+msgstr "بۇ ئۈلگە سۆزلەشكۈسىدىكى مىسال ئۇچۇرى"
+
+#: ../src/ui/theme-viewer.c:336
+#, c-format
+msgid "Fake menu item %d\n"
+msgstr "مەۋھۇم تىزىملىك تۈرى %d\n"
+
+#: ../src/ui/theme-viewer.c:371
+msgid "Border-only window"
+msgstr "گىرۋەكلىك كۆزنەك"
+
+#: ../src/ui/theme-viewer.c:373
+msgid "Bar"
+msgstr "تۈۋرۈكسىمان دىئاگرامما"
+
+#: ../src/ui/theme-viewer.c:390
+msgid "Normal Application Window"
+msgstr "ئادەتتىكى پروگرامما كۆزنىكى"
+
+#: ../src/ui/theme-viewer.c:394
+msgid "Dialog Box"
+msgstr "سۆزلەشكۈ كۆزنەكچىسى"
+
+#: ../src/ui/theme-viewer.c:398
+msgid "Modal Dialog Box"
+msgstr "ھالەت سۆزلەشكۈ رامكىسى"
+
+#: ../src/ui/theme-viewer.c:402
+msgid "Utility Palette"
+msgstr "قورال كۇنۇپكىسى"
+
+#: ../src/ui/theme-viewer.c:406
+msgid "Torn-off Menu"
+msgstr "بۆلىۋالغان تىزىملىك"
+
+#: ../src/ui/theme-viewer.c:410
+msgid "Border"
+msgstr "گىرۋەك"
+
+#: ../src/ui/theme-viewer.c:414
+msgid "Attached Modal Dialog"
+msgstr "قوشۇلغان Modal سۆزلەشكۈ"
+
+#: ../src/ui/theme-viewer.c:747
+#, c-format
+msgid "Button layout test %d"
+msgstr "كۇنۇپكا ئورۇنلاشتۇرۇلۇشىنى سىناش %d"
+
+#: ../src/ui/theme-viewer.c:776
+#, c-format
+msgid "%g milliseconds to draw one window frame"
+msgstr "%g مىللىسېكۇنت(بىر كۆزنەك كاندۇكىنى سىزىشقا كەتكەن ۋاقىت)"
+
+#: ../src/ui/theme-viewer.c:821
+#, c-format
+msgid "Usage: metacity-theme-viewer [THEMENAME]\n"
+msgstr "ئىشلىتىش ئۇسۇلى: metacity-theme-viewer [ئۇسلۇب ئاتى]\n"
+
+#: ../src/ui/theme-viewer.c:828
+#, c-format
+msgid "Error loading theme: %s\n"
+msgstr "تېما قاچىلاشتا خاتالىق كۆرۈلدى：%s\n"
+
+#: ../src/ui/theme-viewer.c:834
+#, c-format
+msgid "Loaded theme \"%s\" in %g seconds\n"
+msgstr "\"%s\" دېگەن ئۇسلۇبنى %g سېكۇنتتا ئوقۇدى\n"
+
+#: ../src/ui/theme-viewer.c:878
+msgid "Normal Title Font"
+msgstr "ئادەتتىكى ماۋزۇ خەت نۇسخىسى"
+
+#: ../src/ui/theme-viewer.c:884
+msgid "Small Title Font"
+msgstr "تارماق ماۋزۇ خەت نۇسخىسى"
+
+#: ../src/ui/theme-viewer.c:890
+msgid "Large Title Font"
+msgstr "ماۋزۇ خەت نۇسخىسى"
+
+#: ../src/ui/theme-viewer.c:895
+msgid "Button Layouts"
+msgstr "كۇنۇپكا ئورۇنلاشتۇرۇلۇشى"
+
+#: ../src/ui/theme-viewer.c:900
+msgid "Benchmark"
+msgstr "ئاساسىي ئۆلچەم"
+
+#: ../src/ui/theme-viewer.c:952
+msgid "Window Title Goes Here"
+msgstr "بۇ يەردە كۆزنەك ماۋزۇسى كۆرسىتىلىدۇ"
+
+#: ../src/ui/theme-viewer.c:1055
+#, c-format
+msgid ""
+"Drew %d frames in %g client-side seconds (%g milliseconds per frame) and %g "
+"seconds wall clock time including X server resources (%g milliseconds per "
+"frame)\n"
+msgstr ""
+"%2$g دىكى خېرىدار تەرەپ سېكۇنت (ھەر كاندۇك %3$g مىللىسېكۇنت) ۋە X "
+"مۇلازىمېتىر مەنبەسى ئىچىدىكى %4$g سېكۇنت ۋاقىت (ھەر بىر كاندۇك %5$g "
+"مىللىسېكۇنت) ئىچىدە %1$d كاندۇك سىزىدۇ\n"
+
+#: ../src/ui/theme-viewer.c:1274
+msgid "position expression test returned TRUE but set error"
+msgstr "ئورۇن ئىپادىسىنى سىناشتا TRUE قايتتى بىراق خاتالىق كۆرۈلدى"
+
+#: ../src/ui/theme-viewer.c:1276
+msgid "position expression test returned FALSE but didn't set error"
+msgstr "ئورۇن ئىپادىسىنى سىناشتا FALSE قايتتى بىراق خاتالىق كۆرۈلمىدى"
+
+#: ../src/ui/theme-viewer.c:1280
+msgid "Error was expected but none given"
+msgstr "خاتالىق چىقىدىغان يەردە خاتالىق چىقمىدى"
+
+#: ../src/ui/theme-viewer.c:1282
+#, c-format
+msgid "Error %d was expected but %d given"
+msgstr "خاتالىق %d چىقىدىغان يەردە %d چىقتى"
+
+#: ../src/ui/theme-viewer.c:1288
+#, c-format
+msgid "Error not expected but one was returned: %s"
+msgstr "خاتالىق چىقمايدىغان يەردە بىر خاتالىق چىقىپ قالدى: %s"
+
+#: ../src/ui/theme-viewer.c:1292
+#, c-format
+msgid "x value was %d, %d was expected"
+msgstr "x نىڭ قىممىتى %d ئىكەن، ئەسلى %d بولسا بولاتتى"
+
+#: ../src/ui/theme-viewer.c:1295
+#, c-format
+msgid "y value was %d, %d was expected"
+msgstr "y نىڭ قىممىتى %d ئىكەن، ئەسلى %d بولسا بولاتتى"
+
+#: ../src/ui/theme-viewer.c:1360
+#, c-format
+msgid "%d coordinate expressions parsed in %g seconds (%g seconds average)\n"
+msgstr ""
+"%d كوئوردېنات ئىپادىسى %g سېكۇنتتا تەھلىل قىلىندى(%g ئوتتۇرىچە سېكۇنت)\n"
+
+#~ msgid "Failed to retrieve color %s[%s] from GTK+ theme.\n"
+#~ msgstr "GTK+ ئۆرنەكتىن رەڭ %s[%s] نى ئىزدىيەلمىدى\n"
+
+#~ msgid "Turn compositing on"
+#~ msgstr "ئارىلاشتۇرۇشنى ئىچىش"
+
+#~ msgid "Turn compositing off"
+#~ msgstr "ئالماشتۇرۇشنى تاقاش"
+
+#~ msgid "Failed to restart: %s\n"
+#~ msgstr "قايتا قوزغاتقىلى بولمىدى：%s\n"
+
+#~ msgid "Error setting compositor status: %s\n"
+#~ msgstr "compositor ھالىتىنى تەڭشەشتە خاتالىق كۆرۈلدى: %s\n"
