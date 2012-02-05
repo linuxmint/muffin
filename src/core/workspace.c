@@ -1122,6 +1122,15 @@ meta_motion_direction_to_string (MetaMotionDirection direction)
 }
 #endif /* WITH_VERBOSE_MODE */
 
+/**
+ * meta_workspace_get_neighbor:
+ * @workspace: a #MetaWorkspace
+ * @direction: a #MetaMotionDirection, direction in which to look for the neighbor
+ *
+ * Gets the neighbor of the #MetaWorkspace in the given direction
+ *
+ * Return value: (transfer none): the neighbor #MetaWorkspace
+ */
 MetaWorkspace*
 meta_workspace_get_neighbor (MetaWorkspace      *workspace,
                              MetaMotionDirection direction)
