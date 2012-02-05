@@ -5517,6 +5517,13 @@ change_workspace_foreach (MetaWindow *window,
   return TRUE;
 }
 
+/**
+ * meta_window_change_workspace:
+ * @window: a #MetaWindow
+ * @workspace: the #MetaWorkspace where to put the window
+ *
+ * Moves the window to the specified workspace.
+ */
 void
 meta_window_change_workspace (MetaWindow    *window,
                               MetaWorkspace *workspace)
