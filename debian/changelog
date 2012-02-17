@@ -1,3 +1,9 @@
+muffin (1.0.1) lisa; urgency=low
+
+  * 1.0.1
+
+ -- Clement Lefebvre <root@linuxmint.com>  Fri, 17 Feb 2012 10:57:41 +0000
+
 muffin (1.0.0) lisa; urgency=low
 
   * Muffin, based on Mutter 3.2.1(-0ubuntu2)
