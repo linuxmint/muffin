@@ -110,6 +110,8 @@ void meta_window_change_workspace_by_index (MetaWindow *window,
                                             guint32     timestamp);
 void meta_window_change_workspace (MetaWindow    *window,
                                     MetaWorkspace *workspace);
+void meta_window_stick (MetaWindow  *window);
+void meta_window_unstick (MetaWindow  *window);
 GObject *meta_window_get_compositor_private (MetaWindow *window);
 void meta_window_set_compositor_private (MetaWindow *window, GObject *priv);
 void meta_window_configure_notify (MetaWindow *window, XConfigureEvent *event);
