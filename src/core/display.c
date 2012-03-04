@@ -745,7 +745,7 @@ meta_display_open (void)
     meta_prop_set_utf8_string_hint (the_display,
                                     the_display->leader_window,
                                     the_display->atom__NET_WM_NAME,
-                                    "Muffin");
+                                    "Mutter (Muffin)");
 
     /* The GNOME keybindings capplet should include both the Muffin and Metacity
      * keybindings */
