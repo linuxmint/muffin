@@ -1532,9 +1532,14 @@ meta_window_actor_new (MetaWindow *window)
 
   /* Hang our compositor window state off the MetaWindow for fast retrieval */
   meta_window_set_compositor_private (window, G_OBJECT (self));
-
-  clutter_container_add_actor (CLUTTER_CONTAINER (info->window_group),
+  
+  if (window->type == META_WINDOW_POPUP_MENU){
+    clutter_container_add_actor (CLUTTER_CONTAINER (info->top_window_group),
 			       CLUTTER_ACTOR (self));
+  }else{
+    clutter_container_add_actor (CLUTTER_CONTAINER (info->window_group),
+			       CLUTTER_ACTOR (self));
+  }
   clutter_actor_hide (CLUTTER_ACTOR (self));
 
   /* Initial position in the stack is arbitrary; stacking will be synced
