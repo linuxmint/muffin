@@ -592,13 +592,16 @@ libmuffin.so.0 libmuffin0 #MINVER#
  meta_shadow_ref@Base 1.0.2
  meta_shadow_unref@Base 1.0.2
  meta_shaped_texture_clear@Base 1.0.2
+ meta_shaped_texture_get_texture@Base 1.0.2
  meta_shaped_texture_get_type@Base 1.0.2
  meta_shaped_texture_get_visible_pixels_region@Base 1.0.2
  meta_shaped_texture_new@Base 1.0.2
  meta_shaped_texture_set_clip_region@Base 1.0.2
  meta_shaped_texture_set_create_mipmaps@Base 1.0.2
  meta_shaped_texture_set_overlay_path@Base 1.0.2
+ meta_shaped_texture_set_pixmap@Base 1.0.2
  meta_shaped_texture_set_shape_region@Base 1.0.2
+ meta_shaped_texture_update_area@Base 1.0.2
  meta_show_dialog@Base 1.0.2
  meta_side_get_type@Base 1.0.2
  meta_stack_add@Base 1.0.2
