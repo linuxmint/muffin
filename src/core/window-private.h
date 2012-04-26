@@ -97,10 +97,18 @@ struct _MetaWindow
   char *role;
   char *sm_client_id;
   char *wm_client_machine;
+
   char *startup_id;
   char *muffin_hints;
   char *gtk_theme_variant;
+  char *gtk_application_id;
+  char *gtk_unique_bus_name;
+  char *gtk_application_object_path;
+  char *gtk_window_object_path;
+  char *gtk_app_menu_object_path;
+  char *gtk_menubar_object_path;
 
+  int hide_titlebar_when_maximized;
   int net_wm_pid;
   
   Window xtransient_for;
@@ -129,6 +137,9 @@ struct _MetaWindow
    * this is the current mode. If not, it is the mode which will be
    * requested after the window grab is released */
   guint tile_mode : 2;
+  /* The last "full" maximized/unmaximized state. We need to keep track of
+   * that to toggle between normal/tiled or maximized/tiled states. */
+  guint saved_maximize : 1;
   int tile_monitor_number;
 
   /* Whether we're shaded */
@@ -399,6 +410,9 @@ struct _MetaWindow
 
   /* Focused window that is (directly or indirectly) attached to this one */
   MetaWindow *attached_focus_window;
+
+  /* The currently complementary tiled window, if any */
+  MetaWindow *tile_match;
 };
 
 struct _MetaWindowClass
@@ -650,5 +664,8 @@ void meta_window_propagate_focus_appearance (MetaWindow *window,
                                              gboolean    focused);
 
 gboolean meta_window_should_attach_to_parent (MetaWindow *window);
+gboolean meta_window_can_tile_side_by_side   (MetaWindow *window);
+
+void meta_window_compute_tile_match (MetaWindow *window);
 
 #endif

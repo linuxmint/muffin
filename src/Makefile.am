@@ -27,8 +27,6 @@ INCLUDES=								\
 	-DGETTEXT_PACKAGE=\"$(GETTEXT_PACKAGE)\"
 
 muffin_built_sources = \
-	muffin-marshal.h \
-	muffin-marshal.c \
 	muffin-enum-types.h \
 	muffin-enum-types.c
 
@@ -132,8 +130,6 @@ libmuffin_la_SOURCES =				\
 	core/core.h				\
 	ui/ui.h					\
 	inlinepixbufs.h				\
-	ui/fixedtip.c				\
-	ui/fixedtip.h				\
 	ui/frames.c				\
 	ui/frames.h				\
 	ui/menu.c				\
@@ -151,7 +147,6 @@ libmuffin_la_SOURCES =				\
 	meta/theme.h				\
 	ui/theme-private.h			\
 	ui/ui.c					\
-	core/all-keybindings.h			\
 	meta/preview-widget.h			\
 	ui/preview-widget.c			\
 	$(muffin_built_sources)
@@ -226,7 +221,7 @@ typelib_DATA = Meta-$(api_version).typelib
 INTROSPECTION_GIRS = Meta-$(api_version).gir
 
 Meta-$(api_version).gir: libmuffin.la
-@META_GIR@_INCLUDES = GObject-2.0 Gdk-3.0 Gtk-3.0 Clutter-1.0 xlib-2.0 xfixes-4.0
+@META_GIR@_INCLUDES = GObject-2.0 GDesktopEnums-3.0 Gdk-3.0 Gtk-3.0 Clutter-1.0 xlib-2.0 xfixes-4.0
 @META_GIR@_PACKAGES = clutter-1.0 gtk+-3.0
 @META_GIR@_CFLAGS = $(INCLUDES)
 @META_GIR@_LIBS = libmuffin.la
@@ -262,20 +257,17 @@ wmproperties_in_files=muffin-wm.desktop.in
 wmproperties_files=$(wmproperties_in_files:.desktop.in=.desktop)
 wmproperties_DATA = $(wmproperties_files)
 
-schemadir   = $(GCONF_SCHEMA_FILE_DIR)
-schema_in_files = muffin.schemas.in
-schema_DATA = $(schema_in_files:.schemas.in=.schemas)
+xmldir       = @GNOME_KEYBINDINGS_KEYSDIR@
+xml_in_files = \
+        50-muffin-windows.xml.in
+xml_DATA     = $(xml_in_files:.xml.in=.xml)
 
+gsettings_SCHEMAS = org.cinnamon.muffin.gschema.xml
 @INTLTOOL_XML_NOMERGE_RULE@
+@GSETTINGS_RULES@
 
-@INTLTOOL_SCHEMAS_RULE@
-
-if GCONF_SCHEMAS_INSTALL
-install-data-local:
-	GCONF_CONFIG_SOURCE=$(GCONF_SCHEMA_CONFIG_SOURCE) $(GCONFTOOL) --makefile-install-rule $(schema_DATA)
-else
-install-data-local:
-endif
+convertdir = $(datadir)/GConf/gsettings
+convert_DATA = muffin-schemas.convert
 
 IMAGES=stock_maximize.png stock_minimize.png stock_delete.png
 VARIABLES=stock_maximize_data $(srcdir)/stock_maximize.png \
@@ -287,7 +279,8 @@ CLEANFILES =					\
 	inlinepixbufs.h				\
 	muffin.desktop				\
 	muffin-wm.desktop			\
-	muffin.schemas				\
+	org.cinnamon.muffin.gschema.xml		\
+	$(xml_DATA)				\
 	$(muffin_built_sources)			\
 	$(typelib_DATA)				\
 	$(gir_DATA)
@@ -304,36 +297,17 @@ EXTRA_DIST=$(desktopfiles_files) 	\
 	$(IMAGES) 			\
 	$(desktopfiles_in_files)	\
 	$(wmproperties_in_files)	\
-	$(schema_in_files)		\
+	$(xml_in_files)			\
+	org.cinnamon.muffin.gschema.xml.in \
+	muffin-schemas.convert \
 	libmuffin.pc.in \
 	muffin-plugins.pc.in  \
 	muffin-enum-types.h.in \
-	muffin-enum-types.c.in \
-	muffin-marshal.list
+	muffin-enum-types.c.in
 
 BUILT_SOURCES += $(muffin_built_sources)
-MUFFIN_STAMP_FILES = stamp-muffin-marshal.h stamp-muffin-enum-types.h
+MUFFIN_STAMP_FILES = stamp-muffin-enum-types.h
 CLEANFILES += $(MUFFIN_STAMP_FILES)
-
-muffin-marshal.h: stamp-muffin-marshal.h
-	@true
-stamp-muffin-marshal.h: Makefile muffin-marshal.list
-	$(AM_V_GEN) $(GLIB_GENMARSHAL) \
-		--prefix=_muffin_marshal \
-		--header \
-	$(srcdir)/muffin-marshal.list > xgen-tmh && \
-	(cmp -s xgen-tmh muffin-marshal.h || cp -f xgen-tmh muffin-marshal.h) && \
-	rm -f xgen-tmh && \
-	echo timestamp > $(@F)
-
-muffin-marshal.c: Makefile muffin-marshal.list
-	 $(AM_V_GEN) (echo "#include \"muffin-marshal.h\"" ; \
-	 $(GLIB_GENMARSHAL) \
-		--prefix=_muffin_marshal \
-		--body \
-	 $(srcdir)/muffin-marshal.list ) > xgen-tmc && \
-	cp -f xgen-tmc muffin-marshal.c && \
-	rm -f xgen-tmc
 
 muffin-enum-types.h: stamp-muffin-enum-types.h Makefile
 	@true

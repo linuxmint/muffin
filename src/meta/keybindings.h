@@ -23,37 +23,11 @@
 #include <meta/display.h>
 #include <meta/common.h>
 
-/**
- * MetaKeyHandlerFunc: (skip)
- *
- */
-typedef void (* MetaKeyHandlerFunc) (MetaDisplay    *display,
-                                     MetaScreen     *screen,
-                                     MetaWindow     *window,
-                                     XEvent         *event,
-                                     MetaKeyBinding *binding,
-				     gpointer        user_data);
+#define META_TYPE_KEY_BINDING               (meta_key_binding_get_type ())
 
-typedef struct
-{
-  const char *name;
-  MetaKeyHandlerFunc func;
-  MetaKeyHandlerFunc default_func;
-  gint data, flags;
-  gpointer user_data;
-  GDestroyNotify user_data_free_func;
-} MetaKeyHandler;
-
-struct _MetaKeyBinding
-{
-  const char *name;
-  KeySym keysym;
-  KeyCode keycode;
-  unsigned int mask;
-  MetaVirtualModifier modifiers;
-  MetaKeyHandler *handler;
-};
-
+const char          *meta_key_binding_get_name      (MetaKeyBinding *binding);
+MetaVirtualModifier  meta_key_binding_get_modifiers (MetaKeyBinding *binding);
+guint                meta_key_binding_get_mask      (MetaKeyBinding *binding);
 
 gboolean meta_keybindings_set_custom_handler (const gchar        *name,
 					      MetaKeyHandlerFunc  handler,

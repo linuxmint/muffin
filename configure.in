@@ -61,21 +61,23 @@ AC_CHECK_SIZEOF(__int64)
 ## byte order
 AC_C_BIGENDIAN
 
-GTK_MIN_VERSION=3.3.3
 CANBERRA_GTK=libcanberra-gtk3
 CANBERRA_GTK_VERSION=0.26
 
-MUFFIN_PC_MODULES="gtk+-3.0 >= $GTK_MIN_VERSION pango >= 1.2.0 cairo >= 1.10.0"
+CLUTTER_PACKAGE=clutter-1.0
 
-AC_ARG_ENABLE(gconf,
-  AC_HELP_STRING([--disable-gconf],
-                 [disable gconf usage, for embedded/size-sensitive non-GNOME builds]),,
-  enable_gconf=yes)
+MUFFIN_PC_MODULES="
+   gtk+-3.0 >= 3.3.7
+   gio-2.0 >= 2.25.10
+   pango >= 1.2.0
+   cairo >= 1.10.0
+   gsettings-desktop-schemas >= 3.3.0
+   xcomposite >= 0.2 xfixes xrender xdamage
+   $CLUTTER_PACKAGE >= 1.9.10
+   cogl-1.0 >= 1.9.6
+"
 
-if test x$enable_gconf = xyes; then
-    AC_DEFINE(HAVE_GCONF,1,[Build with gconf support])
-    MUFFIN_PC_MODULES="$MUFFIN_PC_MODULES gconf-2.0 >= 1.2.0"
-fi
+GLIB_GSETTINGS
 
 AC_ARG_ENABLE(verbose-mode,
   AC_HELP_STRING([--disable-verbose-mode],
@@ -120,8 +122,8 @@ AM_GLIB_GNU_GETTEXT
 # GRegex requires Glib-2.14.0
 PKG_CHECK_MODULES(ALL, glib-2.0 >= 2.14.0)
 # gtk_window_set_icon_name requires gtk2+-2.6.0
-PKG_CHECK_MODULES(MUFFIN_MESSAGE, gtk+-3.0 >= $GTK_MIN_VERSION)
-PKG_CHECK_MODULES(MUFFIN_WINDOW_DEMO, gtk+-3.0 >= $GTK_MIN_VERSION)
+PKG_CHECK_MODULES(MUFFIN_MESSAGE, gtk+-3.0)
+PKG_CHECK_MODULES(MUFFIN_WINDOW_DEMO, gtk+-3.0)
 
 # Unconditionally use this dir to avoid a circular dep with gnomecc
 GNOME_KEYBINDINGS_KEYSDIR="${datadir}/gnome-control-center/keybindings"
@@ -171,31 +173,6 @@ else
   fi
 fi
 
-XCOMPOSITE_VERSION=0.2
-
-AC_MSG_CHECKING([Xcomposite >= $XCOMPOSITE_VERSION])
-if $PKG_CONFIG --atleast-version $XCOMPOSITE_VERSION xcomposite; then
-  MUFFIN_PC_MODULES="$MUFFIN_PC_MODULES xcomposite >= $XCOMPOSITE_VERSION xfixes xrender xdamage"
-  AC_DEFINE(HAVE_COMPOSITE_EXTENSIONS, 1, [Building with compositing manager support])
-  echo "Building with compositing manager"
-
-  ## force on render also
-  have_xrender=yes
-else
-  AC_MSG_ERROR([no. Muffin requires the Xcomposite extension to build.])
-fi
-
-CLUTTER_VERSION=1.7.5
-CLUTTER_PACKAGE=clutter-1.0
-AC_SUBST(CLUTTER_PACKAGE)
-if $PKG_CONFIG --atleast-version $CLUTTER_VERSION $CLUTTER_PACKAGE ; then
-  MUFFIN_PC_MODULES="$MUFFIN_PC_MODULES $CLUTTER_PACKAGE "
-  PKG_CHECK_MODULES(CLUTTER, $CLUTTER_PACKAGE)
-  AC_DEFINE(WITH_CLUTTER, , [Building with Clutter compositor])
-else
-  AC_MSG_ERROR([no. Muffin requires Clutter version $CLUTTER_VERSION.])
-fi
-
 INTROSPECTION_VERSION=0.9.5
 GOBJECT_INTROSPECTION_CHECK([$INTROSPECTION_VERSION])
 
@@ -226,6 +203,10 @@ if test x$have_xcursor = xyes; then
 fi
 
 PKG_CHECK_MODULES(MUFFIN, $MUFFIN_PC_MODULES)
+
+# This is used for plugins
+AC_SUBST(CLUTTER_PACKAGE)
+PKG_CHECK_MODULES(CLUTTER, $CLUTTER_PACKAGE)
 
 AC_PATH_XTRA
 
@@ -400,18 +381,6 @@ fi
 
 AC_SUBST(GDK_PIXBUF_CSOURCE)
 
-if test x$enable_gconf = xyes; then
-   AC_PATH_PROG(GCONFTOOL, gconftool-2, no)
-   if test x"$GCONFTOOL" = xno; then
-     AC_MSG_ERROR([gconftool-2 executable not found in your path - should be installed with GConf])
-   fi
-
-   AM_GCONF_SOURCE_2
-else
-  GCONF_SCHEMAS_INSTALL_TRUE='#'
-  GCONF_SCHEMAS_INSTALL_FALSE=
-fi
-
 AC_PATH_PROG(ZENITY, zenity, no)
 if test x"$ZENITY" = xno; then
   AC_MSG_ERROR([zenity not found in your path - needed for dialogs])
@@ -506,13 +475,6 @@ po/Makefile.in
 
 AC_OUTPUT
 
-if test x$enable_gconf = xno; then
-        echo "*** WARNING WARNING WARNING WARNING WARNING"
-        echo "*** Building without GConf.  This means there's no"
-        echo "*** way to change prefs except hacking source code."
-        echo "*** This is intended for embedded systems etc., not for normal use."
-fi
-
 if test x$enable_verbose_mode = xno; then
         echo "*** WARNING WARNING WARNING WARNING WARNING"
         echo "*** Building without verbose mode"
@@ -529,7 +491,6 @@ muffin-$VERSION
 	source code location:	  ${srcdir}
 	compiler:		  ${CC}
 
-	GConf:                    ${enable_gconf}
 	XFree86 Xinerama:         ${use_xfree_xinerama}
 	Solaris Xinerama:         ${use_solaris_xinerama}
 	Startup notification:     ${have_startup_notification}
@@ -546,8 +507,8 @@ MUFFIN_MINOR_VERSION=muffin_minor_version
 if expr $MUFFIN_MINOR_VERSION % 2 > /dev/null ; then
    stable_version=`expr $MUFFIN_MINOR_VERSION - 1`
    echo "This is the UNSTABLE branch of muffin"
-   echo -n "Use 2.$stable_version.x for stable "
-   echo    "(gnome-2-$stable_version branch in git)"
+   echo -n "Use 3.$stable_version.x for stable "
+   echo    "(gnome-3-$stable_version branch in git)"
 else
    echo "This is the stable branch of muffin"
 fi

@@ -75,8 +75,6 @@ CoglHandle meta_shaped_texture_get_texture (MetaShapedTexture *stex);
 void meta_shaped_texture_set_shape_region (MetaShapedTexture *stex,
                                            cairo_region_t    *region);
 
-cairo_region_t *meta_shaped_texture_get_visible_pixels_region (MetaShapedTexture *stex);
-
 void meta_shaped_texture_set_overlay_path (MetaShapedTexture *stex,
                                            cairo_region_t    *overlay_region,
                                            cairo_path_t      *overlay_path);
@@ -84,6 +82,9 @@ void meta_shaped_texture_set_overlay_path (MetaShapedTexture *stex,
 /* Assumes ownership of clip_region */
 void meta_shaped_texture_set_clip_region (MetaShapedTexture *stex,
 					  cairo_region_t    *clip_region);
+
+cairo_surface_t * meta_shaped_texture_get_image (MetaShapedTexture     *stex,
+                                                 cairo_rectangle_int_t *clip);
 
 G_END_DECLS
 

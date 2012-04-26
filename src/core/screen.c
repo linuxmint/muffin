@@ -39,7 +39,6 @@
 #include "stack.h"
 #include "xprops.h"
 #include <meta/compositor.h>
-#include "muffin-marshal.h"
 #include "muffin-enum-types.h"
 
 #ifdef HAVE_SOLARIS_XINERAMA
@@ -162,8 +161,7 @@ meta_screen_class_init (MetaScreenClass *klass)
                   G_TYPE_FROM_CLASS (object_class),
                   G_SIGNAL_RUN_LAST,
                   G_STRUCT_OFFSET (MetaScreenClass, restacked),
-                  NULL, NULL,
-                  g_cclosure_marshal_VOID__VOID,
+                  NULL, NULL, NULL,
                   G_TYPE_NONE, 0);
 
   pspec = g_param_spec_int ("n-workspaces",
@@ -177,8 +175,7 @@ meta_screen_class_init (MetaScreenClass *klass)
                   G_TYPE_FROM_CLASS (klass),
                   G_SIGNAL_RUN_LAST,
                   0,
-                  NULL, NULL,
-                  g_cclosure_marshal_VOID__INT,
+                  NULL, NULL, NULL,
                   G_TYPE_NONE,
                   1,
                   G_TYPE_INT);
@@ -188,8 +185,7 @@ meta_screen_class_init (MetaScreenClass *klass)
                   G_TYPE_FROM_CLASS (klass),
                   G_SIGNAL_RUN_LAST,
                   0,
-                  NULL, NULL,
-                  g_cclosure_marshal_VOID__INT,
+                  NULL, NULL, NULL,
                   G_TYPE_NONE,
                   1,
                   G_TYPE_INT);
@@ -199,21 +195,19 @@ meta_screen_class_init (MetaScreenClass *klass)
                   G_TYPE_FROM_CLASS (klass),
                   G_SIGNAL_RUN_LAST,
                   0,
-                  NULL, NULL,
-                  _muffin_marshal_VOID__INT_INT_ENUM,
+                  NULL, NULL, NULL,
                   G_TYPE_NONE,
                   3,
                   G_TYPE_INT,
                   G_TYPE_INT,
-                  MUFFIN_TYPE_MOTION_DIRECTION);
+                  META_TYPE_MOTION_DIRECTION);
 
   screen_signals[WINDOW_ENTERED_MONITOR] =
     g_signal_new ("window-entered-monitor",
                   G_TYPE_FROM_CLASS (klass),
                   G_SIGNAL_RUN_LAST,
                   0,
-                  NULL, NULL,
-                  _muffin_marshal_VOID__INT_OBJECT,
+                  NULL, NULL, NULL,
                   G_TYPE_NONE, 2,
                   G_TYPE_INT,
                   META_TYPE_WINDOW);
@@ -223,8 +217,7 @@ meta_screen_class_init (MetaScreenClass *klass)
                   G_TYPE_FROM_CLASS (klass),
                   G_SIGNAL_RUN_LAST,
                   0,
-                  NULL, NULL,
-                  _muffin_marshal_VOID__INT_OBJECT,
+                  NULL, NULL, NULL,
                   G_TYPE_NONE, 2,
                   G_TYPE_INT,
                   META_TYPE_WINDOW);
@@ -234,8 +227,7 @@ meta_screen_class_init (MetaScreenClass *klass)
                   G_TYPE_FROM_CLASS (klass),
                   G_SIGNAL_RUN_LAST,
                   0,
-                  NULL, NULL,
-                  g_cclosure_marshal_VOID__POINTER,
+                  NULL, NULL, NULL,
                   G_TYPE_NONE, 1, G_TYPE_POINTER);
 
   screen_signals[TOGGLE_RECORDING] =
@@ -243,8 +235,7 @@ meta_screen_class_init (MetaScreenClass *klass)
                   G_TYPE_FROM_CLASS (klass),
                   G_SIGNAL_RUN_LAST,
                   0,
-                  NULL, NULL,
-                  g_cclosure_marshal_VOID__VOID,
+                  NULL, NULL, NULL,
                   G_TYPE_NONE, 0);
 
   screen_signals[WORKAREAS_CHANGED] =
@@ -252,8 +243,7 @@ meta_screen_class_init (MetaScreenClass *klass)
                   G_TYPE_FROM_CLASS (object_class),
                   G_SIGNAL_RUN_LAST,
                   G_STRUCT_OFFSET (MetaScreenClass, workareas_changed),
-                  NULL, NULL,
-                  g_cclosure_marshal_VOID__VOID,
+                  NULL, NULL, NULL,
                   G_TYPE_NONE, 0);
 
   screen_signals[MONITORS_CHANGED] =
@@ -261,8 +251,7 @@ meta_screen_class_init (MetaScreenClass *klass)
 		  G_TYPE_FROM_CLASS (object_class),
 		  G_SIGNAL_RUN_LAST,
 		  G_STRUCT_OFFSET (MetaScreenClass, monitors_changed),
-		  NULL, NULL,
-		  g_cclosure_marshal_VOID__VOID,
+          NULL, NULL, NULL,
 		  G_TYPE_NONE, 0);
 
   g_object_class_install_property (object_class,
@@ -1184,9 +1173,11 @@ prefs_changed_callback (MetaPreference pref,
 {
   MetaScreen *screen = data;
   
-  if (pref == META_PREF_NUM_WORKSPACES)
+  if ((pref == META_PREF_NUM_WORKSPACES ||
+       pref == META_PREF_DYNAMIC_WORKSPACES) &&
+      !meta_prefs_get_dynamic_workspaces ())
     {
-      /* GConf doesn't provide timestamps, but luckily update_num_workspaces
+      /* GSettings doesn't provide timestamps, but luckily update_num_workspaces
        * often doesn't need it...
        */
       guint32 timestamp = 
@@ -1494,12 +1485,14 @@ meta_screen_remove_workspace (MetaScreen *screen, MetaWorkspace *workspace,
   new_num = g_list_length (screen->workspaces);
 
   set_number_of_spaces_hint (screen, new_num);
-  meta_prefs_set_num_workspaces (new_num);
+
+  if (!meta_prefs_get_dynamic_workspaces ())
+    meta_prefs_set_num_workspaces (new_num);
 
   /* If deleting a workspace before the current workspace, the active
    * workspace index changes, so we need to update that hint */
   if (active_index_changed)
-      meta_screen_set_active_workspace_hint (workspace->screen);
+      meta_screen_set_active_workspace_hint (screen);
 
   l = next;
   while (l)
@@ -1549,7 +1542,9 @@ meta_screen_append_new_workspace (MetaScreen *screen, gboolean activate,
   new_num = g_list_length (screen->workspaces);
 
   set_number_of_spaces_hint (screen, new_num);
-  meta_prefs_set_num_workspaces (new_num);
+
+  if (!meta_prefs_get_dynamic_workspaces ())
+    meta_prefs_set_num_workspaces (new_num);
 
   meta_screen_queue_workarea_recalc (screen);
 
@@ -1565,7 +1560,7 @@ static void
 update_num_workspaces (MetaScreen *screen,
                        guint32     timestamp)
 {
-  int new_num;
+  int new_num, old_num;
   GList *tmp;
   int i;
   GList *extras;
@@ -1595,6 +1590,7 @@ update_num_workspaces (MetaScreen *screen,
       ++i;
       tmp = tmp->next;
     }
+  old_num = i;
 
   g_assert (last_remaining);
   
@@ -1629,21 +1625,21 @@ update_num_workspaces (MetaScreen *screen,
 
       g_assert (w->windows == NULL);
       meta_workspace_remove (w);
-      
+
       tmp = tmp->next;
     }
-  
+
   g_list_free (extras);
-  
-  while (i < new_num)
-    {
-      meta_workspace_new (screen);
-      ++i;
-    }
+
+  for (i = old_num; i < new_num; i++)
+    meta_workspace_new (screen);
 
   set_number_of_spaces_hint (screen, new_num);
 
   meta_screen_queue_workarea_recalc (screen);
+
+  for (i = old_num; i < new_num; i++)
+    g_signal_emit (screen, screen_signals[WORKSPACE_ADDED], 0, i);
 
   g_object_notify (G_OBJECT (screen), "n-workspaces");
 }
@@ -1935,7 +1931,6 @@ meta_screen_tile_preview_update_timeout (gpointer data)
 {
   MetaScreen *screen = data;
   MetaWindow *window = screen->display->grab_window;
-  gboolean composited = screen->display->compositor != NULL;
   gboolean needs_preview = FALSE;
 
   screen->tile_preview_timeout_id = 0;
@@ -1945,8 +1940,7 @@ meta_screen_tile_preview_update_timeout (gpointer data)
       Window xwindow;
       gulong create_serial;
 
-      screen->tile_preview = meta_tile_preview_new (screen->number,
-                                                    composited);
+      screen->tile_preview = meta_tile_preview_new (screen->number);
       xwindow = meta_tile_preview_get_xwindow (screen->tile_preview,
                                                &create_serial);
       meta_stack_tracker_record_add (screen->stack_tracker,
@@ -2992,7 +2986,7 @@ meta_screen_resize (MetaScreen *screen,
   g_free (old_monitor_infos);
   g_slist_free (windows);
 
-  g_signal_emit (screen, screen_signals[MONITORS_CHANGED], 0, index);
+  g_signal_emit (screen, screen_signals[MONITORS_CHANGED], 0);
 }
 
 void

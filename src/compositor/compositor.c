@@ -532,12 +532,14 @@ meta_compositor_manage_screen (MetaCompositor *compositor,
 
   meta_screen_set_cm_selection (screen);
 
-  info->stage = clutter_stage_get_default ();
+  info->stage = clutter_stage_new ();
 
   meta_screen_get_size (screen, &width, &height);
-  clutter_actor_set_size (info->stage, width, height);
+  clutter_actor_realize (info->stage);
 
   xwin = clutter_x11_get_stage_window (CLUTTER_STAGE (info->stage));
+
+  XResizeWindow (xdisplay, xwin, width, height);
 
   event_mask = FocusChangeMask |
                ExposureMask |
@@ -1157,12 +1159,18 @@ meta_compositor_sync_screen_size (MetaCompositor  *compositor,
 				  guint		   width,
 				  guint		   height)
 {
-  MetaCompScreen *info = meta_screen_get_compositor_data (screen);
+  MetaDisplay    *display = meta_screen_get_display (screen);
+  MetaCompScreen *info    = meta_screen_get_compositor_data (screen);
+  Display        *xdisplay;
+  Window          xwin;
 
   DEBUG_TRACE ("meta_compositor_sync_screen_size\n");
   g_return_if_fail (info);
 
-  clutter_actor_set_size (info->stage, width, height);
+  xdisplay = meta_display_get_xdisplay (display);
+  xwin = clutter_x11_get_stage_window (CLUTTER_STAGE (info->stage));
+
+  XResizeWindow (xdisplay, xwin, width, height);
 
   meta_background_actor_screen_size_changed (screen);
 
