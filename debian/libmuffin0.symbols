@@ -591,7 +591,6 @@ libmuffin.so.0 libmuffin0 #MINVER#
  meta_shadow_paint@Base 1.0.3
  meta_shadow_ref@Base 1.0.3
  meta_shadow_unref@Base 1.0.3
- meta_shaped_texture_clear@Base 1.0.3
  meta_shaped_texture_get_texture@Base 1.0.3
  meta_shaped_texture_get_type@Base 1.0.3
  meta_shaped_texture_get_visible_pixels_region@Base 1.0.3
