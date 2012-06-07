@@ -114,6 +114,7 @@ libmuffin.so.0 libmuffin0 #MINVER#
  meta_direction_get_type@Base 1.0.3
  meta_disable_unredirect_for_screen@Base 1.0.3
  meta_display_add_ignored_crossing_serial@Base 1.0.3
+ meta_display_add_keybinding@Base 1.0.3
  meta_display_begin_grab_op@Base 1.0.3
  meta_display_check_threshold_reached@Base 1.0.3
  meta_display_cleanup_edges@Base 1.0.3
@@ -136,6 +137,7 @@ libmuffin.so.0 libmuffin0 #MINVER#
  meta_display_get_damage_event_base@Base 1.0.3
  meta_display_get_focus_window@Base 1.0.3
  meta_display_get_grab_op@Base 1.0.3
+ meta_display_get_ignored_modifier_mask@Base 1.0.3
  meta_display_get_keybinding_action@Base 1.0.3
  meta_display_get_last_user_time@Base 1.0.3
  meta_display_get_leader_window@Base 1.0.3
@@ -168,6 +170,7 @@ libmuffin.so.0 libmuffin0 #MINVER#
  meta_display_queue_retheme_all_windows@Base 1.0.3
  meta_display_register_x_window@Base 1.0.3
  meta_display_remove_autoraise_callback@Base 1.0.3
+ meta_display_remove_keybinding@Base 1.0.3
  meta_display_retheme_all@Base 1.0.3
  meta_display_screen_for_root@Base 1.0.3
  meta_display_screen_for_x_screen@Base 1.0.3
@@ -332,6 +335,11 @@ libmuffin.so.0 libmuffin0 #MINVER#
  meta_is_syncing@Base 1.0.3
  meta_is_verbose@Base 1.0.3
  meta_key_binding_action_get_type@Base 1.0.3
+ meta_key_binding_flags_get_type@Base 1.0.3
+ meta_key_binding_get_mask@Base 1.0.3
+ meta_key_binding_get_modifiers@Base 1.0.3
+ meta_key_binding_get_name@Base 1.0.3
+ meta_key_binding_get_type@Base 1.0.3
  meta_keybindings_set_custom_handler@Base 1.0.3
  meta_keybindings_switch_window@Base 1.0.3
  meta_later_add@Base 1.0.3
@@ -385,6 +393,7 @@ libmuffin.so.0 libmuffin0 #MINVER#
  meta_pop_no_msg_prefix@Base 1.0.3
  meta_preference_get_type@Base 1.0.3
  meta_preference_to_string@Base 1.0.3
+ meta_prefs_add_keybinding@Base 1.0.3
  meta_prefs_add_listener@Base 1.0.3
  meta_prefs_bell_is_audible@Base 1.0.3
  meta_prefs_change_workspace_name@Base 1.0.3
@@ -401,6 +410,7 @@ libmuffin.so.0 libmuffin0 #MINVER#
  meta_prefs_get_cursor_theme@Base 1.0.3
  meta_prefs_get_disable_workarounds@Base 1.0.3
  meta_prefs_get_draggable_border_width@Base 1.0.3
+ meta_prefs_get_dynamic_workspaces@Base 1.0.3
  meta_prefs_get_edge_tiling@Base 1.0.3
  meta_prefs_get_focus_mode@Base 1.0.3
  meta_prefs_get_focus_new_windows@Base 1.0.3
@@ -411,6 +421,7 @@ libmuffin.so.0 libmuffin0 #MINVER#
  meta_prefs_get_gnome_animations@Base 1.0.3
  meta_prefs_get_key_bindings@Base 1.0.3
  meta_prefs_get_keybinding_action@Base 1.0.3
+ meta_prefs_get_keybindings@Base 1.0.3
  meta_prefs_get_live_hidden_windows@Base 1.0.3
  meta_prefs_get_mouse_button_menu@Base 1.0.3
  meta_prefs_get_mouse_button_mods@Base 1.0.3
@@ -429,6 +440,8 @@ libmuffin.so.0 libmuffin0 #MINVER#
  meta_prefs_get_workspaces_only_on_primary@Base 1.0.3
  meta_prefs_init@Base 1.0.3
  meta_prefs_override_preference_location@Base 1.0.3
+ meta_prefs_override_preference_schema@Base 1.0.3
+ meta_prefs_remove_keybinding@Base 1.0.3
  meta_prefs_remove_listener@Base 1.0.3
  meta_prefs_set_force_fullscreen@Base 1.0.3
  meta_prefs_set_live_hidden_windows@Base 1.0.3
@@ -591,6 +604,7 @@ libmuffin.so.0 libmuffin0 #MINVER#
  meta_shadow_paint@Base 1.0.3
  meta_shadow_ref@Base 1.0.3
  meta_shadow_unref@Base 1.0.3
+ meta_shaped_texture_get_image@Base 1.0.3
  meta_shaped_texture_get_texture@Base 1.0.3
  meta_shaped_texture_get_type@Base 1.0.3
  meta_shaped_texture_get_visible_pixels_region@Base 1.0.3
@@ -638,6 +652,7 @@ libmuffin.so.0 libmuffin0 #MINVER#
  meta_stack_tracker_sync_stack@Base 1.0.3
  meta_stack_update_layer@Base 1.0.3
  meta_stack_update_transient@Base 1.0.3
+ meta_stack_update_window_tile_matches@Base 1.0.3
  meta_stack_windows_cmp@Base 1.0.3
  meta_switch_workspace_completed@Base 1.0.3
  meta_tab_list_get_type@Base 1.0.3
@@ -776,10 +791,12 @@ libmuffin.so.0 libmuffin0 #MINVER#
  meta_window_appears_focused@Base 1.0.3
  meta_window_begin_grab_op@Base 1.0.3
  meta_window_calc_showing@Base 1.0.3
+ meta_window_can_tile_side_by_side@Base 1.0.3
  meta_window_change_workspace@Base 1.0.3
  meta_window_change_workspace_by_index@Base 1.0.3
  meta_window_client_message@Base 1.0.3
  meta_window_compute_group@Base 1.0.3
+ meta_window_compute_tile_match@Base 1.0.3
  meta_window_configure_notify@Base 1.0.3
  meta_window_configure_request@Base 1.0.3
  meta_window_constrain@Base 1.0.3
@@ -805,6 +822,12 @@ libmuffin.so.0 libmuffin0 #MINVER#
  meta_window_get_geometry@Base 1.0.3
  meta_window_get_gravity_position@Base 1.0.3
  meta_window_get_group@Base 1.0.3
+ meta_window_get_gtk_app_menu_object_path@Base 1.0.3
+ meta_window_get_gtk_application_id@Base 1.0.3
+ meta_window_get_gtk_application_object_path@Base 1.0.3
+ meta_window_get_gtk_menubar_object_path@Base 1.0.3
+ meta_window_get_gtk_unique_bus_name@Base 1.0.3
+ meta_window_get_gtk_window_object_path@Base 1.0.3
  meta_window_get_icon_geometry@Base 1.0.3
  meta_window_get_input_rect@Base 1.0.3
  meta_window_get_layer@Base 1.0.3
@@ -820,6 +843,7 @@ libmuffin.so.0 libmuffin0 #MINVER#
  meta_window_get_screen@Base 1.0.3
  meta_window_get_stable_sequence@Base 1.0.3
  meta_window_get_startup_id@Base 1.0.3
+ meta_window_get_tile_match@Base 1.0.3
  meta_window_get_title@Base 1.0.3
  meta_window_get_transient_for@Base 1.0.3
  meta_window_get_transient_for_as_xid@Base 1.0.3
@@ -871,6 +895,7 @@ libmuffin.so.0 libmuffin0 #MINVER#
  meta_window_move@Base 1.0.3
  meta_window_move_frame@Base 1.0.3
  meta_window_move_resize@Base 1.0.3
+ meta_window_move_resize_frame@Base 1.0.3
  meta_window_move_resize_request@Base 1.0.3
  meta_window_move_to_monitor@Base 1.0.3
  meta_window_new@Base 1.0.3
@@ -962,5 +987,4 @@ libmuffin.so.0 libmuffin0 #MINVER#
  meta_workspace_remove_window@Base 1.0.3
  meta_workspace_set_builtin_struts@Base 1.0.3
  meta_workspace_update_window_hints@Base 1.0.3
- preference_update_handler@Base 1.0.3
  wnck_draw_workspace@Base 1.0.3
