@@ -48,12 +48,19 @@
 #include <X11/Xatom.h>
 #include <X11/Xlibint.h> /* For display->resource_mask */
 #include <string.h>
+#include <math.h>
 
 #ifdef HAVE_SHAPE
 #include <X11/extensions/shape.h>
 #endif
 
 #include <X11/extensions/Xcomposite.h>
+
+/* Windows that unmaximize to a size bigger than that fraction of the workarea
+ * will be scaled down to that size (while maintaining aspect ratio).
+ * Windows that cover an area greater then this size are automaximized on map.
+ */
+#define MAX_UNMAXIMIZED_WINDOW_AREA .8
 
 static int destroying_windows_disallowed = 0;
 
@@ -164,7 +171,13 @@ enum {
   PROP_APPEARS_FOCUSED,
   PROP_RESIZEABLE,
   PROP_ABOVE,
-  PROP_WM_CLASS
+  PROP_WM_CLASS,
+  PROP_GTK_APPLICATION_ID,
+  PROP_GTK_UNIQUE_BUS_NAME,
+  PROP_GTK_APPLICATION_OBJECT_PATH,
+  PROP_GTK_WINDOW_OBJECT_PATH,
+  PROP_GTK_APP_MENU_OBJECT_PATH,
+  PROP_GTK_MENUBAR_OBJECT_PATH
 };
 
 enum
@@ -178,6 +191,20 @@ enum
 };
 
 static guint window_signals[LAST_SIGNAL] = { 0 };
+
+static void
+prefs_changed_callback (MetaPreference pref,
+                        gpointer       data)
+{
+  MetaWindow *window = data;
+
+  if (pref != META_PREF_WORKSPACES_ONLY_ON_PRIMARY)
+    return;
+
+  meta_window_update_on_all_workspaces (window);
+
+  meta_window_queue (window, META_QUEUE_CALC_SHOWING);
+}
 
 static void
 meta_window_finalize (GObject *object)
@@ -205,6 +232,12 @@ meta_window_finalize (GObject *object)
   g_free (window->icon_name);
   g_free (window->desc);
   g_free (window->gtk_theme_variant);
+  g_free (window->gtk_application_id);
+  g_free (window->gtk_unique_bus_name);
+  g_free (window->gtk_application_object_path);
+  g_free (window->gtk_window_object_path);
+  g_free (window->gtk_app_menu_object_path);
+  g_free (window->gtk_menubar_object_path);
 }
 
 static void
@@ -267,6 +300,24 @@ meta_window_get_property(GObject         *object,
       break;
     case PROP_ABOVE:
       g_value_set_boolean (value, win->wm_state_above);
+      break;
+    case PROP_GTK_APPLICATION_ID:
+      g_value_set_string (value, win->gtk_application_id);
+      break;
+    case PROP_GTK_UNIQUE_BUS_NAME:
+      g_value_set_string (value, win->gtk_unique_bus_name);
+      break;
+    case PROP_GTK_APPLICATION_OBJECT_PATH:
+      g_value_set_string (value, win->gtk_application_object_path);
+      break;
+    case PROP_GTK_WINDOW_OBJECT_PATH:
+      g_value_set_string (value, win->gtk_window_object_path);
+      break;
+    case PROP_GTK_APP_MENU_OBJECT_PATH:
+      g_value_set_string (value, win->gtk_app_menu_object_path);
+      break;
+    case PROP_GTK_MENUBAR_OBJECT_PATH:
+      g_value_set_string (value, win->gtk_menubar_object_path);
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -365,7 +416,7 @@ meta_window_class_init (MetaWindowClass *klass)
                                    g_param_spec_enum ("window-type",
                                                       "Window Type",
                                                       "The type of the window",
-                                                      MUFFIN_TYPE_WINDOW_TYPE,
+                                                      META_TYPE_WINDOW_TYPE,
                                                       META_WINDOW_NORMAL,
                                                       G_PARAM_READABLE));
 
@@ -434,13 +485,60 @@ meta_window_class_init (MetaWindowClass *klass)
                                                         NULL,
                                                         G_PARAM_READABLE));
 
+  g_object_class_install_property (object_class,
+                                   PROP_GTK_APPLICATION_ID,
+                                   g_param_spec_string ("gtk-application-id",
+                                                        "_GTK_APPLICATION_ID",
+                                                        "Contents of the _GTK_APPLICATION_ID property of this window",
+                                                        NULL,
+                                                        G_PARAM_READABLE));
+
+  g_object_class_install_property (object_class,
+                                   PROP_GTK_UNIQUE_BUS_NAME,
+                                   g_param_spec_string ("gtk-unique-bus-name",
+                                                        "_GTK_UNIQUE_BUS_NAME",
+                                                        "Contents of the _GTK_UNIQUE_BUS_NAME property of this window",
+                                                        NULL,
+                                                        G_PARAM_READABLE));
+
+  g_object_class_install_property (object_class,
+                                   PROP_GTK_APPLICATION_OBJECT_PATH,
+                                   g_param_spec_string ("gtk-application-object-path",
+                                                        "_GTK_APPLICATION_OBJECT_PATH",
+                                                        "Contents of the _GTK_APPLICATION_OBJECT_PATH property of this window",
+                                                        NULL,
+                                                        G_PARAM_READABLE));
+
+  g_object_class_install_property (object_class,
+                                   PROP_GTK_WINDOW_OBJECT_PATH,
+                                   g_param_spec_string ("gtk-window-object-path",
+                                                        "_GTK_WINDOW_OBJECT_PATH",
+                                                        "Contents of the _GTK_WINDOW_OBJECT_PATH property of this window",
+                                                        NULL,
+                                                        G_PARAM_READABLE));
+
+  g_object_class_install_property (object_class,
+                                   PROP_GTK_APP_MENU_OBJECT_PATH,
+                                   g_param_spec_string ("gtk-app-menu-object-path",
+                                                        "_GTK_APP_MENU_OBJECT_PATH",
+                                                        "Contents of the _GTK_APP_MENU_OBJECT_PATH property of this window",
+                                                        NULL,
+                                                        G_PARAM_READABLE));
+
+  g_object_class_install_property (object_class,
+                                   PROP_GTK_MENUBAR_OBJECT_PATH,
+                                   g_param_spec_string ("gtk-menubar-object-path",
+                                                        "_GTK_MENUBAR_OBJECT_PATH",
+                                                        "Contents of the _GTK_MENUBAR_OBJECT_PATH property of this window",
+                                                        NULL,
+                                                        G_PARAM_READABLE));
+
   window_signals[WORKSPACE_CHANGED] =
     g_signal_new ("workspace-changed",
                   G_TYPE_FROM_CLASS (object_class),
                   G_SIGNAL_RUN_LAST,
                   G_STRUCT_OFFSET (MetaWindowClass, workspace_changed),
-                  NULL, NULL,
-                  g_cclosure_marshal_VOID__INT,
+                  NULL, NULL, NULL,
                   G_TYPE_NONE, 1,
                   G_TYPE_INT);
 
@@ -449,8 +547,7 @@ meta_window_class_init (MetaWindowClass *klass)
                   G_TYPE_FROM_CLASS (object_class),
                   G_SIGNAL_RUN_LAST,
                   G_STRUCT_OFFSET (MetaWindowClass, focus),
-                  NULL, NULL,
-                  g_cclosure_marshal_VOID__VOID,
+                  NULL, NULL, NULL,
                   G_TYPE_NONE, 0);
 
   window_signals[RAISED] =
@@ -458,8 +555,7 @@ meta_window_class_init (MetaWindowClass *klass)
                   G_TYPE_FROM_CLASS (object_class),
                   G_SIGNAL_RUN_LAST,
                   G_STRUCT_OFFSET (MetaWindowClass, raised),
-                  NULL, NULL,
-                  g_cclosure_marshal_VOID__VOID,
+                  NULL, NULL, NULL,
                   G_TYPE_NONE, 0);
 
   window_signals[UNMANAGED] =
@@ -467,14 +563,14 @@ meta_window_class_init (MetaWindowClass *klass)
                   G_TYPE_FROM_CLASS (object_class),
                   G_SIGNAL_RUN_LAST,
                   G_STRUCT_OFFSET (MetaWindowClass, unmanaged),
-                  NULL, NULL,
-                  g_cclosure_marshal_VOID__VOID,
+                  NULL, NULL, NULL,
                   G_TYPE_NONE, 0);
 }
 
 static void
 meta_window_init (MetaWindow *self)
 {
+  meta_prefs_add_listener (prefs_changed_callback, self);
 }
 
 #ifdef WITH_VERBOSE_MODE
@@ -1070,6 +1166,8 @@ meta_window_new_with_attrs (MetaDisplay       *display,
   window->compositor_private = NULL;
 
   window->monitor = meta_screen_get_monitor_for_window (window->screen, window);
+
+  window->tile_match = NULL;
 
   if (window->override_redirect)
     {
@@ -1804,6 +1902,8 @@ meta_window_unmanage (MetaWindow  *window,
 
   meta_error_trap_pop (window->display);
 
+  meta_prefs_remove_listener (prefs_changed_callback, window);
+
   g_signal_emit (window, window_signals[UNMANAGED], 0);
 
   g_object_unref (window);
@@ -1897,7 +1997,7 @@ static void
 set_net_wm_state (MetaWindow *window)
 {
   int i;
-  unsigned long data[12];
+  unsigned long data[13];
 
   i = 0;
   if (window->shaded)
@@ -1958,6 +2058,11 @@ set_net_wm_state (MetaWindow *window)
   if (window->on_all_workspaces_requested)
     {
       data[i] = window->display->atom__NET_WM_STATE_STICKY;
+      ++i;
+    }
+  if (meta_window_appears_focused (window))
+    {
+      data[i] = window->display->atom__NET_WM_STATE_FOCUSED;
       ++i;
     }
 
@@ -2272,7 +2377,7 @@ idle_calc_showing (gpointer data)
       tmp = tmp->next;
     }
 
-  if (meta_prefs_get_focus_mode () != META_FOCUS_MODE_CLICK)
+  if (meta_prefs_get_focus_mode () != G_DESKTOP_FOCUS_MODE_CLICK)
     {
       /* When display->mouse_mode is false, we want to ignore
        * EnterNotify events unless they come from mouse motion.  To do
@@ -2612,7 +2717,7 @@ window_state_on_map (MetaWindow *window,
    * approximation to enforce so we do that.
    */
   if (*takes_focus &&
-      meta_prefs_get_focus_new_windows () == META_FOCUS_NEW_WINDOWS_STRICT &&
+      meta_prefs_get_focus_new_windows () == G_DESKTOP_FOCUS_NEW_WINDOWS_STRICT &&
       !window->display->allow_terminal_deactivation &&
       __window_is_terminal (window->display->focus_window) &&
       !meta_window_is_ancestor_of_transient (window->display->focus_window,
@@ -2912,7 +3017,20 @@ meta_window_show (MetaWindow *window)
     }
 
   if (!window->placed)
-    meta_window_force_placement (window);
+    {
+      if (window->showing_for_first_time)
+        {
+          MetaRectangle work_area;
+          meta_window_get_work_area_for_monitor (window, window->monitor->number, &work_area);
+          /* Automaximize windows that map with a size > MAX_UNMAXIMIZED_WINDOW_AREA of the work area */
+          if (window->rect.width * window->rect.height > work_area.width * work_area.height * MAX_UNMAXIMIZED_WINDOW_AREA)
+            {
+              window->maximize_horizontally_after_placement = TRUE;
+              window->maximize_vertically_after_placement = TRUE;
+            }
+        }
+      meta_window_force_placement (window);
+    }
 
   if (needs_stacking_adjustment)
     {
@@ -2947,7 +3065,7 @@ meta_window_show (MetaWindow *window)
        * that new window below a lot of other windows.
        */
       if (overlap ||
-          (meta_prefs_get_focus_mode () == META_FOCUS_MODE_CLICK &&
+          (meta_prefs_get_focus_mode () == G_DESKTOP_FOCUS_MODE_CLICK &&
            meta_prefs_get_raise_on_click ()))
         meta_window_stack_just_below (window, focus_window);
 
@@ -3397,6 +3515,9 @@ meta_window_maximize_internal (MetaWindow        *window,
   else
     meta_window_save_rect (window);
 
+  if (maximize_horizontally && maximize_vertically)
+    window->saved_maximize = TRUE;
+
   window->maximized_horizontally =
     window->maximized_horizontally || maximize_horizontally;
   window->maximized_vertically =
@@ -3559,6 +3680,10 @@ meta_window_tile (MetaWindow *window)
                                        window,
                                        &old_rect,
                                        &new_rect);
+
+      if (window->frame)
+        meta_ui_queue_frame_draw (window->screen->ui,
+                                  window->frame->xwindow);
     }
   else
     {
@@ -3571,20 +3696,15 @@ meta_window_tile (MetaWindow *window)
 static gboolean
 meta_window_can_tile_maximized (MetaWindow *window)
 {
-  if (!META_WINDOW_ALLOWS_RESIZE (window))
-    return FALSE;
-
-  if (!window->has_maximize_func)
-    return FALSE;
-
-  return TRUE;
+  return window->has_maximize_func;
 }
 
-static gboolean
+gboolean
 meta_window_can_tile_side_by_side (MetaWindow *window)
 {
   const MetaMonitorInfo *monitor;
   MetaRectangle tile_area;
+  MetaFrameBorders borders;
 
   if (!meta_window_can_tile_maximized (window))
     return FALSE;
@@ -3598,15 +3718,10 @@ meta_window_can_tile_side_by_side (MetaWindow *window)
 
   tile_area.width /= 2;
 
-  if (window->frame)
-    {
-      MetaFrameBorders borders;
+  meta_frame_calc_borders (window->frame, &borders);
 
-      meta_frame_calc_borders (window->frame, &borders);
-
-      tile_area.width  -= (borders.visible.left + borders.visible.right);
-      tile_area.height -= (borders.visible.top + borders.visible.bottom);
-    }
+  tile_area.width  -= (borders.visible.left + borders.visible.right);
+  tile_area.height -= (borders.visible.top + borders.visible.bottom);
 
   return tile_area.width >= window->size_hints.min_width &&
          tile_area.height >= window->size_hints.min_height;
@@ -3659,6 +3774,9 @@ meta_window_unmaximize_internal (MetaWindow        *window,
   unmaximize_vertically   = directions & META_MAXIMIZE_VERTICAL;
   g_assert (unmaximize_horizontally || unmaximize_vertically);
 
+  if (unmaximize_horizontally && unmaximize_vertically)
+    window->saved_maximize = FALSE;
+
   /* Only do something if the window isn't already maximized in the
    * given direction(s).
    */
@@ -3666,6 +3784,9 @@ meta_window_unmaximize_internal (MetaWindow        *window,
       (unmaximize_vertically   && window->maximized_vertically))
     {
       MetaRectangle target_rect;
+      MetaRectangle work_area;
+
+      meta_window_get_work_area_for_monitor (window, window->monitor->number, &work_area);
 
       meta_topic (META_DEBUG_WINDOW_OPS,
                   "Unmaximizing %s%s\n",
@@ -3690,6 +3811,28 @@ meta_window_unmaximize_internal (MetaWindow        *window,
        * being unmaximized.
        */
       meta_window_get_client_root_coords (window, &target_rect);
+
+      /* Avoid unmaximizing to "almost maximized" size when the previous size
+       * is greater then 80% of the work area use MAX_UNMAXIMIZED_WINDOW_AREA of the work area as upper limit
+       * while maintaining the aspect ratio.
+       */
+      if (unmaximize_horizontally && unmaximize_vertically &&
+          desired_rect->width * desired_rect->height > work_area.width * work_area.height * MAX_UNMAXIMIZED_WINDOW_AREA)
+        {
+          if (desired_rect->width > desired_rect->height)
+            {
+              float aspect = (float)desired_rect->height / (float)desired_rect->width;
+              desired_rect->width = MAX (work_area.width * sqrt (MAX_UNMAXIMIZED_WINDOW_AREA), window->size_hints.min_width);
+              desired_rect->height = MAX (desired_rect->width * aspect, window->size_hints.min_height);
+            }
+          else
+            {
+              float aspect = (float)desired_rect->width / (float)desired_rect->height;
+              desired_rect->height = MAX (work_area.height * sqrt (MAX_UNMAXIMIZED_WINDOW_AREA), window->size_hints.min_height);
+              desired_rect->width = MAX (desired_rect->height * aspect, window->size_hints.min_width);
+            }
+        }
+
       if (unmaximize_horizontally)
         {
           target_rect.x     = desired_rect->x;
@@ -4407,6 +4550,10 @@ meta_window_update_monitor (MetaWindow *window)
       if (old)
         g_signal_emit_by_name (window->screen, "window-left-monitor", old->number, window);
       g_signal_emit_by_name (window->screen, "window-entered-monitor", window->monitor->number, window);
+
+      /* If we're changing monitors, we need to update the has_maximize_func flag,
+       * as the working area has changed. */
+      recalc_window_features (window);
     }
 }
 
@@ -4499,9 +4646,8 @@ meta_window_move_resize_internal (MetaWindow          *window,
               is_user_action ? " (user move/resize)" : "",
               old_rect.x, old_rect.y, old_rect.width, old_rect.height);
 
-  if (window->frame)
-    meta_frame_calc_borders (window->frame,
-                             &borders);
+  meta_frame_calc_borders (window->frame,
+                           &borders);
 
   new_rect.x = root_x_nw;
   new_rect.y = root_y_nw;
@@ -4877,6 +5023,9 @@ meta_window_move_resize_internal (MetaWindow          *window,
     }
 
   meta_window_foreach_transient (window, maybe_move_attached_dialog, NULL);
+
+  meta_stack_update_window_tile_matches (window->screen->stack,
+                                         window->screen->active_workspace);
 }
 
 /**
@@ -4959,15 +5108,18 @@ meta_window_move_frame (MetaWindow  *window,
 {
   int x = root_x_nw;
   int y = root_y_nw;
+  MetaFrameBorders borders;
 
-  if (window->frame)
-    {
-      /* offset by the distance between the origin of the window
-       * and the origin of the enclosing window decorations
-       */
-      x += window->frame->child_x;
-      y += window->frame->child_y;
-    }
+  meta_frame_calc_borders (window->frame, &borders);
+
+  /* root_x_nw and root_y_nw correspond to where the top of
+   * the visible frame should be. Offset by the distance between
+   * the origin of the window and the origin of the enclosing
+   * window decorations.
+   */
+  x += window->frame->child_x - borders.invisible.left;
+  y += window->frame->child_y - borders.invisible.top;
+
   meta_window_move (window, user_op, x, y);
 }
 
@@ -4994,6 +5146,40 @@ meta_window_move_between_rects (MetaWindow  *window,
                            window->user_rect.y,
                            window->user_rect.width,
                            window->user_rect.height);
+}
+
+/**
+ * meta_window_move_resize_frame:
+ * @window: a #MetaWindow
+ * @user_op: bool to indicate whether or not this is a user operation
+ * @root_x_nw: new x
+ * @root_y_nw: new y
+ * @w: desired width
+ * @h: desired height
+ *
+ * Resizes the window so that its outer bounds (including frame)
+ * fit within the given rect
+ */
+void
+meta_window_move_resize_frame (MetaWindow  *window,
+                               gboolean     user_op,
+                               int          root_x_nw,
+                               int          root_y_nw,
+                               int          w,
+                               int          h)
+{
+  MetaFrameBorders borders;
+
+  meta_frame_calc_borders (window->frame, &borders);
+  /* offset by the distance between the origin of the window
+   * and the origin of the enclosing window decorations ( + border)
+   */
+  root_x_nw += borders.visible.left;
+  root_y_nw += borders.visible.top;
+  w -= borders.visible.left + borders.visible.right;
+  h -= borders.visible.top + borders.visible.bottom;
+
+  meta_window_move_resize (window, user_op, root_x_nw, root_y_nw, w, h);
 }
 
 /**
@@ -5631,22 +5817,18 @@ meta_window_get_net_wm_desktop (MetaWindow *window)
 static void
 update_net_frame_extents (MetaWindow *window)
 {
-  unsigned long data[4] = { 0, 0, 0, 0 };
+  unsigned long data[4];
+  MetaFrameBorders borders;
 
-  if (window->frame)
-    {
-      MetaFrameBorders borders;
-
-      meta_frame_calc_borders (window->frame, &borders);
-      /* Left */
-      data[0] = borders.visible.left;
-      /* Right */
-      data[1] = borders.visible.right;
-      /* Top */
-      data[2] = borders.visible.top;
-      /* Bottom */
-      data[3] = borders.visible.bottom;
-    }
+  meta_frame_calc_borders (window->frame, &borders);
+  /* Left */
+  data[0] = borders.visible.left;
+  /* Right */
+  data[1] = borders.visible.right;
+  /* Top */
+  data[2] = borders.visible.top;
+  /* Bottom */
+  data[3] = borders.visible.bottom;
 
   meta_topic (META_DEBUG_GEOMETRY,
               "Setting _NET_FRAME_EXTENTS on managed window 0x%lx "
@@ -6601,6 +6783,17 @@ meta_window_client_message (MetaWindow *window,
   return FALSE;
 }
 
+static void
+meta_window_appears_focused_changed (MetaWindow *window)
+{
+  set_net_wm_state (window);
+
+  g_object_notify (G_OBJECT (window), "appears-focused");
+
+  if (window->frame)
+    meta_frame_queue_draw (window->frame);
+}
+
 /**
  * meta_window_propagate_focus_appearance:
  * @window: the window to start propagating from
@@ -6646,9 +6839,7 @@ meta_window_propagate_focus_appearance (MetaWindow *window,
       if (child_focus_state_changed && !parent->has_focus &&
           parent != window->display->expected_focus_window)
         {
-          g_object_notify (G_OBJECT (parent), "appears-focused");
-          if (parent->frame)
-            meta_frame_queue_draw (parent->frame);
+          meta_window_appears_focused_changed (parent);
         }
 
       child = parent;
@@ -6794,7 +6985,7 @@ meta_window_notify_focus (MetaWindow *window,
            *
            * There is dicussion in bugs 102209, 115072, and 461577
            */
-          if (meta_prefs_get_focus_mode () == META_FOCUS_MODE_CLICK ||
+          if (meta_prefs_get_focus_mode () == G_DESKTOP_FOCUS_MODE_CLICK ||
               !meta_prefs_get_raise_on_click())
             meta_display_ungrab_focus_window_button (window->display, window);
 
@@ -6802,11 +6993,8 @@ meta_window_notify_focus (MetaWindow *window,
           g_object_notify (G_OBJECT (window->display), "focus-window");
 
           if (!window->attached_focus_window)
-            {
-              g_object_notify (G_OBJECT (window), "appears-focused");
-              if (window->frame)
-                meta_frame_queue_draw (window->frame);
-            }
+            meta_window_appears_focused_changed (window);
+
           meta_window_propagate_focus_appearance (window, TRUE);
         }
     }
@@ -6839,11 +7027,7 @@ meta_window_notify_focus (MetaWindow *window,
           window->has_focus = FALSE;
 
           if (!window->attached_focus_window)
-            {
-              g_object_notify (G_OBJECT (window), "appears-focused");
-              if (window->frame)
-                meta_frame_queue_draw (window->frame);
-            }
+            meta_window_appears_focused_changed (window);
 
           meta_error_trap_push (window->display);
           XUninstallColormap (window->display->xdisplay,
@@ -6854,7 +7038,7 @@ meta_window_notify_focus (MetaWindow *window,
           meta_window_update_layer (window);
 
           /* Re-grab for click to focus and raise-on-click, if necessary */
-          if (meta_prefs_get_focus_mode () == META_FOCUS_MODE_CLICK ||
+          if (meta_prefs_get_focus_mode () == G_DESKTOP_FOCUS_MODE_CLICK ||
               !meta_prefs_get_raise_on_click ())
             meta_display_grab_focus_window_button (window->display, window);
        }
@@ -7290,8 +7474,10 @@ meta_window_get_workspaces (MetaWindow *window)
 {
   if (window->on_all_workspaces)
     return window->screen->workspaces;
-  else
+  else if (window->workspace != NULL)
     return window->workspace->list_containing_self;
+  else
+    return NULL;
 }
 
 static void
@@ -7829,6 +8015,23 @@ recalc_window_features (MetaWindow *window)
       window->has_move_func = FALSE;
       window->has_resize_func = FALSE;
       window->has_maximize_func = FALSE;
+    }
+
+  if (window->has_maximize_func)
+    {
+      MetaRectangle work_area;
+      MetaFrameBorders borders;
+      int min_frame_width, min_frame_height;
+
+      meta_window_get_work_area_current_monitor (window, &work_area);
+      meta_frame_calc_borders (window->frame, &borders);
+
+      min_frame_width = window->size_hints.min_width + borders.visible.left + borders.visible.right;
+      min_frame_height = window->size_hints.min_height + borders.visible.top + borders.visible.bottom;
+
+      if (min_frame_width >= work_area.width ||
+          min_frame_height >= work_area.height)
+        window->has_maximize_func = FALSE;
     }
 
   meta_topic (META_DEBUG_WINDOW_OPS,
@@ -8439,9 +8642,16 @@ update_move (MetaWindow  *window,
   shake_threshold = meta_ui_get_drag_threshold (window->screen->ui) *
     DRAG_THRESHOLD_TO_SHAKE_THRESHOLD_FACTOR;
 
-  if (meta_prefs_get_edge_tiling () &&
-      !META_WINDOW_MAXIMIZED (window) &&
-      !META_WINDOW_TILED_SIDE_BY_SIDE (window))
+  if (snap)
+    {
+      /* We don't want to tile while snapping. Also, clear any previous tile
+         request. */
+      window->tile_mode = META_TILE_NONE;
+      window->tile_monitor_number = -1;
+    }
+  else if (meta_prefs_get_edge_tiling () &&
+           !META_WINDOW_MAXIMIZED (window) &&
+           !META_WINDOW_TILED_SIDE_BY_SIDE (window))
     {
       const MetaMonitorInfo *monitor;
       MetaRectangle work_area;
@@ -9825,7 +10035,7 @@ meta_window_set_user_time (MetaWindow *window,
        * doesn't want to have focus transferred for now due to new windows.
        */
       if (meta_prefs_get_focus_new_windows () ==
-               META_FOCUS_NEW_WINDOWS_STRICT &&
+               G_DESKTOP_FOCUS_NEW_WINDOWS_STRICT &&
           __window_is_terminal (window))
         window->display->allow_terminal_deactivation = FALSE;
     }
@@ -10153,6 +10363,78 @@ meta_window_get_wm_class_instance (MetaWindow *window)
 }
 
 /**
+ * meta_window_get_gtk_application_id:
+ * @window: a #MetaWindow
+ *
+ * Return value: (transfer none): the application ID
+ **/
+const char *
+meta_window_get_gtk_application_id (MetaWindow *window)
+{
+  return window->gtk_application_id;
+}
+
+/**
+ * meta_window_get_gtk_unique_bus_name:
+ * @window: a #MetaWindow
+ *
+ * Return value: (transfer none): the unique name
+ **/
+const char *
+meta_window_get_gtk_unique_bus_name (MetaWindow *window)
+{
+  return window->gtk_unique_bus_name;
+}
+
+/**
+ * meta_window_get_gtk_application_object_path:
+ * @window: a #MetaWindow
+ *
+ * Return value: (transfer none): the object path
+ **/
+const char *
+meta_window_get_gtk_application_object_path (MetaWindow *window)
+{
+  return window->gtk_application_object_path;
+}
+
+/**
+ * meta_window_get_gtk_window_object_path:
+ * @window: a #MetaWindow
+ *
+ * Return value: (transfer none): the object path
+ **/
+const char *
+meta_window_get_gtk_window_object_path (MetaWindow *window)
+{
+  return window->gtk_window_object_path;
+}
+
+/**
+ * meta_window_get_gtk_app_menu_object_path:
+ * @window: a #MetaWindow
+ *
+ * Return value: (transfer none): the object path
+ **/
+const char *
+meta_window_get_gtk_app_menu_object_path (MetaWindow *window)
+{
+  return window->gtk_app_menu_object_path;
+}
+
+/**
+ * meta_window_get_gtk_menubar_object_path:
+ * @window: a #MetaWindow
+ *
+ * Return value: (transfer none): the object path
+ **/
+const char *
+meta_window_get_gtk_menubar_object_path (MetaWindow *window)
+{
+  return window->gtk_menubar_object_path;
+}
+
+/**
  * meta_window_get_compositor_private:
  * @window: a #MetaWindow
  *
@@ -10405,7 +10687,8 @@ meta_window_get_frame_type (MetaWindow *window)
       /* can't add border if undecorated */
       return META_FRAME_TYPE_LAST;
     }
-  else if (window->border_only && base_type != META_FRAME_TYPE_ATTACHED)
+  else if ((window->border_only && base_type != META_FRAME_TYPE_ATTACHED) ||
+           (window->hide_titlebar_when_maximized && META_WINDOW_MAXIMIZED (window)))
     {
       /* override base frame type */
       return META_FRAME_TYPE_BORDER;
@@ -10451,4 +10734,100 @@ gboolean
 meta_window_is_attached_dialog (MetaWindow *window)
 {
   return window->attached;
+}
+
+/**
+ * meta_window_get_tile_match:
+ *
+ * Returns the matching tiled window on the same monitor as @window. This is
+ * the topmost tiled window in a complementary tile mode that is:
+ *
+ *  - on the same monitor;
+ *  - on the same workspace;
+ *  - spanning the remaining monitor width;
+ *  - there is no 3rd window stacked between both tiled windows that's
+ *    partially visible in the common edge.
+ *
+ * Return value: (transfer none) (allow-none): the matching tiled window or
+ * %NULL if it doesn't exist.
+ */
+MetaWindow *
+meta_window_get_tile_match (MetaWindow *window)
+{
+  return window->tile_match;
+}
+
+void
+meta_window_compute_tile_match (MetaWindow *window)
+{
+  MetaWindow *match;
+  MetaStack *stack;
+  MetaTileMode match_tile_mode = META_TILE_NONE;
+
+  window->tile_match = NULL;
+
+  if (window->shaded || window->minimized)
+    return;
+
+  if (META_WINDOW_TILED_LEFT (window))
+    match_tile_mode = META_TILE_RIGHT;
+  else if (META_WINDOW_TILED_RIGHT (window))
+    match_tile_mode = META_TILE_LEFT;
+  else
+    return;
+
+  stack = window->screen->stack;
+
+  for (match = meta_stack_get_top (stack);
+       match;
+       match = meta_stack_get_below (stack, match, FALSE))
+    {
+      if (!match->shaded &&
+          !match->minimized &&
+          match->tile_mode == match_tile_mode &&
+          match->monitor == window->monitor &&
+          meta_window_get_workspace (match) == meta_window_get_workspace (window))
+        break;
+    }
+
+  if (match)
+    {
+      MetaWindow *above, *bottommost, *topmost;
+      MetaRectangle above_rect, bottommost_rect, topmost_rect;
+
+      if (meta_stack_windows_cmp (window->screen->stack, match, window) > 0)
+        {
+          topmost = match;
+          bottommost = window;
+        }
+      else
+        {
+          topmost = window;
+          bottommost = match;
+        }
+
+      meta_window_get_outer_rect (bottommost, &bottommost_rect);
+      meta_window_get_outer_rect (topmost, &topmost_rect);
+      /*
+       * If there's a window stacked in between which is partially visible
+       * behind the topmost tile we don't consider the tiles to match.
+       */
+      for (above = meta_stack_get_above (stack, bottommost, FALSE);
+           above && above != topmost;
+           above = meta_stack_get_above (stack, above, FALSE))
+        {
+          if (above->minimized ||
+              above->monitor != window->monitor ||
+              meta_window_get_workspace (above) != meta_window_get_workspace (window))
+            continue;
+
+          meta_window_get_outer_rect (above, &above_rect);
+
+          if (meta_rectangle_overlap (&above_rect, &bottommost_rect) &&
+              meta_rectangle_overlap (&above_rect, &topmost_rect))
+            return;
+        }
+
+      window->tile_match = match;
+    }
 }

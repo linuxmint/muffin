@@ -1578,19 +1578,69 @@ reload_gtk_theme_variant (MetaWindow    *window,
                     requested_variant, window->desc);
     }
 
-  if (g_strcmp0 (requested_variant, current_variant))
+  if (g_strcmp0 (requested_variant, current_variant) != 0)
     {
       g_free (current_variant);
 
-      if (requested_variant)
-        window->gtk_theme_variant = g_strdup (requested_variant);
-      else
-        window->gtk_theme_variant = NULL;
+      window->gtk_theme_variant = g_strdup (requested_variant);
 
       if (window->frame)
         meta_ui_update_frame_style (window->screen->ui, window->frame->xwindow);
     }
 }
+
+static void
+reload_gtk_hide_titlebar_when_maximized (MetaWindow    *window,
+                                         MetaPropValue *value,
+                                         gboolean       initial)
+{
+  gboolean requested_value = FALSE;
+  gboolean current_value = window->hide_titlebar_when_maximized;
+
+  if (value->type != META_PROP_VALUE_INVALID)
+    {
+      requested_value = ((int) value->v.cardinal == 1);
+      meta_verbose ("Request to hide titlebar for window %s.\n", window->desc);
+    }
+
+  if (requested_value == current_value)
+    return;
+
+  window->hide_titlebar_when_maximized = requested_value;
+
+  if (META_WINDOW_MAXIMIZED (window))
+    {
+      meta_window_queue (window, META_QUEUE_MOVE_RESIZE);
+
+      if (window->frame)
+        meta_ui_update_frame_style (window->screen->ui, window->frame->xwindow);
+    }
+}
+
+#define RELOAD_STRING(var_name, propname) \
+  static void                                       \
+  reload_ ## var_name (MetaWindow    *window,       \
+                       MetaPropValue *value,        \
+                       gboolean       initial)      \
+  {                                                 \
+    g_free (window->var_name);                      \
+                                                    \
+    if (value->type != META_PROP_VALUE_INVALID)     \
+      window->var_name = g_strdup (value->v.str);   \
+    else                                            \
+      window->var_name = NULL;                      \
+                                                    \
+    g_object_notify (G_OBJECT (window), propname);  \
+  }
+
+RELOAD_STRING (gtk_unique_bus_name,         "gtk-unique-bus-name")
+RELOAD_STRING (gtk_application_id,          "gtk-application-id")
+RELOAD_STRING (gtk_application_object_path, "gtk-application-object-path")
+RELOAD_STRING (gtk_window_object_path,      "gtk-window-object-path")
+RELOAD_STRING (gtk_app_menu_object_path,    "gtk-app-menu-object-path")
+RELOAD_STRING (gtk_menubar_object_path,     "gtk-menubar-object-path")
+
+#undef RELOAD_STRING
 
 /**
  * Initialises the property hooks system.  Each row in the table named "hooks"
@@ -1645,6 +1695,13 @@ meta_display_init_window_prop_hooks (MetaDisplay *display)
     { display->atom__MOTIF_WM_HINTS,   META_PROP_VALUE_MOTIF_HINTS, reload_mwm_hints,      TRUE,  FALSE },
     { XA_WM_TRANSIENT_FOR,             META_PROP_VALUE_WINDOW,    reload_transient_for,    TRUE,  FALSE },
     { display->atom__GTK_THEME_VARIANT, META_PROP_VALUE_UTF8,     reload_gtk_theme_variant, TRUE, FALSE },
+    { display->atom__GTK_HIDE_TITLEBAR_WHEN_MAXIMIZED, META_PROP_VALUE_CARDINAL,     reload_gtk_hide_titlebar_when_maximized, TRUE, FALSE },
+    { display->atom__GTK_APPLICATION_ID,               META_PROP_VALUE_UTF8,         reload_gtk_application_id,               TRUE, FALSE },
+    { display->atom__GTK_UNIQUE_BUS_NAME,              META_PROP_VALUE_UTF8,         reload_gtk_unique_bus_name,              TRUE, FALSE },
+    { display->atom__GTK_APPLICATION_OBJECT_PATH,      META_PROP_VALUE_UTF8,         reload_gtk_application_object_path,      TRUE, FALSE },
+    { display->atom__GTK_WINDOW_OBJECT_PATH,           META_PROP_VALUE_UTF8,         reload_gtk_window_object_path,           TRUE, FALSE },
+    { display->atom__GTK_APP_MENU_OBJECT_PATH,         META_PROP_VALUE_UTF8,         reload_gtk_app_menu_object_path,         TRUE, FALSE },
+    { display->atom__GTK_MENUBAR_OBJECT_PATH,          META_PROP_VALUE_UTF8,         reload_gtk_menubar_object_path,          TRUE, FALSE },
     { display->atom__NET_WM_USER_TIME_WINDOW, META_PROP_VALUE_WINDOW, reload_net_wm_user_time_window, TRUE, FALSE },
     { display->atom_WM_STATE,          META_PROP_VALUE_INVALID,  NULL,                     FALSE, FALSE },
     { display->atom__NET_WM_ICON,      META_PROP_VALUE_INVALID,  reload_net_wm_icon,       FALSE, FALSE },

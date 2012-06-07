@@ -95,8 +95,16 @@ const char * meta_window_get_wm_class (MetaWindow *window);
 const char * meta_window_get_wm_class_instance (MetaWindow *window);
 gboolean    meta_window_showing_on_its_workspace (MetaWindow *window);
 
+const char * meta_window_get_gtk_application_id (MetaWindow *window);
+const char * meta_window_get_gtk_unique_bus_name (MetaWindow *window);
+const char * meta_window_get_gtk_application_object_path (MetaWindow *window);
+const char * meta_window_get_gtk_window_object_path (MetaWindow *window);
+const char * meta_window_get_gtk_app_menu_object_path (MetaWindow *window);
+const char * meta_window_get_gtk_menubar_object_path (MetaWindow *window);
+
 void meta_window_move(MetaWindow *window, gboolean user_op, int root_x_nw, int root_y_nw);
 void meta_window_move_frame(MetaWindow *window, gboolean user_op, int root_x_nw, int root_y_nw);
+void meta_window_move_resize_frame (MetaWindow *window, gboolean user_op, int root_x_nw, int root_y_nw, int w, int h);
 void meta_window_move_to_monitor (MetaWindow *window, int monitor);
 void meta_window_resize(MetaWindow *window, gboolean user_op, int w, int h);
 
@@ -164,5 +172,7 @@ const char *meta_window_get_muffin_hints (MetaWindow *window);
 MetaFrameType meta_window_get_frame_type (MetaWindow *window);
 
 cairo_region_t *meta_window_get_frame_bounds (MetaWindow *window);
+
+MetaWindow *meta_window_get_tile_match (MetaWindow *window);
 
 #endif

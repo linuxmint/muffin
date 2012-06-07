@@ -360,7 +360,7 @@ meta_shadow_paint (MetaShadow     *shadow,
  * @window_height: actual height of the region to paint a shadow for
  *
  * Computes the bounds of the pixels that will be affected by
- * meta_shadow_paints()
+ * meta_shadow_paint()
  */
 void
 meta_shadow_get_bounds  (MetaShadow            *shadow,
@@ -442,8 +442,7 @@ meta_shadow_factory_class_init (MetaShadowFactoryClass *klass)
                   G_TYPE_FROM_CLASS (object_class),
                   G_SIGNAL_RUN_LAST,
                   0,
-                  NULL, NULL,
-                  g_cclosure_marshal_VOID__VOID,
+                  NULL, NULL, NULL,
                   G_TYPE_NONE, 0);
 }
 

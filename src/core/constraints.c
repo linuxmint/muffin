@@ -439,9 +439,13 @@ setup_constraint_info (ConstraintInfo      *info,
                                          monitor_info->number);
 
   /* Workaround braindead legacy apps that don't know how to
-   * fullscreen themselves properly.
+   * fullscreen themselves properly - don't get fooled by
+   * windows which hide their titlebar when maximized; that's
+   * not the same as fullscreen, even if there are no struts
+   * making the workarea smaller than the monitor.
    */
   if (meta_prefs_get_force_fullscreen() &&
+      !window->hide_titlebar_when_maximized &&
       meta_rectangle_equal (new, &monitor_info->rect) &&
       window->has_fullscreen_func &&
       !window->fullscreen)
@@ -569,7 +573,7 @@ place_window_if_needed(MetaWindow     *window,
                  META_MAXIMIZE_VERTICAL : 0), &info->current);
 
           /* maximization may have changed frame geometry */
-          if (window->frame && !window->fullscreen)
+          if (!window->fullscreen)
             meta_frame_calc_borders (window->frame, info->borders);
 
           if (window->fullscreen_after_placement)
