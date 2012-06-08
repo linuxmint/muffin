@@ -2,8 +2,6 @@ libmuffin.so.0 libmuffin0 #MINVER#
 * Build-Depends-Package: libmuffin-dev
  __window_is_terminal@Base 1.0.3
  _meta_plugin_effect_started@Base 1.0.3
- _muffin_marshal_VOID__INT_INT_ENUM@Base 1.0.3
- _muffin_marshal_VOID__INT_OBJECT@Base 1.0.3
  ag_Xmalloc0@Base 1.0.3
  ag_Xmalloc@Base 1.0.3
  ag_get_next_completed_task@Base 1.0.3
@@ -18,7 +16,6 @@ libmuffin.so.0 libmuffin0 #MINVER#
  meta_accel_label_get_type@Base 1.0.3
  meta_accel_label_new_with_mnemonic@Base 1.0.3
  meta_accel_label_set_accelerator@Base 1.0.3
- meta_action_titlebar_get_type@Base 1.0.3
  meta_add_verbose_topic@Base 1.0.3
  meta_alpha_gradient_spec_free@Base 1.0.3
  meta_alpha_gradient_spec_new@Base 1.0.3
@@ -220,10 +217,6 @@ libmuffin.so.0 libmuffin0 #MINVER#
  meta_exit@Base 1.0.3
  meta_exit_code_get_type@Base 1.0.3
  meta_fatal@Base 1.0.3
- meta_fixed_tip_hide@Base 1.0.3
- meta_fixed_tip_show@Base 1.0.3
- meta_focus_mode_get_type@Base 1.0.3
- meta_focus_new_windows_get_type@Base 1.0.3
  meta_frame_borders_clear@Base 1.0.3
  meta_frame_calc_borders@Base 1.0.3
  meta_frame_flags_get_type@Base 1.0.3
@@ -361,15 +354,9 @@ libmuffin.so.0 libmuffin0 #MINVER#
  meta_plugin_disabled@Base 1.0.3
  meta_plugin_end_modal@Base 1.0.3
  meta_plugin_features@Base 1.0.3
- meta_plugin_get_background_actor@Base 1.0.3
  meta_plugin_get_info@Base 1.0.3
- meta_plugin_get_overlay_group@Base 1.0.3
  meta_plugin_get_screen@Base 1.0.3
- meta_plugin_get_stage@Base 1.0.3
  meta_plugin_get_type@Base 1.0.3
- meta_plugin_get_window_actors@Base 1.0.3
- meta_plugin_get_window_group@Base 1.0.3
- meta_plugin_get_xdisplay@Base 1.0.3
  meta_plugin_manager_event_maximize@Base 1.0.3
  meta_plugin_manager_event_simple@Base 1.0.3
  meta_plugin_manager_get@Base 1.0.3
@@ -382,11 +369,7 @@ libmuffin.so.0 libmuffin0 #MINVER#
  meta_plugin_map_completed@Base 1.0.3
  meta_plugin_maximize_completed@Base 1.0.3
  meta_plugin_minimize_completed@Base 1.0.3
- meta_plugin_query_screen_size@Base 1.0.3
  meta_plugin_running@Base 1.0.3
- meta_plugin_set_stage_input_area@Base 1.0.3
- meta_plugin_set_stage_input_region@Base 1.0.3
- meta_plugin_set_stage_reactive@Base 1.0.3
  meta_plugin_switch_workspace_completed@Base 1.0.3
  meta_plugin_type_register@Base 1.0.3
  meta_plugin_unmaximize_completed@Base 1.0.3
@@ -405,7 +388,6 @@ libmuffin.so.0 libmuffin0 #MINVER#
  meta_prefs_get_auto_raise@Base 1.0.3
  meta_prefs_get_auto_raise_delay@Base 1.0.3
  meta_prefs_get_button_layout@Base 1.0.3
- meta_prefs_get_command@Base 1.0.3
  meta_prefs_get_cursor_size@Base 1.0.3
  meta_prefs_get_cursor_theme@Base 1.0.3
  meta_prefs_get_disable_workarounds@Base 1.0.3
@@ -415,11 +397,8 @@ libmuffin.so.0 libmuffin0 #MINVER#
  meta_prefs_get_focus_mode@Base 1.0.3
  meta_prefs_get_focus_new_windows@Base 1.0.3
  meta_prefs_get_force_fullscreen@Base 1.0.3
- meta_prefs_get_gconf_key_for_command@Base 1.0.3
- meta_prefs_get_gconf_key_for_terminal_command@Base 1.0.3
  meta_prefs_get_gnome_accessibility@Base 1.0.3
  meta_prefs_get_gnome_animations@Base 1.0.3
- meta_prefs_get_key_bindings@Base 1.0.3
  meta_prefs_get_keybinding_action@Base 1.0.3
  meta_prefs_get_keybindings@Base 1.0.3
  meta_prefs_get_live_hidden_windows@Base 1.0.3
@@ -430,7 +409,6 @@ libmuffin.so.0 libmuffin0 #MINVER#
  meta_prefs_get_num_workspaces@Base 1.0.3
  meta_prefs_get_overlay_binding@Base 1.0.3
  meta_prefs_get_raise_on_click@Base 1.0.3
- meta_prefs_get_terminal_command@Base 1.0.3
  meta_prefs_get_theme@Base 1.0.3
  meta_prefs_get_titlebar_font@Base 1.0.3
  meta_prefs_get_visual_bell@Base 1.0.3
@@ -439,7 +417,6 @@ libmuffin.so.0 libmuffin0 #MINVER#
  meta_prefs_get_workspace_name@Base 1.0.3
  meta_prefs_get_workspaces_only_on_primary@Base 1.0.3
  meta_prefs_init@Base 1.0.3
- meta_prefs_override_preference_location@Base 1.0.3
  meta_prefs_override_preference_schema@Base 1.0.3
  meta_prefs_remove_keybinding@Base 1.0.3
  meta_prefs_remove_listener@Base 1.0.3
@@ -607,7 +584,6 @@ libmuffin.so.0 libmuffin0 #MINVER#
  meta_shaped_texture_get_image@Base 1.0.3
  meta_shaped_texture_get_texture@Base 1.0.3
  meta_shaped_texture_get_type@Base 1.0.3
- meta_shaped_texture_get_visible_pixels_region@Base 1.0.3
  meta_shaped_texture_new@Base 1.0.3
  meta_shaped_texture_set_clip_region@Base 1.0.3
  meta_shaped_texture_set_create_mipmaps@Base 1.0.3
@@ -751,7 +727,6 @@ libmuffin.so.0 libmuffin0 #MINVER#
  meta_unsigned_long_hash@Base 1.0.3
  meta_verbose_real@Base 1.0.3
  meta_virtual_modifier_get_type@Base 1.0.3
- meta_visual_bell_type_get_type@Base 1.0.3
  meta_warning@Base 1.0.3
  meta_window_activate@Base 1.0.3
  meta_window_activate_with_workspace@Base 1.0.3
