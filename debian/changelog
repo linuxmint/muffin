@@ -1,3 +1,9 @@
+muffin (1.0.4) maya; urgency=low
+
+  * 1.0.4
+
+ -- Clement Lefebvre <root@linuxmint.com>  Fri, 08 Jun 2012 15:47:55 +0100
+
 muffin (1.0.3-UP1) maya; urgency=low
 
   * Fixed black borders (regression in GTK)
