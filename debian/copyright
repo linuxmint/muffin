@@ -1,9 +1,13 @@
-This package was debianized by Thom May <thom@debian.org> on
+This package was originally based on the 'mutter' packaging from the Debian
+project: <http://packages.qa.debian.org/m/mutter.html>
+
+In turn the mutter package was derived from the metacity package from the
+Debian project: <http://packages.qa.debian.org/m/metacity.html>
+
+The metacity package was debianized by Thom May <thom@debian.org> on
 Sun, 10 Feb 2002 12:03:22 +0000.
 
-It was downloaded from http://ftp.gnome.org/pub/GNOME/sources/muffin/
-
-Upstream Author: Havoc Pennington <hp@redhat.com>
+Metacity Upstream Author: Havoc Pennington <hp@redhat.com>
 
 Copyright:
    Copyright © 2001-2008  Havoc Pennington, Red Hat, Inc., and others
