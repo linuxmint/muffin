@@ -1,9 +1,7 @@
 Source: muffin
 Section: x11
 Priority: optional
-Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
-XSBC-Original-Maintainer: Debian GNOME Maintainers <pkg-gnome-maintainers@lists.alioth.debian.org>
-Uploaders: @GNOME_TEAM@
+Maintainer: Linux Mint <root@linuxmint.com>
 Build-Depends: cdbs (>= 0.4.90),
                debhelper (>= 8),
                dh-autoreconf,
@@ -34,8 +32,6 @@ Build-Depends: cdbs (>= 0.4.90),
                gnome-doc-utils (>= 0.8),
                gnome-pkg-tools (>= 0.10)
 Standards-Version: 3.9.2
-Vcs-Svn: svn://svn.debian.org/svn/pkg-gnome/packages/unstable/muffin
-Vcs-Browser: http://svn.debian.org/viewsvn/pkg-gnome/packages/unstable/muffin
 
 Package: muffin
 Architecture: any
