@@ -30,7 +30,8 @@ Build-Depends: cdbs (>= 0.4.90),
                libice-dev,
                zenity,
                gnome-doc-utils (>= 0.8),
-               gnome-pkg-tools (>= 0.10)
+               gnome-pkg-tools (>= 0.10),
+               gsettings-desktop-schemas (>= 3.3.0)
 Standards-Version: 3.9.2
 
 Package: muffin
