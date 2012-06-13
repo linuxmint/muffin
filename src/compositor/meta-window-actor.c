@@ -641,6 +641,9 @@ meta_window_actor_paint (ClutterActor *actor)
   MetaWindowActorPrivate *priv = self->priv;
   gboolean appears_focused = meta_window_appears_focused (priv->window);
   MetaShadow *shadow = appears_focused ? priv->focused_shadow : priv->unfocused_shadow;
+  if (g_getenv ("MUFFIN_NO_SHADOWS")) {
+      shadow = NULL;
+  }
 
   if (shadow != NULL)
     {
@@ -1896,6 +1899,10 @@ check_needs_pixmap (MetaWindowActor *self)
 static void
 check_needs_shadow (MetaWindowActor *self)
 {
+  if (g_getenv ("MUFFIN_NO_SHADOWS")) {
+      return;
+  }
+
   MetaWindowActorPrivate *priv = self->priv;
   MetaShadow *old_shadow = NULL;
   MetaShadow **shadow_location;
