@@ -1,7 +1,8 @@
 /* -*- mode: C; c-file-style: "gnu"; indent-tabs-mode: nil; -*- */
 
 /**
- * \file stack.c  Which windows cover which other windows
+ * SECTION:stack
+ * @short_description: Which windows cover which other windows
  */
 
 /* 
@@ -798,7 +799,7 @@ apply_constraints (Constraint **constraints,
   g_slist_free (heads);
 }
 
-/**
+/*
  * Go through "deleted" and take the matching windows
  * out of "windows".
  */
@@ -898,7 +899,7 @@ stack_do_window_additions (MetaStack *stack)
   stack->added = NULL;
 }
 
-/**
+/*
  * Update the layers that windows are in
  */
 static void
@@ -943,7 +944,7 @@ stack_do_relayer (MetaStack *stack)
   stack->need_relayer = FALSE;
 }
 
-/**
+/*
  * Update stack_position and layer to reflect transiency
  * constraints
  */
@@ -975,7 +976,7 @@ stack_do_constrain (MetaStack *stack)
   stack->need_constrain = FALSE;
 }
 
-/**
+/*
  * Sort stack->sorted with layers having priority over stack_position.
  */
 static void
@@ -993,7 +994,7 @@ stack_do_resort (MetaStack *stack)
   stack->need_resort = FALSE;
 }
 
-/**
+/*
  * Puts the stack into canonical form.
  *
  * Honour the removed and added lists of the stack, and then recalculate
@@ -1012,7 +1013,7 @@ stack_ensure_sorted (MetaStack *stack)
   stack_do_resort (stack);
 }
 
-/**
+/*
  * This function is used to avoid raising a window above popup
  * menus and other such things.
  *
@@ -1112,7 +1113,7 @@ raise_window_relative_to_managed_windows (MetaScreen *screen,
     }
 }
 
-/**
+/*
  * Order the windows on the X server to be the same as in our structure.
  * We do this using XRestackWindows if we don't know the previous order,
  * or XConfigureWindow on a few particular windows if we do and can figure

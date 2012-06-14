@@ -3451,7 +3451,7 @@ meta_window_save_rect (MetaWindow *window)
     }
 }
 
-/**
+/*
  * Save the user_rect regardless of whether the window is maximized or
  * fullscreen. See save_user_window_placement() for most uses.
  *
@@ -3463,7 +3463,7 @@ force_save_user_window_placement (MetaWindow *window)
   meta_window_get_client_root_coords (window, &window->user_rect);
 }
 
-/**
+/*
  * Save the user_rect, but only if the window is neither maximized nor
  * fullscreen, otherwise the window may snap back to those dimensions
  * (bug #461927).

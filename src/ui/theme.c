@@ -22,7 +22,8 @@
  */
 
 /**
- * \file theme.c    Making Metacity look pretty
+ * SECTION:theme
+ * @short_description: Making Metacity look pretty
  *
  * The window decorations drawn by Metacity are described by files on disk
  * known internally as "themes" (externally as "window border themes" on
@@ -34,7 +35,7 @@
  * be better split out into separate files.
  */
 
-/**
+/*
  * \defgroup tokenizer   The theme expression tokenizer
  *
  * Themes can use a simple expression language to represent the values of
@@ -45,7 +46,7 @@
  * we could and make sure the parse trees were the same.
  */
 
-/**
+/*
  * \defgroup parser  The theme expression parser
  *
  * Themes can use a simple expression language to represent the values of
@@ -89,7 +90,7 @@ static void hls_to_rgb			(gdouble	 *h,
 					 gdouble	 *l,
 					 gdouble	 *s);
 
-/**
+/*
  * The current theme. (Themes are singleton.)
  */
 static MetaTheme *meta_current_theme = NULL;
@@ -184,7 +185,7 @@ color_composite (const GdkRGBA *bg,
   color->blue = color->blue + (fg->blue - color->blue) * alpha;
 }
 
-/**
+/*
  * Sets all the fields of a border to dummy values.
  *
  * \param border The border whose fields should be reset.
@@ -240,7 +241,7 @@ meta_frame_layout_new  (void)
   return layout;
 }
 
-/**
+/*
  *
  */
 static gboolean
@@ -261,7 +262,7 @@ validate_border (const GtkBorder *border,
   return *bad == NULL;
 }
 
-/**
+/*
  * Ensures that the theme supplied a particular dimension. When a
  * MetaFrameLayout is created, all its integer fields are set to -1
  * by meta_frame_layout_new(). After an instance of this type
@@ -1639,7 +1640,7 @@ meta_color_spec_render (MetaColorSpec   *spec,
     }
 }
 
-/**
+/*
  * Represents an operation as a string.
  *
  * \param type  an operation, such as addition
@@ -1671,7 +1672,7 @@ op_name (PosOperatorType type)
   return "<unknown>";
 }
 
-/**
+/*
  * Parses a string and returns an operation.
  *
  * \param p  a pointer into a string representing an operation; part of an
@@ -1727,7 +1728,7 @@ op_from_string (const char *p,
   return POS_OP_NONE;
 }
 
-/**
+/*
  * Frees an array of tokens. All the tokens and their associated memory
  * will be freed.
  *
@@ -1751,7 +1752,7 @@ free_tokens (PosToken *tokens,
   g_free (tokens);
 }
 
-/**
+/*
  * Tokenises a number in an expression.
  *
  * \param p  a pointer into a string representing an operation; part of an
@@ -1842,7 +1843,7 @@ parse_number (const char  *p,
   return TRUE;
 }
 
-/**
+/*
  * Whether a variable can validly appear as part of the name of a variable.
  */
 #define IS_VARIABLE_CHAR(c) (g_ascii_isalpha ((c)) || (c) == '_')
@@ -1887,7 +1888,7 @@ debug_print_tokens (PosToken *tokens,
 }
 #endif
 
-/**
+/*
  * Tokenises an expression.
  *
  * \param      expr        The expression
@@ -2024,7 +2025,7 @@ pos_tokenize (const char  *expr,
   return FALSE;
 }
 
-/**
+/*
  * The type of a PosExpr: either integer, double, or an operation.
  * \ingroup parser
  */
@@ -2035,7 +2036,7 @@ typedef enum
   POS_EXPR_OPERATOR
 } PosExprType;
 
-/**
+/*
  * Type and value of an expression in a parsed sequence. We don't
  * keep expressions in a tree; if this is of type POS_EXPR_OPERATOR,
  * the arguments of the operator will be in the array positions
@@ -2333,7 +2334,7 @@ do_operations (PosExpr *exprs,
   return TRUE;
 }
 
-/**
+/*
  * There is a predefined set of variables which can appear in an expression.
  * Here we take a token representing a variable, and return the current value
  * of that variable in a particular environment.
@@ -2458,7 +2459,7 @@ pos_eval_get_variable (PosToken                  *t,
   return TRUE;
 }
 
-/**
+/*
  * Evaluates a sequence of tokens within a particular environment context,
  * and returns the current value. May recur if parantheses are found.
  *
@@ -2633,7 +2634,7 @@ pos_eval_helper (PosToken                   *tokens,
  *
  *   so very not worth fooling with bison, yet so very painful by hand.
  */
-/**
+/*
  * Evaluates an expression.
  *
  * \param spec  The expression to evaluate.
@@ -4312,7 +4313,7 @@ meta_draw_op_list_contains (MetaDrawOpList    *op_list,
   return FALSE;
 }
 
-/**
+/*
  * Constructor for a MetaFrameStyle.
  *
  * \param parent  The parent style. Data not filled in here will be
@@ -4340,7 +4341,7 @@ meta_frame_style_new (MetaFrameStyle *parent)
   return style;
 }
 
-/**
+/*
  * Increases the reference count of a frame style.
  * If the style is NULL, this is a no-op.
  *
@@ -5852,7 +5853,7 @@ meta_theme_define_color_constant (MetaTheme   *theme,
   return TRUE;
 }
 
-/**
+/*
  * Looks up a colour constant.
  *
  * \param theme  the theme containing the constant
@@ -5909,7 +5910,7 @@ meta_gtk_widget_get_font_desc (GtkWidget *widget,
   return font_desc;
 }
 
-/**
+/*
  * Returns the height of the letters in a particular font.
  *
  * \param font_desc  the font
@@ -6509,7 +6510,7 @@ meta_gtk_arrow_to_string (GtkArrowType arrow)
   return "<unknown>";
 }
 
-/**
+/*
  * Returns a fill_type from a string.  The inverse of
  * meta_image_fill_type_to_string().
  *
@@ -6527,7 +6528,7 @@ meta_image_fill_type_from_string (const char *str)
     return -1;
 }
 
-/**
+/*
  * Returns a string representation of a fill_type.  The inverse of
  * meta_image_fill_type_from_string().
  *
@@ -6548,7 +6549,7 @@ meta_image_fill_type_to_string (MetaImageFillType fill_type)
   return "<unknown>";
 }
 
-/**
+/*
  * Takes a colour "a", scales the lightness and saturation by a certain amount,
  * and sets "b" to the resulting colour.
  * gtkstyle.c cut-and-pastage.
@@ -6591,7 +6592,7 @@ gtk_style_shade (GdkRGBA *a,
   b->blue = blue;
 }
 
-/**
+/*
  * Converts a red/green/blue triplet to a hue/lightness/saturation triplet.
  *
  * \param r  on input, red; on output, hue
@@ -6669,7 +6670,7 @@ rgb_to_hls (gdouble *r,
   *b = s;
 }
 
-/**
+/*
  * Converts a hue/lightness/saturation triplet to a red/green/blue triplet.
  *
  * \param h  on input, hue; on output, red
@@ -6965,7 +6966,7 @@ draw_bg_gradient_composite (const MetaTextureSpec *bg,
 }
 #endif
 
-/**
+/*
  * Returns the earliest version of the theme format which required support
  * for a particular button.  (For example, "shade" first appeared in v2, and
  * "close" in v1.)

@@ -25,7 +25,8 @@
  */
 
 /**
- * \file display.c Handles operations on an X display.
+ * SECTION:MetaDisplay
+ * @short_description: Handles operations on an X display.
  *
  * The display is represented as a MetaDisplay struct.
  */
@@ -86,7 +87,7 @@
          g == META_GRAB_OP_KEYBOARD_ESCAPING_DOCK   ||  \
          g == META_GRAB_OP_KEYBOARD_ESCAPING_GROUP)
 
-/**
+/*
  * \defgroup pings Pings
  *
  * Sometimes we want to see whether a window is responding,
@@ -101,7 +102,7 @@
  * that we're never going to do so and simplify it a bit.
  */
 
-/**
+/*
  * Describes a ping on a window. When we send a ping to a window, we build
  * one of these structs, and it eventually gets passed to the timeout function
  * or to the function which handles the response from the window. If the window
@@ -150,7 +151,7 @@ enum {
 
 static guint display_signals [LAST_SIGNAL] = { 0 };
 
-/**
+/*
  * The display we're managing.  This is a singleton object.  (Historically,
  * this was a list of displays, but there was never any way to add more
  * than one element to it.)  The goofy name is because we don't want it
@@ -294,7 +295,7 @@ meta_display_class_init (MetaDisplayClass *klass)
 }
 
 
-/**
+/*
  * Destructor for MetaPingData structs. Will destroy the
  * event source for the struct as well.
  *
@@ -310,7 +311,7 @@ ping_data_free (MetaPingData *ping_data)
   g_free (ping_data);
 }
 
-/**
+/*
  * Frees every pending ping structure for the given X window on the
  * given display. This means that we also destroy the timeouts.
  *
@@ -416,7 +417,7 @@ meta_display_init (MetaDisplay *disp)
    * but it doesn't really matter. */
 }
 
-/**
+/*
  * Opens a new display, sets it up, initialises all the X extensions
  * we will need, and adds it to the list of displays.
  *
@@ -1167,7 +1168,7 @@ meta_display_ungrab (MetaDisplay *display)
                 display->server_grab_count);
 }
 
-/**
+/*
  * Returns the singleton MetaDisplay if "xdisplay" matches the X display it's
  * managing; otherwise gives a warning and returns NULL.  When we were claiming
  * to be able to manage multiple displays, this was supposed to find the
@@ -1190,7 +1191,7 @@ meta_display_for_x_display (Display *xdisplay)
   return NULL;
 }
 
-/**
+/*
  * Accessor for the singleton MetaDisplay.
  *
  * \return  The only MetaDisplay there is.  This can be NULL, but only
@@ -1600,7 +1601,7 @@ handle_net_restack_window (MetaDisplay* display,
 }
 #endif
 
-/**
+/*
  * This is the most important function in the whole program. It is the heart,
  * it is the nexus, it is the Grand Central Station of Muffin's world.
  * When we create a MetaDisplay, we ask GDK to pass *all* events for *all*
@@ -4193,12 +4194,12 @@ meta_display_set_cursor_theme (const char *theme,
 #endif
 }
 
-/**
+/*
  * Stores whether syncing is currently enabled.
  */
 static gboolean is_syncing = FALSE;
 
-/**
+/*
  * Returns whether X synchronisation is currently enabled.
  *
  * \return true if we must wait for events whenever we send X requests;
@@ -4215,7 +4216,7 @@ meta_is_syncing (void)
   return is_syncing;
 }
 
-/**
+/*
  * A handy way to turn on synchronisation on or off for every display.
  *
  * \bug Of course there is only one display ever anyway, so this can
@@ -4232,13 +4233,13 @@ meta_set_syncing (gboolean setting)
     }
 }
 
-/**
+/*
  * How long, in milliseconds, we should wait after pinging a window
  * before deciding it's not going to get back to us.
  */
 #define PING_TIMEOUT_DELAY 5000
 
-/**
+/*
  * Does whatever it is we decided to do when a window didn't respond
  * to a ping. We also remove the ping from the display's list of
  * pending pings. This function is called by the event loop when the timeout
@@ -4277,7 +4278,7 @@ meta_display_ping_timeout (gpointer data)
   return FALSE;
 }
 
-/**
+/*
  * Sends a ping request to a window. The window must respond to
  * the request within a certain amount of time. If it does, we
  * will call one callback; if the time passes and we haven't had
@@ -4407,7 +4408,7 @@ process_request_frame_extents (MetaDisplay    *display,
   meta_XFree (hints);
 }
 
-/**
+/*
  * Process the pong (the response message) from the ping we sent
  * to the window. This involves removing the timeout, calling the
  * reply handler function, and freeing memory.
@@ -4463,7 +4464,7 @@ process_pong_message (MetaDisplay    *display,
     }
 }
 
-/**
+/*
  * Finds whether a window has any pings waiting on it.
  *
  * \param display The MetaDisplay of the window.

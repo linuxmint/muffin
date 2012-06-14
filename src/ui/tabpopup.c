@@ -843,11 +843,11 @@ meta_select_workspace_class_init (MetaSelectWorkspaceClass *klass)
   widget_class->draw = meta_select_workspace_draw;
 }
 
-/**
+/*
  * meta_convert_meta_to_wnck() converts a MetaWindow to a
  * WnckWindowDisplayInfo window that is used to build a thumbnail of a
  * workspace.
- **/
+ */
 static WnckWindowDisplayInfo
 meta_convert_meta_to_wnck (MetaWindow *window, MetaScreen *screen)
 {

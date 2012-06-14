@@ -199,7 +199,7 @@ free_this (gpointer candidate, gpointer dummy)
   g_free (candidate);
 }
 
-/**
+/*
  * Frees the combined struts list of a workspace.
  *
  * \param workspace  The workspace.
@@ -215,7 +215,7 @@ workspace_free_all_struts (MetaWorkspace *workspace)
   workspace->all_struts = NULL;
 }
 
-/**
+/*
  * Frees the struts list set with meta_workspace_set_builtin_struts
  *
  * \param workspace  The workspace.

@@ -169,7 +169,7 @@ typedef struct
 {
   MetaBasePreference base;
 
-  /**
+  /*
    * A handler.  Many of the string preferences aren't stored as
    * strings and need parsing; others of them have default values
    * which can't be solved in the general case.  If you include a
@@ -187,7 +187,7 @@ typedef struct
    */
   GSettingsGetMapping handler;
 
-  /**
+  /*
    * Where to write the incoming string.
    *
    * This must be NULL if the handler is non-NULL.
@@ -931,7 +931,7 @@ do_override (char *key,
 
 
 /**
- * meta_prefs_override_preference_schema
+ * meta_prefs_override_preference_schema:
  * @key: the preference name
  * @schema: new schema for preference %key
  *
@@ -1061,7 +1061,7 @@ bindings_changed (GSettings *settings,
   g_strfreev (strokes);
 }
 
-/**
+/*
  * Special case: give a warning the first time disable_workarounds
  * is turned on.
  */
@@ -2008,7 +2008,8 @@ meta_prefs_remove_keybinding (const char *name)
 
 /**
  * meta_prefs_get_keybindings:
- * Return: (element-type MetaKeyPref) (transfer container):
+ * 
+ * Returns: (element-type MetaKeyPref) (transfer container):
  */
 GList *
 meta_prefs_get_keybindings ()

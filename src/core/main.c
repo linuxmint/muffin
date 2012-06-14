@@ -23,14 +23,14 @@
  */
 
 /**
- * \file 
- * Program startup.
+ * SECTION:main
+ * @short_description: Program startup.
+ * 
  * Functions which parse the command-line arguments, create the display,
  * kick everything off and then close down Muffin when it's time to go.
- */
-
-/**
- * \mainpage
+ *
+ * 
+ * 
  * Muffin - a boring window manager for the adult in you
  *
  * Many window managers are like Marshmallow Froot Loops; Muffin
@@ -77,12 +77,12 @@
 #include <girepository.h>
 #endif
 
-/**
+/*
  * The exit code we'll return to our parent process when we eventually die.
  */
 static MetaExitCode meta_exit_code = META_EXIT_SUCCESS;
 
-/**
+/*
  * Handle on the main loop, so that we have an easy way of shutting Muffin
  * down.
  */
@@ -91,7 +91,7 @@ static GMainLoop *meta_main_loop = NULL;
 static void prefs_changed_callback (MetaPreference pref,
                                     gpointer       data);
 
-/**
+/*
  * Prints log messages. If Muffin was compiled with backtrace support,
  * also prints a backtrace (see meta_print_backtrace()).
  *
@@ -111,7 +111,7 @@ log_handler (const gchar   *log_domain,
   meta_print_backtrace ();
 }
 
-/**
+/*
  * Prints a list of which configure script options were used to
  * build this copy of Muffin. This is actually always called
  * on startup, but it's all no-op unless we're in verbose mode
@@ -157,7 +157,7 @@ meta_print_compilation_info (void)
 #endif
 }
 
-/**
+/*
  * Prints the version number, the current timestamp (not the
  * build date), the locale, the character encoding, and a list
  * of configure script options that were used to build this
@@ -188,7 +188,7 @@ meta_print_self_identity (void)
   meta_print_compilation_info ();
 }
 
-/**
+/*
  * The set of possible options that can be set on Muffin's
  * command line.
  */
@@ -326,7 +326,7 @@ meta_clutter_init (void)
     }
 }
 
-/**
+/*
  * Selects which display Muffin should use. It first tries to use
  * display_name as the display. If display_name is NULL then
  * try to use the environment variable MUFFIN_DISPLAY. If that
@@ -559,7 +559,7 @@ meta_run (void)
   return meta_exit_code;
 }
 
-/**
+/*
  * Stops Muffin. This tells the event loop to stop processing; it is
  * rather dangerous to use this because this will leave the user with
  * no window manager. We generally do this only if, for example, the
@@ -578,7 +578,7 @@ meta_quit (MetaExitCode code)
     }
 }
 
-/**
+/*
  * Called on pref changes. (One of several functions of its kind and purpose.)
  *
  * \bug Why are these particular prefs handled in main.c and not others?

@@ -128,7 +128,7 @@ int         meta_prefs_get_cursor_size       (void);
 gboolean    meta_prefs_get_compositing_manager (void);
 gboolean    meta_prefs_get_force_fullscreen  (void);
 
-/**
+/*
  * Sets whether the compositor is turned on.
  *
  * \param whether   TRUE to turn on, FALSE to turn off
@@ -275,7 +275,7 @@ typedef struct
 
   MetaKeyBindingAction action;
 
-  /**
+  /*
    * A list of MetaKeyCombos. Each of them is bound to
    * this keypref. If one has keysym==modifiers==0, it is
    * ignored.

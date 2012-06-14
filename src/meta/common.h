@@ -363,7 +363,7 @@ void meta_frame_borders_clear (MetaFrameBorders *self);
   (ycoord) >= (rect).y &&                   \
   (ycoord) <  ((rect).y + (rect).height))
 
-/**
+/*
  * Layers a window can be in.
  * These MUST be in the order of stacking.
  */
