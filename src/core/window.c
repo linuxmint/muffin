@@ -4625,7 +4625,9 @@ meta_window_move_resize_internal (MetaWindow          *window,
   MetaRectangle new_rect;
   MetaRectangle old_rect;
 
-  g_return_if_fail (!window->override_redirect);
+  if (!window->type == META_WINDOW_TOOLTIP) {
+    g_return_if_fail (!window->override_redirect);
+  }
 
   is_configure_request = (flags & META_IS_CONFIGURE_REQUEST) != 0;
   do_gravity_adjust = (flags & META_DO_GRAVITY_ADJUST) != 0;
@@ -5077,7 +5079,9 @@ meta_window_move (MetaWindow  *window,
 {
   MetaMoveResizeFlags flags;
 
-  g_return_if_fail (!window->override_redirect);
+  if (!window->type == META_WINDOW_TOOLTIP) {
+    g_return_if_fail (!window->override_redirect);
+  }
 
   flags = (user_op ? META_IS_USER_ACTION : 0) | META_IS_MOVE_ACTION;
 
