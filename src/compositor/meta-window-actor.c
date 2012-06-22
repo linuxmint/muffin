@@ -1539,9 +1539,6 @@ meta_window_actor_new (MetaWindow *window)
 
   /* Hang our compositor window state off the MetaWindow for fast retrieval */
   meta_window_set_compositor_private (window, G_OBJECT (self));
-  //meta_window_get_work_area_for_monitor(window, 0, rect);
-  meta_window_get_work_area_all_monitors(window, rectWorkArea);
-  printf("NEW WINDOW (%s); workspace (%ld): x=%d, y=%d, width=%d, height=%d\n", meta_window_get_wm_class(window), (long) window->workspace, rectWorkArea->x, rectWorkArea->y, rectWorkArea->width, rectWorkArea->height);
   
   if (window->type == META_WINDOW_POPUP_MENU){
     clutter_container_add_actor (CLUTTER_CONTAINER (info->top_window_group),
@@ -1570,9 +1567,6 @@ meta_window_actor_new (MetaWindow *window)
       clutter_container_add_actor (CLUTTER_CONTAINER (info->top_window_group),
 			       CLUTTER_ACTOR (self));
     }
-    rectWindow = meta_window_get_rect(window);
-    printf("NEW TOOLTIP: (%s): x=%d, y=%d, width=%d, height=%d\n", meta_window_get_wm_class(window), rectWindow->x, rectWindow->y, rectWindow->width, rectWindow->height);
-  
   }else{
     clutter_container_add_actor (CLUTTER_CONTAINER (info->window_group),
 			       CLUTTER_ACTOR (self));
