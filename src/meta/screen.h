@@ -75,6 +75,11 @@ int meta_screen_get_active_workspace_index (MetaScreen *screen);
 
 MetaWorkspace * meta_screen_get_active_workspace (MetaScreen *screen);
 
+void meta_screen_show_desktop (MetaScreen *screen,
+                                guint32        timestamp);
+                                
+void meta_screen_unshow_desktop (MetaScreen *screen);
+
 int  meta_screen_get_n_monitors       (MetaScreen    *screen);
 int  meta_screen_get_primary_monitor  (MetaScreen    *screen);
 void meta_screen_get_monitor_geometry (MetaScreen    *screen,

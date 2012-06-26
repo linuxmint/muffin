@@ -233,10 +233,6 @@ void meta_screen_resize (MetaScreen *screen,
 void     meta_screen_minimize_all_on_active_workspace_except (MetaScreen *screen,
                                                               MetaWindow *keep);
 
-/* Show/hide the desktop (temporarily hide all windows) */
-void     meta_screen_show_desktop        (MetaScreen *screen,
-                                          guint32     timestamp);
-void     meta_screen_unshow_desktop      (MetaScreen *screen);
 
 /* Update whether the destkop is being shown for the current active_workspace */
 void     meta_screen_update_showing_desktop_hint          (MetaScreen *screen);
