@@ -4217,7 +4217,7 @@ window_activate (MetaWindow     *window,
      rather than move windows or workspaces.
      See http://bugzilla.gnome.org/show_bug.cgi?id=482354 */
   if (window->xtransient_for == None &&
-      !meta_window_located_on_workspace (window, workspace))
+      !meta_window_located_on_workspace (window, window->screen->active_workspace))
     {
       meta_window_set_demands_attention (window);
       /* We've marked it as demanding, don't need to do anything else. */
@@ -4227,7 +4227,7 @@ window_activate (MetaWindow     *window,
     {
       /* Move transients to current workspace - preference dialogs should appear over
          the source window.  */
-    meta_window_change_workspace (window, workspace);
+        meta_window_change_workspace (window, workspace);
     }
 
   if (window->shaded)
