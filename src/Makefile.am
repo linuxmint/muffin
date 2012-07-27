@@ -151,7 +151,8 @@ libmuffin_la_SOURCES =				\
 	ui/preview-widget.c			\
 	$(muffin_built_sources)
 
-libmuffin_la_LDFLAGS = -no-undefined
+MUFFIN_RELEASE=$(MUFFIN_MAJOR_VERSION).$(MUFFIN_MINOR_VERSION).$(MUFFIN_MICRO_VERSION)
+libmuffin_la_LDFLAGS = -no-undefined -release $(MUFFIN_RELEASE)
 libmuffin_la_LIBADD  = $(MUFFIN_LIBS) -lclutter-glx-1.0
 
 # Headers installed for plugins; introspected information will
