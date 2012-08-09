@@ -462,9 +462,6 @@ if test "x$enable_debug" = "xyes"; then
 	CFLAGS="$CFLAGS -g -O"
 fi
 
-# Use gnome-doc-utils:
-GNOME_DOC_INIT([0.8.0])
-
 GTK_DOC_CHECK([1.15], [--flavour no-tmpl])
 
 AC_CHECK_DECL([GL_EXT_x11_sync_object],
