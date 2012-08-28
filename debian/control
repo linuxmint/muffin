@@ -6,9 +6,7 @@
 Source: muffin
 Section: x11
 Priority: optional
-Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
-XSBC-Original-Maintainer: Debian GNOME Maintainers <pkg-gnome-maintainers@lists.alioth.debian.org>
-Uploaders: Debian GNOME Maintainers <pkg-gnome-maintainers@lists.alioth.debian.org>
+Maintainer: Linux Mint <root@linuxmint.com>
 Build-Depends: cdbs (>= 0.4.90),
                debhelper (>= 8),
                dh-autoreconf,
