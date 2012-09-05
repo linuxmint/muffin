@@ -1,3 +1,9 @@
+muffin (1.0.9) maya; urgency=low
+
+  * 1.0.9 (skipped 1.0.8 and 1.0.7 due to a git rebase)
+
+ -- Clement Lefebvre <root@linuxmint.com>  Wed, 05 Sep 2012 23:55:04 +0100
+
 muffin (1.0.6) maya; urgency=low
 
   * 1.0.6
