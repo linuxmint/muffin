@@ -1508,9 +1508,6 @@ meta_window_actor_new (MetaWindow *window)
   MetaWindowActorPrivate *priv;
   MetaFrame		 *frame;
   Window		  top_window;
-  MetaRectangle rectWorkArea[1];
-  MetaRectangle *rectWindow;
-  int tooltipMoved = FALSE;
 
   frame = meta_window_get_frame (window);
   if (frame)
@@ -1540,33 +1537,9 @@ meta_window_actor_new (MetaWindow *window)
   /* Hang our compositor window state off the MetaWindow for fast retrieval */
   meta_window_set_compositor_private (window, G_OBJECT (self));
   
-  if (window->type == META_WINDOW_POPUP_MENU){
+  if (window->type == META_WINDOW_POPUP_MENU || window->type == META_WINDOW_TOOLTIP){
     clutter_container_add_actor (CLUTTER_CONTAINER (info->top_window_group),
 			       CLUTTER_ACTOR (self));
-  }
-  else if (window->type == META_WINDOW_TOOLTIP) {
-    meta_window_get_work_area_all_monitors(window, rectWorkArea);
-    rectWindow = meta_window_get_rect(window);
-    // move tooltip out of top panel if necessary
-    if (rectWindow->y < rectWorkArea->y) {
-      meta_window_move(window, FALSE, rectWindow->x, rectWorkArea->y);
-      tooltipMoved = TRUE;
-    }
-    rectWindow = meta_window_get_rect(window);
-    // move tooltip out of bottom panel if necessary
-    if ((rectWindow->y + rectWindow->height) > (rectWorkArea->y  + rectWorkArea->height)) {
-      meta_window_move(window, FALSE, rectWindow->x, rectWorkArea->y + rectWorkArea->height - rectWindow->height);
-      tooltipMoved = TRUE;
-    }
-    
-    if (tooltipMoved) {
-      clutter_container_add_actor (CLUTTER_CONTAINER (info->window_group),
-			       CLUTTER_ACTOR (self));
-    }
-    else {
-      clutter_container_add_actor (CLUTTER_CONTAINER (info->top_window_group),
-			       CLUTTER_ACTOR (self));
-    }
   }else{
     clutter_container_add_actor (CLUTTER_CONTAINER (info->window_group),
 			       CLUTTER_ACTOR (self));
