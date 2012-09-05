@@ -475,6 +475,8 @@ meta_display_open (void)
       buf[sizeof(buf)-1] = '\0';
       the_display->hostname = g_strdup (buf);
     }
+  else
+    the_display->hostname = NULL;
   the_display->error_trap_synced_at_last_pop = TRUE;
   the_display->error_traps = 0;
   the_display->error_trap_handler = NULL;
@@ -1052,6 +1054,7 @@ meta_display_close (MetaDisplay *display,
   meta_display_free_window_prop_hooks (display);
   meta_display_free_group_prop_hooks (display);
   
+  g_free (display->hostname);
   g_free (display->name);
 
   meta_display_shutdown_keys (display);
