@@ -925,7 +925,7 @@ ptrcmp (gconstpointer a, gconstpointer b)
  * now determines whether override-redirect windows will be
  * included.
  *
- * Return value: (transfer container): the list of windows.
+ * Return value: (transfer container) (element-type MetaWindow): the list of windows.
  */
 GSList*
 meta_display_list_windows (MetaDisplay          *display,
