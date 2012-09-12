@@ -3654,8 +3654,9 @@ meta_window_tile (MetaWindow *window)
 {
   MetaMaximizeFlags directions;
 
-  /* Don't do anything if no tiling is requested */
-  if (window->tile_mode == META_TILE_NONE)
+/* Don't do anything if no tiling is requested or we're already tiled */
+  if (window->tile_mode == META_TILE_NONE || window->maximized_vertically ||
+                                             window->maximized_horizontally )
     return;
 
   if (window->tile_mode == META_TILE_MAXIMIZED)
