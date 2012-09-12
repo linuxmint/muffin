@@ -634,6 +634,7 @@ libmuffin.so.0 libmuffin0 #MINVER#
  meta_tab_list_get_type@Base 1.0.9
  meta_tab_show_type_get_type@Base 1.0.9
  meta_text_property_to_utf8@Base 1.0.9
+ meta_texture_rectangle_check@Base 1.0.9
  meta_texture_rectangle_new@Base 1.0.9
  meta_texture_tower_free@Base 1.0.9
  meta_texture_tower_get_paint_texture@Base 1.0.9
