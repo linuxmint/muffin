@@ -338,6 +338,7 @@ libmuffin.so.0 libmuffin0 #MINVER#
  meta_later_add@Base 1.0.9
  meta_later_remove@Base 1.0.9
  meta_later_type_get_type@Base 1.0.9
+ meta_list_windows_flags_get_type@Base 1.0.9
  meta_make_border_region@Base 1.0.9
  meta_maximize_flags_get_type@Base 1.0.9
  meta_menu_op_get_type@Base 1.0.9
