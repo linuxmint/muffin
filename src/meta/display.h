@@ -64,6 +64,11 @@ typedef enum
 #undef item
 }MetaAtom;
 
+typedef enum {
+  META_LIST_DEFAULT                   = 0,      /* normal windows */
+  META_LIST_INCLUDE_OVERRIDE_REDIRECT = 1 << 0, /* normal and O-R */
+} MetaListWindowsFlags;
+
 void meta_display_get_compositor_version (MetaDisplay *display,
                                           int         *major,
                                           int         *minor);
@@ -76,6 +81,9 @@ gboolean meta_display_has_shape (MetaDisplay *display);
 MetaScreen *meta_display_screen_for_root (MetaDisplay *display,
                                           Window       xroot);
 MetaWindow *meta_display_get_focus_window (MetaDisplay *display);
+
+GSList*     meta_display_list_windows        (MetaDisplay          *display,
+                                              MetaListWindowsFlags  flags);
 
 gboolean  meta_display_xwindow_is_a_no_focus_window (MetaDisplay *display,
                                                      Window xwindow);
