@@ -55,6 +55,15 @@
       </_description>
     </key>
 
+    <key name="workspace-cycle" type="b">
+      <default>false</default>
+      <_summary>Allow cycling through workspaces</_summary>
+      <_description>
+        Allows cycling through workspaces, going to the workspace at the other end
+        if you are at the left-most or right-most one.
+      </_description>
+    </key>
+
     <key name="workspaces-only-on-primary" type="b">
       <default>false</default>
       <_summary>Workspaces only on primary</_summary>
