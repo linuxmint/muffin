@@ -233,7 +233,7 @@ atom_list_from_results (GetPropertyResults *results,
   return TRUE;
 }
 
-gboolean
+LOCAL_SYMBOL gboolean
 meta_prop_get_atom_list (MetaDisplay *display,
                          Window       xwindow,
                          Atom         xatom,
@@ -277,7 +277,7 @@ cardinal_list_from_results (GetPropertyResults *results,
   return TRUE;
 }
 
-gboolean
+LOCAL_SYMBOL LOCAL_SYMBOL gboolean
 meta_prop_get_cardinal_list (MetaDisplay *display,
                              Window       xwindow,
                              Atom         xatom,
@@ -343,7 +343,7 @@ motif_hints_from_results (GetPropertyResults *results,
   return TRUE;
 }
 
-gboolean
+LOCAL_SYMBOL gboolean
 meta_prop_get_motif_hints (MetaDisplay   *display,
                            Window         xwindow,
                            Atom           xatom,
@@ -375,7 +375,7 @@ latin1_string_from_results (GetPropertyResults *results,
   return TRUE;
 }
 
-gboolean
+LOCAL_SYMBOL gboolean
 meta_prop_get_latin1_string (MetaDisplay *display,
                              Window       xwindow,
                              Atom         xatom,
@@ -423,7 +423,7 @@ utf8_string_from_results (GetPropertyResults *results,
   return TRUE;
 }
 
-gboolean
+LOCAL_SYMBOL gboolean
 meta_prop_get_utf8_string (MetaDisplay *display,
                            Window       xwindow,
                            Atom         xatom,
@@ -517,7 +517,7 @@ utf8_list_from_results (GetPropertyResults *results,
 }
 
 /* returns g_malloc not Xmalloc memory */
-gboolean
+LOCAL_SYMBOL gboolean
 meta_prop_get_utf8_list (MetaDisplay   *display,
                          Window         xwindow,
                          Atom           xatom,
@@ -536,7 +536,7 @@ meta_prop_get_utf8_list (MetaDisplay   *display,
   return utf8_list_from_results (&results, str_p, n_str_p);
 }
 
-void
+LOCAL_SYMBOL void
 meta_prop_set_utf8_string_hint (MetaDisplay *display,
                                 Window xwindow,
                                 Atom atom,
@@ -582,7 +582,7 @@ counter_from_results (GetPropertyResults *results,
 }
 #endif
 
-gboolean
+LOCAL_SYMBOL gboolean
 meta_prop_get_window (MetaDisplay *display,
                       Window       xwindow,
                       Atom         xatom,
@@ -599,7 +599,7 @@ meta_prop_get_window (MetaDisplay *display,
   return window_from_results (&results, window_p);
 }
 
-gboolean
+LOCAL_SYMBOL gboolean
 meta_prop_get_cardinal (MetaDisplay   *display,
                         Window         xwindow,
                         Atom           xatom,
@@ -628,7 +628,7 @@ cardinal_with_atom_type_from_results (GetPropertyResults *results,
   return TRUE;
 }
 
-gboolean
+LOCAL_SYMBOL gboolean
 meta_prop_get_cardinal_with_atom_type (MetaDisplay   *display,
                                        Window         xwindow,
                                        Atom           xatom,
@@ -669,7 +669,7 @@ text_property_from_results (GetPropertyResults *results,
   return *utf8_str_p != NULL;
 }
 
-gboolean
+LOCAL_SYMBOL gboolean
 meta_prop_get_text_property (MetaDisplay   *display,
                              Window         xwindow,
                              Atom           xatom,
@@ -762,7 +762,7 @@ wm_hints_from_results (GetPropertyResults *results,
   return TRUE;
 }
 
-gboolean
+LOCAL_SYMBOL gboolean
 meta_prop_get_wm_hints (MetaDisplay   *display,
                         Window         xwindow,
                         Atom           xatom,
@@ -823,7 +823,7 @@ class_hint_from_results (GetPropertyResults *results,
   return TRUE;
 }
 
-gboolean
+LOCAL_SYMBOL gboolean
 meta_prop_get_class_hint (MetaDisplay   *display,
                           Window         xwindow,
                           Atom           xatom,
@@ -898,7 +898,7 @@ size_hints_from_results (GetPropertyResults *results,
   return TRUE;
 }
 
-gboolean
+LOCAL_SYMBOL gboolean
 meta_prop_get_size_hints (MetaDisplay   *display,
                           Window         xwindow,
                           Atom           xatom,
@@ -947,7 +947,7 @@ latin1_to_utf8 (const char *text)
   return g_string_free (str, FALSE);
 }
 
-void
+LOCAL_SYMBOL void
 meta_prop_get_values (MetaDisplay   *display,
                       Window         xwindow,
                       MetaPropValue *values,
@@ -1234,7 +1234,7 @@ free_value (MetaPropValue *value)
     }
 }
 
-void
+LOCAL_SYMBOL void
 meta_prop_free_values (MetaPropValue *values,
                        int            n_values)
 {

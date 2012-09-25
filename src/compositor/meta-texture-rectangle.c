@@ -31,7 +31,7 @@
 #include <clutter/clutter.h>
 #include "meta-texture-rectangle.h"
 
-CoglTexture *
+LOCAL_SYMBOL CoglTexture *
 meta_texture_rectangle_new (unsigned int width,
                             unsigned int height,
                             CoglPixelFormat format,
@@ -84,7 +84,7 @@ texture_rectangle_check_cb (CoglTexture *sub_texture,
  *
  * http://git.gnome.org/browse/cogl/commit/?h=8012eee31
  */
-gboolean
+LOCAL_SYMBOL gboolean
 meta_texture_rectangle_check (CoglTexture *texture)
 {
   gboolean result = FALSE;

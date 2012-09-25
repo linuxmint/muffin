@@ -209,7 +209,7 @@ tab_entry_new (const MetaTabEntry *entry,
   return te;
 }
 
-MetaTabPopup*
+LOCAL_SYMBOL MetaTabPopup*
 meta_ui_tab_popup_new (const MetaTabEntry *entries,
                        int                 screen_number,
                        int                 entry_count,
@@ -403,7 +403,7 @@ free_tab_entry (gpointer data, gpointer user_data)
   g_free (te);
 }
 
-void
+LOCAL_SYMBOL void
 meta_ui_tab_popup_free (MetaTabPopup *popup)
 {
   meta_verbose ("Destroying tab popup window\n");
@@ -424,7 +424,7 @@ meta_ui_tab_popup_free (MetaTabPopup *popup)
   g_free (popup);
 }
 
-void
+LOCAL_SYMBOL void
 meta_ui_tab_popup_set_showing (MetaTabPopup *popup,
                                gboolean      showing)
 {
@@ -516,7 +516,7 @@ display_entry (MetaTabPopup *popup,
   popup->current_selected_entry = te;
 }
 
-void
+LOCAL_SYMBOL void
 meta_ui_tab_popup_forward (MetaTabPopup *popup)
 {
   if (popup->current != NULL)
@@ -535,7 +535,7 @@ meta_ui_tab_popup_forward (MetaTabPopup *popup)
     }
 }
 
-void
+LOCAL_SYMBOL void
 meta_ui_tab_popup_backward (MetaTabPopup *popup)
 {
   if (popup->current != NULL)
@@ -554,7 +554,7 @@ meta_ui_tab_popup_backward (MetaTabPopup *popup)
     }
 }
 
-MetaTabEntryKey
+LOCAL_SYMBOL MetaTabEntryKey
 meta_ui_tab_popup_get_selected (MetaTabPopup *popup)
 {
   if (popup->current)
@@ -569,7 +569,7 @@ meta_ui_tab_popup_get_selected (MetaTabPopup *popup)
     return (MetaTabEntryKey)None;
 }
 
-void
+LOCAL_SYMBOL void
 meta_ui_tab_popup_select (MetaTabPopup *popup,
                           MetaTabEntryKey key)
 {

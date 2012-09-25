@@ -650,7 +650,7 @@ find_first_fit (MetaWindow *window,
   return retval;
 }
 
-void
+LOCAL_SYMBOL void
 meta_window_place (MetaWindow        *window,
                    MetaFrameBorders  *borders,
                    int                x,

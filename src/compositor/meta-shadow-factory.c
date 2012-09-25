@@ -119,7 +119,7 @@ static guint signals[LAST_SIGNAL] = { 0 };
 
 /* The first element in this array also defines the default parameters
  * for newly created classes */
-MetaShadowClassInfo default_shadow_classes[] = {
+static MetaShadowClassInfo default_shadow_classes[] = {
   { "normal",       { 6, -1, 0, 3, 255 }, { 3, -1, 0, 3, 128 } },
   { "dialog",       { 6, -1, 0, 3, 255 }, { 3, -1, 0, 3, 128 } },
   { "modal_dialog", { 6, -1, 0, 1, 255 }, { 3, -1, 0, 3, 128 } },
@@ -154,7 +154,7 @@ meta_shadow_cache_key_equal (gconstpointer a,
           meta_window_shape_equal (key_a->shape, key_b->shape));
 }
 
-MetaShadow *
+LOCAL_SYMBOL MetaShadow *
 meta_shadow_ref (MetaShadow *shadow)
 {
   shadow->ref_count++;
@@ -162,7 +162,7 @@ meta_shadow_ref (MetaShadow *shadow)
   return shadow;
 }
 
-void
+LOCAL_SYMBOL void
 meta_shadow_unref (MetaShadow *shadow)
 {
   shadow->ref_count--;
@@ -199,7 +199,7 @@ meta_shadow_unref (MetaShadow *shadow)
  * different sizes with the same extracted #MetaWindowShape the
  * size needs to be passed in here.)
  */
-void
+LOCAL_SYMBOL void
 meta_shadow_paint (MetaShadow     *shadow,
                    int             window_x,
                    int             window_y,
@@ -362,7 +362,7 @@ meta_shadow_paint (MetaShadow     *shadow,
  * Computes the bounds of the pixels that will be affected by
  * meta_shadow_paint()
  */
-void
+LOCAL_SYMBOL void
 meta_shadow_get_bounds  (MetaShadow            *shadow,
                          int                    window_x,
                          int                    window_y,
@@ -446,7 +446,7 @@ meta_shadow_factory_class_init (MetaShadowFactoryClass *klass)
                   G_TYPE_NONE, 0);
 }
 
-MetaShadowFactory *
+LOCAL_SYMBOL MetaShadowFactory *
 meta_shadow_factory_new (void)
 {
   return g_object_new (META_TYPE_SHADOW_FACTORY, NULL);
@@ -853,7 +853,7 @@ get_shadow_params (MetaShadowFactory *factory,
  * Return value: (transfer full): a newly referenced #MetaShadow; unref with
  *  meta_shadow_unref()
  */
-MetaShadow *
+LOCAL_SYMBOL MetaShadow *
 meta_shadow_factory_get_shadow (MetaShadowFactory *factory,
                                 MetaWindowShape   *shape,
                                 int                width,

@@ -278,7 +278,7 @@ do_all_constraints (MetaWindow         *window,
   return TRUE;
 }
 
-void
+LOCAL_SYMBOL void
 meta_window_constrain (MetaWindow          *window,
                        MetaFrameBorders    *orig_borders,
                        MetaMoveResizeFlags  flags,

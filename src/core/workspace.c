@@ -157,7 +157,7 @@ maybe_add_to_list (MetaScreen *screen, MetaWindow *window, gpointer data)
     *mru_list = g_list_prepend (*mru_list, window);
 }
 
-MetaWorkspace*
+LOCAL_SYMBOL MetaWorkspace*
 meta_workspace_new (MetaScreen *screen)
 {
   MetaWorkspace *workspace;
@@ -231,7 +231,7 @@ workspace_free_builtin_struts (MetaWorkspace *workspace)
   workspace->builtin_struts = NULL;
 }
 
-void
+LOCAL_SYMBOL void
 meta_workspace_remove (MetaWorkspace *workspace)
 {
   GList *tmp;
@@ -297,7 +297,7 @@ meta_workspace_remove (MetaWorkspace *workspace)
    */
 }
 
-void
+LOCAL_SYMBOL void
 meta_workspace_add_window (MetaWorkspace *workspace,
                            MetaWindow    *window)
 {
@@ -350,7 +350,7 @@ meta_workspace_add_window (MetaWorkspace *workspace,
   g_object_notify (G_OBJECT (workspace), "n-windows");
 }
 
-void
+LOCAL_SYMBOL void
 meta_workspace_remove_window (MetaWorkspace *workspace,
                               MetaWindow    *window)
 {
@@ -399,7 +399,7 @@ meta_workspace_remove_window (MetaWorkspace *workspace,
   g_object_notify (G_OBJECT (workspace), "n-windows");
 }
 
-void
+LOCAL_SYMBOL void
 meta_workspace_relocate_windows (MetaWorkspace *workspace,
                                  MetaWorkspace *new_home)
 {
@@ -427,7 +427,7 @@ meta_workspace_relocate_windows (MetaWorkspace *workspace,
   g_assert (workspace->windows == NULL);
 }
 
-void
+LOCAL_SYMBOL void
 meta_workspace_queue_calc_showing  (MetaWorkspace *workspace)
 {
   GList *tmp;
@@ -750,7 +750,7 @@ meta_workspace_list_windows (MetaWorkspace *workspace)
   return workspace_windows;
 }
 
-void
+LOCAL_SYMBOL void
 meta_workspace_invalidate_work_area (MetaWorkspace *workspace)
 {
   GList *tmp;
@@ -1053,7 +1053,7 @@ meta_workspace_set_builtin_struts (MetaWorkspace *workspace,
   meta_workspace_invalidate_work_area (workspace);
 }
 
-void
+LOCAL_SYMBOL void
 meta_workspace_get_work_area_for_monitor (MetaWorkspace *workspace,
                                           int            which_monitor,
                                           MetaRectangle *area)
@@ -1075,7 +1075,7 @@ meta_workspace_get_work_area_all_monitors (MetaWorkspace *workspace,
   *area = workspace->work_area_screen;
 }
 
-GList*
+LOCAL_SYMBOL GList*
 meta_workspace_get_onscreen_region (MetaWorkspace *workspace)
 {
   ensure_work_areas_validated (workspace);
@@ -1083,7 +1083,7 @@ meta_workspace_get_onscreen_region (MetaWorkspace *workspace)
   return workspace->screen_region;
 }
 
-GList*
+LOCAL_SYMBOL GList*
 meta_workspace_get_onmonitor_region (MetaWorkspace *workspace,
                                      int            which_monitor)
 {
@@ -1190,13 +1190,13 @@ meta_workspace_get_neighbor (MetaWorkspace      *workspace,
   return meta_screen_get_workspace_by_index (workspace->screen, i);
 }
 
-const char*
+LOCAL_SYMBOL const char*
 meta_workspace_get_name (MetaWorkspace *workspace)
 {
   return meta_prefs_get_workspace_name (meta_workspace_index (workspace));
 }
 
-void
+LOCAL_SYMBOL void
 meta_workspace_focus_default_window (MetaWorkspace *workspace,
                                      MetaWindow    *not_this_one,
                                      guint32        timestamp)

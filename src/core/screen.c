@@ -691,7 +691,7 @@ create_guard_window (Display *xdisplay, MetaScreen *screen)
   return guard_window;
 }
 
-MetaScreen*
+LOCAL_SYMBOL MetaScreen*
 meta_screen_new (MetaDisplay *display,
                  int          number,
                  guint32      timestamp)
@@ -960,7 +960,7 @@ meta_screen_new (MetaDisplay *display,
   return screen;
 }
 
-void
+LOCAL_SYMBOL void
 meta_screen_free (MetaScreen *screen,
                   guint32     timestamp)
 {
@@ -1086,7 +1086,7 @@ list_windows (MetaScreen *screen)
   return g_list_reverse (result);
 }
 
-void
+LOCAL_SYMBOL void
 meta_screen_manage_all_windows (MetaScreen *screen)
 {
   GList *windows;
@@ -1117,7 +1117,7 @@ meta_screen_manage_all_windows (MetaScreen *screen)
   meta_display_ungrab (screen->display);
 }
 
-void
+LOCAL_SYMBOL void
 meta_screen_composite_all_windows (MetaScreen *screen)
 {
   MetaDisplay *display;
@@ -1255,7 +1255,7 @@ listify_func (gpointer key, gpointer value, gpointer data)
  * Calls the specified function for each window on the screen,
  * ignoring override-redirect windows.
  */
-void
+LOCAL_SYMBOL void
 meta_screen_foreach_window (MetaScreen *screen,
                             MetaScreenWindowFunc func,
                             gpointer data)
@@ -1301,7 +1301,7 @@ queue_draw (MetaScreen *screen, MetaWindow *window, gpointer data)
     meta_frame_queue_draw (window->frame);
 }
 
-void
+LOCAL_SYMBOL void
 meta_screen_queue_frame_redraws (MetaScreen *screen)
 {
   meta_screen_foreach_window (screen, queue_draw, NULL);
@@ -1313,7 +1313,7 @@ queue_resize (MetaScreen *screen, MetaWindow *window, gpointer data)
   meta_window_queue (window, META_QUEUE_MOVE_RESIZE);
 }
 
-void
+LOCAL_SYMBOL void
 meta_screen_queue_window_resizes (MetaScreen *screen)
 {
   meta_screen_foreach_window (screen, queue_resize, NULL);
@@ -1650,7 +1650,7 @@ update_focus_mode (MetaScreen *screen)
   /* nothing to do anymore */ ;
 }
 
-void
+LOCAL_SYMBOL void
 meta_screen_set_cursor (MetaScreen *screen,
                         MetaCursor  cursor)
 {
@@ -1667,7 +1667,7 @@ meta_screen_set_cursor (MetaScreen *screen,
   XFreeCursor (screen->display->xdisplay, xcursor);
 }
 
-void
+LOCAL_SYMBOL void
 meta_screen_update_cursor (MetaScreen *screen)
 {
   Cursor xcursor;
@@ -1679,7 +1679,7 @@ meta_screen_update_cursor (MetaScreen *screen)
   XFreeCursor (screen->display->xdisplay, xcursor);
 }
 
-void
+LOCAL_SYMBOL void
 meta_screen_tab_popup_create (MetaScreen      *screen,
                               MetaTabList      list_type,
                               MetaTabShowType  show_type,
@@ -1793,7 +1793,7 @@ meta_screen_tab_popup_create (MetaScreen      *screen,
     meta_ui_tab_popup_set_showing (screen->tab_popup, TRUE);
 }
 
-void
+LOCAL_SYMBOL void
 meta_screen_tab_popup_forward (MetaScreen *screen)
 {
   g_return_if_fail (screen->tab_popup != NULL);
@@ -1801,7 +1801,7 @@ meta_screen_tab_popup_forward (MetaScreen *screen)
   meta_ui_tab_popup_forward (screen->tab_popup);
 }
 
-void
+LOCAL_SYMBOL void
 meta_screen_tab_popup_backward (MetaScreen *screen)
 {
   g_return_if_fail (screen->tab_popup != NULL);
@@ -1809,7 +1809,7 @@ meta_screen_tab_popup_backward (MetaScreen *screen)
   meta_ui_tab_popup_backward (screen->tab_popup);
 }
 
-MetaWindow *
+LOCAL_SYMBOL MetaWindow *
 meta_screen_tab_popup_get_selected (MetaScreen *screen)
 {
   g_return_val_if_fail (screen->tab_popup != NULL, NULL);
@@ -1817,7 +1817,7 @@ meta_screen_tab_popup_get_selected (MetaScreen *screen)
   return (MetaWindow *) meta_ui_tab_popup_get_selected (screen->tab_popup);
 }
 
-void
+LOCAL_SYMBOL void
 meta_screen_tab_popup_destroy (MetaScreen *screen)
 {
   if (screen->tab_popup)
@@ -1827,7 +1827,7 @@ meta_screen_tab_popup_destroy (MetaScreen *screen)
     }
 }
 
-void
+LOCAL_SYMBOL void
 meta_screen_workspace_popup_create (MetaScreen    *screen,
                                     MetaWorkspace *initial_selection)
 {
@@ -1898,7 +1898,7 @@ meta_screen_workspace_popup_create (MetaScreen    *screen,
   meta_ui_tab_popup_set_showing (screen->ws_popup, TRUE);
 }
 
-void
+LOCAL_SYMBOL void
 meta_screen_workspace_popup_select (MetaScreen    *screen,
                                     MetaWorkspace *workspace)
 {
@@ -1908,7 +1908,7 @@ meta_screen_workspace_popup_select (MetaScreen    *screen,
                             (MetaTabEntryKey) workspace);
 }
 
-MetaWorkspace *
+LOCAL_SYMBOL MetaWorkspace *
 meta_screen_workspace_popup_get_selected (MetaScreen *screen)
 {
   g_return_val_if_fail (screen->ws_popup != NULL, NULL);
@@ -1916,7 +1916,7 @@ meta_screen_workspace_popup_get_selected (MetaScreen *screen)
   return (MetaWorkspace *) meta_ui_tab_popup_get_selected (screen->ws_popup);
 }
 
-void
+LOCAL_SYMBOL void
 meta_screen_workspace_popup_destroy (MetaScreen *screen)
 {
   if (screen->ws_popup)
@@ -1984,7 +1984,7 @@ meta_screen_tile_preview_update_timeout (gpointer data)
 
 #define TILE_PREVIEW_TIMEOUT_MS 200
 
-void
+LOCAL_SYMBOL void
 meta_screen_tile_preview_update (MetaScreen *screen,
                                  gboolean    delay)
 {
@@ -2007,7 +2007,7 @@ meta_screen_tile_preview_update (MetaScreen *screen,
     }
 }
 
-void
+LOCAL_SYMBOL void
 meta_screen_tile_preview_hide (MetaScreen *screen)
 {
   if (screen->tile_preview_timeout_id > 0)
@@ -2017,7 +2017,7 @@ meta_screen_tile_preview_hide (MetaScreen *screen)
     meta_tile_preview_hide (screen->tile_preview);
 }
 
-MetaWindow*
+LOCAL_SYMBOL MetaWindow*
 meta_screen_get_mouse_window (MetaScreen  *screen,
                               MetaWindow  *not_this_one)
 {
@@ -2052,7 +2052,7 @@ meta_screen_get_mouse_window (MetaScreen  *screen,
   return window;
 }
 
-const MetaMonitorInfo*
+LOCAL_SYMBOL const MetaMonitorInfo*
 meta_screen_get_monitor_for_rect (MetaScreen    *screen,
                                   MetaRectangle *rect)
 {
@@ -2084,7 +2084,7 @@ meta_screen_get_monitor_for_rect (MetaScreen    *screen,
   return &screen->monitor_infos[best_monitor];
 }
 
-const MetaMonitorInfo*
+LOCAL_SYMBOL const MetaMonitorInfo*
 meta_screen_get_monitor_for_window (MetaScreen *screen,
                                     MetaWindow *window)
 {
@@ -2095,7 +2095,7 @@ meta_screen_get_monitor_for_window (MetaScreen *screen,
   return meta_screen_get_monitor_for_rect (screen, &window_rect);
 }
 
-const MetaMonitorInfo* 
+LOCAL_SYMBOL const MetaMonitorInfo* 
 meta_screen_get_monitor_neighbor (MetaScreen         *screen,
                                   int                 which_monitor,
                                   MetaScreenDirection direction)
@@ -2128,7 +2128,7 @@ meta_screen_get_monitor_neighbor (MetaScreen         *screen,
   return NULL;
 }
 
-void
+LOCAL_SYMBOL void
 meta_screen_get_natural_monitor_list (MetaScreen *screen,
                                       int**       monitors_list,
                                       int*        n_monitors)
@@ -2223,7 +2223,7 @@ meta_screen_get_natural_monitor_list (MetaScreen *screen,
   g_queue_free (monitor_queue);
 }
 
-const MetaMonitorInfo*
+LOCAL_SYMBOL const MetaMonitorInfo*
 meta_screen_get_current_monitor (MetaScreen *screen)
 {
   if (screen->n_monitor_infos == 1)
@@ -2332,7 +2332,7 @@ meta_screen_get_monitor_geometry (MetaScreen    *screen,
 #define _NET_WM_BOTTOMRIGHT 2
 #define _NET_WM_BOTTOMLEFT  3
 
-void
+LOCAL_SYMBOL void
 meta_screen_update_workspace_layout (MetaScreen *screen)
 {
   gulong *list;
@@ -2505,7 +2505,7 @@ set_workspace_names (MetaScreen *screen)
   g_string_free (flattened, TRUE);
 }
 
-void
+LOCAL_SYMBOL void
 meta_screen_update_workspace_names (MetaScreen *screen)
 {
   char **names;
@@ -2542,7 +2542,7 @@ meta_screen_update_workspace_names (MetaScreen *screen)
   g_strfreev (names);
 }
 
-Window
+LOCAL_SYMBOL Window
 meta_create_offscreen_window (Display *xdisplay,
                               Window   parent,
                               long     valuemask)
@@ -2622,7 +2622,7 @@ set_work_area_later_func (MetaScreen *screen)
   return FALSE;
 }
 
-void
+LOCAL_SYMBOL void
 meta_screen_queue_workarea_recalc (MetaScreen *screen)
 {
   /* Recompute work area later before redrawing */
@@ -2659,7 +2659,7 @@ meta_screen_corner_to_string (MetaScreenCorner corner)
 }
 #endif /* WITH_VERBOSE_MODE */
 
-void
+LOCAL_SYMBOL void
 meta_screen_calc_workspace_layout (MetaScreen          *screen,
                                    int                  num_workspaces,
                                    int                  current_space,
@@ -2928,7 +2928,7 @@ meta_screen_calc_workspace_layout (MetaScreen          *screen,
 #endif /* WITH_VERBOSE_MODE */
 }
 
-void
+LOCAL_SYMBOL void
 meta_screen_free_workspace_layout (MetaWorkspaceLayout *layout)
 {
   g_free (layout->grid);
@@ -2948,7 +2948,7 @@ meta_screen_resize_func (MetaScreen *screen,
   meta_window_recalc_features (window);
 }
 
-void
+LOCAL_SYMBOL void
 meta_screen_resize (MetaScreen *screen,
                     int         width,
                     int         height)
@@ -2989,7 +2989,7 @@ meta_screen_resize (MetaScreen *screen,
   g_signal_emit (screen, screen_signals[MONITORS_CHANGED], 0);
 }
 
-void
+LOCAL_SYMBOL void
 meta_screen_update_showing_desktop_hint (MetaScreen *screen)
 {
   unsigned long data[1];
@@ -3030,7 +3030,7 @@ queue_windows_showing (MetaScreen *screen)
   g_slist_free (windows);
 }
 
-void
+LOCAL_SYMBOL void
 meta_screen_minimize_all_on_active_workspace_except (MetaScreen *screen,
                                                      MetaWindow *keep)
 {
@@ -3323,7 +3323,7 @@ meta_screen_get_startup_sequences (MetaScreen *screen)
  * FALSE if they have not (for example, if they had already
  * been applied.)
  */
-gboolean
+LOCAL_SYMBOL gboolean
 meta_screen_apply_startup_properties (MetaScreen *screen,
                                       MetaWindow *window)
 {
@@ -3580,13 +3580,13 @@ meta_screen_get_active_workspace (MetaScreen *screen)
   return screen->active_workspace;
 }
 
-void
+LOCAL_SYMBOL void
 meta_screen_restacked (MetaScreen *screen)
 {
   g_signal_emit (screen, screen_signals[RESTACKED], 0);
 }
 
-void
+LOCAL_SYMBOL void
 meta_screen_workspace_switched (MetaScreen         *screen,
                                 int                 from,
                                 int                 to,
@@ -3596,7 +3596,7 @@ meta_screen_workspace_switched (MetaScreen         *screen,
                  from, to, direction);
 }
 
-void
+LOCAL_SYMBOL void
 meta_screen_set_active_workspace_hint (MetaScreen *screen)
 {
   unsigned long data[1];

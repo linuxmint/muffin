@@ -635,7 +635,7 @@ meta_frames_calc_geometry (MetaFrames        *frames,
                             fgeom);
 }
 
-MetaFrames*
+LOCAL_SYMBOL MetaFrames*
 meta_frames_new (int screen_number)
 {
   GdkScreen *screen;
@@ -677,7 +677,7 @@ meta_frames_attach_style (MetaFrames  *frames,
                                                                 variant));
 }
 
-void
+LOCAL_SYMBOL void
 meta_frames_manage_window (MetaFrames *frames,
                            Window      xwindow,
                            GdkWindow  *window)
@@ -715,7 +715,7 @@ meta_frames_manage_window (MetaFrames *frames,
   g_hash_table_replace (frames->frames, &frame->xwindow, frame);
 }
 
-void
+LOCAL_SYMBOL void
 meta_frames_unmanage_window (MetaFrames *frames,
                              Window      xwindow)
 {
@@ -785,7 +785,7 @@ meta_frames_lookup_window (MetaFrames *frames,
   return frame;
 }
 
-void
+LOCAL_SYMBOL void
 meta_frames_get_borders (MetaFrames *frames,
                          Window xwindow,
                          MetaFrameBorders *borders)
@@ -820,7 +820,7 @@ meta_frames_get_borders (MetaFrames *frames,
                                 borders);
 }
 
-void
+LOCAL_SYMBOL void
 meta_frames_get_corner_radiuses (MetaFrames *frames,
                                  Window      xwindow,
                                  float      *top_left,
@@ -854,7 +854,7 @@ meta_frames_get_corner_radiuses (MetaFrames *frames,
     *bottom_right = fgeom.bottom_right_corner_rounded_radius + sqrt(fgeom.bottom_right_corner_rounded_radius);
 }
 
-void
+LOCAL_SYMBOL void
 meta_frames_reset_bg (MetaFrames *frames,
                       Window  xwindow)
 {
@@ -876,7 +876,7 @@ set_background_none (Display *xdisplay,
                            CWBackPixmap, &attrs);
 }
 
-void
+LOCAL_SYMBOL void
 meta_frames_unflicker_bg (MetaFrames *frames,
                           Window      xwindow,
                           int         target_width,
@@ -1015,7 +1015,7 @@ get_visible_region (MetaFrames        *frames,
   return visible_region;
 }
 
-cairo_region_t *
+LOCAL_SYMBOL cairo_region_t *
 meta_frames_get_frame_bounds (MetaFrames *frames,
                               Window      xwindow,
                               int         window_width,
@@ -1034,7 +1034,7 @@ meta_frames_get_frame_bounds (MetaFrames *frames,
                              window_width, window_height);
 }
 
-void
+LOCAL_SYMBOL void
 meta_frames_move_resize_frame (MetaFrames *frames,
                                Window      xwindow,
                                int         x,
@@ -1054,7 +1054,7 @@ meta_frames_move_resize_frame (MetaFrames *frames,
     invalidate_whole_window (frames, frame);
 }
 
-void
+LOCAL_SYMBOL void
 meta_frames_queue_draw (MetaFrames *frames,
                         Window      xwindow)
 {
@@ -1065,7 +1065,7 @@ meta_frames_queue_draw (MetaFrames *frames,
   invalidate_whole_window (frames, frame);
 }
 
-void
+LOCAL_SYMBOL void
 meta_frames_set_title (MetaFrames *frames,
                        Window      xwindow,
                        const char *title)
@@ -1088,7 +1088,7 @@ meta_frames_set_title (MetaFrames *frames,
   invalidate_whole_window (frames, frame);
 }
 
-void
+LOCAL_SYMBOL void
 meta_frames_update_frame_style (MetaFrames *frames,
                                 Window      xwindow)
 {
@@ -1102,7 +1102,7 @@ meta_frames_update_frame_style (MetaFrames *frames,
   invalidate_whole_window (frames, frame);
 }
 
-void
+LOCAL_SYMBOL void
 meta_frames_repaint_frame (MetaFrames *frames,
                            Window      xwindow)
 {
@@ -1509,7 +1509,7 @@ meta_frames_button_press_event (GtkWidget      *widget,
   return TRUE;
 }
 
-void
+LOCAL_SYMBOL void
 meta_frames_notify_menu_hide (MetaFrames *frames)
 {
   Display *display = GDK_DISPLAY_XDISPLAY (gdk_display_get_default ());
@@ -2628,7 +2628,7 @@ get_control (MetaFrames *frames,
     return META_FRAME_CONTROL_TITLE;
 }
 
-void
+LOCAL_SYMBOL void
 meta_frames_push_delay_exposes (MetaFrames *frames)
 {
   if (frames->expose_delay_count == 0)
@@ -2657,7 +2657,7 @@ queue_pending_exposes_func (gpointer key, gpointer value, gpointer data)
     }
 }
 
-void
+LOCAL_SYMBOL void
 meta_frames_pop_delay_exposes  (MetaFrames *frames)
 {
   g_return_if_fail (frames->expose_delay_count > 0);

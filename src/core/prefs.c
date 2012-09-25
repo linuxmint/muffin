@@ -1918,7 +1918,7 @@ meta_prefs_get_visual_bell_type (void)
   return visual_bell_type;
 }
 
-gboolean
+LOCAL_SYMBOL gboolean
 meta_prefs_add_keybinding (const char           *name,
                            const char           *schema,
                            MetaKeyBindingAction  action,
@@ -1975,7 +1975,7 @@ meta_prefs_add_keybinding (const char           *name,
   return TRUE;
 }
 
-gboolean
+LOCAL_SYMBOL gboolean
 meta_prefs_remove_keybinding (const char *name)
 {
   MetaKeyPref *pref;

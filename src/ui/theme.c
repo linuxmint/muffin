@@ -207,7 +207,7 @@ init_border (GtkBorder *border)
  *
  * Returns: The newly created MetaFrameLayout.
  */
-MetaFrameLayout*
+LOCAL_SYMBOL MetaFrameLayout*
 meta_frame_layout_new  (void)
 {
   MetaFrameLayout *layout;
@@ -311,7 +311,7 @@ validate_geometry_border (const GtkBorder *border,
     return TRUE;
 }
 
-gboolean
+LOCAL_SYMBOL gboolean
 meta_frame_layout_validate (const MetaFrameLayout *layout,
                             GError               **error)
 {
@@ -361,7 +361,7 @@ meta_frame_layout_validate (const MetaFrameLayout *layout,
   return TRUE;
 }
 
-MetaFrameLayout*
+LOCAL_SYMBOL MetaFrameLayout*
 meta_frame_layout_copy (const MetaFrameLayout *src)
 {
   MetaFrameLayout *layout;
@@ -375,7 +375,7 @@ meta_frame_layout_copy (const MetaFrameLayout *src)
   return layout;
 }
 
-void
+LOCAL_SYMBOL void
 meta_frame_layout_ref (MetaFrameLayout *layout)
 {
   g_return_if_fail (layout != NULL);
@@ -383,7 +383,7 @@ meta_frame_layout_ref (MetaFrameLayout *layout)
   layout->refcount += 1;
 }
 
-void
+LOCAL_SYMBOL void
 meta_frame_layout_unref (MetaFrameLayout *layout)
 {
   g_return_if_fail (layout != NULL);
@@ -398,7 +398,7 @@ meta_frame_layout_unref (MetaFrameLayout *layout)
     }
 }
 
-void
+LOCAL_SYMBOL void
 meta_frame_layout_get_borders (const MetaFrameLayout *layout,
                                int                    text_height,
                                MetaFrameFlags         flags,
@@ -612,7 +612,7 @@ strip_button (MetaButtonSpace *func_rects[MAX_BUTTONS_PER_CORNER],
   return FALSE; /* did not strip anything */
 }
 
-void
+LOCAL_SYMBOL void
 meta_frame_layout_calc_geometry (const MetaFrameLayout  *layout,
                                  int                     text_height,
                                  MetaFrameFlags          flags,
@@ -986,7 +986,7 @@ meta_frame_layout_calc_geometry (const MetaFrameLayout  *layout,
  * meta_gradient_spec_new: (skip)
  *
  */
-MetaGradientSpec*
+LOCAL_SYMBOL MetaGradientSpec*
 meta_gradient_spec_new (MetaGradientType type)
 {
   MetaGradientSpec *spec;
@@ -1005,7 +1005,7 @@ free_color_spec (gpointer spec, gpointer user_data)
   meta_color_spec_free (spec);
 }
 
-void
+LOCAL_SYMBOL void
 meta_gradient_spec_free (MetaGradientSpec *spec)
 {
   g_return_if_fail (spec != NULL);
@@ -1017,7 +1017,7 @@ meta_gradient_spec_free (MetaGradientSpec *spec)
   g_free (spec);
 }
 
-GdkPixbuf*
+LOCAL_SYMBOL GdkPixbuf*
 meta_gradient_spec_render (const MetaGradientSpec *spec,
                            GtkStyleContext        *style,
                            int                     width,
@@ -1055,7 +1055,7 @@ meta_gradient_spec_render (const MetaGradientSpec *spec,
   return pixbuf;
 }
 
-gboolean
+LOCAL_SYMBOL gboolean
 meta_gradient_spec_validate (MetaGradientSpec *spec,
                              GError          **error)
 {
@@ -1076,7 +1076,7 @@ meta_gradient_spec_validate (MetaGradientSpec *spec,
  * meta_alpha_gradient_spec_new: (skip)
  *
  */
-MetaAlphaGradientSpec*
+LOCAL_SYMBOL LOCAL_SYMBOL MetaAlphaGradientSpec*
 meta_alpha_gradient_spec_new (MetaGradientType       type,
                               int                    n_alphas)
 {
@@ -1093,7 +1093,7 @@ meta_alpha_gradient_spec_new (MetaGradientType       type,
   return spec;
 }
 
-void
+LOCAL_SYMBOL void
 meta_alpha_gradient_spec_free (MetaAlphaGradientSpec *spec)
 {
   g_return_if_fail (spec != NULL);
@@ -1106,7 +1106,7 @@ meta_alpha_gradient_spec_free (MetaAlphaGradientSpec *spec)
  * meta_color_spec_new: (skip)
  *
  */
-MetaColorSpec*
+LOCAL_SYMBOL MetaColorSpec*
 meta_color_spec_new (MetaColorSpecType type)
 {
   MetaColorSpec *spec;
@@ -1145,7 +1145,7 @@ meta_color_spec_new (MetaColorSpecType type)
   return spec;
 }
 
-void
+LOCAL_SYMBOL void
 meta_color_spec_free (MetaColorSpec *spec)
 {
   g_return_if_fail (spec != NULL);
@@ -1190,7 +1190,7 @@ meta_color_spec_free (MetaColorSpec *spec)
  * meta_color_spec_new_from_string: (skip)
  *
  */
-MetaColorSpec*
+LOCAL_SYMBOL MetaColorSpec*
 meta_color_spec_new_from_string (const char *str,
                                  GError    **err)
 {
@@ -1493,7 +1493,7 @@ meta_color_spec_new_from_string (const char *str,
  * meta_color_spec_new_gtk: (skip)
  *
  */
-MetaColorSpec*
+LOCAL_SYMBOL LOCAL_SYMBOL MetaColorSpec*
 meta_color_spec_new_gtk (MetaGtkColorComponent component,
                          GtkStateFlags         state)
 {
@@ -1510,7 +1510,7 @@ meta_color_spec_new_gtk (MetaGtkColorComponent component,
 /* Based on set_color() in gtkstyle.c */
 #define LIGHTNESS_MULT 1.3
 #define DARKNESS_MULT  0.7
-void
+LOCAL_SYMBOL void
 meta_gtk_style_get_light_color (GtkStyleContext *style,
                                 GtkStateFlags    state,
                                 GdkRGBA         *color)
@@ -1519,7 +1519,7 @@ meta_gtk_style_get_light_color (GtkStyleContext *style,
   gtk_style_shade (color, color, LIGHTNESS_MULT);
 }
 
-void
+LOCAL_SYMBOL void
 meta_gtk_style_get_dark_color (GtkStyleContext *style,
                                GtkStateFlags    state,
                                GdkRGBA         *color)
@@ -1584,7 +1584,7 @@ meta_set_custom_color_from_style (GdkRGBA         *color,
     meta_color_spec_render (fallback, context, color);
 }
 
-void
+LOCAL_SYMBOL void
 meta_color_spec_render (MetaColorSpec   *spec,
                         GtkStyleContext *context,
                         GdkRGBA         *color)
@@ -2690,7 +2690,7 @@ pos_eval (MetaDrawSpec              *spec,
  * meta_parse_position_expression: (skip)
  *
  */
-gboolean
+LOCAL_SYMBOL gboolean
 meta_parse_position_expression (MetaDrawSpec              *spec,
                                 const MetaPositionExprEnv *env,
                                 int                       *x_return,
@@ -2731,7 +2731,7 @@ meta_parse_position_expression (MetaDrawSpec              *spec,
  * meta_parse_size_expression: (skip)
  *
  */
-gboolean
+LOCAL_SYMBOL gboolean
 meta_parse_size_expression (MetaDrawSpec              *spec,
                             const MetaPositionExprEnv *env,
                             int                       *val_return,
@@ -2764,7 +2764,7 @@ meta_parse_size_expression (MetaDrawSpec              *spec,
  * lookups to eval them. Obviously it's a tradeoff that
  * slows down theme load times.
  */
-gboolean
+LOCAL_SYMBOL gboolean
 meta_theme_replace_constants (MetaTheme   *theme,
                               PosToken    *tokens,
                               int          n_tokens,
@@ -2869,7 +2869,7 @@ parse_size_unchecked (MetaDrawSpec        *spec,
   return retval;
 }
 
-void
+LOCAL_SYMBOL void
 meta_draw_spec_free (MetaDrawSpec *spec)
 {
   if (!spec) return;
@@ -2881,7 +2881,7 @@ meta_draw_spec_free (MetaDrawSpec *spec)
  * meta_draw_spec_new: (skip)
  *
  */
-MetaDrawSpec *
+LOCAL_SYMBOL MetaDrawSpec *
 meta_draw_spec_new (MetaTheme  *theme,
                     const char *expr,
                     GError    **error)
@@ -2913,7 +2913,7 @@ meta_draw_spec_new (MetaTheme  *theme,
  * meta_draw_op_new: (skip)
  *
  */
-MetaDrawOp*
+LOCAL_SYMBOL MetaDrawOp*
 meta_draw_op_new (MetaDrawType type)
 {
   MetaDrawOp *op;
@@ -2986,7 +2986,7 @@ meta_draw_op_new (MetaDrawType type)
   return op;
 }
 
-void
+LOCAL_SYMBOL void
 meta_draw_op_free (MetaDrawOp *op)
 {
   g_return_if_fail (op != NULL);
@@ -4100,7 +4100,7 @@ meta_draw_op_draw_with_env (const MetaDrawOp    *op,
   gtk_style_context_restore (style_gtk);
 }
 
-void
+LOCAL_SYMBOL void
 meta_draw_op_draw_with_style (const MetaDrawOp    *op,
                               GtkStyleContext     *style_gtk,
                               GtkWidget           *widget,
@@ -4118,7 +4118,7 @@ meta_draw_op_draw_with_style (const MetaDrawOp    *op,
 
 }
 
-void
+LOCAL_SYMBOL void
 meta_draw_op_draw (const MetaDrawOp    *op,
                    GtkWidget           *widget,
                    cairo_t             *cr,
@@ -4133,7 +4133,7 @@ meta_draw_op_draw (const MetaDrawOp    *op,
  * meta_draw_op_list_new: (skip)
  *
  */
-MetaDrawOpList*
+LOCAL_SYMBOL MetaDrawOpList*
 meta_draw_op_list_new (int n_preallocs)
 {
   MetaDrawOpList *op_list;
@@ -4150,7 +4150,7 @@ meta_draw_op_list_new (int n_preallocs)
   return op_list;
 }
 
-void
+LOCAL_SYMBOL void
 meta_draw_op_list_ref (MetaDrawOpList *op_list)
 {
   g_return_if_fail (op_list != NULL);
@@ -4158,7 +4158,7 @@ meta_draw_op_list_ref (MetaDrawOpList *op_list)
   op_list->refcount += 1;
 }
 
-void
+LOCAL_SYMBOL void
 meta_draw_op_list_unref (MetaDrawOpList *op_list)
 {
   g_return_if_fail (op_list != NULL);
@@ -4180,7 +4180,7 @@ meta_draw_op_list_unref (MetaDrawOpList *op_list)
     }
 }
 
-void
+LOCAL_SYMBOL void
 meta_draw_op_list_draw_with_style  (const MetaDrawOpList *op_list,
                                     GtkStyleContext      *style_gtk,
                                     GtkWidget            *widget,
@@ -4239,7 +4239,7 @@ meta_draw_op_list_draw_with_style  (const MetaDrawOpList *op_list,
   cairo_restore (cr);
 }
 
-void
+LOCAL_SYMBOL void
 meta_draw_op_list_draw  (const MetaDrawOpList *op_list,
                          GtkWidget            *widget,
                          cairo_t              *cr,
@@ -4251,7 +4251,7 @@ meta_draw_op_list_draw  (const MetaDrawOpList *op_list,
                                      cr, info, rect);
 }
 
-void
+LOCAL_SYMBOL void
 meta_draw_op_list_append (MetaDrawOpList       *op_list,
                           MetaDrawOp           *op)
 {
@@ -4265,7 +4265,7 @@ meta_draw_op_list_append (MetaDrawOpList       *op_list,
   op_list->n_ops += 1;
 }
 
-gboolean
+LOCAL_SYMBOL gboolean
 meta_draw_op_list_validate (MetaDrawOpList    *op_list,
                             GError           **error)
 {
@@ -4280,7 +4280,7 @@ meta_draw_op_list_validate (MetaDrawOpList    *op_list,
  * of the list to report the error. It might be nice to
  * store names inside the list sometime.
  */
-gboolean
+LOCAL_SYMBOL gboolean
 meta_draw_op_list_contains (MetaDrawOpList    *op_list,
                             MetaDrawOpList    *child)
 {
@@ -4322,7 +4322,7 @@ meta_draw_op_list_contains (MetaDrawOpList    *op_list,
  *
  * \return The newly-constructed style.
  */
-MetaFrameStyle*
+LOCAL_SYMBOL MetaFrameStyle*
 meta_frame_style_new (MetaFrameStyle *parent)
 {
   MetaFrameStyle *style;
@@ -4347,7 +4347,7 @@ meta_frame_style_new (MetaFrameStyle *parent)
  *
  * \param style  The style.
  */
-void
+LOCAL_SYMBOL void
 meta_frame_style_ref (MetaFrameStyle *style)
 {
   g_return_if_fail (style != NULL);
@@ -4366,7 +4366,7 @@ free_button_ops (MetaDrawOpList *op_lists[META_BUTTON_TYPE_LAST][META_BUTTON_STA
         meta_draw_op_list_unref (op_lists[i][j]);
 }
 
-void
+LOCAL_SYMBOL void
 meta_frame_style_unref (MetaFrameStyle *style)
 {
   g_return_if_fail (style != NULL);
@@ -4508,7 +4508,7 @@ get_button (MetaFrameStyle *style,
   return op_list;
 }
 
-gboolean
+LOCAL_SYMBOL gboolean
 meta_frame_style_validate (MetaFrameStyle    *style,
                            guint              current_theme_version,
                            GError           **error)
@@ -4629,7 +4629,7 @@ button_rect (MetaButtonType           type,
     }
 }
 
-void
+LOCAL_SYMBOL LOCAL_SYMBOL void
 meta_frame_style_draw_with_style (MetaFrameStyle          *style,
                                   GtkStyleContext         *style_gtk,
                                   GtkWidget               *widget,
@@ -4872,7 +4872,7 @@ meta_frame_style_draw_with_style (MetaFrameStyle          *style,
     }
 }
 
-void
+LOCAL_SYMBOL void
 meta_frame_style_draw (MetaFrameStyle          *style,
                        GtkWidget               *widget,
                        cairo_t                 *cr,
@@ -4891,7 +4891,7 @@ meta_frame_style_draw (MetaFrameStyle          *style,
                                     button_states, mini_icon, icon);
 }
 
-MetaFrameStyleSet*
+LOCAL_SYMBOL MetaFrameStyleSet*
 meta_frame_style_set_new (MetaFrameStyleSet *parent)
 {
   MetaFrameStyleSet *style_set;
@@ -4917,7 +4917,7 @@ free_focus_styles (MetaFrameStyle *focus_styles[META_FRAME_FOCUS_LAST])
       meta_frame_style_unref (focus_styles[i]);
 }
 
-void
+LOCAL_SYMBOL void
 meta_frame_style_set_ref (MetaFrameStyleSet *style_set)
 {
   g_return_if_fail (style_set != NULL);
@@ -4925,7 +4925,7 @@ meta_frame_style_set_ref (MetaFrameStyleSet *style_set)
   style_set->refcount += 1;
 }
 
-void
+LOCAL_SYMBOL void
 meta_frame_style_set_unref (MetaFrameStyleSet *style_set)
 {
   g_return_if_fail (style_set != NULL);
@@ -5075,7 +5075,7 @@ check_state  (MetaFrameStyleSet *style_set,
   return TRUE;
 }
 
-gboolean
+LOCAL_SYMBOL gboolean
 meta_frame_style_set_validate  (MetaFrameStyleSet *style_set,
                                 GError           **error)
 {
@@ -5324,7 +5324,7 @@ meta_theme_validate (MetaTheme *theme,
  * meta_theme_load_image: (skip)
  *
  */
-GdkPixbuf*
+LOCAL_SYMBOL GdkPixbuf*
 meta_theme_load_image (MetaTheme  *theme,
                        const char *filename,
                        guint size_of_theme_icons,
@@ -5464,7 +5464,7 @@ theme_get_style (MetaTheme     *theme,
   return style;
 }
 
-MetaFrameStyle*
+LOCAL_SYMBOL MetaFrameStyle*
 meta_theme_get_frame_style (MetaTheme     *theme,
                             MetaFrameType  type,
                             MetaFrameFlags flags)
@@ -5478,7 +5478,7 @@ meta_theme_get_frame_style (MetaTheme     *theme,
   return style;
 }
 
-double
+LOCAL_SYMBOL double
 meta_theme_get_title_scale (MetaTheme     *theme,
                             MetaFrameType  type,
                             MetaFrameFlags flags)
@@ -5496,7 +5496,7 @@ meta_theme_get_title_scale (MetaTheme     *theme,
   return style->layout->title_scale;
 }
 
-void
+LOCAL_SYMBOL void
 meta_theme_draw_frame_with_style (MetaTheme              *theme,
                                   GtkStyleContext        *style_gtk,
                                   GtkWidget              *widget,
@@ -5592,7 +5592,7 @@ meta_theme_get_frame_borders (MetaTheme        *theme,
                                  borders);
 }
 
-void
+LOCAL_SYMBOL void
 meta_theme_calc_geometry (MetaTheme              *theme,
                           MetaFrameType           type,
                           int                     text_height,
@@ -5622,14 +5622,14 @@ meta_theme_calc_geometry (MetaTheme              *theme,
                                    theme);
 }
 
-MetaFrameLayout*
+LOCAL_SYMBOL MetaFrameLayout*
 meta_theme_lookup_layout (MetaTheme         *theme,
                           const char        *name)
 {
   return g_hash_table_lookup (theme->layouts_by_name, name);
 }
 
-void
+LOCAL_SYMBOL void
 meta_theme_insert_layout (MetaTheme         *theme,
                           const char        *name,
                           MetaFrameLayout   *layout)
@@ -5638,14 +5638,14 @@ meta_theme_insert_layout (MetaTheme         *theme,
   g_hash_table_replace (theme->layouts_by_name, g_strdup (name), layout);
 }
 
-MetaDrawOpList*
+LOCAL_SYMBOL MetaDrawOpList*
 meta_theme_lookup_draw_op_list (MetaTheme         *theme,
                                 const char        *name)
 {
   return g_hash_table_lookup (theme->draw_op_lists_by_name, name);
 }
 
-void
+LOCAL_SYMBOL void
 meta_theme_insert_draw_op_list (MetaTheme         *theme,
                                 const char        *name,
                                 MetaDrawOpList    *op_list)
@@ -5654,14 +5654,14 @@ meta_theme_insert_draw_op_list (MetaTheme         *theme,
   g_hash_table_replace (theme->draw_op_lists_by_name, g_strdup (name), op_list);
 }
 
-MetaFrameStyle*
+LOCAL_SYMBOL MetaFrameStyle*
 meta_theme_lookup_style (MetaTheme         *theme,
                          const char        *name)
 {
   return g_hash_table_lookup (theme->styles_by_name, name);
 }
 
-void
+LOCAL_SYMBOL void
 meta_theme_insert_style (MetaTheme         *theme,
                          const char        *name,
                          MetaFrameStyle    *style)
@@ -5670,14 +5670,14 @@ meta_theme_insert_style (MetaTheme         *theme,
   g_hash_table_replace (theme->styles_by_name, g_strdup (name), style);
 }
 
-MetaFrameStyleSet*
+LOCAL_SYMBOL MetaFrameStyleSet*
 meta_theme_lookup_style_set (MetaTheme         *theme,
                              const char        *name)
 {
   return g_hash_table_lookup (theme->style_sets_by_name, name);
 }
 
-void
+LOCAL_SYMBOL LOCAL_SYMBOL void
 meta_theme_insert_style_set    (MetaTheme         *theme,
                                 const char        *name,
                                 MetaFrameStyleSet *style_set)
@@ -5692,7 +5692,7 @@ first_uppercase (const char *str)
   return g_ascii_isupper (*str);
 }
 
-gboolean
+LOCAL_SYMBOL gboolean
 meta_theme_define_int_constant (MetaTheme   *theme,
                                 const char  *name,
                                 int          value,
@@ -5728,7 +5728,7 @@ meta_theme_define_int_constant (MetaTheme   *theme,
   return TRUE;
 }
 
-gboolean
+LOCAL_SYMBOL gboolean
 meta_theme_lookup_int_constant (MetaTheme   *theme,
                                 const char  *name,
                                 int         *value)
@@ -5752,7 +5752,7 @@ meta_theme_lookup_int_constant (MetaTheme   *theme,
     }
 }
 
-gboolean
+LOCAL_SYMBOL gboolean
 meta_theme_define_float_constant (MetaTheme   *theme,
                                   const char  *name,
                                   double       value,
@@ -5792,7 +5792,7 @@ meta_theme_define_float_constant (MetaTheme   *theme,
   return TRUE;
 }
 
-gboolean
+LOCAL_SYMBOL gboolean
 meta_theme_lookup_float_constant (MetaTheme   *theme,
                                   const char  *name,
                                   double      *value)
@@ -5817,7 +5817,7 @@ meta_theme_lookup_float_constant (MetaTheme   *theme,
     }
 }
 
-gboolean
+LOCAL_SYMBOL gboolean
 meta_theme_define_color_constant (MetaTheme   *theme,
                                   const char  *name,
                                   const char  *value,
@@ -5862,7 +5862,7 @@ meta_theme_define_color_constant (MetaTheme   *theme,
  *               doesn't exist
  * \return  TRUE if it exists, FALSE otherwise
  */
-gboolean
+LOCAL_SYMBOL gboolean
 meta_theme_lookup_color_constant (MetaTheme   *theme,
                                   const char  *name,
                                   char       **value)
@@ -5888,7 +5888,7 @@ meta_theme_lookup_color_constant (MetaTheme   *theme,
 }
 
 
-PangoFontDescription*
+LOCAL_SYMBOL PangoFontDescription*
 meta_gtk_widget_get_font_desc (GtkWidget *widget,
                                double     scale,
 			       const PangoFontDescription *override)
@@ -5936,7 +5936,7 @@ meta_pango_font_desc_get_text_height (const PangoFontDescription *font_desc,
   return retval;
 }
 
-MetaGtkColorComponent
+LOCAL_SYMBOL MetaGtkColorComponent
 meta_color_component_from_string (const char *str)
 {
   if (strcmp ("fg", str) == 0)
@@ -5959,7 +5959,7 @@ meta_color_component_from_string (const char *str)
     return META_GTK_COLOR_LAST;
 }
 
-const char*
+LOCAL_SYMBOL const char*
 meta_color_component_to_string (MetaGtkColorComponent component)
 {
   switch (component)
@@ -5987,7 +5987,7 @@ meta_color_component_to_string (MetaGtkColorComponent component)
   return "<unknown>";
 }
 
-MetaButtonState
+LOCAL_SYMBOL MetaButtonState
 meta_button_state_from_string (const char *str)
 {
   if (strcmp ("normal", str) == 0)
@@ -6000,7 +6000,7 @@ meta_button_state_from_string (const char *str)
     return META_BUTTON_STATE_LAST;
 }
 
-const char*
+LOCAL_SYMBOL const char*
 meta_button_state_to_string (MetaButtonState state)
 {
   switch (state)
@@ -6018,7 +6018,7 @@ meta_button_state_to_string (MetaButtonState state)
   return "<unknown>";
 }
 
-MetaButtonType
+LOCAL_SYMBOL MetaButtonType
 meta_button_type_from_string (const char *str, MetaTheme *theme)
 {
   if (META_THEME_ALLOWS(theme, META_THEME_SHADE_STICK_ABOVE_BUTTONS))
@@ -6065,7 +6065,7 @@ meta_button_type_from_string (const char *str, MetaTheme *theme)
     return META_BUTTON_TYPE_LAST;
 }
 
-const char*
+LOCAL_SYMBOL const char*
 meta_button_type_to_string (MetaButtonType type)
 {
   switch (type)
@@ -6113,7 +6113,7 @@ meta_button_type_to_string (MetaButtonType type)
   return "<unknown>";
 }
 
-MetaFramePiece
+LOCAL_SYMBOL MetaFramePiece
 meta_frame_piece_from_string (const char *str)
 {
   if (strcmp ("entire_background", str) == 0)
@@ -6144,7 +6144,7 @@ meta_frame_piece_from_string (const char *str)
     return META_FRAME_PIECE_LAST;
 }
 
-const char*
+LOCAL_SYMBOL const char*
 meta_frame_piece_to_string (MetaFramePiece piece)
 {
   switch (piece)
@@ -6180,7 +6180,7 @@ meta_frame_piece_to_string (MetaFramePiece piece)
   return "<unknown>";
 }
 
-MetaFrameState
+LOCAL_SYMBOL MetaFrameState
 meta_frame_state_from_string (const char *str)
 {
   if (strcmp ("normal", str) == 0)
@@ -6203,7 +6203,7 @@ meta_frame_state_from_string (const char *str)
     return META_FRAME_STATE_LAST;
 }
 
-const char*
+LOCAL_SYMBOL const char*
 meta_frame_state_to_string (MetaFrameState state)
 {
   switch (state)
@@ -6231,7 +6231,7 @@ meta_frame_state_to_string (MetaFrameState state)
   return "<unknown>";
 }
 
-MetaFrameResize
+LOCAL_SYMBOL MetaFrameResize
 meta_frame_resize_from_string (const char *str)
 {
   if (strcmp ("none", str) == 0)
@@ -6246,7 +6246,7 @@ meta_frame_resize_from_string (const char *str)
     return META_FRAME_RESIZE_LAST;
 }
 
-const char*
+LOCAL_SYMBOL const char*
 meta_frame_resize_to_string (MetaFrameResize resize)
 {
   switch (resize)
@@ -6266,7 +6266,7 @@ meta_frame_resize_to_string (MetaFrameResize resize)
   return "<unknown>";
 }
 
-MetaFrameFocus
+LOCAL_SYMBOL MetaFrameFocus
 meta_frame_focus_from_string (const char *str)
 {
   if (strcmp ("no", str) == 0)
@@ -6277,7 +6277,7 @@ meta_frame_focus_from_string (const char *str)
     return META_FRAME_FOCUS_LAST;
 }
 
-const char*
+LOCAL_SYMBOL const char*
 meta_frame_focus_to_string (MetaFrameFocus focus)
 {
   switch (focus)
@@ -6293,7 +6293,7 @@ meta_frame_focus_to_string (MetaFrameFocus focus)
   return "<unknown>";
 }
 
-MetaFrameType
+LOCAL_SYMBOL MetaFrameType
 meta_frame_type_from_string (const char *str)
 {
   if (strcmp ("normal", str) == 0)
@@ -6356,7 +6356,7 @@ meta_frame_type_to_string (MetaFrameType type)
   return "<unknown>";
 }
 
-MetaGradientType
+LOCAL_SYMBOL MetaGradientType
 meta_gradient_type_from_string (const char *str)
 {
   if (strcmp ("vertical", str) == 0)
@@ -6369,7 +6369,7 @@ meta_gradient_type_from_string (const char *str)
     return META_GRADIENT_LAST;
 }
 
-const char*
+LOCAL_SYMBOL const char*
 meta_gradient_type_to_string (MetaGradientType type)
 {
   switch (type)
@@ -6387,7 +6387,7 @@ meta_gradient_type_to_string (MetaGradientType type)
   return "<unknown>";
 }
 
-GtkStateFlags
+LOCAL_SYMBOL GtkStateFlags
 meta_gtk_state_from_string (const char *str)
 {
   if (g_ascii_strcasecmp ("normal", str) == 0)
@@ -6410,7 +6410,7 @@ meta_gtk_state_from_string (const char *str)
     return -1; /* hack */
 }
 
-const char*
+LOCAL_SYMBOL const char*
 meta_gtk_state_to_string (GtkStateFlags state)
 {
   switch (state)
@@ -6436,7 +6436,7 @@ meta_gtk_state_to_string (GtkStateFlags state)
   return "<unknown>";
 }
 
-GtkShadowType
+LOCAL_SYMBOL GtkShadowType
 meta_gtk_shadow_from_string (const char *str)
 {
   if (strcmp ("none", str) == 0)
@@ -6453,7 +6453,7 @@ meta_gtk_shadow_from_string (const char *str)
     return -1;
 }
 
-const char*
+LOCAL_SYMBOL const char*
 meta_gtk_shadow_to_string (GtkShadowType shadow)
 {
   switch (shadow)
@@ -6473,7 +6473,7 @@ meta_gtk_shadow_to_string (GtkShadowType shadow)
   return "<unknown>";
 }
 
-GtkArrowType
+LOCAL_SYMBOL GtkArrowType
 meta_gtk_arrow_from_string (const char *str)
 {
   if (strcmp ("up", str) == 0)
@@ -6490,7 +6490,7 @@ meta_gtk_arrow_from_string (const char *str)
     return -1;
 }
 
-const char*
+LOCAL_SYMBOL const char*
 meta_gtk_arrow_to_string (GtkArrowType arrow)
 {
   switch (arrow)
@@ -6517,7 +6517,7 @@ meta_gtk_arrow_to_string (GtkArrowType arrow)
  * \param str  a string representing a fill_type
  * \result  the fill_type, or -1 if it represents no fill_type.
  */
-MetaImageFillType
+LOCAL_SYMBOL MetaImageFillType
 meta_image_fill_type_from_string (const char *str)
 {
   if (strcmp ("tile", str) == 0)
@@ -6535,7 +6535,7 @@ meta_image_fill_type_from_string (const char *str)
  * \param fill_type  the fill type
  * \result  a string representing that type
  */
-const char*
+LOCAL_SYMBOL const char*
 meta_image_fill_type_to_string (MetaImageFillType fill_type)
 {
   switch (fill_type)
@@ -6974,7 +6974,7 @@ draw_bg_gradient_composite (const MetaTextureSpec *bg,
  * \param type  the button type
  * \return  the number of the theme format
  */
-guint
+LOCAL_SYMBOL guint
 meta_theme_earliest_version_with_button (MetaButtonType type)
 {
   switch (type)

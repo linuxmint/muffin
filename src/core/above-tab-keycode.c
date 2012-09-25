@@ -230,7 +230,7 @@ compute_above_tab_keycode (Display *xdisplay)
 }
 #endif /* HAVE_XKB */
 
-guint
+LOCAL_SYMBOL guint
 meta_display_get_above_tab_keycode (MetaDisplay *display)
 {
   if (display->above_tab_keycode == 0) /* not yet computed */

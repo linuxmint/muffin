@@ -40,7 +40,7 @@
                     FocusChangeMask |                              \
                     ColormapChangeMask)
 
-void
+LOCAL_SYMBOL void
 meta_window_ensure_frame (MetaWindow *window)
 {
   MetaFrame *frame;
@@ -169,7 +169,7 @@ meta_window_ensure_frame (MetaWindow *window)
   meta_display_ungrab (window->display);
 }
 
-void
+LOCAL_SYMBOL void
 meta_window_destroy_frame (MetaWindow *window)
 {
   MetaFrame *frame;
@@ -237,7 +237,7 @@ meta_window_destroy_frame (MetaWindow *window)
 }
 
 
-MetaFrameFlags
+LOCAL_SYMBOL MetaFrameFlags
 meta_frame_get_flags (MetaFrame *frame)
 {
   MetaFrameFlags flags;
@@ -318,7 +318,7 @@ meta_frame_borders_clear (MetaFrameBorders *self)
   self->visible.right  = self->invisible.right  = self->total.right  = 0;
 }
 
-void
+LOCAL_SYMBOL void
 meta_frame_calc_borders (MetaFrame        *frame,
                          MetaFrameBorders *borders)
 {
@@ -332,7 +332,7 @@ meta_frame_calc_borders (MetaFrame        *frame,
                                borders);
 }
 
-void
+LOCAL_SYMBOL void
 meta_frame_get_corner_radiuses (MetaFrame *frame,
                                 float     *top_left,
                                 float     *top_right,
@@ -345,7 +345,7 @@ meta_frame_get_corner_radiuses (MetaFrame *frame,
                                bottom_left, bottom_right);
 }
 
-gboolean
+LOCAL_SYMBOL gboolean
 meta_frame_sync_to_window (MetaFrame *frame,
                            int        resize_gravity,
                            gboolean   need_move,
@@ -391,7 +391,7 @@ meta_frame_sync_to_window (MetaFrame *frame,
   return need_resize;
 }
 
-cairo_region_t *
+LOCAL_SYMBOL cairo_region_t *
 meta_frame_get_frame_bounds (MetaFrame *frame)
 {
   return meta_ui_get_frame_bounds (frame->window->screen->ui,
@@ -400,14 +400,14 @@ meta_frame_get_frame_bounds (MetaFrame *frame)
                                    frame->rect.height);
 }
 
-void
+LOCAL_SYMBOL void
 meta_frame_queue_draw (MetaFrame *frame)
 {
   meta_ui_queue_frame_draw (frame->window->screen->ui,
                             frame->xwindow);
 }
 
-void
+LOCAL_SYMBOL void
 meta_frame_set_screen_cursor (MetaFrame	*frame,
 			      MetaCursor cursor)
 {
@@ -426,7 +426,7 @@ meta_frame_set_screen_cursor (MetaFrame	*frame,
     }
 }
 
-Window
+LOCAL_SYMBOL Window
 meta_frame_get_xwindow (MetaFrame *frame)
 {
   return frame->xwindow;
