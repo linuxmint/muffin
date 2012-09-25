@@ -62,6 +62,16 @@ AC_CHECK_SIZEOF(__int64)
 ## byte order
 AC_C_BIGENDIAN
 
+#### Usability of visibility attributes
+gl_VISIBILITY
+AC_DEFINE(LOCAL_SYMBOL, [], [attribute of the non-exported symbols])
+AC_DEFINE(API_EXPORTED, [], [attribute of the symbols exported in the API])
+if test $HAVE_VISIBILITY = 1; then
+     AC_DEFINE(LOCAL_SYMBOL, [__attribute__ ((visibility ("hidden")))])
+     AC_DEFINE(API_EXPORTED, [__attribute__ ((visibility ("default")))])
+fi
+
+
 CANBERRA_GTK=libcanberra-gtk3
 CANBERRA_GTK_VERSION=0.26
 
