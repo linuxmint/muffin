@@ -183,9 +183,6 @@ void          meta_screen_tile_preview_update          (MetaScreen    *screen,
                                                         gboolean       delay);
 void          meta_screen_tile_preview_hide            (MetaScreen    *screen);
 
-MetaWindow*   meta_screen_get_mouse_window     (MetaScreen                 *screen,
-                                                MetaWindow                 *not_this_one);
-
 const MetaMonitorInfo* meta_screen_get_current_monitor    (MetaScreen    *screen);
 const MetaMonitorInfo* meta_screen_get_monitor_for_rect   (MetaScreen    *screen,
                                                            MetaRectangle *rect);
