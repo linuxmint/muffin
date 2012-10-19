@@ -4,12 +4,16 @@
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
 
+ifneq (,$(filter parallel=%,$(DEB_BUILD_OPTIONS)))
+DH_PARALLEL_OPTION = --parallel
+endif
+
 CONFIGURE_FLAGS = --enable-startup-notification=yes 	\
                   --disable-static
 		  
 
 %:
-	dh  $@ --with autoreconf
+	dh  $@ --with autoreconf $(DH_PARALLEL_OPTION)
 
 override_dh_auto_configure:
 	dh_auto_configure -- $(CONFIGURE_FLAGS)
