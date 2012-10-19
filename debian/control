@@ -37,7 +37,7 @@ Package: muffin
 Architecture: any
 Depends: ${shlibs:Depends},
          ${misc:Depends},
-         muffin-common (= ${binary:Version}),
+         muffin-common (= ${source:Version}),
          libgnome2-common,
          zenity
 Provides: x-window-manager
@@ -61,7 +61,7 @@ Section: libs
 Architecture: any
 Depends: ${shlibs:Depends},
          ${misc:Depends},
-         muffin-common (= ${binary:Version})
+         muffin-common (= ${source:Version})
 Description: window manager library from the Muffin window manager
  Muffin is a small window manager, using GTK+ and Clutter to do
  everything.
