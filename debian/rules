@@ -4,7 +4,8 @@
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
 
-CONFIGURE_FLAGS = --enable-startup-notification=yes
+CONFIGURE_FLAGS = --enable-startup-notification=yes 	\
+                  --disable-static
 		  
 
 %:
