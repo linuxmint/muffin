@@ -108,6 +108,24 @@ Description: Development files for the Muffin window manager
  .
  This package contains the development files.
 
+Package: muffin-dbg
+Section: debug
+Priority: extra
+Architecture: any
+Depends: libmuffin0 (= ${binary:Version}),
+         muffin (= ${binary:Version}),
+         ${misc:Depends}
+Description: Debugging symbols for the Muffin window manager
+ Muffin is a small window manager, using GTK+ and Clutter to do
+ everything.
+ .
+ Muffin is the clutter-based evolution of Metacity, which, as the
+ author says, is a "Boring window manager for the adult in you. Many
+ window managers are like Marshmallow Froot Loops; Metacity is like
+ Cheerios."
+ .
+ This package contains the debugging symbols.
+
 Package: gir1.2-muffin-3.0
 Section: libs
 Architecture: any
