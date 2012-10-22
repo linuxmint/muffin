@@ -276,6 +276,7 @@ libmuffin.so.0 libmuffin0 #MINVER#
  meta_g_utf8_strndup@Base 1.1.2
  meta_gdk_pixbuf_get_from_pixmap@Base 1.1.2
  meta_get_background_actor_for_screen@Base 1.1.2
+ meta_get_bottom_window_group_for_screen@Base 1.1.2
  meta_get_display@Base 1.1.2
  meta_get_option_context@Base 1.1.2
  meta_get_overlay_group_for_screen@Base 1.1.2
