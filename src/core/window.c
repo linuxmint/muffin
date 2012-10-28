@@ -10146,6 +10146,34 @@ meta_window_set_demands_attention (MetaWindow *window)
     }
 }
 
+/**
+ * meta_window_is_demanding_attention:
+ * @window: A #MetaWindow
+ *
+ * Returns true if window has the demands-attention flag set.
+ *
+ * Return value: %TRUE if wm_state_demands_attention is set.
+ */
+gboolean
+meta_window_is_demanding_attention (MetaWindow *window)
+{
+  return window->wm_state_demands_attention;
+}
+
+/**
+ * meta_window_is_urgent:
+ * @window: A #MetaWindow
+ *
+ * Returns true if window has the urgent hint set.
+ *
+ * Return value: %TRUE if wm_hints_urgent is set.
+ */
+gboolean
+meta_window_is_urgent (MetaWindow *window)
+{
+  return window->wm_hints_urgent;
+}
+
 void
 meta_window_unset_demands_attention (MetaWindow *window)
 {
