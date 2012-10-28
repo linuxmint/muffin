@@ -845,6 +845,7 @@ libmuffin.so.0 libmuffin0 #MINVER#
  meta_window_has_focus@Base 1.1.2
  meta_window_is_ancestor_of_transient@Base 1.1.2
  meta_window_is_attached_dialog@Base 1.1.2
+ meta_window_is_demanding_attention@Base 1.1.2
  meta_window_is_fullscreen@Base 1.1.2
  meta_window_is_hidden@Base 1.1.2
  meta_window_is_mapped@Base 1.1.2
@@ -855,6 +856,7 @@ libmuffin.so.0 libmuffin0 #MINVER#
  meta_window_is_remote@Base 1.1.2
  meta_window_is_shaded@Base 1.1.2
  meta_window_is_skip_taskbar@Base 1.1.2
+ meta_window_is_urgent@Base 1.1.2
  meta_window_kill@Base 1.1.2
  meta_window_load_initial_properties@Base 1.1.2
  meta_window_located_on_workspace@Base 1.1.2
