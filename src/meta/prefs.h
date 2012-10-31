@@ -53,6 +53,7 @@ typedef enum
   META_PREF_DISABLE_WORKAROUNDS,
   META_PREF_BUTTON_LAYOUT,
   META_PREF_WORKSPACE_NAMES,
+  META_PREF_WORKSPACE_CYCLE,
   META_PREF_VISUAL_BELL,
   META_PREF_AUDIBLE_BELL,
   META_PREF_VISUAL_BELL_TYPE,
@@ -95,6 +96,7 @@ const char*                 meta_prefs_get_theme              (void);
 /* returns NULL if GTK default should be used */
 const PangoFontDescription* meta_prefs_get_titlebar_font      (void);
 int                         meta_prefs_get_num_workspaces     (void);
+gboolean                    meta_prefs_get_workspace_cycle    (void);
 gboolean                    meta_prefs_get_dynamic_workspaces (void);
 gboolean                    meta_prefs_get_application_based  (void);
 gboolean                    meta_prefs_get_disable_workarounds (void);

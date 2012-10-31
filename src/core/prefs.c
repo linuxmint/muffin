@@ -45,6 +45,7 @@
 #define KEY_TITLEBAR_FONT "titlebar-font"
 #define KEY_NUM_WORKSPACES "num-workspaces"
 #define KEY_WORKSPACE_NAMES "workspace-names"
+#define KEY_WORKSPACE_CYCLE "workspace-cycle"
 
 /* Keys from "foreign" schemas */
 #define KEY_GNOME_ACCESSIBILITY "toolkit-accessibility"
@@ -79,6 +80,7 @@ static gboolean raise_on_click = TRUE;
 static gboolean attach_modal_dialogs = FALSE;
 static char* current_theme = NULL;
 static int num_workspaces = 4;
+static gboolean workspace_cycle = FALSE;
 static GDesktopTitlebarAction action_double_click_titlebar = G_DESKTOP_TITLEBAR_ACTION_TOGGLE_MAXIMIZE;
 static GDesktopTitlebarAction action_middle_click_titlebar = G_DESKTOP_TITLEBAR_ACTION_LOWER;
 static GDesktopTitlebarAction action_right_click_titlebar = G_DESKTOP_TITLEBAR_ACTION_MENU;
@@ -280,6 +282,13 @@ static MetaBoolPreference preferences_bool[] =
         META_PREF_TITLEBAR_FONT, /* note! shares a pref */
       },
       &use_system_font,
+    },
+    {
+      { "workspace-cycle",
+        SCHEMA_MUFFIN,
+        META_PREF_WORKSPACE_CYCLE,
+      },
+      &workspace_cycle,
     },
     {
       { "dynamic-workspaces",
@@ -1507,6 +1516,12 @@ meta_prefs_get_num_workspaces (void)
 }
 
 gboolean
+meta_prefs_get_workspace_cycle (void)
+{
+  return workspace_cycle;
+}
+
+gboolean
 meta_prefs_get_dynamic_workspaces (void)
 {
   return dynamic_workspaces;
@@ -1622,6 +1637,9 @@ meta_preference_to_string (MetaPreference pref)
 
     case META_PREF_WORKSPACES_ONLY_ON_PRIMARY:
       return "WORKSPACES_ONLY_ON_PRIMARY";
+
+    case META_PREF_WORKSPACE_CYCLE:
+      return "WORKSPACE_CYCLE";
 
     case META_PREF_NO_TAB_POPUP:
       return "NO_TAB_POPUP";
