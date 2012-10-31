@@ -36,7 +36,9 @@
  * 02110-1335, USA.
  */
 
+#ifndef _GNU_SOURCE
 #define _GNU_SOURCE
+#endif
 #define _SVID_SOURCE /* for gethostname() */
 
 #include <config.h>
