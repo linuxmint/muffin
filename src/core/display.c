@@ -2922,7 +2922,7 @@ key_event_description (Display *xdisplay,
   KeySym keysym;
   const char *str;
   
-  keysym = XKeycodeToKeysym (xdisplay, event->xkey.keycode, 0);  
+  keysym = XkbKeycodeToKeysym (xdisplay, event->xkey.keycode, 0, 0);  
 
   str = XKeysymToString (keysym);
   

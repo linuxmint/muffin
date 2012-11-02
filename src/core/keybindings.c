@@ -673,7 +673,7 @@ meta_display_get_keybinding_action (MetaDisplay  *display,
   MetaKeyBinding *binding;
   KeySym keysym;
 
-  keysym = XKeycodeToKeysym (display->xdisplay, keycode, 0);
+  keysym = XkbKeycodeToKeysym (display->xdisplay, keycode, 0, 0);
   mask = mask & 0xff & ~display->ignored_modifier_mask;
   binding = display_get_keybinding (display, keysym, keycode, mask);
 
@@ -1572,7 +1572,7 @@ meta_display_process_key_event (MetaDisplay *display,
   
   /* window may be NULL */
   
-  keysym = XKeycodeToKeysym (display->xdisplay, event->xkey.keycode, 0);
+  keysym = XkbKeycodeToKeysym (display->xdisplay, event->xkey.keycode, 0, 0);
 
   str = XKeysymToString (keysym);
   
