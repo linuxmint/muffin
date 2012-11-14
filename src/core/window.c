@@ -5746,10 +5746,13 @@ window_stick_impl (MetaWindow  *window)
    * to that original workspace list if on_all_workspaces is
    * toggled back off.
    */
+  int old_workspace = meta_workspace_index (window->workspace);
   window->on_all_workspaces_requested = TRUE;
   meta_window_update_on_all_workspaces (window);
 
   meta_window_queue(window, META_QUEUE_CALC_SHOWING);
+  g_signal_emit (window, window_signals[WORKSPACE_CHANGED], 0,
+                 old_workspace);
 }
 
 static void
@@ -5772,6 +5775,7 @@ window_unstick_impl (MetaWindow  *window)
     meta_window_change_workspace (window, window->screen->active_workspace);
 
   meta_window_queue(window, META_QUEUE_CALC_SHOWING);
+  g_signal_emit (window, window_signals[WORKSPACE_CHANGED], 0, -1);
 }
 
 static gboolean
