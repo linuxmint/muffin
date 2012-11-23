@@ -689,13 +689,8 @@ meta_workspace_activate (MetaWorkspace *workspace,
 int
 meta_workspace_index (MetaWorkspace *workspace)
 {
-  int ret;
-
-  ret = g_list_index (workspace->screen->workspaces, workspace);
-
-  if (ret < 0)
-    meta_bug ("Workspace does not exist to index!\n");
-
+  int ret = g_list_index (workspace->screen->workspaces, workspace);
+  /* return value is negative if the workspace is invalid */
   return ret;
 }
 
