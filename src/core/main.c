@@ -72,6 +72,7 @@
 
 #include <clutter/clutter.h>
 #include <clutter/x11/clutter-x11.h>
+#include <GL/gl.h>
 
 #ifdef HAVE_INTROSPECTION
 #include <girepository.h>
@@ -454,6 +455,14 @@ meta_init (void)
    * Clutter can only be initialized after the UI.
    */
   meta_clutter_init ();
+  
+  const char *renderer = (const char *) glGetString (GL_RENDERER);
+  if (strstr (renderer, "llvmpipe") ||
+      strstr (renderer, "Rasterizer") ||
+      strstr (renderer, "softpipe"))
+  {
+    g_setenv ("CINNAMON_SOFTWARE_RENDERING", "1", FALSE);
+  }
 }
 
 /**
