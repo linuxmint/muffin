@@ -668,7 +668,7 @@ apply_edge_resistance_to_each_side (MetaDisplay         *display,
   return modified;
 }
 
-void
+LOCAL_SYMBOL void
 meta_display_cleanup_edges (MetaDisplay *display)
 {
   guint i,j;
@@ -1138,7 +1138,7 @@ compute_resistance_and_snapping_edges (MetaDisplay *display)
 /* Note that old_[xy] and new_[xy] are with respect to inner positions of
  * the window.
  */
-void
+LOCAL_SYMBOL void
 meta_window_edge_resistance_for_move (MetaWindow  *window,
                                       int          old_x,
                                       int          old_y,
@@ -1222,7 +1222,7 @@ meta_window_edge_resistance_for_move (MetaWindow  *window,
 /* Note that old_(width|height) and new_(width|height) are with respect to
  * sizes of the inner window.
  */
-void
+LOCAL_SYMBOL void
 meta_window_edge_resistance_for_resize (MetaWindow  *window,
                                         int          old_width,
                                         int          old_height,

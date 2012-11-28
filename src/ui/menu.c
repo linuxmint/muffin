@@ -320,7 +320,7 @@ menu_item_new (MenuItem *menuitem, int workspace_id)
   return mi;
 }
 
-MetaWindowMenu*
+LOCAL_SYMBOL MetaWindowMenu*
 meta_window_menu_new   (MetaFrames         *frames,
                         MetaMenuOp          ops,
                         MetaMenuOp          insensitive,
@@ -496,7 +496,7 @@ meta_window_menu_new   (MetaFrames         *frames,
   return menu;
 }
 
-void
+LOCAL_SYMBOL void
 meta_window_menu_popup (MetaWindowMenu     *menu,
                         int                 root_x,
                         int                 root_y,
@@ -525,7 +525,7 @@ meta_window_menu_popup (MetaWindowMenu     *menu,
     meta_warning ("GtkMenu failed to grab the pointer\n");
 }
 
-void
+LOCAL_SYMBOL void
 meta_window_menu_free (MetaWindowMenu *menu)
 {
   gtk_widget_destroy (menu->menu);

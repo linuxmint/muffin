@@ -60,7 +60,7 @@ get_window (Display *xdisplay,
   return window;
 }
 
-void
+LOCAL_SYMBOL void
 meta_core_get (Display *xdisplay,
     Window xwindow,
     ...)
@@ -163,7 +163,7 @@ meta_core_get (Display *xdisplay,
   va_end (args);
 }
 
-void
+LOCAL_SYMBOL void
 meta_core_queue_frame_resize (Display *xdisplay,
                               Window   frame_xwindow)
 {
@@ -172,7 +172,7 @@ meta_core_queue_frame_resize (Display *xdisplay,
   meta_window_queue (window, META_QUEUE_MOVE_RESIZE);
 }
 
-void
+LOCAL_SYMBOL void
 meta_core_user_move (Display *xdisplay,
                      Window   frame_xwindow,
                      int      x,
@@ -183,7 +183,7 @@ meta_core_user_move (Display *xdisplay,
   meta_window_move (window, TRUE, x, y);
 }
 
-void
+LOCAL_SYMBOL void
 meta_core_user_resize  (Display *xdisplay,
                         Window   frame_xwindow,
                         int      gravity,
@@ -195,7 +195,7 @@ meta_core_user_resize  (Display *xdisplay,
   meta_window_resize_with_gravity (window, TRUE, width, height, gravity);
 }
 
-void
+LOCAL_SYMBOL void
 meta_core_user_raise (Display *xdisplay,
                       Window   frame_xwindow)
 {
@@ -242,7 +242,7 @@ lower_window_and_transients (MetaWindow *window,
   return FALSE;
 }
 
-void
+LOCAL_SYMBOL void
 meta_core_user_lower_and_unfocus (Display *xdisplay,
                                   Window   frame_xwindow,
                                   guint32  timestamp)
@@ -260,7 +260,7 @@ meta_core_user_lower_and_unfocus (Display *xdisplay,
                                        timestamp);
 }
 
-void
+LOCAL_SYMBOL void
 meta_core_lower_beneath_grab_window (Display *xdisplay,
                                      Window   xwindow,
                                      guint32  timestamp)
@@ -294,7 +294,7 @@ meta_core_lower_beneath_grab_window (Display *xdisplay,
   meta_error_trap_pop (display);
 }
 
-void
+LOCAL_SYMBOL void
 meta_core_user_focus (Display *xdisplay,
                       Window   frame_xwindow,
                       guint32  timestamp)
@@ -304,7 +304,7 @@ meta_core_user_focus (Display *xdisplay,
   meta_window_focus (window, timestamp);
 }
 
-void
+LOCAL_SYMBOL void
 meta_core_minimize (Display *xdisplay,
                     Window   frame_xwindow)
 {
@@ -313,7 +313,7 @@ meta_core_minimize (Display *xdisplay,
   meta_window_minimize (window);
 }
 
-void
+LOCAL_SYMBOL void
 meta_core_maximize (Display *xdisplay,
                     Window   frame_xwindow)
 {
@@ -326,7 +326,7 @@ meta_core_maximize (Display *xdisplay,
                         META_MAXIMIZE_HORIZONTAL | META_MAXIMIZE_VERTICAL);
 }
 
-void
+LOCAL_SYMBOL void
 meta_core_toggle_maximize_vertically (Display *xdisplay,
 				      Window   frame_xwindow)
 {
@@ -343,7 +343,7 @@ meta_core_toggle_maximize_vertically (Display *xdisplay,
     			    META_MAXIMIZE_VERTICAL);
 }
 
-void
+LOCAL_SYMBOL void
 meta_core_toggle_maximize_horizontally (Display *xdisplay,
 				        Window   frame_xwindow)
 {
@@ -360,7 +360,7 @@ meta_core_toggle_maximize_horizontally (Display *xdisplay,
     			    META_MAXIMIZE_HORIZONTAL);
 }
 
-void
+LOCAL_SYMBOL void
 meta_core_toggle_maximize (Display *xdisplay,
                            Window   frame_xwindow)
 {
@@ -377,7 +377,7 @@ meta_core_toggle_maximize (Display *xdisplay,
                           META_MAXIMIZE_HORIZONTAL | META_MAXIMIZE_VERTICAL);
 }
 
-void
+LOCAL_SYMBOL void
 meta_core_unmaximize (Display *xdisplay,
                       Window   frame_xwindow)
 {
@@ -390,7 +390,7 @@ meta_core_unmaximize (Display *xdisplay,
                           META_MAXIMIZE_HORIZONTAL | META_MAXIMIZE_VERTICAL);
 }
 
-void
+LOCAL_SYMBOL void
 meta_core_delete (Display *xdisplay,
                   Window   frame_xwindow,
                   guint32  timestamp)
@@ -400,7 +400,7 @@ meta_core_delete (Display *xdisplay,
   meta_window_delete (window, timestamp);
 }
 
-void
+LOCAL_SYMBOL void
 meta_core_unshade (Display *xdisplay,
                    Window   frame_xwindow,
                    guint32  timestamp)
@@ -410,7 +410,7 @@ meta_core_unshade (Display *xdisplay,
   meta_window_unshade (window, timestamp);
 }
 
-void
+LOCAL_SYMBOL void
 meta_core_shade (Display *xdisplay,
                  Window   frame_xwindow,
                  guint32  timestamp)
@@ -420,7 +420,7 @@ meta_core_shade (Display *xdisplay,
   meta_window_shade (window, timestamp);
 }
 
-void
+LOCAL_SYMBOL void
 meta_core_unstick (Display *xdisplay,
                    Window   frame_xwindow)
 {
@@ -429,7 +429,7 @@ meta_core_unstick (Display *xdisplay,
   meta_window_unstick (window);
 }
 
-void
+LOCAL_SYMBOL void
 meta_core_make_above (Display *xdisplay,
                       Window   frame_xwindow)
 {
@@ -438,7 +438,7 @@ meta_core_make_above (Display *xdisplay,
   meta_window_make_above (window);
 }
 
-void
+LOCAL_SYMBOL void
 meta_core_unmake_above (Display *xdisplay,
                         Window   frame_xwindow)
 {
@@ -447,7 +447,7 @@ meta_core_unmake_above (Display *xdisplay,
   meta_window_unmake_above (window);
 }
 
-void
+LOCAL_SYMBOL void
 meta_core_stick (Display *xdisplay,
                  Window   frame_xwindow)
 {
@@ -456,7 +456,7 @@ meta_core_stick (Display *xdisplay,
   meta_window_stick (window);
 }
 
-void
+LOCAL_SYMBOL void
 meta_core_change_workspace (Display *xdisplay,
                             Window   frame_xwindow,
                             int      new_workspace)
@@ -468,7 +468,7 @@ meta_core_change_workspace (Display *xdisplay,
                                                                     new_workspace));
 }
 
-int
+LOCAL_SYMBOL int
 meta_core_get_num_workspaces (Screen  *xscreen)
 {
   MetaScreen *screen;
@@ -478,7 +478,7 @@ meta_core_get_num_workspaces (Screen  *xscreen)
   return meta_screen_get_n_workspaces (screen);
 }
 
-int
+LOCAL_SYMBOL int
 meta_core_get_active_workspace (Screen *xscreen)
 {
   MetaScreen *screen;
@@ -488,7 +488,7 @@ meta_core_get_active_workspace (Screen *xscreen)
   return meta_workspace_index (screen->active_workspace);
 }
 
-void
+LOCAL_SYMBOL void
 meta_core_show_window_menu (Display *xdisplay,
                             Window   frame_xwindow,
                             int      root_x,
@@ -505,7 +505,7 @@ meta_core_show_window_menu (Display *xdisplay,
   meta_window_show_menu (window, root_x, root_y, button, timestamp);
 }
 
-void
+LOCAL_SYMBOL void
 meta_core_get_menu_accelerator (MetaMenuOp           menu_op,
                                 int                  workspace,
                                 unsigned int        *keysym,
@@ -619,7 +619,7 @@ meta_core_get_menu_accelerator (MetaMenuOp           menu_op,
     }
 }
 
-const char*
+LOCAL_SYMBOL const char*
 meta_core_get_workspace_name_with_index (Display *xdisplay,
                                          Window   xroot,
                                          int      index)
@@ -635,7 +635,7 @@ meta_core_get_workspace_name_with_index (Display *xdisplay,
   return workspace ? meta_workspace_get_name (workspace) : NULL;
 }
 
-gboolean
+LOCAL_SYMBOL gboolean
 meta_core_begin_grab_op (Display    *xdisplay,
                          Window      frame_xwindow,
                          MetaGrabOp  op,
@@ -663,7 +663,7 @@ meta_core_begin_grab_op (Display    *xdisplay,
                                      timestamp, root_x, root_y);
 }
 
-void
+LOCAL_SYMBOL void
 meta_core_end_grab_op (Display *xdisplay,
                        guint32  timestamp)
 {
@@ -674,7 +674,7 @@ meta_core_end_grab_op (Display *xdisplay,
   meta_display_end_grab_op (display, timestamp);
 }
 
-MetaGrabOp
+LOCAL_SYMBOL MetaGrabOp
 meta_core_get_grab_op (Display *xdisplay)
 {
   MetaDisplay *display;
@@ -684,7 +684,7 @@ meta_core_get_grab_op (Display *xdisplay)
   return display->grab_op;
 }
 
-Window
+LOCAL_SYMBOL Window
 meta_core_get_grab_frame (Display *xdisplay)
 {
   MetaDisplay *display;
@@ -705,7 +705,7 @@ meta_core_get_grab_frame (Display *xdisplay)
     return None;
 }
 
-int
+LOCAL_SYMBOL int
 meta_core_get_grab_button (Display  *xdisplay)
 {
   MetaDisplay *display;
@@ -718,7 +718,7 @@ meta_core_get_grab_button (Display  *xdisplay)
   return display->grab_button;
 }
 
-void
+LOCAL_SYMBOL void
 meta_core_grab_buttons  (Display *xdisplay,
                          Window   frame_xwindow)
 {
@@ -730,7 +730,7 @@ meta_core_grab_buttons  (Display *xdisplay,
   meta_display_grab_window_buttons (display, frame_xwindow);
 }
 
-void
+LOCAL_SYMBOL void
 meta_core_set_screen_cursor (Display *xdisplay,
                              Window   frame_on_screen,
                              MetaCursor cursor)
@@ -740,7 +740,7 @@ meta_core_set_screen_cursor (Display *xdisplay,
   meta_frame_set_screen_cursor (window->frame, cursor);
 }
 
-void
+LOCAL_SYMBOL void
 meta_core_increment_event_serial (Display *xdisplay)
 {
   MetaDisplay *display;
@@ -750,7 +750,7 @@ meta_core_increment_event_serial (Display *xdisplay)
   meta_display_increment_event_serial (display);
 }
 
-void
+LOCAL_SYMBOL void
 meta_invalidate_default_icons (void)
 {
   MetaDisplay *display = meta_get_display ();

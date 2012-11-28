@@ -22,6 +22,10 @@
  * 02110-1335, USA.
  */
 
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include <math.h>
 #include <string.h>
 
@@ -72,7 +76,7 @@ struct _MetaTextureTower
  *
  * Return value: the new texture tower. Free with meta_texture_tower_free()
  */
-MetaTextureTower *
+LOCAL_SYMBOL MetaTextureTower *
 meta_texture_tower_new (void)
 {
   MetaTextureTower *tower;
@@ -88,7 +92,7 @@ meta_texture_tower_new (void)
  *
  * Frees a texture tower created with meta_texture_tower_new().
  */
-void
+LOCAL_SYMBOL void
 meta_texture_tower_free (MetaTextureTower *tower)
 {
   g_return_if_fail (tower != NULL);
@@ -108,7 +112,7 @@ meta_texture_tower_free (MetaTextureTower *tower)
  * will be used as level 0 of the tower and will be referenced until
  * unset or until the tower is freed.
  */
-void
+LOCAL_SYMBOL void
 meta_texture_tower_set_base_texture (MetaTextureTower *tower,
                                      CoglHandle        texture)
 {
@@ -173,7 +177,7 @@ meta_texture_tower_set_base_texture (MetaTextureTower *tower,
  * time a scaled down version of the base texture is retrieved,
  * the appropriate area of the scaled down texture will be updated.
  */
-void
+LOCAL_SYMBOL void
 meta_texture_tower_update_area (MetaTextureTower *tower,
                                 int               x,
                                 int               y,
@@ -577,7 +581,7 @@ texture_tower_revalidate (MetaTextureTower *tower,
  * Return value: the COGL texture handle to use for painting, or
  *  %COGL_INVALID_HANDLE if no base texture has yet been set.
  */
-CoglHandle
+LOCAL_SYMBOL CoglHandle
 meta_texture_tower_get_paint_texture (MetaTextureTower *tower)
 {
   int texture_width, texture_height;

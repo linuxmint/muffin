@@ -77,7 +77,7 @@ static MetaWindowPropHooks* find_hooks (MetaDisplay *display,
                                         Atom         property);
 
 
-void
+LOCAL_SYMBOL void
 meta_window_reload_property (MetaWindow *window,
                              Atom        property,
                              gboolean    initial)
@@ -85,7 +85,7 @@ meta_window_reload_property (MetaWindow *window,
   meta_window_reload_properties (window, &property, 1, initial);
 }
 
-void
+LOCAL_SYMBOL void
 meta_window_reload_properties (MetaWindow *window,
                                const Atom *properties,
                                int         n_properties,
@@ -98,7 +98,7 @@ meta_window_reload_properties (MetaWindow *window,
                                               initial);
 }
 
-void
+LOCAL_SYMBOL void
 meta_window_reload_property_from_xwindow (MetaWindow *window,
                                           Window      xwindow,
                                           Atom        property,
@@ -108,7 +108,7 @@ meta_window_reload_property_from_xwindow (MetaWindow *window,
                                               initial);
 }
 
-void
+LOCAL_SYMBOL void
 meta_window_reload_properties_from_xwindow (MetaWindow *window,
                                             Window      xwindow,
                                             const Atom *properties,
@@ -148,7 +148,7 @@ meta_window_reload_properties_from_xwindow (MetaWindow *window,
   g_free (values);
 }
 
-void
+LOCAL_SYMBOL void
 meta_window_load_initial_properties (MetaWindow *window)
 {
   int i, j;
@@ -986,7 +986,7 @@ spew_size_hints_differences (const XSizeHints *old,
                 old->win_gravity, new->win_gravity);  
 }
 
-void
+LOCAL_SYMBOL void
 meta_set_normal_hints (MetaWindow *window,
                        XSizeHints *hints)
 {
@@ -1657,7 +1657,7 @@ RELOAD_STRING (gtk_menubar_object_path,     "gtk-menubar-object-path")
  * was META_PROP_VALUE_INVALID, the callback still gets called anyway.)
  * This value may be NULL, in which case no callback will be called.
  */
-void
+LOCAL_SYMBOL void
 meta_display_init_window_prop_hooks (MetaDisplay *display)
 {
   /* INIT: load initially
@@ -1742,7 +1742,7 @@ meta_display_init_window_prop_hooks (MetaDisplay *display)
   display->n_prop_hooks = cursor - table;
 }
 
-void
+LOCAL_SYMBOL void
 meta_display_free_window_prop_hooks (MetaDisplay *display)
 {
   g_hash_table_unref (display->prop_hooks);

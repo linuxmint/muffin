@@ -57,7 +57,7 @@ struct _MetaUI
   guint32 button_click_time;
 };
 
-void
+LOCAL_SYMBOL void
 meta_ui_init (void)
 {
   /* As of 2.91.7, Gdk uses XI2 by default, which conflicts with the
@@ -76,7 +76,7 @@ meta_ui_init (void)
   meta_stock_icons_init ();
 }
 
-Display*
+LOCAL_SYMBOL Display*
 meta_ui_get_display (void)
 {
   return GDK_DISPLAY_XDISPLAY (gdk_display_get_default ());
@@ -242,7 +242,7 @@ filter_func (GdkXEvent *xevent,
     return GDK_FILTER_CONTINUE;
 }
 
-void
+LOCAL_SYMBOL void
 meta_ui_add_event_func (Display       *xdisplay,
                         MetaEventFunc  func,
                         gpointer       data)
@@ -257,7 +257,7 @@ meta_ui_add_event_func (Display       *xdisplay,
 }
 
 /* removal is by data due to proxy function */
-void
+LOCAL_SYMBOL void
 meta_ui_remove_event_func (Display       *xdisplay,
                            MetaEventFunc  func,
                            gpointer       data)
@@ -270,7 +270,7 @@ meta_ui_remove_event_func (Display       *xdisplay,
   ef = NULL;
 }
 
-MetaUI*
+LOCAL_SYMBOL MetaUI*
 meta_ui_new (Display *xdisplay,
              Screen  *screen)
 {
@@ -295,7 +295,7 @@ meta_ui_new (Display *xdisplay,
   return ui;
 }
 
-void
+LOCAL_SYMBOL void
 meta_ui_free (MetaUI *ui)
 {
   GdkDisplay *gdisplay;
@@ -308,7 +308,7 @@ meta_ui_free (MetaUI *ui)
   g_free (ui);
 }
 
-void
+LOCAL_SYMBOL void
 meta_ui_get_frame_borders (MetaUI *ui,
                            Window frame_xwindow,
                            MetaFrameBorders *borders)
@@ -317,7 +317,7 @@ meta_ui_get_frame_borders (MetaUI *ui,
                            borders);
 }
 
-void
+LOCAL_SYMBOL void
 meta_ui_get_corner_radiuses (MetaUI *ui,
                              Window  xwindow,
                              float  *top_left,
@@ -330,7 +330,7 @@ meta_ui_get_corner_radiuses (MetaUI *ui,
                                    bottom_left, bottom_right);
 }
 
-Window
+LOCAL_SYMBOL Window
 meta_ui_create_frame_window (MetaUI *ui,
                              Display *xdisplay,
                              Visual *xvisual,
@@ -402,14 +402,14 @@ meta_ui_create_frame_window (MetaUI *ui,
   return GDK_WINDOW_XID (window);
 }
 
-void
+LOCAL_SYMBOL void
 meta_ui_destroy_frame_window (MetaUI *ui,
 			      Window  xwindow)
 {
   meta_frames_unmanage_window (ui->frames, xwindow);
 }
 
-void
+LOCAL_SYMBOL void
 meta_ui_move_resize_frame (MetaUI *ui,
 			   Window frame,
 			   int x,
@@ -420,7 +420,7 @@ meta_ui_move_resize_frame (MetaUI *ui,
   meta_frames_move_resize_frame (ui->frames, frame, x, y, width, height);
 }
 
-void
+LOCAL_SYMBOL void
 meta_ui_map_frame   (MetaUI *ui,
                      Window  xwindow)
 {
@@ -434,7 +434,7 @@ meta_ui_map_frame   (MetaUI *ui,
     gdk_window_show_unraised (window);
 }
 
-void
+LOCAL_SYMBOL void
 meta_ui_unmap_frame (MetaUI *ui,
                      Window  xwindow)
 {
@@ -448,7 +448,7 @@ meta_ui_unmap_frame (MetaUI *ui,
     gdk_window_hide (window);
 }
 
-void
+LOCAL_SYMBOL void
 meta_ui_unflicker_frame_bg (MetaUI *ui,
                             Window  xwindow,
                             int     target_width,
@@ -458,28 +458,28 @@ meta_ui_unflicker_frame_bg (MetaUI *ui,
                             target_width, target_height);
 }
 
-void
+LOCAL_SYMBOL void
 meta_ui_update_frame_style (MetaUI  *ui,
                             Window   xwindow)
 {
   meta_frames_update_frame_style (ui->frames, xwindow);
 }
 
-void
+LOCAL_SYMBOL void
 meta_ui_repaint_frame (MetaUI *ui,
                        Window xwindow)
 {
   meta_frames_repaint_frame (ui->frames, xwindow);
 }
 
-void
+LOCAL_SYMBOL void
 meta_ui_reset_frame_bg (MetaUI *ui,
                         Window xwindow)
 {
   meta_frames_reset_bg (ui->frames, xwindow);
 }
 
-cairo_region_t *
+LOCAL_SYMBOL cairo_region_t *
 meta_ui_get_frame_bounds (MetaUI  *ui,
                           Window   xwindow,
                           int      window_width,
@@ -489,14 +489,14 @@ meta_ui_get_frame_bounds (MetaUI  *ui,
                                        window_width, window_height);
 }
 
-void
+LOCAL_SYMBOL void
 meta_ui_queue_frame_draw (MetaUI *ui,
                           Window xwindow)
 {
   meta_frames_queue_draw (ui->frames, xwindow);
 }
 
-void
+LOCAL_SYMBOL void
 meta_ui_set_frame_title (MetaUI     *ui,
                          Window      xwindow,
                          const char *title)
@@ -504,7 +504,7 @@ meta_ui_set_frame_title (MetaUI     *ui,
   meta_frames_set_title (ui->frames, xwindow, title);
 }
 
-MetaWindowMenu*
+LOCAL_SYMBOL MetaWindowMenu*
 meta_ui_window_menu_new  (MetaUI             *ui,
                           Window              client_xwindow,
                           MetaMenuOp          ops,
@@ -522,7 +522,7 @@ meta_ui_window_menu_new  (MetaUI             *ui,
                                func, data);
 }
 
-void
+LOCAL_SYMBOL void
 meta_ui_window_menu_popup (MetaWindowMenu     *menu,
                            int                 root_x,
                            int                 root_y,
@@ -532,13 +532,13 @@ meta_ui_window_menu_popup (MetaWindowMenu     *menu,
   meta_window_menu_popup (menu, root_x, root_y, button, timestamp);
 }
 
-void
+LOCAL_SYMBOL void
 meta_ui_window_menu_free (MetaWindowMenu *menu)
 {
   meta_window_menu_free (menu);
 }
 
-GdkPixbuf*
+LOCAL_SYMBOL GdkPixbuf*
 meta_gdk_pixbuf_get_from_pixmap (Pixmap       xpixmap,
                                  int          src_x,
                                  int          src_y,
@@ -588,19 +588,19 @@ meta_gdk_pixbuf_get_from_pixmap (Pixmap       xpixmap,
   return retval;
 }
 
-void
+LOCAL_SYMBOL void
 meta_ui_push_delay_exposes (MetaUI *ui)
 {
   meta_frames_push_delay_exposes (ui->frames);
 }
 
-void
+LOCAL_SYMBOL void
 meta_ui_pop_delay_exposes  (MetaUI *ui)
 {
   meta_frames_pop_delay_exposes (ui->frames);
 }
 
-GdkPixbuf*
+LOCAL_SYMBOL GdkPixbuf*
 meta_ui_get_default_window_icon (MetaUI *ui)
 {
   static GdkPixbuf *default_icon = NULL;
@@ -635,7 +635,7 @@ meta_ui_get_default_window_icon (MetaUI *ui)
   return default_icon;
 }
 
-GdkPixbuf*
+LOCAL_SYMBOL GdkPixbuf*
 meta_ui_get_default_mini_icon (MetaUI *ui)
 {
   static GdkPixbuf *default_icon = NULL;
@@ -670,7 +670,7 @@ meta_ui_get_default_mini_icon (MetaUI *ui)
   return default_icon;
 }
 
-gboolean
+LOCAL_SYMBOL gboolean
 meta_ui_window_should_not_cause_focus (Display *xdisplay,
                                        Window   xwindow)
 {
@@ -689,7 +689,7 @@ meta_ui_window_should_not_cause_focus (Display *xdisplay,
     return FALSE;
 }
 
-char*
+LOCAL_SYMBOL char*
 meta_text_property_to_utf8 (Display             *xdisplay,
                             const XTextProperty *prop)
 {
@@ -721,7 +721,7 @@ meta_text_property_to_utf8 (Display             *xdisplay,
   return retval;
 }
 
-void
+LOCAL_SYMBOL void
 meta_ui_theme_get_frame_borders (MetaUI *ui,
                                  MetaFrameType      type,
                                  MetaFrameFlags     flags,
@@ -758,7 +758,7 @@ meta_ui_theme_get_frame_borders (MetaUI *ui,
     g_object_unref (style);
 }
 
-void
+LOCAL_SYMBOL void
 meta_ui_set_current_theme (const char *name,
                            gboolean    force_reload)
 {
@@ -766,7 +766,7 @@ meta_ui_set_current_theme (const char *name,
   meta_invalidate_default_icons ();
 }
 
-gboolean
+LOCAL_SYMBOL gboolean
 meta_ui_have_a_theme (void)
 {
   return meta_theme_get_current () != NULL;
@@ -824,7 +824,7 @@ meta_ui_accelerator_parse (const char      *accel,
   gtk_accelerator_parse (accel, keysym, keymask);
 }
 
-gboolean
+LOCAL_SYMBOL gboolean
 meta_ui_parse_accelerator (const char          *accel,
                            unsigned int        *keysym,
                            unsigned int        *keycode,
@@ -879,7 +879,7 @@ meta_ui_parse_accelerator (const char          *accel,
 }
 
 /* Caller responsible for freeing return string of meta_ui_accelerator_name! */
-gchar*
+LOCAL_SYMBOL gchar*
 meta_ui_accelerator_name  (unsigned int        keysym,
                            MetaVirtualModifier mask)
 {
@@ -915,7 +915,7 @@ meta_ui_accelerator_name  (unsigned int        keysym,
 
 }
 
-gboolean
+LOCAL_SYMBOL gboolean
 meta_ui_parse_modifier (const char          *accel,
                         MetaVirtualModifier *mask)
 {
@@ -962,7 +962,7 @@ meta_ui_parse_modifier (const char          *accel,
   return TRUE;
 }
 
-gboolean
+LOCAL_SYMBOL gboolean
 meta_ui_window_is_widget (MetaUI *ui,
                           Window  xwindow)
 {
@@ -1024,7 +1024,7 @@ meta_stock_icons_init (void)
   g_object_unref (G_OBJECT (factory));
 }
 
-int
+LOCAL_SYMBOL int
 meta_ui_get_drag_threshold (MetaUI *ui)
 {
   GtkSettings *settings;
@@ -1038,7 +1038,7 @@ meta_ui_get_drag_threshold (MetaUI *ui)
   return threshold;
 }
 
-MetaUIDirection
+LOCAL_SYMBOL MetaUIDirection
 meta_ui_get_direction (void)
 {
   if (gtk_widget_get_default_direction() == GTK_TEXT_DIR_RTL)

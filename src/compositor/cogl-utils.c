@@ -21,6 +21,9 @@
  * 02110-1335, USA.
  */
 
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include "cogl-utils.h"
 
 /**
@@ -39,7 +42,7 @@
  *
  * Return value: (transfer full): a newly created Cogl texture
  */
-CoglHandle
+LOCAL_SYMBOL CoglHandle
 meta_create_color_texture_4ub (guint8           red,
                                guint8           green,
                                guint8           blue,
@@ -79,7 +82,7 @@ meta_create_color_texture_4ub (guint8           red,
  *
  * Return value: (transfer full): a newly created Cogl material
  */
-CoglHandle
+LOCAL_SYMBOL CoglHandle
 meta_create_texture_material (CoglHandle src_texture)
 {
   static CoglHandle texture_material_template = COGL_INVALID_HANDLE;

@@ -21,6 +21,10 @@
  * 02110-1335, USA.
  */
 
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include <meta/meta-plugin.h>
 #include "meta-module.h"
 
@@ -198,7 +202,7 @@ meta_module_init (MetaModule *self)
 
 }
 
-GType
+LOCAL_SYMBOL GType
 meta_module_get_plugin_type (MetaModule *module)
 {
   MetaModulePrivate *priv = META_MODULE (module)->priv;

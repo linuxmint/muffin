@@ -42,7 +42,7 @@ struct _MetaResizePopup
   MetaRectangle rect;
 };
 
-MetaResizePopup*
+LOCAL_SYMBOL MetaResizePopup*
 meta_ui_resize_popup_new (Display *display,
                           int      screen_number)
 {
@@ -56,7 +56,7 @@ meta_ui_resize_popup_new (Display *display,
   return popup;
 }
 
-void
+LOCAL_SYMBOL void
 meta_ui_resize_popup_free (MetaResizePopup *popup)
 {
   g_return_if_fail (popup != NULL);
@@ -155,7 +155,7 @@ sync_showing (MetaResizePopup *popup)
     }
 }
 
-void
+LOCAL_SYMBOL void
 meta_ui_resize_popup_set (MetaResizePopup *popup,
                           MetaRectangle    rect,
                           int              base_width,
@@ -196,7 +196,7 @@ meta_ui_resize_popup_set (MetaResizePopup *popup,
   sync_showing (popup);
 }
 
-void
+LOCAL_SYMBOL void
 meta_ui_resize_popup_set_showing  (MetaResizePopup *popup,
                                    gboolean         showing)
 {

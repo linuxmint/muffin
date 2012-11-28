@@ -536,7 +536,7 @@ get_kwm_win_icon (MetaDisplay *display,
   return;
 }
 
-void
+LOCAL_SYMBOL void
 meta_icon_cache_init (MetaIconCache *icon_cache)
 {
   g_return_if_fail (icon_cache != NULL);
@@ -582,13 +582,13 @@ clear_icon_cache (MetaIconCache *icon_cache,
     }
 }
 
-void
+LOCAL_SYMBOL void
 meta_icon_cache_free (MetaIconCache *icon_cache)
 {
   clear_icon_cache (icon_cache, FALSE);
 }
 
-void
+LOCAL_SYMBOL void
 meta_icon_cache_property_changed (MetaIconCache *icon_cache,
                                   MetaDisplay   *display,
                                   Atom           atom)
@@ -601,7 +601,7 @@ meta_icon_cache_property_changed (MetaIconCache *icon_cache,
     icon_cache->wm_hints_dirty = TRUE;
 }
 
-gboolean
+LOCAL_SYMBOL gboolean
 meta_icon_cache_get_icon_invalidated (MetaIconCache *icon_cache)
 {
   if (icon_cache->origin <= USING_KWM_WIN_ICON &&
@@ -704,7 +704,7 @@ scaled_from_pixdata (guchar *pixdata,
   return dest;
 }
 
-gboolean
+LOCAL_SYMBOL gboolean
 meta_read_icons (MetaScreen     *screen,
                  Window          xwindow,
                  MetaIconCache  *icon_cache,

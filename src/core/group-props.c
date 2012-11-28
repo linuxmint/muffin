@@ -50,14 +50,14 @@ static MetaGroupPropHooks* find_hooks        (MetaDisplay   *display,
 
 
 
-void
+LOCAL_SYMBOL void
 meta_group_reload_property (MetaGroup *group,
                             Atom       property)
 {
   meta_group_reload_properties (group, &property, 1);
 }
 
-void
+LOCAL_SYMBOL void
 meta_group_reload_properties (MetaGroup  *group,
                               const Atom *properties,
                               int         n_properties)
@@ -168,7 +168,7 @@ reload_net_startup_id (MetaGroup     *group,
 
 #define N_HOOKS 3
 
-void
+LOCAL_SYMBOL void
 meta_display_init_group_prop_hooks (MetaDisplay *display)
 {
   int i;
@@ -202,7 +202,7 @@ meta_display_init_group_prop_hooks (MetaDisplay *display)
     }
 }
 
-void
+LOCAL_SYMBOL void
 meta_display_free_group_prop_hooks (MetaDisplay *display)
 {
   g_assert (display->group_prop_hooks != NULL);

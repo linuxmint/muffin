@@ -25,6 +25,9 @@
  * Foundation, Inc., 51 Franklin Street - Suite 500, Boston, MA
  * 02110-1335, USA.
  */
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 #include "boxes-private.h"
 #include <meta/util.h>
@@ -59,7 +62,7 @@ meta_rectangle_get_type (void)
   return type_id;
 }
 
-char*
+LOCAL_SYMBOL char*
 meta_rectangle_to_string (const MetaRectangle *rect,
                           char                *output)
 {
@@ -73,7 +76,7 @@ meta_rectangle_to_string (const MetaRectangle *rect,
   return output;
 }
 
-char*
+LOCAL_SYMBOL char*
 meta_rectangle_region_to_string (GList      *region,
                                  const char *separator_string,
                                  char       *output)
@@ -105,7 +108,7 @@ meta_rectangle_region_to_string (GList      *region,
   return output;
 }
 
-char*
+LOCAL_SYMBOL char*
 meta_rectangle_edge_to_string (const MetaEdge *edge,
                                char           *output)
 {
@@ -123,7 +126,7 @@ meta_rectangle_edge_to_string (const MetaEdge *edge,
   return output;
 }
 
-char*
+LOCAL_SYMBOL char*
 meta_rectangle_edge_list_to_string (GList      *edge_list,
                                     const char *separator_string,
                                     char       *output)
@@ -325,7 +328,7 @@ meta_rectangle_contains_rect  (const MetaRectangle *outer_rect,
     inner_rect->y + inner_rect->height <= outer_rect->y + outer_rect->height;
 }
 
-void
+LOCAL_SYMBOL void
 meta_rectangle_resize_with_gravity (const MetaRectangle *old_rect,
                                     MetaRectangle       *rect,
                                     int                  gravity,
@@ -564,7 +567,7 @@ compare_rect_areas (gconstpointer a, gconstpointer b)
  *
  * Returns: (transfer full) (element-type Meta.Rectangle): Minimal spanning set
  */
-GList*
+LOCAL_SYMBOL GList*
 meta_rectangle_get_minimal_spanning_set_for_region (
   const MetaRectangle *basic_rect,
   const GSList  *all_struts)
@@ -699,7 +702,7 @@ meta_rectangle_get_minimal_spanning_set_for_region (
  * meta_rectangle_expand_region: (skip)
  *
  */
-GList*
+LOCAL_SYMBOL GList*
 meta_rectangle_expand_region (GList     *region,
                               const int  left_expand,
                               const int  right_expand,
@@ -719,7 +722,7 @@ meta_rectangle_expand_region (GList     *region,
  * meta_rectangle_expand_region_conditionally: (skip)
  *
  */
-GList*
+LOCAL_SYMBOL GList*
 meta_rectangle_expand_region_conditionally (GList     *region,
                                             const int  left_expand,
                                             const int  right_expand,
@@ -748,7 +751,7 @@ meta_rectangle_expand_region_conditionally (GList     *region,
   return region;
 }
 
-void
+LOCAL_SYMBOL void
 meta_rectangle_expand_to_avoiding_struts (MetaRectangle       *rect,
                                           const MetaRectangle *expand_to,
                                           const MetaDirection  direction,
@@ -818,7 +821,7 @@ meta_rectangle_expand_to_avoiding_struts (MetaRectangle       *rect,
     } /* end loop over struts */
 } /* end meta_rectangle_expand_to_avoiding_struts */
 
-void
+LOCAL_SYMBOL void
 meta_rectangle_free_list_and_elements (GList *filled_list)
 {
   g_list_foreach (filled_list, 
@@ -827,7 +830,7 @@ meta_rectangle_free_list_and_elements (GList *filled_list)
   g_list_free (filled_list);
 }
 
-gboolean
+LOCAL_SYMBOL gboolean
 meta_rectangle_could_fit_in_region (const GList         *spanning_rects,
                                     const MetaRectangle *rect)
 {
@@ -845,7 +848,7 @@ meta_rectangle_could_fit_in_region (const GList         *spanning_rects,
   return could_fit;
 }
 
-gboolean
+LOCAL_SYMBOL gboolean
 meta_rectangle_contained_in_region (const GList         *spanning_rects,
                                     const MetaRectangle *rect)
 {
@@ -863,7 +866,7 @@ meta_rectangle_contained_in_region (const GList         *spanning_rects,
   return contained;
 }
 
-gboolean
+LOCAL_SYMBOL gboolean
 meta_rectangle_overlaps_with_region (const GList         *spanning_rects,
                                      const MetaRectangle *rect)
 {
@@ -882,7 +885,7 @@ meta_rectangle_overlaps_with_region (const GList         *spanning_rects,
 }
 
 
-void
+LOCAL_SYMBOL void
 meta_rectangle_clamp_to_fit_into_region (const GList         *spanning_rects,
                                          FixedDirections      fixed_directions,
                                          MetaRectangle       *rect,
@@ -952,7 +955,7 @@ meta_rectangle_clamp_to_fit_into_region (const GList         *spanning_rects,
     }
 }
 
-void
+LOCAL_SYMBOL void
 meta_rectangle_clip_to_region (const GList         *spanning_rects,
                                FixedDirections      fixed_directions,
                                MetaRectangle       *rect)
@@ -1029,7 +1032,7 @@ meta_rectangle_clip_to_region (const GList         *spanning_rects,
     }
 }
 
-void
+LOCAL_SYMBOL void
 meta_rectangle_shove_into_region (const GList         *spanning_rects,
                                   FixedDirections      fixed_directions,
                                   MetaRectangle       *rect)
@@ -1129,7 +1132,7 @@ meta_rectangle_shove_into_region (const GList         *spanning_rects,
     }
 }
 
-void
+LOCAL_SYMBOL void
 meta_rectangle_find_linepoint_closest_to_point (double x1,
                                                 double y1,
                                                 double x2,
@@ -1192,7 +1195,7 @@ meta_rectangle_find_linepoint_closest_to_point (double x1,
 /*                                                                         */
 /***************************************************************************/
 
-gboolean
+LOCAL_SYMBOL gboolean
 meta_rectangle_edge_aligns (const MetaRectangle *rect, const MetaEdge *edge)
 {
   /* The reason for the usage of <= below instead of < is because we are
@@ -1378,7 +1381,7 @@ get_disjoint_strut_rect_list_in_region (const GSList        *old_struts,
   return strut_rects;
 }
 
-gint
+LOCAL_SYMBOL gint
 meta_rectangle_edge_cmp_ignore_type (gconstpointer a, gconstpointer b)
 {
   const MetaEdge *a_edge_rect = (gconstpointer) a;
@@ -1422,7 +1425,7 @@ meta_rectangle_edge_cmp_ignore_type (gconstpointer a, gconstpointer b)
 }
 
 /* To make things easily testable, provide a nice way of sorting edges */
-gint
+LOCAL_SYMBOL gint
 meta_rectangle_edge_cmp (gconstpointer a, gconstpointer b)
 {
   const MetaEdge *a_edge_rect = (gconstpointer) a;
@@ -1702,7 +1705,7 @@ fix_up_edges (MetaRectangle *rect,         MetaEdge *edge,
  * This function removes intersections of edges with the rectangles from the
  * list of edges.
  */
-GList*
+LOCAL_SYMBOL GList*
 meta_rectangle_remove_intersections_with_boxes_from_edges (
   GList        *edges,
   const GSList *rectangles)
@@ -1770,7 +1773,7 @@ meta_rectangle_remove_intersections_with_boxes_from_edges (
  *
  * This function is trying to find all the edges of an onscreen region.
  */
-GList*
+LOCAL_SYMBOL GList*
 meta_rectangle_find_onscreen_edges (const MetaRectangle *basic_rect,
                                     const GSList        *all_struts)
 {
@@ -1856,7 +1859,7 @@ meta_rectangle_find_onscreen_edges (const MetaRectangle *basic_rect,
  * meta_rectangle_find_nonintersected_monitor_edges: (skip)
  *
  */
-GList*
+LOCAL_SYMBOL GList*
 meta_rectangle_find_nonintersected_monitor_edges (
                                     const GList         *monitor_rects,
                                     const GSList        *all_struts)

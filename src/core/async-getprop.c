@@ -27,6 +27,9 @@
  * used in advertising or otherwise to promote the sale, use or other dealings
  * in this Software without prior written authorization from The Open Group.
  */
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 #include <assert.h>
 
@@ -513,7 +516,7 @@ maybe_free_display_data (AgPerDisplayData *dd)
     }
 }
 
-AgGetPropertyTask*
+LOCAL_SYMBOL AgGetPropertyTask*
 ag_task_create (Display *dpy,
                 Window   window,
                 Atom     property,
@@ -580,7 +583,7 @@ free_task (AgGetPropertyTask *task)
   XFree (task);
 }
 
-Status
+LOCAL_SYMBOL Status
 ag_task_get_reply_and_free (AgGetPropertyTask  *task,
                             Atom               *actual_type,
                             int                *actual_format,
@@ -624,31 +627,31 @@ ag_task_get_reply_and_free (AgGetPropertyTask  *task,
   return Success;
 }
 
-Bool
+LOCAL_SYMBOL Bool
 ag_task_have_reply (AgGetPropertyTask *task)
 {
   return task->have_reply;
 }
 
-Atom
+LOCAL_SYMBOL Atom
 ag_task_get_property (AgGetPropertyTask *task)
 {
   return task->property;
 }
 
-Window
+LOCAL_SYMBOL Window
 ag_task_get_window (AgGetPropertyTask *task)
 {
   return task->window;
 }
 
-Display*
+LOCAL_SYMBOL Display*
 ag_task_get_display (AgGetPropertyTask *task)
 {
   return task->dd->display;
 }
 
-AgGetPropertyTask*
+LOCAL_SYMBOL AgGetPropertyTask*
 ag_get_next_completed_task (Display *display)
 {
   AgPerDisplayData *dd;
@@ -667,13 +670,13 @@ ag_get_next_completed_task (Display *display)
   return (AgGetPropertyTask*) dd->completed_tasks;
 }
 
-void*
+LOCAL_SYMBOL void*
 ag_Xmalloc (unsigned long bytes)
 {
   return (void*) Xmalloc (bytes);
 }
 
-void*
+LOCAL_SYMBOL void*
 ag_Xmalloc0 (unsigned long bytes)
 {
   return (void*) Xcalloc (bytes, 1);

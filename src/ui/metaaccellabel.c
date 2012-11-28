@@ -144,7 +144,7 @@ meta_accel_label_init (MetaAccelLabel *accel_label)
   meta_accel_label_update (accel_label);
 }
 
-GtkWidget*
+LOCAL_SYMBOL GtkWidget*
 meta_accel_label_new_with_mnemonic (const gchar *string)
 {
   MetaAccelLabel *accel_label;
@@ -183,7 +183,7 @@ meta_accel_label_finalize (GObject *object)
   G_OBJECT_CLASS (meta_accel_label_parent_class)->finalize (object);
 }
 
-void
+LOCAL_SYMBOL void
 meta_accel_label_set_accelerator (MetaAccelLabel         *accel_label,
                                   guint                   accelerator_key,
                                   MetaVirtualModifier     accelerator_mods)

@@ -56,7 +56,7 @@ meta_finish_workspace_switch (MetaCompScreen *info)
 
 }
 
-void
+LOCAL_SYMBOL void
 meta_switch_workspace_completed (MetaScreen *screen)
 {
   MetaCompScreen *info = meta_screen_get_compositor_data (screen);
@@ -351,7 +351,7 @@ meta_empty_stage_input_region (MetaScreen *screen)
   meta_set_stage_input_region (screen, region);
 }
 
-gboolean
+LOCAL_SYMBOL gboolean
 meta_begin_modal_for_plugin (MetaScreen       *screen,
                              MetaPlugin       *plugin,
                              Window            grab_window,
@@ -421,7 +421,7 @@ meta_begin_modal_for_plugin (MetaScreen       *screen,
   return FALSE;
 }
 
-void
+LOCAL_SYMBOL void
 meta_end_modal_for_plugin (MetaScreen     *screen,
                            MetaPlugin     *plugin,
                            guint32         timestamp)
@@ -447,7 +447,7 @@ meta_end_modal_for_plugin (MetaScreen     *screen,
 /* This is used when reloading plugins to make sure we don't have
  * a left-over modal grab for this screen.
  */
-void
+LOCAL_SYMBOL void
 meta_check_end_modal (MetaScreen *screen)
 {
   MetaDisplay    *display    = meta_screen_get_display (screen);

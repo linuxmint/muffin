@@ -71,7 +71,7 @@ meta_tile_preview_draw (GtkWidget *widget,
   return FALSE;
 }
 
-MetaTilePreview *
+LOCAL_SYMBOL MetaTilePreview *
 meta_tile_preview_new (int      screen_number)
 {
   MetaTilePreview *preview;
@@ -135,7 +135,7 @@ meta_tile_preview_new (int      screen_number)
   return preview;
 }
 
-void
+LOCAL_SYMBOL void
 meta_tile_preview_free (MetaTilePreview *preview)
 {
   gtk_widget_destroy (preview->preview_window);
@@ -146,7 +146,7 @@ meta_tile_preview_free (MetaTilePreview *preview)
   g_free (preview);
 }
 
-void
+LOCAL_SYMBOL void
 meta_tile_preview_show (MetaTilePreview *preview,
                         MetaRectangle   *tile_rect)
 {
@@ -179,13 +179,13 @@ meta_tile_preview_show (MetaTilePreview *preview,
                           preview->tile_rect.width, preview->tile_rect.height);
 }
 
-void
+LOCAL_SYMBOL void
 meta_tile_preview_hide (MetaTilePreview *preview)
 {
   gtk_widget_hide (preview->preview_window);
 }
 
-Window
+LOCAL_SYMBOL Window
 meta_tile_preview_get_xwindow (MetaTilePreview *preview,
                                gulong          *create_serial)
 {

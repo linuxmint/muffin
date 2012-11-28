@@ -32,20 +32,20 @@
 #include <sys/wait.h>
 
 #ifndef HAVE_SM
-void
+LOCAL_SYMBOL void
 meta_session_init (const char *client_id,
                    const char *save_file)
 {
   meta_topic (META_DEBUG_SM, "Compiled without session management support\n");
 }
 
-const MetaWindowSessionInfo*
+LOCAL_SYMBOL const MetaWindowSessionInfo*
 meta_window_lookup_saved_state (MetaWindow *window)
 {
   return NULL;
 }
 
-void
+LOCAL_SYMBOL void
 meta_window_release_saved_state (const MetaWindowSessionInfo *info)
 {
   ;
@@ -220,7 +220,7 @@ static gpointer session_connection = NULL;
 static ClientState current_state = STATE_DISCONNECTED;
 static gboolean interaction_allowed = FALSE;
 
-void
+LOCAL_SYMBOL void
 meta_session_init (const char *previous_client_id,
                    const char *previous_save_file)
 {
@@ -1623,7 +1623,7 @@ find_best_match (GSList     *infos,
     return infos->data;
 }
 
-const MetaWindowSessionInfo*
+LOCAL_SYMBOL const MetaWindowSessionInfo*
 meta_window_lookup_saved_state (MetaWindow *window)
 {
   GSList *possibles;
@@ -1658,7 +1658,7 @@ meta_window_lookup_saved_state (MetaWindow *window)
   return info;
 }
 
-void
+LOCAL_SYMBOL void
 meta_window_release_saved_state (const MetaWindowSessionInfo *info)
 {
   /* We don't want to use the same saved state again for another

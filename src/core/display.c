@@ -187,7 +187,7 @@ static void    prefs_changed_callback    (MetaPreference pref,
 static void    sanity_check_timestamps   (MetaDisplay *display,
                                           guint32      known_good_timestamp);
 
-MetaGroup*     get_focussed_group (MetaDisplay *display);
+static MetaGroup*     get_focussed_group (MetaDisplay *display);
 
 static void
 meta_display_get_property(GObject         *object,
@@ -427,7 +427,7 @@ meta_display_init (MetaDisplay *disp)
  *
  * \ingroup main
  */
-gboolean
+LOCAL_SYMBOL gboolean
 meta_display_open (void)
 {
   Display *xdisplay;
@@ -990,7 +990,7 @@ meta_display_list_windows (MetaDisplay          *display,
   return winlist;
 }
 
-void
+LOCAL_SYMBOL void
 meta_display_close (MetaDisplay *display,
                     guint32      timestamp)
 {
@@ -1096,7 +1096,7 @@ meta_display_screen_for_root (MetaDisplay *display,
   return NULL;
 }
 
-MetaScreen*
+LOCAL_SYMBOL MetaScreen*
 meta_display_screen_for_xwindow (MetaDisplay *display,
                                  Window       xwindow)
 {
@@ -1118,7 +1118,7 @@ meta_display_screen_for_xwindow (MetaDisplay *display,
   return meta_display_screen_for_x_screen (display, attr.screen);
 }
 
-MetaScreen*
+LOCAL_SYMBOL MetaScreen*
 meta_display_screen_for_x_screen (MetaDisplay *display,
                                   Screen      *xscreen)
 {
@@ -1139,7 +1139,7 @@ meta_display_screen_for_x_screen (MetaDisplay *display,
 }
 
 /* Grab/ungrab routines taken from fvwm */
-void
+LOCAL_SYMBOL void
 meta_display_grab (MetaDisplay *display)
 {
   if (display->server_grab_count == 0)
@@ -1151,7 +1151,7 @@ meta_display_grab (MetaDisplay *display)
                 display->server_grab_count);
 }
 
-void
+LOCAL_SYMBOL void
 meta_display_ungrab (MetaDisplay *display)
 {
   if (display->server_grab_count == 0)
@@ -1182,7 +1182,7 @@ meta_display_ungrab (MetaDisplay *display)
  * \return  The singleton X display, or NULL if "xdisplay" isn't the one
  *          we're managing.
  */
-MetaDisplay*
+LOCAL_SYMBOL MetaDisplay*
 meta_display_for_x_display (Display *xdisplay)
 {
   if (the_display->xdisplay == xdisplay)
@@ -1200,7 +1200,7 @@ meta_display_for_x_display (Display *xdisplay)
  * \return  The only MetaDisplay there is.  This can be NULL, but only
  *          during startup.
  */
-MetaDisplay*
+LOCAL_SYMBOL MetaDisplay*
 meta_get_display (void)
 {
   return the_display;
@@ -1293,7 +1293,7 @@ grab_op_is_keyboard (MetaGrabOp op)
     }
 }
 
-gboolean
+LOCAL_SYMBOL gboolean
 meta_grab_op_is_resizing (MetaGrabOp op)
 {
   switch (op)
@@ -1322,7 +1322,7 @@ meta_grab_op_is_resizing (MetaGrabOp op)
     }
 }
 
-gboolean
+LOCAL_SYMBOL gboolean
 meta_grab_op_is_moving (MetaGrabOp op)
 {
   switch (op)
@@ -1539,7 +1539,7 @@ window_raise_with_delay_callback (void *data)
   return FALSE;
 }
 
-void
+LOCAL_SYMBOL void
 meta_display_queue_autoraise_callback (MetaDisplay *display,
                                        MetaWindow  *window)
 {
@@ -2824,7 +2824,7 @@ event_get_time (MetaDisplay *display,
 }
 
 #ifdef WITH_VERBOSE_MODE
-const char*
+LOCAL_SYMBOL const char*
 meta_event_detail_to_string (int d)
 {
   const char *detail = "???";
@@ -2863,7 +2863,7 @@ meta_event_detail_to_string (int d)
 #endif /* WITH_VERBOSE_MODE */
 
 #ifdef WITH_VERBOSE_MODE
-const char*
+LOCAL_SYMBOL const char*
 meta_event_mode_to_string (int m)
 {
   const char *mode = "???";
@@ -3285,14 +3285,14 @@ meta_spew_event (MetaDisplay *display,
 }
 #endif /* WITH_VERBOSE_MODE */
 
-MetaWindow*
+LOCAL_SYMBOL MetaWindow*
 meta_display_lookup_x_window (MetaDisplay *display,
                               Window       xwindow)
 {
   return g_hash_table_lookup (display->window_ids, &xwindow);
 }
 
-void
+LOCAL_SYMBOL void
 meta_display_register_x_window (MetaDisplay *display,
                                 Window      *xwindowp,
                                 MetaWindow  *window)
@@ -3302,7 +3302,7 @@ meta_display_register_x_window (MetaDisplay *display,
   g_hash_table_insert (display->window_ids, xwindowp, window);
 }
 
-void
+LOCAL_SYMBOL void
 meta_display_unregister_x_window (MetaDisplay *display,
                                   Window       xwindow)
 {
@@ -3314,7 +3314,7 @@ meta_display_unregister_x_window (MetaDisplay *display,
   remove_pending_pings_for_window (display, xwindow);
 }
 
-void
+LOCAL_SYMBOL void
 meta_display_notify_window_created (MetaDisplay  *display,
                                     MetaWindow   *window)
 {
@@ -3348,7 +3348,7 @@ meta_display_xwindow_is_a_no_focus_window (MetaDisplay *display,
   return is_a_no_focus_window;
 }
 
-Cursor
+LOCAL_SYMBOL Cursor
 meta_display_create_x_cursor (MetaDisplay *display,
                               MetaCursor cursor)
 {
@@ -3457,7 +3457,7 @@ xcursor_for_op (MetaDisplay *display,
   return meta_display_create_x_cursor (display, cursor);
 }
 
-void
+LOCAL_SYMBOL void
 meta_display_set_grab_op_cursor (MetaDisplay *display,
                                  MetaScreen  *screen,
                                  MetaGrabOp   op,
@@ -3876,7 +3876,7 @@ meta_display_get_grab_op (MetaDisplay *display)
   return display->grab_op;
 }
 
-void
+LOCAL_SYMBOL void
 meta_display_check_threshold_reached (MetaDisplay *display,
                                       int          x,
                                       int          y)
@@ -3955,7 +3955,7 @@ meta_change_button_grab (MetaDisplay *display,
   meta_error_trap_pop (display);
 }
 
-void
+LOCAL_SYMBOL void
 meta_display_grab_window_buttons (MetaDisplay *display,
                                   Window       xwindow)
 {  
@@ -4005,7 +4005,7 @@ meta_display_grab_window_buttons (MetaDisplay *display,
     }
 }
 
-void
+LOCAL_SYMBOL void
 meta_display_ungrab_window_buttons  (MetaDisplay *display,
                                      Window       xwindow)
 {
@@ -4033,7 +4033,7 @@ meta_display_ungrab_window_buttons  (MetaDisplay *display,
 
 /* Grab buttons we only grab while unfocused in click-to-focus mode */
 #define MAX_FOCUS_BUTTON 4
-void
+LOCAL_SYMBOL void
 meta_display_grab_focus_window_button (MetaDisplay *display,
                                        MetaWindow  *window)
 {
@@ -4082,7 +4082,7 @@ meta_display_grab_focus_window_button (MetaDisplay *display,
   }
 }
 
-void
+LOCAL_SYMBOL void
 meta_display_ungrab_focus_window_button (MetaDisplay *display,
                                          MetaWindow  *window)
 {
@@ -4105,7 +4105,7 @@ meta_display_ungrab_focus_window_button (MetaDisplay *display,
   }
 }
 
-void
+LOCAL_SYMBOL void
 meta_display_increment_event_serial (MetaDisplay *display)
 {
   /* We just make some random X request */
@@ -4113,7 +4113,7 @@ meta_display_increment_event_serial (MetaDisplay *display)
                    display->atom__MOTIF_WM_HINTS);
 }
 
-void
+LOCAL_SYMBOL void
 meta_display_update_active_window_hint (MetaDisplay *display)
 {
   GSList *tmp;
@@ -4142,7 +4142,7 @@ meta_display_update_active_window_hint (MetaDisplay *display)
     }
 }
 
-void
+LOCAL_SYMBOL void
 meta_display_queue_retheme_all_windows (MetaDisplay *display)
 {
   GSList* windows;
@@ -4166,13 +4166,13 @@ meta_display_queue_retheme_all_windows (MetaDisplay *display)
   g_slist_free (windows);
 }
 
-void
+LOCAL_SYMBOL void
 meta_display_retheme_all (void)
 {
   meta_display_queue_retheme_all_windows (meta_get_display ());
 }
 
-void 
+LOCAL_SYMBOL void 
 meta_display_set_cursor_theme (const char *theme, 
 			       int         size)
 {
@@ -4306,7 +4306,7 @@ meta_display_ping_timeout (gpointer data)
  *
  * \ingroup pings
  */
-void
+LOCAL_SYMBOL void
 meta_display_ping_window (MetaDisplay       *display,
 			  MetaWindow        *window,
 			  guint32            timestamp,
@@ -4481,7 +4481,7 @@ process_pong_message (MetaDisplay    *display,
  *
  * \ingroup pings
  */
-gboolean
+LOCAL_SYMBOL gboolean
 meta_display_window_has_pending_pings (MetaDisplay *display,
 				       MetaWindow  *window)
 {
@@ -4498,7 +4498,7 @@ meta_display_window_has_pending_pings (MetaDisplay *display,
   return FALSE;
 }
 
-MetaGroup*
+static MetaGroup*
 get_focussed_group (MetaDisplay *display)
 {
   if (display->focus_window)
@@ -4784,7 +4784,7 @@ meta_display_get_tab_current (MetaDisplay   *display,
     return NULL;
 }
 
-int
+LOCAL_SYMBOL int
 meta_resize_gravity_from_grab_op (MetaGrabOp op)
 {
   int gravity;
@@ -5067,7 +5067,7 @@ meta_display_unmanage_screen (MetaDisplay *display,
     meta_display_close (display, timestamp);
 }
 
-void
+LOCAL_SYMBOL void
 meta_display_unmanage_windows_for_screen (MetaDisplay *display,
                                           MetaScreen  *screen,
                                           guint32      timestamp)
@@ -5099,7 +5099,7 @@ meta_display_unmanage_windows_for_screen (MetaDisplay *display,
   g_slist_free (winlist);
 }
 
-int
+LOCAL_SYMBOL int
 meta_display_stack_cmp (const void *a,
                         const void *b)
 {
@@ -5145,7 +5145,7 @@ meta_display_sort_windows_by_stacking (MetaDisplay *display,
   return copy;
 }
 
-void
+LOCAL_SYMBOL void
 meta_display_devirtualize_modifiers (MetaDisplay        *display,
                                      MetaVirtualModifier modifiers,
                                      unsigned int       *mask)
@@ -5242,7 +5242,7 @@ prefs_changed_callback (MetaPreference pref,
     }
 }
 
-void
+LOCAL_SYMBOL void
 meta_display_increment_focus_sentinel (MetaDisplay *display)
 {
   unsigned long data[1];
@@ -5258,7 +5258,7 @@ meta_display_increment_focus_sentinel (MetaDisplay *display)
   display->sentinel_counter += 1;
 }
 
-void
+LOCAL_SYMBOL void
 meta_display_decrement_focus_sentinel (MetaDisplay *display)
 {
   display->sentinel_counter -= 1;
@@ -5267,7 +5267,7 @@ meta_display_decrement_focus_sentinel (MetaDisplay *display)
     display->sentinel_counter = 0;
 }
 
-gboolean
+LOCAL_SYMBOL gboolean
 meta_display_focus_sentinel_clear (MetaDisplay *display)
 {
   return (display->sentinel_counter == 0);
@@ -5414,7 +5414,7 @@ meta_display_focus_the_no_focus_window (MetaDisplay *display,
   meta_display_remove_autoraise_callback (display);
 }
 
-void
+LOCAL_SYMBOL void
 meta_display_remove_autoraise_callback (MetaDisplay *display)
 {
   if (display->autoraise_timeout_id != 0)
@@ -5425,7 +5425,7 @@ meta_display_remove_autoraise_callback (MetaDisplay *display)
     }
 }
 
-void
+LOCAL_SYMBOL void
 meta_display_overlay_key_activate (MetaDisplay *display)
 {
   g_signal_emit (display, display_signals[OVERLAY_KEY], 0);

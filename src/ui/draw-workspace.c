@@ -25,6 +25,10 @@
  * 02110-1335, USA.
  */
 
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include "draw-workspace.h"
 #include "theme-private.h"
 
@@ -153,7 +157,7 @@ draw_window (GtkWidget                   *widget,
   cairo_restore (cr);
 }
 
-void
+LOCAL_SYMBOL void
 wnck_draw_workspace (GtkWidget                   *widget,
                      cairo_t                     *cr,
                      int                          x,

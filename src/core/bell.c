@@ -287,7 +287,7 @@ bell_visual_notify (MetaDisplay *display,
     }
 }
 
-void
+LOCAL_SYMBOL void
 meta_bell_notify (MetaDisplay *display, 
 		  XkbAnyEvent *xkb_ev)
 {
@@ -339,7 +339,7 @@ meta_bell_notify (MetaDisplay *display,
 }
 #endif /* HAVE_XKB */
 
-void
+LOCAL_SYMBOL void
 meta_bell_set_audible (MetaDisplay *display, gboolean audible)
 {
 #ifdef HAVE_XKB
@@ -358,7 +358,7 @@ meta_bell_set_audible (MetaDisplay *display, gboolean audible)
 #endif /* HAVE_XKB */
 }
 
-gboolean
+LOCAL_SYMBOL gboolean
 meta_bell_init (MetaDisplay *display)
 {
 #ifdef HAVE_XKB
@@ -395,7 +395,7 @@ meta_bell_init (MetaDisplay *display)
   return FALSE;
 }
 
-void
+LOCAL_SYMBOL void
 meta_bell_shutdown (MetaDisplay *display)
 {
 #ifdef HAVE_XKB
@@ -415,7 +415,7 @@ meta_bell_shutdown (MetaDisplay *display)
  *
  * \param frame  The frame which is being destroyed
  */
-void
+LOCAL_SYMBOL void
 meta_bell_notify_frame_destroy (MetaFrame *frame)
 {
   if (frame->is_flashing) 
