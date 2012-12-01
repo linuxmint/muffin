@@ -183,7 +183,11 @@ if test x$found_introspection != xno; then
   # parallel install, there's no real reason to change directories, filenames,
   # etc. as we change the Muffin tarball version. Note that this must match
   # api_version in src/Makefile.am
-  META_GIR=Meta_3_0_gir
+
+  # This is set to a magic number which is different from the API which
+  # Mutter uses.  Otherwise there will be dependency conflicts in RPM
+  # based distributions that automatically resolve typelib file dependencies.
+  META_GIR=Meta_Muffin_0_gir
   # META_GIR=[Meta_]muffin_major_version[_]muffin_minor_version[_gir]
   AC_SUBST(META_GIR)
 fi
