@@ -44,7 +44,7 @@
  */
 #define KEY_TITLEBAR_FONT "titlebar-font"
 #define KEY_NUM_WORKSPACES "num-workspaces"
-#define KEY_WORKSPACE_NAMES "workspace-names"
+#define KEY_WORKSPACE_NAMES "workspace-name-overrides"
 #define KEY_WORKSPACE_CYCLE "workspace-cycle"
 
 /* Keys from "foreign" schemas */
@@ -61,6 +61,7 @@
 /* These are the different schemas we are keeping
  * a GSettings instance for */
 #define SCHEMA_GENERAL         "org.gnome.desktop.wm.preferences"
+#define SCHEMA_CINNAMON          "org.cinnamon"
 #define SCHEMA_MUFFIN          "org.cinnamon.muffin"
 #define SCHEMA_INTERFACE       "org.gnome.desktop.interface"
 
@@ -833,6 +834,10 @@ meta_prefs_init (void)
   settings = g_settings_new (SCHEMA_MUFFIN);
   g_signal_connect (settings, "changed", G_CALLBACK (settings_changed), NULL);
   g_hash_table_insert (settings_schemas, g_strdup (SCHEMA_MUFFIN), settings);
+
+  settings = g_settings_new (SCHEMA_CINNAMON);
+  g_signal_connect (settings, "changed", G_CALLBACK (settings_changed), NULL);
+  g_hash_table_insert (settings_schemas, g_strdup (SCHEMA_CINNAMON), settings);
 
   /* Individual keys we watch outside of our schemas */
   settings = g_settings_new (SCHEMA_INTERFACE);
@@ -1815,7 +1820,7 @@ update_workspace_names (void)
   int n_workspace_names, n_names;
   gboolean changed = FALSE;
 
-  names = g_settings_get_strv (SETTINGS (SCHEMA_GENERAL), KEY_WORKSPACE_NAMES);
+  names = g_settings_get_strv (SETTINGS (SCHEMA_CINNAMON), KEY_WORKSPACE_NAMES);
   n_names = g_strv_length (names);
   n_workspace_names = workspace_names ? g_strv_length (workspace_names) : 0;
 
@@ -1908,7 +1913,7 @@ meta_prefs_change_workspace_name (int         num,
       g_variant_builder_add (&builder, "s", value);
     }
 
-  g_settings_set_value (SETTINGS (SCHEMA_GENERAL), KEY_WORKSPACE_NAMES,
+  g_settings_set_value (SETTINGS (SCHEMA_CINNAMON), KEY_WORKSPACE_NAMES,
                         g_variant_builder_end (&builder));
 }
 
