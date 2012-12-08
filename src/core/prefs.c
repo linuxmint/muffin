@@ -1013,6 +1013,9 @@ settings_changed (GSettings *settings,
   const GVariantType *type;
   MetaEnumPreference *cursor;
   gboolean found_enum;
+  gchar *schema;
+  
+  g_object_get(settings, "schema", &schema, NULL);
 
   /* String array, handled separately */
   if (strcmp (key, KEY_WORKSPACE_NAMES) == 0)
@@ -1021,6 +1024,9 @@ settings_changed (GSettings *settings,
         queue_changed (META_PREF_WORKSPACE_NAMES);
       return;
     }
+  
+  if (strcmp(schema, SCHEMA_CINNAMON) == 0)
+    return;
 
   value = g_settings_get_value (settings, key);
   type = g_variant_get_type (value);
