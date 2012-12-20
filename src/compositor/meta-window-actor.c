@@ -1511,7 +1511,9 @@ meta_window_actor_new (MetaWindow *window)
   /* Hang our compositor window state off the MetaWindow for fast retrieval */
   meta_window_set_compositor_private (window, G_OBJECT (self));
   
-  if (window->type == META_WINDOW_POPUP_MENU){
+  if (window->type == META_WINDOW_DROPDOWN_MENU ||
+      window->type == META_WINDOW_POPUP_MENU ||
+      window->type == META_WINDOW_COMBO){
     clutter_container_add_actor (CLUTTER_CONTAINER (info->top_window_group),
 			       CLUTTER_ACTOR (self));
   }
