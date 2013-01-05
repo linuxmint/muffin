@@ -1531,6 +1531,10 @@ meta_window_actor_new (MetaWindow *window)
     }
     clutter_container_add_actor (CLUTTER_CONTAINER (info->top_window_group),
 		       CLUTTER_ACTOR (self));
+  }
+  else if (window->type == META_WINDOW_DESKTOP) {
+    clutter_container_add_actor (CLUTTER_CONTAINER (info->bottom_window_group),
+			       CLUTTER_ACTOR (self));
   }else{
     clutter_container_add_actor (CLUTTER_CONTAINER (info->window_group),
 			       CLUTTER_ACTOR (self));

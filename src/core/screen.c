@@ -2017,6 +2017,16 @@ meta_screen_tile_preview_hide (MetaScreen *screen)
     meta_tile_preview_hide (screen->tile_preview);
 }
 
+/**
+ * meta_screen_get_mouse_window:
+ * @screen: an X screen structure.
+ * @not_this_one: window to be excluded
+ *
+ * Gets the #MetaWindow pointed by the mouse
+ *
+ * Return value: (transfer none): the #MetaWindow pointed by the mouse
+ *  %NULL when window not found
+ */
 MetaWindow*
 meta_screen_get_mouse_window (MetaScreen  *screen,
                               MetaWindow  *not_this_one)
