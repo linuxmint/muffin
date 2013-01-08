@@ -56,12 +56,6 @@
 
 #include <X11/extensions/Xcomposite.h>
 
-/* Windows that unmaximize to a size bigger than that fraction of the workarea
- * will be scaled down to that size (while maintaining aspect ratio).
- * Windows that cover an area greater then this size are automaximized on map.
- */
-#define MAX_UNMAXIMIZED_WINDOW_AREA .8
-
 static int destroying_windows_disallowed = 0;
 
 
@@ -3018,17 +3012,6 @@ meta_window_show (MetaWindow *window)
 
   if (!window->placed)
     {
-      if (window->showing_for_first_time && window->has_maximize_func)
-        {
-          MetaRectangle work_area;
-          meta_window_get_work_area_for_monitor (window, window->monitor->number, &work_area);
-          /* Automaximize windows that map with a size > MAX_UNMAXIMIZED_WINDOW_AREA of the work area */
-          if (window->rect.width * window->rect.height > work_area.width * work_area.height * MAX_UNMAXIMIZED_WINDOW_AREA)
-            {
-              window->maximize_horizontally_after_placement = TRUE;
-              window->maximize_vertically_after_placement = TRUE;
-            }
-        }
       meta_window_force_placement (window);
     }
 
@@ -3812,27 +3795,6 @@ meta_window_unmaximize_internal (MetaWindow        *window,
        * being unmaximized.
        */
       meta_window_get_client_root_coords (window, &target_rect);
-
-      /* Avoid unmaximizing to "almost maximized" size when the previous size
-       * is greater then 80% of the work area use MAX_UNMAXIMIZED_WINDOW_AREA of the work area as upper limit
-       * while maintaining the aspect ratio.
-       */
-      if (unmaximize_horizontally && unmaximize_vertically &&
-          desired_rect->width * desired_rect->height > work_area.width * work_area.height * MAX_UNMAXIMIZED_WINDOW_AREA)
-        {
-          if (desired_rect->width > desired_rect->height)
-            {
-              float aspect = (float)desired_rect->height / (float)desired_rect->width;
-              desired_rect->width = MAX (work_area.width * sqrt (MAX_UNMAXIMIZED_WINDOW_AREA), window->size_hints.min_width);
-              desired_rect->height = MAX (desired_rect->width * aspect, window->size_hints.min_height);
-            }
-          else
-            {
-              float aspect = (float)desired_rect->width / (float)desired_rect->height;
-              desired_rect->height = MAX (work_area.height * sqrt (MAX_UNMAXIMIZED_WINDOW_AREA), window->size_hints.min_height);
-              desired_rect->width = MAX (desired_rect->height * aspect, window->size_hints.min_width);
-            }
-        }
 
       if (unmaximize_horizontally)
         {
