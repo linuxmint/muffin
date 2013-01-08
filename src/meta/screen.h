@@ -85,6 +85,8 @@ int  meta_screen_get_primary_monitor  (MetaScreen    *screen);
 void meta_screen_get_monitor_geometry (MetaScreen    *screen,
                                        int            monitor,
                                        MetaRectangle *geometry);
+MetaWindow* meta_screen_get_mouse_window (MetaScreen *screen,
+                                          MetaWindow *not_this_one);
 
 typedef enum
 {

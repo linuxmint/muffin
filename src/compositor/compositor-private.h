@@ -35,7 +35,7 @@ struct _MetaCompScreen
 {
   MetaScreen            *screen;
 
-  ClutterActor          *stage, *window_group, *overlay_group, *top_window_group;
+  ClutterActor          *stage, *bottom_window_group, *window_group, *overlay_group, *top_window_group;
   ClutterActor          *background_actor;
   ClutterActor		*hidden_group;
   GList                 *windows;
