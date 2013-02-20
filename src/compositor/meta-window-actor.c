@@ -575,7 +575,7 @@ meta_window_actor_get_shadow_params (MetaWindowActor  *self,
                                   params);
 }
 
-void
+LOCAL_SYMBOL void
 meta_window_actor_get_shape_bounds (MetaWindowActor       *self,
                                     cairo_rectangle_int_t *bounds)
 {
@@ -967,7 +967,7 @@ meta_window_actor_thaw (MetaWindowActor *self)
     meta_window_actor_damage_all (self);
 }
 
-gboolean
+LOCAL_SYMBOL gboolean
 meta_window_actor_effect_in_progress (MetaWindowActor *self)
 {
   return (self->priv->minimize_in_progress ||
@@ -1086,7 +1086,7 @@ meta_window_actor_after_effects (MetaWindowActor *self)
     clutter_actor_queue_redraw (priv->actor);
 }
 
-void
+LOCAL_SYMBOL void
 meta_window_actor_effect_completed (MetaWindowActor *self,
                                     gulong           event)
 {
@@ -1188,7 +1188,7 @@ meta_window_actor_detach (MetaWindowActor *self)
   meta_window_actor_queue_create_pixmap (self);
 }
 
-gboolean
+LOCAL_SYMBOL gboolean
 meta_window_actor_should_unredirect (MetaWindowActor *self)
 {
   MetaWindow *metaWindow = meta_window_actor_get_meta_window (self);
@@ -1224,7 +1224,7 @@ meta_window_actor_should_unredirect (MetaWindowActor *self)
   return FALSE;
 }
 
-void
+LOCAL_SYMBOL void
 meta_window_actor_set_redirected (MetaWindowActor *self, gboolean state)
 {
   MetaWindow *metaWindow = meta_window_actor_get_meta_window (self);
@@ -1250,7 +1250,7 @@ meta_window_actor_set_redirected (MetaWindowActor *self, gboolean state)
     }
 }
 
-void
+LOCAL_SYMBOL void
 meta_window_actor_destroy (MetaWindowActor *self)
 {
   MetaWindow	      *window;
@@ -1300,7 +1300,7 @@ meta_window_actor_destroy (MetaWindowActor *self)
     clutter_actor_destroy (CLUTTER_ACTOR (self));
 }
 
-void
+LOCAL_SYMBOL void
 meta_window_actor_sync_actor_position (MetaWindowActor *self)
 {
   MetaWindowActorPrivate *priv = self->priv;
@@ -1371,7 +1371,7 @@ meta_window_actor_show (MetaWindowActor   *self,
     }
 }
 
-void
+LOCAL_SYMBOL void
 meta_window_actor_hide (MetaWindowActor *self,
                         MetaCompEffect   effect)
 {
@@ -1414,7 +1414,7 @@ meta_window_actor_hide (MetaWindowActor *self,
     clutter_actor_hide (CLUTTER_ACTOR (self));
 }
 
-void
+LOCAL_SYMBOL void
 meta_window_actor_maximize (MetaWindowActor    *self,
                             MetaRectangle      *old_rect,
                             MetaRectangle      *new_rect)
@@ -1443,7 +1443,7 @@ meta_window_actor_maximize (MetaWindowActor    *self,
     }
 }
 
-void
+LOCAL_SYMBOL void
 meta_window_actor_unmaximize (MetaWindowActor   *self,
                               MetaRectangle     *old_rect,
                               MetaRectangle     *new_rect)
@@ -1471,7 +1471,7 @@ meta_window_actor_unmaximize (MetaWindowActor   *self,
     }
 }
 
-MetaWindowActor *
+LOCAL_SYMBOL MetaWindowActor *
 meta_window_actor_new (MetaWindow *window)
 {
   MetaScreen	 	 *screen = meta_window_get_screen (window);
@@ -1549,7 +1549,7 @@ meta_window_actor_new (MetaWindow *window)
   return self;
 }
 
-void
+LOCAL_SYMBOL void
 meta_window_actor_mapped (MetaWindowActor *self)
 {
   MetaWindowActorPrivate *priv = self->priv;
@@ -1561,7 +1561,7 @@ meta_window_actor_mapped (MetaWindowActor *self)
   meta_window_actor_queue_create_pixmap (self);
 }
 
-void
+LOCAL_SYMBOL void
 meta_window_actor_unmapped (MetaWindowActor *self)
 {
   MetaWindowActorPrivate *priv = self->priv;
@@ -1699,7 +1699,7 @@ meta_window_actor_update_shape_region (MetaWindowActor *self,
  * Return value: (transfer none): the area obscured by the window,
  *  %NULL is the same as an empty region.
  */
-cairo_region_t *
+LOCAL_SYMBOL cairo_region_t *
 meta_window_actor_get_obscured_region (MetaWindowActor *self)
 {
   MetaWindowActorPrivate *priv = self->priv;
@@ -1746,7 +1746,7 @@ dump_region (cairo_region_t *region)
  * drawn. Regions not in @visible_region are completely obscured.
  * This will be set before painting then unset afterwards.
  */
-void
+LOCAL_SYMBOL void
 meta_window_actor_set_visible_region (MetaWindowActor *self,
                                       cairo_region_t  *visible_region)
 {
@@ -1768,7 +1768,7 @@ meta_window_actor_set_visible_region (MetaWindowActor *self,
  * shadow hid by the window itself. This will be set before painting
  * then unset afterwards.
  */
-void
+LOCAL_SYMBOL void
 meta_window_actor_set_visible_region_beneath (MetaWindowActor *self,
                                               cairo_region_t  *beneath_region)
 {
@@ -1795,7 +1795,7 @@ meta_window_actor_set_visible_region_beneath (MetaWindowActor *self,
  * Unsets the regions set by meta_window_actor_reset_visible_region() and
  * meta_window_actor_reset_visible_region_beneath()
  */
-void
+LOCAL_SYMBOL void
 meta_window_actor_reset_visible_regions (MetaWindowActor *self)
 {
   MetaWindowActorPrivate *priv = self->priv;
@@ -1974,7 +1974,7 @@ is_frozen (MetaWindowActor *self)
   return self->priv->freeze_count ? TRUE : FALSE;
 }
 
-void
+LOCAL_SYMBOL void
 meta_window_actor_process_damage (MetaWindowActor    *self,
                                   XDamageNotifyEvent *event)
 {
@@ -2016,7 +2016,7 @@ meta_window_actor_process_damage (MetaWindowActor    *self,
                                    event->area.height);
 }
 
-void
+LOCAL_SYMBOL void
 meta_window_actor_sync_visibility (MetaWindowActor *self)
 {
   MetaWindowActorPrivate *priv = self->priv;
@@ -2240,7 +2240,7 @@ check_needs_reshape (MetaWindowActor *self)
   meta_window_actor_invalidate_shadow (self);
 }
 
-void
+LOCAL_SYMBOL void
 meta_window_actor_update_shape (MetaWindowActor *self)
 {
   MetaWindowActorPrivate *priv = self->priv;
@@ -2255,7 +2255,7 @@ meta_window_actor_update_shape (MetaWindowActor *self)
   clutter_actor_queue_redraw (priv->actor);
 }
 
-void
+LOCAL_SYMBOL void
 meta_window_actor_pre_paint (MetaWindowActor *self)
 {
   MetaWindowActorPrivate *priv = self->priv;
@@ -2310,7 +2310,7 @@ meta_window_actor_pre_paint (MetaWindowActor *self)
   check_needs_shadow (self);
 }
 
-void
+LOCAL_SYMBOL void
 meta_window_actor_invalidate_shadow (MetaWindowActor *self)
 {
   MetaWindowActorPrivate *priv = self->priv;
@@ -2320,7 +2320,7 @@ meta_window_actor_invalidate_shadow (MetaWindowActor *self)
   clutter_actor_queue_redraw (CLUTTER_ACTOR (self));
 }
 
-void
+LOCAL_SYMBOL void
 meta_window_actor_update_opacity (MetaWindowActor *self)
 {
   MetaWindowActorPrivate *priv = self->priv;

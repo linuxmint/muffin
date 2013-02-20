@@ -631,7 +631,7 @@ maybe_leave_show_desktop_mode (MetaWindow *window)
     }
 }
 
-MetaWindow*
+LOCAL_SYMBOL MetaWindow*
 meta_window_new (MetaDisplay *display,
                  Window       xwindow,
                  gboolean     must_be_viewable)
@@ -762,7 +762,7 @@ maybe_filter_window (MetaDisplay       *display,
   return filtered;
 }
 
-gboolean
+LOCAL_SYMBOL gboolean
 meta_window_should_attach_to_parent (MetaWindow *window)
 {
   MetaWindow *parent;
@@ -787,7 +787,7 @@ meta_window_should_attach_to_parent (MetaWindow *window)
     }
 }
 
-MetaWindow*
+LOCAL_SYMBOL LOCAL_SYMBOL MetaWindow*
 meta_window_new_with_attrs (MetaDisplay       *display,
                             Window             xwindow,
                             gboolean           must_be_viewable,
@@ -1633,7 +1633,7 @@ detach_foreach_func (MetaWindow *window,
   return TRUE;
 }
 
-void
+LOCAL_SYMBOL void
 meta_window_unmanage (MetaWindow  *window,
                       guint32      timestamp)
 {
@@ -1913,7 +1913,7 @@ should_be_on_all_workspaces (MetaWindow *window)
      !meta_window_is_on_primary_monitor (window));
 }
 
-void
+LOCAL_SYMBOL void
 meta_window_update_on_all_workspaces (MetaWindow *window)
 {
   gboolean old_value;
@@ -2087,7 +2087,7 @@ set_net_wm_state (MetaWindow *window)
     }
 }
 
-gboolean
+LOCAL_SYMBOL gboolean
 meta_window_located_on_workspace (MetaWindow    *window,
                                   MetaWorkspace *workspace)
 {
@@ -2177,7 +2177,7 @@ meta_window_showing_on_its_workspace (MetaWindow *window)
   return showing;
 }
 
-gboolean
+LOCAL_SYMBOL gboolean
 meta_window_should_be_showing (MetaWindow  *window)
 {
   gboolean on_workspace;
@@ -2230,7 +2230,7 @@ implement_showing (MetaWindow *window,
   window->pending_compositor_effect = META_COMP_EFFECT_NONE;
 }
 
-void
+LOCAL_SYMBOL void
 meta_window_calc_showing (MetaWindow  *window)
 {
   implement_showing (window, meta_window_should_be_showing (window));
@@ -2455,7 +2455,7 @@ meta_window_flush_calc_showing (MetaWindow *window)
     }
 }
 
-void
+LOCAL_SYMBOL void
 meta_window_queue (MetaWindow *window, guint queuebits)
 {
   guint queuenum;
@@ -2636,7 +2636,7 @@ intervening_user_event_occurred (MetaWindow *window)
  * behavior is worthwhile.  The basic idea is to get more feedback about how
  * usage scenarios of "strict" focus users and what they expect.  See #326159.
  */
-gboolean
+LOCAL_SYMBOL gboolean
 __window_is_terminal (MetaWindow *window)
 {
   if (window == NULL || window->res_class == NULL)
@@ -3475,7 +3475,7 @@ save_user_window_placement (MetaWindow *window)
     }
 }
 
-void
+LOCAL_SYMBOL void
 meta_window_maximize_internal (MetaWindow        *window,
                                MetaMaximizeFlags  directions,
                                MetaRectangle     *saved_rect)
@@ -3632,7 +3632,7 @@ meta_window_is_on_primary_monitor (MetaWindow *window)
   return window->monitor->is_primary;
 }
 
-void
+LOCAL_SYMBOL void
 meta_window_tile (MetaWindow *window)
 {
   MetaMaximizeFlags directions;
@@ -3683,7 +3683,7 @@ meta_window_can_tile_maximized (MetaWindow *window)
   return window->has_maximize_func;
 }
 
-gboolean
+LOCAL_SYMBOL gboolean
 meta_window_can_tile_side_by_side (MetaWindow *window)
 {
   const MetaMonitorInfo *monitor;
@@ -3895,7 +3895,7 @@ meta_window_unmaximize (MetaWindow        *window,
  * Unlike meta_window_unmaximize(), tiling is not restored for windows
  * with a tile mode other than META_TILE_NONE.
  */
-void
+LOCAL_SYMBOL void
 meta_window_unmaximize_with_gravity (MetaWindow        *window,
                                      MetaMaximizeFlags  directions,
                                      int                new_width,
@@ -3911,7 +3911,7 @@ meta_window_unmaximize_with_gravity (MetaWindow        *window,
   meta_window_unmaximize_internal (window, directions, &desired_rect, gravity);
 }
 
-void
+LOCAL_SYMBOL void
 meta_window_make_above (MetaWindow  *window)
 {
   g_return_if_fail (!window->override_redirect);
@@ -3920,7 +3920,7 @@ meta_window_make_above (MetaWindow  *window)
   meta_window_raise (window);
 }
 
-void
+LOCAL_SYMBOL void
 meta_window_unmake_above (MetaWindow  *window)
 {
   g_return_if_fail (!window->override_redirect);
@@ -3943,7 +3943,7 @@ meta_window_set_above (MetaWindow *window,
   g_object_notify (G_OBJECT (window), "above");
 }
 
-void
+LOCAL_SYMBOL LOCAL_SYMBOL void
 meta_window_make_fullscreen_internal (MetaWindow  *window)
 {
   if (!window->fullscreen)
@@ -3979,7 +3979,7 @@ meta_window_make_fullscreen_internal (MetaWindow  *window)
     }
 }
 
-void
+LOCAL_SYMBOL void
 meta_window_make_fullscreen (MetaWindow  *window)
 {
   g_return_if_fail (!window->override_redirect);
@@ -3993,7 +3993,7 @@ meta_window_make_fullscreen (MetaWindow  *window)
     }
 }
 
-void
+LOCAL_SYMBOL void
 meta_window_unmake_fullscreen (MetaWindow  *window)
 {
   g_return_if_fail (!window->override_redirect);
@@ -4035,7 +4035,7 @@ meta_window_unmake_fullscreen (MetaWindow  *window)
     }
 }
 
-void
+LOCAL_SYMBOL void
 meta_window_update_fullscreen_monitors (MetaWindow    *window,
                                         unsigned long  top,
                                         unsigned long  bottom,
@@ -4063,7 +4063,7 @@ meta_window_update_fullscreen_monitors (MetaWindow    *window,
     }
 }
 
-void
+LOCAL_SYMBOL void
 meta_window_shade (MetaWindow  *window,
                    guint32      timestamp)
 {
@@ -4089,7 +4089,7 @@ meta_window_shade (MetaWindow  *window,
     }
 }
 
-void
+LOCAL_SYMBOL void
 meta_window_unshade (MetaWindow  *window,
                      guint32      timestamp)
 {
@@ -4442,7 +4442,7 @@ meta_window_get_monitor (MetaWindow *window)
 
 /* This is called when the monitor setup has changed. The window->monitor
  * reference is still "valid", but refer to the previous monitor setup */
-void
+LOCAL_SYMBOL void
 meta_window_update_for_monitors_changed (MetaWindow *window)
 {
   const MetaMonitorInfo *old, *new;
@@ -5204,7 +5204,7 @@ meta_window_move_resize (MetaWindow  *window,
                                     w, h);
 }
 
-void
+LOCAL_SYMBOL void
 meta_window_resize_with_gravity (MetaWindow *window,
                                  gboolean     user_op,
                                  int          w,
@@ -5305,7 +5305,7 @@ meta_window_configure_notify (MetaWindow      *window,
     meta_compositor_sync_window_geometry (window->display->compositor, window);
 }
 
-void
+LOCAL_SYMBOL void
 meta_window_get_position (MetaWindow  *window,
                           int         *x,
                           int         *y)
@@ -5326,7 +5326,7 @@ meta_window_get_position (MetaWindow  *window,
     }
 }
 
-void
+LOCAL_SYMBOL void
 meta_window_get_client_root_coords (MetaWindow    *window,
                                     MetaRectangle *rect)
 {
@@ -5335,7 +5335,7 @@ meta_window_get_client_root_coords (MetaWindow    *window,
   rect->height = window->rect.height;
 }
 
-void
+LOCAL_SYMBOL void
 meta_window_get_gravity_position (MetaWindow  *window,
                                   int          gravity,
                                   int         *root_x,
@@ -5419,7 +5419,7 @@ meta_window_get_gravity_position (MetaWindow  *window,
     *root_y = y;
 }
 
-void
+LOCAL_SYMBOL void
 meta_window_get_geometry (MetaWindow  *window,
                           int         *x,
                           int         *y,
@@ -5539,7 +5539,7 @@ get_modal_transient (MetaWindow *window)
 }
 
 /* XXX META_EFFECT_FOCUS */
-void
+LOCAL_SYMBOL void
 meta_window_focus (MetaWindow  *window,
                    guint32      timestamp)
 {
@@ -5780,7 +5780,7 @@ meta_window_unstick (MetaWindow  *window)
                                  &stick);
 }
 
-unsigned long
+LOCAL_SYMBOL unsigned long
 meta_window_get_net_wm_desktop (MetaWindow *window)
 {
   if (window->on_all_workspaces)
@@ -5818,7 +5818,7 @@ update_net_frame_extents (MetaWindow *window)
   meta_error_trap_pop (window->display);
 }
 
-void
+LOCAL_SYMBOL void
 meta_window_set_current_workspace_hint (MetaWindow *window)
 {
   /* FIXME if on more than one workspace, we claim to be "sticky",
@@ -5934,7 +5934,7 @@ meta_window_lower (MetaWindow  *window)
   meta_stack_lower (window->screen->stack, window);
 }
 
-void
+LOCAL_SYMBOL void
 meta_window_send_icccm_message (MetaWindow *window,
                                 Atom        atom,
                                 guint32     timestamp)
@@ -5970,7 +5970,7 @@ meta_window_send_icccm_message (MetaWindow *window,
     meta_error_trap_pop (window->display);
 }
 
-void
+LOCAL_SYMBOL void
 meta_window_move_resize_request (MetaWindow *window,
                                  guint       value_mask,
                                  int         gravity,
@@ -6135,7 +6135,7 @@ meta_window_move_resize_request (MetaWindow *window,
   save_user_window_placement (window);
 }
 
-gboolean
+LOCAL_SYMBOL gboolean
 meta_window_configure_request (MetaWindow *window,
                                XEvent     *event)
 {
@@ -6219,7 +6219,7 @@ meta_window_configure_request (MetaWindow *window,
   return TRUE;
 }
 
-gboolean
+LOCAL_SYMBOL gboolean
 meta_window_property_notify (MetaWindow *window,
                              XEvent     *event)
 {
@@ -6281,7 +6281,7 @@ meta_window_change_workspace_by_index (MetaWindow *window,
 #define _NET_WM_MOVERESIZE_MOVE_KEYBOARD    10
 #define _NET_WM_MOVERESIZE_CANCEL           11
 
-gboolean
+LOCAL_SYMBOL gboolean
 meta_window_client_message (MetaWindow *window,
                             XEvent     *event)
 {
@@ -6782,7 +6782,7 @@ meta_window_appears_focused_changed (MetaWindow *window)
  * @window's ancestors will have its %attached_focus_window field
  * cleared if it is currently %focus_window.
  */
-void
+LOCAL_SYMBOL void
 meta_window_propagate_focus_appearance (MetaWindow *window,
                                         gboolean    focused)
 {
@@ -6822,7 +6822,7 @@ meta_window_propagate_focus_appearance (MetaWindow *window,
     }
 }
 
-gboolean
+LOCAL_SYMBOL gboolean
 meta_window_notify_focus (MetaWindow *window,
                           XEvent     *event)
 {
@@ -7259,7 +7259,7 @@ update_sm_hints (MetaWindow *window)
                 window->sm_client_id ? window->sm_client_id : "none");
 }
 
-void
+LOCAL_SYMBOL void
 meta_window_update_role (MetaWindow *window)
 {
   char *str;
@@ -7282,7 +7282,7 @@ meta_window_update_role (MetaWindow *window)
                 window->desc, window->role ? window->role : "null");
 }
 
-void
+LOCAL_SYMBOL void
 meta_window_update_net_wm_type (MetaWindow *window)
 {
   int n_atoms;
@@ -7361,7 +7361,7 @@ redraw_icon (MetaWindow *window)
     meta_ui_queue_frame_draw (window->screen->ui, window->frame->xwindow);
 }
 
-void
+LOCAL_SYMBOL void
 meta_window_update_icon_now (MetaWindow *window)
 {
   GdkPixbuf *icon;
@@ -7444,7 +7444,7 @@ idle_update_icon (gpointer data)
   return FALSE;
 }
 
-GList*
+LOCAL_SYMBOL GList*
 meta_window_get_workspaces (MetaWindow *window)
 {
   if (window->on_all_workspaces)
@@ -7643,7 +7643,7 @@ meta_window_update_struts (MetaWindow *window)
     }
 }
 
-void
+LOCAL_SYMBOL void
 meta_window_recalc_window_type (MetaWindow *window)
 {
   recalc_window_type (window);
@@ -7863,7 +7863,7 @@ set_allowed_actions_hint (MetaWindow *window)
 #undef MAX_N_ACTIONS
 }
 
-void
+LOCAL_SYMBOL void
 meta_window_recalc_features (MetaWindow *window)
 {
   recalc_window_features (window);
@@ -8243,7 +8243,7 @@ menu_callback (MetaWindowMenu *menu,
   meta_ui_window_menu_free (menu);
 }
 
-void
+LOCAL_SYMBOL void
 meta_window_show_menu (MetaWindow *window,
                        int         root_x,
                        int         root_y,
@@ -8378,7 +8378,7 @@ meta_window_show_menu (MetaWindow *window,
   meta_ui_window_menu_popup (menu, root_x, root_y, button, timestamp);
 }
 
-void
+LOCAL_SYMBOL void
 meta_window_shove_titlebar_onscreen (MetaWindow *window)
 {
   MetaRectangle  outer_rect;
@@ -8426,7 +8426,7 @@ meta_window_shove_titlebar_onscreen (MetaWindow *window)
                            window->rect.height);
 }
 
-gboolean
+LOCAL_SYMBOL gboolean
 meta_window_titlebar_is_onscreen (MetaWindow *window)
 {
   MetaRectangle  titlebar_rect;
@@ -9240,7 +9240,7 @@ update_tile_mode (MetaWindow *window)
     }
 }
 
-void
+LOCAL_SYMBOL void
 meta_window_handle_mouse_grab_op_event (MetaWindow *window,
                                         XEvent     *event)
 {
@@ -9375,7 +9375,7 @@ meta_window_handle_mouse_grab_op_event (MetaWindow *window,
     }
 }
 
-void
+LOCAL_SYMBOL void
 meta_window_set_gravity (MetaWindow *window,
                          int         gravity)
 {
@@ -9426,7 +9426,7 @@ get_work_area_monitor (MetaWindow    *window,
               area->x, area->y, area->width, area->height);
 }
 
-void
+LOCAL_SYMBOL void
 meta_window_get_work_area_current_monitor (MetaWindow    *window,
                                            MetaRectangle *area)
 {
@@ -9439,7 +9439,7 @@ meta_window_get_work_area_current_monitor (MetaWindow    *window,
                                          area);
 }
 
-void
+LOCAL_SYMBOL void
 meta_window_get_work_area_for_monitor (MetaWindow    *window,
                                        int            which_monitor,
                                        MetaRectangle *area)
@@ -9451,7 +9451,7 @@ meta_window_get_work_area_for_monitor (MetaWindow    *window,
                          which_monitor);
 }
 
-void
+LOCAL_SYMBOL void
 meta_window_get_work_area_all_monitors (MetaWindow    *window,
                                         MetaRectangle *area)
 {
@@ -9477,7 +9477,7 @@ meta_window_get_work_area_all_monitors (MetaWindow    *window,
               window->desc, area->x, area->y, area->width, area->height);
 }
 
-void
+LOCAL_SYMBOL void
 meta_window_get_current_tile_area (MetaWindow    *window,
                                    MetaRectangle *tile_area)
 {
@@ -9502,7 +9502,7 @@ meta_window_get_current_tile_area (MetaWindow    *window,
     tile_area->x += tile_area->width;
 }
 
-gboolean
+LOCAL_SYMBOL gboolean
 meta_window_same_application (MetaWindow *window,
                               MetaWindow *other_window)
 {
@@ -9532,7 +9532,7 @@ meta_window_same_client (MetaWindow *window,
           (other_window->xwindow & ~resource_mask));
 }
 
-void
+LOCAL_SYMBOL void
 meta_window_refresh_resize_popup (MetaWindow *window)
 {
   if (window->display->grab_op == META_GRAB_OP_NONE)
@@ -9818,7 +9818,7 @@ warp_grab_pointer (MetaWindow          *window,
   return TRUE;
 }
 
-void
+LOCAL_SYMBOL void
 meta_window_begin_grab_op (MetaWindow *window,
                            MetaGrabOp  op,
                            gboolean    frame_action,
@@ -9841,7 +9841,7 @@ meta_window_begin_grab_op (MetaWindow *window,
                               x, y);
 }
 
-void
+LOCAL_SYMBOL void
 meta_window_update_keyboard_resize (MetaWindow *window,
                                     gboolean    update_cursor)
 {
@@ -9865,7 +9865,7 @@ meta_window_update_keyboard_resize (MetaWindow *window,
     }
 }
 
-void
+LOCAL_SYMBOL void
 meta_window_update_keyboard_move (MetaWindow *window)
 {
   int x, y;
@@ -9875,7 +9875,7 @@ meta_window_update_keyboard_move (MetaWindow *window)
                      &x, &y);
 }
 
-void
+LOCAL_SYMBOL void
 meta_window_update_layer (MetaWindow *window)
 {
   MetaGroup *group;
@@ -9932,7 +9932,7 @@ ensure_mru_position_after (MetaWindow *window,
     }
 }
 
-void
+LOCAL_SYMBOL void
 meta_window_stack_just_below (MetaWindow *window,
                               MetaWindow *below_this_one)
 {
@@ -9976,7 +9976,7 @@ meta_window_get_user_time (MetaWindow *window)
   return window->net_wm_user_time;
 }
 
-void
+LOCAL_SYMBOL void
 meta_window_set_user_time (MetaWindow *window,
                            guint32     timestamp)
 {
@@ -10760,7 +10760,7 @@ meta_window_get_tile_match (MetaWindow *window)
   return window->tile_match;
 }
 
-void
+LOCAL_SYMBOL void
 meta_window_compute_tile_match (MetaWindow *window)
 {
   MetaWindow *match;

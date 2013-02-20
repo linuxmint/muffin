@@ -21,6 +21,10 @@
  * Foundation, Inc., 51 Franklin Street - Suite 500, Boston, MA
  * 02110-1335, USA.
  */
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include <string.h>
 
 #include "meta-window-shape.h"
@@ -36,7 +40,7 @@ struct _MetaWindowShape
   guint hash;
 };
 
-MetaWindowShape *
+LOCAL_SYMBOL MetaWindowShape *
 meta_window_shape_new (cairo_region_t *region)
 {
   MetaWindowShape *shape;
@@ -158,7 +162,7 @@ meta_window_shape_new (cairo_region_t *region)
   return shape;
 }
 
-MetaWindowShape *
+LOCAL_SYMBOL MetaWindowShape *
 meta_window_shape_ref (MetaWindowShape *shape)
 {
   shape->ref_count++;
@@ -166,7 +170,7 @@ meta_window_shape_ref (MetaWindowShape *shape)
   return shape;
 }
 
-void
+LOCAL_SYMBOL void
 meta_window_shape_unref (MetaWindowShape *shape)
 {
   shape->ref_count--;
@@ -177,13 +181,13 @@ meta_window_shape_unref (MetaWindowShape *shape)
     }
 }
 
-guint
+LOCAL_SYMBOL guint
 meta_window_shape_hash (MetaWindowShape *shape)
 {
   return shape->hash;
 }
 
-gboolean
+LOCAL_SYMBOL gboolean
 meta_window_shape_equal (MetaWindowShape *shape_a,
                          MetaWindowShape *shape_b)
 {
@@ -194,7 +198,7 @@ meta_window_shape_equal (MetaWindowShape *shape_a,
                  sizeof (cairo_rectangle_int_t) * shape_a->n_rectangles) == 0;
 }
 
-void
+LOCAL_SYMBOL void
 meta_window_shape_get_borders (MetaWindowShape *shape,
                                int             *border_top,
                                int             *border_right,
@@ -222,7 +226,7 @@ meta_window_shape_get_borders (MetaWindowShape *shape,
  *
  * Return value: a newly created region
  */
-cairo_region_t *
+LOCAL_SYMBOL cairo_region_t *
 meta_window_shape_to_region (MetaWindowShape *shape,
                              int              center_width,
                              int              center_height)

@@ -20,6 +20,10 @@
  * 02110-1335, USA.
  */
 
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include "region-utils.h"
 
 #include <math.h>
@@ -144,7 +148,7 @@ meta_region_builder_finish (MetaRegionBuilder *builder)
 
 /* MetaRegionIterator */
 
-void
+LOCAL_SYMBOL void
 meta_region_iterator_init (MetaRegionIterator *iter,
                            cairo_region_t     *region)
 {
@@ -167,13 +171,13 @@ meta_region_iterator_init (MetaRegionIterator *iter,
     }
 }
 
-gboolean
+LOCAL_SYMBOL gboolean
 meta_region_iterator_at_end (MetaRegionIterator *iter)
 {
   return iter->i >= iter->n_rectangles;
 }
 
-void
+LOCAL_SYMBOL void
 meta_region_iterator_next (MetaRegionIterator *iter)
 {
   iter->i++;
@@ -312,7 +316,7 @@ expand_region_inverse (cairo_region_t *region,
  *
  * Return value: a new region which is the border of the given region
  */
-cairo_region_t *
+LOCAL_SYMBOL cairo_region_t *
 meta_make_border_region (cairo_region_t *region,
                          int             x_amount,
                          int             y_amount,

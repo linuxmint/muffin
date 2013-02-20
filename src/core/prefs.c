@@ -1669,7 +1669,7 @@ meta_preference_to_string (MetaPreference pref)
 void
 meta_prefs_set_num_workspaces (int n_workspaces)
 {
-  MetaBasePreference *pref;
+  MetaBasePreference *pref = NULL;
 
   find_pref (preferences_int, sizeof(MetaIntPreference),
              KEY_NUM_WORKSPACES, &pref);
@@ -1947,7 +1947,7 @@ meta_prefs_get_visual_bell_type (void)
   return visual_bell_type;
 }
 
-gboolean
+LOCAL_SYMBOL gboolean
 meta_prefs_add_keybinding (const char           *name,
                            const char           *schema,
                            MetaKeyBindingAction  action,
@@ -2004,7 +2004,7 @@ meta_prefs_add_keybinding (const char           *name,
   return TRUE;
 }
 
-gboolean
+LOCAL_SYMBOL gboolean
 meta_prefs_remove_keybinding (const char *name)
 {
   MetaKeyPref *pref;
@@ -2177,7 +2177,7 @@ meta_prefs_get_live_hidden_windows (void)
 void
 meta_prefs_set_live_hidden_windows (gboolean whether)
 {
-  MetaBasePreference *pref;
+  MetaBasePreference *pref = NULL;
 
   find_pref (preferences_bool, sizeof(MetaBoolPreference),
              KEY_LIVE_HIDDEN_WINDOWS, &pref);
@@ -2201,7 +2201,7 @@ meta_prefs_get_no_tab_popup (void)
 void
 meta_prefs_set_no_tab_popup (gboolean whether)
 {
-  MetaBasePreference *pref;
+  MetaBasePreference *pref = NULL;
 
   find_pref (preferences_bool, sizeof(MetaBoolPreference),
              KEY_NO_TAB_POPUP, &pref);

@@ -357,7 +357,7 @@ copy_stack (Window *windows,
   return stack;
 }
 
-MetaStackTracker *
+LOCAL_SYMBOL MetaStackTracker *
 meta_stack_tracker_new (MetaScreen *screen)
 {
   MetaStackTracker *tracker;
@@ -381,7 +381,7 @@ meta_stack_tracker_new (MetaScreen *screen)
   return tracker;
 }
 
-void
+LOCAL_SYMBOL void
 meta_stack_tracker_free (MetaStackTracker *tracker)
 {
   if (tracker->sync_stack_later)
@@ -411,7 +411,7 @@ stack_tracker_queue_request (MetaStackTracker *tracker,
   meta_stack_tracker_dump (tracker);
 }
 
-void
+LOCAL_SYMBOL void
 meta_stack_tracker_record_add (MetaStackTracker *tracker,
 			       Window            window,
 			       gulong            serial)
@@ -425,7 +425,7 @@ meta_stack_tracker_record_add (MetaStackTracker *tracker,
   stack_tracker_queue_request (tracker, op);
 }
 
-void
+LOCAL_SYMBOL void
 meta_stack_tracker_record_remove (MetaStackTracker *tracker,
 				  Window            window,
 				  gulong            serial)
@@ -439,7 +439,7 @@ meta_stack_tracker_record_remove (MetaStackTracker *tracker,
   stack_tracker_queue_request (tracker, op);
 }
 
-void
+LOCAL_SYMBOL void
 meta_stack_tracker_record_restack_windows (MetaStackTracker *tracker,
 					   Window           *windows,
 					   int               n_windows,
@@ -463,7 +463,7 @@ meta_stack_tracker_record_restack_windows (MetaStackTracker *tracker,
 					   serial + i);
 }
 
-void
+LOCAL_SYMBOL void
 meta_stack_tracker_record_raise_above (MetaStackTracker *tracker,
 				       Window            window,
 				       Window            sibling,
@@ -479,7 +479,7 @@ meta_stack_tracker_record_raise_above (MetaStackTracker *tracker,
   stack_tracker_queue_request (tracker, op);
 }
 
-void
+LOCAL_SYMBOL LOCAL_SYMBOL void
 meta_stack_tracker_record_lower_below (MetaStackTracker *tracker,
 				       Window            window,
 				       Window            sibling,
@@ -495,7 +495,7 @@ meta_stack_tracker_record_lower_below (MetaStackTracker *tracker,
   stack_tracker_queue_request (tracker, op);
 }
 
-void
+LOCAL_SYMBOL void
 meta_stack_tracker_record_lower (MetaStackTracker *tracker,
 				 Window            window,
 				 gulong            serial)
@@ -544,7 +544,7 @@ stack_tracker_event_received (MetaStackTracker *tracker,
   meta_stack_tracker_dump (tracker);
 }
 
-void
+LOCAL_SYMBOL void
 meta_stack_tracker_create_event (MetaStackTracker    *tracker,
 				 XCreateWindowEvent  *event)
 {
@@ -557,7 +557,7 @@ meta_stack_tracker_create_event (MetaStackTracker    *tracker,
   stack_tracker_event_received (tracker, &op);
 }
 
-void
+LOCAL_SYMBOL void
 meta_stack_tracker_destroy_event (MetaStackTracker    *tracker,
 				  XDestroyWindowEvent *event)
 {
@@ -570,7 +570,7 @@ meta_stack_tracker_destroy_event (MetaStackTracker    *tracker,
   stack_tracker_event_received (tracker, &op);
 }
 
-void
+LOCAL_SYMBOL void
 meta_stack_tracker_reparent_event (MetaStackTracker    *tracker,
 				   XReparentEvent      *event)
 {
@@ -596,7 +596,7 @@ meta_stack_tracker_reparent_event (MetaStackTracker    *tracker,
     }
 }
 
-void
+LOCAL_SYMBOL void
 meta_stack_tracker_configure_event (MetaStackTracker    *tracker,
 				    XConfigureEvent     *event)
 {
@@ -627,7 +627,7 @@ meta_stack_tracker_configure_event (MetaStackTracker    *tracker,
  * returned list of windows is exactly that you'd get as the
  * children when calling XQueryTree() on the root window.
  */
-void
+LOCAL_SYMBOL void
 meta_stack_tracker_get_stack (MetaStackTracker *tracker,
 			      Window          **windows,
 			      int              *n_windows)
@@ -669,7 +669,7 @@ meta_stack_tracker_get_stack (MetaStackTracker *tracker,
  * Informs the compositor of the current stacking order of windows,
  * based on the predicted view maintained by the #MetaStackTracker.
  */
-void
+LOCAL_SYMBOL void
 meta_stack_tracker_sync_stack (MetaStackTracker *tracker)
 {
   GList *meta_windows;
@@ -734,7 +734,7 @@ stack_tracker_sync_stack_later (gpointer data)
  * any change to the stacking order of the X windows, if we are creating
  * or destroying MetaWindows.
  */
-void
+LOCAL_SYMBOL void
 meta_stack_tracker_queue_sync_stack (MetaStackTracker *tracker)
 {
   if (tracker->sync_stack_later == 0)

@@ -502,7 +502,7 @@ meta_background_actor_new_for_screen (MetaScreen *screen)
  * circumstances), so this should only be called when we actually receive
  * a PropertyNotify event for the property.
  */
-void
+LOCAL_SYMBOL void
 meta_background_actor_update (MetaScreen *screen)
 {
   MetaScreenBackground *background;
@@ -578,7 +578,7 @@ meta_background_actor_update (MetaScreen *screen)
  * Sets the area of the background that is unobscured by overlapping windows.
  * This is used to optimize and only paint the visible portions.
  */
-void
+LOCAL_SYMBOL void
 meta_background_actor_set_visible_region (MetaBackgroundActor *self,
                                           cairo_region_t      *visible_region)
 {
@@ -614,7 +614,7 @@ meta_background_actor_set_visible_region (MetaBackgroundActor *self,
  *
  * Called by the compositor when the size of the #MetaScreen changes
  */
-void
+LOCAL_SYMBOL void
 meta_background_actor_screen_size_changed (MetaScreen *screen)
 {
   MetaScreenBackground *background = meta_screen_background_get (screen);

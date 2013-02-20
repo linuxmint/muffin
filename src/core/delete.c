@@ -193,7 +193,7 @@ meta_window_delete (MetaWindow  *window,
 }
 
 
-void
+LOCAL_SYMBOL void
 meta_window_kill (MetaWindow *window)
 {
   meta_topic (META_DEBUG_WINDOW_OPS,
@@ -221,7 +221,7 @@ meta_window_kill (MetaWindow *window)
   meta_error_trap_pop (window->display);
 }
 
-void
+LOCAL_SYMBOL void
 meta_window_free_delete_dialog (MetaWindow *window)
 {
   if (window->dialog_pid >= 0)

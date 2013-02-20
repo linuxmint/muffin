@@ -235,15 +235,21 @@ endif
 
 muffin_theme_viewer_LDADD= $(MUFFIN_LIBS) libmuffin.la
 
-testboxes_SOURCES = core/testboxes.c
+testboxes_SOURCES = core/testboxes.c core/boxes.c core/util.c
 testgradient_SOURCES = ui/testgradient.c
-testasyncgetprop_SOURCES = core/testasyncgetprop.c
+testasyncgetprop_SOURCES = core/testasyncgetprop.c core/async-getprop.c
+
+# NO-OP: work around the fact that source code tested by the programs are
+# compiled for library
+testasyncgetprop_CFLAGS = $(AM_CFLAGS) 
+testboxes_CFLAGS = $(AM_CFLAGS) 
 
 noinst_PROGRAMS=testboxes testgradient testasyncgetprop
 
-testboxes_LDADD = $(MUFFIN_LIBS) libmuffin.la
+testboxes_LDADD = $(MUFFIN_LIBS)
 testgradient_LDADD = $(MUFFIN_LIBS) libmuffin.la
-testasyncgetprop_LDADD = $(MUFFIN_LIBS) libmuffin.la
+testasyncgetprop_LDADD = $(MUFFIN_LIBS)
+
 
 @INTLTOOL_DESKTOP_RULE@
 

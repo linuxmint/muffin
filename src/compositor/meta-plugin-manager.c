@@ -91,7 +91,7 @@ meta_plugin_manager_load (MetaPluginManager *plugin_mgr,
 /*
  * Registers the given plugin type
  */
-void
+LOCAL_SYMBOL void
 meta_plugin_manager_register (MetaPluginManager *plugin_mgr,
                               GType              plugin_type)
 {
@@ -103,7 +103,7 @@ meta_plugin_manager_register (MetaPluginManager *plugin_mgr,
   plugin_mgr->plugins = g_list_prepend (plugin_mgr->plugins, plugin);
 }
 
-void
+LOCAL_SYMBOL void
 meta_plugin_manager_initialize (MetaPluginManager *plugin_mgr)
 {
   GList *iter;
@@ -155,7 +155,7 @@ meta_plugin_manager_get_default (void)
   return default_plugin_manager;
 }
 
-MetaPluginManager *
+LOCAL_SYMBOL MetaPluginManager *
 meta_plugin_manager_get (MetaScreen *screen)
 {
   MetaPluginManager *plugin_mgr;
@@ -241,7 +241,7 @@ meta_plugin_manager_kill_switch_workspace (MetaPluginManager *plugin_mgr)
  * manager completed() callback, and the compositor must ensure that any
  * appropriate post-effect cleanup is carried out.
  */
-gboolean
+LOCAL_SYMBOL gboolean
 meta_plugin_manager_event_simple (MetaPluginManager *plugin_mgr,
                                   MetaWindowActor   *actor,
                                   unsigned long      event)
@@ -314,7 +314,7 @@ meta_plugin_manager_event_simple (MetaPluginManager *plugin_mgr,
  * manager completed() callback, and the compositor must ensure that any
  * appropriate post-effect cleanup is carried out.
  */
-gboolean
+LOCAL_SYMBOL gboolean
 meta_plugin_manager_event_maximize (MetaPluginManager *plugin_mgr,
                                     MetaWindowActor   *actor,
                                     unsigned long      event,
@@ -387,7 +387,7 @@ meta_plugin_manager_event_maximize (MetaPluginManager *plugin_mgr,
  * manager completed() callback, and the compositor must ensure that any
  * appropriate post-effect cleanup is carried out.
  */
-gboolean
+LOCAL_SYMBOL gboolean
 meta_plugin_manager_switch_workspace (MetaPluginManager   *plugin_mgr,
                                       gint                 from,
                                       gint                 to,
@@ -432,7 +432,7 @@ meta_plugin_manager_switch_workspace (MetaPluginManager   *plugin_mgr,
  * manager completed() callback, and the compositor must ensure that any
  * appropriate post-effect cleanup is carried out.
  */
-gboolean
+LOCAL_SYMBOL gboolean
 meta_plugin_manager_xevent_filter (MetaPluginManager *plugin_mgr,
                                    XEvent            *xev)
 {

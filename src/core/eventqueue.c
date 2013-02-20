@@ -21,6 +21,10 @@
  * Foundation, Inc., 51 Franklin Street - Suite 500, Boston, MA
  * 02110-1335, USA.  */
 
+#if HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include "eventqueue.h"
 #include <X11/Xlib.h>
 
@@ -49,7 +53,7 @@ struct _MetaEventQueue
   GQueue *events;
 };
 
-MetaEventQueue*
+LOCAL_SYMBOL MetaEventQueue*
 meta_event_queue_new (Display *display, MetaEventQueueFunc func, gpointer data)
 {
   GSource *source;
@@ -78,7 +82,7 @@ meta_event_queue_new (Display *display, MetaEventQueueFunc func, gpointer data)
   return eq;
 }
 
-void
+LOCAL_SYMBOL void
 meta_event_queue_free (MetaEventQueue *eq)
 {
   GSource *source;

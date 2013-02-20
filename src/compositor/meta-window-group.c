@@ -235,7 +235,7 @@ meta_window_group_init (MetaWindowGroup *window_group)
 {
 }
 
-ClutterActor *
+LOCAL_SYMBOL ClutterActor *
 meta_window_group_new (MetaScreen *screen)
 {
   MetaWindowGroup *window_group;

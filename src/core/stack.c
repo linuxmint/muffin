@@ -63,7 +63,7 @@ static void stack_do_resort           (MetaStack *stack);
 
 static void stack_ensure_sorted (MetaStack *stack);
 
-MetaStack*
+LOCAL_SYMBOL MetaStack*
 meta_stack_new (MetaScreen *screen)
 {
   MetaStack *stack;
@@ -89,7 +89,7 @@ meta_stack_new (MetaScreen *screen)
   return stack;
 }
 
-void
+LOCAL_SYMBOL void
 meta_stack_free (MetaStack *stack)
 {
   g_array_free (stack->windows, TRUE);
@@ -104,7 +104,7 @@ meta_stack_free (MetaStack *stack)
   g_free (stack);
 }
 
-void
+LOCAL_SYMBOL void
 meta_stack_add (MetaStack  *stack,
                 MetaWindow *window)
 {
@@ -125,7 +125,7 @@ meta_stack_add (MetaStack  *stack,
   meta_stack_update_window_tile_matches (stack, window->screen->active_workspace);
 }
 
-void
+LOCAL_SYMBOL void
 meta_stack_remove (MetaStack  *stack,
                    MetaWindow *window)
 {
@@ -161,7 +161,7 @@ meta_stack_remove (MetaStack  *stack,
   meta_stack_update_window_tile_matches (stack, window->screen->active_workspace);
 }
 
-void
+LOCAL_SYMBOL void
 meta_stack_update_layer (MetaStack  *stack,
                          MetaWindow *window)
 {
@@ -171,7 +171,7 @@ meta_stack_update_layer (MetaStack  *stack,
   meta_stack_update_window_tile_matches (stack, window->screen->active_workspace);
 }
 
-void
+LOCAL_SYMBOL void
 meta_stack_update_transient (MetaStack  *stack,
                              MetaWindow *window)
 {
@@ -182,7 +182,7 @@ meta_stack_update_transient (MetaStack  *stack,
 }
 
 /* raise/lower within a layer */
-void
+LOCAL_SYMBOL void
 meta_stack_raise (MetaStack  *stack,
                   MetaWindow *window)
 {
@@ -210,7 +210,7 @@ meta_stack_raise (MetaStack  *stack,
   meta_stack_update_window_tile_matches (stack, window->screen->active_workspace);
 }
 
-void
+LOCAL_SYMBOL void
 meta_stack_lower (MetaStack  *stack,
                   MetaWindow *window)
 {
@@ -238,13 +238,13 @@ meta_stack_lower (MetaStack  *stack,
   meta_stack_update_window_tile_matches (stack, window->screen->active_workspace);
 }
 
-void
+LOCAL_SYMBOL void
 meta_stack_freeze (MetaStack *stack)
 {
   stack->freeze_count += 1;
 }
 
-void
+LOCAL_SYMBOL void
 meta_stack_thaw (MetaStack *stack)
 {
   g_return_if_fail (stack->freeze_count > 0);
@@ -254,7 +254,7 @@ meta_stack_thaw (MetaStack *stack)
   meta_stack_update_window_tile_matches (stack, NULL);
 }
 
-void
+LOCAL_SYMBOL void
 meta_stack_update_window_tile_matches (MetaStack     *stack,
                                        MetaWorkspace *workspace)
 {
@@ -1362,7 +1362,7 @@ stack_sync_to_server (MetaStack *stack)
   /* That was scary... */
 }
 
-MetaWindow*
+LOCAL_SYMBOL MetaWindow*
 meta_stack_get_top (MetaStack *stack)
 {
   stack_ensure_sorted (stack);
@@ -1373,7 +1373,7 @@ meta_stack_get_top (MetaStack *stack)
     return NULL;
 }
 
-MetaWindow*
+LOCAL_SYMBOL MetaWindow*
 meta_stack_get_bottom (MetaStack  *stack)
 {
   GList *link;
@@ -1387,7 +1387,7 @@ meta_stack_get_bottom (MetaStack  *stack)
     return NULL;
 }
 
-MetaWindow*
+LOCAL_SYMBOL MetaWindow*
 meta_stack_get_above (MetaStack      *stack,
                       MetaWindow     *window,
                       gboolean        only_within_layer)
@@ -1412,7 +1412,7 @@ meta_stack_get_above (MetaStack      *stack,
     return above;
 }
 
-MetaWindow*
+LOCAL_SYMBOL MetaWindow*
 meta_stack_get_below (MetaStack      *stack,
                       MetaWindow     *window,
                       gboolean        only_within_layer)
@@ -1546,7 +1546,7 @@ get_default_focus_window (MetaStack     *stack,
     return topmost_dock;
 }
 
-MetaWindow*
+LOCAL_SYMBOL MetaWindow*
 meta_stack_get_default_focus_window_at_point (MetaStack     *stack,
                                               MetaWorkspace *workspace,
                                               MetaWindow    *not_this_one,
@@ -1557,7 +1557,7 @@ meta_stack_get_default_focus_window_at_point (MetaStack     *stack,
                                    TRUE, root_x, root_y);
 }
 
-MetaWindow*
+LOCAL_SYMBOL MetaWindow*
 meta_stack_get_default_focus_window (MetaStack     *stack,
                                      MetaWorkspace *workspace,
                                      MetaWindow    *not_this_one)
@@ -1566,7 +1566,7 @@ meta_stack_get_default_focus_window (MetaStack     *stack,
                                    FALSE, 0, 0);
 }
 
-GList*
+LOCAL_SYMBOL GList*
 meta_stack_list_windows (MetaStack     *stack,
                          MetaWorkspace *workspace)
 {
@@ -1594,7 +1594,7 @@ meta_stack_list_windows (MetaStack     *stack,
   return workspace_windows;
 }
 
-int
+LOCAL_SYMBOL int
 meta_stack_windows_cmp  (MetaStack  *stack,
                          MetaWindow *window_a,
                          MetaWindow *window_b)
@@ -1632,7 +1632,7 @@ compare_just_window_stack_position (void *a,
     return 0; /* not reached */
 }
 
-GList*
+LOCAL_SYMBOL GList*
 meta_stack_get_positions (MetaStack *stack)
 {
   GList *tmp;
@@ -1683,7 +1683,7 @@ lists_contain_same_windows (GList *a,
   return (tmp1 == NULL);    /* tmp2 is non-NULL if tmp1 is */
 }
 
-void
+LOCAL_SYMBOL void
 meta_stack_set_positions (MetaStack *stack,
                           GList     *windows)
 {
@@ -1776,7 +1776,7 @@ meta_window_set_stack_position_no_sync (MetaWindow *window,
               window->desc, window->stack_position);
 }
 
-void
+LOCAL_SYMBOL void
 meta_window_set_stack_position (MetaWindow *window,
                                 int         position)
 {
