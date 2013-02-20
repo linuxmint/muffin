@@ -1,16 +1,32 @@
 #!/usr/bin/make -f
+# -*- makefile -*-
 
-include /usr/share/cdbs/1/rules/autoreconf.mk
-include /usr/share/cdbs/1/rules/debhelper.mk
-include /usr/share/cdbs/1/class/gnome.mk
-include /usr/share/cdbs/1/rules/utils.mk
-include /usr/share/gnome-pkg-tools/1/rules/gnome-version.mk
--include /usr/share/gnome-pkg-tools/1/rules/gnome-get-source.mk
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
 
-DEB_CONFIGURE_EXTRA_FLAGS += --enable-startup-notification=yes
-DEB_DH_MAKESHLIBS_ARGS_libmuffin0 += -V -- -c4
-DEB_INSTALL_DOCS_muffin += doc/theme-format.txt
-DEB_DH_GIREPOSITORY_ARGS_ALL := /usr/lib/muffin
+ifneq (,$(filter parallel=%,$(DEB_BUILD_OPTIONS)))
+DH_PARALLEL_OPTION = --parallel
+endif
 
-# This does not work with muffin; disabled, for now.
-# LDFLAGS += -Wl,-z,defs -Wl,-O1 -Wl,--as-needed
+CONFIGURE_FLAGS = --enable-startup-notification=yes 	\
+                  --disable-static
+		  
+
+%:
+	dh  $@ --with autoreconf $(DH_PARALLEL_OPTION)
+
+override_dh_auto_configure:
+	dh_auto_configure -- $(CONFIGURE_FLAGS)
+
+override_dh_shlibdeps:
+	dh_shlibdeps
+	dh_girepository /usr/lib/muffin
+
+override_dh_installdocs:
+	dh_installdocs --link-doc=muffin-common
+
+override_dh_install:
+	dh_install -X.la
+
+override_dh_strip:
+	dh_strip --dbg-package=muffin-dbg
