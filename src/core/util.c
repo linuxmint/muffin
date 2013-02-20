@@ -22,7 +22,9 @@
  * 02110-1335, USA.
  */
 
+#ifndef _GNU_SOURCE
 #define _GNU_SOURCE
+#endif
 #define _POSIX_C_SOURCE 200112L /* for fdopen() */
 
 #include <config.h>

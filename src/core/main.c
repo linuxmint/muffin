@@ -41,7 +41,9 @@
  * to investigate, read main(), meta_display_open(), and event_callback().
  */
 
+#ifndef _GNU_SOURCE
 #define _GNU_SOURCE
+#endif
 #define _SVID_SOURCE /* for putenv() and some signal-related functions */
 
 #include <config.h>
