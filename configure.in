@@ -515,7 +515,7 @@ muffin-$VERSION
 
 
 MUFFIN_MINOR_VERSION=muffin_minor_version
-if expr $MUFFIN_MINOR_VERSION % 2 > /dev/null ; then
+if expr $MUFFIN_MINOR_VERSION % 1 > /dev/null ; then
    stable_version=`expr $MUFFIN_MINOR_VERSION - 1`
    echo "This is the UNSTABLE branch of muffin"
    echo -n "Use 3.$stable_version.x for stable "
