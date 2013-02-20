@@ -19,7 +19,9 @@
  * 02110-1335, USA.
  */
 
+#ifndef _GNU_SOURCE
 #define _GNU_SOURCE
+#endif
 #define _XOPEN_SOURCE 600 /* C99 -- for rint() */
 
 #include <gtk/gtk.h>
