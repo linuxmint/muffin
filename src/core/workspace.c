@@ -1183,7 +1183,7 @@ meta_workspace_get_neighbor (MetaWorkspace      *workspace,
 
   meta_screen_free_workspace_layout (&layout);
   
-  return meta_screen_get_workspace_by_index (workspace->screen, layout.current_col);
+  return meta_screen_get_workspace_by_index (workspace->screen, i);
 }
 
 LOCAL_SYMBOL const char*
