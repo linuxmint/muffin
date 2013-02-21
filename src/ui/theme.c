@@ -6431,6 +6431,10 @@ meta_gtk_state_to_string (GtkStateFlags state)
       return "FOCUSED";
     case GTK_STATE_FLAG_BACKDROP:
       return "BACKDROP";
+    case GTK_STATE_FLAG_DIR_LTR:
+      return "DIR_LTR";
+    case GTK_STATE_FLAG_DIR_RTL:
+      return "DIR_RTL";
     }
 
   return "<unknown>";
