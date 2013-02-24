@@ -2027,7 +2027,7 @@ meta_screen_tile_preview_hide (MetaScreen *screen)
  * Return value: (transfer none): the #MetaWindow pointed by the mouse
  *  %NULL when window not found
  */
-LOCAL_SYMBOL MetaWindow*
+MetaWindow*
 meta_screen_get_mouse_window (MetaScreen  *screen,
                               MetaWindow  *not_this_one)
 {
