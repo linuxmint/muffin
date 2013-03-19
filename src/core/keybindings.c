@@ -653,6 +653,90 @@ meta_display_remove_keybinding (MetaDisplay *display,
   return TRUE;
 }
 
+static gboolean
+add_xlet_keybinding_internal (MetaDisplay          *display,
+                              const char           *name,
+                              const char           *binding,
+                              MetaKeyBindingFlags   flags,
+                              MetaKeyBindingAction  action,
+                              MetaKeyHandlerFunc    func,
+                              int                   data,
+                              gpointer              user_data,
+                              GDestroyNotify        free_data)
+{
+  MetaKeyHandler *handler;
+
+  if (!meta_prefs_add_xlet_keybinding (name, binding, action, flags))
+    return FALSE;
+
+  handler = g_new0 (MetaKeyHandler, 1);
+  handler->name = g_strdup (name);
+  handler->func = func;
+  handler->default_func = func;
+  handler->data = data;
+  handler->flags = flags;
+  handler->user_data = user_data;
+  handler->user_data_free_func = free_data;
+
+  g_hash_table_insert (key_handlers, g_strdup (name), handler);
+
+  return TRUE;
+}
+
+
+/**
+ * meta_display_add_xlet_keybinding:
+ * @display: a #MetaDisplay
+ * @name: the binding's unique name
+ * @binding: the parseable keystrokes string (<Control>F1, etc..)
+ * @callback: function to run when the keybinding is invoked
+ * @user_data: the data to pass to @handler
+ * @free_data: function to free @user_data
+ *
+ *
+ * Use meta_display_remove_xlet_keybinding() to remove the binding.
+ *
+ * Returns: %TRUE if the keybinding was added successfully,
+ *          otherwise %FALSE
+ */
+gboolean
+meta_display_add_xlet_keybinding (MetaDisplay         *display,
+                                  const char          *name,
+                                  const char          *binding,
+                                  MetaKeyHandlerFunc   callback,
+                                  gpointer             user_data,
+                                  GDestroyNotify       free_data)
+
+{
+  return add_xlet_keybinding_internal (display, name, binding,
+                                       META_KEY_BINDING_NONE,
+                                       META_KEYBINDING_ACTION_NONE,
+                                       (MetaKeyHandlerFunc)callback, 0, user_data, free_data);
+}
+
+/**
+ * meta_display_remove_xlet_keybinding:
+ * @display: the #MetaDisplay
+ * @name: name of the keybinding to remove
+ *
+ * Remove keybinding @name; the function will fail if @name is not a known
+ * keybinding or has not been added with meta_display_add_xlet_keybinding().
+ *
+ * Returns: %TRUE if the binding has been removed sucessfully,
+ *          otherwise %FALSE
+ */
+gboolean
+meta_display_remove_xlet_keybinding (MetaDisplay *display,
+                                     const char  *name)
+{
+  if (!meta_prefs_remove_xlet_keybinding (name))
+    return FALSE;
+
+  g_hash_table_remove (key_handlers, name);
+
+  return TRUE;
+}
+
 /**
  * meta_display_get_keybinding_action:
  * @display: A #MetaDisplay
@@ -764,6 +848,15 @@ bindings_changed_callback (MetaPreference pref,
     }
 }
 
+void
+meta_display_rebuild_keybindings (MetaDisplay *display)
+{
+    rebuild_key_binding_table (display);
+    rebuild_special_bindings (display);
+    reload_keycodes (display);
+    reload_modifiers (display);
+    regrab_key_bindings (display);
+}
 
 LOCAL_SYMBOL void
 meta_display_shutdown_keys (MetaDisplay *display)
