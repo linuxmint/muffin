@@ -195,4 +195,8 @@ void meta_display_unmanage_screen (MetaDisplay *display,
                                    MetaScreen  *screen,
                                    guint32      timestamp);
 
+void meta_display_keybinding_action_invoke_by_code (MetaDisplay  *display,
+                                                    unsigned int  keycode,
+                                                    unsigned long mask);
+
 #endif

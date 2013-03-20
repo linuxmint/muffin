@@ -61,6 +61,13 @@ static gboolean add_builtin_keybinding (MetaDisplay          *display,
                                         MetaKeyHandlerFunc    handler,
                                         int                   handler_arg);
 
+static void invoke_handler_by_name (MetaDisplay    *display,
+                                    MetaScreen     *screen,
+                                    const char     *handler_name,
+                                    MetaWindow     *window,
+                                    XEvent         *event);
+
+
 static void
 meta_key_binding_free (MetaKeyBinding *binding)
 {
@@ -710,7 +717,7 @@ meta_display_add_xlet_keybinding (MetaDisplay         *display,
 {
   return add_xlet_keybinding_internal (display, name, binding,
                                        META_KEY_BINDING_NONE,
-                                       META_KEYBINDING_ACTION_NONE,
+                                       META_KEYBINDING_ACTION_CUSTOM,
                                        (MetaKeyHandlerFunc)callback, 0, user_data, free_data);
 }
 
@@ -771,6 +778,26 @@ meta_display_get_keybinding_action (MetaDisplay  *display,
   else
     return META_KEYBINDING_ACTION_NONE;
 }
+
+void
+meta_display_keybinding_action_invoke_by_code (MetaDisplay  *display,
+                                               unsigned int  keycode,
+                                               unsigned long mask)
+{
+  MetaKeyBinding *binding;
+  KeySym keysym;
+
+  keysym = XkbKeycodeToKeysym (display->xdisplay, keycode, 0, 0);
+  mask = mask & 0xff & ~display->ignored_modifier_mask;
+  binding = display_get_keybinding (display, keysym, keycode, mask);
+
+  if (!binding && keycode == meta_display_get_above_tab_keycode (display))
+    binding = display_get_keybinding (display, META_KEY_ABOVE_TAB, keycode, mask);
+
+  if (binding)
+    invoke_handler_by_name (display, NULL, binding->name, NULL, NULL);
+}
+
 
 LOCAL_SYMBOL void
 meta_display_process_mapping_event (MetaDisplay *display,
