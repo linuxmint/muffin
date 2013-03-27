@@ -798,6 +798,21 @@ meta_display_keybinding_action_invoke_by_code (MetaDisplay  *display,
     invoke_handler_by_name (display, NULL, binding->name, NULL, NULL);
 }
 
+gboolean
+meta_display_get_is_overlay_key (MetaDisplay *display,
+                                 unsigned int keycode,
+                                 unsigned long mask)
+{
+
+    MetaKeyCombo combo;
+    KeySym keysym;
+
+    keysym = XkbKeycodeToKeysym (display->xdisplay, keycode, 0, 0);
+    mask = mask & 0xff & ~display->ignored_modifier_mask;
+    meta_prefs_get_overlay_binding (&combo);
+
+    return combo.keysym == keysym && combo.modifiers == mask;
+}
 
 LOCAL_SYMBOL void
 meta_display_process_mapping_event (MetaDisplay *display,
