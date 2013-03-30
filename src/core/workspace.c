@@ -1115,6 +1115,16 @@ meta_motion_direction_to_string (MetaMotionDirection direction)
 }
 #endif /* WITH_VERBOSE_MODE */
 
+static int calc_valid_cols_for_current_row(MetaWorkspaceLayout *layout)
+{
+  int validcols = 0;
+  int c;
+  for (c = 0; c < layout->cols && layout->grid[layout->current_row * layout->cols + c] >= 0; ++c) {
+    ++validcols;
+  }
+  return validcols;
+}
+
 /**
  * meta_workspace_get_neighbor:
  * @workspace: a #MetaWorkspace
@@ -1143,6 +1153,15 @@ meta_workspace_get_neighbor (MetaWorkspace      *workspace,
   
   ltr = meta_ui_get_direction() == META_UI_DIRECTION_LTR;
 
+  int validrows = 0;
+
+  {
+    int r;
+    for (r = 0; r < layout.rows && layout.grid[r * layout.cols] >= 0; ++r) {
+      ++validrows;
+    }
+  }
+
   switch (direction) 
     {
     case META_MOTION_LEFT:
@@ -1160,23 +1179,44 @@ meta_workspace_get_neighbor (MetaWorkspace      *workspace,
     default:;
     }
 
-  if (layout.current_col < 0)
-    layout.current_col = (cycle == 1)? layout.cols - 1 : 0;
-  if (layout.current_col >= layout.cols)
-    layout.current_col = (cycle == 1)? 0 : layout.cols - 1;
+  if (layout.current_col < 0) {
+    if (!cycle) {
+      layout.current_col = 0;
+    } else {
+      if (validrows > 1) {
+        layout.current_row = (layout.current_row + validrows - 1) % validrows;
+      }
+      int validcols = calc_valid_cols_for_current_row(&layout);
+      layout.current_col = validcols - 1;
+    }
+  } else {
+    int validcols = calc_valid_cols_for_current_row(&layout);
+    if (layout.current_col >= validcols) {
+      if (!cycle) {
+        layout.current_col = validcols - 1;
+      } else {
+        layout.current_col = 0;
+        if (validrows > 1) {
+          layout.current_row = (layout.current_row + validrows + 1) % validrows;
+        }
+      }
+    }
+  }
+
+  /* sorry, no cycling for rows! */
   if (layout.current_row < 0)
     layout.current_row = 0;
-  if (layout.current_row >= layout.rows)
-    layout.current_row = layout.rows - 1;
+  if (layout.current_row >= validrows)
+    layout.current_row = validrows - 1;
 
-  i = layout.grid[layout.current_row * layout.cols + layout.current_col];
+  int index = layout.current_row * layout.cols + layout.current_col;
+  i = layout.grid[index];
 
-  if (i < 0)
-    i = current_space;
-
+  if (i < 0) {
+    meta_bug ("calc_workspace_layout left an invalid (too-low) workspace number %d in the grid\n", i);
+  }
   if (i >= num_workspaces)
-    meta_bug ("calc_workspace_layout left an invalid (too-high) workspace number %d in the grid\n",
-              i);
+    meta_bug ("calc_workspace_layout left an invalid (too-high) workspace number %d in the grid\n", i);
     
   meta_verbose ("Neighbor workspace is %d at row %d col %d\n",
                 i, layout.current_row, layout.current_col);
