@@ -2034,7 +2034,7 @@ meta_prefs_remove_keybinding (const char *name)
 }
 
 LOCAL_SYMBOL gboolean
-meta_prefs_add_xlet_keybinding (const char           *name,
+meta_prefs_add_custom_keybinding (const char           *name,
                                 const char           *binding,
                                 MetaKeyBindingAction  action,
                                 MetaKeyBindingFlags   flags)
@@ -2044,7 +2044,7 @@ meta_prefs_add_xlet_keybinding (const char           *name,
 
   if (g_hash_table_lookup (key_bindings, name))
     {
-      meta_warning ("Trying to re-add keybinding \"%s\".\n", name);
+      meta_warning ("Trying to re-add custom keybinding \"%s\".\n", name);
       return FALSE;
     }
 
@@ -2067,14 +2067,14 @@ meta_prefs_add_xlet_keybinding (const char           *name,
 }
 
 LOCAL_SYMBOL gboolean
-meta_prefs_remove_xlet_keybinding (const char *name)
+meta_prefs_remove_custom_keybinding (const char *name)
 {
   MetaKeyPref *pref;
 
   pref = g_hash_table_lookup (key_bindings, name);
   if (!pref)
     {
-      meta_warning ("Trying to remove non-existent keybinding \"%s\".\n", name);
+      meta_warning ("Trying to remove non-existent custom keybinding \"%s\".\n", name);
       return FALSE;
     }
 

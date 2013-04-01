@@ -147,14 +147,14 @@ gboolean meta_display_remove_keybinding (MetaDisplay         *display,
 
 void meta_display_rebuild_keybindings (MetaDisplay *display);
 
-gboolean meta_display_add_xlet_keybinding    (MetaDisplay         *display,
-                                              const char          *name,
-                                              const char          *binding,
-                                              MetaKeyHandlerFunc   callback,
-                                              gpointer             user_data,
-                                              GDestroyNotify       free_data);
+gboolean meta_display_add_custom_keybinding    (MetaDisplay         *display,
+                                                const char          *name,
+                                                const char          *binding,
+                                                MetaKeyHandlerFunc   callback,
+                                                gpointer             user_data,
+                                                GDestroyNotify       free_data);
 
-gboolean meta_display_remove_xlet_keybinding (MetaDisplay         *display,
+gboolean meta_display_remove_custom_keybinding (MetaDisplay         *display,
                                               const char          *name);
 
 MetaKeyBindingAction meta_display_get_keybinding_action (MetaDisplay  *display,
