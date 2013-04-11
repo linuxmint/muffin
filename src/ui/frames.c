@@ -1269,6 +1269,27 @@ meta_frame_right_click_event(MetaUIFrame     *frame,
 }
 
 static gboolean
+meta_frame_double_click_edge_event (MetaUIFrame        *frame,
+                                    GdkEventButton     *event,
+                                    MetaFrameControl    control)
+{
+    switch (control) {
+        case META_FRAME_CONTROL_RESIZE_N:
+        case META_FRAME_CONTROL_RESIZE_S:
+            return meta_frame_titlebar_event (frame,
+                                              event,
+                                              G_DESKTOP_TITLEBAR_ACTION_TOGGLE_MAXIMIZE_VERTICALLY);
+        case META_FRAME_CONTROL_RESIZE_E:
+        case META_FRAME_CONTROL_RESIZE_W:
+            return meta_frame_titlebar_event (frame,
+                                              event,
+                                              G_DESKTOP_TITLEBAR_ACTION_TOGGLE_MAXIMIZE_HORIZONTALLY);
+        default:
+            return FALSE;
+        }
+}
+
+static gboolean
 meta_frames_button_press_event (GtkWidget      *widget,
                                 GdkEventButton *event)
 {
@@ -1317,6 +1338,17 @@ meta_frames_button_press_event (GtkWidget      *widget,
     {
       meta_core_end_grab_op (display, event->time);
       return meta_frame_double_click_event (frame, event);
+    }
+
+  if (event->button == 1 &&
+      event->type == GDK_2BUTTON_PRESS &&
+      (control == META_FRAME_CONTROL_RESIZE_N ||
+       control == META_FRAME_CONTROL_RESIZE_S ||
+       control == META_FRAME_CONTROL_RESIZE_E ||
+       control == META_FRAME_CONTROL_RESIZE_W))
+    {
+      meta_core_end_grab_op (display, event->time);
+      return meta_frame_double_click_edge_event (frame, event, control);
     }
 
   if (meta_core_get_grab_op (display) !=
