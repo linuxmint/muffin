@@ -1520,7 +1520,7 @@ meta_window_actor_new (MetaWindow *window)
     clutter_container_add_actor (CLUTTER_CONTAINER (info->top_window_group),
 			       CLUTTER_ACTOR (self));
   }
-  else if (window->type == META_WINDOW_TOOLTIP) {
+  else if (window->type == META_WINDOW_TOOLTIP || window->type == META_WINDOW_OVERRIDE_OTHER) {
     meta_window_get_work_area_all_monitors(window, rectWorkArea);
     rectWindow = meta_window_get_rect(window);
     // move tooltip out of top panel if necessary
