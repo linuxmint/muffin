@@ -61,6 +61,13 @@ static gboolean add_builtin_keybinding (MetaDisplay          *display,
                                         MetaKeyHandlerFunc    handler,
                                         int                   handler_arg);
 
+static void invoke_handler_by_name (MetaDisplay    *display,
+                                    MetaScreen     *screen,
+                                    const char     *handler_name,
+                                    MetaWindow     *window,
+                                    XEvent         *event);
+
+
 static void
 meta_key_binding_free (MetaKeyBinding *binding)
 {
@@ -653,6 +660,90 @@ meta_display_remove_keybinding (MetaDisplay *display,
   return TRUE;
 }
 
+static gboolean
+add_custom_keybinding_internal (MetaDisplay          *display,
+                              const char           *name,
+                              const char           *binding,
+                              MetaKeyBindingFlags   flags,
+                              MetaKeyBindingAction  action,
+                              MetaKeyHandlerFunc    func,
+                              int                   data,
+                              gpointer              user_data,
+                              GDestroyNotify        free_data)
+{
+  MetaKeyHandler *handler;
+
+  if (!meta_prefs_add_custom_keybinding (name, binding, action, flags))
+    return FALSE;
+
+  handler = g_new0 (MetaKeyHandler, 1);
+  handler->name = g_strdup (name);
+  handler->func = func;
+  handler->default_func = func;
+  handler->data = data;
+  handler->flags = flags;
+  handler->user_data = user_data;
+  handler->user_data_free_func = free_data;
+
+  g_hash_table_insert (key_handlers, g_strdup (name), handler);
+
+  return TRUE;
+}
+
+
+/**
+ * meta_display_add_custom_keybinding:
+ * @display: a #MetaDisplay
+ * @name: the binding's unique name
+ * @binding: the parseable keystrokes string (<Control>F1, etc..)
+ * @callback: function to run when the keybinding is invoked
+ * @user_data: the data to pass to @handler
+ * @free_data: function to free @user_data
+ *
+ *
+ * Use meta_display_remove_custom_keybinding() to remove the binding.
+ *
+ * Returns: %TRUE if the keybinding was added successfully,
+ *          otherwise %FALSE
+ */
+gboolean
+meta_display_add_custom_keybinding (MetaDisplay         *display,
+                                  const char          *name,
+                                  const char          *binding,
+                                  MetaKeyHandlerFunc   callback,
+                                  gpointer             user_data,
+                                  GDestroyNotify       free_data)
+
+{
+  return add_custom_keybinding_internal (display, name, binding,
+                                       META_KEY_BINDING_NONE,
+                                       META_KEYBINDING_ACTION_CUSTOM,
+                                       (MetaKeyHandlerFunc)callback, 0, user_data, free_data);
+}
+
+/**
+ * meta_display_remove_custom_keybinding:
+ * @display: the #MetaDisplay
+ * @name: name of the keybinding to remove
+ *
+ * Remove keybinding @name; the function will fail if @name is not a known
+ * keybinding or has not been added with meta_display_add_custom_keybinding().
+ *
+ * Returns: %TRUE if the binding has been removed sucessfully,
+ *          otherwise %FALSE
+ */
+gboolean
+meta_display_remove_custom_keybinding (MetaDisplay *display,
+                                     const char  *name)
+{
+  if (!meta_prefs_remove_custom_keybinding (name))
+    return FALSE;
+
+  g_hash_table_remove (key_handlers, name);
+
+  return TRUE;
+}
+
 /**
  * meta_display_get_keybinding_action:
  * @display: A #MetaDisplay
@@ -686,6 +777,41 @@ meta_display_get_keybinding_action (MetaDisplay  *display,
     return meta_prefs_get_keybinding_action (binding->name);
   else
     return META_KEYBINDING_ACTION_NONE;
+}
+
+void
+meta_display_keybinding_action_invoke_by_code (MetaDisplay  *display,
+                                               unsigned int  keycode,
+                                               unsigned long mask)
+{
+  MetaKeyBinding *binding;
+  KeySym keysym;
+
+  keysym = XkbKeycodeToKeysym (display->xdisplay, keycode, 0, 0);
+  mask = mask & 0xff & ~display->ignored_modifier_mask;
+  binding = display_get_keybinding (display, keysym, keycode, mask);
+
+  if (!binding && keycode == meta_display_get_above_tab_keycode (display))
+    binding = display_get_keybinding (display, META_KEY_ABOVE_TAB, keycode, mask);
+
+  if (binding)
+    invoke_handler_by_name (display, NULL, binding->name, NULL, NULL);
+}
+
+gboolean
+meta_display_get_is_overlay_key (MetaDisplay *display,
+                                 unsigned int keycode,
+                                 unsigned long mask)
+{
+
+    MetaKeyCombo combo;
+    KeySym keysym;
+
+    keysym = XkbKeycodeToKeysym (display->xdisplay, keycode, 0, 0);
+    mask = mask & 0xff & ~display->ignored_modifier_mask;
+    meta_prefs_get_overlay_binding (&combo);
+
+    return combo.keysym == keysym && combo.modifiers == mask;
 }
 
 LOCAL_SYMBOL void
@@ -764,6 +890,15 @@ bindings_changed_callback (MetaPreference pref,
     }
 }
 
+void
+meta_display_rebuild_keybindings (MetaDisplay *display)
+{
+    rebuild_key_binding_table (display);
+    rebuild_special_bindings (display);
+    reload_keycodes (display);
+    reload_modifiers (display);
+    regrab_key_bindings (display);
+}
 
 LOCAL_SYMBOL void
 meta_display_shutdown_keys (MetaDisplay *display)
