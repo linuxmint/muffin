@@ -86,6 +86,7 @@ MUFFIN_PC_MODULES="
    xcomposite >= 0.2 xfixes xrender xdamage
    $CLUTTER_PACKAGE >= 1.9.10
    cogl-1.0 >= 1.9.6
+   gl
 "
 
 GLIB_GSETTINGS
