@@ -67,7 +67,9 @@ typedef enum
   META_PREF_LIVE_HIDDEN_WINDOWS,
   META_PREF_WORKSPACES_ONLY_ON_PRIMARY,
   META_PREF_NO_TAB_POPUP,
-  META_PREF_DRAGGABLE_BORDER_WIDTH
+  META_PREF_DRAGGABLE_BORDER_WIDTH,
+  META_PREF_EDGE_TILE_THRESHOLD,
+  META_PREF_EDGE_DETACH_THRESHOLD
 } MetaPreference;
 
 typedef void (* MetaPrefsChangedFunc) (MetaPreference pref,
@@ -148,6 +150,10 @@ gboolean meta_prefs_get_no_tab_popup (void);
 void     meta_prefs_set_no_tab_popup (gboolean whether);
 
 int      meta_prefs_get_draggable_border_width (void);
+
+int      meta_prefs_get_edge_tile_threshold (void);
+int      meta_prefs_get_edge_detach_threshold (void);
+
 
 /* XXX FIXME This should be x-macroed, but isn't yet because it would be
  * difficult (or perhaps impossible) to add the suffixes using the current

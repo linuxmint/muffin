@@ -8615,9 +8615,7 @@ update_move (MetaWindow  *window,
    * for the zones at the sides of the monitor where trigger tiling
    * because it's about the right size
    */
-#define DRAG_THRESHOLD_TO_SHAKE_THRESHOLD_FACTOR 6
-  shake_threshold = meta_ui_get_drag_threshold (window->screen->ui) *
-    DRAG_THRESHOLD_TO_SHAKE_THRESHOLD_FACTOR;
+  shake_threshold = meta_prefs_get_edge_tile_threshold ();
 
   if (snap)
     {
@@ -8816,10 +8814,8 @@ check_resize_unmaximize(MetaWindow *window,
   int threshold;
   MetaMaximizeFlags new_unmaximize;
 
-#define DRAG_THRESHOLD_TO_RESIZE_THRESHOLD_FACTOR 3
+  threshold = meta_prefs_get_edge_detach_threshold ();
 
-  threshold = meta_ui_get_drag_threshold (window->screen->ui) *
-    DRAG_THRESHOLD_TO_RESIZE_THRESHOLD_FACTOR;
   new_unmaximize = 0;
 
   if (window->maximized_horizontally ||

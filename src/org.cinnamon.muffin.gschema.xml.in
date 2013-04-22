@@ -93,6 +93,30 @@
       </_description>
     </key>
 
+    <key name="edge-tile-threshold" type="i">
+      <default>48</default>
+      <range min="1" max="400"/>
+      <_summary>Window edge snap threshold</_summary>
+      <_description>
+          The region size in pixels, from the edge of the screen, where a dragged
+          window will be registered as 'sticky'
+      </_description>
+    </key>
+
+    <key name="edge-detach-threshold" type="i">
+      <default>24</default>
+      <range min="1" max="400"/>
+      <_summary>Window edge detach threshold</_summary>
+      <_description>
+          The region size in pixels, from the edge of the screen, where a tiled or
+          maximized window will be registered as a drag
+      </_description>
+    </key>
+
+
+
+
+
     <child name="keybindings" schema="org.cinnamon.muffin.keybindings"/>
 
   </schema>

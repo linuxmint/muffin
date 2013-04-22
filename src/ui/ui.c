@@ -1024,20 +1024,6 @@ meta_stock_icons_init (void)
   g_object_unref (G_OBJECT (factory));
 }
 
-LOCAL_SYMBOL int
-meta_ui_get_drag_threshold (MetaUI *ui)
-{
-  GtkSettings *settings;
-  int threshold;
-
-  settings = gtk_widget_get_settings (GTK_WIDGET (ui->frames));
-
-  threshold = 8;
-  g_object_get (G_OBJECT (settings), "gtk-dnd-drag-threshold", &threshold, NULL);
-
-  return threshold;
-}
-
 LOCAL_SYMBOL MetaUIDirection
 meta_ui_get_direction (void)
 {
