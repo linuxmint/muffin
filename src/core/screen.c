@@ -2020,7 +2020,7 @@ meta_screen_tile_preview_hide (MetaScreen *screen)
 /**
  * meta_screen_get_mouse_window:
  * @screen: an X screen structure.
- * @not_this_one: window to be excluded
+ * @not_this_one: (allow-none): window to be excluded
  *
  * Gets the #MetaWindow pointed by the mouse
  *
