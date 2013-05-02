@@ -5,7 +5,7 @@ lib_LTLIBRARIES = libmuffin.la
 
 SUBDIRS=wm-tester tools compositor/plugins
 
-INCLUDES=								\
+AM_CPPFLAGS =								\
 	$(MUFFIN_CFLAGS)						\
 	-I$(srcdir)							\
 	-I$(srcdir)/core						\
