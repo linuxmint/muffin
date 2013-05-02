@@ -517,4 +517,3 @@ muffin-$VERSION
 	Xsync:                    ${found_xsync}
 	Xcursor:                  ${have_xcursor}
 "
-
