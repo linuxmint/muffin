@@ -41,7 +41,6 @@ Depends: ${shlibs:Depends},
          libgnome2-common,
          zenity
 Provides: x-window-manager
-Recommends: gnome-session | x-session-manager
 Suggests: gnome-control-center (>= 1:2.5.4),
           gnome-themes,
           xdg-user-dirs
