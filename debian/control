@@ -38,7 +38,6 @@ Architecture: any
 Depends: ${shlibs:Depends},
          ${misc:Depends},
          muffin-common (= ${source:Version}),
-         libgnome2-common,
          zenity
 Provides: x-window-manager
 Suggests: gnome-themes,
