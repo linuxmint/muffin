@@ -1515,7 +1515,6 @@ meta_window_actor_new (MetaWindow *window)
       window->type == META_WINDOW_POPUP_MENU ||
       window->type == META_WINDOW_COMBO ||
       window->type == META_WINDOW_NOTIFICATION ||
-      window->type == META_WINDOW_DND ||
       window->type == META_WINDOW_OVERRIDE_OTHER){
     clutter_container_add_actor (CLUTTER_CONTAINER (info->top_window_group),
 			       CLUTTER_ACTOR (self));
