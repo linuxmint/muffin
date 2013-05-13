@@ -2741,12 +2741,15 @@ window_state_on_map (MetaWindow *window,
     case META_WINDOW_NOTIFICATION:
     case META_WINDOW_COMBO:
     case META_WINDOW_DND:
-    case META_WINDOW_OVERRIDE_OTHER:
       /* don't focus any of these; places_on_top may be irrelevant for some of
        * these (e.g. dock)--but you never know--the focus window might also be
        * of the same type in some weird situation...
        */
       *takes_focus = FALSE;
+      break;
+    case META_WINDOW_OVERRIDE_OTHER:
+      *takes_focus = FALSE;
+      *places_on_top = TRUE; /* Japanese input needs to be on top */
       break;
     case META_WINDOW_NORMAL:
     case META_WINDOW_DIALOG:
