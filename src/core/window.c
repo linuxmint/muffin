@@ -7665,7 +7665,7 @@ get_pp_name (gint in_pid)
     pid_t pid[2];
     pid[0] = in_pid;
 
-    PROCTAB* tab = openproc(PROC_FILLMEM | PROC_FILLSTAT | PROC_FILLSTATUS | PROC_PID, pid);
+    PROCTAB* tab = openproc(PROC_FILLSTATUS | PROC_PID, pid);
     proc_t *process_info;
 
     if ((process_info = readproc (tab, NULL))) {
@@ -7676,7 +7676,7 @@ get_pp_name (gint in_pid)
 
     if (ppid > 0) {
         pid[0] = ppid;
-        tab = openproc(PROC_FILLMEM | PROC_FILLSTAT | PROC_FILLSTATUS | PROC_PID, pid);
+        tab = openproc(PROC_FILLSTATUS | PROC_PID, pid);
 
         if ((process_info = readproc (tab, NULL))) {
             ret = g_strdup (process_info->cmd);
