@@ -44,7 +44,6 @@
 #include "window-props.h"
 #include "constraints.h"
 #include "muffin-enum-types.h"
-#include <proc/readproc.h>
 
 #include <X11/Xatom.h>
 #include <X11/Xlibint.h> /* For display->resource_mask */
