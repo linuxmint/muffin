@@ -30,7 +30,8 @@ Build-Depends: debhelper (>= 8),
                zenity,
                gnome-doc-utils (>= 0.8),
                gnome-pkg-tools (>= 0.10),
-               gsettings-desktop-schemas-dev (>= 3.3.0)
+               gsettings-desktop-schemas-dev (>= 3.3.0),
+               libprocps0-dev | libproc-dev
 Standards-Version: 3.9.2
 
 Package: muffin

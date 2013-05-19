@@ -44,6 +44,7 @@
 #include "window-props.h"
 #include "constraints.h"
 #include "muffin-enum-types.h"
+#include <proc/readproc.h>
 
 #include <X11/Xatom.h>
 #include <X11/Xlibint.h> /* For display->resource_mask */
@@ -7645,6 +7646,66 @@ meta_window_update_struts (MetaWindow *window)
     }
 }
 
+static void free_proc(proc_t *p)
+{
+    if (!p) /* in case p is NULL */
+        return;
+    if (p->cmdline)
+        free ((void*)*p->cmdline);
+    if (p->environ)
+        free ((void*)*p->environ);
+    free (p);
+}
+
+static gchar *
+get_pp_name (gint in_pid)
+{
+    gchar *ret = NULL;
+    gint ppid = 0;
+    pid_t pid[2];
+    pid[0] = in_pid;
+
+    PROCTAB* tab = openproc(PROC_FILLSTATUS | PROC_PID, pid);
+    proc_t *process_info;
+
+    if ((process_info = readproc (tab, NULL))) {
+        ppid = process_info->ppid;
+        free_proc (process_info);
+    }
+    closeproc (tab);
+
+    if (ppid > 0) {
+        pid[0] = ppid;
+        tab = openproc(PROC_FILLSTATUS | PROC_PID, pid);
+
+        if ((process_info = readproc (tab, NULL))) {
+            ret = g_strdup (process_info->cmd);
+            free_proc(process_info);
+        }
+        closeproc (tab);
+    }
+
+    return ret;
+}
+
+static gboolean
+is_ime_popup (MetaWindow *window)
+{
+    gboolean ret = FALSE;
+
+    const gchar *icon = window->icon_name;
+    gboolean deco = meta_window_get_frame (window) != NULL;
+
+    if (!deco && icon == NULL) {
+        gint id = meta_window_get_pid (window);
+        gchar *pp_name = get_pp_name (id);
+        if (g_strcmp0 (pp_name, "ibus-daemon") == 0)
+            ret = TRUE;
+        g_free (pp_name);
+    }
+    return ret;
+}
+
 LOCAL_SYMBOL void
 meta_window_recalc_window_type (MetaWindow *window)
 {
@@ -7735,6 +7796,12 @@ recalc_window_type (MetaWindow *window)
         {
         /* Decorated types */
         case META_WINDOW_NORMAL:
+          if (is_ime_popup (window)) {
+            window->type = META_WINDOW_POPUP_MENU;
+          }
+          else
+            window->type = META_WINDOW_OVERRIDE_OTHER;
+          break;
         case META_WINDOW_DIALOG:
         case META_WINDOW_MODAL_DIALOG:
         case META_WINDOW_MENU:
