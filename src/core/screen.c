@@ -144,6 +144,8 @@ static void
 meta_screen_finalize (GObject *object)
 {
   /* Actual freeing done in meta_screen_free() for now */
+  
+  G_OBJECT_CLASS (meta_screen_parent_class)->finalize (object);
 }
 
 static void
