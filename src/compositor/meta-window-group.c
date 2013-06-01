@@ -105,18 +105,12 @@ static void
 meta_window_group_paint (ClutterActor *actor)
 {
   cairo_region_t *visible_region;
-  cairo_region_t *unredirected_window_region = NULL;
   ClutterActor *stage;
-  cairo_rectangle_int_t visible_rect, unredirected_rect;
+  cairo_rectangle_int_t visible_rect;
   GList *children, *l;
 
   MetaWindowGroup *window_group = META_WINDOW_GROUP (actor);
   MetaCompScreen *info = meta_screen_get_compositor_data (window_group->screen);
-  if (info->unredirected_window != NULL)
-    {
-      meta_window_actor_get_shape_bounds (META_WINDOW_ACTOR (info->unredirected_window), &unredirected_rect);
-      unredirected_window_region = cairo_region_create_rectangle (&unredirected_rect);
-    }
 
   /* We walk the list from top to bottom (opposite of painting order),
    * and subtract the opaque area of each window out of the visible
@@ -137,12 +131,20 @@ meta_window_group_paint (ClutterActor *actor)
 
   visible_region = cairo_region_create_rectangle (&visible_rect);
 
-  if (unredirected_window_region)
-    cairo_region_subtract (visible_region, unredirected_window_region);
+  if (info->unredirected_window != NULL)
+    {
+      cairo_rectangle_int_t unredirected_rect;
+      MetaWindow *window = meta_window_actor_get_meta_window (info->unredirected_window);
+      meta_window_get_outer_rect (window, (MetaRectangle*) &unredirected_rect);
+      cairo_region_subtract_rectangle (visible_region, &unredirected_rect);
+    }
 
   for (l = children; l; l = l->next)
     {
       if (!CLUTTER_ACTOR_IS_VISIBLE (l->data))
+        continue;
+
+      if (l->data == info->unredirected_window)
         continue;
 
       /* If an actor has effects applied, then that can change the area
@@ -195,9 +197,6 @@ meta_window_group_paint (ClutterActor *actor)
     }
 
   cairo_region_destroy (visible_region);
-
-  if (unredirected_window_region)
-    cairo_region_destroy (unredirected_window_region);
 
   CLUTTER_ACTOR_CLASS (meta_window_group_parent_class)->paint (actor);
 
