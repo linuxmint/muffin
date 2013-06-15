@@ -249,6 +249,8 @@ meta_core_user_lower_and_unfocus (Display *xdisplay,
 {
   MetaWindow *window = get_window (xdisplay, frame_xwindow);
 
+  meta_screen_hide_hud_and_preview (window->screen);
+
   lower_window_and_transients (window, NULL);
 
  /* Rather than try to figure that out whether we just lowered
@@ -294,6 +296,37 @@ meta_core_lower_beneath_grab_window (Display *xdisplay,
   meta_error_trap_pop (display);
 }
 
+
+LOCAL_SYMBOL void
+meta_core_lower_beneath_sibling (Display   *xdisplay,
+                                 Window     xwindow,
+                                 Window     grab_window,
+                                 guint32    timestamp)
+{
+  XWindowChanges changes;
+  MetaDisplay *display;
+  MetaScreen *screen;
+
+  display = meta_display_for_x_display (xdisplay);
+  screen = meta_display_screen_for_xwindow (display, xwindow);
+
+  changes.stack_mode = Below;
+  changes.sibling = grab_window;
+
+  meta_stack_tracker_record_lower_below (screen->stack_tracker,
+                                         xwindow,
+                                         changes.sibling,
+                                         XNextRequest (screen->display->xdisplay));
+
+  meta_error_trap_push (display);
+  XConfigureWindow (xdisplay,
+                    xwindow,
+                    CWSibling | CWStackMode,
+                    &changes);
+  meta_error_trap_pop (display);
+}
+
+
 LOCAL_SYMBOL void
 meta_core_user_focus (Display *xdisplay,
                       Window   frame_xwindow,
@@ -310,6 +343,8 @@ meta_core_minimize (Display *xdisplay,
 {
   MetaWindow *window = get_window (xdisplay, frame_xwindow);
 
+  meta_screen_hide_hud_and_preview (window->screen);
+
   meta_window_minimize (window);
 }
 
@@ -318,6 +353,8 @@ meta_core_maximize (Display *xdisplay,
                     Window   frame_xwindow)
 {
   MetaWindow *window = get_window (xdisplay, frame_xwindow);
+
+  meta_screen_hide_hud_and_preview (window->screen);
 
   if (meta_prefs_get_raise_on_click ())
     meta_window_raise (window);
@@ -331,6 +368,8 @@ meta_core_toggle_maximize_vertically (Display *xdisplay,
 				      Window   frame_xwindow)
 {
   MetaWindow *window = get_window (xdisplay, frame_xwindow);
+
+  meta_screen_hide_hud_and_preview (window->screen);
 
   if (meta_prefs_get_raise_on_click ())
     meta_window_raise (window);
@@ -349,6 +388,8 @@ meta_core_toggle_maximize_horizontally (Display *xdisplay,
 {
   MetaWindow *window = get_window (xdisplay, frame_xwindow);
 
+  meta_screen_hide_hud_and_preview (window->screen);
+
   if (meta_prefs_get_raise_on_click ())
     meta_window_raise (window);
 
@@ -365,6 +406,8 @@ meta_core_toggle_maximize (Display *xdisplay,
                            Window   frame_xwindow)
 {
   MetaWindow *window = get_window (xdisplay, frame_xwindow);
+
+  meta_screen_hide_hud_and_preview (window->screen);
 
   if (meta_prefs_get_raise_on_click ())
     meta_window_raise (window);
@@ -407,6 +450,8 @@ meta_core_unshade (Display *xdisplay,
 {
   MetaWindow *window = get_window (xdisplay, frame_xwindow);
 
+  meta_screen_hide_hud_and_preview (window->screen);
+
   meta_window_unshade (window, timestamp);
 }
 
@@ -417,6 +462,8 @@ meta_core_shade (Display *xdisplay,
 {
   MetaWindow *window = get_window (xdisplay, frame_xwindow);
   
+  meta_screen_hide_hud_and_preview (window->screen);
+
   meta_window_shade (window, timestamp);
 }
 
@@ -497,7 +544,9 @@ meta_core_show_window_menu (Display *xdisplay,
                             guint32  timestamp)
 {
   MetaWindow *window = get_window (xdisplay, frame_xwindow);
-  
+
+  meta_screen_hide_hud_and_preview (window->screen);
+
   if (meta_prefs_get_raise_on_click ())
     meta_window_raise (window);
   meta_window_focus (window, timestamp);

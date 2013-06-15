@@ -65,6 +65,7 @@ struct _MetaWorkspace
   GList  *monitor_edges;
   GSList *builtin_struts;
   GSList *all_struts;
+  GList *snapped_windows;
   guint work_areas_invalid : 1;
 
   guint showing_desktop : 1;
@@ -81,6 +82,9 @@ void           meta_workspace_add_window    (MetaWorkspace *workspace,
                                              MetaWindow    *window);
 void           meta_workspace_remove_window (MetaWorkspace *workspace,
                                              MetaWindow    *window);
+void      meta_workspace_update_snapped_windows (MetaWorkspace *workspace);
+gboolean meta_workspace_has_snapped_windows (MetaWorkspace *workspace);
+void     meta_workspace_recalc_for_snapped_windows (MetaWorkspace *workspace);
 void           meta_workspace_relocate_windows (MetaWorkspace *workspace,
                                                 MetaWorkspace *new_home);
 

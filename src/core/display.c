@@ -1789,13 +1789,16 @@ event_callback (XEvent   *event,
     case KeyRelease:
       if (display->grab_op == META_GRAB_OP_COMPOSITOR)
         break;
-
       /* For key events, it's important to enforce single-handling, or
        * we can get into a confused state. So if a keybinding is
        * handled (because it's one of our hot-keys, or because we are
        * in a keyboard-grabbed mode like moving a window, we don't
        * want to pass the key event to the compositor or GTK+ at all.
        */
+      if (display->grab_window == window &&
+          grab_op_is_mouse (display->grab_op))
+          meta_window_handle_keyboard_grab_op_event (window, event);
+
       if (meta_display_process_key_event (display, window, event))
         filter_out_event = bypass_compositor = TRUE;
       break;

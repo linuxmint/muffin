@@ -5018,7 +5018,6 @@ get_style (MetaFrameStyleSet *style_set,
           case META_FRAME_STATE_NORMAL:
           case META_FRAME_STATE_SHADED:
           case META_FRAME_STATE_LAST:
-            g_assert_not_reached ();
             break;
           }
 
@@ -5427,7 +5426,6 @@ theme_get_style (MetaTheme     *theme,
       state = META_FRAME_STATE_TILED_RIGHT_AND_SHADED;
       break;
     default:
-      g_assert_not_reached ();
       state = META_FRAME_STATE_LAST; /* compiler */
       break;
     }
@@ -5438,12 +5436,20 @@ theme_get_style (MetaTheme     *theme,
       resize = META_FRAME_RESIZE_NONE;
       break;
     case META_FRAME_ALLOWS_VERTICAL_RESIZE:
+    case META_FRAME_ALLOWS_BOTTOM_RESIZE:
+    case META_FRAME_ALLOWS_TOP_RESIZE:
       resize = META_FRAME_RESIZE_VERTICAL;
       break;
     case META_FRAME_ALLOWS_HORIZONTAL_RESIZE:
+    case META_FRAME_ALLOWS_LEFT_RESIZE:
+    case META_FRAME_ALLOWS_RIGHT_RESIZE:
       resize = META_FRAME_RESIZE_HORIZONTAL;
       break;
     case (META_FRAME_ALLOWS_VERTICAL_RESIZE | META_FRAME_ALLOWS_HORIZONTAL_RESIZE):
+    case (META_FRAME_ALLOWS_LEFT_RESIZE | META_FRAME_ALLOWS_BOTTOM_RESIZE):
+    case (META_FRAME_ALLOWS_RIGHT_RESIZE | META_FRAME_ALLOWS_BOTTOM_RESIZE):
+    case (META_FRAME_ALLOWS_LEFT_RESIZE | META_FRAME_ALLOWS_TOP_RESIZE):
+    case (META_FRAME_ALLOWS_RIGHT_RESIZE | META_FRAME_ALLOWS_TOP_RESIZE):
       resize = META_FRAME_RESIZE_BOTH;
       break;
     default:

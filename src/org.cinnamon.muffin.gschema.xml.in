@@ -93,29 +93,25 @@
       </_description>
     </key>
 
-    <key name="edge-tile-threshold" type="i">
-      <default>48</default>
+    <key name="tile-hud-threshold" type="i">
+      <default>150</default>
       <range min="1" max="400"/>
-      <_summary>Window edge snap threshold</_summary>
+      <_summary>Window tile HUD threshold</_summary>
       <_description>
-          The region size in pixels, from the edge of the screen, where a dragged
-          window will be registered as 'sticky'
+          The distance from the edge of the screen you must be within before
+          the tile/snap HUD appears
       </_description>
     </key>
 
-    <key name="edge-detach-threshold" type="i">
+    <key name="resize-threshold" type="i">
       <default>24</default>
       <range min="1" max="400"/>
-      <_summary>Window edge detach threshold</_summary>
+      <_summary>Window resize tension threshold</_summary>
       <_description>
-          The region size in pixels, from the edge of the screen, where a tiled or
-          maximized window will be registered as a drag
+          The distance you have to move a resize grip before it's actually
+          registered as a resize
       </_description>
     </key>
-
-
-
-
 
     <child name="keybindings" schema="org.cinnamon.muffin.keybindings"/>
 
@@ -126,12 +122,36 @@
       <default><![CDATA[['<Control><Shift><Alt>r']]]></default>
     </key>
 
-    <key name="toggle-tiled-left" type="as">
-      <default><![CDATA[['<Super>Left']]]></default>
+    <key name="push-tile-left" type="as">
+      <default>[]</default>
     </key>
 
-    <key name="toggle-tiled-right" type="as">
-      <default><![CDATA[['<Super>Right']]]></default>
+    <key name="push-tile-right" type="as">
+      <default>[]</default>
+    </key>
+
+    <key name="push-tile-up" type="as">
+      <default>[]</default>
+    </key>
+
+    <key name="push-tile-down" type="as">
+      <default>[]</default>
+    </key>
+
+    <key name="push-snap-left" type="as">
+      <default>[]</default>
+    </key>
+
+    <key name="push-snap-right" type="as">
+      <default>[]</default>
+    </key>
+
+    <key name="push-snap-up" type="as">
+      <default>[]</default>
+    </key>
+
+    <key name="push-snap-down" type="as">
+      <default>[]</default>
     </key>
 
     <key name="tab-popup-select" type="as">

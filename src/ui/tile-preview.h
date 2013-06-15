@@ -30,9 +30,11 @@ typedef struct _MetaTilePreview MetaTilePreview;
 MetaTilePreview   *meta_tile_preview_new    (int                screen_number);
 void               meta_tile_preview_free   (MetaTilePreview   *preview);
 void               meta_tile_preview_show   (MetaTilePreview   *preview,
-                                             MetaRectangle     *rect);
+                                             MetaRectangle     *rect,
+                                             gboolean           snap);
 void               meta_tile_preview_hide   (MetaTilePreview   *preview);
 Window             meta_tile_preview_get_xwindow (MetaTilePreview   *preview,
                                                   gulong            *create_serial);
+gboolean           meta_tile_preview_get_visible (MetaTilePreview *preview);
 
 #endif /* META_TILE_PREVIEW_H */

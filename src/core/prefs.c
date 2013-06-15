@@ -97,8 +97,8 @@ static gboolean gnome_animations = TRUE;
 static char *cursor_theme = NULL;
 static int   cursor_size = 24;
 static int   draggable_border_width = 10;
-static int edge_tile_threshold = 48;
-static int edge_detach_threshold = 24;
+static int tile_hud_threshold = 150;
+static int resize_threshold = 24;
 static gboolean resize_with_right_button = FALSE;
 static gboolean edge_tiling = FALSE;
 static gboolean force_fullscreen = TRUE;
@@ -463,18 +463,18 @@ static MetaIntPreference preferences_int[] =
       &draggable_border_width
     },
     {
-      { "edge-tile-threshold",
+      { "tile-hud-threshold",
         SCHEMA_MUFFIN,
-        META_PREF_EDGE_TILE_THRESHOLD,
+        META_PREF_TILE_HUD_THRESHOLD,
       },
-      &edge_tile_threshold
+      &tile_hud_threshold
     },
     {
-      { "edge-detach-threshold",
+      { "resize-threshold",
         SCHEMA_MUFFIN,
-        META_PREF_EDGE_DETACH_THRESHOLD,
+        META_PREF_RESIZE_THRESHOLD,
       },
-      &edge_detach_threshold
+      &resize_threshold
     },
     { { NULL, 0, 0 }, NULL },
   };
@@ -1674,11 +1674,11 @@ meta_preference_to_string (MetaPreference pref)
     case META_PREF_DRAGGABLE_BORDER_WIDTH:
       return "DRAGGABLE_BORDER_WIDTH";
 
-    case META_PREF_EDGE_TILE_THRESHOLD:
-      return "EDGE_TILE_THRESHOLD";
+    case META_PREF_TILE_HUD_THRESHOLD:
+      return "TILE_HUD_THRESHOLD";
 
-    case META_PREF_EDGE_DETACH_THRESHOLD:
-      return "EDGE_DETACH_THRESHOLD";
+    case META_PREF_RESIZE_THRESHOLD:
+      return "RESIZE_THRESHOLD";
 
     case META_PREF_DYNAMIC_WORKSPACES:
       return "DYNAMIC_WORKSPACES";
@@ -2287,15 +2287,15 @@ meta_prefs_get_draggable_border_width (void)
 }
 
 int
-meta_prefs_get_edge_tile_threshold (void)
+meta_prefs_get_tile_hud_threshold (void)
 {
-  return edge_tile_threshold;
+  return tile_hud_threshold;
 }
 
 int
-meta_prefs_get_edge_detach_threshold (void)
+meta_prefs_get_resize_threshold (void)
 {
-  return edge_detach_threshold;
+  return resize_threshold;
 }
 
 void
