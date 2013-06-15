@@ -3660,7 +3660,6 @@ LOCAL_SYMBOL void
 meta_window_tile (MetaWindow *window)
 {
   MetaMaximizeFlags directions;
-
 /* Don't do anything if no tiling is requested or we're already tiled */
   if (window->tile_mode == META_TILE_NONE || window->maximized_vertically ||
                                              window->maximized_horizontally )
@@ -3699,6 +3698,8 @@ meta_window_tile (MetaWindow *window)
        */
       meta_window_queue (window, META_QUEUE_MOVE_RESIZE);
     }
+    meta_window_stick (window);
+    meta_window_set_above (window, TRUE);
 }
 
 static gboolean
@@ -9346,7 +9347,11 @@ update_tile_mode (MetaWindow *window)
     {
       case META_TILE_LEFT:
       case META_TILE_RIGHT:
-          if (!META_WINDOW_TILED_SIDE_BY_SIDE (window))
+      case META_TILE_ULC:
+      case META_TILE_LLC:
+      case META_TILE_URC:
+      case META_TILE_LRC:
+          if (!META_WINDOW_TILED_SIDE_BY_SIDE (window) || !META_WINDOW_TILED_CORNER (window))
               window->tile_mode = META_TILE_NONE;
           break;
       case META_TILE_MAXIMIZED:
@@ -10916,6 +10921,15 @@ meta_window_compute_tile_match (MetaWindow *window)
     match_tile_mode = META_TILE_RIGHT;
   else if (META_WINDOW_TILED_RIGHT (window))
     match_tile_mode = META_TILE_LEFT;
+  else if (META_WINDOW_TILED_ULC (window))
+    match_tile_mode = META_TILE_ULC;
+  else if (META_WINDOW_TILED_LLC (window))
+    match_tile_mode = META_TILE_LLC;
+  else if (META_WINDOW_TILED_URC (window))
+    match_tile_mode = META_TILE_URC;
+  else if (META_WINDOW_TILED_LRC (window))
+    match_tile_mode = META_TILE_LRC;
+
   else
     return;
 

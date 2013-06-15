@@ -448,6 +448,11 @@ struct _MetaWindowClass
                                        (w)->tile_mode == META_TILE_LLC || \
                                        (w)->tile_mode == META_TILE_URC || \
                                        (w)->tile_mode == META_TILE_LRC)
+#define META_WINDOW_TILED_ULC(w)       ((w)->tile_mode == META_TILE_ULC)
+#define META_WINDOW_TILED_LLC(w)       ((w)->tile_mode == META_TILE_LLC)
+#define META_WINDOW_TILED_URC(w)       ((w)->tile_mode == META_TILE_URC)
+#define META_WINDOW_TILED_LRC(w)       ((w)->tile_mode == META_TILE_LRC)
+
 #define META_WINDOW_TILED_MAXIMIZED(w)(META_WINDOW_MAXIMIZED(w) && \
                                        (w)->tile_mode == META_TILE_MAXIMIZED)
 #define META_WINDOW_ALLOWS_MOVE(w)     ((w)->has_move_func && !(w)->fullscreen)
