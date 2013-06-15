@@ -8643,7 +8643,7 @@ update_move_timeout (gpointer data)
   return FALSE;
 }
 
-LOCAL_SYMBOL gboolean
+static gboolean
 at_left_edge (MetaRectangle monitor,
               MetaRectangle work_area,
               int           x,
@@ -8652,7 +8652,7 @@ at_left_edge (MetaRectangle monitor,
     return x >= monitor.x && x < (work_area.x + shake_threshold);
 }
 
-LOCAL_SYMBOL gboolean
+static gboolean
 at_right_edge (MetaRectangle monitor,
                MetaRectangle work_area,
                int           x,
@@ -8662,7 +8662,7 @@ at_right_edge (MetaRectangle monitor,
            x < (monitor.x + monitor.width);
 }
 
-LOCAL_SYMBOL gboolean
+static gboolean
 at_top_edge (MetaRectangle monitor,
              MetaRectangle work_area,
              int           y,
@@ -8671,7 +8671,7 @@ at_top_edge (MetaRectangle monitor,
     return y >= monitor.y && y <= work_area.y;
 }
 
-LOCAL_SYMBOL gboolean
+static gboolean
 at_bottom_edge (MetaRectangle monitor,
                 MetaRectangle work_area,
                 int           y,
@@ -8765,11 +8765,6 @@ update_move (MetaWindow  *window,
       right_edge = at_right_edge (monitor->rect, work_area, x, shake_threshold);
       top_edge = at_top_edge (monitor->rect, work_area, y, shake_threshold);
       bottom_edge = at_bottom_edge (monitor->rect, work_area, y, shake_threshold);
-
-
-
-
-
 
       if (meta_window_can_tile_corner (window) && (left_edge && top_edge))
         window->tile_mode = META_TILE_ULC;

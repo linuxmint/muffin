@@ -1963,7 +1963,7 @@ meta_screen_tile_preview_update_timeout (gpointer data)
           case META_TILE_LLC:
           case META_TILE_URC:
           case META_TILE_LRC:
-              if (!META_WINDOW_TILED_CORNER (window))
+           //   if (!META_WINDOW_TILED_CORNER (window))  FIXME
                 needs_preview = TRUE;
               break;
           case META_TILE_MAXIMIZED:
