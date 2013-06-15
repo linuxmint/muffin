@@ -3842,13 +3842,6 @@ meta_window_unmaximize_internal (MetaWindow        *window,
   unmaximize_vertically   = directions & META_MAXIMIZE_VERTICAL;
   g_assert (unmaximize_horizontally || unmaximize_vertically);
 
-  if (window->corner_tiled || window->side_tiled) {
-    window->corner_tiled = FALSE;
-    window->side_tiled = FALSE;
-    meta_window_set_above (window, FALSE);
-    meta_window_unstick (window);
-  }
-
   if (unmaximize_horizontally && unmaximize_vertically)
     window->saved_maximize = FALSE;
 
@@ -3953,6 +3946,13 @@ meta_window_unmaximize_internal (MetaWindow        *window,
 
       recalc_window_features (window);
       set_net_wm_state (window);
+    }
+
+    if (window->corner_tiled || window->side_tiled) {
+    window->corner_tiled = FALSE;
+    window->side_tiled = FALSE;
+    meta_window_set_above (window, FALSE);
+    meta_window_unstick (window);
     }
 
     g_object_freeze_notify (G_OBJECT (window));
