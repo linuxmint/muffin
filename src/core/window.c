@@ -9621,6 +9621,30 @@ meta_window_get_current_tile_area (MetaWindow    *window,
 
   if (window->tile_mode == META_TILE_RIGHT)
     tile_area->x += tile_area->width;
+
+  if (window->tile_mode == META_TILE_ULC) {
+    tile_area->width /= 2;
+    tile_area->height /= 2;
+  }
+
+  if (window->tile_mode == META_TILE_LLC) {
+    tile_area->width /= 2;
+    tile_area->height /= 2;
+    tile_area->y += tile_area->height;
+  }
+
+  if (window->tile_mode == META_TILE_URC) {
+    tile_area->width /= 2;
+    tile_area->height /= 2;
+    tile_area->x += tile_area->width;
+  }
+
+  if (window->tile_mode == META_TILE_LRC) {
+    tile_area->width /= 2;
+    tile_area->height /= 2;
+    tile_area->x += tile_area->width;
+    tile_area->y += tile_area->height;
+  }
 }
 
 LOCAL_SYMBOL gboolean

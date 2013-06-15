@@ -1959,7 +1959,13 @@ meta_screen_tile_preview_update_timeout (gpointer data)
               if (!META_WINDOW_TILED_SIDE_BY_SIDE (window))
                 needs_preview = TRUE;
               break;
-
+          case META_TILE_ULC:
+          case META_TILE_LLC:
+          case META_TILE_URC:
+          case META_TILE_LRC:
+              if (!META_WINDOW_TILED_CORNER (window))
+                needs_preview = TRUE;
+              break;
           case META_TILE_MAXIMIZED:
               if (!META_WINDOW_MAXIMIZED (window))
                 needs_preview = TRUE;
