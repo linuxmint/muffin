@@ -3695,14 +3695,12 @@ meta_window_tile (MetaWindow *window)
       window->tile_mode == META_TILE_LRC) {
     window->corner_tiled = TRUE;
     meta_window_stick (window);
-    meta_window_set_above (window, TRUE);
   }
 
   if (window->tile_mode == META_TILE_LEFT ||
       window->tile_mode == META_TILE_RIGHT) {
     window->side_tiled = TRUE;
     meta_window_stick (window);
-    meta_window_set_above (window, TRUE);
   }
 
   meta_window_maximize_internal (window, directions, NULL);
@@ -3951,7 +3949,6 @@ meta_window_unmaximize_internal (MetaWindow        *window,
     if (window->corner_tiled || window->side_tiled) {
     window->corner_tiled = FALSE;
     window->side_tiled = FALSE;
-    meta_window_set_above (window, FALSE);
     meta_window_unstick (window);
     }
 
