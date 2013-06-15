@@ -3820,13 +3820,18 @@ meta_window_unmaximize_internal (MetaWindow        *window,
                                  int                gravity)
 {
   gboolean unmaximize_horizontally, unmaximize_vertically;
-
   g_return_if_fail (!window->override_redirect);
 
   /* At least one of the two directions ought to be set */
   unmaximize_horizontally = directions & META_MAXIMIZE_HORIZONTAL;
   unmaximize_vertically   = directions & META_MAXIMIZE_VERTICAL;
   g_assert (unmaximize_horizontally || unmaximize_vertically);
+
+  if (window->corner_tiled) {
+    window->corner_tiled = FALSE;
+    meta_window_set_above (window, FALSE);
+    meta_window_unstick (window);
+  }
 
   if (unmaximize_horizontally && unmaximize_vertically)
     window->saved_maximize = FALSE;
