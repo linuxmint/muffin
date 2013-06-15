@@ -4946,9 +4946,17 @@ meta_frame_style_set_unref (MetaFrameStyleSet *style_set)
       free_focus_styles (style_set->maximized_styles);
       free_focus_styles (style_set->tiled_left_styles);
       free_focus_styles (style_set->tiled_right_styles);
+      free_focus_styles (style_set->tiled_ulc_styles);
+      free_focus_styles (style_set->tiled_llc_styles);
+      free_focus_styles (style_set->tiled_urc_styles);
+      free_focus_styles (style_set->tiled_lrc_styles);
       free_focus_styles (style_set->maximized_and_shaded_styles);
       free_focus_styles (style_set->tiled_left_and_shaded_styles);
       free_focus_styles (style_set->tiled_right_and_shaded_styles);
+      free_focus_styles (style_set->tiled_ulc_and_shaded_styles);
+      free_focus_styles (style_set->tiled_llc_and_shaded_styles);
+      free_focus_styles (style_set->tiled_urc_and_shaded_styles);
+      free_focus_styles (style_set->tiled_lrc_and_shaded_styles);
 
       if (style_set->parent)
         meta_frame_style_set_unref (style_set->parent);
@@ -5006,6 +5014,18 @@ get_style (MetaFrameStyleSet *style_set,
           case META_FRAME_STATE_TILED_RIGHT:
             styles = style_set->tiled_right_styles;
             break;
+          case META_FRAME_STATE_TILED_ULC:
+            styles = style_set->tiled_ulc_styles;
+            break;
+          case META_FRAME_STATE_TILED_LLC:
+            styles = style_set->tiled_llc_styles;
+            break;
+          case META_FRAME_STATE_TILED_URC:
+            styles = style_set->tiled_urc_styles;
+            break;
+          case META_FRAME_STATE_TILED_LRC:
+            styles = style_set->tiled_lrc_styles;
+            break;
           case META_FRAME_STATE_MAXIMIZED_AND_SHADED:
             styles = style_set->maximized_and_shaded_styles;
             break;
@@ -5014,6 +5034,18 @@ get_style (MetaFrameStyleSet *style_set,
             break;
           case META_FRAME_STATE_TILED_RIGHT_AND_SHADED:
             styles = style_set->tiled_right_and_shaded_styles;
+            break;
+          case META_FRAME_STATE_TILED_ULC_AND_SHADED:
+            styles = style_set->tiled_ulc_and_shaded_styles;
+            break;
+          case META_FRAME_STATE_TILED_LLC_AND_SHADED:
+            styles = style_set->tiled_llc_and_shaded_styles;
+            break;
+          case META_FRAME_STATE_TILED_URC_AND_SHADED:
+            styles = style_set->tiled_urc_and_shaded_styles;
+            break;
+          case META_FRAME_STATE_TILED_LRC_AND_SHADED:
+            styles = style_set->tiled_lrc_and_shaded_styles;
             break;
           case META_FRAME_STATE_NORMAL:
           case META_FRAME_STATE_SHADED:
@@ -5028,11 +5060,19 @@ get_style (MetaFrameStyleSet *style_set,
         if (style == NULL)
           {
             if (state == META_FRAME_STATE_TILED_LEFT ||
-                state == META_FRAME_STATE_TILED_RIGHT)
+                state == META_FRAME_STATE_TILED_RIGHT ||
+                state == META_FRAME_STATE_TILED_ULC ||
+                state == META_FRAME_STATE_TILED_LLC ||
+                state == META_FRAME_STATE_TILED_URC ||
+                state == META_FRAME_STATE_TILED_LRC)
               style = get_style (style_set, META_FRAME_STATE_NORMAL,
                                  resize, focus);
             else if (state == META_FRAME_STATE_TILED_LEFT_AND_SHADED ||
-                     state == META_FRAME_STATE_TILED_RIGHT_AND_SHADED)
+                     state == META_FRAME_STATE_TILED_RIGHT_AND_SHADED ||
+                     state == META_FRAME_STATE_TILED_ULC_AND_SHADED ||
+                     state == META_FRAME_STATE_TILED_LLC_AND_SHADED ||
+                     state == META_FRAME_STATE_TILED_URC_AND_SHADED ||
+                     state == META_FRAME_STATE_TILED_LRC_AND_SHADED)
               style = get_style (style_set, META_FRAME_STATE_SHADED,
                                  resize, focus);
           }
@@ -5400,7 +5440,9 @@ theme_get_style (MetaTheme     *theme,
     return NULL;
   
   switch (flags & (META_FRAME_MAXIMIZED | META_FRAME_SHADED |
-                   META_FRAME_TILED_LEFT | META_FRAME_TILED_RIGHT))
+                   META_FRAME_TILED_LEFT | META_FRAME_TILED_RIGHT |
+                   META_FRAME_TILED_ULC | META_FRAME_TILED_LLC |
+                   META_FRAME_TILED_URC | META_FRAME_TILED_LRC ))
     {
     case 0:
       state = META_FRAME_STATE_NORMAL;
@@ -5414,6 +5456,18 @@ theme_get_style (MetaTheme     *theme,
     case META_FRAME_TILED_RIGHT:
       state = META_FRAME_STATE_TILED_RIGHT;
       break;
+    case META_FRAME_TILED_ULC:
+      state = META_FRAME_STATE_TILED_ULC;
+      break;
+    case META_FRAME_TILED_LLC:
+      state = META_FRAME_STATE_TILED_LLC;
+      break;
+    case META_FRAME_TILED_URC:
+      state = META_FRAME_STATE_TILED_URC;
+      break;
+    case META_FRAME_TILED_LRC:
+      state = META_FRAME_STATE_TILED_LRC;
+      break;
     case META_FRAME_SHADED:
       state = META_FRAME_STATE_SHADED;
       break;
@@ -5425,6 +5479,18 @@ theme_get_style (MetaTheme     *theme,
       break;
     case (META_FRAME_TILED_RIGHT | META_FRAME_SHADED):
       state = META_FRAME_STATE_TILED_RIGHT_AND_SHADED;
+      break;
+    case (META_FRAME_TILED_ULC | META_FRAME_SHADED):
+      state = META_FRAME_STATE_TILED_ULC_AND_SHADED;
+      break;
+    case (META_FRAME_TILED_LLC | META_FRAME_SHADED):
+      state = META_FRAME_STATE_TILED_LLC_AND_SHADED;
+      break;
+    case (META_FRAME_TILED_URC | META_FRAME_SHADED):
+      state = META_FRAME_STATE_TILED_URC_AND_SHADED;
+      break;
+    case (META_FRAME_TILED_LRC | META_FRAME_SHADED):
+      state = META_FRAME_STATE_TILED_LRC_AND_SHADED;
       break;
     default:
       g_assert_not_reached ();
@@ -6191,6 +6257,14 @@ meta_frame_state_from_string (const char *str)
     return META_FRAME_STATE_TILED_LEFT;
   else if (strcmp ("tiled_right", str) == 0)
     return META_FRAME_STATE_TILED_RIGHT;
+  else if (strcmp ("tiled_ulc", str) == 0)
+    return META_FRAME_STATE_TILED_ULC;
+  else if (strcmp ("tiled_llc", str) == 0)
+    return META_FRAME_STATE_TILED_LLC;
+  else if (strcmp ("tiled_urc", str) == 0)
+    return META_FRAME_STATE_TILED_URC;
+  else if (strcmp ("tiled_lrc", str) == 0)
+    return META_FRAME_STATE_TILED_LRC;
   else if (strcmp ("shaded", str) == 0)
     return META_FRAME_STATE_SHADED;
   else if (strcmp ("maximized_and_shaded", str) == 0)
@@ -6199,6 +6273,14 @@ meta_frame_state_from_string (const char *str)
     return META_FRAME_STATE_TILED_LEFT_AND_SHADED;
   else if (strcmp ("tiled_right_and_shaded", str) == 0)
     return META_FRAME_STATE_TILED_RIGHT_AND_SHADED;
+  else if (strcmp ("tiled_ulc_and_shaded", str) == 0)
+    return META_FRAME_STATE_TILED_ULC_AND_SHADED;
+  else if (strcmp ("tiled_llc_and_shaded", str) == 0)
+    return META_FRAME_STATE_TILED_LLC_AND_SHADED;
+  else if (strcmp ("tiled_urc_and_shaded", str) == 0)
+    return META_FRAME_STATE_TILED_URC_AND_SHADED;
+  else if (strcmp ("tiled_lrc_and_shaded", str) == 0)
+    return META_FRAME_STATE_TILED_LRC_AND_SHADED;
   else
     return META_FRAME_STATE_LAST;
 }
@@ -6216,6 +6298,14 @@ meta_frame_state_to_string (MetaFrameState state)
       return "tiled_left";
     case META_FRAME_STATE_TILED_RIGHT:
       return "tiled_right";
+    case META_FRAME_STATE_TILED_ULC:
+      return "tiled_ulc";
+    case META_FRAME_STATE_TILED_LLC:
+      return "tiled_llc";
+    case META_FRAME_STATE_TILED_URC:
+      return "tiled_urc";
+    case META_FRAME_STATE_TILED_LRC:
+      return "tiled_lrc";
     case META_FRAME_STATE_SHADED:
       return "shaded";
     case META_FRAME_STATE_MAXIMIZED_AND_SHADED:
@@ -6224,6 +6314,14 @@ meta_frame_state_to_string (MetaFrameState state)
       return "tiled_left_and_shaded";
     case META_FRAME_STATE_TILED_RIGHT_AND_SHADED:
       return "tiled_right_and_shaded";
+    case META_FRAME_STATE_TILED_ULC_AND_SHADED:
+      return "tiled_ulc_and_shaded";
+    case META_FRAME_STATE_TILED_LLC_AND_SHADED:
+      return "tiled_llc_and_shaded";
+    case META_FRAME_STATE_TILED_URC_AND_SHADED:
+      return "tiled_urc_and_shaded";
+    case META_FRAME_STATE_TILED_LRC_AND_SHADED:
+      return "tiled_lrc_and_shaded";
     case META_FRAME_STATE_LAST:
       break;
     }

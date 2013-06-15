@@ -129,6 +129,7 @@ struct _MetaWindow
   guint maximized_vertically : 1;
 
   guint corner_tiled : 1;
+  guint side_tiled: 1;
 
   /* Whether we have to maximize/minimize after placement */
   guint maximize_horizontally_after_placement : 1;
@@ -439,14 +440,12 @@ struct _MetaWindowClass
                                         (w)->maximized_vertically)
 #define META_WINDOW_MAXIMIZED_VERTICALLY(w)    ((w)->maximized_vertically)
 #define META_WINDOW_MAXIMIZED_HORIZONTALLY(w)  ((w)->maximized_horizontally)
-#define META_WINDOW_TILED_SIDE_BY_SIDE(w)      ((w)->maximized_vertically && \
-                                                !(w)->maximized_horizontally && \
-                                                 (w)->tile_mode != META_TILE_NONE)
+#define META_WINDOW_TILED_SIDE_BY_SIDE(w)      ((w)->side_tiled && (w)->tile_mode != META_TILE_NONE)
 #define META_WINDOW_TILED_LEFT(w)     (META_WINDOW_TILED_SIDE_BY_SIDE(w) && \
                                        (w)->tile_mode == META_TILE_LEFT)
 #define META_WINDOW_TILED_RIGHT(w)    (META_WINDOW_TILED_SIDE_BY_SIDE(w) && \
                                        (w)->tile_mode == META_TILE_RIGHT)
-#define META_WINDOW_TILED_CORNER(w)    ((w)->corner_tiled)
+#define META_WINDOW_TILED_CORNER(w)    ((w)->corner_tiled && (w)->tile_mode != META_TILE_NONE)
 #define META_WINDOW_TILED_ULC(w)       (META_WINDOW_TILED_CORNER (w) && (w)->tile_mode == META_TILE_ULC)
 #define META_WINDOW_TILED_LLC(w)       (META_WINDOW_TILED_CORNER (w) && (w)->tile_mode == META_TILE_LLC)
 #define META_WINDOW_TILED_URC(w)       (META_WINDOW_TILED_CORNER (w) && (w)->tile_mode == META_TILE_URC)

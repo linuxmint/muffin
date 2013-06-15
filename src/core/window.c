@@ -157,6 +157,7 @@ enum {
   PROP_MAXIMIZED_HORIZONTALLY,
   PROP_MAXIMIZED_VERTICALLY,
   PROP_CORNER_TILED,
+  PROP_SIDE_TILED,
   PROP_MINIMIZED,
   PROP_WINDOW_TYPE,
   PROP_USER_TIME,
@@ -270,6 +271,9 @@ meta_window_get_property(GObject         *object,
       break;
     case PROP_CORNER_TILED:
       g_value_set_boolean (value, win->corner_tiled);
+      break;
+    case PROP_SIDE_TILED:
+      g_value_set_boolean (value, win->side_tiled);
       break;
     case PROP_MINIMIZED:
       g_value_set_boolean (value, win->minimized);
@@ -1057,6 +1061,7 @@ meta_window_new_with_attrs (MetaDisplay       *display,
   window->maximized_horizontally = FALSE;
   window->maximized_vertically = FALSE;
   window->corner_tiled = FALSE;
+  window->side_tiled = FALSE;
   window->maximize_horizontally_after_placement = FALSE;
   window->maximize_vertically_after_placement = FALSE;
   window->minimize_after_placement = FALSE;
@@ -3675,7 +3680,8 @@ meta_window_tile (MetaWindow *window)
 /* Don't do anything if no tiling is requested or we're already tiled */
   if (window->tile_mode == META_TILE_NONE || window->maximized_vertically ||
                                              window->maximized_horizontally ||
-                                             window->corner_tiled)
+                                             window->corner_tiled ||
+                                             window->side_tiled)
     return;
 
   if (window->tile_mode == META_TILE_MAXIMIZED)
@@ -3686,8 +3692,18 @@ meta_window_tile (MetaWindow *window)
   if (window->tile_mode == META_TILE_ULC ||
       window->tile_mode == META_TILE_LLC ||
       window->tile_mode == META_TILE_URC ||
-      window->tile_mode == META_TILE_LRC)
+      window->tile_mode == META_TILE_LRC) {
     window->corner_tiled = TRUE;
+    meta_window_stick (window);
+    meta_window_set_above (window, TRUE);
+  }
+
+  if (window->tile_mode == META_TILE_LEFT ||
+      window->tile_mode == META_TILE_RIGHT) {
+    window->side_tiled = TRUE;
+    meta_window_stick (window);
+    meta_window_set_above (window, TRUE);
+  }
 
   meta_window_maximize_internal (window, directions, NULL);
   meta_screen_tile_preview_update (window->screen, FALSE);
@@ -3717,8 +3733,6 @@ meta_window_tile (MetaWindow *window)
        */
       meta_window_queue (window, META_QUEUE_MOVE_RESIZE);
     }
-    meta_window_stick (window);
-    meta_window_set_above (window, TRUE);
 }
 
 static gboolean
@@ -3790,6 +3804,7 @@ unmaximize_window_before_freeing (MetaWindow        *window)
   window->maximized_horizontally = FALSE;
   window->maximized_vertically = FALSE;
   window->corner_tiled = FALSE;
+  window->side_tiled = FALSE;
 
   if (window->withdrawn)                /* See bug #137185 */
     {
@@ -3827,8 +3842,9 @@ meta_window_unmaximize_internal (MetaWindow        *window,
   unmaximize_vertically   = directions & META_MAXIMIZE_VERTICAL;
   g_assert (unmaximize_horizontally || unmaximize_vertically);
 
-  if (window->corner_tiled) {
+  if (window->corner_tiled || window->side_tiled) {
     window->corner_tiled = FALSE;
+    window->side_tiled = FALSE;
     meta_window_set_above (window, FALSE);
     meta_window_unstick (window);
   }

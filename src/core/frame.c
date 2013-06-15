@@ -297,6 +297,18 @@ meta_frame_get_flags (MetaFrame *frame)
   if (META_WINDOW_TILED_RIGHT (frame->window))
     flags |= META_FRAME_TILED_RIGHT;
 
+  if (META_WINDOW_TILED_ULC (frame->window))
+    flags |= META_FRAME_TILED_ULC;
+
+  if (META_WINDOW_TILED_LLC (frame->window))
+    flags |= META_FRAME_TILED_LLC;
+
+  if (META_WINDOW_TILED_URC (frame->window))
+    flags |= META_FRAME_TILED_URC;
+
+  if (META_WINDOW_TILED_LRC (frame->window))
+    flags |= META_FRAME_TILED_LRC;
+
   if (frame->window->fullscreen)
     flags |= META_FRAME_FULLSCREEN;
 

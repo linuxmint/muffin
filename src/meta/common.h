@@ -53,7 +53,11 @@ typedef enum
   META_FRAME_IS_FLASHING              = 1 << 13,
   META_FRAME_ABOVE                    = 1 << 14,
   META_FRAME_TILED_LEFT               = 1 << 15,
-  META_FRAME_TILED_RIGHT              = 1 << 16
+  META_FRAME_TILED_RIGHT              = 1 << 16,
+  META_FRAME_TILED_ULC                = 1 << 17,
+  META_FRAME_TILED_LLC                = 1 << 18,
+  META_FRAME_TILED_URC                = 1 << 19,
+  META_FRAME_TILED_LRC                = 1 << 20
 } MetaFrameFlags;
 
 typedef enum
