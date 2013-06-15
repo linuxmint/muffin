@@ -3689,6 +3689,22 @@ meta_window_tile (MetaWindow *window)
   else
     directions = META_MAXIMIZE_VERTICAL;
 
+  if (window->tile_mode == META_TILE_ULC ||
+      window->tile_mode == META_TILE_LLC ||
+      window->tile_mode == META_TILE_URC ||
+      window->tile_mode == META_TILE_LRC) {
+    window->corner_tiled = TRUE;
+    meta_window_stick (window);
+    meta_window_set_above (window, TRUE);
+  }
+
+  if (window->tile_mode == META_TILE_LEFT ||
+      window->tile_mode == META_TILE_RIGHT) {
+    window->side_tiled = TRUE;
+    meta_window_stick (window);
+    meta_window_set_above (window, TRUE);
+  }
+
   meta_window_maximize_internal (window, directions, NULL);
   meta_screen_tile_preview_update (window->screen, FALSE);
 
@@ -3717,22 +3733,6 @@ meta_window_tile (MetaWindow *window)
        */
       meta_window_queue (window, META_QUEUE_MOVE_RESIZE);
     }
-
-  if (window->tile_mode == META_TILE_ULC ||
-      window->tile_mode == META_TILE_LLC ||
-      window->tile_mode == META_TILE_URC ||
-      window->tile_mode == META_TILE_LRC) {
-    window->corner_tiled = TRUE;
-    meta_window_stick (window);
-    meta_window_set_above (window, TRUE);
-  }
-
-  if (window->tile_mode == META_TILE_LEFT ||
-      window->tile_mode == META_TILE_RIGHT) {
-    window->side_tiled = TRUE;
-    meta_window_stick (window);
-    meta_window_set_above (window, TRUE);
-  }
 }
 
 static gboolean
