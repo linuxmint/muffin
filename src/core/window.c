@@ -156,6 +156,7 @@ enum {
   PROP_FULLSCREEN,
   PROP_MAXIMIZED_HORIZONTALLY,
   PROP_MAXIMIZED_VERTICALLY,
+  PROP_CORNER_TILED,
   PROP_MINIMIZED,
   PROP_WINDOW_TYPE,
   PROP_USER_TIME,
@@ -266,6 +267,9 @@ meta_window_get_property(GObject         *object,
       break;
     case PROP_MAXIMIZED_VERTICALLY:
       g_value_set_boolean (value, win->maximized_vertically);
+      break;
+    case PROP_CORNER_TILED:
+      g_value_set_boolean (value, win->corner_tiled);
       break;
     case PROP_MINIMIZED:
       g_value_set_boolean (value, win->minimized);
@@ -397,6 +401,13 @@ meta_window_class_init (MetaWindowClass *klass)
                                    g_param_spec_boolean ("maximized-vertically",
                                                          "Maximizing vertically",
                                                          "Whether window is maximized vertically",
+                                                         FALSE,
+                                                         G_PARAM_READABLE));
+  g_object_class_install_property (object_class,
+                                   PROP_CORNER_TILED,
+                                   g_param_spec_boolean ("corner-tiled",
+                                                         "Tiled to a corner",
+                                                         "Whether window is tiled in a corner",
                                                          FALSE,
                                                          G_PARAM_READABLE));
   g_object_class_install_property (object_class,
@@ -1045,6 +1056,7 @@ meta_window_new_with_attrs (MetaDisplay       *display,
 
   window->maximized_horizontally = FALSE;
   window->maximized_vertically = FALSE;
+  window->corner_tiled = FALSE;
   window->maximize_horizontally_after_placement = FALSE;
   window->maximize_vertically_after_placement = FALSE;
   window->minimize_after_placement = FALSE;
@@ -3662,13 +3674,20 @@ meta_window_tile (MetaWindow *window)
   MetaMaximizeFlags directions;
 /* Don't do anything if no tiling is requested or we're already tiled */
   if (window->tile_mode == META_TILE_NONE || window->maximized_vertically ||
-                                             window->maximized_horizontally )
+                                             window->maximized_horizontally ||
+                                             window->corner_tiled)
     return;
 
   if (window->tile_mode == META_TILE_MAXIMIZED)
     directions = META_MAXIMIZE_VERTICAL | META_MAXIMIZE_HORIZONTAL;
   else
     directions = META_MAXIMIZE_VERTICAL;
+
+  if (window->tile_mode == META_TILE_ULC ||
+      window->tile_mode == META_TILE_LLC ||
+      window->tile_mode == META_TILE_URC ||
+      window->tile_mode == META_TILE_LRC)
+    window->corner_tiled = TRUE;
 
   meta_window_maximize_internal (window, directions, NULL);
   meta_screen_tile_preview_update (window->screen, FALSE);
@@ -3770,6 +3789,7 @@ unmaximize_window_before_freeing (MetaWindow        *window)
 
   window->maximized_horizontally = FALSE;
   window->maximized_vertically = FALSE;
+  window->corner_tiled = FALSE;
 
   if (window->withdrawn)                /* See bug #137185 */
     {
