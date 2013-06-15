@@ -186,6 +186,34 @@ enum
   LAST_SIGNAL
 };
 
+/* edge zones for tiling/snapping identification
+
+  __________________
+  |  0   1   2   3  |
+  |                 |
+  | 11           4  |
+  |                 |
+  | 10           5  |
+  |                 |
+  |  9   8   7   6  |
+  |_________________|
+
+*/
+
+enum {
+    ZONE_0 = 0,
+    ZONE_1,
+    ZONE_3,
+    ZONE_4,
+    ZONE_5,
+    ZONE_6,
+    ZONE_7,
+    ZONE_8,
+    ZONE_9,
+    ZONE_10,
+    ZONE_11
+}
+
 static guint window_signals[LAST_SIGNAL] = { 0 };
 
 static void
