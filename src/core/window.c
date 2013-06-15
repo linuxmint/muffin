@@ -3735,6 +3735,31 @@ meta_window_can_tile_side_by_side (MetaWindow *window)
          tile_area.height >= window->size_hints.min_height;
 }
 
+LOCAL_SYMBOL gboolean
+meta_window_can_tile_corner (MetaWindow *window)
+{
+  const MetaMonitorInfo *monitor;
+  MetaRectangle tile_area;
+  MetaFrameBorders borders;
+
+  if (!meta_window_can_tile_maximized (window))
+    return FALSE;
+
+  monitor = meta_screen_get_current_monitor (window->screen);
+  meta_window_get_work_area_for_monitor (window, monitor->number, &tile_area);
+
+  tile_area.width /= 2;
+  tile_area.height /= 2;
+
+  meta_frame_calc_borders (window->frame, &borders);
+
+  tile_area.width  -= (borders.visible.left + borders.visible.right);
+  tile_area.height -= (borders.visible.top + borders.visible.bottom);
+
+  return tile_area.width >= window->size_hints.min_width &&
+         tile_area.height >= window->size_hints.min_height;
+}
+
 static void
 unmaximize_window_before_freeing (MetaWindow        *window)
 {
@@ -8618,6 +8643,44 @@ update_move_timeout (gpointer data)
   return FALSE;
 }
 
+LOCAL_SYMBOL gboolean
+at_left_edge (MetaRectangle monitor,
+              MetaRectangle work_area,
+              int           x,
+              int           shake_threshold)
+{
+    return x >= monitor.x && x < (work_area.x + shake_threshold);
+}
+
+LOCAL_SYMBOL gboolean
+at_right_edge (MetaRectangle monitor,
+               MetaRectangle work_area,
+               int           x,
+               int           shake_threshold)
+{
+    return x >= (work_area.x + work_area.width - shake_threshold) &&
+           x < (monitor.x + monitor.width);
+}
+
+LOCAL_SYMBOL gboolean
+at_top_edge (MetaRectangle monitor,
+             MetaRectangle work_area,
+             int           y,
+             int           shake_threshold)
+{
+    return y >= monitor.y && y <= work_area.y;
+}
+
+LOCAL_SYMBOL gboolean
+at_bottom_edge (MetaRectangle monitor,
+                MetaRectangle work_area,
+                int           y,
+                int           shake_threshold)
+{
+    return y >= (work_area.y + work_area.height - shake_threshold) &&
+           y < (monitor.y + monitor.height);
+}
+
 static void
 update_move (MetaWindow  *window,
              gboolean     snap,
@@ -8695,15 +8758,32 @@ update_move (MetaWindow  *window,
       /* Check if the cursor is in a position which triggers tiling
        * and set tile_mode accordingly.
        */
-      if (meta_window_can_tile_side_by_side (window) &&
-          x >= monitor->rect.x && x < (work_area.x + shake_threshold))
+
+      gboolean left_edge, right_edge, top_edge, bottom_edge;
+
+      left_edge = at_left_edge (monitor->rect, work_area, x, shake_threshold);
+      right_edge = at_right_edge (monitor->rect, work_area, x, shake_threshold);
+      top_edge = at_top_edge (monitor->rect, work_area, y, shake_threshold);
+      bottom_edge = at_bottom_edge (monitor->rect, work_area, y, shake_threshold);
+
+
+
+
+
+
+      if (meta_window_can_tile_corner (window) && (left_edge && top_edge))
+        window->tile_mode = META_TILE_ULC;
+      else if (meta_window_can_tile_corner (window) && (left_edge && bottom_edge))
+        window->tile_mode = META_TILE_LLC;
+      else if (meta_window_can_tile_corner (window) && (right_edge && top_edge))
+        window->tile_mode = META_TILE_URC;
+      else if (meta_window_can_tile_corner (window) && (right_edge && bottom_edge))
+        window->tile_mode = META_TILE_LRC;
+      else if (meta_window_can_tile_side_by_side (window) && left_edge)
         window->tile_mode = META_TILE_LEFT;
-      else if (meta_window_can_tile_side_by_side (window) &&
-               x >= work_area.x + work_area.width - shake_threshold &&
-               x < (monitor->rect.x + monitor->rect.width))
+      else if (meta_window_can_tile_side_by_side (window) && right_edge)
         window->tile_mode = META_TILE_RIGHT;
-      else if (meta_window_can_tile_maximized (window) &&
-               y >= monitor->rect.y && y <= work_area.y)
+      else if (meta_window_can_tile_maximized (window) && top_edge)
         window->tile_mode = META_TILE_MAXIMIZED;
       else
         window->tile_mode = META_TILE_NONE;
