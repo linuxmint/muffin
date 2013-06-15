@@ -5018,7 +5018,6 @@ get_style (MetaFrameStyleSet *style_set,
           case META_FRAME_STATE_NORMAL:
           case META_FRAME_STATE_SHADED:
           case META_FRAME_STATE_LAST:
-            g_assert_not_reached ();
             break;
           }
 
@@ -5427,7 +5426,6 @@ theme_get_style (MetaTheme     *theme,
       state = META_FRAME_STATE_TILED_RIGHT_AND_SHADED;
       break;
     default:
-      g_assert_not_reached ();
       state = META_FRAME_STATE_LAST; /* compiler */
       break;
     }
