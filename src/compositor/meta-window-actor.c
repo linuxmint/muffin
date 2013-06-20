@@ -1318,7 +1318,8 @@ meta_window_actor_destroy (MetaWindowActor *self)
       window_type == META_WINDOW_NOTIFICATION ||
       window_type == META_WINDOW_COMBO ||
       window_type == META_WINDOW_DND ||
-      window_type == META_WINDOW_OVERRIDE_OTHER)
+      window_type == META_WINDOW_OVERRIDE_OTHER ||
+      meta_window_is_override_redirect(window))
     {
       /*
        * No effects, just kill it.
