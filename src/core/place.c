@@ -451,10 +451,12 @@ rectangle_overlaps_some_window (MetaRectangle *rect,
         case META_WINDOW_UTILITY:
         case META_WINDOW_TOOLBAR:
         case META_WINDOW_MENU:
-          meta_window_get_outer_rect (other, &other_rect);
-          
-          if (meta_rectangle_intersect (rect, &other_rect, &dest))
-            return TRUE;
+          if (!meta_window_is_override_redirect(other)) {
+            meta_window_get_outer_rect (other, &other_rect);
+            
+            if (meta_rectangle_intersect (rect, &other_rect, &dest))
+              return TRUE;
+          }
           break;
         }
       
@@ -713,6 +715,10 @@ meta_window_place (MetaWindow        *window,
    */
 
   meta_topic (META_DEBUG_PLACEMENT, "Placing window %s\n", window->desc);
+
+  if (meta_window_is_override_redirect(window)) {
+    goto done_no_constraints;
+  }
 
   windows = NULL;
   parent = meta_display_lookup_x_window (window->display,

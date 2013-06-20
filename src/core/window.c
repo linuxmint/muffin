@@ -2835,6 +2835,9 @@ window_state_on_map (MetaWindow *window,
       /* The default is correct for these */
       break;
     }
+  if (window->override_redirect) {
+    *takes_focus = FALSE;
+  }
 }
 
 static gboolean
@@ -8038,41 +8041,9 @@ recalc_window_type (MetaWindow *window)
   /* We don't want to allow override-redirect windows to have decorated-window
    * types since that's just confusing.
    */
-  if (window->override_redirect)
-    {
-      switch (window->type)
-        {
-        /* Decorated types */
-        case META_WINDOW_NORMAL:
-          if (is_ime_popup (window)) {
-            window->type = META_WINDOW_POPUP_MENU;
-          }
-          else
-            window->type = META_WINDOW_OVERRIDE_OTHER;
-          break;
-        case META_WINDOW_DIALOG:
-        case META_WINDOW_MODAL_DIALOG:
-        case META_WINDOW_MENU:
-        case META_WINDOW_UTILITY:
-          window->type = META_WINDOW_OVERRIDE_OTHER;
-          break;
-        /* Undecorated types, normally not override-redirect */
-        case META_WINDOW_DESKTOP:
-        case META_WINDOW_DOCK:
-        case META_WINDOW_TOOLBAR:
-        case META_WINDOW_SPLASHSCREEN:
-        /* Undecorated types, normally override-redirect types */
-        case META_WINDOW_DROPDOWN_MENU:
-        case META_WINDOW_POPUP_MENU:
-        case META_WINDOW_TOOLTIP:
-        case META_WINDOW_NOTIFICATION:
-        case META_WINDOW_COMBO:
-        case META_WINDOW_DND:
-        /* To complete enum */
-        case META_WINDOW_OVERRIDE_OTHER:
-          break;
-        }
-    }
+  if (window->override_redirect && window->type == META_WINDOW_NORMAL && is_ime_popup(window)) {
+    window->type = META_WINDOW_POPUP_MENU;
+  }
 
   meta_verbose ("Calculated type %u for %s, old type %u\n",
                 window->type, window->desc, old_type);
@@ -8348,38 +8319,44 @@ recalc_window_features (MetaWindow *window)
 
   if (window->wm_state_skip_pager)
     window->skip_pager = TRUE;
-
-  switch (window->type)
-    {
-      /* Force skip taskbar/pager on these window types */
-    case META_WINDOW_DESKTOP:
-    case META_WINDOW_DOCK:
-    case META_WINDOW_TOOLBAR:
-    case META_WINDOW_MENU:
-    case META_WINDOW_UTILITY:
-    case META_WINDOW_SPLASHSCREEN:
-    case META_WINDOW_DROPDOWN_MENU:
-    case META_WINDOW_POPUP_MENU:
-    case META_WINDOW_TOOLTIP:
-    case META_WINDOW_NOTIFICATION:
-    case META_WINDOW_COMBO:
-    case META_WINDOW_DND:
-    case META_WINDOW_OVERRIDE_OTHER:
-      window->skip_taskbar = TRUE;
-      window->skip_pager = TRUE;
-      break;
-
-    case META_WINDOW_DIALOG:
-    case META_WINDOW_MODAL_DIALOG:
-      /* only skip taskbar if we have a real transient parent */
-      if (window->xtransient_for != None &&
-          window->xtransient_for != window->screen->xroot)
+  
+  if (window->override_redirect) {
+    window->skip_taskbar = TRUE;
+    window->skip_pager = TRUE;
+  }
+  else {
+    switch (window->type)
+      {
+        /* Force skip taskbar/pager on these window types */
+      case META_WINDOW_DESKTOP:
+      case META_WINDOW_DOCK:
+      case META_WINDOW_TOOLBAR:
+      case META_WINDOW_MENU:
+      case META_WINDOW_UTILITY:
+      case META_WINDOW_SPLASHSCREEN:
+      case META_WINDOW_DROPDOWN_MENU:
+      case META_WINDOW_POPUP_MENU:
+      case META_WINDOW_TOOLTIP:
+      case META_WINDOW_NOTIFICATION:
+      case META_WINDOW_COMBO:
+      case META_WINDOW_DND:
+      case META_WINDOW_OVERRIDE_OTHER:
         window->skip_taskbar = TRUE;
-      break;
+        window->skip_pager = TRUE;
+        break;
 
-    case META_WINDOW_NORMAL:
-      break;
-    }
+      case META_WINDOW_DIALOG:
+      case META_WINDOW_MODAL_DIALOG:
+        /* only skip taskbar if we have a real transient parent */
+        if (window->xtransient_for != None &&
+            window->xtransient_for != window->screen->xroot)
+          window->skip_taskbar = TRUE;
+        break;
+
+      case META_WINDOW_NORMAL:
+        break;
+      }
+  }
 
   meta_topic (META_DEBUG_WINDOW_OPS,
               "Window %s decorated = %d border_only = %d has_close = %d has_minimize = %d has_maximize = %d has_move = %d has_shade = %d skip_taskbar = %d skip_pager = %d\n",
@@ -11348,6 +11325,10 @@ meta_window_get_frame_type (MetaWindow *window)
       base_type = META_FRAME_TYPE_LAST;
       break;
     }
+  
+  if (window->override_redirect) {
+    base_type = META_FRAME_TYPE_LAST;
+  }
 
   if (base_type == META_FRAME_TYPE_LAST)
     {
