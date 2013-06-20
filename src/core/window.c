@@ -10731,8 +10731,7 @@ meta_window_get_frame_type (MetaWindow *window)
       /* can't add border if undecorated */
       return META_FRAME_TYPE_LAST;
     }
-  else if ((window->border_only && base_type != META_FRAME_TYPE_ATTACHED) ||
-           (window->hide_titlebar_when_maximized && META_WINDOW_MAXIMIZED (window)))
+  else if ((window->border_only && base_type != META_FRAME_TYPE_ATTACHED))
     {
       /* override base frame type */
       return META_FRAME_TYPE_BORDER;

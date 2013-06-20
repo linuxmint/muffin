@@ -1593,34 +1593,6 @@ reload_gtk_theme_variant (MetaWindow    *window,
 }
 
 static void
-reload_gtk_hide_titlebar_when_maximized (MetaWindow    *window,
-                                         MetaPropValue *value,
-                                         gboolean       initial)
-{
-  gboolean requested_value = FALSE;
-  gboolean current_value = window->hide_titlebar_when_maximized;
-
-  if (value->type != META_PROP_VALUE_INVALID)
-    {
-      requested_value = ((int) value->v.cardinal == 1);
-      meta_verbose ("Request to hide titlebar for window %s.\n", window->desc);
-    }
-
-  if (requested_value == current_value)
-    return;
-
-  window->hide_titlebar_when_maximized = requested_value;
-
-  if (META_WINDOW_MAXIMIZED (window))
-    {
-      meta_window_queue (window, META_QUEUE_MOVE_RESIZE);
-
-      if (window->frame)
-        meta_ui_update_frame_style (window->screen->ui, window->frame->xwindow);
-    }
-}
-
-static void
 reload_bypass_compositor (MetaWindow    *window,
                           MetaPropValue *value,
                           gboolean       initial)
@@ -1749,8 +1721,7 @@ meta_display_init_window_prop_hooks (MetaDisplay *display)
     { display->atom__NET_WM_STATE,     META_PROP_VALUE_ATOM_LIST, reload_net_wm_state,     TRUE,  FALSE },
     { display->atom__MOTIF_WM_HINTS,   META_PROP_VALUE_MOTIF_HINTS, reload_mwm_hints,      TRUE,  FALSE },
     { XA_WM_TRANSIENT_FOR,             META_PROP_VALUE_WINDOW,    reload_transient_for,    TRUE,  FALSE },
-    { display->atom__GTK_THEME_VARIANT, META_PROP_VALUE_UTF8,     reload_gtk_theme_variant, TRUE, FALSE },
-    { display->atom__GTK_HIDE_TITLEBAR_WHEN_MAXIMIZED, META_PROP_VALUE_CARDINAL,     reload_gtk_hide_titlebar_when_maximized, TRUE, FALSE },
+    { display->atom__GTK_THEME_VARIANT, META_PROP_VALUE_UTF8,     reload_gtk_theme_variant, TRUE, FALSE },    
     { display->atom__GTK_APPLICATION_ID,               META_PROP_VALUE_UTF8,         reload_gtk_application_id,               TRUE, FALSE },
     { display->atom__GTK_UNIQUE_BUS_NAME,              META_PROP_VALUE_UTF8,         reload_gtk_unique_bus_name,              TRUE, FALSE },
     { display->atom__GTK_APPLICATION_OBJECT_PATH,      META_PROP_VALUE_UTF8,         reload_gtk_application_object_path,      TRUE, FALSE },
