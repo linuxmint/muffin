@@ -3046,15 +3046,7 @@ handle_show_desktop (MetaDisplay    *display,
                        MetaKeyBinding *binding,
                        gpointer        dummy)
 {
-  if (screen->active_workspace->showing_desktop)
-    {
-      meta_screen_unshow_desktop (screen);
-      meta_workspace_focus_default_window (screen->active_workspace, 
-                                           NULL,
-                                           event->xkey.time);
-    }
-  else
-    meta_screen_show_desktop (screen, event->xkey.time);
+  meta_screen_toggle_desktop (screen, event->xkey.time);
 }
 
 static void
