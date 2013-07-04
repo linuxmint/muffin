@@ -137,6 +137,8 @@ static void unminimize_window_and_all_transient_parents (MetaWindow *window);
 
 static void notify_tile_type (MetaWindow *window);
 
+static void normalize_tile_state (MetaWindow *window);
+
 /* Idle handlers for the three queues (run with meta_later_add()). The
  * "data" parameter in each case will be a GINT_TO_POINTER of the
  * index into the queue arrays to use.
@@ -3572,6 +3574,11 @@ meta_topic (META_DEBUG_WINDOW_OPS,
   else
     meta_window_save_rect (window);
 
+  meta_window_set_tile_type (window, META_WINDOW_TILE_TYPE_NONE);
+  window->tile_mode = META_TILE_NONE;
+  notify_tile_type (window);
+  normalize_tile_state (window);
+
   if (maximize_horizontally && maximize_vertically)
     window->saved_maximize = TRUE;
 
@@ -3737,6 +3744,15 @@ notify_tile_type (MetaWindow *window)
   g_object_thaw_notify (G_OBJECT (window));
 }
 
+static void
+normalize_tile_state (MetaWindow *window)
+{
+  window->snap_queued = FALSE;
+  window->resize_tile_mode = META_TILE_NONE;
+  window->resizing_tile_type = META_WINDOW_TILE_TYPE_NONE;
+  meta_screen_update_snapped_windows (window->screen);
+}
+
 LOCAL_SYMBOL void
 meta_window_tile (MetaWindow *window, gboolean force)
 {
@@ -3767,9 +3783,7 @@ meta_window_tile (MetaWindow *window, gboolean force)
   recalc_window_features (window);
   set_net_wm_state (window);
 
-  meta_screen_update_snapped_windows (window->screen);
-  window->snap_queued = FALSE;
-  window->resize_tile_mode = META_TILE_NONE;
+  normalize_tile_state (window);
 
   meta_screen_tile_preview_update (window->screen, FALSE);
 
@@ -3799,7 +3813,6 @@ meta_window_tile (MetaWindow *window, gboolean force)
       meta_window_queue (window, META_QUEUE_MOVE_RESIZE);
     }
 
-  window->resizing_tile_type = META_WINDOW_TILE_TYPE_NONE;
   meta_screen_tile_preview_hide (window->screen);
   meta_window_get_outer_rect (window, &window->snapped_rect);
 

@@ -3512,6 +3512,7 @@ handle_tile_action (MetaDisplay    *display,
       window->snap_queued = snap;
       window->tile_monitor_number = window->monitor->number;
       window->tile_mode = new_mode;
+      window->custom_snap_size = FALSE;
       /* Maximization constraints beat tiling constraints, so if the window
        * is maximized, tiling won't have any effect unless we unmaximize it
        * horizontally first; rather than calling meta_window_unmaximize(),
@@ -3522,6 +3523,7 @@ handle_tile_action (MetaDisplay    *display,
   } else {
       window->last_tile_mode = window->tile_mode;
       window->tile_mode = new_mode;
+      window->custom_snap_size = FALSE;
       meta_window_set_tile_type (window, META_WINDOW_TILE_TYPE_NONE);
       window->tile_monitor_number = window->saved_maximize ? window->monitor->number
                                                            : -1;
