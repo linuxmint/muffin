@@ -2150,12 +2150,13 @@ set_net_wm_state (MetaWindow *window)
     data[4] = (unsigned long) rect.width;
     data[5] = (unsigned long) rect.height;
     data[6] = (unsigned long) window->tile_monitor_number;
+    data[7] = (unsigned long) window->custom_snap_size ? 1 : 0;
 
     meta_error_trap_push (window->display);
     XChangeProperty (window->display->xdisplay, window->xwindow,
                      window->display->atom__NET_WM_WINDOW_TILE_INFO,
                      XA_CARDINAL,
-                     32, PropModeReplace, (guchar*) data, 7);
+                     32, PropModeReplace, (guchar*) data, 8);
     meta_error_trap_pop (window->display);
   }
 }
@@ -3751,7 +3752,6 @@ meta_window_tile (MetaWindow *window, gboolean force)
 
   window->maximized_horizontally = FALSE;
   window->maximized_vertically = FALSE;
-
 
   if (window->tile_mode != META_TILE_NONE) {
       if (window->snap_queued || window->resizing_tile_type == META_WINDOW_TILE_TYPE_SNAPPED) {

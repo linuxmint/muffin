@@ -603,7 +603,7 @@ place_window_if_needed(MetaWindow     *window,
                                            window->display->atom__NET_WM_WINDOW_TILE_INFO,
                                            &tile_info, &nitems))
             {
-              if (nitems == 7)
+              if (nitems == 8)
                 {
                   window->tile_mode = (MetaTileMode) tile_info[0];
                   meta_window_move_resize_frame (window,
@@ -612,7 +612,7 @@ place_window_if_needed(MetaWindow     *window,
                                                  tile_info[3],
                                                  tile_info[4],
                                                  tile_info[5]);
-                  window->custom_snap_size = TRUE;
+                  window->custom_snap_size = tile_info[7] == 1;
                   window->tile_monitor_number = tile_info[6];
                   if (tile_info[1] == META_WINDOW_TILE_TYPE_SNAPPED)
                     window->snap_queued = TRUE;
