@@ -9033,6 +9033,8 @@ update_move (MetaWindow  *window,
   if (window->tile_type == META_WINDOW_TILE_TYPE_SNAPPED)
     breakloose_threshold *= 2;
   if ((META_WINDOW_MAXIMIZED (window) && ABS (dy) >= breakloose_threshold) ||
+      (META_WINDOW_MAXIMIZED_VERTICALLY (window) && ABS (dy) >= breakloose_threshold) ||
+      (META_WINDOW_MAXIMIZED_HORIZONTALLY (window) && ABS (dx) >= breakloose_threshold) ||
       (META_WINDOW_TILED_OR_SNAPPED (window) && (MAX (ABS (dx), ABS (dy)) >= breakloose_threshold)))
     {
       double prop;
