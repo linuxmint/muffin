@@ -3634,7 +3634,8 @@ meta_window_maximize (MetaWindow        *window,
 	  return;
 	}
 
-      if (window->tile_mode != META_TILE_NONE)
+      if (window->tile_mode != META_TILE_NONE ||
+          window->last_tile_mode != META_TILE_NONE)
         {
           saved_rect = &window->saved_rect;
 
@@ -3745,7 +3746,7 @@ meta_window_tile (MetaWindow *window, gboolean force)
 
   if (window->last_tile_mode == META_TILE_NONE &&
       window->resizing_tile_type == META_WINDOW_TILE_TYPE_NONE &&
-      !META_WINDOW_MAXIMIZED (window));
+      !META_WINDOW_MAXIMIZED (window))
   {
      meta_window_save_rect (window);
   }
@@ -3970,13 +3971,6 @@ meta_window_unmaximize_internal (MetaWindow        *window,
         window->maximized_horizontally && !unmaximize_horizontally;
       window->maximized_vertically =
         window->maximized_vertically   && !unmaximize_vertically;
-
-      /* Reset the tile mode for maximized tiled windows for consistency
-       * with "normal" maximized windows, but keep other tile modes,
-       * as side-by-side tiled windows may snap back.
-       */
-      if (window->tile_mode == META_TILE_MAXIMIZED)
-        window->tile_mode = META_TILE_NONE;
 
       /* Unmaximize to the saved_rect position in the direction(s)
        * being unmaximized.
@@ -9635,10 +9629,6 @@ update_tile_mode (MetaWindow *window)
       case META_TILE_TOP:
       case META_TILE_BOTTOM:
           if (!META_WINDOW_TILED_OR_SNAPPED (window))
-              window->tile_mode = META_TILE_NONE;
-          break;
-      case META_TILE_MAXIMIZED:
-          if (!META_WINDOW_MAXIMIZED (window))
               window->tile_mode = META_TILE_NONE;
           break;
     }

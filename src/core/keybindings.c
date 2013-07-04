@@ -1848,7 +1848,7 @@ process_mouse_move_resize_grab (MetaDisplay *display,
        * need to remaximize it.  In normal cases, we need to do a
        * moveresize now to get the position back to the original.
        */
-      if (window->shaken_loose || window->tile_mode == META_TILE_MAXIMIZED)
+      if (window->shaken_loose)
         meta_window_maximize (window,
                               META_MAXIMIZE_HORIZONTAL |
                               META_MAXIMIZE_VERTICAL);
@@ -3374,7 +3374,6 @@ get_new_tile_mode (MetaTileMode direction,
     MetaTileMode ret = META_TILE_NONE;
     switch (current) {
         case META_TILE_NONE:
-        case META_TILE_MAXIMIZED:
             ret = direction;
             break;
         case META_TILE_LEFT:
@@ -3521,13 +3520,11 @@ handle_tile_action (MetaDisplay    *display,
        */
       meta_window_tile (window, TRUE);
   } else {
-      window->tile_mode = new_mode;
       window->last_tile_mode = window->tile_mode;
+      window->tile_mode = new_mode;
       meta_window_set_tile_type (window, META_WINDOW_TILE_TYPE_NONE);
       window->tile_monitor_number = window->saved_maximize ? window->monitor->number
                                                            : -1;
-      window->tile_mode = window->saved_maximize ? META_TILE_MAXIMIZED
-                                                 : META_TILE_NONE;
       if (window->saved_maximize)
         meta_window_maximize (window, META_MAXIMIZE_VERTICAL |
                                       META_MAXIMIZE_HORIZONTAL);

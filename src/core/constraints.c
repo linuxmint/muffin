@@ -804,11 +804,7 @@ constrain_maximization (MetaWindow         *window,
     return TRUE;
 
   /* Calculate target_size = maximized size of (window + frame) */
-  if (META_WINDOW_TILED_MAXIMIZED (window))
-    {
-      meta_window_get_current_tile_area (window, &target_size);
-    }
-  else if (META_WINDOW_MAXIMIZED (window) && g_list_length (window->screen->active_workspace->snapped_windows) == 0)
+  if (META_WINDOW_MAXIMIZED (window) && g_list_length (window->screen->active_workspace->snapped_windows) == 0)
     {
       target_size = info->work_area_monitor;
     }
