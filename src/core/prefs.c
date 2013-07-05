@@ -102,7 +102,7 @@ static int resize_threshold = 24;
 static gboolean resize_with_right_button = FALSE;
 static gboolean edge_tiling = FALSE;
 static gboolean force_fullscreen = TRUE;
-static KeySym snap_modifier[2];
+static unsigned int snap_modifier[2];
 
 static GDesktopVisualBellType visual_bell_type = G_DESKTOP_VISUAL_BELL_FULLSCREEN_FLASH;
 static MetaButtonLayout button_layout;
@@ -1312,6 +1312,10 @@ snap_modifier_handler (GVariant *value,
   {
     snap_modifier[0] = XStringToKeysym("Control_L");
     snap_modifier[1] = XStringToKeysym("Control_R");
+  } else
+  {
+    snap_modifier[0] = 0;
+    snap_modifier[1] = 0;
   }
   return TRUE;
 }
@@ -2352,7 +2356,7 @@ meta_prefs_set_force_fullscreen (gboolean whether)
   force_fullscreen = whether;
 }
 
-KeySym *
+unsigned int *
 meta_prefs_get_snap_modifier (void)
 {
     return snap_modifier;

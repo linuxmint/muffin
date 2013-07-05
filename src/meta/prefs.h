@@ -156,7 +156,7 @@ int      meta_prefs_get_draggable_border_width (void);
 int      meta_prefs_get_tile_hud_threshold (void);
 int      meta_prefs_get_resize_threshold (void);
 
-KeySym*  meta_prefs_get_snap_modifier (void);
+unsigned int *  meta_prefs_get_snap_modifier (void);
 
 /* XXX FIXME This should be x-macroed, but isn't yet because it would be
  * difficult (or perhaps impossible) to add the suffixes using the current

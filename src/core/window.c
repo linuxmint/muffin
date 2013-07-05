@@ -9804,9 +9804,9 @@ meta_window_handle_keyboard_grab_op_event (MetaWindow *window,
             {
               if (check_use_this_motion_notify (window,
                                                 event)) {
-                KeySym *mod_set = meta_prefs_get_snap_modifier ();
+                unsigned int *mod_set = meta_prefs_get_snap_modifier ();
                 KeySym keysym = XkbKeycodeToKeysym (window->display->xdisplay, event->xkey.keycode, 0, 0);
-                if (&mod_set[0] != NULL)
+                if (mod_set[0] != 0)
                 {
                     if (event->type == KeyPress && (keysym == mod_set[0] ||
                                                     keysym == mod_set[1]))
