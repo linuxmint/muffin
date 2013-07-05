@@ -424,7 +424,7 @@ static MetaStringPreference preferences_string[] =
     },
     {
       { "button-layout",
-        SCHEMA_GENERAL,
+        SCHEMA_MUFFIN,
         META_PREF_BUTTON_LAYOUT,
       },
       button_layout_handler,

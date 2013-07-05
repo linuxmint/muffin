@@ -36,12 +36,11 @@
     </key>
 
     <key name="edge-tiling" type="b">
-      <default>false</default>
-      <_summary>Enable edge tiling when dropping windows on screen edges</_summary>
+      <default>true</default>
+      <_summary>Enable edge tiling and snapping</_summary>
       <_description>
-        If enabled, dropping windows on vertical screen edges maximizes them
-        vertically and resizes them horizontally to cover half of the available
-        area. Dropping windows on the top screen edge maximizes them completely.
+        If enabled, allows you to drag windows to the screen edges
+        to tile or snap them in place.
       </_description>
     </key>
 
@@ -127,6 +126,15 @@
       <_description>
         Enables old-style snapping by holding the shift key while dragging a window
       </_description>
+    </key>
+
+    <key name="button-layout" type="s">
+      <default>":minimize,maximize,close"</default>
+      <summary>Arrangement of buttons on the titlebar</summary>
+      <description>
+        This key overrides the key in org.gnome.desktop.wm.preferences when
+        running Cinnamon.
+      </description>
     </key>
 
     <child name="keybindings" schema="org.cinnamon.muffin.keybindings"/>
