@@ -1527,8 +1527,7 @@ meta_window_actor_tile (MetaWindowActor    *self,
 
   self->priv->tile_in_progress++;
   meta_window_actor_freeze (self);
-g_printerr ("x %d, y %d, width %d, height %d\n", new_rect->x, new_rect->y,
-                                           new_rect->width, new_rect->height);
+
   if (!info->plugin_mgr ||
       !meta_plugin_manager_event_maximize (info->plugin_mgr,
                                            self,
