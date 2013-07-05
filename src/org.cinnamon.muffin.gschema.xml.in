@@ -137,6 +137,16 @@
       </description>
     </key>
 
+    <key name="invert-workspace-flip-direction" type="b">
+      <default>false</default>
+      <_summary>Inverts the direction the left and right arrows take you when
+         you switch workspaces during a window drag</_summary>
+      <_description>
+        Changes left-right arrow keys to window-centric directions rather than
+        workspace-centric
+      </_description>
+    </key>
+
     <child name="keybindings" schema="org.cinnamon.muffin.keybindings"/>
 
   </schema>

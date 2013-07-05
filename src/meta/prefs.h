@@ -72,7 +72,8 @@ typedef enum
   META_PREF_TILE_HUD_THRESHOLD,
   META_PREF_RESIZE_THRESHOLD,
   META_PREF_SNAP_MODIFIER,
-  META_PREF_LEGACY_SNAP
+  META_PREF_LEGACY_SNAP,
+  META_PREF_INVERT_WORKSPACE_FLIP_DIRECTION
 } MetaPreference;
 
 typedef void (* MetaPrefsChangedFunc) (MetaPreference pref,
@@ -160,6 +161,8 @@ int      meta_prefs_get_resize_threshold (void);
 unsigned int *  meta_prefs_get_snap_modifier (void);
 
 gboolean meta_prefs_get_legacy_snap (void);
+
+gboolean meta_prefs_get_invert_flip_direction (void);
 
 /* XXX FIXME This should be x-macroed, but isn't yet because it would be
  * difficult (or perhaps impossible) to add the suffixes using the current

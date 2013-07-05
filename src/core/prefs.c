@@ -115,6 +115,7 @@ static gboolean workspaces_only_on_primary = FALSE;
 
 static gboolean no_tab_popup = FALSE;
 static gboolean legacy_snap = FALSE;
+static gboolean invert_workspace_flip = FALSE;
 
 static void handle_preference_update_enum (GSettings *settings,
                                            gchar     *key);
@@ -392,6 +393,13 @@ static MetaBoolPreference preferences_bool[] =
         META_PREF_LEGACY_SNAP,
       },
       &legacy_snap,
+    },
+    {
+      { "invert-workspace-flip-direction",
+        SCHEMA_MUFFIN,
+        META_PREF_INVERT_WORKSPACE_FLIP_DIRECTION,
+      },
+      &invert_workspace_flip,
     },
     { { NULL, 0, 0 }, NULL },
   };
@@ -1744,6 +1752,9 @@ meta_preference_to_string (MetaPreference pref)
 
     case META_PREF_LEGACY_SNAP:
       return "LEGACY_SNAP";
+
+    case META_PREF_INVERT_WORKSPACE_FLIP_DIRECTION:
+      return "INVERT_WORKSPACE_FLIP_DIRECTION";
     }
 
   return "(unknown)";
@@ -2375,4 +2386,10 @@ unsigned int *
 meta_prefs_get_snap_modifier (void)
 {
     return snap_modifier;
+}
+
+gboolean
+meta_prefs_get_invert_flip_direction (void)
+{
+    return invert_workspace_flip;
 }

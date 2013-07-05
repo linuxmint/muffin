@@ -9838,15 +9838,17 @@ meta_window_handle_keyboard_grab_op_event (MetaWindow *window,
                                  event->xmotion.x_root,
                                  event->xmotion.y_root);
                 }
+                guint motion_left = meta_prefs_get_invert_flip_direction () ? META_MOTION_LEFT : META_MOTION_RIGHT;
+                guint motion_right = meta_prefs_get_invert_flip_direction () ? META_MOTION_RIGHT : META_MOTION_LEFT;
                 if (event->type == KeyPress && keysym == XK_Left) {
                     MetaWorkspace *target_workspace = meta_workspace_get_neighbor (window->screen->active_workspace,
-                                                                                   META_MOTION_RIGHT);
+                                                                                   motion_left);
                     if (target_workspace)
                         meta_workspace_activate (target_workspace, event->xkey.time);
                 }
                 if (event->type == KeyPress && keysym == XK_Right) {
                     MetaWorkspace *target_workspace = meta_workspace_get_neighbor (window->screen->active_workspace,
-                                                                                   META_MOTION_LEFT);
+                                                                                   motion_right);
                     if (target_workspace)
                         meta_workspace_activate (target_workspace, event->xkey.time);
                 }
