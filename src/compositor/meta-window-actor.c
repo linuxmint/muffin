@@ -91,6 +91,7 @@ struct _MetaWindowActorPrivate
   gint              minimize_in_progress;
   gint              maximize_in_progress;
   gint              unmaximize_in_progress;
+  gint              tile_in_progress;
   gint              map_in_progress;
   gint              destroy_in_progress;
 
@@ -978,6 +979,7 @@ meta_window_actor_effect_in_progress (MetaWindowActor *self)
 	  self->priv->maximize_in_progress ||
 	  self->priv->unmaximize_in_progress ||
 	  self->priv->map_in_progress ||
+      self->priv->tile_in_progress ||
 	  self->priv->destroy_in_progress);
 }
 
@@ -1010,6 +1012,7 @@ is_freeze_thaw_effect (gulong event)
   case META_PLUGIN_DESTROY:
   case META_PLUGIN_MAXIMIZE:
   case META_PLUGIN_UNMAXIMIZE:
+  case META_PLUGIN_TILE:
     return TRUE;
     break;
   default:
@@ -1043,6 +1046,7 @@ start_simple_effect (MetaWindowActor *self,
   case META_PLUGIN_UNMAXIMIZE:
   case META_PLUGIN_MAXIMIZE:
   case META_PLUGIN_SWITCH_WORKSPACE:
+  case META_PLUGIN_TILE:
     g_assert_not_reached ();
     break;
   }
@@ -1148,6 +1152,14 @@ meta_window_actor_effect_completed (MetaWindowActor *self,
       {
 	g_warning ("Error in maximize accounting.");
 	priv->maximize_in_progress = 0;
+      }
+    break;
+  case META_PLUGIN_TILE:
+    priv->tile_in_progress--;
+    if (priv->tile_in_progress < 0)
+      {
+    g_warning ("Error in tile accounting.");
+    priv->tile_in_progress = 0;
       }
     break;
   case META_PLUGIN_SWITCH_WORKSPACE:
@@ -1496,6 +1508,36 @@ meta_window_actor_unmaximize (MetaWindowActor   *self,
                                            new_rect->width, new_rect->height))
     {
       self->priv->unmaximize_in_progress--;
+      meta_window_actor_thaw (self);
+    }
+}
+
+LOCAL_SYMBOL void
+meta_window_actor_tile (MetaWindowActor    *self,
+                        MetaRectangle      *old_rect,
+                        MetaRectangle      *new_rect)
+{
+  MetaCompScreen *info = meta_screen_get_compositor_data (self->priv->screen);
+
+  /* The window has already been resized (in order to compute new_rect),
+   * which by side effect caused the actor to be resized. Restore it to the
+   * old size and position */
+  clutter_actor_set_position (CLUTTER_ACTOR (self), old_rect->x, old_rect->y);
+  clutter_actor_set_size (CLUTTER_ACTOR (self), old_rect->width, old_rect->height);
+
+  self->priv->tile_in_progress++;
+  meta_window_actor_freeze (self);
+g_printerr ("x %d, y %d, width %d, height %d\n", new_rect->x, new_rect->y,
+                                           new_rect->width, new_rect->height);
+  if (!info->plugin_mgr ||
+      !meta_plugin_manager_event_maximize (info->plugin_mgr,
+                                           self,
+                                           META_PLUGIN_TILE,
+                                           new_rect->x, new_rect->y,
+                                           new_rect->width, new_rect->height))
+
+    {
+      self->priv->tile_in_progress--;
       meta_window_actor_thaw (self);
     }
 }

@@ -3797,10 +3797,10 @@ meta_window_tile (MetaWindow *window, gboolean force)
       meta_window_move_resize_now (window);
 
       meta_window_get_outer_rect (window, &new_rect);
-      meta_compositor_maximize_window (window->display->compositor,
-                                       window,
-                                       &old_rect,
-                                       &new_rect);
+      meta_compositor_tile_window (window->display->compositor,
+                                   window,
+                                   &old_rect,
+                                   &new_rect);
 
       if (window->frame)
         meta_ui_queue_frame_draw (window->screen->ui,

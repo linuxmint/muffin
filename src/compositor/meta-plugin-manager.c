@@ -326,10 +326,10 @@ meta_plugin_manager_event_maximize (MetaPluginManager *plugin_mgr,
   GList *l = plugin_mgr->plugins;
   gboolean retval = FALSE;
   MetaDisplay *display  = meta_screen_get_display (plugin_mgr->screen);
-
+            g_printerr ("what what\n");
   if (display->display_opening)
     return FALSE;
-
+            g_printerr ("what what111111\n");
   while (l)
     {
       MetaPlugin        *plugin = l->data;
@@ -339,7 +339,7 @@ meta_plugin_manager_event_maximize (MetaPluginManager *plugin_mgr,
           (meta_plugin_features (plugin) & event))
         {
           retval = TRUE;
-
+            g_printerr ("what what22222\n");
           switch (event)
             {
             case META_PLUGIN_MAXIMIZE:
@@ -366,6 +366,17 @@ meta_plugin_manager_event_maximize (MetaPluginManager *plugin_mgr,
                   klass->unmaximize (plugin, actor,
                                      target_x, target_y,
                                      target_width, target_height);
+                }
+              break;
+            case META_PLUGIN_TILE:
+              if (klass->tile)
+                {
+                  meta_plugin_manager_kill_window_effects (plugin_mgr,
+                                                           actor);
+                  _meta_plugin_effect_started (plugin);
+                  klass->tile (plugin, actor,
+                               target_x, target_y,
+                               target_width, target_height);
                 }
               break;
             default:
