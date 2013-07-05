@@ -102,6 +102,7 @@ static int resize_threshold = 24;
 static gboolean resize_with_right_button = FALSE;
 static gboolean edge_tiling = FALSE;
 static gboolean force_fullscreen = TRUE;
+static KeySym snap_modifier[2];
 
 static GDesktopVisualBellType visual_bell_type = G_DESKTOP_VISUAL_BELL_FULLSCREEN_FLASH;
 static MetaButtonLayout button_layout;
@@ -137,6 +138,7 @@ static void maybe_give_disable_workarounds_warning (void);
 static gboolean titlebar_handler (GVariant*, gpointer*, gpointer);
 static gboolean theme_name_handler (GVariant*, gpointer*, gpointer);
 static gboolean mouse_button_mods_handler (GVariant*, gpointer*, gpointer);
+static gboolean snap_modifier_handler (GVariant*, gpointer*, gpointer);
 static gboolean button_layout_handler (GVariant*, gpointer*, gpointer);
 
 static void     do_override               (char *key, char *schema);
@@ -429,6 +431,15 @@ static MetaStringPreference preferences_string[] =
       NULL,
       &cursor_theme,
     },
+    {
+      { "snap-modifier",
+        SCHEMA_MUFFIN,
+        META_PREF_SNAP_MODIFIER,
+      },
+      snap_modifier_handler,
+      NULL,
+    },
+
     { { NULL, 0, 0 }, NULL },
   };
 
@@ -1272,6 +1283,40 @@ mouse_button_mods_handler (GVariant *value,
 }
 
 static gboolean
+snap_modifier_handler (GVariant *value,
+                       gpointer *result,
+                       gpointer  data)
+{
+
+  const gchar *string_value;
+
+  *result = NULL; /* ignored */
+  string_value = g_variant_get_string (value, NULL);
+
+  if (g_strcmp0 (string_value, "Super") == 0)
+  {
+    snap_modifier[0] = XStringToKeysym("Super_L");
+    snap_modifier[1] = XStringToKeysym("Super_R");
+  }
+  else if (g_strcmp0 (string_value, "Alt") == 0)
+  {
+    snap_modifier[0] = XStringToKeysym("Alt_L");
+    snap_modifier[1] = XStringToKeysym("Alt_R");
+  }
+  else if (g_strcmp0 (string_value, "Shift") == 0)
+  {
+    snap_modifier[0] = XStringToKeysym("Shift_L");
+    snap_modifier[1] = XStringToKeysym("Shift_R");
+  }
+  else if (g_strcmp0 (string_value, "Control") == 0)
+  {
+    snap_modifier[0] = XStringToKeysym("Control_L");
+    snap_modifier[1] = XStringToKeysym("Control_R");
+  }
+  return TRUE;
+}
+
+static gboolean
 button_layout_equal (const MetaButtonLayout *a,
                      const MetaButtonLayout *b)
 {  
@@ -1682,6 +1727,9 @@ meta_preference_to_string (MetaPreference pref)
 
     case META_PREF_DYNAMIC_WORKSPACES:
       return "DYNAMIC_WORKSPACES";
+
+    case META_PREF_SNAP_MODIFIER:
+      return "SNAP_MODIFIER";
     }
 
   return "(unknown)";
@@ -2302,4 +2350,10 @@ void
 meta_prefs_set_force_fullscreen (gboolean whether)
 {
   force_fullscreen = whether;
+}
+
+KeySym *
+meta_prefs_get_snap_modifier (void)
+{
+    return snap_modifier;
 }

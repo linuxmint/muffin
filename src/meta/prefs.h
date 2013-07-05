@@ -30,6 +30,7 @@
 #include <meta/types.h>
 #include <pango/pango-font.h>
 #include <gdesktop-enums.h>
+#include <X11/XKBlib.h>
 
 /* Keep in sync with GSettings schemas! */
 typedef enum
@@ -69,7 +70,8 @@ typedef enum
   META_PREF_NO_TAB_POPUP,
   META_PREF_DRAGGABLE_BORDER_WIDTH,
   META_PREF_TILE_HUD_THRESHOLD,
-  META_PREF_RESIZE_THRESHOLD
+  META_PREF_RESIZE_THRESHOLD,
+  META_PREF_SNAP_MODIFIER
 } MetaPreference;
 
 typedef void (* MetaPrefsChangedFunc) (MetaPreference pref,
@@ -154,6 +156,7 @@ int      meta_prefs_get_draggable_border_width (void);
 int      meta_prefs_get_tile_hud_threshold (void);
 int      meta_prefs_get_resize_threshold (void);
 
+KeySym*  meta_prefs_get_snap_modifier (void);
 
 /* XXX FIXME This should be x-macroed, but isn't yet because it would be
  * difficult (or perhaps impossible) to add the suffixes using the current

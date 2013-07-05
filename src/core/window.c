@@ -108,7 +108,6 @@ static void meta_window_unqueue (MetaWindow *window, guint queuebits);
 
 static void     update_move           (MetaWindow   *window,
                                        gboolean      legacy_snap,
-                                       gboolean      snap_mode,
                                        int           x,
                                        int           y);
 static gboolean update_move_timeout   (gpointer data);
@@ -8825,7 +8824,6 @@ update_move_timeout (gpointer data)
 
   update_move (window,
                window->display->grab_last_user_action_was_snap,
-               window->snap_queued,
                window->display->grab_latest_motion_x,
                window->display->grab_latest_motion_y);
 
@@ -8904,7 +8902,6 @@ meta_window_get_current_zone (MetaWindow   *window,
 static void
 update_move (MetaWindow  *window,
              gboolean     legacy_snap,
-             gboolean     snap_mode,
              int          x,
              int          y)
 {
@@ -8930,11 +8927,6 @@ update_move (MetaWindow  *window,
                 display->grab_anchor_window_pos.x,
                 display->grab_anchor_window_pos.y,
                 dx, dy);
-
-  if (snap_mode)
-    window->snap_queued = TRUE;
-  else
-    window->snap_queued = FALSE;
 
   /* Don't bother doing anything if no move has been specified.  (This
    * happens often, even in keyboard moving, due to the warping of the
@@ -9725,7 +9717,6 @@ meta_window_handle_mouse_grab_op_event (MetaWindow *window,
               else if (event->xbutton.root == window->screen->xroot)
                   update_move (window,
                                event->xbutton.state & ShiftMask,
-                               event->xbutton.state & ControlMask,
                                event->xbutton.x_root, event->xbutton.y_root);
               if (meta_prefs_get_edge_tiling ())
                   meta_screen_tile_hud_update (window->screen, FALSE, TRUE);
@@ -9771,7 +9762,6 @@ meta_window_handle_mouse_grab_op_event (MetaWindow *window,
                                                 event))
                 update_move (window,
                              event->xmotion.state & ShiftMask,
-                             event->xmotion.state & ControlMask,
                              event->xmotion.x_root,
                              event->xmotion.y_root);
             }
@@ -9814,16 +9804,20 @@ meta_window_handle_keyboard_grab_op_event (MetaWindow *window,
             {
               if (check_use_this_motion_notify (window,
                                                 event)) {
-                guint snap = FALSE;
+                KeySym *mod_set = meta_prefs_get_snap_modifier ();
                 KeySym keysym = XkbKeycodeToKeysym (window->display->xdisplay, event->xkey.keycode, 0, 0);
-                if (event->type == KeyPress && (keysym == XK_Control_L ||
-                                                keysym == XK_Control_R))
-                    snap = TRUE;
-                update_move (window,
-                             event->xmotion.state & ShiftMask,
-                             snap,
-                             event->xmotion.x_root,
-                             event->xmotion.y_root);
+                if (&mod_set[0] != NULL)
+                {
+                    if (event->type == KeyPress && (keysym == mod_set[0] ||
+                                                    keysym == mod_set[1]))
+                        window->snap_queued = TRUE;
+                    else
+                        window->snap_queued = FALSE;
+                    update_move (window,
+                                 event->xmotion.state & ShiftMask,
+                                 event->xmotion.x_root,
+                                 event->xmotion.y_root);
+                }
                 if (event->type == KeyPress && keysym == XK_Left) {
                     MetaWorkspace *target_workspace = meta_workspace_get_neighbor (window->screen->active_workspace,
                                                                                    META_MOTION_RIGHT);

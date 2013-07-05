@@ -113,6 +113,14 @@
       </_description>
     </key>
 
+    <key name="snap-modifier" type="s">
+      <default>'Control'</default>
+      <_summary>Modifier for toggling between tile and snap mode</_summary>
+      <_description>
+        When dragging a window, holding this key will engage snap mode.
+      </_description>
+    </key>
+
     <child name="keybindings" schema="org.cinnamon.muffin.keybindings"/>
 
   </schema>
