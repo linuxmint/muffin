@@ -3787,8 +3787,7 @@ meta_window_tile (MetaWindow *window, gboolean force)
 
   meta_screen_tile_preview_update (window->screen, FALSE);
 
-  if (window->display->compositor && window->last_tile_mode == META_TILE_NONE &&
-      window->resizing_tile_type == META_WINDOW_TILE_TYPE_NONE)
+  if (window->display->compositor)
     {
       MetaRectangle old_rect;
       MetaRectangle new_rect;
