@@ -114,7 +114,7 @@ static gboolean live_hidden_windows = FALSE;
 static gboolean workspaces_only_on_primary = FALSE;
 
 static gboolean no_tab_popup = FALSE;
-
+static gboolean legacy_snap = FALSE;
 
 static void handle_preference_update_enum (GSettings *settings,
                                            gchar     *key);
@@ -385,6 +385,13 @@ static MetaBoolPreference preferences_bool[] =
         META_PREF_NO_TAB_POPUP,
       },
       &no_tab_popup,
+    },
+    {
+      { "legacy-snap",
+        SCHEMA_MUFFIN,
+        META_PREF_LEGACY_SNAP,
+      },
+      &legacy_snap,
     },
     { { NULL, 0, 0 }, NULL },
   };
@@ -1734,6 +1741,9 @@ meta_preference_to_string (MetaPreference pref)
 
     case META_PREF_SNAP_MODIFIER:
       return "SNAP_MODIFIER";
+
+    case META_PREF_LEGACY_SNAP:
+      return "LEGACY_SNAP";
     }
 
   return "(unknown)";
@@ -2315,11 +2325,16 @@ meta_prefs_get_workspaces_only_on_primary (void)
   return workspaces_only_on_primary;
 }
 
-
 gboolean
 meta_prefs_get_no_tab_popup (void)
 {
   return no_tab_popup;
+}
+
+gboolean
+meta_prefs_get_legacy_snap (void)
+{
+  return legacy_snap;
 }
 
 void

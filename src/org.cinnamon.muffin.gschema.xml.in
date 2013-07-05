@@ -121,6 +121,14 @@
       </_description>
     </key>
 
+    <key name="legacy-snap" type="b">
+      <default>false</default>
+      <_summary>Enable legacy drag snapping</_summary>
+      <_description>
+        Enables old-style snapping by holding the shift key while dragging a window
+      </_description>
+    </key>
+
     <child name="keybindings" schema="org.cinnamon.muffin.keybindings"/>
 
   </schema>

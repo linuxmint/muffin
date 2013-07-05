@@ -8958,7 +8958,7 @@ update_move (MetaWindow  *window,
    * because it's about the right size
    */
 
-  if (legacy_snap)
+  if (legacy_snap && meta_prefs_get_legacy_snap ())
     {
       /* We don't want to tile while snapping. Also, clear any previous tile
          request. */
@@ -9192,7 +9192,7 @@ update_move (MetaWindow  *window,
                                         &new_x,
                                         &new_y,
                                         update_move_timeout,
-                                        legacy_snap,
+                                        legacy_snap && meta_prefs_get_legacy_snap (),
                                         FALSE);
 
   meta_window_move (window, TRUE, new_x, new_y);
