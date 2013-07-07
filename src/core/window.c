@@ -4057,11 +4057,12 @@ meta_window_unmaximize_internal (MetaWindow        *window,
 
       if (window->tile_type != META_WINDOW_TILE_TYPE_NONE) {
           meta_window_set_tile_type (window, META_WINDOW_TILE_TYPE_NONE);
-          meta_screen_update_snapped_windows (window->screen);
-          notify_tile_type (window);
       }
       if (window->resizing_tile_type == META_WINDOW_TILE_TYPE_NONE)
           window->custom_snap_size = FALSE;
+
+      normalize_tile_state (window);
+      notify_tile_type (window);
 
       recalc_window_features (window);
       set_net_wm_state (window);
