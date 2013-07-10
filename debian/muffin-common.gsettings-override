@@ -1,3 +1,0 @@
-[org.cinnamon.muffin.keybindings]
-toggle-tiled-left = ['<Super>Left','<Primary><Super>Left']
-toggle-tiled-right = ['<Super>Right','<Primary><Super>Right']

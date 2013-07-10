@@ -166,4 +166,9 @@ void meta_compositor_sync_screen_size          (MetaCompositor *compositor,
 void meta_compositor_flash_screen              (MetaCompositor *compositor,
                                                 MetaScreen     *screen);
 
+void meta_compositor_tile_window       (MetaCompositor      *compositor,
+                                        MetaWindow          *window,
+                                        MetaRectangle       *old_rect,
+                                        MetaRectangle       *new_rect);
+
 #endif /* META_COMPOSITOR_H */

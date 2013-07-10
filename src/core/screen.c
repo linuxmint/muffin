@@ -74,6 +74,8 @@ static void meta_screen_sn_event   (SnMonitorEvent *event,
                                     void           *user_data);
 #endif
 
+#define SNAP_OSD_TIMEOUT 2
+
 enum
 {
   PROP_N_WORKSPACES = 1,
@@ -92,6 +94,8 @@ enum
   STARTUP_SEQUENCE_CHANGED,
   WORKAREAS_CHANGED,
   MONITORS_CHANGED,
+  SNAP_OSD_SHOW,
+  SNAP_OSD_HIDE,
 
   LAST_SIGNAL
 };
@@ -255,6 +259,22 @@ meta_screen_class_init (MetaScreenClass *klass)
 		  G_STRUCT_OFFSET (MetaScreenClass, monitors_changed),
           NULL, NULL, NULL,
 		  G_TYPE_NONE, 0);
+
+  screen_signals[SNAP_OSD_SHOW] =
+    g_signal_new ("show-snap-osd",
+                  G_TYPE_FROM_CLASS (klass),
+                  G_SIGNAL_RUN_LAST,
+                  0,
+                  NULL, NULL, NULL,
+                  G_TYPE_NONE, 0);
+
+  screen_signals[SNAP_OSD_HIDE] =
+    g_signal_new ("hide-snap-osd",
+                  G_TYPE_FROM_CLASS (klass),
+                  G_SIGNAL_RUN_LAST,
+                  0,
+                  NULL, NULL, NULL,
+                  G_TYPE_NONE, 0);
 
   g_object_class_install_property (object_class,
                                    PROP_N_WORKSPACES,
@@ -926,8 +946,16 @@ meta_screen_new (MetaDisplay *display,
   screen->tab_popup = NULL;
   screen->ws_popup = NULL;
   screen->tile_preview = NULL;
+  screen->tile_hud = NULL;
 
   screen->tile_preview_timeout_id = 0;
+  screen->tile_hud_timeout_id = 0;
+  screen->tile_hud_fade_timeout_id = 0;
+
+  screen->snap_osd_timeout_id = 0;
+
+  screen->hud_opacity = 0.0;
+  screen->hud_hiding = FALSE;
 
   screen->stack = meta_stack_new (screen);
   screen->stack_tracker = meta_stack_tracker_new (screen);
@@ -1031,7 +1059,19 @@ meta_screen_free (MetaScreen *screen,
 
   if (screen->tile_preview)
     meta_tile_preview_free (screen->tile_preview);
-  
+
+  if (screen->tile_hud_timeout_id)
+    g_source_remove (screen->tile_hud_timeout_id);
+
+  if (screen->tile_hud_fade_timeout_id)
+    g_source_remove (screen->tile_hud_fade_timeout_id);
+
+  if (screen->snap_osd_timeout_id)
+    g_source_remove (screen->snap_osd_timeout_id);
+
+  if (screen->tile_hud)
+    meta_tile_hud_free (screen->tile_hud);
+
   g_free (screen->screen_name);
 
   g_object_unref (screen);
@@ -1929,6 +1969,32 @@ meta_screen_workspace_popup_destroy (MetaScreen *screen)
 }
 
 static gboolean
+snap_osd_timeout (void *data)
+{
+  MetaScreen *screen = data;
+  if (meta_screen_tile_preview_get_visible (screen) ||
+      meta_screen_tile_hud_get_visible (screen))
+      g_signal_emit (screen, screen_signals[SNAP_OSD_SHOW], 0);
+  screen->snap_osd_timeout_id = 0;
+  return FALSE;
+}
+
+static gboolean
+maybe_hide_snap_osd (void *data)
+{
+    MetaScreen *screen = data;
+    if (!meta_screen_tile_preview_get_visible (screen) &&
+        !meta_screen_tile_hud_get_visible (screen)) {
+        if (screen->snap_osd_timeout_id > 0) {
+            g_source_remove (screen->snap_osd_timeout_id);
+            screen->snap_osd_timeout_id = 0;
+        }
+        g_signal_emit (screen, screen_signals[SNAP_OSD_HIDE], 0);
+    }
+    return FALSE;
+}
+
+static gboolean
 meta_screen_tile_preview_update_timeout (gpointer data)
 {
   MetaScreen *screen = data;
@@ -1941,7 +2007,6 @@ meta_screen_tile_preview_update_timeout (gpointer data)
     {
       Window xwindow;
       gulong create_serial;
-
       screen->tile_preview = meta_tile_preview_new (screen->number);
       xwindow = meta_tile_preview_get_xwindow (screen->tile_preview,
                                                &create_serial);
@@ -1950,7 +2015,7 @@ meta_screen_tile_preview_update_timeout (gpointer data)
                                      create_serial);
     }
 
-  if (window)
+  if (window && window->mouse_on_edge)
     {
       switch (window->tile_mode)
         {
@@ -1959,12 +2024,18 @@ meta_screen_tile_preview_update_timeout (gpointer data)
               if (!META_WINDOW_TILED_SIDE_BY_SIDE (window))
                 needs_preview = TRUE;
               break;
-
-          case META_TILE_MAXIMIZED:
-              if (!META_WINDOW_MAXIMIZED (window))
+          case META_TILE_ULC:
+          case META_TILE_LLC:
+          case META_TILE_URC:
+          case META_TILE_LRC:
+              if (!META_WINDOW_TILED_CORNER (window))
                 needs_preview = TRUE;
               break;
-
+          case META_TILE_TOP:
+          case META_TILE_BOTTOM:
+              if (!META_WINDOW_TILED_TOP_BOTTOM (window))
+                needs_preview = TRUE;
+              break;
           default:
               needs_preview = FALSE;
               break;
@@ -1976,7 +2047,11 @@ meta_screen_tile_preview_update_timeout (gpointer data)
       MetaRectangle tile_rect;
 
       meta_window_get_current_tile_area (window, &tile_rect);
-      meta_tile_preview_show (screen->tile_preview, &tile_rect);
+      meta_tile_preview_show (screen->tile_preview, &tile_rect, window->snap_queued);
+      if (screen->snap_osd_timeout_id == 0)
+        screen->snap_osd_timeout_id = g_timeout_add_seconds (SNAP_OSD_TIMEOUT,
+                                                             snap_osd_timeout,
+                                                             screen);
     }
   else
     meta_tile_preview_hide (screen->tile_preview);
@@ -1990,7 +2065,7 @@ LOCAL_SYMBOL void
 meta_screen_tile_preview_update (MetaScreen *screen,
                                  gboolean    delay)
 {
-  if (delay)
+  if (delay && !meta_screen_tile_preview_get_visible (screen))
     {
       if (screen->tile_preview_timeout_id > 0)
         return;
@@ -2017,6 +2092,163 @@ meta_screen_tile_preview_hide (MetaScreen *screen)
 
   if (screen->tile_preview)
     meta_tile_preview_hide (screen->tile_preview);
+
+  g_timeout_add (250, maybe_hide_snap_osd, screen);
+}
+
+LOCAL_SYMBOL gboolean
+meta_screen_tile_preview_get_visible (MetaScreen *screen)
+{
+    if (screen->tile_preview == NULL)
+        return FALSE;
+
+    return meta_tile_preview_get_visible (screen->tile_preview);
+}
+
+static gboolean
+meta_screen_tile_hud_update_timeout (gpointer data)
+{
+  MetaScreen *screen = data;
+  MetaWindow *window = screen->display->grab_window;
+  if (!screen->tile_hud)
+    {
+      Window xwindow;
+      gulong create_serial;
+
+      screen->tile_hud = meta_tile_hud_new (screen->number);
+      xwindow = meta_tile_hud_get_xwindow (screen->tile_hud,
+                                           &create_serial);
+      meta_stack_tracker_record_add (screen->stack_tracker,
+                                     xwindow,
+                                     create_serial);
+    }
+
+  if (!screen->hud_hiding && window != NULL && window->current_proximity_zone != ZONE_NONE)
+    {
+      HUDTileRestrictions rest = meta_window_get_tile_restrictions (window);
+      MetaRectangle work_area;
+      /* This bit is liable to get more complicated when there are multiple
+         monitors involved - we'll have partial hud, with a bare area at the
+         monitor 'joint' or something... */
+      const MetaMonitorInfo *monitor;
+      monitor = meta_screen_get_current_monitor (screen);
+      meta_window_get_work_area_for_monitor (window, monitor->number, &work_area);
+      meta_tile_hud_show (screen->tile_hud,
+                          &work_area, screen->hud_opacity,
+                          window->snap_queued,
+                          rest,
+                          window->current_proximity_zone);
+    if (screen->snap_osd_timeout_id == 0)
+        screen->snap_osd_timeout_id = g_timeout_add_seconds (SNAP_OSD_TIMEOUT,
+                                                             snap_osd_timeout,
+                                                             screen);
+    }
+  else {
+      meta_tile_hud_fade_out (screen->tile_hud, screen->hud_opacity, FALSE);
+      g_timeout_add (250, maybe_hide_snap_osd, screen);
+  }
+
+  if (!screen->hud_hiding && screen->hud_opacity < 1.0) {
+    screen->hud_opacity += 0.05;
+    return TRUE;
+  } else if (screen->hud_hiding && screen->hud_opacity > 0.0) {
+    screen->hud_opacity -= 0.05;
+    return TRUE;
+  } else {
+    screen->tile_hud_fade_timeout_id = 0;
+    return FALSE;
+  }
+}
+
+#define TILE_HUD_TIMEOUT_MS 100
+#define TILE_HUD_FADE_IN_MS 25
+#define TILE_HUD_FADE_OUT_MS 15
+
+static gboolean
+do_hud_fade_in_out (gpointer data)
+{
+    MetaScreen *screen = META_SCREEN (data);
+    screen->tile_hud_timeout_id = 0;
+
+    if (screen->hud_hiding) 
+        screen->tile_hud_fade_timeout_id = 
+            g_timeout_add (TILE_HUD_FADE_OUT_MS,
+                           meta_screen_tile_hud_update_timeout,
+                           screen);
+    else
+        screen->tile_hud_fade_timeout_id = 
+            g_timeout_add (TILE_HUD_FADE_IN_MS,
+                           meta_screen_tile_hud_update_timeout,
+                           screen);
+
+    return FALSE;
+}
+
+LOCAL_SYMBOL void
+meta_screen_tile_hud_update (MetaScreen *screen,
+                              gboolean    delay,
+                              gboolean    hiding)
+{
+  if (screen->hud_hiding != hiding) {
+    if (screen->tile_hud_fade_timeout_id > 0) {
+        g_source_remove (screen->tile_hud_fade_timeout_id);
+        screen->tile_hud_fade_timeout_id = 0;
+    }
+    screen->hud_hiding = hiding;
+  }
+
+  if (delay && !meta_screen_tile_hud_get_visible (screen))
+    {
+      if (screen->tile_hud_timeout_id > 0)
+        return;
+
+      screen->tile_hud_timeout_id =
+        g_timeout_add (TILE_HUD_TIMEOUT_MS,
+                       do_hud_fade_in_out,
+                       screen);
+    }
+  else
+    {
+      if (screen->tile_hud_timeout_id > 0) {
+        g_source_remove (screen->tile_hud_timeout_id);
+        screen->tile_hud_timeout_id = 0;
+      }
+
+      do_hud_fade_in_out ((gpointer)screen);
+    }
+}
+
+LOCAL_SYMBOL void
+meta_screen_tile_hud_hide (MetaScreen *screen)
+{
+  if (screen->tile_hud_timeout_id > 0)
+    g_source_remove (screen->tile_hud_timeout_id);
+  if (screen->tile_hud_fade_timeout_id > 0)
+    g_source_remove (screen->tile_hud_fade_timeout_id);
+
+  if (screen->tile_hud)
+    meta_tile_hud_hide (screen->tile_hud);
+  screen->hud_opacity = 0.0;
+  screen->hud_hiding = FALSE;
+  screen->tile_hud_timeout_id = 0;
+
+  g_timeout_add (250, maybe_hide_snap_osd, screen);
+}
+
+LOCAL_SYMBOL gboolean
+meta_screen_tile_hud_get_visible (MetaScreen *screen)
+{
+    if (screen->tile_hud == NULL)
+        return FALSE;
+
+    return meta_tile_hud_get_visible (screen->tile_hud);
+}
+
+LOCAL_SYMBOL void
+meta_screen_hide_hud_and_preview (MetaScreen *screen)
+{
+    meta_screen_tile_hud_hide (screen);
+    meta_screen_tile_preview_hide (screen);
 }
 
 /**
@@ -3604,6 +3836,7 @@ meta_screen_workspace_switched (MetaScreen         *screen,
                                 int                 to,
                                 MetaMotionDirection direction)
 {
+  meta_screen_update_snapped_windows (screen);
   g_signal_emit (screen, screen_signals[WORKSPACE_SWITCHED], 0,
                  from, to, direction);
 }
@@ -3634,3 +3867,14 @@ meta_screen_set_active_workspace_hint (MetaScreen *screen)
   meta_error_trap_pop (screen->display);
 }
 
+LOCAL_SYMBOL void
+meta_screen_update_snapped_windows (MetaScreen *screen)
+{
+    GList* tmp = screen->workspaces;
+    while (tmp)
+        {
+          MetaWorkspace* work = (MetaWorkspace*) tmp->data;
+          meta_workspace_update_snapped_windows (work);
+          tmp = tmp->next;
+        }
+}

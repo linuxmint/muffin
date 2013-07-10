@@ -29,7 +29,7 @@
 #include "workspace-private.h"
 #include "place.h"
 #include <meta/prefs.h>
-
+#include "xprops.h"
 #include <stdlib.h>
 #include <math.h>
 
@@ -208,11 +208,6 @@ static void extend_by_frame              (MetaRectangle           *rect,
                                           const MetaFrameBorders  *borders);
 static void unextend_by_frame            (MetaRectangle           *rect,
                                           const MetaFrameBorders  *borders);
-static inline void get_size_limits       (const MetaWindow        *window,
-                                          const MetaFrameBorders  *borders,
-                                          gboolean include_frame,
-                                          MetaRectangle *min_size,
-                                          MetaRectangle *max_size);
 
 typedef gboolean (* ConstraintFunc) (MetaWindow         *window,
                                      ConstraintInfo     *info,
@@ -596,6 +591,39 @@ place_window_if_needed(MetaWindow     *window,
           meta_window_minimize (window);
           window->minimize_after_placement = FALSE;
         }
+      if (window->tile_after_placement)
+        {
+          window->tile_after_placement = FALSE;
+
+          gulong *tile_info = NULL;
+          int nitems;
+
+          if (meta_prop_get_cardinal_list (window->display,
+                                           window->xwindow,
+                                           window->display->atom__NET_WM_WINDOW_TILE_INFO,
+                                           &tile_info, &nitems))
+            {
+              if (nitems == 8)
+                {
+                  window->tile_mode = (MetaTileMode) tile_info[0];
+                  meta_window_move_resize_frame (window,
+                                                 TRUE,
+                                                 tile_info[2],
+                                                 tile_info[3],
+                                                 tile_info[4],
+                                                 tile_info[5]);
+                  window->custom_snap_size = tile_info[7] == 1;
+                  window->tile_monitor_number = tile_info[6];
+                  if (tile_info[1] == META_WINDOW_TILE_TYPE_SNAPPED)
+                    window->snap_queued = TRUE;
+                  else
+                    window->snap_queued = FALSE;
+                  meta_window_tile (window, TRUE);
+                  meta_XFree (tile_info);
+                }
+            }
+
+        }
     }
 }
 
@@ -710,42 +738,6 @@ unextend_by_frame (MetaRectangle           *rect,
   rect->height -= borders->visible.top + borders->visible.bottom;
 }
 
-static inline void
-get_size_limits (const MetaWindow        *window,
-                 const MetaFrameBorders *borders,
-                 gboolean                 include_frame,
-                 MetaRectangle *min_size,
-                 MetaRectangle *max_size)
-{
-  /* We pack the results into MetaRectangle structs just for convienience; we
-   * don't actually use the position of those rects.
-   */
-  min_size->width  = window->size_hints.min_width;
-  min_size->height = window->size_hints.min_height;
-  max_size->width  = window->size_hints.max_width;
-  max_size->height = window->size_hints.max_height;
-
-  if (include_frame)
-    {
-      int fw = borders->visible.left + borders->visible.right;
-      int fh = borders->visible.top + borders->visible.bottom;
-
-      min_size->width  += fw;
-      min_size->height += fh;
-      /* Do check to avoid overflow (e.g. max_size->width & max_size->height
-       * may be set to G_MAXINT by meta_set_normal_hints()).
-       */
-      if (max_size->width < (G_MAXINT - fw))
-        max_size->width += fw;
-      else
-        max_size->width = G_MAXINT;
-      if (max_size->height < (G_MAXINT - fh))
-        max_size->height += fh;
-      else
-        max_size->height = G_MAXINT;
-    }
-}
-
 static gboolean
 constrain_modal_dialog (MetaWindow         *window,
                         ConstraintInfo     *info,
@@ -808,15 +800,11 @@ constrain_maximization (MetaWindow         *window,
 
   /* Determine whether constraint applies; exit if it doesn't */
   if ((!window->maximized_horizontally && !window->maximized_vertically) ||
-      META_WINDOW_TILED_SIDE_BY_SIDE (window))
+      META_WINDOW_TILED_OR_SNAPPED (window))
     return TRUE;
 
   /* Calculate target_size = maximized size of (window + frame) */
-  if (META_WINDOW_TILED_MAXIMIZED (window))
-    {
-      meta_window_get_current_tile_area (window, &target_size);
-    }
-  else if (META_WINDOW_MAXIMIZED (window))
+  if (META_WINDOW_MAXIMIZED (window) && g_list_length (window->screen->active_workspace->snapped_windows) == 0)
     {
       target_size = info->work_area_monitor;
     }
@@ -838,12 +826,41 @@ constrain_maximization (MetaWindow         *window,
         direction = META_DIRECTION_VERTICAL;
       active_workspace_struts = window->screen->active_workspace->all_struts;
 
-      target_size = info->current;
-      extend_by_frame (&target_size, info->borders);
-      meta_rectangle_expand_to_avoiding_struts (&target_size,
-                                                &info->entire_monitor,
-                                                direction,
-                                                active_workspace_struts);
+      if (g_list_length (window->screen->active_workspace->snapped_windows) > 0) {
+        GList *tmp = window->screen->active_workspace->snapped_windows;
+        GSList *snapped_windows_as_struts = NULL;
+        while (tmp) {
+            if (tmp->data == window) {
+                tmp = tmp->next;
+                continue;
+            }
+            MetaStrut *strut = g_slice_new0 (MetaStrut);
+            MetaSide side;
+            MetaRectangle rect;
+            meta_window_get_outer_rect (META_WINDOW (tmp->data), &rect);
+            side = meta_window_get_tile_side (META_WINDOW (tmp->data));
+            strut->rect = rect;
+            strut->side = side;
+            snapped_windows_as_struts = g_slist_prepend (snapped_windows_as_struts, strut);
+            tmp = tmp->next;
+        }
+
+        target_size = info->current;
+        extend_by_frame (&target_size, info->borders);
+        meta_rectangle_expand_to_snapped_borders (&target_size,
+                                                  &info->entire_monitor,
+                                                   active_workspace_struts,
+                                                   snapped_windows_as_struts,
+                                                   &window->user_rect);
+        g_slist_free (snapped_windows_as_struts);
+      } else {
+          target_size = info->current;
+          extend_by_frame (&target_size, info->borders);
+          meta_rectangle_expand_to_avoiding_struts (&target_size,
+                                                    &info->entire_monitor,
+                                                    direction,
+                                                    active_workspace_struts);
+      }
    }
   /* Now make target_size = maximized size of client window */
   unextend_by_frame (&target_size, info->borders);
@@ -851,7 +868,7 @@ constrain_maximization (MetaWindow         *window,
   /* Check min size constraints; max size constraints are ignored for maximized
    * windows, as per bug 327543.
    */
-  get_size_limits (window, info->borders, FALSE, &min_size, &max_size);
+  meta_window_get_size_limits (window, info->borders, FALSE, &min_size, &max_size);
   hminbad = target_size.width < min_size.width && window->maximized_horizontally;
   vminbad = target_size.height < min_size.height && window->maximized_vertically;
   if (hminbad || vminbad)
@@ -890,6 +907,7 @@ constrain_tiling (MetaWindow         *window,
 {
   MetaRectangle target_size;
   MetaRectangle min_size, max_size;
+  MetaRectangle actual_position;
   gboolean hminbad, vminbad;
   gboolean horiz_equal, vert_equal;
   gboolean constraint_already_satisfied;
@@ -898,19 +916,114 @@ constrain_tiling (MetaWindow         *window,
     return TRUE;
 
   /* Determine whether constraint applies; exit if it doesn't */
-  if (!META_WINDOW_TILED_SIDE_BY_SIDE (window))
+  if (!META_WINDOW_TILED_OR_SNAPPED (window))
     return TRUE;
 
   /* Calculate target_size - as the tile previews need this as well, we
    * use an external function for the actual calculation
    */
-  meta_window_get_current_tile_area (window, &target_size);
+  if (window->tile_mode != META_TILE_NONE)
+    meta_window_get_current_tile_area (window, &target_size);
+  else
+    return TRUE;
+
+  meta_window_get_outer_rect (window, &actual_position);
+
+  if (window->custom_snap_size) {
+      switch (window->tile_mode) {
+        case META_TILE_LEFT:
+            target_size.width = BOX_RIGHT (actual_position) - target_size.x;
+            break;
+        case META_TILE_RIGHT:
+            target_size.width = BOX_RIGHT (target_size) - BOX_LEFT (actual_position);
+            target_size.x = BOX_LEFT (actual_position);
+            break;
+        case META_TILE_TOP:
+            target_size.height = BOX_BOTTOM (actual_position) - BOX_TOP (target_size);
+            break;
+        case META_TILE_BOTTOM:
+            target_size.height = BOX_BOTTOM (target_size) - BOX_TOP (actual_position);
+            target_size.y = BOX_TOP (actual_position);
+            break;
+        case META_TILE_ULC:
+            if (GRAB_OP (window) == META_GRAB_OP_RESIZING_S ||
+                GRAB_OP (window) == META_GRAB_OP_KEYBOARD_RESIZING_S) {
+                target_size.width = window->snapped_rect.width;
+                target_size.height = BOX_BOTTOM (actual_position) - BOX_TOP (target_size);
+            } else if (GRAB_OP (window) == META_GRAB_OP_RESIZING_E ||
+                       GRAB_OP (window) == META_GRAB_OP_KEYBOARD_RESIZING_E) {
+                target_size.width = BOX_RIGHT (actual_position) - target_size.x;
+                target_size.height = window->snapped_rect.height;
+            } else {
+                target_size.width = BOX_RIGHT (actual_position) - target_size.x;
+                target_size.height = BOX_BOTTOM (actual_position) - BOX_TOP (target_size);
+            }
+            break;
+        case META_TILE_LLC:
+            if (GRAB_OP (window) == META_GRAB_OP_RESIZING_N ||
+                GRAB_OP (window) == META_GRAB_OP_KEYBOARD_RESIZING_N) {
+                target_size.width = window->snapped_rect.width;
+                target_size.height = BOX_BOTTOM (target_size) - BOX_TOP (actual_position);
+                target_size.y = BOX_TOP (actual_position);
+            } else if (GRAB_OP (window) == META_GRAB_OP_RESIZING_E ||
+                       GRAB_OP (window) == META_GRAB_OP_KEYBOARD_RESIZING_E) {
+                target_size.width = BOX_RIGHT (actual_position) - target_size.x;
+                target_size.height = window->snapped_rect.height;
+                target_size.y = window->snapped_rect.y;
+            } else {
+                target_size.width = BOX_RIGHT (actual_position) - target_size.x;
+                target_size.height = BOX_BOTTOM (target_size) - BOX_TOP (actual_position);
+                target_size.y = BOX_TOP (actual_position);
+            }
+            break;
+        case META_TILE_URC:
+            if (GRAB_OP (window) == META_GRAB_OP_RESIZING_W ||
+                GRAB_OP (window) == META_GRAB_OP_KEYBOARD_RESIZING_W) {
+                target_size.width = BOX_RIGHT (target_size) - BOX_LEFT (actual_position);
+                target_size.x = BOX_LEFT (actual_position);
+                target_size.height = window->snapped_rect.height;
+            } else if (GRAB_OP (window) == META_GRAB_OP_RESIZING_S ||
+                       GRAB_OP (window) == META_GRAB_OP_KEYBOARD_RESIZING_S) {
+                target_size.width = window->snapped_rect.width;
+                target_size.x = window->snapped_rect.x;
+                target_size.height = BOX_BOTTOM (actual_position) - BOX_TOP (target_size);
+            } else {
+                target_size.width = BOX_RIGHT (target_size) - BOX_LEFT (actual_position);
+                target_size.x = BOX_LEFT (actual_position);
+                target_size.height = BOX_BOTTOM (actual_position) - BOX_TOP (target_size);
+            }
+            break;
+        case META_TILE_LRC:
+            if (GRAB_OP (window) == META_GRAB_OP_RESIZING_W ||
+                GRAB_OP (window) == META_GRAB_OP_KEYBOARD_RESIZING_W) {
+                target_size.width = BOX_RIGHT (target_size) - BOX_LEFT (actual_position);
+                target_size.x = BOX_LEFT (actual_position);
+                target_size.height = window->snapped_rect.height;
+                target_size.y = window->snapped_rect.y;
+            } else if (GRAB_OP (window) == META_GRAB_OP_RESIZING_N ||
+                       GRAB_OP (window) == META_GRAB_OP_KEYBOARD_RESIZING_N) {
+                target_size.width = window->snapped_rect.width;
+                target_size.x = window->snapped_rect.x;
+                target_size.height = BOX_BOTTOM (target_size) - BOX_TOP (actual_position);
+                target_size.y = BOX_TOP (actual_position);
+            } else {
+                target_size.width = BOX_RIGHT (target_size) - BOX_LEFT (actual_position);
+                target_size.x = BOX_LEFT (actual_position);
+                target_size.height = BOX_BOTTOM (target_size) - BOX_TOP (actual_position);
+                target_size.y = BOX_TOP (actual_position);
+            }
+            break;
+        default:
+            break;
+      }
+  }
+
   unextend_by_frame (&target_size, info->borders);
 
   /* Check min size constraints; max size constraints are ignored as for
    * maximized windows.
    */
-  get_size_limits (window, info->borders, FALSE, &min_size, &max_size);
+  meta_window_get_size_limits (window, info->borders, FALSE, &min_size, &max_size);
   hminbad = target_size.width < min_size.width;
   vminbad = target_size.height < min_size.height;
   if (hminbad || vminbad)
@@ -953,7 +1066,7 @@ constrain_fullscreen (MetaWindow         *window,
 
   monitor = info->entire_monitor;
 
-  get_size_limits (window, info->borders, FALSE, &min_size, &max_size);
+  meta_window_get_size_limits (window, info->borders, FALSE, &min_size, &max_size);
   too_big =   !meta_rectangle_could_fit_rect (&monitor, &min_size);
   too_small = !meta_rectangle_could_fit_rect (&max_size, &monitor);
   if (too_big || too_small)
@@ -986,8 +1099,9 @@ constrain_size_increments (MetaWindow         *window,
 
   /* Determine whether constraint applies; exit if it doesn't */
   if (META_WINDOW_MAXIMIZED (window) || window->fullscreen || 
-      META_WINDOW_TILED_SIDE_BY_SIDE (window) ||
-      info->action_type == ACTION_MOVE)
+      META_WINDOW_TILED_OR_SNAPPED (window) ||
+      info->action_type == ACTION_MOVE ||
+      window->resizing_tile_type != META_WINDOW_TILE_TYPE_NONE)
     return TRUE;
 
   /* Determine whether constraint is already satisfied; exit if it is */
@@ -1062,7 +1176,7 @@ constrain_size_limits (MetaWindow         *window,
     return TRUE;
 
   /* Determine whether constraint is already satisfied; exit if it is */
-  get_size_limits (window, info->borders, FALSE, &min_size, &max_size);
+  meta_window_get_size_limits (window, info->borders, FALSE, &min_size, &max_size);
   /* We ignore max-size limits for maximized windows; see #327543 */
   if (window->maximized_horizontally)
     max_size.width = MAX (max_size.width, info->current.width);
@@ -1118,7 +1232,7 @@ constrain_aspect_ratio (MetaWindow         *window,
   constraints_are_inconsistent = minr > maxr;
   if (constraints_are_inconsistent ||
       META_WINDOW_MAXIMIZED (window) || window->fullscreen || 
-      META_WINDOW_TILED_SIDE_BY_SIDE (window) ||
+      META_WINDOW_TILED_OR_SNAPPED (window) ||
       info->action_type == ACTION_MOVE)
     return TRUE;
 
@@ -1254,7 +1368,7 @@ do_screen_and_monitor_relative_constraints (
 
   /* Determine whether constraint applies; exit if it doesn't */
   how_far_it_can_be_smushed = info->current;
-  get_size_limits (window, info->borders, TRUE, &min_size, &max_size);
+  meta_window_get_size_limits (window, info->borders, TRUE, &min_size, &max_size);
   extend_by_frame (&info->current, info->borders);
 
   if (info->action_type != ACTION_MOVE)

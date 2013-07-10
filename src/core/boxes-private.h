@@ -32,6 +32,8 @@
 #define BOX_RIGHT(box)   ((box).x + (box).width)  /* One pixel past right   */
 #define BOX_TOP(box)     ((box).y)                /* Topmost pixel of rect  */
 #define BOX_BOTTOM(box)  ((box).y + (box).height) /* One pixel past bottom  */
+#define BOX_CENTER_X(box)  ((box).x + (box).width / 2)  /* Center in X */
+#define BOX_CENTER_Y(box)  ((box).y + (box).height / 2)  /* Center in Y */
 
 typedef enum
 {
@@ -107,6 +109,12 @@ GList*   meta_rectangle_expand_region_conditionally (
                                          const int            bottom_expand,
                                          const int            min_x,
                                          const int            min_y);
+
+void meta_rectangle_expand_to_snapped_borders (MetaRectangle       *rect,
+                                               const MetaRectangle *expand_to,
+                                               const GSList        *all_struts,
+                                               const GSList        *snapped_windows_as_struts,
+                                               const MetaRectangle *user_rect);
 
 /* Expand rect in direction to the size of expand_to, and then clip out any
  * overlapping struts oriented orthognal to the expansion direction.  (Think

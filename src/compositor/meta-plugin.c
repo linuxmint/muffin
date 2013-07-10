@@ -89,6 +89,9 @@ meta_plugin_set_features (MetaPlugin *plugin)
 
   if (klass->switch_workspace)
     priv->features |= META_PLUGIN_SWITCH_WORKSPACE;
+
+  if (klass->tile)
+    priv->features |= META_PLUGIN_TILE;
 }
 
 static void
@@ -341,6 +344,13 @@ meta_plugin_unmaximize_completed (MetaPlugin      *plugin,
                                   MetaWindowActor *actor)
 {
   meta_plugin_window_effect_completed (plugin, actor, META_PLUGIN_UNMAXIMIZE);
+}
+
+void
+meta_plugin_tile_completed     (MetaPlugin      *plugin,
+                                MetaWindowActor *actor)
+{
+  meta_plugin_window_effect_completed (plugin, actor, META_PLUGIN_TILE);
 }
 
 void

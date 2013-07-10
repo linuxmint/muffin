@@ -34,6 +34,7 @@
 #define META_PLUGIN_MINIMIZE         (1<<0)
 #define META_PLUGIN_MAXIMIZE         (1<<1)
 #define META_PLUGIN_UNMAXIMIZE       (1<<2)
+#define META_PLUGIN_TILE             (1<<6)
 #define META_PLUGIN_MAP              (1<<3)
 #define META_PLUGIN_DESTROY          (1<<4)
 #define META_PLUGIN_SWITCH_WORKSPACE (1<<5)

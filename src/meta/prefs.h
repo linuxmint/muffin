@@ -30,6 +30,7 @@
 #include <meta/types.h>
 #include <pango/pango-font.h>
 #include <gdesktop-enums.h>
+#include <X11/XKBlib.h>
 
 /* Keep in sync with GSettings schemas! */
 typedef enum
@@ -68,8 +69,11 @@ typedef enum
   META_PREF_WORKSPACES_ONLY_ON_PRIMARY,
   META_PREF_NO_TAB_POPUP,
   META_PREF_DRAGGABLE_BORDER_WIDTH,
-  META_PREF_EDGE_TILE_THRESHOLD,
-  META_PREF_EDGE_DETACH_THRESHOLD
+  META_PREF_TILE_HUD_THRESHOLD,
+  META_PREF_RESIZE_THRESHOLD,
+  META_PREF_SNAP_MODIFIER,
+  META_PREF_LEGACY_SNAP,
+  META_PREF_INVERT_WORKSPACE_FLIP_DIRECTION
 } MetaPreference;
 
 typedef void (* MetaPrefsChangedFunc) (MetaPreference pref,
@@ -151,9 +155,14 @@ void     meta_prefs_set_no_tab_popup (gboolean whether);
 
 int      meta_prefs_get_draggable_border_width (void);
 
-int      meta_prefs_get_edge_tile_threshold (void);
-int      meta_prefs_get_edge_detach_threshold (void);
+int      meta_prefs_get_tile_hud_threshold (void);
+int      meta_prefs_get_resize_threshold (void);
 
+unsigned int *  meta_prefs_get_snap_modifier (void);
+
+gboolean meta_prefs_get_legacy_snap (void);
+
+gboolean meta_prefs_get_invert_flip_direction (void);
 
 /* XXX FIXME This should be x-macroed, but isn't yet because it would be
  * difficult (or perhaps impossible) to add the suffixes using the current
@@ -201,8 +210,14 @@ typedef enum _MetaKeyBindingAction
   META_KEYBINDING_ACTION_ACTIVATE_WINDOW_MENU,
   META_KEYBINDING_ACTION_TOGGLE_FULLSCREEN,
   META_KEYBINDING_ACTION_TOGGLE_MAXIMIZED,
-  META_KEYBINDING_ACTION_TOGGLE_TILED_LEFT,
-  META_KEYBINDING_ACTION_TOGGLE_TILED_RIGHT,
+  META_KEYBINDING_ACTION_PUSH_TILE_LEFT,
+  META_KEYBINDING_ACTION_PUSH_TILE_RIGHT,
+  META_KEYBINDING_ACTION_PUSH_TILE_UP,
+  META_KEYBINDING_ACTION_PUSH_TILE_DOWN,
+  META_KEYBINDING_ACTION_PUSH_SNAP_LEFT,
+  META_KEYBINDING_ACTION_PUSH_SNAP_RIGHT,
+  META_KEYBINDING_ACTION_PUSH_SNAP_UP,
+  META_KEYBINDING_ACTION_PUSH_SNAP_DOWN,
   META_KEYBINDING_ACTION_TOGGLE_ABOVE,
   META_KEYBINDING_ACTION_MAXIMIZE,
   META_KEYBINDING_ACTION_UNMAXIMIZE,
