@@ -820,10 +820,18 @@ struct _MetaFrameStyleSet
   MetaFrameStyle *maximized_styles[META_FRAME_FOCUS_LAST];
   MetaFrameStyle *tiled_left_styles[META_FRAME_FOCUS_LAST];
   MetaFrameStyle *tiled_right_styles[META_FRAME_FOCUS_LAST];
+  MetaFrameStyle *tiled_ulc_styles[META_FRAME_FOCUS_LAST];
+  MetaFrameStyle *tiled_llc_styles[META_FRAME_FOCUS_LAST];
+  MetaFrameStyle *tiled_urc_styles[META_FRAME_FOCUS_LAST];
+  MetaFrameStyle *tiled_lrc_styles[META_FRAME_FOCUS_LAST];
   MetaFrameStyle *shaded_styles[META_FRAME_RESIZE_LAST][META_FRAME_FOCUS_LAST];
   MetaFrameStyle *maximized_and_shaded_styles[META_FRAME_FOCUS_LAST];
   MetaFrameStyle *tiled_left_and_shaded_styles[META_FRAME_FOCUS_LAST];
   MetaFrameStyle *tiled_right_and_shaded_styles[META_FRAME_FOCUS_LAST];
+  MetaFrameStyle *tiled_ulc_and_shaded_styles[META_FRAME_FOCUS_LAST];
+  MetaFrameStyle *tiled_llc_and_shaded_styles[META_FRAME_FOCUS_LAST];
+  MetaFrameStyle *tiled_urc_and_shaded_styles[META_FRAME_FOCUS_LAST];
+  MetaFrameStyle *tiled_lrc_and_shaded_styles[META_FRAME_FOCUS_LAST];
 };
 
 /**

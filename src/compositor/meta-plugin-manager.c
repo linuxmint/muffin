@@ -368,6 +368,17 @@ meta_plugin_manager_event_maximize (MetaPluginManager *plugin_mgr,
                                      target_width, target_height);
                 }
               break;
+            case META_PLUGIN_TILE:
+              if (klass->tile)
+                {
+                  meta_plugin_manager_kill_window_effects (plugin_mgr,
+                                                           actor);
+                  _meta_plugin_effect_started (plugin);
+                  klass->tile (plugin, actor,
+                               target_x, target_y,
+                               target_width, target_height);
+                }
+              break;
             default:
               g_warning ("Incorrect handler called for event %lu", event);
             }

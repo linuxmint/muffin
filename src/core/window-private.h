@@ -44,6 +44,7 @@
 #include <X11/Xutil.h>
 #include <cairo.h>
 #include <gdk-pixbuf/gdk-pixbuf.h>
+#include "tile-hud.h"
 
 typedef struct _MetaWindowQueue MetaWindowQueue;
 
@@ -60,7 +61,39 @@ typedef enum {
   META_QUEUE_UPDATE_ICON  = 1 << 2,
 } MetaQueueType;
 
+/* edge zones for tiling/snapping identification
+
+  ___________________________
+  | 4          0          5 |
+  |                         |
+  |                         |
+  |                         |
+  |                         |
+  |  2                   3  |
+  |                         |
+  |                         |
+  |                         |
+  |                         |
+  | 7          1          6 |
+  |_________________________|
+
+*/
+
+enum {
+    ZONE_0 = 0,
+    ZONE_1,
+    ZONE_2,
+    ZONE_3,
+    ZONE_4,
+    ZONE_5,
+    ZONE_6,
+    ZONE_7,
+    ZONE_NONE
+};
+
 #define NUMBER_OF_QUEUES 3
+
+#define HUD_WIDTH 24
 
 struct _MetaWindow
 {
@@ -127,15 +160,28 @@ struct _MetaWindow
   guint maximized_horizontally : 1;
   guint maximized_vertically : 1;
 
+  guint32 snap_delay_timestamp;
+  guint snap_queued : 1;
+  guint zone_queued;
+  MetaWindowTileType tile_type;
+  MetaWindowTileType resizing_tile_type;
+  guint custom_snap_size : 1;
+  guint current_proximity_zone;
+  guint mouse_on_edge : 1;
+
   /* Whether we have to maximize/minimize after placement */
   guint maximize_horizontally_after_placement : 1;
   guint maximize_vertically_after_placement : 1;
   guint minimize_after_placement : 1;
+  guint tile_after_placement : 1;
 
   /* The current or requested tile mode. If maximized_vertically is true,
    * this is the current mode. If not, it is the mode which will be
    * requested after the window grab is released */
-  guint tile_mode : 2;
+  guint tile_mode : 4;
+  guint last_tile_mode : 4;
+  guint resize_tile_mode : 4;
+
   /* The last "full" maximized/unmaximized state. We need to keep track of
    * that to toggle between normal/tiled or maximized/tiled states. */
   guint saved_maximize : 1;
@@ -389,7 +435,9 @@ struct _MetaWindow
    * Position always in root coords, unlike window->rect.
    */
   MetaRectangle user_rect;
-  
+
+  MetaRectangle snapped_rect;
+
   /* Requested geometry */
   int border_width;
   /* x/y/w/h here get filled with ConfigureRequest values */
@@ -436,22 +484,51 @@ struct _MetaWindowClass
                                         (w)->maximized_vertically)
 #define META_WINDOW_MAXIMIZED_VERTICALLY(w)    ((w)->maximized_vertically)
 #define META_WINDOW_MAXIMIZED_HORIZONTALLY(w)  ((w)->maximized_horizontally)
-#define META_WINDOW_TILED_SIDE_BY_SIDE(w)      ((w)->maximized_vertically && \
-                                                !(w)->maximized_horizontally && \
-                                                 (w)->tile_mode != META_TILE_NONE)
-#define META_WINDOW_TILED_LEFT(w)     (META_WINDOW_TILED_SIDE_BY_SIDE(w) && \
-                                       (w)->tile_mode == META_TILE_LEFT)
-#define META_WINDOW_TILED_RIGHT(w)    (META_WINDOW_TILED_SIDE_BY_SIDE(w) && \
-                                       (w)->tile_mode == META_TILE_RIGHT)
-#define META_WINDOW_TILED_MAXIMIZED(w)(META_WINDOW_MAXIMIZED(w) && \
-                                       (w)->tile_mode == META_TILE_MAXIMIZED)
+#define META_WINDOW_TILED(w)                   ((w)->tile_type == META_WINDOW_TILE_TYPE_TILED)
+#define META_WINDOW_SNAPPED(w)                 ((w)->tile_type == META_WINDOW_TILE_TYPE_SNAPPED)
+#define META_WINDOW_TILED_OR_SNAPPED(w)        (META_WINDOW_SNAPPED (w) || META_WINDOW_TILED (w))
+#define META_WINDOW_TILED_LEFT(w)     (META_WINDOW_TILED_OR_SNAPPED (w) && (w)->tile_mode == META_TILE_LEFT)
+#define META_WINDOW_TILED_RIGHT(w)    (META_WINDOW_TILED_OR_SNAPPED (w) && (w)->tile_mode == META_TILE_RIGHT)
+#define META_WINDOW_TILED_SIDE_BY_SIDE(w)      (META_WINDOW_TILED_LEFT (w) || META_WINDOW_TILED_RIGHT (w))
+#define META_WINDOW_TILED_ULC(w)       (META_WINDOW_TILED_OR_SNAPPED (w) && (w)->tile_mode == META_TILE_ULC)
+#define META_WINDOW_TILED_LLC(w)       (META_WINDOW_TILED_OR_SNAPPED (w) && (w)->tile_mode == META_TILE_LLC)
+#define META_WINDOW_TILED_URC(w)       (META_WINDOW_TILED_OR_SNAPPED (w) && (w)->tile_mode == META_TILE_URC)
+#define META_WINDOW_TILED_LRC(w)       (META_WINDOW_TILED_OR_SNAPPED (w) && (w)->tile_mode == META_TILE_LRC)
+#define META_WINDOW_TILED_CORNER(w)    (META_WINDOW_TILED_ULC (w) || \
+                                        META_WINDOW_TILED_LLC (w) || \
+                                        META_WINDOW_TILED_URC (w) || \
+                                        META_WINDOW_TILED_LRC (w))
+
+#define META_WINDOW_TILED_TOP(w)     (META_WINDOW_TILED_OR_SNAPPED (w) && (w)->tile_mode == META_TILE_TOP)
+#define META_WINDOW_TILED_BOTTOM(w)    (META_WINDOW_TILED_OR_SNAPPED (w) && (w)->tile_mode == META_TILE_BOTTOM)
+
+#define META_WINDOW_TILED_TOP_BOTTOM(w)  (META_WINDOW_TILED_TOP (w) || \
+                                          META_WINDOW_TILED_BOTTOM (w))
+
 #define META_WINDOW_ALLOWS_MOVE(w)     ((w)->has_move_func && !(w)->fullscreen)
-#define META_WINDOW_ALLOWS_RESIZE_EXCEPT_HINTS(w)   ((w)->has_resize_func && !META_WINDOW_MAXIMIZED (w) && !META_WINDOW_TILED_SIDE_BY_SIDE(w) && !(w)->fullscreen && !(w)->shaded)
+#define META_WINDOW_ALLOWS_RESIZE_EXCEPT_HINTS(w) ((w)->has_resize_func && !META_WINDOW_MAXIMIZED (w) && !(w)->fullscreen && !(w)->shaded)
 #define META_WINDOW_ALLOWS_RESIZE(w)   (META_WINDOW_ALLOWS_RESIZE_EXCEPT_HINTS (w) &&                \
                                         (((w)->size_hints.min_width < (w)->size_hints.max_width) ||  \
                                          ((w)->size_hints.min_height < (w)->size_hints.max_height)))
-#define META_WINDOW_ALLOWS_HORIZONTAL_RESIZE(w) (META_WINDOW_ALLOWS_RESIZE_EXCEPT_HINTS (w) && (w)->size_hints.min_width < (w)->size_hints.max_width)
-#define META_WINDOW_ALLOWS_VERTICAL_RESIZE(w)   (META_WINDOW_ALLOWS_RESIZE_EXCEPT_HINTS (w) && (w)->size_hints.min_height < (w)->size_hints.max_height)
+#define META_WINDOW_ALLOWS_HORIZONTAL_RESIZE(w) (META_WINDOW_ALLOWS_RESIZE_EXCEPT_HINTS (w) && (w)->size_hints.min_width < (w)->size_hints.max_width && \
+                                                !META_WINDOW_TILED_OR_SNAPPED (w))
+#define META_WINDOW_ALLOWS_VERTICAL_RESIZE(w)   (META_WINDOW_ALLOWS_RESIZE_EXCEPT_HINTS (w) && (w)->size_hints.min_height < (w)->size_hints.max_height && \
+                                                !META_WINDOW_TILED_OR_SNAPPED (w))
+#define META_WINDOW_ALLOWS_TOP_RESIZE(w)        (META_WINDOW_ALLOWS_RESIZE_EXCEPT_HINTS (w) && META_WINDOW_TILED_OR_SNAPPED (w) && \
+                                                 ((w)->tile_mode == META_TILE_BOTTOM || \
+                                                  (w)->tile_mode == META_TILE_LLC || (w)->tile_mode == META_TILE_LRC))
+#define META_WINDOW_ALLOWS_BOTTOM_RESIZE(w)        (META_WINDOW_ALLOWS_RESIZE_EXCEPT_HINTS (w) && META_WINDOW_TILED_OR_SNAPPED (w) && \
+                                                    ((w)->tile_mode == META_TILE_TOP || \
+                                                     (w)->tile_mode == META_TILE_ULC || (w)->tile_mode == META_TILE_URC))
+#define META_WINDOW_ALLOWS_LEFT_RESIZE(w)        (META_WINDOW_ALLOWS_RESIZE_EXCEPT_HINTS (w) && META_WINDOW_TILED_OR_SNAPPED (w) && \
+                                                  ((w)->tile_mode == META_TILE_RIGHT || \
+                                                   (w)->tile_mode == META_TILE_URC || (w)->tile_mode == META_TILE_LRC))
+#define META_WINDOW_ALLOWS_RIGHT_RESIZE(w)        (META_WINDOW_ALLOWS_RESIZE_EXCEPT_HINTS (w) && META_WINDOW_TILED_OR_SNAPPED (w) && \
+                                                   ((w)->tile_mode == META_TILE_LEFT || \
+                                                    (w)->tile_mode == META_TILE_ULC || (w)->tile_mode == META_TILE_LLC))
+#define GRAB_OP(w)                                 ((w)->display->grab_op)
+
+#define META_WINDOW_
 
 MetaWindow* meta_window_new                (MetaDisplay *display,
                                             Window       xwindow,
@@ -466,7 +543,8 @@ void        meta_window_unmanage           (MetaWindow  *window,
 void        meta_window_calc_showing       (MetaWindow  *window);
 void        meta_window_queue              (MetaWindow  *window,
                                             guint queuebits);
-void        meta_window_tile               (MetaWindow        *window);
+void        meta_window_tile               (MetaWindow        *window,
+                                            gboolean           force);
 void        meta_window_maximize_internal  (MetaWindow        *window,
                                             MetaMaximizeFlags  directions,
                                             MetaRectangle     *saved_rect);
@@ -601,6 +679,9 @@ void meta_window_set_gravity (MetaWindow *window,
 void meta_window_handle_mouse_grab_op_event (MetaWindow *window,
                                              XEvent     *event);
 
+void meta_window_handle_keyboard_grab_op_event (MetaWindow *window,
+                                                XEvent     *event);
+
 GList* meta_window_get_workspaces (MetaWindow *window);
 
 gboolean meta_window_located_on_workspace (MetaWindow    *window,
@@ -617,6 +698,11 @@ void meta_window_get_work_area_all_monitors    (MetaWindow    *window,
 void meta_window_get_current_tile_area         (MetaWindow    *window,
                                                 MetaRectangle *tile_area);
 
+void meta_window_get_tile_threshold_area_for_mode        (MetaWindow    *window,
+                                                          MetaRectangle  work_area,
+                                                          MetaTileMode   mode,
+                                                          MetaRectangle *tile_area,
+                                                          gint           zone_width);
 
 gboolean meta_window_same_application (MetaWindow *window,
                                        MetaWindow *other_window);
@@ -668,7 +754,33 @@ void meta_window_propagate_focus_appearance (MetaWindow *window,
 
 gboolean meta_window_should_attach_to_parent (MetaWindow *window);
 gboolean meta_window_can_tile_side_by_side   (MetaWindow *window);
+gboolean meta_window_can_tile_top_bottom (MetaWindow *window);
+gboolean meta_window_can_tile_corner         (MetaWindow *window);
+MetaSide meta_window_get_tile_side (MetaWindow *window);
+
+inline void meta_window_get_size_limits   (const MetaWindow        *window,
+                                          const MetaFrameBorders  *borders,
+                                          gboolean include_frame,
+                                          MetaRectangle *min_size,
+                                          MetaRectangle *max_size);
 
 void meta_window_compute_tile_match (MetaWindow *window);
+
+HUDTileRestrictions meta_window_get_tile_restrictions (MetaWindow *window);
+
+gboolean meta_window_mouse_on_edge (MetaWindow *window,
+                                    gint        x,
+                                    gint        y);
+
+guint meta_window_get_current_zone (MetaWindow   *window,
+                                    MetaRectangle monitor,
+                                    MetaRectangle work_area,
+                                    int           x,
+                                    int           y,
+                                    int           zone_threshold);
+
+void       meta_window_set_tile_type (MetaWindow *window,
+                                      MetaWindowTileType  type);
+MetaWindowTileType  meta_window_get_tile_type (MetaWindow *window);
 
 #endif

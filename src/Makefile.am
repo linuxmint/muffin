@@ -132,6 +132,8 @@ libmuffin_la_SOURCES =				\
 	inlinepixbufs.h				\
 	ui/frames.c				\
 	ui/frames.h				\
+    ui/tile-hud.c           \
+    ui/tile-hud.h           \
 	ui/menu.c				\
 	ui/menu.h				\
 	ui/metaaccellabel.c			\
@@ -266,11 +268,6 @@ wmpropertiesdir=$(datadir)/gnome/wm-properties
 wmproperties_in_files=muffin-wm.desktop.in
 wmproperties_files=$(wmproperties_in_files:.desktop.in=.desktop)
 wmproperties_DATA = $(wmproperties_files)
-
-xmldir       = @GNOME_KEYBINDINGS_KEYSDIR@
-xml_in_files = \
-        50-muffin-windows.xml.in
-xml_DATA     = $(xml_in_files:.xml.in=.xml)
 
 gsettings_SCHEMAS = org.cinnamon.muffin.gschema.xml
 @INTLTOOL_XML_NOMERGE_RULE@

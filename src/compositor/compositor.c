@@ -380,6 +380,7 @@ meta_begin_modal_for_plugin (MetaScreen       *screen,
    * are significant differences in how we handle grabs that make it difficult to
    * merge the two.
    */
+   g_printerr ("begin modal\n");
   MetaDisplay    *display    = meta_screen_get_display (screen);
   Display        *xdpy       = meta_display_get_xdisplay (display);
   MetaCompositor *compositor = display->compositor;
@@ -966,6 +967,20 @@ meta_compositor_switch_workspace (MetaCompositor     *compositor,
        */
       meta_finish_workspace_switch (info);
     }
+}
+
+void
+meta_compositor_tile_window (MetaCompositor    *compositor,
+                                 MetaWindow        *window,
+                               MetaRectangle     *old_rect,
+                               MetaRectangle     *new_rect)
+{
+  MetaWindowActor *window_actor = META_WINDOW_ACTOR (meta_window_get_compositor_private (window));
+  DEBUG_TRACE ("meta_compositor_tile_window\n");
+  if (!window_actor)
+    return;
+
+  meta_window_actor_tile (window_actor, old_rect, new_rect);
 }
 
 static void

@@ -186,5 +186,5 @@ MetaUIDirection meta_ui_get_direction (void);
 
 #include "tabpopup.h"
 #include "tile-preview.h"
-
+#include "tile-hud.h"
 #endif

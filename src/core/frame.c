@@ -276,6 +276,18 @@ meta_frame_get_flags (MetaFrame *frame)
   if (META_WINDOW_ALLOWS_VERTICAL_RESIZE (frame->window))
     flags |= META_FRAME_ALLOWS_VERTICAL_RESIZE;
   
+  if (META_WINDOW_ALLOWS_TOP_RESIZE (frame->window))
+    flags |= META_FRAME_ALLOWS_TOP_RESIZE;
+
+  if (META_WINDOW_ALLOWS_BOTTOM_RESIZE (frame->window))
+    flags |= META_FRAME_ALLOWS_BOTTOM_RESIZE;
+
+  if (META_WINDOW_ALLOWS_LEFT_RESIZE (frame->window))
+    flags |= META_FRAME_ALLOWS_LEFT_RESIZE;
+
+  if (META_WINDOW_ALLOWS_RIGHT_RESIZE (frame->window))
+    flags |= META_FRAME_ALLOWS_RIGHT_RESIZE;
+
   if (meta_window_appears_focused (frame->window))
     flags |= META_FRAME_HAS_FOCUS;
 
@@ -288,13 +300,14 @@ meta_frame_get_flags (MetaFrame *frame)
   /* FIXME: Should we have some kind of UI for windows that are just vertically
    * maximized or just horizontally maximized?
    */
-  if (META_WINDOW_MAXIMIZED (frame->window))
+  if (META_WINDOW_MAXIMIZED (frame->window) && 
+                             !meta_workspace_has_snapped_windows (frame->window->workspace))
     flags |= META_FRAME_MAXIMIZED;
 
-  if (META_WINDOW_TILED_LEFT (frame->window))
+  if (META_WINDOW_TILED_LEFT (frame->window) && frame->window->tile_type != META_WINDOW_TILE_TYPE_SNAPPED)
     flags |= META_FRAME_TILED_LEFT;
 
-  if (META_WINDOW_TILED_RIGHT (frame->window))
+  if (META_WINDOW_TILED_RIGHT (frame->window) && frame->window->tile_type != META_WINDOW_TILE_TYPE_SNAPPED)
     flags |= META_FRAME_TILED_RIGHT;
 
   if (frame->window->fullscreen)
@@ -305,7 +318,7 @@ meta_frame_get_flags (MetaFrame *frame)
 
   if (frame->window->wm_state_above)
     flags |= META_FRAME_ABOVE;
-  
+
   return flags;
 }
 

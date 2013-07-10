@@ -83,6 +83,13 @@ struct _MetaPluginClass
                             gint                width,
                             gint                height);
 
+  void (*tile)             (MetaPlugin         *plugin,
+                            MetaWindowActor    *actor,
+                            gint                x,
+                            gint                y,
+                            gint                width,
+                            gint                height);
+
   void (*map)              (MetaPlugin         *plugin,
                             MetaWindowActor    *actor);
 
@@ -237,6 +244,10 @@ meta_plugin_maximize_completed (MetaPlugin      *plugin,
 void
 meta_plugin_unmaximize_completed (MetaPlugin      *plugin,
                                   MetaWindowActor *actor);
+
+void
+meta_plugin_tile_completed     (MetaPlugin      *plugin,
+                                MetaWindowActor *actor);
 
 void
 meta_plugin_map_completed (MetaPlugin      *plugin,

@@ -29,14 +29,18 @@
 #include "tile-preview.h"
 #include "core.h"
 
-#define OUTLINE_WIDTH 5  /* frame width in non-composite case */
-
+#define ALPHA 0.2
 
 struct _MetaTilePreview {
   GtkWidget     *preview_window;
   gulong         create_serial;
 
   GdkRGBA       *preview_color;
+  GdkRGBA       *snap_preview_color; 
+  GdkRGBA       *current_color;
+  GdkRGBA       *border_color;
+
+  gboolean       snap_state;
 
   MetaRectangle  tile_rect;
 };
@@ -51,16 +55,16 @@ meta_tile_preview_draw (GtkWidget *widget,
   cairo_set_line_width (cr, 1.0);
 
   /* Fill the preview area with a transparent color */
-  gdk_cairo_set_source_rgba (cr, preview->preview_color);
+  gdk_cairo_set_source_rgba (cr, preview->current_color);
 
   cairo_set_operator (cr, CAIRO_OPERATOR_SOURCE);
   cairo_paint (cr);
 
   /* Use the opaque color for the border */
   cairo_set_source_rgb (cr,
-                        preview->preview_color->red,
-                        preview->preview_color->green,
-                        preview->preview_color->blue);
+                        preview->border_color->red,
+                        preview->border_color->green,
+                        preview->border_color->blue);
 
   cairo_rectangle (cr,
                    0.5, 0.5,
@@ -90,6 +94,10 @@ meta_tile_preview_new (int      screen_number)
   gtk_widget_set_app_paintable (preview->preview_window, TRUE);
 
   preview->preview_color = NULL;
+  preview->snap_preview_color = NULL;
+  preview->current_color = NULL;
+
+  preview->snap_state = FALSE;
 
   preview->tile_rect.x = preview->tile_rect.y = 0;
   preview->tile_rect.width = preview->tile_rect.height = 0;
@@ -108,7 +116,18 @@ meta_tile_preview_new (int      screen_number)
   gtk_widget_path_free (path);
 
   gtk_style_context_get (context, GTK_STATE_FLAG_SELECTED,
-                         "background-color", &preview->preview_color,
+                         "background-color", &preview->snap_preview_color,
+                         NULL);
+
+  gtk_style_context_add_class (context,
+                               "gtkstyle-fallback");
+
+  gtk_style_context_get (context, GTK_STATE_FLAG_NORMAL,
+                         "color", &preview->preview_color,
+                         NULL);
+
+  gtk_style_context_get (context, GTK_STATE_FLAG_NORMAL,
+                         "color", &preview->border_color,
                          NULL);
 
   /* The background-color for the .rubberband class should probably
@@ -119,7 +138,9 @@ meta_tile_preview_new (int      screen_number)
   gtk_style_context_get_style (context,
                                "selection-box-alpha", &selection_alpha,
                                NULL);
-  preview->preview_color->alpha = (double)selection_alpha / 0xFF;
+  preview->preview_color->alpha = ALPHA;
+  preview->snap_preview_color->alpha = ALPHA;
+
 
   g_object_unref (context);
 
@@ -142,13 +163,18 @@ meta_tile_preview_free (MetaTilePreview *preview)
 
   if (preview->preview_color)
     gdk_rgba_free (preview->preview_color);
+  if (preview->snap_preview_color)
+    gdk_rgba_free (preview->snap_preview_color);
+  if (preview->border_color)
+    gdk_rgba_free (preview->border_color);
 
   g_free (preview);
 }
 
 LOCAL_SYMBOL void
 meta_tile_preview_show (MetaTilePreview *preview,
-                        MetaRectangle   *tile_rect)
+                        MetaRectangle   *tile_rect,
+                        gboolean         snap)
 {
   GdkWindow *window;
   GdkRectangle old_rect;
@@ -157,14 +183,27 @@ meta_tile_preview_show (MetaTilePreview *preview,
       && preview->tile_rect.x == tile_rect->x
       && preview->tile_rect.y == tile_rect->y
       && preview->tile_rect.width == tile_rect->width
-      && preview->tile_rect.height == tile_rect->height)
+      && preview->tile_rect.height == tile_rect->height) {
+    if (preview->snap_state != snap) {
+        preview->snap_state = snap;
+        preview->current_color = snap ? preview->snap_preview_color :
+                                        preview->preview_color;
+        gtk_widget_queue_draw (preview->preview_window);
+    }
     return; /* nothing to do */
+  }
+
+  preview->snap_state = snap;
+  preview->current_color = snap ? preview->snap_preview_color :
+                                  preview->preview_color;
 
   gtk_widget_show (preview->preview_window);
   window = gtk_widget_get_window (preview->preview_window);
-  meta_core_lower_beneath_grab_window (GDK_DISPLAY_XDISPLAY (gdk_display_get_default ()),
-                                       GDK_WINDOW_XID (window),
-                                       gtk_get_current_event_time ());
+  // TODO:  Preview doesn't cover window contents, so why not have it on top,
+  // otherwise it's blocked in certain instances.
+  // meta_core_lower_beneath_grab_window (GDK_DISPLAY_XDISPLAY (gdk_display_get_default ()),
+  //                                      GDK_WINDOW_XID (window),
+  //                                      gtk_get_current_event_time ());
 
   old_rect.x = old_rect.y = 0;
   old_rect.width = preview->tile_rect.width;
@@ -183,6 +222,12 @@ LOCAL_SYMBOL void
 meta_tile_preview_hide (MetaTilePreview *preview)
 {
   gtk_widget_hide (preview->preview_window);
+}
+
+LOCAL_SYMBOL gboolean
+meta_tile_preview_get_visible (MetaTilePreview *preview)
+{
+    return gtk_widget_get_visible (preview->preview_window);
 }
 
 LOCAL_SYMBOL Window

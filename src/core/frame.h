@@ -25,6 +25,7 @@
 #define META_FRAME_PRIVATE_H
 
 #include "window-private.h"
+#include "workspace-private.h"
 
 struct _MetaFrame
 {

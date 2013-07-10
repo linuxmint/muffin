@@ -646,7 +646,6 @@ reload_net_wm_state (MetaWindow    *window,
                   "the property in the first place\n");
     return;
   }
-
   window->shaded = FALSE;
   window->maximized_horizontally = FALSE;
   window->maximized_vertically = FALSE;
@@ -688,7 +687,8 @@ reload_net_wm_state (MetaWindow    *window,
         window->wm_state_demands_attention = TRUE;
       else if (value->v.atom_list.atoms[i] == window->display->atom__NET_WM_STATE_STICKY)
         window->on_all_workspaces_requested = TRUE;
-
+      else if (value->v.atom_list.atoms[i] == window->display->atom__NET_WM_STATE_TILED)
+        window->tile_after_placement = TRUE;
       ++i;
     }
 

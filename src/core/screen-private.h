@@ -77,8 +77,14 @@ struct _MetaScreen
   MetaUI *ui;
   MetaTabPopup *tab_popup, *ws_popup;
   MetaTilePreview *tile_preview;
+  MetaTileHUD *tile_hud;
 
   guint tile_preview_timeout_id;
+  guint tile_hud_timeout_id;
+  guint tile_hud_fade_timeout_id;
+  guint snap_osd_timeout_id;
+  float hud_opacity;
+  gboolean hud_hiding;
 
   MetaWorkspace *active_workspace;
 
@@ -183,6 +189,17 @@ void          meta_screen_tile_preview_update          (MetaScreen    *screen,
                                                         gboolean       delay);
 void          meta_screen_tile_preview_hide            (MetaScreen    *screen);
 
+gboolean      meta_screen_tile_preview_get_visible (MetaScreen *screen);
+
+void          meta_screen_tile_hud_update          (MetaScreen    *screen,
+                                                    gboolean       delay,
+                                                    gboolean       hiding);
+void          meta_screen_tile_hud_hide            (MetaScreen    *screen);
+
+gboolean      meta_screen_tile_hud_get_visible (MetaScreen *screen);
+
+void          meta_screen_hide_hud_and_preview (MetaScreen *screen);
+
 const MetaMonitorInfo* meta_screen_get_current_monitor    (MetaScreen    *screen);
 const MetaMonitorInfo* meta_screen_get_monitor_for_rect   (MetaScreen    *screen,
                                                            MetaRectangle *rect);
@@ -247,4 +264,5 @@ void     meta_screen_workspace_switched (MetaScreen         *screen,
 
 void meta_screen_set_active_workspace_hint (MetaScreen *screen);
 
+void meta_screen_update_snapped_windows (MetaScreen *screen);
 #endif

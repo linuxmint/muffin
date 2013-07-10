@@ -97,11 +97,12 @@ static gboolean gnome_animations = TRUE;
 static char *cursor_theme = NULL;
 static int   cursor_size = 24;
 static int   draggable_border_width = 10;
-static int edge_tile_threshold = 48;
-static int edge_detach_threshold = 24;
+static int tile_hud_threshold = 150;
+static int resize_threshold = 24;
 static gboolean resize_with_right_button = FALSE;
 static gboolean edge_tiling = FALSE;
 static gboolean force_fullscreen = TRUE;
+static unsigned int snap_modifier[2];
 
 static GDesktopVisualBellType visual_bell_type = G_DESKTOP_VISUAL_BELL_FULLSCREEN_FLASH;
 static MetaButtonLayout button_layout;
@@ -113,7 +114,8 @@ static gboolean live_hidden_windows = FALSE;
 static gboolean workspaces_only_on_primary = FALSE;
 
 static gboolean no_tab_popup = FALSE;
-
+static gboolean legacy_snap = FALSE;
+static gboolean invert_workspace_flip = FALSE;
 
 static void handle_preference_update_enum (GSettings *settings,
                                            gchar     *key);
@@ -137,6 +139,7 @@ static void maybe_give_disable_workarounds_warning (void);
 static gboolean titlebar_handler (GVariant*, gpointer*, gpointer);
 static gboolean theme_name_handler (GVariant*, gpointer*, gpointer);
 static gboolean mouse_button_mods_handler (GVariant*, gpointer*, gpointer);
+static gboolean snap_modifier_handler (GVariant*, gpointer*, gpointer);
 static gboolean button_layout_handler (GVariant*, gpointer*, gpointer);
 
 static void     do_override               (char *key, char *schema);
@@ -384,6 +387,20 @@ static MetaBoolPreference preferences_bool[] =
       },
       &no_tab_popup,
     },
+    {
+      { "legacy-snap",
+        SCHEMA_MUFFIN,
+        META_PREF_LEGACY_SNAP,
+      },
+      &legacy_snap,
+    },
+    {
+      { "invert-workspace-flip-direction",
+        SCHEMA_MUFFIN,
+        META_PREF_INVERT_WORKSPACE_FLIP_DIRECTION,
+      },
+      &invert_workspace_flip,
+    },
     { { NULL, 0, 0 }, NULL },
   };
 
@@ -415,7 +432,7 @@ static MetaStringPreference preferences_string[] =
     },
     {
       { "button-layout",
-        SCHEMA_GENERAL,
+        SCHEMA_MUFFIN,
         META_PREF_BUTTON_LAYOUT,
       },
       button_layout_handler,
@@ -429,6 +446,15 @@ static MetaStringPreference preferences_string[] =
       NULL,
       &cursor_theme,
     },
+    {
+      { "snap-modifier",
+        SCHEMA_MUFFIN,
+        META_PREF_SNAP_MODIFIER,
+      },
+      snap_modifier_handler,
+      NULL,
+    },
+
     { { NULL, 0, 0 }, NULL },
   };
 
@@ -463,18 +489,18 @@ static MetaIntPreference preferences_int[] =
       &draggable_border_width
     },
     {
-      { "edge-tile-threshold",
+      { "tile-hud-threshold",
         SCHEMA_MUFFIN,
-        META_PREF_EDGE_TILE_THRESHOLD,
+        META_PREF_TILE_HUD_THRESHOLD,
       },
-      &edge_tile_threshold
+      &tile_hud_threshold
     },
     {
-      { "edge-detach-threshold",
+      { "resize-threshold",
         SCHEMA_MUFFIN,
-        META_PREF_EDGE_DETACH_THRESHOLD,
+        META_PREF_RESIZE_THRESHOLD,
       },
-      &edge_detach_threshold
+      &resize_threshold
     },
     { { NULL, 0, 0 }, NULL },
   };
@@ -1272,6 +1298,44 @@ mouse_button_mods_handler (GVariant *value,
 }
 
 static gboolean
+snap_modifier_handler (GVariant *value,
+                       gpointer *result,
+                       gpointer  data)
+{
+
+  const gchar *string_value;
+
+  *result = NULL; /* ignored */
+  string_value = g_variant_get_string (value, NULL);
+
+  if (g_strcmp0 (string_value, "Super") == 0)
+  {
+    snap_modifier[0] = XStringToKeysym("Super_L");
+    snap_modifier[1] = XStringToKeysym("Super_R");
+  }
+  else if (g_strcmp0 (string_value, "Alt") == 0)
+  {
+    snap_modifier[0] = XStringToKeysym("Alt_L");
+    snap_modifier[1] = XStringToKeysym("Alt_R");
+  }
+  else if (g_strcmp0 (string_value, "Shift") == 0)
+  {
+    snap_modifier[0] = XStringToKeysym("Shift_L");
+    snap_modifier[1] = XStringToKeysym("Shift_R");
+  }
+  else if (g_strcmp0 (string_value, "Control") == 0)
+  {
+    snap_modifier[0] = XStringToKeysym("Control_L");
+    snap_modifier[1] = XStringToKeysym("Control_R");
+  } else
+  {
+    snap_modifier[0] = 0;
+    snap_modifier[1] = 0;
+  }
+  return TRUE;
+}
+
+static gboolean
 button_layout_equal (const MetaButtonLayout *a,
                      const MetaButtonLayout *b)
 {  
@@ -1674,14 +1738,23 @@ meta_preference_to_string (MetaPreference pref)
     case META_PREF_DRAGGABLE_BORDER_WIDTH:
       return "DRAGGABLE_BORDER_WIDTH";
 
-    case META_PREF_EDGE_TILE_THRESHOLD:
-      return "EDGE_TILE_THRESHOLD";
+    case META_PREF_TILE_HUD_THRESHOLD:
+      return "TILE_HUD_THRESHOLD";
 
-    case META_PREF_EDGE_DETACH_THRESHOLD:
-      return "EDGE_DETACH_THRESHOLD";
+    case META_PREF_RESIZE_THRESHOLD:
+      return "RESIZE_THRESHOLD";
 
     case META_PREF_DYNAMIC_WORKSPACES:
       return "DYNAMIC_WORKSPACES";
+
+    case META_PREF_SNAP_MODIFIER:
+      return "SNAP_MODIFIER";
+
+    case META_PREF_LEGACY_SNAP:
+      return "LEGACY_SNAP";
+
+    case META_PREF_INVERT_WORKSPACE_FLIP_DIRECTION:
+      return "INVERT_WORKSPACE_FLIP_DIRECTION";
     }
 
   return "(unknown)";
@@ -2263,11 +2336,16 @@ meta_prefs_get_workspaces_only_on_primary (void)
   return workspaces_only_on_primary;
 }
 
-
 gboolean
 meta_prefs_get_no_tab_popup (void)
 {
   return no_tab_popup;
+}
+
+gboolean
+meta_prefs_get_legacy_snap (void)
+{
+  return legacy_snap;
 }
 
 void
@@ -2287,19 +2365,31 @@ meta_prefs_get_draggable_border_width (void)
 }
 
 int
-meta_prefs_get_edge_tile_threshold (void)
+meta_prefs_get_tile_hud_threshold (void)
 {
-  return edge_tile_threshold;
+  return tile_hud_threshold;
 }
 
 int
-meta_prefs_get_edge_detach_threshold (void)
+meta_prefs_get_resize_threshold (void)
 {
-  return edge_detach_threshold;
+  return resize_threshold;
 }
 
 void
 meta_prefs_set_force_fullscreen (gboolean whether)
 {
   force_fullscreen = whether;
+}
+
+unsigned int *
+meta_prefs_get_snap_modifier (void)
+{
+    return snap_modifier;
+}
+
+gboolean
+meta_prefs_get_invert_flip_direction (void)
+{
+    return invert_workspace_flip;
 }
