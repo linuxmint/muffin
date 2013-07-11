@@ -3677,6 +3677,8 @@ meta_window_maximize (MetaWindow        *window,
           meta_window_queue(window, META_QUEUE_MOVE_RESIZE);
         }
     }
+    meta_screen_tile_preview_hide (window->screen);
+    normalize_tile_state (window);
 }
 
 /**
@@ -9009,7 +9011,8 @@ update_move (MetaWindow  *window,
 
       switch (edge_zone) {
         case ZONE_0:
-            window->tile_mode = META_TILE_TOP;
+            window->tile_mode = meta_prefs_get_tile_maximize() ? META_TILE_MAXIMIZE :
+                                                                 META_TILE_TOP;
             break;
         case ZONE_1:
             window->tile_mode = META_TILE_BOTTOM;
@@ -9731,7 +9734,10 @@ meta_window_handle_mouse_grab_op_event (MetaWindow *window,
                                              event->xbutton.x_root,
                                              event->xbutton.y_root)) {
                   window->custom_snap_size = FALSE;
-                  meta_window_tile (window, FALSE);
+                  if (window->tile_mode == META_TILE_MAXIMIZE)
+                    meta_window_maximize(window, META_MAXIMIZE_VERTICAL | META_MAXIMIZE_HORIZONTAL);
+                  else
+                    meta_window_tile (window, FALSE);
               }
               else if (event->xbutton.root == window->screen->xroot)
                   update_move (window,
@@ -10024,6 +10030,7 @@ meta_window_get_tile_threshold_area_for_mode (MetaWindow    *window,
           tile_area->height = zone_width;
           break;
       case META_TILE_TOP:
+      case META_TILE_MAXIMIZE:
           tile_area->height = zone_width;
           tile_area->x = tile_area->x + zone_width;
           tile_area->width = tile_area->width - (2 * zone_width);

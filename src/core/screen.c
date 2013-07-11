@@ -2036,6 +2036,10 @@ meta_screen_tile_preview_update_timeout (gpointer data)
               if (!META_WINDOW_TILED_TOP_BOTTOM (window))
                 needs_preview = TRUE;
               break;
+          case META_TILE_MAXIMIZE:
+              if (!META_WINDOW_MAXIMIZED (window))
+                needs_preview = TRUE;
+              break;
           default:
               needs_preview = FALSE;
               break;

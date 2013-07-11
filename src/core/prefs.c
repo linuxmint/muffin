@@ -116,6 +116,7 @@ static gboolean workspaces_only_on_primary = FALSE;
 static gboolean no_tab_popup = FALSE;
 static gboolean legacy_snap = FALSE;
 static gboolean invert_workspace_flip = FALSE;
+static gboolean tile_maximize = FALSE;
 
 static void handle_preference_update_enum (GSettings *settings,
                                            gchar     *key);
@@ -400,6 +401,13 @@ static MetaBoolPreference preferences_bool[] =
         META_PREF_INVERT_WORKSPACE_FLIP_DIRECTION,
       },
       &invert_workspace_flip,
+    },
+    {
+      { "tile-maximize",
+        SCHEMA_MUFFIN,
+        META_PREF_TILE_MAXIMIZE,
+      },
+      &tile_maximize,
     },
     { { NULL, 0, 0 }, NULL },
   };
@@ -1755,6 +1763,9 @@ meta_preference_to_string (MetaPreference pref)
 
     case META_PREF_INVERT_WORKSPACE_FLIP_DIRECTION:
       return "INVERT_WORKSPACE_FLIP_DIRECTION";
+
+    case META_PREF_TILE_MAXIMIZE:
+      return "TILE_MAXIMIZE";
     }
 
   return "(unknown)";
@@ -2392,4 +2403,10 @@ gboolean
 meta_prefs_get_invert_flip_direction (void)
 {
     return invert_workspace_flip;
+}
+
+gboolean
+meta_prefs_get_tile_maximize (void)
+{
+    return tile_maximize;
 }

@@ -83,7 +83,8 @@ typedef enum {
   META_TILE_URC,
   META_TILE_LRC,
   META_TILE_TOP,
-  META_TILE_BOTTOM
+  META_TILE_BOTTOM,
+  META_TILE_MAXIMIZE
 } MetaTileMode;
 
 struct _MetaDisplay
