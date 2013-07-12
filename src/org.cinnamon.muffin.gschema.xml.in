@@ -147,6 +147,14 @@
       </_description>
     </key>
 
+    <key name="tile-maximize" type="b">
+      <default>false</default>
+      <_summary>Sets maximize as the tile action for the top edge of the screen</_summary>
+      <_description>
+        Makes tiling to the top maximize the window
+      </_description>
+    </key>
+
     <child name="keybindings" schema="org.cinnamon.muffin.keybindings"/>
 
   </schema>
