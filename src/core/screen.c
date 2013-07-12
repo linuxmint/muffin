@@ -96,6 +96,7 @@ enum
   MONITORS_CHANGED,
   SNAP_OSD_SHOW,
   SNAP_OSD_HIDE,
+  WORKSPACE_OSD_SHOW,
 
   LAST_SIGNAL
 };
@@ -270,6 +271,14 @@ meta_screen_class_init (MetaScreenClass *klass)
 
   screen_signals[SNAP_OSD_HIDE] =
     g_signal_new ("hide-snap-osd",
+                  G_TYPE_FROM_CLASS (klass),
+                  G_SIGNAL_RUN_LAST,
+                  0,
+                  NULL, NULL, NULL,
+                  G_TYPE_NONE, 0);
+
+  screen_signals[WORKSPACE_OSD_SHOW] =
+    g_signal_new ("show-workspace-osd",
                   G_TYPE_FROM_CLASS (klass),
                   G_SIGNAL_RUN_LAST,
                   0,

@@ -9851,13 +9851,23 @@ meta_window_handle_keyboard_grab_op_event (MetaWindow *window,
                     MetaWorkspace *target_workspace = meta_workspace_get_neighbor (window->screen->active_workspace,
                                                                                    motion_left);
                     if (target_workspace)
+                      {
+                        gint old_ws_index = meta_workspace_index (window->screen->active_workspace);
                         meta_workspace_activate (target_workspace, event->xkey.time);
+                        if (old_ws_index != meta_workspace_index (window->screen->active_workspace))
+                          g_signal_emit_by_name (window->screen, "show-workspace-osd", NULL);
+                      }
                 }
                 if (event->type == KeyPress && keysym == XK_Right) {
                     MetaWorkspace *target_workspace = meta_workspace_get_neighbor (window->screen->active_workspace,
                                                                                    motion_right);
                     if (target_workspace)
+                      {
+                        gint old_ws_index = meta_workspace_index (window->screen->active_workspace);
                         meta_workspace_activate (target_workspace, event->xkey.time);
+                        if (old_ws_index != meta_workspace_index (window->screen->active_workspace))
+                          g_signal_emit_by_name (window->screen, "show-workspace-osd", NULL);
+                      }
                 }
               }
             }
