@@ -3436,6 +3436,8 @@ meta_window_minimize (MetaWindow  *window)
         }
       g_object_notify (G_OBJECT (window), "minimized");
     }
+
+  meta_screen_update_snapped_windows (window->screen);
 }
 
 void
@@ -3454,6 +3456,8 @@ meta_window_unminimize (MetaWindow  *window)
                                      NULL);
       g_object_notify (G_OBJECT (window), "minimized");
     }
+
+  meta_screen_update_snapped_windows (window->screen);
 }
 
 static void
