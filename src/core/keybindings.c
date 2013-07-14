@@ -4030,14 +4030,14 @@ init_builtin_key_bindings (MetaDisplay *display)
                           handle_switch, META_TAB_LIST_GROUP);
 
   add_builtin_keybinding (display,
-                          "switch-windows",
+                          "switch-applications",
                           SCHEMA_COMMON_KEYBINDINGS,
                           META_KEY_BINDING_REVERSES,
                           META_KEYBINDING_ACTION_SWITCH_WINDOWS,
                           handle_switch, META_TAB_LIST_NORMAL);
 
   add_builtin_keybinding (display,
-                          "switch-windows-backward",
+                          "switch-applications-backward",
                           SCHEMA_COMMON_KEYBINDINGS,
                           REVERSES_AND_REVERSED,
                           META_KEYBINDING_ACTION_SWITCH_WINDOWS_BACKWARD,
