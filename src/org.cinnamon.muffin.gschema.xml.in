@@ -165,35 +165,35 @@
     </key>
 
     <key name="push-tile-left" type="as">
-      <default>[]</default>
+      <default><![CDATA[['<Super>Left']]]></default>
     </key>
 
     <key name="push-tile-right" type="as">
-      <default>[]</default>
+      <default><![CDATA[['<Super>Right']]]></default>
     </key>
 
     <key name="push-tile-up" type="as">
-      <default>[]</default>
+      <default><![CDATA[['<Super>Up']]]></default>
     </key>
 
     <key name="push-tile-down" type="as">
-      <default>[]</default>
+      <default><![CDATA[['<Super>Down']]]></default>
     </key>
 
     <key name="push-snap-left" type="as">
-      <default>[]</default>
+      <default><![CDATA[['<Control><Super>Left']]]></default>
     </key>
 
     <key name="push-snap-right" type="as">
-      <default>[]</default>
+      <default><![CDATA[['<Control><Super>Right']]]></default>
     </key>
 
     <key name="push-snap-up" type="as">
-      <default>[]</default>
+      <default><![CDATA[['<Control><Super>Up']]]></default>
     </key>
 
     <key name="push-snap-down" type="as">
-      <default>[]</default>
+      <default><![CDATA[['<Control><Super>Down']]]></default>
     </key>
 
     <key name="tab-popup-select" type="as">
@@ -204,6 +204,303 @@
     <key name="tab-popup-cancel" type="as">
       <default>[]</default>
       <_summary>Cancel tab popup</_summary>
+    </key>
+
+    <key name="switch-to-workspace-1" type="as">
+      <default>[]</default>
+      <_summary>Switch to workspace 1</_summary>
+    </key>
+    <key name="switch-to-workspace-2" type="as">
+      <default>[]</default>
+      <_summary>Switch to workspace 2</_summary>
+    </key>
+    <key name="switch-to-workspace-3" type="as">
+      <default>[]</default>
+      <_summary>Switch to workspace 3</_summary>
+    </key>
+    <key name="switch-to-workspace-4" type="as">
+      <default>[]</default>
+      <_summary>Switch to workspace 4</_summary>
+    </key>
+    <key name="switch-to-workspace-5" type="as">
+      <default>[]</default>
+      <_summary>Switch to workspace 5</_summary>
+    </key>
+    <key name="switch-to-workspace-6" type="as">
+      <default>[]</default>
+      <_summary>Switch to workspace 6</_summary>
+    </key>
+    <key name="switch-to-workspace-7" type="as">
+      <default>[]</default>
+      <_summary>Switch to workspace 7</_summary>
+    </key>
+    <key name="switch-to-workspace-8" type="as">
+      <default>[]</default>
+      <_summary>Switch to workspace 8</_summary>
+    </key>
+    <key name="switch-to-workspace-9" type="as">
+      <default>[]</default>
+      <_summary>Switch to workspace 9</_summary>
+    </key>
+    <key name="switch-to-workspace-10" type="as">
+      <default>[]</default>
+      <_summary>Switch to workspace 10</_summary>
+    </key>
+    <key name="switch-to-workspace-11" type="as">
+      <default>[]</default>
+      <_summary>Switch to workspace 11</_summary>
+    </key>
+    <key name="switch-to-workspace-12" type="as">
+      <default>[]</default>
+      <_summary>Switch to workspace 12</_summary>
+    </key>
+    <key name="switch-to-workspace-left" type="as">
+      <default><![CDATA[['<Control><Alt>Left']]]></default>
+      <_summary>Switch to workspace left</_summary>
+    </key>
+    <key name="switch-to-workspace-right" type="as">
+      <default><![CDATA[['<Control><Alt>Right']]]></default>
+      <_summary>Switch to workspace right</_summary>
+    </key>
+    <key name="switch-to-workspace-up" type="as">
+      <default><![CDATA[['<Control><Alt>Up']]]></default>
+      <_summary>Switch to workspace above</_summary>
+    </key>
+    <key name="switch-to-workspace-down" type="as">
+      <default><![CDATA[['<Control><Alt>Down']]]></default>
+      <_summary>Switch to workspace below</_summary>
+    </key>
+    <key name="switch-group" type="as">
+      <default><![CDATA[['<Alt>Above_Tab']]]></default>
+      <_summary>Switch windows of an application</_summary>
+    </key>
+    <key name="switch-group-backward" type="as">
+      <default>[]</default>
+      <_summary>Reverse switch windows of an application</_summary>
+    </key>
+    <key name="switch-windows" type="as">
+      <default><![CDATA[['<Alt>Tab']]]></default>
+      <_summary>Switch applications</_summary>
+    </key>
+    <key name="switch-windows-backward" type="as">
+      <default>[]</default>
+      <_summary>Reverse switch applications</_summary>
+    </key>
+    <key name="switch-panels" type="as">
+      <default><![CDATA[['<Control><Alt>Tab']]]></default>
+      <_summary>Switch system controls</_summary>
+    </key>
+    <key name="switch-panels-backward" type="as">
+      <default>[]</default>
+      <_summary>Reverse switch system controls</_summary>
+    </key>
+    <key name="cycle-group" type="as">
+      <default><![CDATA[['<Alt>F6']]]></default>
+      <_summary>Switch windows of an app directly</_summary>
+    </key>
+    <key name="cycle-group-backward" type="as">
+      <default>[]</default>
+      <_summary>Reverse switch windows of an app directly</_summary>
+    </key>
+    <key name="cycle-windows" type="as">
+      <default><![CDATA[['<Alt>Escape']]]></default>
+      <_summary>Switch windows directly</_summary>
+    </key>
+    <key name="cycle-windows-backward" type="as">
+      <default>[]</default>
+      <_summary>Reverse switch windows directly</_summary>
+    </key>
+    <key name="cycle-panels" type="as">
+      <default><![CDATA[['<Control><Alt>Escape']]]></default>
+      <_summary>Switch system controls directly</_summary>
+    </key>
+    <key name="cycle-panels-backward" type="as">
+      <default>[]</default>
+      <_summary>Reverse switch system controls directly</_summary>
+    </key>
+    <key name="show-desktop" type="as">
+      <default>[]</default>
+      <_summary>Hide all normal windows</_summary>
+    </key>
+    <key name="panel-main-menu" type="as">
+      <default><![CDATA[['<Alt>F1']]]></default>
+      <_summary>Show the activities overview</_summary>
+    </key>
+    <key name="panel-run-dialog" type="as">
+      <default><![CDATA[['<Alt>F2']]]></default>
+      <_summary>Show the run command prompt</_summary>
+    </key>
+    <key name="set-spew-mark" type="as">
+      <default>[]</default>
+      <_summary>Don&apos;t use</_summary>
+    </key>
+    <key name="activate-window-menu" type="as">
+      <default><![CDATA[['<Alt>space']]]></default>
+      <_summary>Activate the window menu</_summary>
+    </key>
+    <key name="toggle-fullscreen" type="as">
+      <default>[]</default>
+      <_summary>Toggle fullscreen mode</_summary>
+    </key>
+    <key name="toggle-maximized" type="as">
+      <default><![CDATA[['<Alt>F10']]]></default>
+      <_summary>Toggle maximization state</_summary>
+    </key>
+    <key name="toggle-above" type="as">
+      <default>[]</default>
+      <_summary>Toggle window always appearing on top</_summary>
+    </key>
+    <key name="maximize" type="as">
+      <default>[]</default>
+      <_summary>Maximize window</_summary>
+    </key>
+    <key name="unmaximize" type="as">
+      <default><![CDATA[['<Alt>F5']]]></default>
+      <_summary>Restore window</_summary>
+    </key>
+    <key name="toggle-shaded" type="as">
+      <default>[]</default>
+      <_summary>Toggle shaded state</_summary>
+    </key>
+    <key name="minimize" type="as">
+      <default>[]</default>
+      <_summary>Minimize window</_summary>
+    </key>
+    <key name="close" type="as">
+      <default><![CDATA[['<Alt>F4']]]></default>
+      <_summary>Close window</_summary>
+    </key>
+    <key name="begin-move" type="as">
+      <default><![CDATA[['<Alt>F7']]]></default>
+      <_summary>Move window</_summary>
+    </key>
+    <key name="begin-resize" type="as">
+      <default><![CDATA[['<Alt>F8']]]></default>
+      <_summary>Resize window</_summary>
+    </key>
+    <key name="toggle-on-all-workspaces" type="as">
+      <default>[]</default>
+      <_summary>Toggle window on all workspaces or one</_summary>
+    </key>
+    <key name="move-to-workspace-1" type="as">
+      <default>[]</default>
+      <_summary>Move window to workspace 1</_summary>
+    </key>
+    <key name="move-to-workspace-2" type="as">
+      <default>[]</default>
+      <_summary>Move window to workspace 2</_summary>
+    </key>
+    <key name="move-to-workspace-3" type="as">
+      <default>[]</default>
+      <_summary>Move window to workspace 3</_summary>
+    </key>
+    <key name="move-to-workspace-4" type="as">
+      <default>[]</default>
+      <_summary>Move window to workspace 4</_summary>
+    </key>
+    <key name="move-to-workspace-5" type="as">
+      <default>[]</default>
+      <_summary>Move window to workspace 5</_summary>
+    </key>
+    <key name="move-to-workspace-6" type="as">
+      <default>[]</default>
+      <_summary>Move window to workspace 6</_summary>
+    </key>
+    <key name="move-to-workspace-7" type="as">
+      <default>[]</default>
+      <_summary>Move window to workspace 7</_summary>
+    </key>
+    <key name="move-to-workspace-8" type="as">
+      <default>[]</default>
+      <_summary>Move window to workspace 8</_summary>
+    </key>
+    <key name="move-to-workspace-9" type="as">
+      <default>[]</default>
+      <_summary>Move window to workspace 9</_summary>
+    </key>
+    <key name="move-to-workspace-10" type="as">
+      <default>[]</default>
+      <_summary>Move window to workspace 10</_summary>
+    </key>
+    <key name="move-to-workspace-11" type="as">
+      <default>[]</default>
+      <_summary>Move window to workspace 11</_summary>
+    </key>
+    <key name="move-to-workspace-12" type="as">
+      <default>[]</default>
+      <_summary>Move window to workspace 12</_summary>
+    </key>
+    <key name="move-to-workspace-left" type="as">
+      <default><![CDATA[['<Control><Shift><Alt>Left']]]></default>
+      <_summary>Move window one workspace to the left</_summary>
+    </key>
+    <key name="move-to-workspace-right" type="as">
+      <default><![CDATA[['<Control><Shift><Alt>Right']]]></default>
+      <_summary>Move window one workspace to the right</_summary>
+    </key>
+    <key name="move-to-workspace-up" type="as">
+      <default><![CDATA[['<Control><Shift><Alt>Up']]]></default>
+      <_summary>Move window one workspace up</_summary>
+    </key>
+    <key name="move-to-workspace-down" type="as">
+      <default><![CDATA[['<Control><Shift><Alt>Down']]]></default>
+      <_summary>Move window one workspace down</_summary>
+    </key>
+    <key name="raise-or-lower" type="as">
+      <default>[]</default>
+      <_summary>Raise window if covered, otherwise lower it</_summary>
+    </key>
+    <key name="raise" type="as">
+      <default>[]</default>
+      <_summary>Raise window above other windows</_summary>
+    </key>
+    <key name="lower" type="as">
+      <default>[]</default>
+      <_summary>Lower window below other windows</_summary>
+    </key>
+    <key name="maximize-vertically" type="as">
+      <default>[]</default>
+      <_summary>Maximize window vertically</_summary>
+    </key>
+    <key name="maximize-horizontally" type="as">
+      <default>[]</default>
+      <_summary>Maximize window horizontally</_summary>
+    </key>
+    <key name="move-to-corner-nw" type="as">
+      <default>[]</default>
+      <_summary>Move window to top left corner</_summary>
+    </key>
+    <key name="move-to-corner-ne" type="as">
+      <default>[]</default>
+      <_summary>Move window to top right corner</_summary>
+    </key>
+    <key name="move-to-corner-sw" type="as">
+      <default>[]</default>
+      <_summary>Move window to bottom left corner</_summary>
+    </key>
+    <key name="move-to-corner-se" type="as">
+      <default>[]</default>
+      <_summary>Move window to bottom right corner</_summary>
+    </key>
+    <key name="move-to-side-n" type="as">
+      <default>[]</default>
+      <_summary>Move window to top edge of screen</_summary>
+    </key>
+    <key name="move-to-side-s" type="as">
+      <default>[]</default>
+      <_summary>Move window to bottom edge of screen</_summary>
+    </key>
+    <key name="move-to-side-e" type="as">
+      <default>[]</default>
+      <_summary>Move window to right side of screen</_summary>
+    </key>
+    <key name="move-to-side-w" type="as">
+      <default>[]</default>
+      <_summary>Move window to left side of screen</_summary>
+    </key>
+    <key name="move-to-center" type="as">
+      <default>[]</default>
+      <_summary>Move window to center of screen</_summary>
     </key>
 
   </schema>
