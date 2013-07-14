@@ -830,7 +830,7 @@ constrain_maximization (MetaWindow         *window,
         GList *tmp = window->screen->active_workspace->snapped_windows;
         GSList *snapped_windows_as_struts = NULL;
         while (tmp) {
-            if (tmp->data == window) {
+            if (tmp->data == window || META_WINDOW (tmp->data)->minimized) {
                 tmp = tmp->next;
                 continue;
             }
