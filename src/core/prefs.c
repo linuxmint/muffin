@@ -53,6 +53,7 @@
 #define KEY_GNOME_CURSOR_THEME "cursor-theme"
 #define KEY_GNOME_CURSOR_SIZE "cursor-size"
 
+#define KEY_WS_NAMES_GNOME "workspace-names"
 #define KEY_OVERLAY_KEY "overlay-key"
 #define KEY_LIVE_HIDDEN_WINDOWS "live-hidden-windows"
 #define KEY_WORKSPACES_ONLY_ON_PRIMARY "workspaces-only-on-primary"
@@ -1107,6 +1108,10 @@ settings_changed (GSettings *settings,
   else if (g_str_equal (key, KEY_OVERLAY_KEY))
     {
       queue_changed (META_PREF_KEYBINDINGS);
+    }
+  else if (g_str_equal (key, KEY_WS_NAMES_GNOME))
+    {
+      return;
     }
   else
     {
