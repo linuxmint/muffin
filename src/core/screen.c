@@ -3311,6 +3311,21 @@ meta_screen_minimize_all_on_active_workspace_except (MetaScreen *screen,
 }
 
 void
+meta_screen_toggle_desktop (MetaScreen *screen,
+							guint32    timestamp)
+{
+  if (screen->active_workspace->showing_desktop)
+    {
+      meta_screen_unshow_desktop (screen);
+      meta_workspace_focus_default_window (screen->active_workspace, 
+                                           NULL,
+                                           timestamp);
+    }
+  else
+    meta_screen_show_desktop (screen, timestamp);
+}
+
+void
 meta_screen_show_desktop (MetaScreen *screen, 
                           guint32     timestamp)
 {

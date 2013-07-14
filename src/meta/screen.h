@@ -77,6 +77,9 @@ MetaWorkspace * meta_screen_get_active_workspace (MetaScreen *screen);
 
 void meta_screen_show_desktop (MetaScreen *screen,
                                 guint32        timestamp);
+
+void meta_screen_toggle_desktop (MetaScreen *screen,
+								 guint32    timestamp);
                                 
 void meta_screen_unshow_desktop (MetaScreen *screen);
 
