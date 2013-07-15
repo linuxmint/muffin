@@ -9849,8 +9849,8 @@ meta_window_handle_keyboard_grab_op_event (MetaWindow *window,
                                  event->xmotion.x_root,
                                  event->xmotion.y_root);
                 }
-                guint motion_left = meta_prefs_get_invert_flip_direction () ? META_MOTION_LEFT : META_MOTION_RIGHT;
-                guint motion_right = meta_prefs_get_invert_flip_direction () ? META_MOTION_RIGHT : META_MOTION_LEFT;
+                guint motion_left = meta_prefs_get_invert_flip_direction () ? META_MOTION_RIGHT : META_MOTION_LEFT;
+                guint motion_right = meta_prefs_get_invert_flip_direction () ? META_MOTION_LEFT : META_MOTION_RIGHT;
                 if (event->type == KeyPress && keysym == XK_Left) {
                     MetaWorkspace *target_workspace = meta_workspace_get_neighbor (window->screen->active_workspace,
                                                                                    motion_left);
