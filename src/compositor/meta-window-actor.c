@@ -162,6 +162,8 @@ static void meta_window_actor_clear_shape_region    (MetaWindowActor *self);
 static void meta_window_actor_clear_bounding_region (MetaWindowActor *self);
 static void meta_window_actor_clear_shadow_clip     (MetaWindowActor *self);
 
+static void check_needs_reshape (MetaWindowActor *self);
+
 G_DEFINE_TYPE (MetaWindowActor, meta_window_actor, CLUTTER_TYPE_GROUP);
 
 static void
@@ -366,7 +368,8 @@ meta_window_actor_constructed (GObject *object)
     }
 
   meta_window_actor_update_opacity (self);
-  meta_window_actor_update_shape (self);
+
+  priv->shape_region = cairo_region_create();
 }
 
 static void
@@ -1210,8 +1213,6 @@ meta_window_actor_should_unredirect (MetaWindowActor *self)
   MetaWindow *metaWindow = meta_window_actor_get_meta_window (self);
   MetaWindowActorPrivate *priv = self->priv;
 
-  gboolean occupies_full_monitors = FALSE;
-
   if (meta_window_requested_dont_bypass_compositor (metaWindow))
     return FALSE;
 
@@ -1224,33 +1225,7 @@ meta_window_actor_should_unredirect (MetaWindowActor *self)
   if (priv->argb32 && !meta_window_requested_bypass_compositor (metaWindow))
     return FALSE;
 
-  if (meta_window_is_fullscreen (metaWindow))
-    occupies_full_monitors = TRUE;
-  else if (meta_window_is_override_redirect (metaWindow))
-    {
-      MetaScreen *screen = meta_window_get_screen (metaWindow);
-      MetaRectangle window_rect, monitor_rect;
-
-      int num_monitors = meta_screen_get_n_monitors (screen);
-      int screen_width, screen_height, i;
-
-      meta_screen_get_size (screen, &screen_width, &screen_height);
-      meta_window_get_outer_rect (priv->window, &window_rect);
-
-      if (window_rect.x == 0 && window_rect.y == 0 &&
-          window_rect.width == screen_width && window_rect.height == screen_height)
-        occupies_full_monitors = TRUE;
-
-      for (i = 0; i < num_monitors; i++)
-        {
-          meta_screen_get_monitor_geometry (screen , i, &monitor_rect);
-          if (monitor_rect.x == window_rect.x && monitor_rect.y == window_rect.y &&
-              monitor_rect.width == window_rect.width && monitor_rect.height == window_rect.height)
-            occupies_full_monitors = TRUE;
-        }
-    }
-
-  if (!occupies_full_monitors)
+  if (!meta_window_is_monitor_sized (metaWindow))
     return FALSE;
 
   if (meta_window_requested_bypass_compositor (metaWindow))
@@ -1279,7 +1254,7 @@ meta_window_actor_set_redirected (MetaWindowActor *self, gboolean state)
       meta_error_trap_push (display);
       XCompositeRedirectWindow (xdisplay, xwin, CompositeRedirectManual);
       meta_error_trap_pop (display);
-      meta_window_actor_queue_create_pixmap (self);
+      meta_window_actor_detach (self);
       self->priv->unredirected = FALSE;
     }
   else
