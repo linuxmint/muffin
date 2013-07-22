@@ -17,7 +17,6 @@ src/core/window.c
 src/core/window-props.c
 src/core/xprops.c
 src/muffin.desktop.in
-src/muffin-wm.desktop.in
 src/org.cinnamon.muffin.gschema.xml.in
 src/tools/muffin-message.c
 src/ui/frames.c
