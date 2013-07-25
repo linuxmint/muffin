@@ -146,74 +146,47 @@ do_side_box (MetaTileHUD *hud, cairo_t *cr, gint side, MetaRectangle rect)
 }
 
 static void
+_do_corner_box (MetaTileHUD *hud, cairo_t *cr, int w, int h)
+{
+        cairo_pattern_t *pat = cairo_pattern_create_linear(0, 0, w, h);
+        update_color (hud, pat);
+        cairo_move_to (cr, 0, 0);
+        cairo_line_to (cr, w, 0);
+        cairo_line_to (cr, w, h - R);
+        cairo_arc (cr, w - R, h - R, R, 0, _90_DEG);
+        cairo_line_to (cr, 0, h);
+        cairo_close_path (cr);
+        cairo_clip_preserve (cr);
+        cairo_set_source (cr, pat);
+        cairo_fill_preserve (cr);
+        gdk_cairo_set_source_rgba (cr, hud->border_color);
+        cairo_stroke (cr);
+        cairo_pattern_destroy(pat);
+}
+
+static void
 do_corner_box (MetaTileHUD *hud, cairo_t *cr, gint side, MetaRectangle rect)
 {
-  cairo_pattern_t *pat;
   cairo_save (cr);
   switch (side) {
     case LEFT | TOP:
-        pat = cairo_pattern_create_linear(BOX_LEFT (rect), BOX_TOP (rect), BOX_RIGHT (rect), BOX_BOTTOM (rect));
-        update_color (hud, pat);
-        cairo_move_to (cr, BOX_LEFT (rect), BOX_TOP (rect));
-        cairo_line_to (cr, BOX_RIGHT (rect), BOX_TOP (rect));
-        cairo_line_to (cr, BOX_RIGHT (rect), BOX_BOTTOM (rect) - R);
-        cairo_arc (cr, BOX_RIGHT (rect) - R, BOX_BOTTOM (rect) - R, R, 0, _90_DEG);
-        cairo_line_to (cr, BOX_LEFT (rect), BOX_BOTTOM (rect));
-        cairo_close_path (cr);
-        cairo_clip_preserve (cr);
-        cairo_set_source (cr, pat);
-        cairo_fill_preserve (cr);
-        gdk_cairo_set_source_rgba (cr, hud->border_color);
-        cairo_stroke (cr);
-        cairo_pattern_destroy(pat);
+        cairo_translate(cr, BOX_LEFT(rect), BOX_TOP(rect));
+        _do_corner_box(hud, cr, rect.height, rect.width);
         break;
     case RIGHT | TOP:
-        pat = cairo_pattern_create_linear(BOX_RIGHT (rect), BOX_TOP (rect), BOX_LEFT (rect), BOX_BOTTOM (rect));
-        update_color (hud, pat);
-        cairo_move_to (cr, BOX_RIGHT (rect), BOX_TOP (rect));
-        cairo_line_to (cr, BOX_RIGHT (rect), BOX_BOTTOM (rect));
-        cairo_line_to (cr, BOX_LEFT (rect) + R, BOX_BOTTOM (rect));
-        cairo_arc (cr, BOX_LEFT (rect) + R, BOX_BOTTOM (rect) - R, R, _90_DEG, _180_DEG);
-        cairo_line_to (cr, BOX_LEFT (rect), BOX_TOP (rect));
-        cairo_close_path (cr);
-        cairo_clip_preserve (cr);
-        cairo_set_source (cr, pat);
-        cairo_fill_preserve (cr);
-        gdk_cairo_set_source_rgba (cr, hud->border_color);
-        cairo_stroke (cr);
-        cairo_pattern_destroy(pat);
+        cairo_translate(cr, BOX_RIGHT(rect), BOX_TOP(rect));
+        cairo_rotate(cr, _90_DEG);
+        _do_corner_box(hud, cr, rect.height, rect.width);
         break;
     case RIGHT | BOTTOM:
-        pat = cairo_pattern_create_linear(BOX_RIGHT (rect), BOX_BOTTOM (rect), BOX_LEFT (rect), BOX_TOP (rect));
-        update_color (hud, pat);
-        cairo_move_to (cr, BOX_RIGHT (rect), BOX_BOTTOM (rect));
-        cairo_line_to (cr, BOX_LEFT (rect), BOX_BOTTOM (rect));
-        cairo_line_to (cr, BOX_LEFT (rect), BOX_TOP (rect) + R);
-        cairo_arc (cr, BOX_LEFT (rect) + R, BOX_TOP (rect) + R, R, _180_DEG, _270_DEG);
-        cairo_line_to (cr, BOX_RIGHT (rect), BOX_TOP (rect));
-        cairo_close_path (cr);
-        cairo_clip_preserve (cr);
-        cairo_set_source (cr, pat);
-        cairo_fill_preserve (cr);
-        gdk_cairo_set_source_rgba (cr, hud->border_color);
-        cairo_stroke (cr);
-        cairo_pattern_destroy(pat);
+        cairo_translate(cr, BOX_RIGHT(rect), BOX_BOTTOM(rect));
+        cairo_rotate(cr, _180_DEG);
+        _do_corner_box(hud, cr, rect.height, rect.width);
         break;
     case LEFT | BOTTOM:
-        pat = cairo_pattern_create_linear(BOX_LEFT (rect), BOX_BOTTOM (rect), BOX_RIGHT (rect), BOX_TOP (rect));
-        update_color (hud, pat);
-        cairo_move_to (cr, BOX_LEFT (rect), BOX_BOTTOM (rect));
-        cairo_line_to (cr, BOX_LEFT (rect), BOX_TOP (rect));
-        cairo_line_to (cr, BOX_RIGHT (rect) - R, BOX_TOP (rect));
-        cairo_arc (cr, BOX_RIGHT (rect) - R, BOX_TOP (rect) + R, R, _270_DEG, 0);
-        cairo_line_to (cr, BOX_RIGHT (rect), BOX_BOTTOM (rect));
-        cairo_close_path (cr);
-        cairo_clip_preserve (cr);
-        cairo_set_source (cr, pat);
-        cairo_fill_preserve (cr);
-        gdk_cairo_set_source_rgba (cr, hud->border_color);
-        cairo_stroke (cr);
-        cairo_pattern_destroy(pat);
+        cairo_translate(cr, BOX_LEFT(rect), BOX_BOTTOM(rect));
+        cairo_rotate(cr, _270_DEG);
+        _do_corner_box(hud, cr, rect.height, rect.width);
         break;
   }
   cairo_restore (cr);
