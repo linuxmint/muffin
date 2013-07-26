@@ -122,6 +122,15 @@ do_side_box (MetaTileHUD *hud, cairo_t *cr, gint side, MetaRectangle rect)
 {
   cairo_save (cr);
   switch (side) {
+    case TOP:
+        cairo_translate(cr, BOX_LEFT(rect), BOX_TOP(rect));
+        _do_side_box(hud, cr, rect.width, rect.height);
+        break;
+    case BOTTOM:
+        cairo_translate(cr, BOX_RIGHT(rect), BOX_BOTTOM(rect));
+        cairo_rotate(cr, _180_DEG);
+        _do_side_box(hud, cr, rect.width, rect.height);
+        break;
     case LEFT:
         cairo_translate(cr, BOX_LEFT(rect), BOX_BOTTOM(rect));
         cairo_rotate(cr, _270_DEG);
@@ -131,15 +140,6 @@ do_side_box (MetaTileHUD *hud, cairo_t *cr, gint side, MetaRectangle rect)
         cairo_translate(cr, BOX_RIGHT(rect), BOX_TOP(rect));
         cairo_rotate(cr, _90_DEG);
         _do_side_box(hud, cr, rect.height, rect.width);
-        break;
-    case TOP:
-        cairo_translate(cr, BOX_LEFT(rect), BOX_TOP(rect));
-        _do_side_box(hud, cr, rect.width, rect.height);
-        break;
-    case BOTTOM:
-        cairo_translate(cr, BOX_RIGHT(rect), BOX_BOTTOM(rect));
-        cairo_rotate(cr, _180_DEG);
-        _do_side_box(hud, cr, rect.width, rect.height);
         break;
   }
   cairo_restore (cr);
@@ -267,7 +267,7 @@ meta_tile_hud_draw (GtkWidget *widget,
 }
 
 LOCAL_SYMBOL MetaTileHUD *
-meta_tile_hud_new (int            screen_number)
+meta_tile_hud_new (int screen_number)
 {
   MetaTileHUD *hud;
   GdkScreen *screen;
