@@ -303,6 +303,8 @@ meta_tile_hud_constructed (GObject *self)
   GtkWidgetPath *path;
   MetaTileHUD *hud = META_TILE_HUD(self);
 
+  G_OBJECT_CLASS(meta_tile_hud_parent_class)->constructed(self);
+  
   screen = gdk_display_get_screen (gdk_display_get_default (), hud->screen_number);
 
   hud->snap_state = FALSE;
