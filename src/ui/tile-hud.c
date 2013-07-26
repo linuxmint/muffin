@@ -35,7 +35,8 @@
 #include "core.h"
 
 struct _MetaTileHUD {
-  GtkWidget     *hud_window;
+  GtkWidget      parent;
+  gint           screen_number;
   gulong         create_serial;
 
   gboolean       snap_state;
@@ -57,6 +58,12 @@ struct _MetaTileHUD {
 
   HUDTileRestrictions restrictions;
 };
+
+struct _MetaTileHUDClass {
+  GtkWindowClass parent_class;
+};
+
+G_DEFINE_TYPE(MetaTileHUD, meta_tile_hud, GTK_TYPE_WINDOW);
 
 enum {
     TOP    = 1 << 0,
@@ -266,19 +273,37 @@ meta_tile_hud_draw (GtkWidget *widget,
   return FALSE;
 }
 
-LOCAL_SYMBOL MetaTileHUD *
-meta_tile_hud_new (int screen_number)
+enum { PROP0, PROP_SCREEN_NUMBER, N_PROPERTIES };
+
+static void
+meta_tile_hud_set_property(GObject *hud, guint prop_id, const GValue *value, GParamSpec *pspec)
 {
-  MetaTileHUD *hud;
+  switch(prop_id)
+    {
+    case PROP_SCREEN_NUMBER:
+      META_TILE_HUD(hud)->screen_number = g_value_get_int(value);
+      break;
+    default:
+      g_return_if_reached();
+    }
+}
+
+static void
+meta_tile_hud_init (MetaTileHUD *hud)
+{
+  /* We need construct properties to be available, so initialisation
+     actually happens in _constructed(). */
+}
+
+static void
+meta_tile_hud_constructed (GObject *self)
+{
   GdkScreen *screen;
   GtkStyleContext *context;
   GtkWidgetPath *path;
+  MetaTileHUD *hud = META_TILE_HUD(self);
 
-  screen = gdk_display_get_screen (gdk_display_get_default (), screen_number);
-
-  hud = g_new (MetaTileHUD, 1);
-
-  hud->hud_window = gtk_window_new (GTK_WINDOW_POPUP);
+  screen = gdk_display_get_screen (gdk_display_get_default (), hud->screen_number);
 
   hud->snap_state = FALSE;
 
@@ -290,15 +315,15 @@ meta_tile_hud_new (int screen_number)
 
   hud->current_proximity_zone = ZONE_NONE;
 
-  gtk_window_set_screen (GTK_WINDOW (hud->hud_window), screen);
-  gtk_widget_set_app_paintable (hud->hud_window, TRUE);
+  gtk_window_set_screen (GTK_WINDOW (hud), screen);
+  gtk_widget_set_app_paintable (GTK_WIDGET(hud), TRUE);
 
   hud->relative_work_area.x = hud->relative_work_area.y = 0;
   hud->abs_work_area.x = hud->abs_work_area.y = 0;
   hud->relative_work_area.width = hud->relative_work_area.height = 0;
   hud->abs_work_area.width = hud->abs_work_area.height = 0;
 
-  gtk_widget_set_visual (hud->hud_window,
+  gtk_widget_set_visual (GTK_WIDGET(hud),
                          gdk_screen_get_rgba_visual (screen));
 
   path = gtk_widget_path_new ();
@@ -333,21 +358,41 @@ meta_tile_hud_new (int screen_number)
   g_object_unref (context);
 
   hud->create_serial = XNextRequest (GDK_DISPLAY_XDISPLAY (gdk_display_get_default ()));
-  gtk_widget_realize (hud->hud_window);
-  g_signal_connect (hud->hud_window, "draw",
+  gtk_widget_realize (GTK_WIDGET(hud));
+  g_signal_connect (G_OBJECT(hud), "draw",
                     G_CALLBACK (meta_tile_hud_draw), hud);
 
   gdk_rgba_parse (&hud->invis, "#000000");
   hud->invis.alpha = 0.0;
   
   hud->opacity = 0.0;
-  return hud;
+}
+
+static void
+meta_tile_hud_class_init (MetaTileHUDClass* klass)
+{
+  G_OBJECT_CLASS(klass)->constructed = meta_tile_hud_constructed;
+  G_OBJECT_CLASS(klass)->set_property = meta_tile_hud_set_property;
+  g_object_class_install_property (G_OBJECT_CLASS(klass),
+                                   PROP_SCREEN_NUMBER,
+                                   g_param_spec_int ("screen-number",
+                                                     "Screen Number",
+                                                     "Screen number this HUD displays on",
+                                                     0, G_MAXINT,
+                                                     0,
+                                                     G_PARAM_WRITABLE | G_PARAM_CONSTRUCT_ONLY));
+}
+
+LOCAL_SYMBOL MetaTileHUD *
+meta_tile_hud_new (int screen_number)
+{
+  return g_object_new (META_TYPE_TILE_HUD, "screen-number", screen_number, "type", GTK_WINDOW_POPUP, NULL);
 }
 
 LOCAL_SYMBOL void
 meta_tile_hud_free (MetaTileHUD *hud)
 {
-  gtk_widget_destroy (hud->hud_window);
+  gtk_widget_destroy (GTK_WIDGET(hud));
 
   if (hud->tile_color)
     gdk_rgba_free (hud->tile_color);
@@ -379,8 +424,8 @@ meta_tile_hud_show (MetaTileHUD        *hud,
   hud->current_proximity_zone = current_proximity_zone;
   hud->restrictions = restrictions;
 
-  gtk_widget_show (hud->hud_window);
-  window = gtk_widget_get_window (hud->hud_window);
+  gtk_widget_show (GTK_WIDGET(hud));
+  window = gtk_widget_get_window (GTK_WIDGET(hud));
 
   meta_core_lower_beneath_grab_window (GDK_DISPLAY_XDISPLAY (gdk_display_get_default ()),
                                        GDK_WINDOW_XID (window),
@@ -406,12 +451,6 @@ meta_tile_hud_show (MetaTileHUD        *hud,
 }
 
 LOCAL_SYMBOL void
-meta_tile_hud_hide (MetaTileHUD *hud)
-{
-  gtk_widget_hide (hud->hud_window);
-}
-
-LOCAL_SYMBOL void
 meta_tile_hud_fade_out (MetaTileHUD *hud, float opacity, gboolean snap)
 {
   hud->opacity = opacity;
@@ -419,7 +458,7 @@ meta_tile_hud_fade_out (MetaTileHUD *hud, float opacity, gboolean snap)
   GdkRectangle old_rect;
   GdkWindow *window;
 
-  window = gtk_widget_get_window (hud->hud_window);
+  window = gtk_widget_get_window (GTK_WIDGET(hud));
 
   old_rect.x = hud->abs_work_area.x;
   old_rect.y = 0;
@@ -433,20 +472,14 @@ meta_tile_hud_fade_out (MetaTileHUD *hud, float opacity, gboolean snap)
                           hud->abs_work_area.width, hud->abs_work_area.height);
 
   if (opacity <= 0.0)
-    meta_tile_hud_hide (hud);
-}
-
-LOCAL_SYMBOL gboolean
-meta_tile_hud_get_visible (MetaTileHUD *hud)
-{
-    return gtk_widget_get_visible (hud->hud_window);
+    gtk_widget_hide (GTK_WIDGET(hud));
 }
 
 LOCAL_SYMBOL Window
 meta_tile_hud_get_xwindow (MetaTileHUD *hud,
-                               gulong          *create_serial)
+                           gulong      *create_serial)
 {
-  GdkWindow *window = gtk_widget_get_window (hud->hud_window);
+  GdkWindow *window = gtk_widget_get_window (GTK_WIDGET(hud));
 
   if (create_serial)
     *create_serial = hud->create_serial;
