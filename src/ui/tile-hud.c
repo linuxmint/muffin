@@ -35,7 +35,7 @@
 #include "core.h"
 
 struct _MetaTileHUD {
-  GtkWidget      parent;
+  GtkWindow      parent;
   gint           screen_number;
   gulong         create_serial;
 
