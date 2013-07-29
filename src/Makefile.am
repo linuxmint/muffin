@@ -264,11 +264,6 @@ desktopfiles_in_files=muffin.desktop.in
 desktopfiles_files=$(desktopfiles_in_files:.desktop.in=.desktop)
 desktopfiles_DATA = $(desktopfiles_files)
 
-wmpropertiesdir=$(datadir)/gnome/wm-properties
-wmproperties_in_files=muffin-wm.desktop.in
-wmproperties_files=$(wmproperties_in_files:.desktop.in=.desktop)
-wmproperties_DATA = $(wmproperties_files)
-
 gsettings_SCHEMAS = org.cinnamon.muffin.gschema.xml
 @INTLTOOL_XML_NOMERGE_RULE@
 @GSETTINGS_RULES@
@@ -285,7 +280,6 @@ BUILT_SOURCES = inlinepixbufs.h
 CLEANFILES =					\
 	inlinepixbufs.h				\
 	muffin.desktop				\
-	muffin-wm.desktop			\
 	org.cinnamon.muffin.gschema.xml		\
 	$(xml_DATA)				\
 	$(muffin_built_sources)			\
@@ -300,10 +294,8 @@ pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = libmuffin.pc muffin-plugins.pc
 
 EXTRA_DIST=$(desktopfiles_files) 	\
-	$(wmproperties_files)		\
 	$(IMAGES) 			\
 	$(desktopfiles_in_files)	\
-	$(wmproperties_in_files)	\
 	$(xml_in_files)			\
 	org.cinnamon.muffin.gschema.xml.in \
 	muffin-schemas.convert \
