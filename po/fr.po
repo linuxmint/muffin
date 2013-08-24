@@ -480,7 +480,7 @@ msgid ""
 msgstr ""
 "Détermine si les espaces de travail sont gérés de manière dynamique ou si le "
 "nombre d'espaces de travail est fixe (déterminé par la clé num-workspaces "
-"dans org.gnome.desktop.wm.preferences)."
+"dans org.cinnamon.desktop.wm.preferences)."
 
 #: ../src/org.cinnamon.muffin.gschema.xml.in.h:11
 msgid "Workspaces only on primary"

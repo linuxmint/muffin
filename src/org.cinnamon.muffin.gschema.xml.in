@@ -50,7 +50,7 @@
       <_description>
         Determines whether workspaces are managed dynamically or
         whether there's a static number of workspaces (determined
-        by the num-workspaces key in org.gnome.desktop.wm.preferences).
+        by the num-workspaces key in org.cinnamon.desktop.wm.preferences).
       </_description>
     </key>
 
@@ -132,7 +132,7 @@
       <default>":minimize,maximize,close"</default>
       <summary>Arrangement of buttons on the titlebar</summary>
       <description>
-        This key overrides the key in org.gnome.desktop.wm.preferences when
+        This key overrides the key in org.cinnamon.desktop.wm.preferences when
         running Cinnamon.
       </description>
     </key>

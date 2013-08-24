@@ -456,7 +456,7 @@ msgid ""
 "gnome.desktop.wm.preferences)."
 msgstr ""
 "Xác định vùng làm việc được quản lý động, hay cố định số vùng làm việc, xác "
-"định bởi khoá num-workspaces trong org.gnome.desktop.wm.preferences."
+"định bởi khoá num-workspaces trong org.cinnamon.desktop.wm.preferences."
 
 #: ../src/org.cinnamon.muffin.gschema.xml.in.h:11
 msgid "Workspaces only on primary"

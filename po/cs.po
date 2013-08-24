@@ -430,7 +430,7 @@ msgid ""
 "gnome.desktop.wm.preferences)."
 msgstr ""
 "Určuje, zda jsou pracovní plochy spravovány dynamicky nebo jich je pevný "
-"počet (daný klíčem num-workspaces v org.gnome.desktop.wm.preferences)."
+"počet (daný klíčem num-workspaces v org.cinnamon.desktop.wm.preferences)."
 
 #: ../src/org.cinnamon.muffin.gschema.xml.in.h:7
 msgid "Draggable border width"

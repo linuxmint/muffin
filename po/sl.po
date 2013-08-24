@@ -392,8 +392,8 @@ msgid "Workspaces are managed dynamically"
 msgstr "Število delovnih površin je spremenljivo"
 
 #: ../src/org.cinnamon.muffin.gschema.xml.in.h:10
-msgid "Determines whether workspaces are managed dynamically or whether there's a static number of workspaces (determined by the num-workspaces key in org.gnome.desktop.wm.preferences)."
-msgstr "Možnost določa ali je število delovnih površin spremenljivo ali pa je to število stalno (določenih s ključem števila delovnih površin med možnostmi v org.gnome.desktop.wm.preferences)."
+msgid "Determines whether workspaces are managed dynamically or whether there's a static number of workspaces (determined by the num-workspaces key in org.cinnamon.desktop.wm.preferences)."
+msgstr "Možnost določa ali je število delovnih površin spremenljivo ali pa je to število stalno (določenih s ključem števila delovnih površin med možnostmi v org.cinnamon.desktop.wm.preferences)."
 
 #: ../src/org.cinnamon.muffin.gschema.xml.in.h:11
 msgid "Workspaces only on primary"

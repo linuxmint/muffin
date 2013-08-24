@@ -441,7 +441,7 @@ msgid ""
 "gnome.desktop.wm.preferences)."
 msgstr ""
 "Afgør om arbejdsområderne håndteres dynamisk, eller om der er et statisk "
-"antal arbejdsområder (angivet med nøglen num-workspaces i org.gnome.desktop."
+"antal arbejdsområder (angivet med nøglen num-workspaces i org.cinnamon.desktop."
 "wm.preferences)."
 
 #: ../src/org.cinnamon.muffin.gschema.xml.in.h:7

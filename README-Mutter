@@ -59,23 +59,23 @@ MUFFIN FEATURES
 
  - Has a simple theme system and a couple of extra themes come with it.
    Change themes via gsettings:
-     gsettings set org.gnome.desktop.wm.preferences theme Crux
-     gsettings set org.gnome.desktop.wm.preferences theme Gorilla
-     gsettings set org.gnome.desktop.wm.preferences theme Atlanta
-     gsettings set org.gnome.desktop.wm.preferences theme Bright
+     gsettings set org.cinnamon.desktop.wm.preferences theme Crux
+     gsettings set org.cinnamon.desktop.wm.preferences theme Gorilla
+     gsettings set org.cinnamon.desktop.wm.preferences theme Atlanta
+     gsettings set org.cinnamon.desktop.wm.preferences theme Bright
 
    See theme-format.txt for docs on the theme format. Use 
    metacity-theme-viewer to preview themes.
 
  - Change number of workspaces via gsettings:
-     gsettings set org.gnome.desktop.wm.preferences num-workspaces 5
+     gsettings set org.cinnamon.desktop.wm.preferences num-workspaces 5
 
    Can also change workspaces from GNOME 2 pager.
 
  - Change focus mode:
-     gsettings set org.gnome.desktop.wm.preferences focus-mode mouse
-     gsettings set org.gnome.desktop.wm.preferences focus-mode sloppy
-     gsettings set org.gnome.desktop.wm.preferences focus-mode click
+     gsettings set org.cinnamon.desktop.wm.preferences focus-mode mouse
+     gsettings set org.cinnamon.desktop.wm.preferences focus-mode sloppy
+     gsettings set org.cinnamon.desktop.wm.preferences focus-mode click
 
  - Global keybinding defaults include:   
 
@@ -90,7 +90,7 @@ MUFFIN FEATURES
 
    Change keybindings for example:
 
-     gsettings set org.gnome.desktop.wm.keybindings switch-to-workspace-1 '[<Alt>F1]'
+     gsettings set org.cinnamon.desktop.wm.keybindings switch-to-workspace-1 '[<Alt>F1]'
    
    Also try the GNOME keyboard shortcuts control panel.
 

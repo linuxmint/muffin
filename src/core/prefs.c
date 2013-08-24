@@ -61,10 +61,10 @@
 
 /* These are the different schemas we are keeping
  * a GSettings instance for */
-#define SCHEMA_GENERAL         "org.gnome.desktop.wm.preferences"
+#define SCHEMA_GENERAL         "org.cinnamon.desktop.wm.preferences"
 #define SCHEMA_CINNAMON          "org.cinnamon"
 #define SCHEMA_MUFFIN          "org.cinnamon.muffin"
-#define SCHEMA_INTERFACE       "org.gnome.desktop.interface"
+#define SCHEMA_INTERFACE       "org.cinnamon.desktop.interface"
 
 #define SETTINGS(s) g_hash_table_lookup (settings_schemas, (s))
 
@@ -76,16 +76,16 @@ static GHashTable *settings_schemas;
 static gboolean use_system_font = FALSE;
 static PangoFontDescription *titlebar_font = NULL;
 static MetaVirtualModifier mouse_button_mods = Mod1Mask;
-static GDesktopFocusMode focus_mode = G_DESKTOP_FOCUS_MODE_CLICK;
-static GDesktopFocusNewWindows focus_new_windows = G_DESKTOP_FOCUS_NEW_WINDOWS_SMART;
+static CDesktopFocusMode focus_mode = C_DESKTOP_FOCUS_MODE_CLICK;
+static CDesktopFocusNewWindows focus_new_windows = C_DESKTOP_FOCUS_NEW_WINDOWS_SMART;
 static gboolean raise_on_click = TRUE;
 static gboolean attach_modal_dialogs = FALSE;
 static char* current_theme = NULL;
 static int num_workspaces = 4;
 static gboolean workspace_cycle = FALSE;
-static GDesktopTitlebarAction action_double_click_titlebar = G_DESKTOP_TITLEBAR_ACTION_TOGGLE_MAXIMIZE;
-static GDesktopTitlebarAction action_middle_click_titlebar = G_DESKTOP_TITLEBAR_ACTION_LOWER;
-static GDesktopTitlebarAction action_right_click_titlebar = G_DESKTOP_TITLEBAR_ACTION_MENU;
+static CDesktopTitlebarAction action_double_click_titlebar = C_DESKTOP_TITLEBAR_ACTION_TOGGLE_MAXIMIZE;
+static CDesktopTitlebarAction action_middle_click_titlebar = C_DESKTOP_TITLEBAR_ACTION_LOWER;
+static CDesktopTitlebarAction action_right_click_titlebar = C_DESKTOP_TITLEBAR_ACTION_MENU;
 static gboolean dynamic_workspaces = FALSE;
 static gboolean application_based = FALSE;
 static gboolean disable_workarounds = FALSE;
@@ -105,7 +105,7 @@ static gboolean edge_tiling = FALSE;
 static gboolean force_fullscreen = TRUE;
 static unsigned int snap_modifier[2];
 
-static GDesktopVisualBellType visual_bell_type = G_DESKTOP_VISUAL_BELL_FULLSCREEN_FLASH;
+static CDesktopVisualBellType visual_bell_type = C_DESKTOP_VISUAL_BELL_FULLSCREEN_FLASH;
 static MetaButtonLayout button_layout;
 
 /* NULL-terminated array */
@@ -1160,13 +1160,13 @@ meta_prefs_get_mouse_button_mods  (void)
   return mouse_button_mods;
 }
 
-GDesktopFocusMode
+CDesktopFocusMode
 meta_prefs_get_focus_mode (void)
 {
   return focus_mode;
 }
 
-GDesktopFocusNewWindows
+CDesktopFocusNewWindows
 meta_prefs_get_focus_new_windows (void)
 {
   return focus_new_windows;
@@ -1184,7 +1184,7 @@ meta_prefs_get_raise_on_click (void)
   /* Force raise_on_click on for click-to-focus, as requested by Havoc
    * in #326156.
    */
-  return raise_on_click || focus_mode == G_DESKTOP_FOCUS_MODE_CLICK;
+  return raise_on_click || focus_mode == C_DESKTOP_FOCUS_MODE_CLICK;
 }
 
 const char*
@@ -2050,7 +2050,7 @@ meta_prefs_bell_is_audible (void)
   return bell_is_audible;
 }
 
-GDesktopVisualBellType
+CDesktopVisualBellType
 meta_prefs_get_visual_bell_type (void)
 {
   return visual_bell_type;
@@ -2213,19 +2213,19 @@ meta_prefs_get_overlay_binding (MetaKeyCombo *combo)
   *combo = overlay_key_combo;
 }
 
-GDesktopTitlebarAction
+CDesktopTitlebarAction
 meta_prefs_get_action_double_click_titlebar (void)
 {
   return action_double_click_titlebar;
 }
 
-GDesktopTitlebarAction
+CDesktopTitlebarAction
 meta_prefs_get_action_middle_click_titlebar (void)
 {
   return action_middle_click_titlebar;
 }
 
-GDesktopTitlebarAction
+CDesktopTitlebarAction
 meta_prefs_get_action_right_click_titlebar (void)
 {
   return action_right_click_titlebar;

@@ -454,7 +454,7 @@ msgid ""
 msgstr ""
 "Визначає, чи робочі простори керуються динамічно, чи є певна статична "
 "кількість просторів (визначено ключем num-workspaces у "
-"org.gnome.desktop.wm.preferences)."
+"org.cinnamon.desktop.wm.preferences)."
 
 #: ../src/org.cinnamon.muffin.gschema.xml.in.h:11
 msgid "Workspaces only on primary"

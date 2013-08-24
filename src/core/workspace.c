@@ -1251,7 +1251,7 @@ meta_workspace_focus_default_window (MetaWorkspace *workspace,
     }
 
 
-  if (meta_prefs_get_focus_mode () == G_DESKTOP_FOCUS_MODE_CLICK ||
+  if (meta_prefs_get_focus_mode () == C_DESKTOP_FOCUS_MODE_CLICK ||
       !workspace->screen->display->mouse_mode)
     focus_ancestor_or_top_window (workspace, not_this_one, timestamp);
   else
@@ -1289,9 +1289,9 @@ meta_workspace_focus_default_window (MetaWorkspace *workspace,
                                                      window);
             }
         }
-      else if (meta_prefs_get_focus_mode () == G_DESKTOP_FOCUS_MODE_SLOPPY)
+      else if (meta_prefs_get_focus_mode () == C_DESKTOP_FOCUS_MODE_SLOPPY)
         focus_ancestor_or_top_window (workspace, not_this_one, timestamp);
-      else if (meta_prefs_get_focus_mode () == G_DESKTOP_FOCUS_MODE_MOUSE)
+      else if (meta_prefs_get_focus_mode () == C_DESKTOP_FOCUS_MODE_MOUSE)
         {
           meta_topic (META_DEBUG_FOCUS,
                       "Setting focus to no_focus_window, since no valid "
@@ -1346,7 +1346,7 @@ focus_ancestor_or_top_window (MetaWorkspace *workspace,
           meta_window_focus (ancestor, timestamp);
 
           /* Also raise the window if in click-to-focus */
-          if (meta_prefs_get_focus_mode () == G_DESKTOP_FOCUS_MODE_CLICK)
+          if (meta_prefs_get_focus_mode () == C_DESKTOP_FOCUS_MODE_CLICK)
             meta_window_raise (ancestor);
 
           return;
@@ -1365,7 +1365,7 @@ focus_ancestor_or_top_window (MetaWorkspace *workspace,
       meta_window_focus (window, timestamp);
 
       /* Also raise the window if in click-to-focus */
-      if (meta_prefs_get_focus_mode () == G_DESKTOP_FOCUS_MODE_CLICK)
+      if (meta_prefs_get_focus_mode () == C_DESKTOP_FOCUS_MODE_CLICK)
         meta_window_raise (window);
     }
   else

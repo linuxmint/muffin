@@ -459,7 +459,7 @@ msgid ""
 msgstr ""
 "Određuje da li se radnim prostorima upravlja dinamički ili će postojati "
 "stalni broj radnih prostora (određen brojem radnih prostora u "
-"„org.gnome.desktop.wm.preferences“)."
+"„org.cinnamon.desktop.wm.preferences“)."
 
 #: ../src/org.cinnamon.muffin.gschema.xml.in.h:11
 msgid "Workspaces only on primary"

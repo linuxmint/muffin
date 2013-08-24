@@ -29,7 +29,7 @@
 #include <meta/common.h>
 #include <meta/types.h>
 #include <pango/pango-font.h>
-#include <gdesktop-enums.h>
+#include <libcinnamon-desktop/cdesktop-enums.h>
 #include <X11/XKBlib.h>
 
 /* Keep in sync with GSettings schemas! */
@@ -95,8 +95,8 @@ const char* meta_preference_to_string (MetaPreference pref);
 MetaVirtualModifier         meta_prefs_get_mouse_button_mods  (void);
 guint                       meta_prefs_get_mouse_button_resize (void);
 guint                       meta_prefs_get_mouse_button_menu  (void);
-GDesktopFocusMode           meta_prefs_get_focus_mode         (void);
-GDesktopFocusNewWindows     meta_prefs_get_focus_new_windows  (void);
+CDesktopFocusMode           meta_prefs_get_focus_mode         (void);
+CDesktopFocusNewWindows     meta_prefs_get_focus_new_windows  (void);
 gboolean                    meta_prefs_get_attach_modal_dialogs (void);
 gboolean                    meta_prefs_get_raise_on_click     (void);
 const char*                 meta_prefs_get_theme              (void);
@@ -122,9 +122,9 @@ const char*                 meta_prefs_get_terminal_command   (void);
 void                        meta_prefs_get_button_layout (MetaButtonLayout *button_layout);
 
 /* Double, right, middle click can be configured to any titlebar meta-action */
-GDesktopTitlebarAction      meta_prefs_get_action_double_click_titlebar (void);
-GDesktopTitlebarAction      meta_prefs_get_action_middle_click_titlebar (void);
-GDesktopTitlebarAction      meta_prefs_get_action_right_click_titlebar (void);
+CDesktopTitlebarAction      meta_prefs_get_action_double_click_titlebar (void);
+CDesktopTitlebarAction      meta_prefs_get_action_middle_click_titlebar (void);
+CDesktopTitlebarAction      meta_prefs_get_action_right_click_titlebar (void);
 
 void meta_prefs_set_num_workspaces (int n_workspaces);
 
@@ -333,7 +333,7 @@ void meta_prefs_get_overlay_binding (MetaKeyCombo *combo);
 
 gboolean           meta_prefs_get_visual_bell      (void);
 gboolean           meta_prefs_bell_is_audible      (void);
-GDesktopVisualBellType meta_prefs_get_visual_bell_type (void);
+CDesktopVisualBellType meta_prefs_get_visual_bell_type (void);
 
 #endif
 

@@ -437,7 +437,7 @@ msgid ""
 "static number of workspaces (determined by the num-workspaces key in org."
 "gnome.desktop.wm.preferences)."
 msgstr ""
-"决定工作区动态管理还是静态数量的工作区(由 org.gnome.desktop.wm.preferences 中"
+"决定工作区动态管理还是静态数量的工作区(由 org.cinnamon.desktop.wm.preferences 中"
 "的 num-workspaces 键确定)。"
 
 # 或者 只在主显示器上显示工作区

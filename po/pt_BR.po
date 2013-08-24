@@ -449,7 +449,7 @@ msgid ""
 msgstr ""
 "Determina se as áreas de trabalho são gerenciadas de forma dinâmica ou se há "
 "um número estático de áreas de trabalho (determinado pela chave num-"
-"workspaces em org.gnome.desktop.wm.preferences)."
+"workspaces em org.cinnamon.desktop.wm.preferences)."
 
 #: ../src/org.cinnamon.muffin.gschema.xml.in.h:7
 msgid "Draggable border width"

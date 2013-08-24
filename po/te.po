@@ -450,7 +450,7 @@ msgid ""
 "static number of workspaces (determined by the num-workspaces key in org."
 "gnome.desktop.wm.preferences)."
 msgstr ""
-"పని చేసేస్థలాలు  గతికంగా నిర్వహించారా  లేదో లేదా పని చేసేస్థలాలు ఒక స్టాటిక్ సంఖ్య (org.gnome.desktop."
+"పని చేసేస్థలాలు  గతికంగా నిర్వహించారా  లేదో లేదా పని చేసేస్థలాలు ఒక స్టాటిక్ సంఖ్య (org.cinnamon.desktop."
 "wm.అభీష్టాల లో num-workspaces కీ ద్వారా గుర్తిస్తారు) ఉందో లేదో నిర్ణయిస్తుంది."
 
 #: ../src/org.cinnamon.muffin.gschema.xml.in.h:11

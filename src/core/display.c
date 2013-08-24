@@ -1963,7 +1963,7 @@ event_callback (XEvent   *event,
                * in application-based mode, and the different
                * app is not a dock or desktop, eat the focus click.
                */
-              if (meta_prefs_get_focus_mode () == G_DESKTOP_FOCUS_MODE_CLICK &&
+              if (meta_prefs_get_focus_mode () == C_DESKTOP_FOCUS_MODE_CLICK &&
                   meta_prefs_get_application_based () &&
                   !window->has_focus &&
                   window->type != META_WINDOW_DOCK &&
@@ -2051,8 +2051,8 @@ event_callback (XEvent   *event,
         {
           switch (meta_prefs_get_focus_mode ())
             {
-            case G_DESKTOP_FOCUS_MODE_SLOPPY:
-            case G_DESKTOP_FOCUS_MODE_MOUSE:
+            case C_DESKTOP_FOCUS_MODE_SLOPPY:
+            case C_DESKTOP_FOCUS_MODE_MOUSE:
               display->mouse_mode = TRUE;
               if (window->type != META_WINDOW_DOCK &&
                   window->type != META_WINDOW_DESKTOP)
@@ -2090,7 +2090,7 @@ event_callback (XEvent   *event,
                * alternative mechanism works great.
                */
               if (window->type == META_WINDOW_DESKTOP &&
-                  meta_prefs_get_focus_mode() == G_DESKTOP_FOCUS_MODE_MOUSE &&
+                  meta_prefs_get_focus_mode() == C_DESKTOP_FOCUS_MODE_MOUSE &&
                   display->expected_focus_window != NULL)
                 {
                   meta_topic (META_DEBUG_FOCUS,
@@ -2102,7 +2102,7 @@ event_callback (XEvent   *event,
                                                           event->xcrossing.time);
                 }
               break;
-            case G_DESKTOP_FOCUS_MODE_CLICK:
+            case C_DESKTOP_FOCUS_MODE_CLICK:
               break;
             }
           
@@ -4051,7 +4051,7 @@ meta_display_grab_focus_window_button (MetaDisplay *display,
    * focus window may not be raised, and who wants to think about
    * mouse focus anyway.
    */
-  if (meta_prefs_get_focus_mode () != G_DESKTOP_FOCUS_MODE_CLICK)
+  if (meta_prefs_get_focus_mode () != C_DESKTOP_FOCUS_MODE_CLICK)
     {
       meta_verbose (" (well, not grabbing since not in click to focus mode)\n");
       return;

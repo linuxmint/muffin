@@ -381,8 +381,8 @@ msgid "Workspaces are managed dynamically"
 msgstr "Arbetsytor hanteras dynamiskt"
 
 #: ../src/org.cinnamon.muffin.gschema.xml.in.h:10
-msgid "Determines whether workspaces are managed dynamically or whether there's a static number of workspaces (determined by the num-workspaces key in org.gnome.desktop.wm.preferences)."
-msgstr "Bestämmer huruvida arbetsytor hanteras dynamiskt eller huruvida det finns ett fast antal arbetsytor (bestäms av nyckeln num-workspaces i org.gnome.desktop.wm.preferences)."
+msgid "Determines whether workspaces are managed dynamically or whether there's a static number of workspaces (determined by the num-workspaces key in org.cinnamon.desktop.wm.preferences)."
+msgstr "Bestämmer huruvida arbetsytor hanteras dynamiskt eller huruvida det finns ett fast antal arbetsytor (bestäms av nyckeln num-workspaces i org.cinnamon.desktop.wm.preferences)."
 
 #: ../src/org.cinnamon.muffin.gschema.xml.in.h:11
 msgid "Workspaces only on primary"

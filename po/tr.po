@@ -471,7 +471,7 @@ msgid ""
 msgstr ""
 "Çalışma alanlarının dinamik olarak mı yönetileceğini yoksa sabit sayıda "
 "çalışma alanı mı olacağını "
-"belirler (org.gnome.desktop.wm.preferences içindeki num-workspaces değişkeni "
+"belirler (org.cinnamon.desktop.wm.preferences içindeki num-workspaces değişkeni "
 "tarafından belirlenir)."
 
 #: ../src/org.cinnamon.muffin.gschema.xml.in.h:11

@@ -131,7 +131,7 @@ bell_flash_screen (MetaDisplay *display,
       XFreeGC (display->xdisplay, gc);
     }
 
-  if (meta_prefs_get_focus_mode () != G_DESKTOP_FOCUS_MODE_CLICK &&
+  if (meta_prefs_get_focus_mode () != C_DESKTOP_FOCUS_MODE_CLICK &&
       !display->mouse_mode)
     meta_display_increment_focus_sentinel (display);
   XFlush (display->xdisplay);
@@ -278,10 +278,10 @@ bell_visual_notify (MetaDisplay *display,
 {
   switch (meta_prefs_get_visual_bell_type ()) 
     {
-    case G_DESKTOP_VISUAL_BELL_FULLSCREEN_FLASH:
+    case C_DESKTOP_VISUAL_BELL_FULLSCREEN_FLASH:
       bell_flash_fullscreen (display, xkb_ev);
       break;
-    case G_DESKTOP_VISUAL_BELL_FRAME_FLASH:
+    case C_DESKTOP_VISUAL_BELL_FRAME_FLASH:
       bell_flash_frame (display, xkb_ev); /* does nothing yet */
       break;
     }

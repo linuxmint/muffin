@@ -467,7 +467,7 @@ msgid ""
 "gnome.desktop.wm.preferences)."
 msgstr ""
 "Определя дали се ползва динамично управление на работните места или броят им "
-"е установено число (зададено чрез ключа „num-workspaces“ в org.gnome.desktop."
+"е установено число (зададено чрез ключа „num-workspaces“ в org.cinnamon.desktop."
 "wm.preferences)."
 
 #: ../src/org.cinnamon.muffin.gschema.xml.in.h:11

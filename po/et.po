@@ -384,7 +384,7 @@ msgid ""
 "gnome.desktop.wm.preferences)."
 msgstr ""
 "Määrab, kas tööalasid hallatakse dünaamiliselt või on nende arv staatiline "
-"(arvu määrab org.gnome.desktop.wm.preferences all võti num-workspaces)."
+"(arvu määrab org.cinnamon.desktop.wm.preferences all võti num-workspaces)."
 
 msgid "Workspaces only on primary"
 msgstr "Tööalad ainult peamisel"

@@ -1146,7 +1146,7 @@ meta_frame_titlebar_event (MetaUIFrame    *frame,
   
   switch (action)
     {
-    case G_DESKTOP_TITLEBAR_ACTION_TOGGLE_SHADE:
+    case C_DESKTOP_TITLEBAR_ACTION_TOGGLE_SHADE:
       {
         meta_core_get (display, frame->xwindow,
                        META_CORE_GET_FRAME_FLAGS, &flags,
@@ -1166,7 +1166,7 @@ meta_frame_titlebar_event (MetaUIFrame    *frame,
       }
       break;          
       
-    case G_DESKTOP_TITLEBAR_ACTION_TOGGLE_MAXIMIZE:
+    case C_DESKTOP_TITLEBAR_ACTION_TOGGLE_MAXIMIZE:
       {
         meta_core_get (display, frame->xwindow,
                        META_CORE_GET_FRAME_FLAGS, &flags,
@@ -1179,7 +1179,7 @@ meta_frame_titlebar_event (MetaUIFrame    *frame,
       }
       break;
 
-    case G_DESKTOP_TITLEBAR_ACTION_TOGGLE_MAXIMIZE_HORIZONTALLY:
+    case C_DESKTOP_TITLEBAR_ACTION_TOGGLE_MAXIMIZE_HORIZONTALLY:
       {
         meta_core_get (display, frame->xwindow,
                        META_CORE_GET_FRAME_FLAGS, &flags,
@@ -1192,7 +1192,7 @@ meta_frame_titlebar_event (MetaUIFrame    *frame,
       }
       break;
 
-    case G_DESKTOP_TITLEBAR_ACTION_TOGGLE_MAXIMIZE_VERTICALLY:
+    case C_DESKTOP_TITLEBAR_ACTION_TOGGLE_MAXIMIZE_VERTICALLY:
       {
         meta_core_get (display, frame->xwindow,
                        META_CORE_GET_FRAME_FLAGS, &flags,
@@ -1205,7 +1205,7 @@ meta_frame_titlebar_event (MetaUIFrame    *frame,
       }
       break;
 
-    case G_DESKTOP_TITLEBAR_ACTION_MINIMIZE:
+    case C_DESKTOP_TITLEBAR_ACTION_MINIMIZE:
       {
         meta_core_get (display, frame->xwindow,
                        META_CORE_GET_FRAME_FLAGS, &flags,
@@ -1218,17 +1218,17 @@ meta_frame_titlebar_event (MetaUIFrame    *frame,
       }
       break;
 
-    case G_DESKTOP_TITLEBAR_ACTION_NONE:
+    case C_DESKTOP_TITLEBAR_ACTION_NONE:
       /* Yaay, a sane user that doesn't use that other weird crap! */
       break;
     
-    case G_DESKTOP_TITLEBAR_ACTION_LOWER:
+    case C_DESKTOP_TITLEBAR_ACTION_LOWER:
       meta_core_user_lower_and_unfocus (display,
                                         frame->xwindow,
                                         event->time);
       break;
 
-    case G_DESKTOP_TITLEBAR_ACTION_MENU:
+    case C_DESKTOP_TITLEBAR_ACTION_MENU:
       meta_core_show_window_menu (display,
                                   frame->xwindow,
                                   event->x_root,
@@ -1278,12 +1278,12 @@ meta_frame_double_click_edge_event (MetaUIFrame        *frame,
         case META_FRAME_CONTROL_RESIZE_S:
             return meta_frame_titlebar_event (frame,
                                               event,
-                                              G_DESKTOP_TITLEBAR_ACTION_TOGGLE_MAXIMIZE_VERTICALLY);
+                                              C_DESKTOP_TITLEBAR_ACTION_TOGGLE_MAXIMIZE_VERTICALLY);
         case META_FRAME_CONTROL_RESIZE_E:
         case META_FRAME_CONTROL_RESIZE_W:
             return meta_frame_titlebar_event (frame,
                                               event,
-                                              G_DESKTOP_TITLEBAR_ACTION_TOGGLE_MAXIMIZE_HORIZONTALLY);
+                                              C_DESKTOP_TITLEBAR_ACTION_TOGGLE_MAXIMIZE_HORIZONTALLY);
         default:
             return FALSE;
         }

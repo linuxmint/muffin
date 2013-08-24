@@ -407,7 +407,7 @@ msgid ""
 "static number of workspaces (determined by the num-workspaces key in org."
 "gnome.desktop.wm.preferences)."
 msgstr ""
-"決定工作區以動態方式管理或是有固定數量的工作區 (以 org.gnome.desktop.wm."
+"決定工作區以動態方式管理或是有固定數量的工作區 (以 org.cinnamon.desktop.wm."
 "preferences 中的 num-workspaces 鍵值來決定)。"
 
 #: ../src/org.cinnamon.muffin.gschema.xml.in.h:7

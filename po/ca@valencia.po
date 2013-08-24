@@ -475,7 +475,7 @@ msgid ""
 msgstr ""
 "Determina si els espais de treball es gestionen dinàmicament o hi ha un "
 "nombre determinat d'espais de treball (determinat per la clau num-workspaces "
-"a org.gnome.desktop.wm.preferences)."
+"a org.cinnamon.desktop.wm.preferences)."
 
 #: ../src/org.cinnamon.muffin.gschema.xml.in.h:11
 msgid "Workspaces only on primary"
