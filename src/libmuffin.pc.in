@@ -12,7 +12,7 @@ muffin_plugin_api_version=@MUFFIN_PLUGIN_API_VERSION@
 
 Name: libmuffin
 Description: Muffin window manager library
-Requires: gsettings-desktop-schemas gtk+-3.0 @CLUTTER_PACKAGE@ x11
+Requires: cinnamon-desktop gtk+-3.0 @CLUTTER_PACKAGE@ x11
 Version: @VERSION@
 Libs: -L${libdir} -lmuffin
 Cflags: -I${includedir}/muffin -DMUFFIN_MAJOR_VERSION=${muffin_major_version} -DMUFFIN_MINOR_VERSION=${muffin_minor_version} -DMUFFIN_MICRO_VERSION=${muffin_micro_version} -DMUFFIN_PLUGIN_API_VERSION=${muffin_plugin_api_version}
