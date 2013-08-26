@@ -168,6 +168,7 @@ struct _MetaWindow
   guint custom_snap_size : 1;
   guint current_proximity_zone;
   guint mouse_on_edge : 1;
+  guint maybe_retile_maximize : 1;
 
   /* Whether we have to maximize/minimize after placement */
   guint maximize_horizontally_after_placement : 1;

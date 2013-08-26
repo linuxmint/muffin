@@ -1106,6 +1106,7 @@ meta_window_new_with_attrs (MetaDisplay       *display,
   window->tile_mode = META_TILE_NONE;
   window->last_tile_mode = META_TILE_NONE;
   window->resize_tile_mode = META_TILE_NONE;
+  window->maybe_retile_maximize = FALSE;
   window->tile_monitor_number = -1;
   window->shaded = FALSE;
   window->initially_iconic = FALSE;
@@ -9025,8 +9026,8 @@ update_move (MetaWindow  *window,
 
       switch (edge_zone) {
         case ZONE_0:
-            window->tile_mode = meta_prefs_get_tile_maximize() ? META_TILE_MAXIMIZE :
-                                                                 META_TILE_TOP;
+            window->tile_mode = window->maybe_retile_maximize ? META_TILE_MAXIMIZE :
+                (meta_prefs_get_tile_maximize() ? META_TILE_MAXIMIZE : META_TILE_TOP);
             break;
         case ZONE_1:
             window->tile_mode = META_TILE_BOTTOM;
@@ -9078,6 +9079,8 @@ update_move (MetaWindow  *window,
        * is enabled, as top edge tiling can be used in that case
        */
       window->shaken_loose = !meta_prefs_get_edge_tiling ();
+      if (window->saved_maximize)
+        window->maybe_retile_maximize = TRUE;
       window->tile_mode = META_TILE_NONE;
 
       /* move the unmaximized window to the cursor */
@@ -9784,11 +9787,9 @@ meta_window_handle_mouse_grab_op_event (MetaWindow *window,
                 update_tile_mode (window);
             }
         }
-
+      window->maybe_retile_maximize = FALSE;
       meta_display_end_grab_op (window->display, event->xbutton.time);
       break;
-
-
 
     case MotionNotify:
       meta_display_check_threshold_reached (window->display,
