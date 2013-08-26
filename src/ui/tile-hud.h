@@ -26,6 +26,7 @@
 #include <meta/boxes.h>
 
 typedef struct _MetaTileHUD MetaTileHUD;
+typedef struct _MetaTileHUDClass MetaTileHUDClass;
 
 typedef enum {
     HUD_CAN_TILE_SIDE_BY_SIDE    = 1 << 1,
@@ -33,6 +34,14 @@ typedef enum {
     HUD_CAN_TILE_CORNER          = 1 << 3
 } HUDTileRestrictions;
 
+#define META_TYPE_TILE_HUD                  (meta_tile_hud_get_type ())
+#define META_TILE_HUD(obj)                  (G_TYPE_CHECK_INSTANCE_CAST ((obj), META_TYPE_TILE_HUD, MetaTileHUD))
+#define META_IS_TILE_HUD(obj)               (G_TYPE_CHECK_INSTANCE_TYPE ((obj), META_TYPE_TILE_HUD))
+#define META_TILE_HUD_CLASS(klass)          (G_TYPE_CHECK_CLASS_CAST ((klass), META_TYPE_TILE_HUD, MetaTileHUDClass))
+#define META_IS_TILE_HUD_CLASS(klass)       (G_TYPE_CHECK_CLASS_TYPE ((klass), META_TYPE_TILE_HUD))
+#define META_TILE_HUD_GET_CLASS(obj)        (G_TYPE_INSTANCE_GET_CLASS ((obj), META_TYPE_TILE_HUD, MetaTileHUDClass))
+
+GType              meta_tile_hud_get_type    (void) G_GNUC_CONST;
 MetaTileHUD       *meta_tile_hud_new         (int                 screen_number);
 void               meta_tile_hud_free        (MetaTileHUD        *hud);
 void               meta_tile_hud_show        (MetaTileHUD        *hud,
@@ -41,12 +50,10 @@ void               meta_tile_hud_show        (MetaTileHUD        *hud,
                                               gboolean            snap,
                                               HUDTileRestrictions restrictions,
                                               guint               current_proximity_zone);
-void               meta_tile_hud_hide        (MetaTileHUD        *hud);
 void               meta_tile_hud_fade_out    (MetaTileHUD        *hud,
                                               float               opacity,
                                               gboolean            snap);
 Window             meta_tile_hud_get_xwindow (MetaTileHUD        *hud,
                                               gulong             *create_serial);
-gboolean           meta_tile_hud_get_visible (MetaTileHUD        *hud);
 
 #endif /* META_TILE_HUD_H */

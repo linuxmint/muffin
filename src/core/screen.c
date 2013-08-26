@@ -2240,7 +2240,7 @@ meta_screen_tile_hud_hide (MetaScreen *screen)
     g_source_remove (screen->tile_hud_fade_timeout_id);
 
   if (screen->tile_hud)
-    meta_tile_hud_hide (screen->tile_hud);
+    gtk_widget_hide (GTK_WIDGET(screen->tile_hud));
   screen->hud_opacity = 0.0;
   screen->hud_hiding = FALSE;
   screen->tile_hud_timeout_id = 0;
@@ -2254,7 +2254,7 @@ meta_screen_tile_hud_get_visible (MetaScreen *screen)
     if (screen->tile_hud == NULL)
         return FALSE;
 
-    return meta_tile_hud_get_visible (screen->tile_hud);
+    return gtk_widget_get_visible (GTK_WIDGET(screen->tile_hud));
 }
 
 LOCAL_SYMBOL void
