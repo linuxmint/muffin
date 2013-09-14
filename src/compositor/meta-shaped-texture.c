@@ -160,6 +160,7 @@ meta_shaped_texture_dispose (GObject *object)
 
   meta_shaped_texture_dirty_mask (self);
   g_clear_pointer (&priv->texture, cogl_object_unref);
+  g_clear_pointer (&priv->opaque_region, cairo_region_destroy);
 
   meta_shaped_texture_set_shape_region (self, NULL);
   meta_shaped_texture_set_clip_region (self, NULL);
