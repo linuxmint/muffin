@@ -392,4 +392,16 @@ typedef enum
   META_LAYER_LAST	       = 8
 } MetaStackLayer;
 
+
+/*
+ * Placement mode
+ */
+typedef enum
+{
+  META_PLACEMENT_MODE_AUTOMATIC,
+  META_PLACEMENT_MODE_POINTER,
+  META_PLACEMENT_MODE_MANUAL
+} MetaPlacementMode;
+
+
 #endif

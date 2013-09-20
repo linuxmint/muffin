@@ -88,6 +88,48 @@ northwestcmp (gconstpointer a, gconstpointer b)
     return 0;
 }
 
+static gboolean
+place_by_pointer(MetaWindow *window,
+                 MetaFrameBorders *borders,
+                 MetaPlacementMode placement_mode,
+                 int *new_x,
+                 int *new_y)
+{
+  int window_width, window_height;
+  Window root_return, child_return;
+  int root_x_return, root_y_return;
+  int win_x_return, win_y_return;
+  unsigned int mask_return;
+
+  XQueryPointer (window->display->xdisplay,
+                 window->screen->xroot,
+                 &root_return,
+                 &child_return,
+                 &root_x_return,
+                 &root_y_return,
+                 &win_x_return,
+                 &win_y_return,
+                 &mask_return);
+
+  window_width = window->frame ? window->frame->rect.width : window->rect.width;
+  window_height = window->frame ? window->frame->rect.height : window->rect.height;
+
+  if (borders) {
+    *new_x = root_x_return + borders->visible.left - window_width / 2;
+    *new_y = root_y_return + borders->visible.top  - window_height / 2;
+  }
+  else {
+    *new_x = root_x_return - window_width / 2;
+    *new_y = root_y_return - window_height / 2;
+  }
+
+  if (placement_mode == META_PLACEMENT_MODE_MANUAL)
+    window->move_after_placement = TRUE;
+
+  return TRUE;
+}
+
+
 static void
 find_next_cascade (MetaWindow *window,
                    MetaFrameBorders *borders,
@@ -662,6 +704,7 @@ meta_window_place (MetaWindow        *window,
 {
   GList *windows;
   const MetaMonitorInfo *xi;
+  MetaPlacementMode placement_mode;
 
   /* frame member variables should NEVER be used in here, only
    * MetaFrameBorders. But remember borders == NULL
@@ -871,6 +914,17 @@ meta_window_place (MetaWindow        *window,
   /* "Origin" placement algorithm */
   x = xi->rect.x;
   y = xi->rect.y;
+
+  
+  /* Placement based on pointer position */
+  placement_mode = meta_prefs_get_placement_mode();
+
+  if (placement_mode == META_PLACEMENT_MODE_POINTER ||
+      placement_mode == META_PLACEMENT_MODE_MANUAL)
+    {
+      if (place_by_pointer (window, borders, placement_mode, &x, &y))
+        goto done_check_denied_focus;
+    }
 
   if (find_first_fit (window, borders, windows,
                       xi->number,
