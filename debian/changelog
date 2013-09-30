@@ -1,3 +1,9 @@
+muffin (1.9.1) petra; urgency=low
+
+  * 1.9.1
+
+ -- Clement Lefebvre <root@linuxmint.com>  Mon, 30 Sep 2013 12:07:31 +0100
+
 muffin (1.8.2) olivia; urgency=low
 
   * 1.8.2
