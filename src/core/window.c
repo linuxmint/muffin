@@ -11546,20 +11546,76 @@ meta_window_get_tile_restrictions (MetaWindow *window)
     return ret;
 }
 
+#define ORIGIN_CONSTANT 1
+#define EXTREME_CONSTANT 2
+#define COMMON_EDGE_PADDING 10
+
+static void
+get_extra_padding_for_common_monitor_edges (MetaWindow        *window,
+                                                  gint         monitor_num,
+                                         MetaRectangle         cur_rect,
+                                                  gint        *left_shift,
+                                                  gint       *right_shift,
+                                                  gint          *up_shift,
+                                                  gint        *down_shift)
+{
+    gint num_mons;
+    gint i;
+    MetaRectangle other_rect;
+    num_mons = meta_screen_get_n_monitors (window->screen);
+
+    if (num_mons == 1)
+        return;
+
+    for (i = 0; i < num_mons; i++) {
+        if (i == monitor_num)
+            continue;
+
+        meta_screen_get_monitor_geometry (window->screen, i, &other_rect);
+
+        if (BOX_CENTER_X (other_rect) < BOX_LEFT (cur_rect)) {
+            *left_shift += COMMON_EDGE_PADDING;
+            continue;
+        }
+        if (BOX_CENTER_X (other_rect) > BOX_RIGHT (cur_rect)) {
+            *right_shift += COMMON_EDGE_PADDING;
+            continue;
+        }
+        if (BOX_CENTER_Y (other_rect) < BOX_TOP (cur_rect)) {
+            *up_shift += COMMON_EDGE_PADDING;
+            continue;
+        }
+        if (BOX_CENTER_Y (other_rect) > BOX_BOTTOM (cur_rect)) {
+            *down_shift += COMMON_EDGE_PADDING;
+            continue;
+        }
+    }
+}
+
 gboolean
 meta_window_mouse_on_edge (MetaWindow *window, gint x, gint y)
 {
     MetaRectangle work_area;
     gboolean ret = FALSE;
     const MetaMonitorInfo *monitor;
+    gint left_shift, right_shift, up_shift, down_shift;
+    left_shift = right_shift = up_shift = down_shift = 0;
 
     monitor = meta_screen_get_current_monitor (window->screen);
     meta_window_get_work_area_for_monitor (window, monitor->number, &work_area);
 
-    ret = x <= BOX_LEFT (work_area) ||
-          x >= BOX_RIGHT (work_area) - 1 ||
-          y <= BOX_TOP (work_area) ||
-          y >= BOX_BOTTOM (work_area) - 1;
+    get_extra_padding_for_common_monitor_edges (window,
+                                                monitor->number,
+                                                work_area,
+                                                &left_shift,
+                                                &right_shift,
+                                                &up_shift,
+                                                &down_shift);
+
+    ret = x <= BOX_LEFT (work_area) + ORIGIN_CONSTANT + left_shift ||
+          x >= BOX_RIGHT (work_area) - EXTREME_CONSTANT - right_shift ||
+          y <= BOX_TOP (work_area) + ORIGIN_CONSTANT  + up_shift ||
+          y >= BOX_BOTTOM (work_area) - EXTREME_CONSTANT - down_shift;
 
     return ret;
 }
