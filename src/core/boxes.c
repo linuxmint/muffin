@@ -772,6 +772,10 @@ meta_rectangle_expand_to_snapped_borders (MetaRectangle       *rect,
   for (strut_iter = all_struts; strut_iter; strut_iter = strut_iter->next)
     {
       MetaStrut *strut = (MetaStrut*) strut_iter->data;
+
+      if (!meta_rectangle_overlap (&strut->rect, expand_to))
+        continue;
+
       if (strut->side & META_SIDE_LEFT)
         if (BOX_RIGHT (strut->rect) > min_x)
             min_x = BOX_RIGHT (strut->rect);
