@@ -336,10 +336,8 @@ gboolean           meta_prefs_get_visual_bell      (void);
 gboolean           meta_prefs_bell_is_audible      (void);
 CDesktopVisualBellType meta_prefs_get_visual_bell_type (void);
 
-#endif
-
 MetaPlacementMode meta_prefs_get_placement_mode (void);
 
-
+#endif
 
 
