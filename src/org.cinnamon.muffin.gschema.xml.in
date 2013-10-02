@@ -1,4 +1,10 @@
 <schemalist>
+  <enum id="placement_type">
+    <value value="0" nick="automatic"/>
+    <value value="1" nick="pointer"/>
+    <value value="2" nick="manual"/>
+  </enum>
+
   <schema id="org.cinnamon.muffin" path="/org/cinnamon/muffin/"
           gettext-domain="@GETTEXT_DOMAIN">
 
@@ -153,6 +159,18 @@
       <_description>
         Makes tiling to the top maximize the window
       </_description>
+    </key>
+
+    <key name="placement-mode" enum="placement_type">
+      <default>'automatic'</default>
+      <_summary>Window placement mode</_summary>
+      <_description>The window placement mode indicates how new windows
+      are positioned. "automatic" means the system chooses a location
+      automatically based on the space available on the desktop, or by
+      a simple cascade if there is no space; "pointer" means that new
+      windows are placed according to the mouse pointer position;
+      "manual" means that the user must manually place the new window
+      with the mouse or keyboard.</_description>
     </key>
 
     <child name="keybindings" schema="org.cinnamon.muffin.keybindings"/>

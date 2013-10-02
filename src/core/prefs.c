@@ -149,6 +149,8 @@ static void     do_override               (char *key, char *schema);
 static void     init_bindings             (void);
 static void     init_workspace_names      (void);
 
+static MetaPlacementMode placement_mode = META_PLACEMENT_MODE_AUTOMATIC;
+
 
 typedef struct
 {
@@ -264,6 +266,13 @@ static MetaEnumPreference preferences_enum[] =
         META_PREF_ACTION_RIGHT_CLICK_TITLEBAR,
       },
       &action_right_click_titlebar,
+    },
+    {
+      { "placement-mode",
+        SCHEMA_MUFFIN,
+        META_PREF_PLACEMENT_MODE,
+      },
+      &placement_mode,
     },
     { { NULL, 0, 0 }, NULL },
   };
@@ -1771,6 +1780,10 @@ meta_preference_to_string (MetaPreference pref)
 
     case META_PREF_TILE_MAXIMIZE:
       return "TILE_MAXIMIZE";
+
+    case META_PREF_PLACEMENT_MODE:
+      return "PLACEMENT_MODE";
+
     }
 
   return "(unknown)";
@@ -2414,4 +2427,10 @@ gboolean
 meta_prefs_get_tile_maximize (void)
 {
     return tile_maximize;
+}
+
+MetaPlacementMode
+meta_prefs_get_placement_mode (void)
+{
+  return placement_mode;
 }
