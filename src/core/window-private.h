@@ -175,6 +175,7 @@ struct _MetaWindow
   guint maximize_vertically_after_placement : 1;
   guint minimize_after_placement : 1;
   guint tile_after_placement : 1;
+  guint move_after_placement : 1;
 
   /* The current or requested tile mode. If maximized_vertically is true,
    * this is the current mode. If not, it is the mode which will be

@@ -74,7 +74,8 @@ typedef enum
   META_PREF_SNAP_MODIFIER,
   META_PREF_LEGACY_SNAP,
   META_PREF_INVERT_WORKSPACE_FLIP_DIRECTION,
-  META_PREF_TILE_MAXIMIZE
+  META_PREF_TILE_MAXIMIZE,
+  META_PREF_PLACEMENT_MODE
 } MetaPreference;
 
 typedef void (* MetaPrefsChangedFunc) (MetaPreference pref,
@@ -336,6 +337,8 @@ gboolean           meta_prefs_bell_is_audible      (void);
 CDesktopVisualBellType meta_prefs_get_visual_bell_type (void);
 
 #endif
+
+MetaPlacementMode meta_prefs_get_placement_mode (void);
 
 
 
