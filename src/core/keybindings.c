@@ -1835,8 +1835,8 @@ process_mouse_move_resize_grab (MetaDisplay *display,
   if (keysym == XK_Escape)
     {
       /* Hide the tiling preview if necessary */
-      if (window->tile_mode != META_TILE_NONE)
-        meta_screen_tile_preview_hide (screen);
+      meta_screen_tile_preview_hide (screen);
+      meta_screen_tile_hud_hide (screen);
 
       /* Restore the original tile mode */
       window->tile_mode = display->grab_tile_mode;
