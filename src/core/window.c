@@ -1807,7 +1807,8 @@ meta_window_unmanage (MetaWindow  *window,
       g_object_notify (G_OBJECT (window->display), "focus-window");
     }
 
-  if (window->maximized_horizontally || window->maximized_vertically)
+  if (window->maximized_horizontally || window->maximized_vertically ||
+      window->tile_type != META_WINDOW_TILE_TYPE_NONE)
     unmaximize_window_before_freeing (window);
 
   /* The XReparentWindow call in meta_window_destroy_frame() moves the
@@ -4692,6 +4693,11 @@ maybe_move_attached_dialog (MetaWindow *window,
 int
 meta_window_get_monitor (MetaWindow *window)
 {
+  g_return_val_if_fail (META_IS_WINDOW (window), -1);
+
+  if (window->monitor == NULL)
+    return -1;
+
   return window->monitor->number;
 }
 
@@ -11517,7 +11523,7 @@ meta_window_set_tile_type (MetaWindow        *window,
 MetaWindowTileType
 meta_window_get_tile_type (MetaWindow *window)
 {
-    g_return_val_if_fail (META_IS_WINDOW (window), FALSE);
+    g_return_val_if_fail (META_IS_WINDOW (window), META_WINDOW_TILE_TYPE_NONE);
 
     return window->tile_type;
 }
