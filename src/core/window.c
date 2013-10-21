@@ -9878,7 +9878,7 @@ meta_window_handle_keyboard_grab_op_event (MetaWindow *window,
       meta_display_check_threshold_reached (window->display,
                                             event->xmotion.x_root,
                                             event->xmotion.y_root);
-      if (meta_grab_op_is_moving (window->display->grab_op))
+      if (window->display->grab_op == META_GRAB_OP_MOVING)
         {
           if (event->xmotion.root == window->screen->xroot)
             {
