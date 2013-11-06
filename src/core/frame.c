@@ -300,15 +300,23 @@ meta_frame_get_flags (MetaFrame *frame)
   /* FIXME: Should we have some kind of UI for windows that are just vertically
    * maximized or just horizontally maximized?
    */
-  if (META_WINDOW_MAXIMIZED (frame->window) && 
-                             !meta_workspace_has_snapped_windows (frame->window->workspace))
+  if (META_WINDOW_MAXIMIZED (frame->window))
     flags |= META_FRAME_MAXIMIZED;
 
-  if (META_WINDOW_TILED_LEFT (frame->window) && frame->window->tile_type != META_WINDOW_TILE_TYPE_SNAPPED)
+  if (META_WINDOW_TILED_LEFT (frame->window) ||
+      META_WINDOW_TILED_ULC (frame->window) ||
+      META_WINDOW_TILED_LLC (frame->window))
     flags |= META_FRAME_TILED_LEFT;
 
-  if (META_WINDOW_TILED_RIGHT (frame->window) && frame->window->tile_type != META_WINDOW_TILE_TYPE_SNAPPED)
+  if (META_WINDOW_TILED_RIGHT (frame->window) ||
+      META_WINDOW_TILED_URC (frame->window) ||
+      META_WINDOW_TILED_LRC (frame->window))
     flags |= META_FRAME_TILED_RIGHT;
+
+  if (META_WINDOW_TILED_TOP (frame->window) ||
+      META_WINDOW_TILED_BOTTOM (frame->window)) {
+    flags |= META_FRAME_MAXIMIZED;
+  }
 
   if (frame->window->fullscreen)
     flags |= META_FRAME_FULLSCREEN;
