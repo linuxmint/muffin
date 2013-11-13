@@ -306,52 +306,53 @@ get_standalone_layer (MetaWindow *window)
   
   if (meta_window_is_override_redirect(window)) {
     layer = META_LAYER_OVERRIDE_REDIRECT;
+    return layer;
   }
-  else {
-    switch (window->type)
-      {
-      case META_WINDOW_DESKTOP:
-        layer = META_LAYER_DESKTOP;
-        break;
 
-      case META_WINDOW_DOCK:
-        /* still experimenting here */
-        if (window->wm_state_below)
-          layer = META_LAYER_BOTTOM;
-        else
-          layer = META_LAYER_DOCK;
-        break;
+  switch (window->type)
+    {
+    case META_WINDOW_DESKTOP:
+      layer = META_LAYER_DESKTOP;
+      break;
 
-      case META_WINDOW_DROPDOWN_MENU:
-      case META_WINDOW_POPUP_MENU:
-      case META_WINDOW_TOOLTIP:
-      case META_WINDOW_NOTIFICATION:
-      case META_WINDOW_COMBO:
-      case META_WINDOW_OVERRIDE_OTHER:
-        layer = META_LAYER_OVERRIDE_REDIRECT;
-        break;
-      default:       
-        meta_window_foreach_transient (window,
-                                       is_focused_foreach,
-                                       &focused_transient);
+    case META_WINDOW_DOCK:
+      /* still experimenting here */
+      if (window->wm_state_below)
+        layer = META_LAYER_BOTTOM;
+      else
+        layer = META_LAYER_DOCK;
+      break;
 
-        if (window->wm_state_below)
-          layer = META_LAYER_BOTTOM;
-        else if (window->fullscreen &&
-                 (focused_transient ||
-                  window == window->display->expected_focus_window ||
-                  window->display->expected_focus_window == NULL ||
-                  (window->display->expected_focus_window != NULL &&
-                   windows_on_different_monitor (window,
-                                                 window->display->expected_focus_window))))
-          layer = META_LAYER_FULLSCREEN;
-        else if (window->wm_state_above)
-          layer = META_LAYER_TOP;
-        else
-          layer = META_LAYER_NORMAL;
-        break;
-      }
-  }
+    case META_WINDOW_DROPDOWN_MENU:
+    case META_WINDOW_POPUP_MENU:
+    case META_WINDOW_TOOLTIP:
+    case META_WINDOW_NOTIFICATION:
+    case META_WINDOW_COMBO:
+    case META_WINDOW_OVERRIDE_OTHER:
+      layer = META_LAYER_OVERRIDE_REDIRECT;
+      break;
+    default:       
+      meta_window_foreach_transient (window,
+                                     is_focused_foreach,
+                                     &focused_transient);
+
+      if (window->wm_state_below)
+        layer = META_LAYER_BOTTOM;
+      else if (window->fullscreen &&
+               (focused_transient ||
+                window == window->display->expected_focus_window ||
+                window->display->expected_focus_window == NULL ||
+                (window->display->expected_focus_window != NULL &&
+                 windows_on_different_monitor (window,
+                                               window->display->expected_focus_window))))
+        layer = META_LAYER_FULLSCREEN;
+      else if (window->wm_state_above)
+        layer = META_LAYER_TOP;
+      else
+        layer = META_LAYER_NORMAL;
+      break;
+    }
+
   return layer;
 }
 
