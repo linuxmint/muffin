@@ -1566,15 +1566,15 @@ meta_window_actor_new (MetaWindow *window)
     meta_window_get_work_area_all_monitors(window, rectWorkArea);
     rectWindow = meta_window_get_rect(window);
     // move tooltip out of top panel if necessary
-    if (rectWindow->y < rectWorkArea->y) {
+    if (rectWindow->y != 0 && rectWindow->y < rectWorkArea->y) {
       meta_window_move(window, FALSE, rectWindow->x, rectWorkArea->y);
     }
     rectWindow = meta_window_get_rect(window);
     // move tooltip out of bottom panel if necessary
-    if ((rectWindow->y + rectWindow->height) > (rectWorkArea->y  + rectWorkArea->height)) {
+    if (rectWindow->y != 0 && (rectWindow->y + rectWindow->height) > (rectWorkArea->y  + rectWorkArea->height)) {
       meta_window_move(window, FALSE, rectWindow->x, rectWorkArea->y + rectWorkArea->height - rectWindow->height);
     }
-    clutter_container_add_actor (CLUTTER_CONTAINER (info->top_window_group),
+    clutter_container_add_actor (CLUTTER_CONTAINER (info->window_group),
 		       CLUTTER_ACTOR (self));
   }
   else if (window->type == META_WINDOW_DESKTOP) {
