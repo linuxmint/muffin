@@ -954,69 +954,69 @@ constrain_tiling (MetaWindow         *window,
         case META_TILE_ULC:
             if (GRAB_OP (window) == META_GRAB_OP_RESIZING_S ||
                 GRAB_OP (window) == META_GRAB_OP_KEYBOARD_RESIZING_S) {
-                target_size.width = window->snapped_rect.width;
-                target_size.height = BOX_BOTTOM (actual_position) - BOX_TOP (target_size);
+                target_size.width = window->snapped_rect.width + 1;
+                target_size.height = BOX_BOTTOM (actual_position) - BOX_TOP (target_size) + 1;
             } else if (GRAB_OP (window) == META_GRAB_OP_RESIZING_E ||
                        GRAB_OP (window) == META_GRAB_OP_KEYBOARD_RESIZING_E) {
-                target_size.width = BOX_RIGHT (actual_position) - target_size.x;
-                target_size.height = window->snapped_rect.height;
+                target_size.width = BOX_RIGHT (actual_position) - target_size.x + 1;
+                target_size.height = window->snapped_rect.height + 1;
             } else {
-                target_size.width = BOX_RIGHT (actual_position) - target_size.x;
-                target_size.height = BOX_BOTTOM (actual_position) - BOX_TOP (target_size);
+                target_size.width = BOX_RIGHT (actual_position) - target_size.x + 1;
+                target_size.height = BOX_BOTTOM (actual_position) - BOX_TOP (target_size) + 1;
             }
             break;
         case META_TILE_LLC:
             if (GRAB_OP (window) == META_GRAB_OP_RESIZING_N ||
                 GRAB_OP (window) == META_GRAB_OP_KEYBOARD_RESIZING_N) {
-                target_size.width = window->snapped_rect.width;
-                target_size.height = BOX_BOTTOM (target_size) - BOX_TOP (actual_position);
-                target_size.y = BOX_TOP (actual_position);
+                target_size.width = window->snapped_rect.width + 1;
+                target_size.height = BOX_BOTTOM (target_size) - BOX_TOP (actual_position) + 1;
+                target_size.y = BOX_TOP (actual_position) - 1;
             } else if (GRAB_OP (window) == META_GRAB_OP_RESIZING_E ||
                        GRAB_OP (window) == META_GRAB_OP_KEYBOARD_RESIZING_E) {
-                target_size.width = BOX_RIGHT (actual_position) - target_size.x;
-                target_size.height = window->snapped_rect.height;
-                target_size.y = window->snapped_rect.y;
+                target_size.width = BOX_RIGHT (actual_position) - target_size.x + 1;
+                target_size.height = window->snapped_rect.height + 1;
+                target_size.y = window->snapped_rect.y - 1;
             } else {
-                target_size.width = BOX_RIGHT (actual_position) - target_size.x;
-                target_size.height = BOX_BOTTOM (target_size) - BOX_TOP (actual_position);
-                target_size.y = BOX_TOP (actual_position);
+                target_size.width = BOX_RIGHT (actual_position) - target_size.x + 1;
+                target_size.height = BOX_BOTTOM (target_size) - BOX_TOP (actual_position) + 1;
+                target_size.y = BOX_TOP (actual_position) - 1;
             }
             break;
         case META_TILE_URC:
             if (GRAB_OP (window) == META_GRAB_OP_RESIZING_W ||
                 GRAB_OP (window) == META_GRAB_OP_KEYBOARD_RESIZING_W) {
-                target_size.width = BOX_RIGHT (target_size) - BOX_LEFT (actual_position);
-                target_size.x = BOX_LEFT (actual_position);
-                target_size.height = window->snapped_rect.height;
+                target_size.width = BOX_RIGHT (target_size) - BOX_LEFT (actual_position) + 1;
+                target_size.x = BOX_LEFT (actual_position) - 1;
+                target_size.height = window->snapped_rect.height + 1;
             } else if (GRAB_OP (window) == META_GRAB_OP_RESIZING_S ||
                        GRAB_OP (window) == META_GRAB_OP_KEYBOARD_RESIZING_S) {
-                target_size.width = window->snapped_rect.width;
-                target_size.x = window->snapped_rect.x;
-                target_size.height = BOX_BOTTOM (actual_position) - BOX_TOP (target_size);
+                target_size.width = window->snapped_rect.width + 1;
+                target_size.x = window->snapped_rect.x - 1;
+                target_size.height = BOX_BOTTOM (actual_position) - BOX_TOP (target_size) + 1;
             } else {
-                target_size.width = BOX_RIGHT (target_size) - BOX_LEFT (actual_position);
-                target_size.x = BOX_LEFT (actual_position);
-                target_size.height = BOX_BOTTOM (actual_position) - BOX_TOP (target_size);
+                target_size.width = BOX_RIGHT (target_size) - BOX_LEFT (actual_position) + 1;
+                target_size.x = BOX_LEFT (actual_position) - 1;
+                target_size.height = BOX_BOTTOM (actual_position) - BOX_TOP (target_size) + 1;
             }
             break;
         case META_TILE_LRC:
             if (GRAB_OP (window) == META_GRAB_OP_RESIZING_W ||
                 GRAB_OP (window) == META_GRAB_OP_KEYBOARD_RESIZING_W) {
-                target_size.width = BOX_RIGHT (target_size) - BOX_LEFT (actual_position);
-                target_size.x = BOX_LEFT (actual_position);
-                target_size.height = window->snapped_rect.height;
-                target_size.y = window->snapped_rect.y;
+                target_size.width = BOX_RIGHT (target_size) - BOX_LEFT (actual_position) + 1;
+                target_size.x = BOX_LEFT (actual_position) - 1;
+                target_size.height = window->snapped_rect.height + 1;
+                target_size.y = window->snapped_rect.y - 1;
             } else if (GRAB_OP (window) == META_GRAB_OP_RESIZING_N ||
                        GRAB_OP (window) == META_GRAB_OP_KEYBOARD_RESIZING_N) {
-                target_size.width = window->snapped_rect.width;
-                target_size.x = window->snapped_rect.x;
-                target_size.height = BOX_BOTTOM (target_size) - BOX_TOP (actual_position);
-                target_size.y = BOX_TOP (actual_position);
+                target_size.width = window->snapped_rect.width + 1;
+                target_size.x = window->snapped_rect.x - 1;
+                target_size.height = BOX_BOTTOM (target_size) - BOX_TOP (actual_position) + 1;
+                target_size.y = BOX_TOP (actual_position) - 1;
             } else {
-                target_size.width = BOX_RIGHT (target_size) - BOX_LEFT (actual_position);
-                target_size.x = BOX_LEFT (actual_position);
-                target_size.height = BOX_BOTTOM (target_size) - BOX_TOP (actual_position);
-                target_size.y = BOX_TOP (actual_position);
+                target_size.width = BOX_RIGHT (target_size) - BOX_LEFT (actual_position) + 1;
+                target_size.x = BOX_LEFT (actual_position) - 1;
+                target_size.height = BOX_BOTTOM (target_size) - BOX_TOP (actual_position) + 1;
+                target_size.y = BOX_TOP (actual_position) - 1;
             }
             break;
         default:
