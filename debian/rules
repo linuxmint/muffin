@@ -4,29 +4,32 @@
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
 
+export DEB_LDFLAGS_MAINT_APPEND=-Wl,--as-needed
+
 ifneq (,$(filter parallel=%,$(DEB_BUILD_OPTIONS)))
-DH_PARALLEL_OPTION = --parallel
+  NUMJOBS = $(patsubst parallel=%,%,$(filter parallel=%,$(DEB_BUILD_OPTIONS)))
+  MAKEFLAGS += -j$(NUMJOBS)
 endif
 
-CONFIGURE_FLAGS = --enable-startup-notification=yes 	\
-                  --disable-static
-		  
-
 %:
-	dh  $@ --with autoreconf $(DH_PARALLEL_OPTION)
+	dh  $@ --with autoreconf,gir
+
+override_dh_autoreconf:
+	dh_autoreconf --as-needed
 
 override_dh_auto_configure:
-	dh_auto_configure -- $(CONFIGURE_FLAGS)
+	dh_auto_configure -- --disable-static \
+	                     --enable-startup-notification=yes \
+	                     --disable-silent-rules
 
-override_dh_shlibdeps:
-	dh_shlibdeps
-	dh_girepository /usr/lib/muffin
+override_dh_girepository:
+	dh_girepository /usr/lib/$(DEB_HOST_MULTIARCH)/muffin
+
+override_dh_strip:
+	dh_strip --dbg-package=muffin-dbg
 
 override_dh_installdocs:
 	dh_installdocs --link-doc=muffin-common
 
 override_dh_install:
-	dh_install -X.la
-
-override_dh_strip:
-	dh_strip --dbg-package=muffin-dbg
+	dh_install -X.la --fail-missing

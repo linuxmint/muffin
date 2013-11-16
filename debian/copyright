@@ -1,73 +1,153 @@
-This package was originally based on the 'mutter' packaging from the Debian
-project: <http://packages.qa.debian.org/m/mutter.html>
+Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: muffin
+Upstream-Contact: Linux Mint Project <root@linuxmint.com>
+Source: https://github.com/linuxmint/muffin
 
-In turn the mutter package was derived from the metacity package from the
-Debian project: <http://packages.qa.debian.org/m/metacity.html>
+Files: *
+Copyright:  2001-2008, Havoc Pennington, Red Hat, Inc., and others
+            2002-2004, 2009-2011, Red Hat, Inc
+            2002,      The Gnome Foundation
+            2007,      The GNOME Project
+            2002,      Ross Burton
+            2004-2006, Elijah Newren
+            2001,      Dominik Vogt, Matthias Clasen, and fvwm2 team
+            2003-2004, Rob Adams
+            2002,      Sun Microsystems, Inc.
+            1986-1998, The Open Group
+            1987,      Digital Equipment Corporation
+            2001,      Anders Carlsson
+            2008-2009, Thomas Thurman
+            1995-2000, 2005-2006, GTK+ Team
+            1988,      Wyse Technology, Inc.,
+            2007-2008, Iain Holmes
+            2000-2001, Eazel, Inc.
+            2001,      Ximian, Inc.
+            2002,      Gaute Lindkvist
+            2002,      James M. Cape
+            2002,      Garrett LeSage
+            2002,      Tuomas Kuosmanen
+            2002,      Jorn Baayen
+            1997-2000, Dan Pascu and Alfredo Kojima
+            1999-2007, Free Software Foundation, Inc.
+            1995-1997, Ulrich Drepper
+            1994,      X Consortium
+            2004-2008, Rodney Dawes
+            2004,      Scott James Remnant
+            2002,      Simos Xenitellis
+            2003-2006, Miloslav Trmac
+            2008,      GNOME i18n Project for Vietnamese
+            2003-2006, Sharif FarsiWeb, Inc.
+            2003,      Åsmund Skjæveland.
+            2005-2006, Canonical Ltd. and Rosetta Contributors
+            2004-2006, Adam Weinberger and the GNOME Foundation
+            2004,      Kakilik Project Croatiann team
+            2007-2008, OpenedHand
+            2008-2012, Intel Corporation
+            2008,      Matthew Allum
+            2003, Keith Packard
+            2005-2007, Olivier Fourdan
+            1987, Digital Equipment Corporation
+            1987-1988, 1998 The Open Group
+            2004-2005, Tom Tromey
+            2004-2005, Carsten Schaar
+            2010, Milan Bouchet-Valat
+            2009, Sander Dijkhuis
+            2012 Clement Lefebvre
+            2010-2011 Florian Müllner
+            2011, 2012 Jasper St. Pierre
+            2012 Nelson Marques
+            2012 Owen W. Taylor
+            2011 Rui Matos
+License: GPL-2+
 
-The metacity package was debianized by Thom May <thom@debian.org> on
-Sun, 10 Feb 2002 12:03:22 +0000.
 
-Metacity Upstream Author: Havoc Pennington <hp@redhat.com>
+Files: src/ui/metaaccellabel.*
+Copyright: 1995-1997, Peter Mattis, Spencer Kimball and Josh MacDonald
+           1998, Tim Janik
+           2002, Red Hat, Inc.
+License: LGPL-2+
 
-Copyright:
-   Copyright © 2001-2008  Havoc Pennington, Red Hat, Inc., and others
-   Copyright © 2002       The Gnome Foundation
-   Copyright © 2007       The GNOME Project
-   Copyright © 2002       Ross Burton
-   Copyright © 2004-2006  Elijah Newren
-   Copyright © 2001       Dominik Vogt, Matthias Clasen, and fvwm2 team
-   Copyright © 2003-2004  Rob Adams
-   Copyright © 2002       Sun Microsystems, Inc.
-   Copyright © 1986-1998  The Open Group
-   Copyright © 1987       Digital Equipment Corporation
-   Copyright © 2001       Anders Carlsson
-   Copyright © 2008       Thomas Thurman
-   Copyright © 1995-2000  GTK+ Team
-   Copyright © 1988       Wyse Technology, Inc.,
-   Copyright © 2008       Iain Holmes
-   Copyright © 2000-2001  Eazel, Inc.
-   Copyright © 2001       Ximian, Inc.
-   Copyright © 2002       Gaute Lindkvist
-   Copyright © 2002       James M. Cape
-   Copyright © 2002       Garrett LeSage
-   Copyright © 2002       Tuomas Kuosmanen
-   Copyright © 2002       Jorn Baayen
-   Copyright © 1997-2000  Dan Pascu and Alfredo Kojima
-   Copyright © 1995-1997  Peter Mattis, Spencer Kimball and Josh MacDonald
-   Copyright © 1998       Tim Janik
-   Copyright © 1999-2007  Free Software Foundation, Inc.
-   Copyright © 1995-1997  Ulrich Drepper
-   Copyright © 1994       X Consortium
-   Copyright © 2004-2008  Rodney Dawes
-   Copyright © 2004       Scott James Remnant
-   Copyright © 2002       Simos Xenitellis
-   Copyright © 2003-2006  Miloslav Trmac
-   Copyright © 2008       GNOME i18n Project for Vietnamese
-   Copyright © 2003-2006  Sharif FarsiWeb, Inc.
-   Copyright © 2003       Åsmund Skjæveland.
-   Copyright © 2005-2006  Canonical Ltd. and Rosetta Contributors
-   Copyright © 2004-2006  Adam Weinberger and the GNOME Foundation
-   Copyright © 2004       Kakilik Project
-   Copyright ©            Croatiann team
-   Copyright © 2007-2008  OpenedHand
-   Copyright © 2008-2009  Intel Corporation
-   Copyright © 2008       Matthew Allum
 
-License:
+Files: src/core/async-getprop.* src/core/testasyncgetprop.c
+Copyright: 2002 Havoc Pennington
+           1986, 1998 The Open Group
+License: MIT
 
-   This package is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2 of the License, or
-   (at your option) any later version.
 
-   This package is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+Files: src/core/muffin-Xatomtype.h
+Copyright: 1987, 1998 The Open Group
+           1987, Digital Equipment Corporation
+License: MIT
 
-   You should have received a copy of the GNU General Public License
-   along with this package; if not, write to the Free Software
-   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
 
-On Debian systems, the complete text of the GNU General
-Public License can be found in `/usr/share/common-licenses/GPL'.
+Files: debian/*
+Copyright: 2012, Nicolas Bourdaud <nicolas.bourdaud@gmail.com>
+           2012, Laszlo Boszormenyi (GCS) <gcs@debian.hu>
+           2011-2012, Michael Biebl
+           2011-2012, Sjoerd Simons
+           2012 Clement Lefebvre
+           2012 Gwendal Le Bihan
+License: GPL-2+
+
+
+
+License: GPL-2+
+ This package is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation; either version 2 of the License, or
+ (at your option) any later version.
+ .
+ This package is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+ .
+ You should have received a copy of the GNU General Public License
+ along with this package; if not, write to the Free Software
+ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
+ .
+ On Debian systems, the complete text of the GNU General
+ Public License can be found in `/usr/share/common-licenses/GPL-2'.
+
+
+License: LGPL-2+
+ This library is free software; you can redistribute it and/or
+ modify it under the terms of the GNU Lesser General Public
+ License as published by the Free Software Foundation; either
+ version 2 of the License, or (at your option) any later version.
+ .
+ This library is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the GNU
+ Lesser General Public License for more details.
+ .
+ You should have received a copy of the GNU Lesser General Public
+ License along with this library; if not, write to the
+ Free Software Foundation, Inc., 51 Franklin Street - Suite 500,
+ Boston, MA 02110-1335, USA.
+ .
+ On Debian systems, the complete text of the GNU Lesser General
+ Public License can be found in `/usr/share/common-licenses/LGPL-2'.
+
+
+License: MIT
+ Permission to use, copy, modify, distribute, and sell this software
+ and its documentation for any purpose is hereby granted without
+ fee, provided that the above copyright notice appear in all copies
+ and that both that copyright notice and this permission notice
+ appear in supporting documentation.
+ .
+ The above copyright notice and this permission notice shall be
+ included in all copies or substantial portions of the Software.
+ .
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ NONINFRINGEMENT.  IN NO EVENT SHALL THE OPEN GROUP BE LIABLE FOR
+ ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
+ CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ .
+ Except as contained in this notice, the name of The Open Group shall not be
+ used in advertising or otherwise to promote the sale, use or other dealings
+ in this Software without prior written authorization from The Open Group.

@@ -1,1 +1,1 @@
-usr/lib/libmuffin.so.*
+usr/lib/*/libmuffin.so.*
