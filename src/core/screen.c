@@ -3329,6 +3329,10 @@ meta_screen_toggle_desktop (MetaScreen *screen,
       meta_workspace_focus_default_window (screen->active_workspace,
                                            not_this_one,
                                            timestamp);
+      // If there's only one window, make sure it gets the focus
+      meta_workspace_focus_default_window (screen->active_workspace,
+                                           NULL,
+                                           timestamp);
     }
   else
     meta_screen_show_desktop (screen, timestamp);
