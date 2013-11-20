@@ -3316,9 +3316,18 @@ meta_screen_toggle_desktop (MetaScreen *screen,
 {
   if (screen->active_workspace->showing_desktop)
     {
+      /*
+       * dirty hack because the actual window to be focused after unshowing the desktop
+       * lost its focus when showing desktop
+       * and therefore is second in the MRU list
+       */
+      MetaWindow *not_this_one;
+      not_this_one = meta_stack_get_default_focus_window(screen->stack, 
+                                                         screen->active_workspace,
+                                                         NULL);
       meta_screen_unshow_desktop (screen);
-      meta_workspace_focus_default_window (screen->active_workspace, 
-                                           NULL,
+      meta_workspace_focus_default_window (screen->active_workspace,
+                                           not_this_one,
                                            timestamp);
     }
   else
