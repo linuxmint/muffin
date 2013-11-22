@@ -386,7 +386,6 @@ typedef enum
   META_LAYER_NORMAL	       = 2,
   META_LAYER_TOP	       = 4, /* Same as DOCK; see EWMH and bug 330717 */
   META_LAYER_DOCK	       = 4,
-  META_LAYER_FULLSCREEN	       = 5,
   META_LAYER_FOCUSED_WINDOW    = 6,
   META_LAYER_OVERRIDE_REDIRECT = 7,
   META_LAYER_LAST	       = 8
