@@ -431,21 +431,25 @@ meta_frame_layout_get_borders (const MetaFrameLayout *layout,
 
   draggable_borders = meta_prefs_get_draggable_border_width ();
 
-  if (flags & META_FRAME_ALLOWS_HORIZONTAL_RESIZE)
+  if (flags & META_FRAME_ALLOWS_TOP_RESIZE)
     {
-      borders->invisible.left   = MAX (0, draggable_borders - borders->visible.left);
-      borders->invisible.right  = MAX (0, draggable_borders - borders->visible.right);
+      if (type != META_FRAME_TYPE_ATTACHED)
+        borders->invisible.top = MAX (0, draggable_borders - 2);
     }
 
-  if (flags & META_FRAME_ALLOWS_VERTICAL_RESIZE)
+  if (flags & META_FRAME_ALLOWS_BOTTOM_RESIZE)
     {
       borders->invisible.bottom = MAX (0, draggable_borders - borders->visible.bottom);
+    }
 
-      /* borders.visible.top is the height of the *title bar*. We can't do the same
-       * algorithm here, titlebars are expectedly much bigger. Just subtract a couple
-       * pixels to get a proper feel. */
-      if (type != META_FRAME_TYPE_ATTACHED)
-        borders->invisible.top    = MAX (0, draggable_borders - 2);
+  if (flags & META_FRAME_ALLOWS_LEFT_RESIZE)
+    {
+      borders->invisible.left   = MAX (0, draggable_borders - borders->visible.left);
+    }
+
+  if (flags & META_FRAME_ALLOWS_RIGHT_RESIZE)
+    {
+      borders->invisible.right   = MAX (0, draggable_borders - borders->visible.right);
     }
 
   borders->total.left   = borders->invisible.left   + borders->visible.left;
