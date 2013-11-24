@@ -3401,7 +3401,8 @@ meta_window_hide (MetaWindow *window)
        * focus the default window for the active workspace (this scenario
        * arises when we are switching workspaces).
        */
-      if (my_workspace == window->screen->active_workspace)
+      if (window->type == META_WINDOW_MODAL_DIALOG &&
+          my_workspace == window->screen->active_workspace)
         not_this_one = window;
 
       meta_workspace_focus_default_window (window->screen->active_workspace,
