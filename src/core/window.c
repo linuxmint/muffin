@@ -2069,12 +2069,12 @@ set_net_wm_state (MetaWindow *window)
       data[i] = window->display->atom__NET_WM_STATE_SKIP_TASKBAR;
       ++i;
     }
-  if (window->maximized_horizontally)
+  if (window->maximized_horizontally || window->tile_type != META_WINDOW_TILE_TYPE_NONE)
     {
       data[i] = window->display->atom__NET_WM_STATE_MAXIMIZED_HORZ;
       ++i;
     }
-  if (window->maximized_vertically)
+  if (window->maximized_vertically || window->tile_type != META_WINDOW_TILE_TYPE_NONE)
     {
       data[i] = window->display->atom__NET_WM_STATE_MAXIMIZED_VERT;
       ++i;
