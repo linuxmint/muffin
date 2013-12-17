@@ -194,7 +194,7 @@ meta_workspace_new (MetaScreen *screen)
   return workspace;
 }
 
-/** Foreach function for workspace_free_struts() */
+/* Foreach function for workspace_free_struts() */
 static void
 free_this (gpointer candidate, gpointer dummy)
 {
@@ -1390,4 +1390,3 @@ meta_workspace_get_screen (MetaWorkspace *workspace)
 {
   return workspace->screen;
 }
-
