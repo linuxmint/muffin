@@ -750,11 +750,9 @@ meta_window_actor_has_shadow (MetaWindowActor *self)
       meta_window_is_fullscreen (priv->window))
     return FALSE;
 
-  /*
-   * If we have two snap-tiled windows, we don't want the shadow to obstruct
-   * the other window.
-   */
-  if (meta_window_get_tile_match (priv->window))
+  /* Don't shadow tiled windows of any type */
+
+  if (meta_window_get_tile_type (priv->window) != META_WINDOW_TILE_TYPE_NONE)
     return FALSE;
 
   /*
