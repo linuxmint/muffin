@@ -3593,7 +3593,7 @@ meta_topic (META_DEBUG_WINDOW_OPS,
     meta_window_save_rect (window);
 
   meta_window_set_tile_type (window, META_WINDOW_TILE_TYPE_NONE);
-  window->tile_mode = META_TILE_NONE;
+  window->tile_mode = META_TILE_MAXIMIZE;
   notify_tile_type (window);
   normalize_tile_state (window);
 
