@@ -1497,6 +1497,12 @@ meta_window_actor_destroy (MetaWindowActor *self)
   window_type = meta_window_get_window_type (window);
   meta_window_set_compositor_private (window, NULL);
 
+  if (priv->send_frame_messages_timer != 0)
+    {
+      g_source_remove (priv->send_frame_messages_timer);
+      priv->send_frame_messages_timer = 0;
+    }
+
   if (window_type == META_WINDOW_DROPDOWN_MENU ||
       window_type == META_WINDOW_POPUP_MENU ||
       window_type == META_WINDOW_TOOLTIP ||
