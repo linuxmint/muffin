@@ -3659,8 +3659,9 @@ meta_window_maximize (MetaWindow        *window,
 	  return;
 	}
 
-      if (window->tile_mode != META_TILE_NONE ||
-          window->last_tile_mode != META_TILE_NONE)
+      if ((window->tile_mode != META_TILE_NONE ||
+          window->last_tile_mode != META_TILE_NONE) &&
+    	  window->tile_mode != META_TILE_MAXIMIZE)
         {
           saved_rect = &window->saved_rect;
 
