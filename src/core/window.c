@@ -44,6 +44,7 @@
 #include "window-props.h"
 #include "constraints.h"
 #include "muffin-enum-types.h"
+#include <clutter/clutter.h>
 
 #include <X11/Xatom.h>
 #include <X11/Xlibint.h> /* For display->resource_mask */
@@ -9056,12 +9057,15 @@ update_move (MetaWindow  *window,
                                                                      y,
                                                                      meta_prefs_get_tile_hud_threshold ());
 
+      int scale;
+      scale = CLAMP ((int)(clutter_backend_get_resolution (clutter_get_default_backend ()) / 96.0), 1, 4);
+
       guint edge_zone = meta_window_get_current_zone (window,
                                                       monitor->rect,
                                                       work_area,
                                                       x,
                                                       y,
-                                                      HUD_WIDTH);
+                                                      HUD_WIDTH * scale);
 
       switch (edge_zone) {
         case ZONE_0:
