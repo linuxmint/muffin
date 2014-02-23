@@ -100,6 +100,7 @@ static int   cursor_size = 24;
 static int   draggable_border_width = 10;
 static int tile_hud_threshold = 150;
 static int resize_threshold = 24;
+static int ui_scale = 1;
 static gboolean resize_with_right_button = FALSE;
 static gboolean edge_tiling = FALSE;
 static gboolean force_fullscreen = TRUE;
@@ -873,6 +874,17 @@ queue_changed (MetaPreference pref)
                                     changed_idle_handler, NULL, NULL);
 }
 
+static void
+update_ui_scale (GdkScreen *screen, gpointer data)
+{
+  GValue value = G_VALUE_INIT;
+
+  g_value_init (&value, G_TYPE_INT);
+
+  gdk_screen_get_setting (screen, "gdk-window-scaling-factor", &value);
+  ui_scale = g_value_get_int (&value);
+}
+
 
 /****************************************************************************/
 /* Initialisation.                                                          */
@@ -924,6 +936,13 @@ meta_prefs_init (void)
   handle_preference_init_bool ();
   handle_preference_init_string ();
   handle_preference_init_int ();
+
+  GdkDisplay *display = gdk_display_get_default();
+
+  g_signal_connect_swapped (gdk_display_get_default_screen (display), "monitors-changed",
+                            G_CALLBACK (update_ui_scale), NULL);
+
+  update_ui_scale (gdk_display_get_default_screen (display), NULL);
 
   init_bindings ();
   init_workspace_names ();
@@ -1211,7 +1230,7 @@ meta_prefs_get_cursor_theme (void)
 int
 meta_prefs_get_cursor_size (void)
 {
-  return cursor_size;
+  return cursor_size * ui_scale;
 }
 
 
@@ -2390,19 +2409,19 @@ meta_prefs_set_no_tab_popup (gboolean whether)
 int
 meta_prefs_get_draggable_border_width (void)
 {
-  return draggable_border_width;
+  return draggable_border_width * ui_scale;
 }
 
 int
 meta_prefs_get_tile_hud_threshold (void)
 {
-  return tile_hud_threshold;
+  return tile_hud_threshold * ui_scale;
 }
 
 int
 meta_prefs_get_resize_threshold (void)
 {
-  return resize_threshold;
+  return resize_threshold * ui_scale;
 }
 
 void
