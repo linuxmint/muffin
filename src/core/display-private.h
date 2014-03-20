@@ -367,6 +367,9 @@ void        meta_display_unregister_x_window (MetaDisplay *display,
 void        meta_display_notify_window_created (MetaDisplay  *display,
                                                 MetaWindow   *window);
 
+void        meta_display_notify_window_moved_resized (MetaDisplay *display,
+                                                      MetaWindow *window);
+
 MetaDisplay* meta_display_for_x_display  (Display     *xdisplay);
 MetaDisplay* meta_get_display            (void);
 

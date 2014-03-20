@@ -5568,6 +5568,9 @@ meta_window_configure_notify (MetaWindow      *window,
 
   if (window->display->compositor)
     meta_compositor_sync_window_geometry (window->display->compositor, window);
+  
+  // For use after moving for steam notifs
+  meta_display_notify_window_moved_resized(window->display, window);
 }
 
 LOCAL_SYMBOL void
