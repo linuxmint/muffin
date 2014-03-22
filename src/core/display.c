@@ -305,8 +305,10 @@ static void
 ping_data_free (MetaPingData *ping_data)
 {
   /* Remove the timeout */
-  if (ping_data->ping_timeout_id != 0)
+  if (ping_data->ping_timeout_id != 0) {
     g_source_remove (ping_data->ping_timeout_id);
+    ping_data->ping_timeout_id = 0;
+  }
 
   g_free (ping_data);
 }
@@ -1554,8 +1556,10 @@ meta_display_queue_autoraise_callback (MetaDisplay *display,
   auto_raise_data->display = window->display;
   auto_raise_data->xwindow = window->xwindow;
   
-  if (display->autoraise_timeout_id != 0)
+  if (display->autoraise_timeout_id != 0) {
     g_source_remove (display->autoraise_timeout_id);
+    display->autoraise_timeout_id = 0;
+  }
 
   display->autoraise_timeout_id = 
     g_timeout_add_full (G_PRIORITY_DEFAULT,

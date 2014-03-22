@@ -146,8 +146,10 @@ new_ice_connection (IceConn connection, IcePointer client_data, Bool opening,
   else 
     {
       input_id = GPOINTER_TO_UINT ((gpointer) *watch_data);
-
-      g_source_remove (input_id);
+      if (input_id) {
+        g_source_remove (input_id);
+        input_id = 0;
+      }
     }
 }
 

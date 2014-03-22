@@ -338,8 +338,10 @@ meta_frames_finalize (GObject *object)
   g_hash_table_destroy (frames->text_heights);
 
   invalidate_all_caches (frames);
-  if (frames->invalidate_cache_timeout_id)
+  if (frames->invalidate_cache_timeout_id) {
     g_source_remove (frames->invalidate_cache_timeout_id);
+    frames->invalidate_cache_timeout_id = 0;
+  }
   
   g_assert (g_hash_table_size (frames->frames) == 0);
   g_hash_table_destroy (frames->frames);
@@ -2055,8 +2057,10 @@ populate_cache (MetaFrames *frames,
         piece->pixmap = generate_pixmap (frames, frame, &piece->rect);
     }
   
-  if (frames->invalidate_cache_timeout_id)
+  if (frames->invalidate_cache_timeout_id) {
     g_source_remove (frames->invalidate_cache_timeout_id);
+    frames->invalidate_cache_timeout_id = 0;
+  }
   
   frames->invalidate_cache_timeout_id = g_timeout_add (1000, invalidate_cache_timeout, frames);
 

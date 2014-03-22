@@ -737,18 +737,22 @@ meta_display_cleanup_edges (MetaDisplay *display)
   edge_data->bottom_edges = NULL;
 
   /* Cleanup the timeouts */
-  if (edge_data->left_data.timeout_setup   &&
-      edge_data->left_data.timeout_id   != 0)
+  if (edge_data->left_data.timeout_setup && edge_data->left_data.timeout_id != 0) {
     g_source_remove (edge_data->left_data.timeout_id);
-  if (edge_data->right_data.timeout_setup  &&
-      edge_data->right_data.timeout_id  != 0)
+    edge_data->left_data.timeout_id = 0;
+  }
+  if (edge_data->right_data.timeout_setup && edge_data->right_data.timeout_id != 0) {
     g_source_remove (edge_data->right_data.timeout_id);
-  if (edge_data->top_data.timeout_setup    &&
-      edge_data->top_data.timeout_id    != 0)
+    edge_data->right_data.timeout_id = 0;
+  }
+  if (edge_data->top_data.timeout_setup && edge_data->top_data.timeout_id != 0) {
     g_source_remove (edge_data->top_data.timeout_id);
-  if (edge_data->bottom_data.timeout_setup &&
-      edge_data->bottom_data.timeout_id != 0)
+    edge_data->top_data.timeout_id = 0;
+  }
+  if (edge_data->bottom_data.timeout_setup && edge_data->bottom_data.timeout_id != 0) {
     g_source_remove (edge_data->bottom_data.timeout_id);
+    edge_data->bottom_data.timeout_id = 0;
+  }
 
   g_free (display->grab_edge_resistance_data);
   display->grab_edge_resistance_data = NULL;

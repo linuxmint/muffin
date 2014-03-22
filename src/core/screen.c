@@ -1057,26 +1057,36 @@ meta_screen_free (MetaScreen *screen,
   XDestroyWindow (screen->display->xdisplay,
                   screen->wm_sn_selection_window);
   
-  if (screen->work_area_later != 0)
+  if (screen->work_area_later != 0) {
     g_source_remove (screen->work_area_later);
+    screen->work_area_later = 0;
+  }
 
   if (screen->monitor_infos)
     g_free (screen->monitor_infos);
 
-  if (screen->tile_preview_timeout_id)
+  if (screen->tile_preview_timeout_id) {
     g_source_remove (screen->tile_preview_timeout_id);
+    screen->tile_preview_timeout_id = 0;
+  }
 
   if (screen->tile_preview)
     meta_tile_preview_free (screen->tile_preview);
 
-  if (screen->tile_hud_timeout_id)
+  if (screen->tile_hud_timeout_id) {
     g_source_remove (screen->tile_hud_timeout_id);
+    screen->tile_hud_timeout_id = 0;
+  }
 
-  if (screen->tile_hud_fade_timeout_id)
+  if (screen->tile_hud_fade_timeout_id) {
     g_source_remove (screen->tile_hud_fade_timeout_id);
+    screen->tile_hud_fade_timeout_id = 0;
+  }
 
-  if (screen->snap_osd_timeout_id)
+  if (screen->snap_osd_timeout_id) {
     g_source_remove (screen->snap_osd_timeout_id);
+    screen->snap_osd_timeout_id = 0;
+  }
 
   if (screen->tile_hud)
     meta_tile_hud_free (screen->tile_hud);
@@ -2090,8 +2100,10 @@ meta_screen_tile_preview_update (MetaScreen *screen,
     }
   else
     {
-      if (screen->tile_preview_timeout_id > 0)
+      if (screen->tile_preview_timeout_id > 0) {
         g_source_remove (screen->tile_preview_timeout_id);
+        screen->tile_preview_timeout_id = 0;
+      }
 
       meta_screen_tile_preview_update_timeout ((gpointer)screen);
     }
@@ -2100,8 +2112,10 @@ meta_screen_tile_preview_update (MetaScreen *screen,
 LOCAL_SYMBOL void
 meta_screen_tile_preview_hide (MetaScreen *screen)
 {
-  if (screen->tile_preview_timeout_id > 0)
+  if (screen->tile_preview_timeout_id > 0) {
     g_source_remove (screen->tile_preview_timeout_id);
+    screen->tile_preview_timeout_id = 0;
+  }
 
   if (screen->tile_preview)
     meta_tile_preview_hide (screen->tile_preview);
@@ -2234,10 +2248,14 @@ meta_screen_tile_hud_update (MetaScreen *screen,
 LOCAL_SYMBOL void
 meta_screen_tile_hud_hide (MetaScreen *screen)
 {
-  if (screen->tile_hud_timeout_id > 0)
+  if (screen->tile_hud_timeout_id > 0) {
     g_source_remove (screen->tile_hud_timeout_id);
-  if (screen->tile_hud_fade_timeout_id > 0)
+    screen->tile_hud_timeout_id = 0;
+  }
+  if (screen->tile_hud_fade_timeout_id > 0) {
     g_source_remove (screen->tile_hud_fade_timeout_id);
+    screen->tile_hud_fade_timeout_id = 0;
+  }
 
   if (screen->tile_hud)
     meta_tile_hud_hide (screen->tile_hud);
