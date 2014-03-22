@@ -1771,7 +1771,7 @@ warn_about_lame_clients_and_finish_interact (gboolean shutdown)
        * are kind of dumb to worry about
        */
       if (window->sm_client_id == NULL &&
-          window->type == META_WINDOW_NORMAL)
+          (window->type == META_WINDOW_NORMAL && !window->override_redirect))
         lame = g_slist_prepend (lame, window);
           
       tmp = tmp->next;
