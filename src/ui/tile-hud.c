@@ -30,6 +30,7 @@
 #include "display-private.h"
 #include "window-private.h"
 #include "boxes-private.h"
+#include <clutter/clutter.h>
 #include <math.h>
 
 #include "core.h"
@@ -263,18 +264,21 @@ meta_tile_hud_draw (GtkWidget *widget,
   cairo_paint (cr);
   MetaRectangle tile_area;
 
+  int width;
+  width = HUD_WIDTH * CLAMP ((int)(clutter_backend_get_resolution (clutter_get_default_backend ()) / 96.0), 1, 4);
+
   if (hud->restrictions & HUD_CAN_TILE_SIDE_BY_SIDE)
       {
       // LEFT
       if (hud->current_proximity_zone == ZONE_2) {
-          meta_window_get_tile_threshold_area_for_mode (NULL, hud->relative_work_area, META_TILE_LEFT, &tile_area, HUD_WIDTH);
+          meta_window_get_tile_threshold_area_for_mode (NULL, hud->relative_work_area, META_TILE_LEFT, &tile_area, width);
           tile_area.y += OFFSET;
           tile_area.height -= 2 * OFFSET;
           do_side_box (hud, cr, LEFT, tile_area);
       }
       // RIGHT
       if (hud->current_proximity_zone == ZONE_3) {
-          meta_window_get_tile_threshold_area_for_mode (NULL, hud->relative_work_area, META_TILE_RIGHT, &tile_area, HUD_WIDTH);
+          meta_window_get_tile_threshold_area_for_mode (NULL, hud->relative_work_area, META_TILE_RIGHT, &tile_area, width);
           tile_area.y += OFFSET;
           tile_area.height -= 2 * OFFSET;
           do_side_box (hud, cr, RIGHT, tile_area);
@@ -284,36 +288,36 @@ meta_tile_hud_draw (GtkWidget *widget,
   if (hud->restrictions & HUD_CAN_TILE_CORNER) {
       // ULC
       if (hud->current_proximity_zone == ZONE_4) {
-          meta_window_get_tile_threshold_area_for_mode (NULL, hud->relative_work_area, META_TILE_ULC, &tile_area, HUD_WIDTH);
+          meta_window_get_tile_threshold_area_for_mode (NULL, hud->relative_work_area, META_TILE_ULC, &tile_area, width);
           do_corner_box (hud, cr, LEFT | TOP, tile_area);
       }
       // LLC
       if (hud->current_proximity_zone == ZONE_7) {
-          meta_window_get_tile_threshold_area_for_mode (NULL, hud->relative_work_area, META_TILE_LLC, &tile_area, HUD_WIDTH);
+          meta_window_get_tile_threshold_area_for_mode (NULL, hud->relative_work_area, META_TILE_LLC, &tile_area, width);
           do_corner_box (hud, cr, LEFT | BOTTOM, tile_area);
       }
       // URC
       if (hud->current_proximity_zone == ZONE_5) {
-          meta_window_get_tile_threshold_area_for_mode (NULL, hud->relative_work_area, META_TILE_URC, &tile_area, HUD_WIDTH);
+          meta_window_get_tile_threshold_area_for_mode (NULL, hud->relative_work_area, META_TILE_URC, &tile_area, width);
           do_corner_box (hud, cr, RIGHT | TOP, tile_area);
       }
       // LRC
       if (hud->current_proximity_zone == ZONE_6) {
-          meta_window_get_tile_threshold_area_for_mode (NULL, hud->relative_work_area, META_TILE_LRC, &tile_area, HUD_WIDTH);
+          meta_window_get_tile_threshold_area_for_mode (NULL, hud->relative_work_area, META_TILE_LRC, &tile_area, width);
           do_corner_box (hud, cr, RIGHT | BOTTOM, tile_area);
       }
   }
   if (hud->restrictions & HUD_CAN_TILE_TOP_BOTTOM) {
       // TOP
       if (hud->current_proximity_zone == ZONE_0) {
-          meta_window_get_tile_threshold_area_for_mode (NULL, hud->relative_work_area, META_TILE_TOP, &tile_area, HUD_WIDTH);
+          meta_window_get_tile_threshold_area_for_mode (NULL, hud->relative_work_area, META_TILE_TOP, &tile_area, width);
           tile_area.x += OFFSET;
           tile_area.width -= 2 * OFFSET;
           do_side_box (hud, cr, TOP, tile_area);
       }
       // BOTTOM
       if (hud->current_proximity_zone == ZONE_1) {
-          meta_window_get_tile_threshold_area_for_mode (NULL, hud->relative_work_area, META_TILE_BOTTOM, &tile_area, HUD_WIDTH);
+          meta_window_get_tile_threshold_area_for_mode (NULL, hud->relative_work_area, META_TILE_BOTTOM, &tile_area, width);
           tile_area.x += OFFSET;
           tile_area.width -= 2 * OFFSET;
           do_side_box (hud, cr, BOTTOM, tile_area);
