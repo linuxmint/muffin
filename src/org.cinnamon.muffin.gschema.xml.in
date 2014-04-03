@@ -154,7 +154,7 @@
     </key>
 
     <key name="tile-maximize" type="b">
-      <default>false</default>
+      <default>true</default>
       <_summary>Sets maximize as the tile action for the top edge of the screen</_summary>
       <_description>
         Makes tiling to the top maximize the window
