@@ -773,9 +773,9 @@ reload_mwm_hints (MetaWindow    *window,
 
       if (hints->decorations == 0)
         window->mwm_decorated = FALSE;
-      // /* some input methods use this */
-      // else if (hints->decorations == MWM_DECOR_BORDER)
-      //   window->mwm_border_only = TRUE;
+      /* some input methods use this */
+      else if (hints->decorations == MWM_DECOR_BORDER)
+        window->mwm_border_only = TRUE;
     }
   else
     meta_verbose ("Decorations flag unset\n");
