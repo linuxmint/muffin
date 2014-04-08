@@ -867,6 +867,8 @@ struct _MetaTheme
    */
   guint format_version;
 
+  guint scale;
+
   /** Symbol table of integer constants. */
   GHashTable *integer_constants;
   /** Symbol table of float constants. */

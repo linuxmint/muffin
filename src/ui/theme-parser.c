@@ -26,6 +26,7 @@
 #include <meta/util.h>
 #include <string.h>
 #include <stdlib.h>
+#include <clutter/clutter.h>
 
 /* We were intending to put the version number
  * in the subdirectory name, but we ended up
@@ -625,7 +626,7 @@ parse_positive_integer (const char          *str,
       return FALSE;
     }
   
-  *val = (int) l;
+  *val = (int) l * theme->scale;
 
   return TRUE;
 }
@@ -3580,6 +3581,7 @@ start_element_handler (GMarkupParseContext *context,
           info->theme->filename = g_strdup (info->theme_file);
           info->theme->dirname = g_strdup (info->theme_dir);
           info->theme->format_version = info->format_version;
+          info->theme->scale = CLAMP ((int)(clutter_backend_get_resolution (clutter_get_default_backend ()) / 96.0), 1, 4);
           
           push_state (info, STATE_THEME);
         }
