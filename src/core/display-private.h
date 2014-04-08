@@ -281,10 +281,6 @@ struct _MetaDisplay
   int damage_error_base;
   int xfixes_event_base;
   int xfixes_error_base;
-
-  int xinput_error_base;
-  int xinput_event_base;
-  int xinput_opcode;
   
 #ifdef HAVE_STARTUP_NOTIFICATION
   SnDisplay *sn_display;
