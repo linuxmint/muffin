@@ -1291,7 +1291,8 @@ meta_window_actor_destroy (MetaWindowActor *self)
       window_type == META_WINDOW_NOTIFICATION ||
       window_type == META_WINDOW_COMBO ||
       window_type == META_WINDOW_DND ||
-      window_type == META_WINDOW_OVERRIDE_OTHER)
+      window_type == META_WINDOW_OVERRIDE_OTHER ||
+      meta_window_is_override_redirect(window))
     {
       /*
        * No effects, just kill it.
@@ -1556,7 +1557,9 @@ meta_window_actor_new (MetaWindow *window)
   
   if (window->type == META_WINDOW_DROPDOWN_MENU ||
       window->type == META_WINDOW_POPUP_MENU ||
-      window->type == META_WINDOW_COMBO) {
+      window->type == META_WINDOW_COMBO ||
+      window->type == META_WINDOW_MENU ||
+      window->type == META_WINDOW_UTILITY) {
     clutter_container_add_actor (CLUTTER_CONTAINER (info->top_window_group),
 			       CLUTTER_ACTOR (self));
   }

@@ -463,7 +463,7 @@ minimize (MetaPlugin *plugin, MetaWindowActor *window_actor)
       icon_geometry.y = 0;
     }
 
-  if (type == META_WINDOW_NORMAL)
+  if (type == META_WINDOW_NORMAL && !meta_window_is_override_redirect(meta_window))
     {
       ClutterAnimation *animation;
       EffectCompleteData *data = g_new0 (EffectCompleteData, 1);
@@ -545,7 +545,7 @@ maximize (MetaPlugin *plugin,
 
   type = meta_window_get_window_type (meta_window);
 
-  if (type == META_WINDOW_NORMAL)
+  if (type == META_WINDOW_NORMAL && !meta_window_is_override_redirect(meta_window))
     {
       ClutterAnimation *animation;
       EffectCompleteData *data = g_new0 (EffectCompleteData, 1);
@@ -603,7 +603,7 @@ unmaximize (MetaPlugin *plugin,
   MetaWindow *meta_window = meta_window_actor_get_meta_window (window_actor);
   MetaWindowType type = meta_window_get_window_type (meta_window);
 
-  if (type == META_WINDOW_NORMAL)
+  if (type == META_WINDOW_NORMAL && !meta_window_is_override_redirect(meta_window))
     {
       ActorPrivate *apriv = get_actor_private (window_actor);
 
@@ -648,7 +648,7 @@ map (MetaPlugin *plugin, MetaWindowActor *window_actor)
 
   type = meta_window_get_window_type (meta_window);
 
-  if (type == META_WINDOW_NORMAL)
+  if (type == META_WINDOW_NORMAL && !meta_window_is_override_redirect(meta_window))
     {
       ClutterAnimation *animation;
       EffectCompleteData *data = g_new0 (EffectCompleteData, 1);
@@ -708,7 +708,7 @@ destroy (MetaPlugin *plugin, MetaWindowActor *window_actor)
 
   type = meta_window_get_window_type (meta_window);
 
-  if (type == META_WINDOW_NORMAL)
+  if (type == META_WINDOW_NORMAL && !meta_window_is_override_redirect(meta_window))
     {
       ClutterAnimation *animation;
       EffectCompleteData *data = g_new0 (EffectCompleteData, 1);

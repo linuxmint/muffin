@@ -303,6 +303,11 @@ get_standalone_layer (MetaWindow *window)
 {
   MetaStackLayer layer;
   gboolean focused_transient = FALSE;
+  
+  if (meta_window_is_override_redirect(window)) {
+    layer = META_LAYER_OVERRIDE_REDIRECT;
+    return layer;
+  }
 
   switch (window->type)
     {

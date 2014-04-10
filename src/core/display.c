@@ -140,6 +140,7 @@ enum
   WINDOW_MARKED_URGENT,
   GRAB_OP_BEGIN,
   GRAB_OP_END,
+  WINDOW_MOVED_RESIZED,
   LAST_SIGNAL
 };
 
@@ -284,6 +285,14 @@ meta_display_class_init (MetaDisplayClass *klass)
                   META_TYPE_SCREEN,
                   META_TYPE_WINDOW,
                   META_TYPE_GRAB_OP);
+  
+  display_signals[WINDOW_MOVED_RESIZED] =
+    g_signal_new ("window-moved-resized",
+                  G_TYPE_FROM_CLASS (klass),
+                  G_SIGNAL_RUN_LAST,
+                  0,
+                  NULL, NULL, NULL,
+                  G_TYPE_NONE, 1, META_TYPE_WINDOW);
 
   g_object_class_install_property (object_class,
                                    PROP_FOCUS_WINDOW,
@@ -3326,6 +3335,13 @@ meta_display_notify_window_created (MetaDisplay  *display,
                                     MetaWindow   *window)
 {
   g_signal_emit (display, display_signals[WINDOW_CREATED], 0, window);
+}
+
+LOCAL_SYMBOL void
+meta_display_notify_window_moved_resized (MetaDisplay *display,
+                                                      MetaWindow *window)
+{
+  g_signal_emit (display, display_signals[WINDOW_MOVED_RESIZED], 0, window);
 }
 
 /**
