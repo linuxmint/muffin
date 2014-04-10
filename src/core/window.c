@@ -3660,8 +3660,9 @@ meta_window_maximize (MetaWindow        *window,
 	  return;
 	}
 
-      if (window->tile_mode != META_TILE_NONE ||
-          window->last_tile_mode != META_TILE_NONE)
+      if ((window->tile_mode != META_TILE_NONE ||
+          window->last_tile_mode != META_TILE_NONE) &&
+    	  window->tile_mode != META_TILE_MAXIMIZE)
         {
           saved_rect = &window->saved_rect;
 
@@ -3891,10 +3892,6 @@ meta_window_can_tile_side_by_side (MetaWindow *window)
   monitor = meta_screen_get_current_monitor (window->screen);
   meta_window_get_work_area_for_monitor (window, monitor->number, &tile_area);
 
-  /* Do not allow tiling in portrait orientation */
-  if (tile_area.height > tile_area.width)
-    return FALSE;
-
   tile_area.width /= 2;
 
   meta_frame_calc_borders (window->frame, &borders);
@@ -3918,10 +3915,6 @@ meta_window_can_tile_top_bottom (MetaWindow *window)
 
   monitor = meta_screen_get_current_monitor (window->screen);
   meta_window_get_work_area_for_monitor (window, monitor->number, &tile_area);
-
-  /* Do not allow tiling in portrait orientation */
-  if (tile_area.height > tile_area.width)
-    return FALSE;
 
   tile_area.height /= 2;
 
