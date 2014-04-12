@@ -2760,6 +2760,19 @@ handle_maximize_horizontally (MetaDisplay    *display,
     }
 }
 
+static void
+handle_opacity (MetaDisplay    *display,
+                MetaScreen     *screen,
+                MetaWindow     *window,
+                XEvent         *event,
+                MetaKeyBinding *binding,
+                gpointer        dummy)
+{
+    MetaKeyBindingAction action = meta_prefs_get_keybinding_action (binding->name);
+
+    meta_window_adjust_opacity (window, action == META_KEYBINDING_ACTION_INCREASE_OPACITY);
+}
+
 /* Move a window to a corner; to_bottom/to_right are FALSE for the
  * top or left edge, or TRUE for the bottom/right edge.  xchange/ychange
  * are FALSE if that dimension is not to be changed, TRUE otherwise.
@@ -4527,6 +4540,20 @@ init_builtin_key_bindings (MetaDisplay *display)
                           META_KEY_BINDING_PER_WINDOW,
                           META_KEYBINDING_ACTION_MOVE_TO_CENTER,
                           handle_move_to_center, 0);
+
+  add_builtin_keybinding (display,
+                          "increase-opacity",
+                          SCHEMA_MUFFIN_KEYBINDINGS,
+                          META_KEY_BINDING_PER_WINDOW,
+                          META_KEYBINDING_ACTION_INCREASE_OPACITY,
+                          handle_opacity, 0);
+
+  add_builtin_keybinding (display,
+                          "decrease-opacity",
+                          SCHEMA_MUFFIN_KEYBINDINGS,
+                          META_KEY_BINDING_PER_WINDOW,
+                          META_KEYBINDING_ACTION_DECREASE_OPACITY,
+                          handle_opacity, 0);
 }
 
 LOCAL_SYMBOL void

@@ -520,6 +520,15 @@
       <default>[]</default>
       <_summary>Move window to center of screen</_summary>
     </key>
+    <key name="increase-opacity" type="as">
+      <default>[]</default>
+      <_summary>Increase the opacity of the current window</_summary>
+    </key>
+    <key name="decrease-opacity" type="as">
+      <default>[]</default>
+      <_summary>Decrease the opacity of the current window</_summary>
+    </key>
+
 
   </schema>
 </schemalist>
