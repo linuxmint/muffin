@@ -30,7 +30,8 @@ Build-Depends: debhelper (>= 9),
                zenity,
                gnome-doc-utils (>= 0.8),
                gnome-pkg-tools (>= 0.10),
-               libcinnamon-desktop-dev (>= 1.0.0)
+               libcinnamon-desktop-dev (>= 1.0.0),
+               gobject-introspection
 Standards-Version: 3.9.4
 
 Package: muffin
