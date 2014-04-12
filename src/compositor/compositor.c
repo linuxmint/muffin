@@ -140,7 +140,7 @@ process_property_notify (MetaCompositor	*compositor,
 
   /* Check for the opacity changing */
   if (event->atom == compositor->atom_net_wm_window_opacity)
-    {
+    {g_printerr ("REMOVE ME OPACITY ON COMPOSITOR\n");
       meta_window_actor_update_opacity (window_actor);
       DEBUG_TRACE ("process_property_notify: net_wm_window_opacity\n");
       return;

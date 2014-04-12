@@ -564,6 +564,8 @@ void        meta_window_shade              (MetaWindow  *window,
                                             guint32      timestamp);
 void        meta_window_unshade            (MetaWindow  *window,
                                             guint32      timestamp);
+void        meta_window_adjust_opacity     (MetaWindow  *window,
+                                            gboolean     increase);
 void        meta_window_change_workspace   (MetaWindow  *window,
                                             MetaWorkspace *workspace);
 void        meta_window_stick              (MetaWindow  *window);

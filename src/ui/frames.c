@@ -1136,6 +1136,12 @@ redraw_control (MetaFrames *frames,
   invalidate_cache (frames, frame);
 }
 
+enum
+{
+    MOUSEWHEEL_UP   = 4,
+    MOUSEWHEEL_DOWN = 5
+};
+
 static gboolean
 meta_frame_titlebar_event (MetaUIFrame    *frame,
                            GdkEventButton *event,
@@ -1238,6 +1244,48 @@ meta_frame_titlebar_event (MetaUIFrame    *frame,
                                   event->button,
                                   event->time);
       break;
+
+    /* These last 3 are CDesktopTitlebarScrollAction but
+       since we're working with ints, it doesn't matter */
+
+    case C_DESKTOP_TITLEBAR_SCROLL_ACTION_SHADE:
+      {
+        meta_core_get (display, frame->xwindow,
+                       META_CORE_GET_FRAME_FLAGS, &flags,
+                       META_CORE_GET_END);
+        
+        if (flags & META_FRAME_ALLOWS_SHADE)
+          {
+            if (event->button == MOUSEWHEEL_DOWN &&
+                flags & META_FRAME_SHADED)
+              meta_core_unshade (display,
+                                 frame->xwindow,
+                                 event->time);
+            else if (event->button == MOUSEWHEEL_UP &&
+                     flags & ~META_FRAME_SHADED)
+              meta_core_shade (display,
+                               frame->xwindow,
+                               event->time);
+          }
+      }
+      break;
+
+    case C_DESKTOP_TITLEBAR_SCROLL_ACTION_OPACITY:
+      {
+        if (event->button == MOUSEWHEEL_UP) {
+            meta_core_adjust_opacity (display,
+                                      frame->xwindow,
+                                      TRUE); /* TRUE = increase */
+        } else {
+            meta_core_adjust_opacity (display,
+                                      frame->xwindow,
+                                      FALSE); /* decrease */
+        }
+      }
+      break;
+
+    case C_DESKTOP_TITLEBAR_SCROLL_ACTION_NONE:
+      break;
     }
   
   return TRUE;
@@ -1267,6 +1315,15 @@ meta_frame_right_click_event(MetaUIFrame     *frame,
 {
   int action = meta_prefs_get_action_right_click_titlebar();
   
+  return meta_frame_titlebar_event (frame, event, action);
+}
+
+static gboolean
+meta_frame_scroll_wheel_event (MetaUIFrame     *frame,
+                               GdkEventButton  *event)
+{
+  int action = meta_prefs_get_action_scroll_wheel_titlebar();
+
   return meta_frame_titlebar_event (frame, event, action);
 }
 
@@ -1530,6 +1587,11 @@ meta_frames_button_press_event (GtkWidget      *widget,
                                    event->x_root,
                                    event->y_root);
         }
+    }
+  else if (control == META_FRAME_CONTROL_TITLE &&
+           (event->button == 4 || event->button == 5))
+    {
+      return meta_frame_scroll_wheel_event (frame, event);
     }
   else if (event->button == 2)
     {

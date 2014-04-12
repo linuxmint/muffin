@@ -43,6 +43,7 @@ typedef enum
   META_PREF_ACTION_DOUBLE_CLICK_TITLEBAR,
   META_PREF_ACTION_MIDDLE_CLICK_TITLEBAR,
   META_PREF_ACTION_RIGHT_CLICK_TITLEBAR,
+  META_PREF_ACTION_SCROLL_WHEEL_TITLEBAR,
   META_PREF_AUTO_RAISE,
   META_PREF_AUTO_RAISE_DELAY,
   META_PREF_THEME,
@@ -126,6 +127,7 @@ void                        meta_prefs_get_button_layout (MetaButtonLayout *butt
 CDesktopTitlebarAction      meta_prefs_get_action_double_click_titlebar (void);
 CDesktopTitlebarAction      meta_prefs_get_action_middle_click_titlebar (void);
 CDesktopTitlebarAction      meta_prefs_get_action_right_click_titlebar (void);
+CDesktopTitlebarScrollAction meta_prefs_get_action_scroll_wheel_titlebar (void);
 
 void meta_prefs_set_num_workspaces (int n_workspaces);
 

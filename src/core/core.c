@@ -495,6 +495,16 @@ meta_core_unmake_above (Display *xdisplay,
 }
 
 LOCAL_SYMBOL void
+meta_core_adjust_opacity      (Display *xdisplay,
+                               Window   frame_xwindow,
+                               gboolean increase)
+{
+  MetaWindow *window = get_window (xdisplay, frame_xwindow);
+
+  meta_window_adjust_opacity (window, increase);
+}
+
+LOCAL_SYMBOL void
 meta_core_stick (Display *xdisplay,
                  Window   frame_xwindow)
 {

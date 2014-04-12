@@ -56,6 +56,7 @@
 #endif
 #include <X11/XKBlib.h>
 #include <X11/extensions/Xcomposite.h>
+#include <gdk/gdkx.h>
 
 static int destroying_windows_disallowed = 0;
 
@@ -4361,6 +4362,37 @@ meta_window_unshade (MetaWindow  *window,
 
       set_net_wm_state (window);
     }
+}
+
+#define OPACITY_STEP 32
+
+LOCAL_SYMBOL void
+meta_window_adjust_opacity (MetaWindow   *window,
+                            gboolean      increase)
+{
+  ClutterActor *actor = CLUTTER_ACTOR (meta_window_get_compositor_private (window));
+
+  gint current_opacity, new_opacity;
+
+  current_opacity = clutter_actor_get_opacity (actor);
+
+  if (increase) {
+    new_opacity = MIN (current_opacity + OPACITY_STEP, 255);
+  } else {
+    new_opacity = MAX (current_opacity - OPACITY_STEP, 0);
+  }
+
+  if (new_opacity != current_opacity) {
+    clutter_actor_set_opacity (actor, (guint8) new_opacity);
+  }
+}
+
+void
+meta_window_reset_opacity (MetaWindow *window)
+{
+    ClutterActor *actor = CLUTTER_ACTOR (meta_window_get_compositor_private (window));
+
+    clutter_actor_set_opacity (actor, 255);
 }
 
 static gboolean

@@ -154,6 +154,9 @@ void meta_core_unmake_above     (Display *xdisplay,
                                  Window   frame_xwindow);
 void meta_core_make_above       (Display *xdisplay,
                                  Window   frame_xwindow);
+void meta_core_adjust_opacity      (Display *xdisplay,
+                                    Window   frame_xwindow,
+                                    gboolean increase);
 void meta_core_change_workspace (Display *xdisplay,
                                  Window   frame_xwindow,
                                  int      new_workspace);

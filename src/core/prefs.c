@@ -86,6 +86,7 @@ static gboolean workspace_cycle = FALSE;
 static CDesktopTitlebarAction action_double_click_titlebar = C_DESKTOP_TITLEBAR_ACTION_TOGGLE_MAXIMIZE;
 static CDesktopTitlebarAction action_middle_click_titlebar = C_DESKTOP_TITLEBAR_ACTION_LOWER;
 static CDesktopTitlebarAction action_right_click_titlebar = C_DESKTOP_TITLEBAR_ACTION_MENU;
+static CDesktopTitlebarScrollAction action_scroll_titlebar = C_DESKTOP_TITLEBAR_SCROLL_ACTION_NONE;
 static gboolean dynamic_workspaces = FALSE;
 static gboolean application_based = FALSE;
 static gboolean disable_workarounds = FALSE;
@@ -267,6 +268,13 @@ static MetaEnumPreference preferences_enum[] =
         META_PREF_ACTION_RIGHT_CLICK_TITLEBAR,
       },
       &action_right_click_titlebar,
+    },
+    {
+      { "action-scroll-titlebar",
+        SCHEMA_GENERAL,
+        META_PREF_ACTION_SCROLL_WHEEL_TITLEBAR,
+      },
+      &action_scroll_titlebar,
     },
     {
       { "placement-mode",
@@ -1722,6 +1730,9 @@ meta_preference_to_string (MetaPreference pref)
     case META_PREF_ACTION_RIGHT_CLICK_TITLEBAR:
       return "ACTION_RIGHT_CLICK_TITLEBAR";
 
+    case META_PREF_ACTION_SCROLL_WHEEL_TITLEBAR:
+      return "ACTION_SCROLL_WHEEL_TITLEBAR";
+
     case META_PREF_AUTO_RAISE:
       return "AUTO_RAISE";
       
@@ -2261,6 +2272,12 @@ CDesktopTitlebarAction
 meta_prefs_get_action_right_click_titlebar (void)
 {
   return action_right_click_titlebar;
+}
+
+CDesktopTitlebarScrollAction
+meta_prefs_get_action_scroll_wheel_titlebar (void)
+{
+  return action_scroll_titlebar;
 }
 
 gboolean
