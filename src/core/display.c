@@ -140,6 +140,8 @@ enum
   WINDOW_MARKED_URGENT,
   GRAB_OP_BEGIN,
   GRAB_OP_END,
+  ZOOM_SCROLL_IN,
+  ZOOM_SCROLL_OUT,
   LAST_SIGNAL
 };
 
@@ -284,6 +286,22 @@ meta_display_class_init (MetaDisplayClass *klass)
                   META_TYPE_SCREEN,
                   META_TYPE_WINDOW,
                   META_TYPE_GRAB_OP);
+
+  display_signals[ZOOM_SCROLL_IN] =
+    g_signal_new ("zoom-scroll-in",
+                  G_TYPE_FROM_CLASS (klass),
+                  G_SIGNAL_RUN_LAST,
+                  0,
+                  NULL, NULL, NULL,
+                  G_TYPE_NONE, 0);
+
+  display_signals[ZOOM_SCROLL_OUT] =
+    g_signal_new ("zoom-scroll-out",
+                  G_TYPE_FROM_CLASS (klass),
+                  G_SIGNAL_RUN_LAST,
+                  0,
+                  NULL, NULL, NULL,
+                  G_TYPE_NONE, 0);
 
   g_object_class_install_property (object_class,
                                    PROP_FOCUS_WINDOW,
@@ -1810,9 +1828,16 @@ event_callback (XEvent   *event,
       if (display->grab_op == META_GRAB_OP_COMPOSITOR)
         break;
 
-      if (event->xbutton.button == 4 || event->xbutton.button == 5)
-        /* Scrollwheel event, do nothing and deliver event to compositor below */
+      if (event->xbutton.button == 4) {
+        g_signal_emit (display, display_signals[ZOOM_SCROLL_IN], 0);
         break;
+      }
+
+      if (event->xbutton.button == 5) {
+        g_signal_emit (display, display_signals[ZOOM_SCROLL_OUT], 0);
+        break;
+      }
+        /* Scrollwheel event, do nothing and deliver event to compositor below */
 
       if ((window &&
            grab_op_is_mouse (display->grab_op) &&
@@ -3970,6 +3995,8 @@ meta_display_grab_window_buttons (MetaDisplay *display,
    * Grab Alt + button2 for resizing window.
    * Grab Alt + button3 for popping up window menu.
    * Grab Alt + Shift + button1 for snap-moving window.
+   * Grab Alt + button4 for scrolling in
+   * Grab Alt + button5 for scrolling out
    */
   meta_verbose ("Grabbing window buttons for 0x%lx\n", xwindow);
   
@@ -3982,7 +4009,7 @@ meta_display_grab_window_buttons (MetaDisplay *display,
     {
       gboolean debug = g_getenv ("MUFFIN_DEBUG_BUTTON_GRABS") != NULL;
       int i;
-      for (i = 1; i < 4; i++)
+      for (i = 1; i < 6; i++)
         {
           meta_change_button_grab (display, xwindow,
                                    TRUE,
@@ -4024,7 +4051,7 @@ meta_display_ungrab_window_buttons  (MetaDisplay *display,
   
   debug = g_getenv ("MUFFIN_DEBUG_BUTTON_GRABS") != NULL;
   i = 1;
-  while (i < 4)
+  while (i < 6)
     {
       meta_change_button_grab (display, xwindow,
                                FALSE, FALSE, i,
