@@ -1828,16 +1828,23 @@ event_callback (XEvent   *event,
       if (display->grab_op == META_GRAB_OP_COMPOSITOR)
         break;
 
-      if (event->xbutton.button == 4) {
-        g_signal_emit (display, display_signals[ZOOM_SCROLL_IN], 0);
-        break;
-      }
+      if (event->xbutton.button == 4 || event->xbutton.button == 5)
+        {
+          if (event->xbutton.state == display->window_grab_modifiers)
+            {
+              if (event->xbutton.button == 4)
+                {
+                  g_signal_emit (display, display_signals[ZOOM_SCROLL_IN], 0);
+                }
 
-      if (event->xbutton.button == 5) {
-        g_signal_emit (display, display_signals[ZOOM_SCROLL_OUT], 0);
-        break;
-      }
-        /* Scrollwheel event, do nothing and deliver event to compositor below */
+              if (event->xbutton.button == 5)
+                {
+                  g_signal_emit (display, display_signals[ZOOM_SCROLL_OUT], 0);
+                }
+              filter_out_event = bypass_compositor = TRUE;
+            }
+          break;
+        }
 
       if ((window &&
            grab_op_is_mouse (display->grab_op) &&
