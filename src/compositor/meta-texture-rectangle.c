@@ -46,10 +46,14 @@ meta_texture_rectangle_new (unsigned int width,
     clutter_backend_get_cogl_context (backend);
   CoglTextureRectangle *tex_rect;
 
+#if COGL_VERSION_CHECK (1, 7, 0)
+  tex_rect = cogl_texture_rectangle_new_with_size (context, width, height);
+#else
   tex_rect = cogl_texture_rectangle_new_with_size (context,
                                                    width, height,
                                                    internal_format,
                                                    error);
+#endif
   if (tex_rect == NULL)
     return NULL;
 
