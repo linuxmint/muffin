@@ -6447,6 +6447,12 @@ meta_gtk_state_to_string (GtkStateFlags state)
     case GTK_STATE_FLAG_DIR_RTL:
       return "DIR_RTL";
 #endif
+#if GTK_MAJOR_VERSION > 3 || (GTK_MAJOR_VERSION == 3 && GTK_MINOR_VERSION >= 12)
+    case GTK_STATE_FLAG_LINK:
+      return "LINK";
+    case GTK_STATE_FLAG_VISITED:
+      return "VISITED";
+#endif
     }
 
   return "<unknown>";
