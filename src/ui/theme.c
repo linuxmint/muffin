@@ -3077,6 +3077,7 @@ meta_draw_op_free (MetaDrawOp *op)
       meta_draw_spec_free (op->data.image.y);
       meta_draw_spec_free (op->data.image.width);
       meta_draw_spec_free (op->data.image.height);
+      g_free (op->data.image.icon_name);
       break;
 
     case META_DRAW_GTK_ARROW:
@@ -3373,7 +3374,7 @@ scale_and_alpha_pixbuf (GdkPixbuf             *src,
             {
               temp_pixbuf = gdk_pixbuf_scale_simple (src,
                                                      dest_w, dest_h,
-                                                     GDK_INTERP_BILINEAR);
+                                                     GDK_INTERP_HYPER);
             }
 
           /* prefer to replicate_cols if possible, as that
@@ -3503,12 +3504,37 @@ draw_op_as_pixbuf (const MetaDrawOp    *op,
       }
       break;
 
-      
     case META_DRAW_IMAGE:
       {
-	if (op->data.image.colorize_spec)
-	  {
-	    GdkRGBA color;
+        GdkPixbuf *in_pixbuf = NULL;
+        if (op->data.image.icon_name != NULL)
+          {
+            gchar *name_size = g_strdup_printf ("%s___%d", op->data.image.icon_name, MIN (width, height));
+            in_pixbuf = g_hash_table_lookup (meta_current_theme->icons_by_name_size,
+                                             name_size);
+
+            if (in_pixbuf == NULL)
+              {
+                in_pixbuf = gtk_icon_theme_load_icon_for_scale (gtk_icon_theme_get_default (),
+                                                 op->data.image.icon_name,
+                                                 MIN (width, height),
+                                                 op->data.image.icon_scale,
+                                                 0,
+                                                 NULL);
+                g_hash_table_replace (meta_current_theme->icons_by_name_size,
+                                      g_strdup (name_size),
+                                      in_pixbuf);
+              }
+            g_free (name_size);
+          }
+        else
+          {
+            in_pixbuf = op->data.image.pixbuf;
+          }
+
+        if (op->data.image.colorize_spec)
+          {
+            GdkRGBA color;
 
             meta_color_spec_render (op->data.image.colorize_spec,
                                     context, &color);
@@ -3521,7 +3547,7 @@ draw_op_as_pixbuf (const MetaDrawOp    *op,
                 
                 /* const cast here */
                 ((MetaDrawOp*)op)->data.image.colorize_cache_pixbuf =
-                  colorize_pixbuf (op->data.image.pixbuf,
+                  colorize_pixbuf (in_pixbuf,
                                    &color);
                 ((MetaDrawOp*)op)->data.image.colorize_cache_pixel =
                   GDK_COLOR_RGB (color);
@@ -3539,12 +3565,12 @@ draw_op_as_pixbuf (const MetaDrawOp    *op,
 	  }
 	else
 	  {
-	    pixbuf = scale_and_alpha_pixbuf (op->data.image.pixbuf,
-                                             op->data.image.alpha_spec,
-                                             op->data.image.fill_type,
-                                             width, height,
-                                             op->data.image.vertical_stripes,
-                                             op->data.image.horizontal_stripes);
+	    pixbuf = scale_and_alpha_pixbuf (in_pixbuf,
+                                         op->data.image.alpha_spec,
+                                         op->data.image.fill_type,
+                                         width, height,
+                                         op->data.image.vertical_stripes,
+                                         op->data.image.horizontal_stripes);
 	  }
         break;
       }
@@ -3879,12 +3905,18 @@ meta_draw_op_draw_with_env (const MetaDrawOp    *op,
 
         rwidth = parse_size_unchecked (op->data.image.width, env);
         rheight = parse_size_unchecked (op->data.image.height, env);
-        
+
         pixbuf = draw_op_as_pixbuf (op, style_gtk, info,
                                     rwidth, rheight);
 
         if (pixbuf)
           {
+            if (op->data.image.icon_name)
+              {
+                env->object_width = gdk_pixbuf_get_width (pixbuf) / op->data.image.icon_scale;
+                env->object_height = gdk_pixbuf_get_height (pixbuf) / op->data.image.icon_scale;
+              }
+
             rx = parse_x_position_unchecked (op->data.image.x, env);
             ry = parse_y_position_unchecked (op->data.image.y, env);
 
@@ -5171,7 +5203,13 @@ meta_theme_new (void)
                            g_str_equal,
                            g_free,
                            (GDestroyNotify) g_object_unref);
-  
+
+  theme->icons_by_name_size =
+    g_hash_table_new_full (g_str_hash,
+                           g_str_equal,
+                           g_free,
+                           (GDestroyNotify) g_object_unref);
+
   theme->layouts_by_name =
     g_hash_table_new_full (g_str_hash,
                            g_str_equal,
@@ -5240,6 +5278,8 @@ meta_theme_free (MetaTheme *theme)
     g_hash_table_destroy (theme->integer_constants);
   if (theme->images_by_filename)
     g_hash_table_destroy (theme->images_by_filename);
+  if (theme->icons_by_name_size)
+    g_hash_table_destroy (theme->icons_by_name_size);
   if (theme->layouts_by_name)
     g_hash_table_destroy (theme->layouts_by_name);
   if (theme->draw_op_lists_by_name)  
@@ -5330,7 +5370,6 @@ meta_theme_validate (MetaTheme *theme,
 LOCAL_SYMBOL GdkPixbuf*
 meta_theme_load_image (MetaTheme  *theme,
                        const char *filename,
-                       guint size_of_theme_icons,
                        GError    **error)
 {
   GdkPixbuf *pixbuf;
@@ -5340,32 +5379,17 @@ meta_theme_load_image (MetaTheme  *theme,
 
   if (pixbuf == NULL)
     {
-       
-      if (g_str_has_prefix (filename, "theme:") &&
-          META_THEME_ALLOWS (theme, META_THEME_IMAGES_FROM_ICON_THEMES))
+      char *full_path;
+      full_path = g_build_filename (theme->dirname, filename, NULL);
+  
+      pixbuf = gdk_pixbuf_new_from_file (full_path, error);
+      if (pixbuf == NULL)
         {
-          pixbuf = gtk_icon_theme_load_icon (
-              gtk_icon_theme_get_default (),
-              filename+6,
-              size_of_theme_icons,
-              0,
-              error);
-          if (pixbuf == NULL) return NULL;
-         }
-      else
-        {
-          char *full_path;
-          full_path = g_build_filename (theme->dirname, filename, NULL);
-      
-          pixbuf = gdk_pixbuf_new_from_file (full_path, error);
-          if (pixbuf == NULL)
-            {
-              g_free (full_path);
-              return NULL;
-            }
-      
           g_free (full_path);
-        }      
+          return NULL;
+        }
+  
+      g_free (full_path);
       g_hash_table_replace (theme->images_by_filename,
                             g_strdup (filename),
                             pixbuf);

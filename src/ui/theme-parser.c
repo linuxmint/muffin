@@ -37,9 +37,18 @@
 
 /* Highest version of the theme format to
  * look out for.
+ *
+ * HiDPI info: To enable titlebar buttons to scale properly (when they're SVG's),
+ * use a -4 extension, and then define your image filenames as "theme:file_name_no_extension"
+ * The images in the theme folder are prepended to the current icon theme, and scaled correctly
+ * for hidpi viewing.
+ *
+ * Existing themes should render ok as -3's, but button images will just be pixbuf scaled, and hence
+ * may be slightly fuzzy in hidpi mode
+ *
  */
-#define THEME_MAJOR_VERSION 3
-#define THEME_MINOR_VERSION 4
+#define THEME_MAJOR_VERSION 4
+#define THEME_MINOR_VERSION 0
 #define THEME_VERSION (1000 * THEME_MAJOR_VERSION + THEME_MINOR_VERSION)
 
 #define METACITY_THEME_FILENAME_FORMAT "metacity-theme-%d.xml"
@@ -1675,6 +1684,30 @@ check_expression (PosToken            *tokens,
 }
 #endif
 
+static gchar *
+replace_token (const char *string, const char *old_token, const char *new_token)
+{
+    gchar *ret = NULL;
+    gint index = -1;
+    gchar *ptr = NULL;
+
+    ptr = g_strstr_len (string, -1, old_token);
+
+    if (ptr) {
+        index = ptr - string;
+        GString *gs = g_string_new (string);
+        gs = g_string_erase (gs, index, strlen (old_token));
+        gs = g_string_insert (gs, index, new_token);
+        ret = gs->str;
+        g_string_free (gs, FALSE);
+    } else {
+        ret = g_strdup (string);
+    }
+
+    return ret;
+}
+
+
 static void
 parse_draw_op_element (GMarkupParseContext  *context,
                        const gchar          *element_name,
@@ -2165,13 +2198,15 @@ parse_draw_op_element (GMarkupParseContext  *context,
       const char *alpha;
       const char *colorize;
       const char *fill_type;
+      gchar *real_width, *real_height;
       MetaAlphaGradientSpec *alpha_spec;
-      GdkPixbuf *pixbuf;
+      GdkPixbuf *pixbuf = NULL;
       MetaColorSpec *colorize_spec = NULL;
       MetaImageFillType fill_type_val;
       int h, w, c;
       int pixbuf_width, pixbuf_height, pixbuf_n_channels, pixbuf_rowstride;
       guchar *pixbuf_pixels;
+      gchar *icon_name = NULL;
       
       if (!locate_attributes (context, element_name, attribute_names, attribute_values,
                               error,
@@ -2182,8 +2217,16 @@ parse_draw_op_element (GMarkupParseContext  *context,
                               "fill_type", &fill_type,
                               NULL))
         return;
+
+      if (info->theme->scale > 1) {
+        real_width = replace_token (width, "object_width", "width");
+        real_height = replace_token (height, "object_height", "height");
+      } else {
+        real_width = g_strdup (width);
+        real_height = g_strdup (height);
+      }
       
-#if 0      
+#if 0
       if (!check_expression (x, TRUE, info->theme, context, error))
         return;
 
@@ -2209,20 +2252,31 @@ parse_draw_op_element (GMarkupParseContext  *context,
                          fill_type, element_name);
             }
         }
-      
+
       /* Check last so we don't have to free it when other
        * stuff fails.
        *
        * If it's a theme image, ask for it at 64px, which is
        * the largest possible. We scale it anyway.
        */
-      pixbuf = meta_theme_load_image (info->theme, filename, 64, error);
+
+      if (g_str_has_prefix (filename, "theme:") &&
+          META_THEME_ALLOWS (info->theme, META_THEME_IMAGES_FROM_ICON_THEMES))
+        {
+          icon_name = g_strdup (filename + 6);
+
+          goto skip_pixbuf;
+        }
+
+      pixbuf = meta_theme_load_image (info->theme, filename, error);
 
       if (pixbuf == NULL)
         {
           add_context_to_error (error, context);
           return;
         }
+
+skip_pixbuf:
 
       if (colorize)
         {
@@ -2231,7 +2285,8 @@ parse_draw_op_element (GMarkupParseContext  *context,
           if (colorize_spec == NULL)
             {
               add_context_to_error (error, context);
-              g_object_unref (G_OBJECT (pixbuf));
+              if (pixbuf != NULL)
+                g_object_unref (G_OBJECT (pixbuf));
               return;
             }
         }
@@ -2239,82 +2294,102 @@ parse_draw_op_element (GMarkupParseContext  *context,
       alpha_spec = NULL;
       if (alpha && !parse_alpha (alpha, &alpha_spec, context, error))
         {
-          g_object_unref (G_OBJECT (pixbuf));
+          if (pixbuf != NULL)
+            g_object_unref (G_OBJECT (pixbuf));
           return;
         }
       
+      if (pixbuf == NULL && icon_name == NULL)
+        {
+          add_context_to_error (error, context);
+          return;
+        }
+
       op = meta_draw_op_new (META_DRAW_IMAGE);
 
       op->data.image.pixbuf = pixbuf;
+      op->data.image.icon_name = icon_name;
+      op->data.image.icon_scale = info->theme->scale;
       op->data.image.colorize_spec = colorize_spec;
 
       op->data.image.x = meta_draw_spec_new (info->theme, x, NULL);
       op->data.image.y = meta_draw_spec_new (info->theme, y, NULL);
-      op->data.image.width = meta_draw_spec_new (info->theme, width, NULL);
-      op->data.image.height = meta_draw_spec_new (info->theme, height, NULL);
+      op->data.image.width = meta_draw_spec_new (info->theme, real_width, NULL);
+      op->data.image.height = meta_draw_spec_new (info->theme, real_height, NULL);
+
+      g_free (real_width);
+      g_free (real_height);
 
       op->data.image.alpha_spec = alpha_spec;
       op->data.image.fill_type = fill_type_val;
-      
-      /* Check for vertical & horizontal stripes */
-      pixbuf_n_channels = gdk_pixbuf_get_n_channels(pixbuf);
-      pixbuf_width = gdk_pixbuf_get_width(pixbuf);
-      pixbuf_height = gdk_pixbuf_get_height(pixbuf);
-      pixbuf_rowstride = gdk_pixbuf_get_rowstride(pixbuf);
-      pixbuf_pixels = gdk_pixbuf_get_pixels(pixbuf);
 
-      /* Check for horizontal stripes */
-      for (h = 0; h < pixbuf_height; h++)
+      if (pixbuf != NULL)
         {
-          for (w = 1; w < pixbuf_width; w++)
+          /* Check for vertical & horizontal stripes */
+          pixbuf_n_channels = gdk_pixbuf_get_n_channels(pixbuf);
+          pixbuf_width = gdk_pixbuf_get_width(pixbuf);
+          pixbuf_height = gdk_pixbuf_get_height(pixbuf);
+          pixbuf_rowstride = gdk_pixbuf_get_rowstride(pixbuf);
+          pixbuf_pixels = gdk_pixbuf_get_pixels(pixbuf);
+
+          /* Check for horizontal stripes */
+          for (h = 0; h < pixbuf_height; h++)
             {
-              for (c = 0; c < pixbuf_n_channels; c++)
+              for (w = 1; w < pixbuf_width; w++)
                 {
-                  if (pixbuf_pixels[(h * pixbuf_rowstride) + c] !=
-                      pixbuf_pixels[(h * pixbuf_rowstride) + w + c])
+                  for (c = 0; c < pixbuf_n_channels; c++)
+                    {
+                      if (pixbuf_pixels[(h * pixbuf_rowstride) + c] !=
+                          pixbuf_pixels[(h * pixbuf_rowstride) + w + c])
+                        break;
+                    }
+                  if (c < pixbuf_n_channels)
                     break;
                 }
-              if (c < pixbuf_n_channels)
+              if (w < pixbuf_width)
                 break;
             }
-          if (w < pixbuf_width)
-            break;
-        }
 
-      if (h >= pixbuf_height)
-        {
-          op->data.image.horizontal_stripes = TRUE; 
+          if (h >= pixbuf_height)
+            {
+              op->data.image.horizontal_stripes = TRUE; 
+            }
+          else
+            {
+              op->data.image.horizontal_stripes = FALSE; 
+            }
+
+          /* Check for vertical stripes */
+          for (w = 0; w < pixbuf_width; w++)
+            {
+              for (h = 1; h < pixbuf_height; h++)
+                {
+                  for (c = 0; c < pixbuf_n_channels; c++)
+                    {
+                      if (pixbuf_pixels[w + c] !=
+                          pixbuf_pixels[(h * pixbuf_rowstride) + w + c])
+                        break;
+                    }
+                  if (c < pixbuf_n_channels)
+                    break;
+                }
+              if (h < pixbuf_height)
+                break;
+            }
+
+          if (w >= pixbuf_width)
+            {
+              op->data.image.vertical_stripes = TRUE; 
+            }
+          else
+            {
+              op->data.image.vertical_stripes = FALSE; 
+            }
         }
       else
         {
-          op->data.image.horizontal_stripes = FALSE; 
-        }
-
-      /* Check for vertical stripes */
-      for (w = 0; w < pixbuf_width; w++)
-        {
-          for (h = 1; h < pixbuf_height; h++)
-            {
-              for (c = 0; c < pixbuf_n_channels; c++)
-                {
-                  if (pixbuf_pixels[w + c] !=
-                      pixbuf_pixels[(h * pixbuf_rowstride) + w + c])
-                    break;
-                }
-              if (c < pixbuf_n_channels)
-                break;
-            }
-          if (h < pixbuf_height)
-            break;
-        }
-
-      if (w >= pixbuf_width)
-        {
-          op->data.image.vertical_stripes = TRUE; 
-        }
-      else
-        {
-          op->data.image.vertical_stripes = FALSE; 
+          op->data.image.horizontal_stripes = FALSE;
+          op->data.image.vertical_stripes = FALSE;
         }
       
       g_assert (info->op_list);
@@ -4234,6 +4309,8 @@ load_theme (const char *theme_dir,
   text = NULL;
   retval = NULL;
   context = NULL;
+
+  gtk_icon_theme_prepend_search_path (gtk_icon_theme_get_default (), theme_dir);
 
   theme_filename = g_strdup_printf (METACITY_THEME_FILENAME_FORMAT, major_version);
   theme_file = g_build_filename (theme_dir, theme_filename, NULL);
