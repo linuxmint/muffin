@@ -546,8 +546,6 @@ struct _MetaDrawOp
       MetaDrawSpec *y;
       MetaDrawSpec *width;
       MetaDrawSpec *height;
-      gchar *icon_name;
-      guint icon_scale;
 
       guint32 colorize_cache_pixel;
       GdkPixbuf *colorize_cache_pixbuf;
@@ -881,7 +879,6 @@ struct _MetaTheme
    * */
   GHashTable *color_constants;
   GHashTable *images_by_filename;
-  GHashTable *icons_by_name_size;
   GHashTable *layouts_by_name;
   GHashTable *draw_op_lists_by_name;
   GHashTable *styles_by_name;
@@ -1073,6 +1070,7 @@ gboolean       meta_frame_style_set_validate  (MetaFrameStyleSet *style_set,
 
 GdkPixbuf* meta_theme_load_image (MetaTheme  *theme,
                                   const char *filename,
+                                  guint       size_of_theme_icons,
                                   GError    **error);
 
 MetaFrameStyle* meta_theme_get_frame_style (MetaTheme     *theme,
