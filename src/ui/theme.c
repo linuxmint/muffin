@@ -5330,7 +5330,7 @@ meta_theme_validate (MetaTheme *theme,
 LOCAL_SYMBOL GdkPixbuf*
 meta_theme_load_image (MetaTheme  *theme,
                        const char *filename,
-                       guint size_of_theme_icons,
+                       guint       scale,
                        GError    **error)
 {
   GdkPixbuf *pixbuf;
@@ -5344,12 +5344,12 @@ meta_theme_load_image (MetaTheme  *theme,
       if (g_str_has_prefix (filename, "theme:") &&
           META_THEME_ALLOWS (theme, META_THEME_IMAGES_FROM_ICON_THEMES))
         {
-          pixbuf = gtk_icon_theme_load_icon (
-              gtk_icon_theme_get_default (),
-              filename+6,
-              size_of_theme_icons,
-              0,
-              error);
+          pixbuf = gtk_icon_theme_load_icon_for_scale (gtk_icon_theme_get_default (),
+                                                       filename+6,
+                                                       20,
+                                                       scale,
+                                                       0,
+                                                       error);
           if (pixbuf == NULL) return NULL;
          }
       else
@@ -5357,7 +5357,19 @@ meta_theme_load_image (MetaTheme  *theme,
           char *full_path;
           full_path = g_build_filename (theme->dirname, filename, NULL);
       
-          pixbuf = gdk_pixbuf_new_from_file (full_path, error);
+          GdkPixbuf *test_pixbuf = NULL;
+          gint test_height, test_width;
+
+          test_pixbuf = gdk_pixbuf_new_from_file (full_path, error);
+          test_height = gdk_pixbuf_get_height (test_pixbuf);
+          test_width = gdk_pixbuf_get_width (test_pixbuf);
+
+          g_object_unref (test_pixbuf);
+
+          test_height *= scale;
+          test_width *= scale;
+
+          pixbuf = gdk_pixbuf_new_from_file_at_size (full_path, test_width, test_height, error);
           if (pixbuf == NULL)
             {
               g_free (full_path);

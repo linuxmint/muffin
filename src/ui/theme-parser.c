@@ -2213,10 +2213,8 @@ parse_draw_op_element (GMarkupParseContext  *context,
       /* Check last so we don't have to free it when other
        * stuff fails.
        *
-       * If it's a theme image, ask for it at 64px, which is
-       * the largest possible. We scale it anyway.
        */
-      pixbuf = meta_theme_load_image (info->theme, filename, 64, error);
+      pixbuf = meta_theme_load_image (info->theme, filename, info->theme->scale, error);
 
       if (pixbuf == NULL)
         {
