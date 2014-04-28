@@ -370,8 +370,6 @@ texture_tower_create_texture (MetaTextureTower *tower,
                                     /* rowstride */
                                     width * 4,
                                     /* data */
-                                    NULL,
-                                    /* error */
                                     NULL);
     }
   else

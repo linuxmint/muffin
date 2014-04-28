@@ -37,8 +37,7 @@ meta_texture_rectangle_new (unsigned int width,
                             CoglPixelFormat format,
                             CoglPixelFormat internal_format,
                             unsigned int rowstride,
-                            const guint8 *data,
-                            GError **error)
+                            const guint8 *data)
 {
   ClutterBackend *backend =
     clutter_get_default_backend ();
@@ -52,7 +51,7 @@ meta_texture_rectangle_new (unsigned int width,
   tex_rect = cogl_texture_rectangle_new_with_size (context,
                                                    width, height,
                                                    internal_format,
-                                                   error);
+                                                   NULL);
 #endif
   if (tex_rect == NULL)
     return NULL;
