@@ -297,8 +297,7 @@ meta_shaped_texture_ensure_mask (MetaShapedTexture *stex)
                                                          COGL_PIXEL_FORMAT_A_8,
                                                          COGL_PIXEL_FORMAT_A_8,
                                                          stride,
-                                                         mask_data,
-                                                         NULL /* error */);
+                                                         mask_data);
       else
         priv->mask_texture = cogl_texture_new_from_data (tex_width, tex_height,
                                                          COGL_TEXTURE_NONE,
