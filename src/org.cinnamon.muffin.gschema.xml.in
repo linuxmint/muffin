@@ -337,7 +337,7 @@
       <_summary>Reverse switch system controls directly</_summary>
     </key>
     <key name="show-desktop" type="as">
-      <default>[]</default>
+      <default><![CDATA[['<Super>D']]]></default>
       <_summary>Hide all normal windows</_summary>
     </key>
     <key name="panel-main-menu" type="as">
