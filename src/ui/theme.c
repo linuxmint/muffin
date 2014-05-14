@@ -3311,6 +3311,31 @@ replicate_cols (GdkPixbuf  *src,
   return result;
 }
 
+/* gdk_pixbuf_scale_simple doesn't do too well with
+   scaling a pixel or two up or down, you end up with
+   a blurry icon.  Avoid scaling the icon if the scaled
+   size difference is within our arbitrary tolerance.  This
+   isn't perfect.. if you use a crazy-sized window title font,
+   your icons still may end up less than ideal, but for most users,
+   this will solve things.
+
+   It would be more effective to avoid scaling at all,
+   and load the image from a file directly here (especially
+   with SVG images,) but images are used in some themes to
+   construct frames and I don't want to affect that.  There
+   are also unknown performance implications to loading here
+   every time a window is added)
+*/
+
+#define PIXBUF_SIZE_TOLERANCE 2
+
+static gboolean
+in_tolerance_to (gint size, gint scale_size)
+{
+  return scale_size <= size + PIXBUF_SIZE_TOLERANCE &&
+         scale_size >= size - PIXBUF_SIZE_TOLERANCE;
+}
+
 static GdkPixbuf*
 scale_and_alpha_pixbuf (GdkPixbuf             *src,
                         MetaAlphaGradientSpec *alpha_spec,
@@ -3364,7 +3389,7 @@ scale_and_alpha_pixbuf (GdkPixbuf             *src,
               dest_h = height;
             }
 
-          if (dest_w == src_w && dest_h == src_h)
+          if (in_tolerance_to (src_w, dest_w) && in_tolerance_to (src_h, dest_h))
             {
               temp_pixbuf = src;
               g_object_ref (G_OBJECT (temp_pixbuf));
