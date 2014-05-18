@@ -102,6 +102,7 @@ static int   draggable_border_width = 10;
 static int tile_hud_threshold = 150;
 static int resize_threshold = 24;
 static int ui_scale = 1;
+static int min_window_opacity = 0;
 static gboolean resize_with_right_button = FALSE;
 static gboolean edge_tiling = FALSE;
 static gboolean force_fullscreen = TRUE;
@@ -529,6 +530,17 @@ static MetaIntPreference preferences_int[] =
       },
       &resize_threshold
     },
+    {
+      { "min-window-opacity",
+        SCHEMA_GENERAL,
+        META_PREF_MIN_WIN_OPACITY,
+      },
+      &min_window_opacity
+    },
+
+
+
+
     { { NULL, 0, 0 }, NULL },
   };
 
@@ -891,6 +903,7 @@ update_ui_scale (GdkScreen *screen, gpointer data)
 
   gdk_screen_get_setting (screen, "gdk-window-scaling-factor", &value);
   ui_scale = g_value_get_int (&value);
+  g_printerr ("update sacle is %d\n", ui_scale);
 }
 
 
@@ -1814,6 +1827,9 @@ meta_preference_to_string (MetaPreference pref)
     case META_PREF_PLACEMENT_MODE:
       return "PLACEMENT_MODE";
 
+    case META_PREF_MIN_WIN_OPACITY:
+      return "MIN_WIN_OPACITY";
+
     }
 
   return "(unknown)";
@@ -2469,4 +2485,10 @@ MetaPlacementMode
 meta_prefs_get_placement_mode (void)
 {
   return placement_mode;
+}
+
+gint
+meta_prefs_get_min_win_opacity (void)
+{
+  return min_window_opacity;
 }

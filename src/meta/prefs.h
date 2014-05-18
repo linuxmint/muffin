@@ -76,7 +76,8 @@ typedef enum
   META_PREF_LEGACY_SNAP,
   META_PREF_INVERT_WORKSPACE_FLIP_DIRECTION,
   META_PREF_TILE_MAXIMIZE,
-  META_PREF_PLACEMENT_MODE
+  META_PREF_PLACEMENT_MODE,
+  META_PREF_MIN_WIN_OPACITY
 } MetaPreference;
 
 typedef void (* MetaPrefsChangedFunc) (MetaPreference pref,
@@ -169,6 +170,8 @@ gboolean meta_prefs_get_legacy_snap (void);
 gboolean meta_prefs_get_invert_flip_direction (void);
 
 gboolean meta_prefs_get_tile_maximize (void);
+
+gint meta_prefs_get_min_win_opacity (void);
 
 /* XXX FIXME This should be x-macroed, but isn't yet because it would be
  * difficult (or perhaps impossible) to add the suffixes using the current
