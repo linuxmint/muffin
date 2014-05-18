@@ -890,7 +890,7 @@ update_ui_scale (GdkScreen *screen, gpointer data)
   g_value_init (&value, G_TYPE_INT);
 
   gdk_screen_get_setting (screen, "gdk-window-scaling-factor", &value);
-  ui_scale = g_value_get_int (&value);
+  ui_scale = MAX (g_value_get_int (&value), 1); // Never let it be 0;
 }
 
 
@@ -947,8 +947,10 @@ meta_prefs_init (void)
 
   GdkDisplay *display = gdk_display_get_default();
 
-  g_signal_connect_swapped (gdk_display_get_default_screen (display), "monitors-changed",
-                            G_CALLBACK (update_ui_scale), NULL);
+  g_signal_connect (gdk_display_get_default_screen (display), "monitors-changed",
+                    G_CALLBACK (update_ui_scale), NULL);
+  g_signal_connect (gdk_display_get_default_screen (display), "size-changed",
+                    G_CALLBACK (update_ui_scale), NULL);
 
   update_ui_scale (gdk_display_get_default_screen (display), NULL);
 
