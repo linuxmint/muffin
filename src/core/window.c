@@ -4379,7 +4379,7 @@ meta_window_adjust_opacity (MetaWindow   *window,
   if (increase) {
     new_opacity = MIN (current_opacity + OPACITY_STEP, 255);
   } else {
-    new_opacity = MAX (current_opacity - OPACITY_STEP, 0);
+    new_opacity = MAX (current_opacity - OPACITY_STEP, MAX (0, meta_prefs_get_min_win_opacity ()));
   }
 
   if (new_opacity != current_opacity) {
