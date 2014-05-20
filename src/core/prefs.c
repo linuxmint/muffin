@@ -53,6 +53,7 @@
 #define KEY_GNOME_CURSOR_THEME "cursor-theme"
 #define KEY_GNOME_CURSOR_SIZE "cursor-size"
 
+#define KEY_MIN_WINDOW_OPACITY "min-window-opacity"
 #define KEY_WS_NAMES_GNOME "workspace-names"
 #define KEY_OVERLAY_KEY "overlay-key"
 #define KEY_LIVE_HIDDEN_WINDOWS "live-hidden-windows"
@@ -129,6 +130,7 @@ static gboolean update_binding         (MetaKeyPref *binding,
 static gboolean update_key_binding     (const char  *key,
                                         gchar      **strokes);
 static gboolean update_workspace_names (void);
+static void update_min_win_opacity (void);
 
 static void settings_changed (GSettings      *settings,
                               gchar          *key,
@@ -530,17 +532,6 @@ static MetaIntPreference preferences_int[] =
       },
       &resize_threshold
     },
-    {
-      { "min-window-opacity",
-        SCHEMA_GENERAL,
-        META_PREF_MIN_WIN_OPACITY,
-      },
-      &min_window_opacity
-    },
-
-
-
-
     { { NULL, 0, 0 }, NULL },
   };
 
@@ -967,6 +958,7 @@ meta_prefs_init (void)
 
   init_bindings ();
   init_workspace_names ();
+  update_min_win_opacity ();
 }
 
 static gboolean
@@ -1120,11 +1112,18 @@ settings_changed (GSettings *settings,
   /* String array, handled separately */
   if (strcmp (key, KEY_WORKSPACE_NAMES) == 0)
     {
-      if (update_workspace_names ());
+      if (update_workspace_names ())
         queue_changed (META_PREF_WORKSPACE_NAMES);
       return;
     }
   
+  if (strcmp (key, KEY_MIN_WINDOW_OPACITY) == 0)
+    {
+      update_min_win_opacity ();
+      queue_changed (META_PREF_MIN_WIN_OPACITY);
+      return;
+    }
+
   if (strcmp(schema, SCHEMA_CINNAMON) == 0)
     return;
 
@@ -2019,6 +2018,18 @@ update_workspace_names (void)
     g_strfreev (names);
 
   return changed;
+}
+
+static void
+update_min_win_opacity (void)
+{
+  int pct;
+  int mapped;
+
+  pct = g_settings_get_int (SETTINGS (SCHEMA_GENERAL), KEY_MIN_WINDOW_OPACITY);
+  mapped = (int)(((double)pct / 100.0) * 255.0);
+
+  min_window_opacity = CLAMP (mapped, 0, 255);
 }
 
 const char*
