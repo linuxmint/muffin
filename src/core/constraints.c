@@ -444,7 +444,7 @@ setup_constraint_info (ConstraintInfo      *info,
    * fullscreen themselves properly.
    */
   if (meta_prefs_get_force_fullscreen() &&
-      (window->decorated || !meta_window_is_client_decorated (window)) &&
+      (window->decorated && !meta_window_is_client_decorated (window)) &&
       meta_rectangle_equal (new, &monitor_info->rect) &&
       window->has_fullscreen_func &&
       !window->fullscreen)
