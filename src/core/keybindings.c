@@ -3382,9 +3382,9 @@ get_new_tile_mode (MetaTileMode direction,
             break;
         case META_TILE_MAXIMIZE:
             if (direction == META_TILE_LEFT)
-                ret = META_TILE_ULC;
+                ret = META_TILE_LEFT;
             else if (direction == META_TILE_RIGHT)
-                ret = META_TILE_URC;
+                ret = META_TILE_RIGHT;
             else if (direction == META_TILE_TOP)
                 ret = direction;
             else if (direction == META_TILE_BOTTOM)
