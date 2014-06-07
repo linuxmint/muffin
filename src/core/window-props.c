@@ -692,21 +692,11 @@ reload_net_wm_state (MetaWindow    *window,
   i = 0;
   while (i < value->v.atom_list.n_atoms)
     {
-      if (value->v.atom_list.atoms[i] == window->display->atom__NET_WM_STATE_TILED)
-        window->tile_after_placement = TRUE;
-      ++i;
-    }
-
-  i = 0;
-  while (i < value->v.atom_list.n_atoms)
-    {
       if (value->v.atom_list.atoms[i] == window->display->atom__NET_WM_STATE_SHADED)
         window->shaded = TRUE;
-      else if (value->v.atom_list.atoms[i] == window->display->atom__NET_WM_STATE_MAXIMIZED_HORZ &&
-               !window->tile_after_placement)
+      else if (value->v.atom_list.atoms[i] == window->display->atom__NET_WM_STATE_MAXIMIZED_HORZ)
         window->maximize_horizontally_after_placement = TRUE;
-      else if (value->v.atom_list.atoms[i] == window->display->atom__NET_WM_STATE_MAXIMIZED_VERT &&
-               !window->tile_after_placement)
+      else if (value->v.atom_list.atoms[i] == window->display->atom__NET_WM_STATE_MAXIMIZED_VERT)
         window->maximize_vertically_after_placement = TRUE;
       else if (value->v.atom_list.atoms[i] == window->display->atom__NET_WM_STATE_HIDDEN)
         window->minimize_after_placement = TRUE;
@@ -726,6 +716,8 @@ reload_net_wm_state (MetaWindow    *window,
         window->wm_state_demands_attention = TRUE;
       else if (value->v.atom_list.atoms[i] == window->display->atom__NET_WM_STATE_STICKY)
         window->on_all_workspaces_requested = TRUE;
+      else if (value->v.atom_list.atoms[i] == window->display->atom__NET_WM_STATE_TILED)
+        window->tile_after_placement = TRUE;
       ++i;
     }
 
