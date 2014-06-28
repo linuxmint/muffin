@@ -1698,7 +1698,7 @@ meta_window_unmanage (MetaWindow  *window,
 
   if (window->display->compositor)
     {
-      if (window->visible_to_compositor)
+      if (window->visible_to_compositor || meta_window_is_attached_dialog (window))
         meta_compositor_hide_window (window->display->compositor, window,
                                      META_COMP_EFFECT_DESTROY);
 
