@@ -4,49 +4,53 @@ Priority: optional
 Maintainer: Linux Mint <root@linuxmint.com>
 Build-Depends: debhelper (>= 9),
                dh-autoreconf,
-               intltool (>= 0.34.90),
-               libgtk-3-dev (>= 3.0.8-1~),
-               libcanberra-gtk3-dev,
-               gobject-introspection (>= 0.9.12-5~),
-               libgirepository1.0-dev (>= 0.9.12),
-               libjson-glib-dev (>= 0.13.2-1~),
-               libclutter-1.0-dev (>= 1.7.5),
-               libpango1.0-dev (>= 1.2.0),
-               libgconf2-dev (>= 2.6.1-2),
-               libglib2.0-dev (>= 2.6.0),
-               libstartup-notification0-dev (>= 0.7),
-               libxcomposite-dev (>= 1:0.2),
-               libxfixes-dev,
-               libxrender-dev,
-               libxdamage-dev,
-               libxcursor-dev,
-               libxt-dev,
-               libx11-dev,
-               libxinerama-dev,
-               libxext-dev,
-               libxrandr-dev,
-               libsm-dev,
-               libice-dev,
-               zenity,
+               dh-acc,
                gnome-doc-utils (>= 0.8),
                gnome-pkg-tools (>= 0.10),
+               gobject-introspection (>= 0.9.12-5~),
+               intltool (>= 0.34.90),
+               libcanberra-gtk3-dev,
                libcinnamon-desktop-dev (>= 1.0.0),
-               gobject-introspection
+               libclutter-1.0-dev (>= 1.7.5),
+               libgconf2-dev (>= 2.6.1-2),
+               libgirepository1.0-dev (>= 0.9.12),
+               libglib2.0-dev (>= 2.6.0),
+               libgtk-3-dev (>= 3.0.8-1~),
+               libice-dev,
+               libjson-glib-dev (>= 0.13.2-1~),
+               libpango1.0-dev (>= 1.2.0),
+               libsm-dev,
+               libstartup-notification0-dev (>= 0.7),
+               libx11-dev,
+               libxcomposite-dev (>= 1:0.2),
+               libxcursor-dev,
+               libxdamage-dev,
+               libxext-dev,
+               libxfixes-dev,
+               libxinerama-dev,
+               libxrandr-dev,
+               libxrender-dev,
+               libxt-dev,
+               zenity
 Standards-Version: 3.9.4
 
 Package: muffin
 Architecture: any
 Pre-Depends: ${misc:Pre-Depends}
-Depends: ${shlibs:Depends},
+Depends: muffin-common (= ${source:Version}),
+         zenity,
          ${misc:Depends},
-         muffin-common (= ${source:Version}),
-         zenity
+         ${shlibs:Depends}
 Provides: x-window-manager
-Suggests: gnome-themes,
-          xdg-user-dirs
-Description: window and compositing manager
- Muffin is a window manager performing compositing as well based on
- GTK+ and Clutter and used in Cinnamon desktop environment.
+Recommends: cinnamon-session | x-session-manager
+Suggests: cinnamon-control-center, xdg-user-dirs
+Description: lightweight window and compositing manager
+ Muffin is a small window manager performing compositing as well based on
+ GTK+ and Clutter and used in desktop environment such as Cinnamon.
+ .
+ It is fairly extensible by the mean of plugins, providing new or customized
+ visual effects as well as a flexibility in the behavior of the window
+ manager.
  .
  This package contains the core binaries.
 
@@ -54,38 +58,80 @@ Package: libmuffin0
 Section: libs
 Architecture: any
 Pre-Depends: ${misc:Pre-Depends}
-Depends: ${shlibs:Depends},
-         ${misc:Depends},
-         muffin-common (= ${source:Version})
-Description: window and compositing manager (shared library)
- Muffin is a window manager performing compositing as well based on
- GTK+ and Clutter and used in Cinnamon desktop environment.
+Depends: muffin-common (= ${source:Version}), ${misc:Depends}, ${shlibs:Depends}
+Description: lightweight window and compositing manager (shared library)
+ Muffin is a small window manager performing compositing as well based on
+ GTK+ and Clutter and used in desktop environment such as Cinnamon.
  .
- This package contains the shared library.
+ It is fairly extensible by the mean of plugins, providing new or customized
+ visual effects as well as a flexibility in the behavior of the window
+ manager.
+ .
+ This package contains the window manager shared library, used by muffin
+ itself, and Cinnamon.
 
 Package: muffin-common
 Section: misc
 Architecture: all
 Depends: ${misc:Depends}
-Description: window and compositing manager (data files)
- Muffin is a window manager performing compositing as well based on
- GTK+ and Clutter and used in Cinnamon desktop environment.
+Description: lightweight window and compositing manager (data files)
+ Muffin is a small window manager performing compositing as well based on
+ GTK+ and Clutter and used in desktop environment such as Cinnamon.
  .
- This package contains the shared files.
+ It is fairly extensible by the mean of plugins, providing new or customized
+ visual effects as well as a flexibility in the behavior of the window
+ manager.
+ .
+ This package contains the shared data files.
 
 Package: libmuffin-dev
 Section: libdevel
 Architecture: any
-Depends: ${misc:Depends},
-         libmuffin0 (= ${binary:Version}),
-         gir1.2-muffin-3.0 (= ${binary:Version}),
+Depends: gir1.2-muffin-3.0 (= ${binary:Version}),
          libclutter-1.0-dev (>= 1.0.0),
-         libgtk-3-dev (>= 3.0.0)
-Description: window and compositing manager (development files)
- Muffin is a window manager performing compositing as well based on
- GTK+ and Clutter and used in Cinnamon desktop environment.
+         libgtk-3-dev (>= 3.0.0),
+         libmuffin0 (= ${binary:Version}),
+         ${misc:Depends}
+Description: lightweight window and compositing manager (development files)
+ Muffin is a small window manager performing compositing as well based on
+ GTK+ and Clutter and used in desktop environment such as Cinnamon.
+ .
+ It is fairly extensible by the mean of plugins, providing new or customized
+ visual effects as well as a flexibility in the behavior of the window
+ manager.
  .
  This package contains the development files.
+
+Package: gir1.2-meta-muffin-0.0
+Section: introspection
+Architecture: any
+Depends: ${gir:Depends}, ${misc:Depends}
+Description: GObject introspection data for Muffin
+ Muffin is a small window manager performing compositing as well based on
+ GTK+ and Clutter and used in desktop environment such as Cinnamon.
+ .
+ It is fairly extensible by the mean of plugins, providing new or customized
+ visual effects as well as a flexibility in the behavior of the window
+ manager.
+ .
+ This package contains the GObject introspection data which may be
+ used to generate dynamic bindings.
+
+Package: gir1.2-muffin-3.0
+Section: introspection
+Architecture: any
+Depends: ${gir:Depends}, ${misc:Depends}
+Description: GObject introspection data for Muffin (compatibility version)
+ Muffin is a small window manager performing compositing as well based on
+ GTK+ and Clutter and used in desktop environment such as Cinnamon.
+ .
+ It is fairly extensible by the mean of plugins, providing new or customized
+ visual effects as well as a flexibility in the behavior of the window
+ manager.
+ .
+ This package contains the GObject introspection data which may be used to
+ generate dynamic bindings. It provides the old API version for typelib to
+ be used by old version of cinnamon.
 
 Package: muffin-dbg
 Section: debug
@@ -94,20 +140,12 @@ Architecture: any
 Depends: libmuffin0 (= ${binary:Version}),
          muffin (= ${binary:Version}),
          ${misc:Depends}
-Description: window and compositing manager (debugging symbols)
- Muffin is a window manager performing compositing as well based on
- GTK+ and Clutter and used in Cinnamon desktop environment.
+Description: lightweight window and compositing manager (debugging symbols)
+ Muffin is a small window manager performing compositing as well based on
+ GTK+ and Clutter and used in desktop environment such as Cinnamon.
+ .
+ It is fairly extensible by the mean of plugins, providing new or customized
+ visual effects as well as a flexibility in the behavior of the window
+ manager.
  .
  This package contains the debugging symbols.
-
-Package: gir1.2-muffin-3.0
-Section: introspection
-Architecture: any
-Depends: ${gir:Depends},
-         ${misc:Depends}
-Description: GObject introspection data for Muffin
- Muffin is a window manager performing compositing as well based on
- GTK+ and Clutter and used in Cinnamon desktop environment.
- .
- This package contains the GObject introspection data which may be
- used to generate dynamic bindings.

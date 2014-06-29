@@ -1,5 +1,5 @@
-usr/share/GConf
-usr/share/glib-2.0
-usr/share/locale
-usr/share/man
+usr/share/GConf/gsettings/muffin-*
+usr/share/glib-2.0/*/*muffin*
+usr/share/locale/*/*/muffin.mo
+usr/share/man/*/muffin*
 usr/share/muffin

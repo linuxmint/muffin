@@ -219,12 +219,12 @@ api_version = Muffin.0
 # by plugins.  If you're writing a plugin, use g-ir-compiler --add-include-path
 # and g-ir-compiler --includedir.
 girdir = $(pkglibdir)
-gir_DATA = Meta-$(api_version).gir
+gir_DATA = Meta-$(api_version).gir Meta-3.0.gir
 
 typelibdir = $(pkglibdir)
-typelib_DATA = Meta-$(api_version).typelib
+typelib_DATA = Meta-$(api_version).typelib Meta-3.0.typelib
 
-INTROSPECTION_GIRS = Meta-$(api_version).gir
+INTROSPECTION_GIRS = $(gir_DATA)
 
 Meta-$(api_version).gir: libmuffin.la
 @META_GIR@_INCLUDES = GObject-2.0 CDesktopEnums-3.0 Gdk-3.0 Gtk-3.0 Clutter-1.0 xlib-2.0 xfixes-4.0
@@ -236,6 +236,17 @@ Meta-$(api_version).gir: libmuffin.la
 	$(libmuffininclude_base_headers)	\
 	$(filter %.c,$(libmuffin_la_SOURCES))
 @META_GIR@_SCANNERFLAGS = --warn-all --warn-error
+
+Meta-3.0.gir: libmuffin.la
+Meta_3_0_gir_INCLUDES = GObject-2.0 CDesktopEnums-3.0 Gdk-3.0 Gtk-3.0 Clutter-1.0 xlib-2.0 xfixes-4.0
+Meta_3_0_gir_PACKAGES = clutter-1.0 gtk+-3.0
+Meta_3_0_gir_CFLAGS = $(INCLUDES)
+Meta_3_0_gir_LIBS = libmuffin.la
+Meta_3_0_gir_FILES =				\
+	muffin-enum-types.h			\
+	$(libmuffininclude_base_headers)	\
+	$(filter %.c,$(libmuffin_la_SOURCES))
+Meta_3_0_gir_SCANNERFLAGS = --warn-all --warn-error
 
 endif
 
