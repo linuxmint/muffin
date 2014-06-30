@@ -2791,19 +2791,17 @@ handle_move_to_corner_backend (MetaDisplay    *display,
 {
   MetaRectangle work_area;
   MetaRectangle outer;
-  int orig_x, orig_y;
   int new_x, new_y;
 
   meta_window_get_work_area_all_monitors (window, &work_area);
   meta_window_get_outer_rect (window, &outer);
-  meta_window_get_position (window, &orig_x, &orig_y);
 
   if (xchange) {
     new_x = work_area.x + (to_right ?
             work_area.width - outer.width :
             0);
   } else {
-    new_x = orig_x;
+    new_x = outer.x;
   }
 
   if (ychange) {
@@ -2811,7 +2809,7 @@ handle_move_to_corner_backend (MetaDisplay    *display,
             work_area.height - outer.height :
             0);
   } else {
-    new_y = orig_y;
+    new_y = outer.y;
   }
 
   meta_window_move_frame (window,
