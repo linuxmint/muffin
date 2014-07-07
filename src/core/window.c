@@ -1817,7 +1817,7 @@ meta_window_unmanage (MetaWindow  *window,
    * window so we need to send a configure notify; see bug 399552.  (We
    * also do this just in case a window got unmaximized.)
    */
-
+  send_configure_notify (window);
 
   meta_window_unqueue (window, META_QUEUE_CALC_SHOWING |
                                META_QUEUE_MOVE_RESIZE |
@@ -1855,8 +1855,6 @@ meta_window_unmanage (MetaWindow  *window,
   if (window->frame)
     meta_window_destroy_frame (window);
 
-
-  send_configure_notify (window);
   /* If an undecorated window is being withdrawn, that will change the
    * stack as presented to the compositing manager, without actually
    * changing the stacking order of X windows.
@@ -7414,8 +7412,8 @@ send_configure_notify (MetaWindow *window)
   event.xconfigure.above = None; /* FIXME */
   event.xconfigure.override_redirect = False;
 
-  g_printerr (          "Sending synthetic configure notify to %s with x: %d y: %d w: %d h: %d\n",
-              window->desc,
+  meta_topic (META_DEBUG_GEOMETRY,
+              "Sending synthetic configure notify to %s with x: %d y: %d w: %d h: %d\n",              window->desc,
               event.xconfigure.x, event.xconfigure.y,
               event.xconfigure.width, event.xconfigure.height);
 
