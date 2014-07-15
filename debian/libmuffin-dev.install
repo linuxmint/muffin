@@ -1,4 +1,4 @@
-usr/include
+usr/include/muffin
 usr/lib/*/libmuffin.so
+usr/lib/*/muffin/*.gir	/usr/share/gir-1.0
 usr/lib/*/pkgconfig/*.pc
-usr/lib/*/muffin/Meta-*.gir
