@@ -240,8 +240,6 @@ struct _MetaDisplay
   unsigned int hyper_mask;
   unsigned int super_mask;
   unsigned int meta_mask;
-  MetaKeyCombo overlay_key_combo;
-  gboolean overlay_key_only_pressed;
   
   /* Monitor cache */
   unsigned int monitor_cache_invalidated : 1;
@@ -436,8 +434,6 @@ gboolean meta_display_focus_sentinel_clear (MetaDisplay *display);
 void meta_display_queue_autoraise_callback  (MetaDisplay *display,
                                              MetaWindow  *window);
 void meta_display_remove_autoraise_callback (MetaDisplay *display);
-
-void meta_display_overlay_key_activate (MetaDisplay *display);
 
 /* In above-tab-keycode.c */
 guint meta_display_get_above_tab_keycode (MetaDisplay *display);

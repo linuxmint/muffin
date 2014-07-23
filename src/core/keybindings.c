@@ -49,6 +49,7 @@
 #endif
 
 #define SCHEMA_MUFFIN_KEYBINDINGS "org.cinnamon.muffin.keybindings"
+#define SCHEMA_MUFFIN "org.cinnamon.muffin"
 
 static gboolean all_bindings_disabled = FALSE;
 
@@ -303,12 +304,6 @@ reload_keycodes (MetaDisplay *display)
   meta_topic (META_DEBUG_KEYBINDINGS,
               "Reloading keycodes for binding tables\n");
 
-  if (display->overlay_key_combo.keysym != 0)
-    {
-      display->overlay_key_combo.keycode =
-        keysym_to_keycode (display, display->overlay_key_combo.keysym);
-    }
-  
   if (display->key_bindings)
     {
       int i;
@@ -477,19 +472,6 @@ rebuild_key_binding_table (MetaDisplay *display)
                          &display->n_key_bindings,
                          prefs);
   g_list_free (prefs);
-}
-
-static void
-rebuild_special_bindings (MetaDisplay *display)
-{
-  MetaKeyCombo combo;
-  
-  meta_prefs_get_overlay_binding (&combo);
-
-  if (combo.keysym != None || combo.keycode != 0)
-    {
-      display->overlay_key_combo = combo;
-    }
 }
 
 static void
@@ -797,22 +779,6 @@ meta_display_keybinding_action_invoke_by_code (MetaDisplay  *display,
     invoke_handler_by_name (display, NULL, binding->name, NULL, NULL);
 }
 
-gboolean
-meta_display_get_is_overlay_key (MetaDisplay *display,
-                                 unsigned int keycode,
-                                 unsigned long mask)
-{
-
-    MetaKeyCombo combo;
-    KeySym keysym;
-
-    keysym = XkbKeycodeToKeysym (display->xdisplay, keycode, 0, 0);
-    mask = mask & 0xff & ~display->ignored_modifier_mask;
-    meta_prefs_get_overlay_binding (&combo);
-
-    return combo.keysym == keysym && combo.modifiers == mask;
-}
-
 LOCAL_SYMBOL void
 meta_display_process_mapping_event (MetaDisplay *display,
                                     XEvent      *event)
@@ -879,7 +845,6 @@ bindings_changed_callback (MetaPreference pref,
     {
     case META_PREF_KEYBINDINGS:
       rebuild_key_binding_table (display);
-      rebuild_special_bindings (display);
       reload_keycodes (display);
       reload_modifiers (display);
       regrab_key_bindings (display);
@@ -893,7 +858,6 @@ void
 meta_display_rebuild_keybindings (MetaDisplay *display)
 {
     rebuild_key_binding_table (display);
-    rebuild_special_bindings (display);
     reload_keycodes (display);
     reload_modifiers (display);
     regrab_key_bindings (display);
@@ -1070,18 +1034,11 @@ ungrab_all_keys (MetaDisplay *display,
 LOCAL_SYMBOL void
 meta_screen_grab_keys (MetaScreen *screen)
 {
-  MetaDisplay *display = screen->display;  
   if (screen->all_keys_grabbed)
     return;
 
   if (screen->keys_grabbed)
     return;
-  
-  if (display->overlay_key_combo.keycode != 0)
-    meta_grab_key (display, screen->xroot,
-                   display->overlay_key_combo.keysym,
-                   display->overlay_key_combo.keycode,
-                   display->overlay_key_combo.modifiers);
 
   grab_keys (screen->display->key_bindings,
              screen->display->n_key_bindings,
@@ -1583,73 +1540,6 @@ process_event (MetaKeyBinding       *bindings,
   return FALSE;
 }
 
-static gboolean
-process_overlay_key (MetaDisplay *display,
-                     MetaScreen *screen,
-                     XEvent *event,
-                     KeySym keysym)
-{
-  if (display->overlay_key_only_pressed)
-    {
-      if (event->xkey.keycode != display->overlay_key_combo.keycode)
-        {
-          display->overlay_key_only_pressed = FALSE;
-
-          /* OK, the user hit modifier+key rather than pressing and
-           * releasing the ovelay key. We want to handle the key
-           * sequence "normally". Unfortunately, using
-           * XAllowEvents(..., ReplayKeyboard, ...) doesn't quite
-           * work, since global keybindings won't be activated ("this
-           * time, however, the function ignores any passive grabs at
-           * above (toward the root of) the grab_window of the grab
-           * just released.") So, we first explicitly check for one of
-           * our global keybindings, and if not found, we then replay
-           * the event. Other clients with global grabs will be out of
-           * luck.
-           */
-          if (process_event (display->key_bindings,
-                             display->n_key_bindings,
-                             display, screen, NULL, event, keysym,
-                             FALSE))
-            {
-              /* As normally, after we've handled a global key
-               * binding, we unfreeze the keyboard but keep the grab
-               * (this is important for something like cycling
-               * windows */
-              XAllowEvents (display->xdisplay, AsyncKeyboard, event->xkey.time);
-            }
-          else
-            {
-              /* Replay the event so it gets delivered to our
-               * per-window key bindings or to the application */
-              XAllowEvents (display->xdisplay, ReplayKeyboard, event->xkey.time);
-            }
-        }
-      else if (event->xkey.type == KeyRelease)
-        {
-          display->overlay_key_only_pressed = FALSE;
-          /* We want to unfreeze events, but keep the grab so that if the user
-           * starts typing into the overlay we get all the keys */
-          XAllowEvents (display->xdisplay, AsyncKeyboard, event->xkey.time);
-          meta_display_overlay_key_activate (display);
-        }
-
-      return TRUE;
-    }
-  else if (event->xkey.type == KeyPress &&
-           event->xkey.keycode == display->overlay_key_combo.keycode)
-    {
-      display->overlay_key_only_pressed = TRUE;
-      /* We keep the keyboard frozen - this allows us to use ReplayKeyboard
-       * on the next event if it's not the release of the overlay key */
-      XAllowEvents (display->xdisplay, SyncKeyboard, event->xkey.time);
-
-      return TRUE;
-    }
-  else
-    return FALSE;
-}
-
 /* Handle a key event. May be called recursively: some key events cause
  * grabs to be ended and then need to be processed again in their own
  * right. This cannot cause infinite recursion because we never call
@@ -1672,7 +1562,6 @@ meta_display_process_key_event (MetaDisplay *display,
   KeySym keysym;
   gboolean keep_grab;
   gboolean all_keys_grabbed;
-  gboolean handled;
   const char *str;
   MetaScreen *screen;
 
@@ -1719,12 +1608,6 @@ meta_display_process_key_event (MetaDisplay *display,
               window ? window->desc : "(no window)");
 
   all_keys_grabbed = window ? window->all_keys_grabbed : screen->all_keys_grabbed;
-  if (!all_keys_grabbed)
-    {
-      handled = process_overlay_key (display, screen, event, keysym);
-      if (handled)
-        return TRUE;
-    }
 
   XAllowEvents (display->xdisplay, AsyncKeyboard, event->xkey.time);
 
@@ -4027,7 +3910,6 @@ init_builtin_key_bindings (MetaDisplay *display)
                           META_KEYBINDING_ACTION_WORKSPACE_DOWN,
                           handle_switch_to_workspace, META_MOTION_DOWN);
 
-
   /* The ones which have inverses.  These can't be bound to any keystroke
    * containing Shift because Shift will invert their "backward" state.
    *
@@ -4589,7 +4471,6 @@ meta_display_init_keys (MetaDisplay *display)
   init_builtin_key_bindings (display);
 
   rebuild_key_binding_table (display);
-  rebuild_special_bindings (display);
 
   reload_keycodes (display);
   reload_modifiers (display);

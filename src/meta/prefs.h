@@ -337,8 +337,6 @@ void meta_prefs_get_window_binding (const char          *name,
                                     unsigned int        *keysym,
                                     MetaVirtualModifier *modifiers);
 
-void meta_prefs_get_overlay_binding (MetaKeyCombo *combo);
-
 gboolean           meta_prefs_get_visual_bell      (void);
 gboolean           meta_prefs_bell_is_audible      (void);
 CDesktopVisualBellType meta_prefs_get_visual_bell_type (void);

@@ -133,7 +133,6 @@ G_DEFINE_TYPE(MetaDisplay, meta_display, G_TYPE_OBJECT);
 /* Signals */
 enum
 {
-  OVERLAY_KEY,
   FOCUS_WINDOW,
   WINDOW_CREATED,
   WINDOW_DEMANDS_ATTENTION,
@@ -231,14 +230,6 @@ meta_display_class_init (MetaDisplayClass *klass)
 
   object_class->get_property = meta_display_get_property;
   object_class->set_property = meta_display_set_property;
-
-  display_signals[OVERLAY_KEY] =
-    g_signal_new ("overlay-key",
-                  G_TYPE_FROM_CLASS (klass),
-                  G_SIGNAL_RUN_LAST,
-                  0,
-                  NULL, NULL, NULL,
-                  G_TYPE_NONE, 0);
 
   display_signals[WINDOW_CREATED] =
     g_signal_new ("window-created",
@@ -5465,12 +5456,6 @@ meta_display_remove_autoraise_callback (MetaDisplay *display)
       display->autoraise_timeout_id = 0;
       display->autoraise_window = NULL;
     }
-}
-
-LOCAL_SYMBOL void
-meta_display_overlay_key_activate (MetaDisplay *display)
-{
-  g_signal_emit (display, display_signals[OVERLAY_KEY], 0);
 }
 
 void

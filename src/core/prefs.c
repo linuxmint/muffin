@@ -55,7 +55,6 @@
 
 #define KEY_MIN_WINDOW_OPACITY "min-window-opacity"
 #define KEY_WS_NAMES_GNOME "workspace-names"
-#define KEY_OVERLAY_KEY "overlay-key"
 #define KEY_LIVE_HIDDEN_WINDOWS "live-hidden-windows"
 #define KEY_WORKSPACES_ONLY_ON_PRIMARY "workspaces-only-on-primary"
 #define KEY_NO_TAB_POPUP "no-tab-popup"
@@ -1154,10 +1153,6 @@ settings_changed (GSettings *settings,
       else
         handle_preference_update_string (settings, key);
     }
-  else if (g_str_equal (key, KEY_OVERLAY_KEY))
-    {
-      queue_changed (META_PREF_KEYBINDINGS);
-    }
   else if (g_str_equal (key, KEY_WS_NAMES_GNOME))
     {
       return;
@@ -1851,8 +1846,6 @@ meta_prefs_set_num_workspaces (int n_workspaces)
 
 static GHashTable *key_bindings;
 
-static MetaKeyCombo overlay_key_combo = { 0, 0, 0 };
-
 static void
 meta_key_pref_free (MetaKeyPref *pref)
 {
@@ -1864,37 +1857,11 @@ meta_key_pref_free (MetaKeyPref *pref)
   g_free (pref);
 }
 
-/* These bindings are for modifiers alone, so they need special handling */
-static void
-init_special_bindings (void)
-{
-  char *val;
-  
-  /* Default values for bindings which are global, but take special handling */
-  meta_ui_parse_accelerator ("Super_L", &overlay_key_combo.keysym, 
-                             &overlay_key_combo.keycode, 
-                             &overlay_key_combo.modifiers);
-
-  val = g_settings_get_string (SETTINGS (SCHEMA_MUFFIN), KEY_OVERLAY_KEY);
-    
-  if (val && meta_ui_parse_accelerator (val, &overlay_key_combo.keysym, 
-                                        &overlay_key_combo.keycode, 
-                                        &overlay_key_combo.modifiers))
-    ;
-  else
-    {
-      meta_topic (META_DEBUG_KEYBINDINGS,
-                  "Failed to parse value for overlay_key\n");
-    }
-  g_free (val);
-}
-
 static void
 init_bindings (void)
 {
   key_bindings = g_hash_table_new_full (g_str_hash, g_str_equal, g_free,
                                         (GDestroyNotify)meta_key_pref_free);
-  init_special_bindings ();  
 }
 
 static void
@@ -2276,12 +2243,6 @@ GList *
 meta_prefs_get_keybindings ()
 {
   return g_hash_table_get_values (key_bindings);
-}
-
-void 
-meta_prefs_get_overlay_binding (MetaKeyCombo *combo)
-{
-  *combo = overlay_key_combo;
 }
 
 CDesktopTitlebarAction

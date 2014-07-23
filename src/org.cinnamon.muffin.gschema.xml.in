@@ -8,19 +8,6 @@
   <schema id="org.cinnamon.muffin" path="/org/cinnamon/muffin/"
           gettext-domain="@GETTEXT_DOMAIN">
 
-    <key name="overlay-key" type="s">
-      <default>'Super_L'</default>
-      <_summary>Modifier to use for extended window management operations</_summary>
-      <_description>
-        This key will initiate the "overlay", which is a combination window
-        overview and application launching system.  The default is intended
-        to be the "Windows key" on PC hardware.
-
-        It's expected that this binding either the default or set to
-        the empty string.
-      </_description>
-    </key>
-
     <key name="attach-modal-dialogs" type="b">
       <default>false</default>
       <_summary>Attach modal dialogs</_summary>
