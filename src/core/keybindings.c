@@ -48,10 +48,11 @@
 #include <X11/XKBlib.h>
 #endif
 
-#define SCHEMA_MUFFIN_KEYBINDINGS "org.cinnamon.muffin.keybindings"
+#define SCHEMA_MUFFIN_KEYBINDINGS "org.cinnamon.desktop.keybindings.wm"
 #define SCHEMA_MUFFIN "org.cinnamon.muffin"
 
 static gboolean all_bindings_disabled = FALSE;
+static gboolean modifier_only_is_down = FALSE;
 
 static gboolean add_builtin_keybinding (MetaDisplay          *display,
                                         const char           *name,
@@ -644,7 +645,7 @@ meta_display_remove_keybinding (MetaDisplay *display,
 static gboolean
 add_custom_keybinding_internal (MetaDisplay          *display,
                               const char           *name,
-                              const char           *binding,
+                              const char          **bindings,
                               MetaKeyBindingFlags   flags,
                               MetaKeyBindingAction  action,
                               MetaKeyHandlerFunc    func,
@@ -654,7 +655,7 @@ add_custom_keybinding_internal (MetaDisplay          *display,
 {
   MetaKeyHandler *handler;
 
-  if (!meta_prefs_add_custom_keybinding (name, binding, action, flags))
+  if (!meta_prefs_add_custom_keybinding (name, bindings, action, flags))
     return FALSE;
 
   handler = g_new0 (MetaKeyHandler, 1);
@@ -676,7 +677,7 @@ add_custom_keybinding_internal (MetaDisplay          *display,
  * meta_display_add_custom_keybinding:
  * @display: a #MetaDisplay
  * @name: the binding's unique name
- * @binding: the parseable keystrokes string (<Control>F1, etc..)
+ * @bindings: (allow-none) (array zero-terminated=1): array of parseable keystrokes
  * @callback: function to run when the keybinding is invoked
  * @user_data: the data to pass to @handler
  * @free_data: function to free @user_data
@@ -688,15 +689,15 @@ add_custom_keybinding_internal (MetaDisplay          *display,
  *          otherwise %FALSE
  */
 gboolean
-meta_display_add_custom_keybinding (MetaDisplay         *display,
+meta_display_add_custom_keybinding (MetaDisplay       *display,
                                   const char          *name,
-                                  const char          *binding,
+                                  const char         **bindings,
                                   MetaKeyHandlerFunc   callback,
                                   gpointer             user_data,
                                   GDestroyNotify       free_data)
 
 {
-  return add_custom_keybinding_internal (display, name, binding,
+  return add_custom_keybinding_internal (display, name, bindings,
                                        META_KEY_BINDING_NONE,
                                        META_KEYBINDING_ACTION_CUSTOM,
                                        (MetaKeyHandlerFunc)callback, 0, user_data, free_data);
@@ -1475,6 +1476,62 @@ invoke_handler_by_name (MetaDisplay    *display,
     invoke_handler (display, screen, handler, window, event, NULL);
 }
 
+
+static gboolean
+modifier_only_keysym (KeySym keysym)
+{
+  return keysym == XK_Super_L ||
+         keysym == XK_Super_R ||
+         keysym == XK_Control_L ||
+         keysym == XK_Control_R ||
+         keysym == XK_Alt_L ||
+         keysym == XK_Alt_R ||
+         keysym == XK_Shift_L ||
+         keysym == XK_Shift_R;
+}
+
+static void
+strip_self_mod (KeySym keysym, unsigned long *mask)
+{
+  unsigned long mod = 0;
+
+  switch (keysym)
+    {
+      case XK_Super_L:
+      case XK_Super_R:
+        mod = GDK_MOD4_MASK;
+        break;
+      case XK_Control_L:
+      case XK_Control_R:
+        mod = GDK_CONTROL_MASK;
+        break;
+      case XK_Alt_L:
+      case XK_Alt_R:
+        mod = GDK_MOD1_MASK;
+        break;
+      case XK_Shift_L:
+      case XK_Shift_R:
+        mod = GDK_SHIFT_MASK;
+        break;
+      default:
+        mod = 0;
+        break;
+    }
+  
+  *mask = *mask & ~mod;
+}
+
+static gboolean
+is_modifier_only_kb (MetaDisplay *display, XEvent *event, KeySym keysym)
+{
+    unsigned long mask;
+
+    mask = (event->xkey.state & 0xff & ~(display->ignored_modifier_mask));
+    strip_self_mod (keysym, &mask);
+
+    return mask == 0 && modifier_only_keysym (keysym);
+}
+
 /* now called from only one place, may be worth merging */
 static gboolean
 process_event (MetaKeyBinding       *bindings,
@@ -1484,12 +1541,22 @@ process_event (MetaKeyBinding       *bindings,
                MetaWindow           *window,
                XEvent               *event,
                KeySym                keysym,
-               gboolean              on_window)
+               gboolean              on_window,
+               gboolean              allow_release)
 {
   int i;
+  unsigned long mask;
+
   /* we used to have release-based bindings but no longer. */
-  if (event->type == KeyRelease)
+  if (event->type == KeyRelease && !allow_release)
     return FALSE;
+
+  mask = event->xkey.state & 0xff & ~(display->ignored_modifier_mask);
+
+  if (allow_release)
+    {
+      strip_self_mod (keysym, &mask);
+    }
 
   /*
    * TODO: This would be better done with a hash table;
@@ -1500,10 +1567,9 @@ process_event (MetaKeyBinding       *bindings,
       MetaKeyHandler *handler = bindings[i].handler;
 
       if ((!on_window && handler->flags & META_KEY_BINDING_PER_WINDOW) ||
-          event->type != KeyPress ||
+          (event->type != KeyPress && !allow_release) ||
           bindings[i].keycode != event->xkey.keycode ||
-          ((event->xkey.state & 0xff & ~(display->ignored_modifier_mask)) !=
-           bindings[i].mask))
+          mask != bindings[i].mask)
         continue;
 
       /*
@@ -1540,6 +1606,76 @@ process_event (MetaKeyBinding       *bindings,
   return FALSE;
 }
 
+static gboolean
+process_modifier_key (MetaDisplay *display,
+                     MetaScreen *screen,
+                     XEvent *event,
+                     KeySym keysym)
+{
+  if (modifier_only_is_down)
+    {
+      if (!is_modifier_only_kb (display, event, keysym))
+        {
+          modifier_only_is_down = FALSE;
+
+          /* OK, the user hit modifier+key rather than pressing and
+           * releasing the ovelay key. We want to handle the key
+           * sequence "normally". Unfortunately, using
+           * XAllowEvents(..., ReplayKeyboard, ...) doesn't quite
+           * work, since global keybindings won't be activated ("this
+           * time, however, the function ignores any passive grabs at
+           * above (toward the root of) the grab_window of the grab
+           * just released.") So, we first explicitly check for one of
+           * our global keybindings, and if not found, we then replay
+           * the event. Other clients with global grabs will be out of
+           * luck.
+           */
+          if (process_event (display->key_bindings,
+                             display->n_key_bindings,
+                             display, screen, NULL, event, keysym,
+                             FALSE, FALSE))
+            {
+              /* As normally, after we've handled a global key
+               * binding, we unfreeze the keyboard but keep the grab
+               * (this is important for something like cycling
+               * windows */
+              XAllowEvents (display->xdisplay, AsyncKeyboard, event->xkey.time);
+            }
+          else
+            {
+              /* Replay the event so it gets delivered to our
+               * per-window key bindings or to the application */
+              XAllowEvents (display->xdisplay, ReplayKeyboard, event->xkey.time);
+            }
+        }
+      else if (event->xkey.type == KeyRelease)
+        {
+          modifier_only_is_down = FALSE;
+          /* We want to unfreeze events, but keep the grab so that if the user
+           * starts typing into the overlay we get all the keys */
+          XAllowEvents (display->xdisplay, AsyncKeyboard, event->xkey.time);
+          return process_event (display->key_bindings,
+                                display->n_key_bindings,
+                                display, screen, NULL, event, keysym,
+                                FALSE, TRUE);
+        }
+
+      return TRUE;
+    }
+  else if (event->xkey.type == KeyPress &&
+           is_modifier_only_kb (display, event, keysym))
+    {
+      modifier_only_is_down = TRUE;
+      /* We keep the keyboard frozen - this allows us to use ReplayKeyboard
+       * on the next event if it's not the release of the overlay key */
+      XAllowEvents (display->xdisplay, SyncKeyboard, event->xkey.time);
+
+      return TRUE;
+    }
+  else
+    return FALSE;
+}
+
 /* Handle a key event. May be called recursively: some key events cause
  * grabs to be ended and then need to be processed again in their own
  * right. This cannot cause infinite recursion because we never call
@@ -1562,6 +1698,7 @@ meta_display_process_key_event (MetaDisplay *display,
   KeySym keysym;
   gboolean keep_grab;
   gboolean all_keys_grabbed;
+  gboolean handled;
   const char *str;
   MetaScreen *screen;
 
@@ -1608,6 +1745,13 @@ meta_display_process_key_event (MetaDisplay *display,
               window ? window->desc : "(no window)");
 
   all_keys_grabbed = window ? window->all_keys_grabbed : screen->all_keys_grabbed;
+
+  if (!all_keys_grabbed)
+    {
+      handled = process_modifier_key (display, screen, event, keysym);
+      if (handled)
+        return TRUE;
+    }
 
   XAllowEvents (display->xdisplay, AsyncKeyboard, event->xkey.time);
 
@@ -1701,7 +1845,7 @@ meta_display_process_key_event (MetaDisplay *display,
   return process_event (display->key_bindings,
                         display->n_key_bindings,
                         display, screen, window, event, keysym,
-                        !all_keys_grabbed && window);
+                        !all_keys_grabbed && window, FALSE);
 }
 
 static gboolean
@@ -2958,9 +3102,6 @@ handle_panel (MetaDisplay    *display,
   switch (action)
     {
     /* FIXME: The numbers are wrong */
-    case META_KEYBINDING_ACTION_PANEL_MAIN_MENU:
-      action_atom = display->atom__GNOME_PANEL_ACTION_MAIN_MENU;
-      break;
     case META_KEYBINDING_ACTION_PANEL_RUN_DIALOG:
       action_atom = display->atom__GNOME_PANEL_ACTION_RUN_DIALOG;
       break;
@@ -4032,13 +4173,6 @@ init_builtin_key_bindings (MetaDisplay *display)
                           META_KEY_BINDING_NONE,
                           META_KEYBINDING_ACTION_SHOW_DESKTOP,
                           handle_show_desktop, 0);
-
-  add_builtin_keybinding (display,
-                          "panel-main-menu",
-                          SCHEMA_MUFFIN_KEYBINDINGS,
-                          META_KEY_BINDING_NONE,
-                          META_KEYBINDING_ACTION_PANEL_MAIN_MENU,
-                          handle_panel, META_KEYBINDING_ACTION_PANEL_MAIN_MENU);
 
   add_builtin_keybinding (display,
                           "panel-run-dialog",

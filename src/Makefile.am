@@ -268,9 +268,6 @@ gsettings_SCHEMAS = org.cinnamon.muffin.gschema.xml
 @INTLTOOL_XML_NOMERGE_RULE@
 @GSETTINGS_RULES@
 
-convertdir = $(datadir)/GConf/gsettings
-convert_DATA = muffin-schemas.convert
-
 IMAGES=stock_maximize.png stock_minimize.png stock_delete.png
 VARIABLES=stock_maximize_data $(srcdir)/stock_maximize.png \
           stock_minimize_data $(srcdir)/stock_minimize.png \
@@ -298,7 +295,6 @@ EXTRA_DIST=$(desktopfiles_files) 	\
 	$(desktopfiles_in_files)	\
 	$(xml_in_files)			\
 	org.cinnamon.muffin.gschema.xml.in \
-	muffin-schemas.convert \
 	libmuffin.pc.in \
 	muffin-plugins.pc.in  \
 	muffin-enum-types.h.in \

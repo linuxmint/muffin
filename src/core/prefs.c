@@ -2184,9 +2184,9 @@ meta_prefs_remove_keybinding (const char *name)
 
 LOCAL_SYMBOL gboolean
 meta_prefs_add_custom_keybinding (const char           *name,
-                                const char           *binding,
-                                MetaKeyBindingAction  action,
-                                MetaKeyBindingFlags   flags)
+                                  const char          **bindings,
+                                  MetaKeyBindingAction  action,
+                                  MetaKeyBindingFlags   flags)
 {
   MetaKeyPref  *pref;
 
@@ -2199,16 +2199,14 @@ meta_prefs_add_custom_keybinding (const char           *name,
 
   pref = g_new0 (MetaKeyPref, 1);
   pref->name = g_strdup (name);
-  pref->schema = g_strdup (binding);
+  pref->schema = NULL;
   pref->action = action;
   pref->bindings = NULL;
   pref->add_shift = (flags & META_KEY_BINDING_REVERSES) != 0;
   pref->per_window = (flags & META_KEY_BINDING_PER_WINDOW) != 0;
   pref->builtin = (flags & META_KEY_BINDING_BUILTIN) != 0;
-  
-  char **strokes = g_strsplit(binding, "XYZZY", 1);
-  update_binding (pref, strokes);
-  g_strfreev (strokes);
+
+  update_binding (pref, (gchar **)bindings);
 
   g_hash_table_insert (key_bindings, g_strdup (name), pref);
 

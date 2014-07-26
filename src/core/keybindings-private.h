@@ -80,7 +80,7 @@ gboolean meta_prefs_add_keybinding          (const char           *name,
 gboolean meta_prefs_remove_keybinding       (const char    *name);
 
 gboolean meta_prefs_add_custom_keybinding          (const char           *name,
-                                                    const char           *binding,
+                                                    const char          **binding,
                                                     MetaKeyBindingAction  action,
                                                     MetaKeyBindingFlags   flags);
 

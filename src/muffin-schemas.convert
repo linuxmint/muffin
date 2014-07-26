@@ -1,6 +1,0 @@
-[org.cinnamon.muffin]
-overlay-key = /apps/muffin/general/overlay_key
-attach-modal-dialogs = /apps/muffin/general/attach_modal_dialogs
-live-hidden-windows = /apps/muffin/general/live_hidden_windows
-workspaces-only-on-primary = /apps/muffin/general/workspaces_only_on_primary
-draggable-border-width = /apps/muffin/general/draggable_border_width
