@@ -3095,6 +3095,18 @@ meta_window_show (MetaWindow *window)
 
   if (!window->placed)
     {
+      if (window->showing_for_first_time && window->has_maximize_func)
+        {
+          MetaRectangle work_area;
+          meta_window_get_work_area_for_monitor (window, window->monitor->number, &work_area);
+          /* Automaximize windows that match the bounds of the work area */
+          if (window->rect.x == work_area.x && window->rect.y == work_area.y &&
+              window->rect.width == work_area.width && window->rect.height == work_area.height)
+            {
+              window->maximize_horizontally_after_placement = TRUE;
+              window->maximize_vertically_after_placement = TRUE;
+            }
+        }
       meta_window_force_placement (window);
     }
 
