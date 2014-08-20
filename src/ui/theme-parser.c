@@ -24,6 +24,7 @@
 #include <config.h>
 #include "theme-private.h"
 #include <meta/util.h>
+#include <meta/prefs.h>
 #include <string.h>
 #include <stdlib.h>
 #include <clutter/clutter.h>
@@ -3579,7 +3580,7 @@ start_element_handler (GMarkupParseContext *context,
           info->theme->filename = g_strdup (info->theme_file);
           info->theme->dirname = g_strdup (info->theme_dir);
           info->theme->format_version = info->format_version;
-          info->theme->scale = CLAMP ((int)(clutter_backend_get_resolution (clutter_get_default_backend ()) / 96.0), 1, 4);
+          info->theme->scale = meta_prefs_get_ui_scale ();
           
           push_state (info, STATE_THEME);
         }

@@ -2463,3 +2463,9 @@ meta_prefs_get_min_win_opacity (void)
 {
   return min_window_opacity;
 }
+
+gint
+meta_prefs_get_ui_scale (void)
+{
+  return ui_scale;
+}

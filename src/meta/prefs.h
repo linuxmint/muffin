@@ -173,6 +173,8 @@ gboolean meta_prefs_get_tile_maximize (void);
 
 gint meta_prefs_get_min_win_opacity (void);
 
+gint meta_prefs_get_ui_scale (void);
+
 /* XXX FIXME This should be x-macroed, but isn't yet because it would be
  * difficult (or perhaps impossible) to add the suffixes using the current
  * system.  It needs some more thought, perhaps after the current system

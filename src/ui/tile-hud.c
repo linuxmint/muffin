@@ -32,6 +32,7 @@
 #include "boxes-private.h"
 #include <clutter/clutter.h>
 #include <math.h>
+#include <meta/prefs.h>
 
 #include "core.h"
 
@@ -265,7 +266,7 @@ meta_tile_hud_draw (GtkWidget *widget,
   MetaRectangle tile_area;
 
   int width;
-  width = HUD_WIDTH * CLAMP ((int)(clutter_backend_get_resolution (clutter_get_default_backend ()) / 96.0), 1, 4);
+  width = HUD_WIDTH * meta_prefs_get_ui_scale ();
 
   if (hud->restrictions & HUD_CAN_TILE_SIDE_BY_SIDE)
       {
