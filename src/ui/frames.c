@@ -1213,6 +1213,36 @@ meta_frame_titlebar_event (MetaUIFrame    *frame,
       }
       break;
 
+    case C_DESKTOP_TITLEBAR_ACTION_TOGGLE_STUCK:
+      {
+        meta_core_get (display, frame->xwindow,
+                       META_CORE_GET_FRAME_FLAGS, &flags,
+                       META_CORE_GET_END);
+
+        if (flags & META_FRAME_STUCK)
+          meta_core_unstick (display,
+                             frame->xwindow);
+        else
+          meta_core_stick (display,
+                           frame->xwindow);
+      }
+      break;
+
+    case C_DESKTOP_TITLEBAR_ACTION_TOGGLE_ABOVE:
+      {
+        meta_core_get (display, frame->xwindow,
+                       META_CORE_GET_FRAME_FLAGS, &flags,
+                       META_CORE_GET_END);
+
+        if (flags & META_FRAME_ABOVE)
+          meta_core_unmake_above (display,
+                                  frame->xwindow);
+        else
+          meta_core_make_above (display,
+                                frame->xwindow);
+      }
+      break;
+
     case C_DESKTOP_TITLEBAR_ACTION_MINIMIZE:
       {
         meta_core_get (display, frame->xwindow,
