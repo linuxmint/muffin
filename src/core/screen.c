@@ -2299,10 +2299,13 @@ meta_screen_get_mouse_window (MetaScreen  *screen,
                               MetaWindow  *not_this_one)
 {
   MetaWindow *window;
+  GList *windows;
   Window root_return, child_return;
   int root_x_return, root_y_return;
   int win_x_return, win_y_return;
   unsigned int mask_return;
+  
+  window = NULL;
   
   if (not_this_one)
     meta_topic (META_DEBUG_FOCUS,
@@ -2320,11 +2323,27 @@ meta_screen_get_mouse_window (MetaScreen  *screen,
                  &mask_return);
   meta_error_trap_pop (screen->display);
 
-  window = meta_stack_get_default_focus_window_at_point (screen->stack,
-                                                         screen->active_workspace,
-                                                         not_this_one,
-                                                         root_x_return,
-                                                         root_y_return);
+  if (screen->active_workspace->showing_desktop)
+    {
+      windows = screen->active_workspace->mru_list;
+      while (windows != NULL)
+        {
+          MetaWindow *w = windows->data;
+          if (w->screen == screen &&
+              w->type == META_WINDOW_DESKTOP)
+            {
+              window = w;
+              break;
+            }
+          windows = windows->next;
+        }
+    }
+  else
+    window = meta_stack_get_default_focus_window_at_point (screen->stack,
+                                                           screen->active_workspace,
+                                                           not_this_one,
+                                                           root_x_return,
+                                                           root_y_return);
 
   return window;
 }
