@@ -8968,7 +8968,12 @@ meta_window_get_current_zone (MetaWindow   *window,
                 zone = ZONE_6;
             break;
         case ZONE_TOP:
-            if (meta_window_can_tile_top_bottom (window))
+            if (meta_prefs_get_tile_maximize() || window->maybe_retile_maximize)
+              {
+                if (meta_window_can_tile_maximized(window))
+                    zone = ZONE_0;
+              }
+            else if (meta_window_can_tile_top_bottom (window))
                 zone = ZONE_0;
             break;
         case ZONE_BOTTOM:
