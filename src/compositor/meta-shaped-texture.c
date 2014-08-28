@@ -488,15 +488,8 @@ meta_shaped_texture_paint (ClutterActor *actor)
 
   filter = COGL_PIPELINE_FILTER_LINEAR;
 
-  if (!clutter_actor_is_in_clone_paint (actor))
-    {
-      int x_origin, y_origin;
-
-      if (meta_actor_is_untransformed (actor,
-                                       &x_origin,
-                                       &y_origin))
-        filter = COGL_PIPELINE_FILTER_NEAREST;
-    }
+  if (meta_actor_painting_untransformed (tex_width, tex_height, NULL, NULL))
+    filter = COGL_PIPELINE_FILTER_NEAREST;
 
   ctx = clutter_backend_get_cogl_context (clutter_get_default_backend ());
   fb = cogl_get_draw_framebuffer ();
