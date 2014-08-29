@@ -624,7 +624,7 @@ place_window_if_needed(MetaWindow     *window,
                     window->snap_queued = TRUE;
                   else
                     window->snap_queued = FALSE;
-                  meta_window_tile (window, TRUE);
+                  meta_window_real_tile (window, TRUE);
                   meta_XFree (tile_info);
                 }
             }

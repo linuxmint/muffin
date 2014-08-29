@@ -74,19 +74,6 @@ typedef void (* MetaWindowPingFunc) (MetaDisplay *display,
  */
 #define N_IGNORED_CROSSING_SERIALS  10
 
-typedef enum {
-  META_TILE_NONE,
-  META_TILE_LEFT,
-  META_TILE_RIGHT,
-  META_TILE_ULC,
-  META_TILE_LLC,
-  META_TILE_URC,
-  META_TILE_LRC,
-  META_TILE_TOP,
-  META_TILE_BOTTOM,
-  META_TILE_MAXIMIZE
-} MetaTileMode;
-
 struct _MetaDisplay
 {
   GObject parent_instance;

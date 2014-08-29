@@ -3810,7 +3810,7 @@ normalize_tile_state (MetaWindow *window)
 }
 
 LOCAL_SYMBOL void
-meta_window_tile (MetaWindow *window, gboolean force)
+meta_window_real_tile (MetaWindow *window, gboolean force)
 {
 /* Don't do anything if no tiling is requested or we're already tiled */
   if (window->tile_mode == META_TILE_NONE || (META_WINDOW_TILED_OR_SNAPPED (window) && !force))
@@ -4129,7 +4129,7 @@ meta_window_unmaximize (MetaWindow        *window,
       window->tile_mode == META_TILE_RIGHT)
     {
       window->maximized_horizontally = FALSE;
-      meta_window_tile (window, FALSE);
+      meta_window_real_tile (window, FALSE);
       return;
     }
 
@@ -9646,7 +9646,7 @@ update_resize (MetaWindow *window,
             window->snap_queued = window->resizing_tile_type == META_WINDOW_TILE_TYPE_SNAPPED;
             window->tile_mode = window->resize_tile_mode;
             window->custom_snap_size = TRUE;
-            meta_window_tile (window, TRUE);
+            meta_window_real_tile (window, TRUE);
         }
     }
 
@@ -9828,7 +9828,7 @@ meta_window_handle_mouse_grab_op_event (MetaWindow *window,
                   if (window->tile_mode == META_TILE_MAXIMIZE)
                     meta_window_maximize(window, META_MAXIMIZE_VERTICAL | META_MAXIMIZE_HORIZONTAL);
                   else
-                    meta_window_tile (window, FALSE);
+                    meta_window_real_tile (window, FALSE);
               }
               else if (event->xbutton.root == window->screen->xroot)
                   update_move (window,
@@ -11706,4 +11706,93 @@ meta_window_mouse_on_edge (MetaWindow *window, gint x, gint y)
           y >= BOX_BOTTOM (work_area) - EXTREME_CONSTANT - down_shift;
 
     return ret;
+}
+
+/**
+ * meta_window_can_tile:
+ * @window: a #MetaWindow
+ * @mode: the #MetaTileMode to check for
+ *
+ * Tests if @window can be tiled or snapped in the supplied
+ * tiling zone
+ *
+ * Return value: whether @window can be tiled
+ */
+
+gboolean
+meta_window_can_tile (MetaWindow *window, MetaTileMode mode)
+{
+  g_return_val_if_fail (META_IS_WINDOW (window), FALSE);
+
+  switch (mode) {
+    case META_TILE_LEFT:
+    case META_TILE_RIGHT:
+        return meta_window_can_tile_side_by_side (window);
+    case META_TILE_TOP:
+    case META_TILE_BOTTOM:
+        return meta_window_can_tile_top_bottom (window);
+    case META_TILE_ULC:
+    case META_TILE_LLC:
+    case META_TILE_URC:
+    case META_TILE_LRC:
+        return meta_window_can_tile_corner (window);
+    case META_TILE_MAXIMIZE:
+    case META_TILE_NONE:
+        return TRUE;
+    default:
+        return FALSE;
+  }
+}
+
+/**
+ * meta_window_tile:
+ * @window: a #MetaWindow
+ * @mode: the #MetaTileMode to use
+ * @snap: whether to snap the window (as opposed to simple tile)
+ *
+ * Tiles or snaps the window in the requested configuration
+ *
+ * Return value: whether or not @window was successfully tiled
+ */
+
+gboolean
+meta_window_tile (MetaWindow *window,
+                  MetaTileMode mode,
+                  gboolean snap)
+{
+    g_return_val_if_fail (META_IS_WINDOW (window), FALSE);
+
+    if (!meta_window_can_tile (window, mode))
+        return FALSE;
+
+  if (mode != META_TILE_NONE) {
+      window->last_tile_mode = window->tile_mode;
+      window->snap_queued = snap;
+      window->tile_monitor_number = window->monitor->number;
+      window->tile_mode = mode;
+      window->custom_snap_size = FALSE;
+      window->saved_maximize = FALSE;
+      /* Maximization constraints beat tiling constraints, so if the window
+       * is maximized, tiling won't have any effect unless we unmaximize it
+       * horizontally first; rather than calling meta_window_unmaximize(),
+       * we just set the flag and rely on meta_window_real_tile() syncing it to
+       * save an additional roundtrip.
+       */
+      meta_window_real_tile (window, TRUE);
+  } else {
+      window->last_tile_mode = window->tile_mode;
+      window->tile_mode = mode;
+      window->custom_snap_size = FALSE;
+      meta_window_set_tile_type (window, META_WINDOW_TILE_TYPE_NONE);
+      window->tile_monitor_number = window->saved_maximize ? window->monitor->number
+                                                           : -1;
+      if (window->saved_maximize)
+        meta_window_maximize (window, META_MAXIMIZE_VERTICAL |
+                                      META_MAXIMIZE_HORIZONTAL);
+      else
+        meta_window_unmaximize (window, META_MAXIMIZE_VERTICAL |
+                                        META_MAXIMIZE_HORIZONTAL);
+  }
+
+  return TRUE;
 }

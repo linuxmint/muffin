@@ -183,4 +183,7 @@ cairo_region_t *meta_window_get_frame_bounds (MetaWindow *window);
 
 MetaWindow *meta_window_get_tile_match (MetaWindow *window);
 
+gboolean meta_window_can_tile (MetaWindow *window, MetaTileMode mode);
+gboolean meta_window_tile (MetaWindow *window, MetaTileMode mode, gboolean snap);
+
 #endif
