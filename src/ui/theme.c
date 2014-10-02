@@ -6490,6 +6490,10 @@ meta_gtk_state_to_string (GtkStateFlags state)
     case GTK_STATE_FLAG_VISITED:
       return "VISITED";
 #endif
+#if GTK_MAJOR_VERSION > 3 || (GTK_MAJOR_VERSION == 3 && GTK_MINOR_VERSION >= 14)
+    case GTK_STATE_FLAG_CHECKED:
+      return "CHECKED";
+#endif
     }
 
   return "<unknown>";
