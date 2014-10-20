@@ -1,5 +1,5 @@
 
-INCLUDES=@MUFFIN_CFLAGS@
+AM_CPPFLAGS=@MUFFIN_CFLAGS@
 
 wm_tester_SOURCES= 				\
 	main.c
