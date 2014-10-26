@@ -47,6 +47,14 @@
       </_description>
     </key>
 
+    <key name="unredirect-fullscreen-windows" type="b">
+      <default>false</default>
+      <_summary>Fullscreen windows are unredirected (i.e. they bypass compositing)</_summary>
+      <_description>
+        Determines whether fullscreen windows bypass compositing. False is better for vsync/screen-tearing, True gives games and apps in fullscreen mode access to better performance.
+      </_description>
+    </key>
+
     <key name="workspace-cycle" type="b">
       <default>false</default>
       <_summary>Allow cycling through workspaces</_summary>

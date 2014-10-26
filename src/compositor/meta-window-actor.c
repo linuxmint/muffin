@@ -1226,6 +1226,9 @@ meta_window_actor_should_unredirect (MetaWindowActor *self)
   if (!meta_window_is_monitor_sized (metaWindow))
     return FALSE;
 
+  if (!meta_prefs_get_unredirect_fullscreen_windows())
+    return FALSE;
+
   if (meta_window_requested_bypass_compositor (metaWindow))
     return TRUE;
 

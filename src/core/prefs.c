@@ -88,6 +88,7 @@ static CDesktopTitlebarAction action_middle_click_titlebar = C_DESKTOP_TITLEBAR_
 static CDesktopTitlebarAction action_right_click_titlebar = C_DESKTOP_TITLEBAR_ACTION_MENU;
 static CDesktopTitlebarScrollAction action_scroll_titlebar = C_DESKTOP_TITLEBAR_SCROLL_ACTION_NONE;
 static gboolean dynamic_workspaces = FALSE;
+static gboolean unredirect_fullscreen_windows = FALSE;
 static gboolean application_based = FALSE;
 static gboolean disable_workarounds = FALSE;
 static gboolean auto_raise = FALSE;
@@ -324,6 +325,13 @@ static MetaBoolPreference preferences_bool[] =
         META_PREF_DYNAMIC_WORKSPACES,
       },
       &dynamic_workspaces,
+    },
+    {
+      { "unredirect-fullscreen-windows",
+        SCHEMA_MUFFIN,
+        META_PREF_UNREDIRECT_FULLSCREEN_WINDOWS,
+      },
+      &unredirect_fullscreen_windows,
     },
     {
       { "application-based",
@@ -1676,6 +1684,12 @@ meta_prefs_get_dynamic_workspaces (void)
 }
 
 gboolean
+meta_prefs_get_unredirect_fullscreen_windows (void)
+{
+  return unredirect_fullscreen_windows;
+}
+
+gboolean
 meta_prefs_get_application_based (void)
 {
   return FALSE; /* For now, we never want this to do anything */
@@ -1806,6 +1820,9 @@ meta_preference_to_string (MetaPreference pref)
 
     case META_PREF_DYNAMIC_WORKSPACES:
       return "DYNAMIC_WORKSPACES";
+
+    case META_PREF_UNREDIRECT_FULLSCREEN_WINDOWS:
+      return "UNREDIRECT_FULLSCREEN_WINDOWS";
 
     case META_PREF_SNAP_MODIFIER:
       return "SNAP_MODIFIER";
