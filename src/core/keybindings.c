@@ -3668,6 +3668,7 @@ handle_move_to_workspace  (MetaDisplay    *display,
 {
   gint which = binding->handler->data;
   gboolean flip = (which < 0);
+  gboolean new = (which == META_MOTION_NOT_EXIST_YET);
   MetaWorkspace *workspace;
   
   /* If which is zero or positive, it's a workspace number, and the window
@@ -3682,15 +3683,17 @@ handle_move_to_workspace  (MetaDisplay    *display,
     return;
   
   workspace = NULL;
-  if (flip)
-    {      
-      workspace = meta_workspace_get_neighbor (screen->active_workspace,
-                                               which);
-    }
-  else
-    {
-      workspace = meta_screen_get_workspace_by_index (screen, which);
-    }
+  if (!new) {
+    if (flip)
+      {      
+        workspace = meta_workspace_get_neighbor (screen->active_workspace,
+                                                 which);
+      }
+    else
+      {
+        workspace = meta_screen_get_workspace_by_index (screen, which);
+      }
+  }
   
   if (workspace)
     {
@@ -3707,10 +3710,15 @@ handle_move_to_workspace  (MetaDisplay    *display,
                                               event->xkey.time);
         }
     }
-  else
+  else if (new)
     {
-      /* We could offer to create it I suppose */
-    }  
+      workspace = meta_screen_append_new_workspace (window->screen, FALSE, event->xkey.time);
+      GSettings *cinnamon = g_settings_new ("org.cinnamon");
+      g_settings_set_int (cinnamon, "number-workspaces", g_list_length (screen->workspaces));
+      g_object_unref (cinnamon);
+
+      meta_window_change_workspace (window, workspace);
+    }
 }
 
 static void 
@@ -4407,6 +4415,13 @@ init_builtin_key_bindings (MetaDisplay *display)
                           META_KEY_BINDING_PER_WINDOW,
                           META_KEYBINDING_ACTION_MOVE_TO_WORKSPACE_DOWN,
                           handle_move_to_workspace, META_MOTION_DOWN);
+
+  add_builtin_keybinding (display,
+                          "move-to-workspace-new",
+                          SCHEMA_MUFFIN_KEYBINDINGS,
+                          META_KEY_BINDING_PER_WINDOW,
+                          META_KEYBINDING_ACTION_MOVE_TO_WORKSPACE_NEW,
+                          handle_move_to_workspace, META_MOTION_NOT_EXIST_YET);
 
   add_builtin_keybinding (display,
                           "raise-or-lower",

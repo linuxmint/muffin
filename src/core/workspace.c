@@ -1156,6 +1156,8 @@ meta_motion_direction_to_string (MetaMotionDirection direction)
       return "Up-Left";
     case META_MOTION_DOWN_LEFT:
       return "Down-Left";
+    case META_MOTION_NOT_EXIST_YET:
+      return "Nothing";
     }
 
   return "Unknown";

@@ -8527,6 +8527,13 @@ menu_callback (MetaWindowMenu *menu,
                                                           workspace_index);
           break;
 
+        case META_MENU_OP_MOVE_NEW:
+          workspace = meta_screen_append_new_workspace (window->screen, FALSE, timestamp);
+          GSettings *cinnamon = g_settings_new ("org.cinnamon");
+          g_settings_set_int (cinnamon, "number-workspaces", g_list_length (window->screen->workspaces));
+          g_object_unref (cinnamon);
+          break;
+
         case META_MENU_OP_STICK:
           meta_window_stick (window);
           break;
@@ -8616,7 +8623,7 @@ meta_window_show_menu (MetaWindow *window,
   ops = META_MENU_OP_NONE;
   insensitive = META_MENU_OP_NONE;
 
-  ops |= (META_MENU_OP_DELETE | META_MENU_OP_MINIMIZE | META_MENU_OP_MOVE | META_MENU_OP_RESIZE);
+  ops |= (META_MENU_OP_DELETE | META_MENU_OP_MINIMIZE | META_MENU_OP_MOVE | META_MENU_OP_RESIZE | META_MENU_OP_MOVE_NEW);
 
   if (!meta_window_titlebar_is_onscreen (window) &&
       window->type != META_WINDOW_DOCK &&

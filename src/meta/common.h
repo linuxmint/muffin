@@ -82,7 +82,8 @@ typedef enum
   META_MENU_OP_MOVE_RIGHT  = 1 << 14,
   META_MENU_OP_MOVE_UP     = 1 << 15,
   META_MENU_OP_MOVE_DOWN   = 1 << 16,
-  META_MENU_OP_RECOVER     = 1 << 17
+  META_MENU_OP_RECOVER     = 1 << 17,
+  META_MENU_OP_MOVE_NEW    = 1 << 18
 } MetaMenuOp;
 
 typedef struct _MetaWindowMenu MetaWindowMenu;
@@ -237,7 +238,8 @@ typedef enum
   META_MOTION_UP_LEFT = -5,
   META_MOTION_UP_RIGHT = -6,
   META_MOTION_DOWN_LEFT = -7,
-  META_MOTION_DOWN_RIGHT = -8
+  META_MOTION_DOWN_RIGHT = -8,
+  META_MOTION_NOT_EXIST_YET = -30
 } MetaMotionDirection;
 
 /* Sometimes we want to talk about sides instead of directions; note

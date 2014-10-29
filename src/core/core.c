@@ -662,6 +662,9 @@ meta_core_get_menu_accelerator (MetaMenuOp           menu_op,
     case META_MENU_OP_MOVE_DOWN:
       name = "move-to-workspace-down";
       break;
+    case META_MENU_OP_MOVE_NEW:
+      name = "move-to-workspace-new";
+      break;
     case META_MENU_OP_RECOVER:
       /* No keybinding for this one */
       break;

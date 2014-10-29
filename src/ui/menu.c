@@ -94,6 +94,8 @@ static MenuItem menuitems[] = {
   { META_MENU_OP_MOVE_LEFT, MENU_ITEM_NORMAL, NULL, FALSE, N_("Move to Workspace _Left") },
   /* Translators: Translate this string the same way as you do in libwnck! */
   { META_MENU_OP_MOVE_RIGHT, MENU_ITEM_NORMAL, NULL, FALSE, N_("Move to Workspace R_ight") },
+  /* Translators: This will create a new workspace, and move this window to that new workspace */
+  { META_MENU_OP_MOVE_NEW, MENU_ITEM_NORMAL, NULL, FALSE, N_("Move to a New _Workspace") },
   /* Translators: Translate this string the same way as you do in libwnck! */
   { META_MENU_OP_MOVE_UP, MENU_ITEM_NORMAL, NULL, FALSE, N_("Move to Workspace _Up") },
   /* Translators: Translate this string the same way as you do in libwnck! */
