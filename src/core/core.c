@@ -89,6 +89,7 @@ meta_core_get (Display *xdisplay,
   if (request != META_CORE_WINDOW_HAS_FRAME &&
       (window == NULL || window->frame == NULL)) {
     meta_bug ("No such frame window 0x%lx!\n", xwindow);
+    va_end (args);
     return;
   }
 
