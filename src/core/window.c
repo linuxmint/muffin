@@ -8609,7 +8609,7 @@ meta_window_show_menu (MetaWindow *window,
   MetaWindowMenu *menu;
   MetaWorkspaceLayout layout;
   int n_workspaces;
-  gboolean ltr;
+  // gboolean ltr;
 
   g_return_if_fail (!window->override_redirect);
 
@@ -8623,7 +8623,8 @@ meta_window_show_menu (MetaWindow *window,
   ops = META_MENU_OP_NONE;
   insensitive = META_MENU_OP_NONE;
 
-  ops |= (META_MENU_OP_DELETE | META_MENU_OP_MINIMIZE | META_MENU_OP_MOVE | META_MENU_OP_RESIZE | META_MENU_OP_MOVE_NEW);
+  //ops |= (META_MENU_OP_DELETE | META_MENU_OP_MINIMIZE | META_MENU_OP_MOVE | META_MENU_OP_RESIZE | META_MENU_OP_MOVE_NEW);
+  ops |= (META_MENU_OP_DELETE | META_MENU_OP_MINIMIZE | META_MENU_OP_MOVE | META_MENU_OP_RESIZE);
 
   if (!meta_window_titlebar_is_onscreen (window) &&
       window->type != META_WINDOW_DOCK &&
@@ -8643,21 +8644,21 @@ meta_window_show_menu (MetaWindow *window,
                                          meta_workspace_index ( window->screen->active_workspace),
                                          &layout);
 
-      if (!window->on_all_workspaces)
-        {
-          ltr = meta_ui_get_direction() == META_UI_DIRECTION_LTR;
+      // if (!window->on_all_workspaces)
+      //   {
+      //     ltr = meta_ui_get_direction() == META_UI_DIRECTION_LTR;
 
-          if (layout.current_col > 0)
-            ops |= ltr ? META_MENU_OP_MOVE_LEFT : META_MENU_OP_MOVE_RIGHT;
-          if ((layout.current_col < layout.cols - 1) &&
-              (layout.current_row * layout.cols + (layout.current_col + 1) < n_workspaces))
-            ops |= ltr ? META_MENU_OP_MOVE_RIGHT : META_MENU_OP_MOVE_LEFT;
-          if (layout.current_row > 0)
-            ops |= META_MENU_OP_MOVE_UP;
-          if ((layout.current_row < layout.rows - 1) &&
-              ((layout.current_row + 1) * layout.cols + layout.current_col < n_workspaces))
-            ops |= META_MENU_OP_MOVE_DOWN;
-        }
+      //     if (layout.current_col > 0)
+      //       ops |= ltr ? META_MENU_OP_MOVE_LEFT : META_MENU_OP_MOVE_RIGHT;
+      //     if ((layout.current_col < layout.cols - 1) &&
+      //         (layout.current_row * layout.cols + (layout.current_col + 1) < n_workspaces))
+      //       ops |= ltr ? META_MENU_OP_MOVE_RIGHT : META_MENU_OP_MOVE_LEFT;
+      //     if (layout.current_row > 0)
+      //       ops |= META_MENU_OP_MOVE_UP;
+      //     if ((layout.current_row < layout.rows - 1) &&
+      //         ((layout.current_row + 1) * layout.cols + layout.current_col < n_workspaces))
+      //       ops |= META_MENU_OP_MOVE_DOWN;
+      //   }
 
       meta_screen_free_workspace_layout (&layout);
 
