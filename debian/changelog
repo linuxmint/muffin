@@ -1,3 +1,9 @@
+muffin (2.4.1) rebecca; urgency=medium
+
+  * re-added keybindings schema to allow cinnamon-desktop migration script to work.
+
+ -- Clement Lefebvre <root@linuxmint.com>  Sat, 08 Nov 2014 10:02:10 +0100
+
 muffin (2.4.0) rebecca; urgency=medium
 
   * 2.4.0
