@@ -28,6 +28,7 @@
 /* Don't include core headers here */
 #include <gdk/gdkx.h>
 #include <meta/common.h>
+#include <meta/window.h>
 
 typedef enum
 {
@@ -88,6 +89,10 @@ typedef enum
  * which could theoretically be handled by this function if we relaxed the
  * requirement that all questions should have exactly one argument.
  */
+
+MetaWindow *meta_core_get_window (Display *xdisplay,
+                                  Window   frame_xwindow);
+
 void meta_core_get (Display *xdisplay,
                     Window window,
                     ...);

@@ -41,9 +41,9 @@
  * meta_core_get_window_info() which takes a bunch of pointers to variables
  * to put its results in, and only fills in the non-null ones.
  */
-static MetaWindow *
-get_window (Display *xdisplay,
-            Window   frame_xwindow)
+LOCAL_SYMBOL MetaWindow *
+meta_core_get_window (Display *xdisplay,
+                      Window   frame_xwindow)
 {
   MetaDisplay *display;
   MetaWindow *window;
@@ -168,7 +168,7 @@ LOCAL_SYMBOL void
 meta_core_queue_frame_resize (Display *xdisplay,
                               Window   frame_xwindow)
 {
-  MetaWindow *window = get_window (xdisplay, frame_xwindow);
+  MetaWindow *window = meta_core_get_window (xdisplay, frame_xwindow);
 
   meta_window_queue (window, META_QUEUE_MOVE_RESIZE);
 }
@@ -179,7 +179,7 @@ meta_core_user_move (Display *xdisplay,
                      int      x,
                      int      y)
 {
-  MetaWindow *window = get_window (xdisplay, frame_xwindow);
+  MetaWindow *window = meta_core_get_window (xdisplay, frame_xwindow);
 
   meta_window_move (window, TRUE, x, y);
 }
@@ -191,7 +191,7 @@ meta_core_user_resize  (Display *xdisplay,
                         int      width,
                         int      height)
 {
-  MetaWindow *window = get_window (xdisplay, frame_xwindow);
+  MetaWindow *window = meta_core_get_window (xdisplay, frame_xwindow);
 
   meta_window_resize_with_gravity (window, TRUE, width, height, gravity);
 }
@@ -200,7 +200,7 @@ LOCAL_SYMBOL void
 meta_core_user_raise (Display *xdisplay,
                       Window   frame_xwindow)
 {
-  MetaWindow *window = get_window (xdisplay, frame_xwindow);
+  MetaWindow *window = meta_core_get_window (xdisplay, frame_xwindow);
   
   meta_window_raise (window);
 }
@@ -248,7 +248,7 @@ meta_core_user_lower_and_unfocus (Display *xdisplay,
                                   Window   frame_xwindow,
                                   guint32  timestamp)
 {
-  MetaWindow *window = get_window (xdisplay, frame_xwindow);
+  MetaWindow *window = meta_core_get_window (xdisplay, frame_xwindow);
 
   meta_screen_hide_hud_and_preview (window->screen);
 
@@ -333,7 +333,7 @@ meta_core_user_focus (Display *xdisplay,
                       Window   frame_xwindow,
                       guint32  timestamp)
 {
-  MetaWindow *window = get_window (xdisplay, frame_xwindow);
+  MetaWindow *window = meta_core_get_window (xdisplay, frame_xwindow);
   
   meta_window_focus (window, timestamp);
 }
@@ -342,7 +342,7 @@ LOCAL_SYMBOL void
 meta_core_minimize (Display *xdisplay,
                     Window   frame_xwindow)
 {
-  MetaWindow *window = get_window (xdisplay, frame_xwindow);
+  MetaWindow *window = meta_core_get_window (xdisplay, frame_xwindow);
 
   meta_screen_hide_hud_and_preview (window->screen);
 
@@ -353,7 +353,7 @@ LOCAL_SYMBOL void
 meta_core_maximize (Display *xdisplay,
                     Window   frame_xwindow)
 {
-  MetaWindow *window = get_window (xdisplay, frame_xwindow);
+  MetaWindow *window = meta_core_get_window (xdisplay, frame_xwindow);
 
   meta_screen_hide_hud_and_preview (window->screen);
 
@@ -368,7 +368,7 @@ LOCAL_SYMBOL void
 meta_core_toggle_maximize_vertically (Display *xdisplay,
 				      Window   frame_xwindow)
 {
-  MetaWindow *window = get_window (xdisplay, frame_xwindow);
+  MetaWindow *window = meta_core_get_window (xdisplay, frame_xwindow);
 
   meta_screen_hide_hud_and_preview (window->screen);
 
@@ -387,7 +387,7 @@ LOCAL_SYMBOL void
 meta_core_toggle_maximize_horizontally (Display *xdisplay,
 				        Window   frame_xwindow)
 {
-  MetaWindow *window = get_window (xdisplay, frame_xwindow);
+  MetaWindow *window = meta_core_get_window (xdisplay, frame_xwindow);
 
   meta_screen_hide_hud_and_preview (window->screen);
 
@@ -406,7 +406,7 @@ LOCAL_SYMBOL void
 meta_core_toggle_maximize (Display *xdisplay,
                            Window   frame_xwindow)
 {
-  MetaWindow *window = get_window (xdisplay, frame_xwindow);
+  MetaWindow *window = meta_core_get_window (xdisplay, frame_xwindow);
 
   meta_screen_hide_hud_and_preview (window->screen);
 
@@ -425,7 +425,7 @@ LOCAL_SYMBOL void
 meta_core_unmaximize (Display *xdisplay,
                       Window   frame_xwindow)
 {
-  MetaWindow *window = get_window (xdisplay, frame_xwindow);
+  MetaWindow *window = meta_core_get_window (xdisplay, frame_xwindow);
 
   if (meta_prefs_get_raise_on_click ())
     meta_window_raise (window);
@@ -439,7 +439,7 @@ meta_core_delete (Display *xdisplay,
                   Window   frame_xwindow,
                   guint32  timestamp)
 {
-  MetaWindow *window = get_window (xdisplay, frame_xwindow);
+  MetaWindow *window = meta_core_get_window (xdisplay, frame_xwindow);
      
   meta_window_delete (window, timestamp);
 }
@@ -449,7 +449,7 @@ meta_core_unshade (Display *xdisplay,
                    Window   frame_xwindow,
                    guint32  timestamp)
 {
-  MetaWindow *window = get_window (xdisplay, frame_xwindow);
+  MetaWindow *window = meta_core_get_window (xdisplay, frame_xwindow);
 
   meta_screen_hide_hud_and_preview (window->screen);
 
@@ -461,7 +461,7 @@ meta_core_shade (Display *xdisplay,
                  Window   frame_xwindow,
                  guint32  timestamp)
 {
-  MetaWindow *window = get_window (xdisplay, frame_xwindow);
+  MetaWindow *window = meta_core_get_window (xdisplay, frame_xwindow);
   
   meta_screen_hide_hud_and_preview (window->screen);
 
@@ -472,7 +472,7 @@ LOCAL_SYMBOL void
 meta_core_unstick (Display *xdisplay,
                    Window   frame_xwindow)
 {
-  MetaWindow *window = get_window (xdisplay, frame_xwindow);
+  MetaWindow *window = meta_core_get_window (xdisplay, frame_xwindow);
 
   meta_window_unstick (window);
 }
@@ -481,7 +481,7 @@ LOCAL_SYMBOL void
 meta_core_make_above (Display *xdisplay,
                       Window   frame_xwindow)
 {
-  MetaWindow *window = get_window (xdisplay, frame_xwindow);
+  MetaWindow *window = meta_core_get_window (xdisplay, frame_xwindow);
 
   meta_window_make_above (window);
 }
@@ -490,7 +490,7 @@ LOCAL_SYMBOL void
 meta_core_unmake_above (Display *xdisplay,
                         Window   frame_xwindow)
 {
-  MetaWindow *window = get_window (xdisplay, frame_xwindow);
+  MetaWindow *window = meta_core_get_window (xdisplay, frame_xwindow);
 
   meta_window_unmake_above (window);
 }
@@ -500,7 +500,7 @@ meta_core_adjust_opacity      (Display *xdisplay,
                                Window   frame_xwindow,
                                gboolean increase)
 {
-  MetaWindow *window = get_window (xdisplay, frame_xwindow);
+  MetaWindow *window = meta_core_get_window (xdisplay, frame_xwindow);
 
   meta_window_adjust_opacity (window, increase);
 }
@@ -509,7 +509,7 @@ LOCAL_SYMBOL void
 meta_core_stick (Display *xdisplay,
                  Window   frame_xwindow)
 {
-  MetaWindow *window = get_window (xdisplay, frame_xwindow);
+  MetaWindow *window = meta_core_get_window (xdisplay, frame_xwindow);
 
   meta_window_stick (window);
 }
@@ -519,7 +519,7 @@ meta_core_change_workspace (Display *xdisplay,
                             Window   frame_xwindow,
                             int      new_workspace)
 {
-  MetaWindow *window = get_window (xdisplay, frame_xwindow);
+  MetaWindow *window = meta_core_get_window (xdisplay, frame_xwindow);
 
   meta_window_change_workspace (window,
                                 meta_screen_get_workspace_by_index (window->screen,
@@ -554,7 +554,7 @@ meta_core_show_window_menu (Display *xdisplay,
                             int      button,
                             guint32  timestamp)
 {
-  MetaWindow *window = get_window (xdisplay, frame_xwindow);
+  MetaWindow *window = meta_core_get_window (xdisplay, frame_xwindow);
 
   meta_screen_hide_hud_and_preview (window->screen);
 
@@ -710,7 +710,7 @@ meta_core_begin_grab_op (Display    *xdisplay,
                          int         root_x,
                          int         root_y)
 {
-  MetaWindow *window = get_window (xdisplay, frame_xwindow);
+  MetaWindow *window = meta_core_get_window (xdisplay, frame_xwindow);
   MetaDisplay *display;
   MetaScreen *screen;
   
@@ -798,7 +798,7 @@ meta_core_set_screen_cursor (Display *xdisplay,
                              Window   frame_on_screen,
                              MetaCursor cursor)
 {
-  MetaWindow *window = get_window (xdisplay, frame_on_screen);
+  MetaWindow *window = meta_core_get_window (xdisplay, frame_on_screen);
 
   meta_frame_set_screen_cursor (window->frame, cursor);
 }

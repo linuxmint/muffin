@@ -31,6 +31,7 @@
 #include <meta/util.h>
 #include "core.h"
 #include "menu.h"
+#include "window-private.h"
 #include <meta/theme.h>
 #include <meta/prefs.h>
 #include "ui.h"
@@ -2612,9 +2613,13 @@ get_control (MetaFrames *frames,
   MetaFrameGeometry fgeom;
   MetaFrameFlags flags;
   MetaFrameType type;
+  MetaWindow *window;
   gboolean has_vert, has_horiz, has_left, has_right, has_bottom, has_top;
   gboolean has_north_resize;
   cairo_rectangle_int_t client;
+
+  window = meta_core_get_window (GDK_DISPLAY_XDISPLAY (gdk_display_get_default ()),
+                                 frame->xwindow);
 
   meta_frames_calc_geometry (frames, frame, &fgeom);
   get_client_rect (&fgeom, fgeom.width, fgeom.height, &client);
@@ -2655,6 +2660,11 @@ get_control (MetaFrames *frames,
 
   if (POINT_IN_RECT (x, y, fgeom.max_rect.clickable))
     {
+      if (flags & META_FRAME_MAXIMIZED &&
+          (META_WINDOW_TILED_TOP (window) ||
+           META_WINDOW_TILED_BOTTOM (window)))
+        return META_FRAME_CONTROL_MAXIMIZE;
+
       if (flags & META_FRAME_MAXIMIZED)
         return META_FRAME_CONTROL_UNMAXIMIZE;
       else
