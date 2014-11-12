@@ -78,13 +78,13 @@ CANBERRA_GTK_VERSION=0.26
 CLUTTER_PACKAGE=clutter-1.0
 
 MUFFIN_PC_MODULES="
-   gtk+-3.0 >= 3.3.7
+   gtk+-3.0 >= 3.9.12
    gio-2.0 >= 2.25.10
-   pango >= 1.2.0
+   pango >= 1.14.0
    cairo >= 1.10.0
-   cinnamon-desktop >= 2.3.0
-   xcomposite >= 0.2 xfixes xrender xdamage
-   $CLUTTER_PACKAGE >= 1.9.10
+   cinnamon-desktop >= 2.4.0
+   xcomposite >= 0.3 xfixes xrender xdamage
+   $CLUTTER_PACKAGE >= 1.10.0
    cogl-1.0 >= 1.9.6
    gl
 "
@@ -131,9 +131,7 @@ AC_CHECK_HEADERS(execinfo.h, [AC_CHECK_FUNCS(backtrace)])
 AM_GLIB_GNU_GETTEXT
 
 ## here we get the flags we'll actually use
-# GRegex requires Glib-2.14.0
-PKG_CHECK_MODULES(ALL, glib-2.0 >= 2.14.0)
-# gtk_window_set_icon_name requires gtk2+-2.6.0
+PKG_CHECK_MODULES(ALL, glib-2.0 >= 2.37.3)
 PKG_CHECK_MODULES(MUFFIN_MESSAGE, gtk+-3.0)
 PKG_CHECK_MODULES(MUFFIN_WINDOW_DEMO, gtk+-3.0)
 
@@ -185,7 +183,7 @@ else
   fi
 fi
 
-INTROSPECTION_VERSION=0.9.5
+INTROSPECTION_VERSION=0.9.2
 GOBJECT_INTROSPECTION_CHECK([$INTROSPECTION_VERSION])
 
 if test x$found_introspection != xno; then
