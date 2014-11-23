@@ -1,3 +1,9 @@
+muffin (2.4.2) rebecca; urgency=medium
+
+  * Frames: Fixed clicking maximize button from a top or bottom-tiled state
+
+ -- Clement Lefebvre <root@linuxmint.com>  Sun, 23 Nov 2014 11:57:56 +0100
+
 muffin (2.4.1) rebecca; urgency=medium
 
   * re-added keybindings schema to allow cinnamon-desktop migration script to work.
