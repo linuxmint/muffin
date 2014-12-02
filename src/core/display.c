@@ -1821,8 +1821,7 @@ event_callback (XEvent   *event,
 
       if (event->xbutton.button == 4 || event->xbutton.button == 5)
         {
-          gboolean unmodified = (event->xbutton.state & display->window_grab_modifiers) == 0;
-          if (!unmodified && event->xbutton.state == display->window_grab_modifiers)
+          if ((event->xbutton.state & ~display->ignored_modifier_mask) == display->window_grab_modifiers)
             {
               if (event->xbutton.button == 4)
                 {
