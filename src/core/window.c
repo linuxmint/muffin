@@ -7975,13 +7975,6 @@ is_ime_popup (MetaWindow *window)
     return !deco && (icon == NULL) && is_target_name;
 }
 
-static gboolean
-is_steam (MetaWindow *window)
-{
-    return window->type == META_WINDOW_MENU &&
-           g_strcmp0 (meta_window_get_wm_class (window), "Steam") == 0;
-}
-
 LOCAL_SYMBOL void
 meta_window_recalc_window_type (MetaWindow *window)
 {
@@ -8079,10 +8072,6 @@ recalc_window_type (MetaWindow *window)
         case META_WINDOW_DIALOG:
         case META_WINDOW_MODAL_DIALOG:
         case META_WINDOW_MENU:
-          if (is_steam (window)) {
-            window->type = META_WINDOW_POPUP_MENU;
-            break;
-          }
         case META_WINDOW_UTILITY:
           window->type = META_WINDOW_OVERRIDE_OTHER;
           break;
