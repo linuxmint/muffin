@@ -5050,7 +5050,8 @@ get_style (MetaFrameStyleSet *style_set,
             break;
           }
 
-        style = styles[focus];
+        if (styles != NULL)        
+                style = styles[focus];
 
         /* Tiled states are optional, try falling back to non-tiled states */
         if (style == NULL)

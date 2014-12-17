@@ -148,7 +148,6 @@ new_ice_connection (IceConn connection, IcePointer client_data, Bool opening,
       input_id = GPOINTER_TO_UINT ((gpointer) *watch_data);
       if (input_id) {
         g_source_remove (input_id);
-        input_id = 0;
       }
     }
 }
@@ -884,7 +883,6 @@ save_state (void)
            client_id);
 
   windows = meta_display_list_windows (meta_get_display (), META_LIST_DEFAULT);
-  stack_position = 0;
 
   windows = g_slist_sort (windows, meta_display_stack_cmp);
   tmp = windows;

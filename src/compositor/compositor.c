@@ -385,7 +385,6 @@ meta_begin_modal_for_plugin (MetaScreen       *screen,
   Display        *xdpy       = meta_display_get_xdisplay (display);
   MetaCompositor *compositor = display->compositor;
   gboolean pointer_grabbed = FALSE;
-  gboolean keyboard_grabbed = FALSE;
   int result;
 
   if (compositor->modal_plugin != NULL || display->grab_op != META_GRAB_OP_NONE)
@@ -416,8 +415,6 @@ meta_begin_modal_for_plugin (MetaScreen       *screen,
 
       if (result != Success)
         goto fail;
-
-      keyboard_grabbed = TRUE;
     }
 
   display->grab_op = META_GRAB_OP_COMPOSITOR;
@@ -433,8 +430,6 @@ meta_begin_modal_for_plugin (MetaScreen       *screen,
  fail:
   if (pointer_grabbed)
     XUngrabPointer (xdpy, timestamp);
-  if (keyboard_grabbed)
-    XUngrabKeyboard (xdpy, timestamp);
 
   return FALSE;
 }

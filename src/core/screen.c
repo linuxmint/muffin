@@ -3028,8 +3028,6 @@ meta_screen_calc_workspace_layout (MetaScreen          *screen,
   
   grid = g_new (int, grid_area);
 
-  current_row = -1;
-  current_col = -1;
   i = 0;
   
   switch (screen->starting_corner) 

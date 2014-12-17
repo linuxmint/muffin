@@ -187,26 +187,12 @@ start (MetaPlugin *plugin)
 {
   MetaDefaultPluginPrivate *priv   = META_DEFAULT_PLUGIN (plugin)->priv;
 
-  guint destroy_timeout  = DESTROY_TIMEOUT;
-  guint minimize_timeout = MINIMIZE_TIMEOUT;
-  guint maximize_timeout = MAXIMIZE_TIMEOUT;
-  guint map_timeout      = MAP_TIMEOUT;
-  guint switch_timeout   = SWITCH_TIMEOUT;
-
   if (meta_plugin_debug_mode (plugin))
     {
       g_debug ("Plugin %s: Entering debug mode.", priv->info.name);
 
       priv->debug_mode = TRUE;
 
-      /*
-       * Double the effect duration to make them easier to observe.
-       */
-      destroy_timeout  *= 2;
-      minimize_timeout *= 2;
-      maximize_timeout *= 2;
-      map_timeout      *= 2;
-      switch_timeout   *= 2;
     }
 }
 
