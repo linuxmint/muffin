@@ -511,10 +511,8 @@ meta_frames_ensure_layout (MetaFrames  *frames,
 
   g_return_if_fail (gtk_widget_get_realized (widget));
 
-  meta_core_get (meta_display_get_xdisplay (meta_get_display ()), frame->xwindow,
-                 META_CORE_GET_FRAME_FLAGS, &flags,
-                 META_CORE_GET_FRAME_TYPE, &type,
-                 META_CORE_GET_END);
+  flags = meta_frame_get_flags (frame->meta_window->frame);
+  type = meta_window_get_frame_type (frame->meta_window);
 
   style = meta_theme_get_frame_style (meta_theme_get_current (),
                                       type, flags);
@@ -594,12 +592,8 @@ meta_frames_calc_geometry (MetaFrames        *frames,
   MetaFrameType type;
   MetaButtonLayout button_layout;
 
-  meta_core_get (meta_display_get_xdisplay (meta_get_display ()), frame->xwindow,
-                 META_CORE_GET_CLIENT_WIDTH, &width,
-                 META_CORE_GET_CLIENT_HEIGHT, &height,
-                 META_CORE_GET_FRAME_FLAGS, &flags,
-                 META_CORE_GET_FRAME_TYPE, &type,
-                 META_CORE_GET_END);
+  flags = meta_frame_get_flags (frame->meta_window->frame);
+  type = meta_window_get_frame_type (frame->meta_window);
 
   meta_frames_ensure_layout (frames, frame);
 
@@ -609,7 +603,8 @@ meta_frames_calc_geometry (MetaFrames        *frames,
                             type,
                             frame->text_height,
                             flags,
-                            width, height,
+                            frame->meta_window->rect.width,
+                            frame->meta_window->rect.height,
                             &button_layout,
                             fgeom);
 }
@@ -650,17 +645,12 @@ static void
 meta_frames_attach_style (MetaFrames  *frames,
                           MetaUIFrame *frame)
 {
-  gboolean has_frame;
   char *variant = NULL;
 
   if (frame->style != NULL)
     g_object_unref (frame->style);
 
-  meta_core_get (meta_display_get_xdisplay (meta_get_display ()),
-                 frame->xwindow,
-                 META_CORE_WINDOW_HAS_FRAME, &has_frame,
-                 META_CORE_GET_THEME_VARIANT, &variant,
-                 META_CORE_GET_END);
+  variant = frame->meta_window->gtk_theme_variant;
 
   if (variant == NULL || strcmp(variant, "normal") == 0)
     frame->style = g_object_ref (frames->normal_style);
@@ -671,6 +661,7 @@ meta_frames_attach_style (MetaFrames  *frames,
 
 LOCAL_SYMBOL void
 meta_frames_manage_window (MetaFrames *frames,
+                           MetaWindow *meta_window,
                            Window      xwindow,
                            GdkWindow  *window)
 {
@@ -691,13 +682,14 @@ meta_frames_manage_window (MetaFrames *frames,
   frame->xwindow = xwindow;
   frame->cache_style = NULL;
   frame->layout = NULL;
+  frame->meta_window = meta_window;
   frame->text_height = -1;
   frame->title = NULL;
   frame->shape_applied = FALSE;
   frame->prelit_control = META_FRAME_CONTROL_NONE;
   frame->button_state = META_BUTTON_STATE_NORMAL;
 
-  meta_core_grab_buttons (meta_display_get_xdisplay (meta_get_display ()), frame->xwindow);
+  meta_display_grab_window_buttons (meta_window->display, frame->xwindow);
 
   g_hash_table_replace (frames->frames, &frame->xwindow, frame);
 }
@@ -769,10 +761,8 @@ meta_frames_get_borders (MetaFrames *frames,
   if (frame == NULL)
     meta_bug ("No such frame 0x%lx\n", xwindow);
 
-  meta_core_get (meta_display_get_xdisplay (meta_get_display ()), frame->xwindow,
-                 META_CORE_GET_FRAME_FLAGS, &flags,
-                 META_CORE_GET_FRAME_TYPE, &type,
-                 META_CORE_GET_END);
+  flags = meta_frame_get_flags (frame->meta_window->frame);
+  type = meta_window_get_frame_type (frame->meta_window);
 
   g_return_if_fail (type < META_FRAME_TYPE_LAST);
 
@@ -1073,10 +1063,8 @@ meta_frame_titlebar_event (MetaUIFrame    *frame,
     {
     case C_DESKTOP_TITLEBAR_ACTION_TOGGLE_SHADE:
       {
-        meta_core_get (display, frame->xwindow,
-                       META_CORE_GET_FRAME_FLAGS, &flags,
-                       META_CORE_GET_END);
-        
+        flags = meta_frame_get_flags (frame->meta_window->frame);
+
         if (flags & META_FRAME_ALLOWS_SHADE)
           {
             if (flags & META_FRAME_SHADED)
@@ -1093,10 +1081,8 @@ meta_frame_titlebar_event (MetaUIFrame    *frame,
       
     case C_DESKTOP_TITLEBAR_ACTION_TOGGLE_MAXIMIZE:
       {
-        meta_core_get (display, frame->xwindow,
-                       META_CORE_GET_FRAME_FLAGS, &flags,
-                       META_CORE_GET_END);
-        
+        flags = meta_frame_get_flags (frame->meta_window->frame);
+
         if (flags & META_FRAME_ALLOWS_MAXIMIZE)
           {
             meta_core_toggle_maximize (display, frame->xwindow);
@@ -1106,10 +1092,8 @@ meta_frame_titlebar_event (MetaUIFrame    *frame,
 
     case C_DESKTOP_TITLEBAR_ACTION_TOGGLE_MAXIMIZE_HORIZONTALLY:
       {
-        meta_core_get (display, frame->xwindow,
-                       META_CORE_GET_FRAME_FLAGS, &flags,
-                       META_CORE_GET_END);
-        
+        flags = meta_frame_get_flags (frame->meta_window->frame);
+
         if (flags & META_FRAME_ALLOWS_MAXIMIZE)
           {
             meta_core_toggle_maximize_horizontally (display, frame->xwindow);
@@ -1119,10 +1103,8 @@ meta_frame_titlebar_event (MetaUIFrame    *frame,
 
     case C_DESKTOP_TITLEBAR_ACTION_TOGGLE_MAXIMIZE_VERTICALLY:
       {
-        meta_core_get (display, frame->xwindow,
-                       META_CORE_GET_FRAME_FLAGS, &flags,
-                       META_CORE_GET_END);
-        
+        flags = meta_frame_get_flags (frame->meta_window->frame);
+
         if (flags & META_FRAME_ALLOWS_MAXIMIZE)
           {
             meta_core_toggle_maximize_vertically (display, frame->xwindow);
@@ -1132,9 +1114,7 @@ meta_frame_titlebar_event (MetaUIFrame    *frame,
 
     case C_DESKTOP_TITLEBAR_ACTION_TOGGLE_STUCK:
       {
-        meta_core_get (display, frame->xwindow,
-                       META_CORE_GET_FRAME_FLAGS, &flags,
-                       META_CORE_GET_END);
+        flags = meta_frame_get_flags (frame->meta_window->frame);
 
         if (flags & META_FRAME_STUCK)
           meta_core_unstick (display,
@@ -1147,9 +1127,7 @@ meta_frame_titlebar_event (MetaUIFrame    *frame,
 
     case C_DESKTOP_TITLEBAR_ACTION_TOGGLE_ABOVE:
       {
-        meta_core_get (display, frame->xwindow,
-                       META_CORE_GET_FRAME_FLAGS, &flags,
-                       META_CORE_GET_END);
+        flags = meta_frame_get_flags (frame->meta_window->frame);
 
         if (flags & META_FRAME_ABOVE)
           meta_core_unmake_above (display,
@@ -1162,10 +1140,8 @@ meta_frame_titlebar_event (MetaUIFrame    *frame,
 
     case C_DESKTOP_TITLEBAR_ACTION_MINIMIZE:
       {
-        meta_core_get (display, frame->xwindow,
-                       META_CORE_GET_FRAME_FLAGS, &flags,
-                       META_CORE_GET_END);
-        
+        flags = meta_frame_get_flags (frame->meta_window->frame);
+
         if (flags & META_FRAME_ALLOWS_MINIMIZE)
           {
             meta_core_minimize (display, frame->xwindow);
@@ -1197,10 +1173,8 @@ meta_frame_titlebar_event (MetaUIFrame    *frame,
 
     case C_DESKTOP_TITLEBAR_SCROLL_ACTION_SHADE:
       {
-        meta_core_get (display, frame->xwindow,
-                       META_CORE_GET_FRAME_FLAGS, &flags,
-                       META_CORE_GET_END);
-        
+        flags = meta_frame_get_flags (frame->meta_window->frame);
+
         if (flags & META_FRAME_ALLOWS_SHADE)
           {
             if (event->button == MOUSEWHEEL_DOWN &&
@@ -1282,19 +1256,15 @@ meta_frames_try_grab_op (MetaFrames  *frames,
                          gdouble      grab_y,
                          guint32      time)
 {
-  Display *display;
   gboolean ret;
 
-  display = meta_display_get_xdisplay (meta_get_display ());
-  ret = meta_core_begin_grab_op (display,
-                                 frame->xwindow,
-                                 op,
-                                 FALSE,
-                                 TRUE,
-                                 frame->grab_button,
-                                 0,
-                                 time,
-                                 grab_x, grab_y);
+  ret = meta_display_begin_grab_op (frame->meta_window->display,
+                                    frame->meta_window->screen,
+                                    frame->meta_window,
+                                    op, FALSE,
+                                    TRUE,
+                                    frame->grab_button, 0,
+                                    time, grab_x, grab_y);
   if (!ret)
     {
       frames->current_grab_op = op;
@@ -1695,9 +1665,7 @@ meta_frames_update_prelit_control (MetaFrames      *frames,
     }        
 
   /* set/unset the prelight cursor */
-  meta_core_set_screen_cursor (meta_display_get_xdisplay (meta_get_display ()),
-                               frame->xwindow,
-                               cursor);  
+  meta_frame_set_screen_cursor (frame->meta_window->frame, cursor);
 
   switch (control)
     {
@@ -1748,11 +1716,9 @@ meta_frames_motion_notify_event     (GtkWidget           *widget,
   if (frame == NULL)
     return FALSE;
 
-  MetaDisplay *display = meta_get_display ();
-
   frames->last_motion_frame = frame;
 
-  if (display->grab_op == META_GRAB_OP_MOVING)
+  if (frame->meta_window->display->grab_op == META_GRAB_OP_MOVING)
     gdk_window_get_device_position (frame->window, event->device,
                                     &x, &y, NULL);
   else
@@ -2121,7 +2087,7 @@ meta_frames_paint (MetaFrames   *frames,
   Display *display;
   
   widget = GTK_WIDGET (frames);
-  display = meta_display_get_xdisplay (meta_get_display ());
+  display = frame->meta_window->display->xdisplay;
 
   for (i = 0; i < META_BUTTON_TYPE_LAST; i++)
     button_states[i] = META_BUTTON_STATE_NORMAL;
@@ -2315,8 +2281,7 @@ get_control (MetaFrames *frames,
   gboolean has_north_resize;
   cairo_rectangle_int_t client;
 
-  window = meta_core_get_window (meta_display_get_xdisplay (meta_get_display ()),
-                                 frame->xwindow);
+  window = frame->meta_window;
 
   meta_window_get_client_area_rect (window, &client);
 
@@ -2334,11 +2299,8 @@ get_control (MetaFrames *frames,
   if (POINT_IN_RECT (x, y, fgeom.menu_rect.clickable))
     return META_FRAME_CONTROL_MENU;
 
-  meta_core_get (meta_display_get_xdisplay (meta_get_display ()),
-                 frame->xwindow,
-                 META_CORE_GET_FRAME_FLAGS, &flags,
-                 META_CORE_GET_FRAME_TYPE, &type,
-                 META_CORE_GET_END);
+  flags = meta_frame_get_flags (window->frame);
+  type = meta_window_get_frame_type (window);
 
   has_north_resize = (type != META_FRAME_TYPE_ATTACHED);
   has_vert = (flags & META_FRAME_ALLOWS_VERTICAL_RESIZE) != 0;

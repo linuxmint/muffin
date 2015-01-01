@@ -26,6 +26,7 @@
 
 /* Don't include gtk.h or gdk.h here */
 #include <meta/common.h>
+#include <meta/types.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <cairo.h>
@@ -66,6 +67,7 @@ void meta_ui_get_frame_borders (MetaUI *ui,
                                 MetaFrameBorders *borders);
 Window meta_ui_create_frame_window (MetaUI *ui,
                                     Display *xdisplay,
+                                    MetaWindow *meta_window,
                                     Visual *xvisual,
 				    gint x,
 				    gint y,
