@@ -1650,13 +1650,14 @@ process_modifier_key (MetaDisplay *display,
             {
               /* we had a binding, we're done */
               XAllowEvents (display->xdisplay, AsyncKeyboard, event->xkey.time);
+              return TRUE;
             }
           else
             {
               /* if we have nothing, let focused window handle it */
               XAllowEvents (display->xdisplay, ReplayKeyboard, event->xkey.time);
+              return FALSE;
             }
-          return TRUE;
         }
     }
   else
