@@ -47,14 +47,9 @@
  */
 typedef struct MetaPluginManager MetaPluginManager;
 
-MetaPluginManager * meta_plugin_manager_get         (MetaScreen *screen);
-MetaPluginManager * meta_plugin_manager_get_default (void);
+MetaPluginManager * meta_plugin_manager_new (MetaScreen *screen);
 
-void     meta_plugin_manager_load         (MetaPluginManager *mgr,
-                                           const gchar       *plugin_name);
-void     meta_plugin_manager_register     (MetaPluginManager *mgr,
-                                           GType              plugin_type);
-void     meta_plugin_manager_initialize   (MetaPluginManager *mgr);
+void     meta_plugin_manager_load         (const gchar       *plugin_name);
 
 gboolean meta_plugin_manager_event_simple (MetaPluginManager *mgr,
                                            MetaWindowActor   *actor,
@@ -79,5 +74,20 @@ gboolean meta_plugin_manager_switch_workspace (MetaPluginManager   *mgr,
 
 gboolean meta_plugin_manager_xevent_filter (MetaPluginManager *mgr,
                                             XEvent            *xev);
+
+gboolean meta_plugin_manager_show_tile_preview (MetaPluginManager *plugin_mgr,
+                                                MetaWindow        *window,
+                                                MetaRectangle     *tile_rect,
+                                                int                tile_monitor_number,
+                                                guint              snap_queued);
+
+gboolean meta_plugin_manager_hide_tile_preview (MetaPluginManager *plugin_mgr);
+
+gboolean meta_plugin_manager_show_hud_preview (MetaPluginManager *plugin_mgr,
+                                               guint              current_proximity_zone,
+                                               MetaRectangle     *work_area,
+                                               guint              snap_queued);
+
+gboolean meta_plugin_manager_hide_hud_preview (MetaPluginManager *plugin_mgr);
 
 #endif

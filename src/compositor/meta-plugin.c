@@ -44,76 +44,16 @@ enum
 {
   PROP_0,
   PROP_SCREEN,
-  PROP_FEATURES,
-  PROP_DISABLED,
   PROP_DEBUG_MODE,
 };
 
 struct _MetaPluginPrivate
 {
   MetaScreen   *screen;
-  gulong        features;
 
   gint          running;
-
-  gboolean      disabled : 1;
   gboolean      debug    : 1;
 };
-
-static void
-meta_plugin_set_features (MetaPlugin *plugin)
-{
-  MetaPluginPrivate  *priv     = plugin->priv;
-  MetaPluginClass    *klass    = META_PLUGIN_GET_CLASS (plugin);
-
-  priv->features = 0;
-
-  /*
-   * Feature flags: identify events that the plugin can handle; a plugin can
-   * handle one or more events.
-   */
-  if (klass->minimize)
-    priv->features |= META_PLUGIN_MINIMIZE;
-
-  if (klass->maximize)
-    priv->features |= META_PLUGIN_MAXIMIZE;
-
-  if (klass->unmaximize)
-    priv->features |= META_PLUGIN_UNMAXIMIZE;
-
-  if (klass->map)
-    priv->features |= META_PLUGIN_MAP;
-
-  if (klass->destroy)
-    priv->features |= META_PLUGIN_DESTROY;
-
-  if (klass->switch_workspace)
-    priv->features |= META_PLUGIN_SWITCH_WORKSPACE;
-
-  if (klass->tile)
-    priv->features |= META_PLUGIN_TILE;
-}
-
-static void
-meta_plugin_constructed (GObject *object)
-{
-  meta_plugin_set_features (META_PLUGIN (object));
-
-  if (G_OBJECT_CLASS (meta_plugin_parent_class)->constructed)
-      G_OBJECT_CLASS (meta_plugin_parent_class)->constructed (object);
-}
-
-static void
-meta_plugin_dispose (GObject *object)
-{
-  G_OBJECT_CLASS (meta_plugin_parent_class)->dispose (object);
-}
-
-static void
-meta_plugin_finalize (GObject *object)
-{
-  G_OBJECT_CLASS (meta_plugin_parent_class)->finalize (object);
-}
 
 static void
 meta_plugin_set_property (GObject      *object,
@@ -127,9 +67,6 @@ meta_plugin_set_property (GObject      *object,
     {
     case PROP_SCREEN:
       priv->screen = g_value_get_object (value);
-      break;
-    case PROP_DISABLED:
-      priv->disabled = g_value_get_boolean (value);
       break;
     case PROP_DEBUG_MODE:
       priv->debug = g_value_get_boolean (value);
@@ -153,14 +90,8 @@ meta_plugin_get_property (GObject    *object,
     case PROP_SCREEN:
       g_value_set_object (value, priv->screen);
       break;
-    case PROP_DISABLED:
-      g_value_set_boolean (value, priv->disabled);
-      break;
     case PROP_DEBUG_MODE:
       g_value_set_boolean (value, priv->debug);
-      break;
-    case PROP_FEATURES:
-      g_value_set_ulong (value, priv->features);
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -174,9 +105,6 @@ meta_plugin_class_init (MetaPluginClass *klass)
 {
   GObjectClass      *gobject_class = G_OBJECT_CLASS (klass);
 
-  gobject_class->constructed     = meta_plugin_constructed;
-  gobject_class->finalize        = meta_plugin_finalize;
-  gobject_class->dispose         = meta_plugin_dispose;
   gobject_class->set_property    = meta_plugin_set_property;
   gobject_class->get_property    = meta_plugin_get_property;
 
@@ -187,22 +115,6 @@ meta_plugin_class_init (MetaPluginClass *klass)
                                                         "MetaScreen",
                                                         META_TYPE_SCREEN,
                                                         G_PARAM_READWRITE));
-
-  g_object_class_install_property (gobject_class,
-				   PROP_FEATURES,
-				   g_param_spec_ulong ("features",
-                                                       "Features",
-                                                       "Plugin Features",
-                                                       0 , G_MAXULONG, 0,
-                                                       G_PARAM_READABLE));
-
-  g_object_class_install_property (gobject_class,
-				   PROP_DISABLED,
-				   g_param_spec_boolean ("disabled",
-                                                      "Plugin disabled",
-                                                      "Plugin disabled",
-                                                      FALSE,
-                                                      G_PARAM_READWRITE));
 
   g_object_class_install_property (gobject_class,
 				   PROP_DEBUG_MODE,
@@ -221,22 +133,6 @@ meta_plugin_init (MetaPlugin *self)
   MetaPluginPrivate *priv;
 
   self->priv = priv = META_PLUGIN_GET_PRIVATE (self);
-}
-
-gulong
-meta_plugin_features (MetaPlugin *plugin)
-{
-  MetaPluginPrivate *priv = META_PLUGIN (plugin)->priv;
-
-  return priv->features;
-}
-
-gboolean
-meta_plugin_disabled (MetaPlugin *plugin)
-{
-  MetaPluginPrivate *priv = META_PLUGIN (plugin)->priv;
-
-  return priv->disabled;
 }
 
 gboolean
@@ -441,20 +337,4 @@ meta_plugin_get_screen (MetaPlugin *plugin)
   MetaPluginPrivate *priv = META_PLUGIN (plugin)->priv;
 
   return priv->screen;
-}
-
-/**
- * meta_plugin_type_register:
- * @plugin_type: a #MetaPlugin type
- *
- * Register @plugin_type as a compositor plugin type to be used.
- * You must call this before calling meta_init().
- */
-void
-meta_plugin_type_register (GType plugin_type)
-{
-  MetaPluginManager *plugin_manager;
-
-  plugin_manager = meta_plugin_manager_get_default ();
-  meta_plugin_manager_register (plugin_manager, plugin_type);
 }

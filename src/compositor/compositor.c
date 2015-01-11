@@ -594,9 +594,7 @@ meta_compositor_manage_screen (MetaCompositor *compositor,
 
   clutter_actor_hide (info->hidden_group);
 
-  info->plugin_mgr =
-    meta_plugin_manager_get (screen);
-  meta_plugin_manager_initialize (info->plugin_mgr);
+  info->plugin_mgr = meta_plugin_manager_new (screen);
 
   /*
    * Delay the creation of the overlay window as long as we can, to avoid
@@ -1424,4 +1422,64 @@ meta_compositor_flash_screen (MetaCompositor *compositor,
                          "opacity", 192,
                          "signal-after::completed", flash_in_completed, flash,
                          NULL);
+}
+
+void
+meta_compositor_show_tile_preview (MetaCompositor *compositor,
+                                   MetaScreen     *screen,
+                                   MetaWindow     *window,
+                                   MetaRectangle  *tile_rect,
+                                   int            tile_monitor_number,
+                                   guint          snap_queued)
+{
+    MetaCompScreen *info = meta_screen_get_compositor_data (screen);
+
+    if (!info->plugin_mgr)
+        return;
+
+    meta_plugin_manager_show_tile_preview (info->plugin_mgr,
+                                           window, tile_rect, tile_monitor_number,
+                                           snap_queued);
+}
+
+void
+meta_compositor_hide_tile_preview (MetaCompositor *compositor,
+                                   MetaScreen     *screen)
+{
+    MetaCompScreen *info = meta_screen_get_compositor_data (screen);
+
+    if (!info->plugin_mgr)
+        return;
+
+    meta_plugin_manager_hide_tile_preview (info->plugin_mgr);
+}
+
+void
+meta_compositor_show_hud_preview (MetaCompositor *compositor,
+                                  MetaScreen     *screen,
+                                  guint          current_proximity_zone,
+                                  MetaRectangle  *work_area,
+                                  guint          snap_queued)
+{
+    MetaCompScreen *info = meta_screen_get_compositor_data (screen);
+
+    if (!info->plugin_mgr)
+        return;
+
+    meta_plugin_manager_show_hud_preview (info->plugin_mgr,
+                                          current_proximity_zone,
+                                          work_area,
+                                          snap_queued);
+}
+
+void
+meta_compositor_hide_hud_preview (MetaCompositor *compositor,
+                                  MetaScreen     *screen)
+{
+    MetaCompScreen *info = meta_screen_get_compositor_data (screen);
+
+    if (!info->plugin_mgr)
+        return;
+
+    meta_plugin_manager_hide_hud_preview (info->plugin_mgr);
 }
