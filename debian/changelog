@@ -1,3 +1,12 @@
+muffin (2.4.3) rebecca; urgency=medium
+
+  * Fixed scroll-zoom modifier mask
+  * Fixed freezing when receiving a Steam notification
+  * Fixed keybinding events not referencing X Windows, improve handling for hotkeys that use modifiers that are themselves hotkeys.
+  * Fixed dark theme variant support
+
+ -- Clement Lefebvre <root@linuxmint.com>  Thu, 15 Jan 2015 16:08:08 +0100
+
 muffin (2.4.2) rebecca; urgency=medium
 
   * Frames: Fixed clicking maximize button from a top or bottom-tiled state
