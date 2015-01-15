@@ -8669,7 +8669,7 @@ meta_window_show_menu (MetaWindow *window,
 
   if (window->wm_state_above)
     ops |= META_MENU_OP_UNABOVE;
-  else if (!META_WINDOW_MAXIMIZED (window))
+  else
     ops |= META_MENU_OP_ABOVE;
 
   if (!window->has_maximize_func)

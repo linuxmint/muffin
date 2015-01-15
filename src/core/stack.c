@@ -341,12 +341,7 @@ get_standalone_layer (MetaWindow *window)
                  windows_on_different_monitor (window,
                                                window->display->expected_focus_window))))
         layer = META_LAYER_FULLSCREEN;
-      /* An 'always-on-top' maximized window doesn't make sense.
-       * It gives the impression of non-responsiveness if the user
-       * then tries to activate another window.  So, don't exhibit
-       * always-on-top behavior temporarily when maximized.
-       */
-      else if (window->wm_state_above && !meta_window_get_maximized (window))
+      else if (window->wm_state_above)
         layer = META_LAYER_TOP;
       else
         layer = META_LAYER_NORMAL;

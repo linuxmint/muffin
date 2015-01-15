@@ -3392,7 +3392,7 @@ handle_toggle_above       (MetaDisplay    *display,
 {
   if (window->wm_state_above)
     meta_window_unmake_above (window);
-  else if (!META_WINDOW_MAXIMIZED (window))
+  else
     meta_window_make_above (window);
 }
 
