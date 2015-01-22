@@ -2076,7 +2076,8 @@ set_net_wm_state (MetaWindow *window)
       data[i] = window->display->atom__NET_WM_STATE_MAXIMIZED_HORZ;
       ++i;
     }
-  if (window->maximized_vertically)
+  /* As of 3.10, Gtk considers _NET_WM_STATE_MAXIMIZED_VERT to be a tiled window also */
+  if (window->maximized_vertically || window->tile_type != META_WINDOW_TILE_TYPE_NONE)
     {
       data[i] = window->display->atom__NET_WM_STATE_MAXIMIZED_VERT;
       ++i;
