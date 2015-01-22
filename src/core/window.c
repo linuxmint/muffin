@@ -7076,6 +7076,28 @@ meta_window_client_message (MetaWindow *window,
       meta_window_update_fullscreen_monitors (window, top, bottom, left, right);
     }
 
+  else if (event->xclient.message_type ==
+           display->atom__GTK_SHOW_WINDOW_MENU)
+    {
+      if (meta_window_is_client_decorated (window))
+        {
+          int x_root, y_root;
+
+          x_root = event->xclient.data.l[1];
+          y_root = event->xclient.data.l[2];
+
+          meta_screen_hide_hud_and_preview (window->screen);
+
+          if (meta_prefs_get_raise_on_click ())
+            meta_window_raise (window);
+          meta_window_focus (window, meta_display_get_current_time_roundtrip (display));
+
+          meta_window_show_menu (window, x_root,
+                                 y_root, GDK_BUTTON_SECONDARY,
+                                 meta_display_get_current_time_roundtrip (display));
+        }
+    }
+
   return FALSE;
 }
 
