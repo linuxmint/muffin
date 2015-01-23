@@ -5805,6 +5805,28 @@ meta_window_get_tile_side (MetaWindow *window)
     return side;
 }
 
+void
+meta_window_get_titlebar_rect (MetaWindow *window,
+                               MetaRectangle *rect)
+{
+  meta_window_get_outer_rect (window, rect);
+
+  /* The returned rectangle is relative to the frame rect. */
+  rect->x = 0;
+  rect->y = 0;
+
+  if (window->frame)
+    {
+      rect->height = window->frame->child_y;
+    }
+  else
+    {
+      /* Pick an arbitrary height for a titlebar. We might want to
+       * eventually have CSD windows expose their borders to us. */
+      rect->height = CSD_TITLEBAR_HEIGHT * meta_prefs_get_ui_scale ();
+    }
+}
+
 const char*
 meta_window_get_startup_id (MetaWindow *window)
 {
@@ -9184,17 +9206,16 @@ update_move (MetaWindow  *window,
 
       display->grab_initial_window_pos.x =
         x - window->saved_rect.width * prop;
-      display->grab_initial_window_pos.y = y;
 
       if (window->frame)
         {
-          display->grab_initial_window_pos.y += window->frame->child_y / 2;
+          display->grab_initial_window_pos.y = y + (window->frame->child_y / 2);
+          display->grab_anchor_root_x = x;
+          display->grab_anchor_root_y = y;
         }
 
       window->saved_rect.x = display->grab_initial_window_pos.x;
       window->saved_rect.y = display->grab_initial_window_pos.y;
-      display->grab_anchor_root_x = x;
-      display->grab_anchor_root_y = y;
 
       meta_window_unmaximize (window,
                               META_MAXIMIZE_HORIZONTAL |
