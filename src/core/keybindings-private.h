@@ -36,7 +36,7 @@ struct _MetaKeyHandler
   char *name;
   MetaKeyHandlerFunc func;
   MetaKeyHandlerFunc default_func;
-  gint data, flags;
+  gint data, flags, action;
   gpointer user_data;
   GDestroyNotify user_data_free_func;
 };

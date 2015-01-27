@@ -143,6 +143,7 @@ find_next_cascade (MetaWindow *window,
   GList *tmp;
   GList *sorted;
   int cascade_x, cascade_y;
+  MetaRectangle titlebar_rect;
   int x_threshold, y_threshold;
   int window_width, window_height;
   int cascade_stage;
@@ -162,17 +163,11 @@ find_next_cascade (MetaWindow *window,
    * manually cascade.
    */
 #define CASCADE_FUZZ 15
-  if (borders)
-    {
-      x_threshold = MAX (borders->visible.left, CASCADE_FUZZ);
-      y_threshold = MAX (borders->visible.top, CASCADE_FUZZ);
-    }
-  else
-    {
-      x_threshold = CASCADE_FUZZ;
-      y_threshold = CASCADE_FUZZ;
-    }
-  
+
+  meta_window_get_titlebar_rect (window, &titlebar_rect);
+  x_threshold = MAX (titlebar_rect.x, CASCADE_FUZZ);
+  y_threshold = MAX (titlebar_rect.y, CASCADE_FUZZ);
+
   /* Find furthest-SE origin of all workspaces.
    * cascade_x, cascade_y are the target position
    * of NW corner of window frame.
@@ -217,9 +212,10 @@ find_next_cascade (MetaWindow *window,
            * point. The new window frame should go at the origin
            * of the client window we're stacking above.
            */
-          meta_window_get_position (w, &wx, &wy);
-          cascade_x = wx;
-          cascade_y = wy;
+          meta_window_get_titlebar_rect (w, &titlebar_rect);
+          /* Cascade the window evenly by the titlebar height; this isn't a typo. */
+          cascade_x = wx + titlebar_rect.height;
+          cascade_y = wy + titlebar_rect.height;
           
           /* If we go off the screen, start over with a new cascade */
 	  if (((cascade_x + window_width) >

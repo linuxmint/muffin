@@ -2076,7 +2076,8 @@ set_net_wm_state (MetaWindow *window)
       data[i] = window->display->atom__NET_WM_STATE_MAXIMIZED_HORZ;
       ++i;
     }
-  if (window->maximized_vertically)
+  /* As of 3.10, Gtk considers _NET_WM_STATE_MAXIMIZED_VERT to be a tiled window also */
+  if (window->maximized_vertically || window->tile_type != META_WINDOW_TILE_TYPE_NONE)
     {
       data[i] = window->display->atom__NET_WM_STATE_MAXIMIZED_VERT;
       ++i;
@@ -5800,6 +5801,28 @@ meta_window_get_tile_side (MetaWindow *window)
     return side;
 }
 
+void
+meta_window_get_titlebar_rect (MetaWindow *window,
+                               MetaRectangle *rect)
+{
+  meta_window_get_outer_rect (window, rect);
+
+  /* The returned rectangle is relative to the frame rect. */
+  rect->x = 0;
+  rect->y = 0;
+
+  if (window->frame)
+    {
+      rect->height = window->frame->child_y;
+    }
+  else
+    {
+      /* Pick an arbitrary height for a titlebar. We might want to
+       * eventually have CSD windows expose their borders to us. */
+      rect->height = CSD_TITLEBAR_HEIGHT * meta_prefs_get_ui_scale ();
+    }
+}
+
 const char*
 meta_window_get_startup_id (MetaWindow *window)
 {
@@ -7071,6 +7094,28 @@ meta_window_client_message (MetaWindow *window,
       meta_window_update_fullscreen_monitors (window, top, bottom, left, right);
     }
 
+  else if (event->xclient.message_type ==
+           display->atom__GTK_SHOW_WINDOW_MENU)
+    {
+      if (meta_window_is_client_decorated (window))
+        {
+          int x_root, y_root;
+
+          x_root = event->xclient.data.l[1];
+          y_root = event->xclient.data.l[2];
+
+          meta_screen_hide_hud_and_preview (window->screen);
+
+          if (meta_prefs_get_raise_on_click ())
+            meta_window_raise (window);
+          meta_window_focus (window, meta_display_get_current_time_roundtrip (display));
+
+          meta_window_show_menu (window, x_root,
+                                 y_root, GDK_BUTTON_SECONDARY,
+                                 meta_display_get_current_time_roundtrip (display));
+        }
+    }
+
   return FALSE;
 }
 
@@ -7971,13 +8016,6 @@ is_ime_popup (MetaWindow *window)
     return !deco && (icon == NULL) && is_target_name;
 }
 
-static gboolean
-is_steam (MetaWindow *window)
-{
-    return window->type == META_WINDOW_MENU &&
-           g_strcmp0 (meta_window_get_wm_class (window), "Steam") == 0;
-}
-
 LOCAL_SYMBOL void
 meta_window_recalc_window_type (MetaWindow *window)
 {
@@ -8075,10 +8113,6 @@ recalc_window_type (MetaWindow *window)
         case META_WINDOW_DIALOG:
         case META_WINDOW_MODAL_DIALOG:
         case META_WINDOW_MENU:
-          if (is_steam (window)) {
-            window->type = META_WINDOW_POPUP_MENU;
-            break;
-          }
         case META_WINDOW_UTILITY:
           window->type = META_WINDOW_OVERRIDE_OTHER;
           break;
@@ -9168,17 +9202,16 @@ update_move (MetaWindow  *window,
 
       display->grab_initial_window_pos.x =
         x - window->saved_rect.width * prop;
-      display->grab_initial_window_pos.y = y;
 
       if (window->frame)
         {
-          display->grab_initial_window_pos.y += window->frame->child_y / 2;
+          display->grab_initial_window_pos.y = y + (window->frame->child_y / 2);
+          display->grab_anchor_root_x = x;
+          display->grab_anchor_root_y = y;
         }
 
       window->saved_rect.x = display->grab_initial_window_pos.x;
       window->saved_rect.y = display->grab_initial_window_pos.y;
-      display->grab_anchor_root_x = x;
-      display->grab_anchor_root_y = y;
 
       meta_window_unmaximize (window,
                               META_MAXIMIZE_HORIZONTAL |

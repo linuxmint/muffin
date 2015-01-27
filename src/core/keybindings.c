@@ -556,6 +556,7 @@ add_keybinding_internal (MetaDisplay          *display,
   handler->default_func = func;
   handler->data = data;
   handler->flags = flags;
+  handler->action = action;
   handler->user_data = user_data;
   handler->user_data_free_func = free_data;
 
@@ -664,6 +665,7 @@ add_custom_keybinding_internal (MetaDisplay          *display,
   handler->default_func = func;
   handler->data = data;
   handler->flags = flags;
+  handler->action = action;
   handler->user_data = user_data;
   handler->user_data_free_func = free_data;
 
@@ -698,7 +700,7 @@ meta_display_add_custom_keybinding (MetaDisplay       *display,
 
 {
   return add_custom_keybinding_internal (display, name, bindings,
-                                       META_KEY_BINDING_NONE,
+                                       META_KEY_BINDING_PER_WINDOW,
                                        META_KEYBINDING_ACTION_CUSTOM,
                                        (MetaKeyHandlerFunc)callback, 0, user_data, free_data);
 }
@@ -1566,8 +1568,11 @@ process_event (MetaKeyBinding       *bindings,
     {
       MetaKeyHandler *handler = bindings[i].handler;
 
-      if ((!on_window && handler->flags & META_KEY_BINDING_PER_WINDOW) ||
-          (event->type != KeyPress && !allow_release) ||
+      /* Custom keybindings are from Cinnamon, and never need a window */
+      if (!on_window && handler->flags & META_KEY_BINDING_PER_WINDOW && handler->action < META_KEYBINDING_ACTION_CUSTOM)
+        continue;
+
+      if ((event->type != KeyPress && !allow_release) ||
           bindings[i].keycode != event->xkey.keycode ||
           mask != bindings[i].mask)
         continue;
@@ -1609,71 +1614,68 @@ process_event (MetaKeyBinding       *bindings,
 static gboolean
 process_modifier_key (MetaDisplay *display,
                      MetaScreen *screen,
+                     MetaWindow *window,
                      XEvent *event,
-                     KeySym keysym)
+                     KeySym keysym,
+                     gboolean have_window,
+                     gboolean *allow_key_up)
 {
-  if (modifier_only_is_down)
-    {
-      if (!is_modifier_only_kb (display, event, keysym))
-        {
-          modifier_only_is_down = FALSE;
 
-          /* OK, the user hit modifier+key rather than pressing and
-           * releasing the ovelay key. We want to handle the key
-           * sequence "normally". Unfortunately, using
-           * XAllowEvents(..., ReplayKeyboard, ...) doesn't quite
-           * work, since global keybindings won't be activated ("this
-           * time, however, the function ignores any passive grabs at
-           * above (toward the root of) the grab_window of the grab
-           * just released.") So, we first explicitly check for one of
-           * our global keybindings, and if not found, we then replay
-           * the event. Other clients with global grabs will be out of
-           * luck.
+  if (event->xkey.type == KeyPress)
+    {
+        /* check if we're just Pressing a captured modifier at this time */
+      if (is_modifier_only_kb (display, event, keysym))
+        {
+          /* remember this state, because we'll need to know it for subsequent events */
+          modifier_only_is_down = TRUE;
+          /* We keep the keyboard frozen - this allows us to use ReplayKeyboard
+           * on the next event if it's not the release of this modifier key */
+          XAllowEvents (display->xdisplay, SyncKeyboard, event->xkey.time);
+          return TRUE;
+        }
+      else
+        {
+          /* If it's a press, with a mod+key combination, we try our own keybindings
+           * first, then pass it to the current window if we don't have anything for it.
+           * Also, negate modifier_only_is_down.  At this point we won't want a modifier
+           * release to trigger a binding, since when it happens now, it will only be the
+           * user releasing the keys after a combination binding has been used
            */
+          modifier_only_is_down = FALSE;
+            /* Try our keybindings */
           if (process_event (display->key_bindings,
                              display->n_key_bindings,
-                             display, screen, NULL, event, keysym,
-                             FALSE, FALSE))
+                             display, screen, window, event, keysym,
+                             have_window, FALSE))
             {
-              /* As normally, after we've handled a global key
-               * binding, we unfreeze the keyboard but keep the grab
-               * (this is important for something like cycling
-               * windows */
+              /* we had a binding, we're done */
               XAllowEvents (display->xdisplay, AsyncKeyboard, event->xkey.time);
+              return TRUE;
             }
           else
             {
-              /* Replay the event so it gets delivered to our
-               * per-window key bindings or to the application */
+              /* if we have nothing, let focused window handle it */
               XAllowEvents (display->xdisplay, ReplayKeyboard, event->xkey.time);
+              return FALSE;
             }
         }
-      else if (event->xkey.type == KeyRelease)
-        {
-          modifier_only_is_down = FALSE;
-          /* We want to unfreeze events, but keep the grab so that if the user
-           * starts typing into the overlay we get all the keys */
-          XAllowEvents (display->xdisplay, AsyncKeyboard, event->xkey.time);
-          return process_event (display->key_bindings,
-                                display->n_key_bindings,
-                                display, screen, NULL, event, keysym,
-                                FALSE, TRUE);
-        }
-
-      return TRUE;
-    }
-  else if (event->xkey.type == KeyPress &&
-           is_modifier_only_kb (display, event, keysym))
-    {
-      modifier_only_is_down = TRUE;
-      /* We keep the keyboard frozen - this allows us to use ReplayKeyboard
-       * on the next event if it's not the release of the overlay key */
-      XAllowEvents (display->xdisplay, SyncKeyboard, event->xkey.time);
-
-      return TRUE;
     }
   else
-    return FALSE;
+    {
+      /* We only care about key releases for modifier-only bindings -
+       * and only when that release directly follows a press.  When this happens,
+       * negate modifier_only_is_down, and allow the binding handler to accept
+       * a key release.
+       */
+      if (is_modifier_only_kb (display, event, keysym))
+        {
+          if (modifier_only_is_down)
+            *allow_key_up = TRUE;
+          modifier_only_is_down = FALSE;
+        }
+    }
+
+  return FALSE;
 }
 
 /* Handle a key event. May be called recursively: some key events cause
@@ -1699,6 +1701,7 @@ meta_display_process_key_event (MetaDisplay *display,
   gboolean keep_grab;
   gboolean all_keys_grabbed;
   gboolean handled;
+  gboolean allow_key_up = FALSE;
   const char *str;
   MetaScreen *screen;
 
@@ -1748,7 +1751,7 @@ meta_display_process_key_event (MetaDisplay *display,
 
   if (!all_keys_grabbed)
     {
-      handled = process_modifier_key (display, screen, event, keysym);
+      handled = process_modifier_key (display, screen, window, event, keysym, (!all_keys_grabbed && window), &allow_key_up);
       if (handled)
         return TRUE;
     }
@@ -1845,7 +1848,7 @@ meta_display_process_key_event (MetaDisplay *display,
   return process_event (display->key_bindings,
                         display->n_key_bindings,
                         display, screen, window, event, keysym,
-                        !all_keys_grabbed && window, FALSE);
+                        !all_keys_grabbed && window, allow_key_up);
 }
 
 static gboolean

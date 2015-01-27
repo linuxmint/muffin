@@ -94,6 +94,7 @@ enum {
 #define NUMBER_OF_QUEUES 3
 
 #define HUD_WIDTH 24
+#define CSD_TITLEBAR_HEIGHT 48
 
 struct _MetaWindow
 {
@@ -710,6 +711,9 @@ void meta_window_get_tile_threshold_area_for_mode        (MetaWindow    *window,
                                                           MetaTileMode   mode,
                                                           MetaRectangle *tile_area,
                                                           gint           zone_width);
+
+void meta_window_get_titlebar_rect (MetaWindow *window,
+                                    MetaRectangle *titlebar_rect);
 
 gboolean meta_window_same_application (MetaWindow *window,
                                        MetaWindow *other_window);
