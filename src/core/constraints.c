@@ -1446,15 +1446,9 @@ do_screen_and_monitor_relative_constraints (
   else
     {
       /* For everything else, shove the rectangle into the relevant region */
-      if (meta_window_is_client_decorated (window))
-        extend_by_frame (window, &info->current, info->borders);
-
       meta_rectangle_shove_into_region (region_spanning_rectangles,
                                         info->fixed_directions,
                                         &info->current);
-
-      if (meta_window_is_client_decorated (window))
-        unextend_by_frame (window, &info->current, info->borders);
     }
 
   unextend_by_frame (window, &info->current, info->borders);
@@ -1575,12 +1569,8 @@ constrain_titlebar_visible (MetaWindow         *window,
     }
   else if (meta_window_is_client_decorated (window))
     {
-      extend_by_frame (window, &info->current, info->borders);
-      extend_by_frame (window, &info->current, info->borders);
       vert_amount_onscreen = CSD_TITLEBAR_HEIGHT * scale; /* Hardcoded for now, we don't get this from Gtk */
-      bottom_amount = vert_amount_offscreen = MAX ((info->current.height - vert_amount_onscreen), 0);
-      unextend_by_frame (window, &info->current, info->borders);
-      unextend_by_frame (window, &info->current, info->borders);
+      bottom_amount = vert_amount_offscreen = MAX ((info->current.height - (vert_amount_onscreen * 2)), 0);
     }
   else
     bottom_amount = vert_amount_offscreen;
@@ -1607,7 +1597,6 @@ constrain_titlebar_visible (MetaWindow         *window,
                                               -bottom_amount,
                                               horiz_amount_onscreen,
                                               vert_amount_onscreen);
-
   return retval;
 }
 
@@ -1660,12 +1649,8 @@ constrain_partially_onscreen (MetaWindow         *window,
     }
   else if (meta_window_is_client_decorated (window))
     {
-      extend_by_frame (window, &info->current, info->borders);
-      extend_by_frame (window, &info->current, info->borders);
-      vert_amount_onscreen = CSD_TITLEBAR_HEIGHT * scale; /* Hardcoded for now, we don't get this from Gtk */
-      bottom_amount = vert_amount_offscreen = MAX ((info->current.height - vert_amount_onscreen), 0);
-      unextend_by_frame (window, &info->current, info->borders);
-      unextend_by_frame (window, &info->current, info->borders);
+      top_amount = vert_amount_onscreen = CSD_TITLEBAR_HEIGHT * scale; /* Hardcoded for now, we don't get this from Gtk */
+      bottom_amount = vert_amount_offscreen = MAX ((info->current.height - (vert_amount_onscreen * 2)), 0);
     }
   else
     bottom_amount = vert_amount_offscreen;

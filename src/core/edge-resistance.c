@@ -1157,15 +1157,6 @@ meta_window_edge_resistance_for_move (MetaWindow  *window,
 
   meta_window_get_outer_rect (window, &old_outer);
 
-  if (meta_window_is_client_decorated (window))
-    {
-      const GtkBorder *extents = &window->custom_frame_extents;
-      old_outer.x += extents->left;
-      old_outer.y += extents->top;
-      old_outer.width -= extents->left + extents->right;
-      old_outer.height -= extents->top + extents->bottom;
-    }
-
   proposed_outer = old_outer;
   proposed_outer.x += (*new_x - old_x);
   proposed_outer.y += (*new_y - old_y);
