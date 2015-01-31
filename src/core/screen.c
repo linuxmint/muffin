@@ -74,7 +74,7 @@ static void meta_screen_sn_event   (SnMonitorEvent *event,
                                     void           *user_data);
 #endif
 
-#define SNAP_OSD_TIMEOUT 2
+#define SNAP_OSD_TIMEOUT 1
 
 enum
 {
