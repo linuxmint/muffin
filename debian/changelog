@@ -1,3 +1,12 @@
+muffin (2.4.4) betsy; urgency=medium
+
+  * Add _NET_WM_STATE_MAXIMIZED_VERT to the _NET_WM_STATE for tiled windows.
+  * window menu: fix right-click support for client-side-decorated windows.
+  * Improved support for client-side-decorated windows:
+  * Fix c-s-d windows properly, to account for unscaled GTK_FRAME_EXTENTS.
+
+ -- Clement Lefebvre <root@linuxmint.com>  Mon, 02 Feb 2015 17:02:03 +0100
+
 muffin (2.4.3) rebecca; urgency=medium
 
   * Fixed scroll-zoom modifier mask
