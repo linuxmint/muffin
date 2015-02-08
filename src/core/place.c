@@ -129,6 +129,34 @@ place_by_pointer(MetaWindow *window,
   return TRUE;
 }
 
+static gboolean
+place_in_center(MetaWindow *window,
+                 MetaFrameBorders *borders,
+                 MetaPlacementMode placement_mode,
+                 int *new_x,
+                 int *new_y)
+{
+  int center_x, center_y;
+  const MetaMonitorInfo *xi;
+  xi = meta_screen_get_current_monitor (window->screen);
+  center_x = xi->rect.width / 2;
+  center_y = xi->rect.height / 2;
+
+  int window_width, window_height;
+  window_width = window->frame ? window->frame->rect.width : window->rect.width;
+  window_height = window->frame ? window->frame->rect.height : window->rect.height;
+
+  if (borders) {
+    *new_x = center_x + borders->visible.left - window_width / 2;
+    *new_y = center_y + borders->visible.top  - window_height / 2;
+  }
+  else {
+    *new_x = center_x - window_width / 2;
+    *new_y = center_y - window_height / 2;
+  }
+
+  return TRUE;
+}
 
 static void
 find_next_cascade (MetaWindow *window,
@@ -913,6 +941,12 @@ meta_window_place (MetaWindow        *window,
       placement_mode == META_PLACEMENT_MODE_MANUAL)
     {
       if (place_by_pointer (window, borders, placement_mode, &x, &y))
+        goto done_check_denied_focus;
+    }
+
+  else if (placement_mode == META_PLACEMENT_MODE_CENTER)
+    {
+      if (place_in_center (window, borders, placement_mode, &x, &y))
         goto done_check_denied_focus;
     }
 
