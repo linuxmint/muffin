@@ -132,8 +132,6 @@ libmuffin_la_SOURCES =				\
 	inlinepixbufs.h				\
 	ui/frames.c				\
 	ui/frames.h				\
-    ui/tile-hud.c           \
-    ui/tile-hud.h           \
 	ui/menu.c				\
 	ui/menu.h				\
 	ui/metaaccellabel.c			\
@@ -142,8 +140,6 @@ libmuffin_la_SOURCES =				\
 	ui/resizepopup.h			\
 	ui/tabpopup.c				\
 	ui/tabpopup.h				\
-	ui/tile-preview.c			\
-	ui/tile-preview.h			\
 	ui/theme-parser.c			\
 	ui/theme.c				\
 	meta/theme.h				\

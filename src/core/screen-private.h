@@ -76,15 +76,12 @@ struct _MetaScreen
   MetaRectangle rect;  /* Size of screen; rect.x & rect.y are always 0 */
   MetaUI *ui;
   MetaTabPopup *tab_popup, *ws_popup;
-  MetaTilePreview *tile_preview;
-  MetaTileHUD *tile_hud;
 
   guint tile_preview_timeout_id;
   guint tile_hud_timeout_id;
-  guint tile_hud_fade_timeout_id;
   guint snap_osd_timeout_id;
-  float hud_opacity;
-  gboolean hud_hiding;
+  gboolean tile_preview_visible;
+  gboolean tile_hud_visible;
 
   MetaWorkspace *active_workspace;
 

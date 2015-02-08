@@ -94,7 +94,7 @@
     </key>
 
     <key name="tile-hud-threshold" type="i">
-      <default>35</default>
+      <default>25</default>
       <range min="1" max="400"/>
       <_summary>Window tile HUD threshold</_summary>
       <_description>
