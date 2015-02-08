@@ -196,12 +196,10 @@ find_nearest_position (const GArray        *edges,
   int best, best_dist, i;
   gboolean edges_align;
 
-  /* Initialize mid, edge, & compare in the off change that the array only
+  /* Initialize mid in the off chance that the array only
    * has one element.
    */
   mid  = 0;
-  edge = g_array_index (edges, MetaEdge*, mid);
-  compare = horizontal ? edge->rect.x : edge->rect.y;
 
   /* Begin the search... */
   low  = 0;
@@ -285,7 +283,6 @@ find_nearest_position (const GArray        *edges,
           if (dist < best_dist)
             {
               best = compare;
-              best_dist = dist;
             }
           break;
         }

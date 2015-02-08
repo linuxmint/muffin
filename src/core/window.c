@@ -4970,11 +4970,7 @@ meta_window_move_resize_internal (MetaWindow          *window,
                   window->frame->rect.width,
                   window->frame->rect.height);
     }
-  else
-    {
-      frame_size_dx = 0;
-      frame_size_dy = 0;
-    }
+
 
   /* For nice effect, when growing the window we want to move/resize
    * the frame first, when shrinking the window we want to move/resize
