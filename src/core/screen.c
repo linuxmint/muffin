@@ -1981,14 +1981,13 @@ static gboolean
 snap_osd_timeout (void *data)
 {
   MetaScreen *screen = data;
-  MetaWindow *window = screen->display->grab_window;
-  int monitor;
+  const MetaMonitorInfo *monitor;
 
-  monitor = meta_window_get_current_tile_monitor_number (window);
-
+  monitor = meta_screen_get_current_monitor (screen);
+  
   if (meta_screen_tile_preview_get_visible (screen) ||
       meta_screen_tile_hud_get_visible (screen))
-      g_signal_emit (screen, screen_signals[SNAP_OSD_SHOW], 0, monitor);
+      g_signal_emit (screen, screen_signals[SNAP_OSD_SHOW], 0, monitor->number);
   screen->snap_osd_timeout_id = 0;
   return FALSE;
 }
