@@ -76,6 +76,14 @@ static void meta_screen_sn_event   (SnMonitorEvent *event,
 
 #define SNAP_OSD_TIMEOUT 1
 
+#define _NET_WM_ORIENTATION_HORZ 0
+#define _NET_WM_ORIENTATION_VERT 1
+
+#define _NET_WM_TOPLEFT     0
+#define _NET_WM_TOPRIGHT    1
+#define _NET_WM_BOTTOMRIGHT 2
+#define _NET_WM_BOTTOMLEFT  3
+
 enum
 {
   PROP_N_WORKSPACES = 1,
@@ -1416,6 +1424,38 @@ meta_screen_get_workspace_by_index (MetaScreen  *screen,
 }
 
 static void
+update_net_desktop_layout (MetaScreen *screen, int n_columns)
+{
+  g_return_if_fail (META_IS_SCREEN (screen));
+
+  screen->columns_of_workspaces = n_columns;
+
+  unsigned long data[4];
+
+  /* Orientation */
+  data[0] = screen->vertical_workspaces ? _NET_WM_ORIENTATION_VERT : _NET_WM_ORIENTATION_HORZ;
+  /* Number of columns */
+  data[1] = screen->columns_of_workspaces;
+  /* Number of rows */
+  data[2] = screen->rows_of_workspaces;
+  /* Starting corner */
+  data[3] = screen->starting_corner;
+
+  meta_verbose ("Setting _NET_DESKTOP_LAYOUT on root window "
+                "to orientation = %lu, columns = %lu, rows = %lu, starting corner = %lu\n",
+                data[0], data[1], data[2], data[3]);
+
+  meta_error_trap_push (screen->display);
+
+  XChangeProperty (screen->display->xdisplay, screen->xroot,
+                   screen->display->atom__NET_DESKTOP_LAYOUT,
+                   XA_CARDINAL, 32, PropModeReplace,
+                   (guchar*) data, 4);
+
+  meta_error_trap_pop (screen->display);
+}
+
+static void
 set_number_of_spaces_hint (MetaScreen *screen,
 			   int         n_spaces)
 {
@@ -1540,6 +1580,8 @@ meta_screen_remove_workspace (MetaScreen *screen, MetaWorkspace *workspace,
   if (!meta_prefs_get_dynamic_workspaces ())
     meta_prefs_set_num_workspaces (new_num);
 
+  update_net_desktop_layout (screen, new_num);
+
   /* If deleting a workspace before the current workspace, the active
    * workspace index changes, so we need to update that hint */
   if (active_index_changed)
@@ -1596,6 +1638,8 @@ meta_screen_append_new_workspace (MetaScreen *screen, gboolean activate,
 
   if (!meta_prefs_get_dynamic_workspaces ())
     meta_prefs_set_num_workspaces (new_num);
+
+  update_net_desktop_layout (screen, new_num);
 
   meta_screen_queue_workarea_recalc (screen);
 
@@ -1686,6 +1730,7 @@ update_num_workspaces (MetaScreen *screen,
     meta_workspace_new (screen);
 
   set_number_of_spaces_hint (screen, new_num);
+  update_net_desktop_layout (screen, new_num);
 
   meta_screen_queue_workarea_recalc (screen);
 
@@ -2564,14 +2609,6 @@ meta_screen_get_monitor_geometry (MetaScreen    *screen,
   *geometry = screen->monitor_infos[monitor].rect;
 }
 
-#define _NET_WM_ORIENTATION_HORZ 0
-#define _NET_WM_ORIENTATION_VERT 1
-
-#define _NET_WM_TOPLEFT     0
-#define _NET_WM_TOPRIGHT    1
-#define _NET_WM_BOTTOMRIGHT 2
-#define _NET_WM_BOTTOMLEFT  3
-
 LOCAL_SYMBOL void
 meta_screen_update_workspace_layout (MetaScreen *screen)
 {
@@ -2695,12 +2732,6 @@ meta_screen_override_workspace_layout (MetaScreen      *screen,
   screen->starting_corner = starting_corner;
   screen->rows_of_workspaces = n_rows;
   screen->columns_of_workspaces = n_columns;
-
-  /* In theory we should remove _NET_DESKTOP_LAYOUT from _NET_SUPPORTED at this
-   * point, but it's unlikely that anybody checks that, and it's unlikely that
-   * anybody who checks that handles changes, so we'd probably just create
-   * a race condition. And it's hard to implement with the code in set_supported_hint()
-   */
 }
 
 static void
