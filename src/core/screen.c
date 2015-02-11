@@ -1595,6 +1595,8 @@ meta_screen_remove_workspace (MetaScreen *screen, MetaWorkspace *workspace,
 
   update_net_desktop_layout (screen, new_num);
 
+  set_workspace_names (screen);
+
   /* If deleting a workspace before the current workspace, the active
    * workspace index changes, so we need to update that hint */
   if (active_index_changed)
@@ -1653,6 +1655,8 @@ meta_screen_append_new_workspace (MetaScreen *screen, gboolean activate,
     meta_prefs_set_num_workspaces (new_num);
 
   update_net_desktop_layout (screen, new_num);
+
+  set_workspace_names (screen);
 
   meta_screen_queue_workarea_recalc (screen);
 
@@ -1744,6 +1748,7 @@ update_num_workspaces (MetaScreen *screen,
 
   set_number_of_spaces_hint (screen, new_num);
   update_net_desktop_layout (screen, new_num);
+  set_workspace_names (screen);
 
   meta_screen_queue_workarea_recalc (screen);
 
