@@ -743,7 +743,9 @@ meta_ui_theme_get_frame_borders (MetaUI *ui,
       if (!font_desc)
         {
           style = gtk_style_context_new ();
-          font_desc = gtk_style_context_get_font (style, 0);
+          gtk_style_context_get (style, GTK_STATE_FLAG_NORMAL,
+                                 GTK_STYLE_PROPERTY_FONT, &font_desc,
+                                 NULL);
         }
 
       text_height = meta_pango_font_desc_get_text_height (font_desc, context);

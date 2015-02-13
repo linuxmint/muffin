@@ -5938,15 +5938,19 @@ meta_theme_lookup_color_constant (MetaTheme   *theme,
 LOCAL_SYMBOL PangoFontDescription*
 meta_gtk_widget_get_font_desc (GtkWidget *widget,
                                double     scale,
-			       const PangoFontDescription *override)
+                               const PangoFontDescription *override)
 {
   GtkStyleContext *style;
   PangoFontDescription *font_desc;
+  const PangoFontDescription *font_desc_original;
   
   g_return_val_if_fail (gtk_widget_get_realized (widget), NULL);
 
   style = gtk_widget_get_style_context (widget);
-  font_desc = pango_font_description_copy (gtk_style_context_get_font (style, 0));
+  gtk_style_context_get (style, GTK_STATE_FLAG_NORMAL,
+                         GTK_STYLE_PROPERTY_FONT, &font_desc_original,
+                         NULL);
+  font_desc = pango_font_description_copy (font_desc_original);
 
   if (override)
     pango_font_description_merge (font_desc, override, TRUE);
