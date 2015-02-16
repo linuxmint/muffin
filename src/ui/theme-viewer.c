@@ -775,7 +775,7 @@ int
 main (int argc, char **argv)
 {
   GtkStyleContext *style;
-  const PangoFontDescription *font_desc;
+  PangoFontDescription *font_desc;
   GtkWidget *window;
   GtkWidget *collection;
   GError *err;
@@ -890,7 +890,9 @@ main (int argc, char **argv)
   gtk_notebook_append_page (GTK_NOTEBOOK (notebook),
                             collection,
                             gtk_label_new (_("Benchmark")));
-  
+
+  pango_font_description_free (font_desc);
+
   i = 0;
   while (i < (int) G_N_ELEMENTS (previews))
     {
@@ -928,15 +930,18 @@ static int
 get_text_height (GtkWidget *widget)
 {
   GtkStyleContext *style;
-  const PangoFontDescription *font_desc;
+  PangoFontDescription *font_desc;
+  int text_height;
 
   style = gtk_widget_get_style_context (widget);
   gtk_style_context_get (style, GTK_STATE_FLAG_NORMAL,
                          GTK_STYLE_PROPERTY_FONT, &font_desc,
                          NULL);
 
-  return meta_pango_font_desc_get_text_height (font_desc,
-                                               gtk_widget_get_pango_context (widget));
+  text_height = meta_pango_font_desc_get_text_height (font_desc,
+                                                      gtk_widget_get_pango_context (widget));
+  pango_font_description_free (font_desc);
+  return text_height;
 }
 
 static PangoLayout*
