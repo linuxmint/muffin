@@ -560,7 +560,7 @@ preview_collection (int font_size,
           pango_font_description_set_size (font_desc,
                                            MAX (pango_font_description_get_size (base_desc) * scale, 1));
           
-          gtk_widget_modify_font (preview, font_desc);
+          gtk_widget_override_font (preview, font_desc);
 
           pango_font_description_free (font_desc);
         }
