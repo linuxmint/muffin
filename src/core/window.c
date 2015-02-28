@@ -11020,10 +11020,15 @@ meta_window_get_display (MetaWindow *window)
 }
 
 /**
- * meta_window_get_xwindow: (skip)
+ * meta_window_get_xwindow:
+ * @window: A #MetaWindow
+ *
+ * Returns: The Window id of the @window
+ * note - we return unsigned long because Window
+ * Can't be introspected (but Window *is* a ulong)
  *
  */
-Window
+unsigned long
 meta_window_get_xwindow (MetaWindow *window)
 {
   return window->xwindow;
