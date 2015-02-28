@@ -79,7 +79,7 @@ void meta_window_get_input_rect (const MetaWindow *window, MetaRectangle *rect);
 void meta_window_get_outer_rect (const MetaWindow *window, MetaRectangle *rect);
 MetaScreen *meta_window_get_screen (MetaWindow *window);
 MetaDisplay *meta_window_get_display (MetaWindow *window);
-Window meta_window_get_xwindow (MetaWindow *window);
+unsigned long meta_window_get_xwindow (MetaWindow *window);
 MetaWindowType meta_window_get_window_type (MetaWindow *window);
 Atom meta_window_get_window_type_atom (MetaWindow *window);
 MetaWorkspace *meta_window_get_workspace (MetaWindow *window);
