@@ -211,6 +211,12 @@ static void unextend_by_frame            (MetaWindow *window,
                                           MetaRectangle           *rect,
                                           const MetaFrameBorders  *borders);
 
+static inline void get_size_limits   (const MetaWindow        *window,
+                                      const MetaFrameBorders  *borders,
+                                            gboolean           include_frame,
+                                            MetaRectangle     *min_size,
+                                            MetaRectangle     *max_size);
+
 typedef gboolean (* ConstraintFunc) (MetaWindow         *window,
                                      ConstraintInfo     *info,
                                      ConstraintPriority  priority,
@@ -773,6 +779,42 @@ unextend_by_frame (MetaWindow              *window,
     }
 }
 
+static inline void
+get_size_limits (const MetaWindow       *window,
+                 const MetaFrameBorders *borders,
+                       gboolean          include_frame,
+                       MetaRectangle    *min_size,
+                       MetaRectangle    *max_size)
+{
+  /* We pack the results into MetaRectangle structs just for convienience; we
+   * don't actually use the position of those rects.
+   */
+  min_size->width  = window->size_hints.min_width;
+  min_size->height = window->size_hints.min_height;
+  max_size->width  = window->size_hints.max_width;
+  max_size->height = window->size_hints.max_height;
+
+  if (include_frame)
+    {
+      int fw = borders->visible.left + borders->visible.right;
+      int fh = borders->visible.top + borders->visible.bottom;
+
+      min_size->width  += fw;
+      min_size->height += fh;
+      /* Do check to avoid overflow (e.g. max_size->width & max_size->height
+       * may be set to G_MAXINT by meta_set_normal_hints()).
+       */
+      if (max_size->width < (G_MAXINT - fw))
+        max_size->width += fw;
+      else
+        max_size->width = G_MAXINT;
+      if (max_size->height < (G_MAXINT - fh))
+        max_size->height += fh;
+      else
+        max_size->height = G_MAXINT;
+    }
+}
+
 static gboolean
 constrain_modal_dialog (MetaWindow         *window,
                         ConstraintInfo     *info,
@@ -904,7 +946,7 @@ constrain_maximization (MetaWindow         *window,
   /* Check min size constraints; max size constraints are ignored for maximized
    * windows, as per bug 327543.
    */
-  meta_window_get_size_limits (window, info->borders, FALSE, &min_size, &max_size);
+  get_size_limits (window, info->borders, FALSE, &min_size, &max_size);
   hminbad = target_size.width < min_size.width && window->maximized_horizontally;
   vminbad = target_size.height < min_size.height && window->maximized_vertically;
   if (hminbad || vminbad)
@@ -1059,7 +1101,7 @@ constrain_tiling (MetaWindow         *window,
   /* Check min size constraints; max size constraints are ignored as for
    * maximized windows.
    */
-  meta_window_get_size_limits (window, info->borders, FALSE, &min_size, &max_size);
+  get_size_limits (window, info->borders, FALSE, &min_size, &max_size);
   hminbad = target_size.width < min_size.width;
   vminbad = target_size.height < min_size.height;
   if (hminbad || vminbad)
@@ -1102,7 +1144,7 @@ constrain_fullscreen (MetaWindow         *window,
 
   monitor = info->entire_monitor;
 
-  meta_window_get_size_limits (window, info->borders, FALSE, &min_size, &max_size);
+  get_size_limits (window, info->borders, FALSE, &min_size, &max_size);
   too_big =   !meta_rectangle_could_fit_rect (&monitor, &min_size);
   too_small = !meta_rectangle_could_fit_rect (&max_size, &monitor);
   if (too_big || too_small)
@@ -1212,7 +1254,7 @@ constrain_size_limits (MetaWindow         *window,
     return TRUE;
 
   /* Determine whether constraint is already satisfied; exit if it is */
-  meta_window_get_size_limits (window, info->borders, FALSE, &min_size, &max_size);
+  get_size_limits (window, info->borders, FALSE, &min_size, &max_size);
   /* We ignore max-size limits for maximized windows; see #327543 */
   if (window->maximized_horizontally)
     max_size.width = MAX (max_size.width, info->current.width);
@@ -1404,7 +1446,7 @@ do_screen_and_monitor_relative_constraints (
 
   /* Determine whether constraint applies; exit if it doesn't */
   how_far_it_can_be_smushed = info->current;
-  meta_window_get_size_limits (window, info->borders, TRUE, &min_size, &max_size);
+  get_size_limits (window, info->borders, TRUE, &min_size, &max_size);
   extend_by_frame (window, &info->current, info->borders);
 
   if (info->action_type != ACTION_MOVE)
