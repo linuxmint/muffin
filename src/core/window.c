@@ -8655,7 +8655,8 @@ meta_window_show_menu (MetaWindow *window,
   //ops |= (META_MENU_OP_DELETE | META_MENU_OP_MINIMIZE | META_MENU_OP_MOVE | META_MENU_OP_RESIZE | META_MENU_OP_MOVE_NEW);
   ops |= (META_MENU_OP_DELETE | META_MENU_OP_MINIMIZE | META_MENU_OP_MOVE | META_MENU_OP_RESIZE);
 
-  if (!meta_window_titlebar_is_onscreen (window) &&
+  if (!meta_window_is_client_decorated (window) &&
+      !meta_window_titlebar_is_onscreen (window) &&
       window->type != META_WINDOW_DOCK &&
       window->type != META_WINDOW_DESKTOP)
     ops |= META_MENU_OP_RECOVER;
