@@ -1,3 +1,15 @@
+muffin (2.4.5) rebecca; urgency=medium
+
+  [ Stefan Dösinger ]
+  * Allow programmatic minimization without MWM_FUNC_MINIMIZE
+
+  [ Michael Webster ]
+  * screen.c: update _NET_DESKTOP_LAYOUT with the current workspace layout.
+  * screen.c: Update _NET_DESKTOP_NAMES when appropriate. Before we only did it when the MetaScreen was initialized - during startup - which would result in the server having the wrong names (or worse, the wrong length array of names.)
+  * MetaWindow: make meta_window_get_xwindow introspectable.
+
+ -- Clement Lefebvre <root@linuxmint.com>  Tue, 31 Mar 2015 09:27:35 +0200
+
 muffin (2.4.4) betsy; urgency=medium
 
   * Add _NET_WM_STATE_MAXIMIZED_VERT to the _NET_WM_STATE for tiled windows.
