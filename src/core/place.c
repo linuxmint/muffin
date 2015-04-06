@@ -130,7 +130,7 @@ place_by_pointer(MetaWindow *window,
 }
 
 static gboolean
-place_in_center(MetaWindow *window,
+place_in_center (MetaWindow *window,
                  MetaFrameBorders *borders,
                  MetaPlacementMode placement_mode,
                  int *new_x,
@@ -138,9 +138,10 @@ place_in_center(MetaWindow *window,
 {
   int center_x, center_y;
   const MetaMonitorInfo *xi;
+
   xi = meta_screen_get_current_monitor (window->screen);
-  center_x = xi->rect.width / 2;
-  center_y = xi->rect.height / 2;
+  center_x = *new_x + xi->rect.width / 2;
+  center_y = *new_y + xi->rect.height / 2;
 
   int window_width, window_height;
   window_width = window->frame ? window->frame->rect.width : window->rect.width;
