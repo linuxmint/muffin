@@ -504,35 +504,12 @@ meta_run (void)
    * try anything in the themes directory.
    */
   if (!meta_ui_have_a_theme ())
-    meta_ui_set_current_theme ("Simple", FALSE);
-  
-  if (!meta_ui_have_a_theme ())
     {
-      const char *dir_entry = NULL;
-      GError *err = NULL;
-      GDir   *themes_dir = NULL;
-      
-      if (!(themes_dir = g_dir_open (MUFFIN_DATADIR"/themes", 0, &err)))
-        {
-          meta_fatal (_("Failed to scan themes directory: %s\n"), err->message);
-          g_error_free (err);
-        } 
-      else 
-        {
-          while (((dir_entry = g_dir_read_name (themes_dir)) != NULL) && 
-                 (!meta_ui_have_a_theme ()))
-            {
-              meta_ui_set_current_theme (dir_entry, FALSE);
-            }
-          
-          g_dir_close (themes_dir);
-        }
+      meta_ui_set_current_theme ("Default", FALSE);
+      meta_warning (_("Could not find theme %s. Falling back to default theme."), meta_prefs_get_theme ());
     }
-  
-  if (!meta_ui_have_a_theme ())
-    meta_fatal (_("Could not find a theme! Be sure %s exists and contains the usual themes.\n"),
-                MUFFIN_DATADIR"/themes");
-  
+ 
+ 
   /* Connect to SM as late as possible - but before managing display,
    * or we might try to manage a window before we have the session
    * info
