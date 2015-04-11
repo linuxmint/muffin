@@ -1,8 +1,8 @@
 AC_PREREQ(2.50)
 
 m4_define([muffin_major_version], [2])
-m4_define([muffin_minor_version], [4])
-m4_define([muffin_micro_version], [4])
+m4_define([muffin_minor_version], [5])
+m4_define([muffin_micro_version], [0])
 
 m4_define([muffin_version],
           [muffin_major_version.muffin_minor_version.muffin_micro_version])
@@ -10,7 +10,7 @@ m4_define([muffin_version],
 m4_define([muffin_plugin_api_version], [3])
 
 AC_INIT([muffin], [muffin_version],
-        [http://bugzilla.gnome.org/enter_bug.cgi?product=muffin])
+        [https://github.com/linuxmint/muffin/issues])
 
 AC_CONFIG_SRCDIR(src/core/display.c)
 AC_CONFIG_HEADERS(config.h)

@@ -1,3 +1,9 @@
+muffin (2.5.0) unstable; urgency=medium
+
+  * bump for development
+
+ -- Michael Webster <miketwebster@gmail.com>  Sat, 11 Apr 2015 08:46:16 -0400
+
 muffin (2.4.4) betsy; urgency=medium
 
   * Add _NET_WM_STATE_MAXIMIZED_VERT to the _NET_WM_STATE for tiled windows.
