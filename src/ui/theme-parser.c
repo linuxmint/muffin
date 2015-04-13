@@ -4330,6 +4330,19 @@ meta_theme_load (const char *theme_name,
             goto out;
         }
     }
+
+  if (strcmp(theme_name, "Default") == 0)
+    {
+      theme_dir = g_build_filename (MUFFIN_DATADIR,
+                                    "muffin",
+                                    "theme",
+                                    NULL);
+
+      retval = load_theme (theme_dir, "Default", 3, &error);
+      g_free (theme_dir);
+      if (!keep_trying (&error))
+        goto out;
+    }
   
   /* We try all supported major versions from current to oldest */
   for (major_version = THEME_MAJOR_VERSION; (major_version > 0); major_version--)

@@ -1,5 +1,5 @@
 
-SUBDIRS=src po doc
+SUBDIRS=src po doc data
 
 ACLOCAL_AMFLAGS = -I m4 ${ACLOCAL_FLAGS}
 
