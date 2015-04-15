@@ -485,8 +485,7 @@ preview_collection (int font_size,
 
   eventbox = gtk_event_box_new ();
   gtk_container_add (GTK_CONTAINER (eventbox), box);
-  
-  gtk_scrolled_window_add_with_viewport (GTK_SCROLLED_WINDOW (sw), eventbox);
+  gtk_container_add (GTK_CONTAINER (sw), eventbox);
 
   desktop_color.red = 0.32;
   desktop_color.green = 0.46;
@@ -561,7 +560,7 @@ preview_collection (int font_size,
           pango_font_description_set_size (font_desc,
                                            MAX (pango_font_description_get_size (base_desc) * scale, 1));
           
-          gtk_widget_modify_font (preview, font_desc);
+          gtk_widget_override_font (preview, font_desc);
 
           pango_font_description_free (font_desc);
         }
@@ -709,8 +708,7 @@ previews_of_button_layouts (void)
 
   eventbox = gtk_event_box_new ();
   gtk_container_add (GTK_CONTAINER (eventbox), box);
-  
-  gtk_scrolled_window_add_with_viewport (GTK_SCROLLED_WINDOW (sw), eventbox);
+  gtk_container_add (GTK_CONTAINER (sw), eventbox);
 
   desktop_color.red = 0.32;
   desktop_color.green = 0.46;
@@ -777,7 +775,7 @@ int
 main (int argc, char **argv)
 {
   GtkStyleContext *style;
-  const PangoFontDescription *font_desc;
+  PangoFontDescription *font_desc;
   GtkWidget *window;
   GtkWidget *collection;
   GError *err;
@@ -855,7 +853,9 @@ main (int argc, char **argv)
 
   gtk_widget_realize (window);
   style = gtk_widget_get_style_context (window);
-  font_desc = gtk_style_context_get_font (style, 0);
+  gtk_style_context_get (style, GTK_STATE_FLAG_NORMAL,
+                         GTK_STYLE_PROPERTY_FONT, &font_desc,
+                         NULL);
 
   g_assert (style);
   g_assert (font_desc);
@@ -890,7 +890,9 @@ main (int argc, char **argv)
   gtk_notebook_append_page (GTK_NOTEBOOK (notebook),
                             collection,
                             gtk_label_new (_("Benchmark")));
-  
+
+  pango_font_description_free (font_desc);
+
   i = 0;
   while (i < (int) G_N_ELEMENTS (previews))
     {
@@ -928,12 +930,18 @@ static int
 get_text_height (GtkWidget *widget)
 {
   GtkStyleContext *style;
-  const PangoFontDescription *font_desc;
+  PangoFontDescription *font_desc;
+  int text_height;
 
   style = gtk_widget_get_style_context (widget);
-  font_desc = gtk_style_context_get_font (style, 0);
-  return meta_pango_font_desc_get_text_height (font_desc,
-                                               gtk_widget_get_pango_context (widget));
+  gtk_style_context_get (style, GTK_STATE_FLAG_NORMAL,
+                         GTK_STYLE_PROPERTY_FONT, &font_desc,
+                         NULL);
+
+  text_height = meta_pango_font_desc_get_text_height (font_desc,
+                                                      gtk_widget_get_pango_context (widget));
+  pango_font_description_free (font_desc);
+  return text_height;
 }
 
 static PangoLayout*
