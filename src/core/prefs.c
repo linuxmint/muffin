@@ -57,7 +57,6 @@
 #define KEY_WS_NAMES_GNOME "workspace-names"
 #define KEY_LIVE_HIDDEN_WINDOWS "live-hidden-windows"
 #define KEY_WORKSPACES_ONLY_ON_PRIMARY "workspaces-only-on-primary"
-#define KEY_NO_TAB_POPUP "no-tab-popup"
 
 /* These are the different schemas we are keeping
  * a GSettings instance for */
@@ -117,7 +116,6 @@ static char **workspace_names = NULL;
 static gboolean live_hidden_windows = FALSE;
 static gboolean workspaces_only_on_primary = FALSE;
 
-static gboolean no_tab_popup = FALSE;
 static gboolean legacy_snap = FALSE;
 static gboolean invert_workspace_flip = FALSE;
 static gboolean tile_maximize = FALSE;
@@ -408,13 +406,6 @@ static MetaBoolPreference preferences_bool[] =
         META_PREF_WORKSPACES_ONLY_ON_PRIMARY,
       },
       &workspaces_only_on_primary,
-    },
-    {
-      { KEY_NO_TAB_POPUP,
-        SCHEMA_MUFFIN,
-        META_PREF_NO_TAB_POPUP,
-      },
-      &no_tab_popup,
     },
     {
       { "legacy-snap",
@@ -1798,9 +1789,6 @@ meta_preference_to_string (MetaPreference pref)
     case META_PREF_WORKSPACE_CYCLE:
       return "WORKSPACE_CYCLE";
 
-    case META_PREF_NO_TAB_POPUP:
-      return "NO_TAB_POPUP";
-
     case META_PREF_DRAGGABLE_BORDER_WIDTH:
       return "DRAGGABLE_BORDER_WIDTH";
 
@@ -2398,25 +2386,9 @@ meta_prefs_get_workspaces_only_on_primary (void)
 }
 
 gboolean
-meta_prefs_get_no_tab_popup (void)
-{
-  return no_tab_popup;
-}
-
-gboolean
 meta_prefs_get_legacy_snap (void)
 {
   return legacy_snap;
-}
-
-void
-meta_prefs_set_no_tab_popup (gboolean whether)
-{
-  MetaBasePreference *pref = NULL;
-
-  find_pref (preferences_bool, sizeof(MetaBoolPreference),
-             KEY_NO_TAB_POPUP, &pref);
-  g_settings_set_boolean (SETTINGS (pref->schema), KEY_NO_TAB_POPUP, whether);
 }
 
 int

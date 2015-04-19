@@ -138,8 +138,6 @@ libmuffin_la_SOURCES =				\
 	ui/metaaccellabel.h			\
 	ui/resizepopup.c			\
 	ui/resizepopup.h			\
-	ui/tabpopup.c				\
-	ui/tabpopup.h				\
 	ui/theme-parser.c			\
 	ui/theme.c				\
 	meta/theme.h				\

@@ -74,15 +74,6 @@
       </_description>
     </key>
 
-    <key name="no-tab-popup" type="b">
-      <default>false</default>
-      <_summary>No tab popup</_summary>
-      <_description>
-        Determines whether the use of popup and highlight frame should
-        be disabled for window cycling.
-      </_description>
-    </key>
-
     <key name="draggable-border-width" type="i">
       <default>10</default>
       <range min="0" max="64"/>

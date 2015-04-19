@@ -3815,11 +3815,6 @@ meta_display_end_grab_op (MetaDisplay *display,
   if (GRAB_OP_IS_WINDOW_SWITCH (display->grab_op) ||
       display->grab_op == META_GRAB_OP_KEYBOARD_WORKSPACE_SWITCHING)
     {
-      if (GRAB_OP_IS_WINDOW_SWITCH (display->grab_op))
-        meta_screen_tab_popup_destroy (display->grab_screen);
-      else
-        meta_screen_workspace_popup_destroy (display->grab_screen);
-
       /* If the ungrab here causes an EnterNotify, ignore it for
        * sloppy focus
        */
