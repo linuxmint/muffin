@@ -28,6 +28,7 @@ Build-Depends: debhelper (>= 9),
                libice-dev,
                zenity,
                gnome-doc-utils (>= 0.8),
+               gtk-doc-tools,
                gnome-pkg-tools (>= 0.10),
                libcinnamon-desktop-dev (>= 2.4.0)
 Standards-Version: 3.9.4
@@ -109,3 +110,13 @@ Description: GObject introspection data for Muffin
  .
  This package contains the GObject introspection data which may be
  used to generate dynamic bindings.
+
+Package: muffin-doc
+Section: doc
+Architecture: all
+Depends: ${misc:Depends}, devhelp
+Description: Muffin documentation
+ Muffin is a window manager performing compositing as well based on
+ GTK+ and Clutter and used in Cinnamon desktop environment.
+ .
+ This package contains the code documentation for Muffin.
