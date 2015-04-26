@@ -75,7 +75,6 @@ struct _MetaScreen
   Visual *default_xvisual;
   MetaRectangle rect;  /* Size of screen; rect.x & rect.y are always 0 */
   MetaUI *ui;
-  MetaTabPopup *tab_popup, *ws_popup;
 
   guint tile_preview_timeout_id;
   guint tile_hud_timeout_id;
@@ -165,22 +164,6 @@ void          meta_screen_queue_window_resizes (MetaScreen                 *scre
 void          meta_screen_set_cursor          (MetaScreen                 *screen,
                                                MetaCursor                  cursor);
 void          meta_screen_update_cursor       (MetaScreen                 *screen);
-
-void          meta_screen_tab_popup_create       (MetaScreen              *screen,
-                                                  MetaTabList              list_type,
-                                                  MetaTabShowType          show_type,
-                                                  MetaWindow              *initial_window);
-void          meta_screen_tab_popup_forward      (MetaScreen              *screen);
-void          meta_screen_tab_popup_backward     (MetaScreen              *screen);
-MetaWindow*   meta_screen_tab_popup_get_selected (MetaScreen              *screen);
-void          meta_screen_tab_popup_destroy      (MetaScreen              *screen);
-
-void          meta_screen_workspace_popup_create       (MetaScreen    *screen,
-                                                        MetaWorkspace *initial_selection);
-void          meta_screen_workspace_popup_select       (MetaScreen    *screen,
-                                                        MetaWorkspace *workspace);
-MetaWorkspace*meta_screen_workspace_popup_get_selected (MetaScreen    *screen);
-void          meta_screen_workspace_popup_destroy      (MetaScreen    *screen);
 
 void          meta_screen_tile_preview_update          (MetaScreen    *screen,
                                                         gboolean       delay);
