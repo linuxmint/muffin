@@ -316,6 +316,9 @@ MetaWindow* meta_stack_get_default_focus_window_at_point (MetaStack     *stack,
                                                           int            root_x,
                                                           int            root_y);
 
+gboolean meta_stack_has_window_in_rect (MetaStack     *stack,
+                                        MetaWorkspace *workspace,
+                                        MetaRectangle *rect);
 /**
  * Finds all the windows in the stack, in order.
  *

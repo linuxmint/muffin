@@ -1450,6 +1450,50 @@ window_contains_point (MetaWindow *window,
   return POINT_IN_RECT (root_x, root_y, rect);
 }
 
+LOCAL_SYMBOL gboolean
+meta_stack_has_window_in_rect (MetaStack     *stack,
+                               MetaWorkspace *workspace,
+                               MetaRectangle *rect)
+{
+  GList *link;
+
+  stack_ensure_sorted (stack);
+
+  link = stack->sorted;
+
+  while (link)
+    {
+      MetaWindow *window = link->data;
+
+      if (window->frame)
+        {
+          if (window &&
+              (window->unmaps_pending == 0) &&
+              (workspace == NULL ||
+               meta_window_located_on_workspace (window, workspace)) &&
+              !window->minimized &&
+              window->type != META_WINDOW_DESKTOP &&
+              meta_rectangle_overlap (rect, &window->frame->rect))
+            return TRUE;
+        }
+      else
+        {
+          if (window &&
+              (window->unmaps_pending == 0) &&
+              (workspace == NULL ||
+               meta_window_located_on_workspace (window, workspace)) &&
+              !window->minimized &&
+              window->type != META_WINDOW_DESKTOP &&
+            meta_rectangle_overlap (rect, &window->rect))
+          return TRUE;
+      }
+
+      link = link->next;
+    }
+
+  return FALSE;
+}
+
 static MetaWindow*
 get_default_focus_window (MetaStack     *stack,
                           MetaWorkspace *workspace,

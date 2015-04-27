@@ -2029,6 +2029,24 @@ meta_screen_hide_hud_and_preview (MetaScreen *screen)
 }
 
 /**
+ * meta_screen_has_window_in_rect:
+ * @screen: an X screen structure.
+ * @rect: The region to find the window
+ *
+ * Checks whether there is a window in @rect
+ *
+ * Return value: whether a window is found
+ */
+gboolean
+meta_screen_has_window_in_rect (MetaScreen    *screen,
+                                MetaRectangle *rect)
+{
+  return meta_stack_has_window_in_rect (screen->stack,
+                                        screen->active_workspace,
+                                        rect);
+}
+
+/**
  * meta_screen_get_mouse_window:
  * @screen: an X screen structure.
  * @not_this_one: (allow-none): window to be excluded

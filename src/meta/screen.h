@@ -90,6 +90,8 @@ void meta_screen_get_monitor_geometry (MetaScreen    *screen,
                                        MetaRectangle *geometry);
 MetaWindow* meta_screen_get_mouse_window (MetaScreen *screen,
                                           MetaWindow *not_this_one);
+gboolean meta_screen_has_window_in_rect (MetaScreen    *screen,
+                                         MetaRectangle *rect);
 
 typedef enum
 {
