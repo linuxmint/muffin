@@ -20,7 +20,8 @@ override_dh_autoreconf:
 override_dh_auto_configure:
 	dh_auto_configure -- --disable-static \
 	                     --enable-startup-notification=yes \
-	                     --disable-silent-rules
+	                     --disable-silent-rules \
+			     --enable-gtk-doc
 
 override_dh_girepository:
 	dh_girepository /usr/lib/$(DEB_HOST_MULTIARCH)/muffin
