@@ -33,6 +33,12 @@
 #include <glib.h>
 #include <gtk/gtk.h>
 
+/**
+ * SECTION:common
+ * @title: Common
+ * @short_description: Muffin common types
+ */
+
 typedef struct _MetaResizePopup MetaResizePopup;
 
 typedef enum

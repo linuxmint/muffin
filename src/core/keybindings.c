@@ -23,6 +23,12 @@
  * 02110-1335, USA.
  */
 
+/**
+ * SECTION:keybindings
+ * @title: MetaKeybinding
+ * @short_description: Key bindings
+ */
+
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
 #endif

@@ -21,6 +21,13 @@
  * Foundation, Inc., 51 Franklin Street - Suite 500, Boston, MA
  * 02110-1335, USA.
  */
+
+/**
+ * SECTION:meta-shadow-factory
+ * @title: MetaShadowFactory
+ * @short_description: Create and cache shadow textures for arbitrary window shapes
+ */
+
 #include <config.h>
 #include <math.h>
 #include <string.h>

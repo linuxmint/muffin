@@ -1,7 +1,5 @@
 /* -*- mode: C; c-file-style: "gnu"; indent-tabs-mode: nil; -*- */
 
-/* Muffin X screen handler */
-
 /* 
  * Copyright (C) 2001, 2002 Havoc Pennington
  * Copyright (C) 2002, 2003 Red Hat Inc.
@@ -24,6 +22,12 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street - Suite 500, Boston, MA
  * 02110-1335, USA.
+ */
+
+/**
+ * SECTION:screen
+ * @title: MetaScreen
+ * @short_description: Muffin X screen handler
  */
 
 #include <config.h>

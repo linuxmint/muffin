@@ -23,6 +23,12 @@
  * Portions adapted from gnome-shell/src/shell-global.c
  */
 
+/**
+ * SECTION:meta-background-actor
+ * @title: MetaBackgroundActor
+ * @short_description: Actor for painting the root window background
+ */
+
 #include <config.h>
 
 #define COGL_ENABLE_EXPERIMENTAL_API
