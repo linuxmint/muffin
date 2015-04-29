@@ -115,16 +115,6 @@ meta_plugin_manager_kill_window_effects (MetaPluginManager *plugin_mgr,
         klass->kill_window_effects (plugin, actor);
 }
 
-static void
-meta_plugin_manager_kill_switch_workspace (MetaPluginManager *plugin_mgr)
-{
-    MetaPlugin        *plugin = plugin_mgr->plugin;
-    MetaPluginClass   *klass = META_PLUGIN_GET_CLASS (plugin);
-
-    if (klass->kill_switch_workspace)
-        klass->kill_switch_workspace (plugin);
-}
-
 /*
  * Public method that the compositor hooks into for events that require
  * no additional parameters.
@@ -284,7 +274,6 @@ meta_plugin_manager_switch_workspace (MetaPluginManager   *plugin_mgr,
     if (klass->switch_workspace)
     {
          retval = TRUE;
-         meta_plugin_manager_kill_switch_workspace (plugin_mgr);
 
          _meta_plugin_effect_started (plugin);
          klass->switch_workspace (plugin, from, to, direction);
