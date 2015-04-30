@@ -24,6 +24,12 @@
  * 02110-1335, USA.
  */
 
+/**
+ * SECTION:prefs
+ * @title: Preferences
+ * @short_description: Muffin preferences
+ */
+
 #include <config.h>
 #include <meta/prefs.h>
 #include "ui.h"

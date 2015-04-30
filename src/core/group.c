@@ -1,7 +1,5 @@
 /* -*- mode: C; c-file-style: "gnu"; indent-tabs-mode: nil; -*- */
 
-/* Muffin window groups */
-
 /* 
  * Copyright (C) 2002 Red Hat Inc.
  * Copyright (C) 2003 Rob Adams
@@ -21,6 +19,14 @@
  * Foundation, Inc., 51 Franklin Street - Suite 500, Boston, MA
  * 02110-1335, USA.
  */
+
+/**
+ * SECTION:group
+ * @title: MetaGroup
+ * @short_description: Muffin window groups
+ *
+ */
+
 
 #include <config.h>
 #include <meta/util.h>

@@ -22,6 +22,12 @@
  * 02110-1335, USA.
  */
 
+/**
+ * SECTION:util
+ * @title: Utility functions
+ * @short_description: Miscellaneous utility functions
+ */
+
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
 #endif

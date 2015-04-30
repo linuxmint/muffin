@@ -23,6 +23,12 @@
  * 02110-1335, USA.
  */
 
+/**
+ * SECTION:meta-shaped-texture
+ * @title: MetaShapedTexture
+ * @short_description: An actor to draw a masked texture.
+ */
+
 #include <config.h>
 
 #define CLUTTER_ENABLE_EXPERIMENTAL_API

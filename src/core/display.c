@@ -25,7 +25,8 @@
  */
 
 /**
- * SECTION:MetaDisplay
+ * SECTION:display
+ * @title: MetaDisplay
  * @short_description: Handles operations on an X display.
  *
  * The display is represented as a MetaDisplay struct.

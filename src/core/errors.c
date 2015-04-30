@@ -22,6 +22,12 @@
  * 02110-1335, USA.
  */
 
+/**
+ * SECTION:errors
+ * @title: Errors
+ * @short_description: Muffin X error handling
+ */
+
 #include <config.h>
 #include <meta/errors.h>
 #include "display-private.h"
