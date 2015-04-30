@@ -94,7 +94,6 @@ static void switch_workspace (MetaPlugin          *plugin,
 
 static void kill_window_effects   (MetaPlugin      *plugin,
                                    MetaWindowActor *actor);
-static void kill_switch_workspace (MetaPlugin      *plugin);
 
 static const MetaPluginInfo * plugin_info (MetaPlugin *plugin);
 
@@ -216,7 +215,6 @@ meta_default_plugin_class_init (MetaDefaultPluginClass *klass)
   plugin_class->switch_workspace = switch_workspace;
   plugin_class->plugin_info      = plugin_info;
   plugin_class->kill_window_effects   = kill_window_effects;
-  plugin_class->kill_switch_workspace = kill_switch_workspace;
 
   g_type_class_add_private (gobject_class, sizeof (MetaDefaultPluginPrivate));
 }
@@ -312,6 +310,13 @@ switch_workspace (MetaPlugin *plugin,
   ClutterActor *stage;
   int           screen_width, screen_height;
   ClutterAnimation *animation;
+
+  if (priv->tml_switch_workspace1)
+    {
+      clutter_timeline_stop (priv->tml_switch_workspace1);
+      clutter_timeline_stop (priv->tml_switch_workspace2);
+      g_signal_emit_by_name (priv->tml_switch_workspace1, "completed", NULL);
+    }
 
   screen = meta_plugin_get_screen (plugin);
   stage = meta_get_stage_for_screen (screen);
@@ -718,19 +723,6 @@ destroy (MetaPlugin *plugin, MetaWindowActor *window_actor)
     }
   else
     meta_plugin_destroy_completed (plugin, window_actor);
-}
-
-static void
-kill_switch_workspace (MetaPlugin     *plugin)
-{
-  MetaDefaultPluginPrivate *priv = META_DEFAULT_PLUGIN (plugin)->priv;
-
-  if (priv->tml_switch_workspace1)
-    {
-      clutter_timeline_stop (priv->tml_switch_workspace1);
-      clutter_timeline_stop (priv->tml_switch_workspace2);
-      g_signal_emit_by_name (priv->tml_switch_workspace1, "completed", NULL);
-    }
 }
 
 static void

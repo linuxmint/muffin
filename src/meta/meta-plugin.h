@@ -123,8 +123,6 @@ struct _MetaPluginClass
   void (*kill_window_effects)      (MetaPlugin      *plugin,
                                     MetaWindowActor *actor);
 
-  void (*kill_switch_workspace)    (MetaPlugin     *plugin);
-
   /* General XEvent filter. This is fired *before* meta itself handles
    * an event. Return TRUE to block any further processing.
    */
