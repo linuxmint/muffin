@@ -77,7 +77,9 @@ typedef enum
   META_PREF_INVERT_WORKSPACE_FLIP_DIRECTION,
   META_PREF_TILE_MAXIMIZE,
   META_PREF_PLACEMENT_MODE,
-  META_PREF_MIN_WIN_OPACITY
+  META_PREF_MIN_WIN_OPACITY,
+  META_PREF_MOUSE_ZOOM_ENABLED,
+  META_PREF_MOUSE_BUTTON_ZOOM_MODS
 } MetaPreference;
 
 typedef void (* MetaPrefsChangedFunc) (MetaPreference pref,
@@ -96,6 +98,8 @@ void meta_prefs_override_preference_schema (const char *key,
 const char* meta_preference_to_string (MetaPreference pref);
 
 MetaVirtualModifier         meta_prefs_get_mouse_button_mods  (void);
+MetaVirtualModifier         meta_prefs_get_mouse_button_zoom_mods (void);
+gboolean                    meta_prefs_get_mouse_zoom_enabled (void);
 guint                       meta_prefs_get_mouse_button_resize (void);
 guint                       meta_prefs_get_mouse_button_menu  (void);
 CDesktopFocusMode           meta_prefs_get_focus_mode         (void);

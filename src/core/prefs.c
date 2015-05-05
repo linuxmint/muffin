@@ -64,11 +64,14 @@
 #define KEY_LIVE_HIDDEN_WINDOWS "live-hidden-windows"
 #define KEY_WORKSPACES_ONLY_ON_PRIMARY "workspaces-only-on-primary"
 
+#define KEY_MOUSEWHEEL_ZOOM_ENABLED "screen-magnifier-enabled"
+
 /* These are the different schemas we are keeping
  * a GSettings instance for */
 #define SCHEMA_GENERAL         "org.cinnamon.desktop.wm.preferences"
 #define SCHEMA_MUFFIN          "org.cinnamon.muffin"
 #define SCHEMA_INTERFACE       "org.cinnamon.desktop.interface"
+#define SCHEMA_A11Y_APPLICATIONS "org.cinnamon.desktop.a11y.applications"
 
 #define SETTINGS(s) g_hash_table_lookup (settings_schemas, (s))
 
@@ -80,6 +83,8 @@ static GHashTable *settings_schemas;
 static gboolean use_system_font = FALSE;
 static PangoFontDescription *titlebar_font = NULL;
 static MetaVirtualModifier mouse_button_mods = Mod1Mask;
+static MetaVirtualModifier mouse_button_zoom_mods = Mod1Mask;
+static gboolean mouse_zoom_enabled = FALSE;
 static CDesktopFocusMode focus_mode = C_DESKTOP_FOCUS_MODE_CLICK;
 static CDesktopFocusNewWindows focus_new_windows = C_DESKTOP_FOCUS_NEW_WINDOWS_SMART;
 static gboolean raise_on_click = TRUE;
@@ -149,6 +154,7 @@ static void maybe_give_disable_workarounds_warning (void);
 static gboolean titlebar_handler (GVariant*, gpointer*, gpointer);
 static gboolean theme_name_handler (GVariant*, gpointer*, gpointer);
 static gboolean mouse_button_mods_handler (GVariant*, gpointer*, gpointer);
+static gboolean mouse_button_zoom_mods_handler (GVariant*, gpointer*, gpointer);
 static gboolean snap_modifier_handler (GVariant*, gpointer*, gpointer);
 static gboolean button_layout_handler (GVariant*, gpointer*, gpointer);
 
@@ -379,6 +385,13 @@ static MetaBoolPreference preferences_bool[] =
       &gnome_accessibility,
     },
     {
+      { KEY_MOUSEWHEEL_ZOOM_ENABLED,
+        SCHEMA_A11Y_APPLICATIONS,
+        META_PREF_MOUSE_ZOOM_ENABLED,
+      },
+      &mouse_zoom_enabled,
+    },
+    {
       { KEY_GNOME_ANIMATIONS,
         SCHEMA_INTERFACE,
         META_PREF_GNOME_ANIMATIONS,
@@ -445,6 +458,14 @@ static MetaStringPreference preferences_string[] =
         META_PREF_MOUSE_BUTTON_MODS,
       },
       mouse_button_mods_handler,
+      NULL,
+    },
+    {
+      { "mouse-button-zoom-modifier",
+        SCHEMA_GENERAL,
+        META_PREF_MOUSE_BUTTON_ZOOM_MODS,
+      },
+      mouse_button_zoom_mods_handler,
       NULL,
     },
     {
@@ -933,6 +954,10 @@ meta_prefs_init (void)
                     G_CALLBACK (settings_changed), NULL);
   g_hash_table_insert (settings_schemas, g_strdup (SCHEMA_INTERFACE), settings);
 
+  settings = g_settings_new (SCHEMA_A11Y_APPLICATIONS);
+  g_signal_connect (settings, "changed::" KEY_MOUSEWHEEL_ZOOM_ENABLED,
+                    G_CALLBACK (settings_changed), NULL);
+  g_hash_table_insert (settings_schemas, g_strdup (SCHEMA_A11Y_APPLICATIONS), settings);
 
   for (tmp = overridden_keys; tmp; tmp = tmp->next)
     {
@@ -1201,6 +1226,18 @@ meta_prefs_get_mouse_button_mods  (void)
   return mouse_button_mods;
 }
 
+MetaVirtualModifier
+meta_prefs_get_mouse_button_zoom_mods  (void)
+{
+  return mouse_button_zoom_mods;
+}
+
+gboolean
+meta_prefs_get_mouse_zoom_enabled (void)
+{
+  return mouse_zoom_enabled;
+}
+
 CDesktopFocusMode
 meta_prefs_get_focus_mode (void)
 {
@@ -1346,6 +1383,42 @@ mouse_button_mods_handler (GVariant *value,
     {
       mouse_button_mods = mods;
       queue_changed (META_PREF_MOUSE_BUTTON_MODS);
+    }
+
+  return TRUE;
+}
+
+static gboolean
+mouse_button_zoom_mods_handler (GVariant *value,
+                                gpointer *result,
+                                gpointer  data)
+{
+  MetaVirtualModifier mods;
+  const gchar *string_value;
+
+  *result = NULL; /* ignored */
+  string_value = g_variant_get_string (value, NULL);
+
+  if (!string_value || !meta_ui_parse_modifier (string_value, &mods))
+    {
+      meta_topic (META_DEBUG_KEYBINDINGS,
+                  "Failed to parse new GSettings value\n");
+
+      meta_warning (_("\"%s\" found in configuration database is "
+                      "not a valid value for mouse button zoom modifier\n"),
+                    string_value);
+
+      return FALSE;
+    }
+
+  meta_topic (META_DEBUG_KEYBINDINGS,
+              "Mouse zoom modifier has new GSettings value \"%s\"\n",
+              string_value);
+
+  if (mods != mouse_button_zoom_mods)
+    {
+      mouse_button_zoom_mods = mods;
+      queue_changed (META_PREF_MOUSE_BUTTON_ZOOM_MODS);
     }
 
   return TRUE;
@@ -1701,6 +1774,12 @@ meta_preference_to_string (MetaPreference pref)
     {
     case META_PREF_MOUSE_BUTTON_MODS:
       return "MOUSE_BUTTON_MODS";
+
+    case META_PREF_MOUSE_BUTTON_ZOOM_MODS:
+      return "MOUSE_BUTTON_ZOOM_MODS";
+
+    case META_PREF_MOUSE_ZOOM_ENABLED:
+      return "MOUSE_ZOOM_ENABLED";
 
     case META_PREF_FOCUS_MODE:
       return "FOCUS_MODE";

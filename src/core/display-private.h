@@ -166,6 +166,7 @@ struct _MetaDisplay
 
   /* Alt+click button grabs */
   unsigned int window_grab_modifiers;
+  unsigned int mouse_zoom_modifiers;
   
   /* current window operation */
   MetaGrabOp  grab_op;
@@ -254,6 +255,8 @@ struct _MetaDisplay
 
   /* Managed by compositor.c */
   MetaCompositor *compositor;
+
+  unsigned int mouse_zoom_enabled : 1;
 
   int render_event_base;
   int render_error_base;

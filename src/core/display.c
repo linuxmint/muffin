@@ -182,6 +182,7 @@ static void    process_selection_clear   (MetaDisplay   *display,
                                           XEvent        *event);
 
 static void    update_window_grab_modifiers (MetaDisplay *display);
+static void    update_mouse_zoom_modifiers (MetaDisplay *display);
 
 static void    prefs_changed_callback    (MetaPreference pref,
                                           void          *data);
@@ -518,6 +519,8 @@ meta_display_open (void)
   meta_display_init_keys (the_display);
 
   update_window_grab_modifiers (the_display);
+  update_mouse_zoom_modifiers (the_display);
+  the_display->mouse_zoom_enabled = meta_prefs_get_mouse_zoom_enabled ();
 
   meta_prefs_add_listener (prefs_changed_callback, the_display);
 
@@ -1819,9 +1822,9 @@ event_callback (XEvent   *event,
     case ButtonPress:
       if (display->grab_op == META_GRAB_OP_COMPOSITOR)
         break;
-      if (display->window_grab_modifiers > 0 && (event->xbutton.button == 4 || event->xbutton.button == 5))
+      if (display->mouse_zoom_modifiers > 0 && (event->xbutton.button == 4 || event->xbutton.button == 5))
         {
-          if ((event->xbutton.state & ~display->ignored_modifier_mask) == display->window_grab_modifiers)
+          if ((event->xbutton.state & ~display->ignored_modifier_mask) == display->mouse_zoom_modifiers)
             {
               if (event->xbutton.button == 4)
                 {
@@ -4002,7 +4005,7 @@ meta_display_grab_window_buttons (MetaDisplay *display,
     {
       gboolean debug = g_getenv ("MUFFIN_DEBUG_BUTTON_GRABS") != NULL;
       int i;
-      for (i = 1; i < 6; i++)
+      for (i = 1; i < 4; i++)
         {
           meta_change_button_grab (display, xwindow,
                                    TRUE,
@@ -4030,6 +4033,28 @@ meta_display_grab_window_buttons (MetaDisplay *display,
                                FALSE,
                                1, display->window_grab_modifiers | ShiftMask);
     }
+
+  if (display->mouse_zoom_enabled && display->mouse_zoom_modifiers != 0)
+    {
+      gboolean debug = g_getenv ("MUFFIN_DEBUG_BUTTON_GRABS") != NULL;
+      int i;
+      for (i = 4; i < 6; i++)
+        {
+          meta_change_button_grab (display, xwindow,
+                                   TRUE,
+                                   FALSE,
+                                   i, display->mouse_zoom_modifiers);
+
+          /* This is for debugging, since I end up moving the Xnest
+           * otherwise ;-)
+           */
+          if (debug)
+            meta_change_button_grab (display, xwindow,
+                                     TRUE,
+                                     FALSE,
+                                     i, ControlMask);
+        }
+    }
 }
 
 LOCAL_SYMBOL void
@@ -4044,7 +4069,7 @@ meta_display_ungrab_window_buttons  (MetaDisplay *display,
   
   debug = g_getenv ("MUFFIN_DEBUG_BUTTON_GRABS") != NULL;
   i = 1;
-  while (i < 6)
+  while (i < 4)
     {
       meta_change_button_grab (display, xwindow,
                                FALSE, FALSE, i,
@@ -4054,6 +4079,23 @@ meta_display_ungrab_window_buttons  (MetaDisplay *display,
         meta_change_button_grab (display, xwindow,
                                  FALSE, FALSE, i, ControlMask);
       
+      ++i;
+    }
+
+  if (display->mouse_zoom_modifiers == 0)
+    return;
+
+  i = 4;
+  while (i < 6)
+    {
+      meta_change_button_grab (display, xwindow,
+                               FALSE, FALSE, i,
+                               display->mouse_zoom_modifiers);
+
+      if (debug)
+        meta_change_button_grab (display, xwindow,
+                                 FALSE, FALSE, i, ControlMask);
+
       ++i;
     }
 }
@@ -5216,6 +5258,19 @@ update_window_grab_modifiers (MetaDisplay *display)
 }
 
 static void
+update_mouse_zoom_modifiers (MetaDisplay *display)
+{
+  MetaVirtualModifier virtual_mods;
+  unsigned int mods;
+
+  virtual_mods = meta_prefs_get_mouse_button_zoom_mods ();
+  meta_display_devirtualize_modifiers (display, virtual_mods,
+                                       &mods);
+
+  display->mouse_zoom_modifiers = mods;
+}
+
+static void
 prefs_changed_callback (MetaPreference pref,
                         void          *data)
 {
@@ -5226,7 +5281,9 @@ prefs_changed_callback (MetaPreference pref,
    * bit differently for the different focus modes.
    */
   if (pref == META_PREF_MOUSE_BUTTON_MODS ||
-      pref == META_PREF_FOCUS_MODE)
+      pref == META_PREF_FOCUS_MODE ||
+      pref == META_PREF_MOUSE_BUTTON_ZOOM_MODS ||
+      pref == META_PREF_MOUSE_ZOOM_ENABLED)
     {
       MetaDisplay *display = data;
       GSList *windows;
@@ -5247,6 +5304,11 @@ prefs_changed_callback (MetaPreference pref,
       /* change our modifier */
       if (pref == META_PREF_MOUSE_BUTTON_MODS)
         update_window_grab_modifiers (display);
+
+      if (pref == META_PREF_MOUSE_BUTTON_ZOOM_MODS)
+        update_mouse_zoom_modifiers (display);
+
+      display->mouse_zoom_enabled = meta_prefs_get_mouse_zoom_enabled ();
 
       /* Grab all */
       tmp = windows;
