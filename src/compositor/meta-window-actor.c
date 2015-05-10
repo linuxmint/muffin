@@ -286,7 +286,7 @@ maybe_desaturate_window (ClutterActor *actor)
         }
       else
         {
-          ClutterEffect *effect = clutter_desaturate_effect_new (0);
+          ClutterEffect *effect = clutter_desaturate_effect_new (0.0);
           clutter_actor_add_effect_with_name (actor, "desaturate-for-transparency", effect);
           priv->has_desat_effect = TRUE;
         }
