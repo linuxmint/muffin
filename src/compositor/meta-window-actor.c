@@ -127,6 +127,8 @@ struct _MetaWindowActorPrivate
   /* This is used to detect fullscreen windows that need to be unredirected */
   guint             full_damage_frames_count;
   guint             does_full_damage  : 1;
+
+  guint             has_desat_effect : 1;
 };
 
 enum
@@ -265,6 +267,41 @@ meta_window_actor_init (MetaWindowActor *self)
 						   MetaWindowActorPrivate);
   priv->opacity = 0xff;
   priv->shadow_class = NULL;
+  priv->has_desat_effect = FALSE;
+}
+
+static void
+maybe_desaturate_window (ClutterActor *actor)
+{
+  MetaWindowActor *window = META_WINDOW_ACTOR (actor);
+  MetaWindowActorPrivate *priv = window->priv;
+
+  guint8 opacity = clutter_actor_get_opacity (actor);
+
+  if (opacity < 255)
+    {
+      if (priv->has_desat_effect)
+        {
+          return;
+        }
+      else
+        {
+          ClutterEffect *effect = clutter_desaturate_effect_new (0);
+          clutter_actor_add_effect_with_name (actor, "desaturate-for-transparency", effect);
+          priv->has_desat_effect = TRUE;
+        }
+    }
+  else
+    {
+      /* This is will tend to get called fairly often - opening new windows, various
+         events on the window, like minimizing... but it's inexpensive - if the ClutterActor
+         priv->effects is NULL, it simply returns.  By default cinnamon and muffin add no
+         other effects except the special case of dimmed windows (attached modal dialogs), which
+         isn't a frequent occurrence. */
+
+      clutter_actor_remove_effect_by_name (actor, "desaturate-for-transparency");
+      priv->has_desat_effect = FALSE;
+    }
 }
 
 static void
@@ -325,6 +362,14 @@ window_appears_focused_notify (MetaWindow *mw,
 }
 
 static void
+clutter_actor_opacity_notify (ClutterActor *actor,
+                              GParamSpec   *arg1m,
+                              gpointer      data)
+{
+  maybe_desaturate_window (actor);
+}
+
+static void
 meta_window_actor_constructed (GObject *object)
 {
   MetaWindowActor        *self     = META_WINDOW_ACTOR (object);
@@ -363,6 +408,8 @@ meta_window_actor_constructed (GObject *object)
                         G_CALLBACK (window_decorated_notify), self);
       g_signal_connect (window, "notify::appears-focused",
                         G_CALLBACK (window_appears_focused_notify), self);
+      g_signal_connect (self, "notify::opacity",
+                        G_CALLBACK (clutter_actor_opacity_notify), NULL);
     }
   else
     {
@@ -374,6 +421,7 @@ meta_window_actor_constructed (GObject *object)
     }
 
   meta_window_actor_update_opacity (self);
+  maybe_desaturate_window (CLUTTER_ACTOR (self));
 
   priv->shape_region = cairo_region_create();
 }
