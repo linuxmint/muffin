@@ -2608,6 +2608,38 @@ handle_toggle_maximized    (MetaDisplay    *display,
 }
 
 static void
+handle_toggle_maximized_vertically   (MetaDisplay    *display,
+                                     MetaScreen     *screen,
+                                     MetaWindow     *window,
+                                     XEvent         *event,
+                                     MetaKeyBinding *binding,
+                                     gpointer        dummy)
+{
+  if (META_WINDOW_MAXIMIZED_VERTICALLY (window))
+    meta_window_unmaximize (window,
+                            META_MAXIMIZE_VERTICAL);
+  else if (window->has_maximize_func)
+    meta_window_maximize (window,
+                          META_MAXIMIZE_VERTICAL);
+}
+
+static void
+handle_toggle_maximized_horizontally (MetaDisplay    *display,
+                                     MetaScreen     *screen,
+                                     MetaWindow     *window,
+                                     XEvent         *event,
+                                     MetaKeyBinding *binding,
+                                     gpointer        dummy)
+{
+  if (META_WINDOW_MAXIMIZED_HORIZONTALLY (window))
+    meta_window_unmaximize (window,
+                            META_MAXIMIZE_HORIZONTAL);
+  else if (window->has_maximize_func)
+    meta_window_maximize (window,
+                          META_MAXIMIZE_HORIZONTAL);
+}
+
+static void
 handle_maximize           (MetaDisplay    *display,
                            MetaScreen     *screen,
                            MetaWindow     *window,
@@ -3129,6 +3161,20 @@ init_builtin_key_bindings (MetaDisplay *display)
                           META_KEY_BINDING_PER_WINDOW,
                           META_KEYBINDING_ACTION_TOGGLE_MAXIMIZED,
                           handle_toggle_maximized, 0);
+
+  add_builtin_keybinding (display,
+                          "toggle-maximized-vertically",
+                          SCHEMA_MUFFIN_KEYBINDINGS,
+                          META_KEY_BINDING_PER_WINDOW,
+                          META_KEYBINDING_ACTION_TOGGLE_MAXIMIZED_VERTICALLY,
+                          handle_toggle_maximized_vertically, 0);
+
+  add_builtin_keybinding (display,
+                          "toggle-maximized-horizontally",
+                          SCHEMA_MUFFIN_KEYBINDINGS,
+                          META_KEY_BINDING_PER_WINDOW,
+                          META_KEYBINDING_ACTION_TOGGLE_MAXIMIZED_HORIZONTALLY,
+                          handle_toggle_maximized_horizontally, 0);
 
   add_builtin_keybinding (display,
                           "push-tile-left",
