@@ -10,6 +10,8 @@
     <title>Muffin Reference Manual</title>
     <releaseinfo>
       This document is for Muffin &version;.
+
+      The latest version of this documentation can be found online at <ulink role="online-location" url="http://developer.linuxmint.com/reference/git/muffin/">http://developer.linuxmint.com/reference/git/muffin/</ulink>.
     </releaseinfo>
   </bookinfo>
 
