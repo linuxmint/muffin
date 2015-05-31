@@ -1520,11 +1520,12 @@ get_background_color (GtkStyleContext *context,
 
   GdkRGBA empty = {0.0, 0.0, 0.0, 0.0};
 
-  // Sometimes the widget has no background color. Steal one from a generic toplevel window, since this always has a background color.
+  // Sometimes the widget has no background color, so append the background
+  // class and ask again.
   if (gdk_rgba_equal(color, &empty))
     {
-      GtkWidget *widget = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-      gtk_style_context_get_background_color(gtk_widget_get_style_context (widget), state, color);
+      gtk_style_context_add_class (context, GTK_STYLE_CLASS_BACKGROUND);
+      gtk_style_context_get_background_color (context, state, color);
     }
 }
 
