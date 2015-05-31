@@ -1,3 +1,13 @@
+muffin (2.6.1) rafaela; urgency=medium
+
+  [ Dexter Chua ]
+  * Fix memory leak
+
+  [ Clement Lefebvre ]
+  * Revert "fix an issue where window turns to a solid colored rectangle during the destroy animation" (caused black borders/backgrounds in metacity themes)
+
+ -- Clement Lefebvre <root@linuxmint.com>  Sun, 31 May 2015 17:57:52 +0200
+
 muffin (2.6.0) rafaela; urgency=medium
 
   * 2.6.0 
