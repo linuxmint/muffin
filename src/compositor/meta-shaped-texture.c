@@ -696,11 +696,7 @@ meta_shaped_texture_get_preferred_width (ClutterActor *self,
                                          gfloat       *min_width_p,
                                          gfloat       *natural_width_p)
 {
-  MetaShapedTexturePrivate *priv;
-
-  g_return_if_fail (META_IS_SHAPED_TEXTURE (self));
-
-  priv = META_SHAPED_TEXTURE (self)->priv;
+  MetaShapedTexturePrivate *priv = META_SHAPED_TEXTURE (self)->priv;
 
   if (min_width_p)
     *min_width_p = priv->tex_width;
@@ -715,11 +711,7 @@ meta_shaped_texture_get_preferred_height (ClutterActor *self,
                                           gfloat       *min_height_p,
                                           gfloat       *natural_height_p)
 {
-  MetaShapedTexturePrivate *priv;
-
-  g_return_if_fail (META_IS_SHAPED_TEXTURE (self));
-
-  priv = META_SHAPED_TEXTURE (self)->priv;
+  MetaShapedTexturePrivate *priv = META_SHAPED_TEXTURE (self)->priv;
 
   if (min_height_p)
     *min_height_p = priv->tex_height;
