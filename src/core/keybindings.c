@@ -2361,22 +2361,24 @@ handle_move_to_center  (MetaDisplay    *display,
                         MetaKeyBinding *binding,
                         gpointer        dummy)
 {
-  MetaRectangle work_area;
-  MetaRectangle outer;
-  int orig_x, orig_y;
-  int frame_width, frame_height;
+  MetaFrameBorders borders;
+  const MetaMonitorInfo *monitor;
+  int window_width, window_height;
+  int center_x, center_y;
 
-  meta_window_get_work_area_all_monitors (window, &work_area);
-  meta_window_get_outer_rect (window, &outer);
-  meta_window_get_position (window, &orig_x, &orig_y);
+  monitor = meta_screen_get_current_monitor (window->screen);
+  meta_frame_calc_borders (window->frame, &borders);
 
-  frame_width = (window->frame ? window->frame->child_x : 0);
-  frame_height = (window->frame ? window->frame->child_y : 0);
+  window_width = (window->frame ? window->frame->rect.width : window->rect.width);
+  window_height = (window->frame ? window->frame->rect.height : window->rect.height);
+
+  center_x = monitor->rect.x + monitor->rect.width / 2;
+  center_y = monitor->rect.y + monitor->rect.height / 2;
 
   meta_window_move_resize (window,
           TRUE,
-          work_area.x + (work_area.width +frame_width -outer.width )/2,
-          work_area.y + (work_area.height+frame_height-outer.height)/2,
+          center_x + borders.visible.left - window_width / 2,
+          center_y + borders.visible.top - window_height / 2,
           window->rect.width,
           window->rect.height);
 }
