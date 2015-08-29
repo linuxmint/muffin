@@ -85,6 +85,7 @@ void meta_screen_unshow_desktop (MetaScreen *screen);
 
 int  meta_screen_get_n_monitors       (MetaScreen    *screen);
 int  meta_screen_get_primary_monitor  (MetaScreen    *screen);
+int  meta_screen_get_current_monitor  (MetaScreen    *screen);
 void meta_screen_get_monitor_geometry (MetaScreen    *screen,
                                        int            monitor,
                                        MetaRectangle *geometry);

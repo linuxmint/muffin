@@ -1785,13 +1785,13 @@ static gboolean
 snap_osd_timeout (void *data)
 {
   MetaScreen *screen = data;
-  const MetaMonitorInfo *monitor;
+  int monitor;
 
   monitor = meta_screen_get_current_monitor (screen);
   
   if (meta_screen_tile_preview_get_visible (screen) ||
       meta_screen_tile_hud_get_visible (screen))
-      g_signal_emit (screen, screen_signals[SNAP_OSD_SHOW], 0, monitor->number);
+      g_signal_emit (screen, screen_signals[SNAP_OSD_SHOW], 0, monitor);
   screen->snap_osd_timeout_id = 0;
   return FALSE;
 }
@@ -1940,9 +1940,9 @@ meta_screen_tile_hud_update_timeout (gpointer data)
         /* This bit is liable to get more complicated when there are multiple
            monitors involved - we'll have partial hud, with a bare area at the
            monitor 'joint' or something... */
-        const MetaMonitorInfo *monitor;
+        int monitor;
         monitor = meta_screen_get_current_monitor (screen);
-        meta_window_get_work_area_for_monitor (window, monitor->number, &work_area);
+        meta_window_get_work_area_for_monitor (window, monitor, &work_area);
         meta_compositor_show_hud_preview (screen->display->compositor,
                                           screen, window->current_proximity_zone,
                                           &work_area, window->snap_queued);
@@ -2201,7 +2201,7 @@ meta_screen_get_natural_monitor_list (MetaScreen *screen,
       visited[i] = FALSE;
     }
 
-  current = meta_screen_get_current_monitor (screen);
+  current = meta_screen_get_current_monitor_info (screen);
   monitor_queue = g_queue_new ();
   g_queue_push_tail (monitor_queue, (gpointer) current);
   visited[current->number] = TRUE;
@@ -2267,11 +2267,27 @@ meta_screen_get_natural_monitor_list (MetaScreen *screen,
   g_queue_free (monitor_queue);
 }
 
-LOCAL_SYMBOL const MetaMonitorInfo*
+const MetaMonitorInfo *
+meta_screen_get_current_monitor_info (MetaScreen *screen)
+{
+    int monitor_index;
+    monitor_index = meta_screen_get_current_monitor (screen);
+    return &screen->monitor_infos[monitor_index];
+}
+
+/**
+ * meta_screen_get_current_monitor:
+ * @screen: a #MetaScreen
+ *
+ * Gets the index of the monitor that currently has the mouse pointer.
+ *
+ * Return value: a monitor index
+ */
+int
 meta_screen_get_current_monitor (MetaScreen *screen)
 {
   if (screen->n_monitor_infos == 1)
-    return &screen->monitor_infos[0];
+    return 0;
   
   /* Sadly, we have to do it this way. Yuck.
    */
@@ -2313,7 +2329,7 @@ meta_screen_get_current_monitor (MetaScreen *screen)
                   screen->last_monitor_index);
     }
 
-  return &screen->monitor_infos[screen->last_monitor_index];
+  return screen->last_monitor_index;
 }
 
 /**

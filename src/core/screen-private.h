@@ -180,11 +180,11 @@ gboolean      meta_screen_tile_hud_get_visible (MetaScreen *screen);
 
 void          meta_screen_hide_hud_and_preview (MetaScreen *screen);
 
-const MetaMonitorInfo* meta_screen_get_current_monitor    (MetaScreen    *screen);
-const MetaMonitorInfo* meta_screen_get_monitor_for_rect   (MetaScreen    *screen,
-                                                           MetaRectangle *rect);
-const MetaMonitorInfo* meta_screen_get_monitor_for_window (MetaScreen    *screen,
-                                                           MetaWindow    *window);
+const MetaMonitorInfo* meta_screen_get_current_monitor_info (MetaScreen    *screen);
+const MetaMonitorInfo* meta_screen_get_monitor_for_rect     (MetaScreen    *screen,
+                                                             MetaRectangle *rect);
+const MetaMonitorInfo* meta_screen_get_monitor_for_window   (MetaScreen    *screen,
+                                                             MetaWindow    *window);
 
 
 const MetaMonitorInfo* meta_screen_get_monitor_neighbor (MetaScreen *screen,

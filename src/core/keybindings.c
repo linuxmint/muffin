@@ -2366,7 +2366,7 @@ handle_move_to_center  (MetaDisplay    *display,
   int window_width, window_height;
   int center_x, center_y;
 
-  monitor = meta_screen_get_current_monitor (window->screen);
+  monitor = meta_screen_get_current_monitor_info (window->screen);
   meta_frame_calc_borders (window->frame, &borders);
 
   window_width = (window->frame ? window->frame->rect.width : window->rect.width);
