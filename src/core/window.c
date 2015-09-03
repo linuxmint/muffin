@@ -3888,7 +3888,7 @@ meta_window_can_tile_maximized (MetaWindow *window)
 LOCAL_SYMBOL gboolean
 meta_window_can_tile_side_by_side (MetaWindow *window)
 {
-  const MetaMonitorInfo *monitor;
+  int monitor;
   MetaRectangle tile_area;
   MetaFrameBorders borders;
 
@@ -3896,7 +3896,7 @@ meta_window_can_tile_side_by_side (MetaWindow *window)
     return FALSE;
 
   monitor = meta_screen_get_current_monitor (window->screen);
-  meta_window_get_work_area_for_monitor (window, monitor->number, &tile_area);
+  meta_window_get_work_area_for_monitor (window, monitor, &tile_area);
 
   tile_area.width /= 2;
 
@@ -3912,7 +3912,7 @@ meta_window_can_tile_side_by_side (MetaWindow *window)
 LOCAL_SYMBOL gboolean
 meta_window_can_tile_top_bottom (MetaWindow *window)
 {
-  const MetaMonitorInfo *monitor;
+  int monitor;
   MetaRectangle tile_area;
   MetaFrameBorders borders;
 
@@ -3920,7 +3920,7 @@ meta_window_can_tile_top_bottom (MetaWindow *window)
     return FALSE;
 
   monitor = meta_screen_get_current_monitor (window->screen);
-  meta_window_get_work_area_for_monitor (window, monitor->number, &tile_area);
+  meta_window_get_work_area_for_monitor (window, monitor, &tile_area);
 
   tile_area.height /= 2;
 
@@ -3936,7 +3936,7 @@ meta_window_can_tile_top_bottom (MetaWindow *window)
 LOCAL_SYMBOL gboolean
 meta_window_can_tile_corner (MetaWindow *window)
 {
-  const MetaMonitorInfo *monitor;
+  int monitor;
   MetaRectangle tile_area;
   MetaFrameBorders borders;
 
@@ -3944,7 +3944,7 @@ meta_window_can_tile_corner (MetaWindow *window)
     return FALSE;
 
   monitor = meta_screen_get_current_monitor (window->screen);
-  meta_window_get_work_area_for_monitor (window, monitor->number, &tile_area);
+  meta_window_get_work_area_for_monitor (window, monitor, &tile_area);
 
   tile_area.width /= 2;
   tile_area.height /= 2;
@@ -9155,7 +9155,7 @@ update_move (MetaWindow  *window,
        * refers to the monitor which contains the largest part of the window,
        * the latter to the one where the pointer is located.
        */
-      monitor = meta_screen_get_current_monitor (window->screen);
+      monitor = meta_screen_get_current_monitor_info (window->screen);
       meta_window_get_work_area_for_monitor (window,
                                              monitor->number,
                                              &work_area);
@@ -11721,15 +11721,15 @@ meta_window_mouse_on_edge (MetaWindow *window, gint x, gint y)
 {
     MetaRectangle work_area;
     gboolean ret = FALSE;
-    const MetaMonitorInfo *monitor;
+    int monitor;
     gint left_shift, right_shift, up_shift, down_shift;
     left_shift = right_shift = up_shift = down_shift = 0;
 
     monitor = meta_screen_get_current_monitor (window->screen);
-    meta_window_get_work_area_for_monitor (window, monitor->number, &work_area);
+    meta_window_get_work_area_for_monitor (window, monitor, &work_area);
 
     get_extra_padding_for_common_monitor_edges (window,
-                                                monitor->number,
+                                                monitor,
                                                 work_area,
                                                 &left_shift,
                                                 &right_shift,
