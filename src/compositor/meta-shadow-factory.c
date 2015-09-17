@@ -137,7 +137,7 @@ static MetaShadowClassInfo default_shadow_classes[] = {
   { "popup-menu",    { 1, -1, 0, 1, 128 }, { 1, -1, 0, 1, 128 } },
 
   { "dropdown-menu", { 1, 10, 0, 1, 128 }, { 1, 10, 0, 1, 128 } },
-  { "attached",      { 2, 50, 0, 1, 255 }, { 1, 50, 0, 1, 128 } }
+  { "attached",      { 6, -1, 0, 1, 255 }, { 3, -1, 0, 3, 128 } }
 };
 
 G_DEFINE_TYPE (MetaShadowFactory, meta_shadow_factory, G_TYPE_OBJECT);
