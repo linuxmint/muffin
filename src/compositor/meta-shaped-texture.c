@@ -31,9 +31,6 @@
 
 #include <config.h>
 
-#define CLUTTER_ENABLE_EXPERIMENTAL_API
-#define COGL_ENABLE_EXPERIMENTAL_API
-
 #include <meta/meta-shaped-texture.h>
 #include "meta-texture-tower.h"
 #include "meta-texture-rectangle.h"

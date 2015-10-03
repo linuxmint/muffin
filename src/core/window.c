@@ -1037,8 +1037,8 @@ meta_window_new_with_attrs (MetaDisplay       *display,
 #ifdef HAVE_XSYNC
   window->sync_request_counter = None;
   window->sync_request_serial = 0;
-  window->sync_request_time.tv_sec = 0;
-  window->sync_request_time.tv_usec = 0;
+  window->sync_request_timeout_id = 0;
+  window->sync_request_alarm = None;
 #endif
 
   window->screen = screen;
@@ -1802,6 +1802,12 @@ meta_window_unmanage (MetaWindow  *window,
       invalidate_work_areas (window);
     }
 
+  if (window->sync_request_timeout_id)
+    {
+      g_source_remove (window->sync_request_timeout_id);
+      window->sync_request_timeout_id = 0;
+    }
+
   if (window->display->grab_window == window)
     meta_display_end_grab_op (window->display, timestamp);
 
@@ -1855,6 +1861,8 @@ meta_window_unmanage (MetaWindow  *window,
 
   if (!window->override_redirect)
     meta_stack_remove (window->screen->stack, window);
+
+  meta_window_destroy_sync_request_alarm (window);
 
   if (window->frame)
     meta_window_destroy_frame (window);
@@ -4653,16 +4661,147 @@ static_gravity_works (MetaDisplay *display)
   return display->static_gravity_works;
 }
 
+void
+meta_window_create_sync_request_alarm (MetaWindow *window)
+{
 #ifdef HAVE_XSYNC
+  XSyncAlarmAttributes values;
+  XSyncValue init;
+
+  if (window->sync_request_counter == None ||
+      window->sync_request_alarm != None)
+    return;
+
+  meta_error_trap_push_with_return (window->display);
+
+  /* In the new (extended style), the counter value is initialized by
+   * the client before mapping the window. In the old style, we're
+   * responsible for setting the initial value of the counter.
+   */
+  if (window->extended_sync_request_counter)
+    {
+      if (!XSyncQueryCounter(window->display->xdisplay,
+                             window->sync_request_counter,
+                             &init))
+        {
+          meta_error_trap_pop_with_return (window->display);
+          window->sync_request_counter = None;
+          return;
+        }
+
+      window->sync_request_serial =
+        XSyncValueLow32 (init) + ((gint64)XSyncValueHigh32 (init) << 32);
+
+      /* if the value is odd, the window starts off with updates frozen */
+      meta_compositor_set_updates_frozen (window->display->compositor, window,
+                                          meta_window_updates_are_frozen (window));
+    }
+  else
+    {
+      XSyncIntToValue (&init, 0);
+      XSyncSetCounter (window->display->xdisplay,
+                       window->sync_request_counter, init);
+      window->sync_request_serial = 0;
+    }
+
+  values.trigger.counter = window->sync_request_counter;
+  values.trigger.test_type = XSyncPositiveComparison;
+
+  /* Initialize to one greater than the current value */
+  values.trigger.value_type = XSyncRelative;
+  XSyncIntToValue (&values.trigger.wait_value, 1);
+
+  /* After triggering, increment test_value by this until
+   * until the test condition is false */
+  XSyncIntToValue (&values.delta, 1);
+
+  /* we want events (on by default anyway) */
+  values.events = True;
+
+  window->sync_request_alarm = XSyncCreateAlarm (window->display->xdisplay,
+                                                 XSyncCACounter |
+                                                 XSyncCAValueType |
+                                                 XSyncCAValue |
+                                                 XSyncCATestType |
+                                                 XSyncCADelta |
+                                                 XSyncCAEvents,
+                                                 &values);
+
+  if (meta_error_trap_pop_with_return (window->display) == Success)
+    meta_display_register_sync_alarm (window->display, &window->sync_request_alarm, window);
+  else
+    {
+      window->sync_request_alarm = None;
+      window->sync_request_counter = None;
+    }
+#endif
+}
+
+void
+meta_window_destroy_sync_request_alarm (MetaWindow *window)
+{
+#ifdef HAVE_XSYNC
+  if (window->sync_request_alarm != None)
+    {
+      /* Has to be unregistered _before_ clearing the structure field */
+      meta_display_unregister_sync_alarm (window->display, window->sync_request_alarm);
+      XSyncDestroyAlarm (window->display->xdisplay,
+                         window->sync_request_alarm);
+      window->sync_request_alarm = None;
+    }
+#endif /* HAVE_XSYNC */
+}
+
+#ifdef HAVE_XSYNC
+static gboolean
+sync_request_timeout (gpointer data)
+{
+  MetaWindow *window = data;
+
+  window->sync_request_timeout_id = 0;
+
+  /* We have now waited for more than a second for the
+   * application to respond to the sync request
+   */
+  window->disable_sync = TRUE;
+
+  /* Reset the wait serial, so we don't continue freezing
+   * window updates
+   */
+  window->sync_request_wait_serial = 0;
+  meta_compositor_set_updates_frozen (window->display->compositor, window,
+                                      meta_window_updates_are_frozen (window));
+
+  if (window == window->display->grab_window &&
+      meta_grab_op_is_resizing (window->display->grab_op))
+    {
+      update_resize (window,
+                     window->display->grab_last_user_action_was_snap,
+                     window->display->grab_latest_motion_x,
+                     window->display->grab_latest_motion_y,
+                     TRUE,
+                     FALSE);
+    }
+
+  return FALSE;
+}
+
 static void
 send_sync_request (MetaWindow *window)
 {
-  XSyncValue value;
   XClientMessageEvent ev;
+  gint64 wait_serial;
 
-  window->sync_request_serial++;
+  /* For the old style of _NET_WM_SYNC_REQUEST_COUNTER, we just have to
+   * increase the value, but for the new "extended" style we need to
+   * pick an even (unfrozen) value sufficiently ahead of the last serial
+   * that we received from the client; the same code still works
+   * for the old style. The increment of 240 is specified by the EWMH
+   * and is (1 second) * (60fps) * (an increment of 4 per frame).
+   */
+  wait_serial = window->sync_request_serial + 240;
 
-  XSyncIntToValue (&value, window->sync_request_serial);
+  window->sync_request_wait_serial = wait_serial;
 
   ev.type = ClientMessage;
   ev.window = window->xwindow;
@@ -4675,8 +4814,9 @@ send_sync_request (MetaWindow *window)
    * want to use _roundtrip, though?
    */
   ev.data.l[1] = meta_display_get_current_time (window->display);
-  ev.data.l[2] = XSyncValueLow32 (value);
-  ev.data.l[3] = XSyncValueHigh32 (value);
+  ev.data.l[2] = wait_serial & G_GUINT64_CONSTANT(0xffffffff);
+  ev.data.l[3] = wait_serial >> 32;
+  ev.data.l[4] = window->extended_sync_request_counter ? 1 : 0;
 
   /* We don't need to trap errors here as we are already
    * inside an error_trap_push()/pop() pair.
@@ -4684,9 +4824,45 @@ send_sync_request (MetaWindow *window)
   XSendEvent (window->display->xdisplay,
 	      window->xwindow, False, 0, (XEvent*) &ev);
 
-  g_get_current_time (&window->sync_request_time);
+  /* We give the window 1 sec to respond to _NET_WM_SYNC_REQUEST;
+   * if this time expires, we consider the window unresponsive
+   * and resize it unsynchonized.
+   */
+  window->sync_request_timeout_id = g_timeout_add (1000,
+                                                   sync_request_timeout,
+                                                   window);
+
+  meta_compositor_set_updates_frozen (window->display->compositor, window,
+                                      meta_window_updates_are_frozen (window));
 }
 #endif
+
+/**
+ * meta_window_updates_are_frozen:
+ * @window: a #MetaWindow
+ *
+ * Gets whether the compositor should be updating the window contents;
+ * window content updates may be frozen at client request by setting
+ * an odd value in the extended _NET_WM_SYNC_REQUEST_COUNTER counter r
+ * by the window manager during a resize operation while waiting for
+ * the client to redraw.
+ *
+ * Return value: %TRUE if updates are currently frozen
+ */
+gboolean
+meta_window_updates_are_frozen (MetaWindow *window)
+{
+#ifdef HAVE_XSYNC
+  if (window->extended_sync_request_counter &&
+      window->sync_request_serial % 2 == 1)
+    return TRUE;
+
+  if (window->sync_request_serial < window->sync_request_wait_serial)
+    return TRUE;
+#endif
+
+  return FALSE;
+}
 
 static gboolean
 maybe_move_attached_dialog (MetaWindow *window,
@@ -4856,6 +5032,7 @@ meta_window_move_resize_internal (MetaWindow          *window,
   gboolean is_configure_request;
   gboolean do_gravity_adjust;
   gboolean is_user_action;
+  gboolean did_placement;
   gboolean configure_frame_first;
   gboolean use_static_gravity;
   /* used for the configure request, but may not be final
@@ -4930,6 +5107,8 @@ meta_window_move_resize_internal (MetaWindow          *window,
                   "weird positioning; new pos %d,%d\n",
                   new_rect.x, new_rect.y);
     }
+
+  did_placement = !window->placed && window->calc_placement;
 
   meta_window_constrain (window,
                          window->frame ? &borders : NULL,
@@ -5142,12 +5321,28 @@ meta_window_move_resize_internal (MetaWindow          *window,
    * efficiently as possible
    */
 
-  /* configure frame first if we grow more than we shrink
+  /* Normally, we configure the frame first depending on whether
+   * we grow the frame more than we shrink. The idea is to avoid
+   * messing up the window contents by having a temporary situation
+   * where the frame is smaller than the window. However, if we're
+   * cooperating with the client to create an atomic frame upate,
+   * and the window is redirected, then we should always update
+   * the frame first, since updating the frame will force a new
+   * backing pixmap to be allocated, and the old backing pixmap
+   * will be left undisturbed for us to paint to the screen until
+   * the client finishes redrawing.
    */
-  size_dx = w - window->rect.width;
-  size_dy = h - window->rect.height;
+  if (window->extended_sync_request_counter)
+    {
+      configure_frame_first = TRUE;
+    }
+  else
+    {
+      size_dx = w - window->rect.width;
+      size_dy = h - window->rect.height;
 
-  configure_frame_first = (size_dx + size_dy >= 0);
+      configure_frame_first = size_dx + size_dy >= 0;
+    }
 
   if (use_static_gravity)
     meta_window_set_gravity (window, StaticGravity);
@@ -5188,15 +5383,13 @@ meta_window_move_resize_internal (MetaWindow          *window,
       meta_error_trap_push (window->display);
 
 #ifdef HAVE_XSYNC
-      if (window->sync_request_counter != None &&
-	  window->display->grab_sync_request_alarm != None &&
-	  window->sync_request_time.tv_usec == 0 &&
-	  window->sync_request_time.tv_sec == 0)
+      if (window == window->display->grab_window &&
+          meta_grab_op_is_resizing (window->display->grab_op) &&
+          !window->disable_sync &&
+          window->sync_request_counter != None &&
+	  window->sync_request_alarm != None &&
+          window->sync_request_timeout_id == 0)
 	{
-	  /* turn off updating */
-	  if (window->display->compositor)
-	    meta_compositor_set_updates (window->display->compositor, window, FALSE);
-
 	  send_sync_request (window);
 	}
 #endif
@@ -5227,7 +5420,8 @@ meta_window_move_resize_internal (MetaWindow          *window,
     save_user_window_placement (window);
 
   if (need_move_frame || need_resize_frame ||
-      need_move_client || need_resize_client)
+      need_move_client || need_resize_client ||
+      did_placement)
     {
       int newx, newy;
       meta_window_get_position (window, &newx, &newy);
@@ -5238,7 +5432,8 @@ meta_window_move_resize_internal (MetaWindow          *window,
                   window->user_rect.width, window->user_rect.height);
       if (window->display->compositor)
         meta_compositor_sync_window_geometry (window->display->compositor,
-                                              window);
+                                              window,
+                                              did_placement);
     }
   else
     {
@@ -5576,7 +5771,7 @@ meta_window_configure_notify (MetaWindow      *window,
     meta_warning ("Unhandled change of windows override redirect status\n");
 
   if (window->display->compositor)
-    meta_compositor_sync_window_geometry (window->display->compositor, window);
+    meta_compositor_sync_window_geometry (window->display->compositor, window, FALSE);
 }
 
 LOCAL_SYMBOL void
@@ -8880,73 +9075,39 @@ check_moveresize_frequency (MetaWindow *window,
 			    gdouble    *remaining)
 {
   GTimeVal current_time;
+  const double max_resizes_per_second = 25.0;
+  const double ms_between_resizes = 1000.0 / max_resizes_per_second;
+  double elapsed;
 
   g_get_current_time (&current_time);
 
 #ifdef HAVE_XSYNC
+  /* If we are throttling via _NET_WM_SYNC_REQUEST, we don't need
+   * an artificial timeout-based throttled */
   if (!window->disable_sync &&
-      window->display->grab_sync_request_alarm != None)
-    {
-      if (window->sync_request_time.tv_sec != 0 ||
-	  window->sync_request_time.tv_usec != 0)
-	{
-	  double elapsed =
-	    time_diff (&current_time, &window->sync_request_time);
-
-	  if (elapsed < 100.0)
-	    {
-	      /* We want to be sure that the timeout happens at
-	       * a time where elapsed will definitely be
-	       * greater than 1000, so we can disable sync
-	       */
-	      if (remaining)
-		*remaining = 100.0 - elapsed + 10;
-
-	      return FALSE;
-	    }
-	  else
-	    {
-	      /* We have now waited for more than a second for the
-	       * application to respond to the sync request
-	       */
-	      window->disable_sync = TRUE;
-	      return TRUE;
-	    }
-	}
-      else
-	{
-	  /* No outstanding sync requests. Go ahead and resize
-	   */
-	  return TRUE;
-	}
-    }
-  else
+      window->sync_request_alarm != None)
+    return TRUE;
 #endif /* HAVE_XSYNC */
+
+  elapsed = time_diff (&current_time, &window->display->grab_last_moveresize_time);
+
+  if (elapsed >= 0.0 && elapsed < ms_between_resizes)
     {
-      const double max_resizes_per_second = 25.0;
-      const double ms_between_resizes = 1000.0 / max_resizes_per_second;
-      double elapsed;
-
-      elapsed = time_diff (&current_time, &window->display->grab_last_moveresize_time);
-
-      if (elapsed >= 0.0 && elapsed < ms_between_resizes)
-	{
-	  meta_topic (META_DEBUG_RESIZING,
-		      "Delaying move/resize as only %g of %g ms elapsed\n",
-		      elapsed, ms_between_resizes);
-
-	  if (remaining)
-	    *remaining = (ms_between_resizes - elapsed);
-
-	  return FALSE;
-	}
-
       meta_topic (META_DEBUG_RESIZING,
-		  " Checked moveresize freq, allowing move/resize now (%g of %g seconds elapsed)\n",
-		  elapsed / 1000.0, 1.0 / max_resizes_per_second);
+                  "Delaying move/resize as only %g of %g ms elapsed\n",
+                  elapsed, ms_between_resizes);
 
-      return TRUE;
+      if (remaining)
+        *remaining = (ms_between_resizes - elapsed);
+
+      return FALSE;
     }
+
+    meta_topic (META_DEBUG_RESIZING,
+                " Checked moveresize freq, allowing move/resize now (%g of %g seconds elapsed)\n",
+                elapsed / 1000.0, 1.0 / max_resizes_per_second);
+
+    return TRUE;
 }
 
 static gboolean
@@ -9623,6 +9784,15 @@ update_resize (MetaWindow *window,
       break;
     }
 
+#ifdef HAVE_XSYNC
+  /* If we're waiting for a request for _NET_WM_SYNC_REQUEST, we'll
+   * resize the window when the window responds, or when we time
+   * the response out.
+   */
+  if (window->sync_request_timeout_id != 0)
+    return;
+#endif
+
   if (!check_moveresize_frequency (window, &remaining) && !force)
     {
       /* we are ignoring an event here, so we schedule a
@@ -9638,10 +9808,6 @@ update_resize (MetaWindow *window,
 
       return;
     }
-
-  /* If we get here, it means the client should have redrawn itself */
-  if (window->display->compositor)
-    meta_compositor_set_updates (window->display->compositor, window, TRUE);
 
   /* Remove any scheduled compensation events */
   if (window->display->grab_resize_timeout_id)
@@ -9833,6 +9999,60 @@ update_tile_mode (MetaWindow *window)
     }
 }
 
+#ifdef HAVE_XSYNC
+void
+meta_window_update_sync_request_counter (MetaWindow *window,
+                                         gint64      new_counter_value)
+{
+  gboolean needs_frame_drawn = FALSE;
+  gboolean no_delay_frame = FALSE;
+
+  if (window->extended_sync_request_counter && new_counter_value % 2 == 0)
+    {
+      needs_frame_drawn = TRUE;
+      no_delay_frame = new_counter_value == window->sync_request_serial + 1;
+    }
+
+  window->sync_request_serial = new_counter_value;
+  meta_compositor_set_updates_frozen (window->display->compositor, window,
+                                      meta_window_updates_are_frozen (window));
+
+  if (window == window->display->grab_window &&
+      meta_grab_op_is_resizing (window->display->grab_op) &&
+      new_counter_value >= window->sync_request_wait_serial &&
+      (!window->extended_sync_request_counter || new_counter_value % 2 == 0) &&
+      window->sync_request_timeout_id)
+    {
+      meta_topic (META_DEBUG_RESIZING,
+                  "Alarm event received last motion x = %d y = %d\n",
+                  window->display->grab_latest_motion_x,
+                  window->display->grab_latest_motion_y);
+
+      g_source_remove (window->sync_request_timeout_id);
+      window->sync_request_timeout_id = 0;
+
+      /* This means we are ready for another configure;
+       * no pointer round trip here, to keep in sync */
+      update_resize (window,
+                     window->display->grab_last_user_action_was_snap,
+                     window->display->grab_latest_motion_x,
+                     window->display->grab_latest_motion_y,
+                     TRUE,
+                     FALSE);
+    }
+
+  /* If sync was previously disabled, turn it back on and hope
+   * the application has come to its senses (maybe it was just
+   * busy with a pagefault or a long computation).
+   */
+  window->disable_sync = FALSE;
+
+  if (needs_frame_drawn)
+    meta_compositor_queue_frame_drawn (window->display->compositor, window,
+                                       no_delay_frame);
+}
+#endif /* HAVE_XSYNC */
+
 LOCAL_SYMBOL void
 meta_window_handle_mouse_grab_op_event (MetaWindow *window,
                                         XEvent     *event)
@@ -9850,8 +10070,7 @@ meta_window_handle_mouse_grab_op_event (MetaWindow *window,
        * busy with a pagefault or a long computation).
        */
       window->disable_sync = FALSE;
-      window->sync_request_time.tv_sec = 0;
-      window->sync_request_time.tv_usec = 0;
+      meta_window_destroy_sync_request_alarm (window);
 
       /* This means we are ready for another configure. */
       switch (window->display->grab_op)
@@ -9929,8 +10148,6 @@ meta_window_handle_mouse_grab_op_event (MetaWindow *window,
                                event->xbutton.y_root,
                                TRUE,
                                TRUE);
-              if (window->display->compositor)
-                meta_compositor_set_updates (window->display->compositor, window, TRUE);
 
               /* If a tiled window has been dragged free with a
                * mouse resize without snapping back to the tiled

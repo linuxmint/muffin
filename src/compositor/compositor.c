@@ -163,6 +163,8 @@ process_damage (MetaCompositor     *compositor,
     return;
 
   meta_window_actor_process_damage (window_actor, event);
+
+  compositor->frame_has_updated_xsurfaces = TRUE;
 }
 
 static void
@@ -526,9 +528,20 @@ meta_check_end_modal (MetaScreen *screen)
       meta_plugin_get_screen (compositor->modal_plugin) == screen)
     {
       meta_end_modal_for_plugin (screen,
-                                   compositor->modal_plugin,
-                                   CurrentTime);
+                                 compositor->modal_plugin,
+                                 CurrentTime);
     }
+}
+
+static void
+after_stage_paint (ClutterStage *stage,
+                   gpointer      data)
+{
+  MetaCompScreen *info = (MetaCompScreen*) data;
+  GList *l;
+
+  for (l = info->windows; l; l = l->next)
+    meta_window_actor_post_paint (l->data);
 }
 
 void
@@ -602,6 +615,13 @@ meta_compositor_manage_screen (MetaCompositor *compositor,
   meta_screen_set_cm_selection (screen);
 
   info->stage = clutter_stage_new ();
+
+  clutter_stage_set_paint_callback (CLUTTER_STAGE (info->stage),
+                                    after_stage_paint,
+                                    info,
+                                    NULL);
+
+  clutter_stage_set_sync_delay (CLUTTER_STAGE (info->stage), META_SYNC_DELAY);
 
   meta_screen_get_size (screen, &width, &height);
   clutter_actor_realize (info->stage);
@@ -776,10 +796,33 @@ meta_compositor_remove_window (MetaCompositor *compositor,
 }
 
 void
-meta_compositor_set_updates (MetaCompositor *compositor,
-                             MetaWindow     *window,
-                             gboolean        updates)
+meta_compositor_set_updates_frozen (MetaCompositor *compositor,
+                                    MetaWindow     *window,
+                                    gboolean        updates_frozen)
 {
+  MetaWindowActor *window_actor;
+
+  DEBUG_TRACE ("meta_compositor_set_updates_frozen\n");
+  window_actor = META_WINDOW_ACTOR (meta_window_get_compositor_private (window));
+  if (!window_actor)
+    return;
+
+  meta_window_actor_set_updates_frozen (window_actor, updates_frozen);
+}
+
+void
+meta_compositor_queue_frame_drawn (MetaCompositor *compositor,
+                                   MetaWindow     *window,
+                                   gboolean        no_delay_frame)
+{
+  MetaWindowActor *window_actor;
+
+  DEBUG_TRACE ("meta_compositor_queue_frame_drawn\n");
+  window_actor = META_WINDOW_ACTOR (meta_window_get_compositor_private (window));
+  if (!window_actor)
+    return;
+
+  meta_window_actor_queue_frame_drawn (window_actor, no_delay_frame);
 }
 
 static gboolean
@@ -1197,7 +1240,8 @@ meta_compositor_window_unmapped (MetaCompositor *compositor,
 
 void
 meta_compositor_sync_window_geometry (MetaCompositor *compositor,
-				      MetaWindow *window)
+				      MetaWindow *window,
+                                      gboolean did_placement)
 {
   MetaWindowActor *window_actor = META_WINDOW_ACTOR (meta_window_get_compositor_private (window));
   MetaScreen      *screen = meta_window_get_screen (window);
@@ -1209,7 +1253,7 @@ meta_compositor_sync_window_geometry (MetaCompositor *compositor,
   if (!window_actor)
     return;
 
-  meta_window_actor_sync_actor_position (window_actor);
+  meta_window_actor_sync_actor_geometry (window_actor, did_placement);
 }
 
 void
@@ -1239,11 +1283,62 @@ meta_compositor_sync_screen_size (MetaCompositor  *compositor,
 }
 
 static void
+frame_callback (CoglOnscreen  *onscreen,
+                CoglFrameEvent event,
+                CoglFrameInfo *frame_info,
+                void          *user_data)
+{
+  MetaCompScreen *info = user_data;
+  GList *l;
+
+  if (event == COGL_FRAME_EVENT_COMPLETE)
+    {
+      gint64 presentation_time_cogl = cogl_frame_info_get_presentation_time (frame_info);
+      gint64 presentation_time;
+
+      if (presentation_time_cogl != 0)
+        {
+          /* Cogl reports presentation in terms of its own clock, which is
+           * guaranteed to be in nanoseconds but with no specified base. The
+           * normal case with the open source GPU drivers on Linux 3.8 and
+           * newer is that the base of cogl_get_clock_time() is that of
+           * clock_gettime(CLOCK_MONOTONIC), so the same as g_get_monotonic_time),
+           * but there's no exposure of that through the API. clock_gettime()
+           * is fairly fast, so calling it twice and subtracting to get a
+           * nearly-zero number is acceptable, if a litle ugly.
+           */
+          CoglContext *context = cogl_framebuffer_get_context (COGL_FRAMEBUFFER (onscreen));
+          gint64 current_cogl_time = cogl_get_clock_time (context);
+          gint64 current_monotonic_time = g_get_monotonic_time ();
+
+          presentation_time =
+            current_monotonic_time + (presentation_time_cogl - current_cogl_time) / 1000;
+        }
+      else
+        {
+          presentation_time = 0;
+        }
+
+      for (l = info->windows; l; l = l->next)
+        meta_window_actor_frame_complete (l->data, frame_info, presentation_time);
+    }
+}
+
+static void
 pre_paint_windows (MetaCompScreen *info)
 {
   GList *l;
   MetaWindowActor *top_window;
   MetaWindowActor *expected_unredirected_window = NULL;
+
+  if (info->onscreen == NULL)
+    {
+      info->onscreen = COGL_ONSCREEN (cogl_get_draw_framebuffer ());
+      info->frame_closure = cogl_onscreen_add_frame_callback (info->onscreen,
+                                                              frame_callback,
+                                                              info,
+                                                              NULL);
+    }
 
   if (info->windows == NULL)
     return;
@@ -1510,4 +1605,52 @@ meta_compositor_hide_hud_preview (MetaCompositor *compositor,
         return;
 
     meta_plugin_manager_hide_hud_preview (info->plugin_mgr);
+}
+
+/**
+ * meta_compositor_monotonic_time_to_server_time:
+ * @display: a #MetaDisplay
+ * @monotonic_time: time in the units of g_get_monotonic_time()
+ *
+ * _NET_WM_FRAME_DRAWN and _NET_WM_FRAME_TIMINGS messages represent time
+ * as a "high resolution server time" - this is the server time interpolated
+ * to microsecond resolution. The advantage of this time representation
+ * is that if  X server is running on the same computer as a client, and
+ * the Xserver uses 'clock_gettime(CLOCK_MONOTONIC, ...)' for the server
+ * time, the client can detect this, and all such clients will share a
+ * a time representation with high accuracy. If there is not a common
+ * time source, then the time synchronization will be less accurate.
+ */
+gint64
+meta_compositor_monotonic_time_to_server_time (MetaDisplay *display,
+                                               gint64       monotonic_time)
+{
+  MetaCompositor *compositor = display->compositor;
+
+  if (compositor->server_time_query_time == 0 ||
+      (!compositor->server_time_is_monotonic_time &&
+       monotonic_time > compositor->server_time_query_time + 10*1000*1000)) /* 10 seconds */
+    {
+      guint32 server_time = meta_display_get_current_time_roundtrip (display);
+      gint64 server_time_usec = (gint64)server_time * 1000;
+      gint64 current_monotonic_time = g_get_monotonic_time ();
+      compositor->server_time_query_time = current_monotonic_time;
+
+      /* If the server time is within a second of the monotonic time,
+       * we assume that they are identical. This seems like a big margin,
+       * but we want to be as robust as possible even if the system
+       * is under load and our processing of the server response is
+       * delayed.
+       */
+      if (server_time_usec > current_monotonic_time - 1000*1000 &&
+          server_time_usec < current_monotonic_time + 1000*1000)
+        compositor->server_time_is_monotonic_time = TRUE;
+
+      compositor->server_time_offset = server_time_usec - current_monotonic_time;
+    }
+
+  if (compositor->server_time_is_monotonic_time)
+    return monotonic_time;
+  else
+    return monotonic_time + compositor->server_time_offset;
 }
