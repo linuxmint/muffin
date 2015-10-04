@@ -54,6 +54,8 @@ libmuffin_la_SOURCES =				\
 	compositor/meta-shadow-factory.c	\
 	compositor/meta-shadow-factory-private.h	\
 	compositor/meta-shaped-texture.c	\
+    compositor/meta-sync-ring.c \
+    compositor/meta-sync-ring.h \
 	compositor/meta-texture-rectangle.c	\
 	compositor/meta-texture-rectangle.h	\
 	compositor/meta-texture-tower.c		\

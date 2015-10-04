@@ -421,6 +421,11 @@ GNOME_DOC_INIT([0.8.0])
 
 GTK_DOC_CHECK([1.15], [--flavour no-tmpl])
 
+AC_CHECK_DECL([GL_EXT_x11_sync_object],
+              [],
+              [AC_MSG_ERROR([GL_EXT_x11_sync_object definition not found, please update your GL headers])],
+              [#include <GL/glx.h>])
+
 #### Warnings (last since -Werror can disturb other tests)
 
 # Stay command-line compatible with the gnome-common configure option. Here

@@ -20,7 +20,8 @@ struct _MetaCompositor
   Atom            atom_x_root_pixmap;
   Atom            atom_x_set_root;
   Atom            atom_net_wm_window_opacity;
-  guint           repaint_func_id;
+  guint           pre_paint_func_id;
+  guint           post_paint_func_id;
 
   ClutterActor   *shadow_src;
 
@@ -33,6 +34,9 @@ struct _MetaCompositor
   guint           show_redraw : 1;
   guint           debug       : 1;
   guint           no_mipmaps  : 1;
+
+  gboolean frame_has_updated_xsurfaces;
+  gboolean have_x11_sync_object;
 };
 
 struct _MetaCompScreen
@@ -59,8 +63,6 @@ struct _MetaCompScreen
   gint                   switch_workspace_in_progress;
 
   MetaPluginManager *plugin_mgr;
-
-  gboolean frame_has_updated_xsurfaces;
 };
 
 /* Wait 2ms after vblank before starting to draw next frame */
