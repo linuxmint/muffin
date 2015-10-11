@@ -621,10 +621,15 @@ meta_compositor_manage_screen (MetaCompositor *compositor,
 
   info->stage = clutter_stage_new ();
 
+#if CLUTTER_CHECK_VERSION (1, 19, 5) /* Unstable API change */
+  g_signal_connect_after (CLUTTER_STAGE (info->stage), "after-paint",
+                          G_CALLBACK (after_stage_paint), info);
+#else
   clutter_stage_set_paint_callback (CLUTTER_STAGE (info->stage),
                                     after_stage_paint,
                                     info,
                                     NULL);
+#endif
 
   clutter_stage_set_sync_delay (CLUTTER_STAGE (info->stage), META_SYNC_DELAY);
 
