@@ -1354,7 +1354,7 @@ meta_pre_paint_func (gpointer data)
     }
 
   if (info->windows == NULL)
-    return;
+    return TRUE;;
 
   top_window = g_list_last (info->windows)->data;
 

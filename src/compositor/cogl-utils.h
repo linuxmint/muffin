@@ -23,9 +23,6 @@
 #ifndef __META_COGL_UTILS_H__
 #define __META_COGL_UTILS_H__
 
-#define COGL_ENABLE_EXPERIMENTAL_API
-#define CLUTTER_ENABLE_EXPERIMENTAL_API
-
 #include <cogl/cogl.h>
 #include <clutter/clutter.h>
 
