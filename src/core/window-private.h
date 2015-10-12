@@ -267,6 +267,9 @@ struct _MetaWindow
   
   /* whether net_wm_user_time has been set yet */
   guint net_wm_user_time_set : 1;
+
+  /* whether net_wm_icon_geometry has been set */
+  guint icon_geometry_set: 1;
   
   /* These are the flags from WM_PROTOCOLS */
   guint take_focus : 1;
@@ -442,6 +445,9 @@ struct _MetaWindow
   MetaRectangle user_rect;
 
   MetaRectangle snapped_rect;
+
+  /* Cached net_wm_icon_geometry */
+  MetaRectangle icon_geometry;
 
   /* Requested geometry */
   int border_width;
