@@ -6,6 +6,8 @@ lib_LTLIBRARIES = libmuffin.la
 SUBDIRS=wm-tester tools compositor/plugins
 
 AM_CPPFLAGS=								\
+	-DCLUTTER_ENABLE_EXPERIMENTAL_API \
+	-DCOGL_ENABLE_EXPERIMENTAL_API \
 	$(MUFFIN_CFLAGS)						\
 	-I$(srcdir)							\
 	-I$(srcdir)/core						\
@@ -52,6 +54,8 @@ libmuffin_la_SOURCES =				\
 	compositor/meta-shadow-factory.c	\
 	compositor/meta-shadow-factory-private.h	\
 	compositor/meta-shaped-texture.c	\
+    compositor/meta-sync-ring.c \
+    compositor/meta-sync-ring.h \
 	compositor/meta-texture-rectangle.c	\
 	compositor/meta-texture-rectangle.h	\
 	compositor/meta-texture-tower.c		\
@@ -264,8 +268,8 @@ gsettings_SCHEMAS = org.cinnamon.muffin.gschema.xml
 
 IMAGES=stock_maximize.png stock_minimize.png stock_delete.png
 VARIABLES=stock_maximize_data $(srcdir)/stock_maximize.png \
-          stock_minimize_data $(srcdir)/stock_minimize.png \
-          stock_delete_data $(srcdir)/stock_delete.png
+		  stock_minimize_data $(srcdir)/stock_minimize.png \
+		  stock_delete_data $(srcdir)/stock_delete.png
 
 BUILT_SOURCES = inlinepixbufs.h
 CLEANFILES =					\
@@ -303,7 +307,7 @@ muffin-enum-types.h: stamp-muffin-enum-types.h Makefile
 stamp-muffin-enum-types.h: $(libmuffininclude_base_headers) muffin-enum-types.h.in
 	$(AM_V_GEN) ( cd $(srcdir) && \
 	  $(GLIB_MKENUMS) \
-	    --template muffin-enum-types.h.in \
+		--template muffin-enum-types.h.in \
 	  $(libmuffininclude_base_headers) ) >> xgen-teth && \
 	(cmp -s xgen-teth muffin-enum-types.h || cp xgen-teth muffin-enum-types.h) && \
 	rm -f xgen-teth && \
@@ -312,7 +316,7 @@ stamp-muffin-enum-types.h: $(libmuffininclude_base_headers) muffin-enum-types.h.
 muffin-enum-types.c: stamp-muffin-enum-types.h muffin-enum-types.c.in
 	  $(AM_V_GEN) ( cd $(srcdir) && \
 	  $(GLIB_MKENUMS) \
-	    --template muffin-enum-types.c.in \
+		--template muffin-enum-types.c.in \
 	  $(libmuffininclude_base_headers) ) >> xgen-tetc && \
 	cp xgen-tetc muffin-enum-types.c && \
 	rm -f xgen-tetc

@@ -32,6 +32,10 @@ void meta_window_actor_process_damage (MetaWindowActor    *self,
                                        XDamageNotifyEvent *event);
 
 void meta_window_actor_pre_paint      (MetaWindowActor    *self);
+void meta_window_actor_post_paint     (MetaWindowActor    *self);
+void meta_window_actor_frame_complete (MetaWindowActor    *self,
+                                       CoglFrameInfo      *frame_info,
+                                       gint64              presentation_time);
 
 void meta_window_actor_invalidate_shadow (MetaWindowActor *self);
 
@@ -43,12 +47,17 @@ void meta_window_actor_get_shape_bounds (MetaWindowActor       *self,
                                           cairo_rectangle_int_t *bounds);
 
 gboolean meta_window_actor_effect_in_progress  (MetaWindowActor *self);
-void     meta_window_actor_sync_actor_position (MetaWindowActor *self);
+void     meta_window_actor_sync_actor_geometry (MetaWindowActor *self,
+                                                gboolean         did_placement);
 void     meta_window_actor_sync_visibility     (MetaWindowActor *self);
 void     meta_window_actor_update_shape        (MetaWindowActor *self);
 void     meta_window_actor_update_opacity      (MetaWindowActor *self);
 void     meta_window_actor_mapped              (MetaWindowActor *self);
 void     meta_window_actor_unmapped            (MetaWindowActor *self);
+void     meta_window_actor_set_updates_frozen  (MetaWindowActor *self,
+                                                gboolean         updates_frozen);
+void     meta_window_actor_queue_frame_drawn   (MetaWindowActor *self,
+                                                gboolean         no_delay_frame);
 
 cairo_region_t *meta_window_actor_get_obscured_region (MetaWindowActor *self);
 

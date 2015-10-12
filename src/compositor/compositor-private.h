@@ -20,15 +20,23 @@ struct _MetaCompositor
   Atom            atom_x_root_pixmap;
   Atom            atom_x_set_root;
   Atom            atom_net_wm_window_opacity;
-  guint           repaint_func_id;
+  guint           pre_paint_func_id;
+  guint           post_paint_func_id;
 
   ClutterActor   *shadow_src;
 
   MetaPlugin     *modal_plugin;
 
-  gboolean        show_redraw : 1;
-  gboolean        debug       : 1;
-  gboolean        no_mipmaps  : 1;
+  gint64          server_time_query_time;
+  gint64          server_time_offset;
+
+  guint           server_time_is_monotonic_time : 1;
+  guint           show_redraw : 1;
+  guint           debug       : 1;
+  guint           no_mipmaps  : 1;
+
+  gboolean frame_has_updated_xsurfaces;
+  gboolean have_x11_sync_object;
 };
 
 struct _MetaCompScreen
@@ -42,6 +50,9 @@ struct _MetaCompScreen
   GHashTable            *windows_by_xid;
   Window                 output;
 
+  CoglOnscreen          *onscreen;
+  CoglFrameClosure      *frame_closure;
+
   /* Used for unredirecting fullscreen windows */
   guint                   disable_unredirect_count;
   MetaWindowActor             *unredirected_window;
@@ -54,6 +65,9 @@ struct _MetaCompScreen
   MetaPluginManager *plugin_mgr;
 };
 
+/* Wait 2ms after vblank before starting to draw next frame */
+#define META_SYNC_DELAY 2
+
 void meta_switch_workspace_completed (MetaScreen    *screen);
 
 gboolean meta_begin_modal_for_plugin (MetaScreen       *screen,
@@ -65,6 +79,9 @@ gboolean meta_begin_modal_for_plugin (MetaScreen       *screen,
 void     meta_end_modal_for_plugin   (MetaScreen       *screen,
                                       MetaPlugin       *plugin,
                                       guint32           timestamp);
+
+gint64 meta_compositor_monotonic_time_to_server_time (MetaDisplay *display,
+                                                      gint64       monotonic_time);
 
 void meta_check_end_modal (MetaScreen *screen);
 
