@@ -314,6 +314,36 @@ reload_gtk_frame_extents (MetaWindow    *window,
 }
 
 static void
+reload_icon_geometry (MetaWindow    *window,
+                      MetaPropValue *value,
+                      gboolean       initial)
+{
+  if (value->type != META_PROP_VALUE_INVALID)
+    {
+      if (value->v.cardinal_list.n_cardinals != 4)
+        {
+          meta_verbose ("_NET_WM_ICON_GEOMETRY on %s has %d values instead of 4\n",
+                        window->desc, value->v.cardinal_list.n_cardinals);
+        }
+      else
+        {
+          MetaRectangle geometry;
+
+          geometry.x = (int)value->v.cardinal_list.cardinals[0];
+          geometry.y = (int)value->v.cardinal_list.cardinals[1];
+          geometry.width = (int)value->v.cardinal_list.cardinals[2];
+          geometry.height = (int)value->v.cardinal_list.cardinals[3];
+
+          meta_window_set_icon_geometry (window, &geometry);
+        }
+    }
+  else
+    {
+      meta_window_set_icon_geometry (window, NULL);
+    }
+}
+
+static void
 reload_struts (MetaWindow    *window,
                MetaPropValue *value,
                gboolean       initial)
@@ -1791,7 +1821,7 @@ meta_display_init_window_prop_hooks (MetaDisplay *display)
     { display->atom_WM_STATE,          META_PROP_VALUE_INVALID,  NULL,                     FALSE, FALSE },
     { display->atom__NET_WM_ICON,      META_PROP_VALUE_INVALID,  reload_net_wm_icon,       FALSE, FALSE },
     { display->atom__KWM_WIN_ICON,     META_PROP_VALUE_INVALID,  reload_kwm_win_icon,      FALSE, FALSE },
-    { display->atom__NET_WM_ICON_GEOMETRY, META_PROP_VALUE_INVALID, NULL,                  FALSE, FALSE },
+    { display->atom__NET_WM_ICON_GEOMETRY, META_PROP_VALUE_CARDINAL_LIST, reload_icon_geometry, FALSE, FALSE },
     { display->atom_WM_CLIENT_LEADER,  META_PROP_VALUE_INVALID, complain_about_broken_client, FALSE, FALSE },
     { display->atom_SM_CLIENT_ID,      META_PROP_VALUE_INVALID, complain_about_broken_client, FALSE, FALSE },
     { display->atom_WM_WINDOW_ROLE,    META_PROP_VALUE_INVALID, reload_wm_window_role,        FALSE, FALSE },

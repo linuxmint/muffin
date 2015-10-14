@@ -7663,19 +7663,14 @@ send_configure_notify (MetaWindow *window)
   meta_error_trap_pop (window->display);
 }
 
-/* FIXME: @rect should be marked (out), but gjs doesn't currently support
- * this. See also http://bugzilla.gnome.org/show_bug.cgi?id=573314
- */
-/**
+/*
  * meta_window_get_icon_geometry:
  * @window: a #MetaWindow
- * @rect: rectangle into which to store the returned geometry.
+ * @rect: (out): rectangle into which to store the returned geometry.
  *
  * Gets the location of the icon corresponding to the window. The location
  * will be provided set by the task bar or other user interface element
- * displaying the icon, and is relative to the root window. This currently
- * retrieves the icon geometry from the X server as a round trip on every
- * call.
+ * displaying the icon, and is relative to the root window.
  *
  * Return value: %TRUE if the icon geometry was succesfully retrieved.
  */
@@ -7683,38 +7678,41 @@ gboolean
 meta_window_get_icon_geometry (MetaWindow    *window,
                                MetaRectangle *rect)
 {
-  gulong *geometry = NULL;
-  int nitems;
-
   g_return_val_if_fail (!window->override_redirect, FALSE);
 
-  if (meta_prop_get_cardinal_list (window->display,
-                                   window->xwindow,
-                                   window->display->atom__NET_WM_ICON_GEOMETRY,
-                                   &geometry, &nitems))
+  if (window->icon_geometry_set)
     {
-      if (nitems != 4)
-        {
-          meta_verbose ("_NET_WM_ICON_GEOMETRY on %s has %d values instead of 4\n",
-                        window->desc, nitems);
-          meta_XFree (geometry);
-          return FALSE;
-        }
-
       if (rect)
-        {
-          rect->x = geometry[0];
-          rect->y = geometry[1];
-          rect->width = geometry[2];
-          rect->height = geometry[3];
-        }
-
-      meta_XFree (geometry);
+        *rect = window->icon_geometry;
 
       return TRUE;
     }
 
   return FALSE;
+}
+
+/**
+ * meta_window_set_icon_geometry:
+ * @window: a #MetaWindow
+ * @rect: (allow-none): rectangle with the desired geometry or %NULL.
+ *
+ * Sets or unsets the location of the icon corresponding to the window. If
+ * set, the location should correspond to a dock, task bar or other user
+ * interface element displaying the icon, and is relative to the root window.
+ */
+void
+meta_window_set_icon_geometry (MetaWindow    *window,
+                               MetaRectangle *rect)
+{
+  if (rect)
+    {
+      window->icon_geometry = *rect;
+      window->icon_geometry_set = TRUE;
+    }
+  else
+    {
+      window->icon_geometry_set = FALSE;
+    }
 }
 
 static Window
