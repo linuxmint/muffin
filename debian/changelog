@@ -1,3 +1,23 @@
+muffin (2.8.0) rosa; urgency=medium
+
+  [ Michael Webster ]
+  * screen.c: Fix toggle-desktop behavior.
+  * Fix some warnings
+  * compositor.c: handle unstable API break
+  * Implement frame sync between apps and compositor.
+  * Add meta-sync-ring and nvidia patch -
+
+  [ Dexter Chua ]
+  * main.c: remove incorrect comment
+
+  [ JosephMcc ]
+  * Keybindings: Change how the "Center window is screen" hotkey works so it centers the window on the proper screen in multiple monitor setups and matches the placement of centered, newly opened windows
+  * screen: Add a public meta_screen_get_current_monitor(). A convenience function for getting the current monitor index for the cursor. Helpful when implementing features with proper multiple monitor support.
+  * Center attached dialogs on the parent window instead of the parents titlebar.
+  * Pull some upstream fixes from mutter to allow getting/setting a windows icon geometry. This will allow us to get a proper working minimize effect when using multiple panel applets
+
+ -- Clement Lefebvre <root@linuxmint.com>  Fri, 16 Oct 2015 14:19:13 +0100
+
 muffin (2.6.1) rafaela; urgency=medium
 
   [ Dexter Chua ]
