@@ -2,7 +2,7 @@ AC_PREREQ(2.50)
 
 m4_define([muffin_major_version], [2])
 m4_define([muffin_minor_version], [8])
-m4_define([muffin_micro_version], [0])
+m4_define([muffin_micro_version], [1])
 
 m4_define([muffin_version],
           [muffin_major_version.muffin_minor_version.muffin_micro_version])

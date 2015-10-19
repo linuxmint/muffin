@@ -1,3 +1,13 @@
+muffin (2.8.1) rosa; urgency=medium
+
+  [ JosephMcc ]
+  * constraints: clean up an unused variable
+
+  [ Clement Lefebvre ]
+  * Attach modal windows by default
+
+ -- Clement Lefebvre <root@linuxmint.com>  Mon, 19 Oct 2015 14:09:18 +0100
+
 muffin (2.8.0) rosa; urgency=medium
 
   [ Michael Webster ]
