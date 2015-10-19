@@ -10,7 +10,7 @@
           gettext-domain="@GETTEXT_DOMAIN">
 
     <key name="attach-modal-dialogs" type="b">
-      <default>false</default>
+      <default>true</default>
       <_summary>Attach modal dialogs</_summary>
       <_description>
         When true, instead of having independent titlebars, modal dialogs
