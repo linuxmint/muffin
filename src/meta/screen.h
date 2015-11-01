@@ -89,6 +89,10 @@ int  meta_screen_get_current_monitor  (MetaScreen    *screen);
 void meta_screen_get_monitor_geometry (MetaScreen    *screen,
                                        int            monitor,
                                        MetaRectangle *geometry);
+
+int meta_screen_get_monitor_index_for_rect (MetaScreen    *screen,
+                                            MetaRectangle *rect);
+
 MetaWindow* meta_screen_get_mouse_window (MetaScreen *screen,
                                           MetaWindow *not_this_one);
 
