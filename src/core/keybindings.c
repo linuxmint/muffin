@@ -2585,9 +2585,6 @@ handle_tile_action (MetaDisplay    *display,
   if (new_mode == window->tile_mode)
     return;
 
-  if (!meta_window_can_tile (window, new_mode))
-    return;
-
   meta_window_tile (window, new_mode, snap);
 }
 
