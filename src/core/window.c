@@ -2182,6 +2182,12 @@ set_net_wm_state (MetaWindow *window)
                      XA_CARDINAL,
                      32, PropModeReplace, (guchar*) data, 8);
     meta_error_trap_pop (window->display);
+  } else {
+    meta_error_trap_push (window->display);
+    XDeleteProperty (window->display->xdisplay,
+                     window->xwindow,
+                     window->display->atom__NET_WM_WINDOW_TILE_INFO);
+    meta_error_trap_pop (window->display);
   }
 }
 
@@ -3852,7 +3858,6 @@ meta_window_real_tile (MetaWindow *window, gboolean force)
   }
 
   recalc_window_features (window);
-  set_net_wm_state (window);
 
   normalize_tile_state (window);
 
@@ -3882,6 +3887,8 @@ meta_window_real_tile (MetaWindow *window, gboolean force)
        */
       meta_window_queue (window, META_QUEUE_MOVE_RESIZE);
     }
+
+  set_net_wm_state (window);
 
   meta_screen_tile_preview_hide (window->screen);
   meta_window_get_outer_rect (window, &window->snapped_rect);
