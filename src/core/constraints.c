@@ -935,7 +935,7 @@ constrain_tiling (MetaWindow         *window,
     return TRUE;
 
   /* Determine whether constraint applies; exit if it doesn't */
-  if (!META_WINDOW_TILED_OR_SNAPPED (window))
+  if (!META_WINDOW_TILED_OR_SNAPPED (window) || window->resizing_tile_type != META_WINDOW_TILE_TYPE_NONE)
     return TRUE;
 
   /* Calculate target_size - as the tile previews need this as well, we
