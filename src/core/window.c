@@ -3844,8 +3844,8 @@ meta_window_real_tile (MetaWindow *window, gboolean force)
      meta_window_save_rect (window);
   }
 
-  window->maximized_horizontally = FALSE;
-  window->maximized_vertically = FALSE;
+  window->maximized_horizontally = FALSE || window->tile_mode == META_TILE_MAXIMIZE;
+  window->maximized_vertically = FALSE || window->tile_mode == META_TILE_MAXIMIZE;
 
   if (window->tile_mode != META_TILE_NONE) {
       if (window->snap_queued || window->resizing_tile_type == META_WINDOW_TILE_TYPE_SNAPPED) {
@@ -4028,11 +4028,16 @@ meta_window_unmaximize_internal (MetaWindow        *window,
    */
   if ((unmaximize_horizontally && window->maximized_horizontally) ||
       (unmaximize_vertically   && window->maximized_vertically) ||
-      window->tile_type != META_WINDOW_TILE_TYPE_NONE ||
+      window->tile_type == META_WINDOW_TILE_TYPE_NONE ||
       window->tile_mode == META_TILE_NONE)
     {
       MetaRectangle target_rect;
       MetaRectangle work_area;
+
+      window->last_tile_mode = META_TILE_NONE;
+      window->tile_mode = META_TILE_NONE;
+      window->resizing_tile_type = META_WINDOW_TILE_TYPE_NONE;
+      window->tile_type = META_WINDOW_TILE_TYPE_NONE;
 
       meta_window_get_work_area_for_monitor (window, window->monitor->number, &work_area);
 
