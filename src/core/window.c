@@ -9875,17 +9875,22 @@ update_resize (MetaWindow *window,
     }
   else
     {
-      if ((new_unmaximize & ~window->display->grab_resize_unmaximize) != 0 || window->tile_type != META_WINDOW_TILE_TYPE_NONE)
+      if ((new_unmaximize & ~window->display->grab_resize_unmaximize) != 0)
         {
-          if (window->resizing_tile_type == META_WINDOW_TILE_TYPE_NONE)
-            window->resizing_tile_type = window->tile_type;
-          if (window->tile_mode != META_TILE_NONE) {
-            window->resize_tile_mode = window->tile_mode;
-          }
-
           meta_window_unmaximize_with_gravity (window,
                                                (new_unmaximize & ~window->display->grab_resize_unmaximize),
                                                new_w, new_h, gravity);
+        }
+
+      if (window->tile_type != META_WINDOW_TILE_TYPE_NONE)
+        {
+          if (window->tile_mode != META_TILE_NONE)
+            {
+              window->resize_tile_mode = window->tile_mode;
+              window->resizing_tile_type = window->tile_type;
+            }
+
+          meta_window_resize_with_gravity (window, TRUE, new_w, new_h, gravity);
         }
 
       if (window->resizing_tile_type == META_WINDOW_TILE_TYPE_NONE && (window->display->grab_resize_unmaximize & ~new_unmaximize))
