@@ -122,8 +122,7 @@ static void     update_resize         (MetaWindow   *window,
                                        gboolean      snap,
                                        int           x,
                                        int           y,
-                                       gboolean      force,
-                                       gboolean      done);
+                                       gboolean      force);
 static gboolean update_resize_timeout (gpointer data);
 static gboolean should_be_on_all_workspaces (MetaWindow *window);
 
@@ -4791,8 +4790,7 @@ sync_request_timeout (gpointer data)
                      window->display->grab_last_user_action_was_snap,
                      window->display->grab_latest_motion_x,
                      window->display->grab_latest_motion_y,
-                     TRUE,
-                     FALSE);
+                     TRUE);
     }
 
   return FALSE;
@@ -8796,6 +8794,12 @@ menu_callback (MetaWindowMenu *menu,
           break;
 
         case META_MENU_OP_RESIZE:
+          if (window->tile_mode != META_TILE_NONE)
+            {
+              window->resize_tile_mode = window->tile_mode;
+              window->resizing_tile_type = window->tile_type;
+            }
+
           meta_window_begin_grab_op (window,
                                      META_GRAB_OP_KEYBOARD_RESIZING_UNKNOWN,
                                      TRUE,
@@ -9657,8 +9661,7 @@ update_resize_timeout (gpointer data)
                  window->display->grab_last_user_action_was_snap,
                  window->display->grab_latest_motion_x,
                  window->display->grab_latest_motion_y,
-                 TRUE,
-                 FALSE);
+                 TRUE);
   return FALSE;
 }
 
@@ -9666,8 +9669,7 @@ static void
 update_resize (MetaWindow *window,
                gboolean    snap,
                int x, int y,
-               gboolean force,
-               gboolean done)
+               gboolean force)
 {
   int dx, dy;
   int new_w, new_h;
@@ -9704,44 +9706,80 @@ update_resize (MetaWindow *window,
 
   if (window->display->grab_op == META_GRAB_OP_KEYBOARD_RESIZING_UNKNOWN)
     {
-      if ((dx > 0) && (dy > 0))
+      if (window->tile_mode == META_TILE_NONE)
         {
-          window->display->grab_op = META_GRAB_OP_KEYBOARD_RESIZING_SE;
-          meta_window_update_keyboard_resize (window, TRUE);
+          if ((dx > 0) && (dy > 0))
+            {
+              window->display->grab_op = META_GRAB_OP_KEYBOARD_RESIZING_SE;
+              meta_window_update_keyboard_resize (window, TRUE);
+            }
+          else if ((dx < 0) && (dy > 0))
+            {
+              window->display->grab_op = META_GRAB_OP_KEYBOARD_RESIZING_SW;
+              meta_window_update_keyboard_resize (window, TRUE);
+            }
+          else if ((dx > 0) && (dy < 0))
+            {
+              window->display->grab_op = META_GRAB_OP_KEYBOARD_RESIZING_NE;
+              meta_window_update_keyboard_resize (window, TRUE);
+            }
+          else if ((dx < 0) && (dy < 0))
+            {
+              window->display->grab_op = META_GRAB_OP_KEYBOARD_RESIZING_NW;
+              meta_window_update_keyboard_resize (window, TRUE);
+            }
+          else if (dx < 0)
+            {
+              window->display->grab_op = META_GRAB_OP_KEYBOARD_RESIZING_W;
+              meta_window_update_keyboard_resize (window, TRUE);
+            }
+          else if (dx > 0)
+            {
+              window->display->grab_op = META_GRAB_OP_KEYBOARD_RESIZING_E;
+              meta_window_update_keyboard_resize (window, TRUE);
+            }
+          else if (dy > 0)
+            {
+              window->display->grab_op = META_GRAB_OP_KEYBOARD_RESIZING_S;
+              meta_window_update_keyboard_resize (window, TRUE);
+            }
+          else if (dy < 0)
+            {
+              window->display->grab_op = META_GRAB_OP_KEYBOARD_RESIZING_N;
+              meta_window_update_keyboard_resize (window, TRUE);
+            }
         }
-      else if ((dx < 0) && (dy > 0))
+      else
         {
-          window->display->grab_op = META_GRAB_OP_KEYBOARD_RESIZING_SW;
-          meta_window_update_keyboard_resize (window, TRUE);
-        }
-      else if ((dx > 0) && (dy < 0))
-        {
-          window->display->grab_op = META_GRAB_OP_KEYBOARD_RESIZING_NE;
-          meta_window_update_keyboard_resize (window, TRUE);
-        }
-      else if ((dx < 0) && (dy < 0))
-        {
-          window->display->grab_op = META_GRAB_OP_KEYBOARD_RESIZING_NW;
-          meta_window_update_keyboard_resize (window, TRUE);
-        }
-      else if (dx < 0)
-        {
-          window->display->grab_op = META_GRAB_OP_KEYBOARD_RESIZING_W;
-          meta_window_update_keyboard_resize (window, TRUE);
-        }
-      else if (dx > 0)
-        {
-          window->display->grab_op = META_GRAB_OP_KEYBOARD_RESIZING_E;
-          meta_window_update_keyboard_resize (window, TRUE);
-        }
-      else if (dy > 0)
-        {
-          window->display->grab_op = META_GRAB_OP_KEYBOARD_RESIZING_S;
-          meta_window_update_keyboard_resize (window, TRUE);
-        }
-      else if (dy < 0)
-        {
-          window->display->grab_op = META_GRAB_OP_KEYBOARD_RESIZING_N;
+          switch (window->tile_mode) 
+            {
+              case META_TILE_LEFT:
+                window->display->grab_op = META_GRAB_OP_KEYBOARD_RESIZING_E;
+                break;
+              case META_TILE_RIGHT:
+                window->display->grab_op = META_GRAB_OP_KEYBOARD_RESIZING_W;
+                break;
+              case META_TILE_TOP:
+                window->display->grab_op = META_GRAB_OP_KEYBOARD_RESIZING_S;
+                break;
+              case META_TILE_BOTTOM:
+                window->display->grab_op = META_GRAB_OP_KEYBOARD_RESIZING_N;
+                break;
+              case META_TILE_ULC:
+                window->display->grab_op = META_GRAB_OP_KEYBOARD_RESIZING_SE;
+                break;
+              case META_TILE_LLC:
+                window->display->grab_op = META_GRAB_OP_KEYBOARD_RESIZING_NE;
+                break;
+              case META_TILE_URC:
+                window->display->grab_op = META_GRAB_OP_KEYBOARD_RESIZING_SW;
+                break;
+              case META_TILE_LRC:
+                window->display->grab_op = META_GRAB_OP_KEYBOARD_RESIZING_NW;
+                break;
+              default:
+                break;
+            }
           meta_window_update_keyboard_resize (window, TRUE);
         }
     }
@@ -9756,7 +9794,8 @@ update_resize (MetaWindow *window,
     case META_GRAB_OP_KEYBOARD_RESIZING_SE:
     case META_GRAB_OP_KEYBOARD_RESIZING_NE:
     case META_GRAB_OP_KEYBOARD_RESIZING_E:
-      new_w += dx;
+      if (meta_window_resize_or_move_allowed (window, META_DIRECTION_RIGHT))
+        new_w += dx;
       break;
 
     case META_GRAB_OP_RESIZING_NW:
@@ -9765,7 +9804,8 @@ update_resize (MetaWindow *window,
     case META_GRAB_OP_KEYBOARD_RESIZING_NW:
     case META_GRAB_OP_KEYBOARD_RESIZING_SW:
     case META_GRAB_OP_KEYBOARD_RESIZING_W:
-      new_w -= dx;
+      if (meta_window_resize_or_move_allowed (window, META_DIRECTION_LEFT))
+        new_w -= dx;
       break;
 	default:
 	  break;
@@ -9779,7 +9819,8 @@ update_resize (MetaWindow *window,
     case META_GRAB_OP_KEYBOARD_RESIZING_SE:
     case META_GRAB_OP_KEYBOARD_RESIZING_S:
     case META_GRAB_OP_KEYBOARD_RESIZING_SW:
-      new_h += dy;
+      if (meta_window_resize_or_move_allowed (window, META_DIRECTION_DOWN))
+        new_h += dy;
       break;
 
     case META_GRAB_OP_RESIZING_N:
@@ -9788,7 +9829,8 @@ update_resize (MetaWindow *window,
     case META_GRAB_OP_KEYBOARD_RESIZING_N:
     case META_GRAB_OP_KEYBOARD_RESIZING_NE:
     case META_GRAB_OP_KEYBOARD_RESIZING_NW:
-      new_h -= dy;
+      if (meta_window_resize_or_move_allowed (window, META_DIRECTION_UP))
+        new_h -= dy;
       break;
     default:
       break;
@@ -9836,11 +9878,15 @@ update_resize (MetaWindow *window,
     {
     case META_GRAB_OP_RESIZING_S:
     case META_GRAB_OP_RESIZING_N:
+    case META_GRAB_OP_KEYBOARD_RESIZING_S:
+    case META_GRAB_OP_KEYBOARD_RESIZING_N:
       new_w = old.width;
       break;
 
     case META_GRAB_OP_RESIZING_E:
     case META_GRAB_OP_RESIZING_W:
+    case META_GRAB_OP_KEYBOARD_RESIZING_E:
+    case META_GRAB_OP_KEYBOARD_RESIZING_W:
       new_h = old.height;
       break;
 
@@ -9849,7 +9895,11 @@ update_resize (MetaWindow *window,
     }
 
   /* compute gravity of client during operation */
-  gravity = meta_resize_gravity_from_grab_op (window->display->grab_op);
+  if (window->tile_mode != META_TILE_NONE)
+    gravity = meta_resize_gravity_from_tile_mode (window->tile_mode);
+  else
+    gravity = meta_resize_gravity_from_grab_op (window->display->grab_op);
+
   g_assert (gravity >= 0);
 
   /* Do any edge resistance/snapping */
@@ -9904,15 +9954,6 @@ update_resize (MetaWindow *window,
 
   window->display->grab_resize_unmaximize = new_unmaximize;
   /* Store the latest resize time, if we actually resized. */
-    if (done) {
-        if (window->resizing_tile_type != META_WINDOW_TILE_TYPE_NONE) {
-            window->snap_queued = window->resizing_tile_type == META_WINDOW_TILE_TYPE_SNAPPED;
-            window->tile_mode = window->resize_tile_mode;
-            window->custom_snap_size = TRUE;
-            meta_window_real_tile (window, TRUE);
-        }
-    }
-
 
   if (window->rect.width != old.width || window->rect.height != old.height)
     g_get_current_time (&window->display->grab_last_moveresize_time);
@@ -10052,8 +10093,7 @@ meta_window_update_sync_request_counter (MetaWindow *window,
                      window->display->grab_last_user_action_was_snap,
                      window->display->grab_latest_motion_x,
                      window->display->grab_latest_motion_y,
-                     TRUE,
-                     FALSE);
+                     TRUE);
     }
 
   /* If sync was previously disabled, turn it back on and hope
@@ -10111,8 +10151,7 @@ meta_window_handle_mouse_grab_op_event (MetaWindow *window,
                          window->display->grab_last_user_action_was_snap,
                          window->display->grab_latest_motion_x,
                          window->display->grab_latest_motion_y,
-                         TRUE,
-                         FALSE);
+                         TRUE);
           break;
 
         default:
@@ -10161,7 +10200,6 @@ meta_window_handle_mouse_grab_op_event (MetaWindow *window,
                                event->xbutton.state & ShiftMask,
                                event->xbutton.x_root,
                                event->xbutton.y_root,
-                               TRUE,
                                TRUE);
 
               /* If a tiled window has been dragged free with a
@@ -10206,7 +10244,6 @@ meta_window_handle_mouse_grab_op_event (MetaWindow *window,
                                event->xmotion.state & ShiftMask,
                                event->xmotion.x_root,
                                event->xmotion.y_root,
-                               FALSE,
                                FALSE);
             }
         }
