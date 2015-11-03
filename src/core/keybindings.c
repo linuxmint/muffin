@@ -2134,7 +2134,10 @@ process_keyboard_resize_grab (MetaDisplay *display,
   width = window->rect.width;
   height = window->rect.height;
 
-  gravity = meta_resize_gravity_from_grab_op (display->grab_op);
+  if (window->tile_mode != META_TILE_NONE)
+    gravity = meta_resize_gravity_from_tile_mode (window->tile_mode);
+  else
+    gravity = meta_resize_gravity_from_grab_op (display->grab_op);
 
   smart_snap = (event->xkey.state & ShiftMask) != 0;
   
