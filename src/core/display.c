@@ -3861,7 +3861,14 @@ meta_display_end_grab_op (MetaDisplay *display,
         meta_screen_ungrab_all_keys (display->grab_screen, timestamp);
     }
 
-  
+  if (display->grab_window &&
+      display->grab_window->resizing_tile_type != META_WINDOW_TILE_TYPE_NONE) {
+    display->grab_window->snap_queued = display->grab_window->resizing_tile_type == META_WINDOW_TILE_TYPE_SNAPPED;
+    display->grab_window->tile_mode = display->grab_window->resize_tile_mode;
+    display->grab_window->custom_snap_size = TRUE;
+    meta_window_real_tile (display->grab_window, TRUE);
+  }
+
   display->grab_window = NULL;
   display->grab_screen = NULL;
   display->grab_xwindow = None;
@@ -4891,6 +4898,45 @@ meta_resize_gravity_from_grab_op (MetaGrabOp op)
       break;
     default:
       break;
+    }
+
+  return gravity;
+}
+
+LOCAL_SYMBOL int
+meta_resize_gravity_from_tile_mode (MetaTileMode mode)
+{
+  int gravity;
+  
+  gravity = -1;
+  switch (mode)
+    {
+      case META_TILE_LEFT:
+        gravity = WestGravity;
+        break;
+      case META_TILE_RIGHT:
+        gravity = EastGravity;
+        break;
+      case META_TILE_TOP:
+        gravity = NorthGravity;
+        break;
+      case META_TILE_BOTTOM:
+        gravity = SouthGravity;
+        break;
+      case META_TILE_ULC:
+        gravity = NorthWestGravity;
+        break;
+      case META_TILE_LLC:
+        gravity = SouthWestGravity;
+        break;
+      case META_TILE_URC:
+        gravity = NorthEastGravity;
+        break;
+      case META_TILE_LRC:
+        gravity = SouthEastGravity;
+        break;
+      default:
+        break;
     }
 
   return gravity;
