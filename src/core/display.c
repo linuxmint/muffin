@@ -1877,8 +1877,10 @@ event_callback (XEvent   *event,
                 meta_stack_set_positions (screen->stack,
                                           display->grab_old_window_stacking);
             }
-          meta_display_end_grab_op (display,
-                                    event->xbutton.time);
+
+          if (display->grab_window->tile_mode == META_TILE_NONE)
+              meta_display_end_grab_op (display,
+                                        event->xbutton.time);
         }
       else if (window && display->grab_op == META_GRAB_OP_NONE)
         {
@@ -3868,6 +3870,8 @@ meta_display_end_grab_op (MetaDisplay *display,
     display->grab_window->custom_snap_size = TRUE;
     meta_window_real_tile (display->grab_window, TRUE);
   }
+
+  meta_screen_hide_hud_and_preview (display->grab_screen);
 
   display->grab_window = NULL;
   display->grab_screen = NULL;
