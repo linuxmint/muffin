@@ -1887,19 +1887,15 @@ process_keyboard_move_grab (MetaDisplay *display,
     case XK_KP_Prior:
     case XK_Up:
     case XK_KP_Up:
-      if (meta_window_resize_or_move_allowed (window, META_DIRECTION_UP)) {
-          y -= incr;
-          handled = TRUE;
-      }
+      y -= incr;
+      handled = TRUE;
       break;
     case XK_KP_End:
     case XK_KP_Next:
     case XK_Down:
     case XK_KP_Down:
-      if (meta_window_resize_or_move_allowed (window, META_DIRECTION_DOWN)) {
-        y += incr;
-        handled = TRUE;
-      }
+      y += incr;
+      handled = TRUE;
       break;
     }
   
@@ -1909,19 +1905,15 @@ process_keyboard_move_grab (MetaDisplay *display,
     case XK_KP_End:
     case XK_Left:
     case XK_KP_Left:
-      if (meta_window_resize_or_move_allowed (window, META_DIRECTION_LEFT)) {
-        x -= incr;
-        handled = TRUE;
-      }
+      x -= incr;
+      handled = TRUE;
       break;
     case XK_KP_Prior:
     case XK_KP_Next:
     case XK_Right:
     case XK_KP_Right:
-      if (meta_window_resize_or_move_allowed (window, META_DIRECTION_RIGHT)) {
-        x += incr;
-        handled = TRUE;
-      }
+      x += incr;
+      handled = TRUE;
       break;
     }
 
@@ -1931,6 +1923,8 @@ process_keyboard_move_grab (MetaDisplay *display,
       meta_topic (META_DEBUG_KEYBINDINGS,
                   "Computed new window location %d,%d due to keypress\n",
                   x, y);
+
+      meta_window_tile (window, META_TILE_NONE, FALSE);
 
       meta_window_get_client_root_coords (window, &old_rect);
 

@@ -9256,8 +9256,6 @@ get_size_limits (const MetaWindow       *window,
     }
 }
 
-
-
 static void
 update_move (MetaWindow  *window,
              gboolean     legacy_snap,
