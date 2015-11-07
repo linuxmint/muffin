@@ -2324,11 +2324,11 @@ handle_move_to (MetaDisplay    *display,
 {
 
   guint direction = binding->handler->data;
-  MetaRectangle work_area;
-  MetaRectangle outer;
-  int new_x, new_y;
+  MetaRectangle work_area, outer;
+  int monitor, new_x, new_y;
 
-  meta_window_get_work_area_all_monitors (window, &work_area);
+  monitor = meta_screen_get_current_monitor (window->screen);
+  meta_window_get_work_area_for_monitor (window, monitor, &work_area);
   meta_window_get_outer_rect (window, &outer);
 
   if (direction & META_MOVE_TO_XCHANGE_FLAG) {
