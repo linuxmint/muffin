@@ -5595,7 +5595,7 @@ Atom meta_display_get_atom (MetaDisplay *display, MetaAtom meta_atom)
  * _NET_SUPPORTING_WM_CHECK mechanism of EWMH). For use by plugins that wish
  * to attach additional custom properties to this window.
  *
- * Return value: (transfer none): xid of the leader window.
+ * Return value: xid of the leader window.
  **/
 Window
 meta_display_get_leader_window (MetaDisplay *display)

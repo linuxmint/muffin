@@ -963,7 +963,7 @@ const char *meta_window_actor_get_description (MetaWindowActor *self)
  * This function is deprecated  and should not be used in newly written code;
  * meta_window_get_workspace() instead.
  *
- * Return value: (transfer none): index of workspace on which this window is
+ * Return value: index of workspace on which this window is
  * located.
  */
 gint

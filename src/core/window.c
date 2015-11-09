@@ -10709,7 +10709,7 @@ find_ancestor_func (MetaWindow *window,
  * so by traversing the @transient's ancestors until it either locates @window
  * or reaches an ancestor that is not transient.
  *
- * Return Value: (transfer none): %TRUE if window is an ancestor of transient.
+ * Return Value: %TRUE if window is an ancestor of transient.
  */
 gboolean
 meta_window_is_ancestor_of_transient (MetaWindow *window,
@@ -11549,7 +11549,7 @@ meta_window_get_transient_for (MetaWindow *window)
  * parents. A typical usage of this hint is for a dialog that wants to stay
  * above its associated window.
  *
- * Return value: (transfer none): the window this window is transient for, or
+ * Return value: the window this window is transient for, or
  * None if the WM_TRANSIENT_FOR hint is unset.
  */
 Window
@@ -11565,7 +11565,7 @@ meta_window_get_transient_for_as_xid (MetaWindow *window)
  * Returns pid of the process that created this window, if known (obtained from
  * the _NET_WM_PID property).
  *
- * Return value: (transfer none): the pid, or -1 if not known.
+ * Return value: the pid, or -1 if not known.
  */
 int
 meta_window_get_pid (MetaWindow *window)
@@ -11618,7 +11618,7 @@ meta_window_is_remote (MetaWindow *window)
  * Queries whether the window is in a modal state as described by the
  * _NET_WM_STATE protocol.
  *
- * Return value: (transfer none): TRUE if the window is in modal state.
+ * Return value: TRUE if the window is in modal state.
  */
 gboolean
 meta_window_is_modal (MetaWindow *window)
