@@ -1,3 +1,11 @@
+muffin (2.8.2) rosa; urgency=medium
+
+  [ JosephMcc ]
+  * Rework the strut handling code to better handle stacked monitor situations
+  * keybindings: Currently our move-to-center keybinding respects the current location of the mouse cursor when placing the window. Change the other move-window-to-* keybindings to match this behavior. Also fixes issues with window being placed incorrectly with regards to the panel on multi-monitors with mixed panel layouts.
+
+ -- Clement Lefebvre <root@linuxmint.com>  Mon, 09 Nov 2015 10:58:27 +0000
+
 muffin (2.8.1) rosa; urgency=medium
 
   [ JosephMcc ]
