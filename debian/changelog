@@ -1,3 +1,13 @@
+muffin (2.8.3) rosa; urgency=medium
+
+  [ leigh123linux ]
+  * Remove invalid (transfer) annnotations
+
+  [ Michael Webster ]
+  * keybindings: make rebuilding keybindings an idle function.  Prior to this, meta_display_rebuild_keybindings was called around 60 times at startup on my more-or-less stock desktop.  Now it is called approximately once, as an idle function, after all keybinding changes are complete.
+
+ -- Clement Lefebvre <root@linuxmint.com>  Wed, 11 Nov 2015 18:40:40 +0000
+
 muffin (2.8.2) rosa; urgency=medium
 
   [ JosephMcc ]
