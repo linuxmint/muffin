@@ -507,6 +507,8 @@ meta_display_open (void)
   the_display->allow_terminal_deactivation = TRUE; /* Only relevant for when a
                                                   terminal has the focus */
 
+  the_display->rebuild_keybinding_idle_id = 0;
+
   /* FIXME copy the checks from GDK probably */
   the_display->static_gravity_works = g_getenv ("MUFFIN_USE_STATIC_GRAVITY") != NULL;
   

@@ -224,6 +224,8 @@ struct _MetaDisplay
   unsigned int hyper_mask;
   unsigned int super_mask;
   unsigned int meta_mask;
+
+  guint        rebuild_keybinding_idle_id;
   
   /* Monitor cache */
   unsigned int monitor_cache_invalidated : 1;

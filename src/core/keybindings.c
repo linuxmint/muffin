@@ -843,6 +843,33 @@ meta_display_process_mapping_event (MetaDisplay *display,
     }
 }
 
+static gboolean
+rebuild_keybindings_at_idle (MetaDisplay *display)
+{
+    display->rebuild_keybinding_idle_id = 0;
+
+    rebuild_key_binding_table (display);
+    reload_keycodes (display);
+    reload_modifiers (display);
+    regrab_key_bindings (display);
+
+    return FALSE;
+}
+
+static void
+queue_rebuild_keybindings (MetaDisplay *display)
+{
+    if (display->rebuild_keybinding_idle_id > 0)
+      {
+        g_source_remove (display->rebuild_keybinding_idle_id);
+        display->rebuild_keybinding_idle_id = 0;
+      }
+
+    display->rebuild_keybinding_idle_id = g_idle_add_full (G_PRIORITY_LOW,
+                                                           (GSourceFunc) rebuild_keybindings_at_idle,
+                                                           display, NULL);
+}
+
 static void
 bindings_changed_callback (MetaPreference pref,
                            void          *data)
@@ -854,23 +881,26 @@ bindings_changed_callback (MetaPreference pref,
   switch (pref)
     {
     case META_PREF_KEYBINDINGS:
-      rebuild_key_binding_table (display);
-      reload_keycodes (display);
-      reload_modifiers (display);
-      regrab_key_bindings (display);
+      queue_rebuild_keybindings (display);
       break;
     default:
       break;
     }
 }
 
+/**
+ * meta_display_rebuild_keybindings:
+ * @display: the #MetaDisplay
+ *
+ * Rebuild all keybindings (typically done after adding, removing, or changing
+ * one or more keybindings)
+ *
+ */
+
 void
 meta_display_rebuild_keybindings (MetaDisplay *display)
 {
-    rebuild_key_binding_table (display);
-    reload_keycodes (display);
-    reload_modifiers (display);
-    regrab_key_bindings (display);
+    queue_rebuild_keybindings (display);
 }
 
 LOCAL_SYMBOL void
