@@ -1,3 +1,10 @@
+muffin (2.8.4) rosa; urgency=medium
+
+  [ Michael Webster ]
+  * meta-window-actor.c: Remove duplicate call to meta_window_get_input_rect()
+
+ -- Clement Lefebvre <root@linuxmint.com>  Fri, 20 Nov 2015 17:25:58 +0000
+
 muffin (2.8.3) rosa; urgency=medium
 
   [ leigh123linux ]
