@@ -1959,7 +1959,6 @@ update_binding (MetaKeyPref *binding,
   unsigned int keysym;
   unsigned int keycode;
   MetaVirtualModifier mods;
-  gboolean changed = FALSE;
   MetaKeyCombo *combo;
   int i;
 
@@ -2008,8 +2007,7 @@ update_binding (MetaKeyPref *binding,
            * Changing the key in response to a modification could lead to cyclic calls. */
           continue;
         }
-  
-      changed = TRUE;
+
       combo = g_malloc0 (sizeof (MetaKeyCombo));
       combo->keysym = keysym;
       combo->keycode = keycode;
@@ -2020,7 +2018,7 @@ update_binding (MetaKeyPref *binding,
                       "New keybinding for \"%s\" is keysym = 0x%x keycode = 0x%x mods = 0x%x\n",
                       binding->name, keysym, keycode, mods);
     }
-  return changed;
+  return TRUE;
 }
 
 static gboolean
