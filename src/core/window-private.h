@@ -812,4 +812,10 @@ gboolean meta_window_is_client_decorated (MetaWindow *window);
 
 gboolean meta_window_updates_are_frozen (MetaWindow *window);
 
+void meta_window_extend_by_frame (MetaWindow              *window,
+                                  MetaRectangle           *rect,
+                                  const MetaFrameBorders  *borders);
+void meta_window_unextend_by_frame (MetaWindow              *window,
+                                    MetaRectangle           *rect,
+                                    const MetaFrameBorders  *borders);
 #endif
