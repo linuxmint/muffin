@@ -3909,9 +3909,7 @@ meta_window_can_tile_side_by_side (MetaWindow *window)
   tile_area.width /= 2;
 
   meta_frame_calc_borders (window->frame, &borders);
-
-  tile_area.width  -= (borders.visible.left + borders.visible.right);
-  tile_area.height -= (borders.visible.top + borders.visible.bottom);
+  meta_window_unextend_by_frame (window, &tile_area, &borders);
 
   return tile_area.width >= window->size_hints.min_width &&
          tile_area.height >= window->size_hints.min_height;
@@ -3933,9 +3931,7 @@ meta_window_can_tile_top_bottom (MetaWindow *window)
   tile_area.height /= 2;
 
   meta_frame_calc_borders (window->frame, &borders);
-
-  tile_area.width  -= (borders.visible.left + borders.visible.right);
-  tile_area.height -= (borders.visible.top + borders.visible.bottom);
+  meta_window_unextend_by_frame (window, &tile_area, &borders);
 
   return tile_area.width >= window->size_hints.min_width &&
          tile_area.height >= window->size_hints.min_height;
@@ -3958,9 +3954,7 @@ meta_window_can_tile_corner (MetaWindow *window)
   tile_area.height /= 2;
 
   meta_frame_calc_borders (window->frame, &borders);
-
-  tile_area.width  -= (borders.visible.left + borders.visible.right);
-  tile_area.height -= (borders.visible.top + borders.visible.bottom);
+  meta_window_unextend_by_frame (window, &tile_area, &borders);
 
   return tile_area.width >= window->size_hints.min_width &&
          tile_area.height >= window->size_hints.min_height;
@@ -9495,6 +9489,9 @@ update_move (MetaWindow  *window,
     if (window->tile_mode != META_TILE_NONE) {
         get_size_limits (window, NULL, FALSE, &min_size, &max_size);
         meta_window_get_current_tile_area (window, &target_size);
+        MetaFrameBorders borders;
+        meta_frame_calc_borders (window->frame, &borders);
+        meta_window_unextend_by_frame (window, &target_size, &borders);
         hminbad = target_size.width < min_size.width;
         vminbad = target_size.height < min_size.height;
     }
@@ -10548,6 +10545,50 @@ meta_window_is_client_decorated (MetaWindow *window)
    * the window is maxized and has no invisible borders or shadows.
    */
   return window->has_custom_frame_extents;
+}
+
+void
+meta_window_extend_by_frame (MetaWindow              *window,
+                             MetaRectangle           *rect,
+                             const MetaFrameBorders  *borders)
+{
+  if (window->frame)
+    {
+      rect->x -= borders->visible.left;
+      rect->y -= borders->visible.top;
+      rect->width  += borders->visible.left + borders->visible.right;
+      rect->height += borders->visible.top + borders->visible.bottom;
+    }
+  else if (meta_window_is_client_decorated (window))
+    {
+      const GtkBorder *extents = &window->custom_frame_extents;
+      rect->x += extents->left;
+      rect->y += extents->top;
+      rect->width -= extents->left + extents->right;
+      rect->height -= extents->top + extents->bottom;
+    }
+}
+
+void
+meta_window_unextend_by_frame (MetaWindow              *window,
+                               MetaRectangle           *rect,
+                               const MetaFrameBorders  *borders)
+{
+  if (window->frame)
+    {
+      rect->x += borders->visible.left;
+      rect->y += borders->visible.top;
+      rect->width  -= borders->visible.left + borders->visible.right;
+      rect->height -= borders->visible.top + borders->visible.bottom;
+    }
+  else if (meta_window_is_client_decorated (window))
+    {
+      const GtkBorder *extents = &window->custom_frame_extents;
+      rect->x -= extents->left;
+      rect->y -= extents->top;
+      rect->width += extents->left + extents->right;
+      rect->height += extents->top + extents->bottom;
+    }
 }
 
 LOCAL_SYMBOL void
