@@ -67,35 +67,58 @@ meta_ui_resize_popup_free (MetaResizePopup *popup)
   g_free (popup);
 }
 
+static gboolean
+size_window_draw (GtkWidget *widget,
+                  cairo_t *cr,
+                  MetaResizePopup *popup)
+{
+  GtkStyleContext *context;
+  gint width, height;
+
+  context = gtk_widget_get_style_context (widget);
+  width = gtk_widget_get_allocated_width (widget);
+  height = gtk_widget_get_allocated_height (widget);
+
+  gtk_render_background (context, cr, 0, 0, width, height);
+  gtk_render_frame (context, cr, 0, 0, width, height);
+
+  return FALSE;
+}
+
 static void
 ensure_size_window (MetaResizePopup *popup)
 {
-  GtkWidget *frame;
-  
+  GdkVisual *visual;
+  GdkScreen *screen;
+
   if (popup->size_window)
     return;
   
   popup->size_window = gtk_window_new (GTK_WINDOW_POPUP);
+  screen = gdk_display_get_screen (gdk_x11_lookup_xdisplay (popup->display),
+                                   popup->screen_number);
+  visual = gdk_screen_get_rgba_visual (screen);
 
-  gtk_window_set_screen (GTK_WINDOW (popup->size_window),
-			 gdk_display_get_screen (gdk_x11_lookup_xdisplay (popup->display),
-						 popup->screen_number));
-  
-  /* never shrink the size window */
-  gtk_window_set_resizable (GTK_WINDOW (popup->size_window),
-                            TRUE);
-  
-  frame = gtk_frame_new (NULL);
-  gtk_frame_set_shadow_type (GTK_FRAME (frame), GTK_SHADOW_OUT);
+  gtk_window_set_screen (GTK_WINDOW (popup->size_window), screen);
+  if (visual != NULL)
+    gtk_widget_set_visual (popup->size_window, visual);
 
-  gtk_container_add (GTK_CONTAINER (popup->size_window), frame);
+  gtk_window_set_type_hint (GTK_WINDOW (popup->size_window),
+                            GDK_WINDOW_TYPE_HINT_TOOLTIP);
+  gtk_window_set_resizable (GTK_WINDOW (popup->size_window), FALSE);
+
+  gtk_widget_set_app_paintable (popup->size_window, TRUE);
+  gtk_style_context_add_class (gtk_widget_get_style_context (popup->size_window),
+                               GTK_STYLE_CLASS_TOOLTIP);
+  g_signal_connect (popup->size_window, "draw",
+                    G_CALLBACK (size_window_draw), popup);
 
   popup->size_label = gtk_label_new ("");
-  gtk_misc_set_padding (GTK_MISC (popup->size_label), 3, 3);
+  g_object_set (popup->size_label, "margin", 6, NULL);
 
-  gtk_container_add (GTK_CONTAINER (frame), popup->size_label);
+  gtk_container_add (GTK_CONTAINER (popup->size_window), popup->size_label);
 
-  gtk_widget_show_all (frame);
+  gtk_widget_show (popup->size_label);
 }
 
 static void

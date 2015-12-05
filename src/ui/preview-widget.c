@@ -41,6 +41,8 @@ static void     meta_preview_size_allocate (GtkWidget        *widget,
                                             GtkAllocation    *allocation);
 static gboolean meta_preview_draw          (GtkWidget        *widget,
                                             cairo_t          *cr);
+static void     meta_preview_realize       (GtkWidget        *widget);
+static void     meta_preview_dispose       (GObject          *object);
 static void     meta_preview_finalize      (GObject          *object);
 
 G_DEFINE_TYPE (MetaPreview, meta_preview, GTK_TYPE_BIN);
@@ -53,8 +55,10 @@ meta_preview_class_init (MetaPreviewClass *class)
 
   widget_class = (GtkWidgetClass*) class;
 
+  gobject_class->dispose = meta_preview_dispose;
   gobject_class->finalize = meta_preview_finalize;
 
+  widget_class->realize = meta_preview_realize;
   widget_class->draw = meta_preview_draw;
   widget_class->get_preferred_width = meta_preview_get_preferred_width;
   widget_class->get_preferred_height = meta_preview_get_preferred_height;
@@ -107,6 +111,16 @@ meta_preview_new (void)
   preview = g_object_new (META_TYPE_PREVIEW, NULL);
   
   return GTK_WIDGET (preview);
+}
+
+static void
+meta_preview_dispose (GObject *object)
+{
+  MetaPreview *preview = META_PREVIEW (object);
+
+  g_clear_object (&preview->style_context);
+
+  G_OBJECT_CLASS (meta_preview_parent_class)->dispose (object);
 }
 
 static void
@@ -214,7 +228,7 @@ meta_preview_draw (GtkWidget *widget,
         client_height = 1;  
       
       meta_theme_draw_frame (preview->theme,
-                             widget,
+                             preview->style_context,
                              cr,
                              preview->type,
                              preview->flags,
@@ -231,6 +245,17 @@ meta_preview_draw (GtkWidget *widget,
 
   /* draw child */
   return GTK_WIDGET_CLASS (meta_preview_parent_class)->draw (widget, cr);
+}
+
+static void
+meta_preview_realize (GtkWidget *widget)
+{
+  MetaPreview *preview = META_PREVIEW (widget);
+
+  GTK_WIDGET_CLASS (meta_preview_parent_class)->realize (widget);
+
+  preview->style_context = meta_theme_create_style_context (gtk_widget_get_screen (widget),
+                                                            NULL);
 }
 
 #define NO_CHILD_WIDTH 80
@@ -467,117 +492,3 @@ meta_preview_get_mini_icon (void)
   
   return default_icon;
 }
-
-cairo_region_t *
-meta_preview_get_clip_region (MetaPreview *preview, gint new_window_width, gint new_window_height)
-{
-  cairo_rectangle_int_t xrect;
-  cairo_region_t *corners_xregion, *window_xregion;
-  gint flags;
-  MetaFrameLayout *fgeom;
-  MetaFrameStyle *frame_style;
-
-  g_return_val_if_fail (META_IS_PREVIEW (preview), NULL);
-
-  flags = (META_PREVIEW (preview)->flags);
-
-  window_xregion = cairo_region_create ();
-
-  xrect.x = 0;
-  xrect.y = 0;
-  xrect.width = new_window_width;
-  xrect.height = new_window_height;
-
-  cairo_region_union_rectangle (window_xregion, &xrect);
-
-  if (preview->theme == NULL)
-    return window_xregion;
-
-  /* Otherwise, we do have a theme, so calculate the corners */
-  frame_style = meta_theme_get_frame_style (preview->theme,
-      META_FRAME_TYPE_NORMAL, flags);
-
-  fgeom = frame_style->layout;
-
-  corners_xregion = cairo_region_create ();
-
-  if (fgeom->top_left_corner_rounded_radius != 0)
-    {
-      const int corner = fgeom->top_left_corner_rounded_radius;
-      const float radius = sqrt(corner) + corner;
-      int i;
-
-      for (i=0; i<corner; i++)
-        {
-
-          const int width = floor(0.5 + radius - sqrt(radius*radius - (radius-(i+0.5))*(radius-(i+0.5))));
-          xrect.x = 0;
-          xrect.y = i;
-          xrect.width = width;
-          xrect.height = 1;
-
-          cairo_region_union_rectangle (corners_xregion, &xrect);
-        }
-    }
-
-  if (fgeom->top_right_corner_rounded_radius != 0)
-    {
-      const int corner = fgeom->top_right_corner_rounded_radius;
-      const float radius = sqrt(corner) + corner;
-      int i;
-
-      for (i=0; i<corner; i++)
-        {
-          const int width = floor(0.5 + radius - sqrt(radius*radius - (radius-(i+0.5))*(radius-(i+0.5))));
-          xrect.x = new_window_width - width;
-          xrect.y = i;
-          xrect.width = width;
-          xrect.height = 1;
-
-          cairo_region_union_rectangle (corners_xregion, &xrect);
-        }
-    }
-
-  if (fgeom->bottom_left_corner_rounded_radius != 0)
-    {
-      const int corner = fgeom->bottom_left_corner_rounded_radius;
-      const float radius = sqrt(corner) + corner;
-      int i;
-
-      for (i=0; i<corner; i++)
-        {
-          const int width = floor(0.5 + radius - sqrt(radius*radius - (radius-(i+0.5))*(radius-(i+0.5))));
-          xrect.x = 0;
-          xrect.y = new_window_height - i - 1;
-          xrect.width = width;
-          xrect.height = 1;
-
-          cairo_region_union_rectangle (corners_xregion, &xrect);
-        }
-    }
-
-  if (fgeom->bottom_right_corner_rounded_radius != 0)
-    {
-      const int corner = fgeom->bottom_right_corner_rounded_radius;
-      const float radius = sqrt(corner) + corner;
-      int i;
-
-      for (i=0; i<corner; i++)
-        {
-          const int width = floor(0.5 + radius - sqrt(radius*radius - (radius-(i+0.5))*(radius-(i+0.5))));
-          xrect.x = new_window_width - width;
-          xrect.y = new_window_height - i - 1;
-          xrect.width = width;
-          xrect.height = 1;
-
-          cairo_region_union_rectangle (corners_xregion, &xrect);
-        }
-    }
-
-  cairo_region_subtract (window_xregion, corners_xregion);
-  cairo_region_destroy (corners_xregion);
-
-  return window_xregion;
-}
-
-

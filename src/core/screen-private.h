@@ -160,8 +160,6 @@ void          meta_screen_manage_all_windows  (MetaScreen                 *scree
 void          meta_screen_foreach_window      (MetaScreen                 *screen,
                                                MetaScreenWindowFunc        func,
                                                gpointer                    data);
-void          meta_screen_queue_frame_redraws (MetaScreen                 *screen);
-void          meta_screen_queue_window_resizes (MetaScreen                 *screen);
 
 void          meta_screen_set_cursor          (MetaScreen                 *screen,
                                                MetaCursor                  cursor);
@@ -236,7 +234,6 @@ void     meta_screen_update_showing_desktop_hint          (MetaScreen *screen);
 
 gboolean meta_screen_apply_startup_properties (MetaScreen *screen,
                                                MetaWindow *window);
-void	 meta_screen_composite_all_windows (MetaScreen *screen);
 
 void     meta_screen_restacked (MetaScreen *screen);
 

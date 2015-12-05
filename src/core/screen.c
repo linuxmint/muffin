@@ -1234,34 +1234,6 @@ meta_screen_manage_all_windows (MetaScreen *screen)
   meta_display_ungrab (screen->display);
 }
 
-LOCAL_SYMBOL void
-meta_screen_composite_all_windows (MetaScreen *screen)
-{
-  MetaDisplay *display;
-  GSList *windows, *tmp;
-
-  display = screen->display;
-  if (!display->compositor)
-    return;
-
-  windows = meta_display_list_windows (display,
-                                       META_LIST_INCLUDE_OVERRIDE_REDIRECT);
-  for (tmp = windows; tmp != NULL; tmp = tmp->next)
-    {
-      MetaWindow *window = tmp->data;
-
-      meta_compositor_add_window (display->compositor, window);
-      if (window->visible_to_compositor)
-        meta_compositor_show_window (display->compositor, window,
-                                     META_COMP_EFFECT_NONE);
-    }
-
-  g_slist_free (windows);
-  
-  /* initialize the compositor's view of the stacking order */
-  meta_stack_tracker_sync_stack (screen->stack_tracker);
-}
-
 /**
  * meta_screen_for_x_screen:
  * @xscreen: an X screen structure.
@@ -1402,38 +1374,15 @@ meta_screen_foreach_window (MetaScreen *screen,
         {
           MetaWindow *window = tmp->data;
 
-          if (window->screen == screen && !window->override_redirect)
+          if (META_IS_WINDOW (window) &&
+              window->screen == screen &&
+              !window->override_redirect)
             (* func) (screen, window, data);
         }
       
       tmp = tmp->next;
     }
   g_slist_free (winlist);
-}
-
-static void
-queue_draw (MetaScreen *screen, MetaWindow *window, gpointer data)
-{
-  if (window->frame)
-    meta_frame_queue_draw (window->frame);
-}
-
-LOCAL_SYMBOL void
-meta_screen_queue_frame_redraws (MetaScreen *screen)
-{
-  meta_screen_foreach_window (screen, queue_draw, NULL);
-}
-
-static void
-queue_resize (MetaScreen *screen, MetaWindow *window, gpointer data)
-{
-  meta_window_queue (window, META_QUEUE_MOVE_RESIZE);
-}
-
-LOCAL_SYMBOL void
-meta_screen_queue_window_resizes (MetaScreen *screen)
-{
-  meta_screen_foreach_window (screen, queue_resize, NULL);
 }
 
 int

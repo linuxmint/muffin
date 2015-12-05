@@ -80,7 +80,6 @@ struct _MetaUIFrame
   PangoLayout *layout;
   int text_height;
   char *title; /* NULL once we have a layout */
-  guint expose_delayed : 1;
   guint shape_applied : 1;
   
   /* FIXME get rid of this, it can just be in the MetaFrames struct */
@@ -100,12 +99,6 @@ struct _MetaFrames
 
   GtkStyleContext *normal_style;
   GHashTable *style_variants;
-
-  int expose_delay_count;
-
-  int invalidate_cache_timeout_id;
-  GList *invalidate_frames;
-  GHashTable *cache;
 };
 
 struct _MetaFramesClass
@@ -168,8 +161,5 @@ void meta_frames_queue_draw (MetaFrames *frames,
 void meta_frames_notify_menu_hide (MetaFrames *frames);
 
 Window meta_frames_get_moving_frame (MetaFrames *frames);
-
-void meta_frames_push_delay_exposes (MetaFrames *frames);
-void meta_frames_pop_delay_exposes  (MetaFrames *frames);
 
 #endif

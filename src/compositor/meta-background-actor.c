@@ -29,216 +29,125 @@
  * @short_description: Actor for painting the root window background
  */
 
-#include <config.h>
+/*
+ * The overall model drawing model of this widget is that we have one
+ * texture, or two interpolated textures, possibly with alpha or
+ * margins that let the underlying background show through, blended
+ * over a solid color or a gradient. The result of that combination
+ * can then be affected by a "vignette" that darkens the background
+ * away from a central point (or as a no-GLSL fallback, simply darkens
+ * the background) and by overall opacity.
+ *
+ * As of GNOME 3.14, GNOME is only using a fraction of this when the
+ * user sets the background through the control center - what can be
+ * set is:
+ *
+ *  A single image without a border
+ *  An animation of images without a border that blend together,
+ *   with the blend changing every 4-5 minutes
+ *  A solid color with a repeated noise texture blended over it
+ *
+ * This all is pretty easy to do in a fragment shader, except when:
+ *
+ *  A) We don't have GLSL - in this case, the operation of
+ *     interpolating the two textures and blending the result over the
+ *     background can't be expressed with Cogl's fixed-function layer
+ *     combining (which is confined to what GL's texture environment
+ *     combining can do) So we can only handle the above directly if
+ *     there are no margins or alpha.
+ *
+ *  B) The image textures are sliced. Texture size limits on older
+ *     hardware (pre-965 intel hardware, r300, etc.)  is often 2048,
+ *     and it would be common to use a texture larger than this for a
+ *     background and expect it to be scaled down. Cogl can compensate
+ *     for this by breaking the texture up into multiple textures, but
+ *     can't multitexture with sliced textures. So we can only handle
+ *     the above if there's a single texture.
+ *
+ * However, even when we *can* represent everything in a single pass,
+ * it's not necessarily efficient. If we want to draw a 1024x768
+ * background, it's pretty inefficient to bilinearly texture from
+ * two 2560x1440 images and mix that. So the drawing model we take
+ * here is that MetaBackground generates a single texture (which
+ * might be a 1x1 texture for a solid color, or a 1x2 texture for a
+ * gradient, or a repeated texture for wallpaper, or a pre-rendered
+ * texture the size of the screen), and we draw with that, possibly
+ * adding the vignette and opacity.
+ */
 
-#include <cogl/cogl-texture-pixmap-x11.h>
+#include <config.h>
 
 #include <clutter/clutter.h>
 
-#include <X11/Xatom.h>
-
 #include "cogl-utils.h"
-#include "compositor-private.h"
+#include "clutter-utils.h"
 #include <meta/errors.h>
 #include "meta-background-actor-private.h"
-
-/* We allow creating multiple MetaBackgroundActors for the same MetaScreen to
- * allow different rendering options to be set for different copies.
- * But we want to share the same underlying CoglTexture for efficiency and
- * to avoid driver bugs that might occur if we created multiple CoglTexturePixmaps
- * for the same pixmap.
- *
- * This structure holds common information.
- */
-typedef struct _MetaScreenBackground MetaScreenBackground;
-
-struct _MetaScreenBackground
-{
-  MetaScreen *screen;
-  GSList *actors;
-
-  float texture_width;
-  float texture_height;
-  CoglHandle texture;
-  CoglMaterialWrapMode wrap_mode;
-  guint have_pixmap : 1;
-};
-
-struct _MetaBackgroundActorPrivate
-{
-  MetaScreenBackground *background;
-  CoglHandle material;
-  cairo_region_t *visible_region;
-  float dim_factor;
-};
+#include "meta-background-private.h"
 
 enum
 {
-  PROP_0,
-
-  PROP_DIM_FACTOR,
-
-  PROP_LAST
+  PROP_META_SCREEN = 1,
+  PROP_MONITOR,
+  PROP_BACKGROUND,
+  PROP_VIGNETTE,
+  PROP_VIGNETTE_SHARPNESS,
+  PROP_BRIGHTNESS
 };
 
-static GParamSpec *obj_props[PROP_LAST];
+typedef enum {
+  CHANGED_BACKGROUND = 1 << 0,
+  CHANGED_EFFECTS = 1 << 2,
+  CHANGED_VIGNETTE_PARAMETERS = 1 << 3,
+  CHANGED_ALL = 0xFFFF
+} ChangedFlags;
+
+#define VERTEX_SHADER_DECLARATIONS                                      \
+"uniform vec2 scale;\n"                                                 \
+"uniform vec2 offset;\n"                                                \
+"varying vec2 position;\n"                                              \
+
+#define VERTEX_SHADER_CODE                                              \
+"position = cogl_tex_coord0_in.xy * scale + offset;\n"                  \
+
+#define FRAGMENT_SHADER_DECLARATIONS                                    \
+"uniform float vignette_sharpness;\n"                                   \
+"varying vec2 position;\n"                                              \
+
+#define FRAGMENT_SHADER_CODE                                                   \
+"float t = 2.0 * length(position);\n"                                          \
+"t = min(t, 1.0);\n"                                                           \
+"float pixel_brightness = 1.0 - t * vignette_sharpness;\n"                     \
+"cogl_color_out.rgb = cogl_color_out.rgb * pixel_brightness;\n"                \
+
+typedef struct _MetaBackgroundLayer MetaBackgroundLayer;
+
+typedef enum {
+  PIPELINE_VIGNETTE = (1 << 0),
+  PIPELINE_BLEND = (1 << 1),
+} PipelineFlags;
+
+struct _MetaBackgroundActorPrivate
+{
+  MetaScreen *screen;
+  int monitor;
+
+  MetaBackground *background;
+
+  gboolean vignette;
+  double brightness;
+  double vignette_sharpness;
+
+  ChangedFlags changed;
+  CoglPipeline *pipeline;
+  PipelineFlags pipeline_flags;
+  cairo_rectangle_int_t texture_area;
+  gboolean force_bilinear;
+
+  cairo_region_t *visible_region;
+};
 
 G_DEFINE_TYPE (MetaBackgroundActor, meta_background_actor, CLUTTER_TYPE_ACTOR);
-
-static void set_texture                (MetaScreenBackground *background,
-                                        CoglHandle            texture);
-static void set_texture_to_stage_color (MetaScreenBackground *background);
-
-static void
-on_notify_stage_color (GObject              *stage,
-                       GParamSpec           *pspec,
-                       MetaScreenBackground *background)
-{
-  if (!background->have_pixmap)
-    set_texture_to_stage_color (background);
-}
-
-static void
-free_screen_background (MetaScreenBackground *background)
-{
-  set_texture (background, COGL_INVALID_HANDLE);
-
-  if (background->screen != NULL)
-    {
-      ClutterActor *stage = meta_get_stage_for_screen (background->screen);
-      g_signal_handlers_disconnect_by_func (stage,
-                                            (gpointer) on_notify_stage_color,
-                                            background);
-      background->screen = NULL;
-    }
-}
-
-static MetaScreenBackground *
-meta_screen_background_get (MetaScreen *screen)
-{
-  MetaScreenBackground *background;
-
-  background = g_object_get_data (G_OBJECT (screen), "meta-screen-background");
-  if (background == NULL)
-    {
-      ClutterActor *stage;
-
-      background = g_new0 (MetaScreenBackground, 1);
-
-      background->screen = screen;
-      g_object_set_data_full (G_OBJECT (screen), "meta-screen-background",
-                              background, (GDestroyNotify) free_screen_background);
-
-      stage = meta_get_stage_for_screen (screen);
-      g_signal_connect (stage, "notify::color",
-                        G_CALLBACK (on_notify_stage_color), background);
-
-      meta_background_actor_update (screen);
-    }
-
-  return background;
-}
-
-static void
-update_wrap_mode_of_actor (MetaBackgroundActor *self)
-{
-  MetaBackgroundActorPrivate *priv = self->priv;
-
-  cogl_material_set_layer_wrap_mode (priv->material, 0, priv->background->wrap_mode);
-}
-
-static void
-update_wrap_mode (MetaScreenBackground *background)
-{
-  GSList *l;
-  int width, height;
-
-  meta_screen_get_size (background->screen, &width, &height);
-
-  /* We turn off repeating when we have a full-screen pixmap to keep from
-   * getting artifacts from one side of the image sneaking into the other
-   * side of the image via bilinear filtering.
-   */
-  if (width == background->texture_width && height == background->texture_height)
-    background->wrap_mode = COGL_MATERIAL_WRAP_MODE_CLAMP_TO_EDGE;
-  else
-    background->wrap_mode = COGL_MATERIAL_WRAP_MODE_REPEAT;
-
-  for (l = background->actors; l; l = l->next)
-    update_wrap_mode_of_actor (l->data);
-}
-
-static void
-set_texture_on_actor (MetaBackgroundActor *self)
-{
-  MetaBackgroundActorPrivate *priv = self->priv;
-  MetaDisplay *display = meta_screen_get_display (priv->background->screen);
-
-  /* This may trigger destruction of an old texture pixmap, which, if
-   * the underlying X pixmap is already gone has the tendency to trigger
-   * X errors inside DRI. For safety, trap errors */
-  meta_error_trap_push (display);
-  cogl_material_set_layer (priv->material, 0, priv->background->texture);
-  meta_error_trap_pop (display);
-
-  clutter_actor_queue_redraw (CLUTTER_ACTOR (self));
-}
-
-static void
-set_texture (MetaScreenBackground *background,
-             CoglHandle            texture)
-{
-  MetaDisplay *display = meta_screen_get_display (background->screen);
-  GSList *l;
-
-  /* This may trigger destruction of an old texture pixmap, which, if
-   * the underlying X pixmap is already gone has the tendency to trigger
-   * X errors inside DRI. For safety, trap errors */
-  meta_error_trap_push (display);
-  if (background->texture != COGL_INVALID_HANDLE)
-    {
-      cogl_handle_unref (background->texture);
-      background->texture = COGL_INVALID_HANDLE;
-    }
-  meta_error_trap_pop (display);
-
-  if (texture != COGL_INVALID_HANDLE)
-    background->texture = cogl_handle_ref (texture);
-
-  background->texture_width = cogl_texture_get_width (background->texture);
-  background->texture_height = cogl_texture_get_height (background->texture);
-
-  for (l = background->actors; l; l = l->next)
-    set_texture_on_actor (l->data);
-
-  update_wrap_mode (background);
-}
-
-/* Sets our material to paint with a 1x1 texture of the stage's background
- * color; doing this when we have no pixmap allows the application to turn
- * off painting the stage. There might be a performance benefit to
- * painting in this case with a solid color, but the normal solid color
- * case is a 1x1 root pixmap, so we'd have to reverse-engineer that to
- * actually pick up the (small?) performance win. This is just a fallback.
- */
-static void
-set_texture_to_stage_color (MetaScreenBackground *background)
-{
-  ClutterActor *stage = meta_get_stage_for_screen (background->screen);
-  ClutterColor color;
-  CoglHandle texture;
-
-  clutter_stage_get_color (CLUTTER_STAGE (stage), &color);
-
-  /* Slicing will prevent COGL from using hardware texturing for
-   * the tiled 1x1 pixmap, and will cause it to draw the window
-   * background in millions of separate 1x1 rectangles */
-  texture = meta_create_color_texture_4ub (color.red, color.green,
-                                           color.blue, 0xff,
-                                           COGL_TEXTURE_NO_SLICING);
-  set_texture (background, texture);
-  cogl_handle_unref (texture);
-}
 
 static void
 meta_background_actor_dispose (GObject *object)
@@ -247,20 +156,31 @@ meta_background_actor_dispose (GObject *object)
   MetaBackgroundActorPrivate *priv = self->priv;
 
   meta_background_actor_set_visible_region (self, NULL);
-
-  if (priv->background != NULL)
+  meta_background_actor_set_background (self, NULL);
+  if (priv->pipeline)
     {
-      priv->background->actors = g_slist_remove (priv->background->actors, self);
-      priv->background = NULL;
-    }
-
-  if (priv->material != COGL_INVALID_HANDLE)
-    {
-      cogl_handle_unref (priv->material);
-      priv->material = COGL_INVALID_HANDLE;
+      cogl_object_unref (priv->pipeline);
+      priv->pipeline = NULL;
     }
 
   G_OBJECT_CLASS (meta_background_actor_parent_class)->dispose (object);
+}
+
+static void
+get_preferred_size (MetaBackgroundActor *self,
+                    gfloat              *width,
+                    gfloat              *height)
+{
+  MetaBackgroundActorPrivate *priv = META_BACKGROUND_ACTOR (self)->priv;
+  MetaRectangle monitor_geometry;
+
+  meta_screen_get_monitor_geometry (priv->screen, priv->monitor, &monitor_geometry);
+
+  if (width != NULL)
+    *width = monitor_geometry.width;
+
+  if (height != NULL)
+    *height = monitor_geometry.height;
 }
 
 static void
@@ -269,11 +189,9 @@ meta_background_actor_get_preferred_width (ClutterActor *actor,
                                            gfloat       *min_width_p,
                                            gfloat       *natural_width_p)
 {
-  MetaBackgroundActor *self = META_BACKGROUND_ACTOR (actor);
-  MetaBackgroundActorPrivate *priv = self->priv;
-  int width, height;
+  gfloat width;
 
-  meta_screen_get_size (priv->background->screen, &width, &height);
+  get_preferred_size (META_BACKGROUND_ACTOR (actor), &width, NULL);
 
   if (min_width_p)
     *min_width_p = width;
@@ -288,11 +206,9 @@ meta_background_actor_get_preferred_height (ClutterActor *actor,
                                             gfloat       *natural_height_p)
 
 {
-  MetaBackgroundActor *self = META_BACKGROUND_ACTOR (actor);
-  MetaBackgroundActorPrivate *priv = self->priv;
-  int width, height;
+  gfloat height;
 
-  meta_screen_get_size (priv->background->screen, &width, &height);
+  get_preferred_size (META_BACKGROUND_ACTOR (actor), NULL, &height);
 
   if (min_height_p)
     *min_height_p = height;
@@ -300,52 +216,309 @@ meta_background_actor_get_preferred_height (ClutterActor *actor,
     *natural_height_p = height;
 }
 
+static CoglPipeline *
+make_pipeline (PipelineFlags pipeline_flags)
+{
+  static CoglPipeline *templates[4];
+  CoglPipeline **templatep;
+
+  templatep = &templates[pipeline_flags];
+  if (*templatep == NULL)
+    {
+      /* Cogl automatically caches pipelines with no eviction policy,
+       * so we need to prevent identical pipelines from getting cached
+       * separately, by reusing the same shader snippets.
+       */
+      *templatep = COGL_PIPELINE (meta_create_texture_pipeline (NULL));
+
+      if ((pipeline_flags & PIPELINE_VIGNETTE) != 0)
+        {
+          static CoglSnippet *vertex_snippet;
+          static CoglSnippet *fragment_snippet;
+
+          if (!vertex_snippet)
+            vertex_snippet = cogl_snippet_new (COGL_SNIPPET_HOOK_VERTEX,
+                                               VERTEX_SHADER_DECLARATIONS, VERTEX_SHADER_CODE);
+
+          cogl_pipeline_add_snippet (*templatep, vertex_snippet);
+
+          if (!fragment_snippet)
+            fragment_snippet = cogl_snippet_new (COGL_SNIPPET_HOOK_FRAGMENT,
+                                                 FRAGMENT_SHADER_DECLARATIONS, FRAGMENT_SHADER_CODE);
+
+          cogl_pipeline_add_snippet (*templatep, fragment_snippet);
+        }
+
+      if ((pipeline_flags & PIPELINE_BLEND) == 0)
+        cogl_pipeline_set_blend (*templatep, "RGBA = ADD (SRC_COLOR, 0)", NULL);
+    }
+
+  return cogl_pipeline_copy (*templatep);
+}
+
+static void
+setup_pipeline (MetaBackgroundActor   *self,
+                cairo_rectangle_int_t *actor_pixel_rect)
+{
+  MetaBackgroundActorPrivate *priv = self->priv;
+  PipelineFlags pipeline_flags = 0;
+  guint8 opacity;
+  float color_component;
+  CoglPipelineFilter filter;
+
+  opacity = clutter_actor_get_paint_opacity (CLUTTER_ACTOR (self));
+  if (opacity < 255)
+    pipeline_flags |= PIPELINE_BLEND;
+  if (priv->vignette && clutter_feature_available (CLUTTER_FEATURE_SHADERS_GLSL))
+    pipeline_flags |= PIPELINE_VIGNETTE;
+
+  if (priv->pipeline &&
+      pipeline_flags != priv->pipeline_flags)
+    {
+      cogl_object_unref (priv->pipeline);
+      priv->pipeline = NULL;
+    }
+
+  if (priv->pipeline == NULL)
+    {
+      priv->pipeline_flags = pipeline_flags;
+      priv->pipeline = make_pipeline (pipeline_flags);
+      priv->changed = CHANGED_ALL;
+    }
+
+  if ((priv->changed & CHANGED_BACKGROUND) != 0)
+    {
+      CoglPipelineWrapMode wrap_mode;
+      CoglTexture *texture = meta_background_get_texture (priv->background,
+                                                          priv->monitor,
+                                                          &priv->texture_area,
+                                                          &wrap_mode);
+      priv->force_bilinear = texture &&
+        (priv->texture_area.width != (int)cogl_texture_get_width (texture) ||
+         priv->texture_area.height != (int)cogl_texture_get_height (texture));
+
+      cogl_pipeline_set_layer_texture (priv->pipeline, 0, texture);
+      cogl_pipeline_set_layer_wrap_mode (priv->pipeline, 0, wrap_mode);
+    }
+
+  if ((priv->changed & CHANGED_VIGNETTE_PARAMETERS) != 0)
+    {
+      cogl_pipeline_set_uniform_1f (priv->pipeline,
+                                    cogl_pipeline_get_uniform_location (priv->pipeline,
+                                                                        "vignette_sharpness"),
+                                    priv->vignette_sharpness);
+    }
+
+  if (priv->vignette)
+    {
+      color_component = priv->brightness * opacity / 255.;
+
+      if (!clutter_feature_available (CLUTTER_FEATURE_SHADERS_GLSL))
+        {
+          /* Darken everything to match the average brightness that would
+           * be there if we were drawing the vignette, which is
+           * (1 - (pi/12.) * vignette_sharpness) [exercise for the reader :]
+           */
+          color_component *= (1 - 0.74 * priv->vignette_sharpness);
+        }
+    }
+  else
+    color_component = opacity / 255.;
+
+  cogl_pipeline_set_color4f (priv->pipeline,
+                             color_component,
+                             color_component,
+                             color_component,
+                             opacity / 255.);
+
+  if (!priv->force_bilinear &&
+      meta_actor_painting_untransformed (actor_pixel_rect->width, actor_pixel_rect->height, NULL, NULL))
+    filter = COGL_PIPELINE_FILTER_NEAREST;
+  else
+    filter = COGL_PIPELINE_FILTER_LINEAR;
+
+  cogl_pipeline_set_layer_filters (priv->pipeline, 0, filter, filter);
+}
+
+static void
+set_glsl_parameters (MetaBackgroundActor   *self,
+                     cairo_rectangle_int_t *actor_pixel_rect)
+{
+  MetaBackgroundActorPrivate *priv = self->priv;
+  float scale[2];
+  float offset[2];
+
+  /* Compute a scale and offset for transforming texture coordinates to the
+   * coordinate system from [-0.5 to 0.5] across the area of the actor
+   */
+  scale[0] = priv->texture_area.width / (float)actor_pixel_rect->width;
+  scale[1] = priv->texture_area.height / (float)actor_pixel_rect->height;
+  offset[0] = priv->texture_area.x / (float)actor_pixel_rect->width - 0.5;
+  offset[1] = priv->texture_area.y / (float)actor_pixel_rect->height - 0.5;
+
+  cogl_pipeline_set_uniform_float (priv->pipeline,
+                                   cogl_pipeline_get_uniform_location (priv->pipeline,
+                                                                       "scale"),
+                                   2, 1, scale);
+
+  cogl_pipeline_set_uniform_float (priv->pipeline,
+                                   cogl_pipeline_get_uniform_location (priv->pipeline,
+                                                                       "offset"),
+                                   2, 1, offset);
+}
+
+static void
+paint_clipped_rectangle (CoglFramebuffer       *fb,
+                         CoglPipeline          *pipeline,
+                         cairo_rectangle_int_t *rect,
+                         cairo_rectangle_int_t *texture_area)
+{
+  float x1, y1, x2, y2;
+  float tx1, ty1, tx2, ty2;
+
+  x1 = rect->x;
+  y1 = rect->y;
+  x2 = rect->x + rect->width;
+  y2 = rect->y + rect->height;
+
+  tx1 = (x1 - texture_area->x) / texture_area->width;
+  ty1 = (y1 - texture_area->y) / texture_area->height;
+  tx2 = (x2 - texture_area->x) / texture_area->width;
+  ty2 = (y2 - texture_area->y) / texture_area->height;
+
+  cogl_framebuffer_draw_textured_rectangle (fb, pipeline,
+                                            x1, y1, x2, y2,
+                                            tx1, ty1, tx2, ty2);
+}
+
 static void
 meta_background_actor_paint (ClutterActor *actor)
 {
   MetaBackgroundActor *self = META_BACKGROUND_ACTOR (actor);
   MetaBackgroundActorPrivate *priv = self->priv;
-  guint8 opacity = clutter_actor_get_paint_opacity (actor);
-  guint8 color_component;
-  int width, height;
+  ClutterActorBox actor_box;
+  cairo_rectangle_int_t actor_pixel_rect;
+  CoglFramebuffer *fb;
+  int i;
 
-  meta_screen_get_size (priv->background->screen, &width, &height);
+  if ((priv->visible_region && cairo_region_is_empty (priv->visible_region)))
+    return;
 
-  color_component = (int)(0.5 + opacity * priv->dim_factor);
+  clutter_actor_get_content_box (actor, &actor_box);
+  actor_pixel_rect.x = actor_box.x1;
+  actor_pixel_rect.y = actor_box.y1;
+  actor_pixel_rect.width = actor_box.x2 - actor_box.x1;
+  actor_pixel_rect.height = actor_box.y2 - actor_box.y1;
 
-  cogl_material_set_color4ub (priv->material,
-                              color_component,
-                              color_component,
-                              color_component,
-                              opacity);
+  setup_pipeline (self, &actor_pixel_rect);
+  set_glsl_parameters (self, &actor_pixel_rect);
 
-  cogl_set_source (priv->material);
+  /* Limit to how many separate rectangles we'll draw; beyond this just
+   * fall back and draw the whole thing */
+#define MAX_RECTS 64
 
-  if (priv->visible_region)
+  fb = cogl_get_draw_framebuffer ();
+
+  /* Now figure out what to actually paint.
+   */
+  if (priv->visible_region != NULL)
     {
-      int n_rectangles = cairo_region_num_rectangles (priv->visible_region);
-      int i;
-
-      for (i = 0; i < n_rectangles; i++)
+      int n_rects = cairo_region_num_rectangles (priv->visible_region);
+      if (n_rects <= MAX_RECTS)
         {
-          cairo_rectangle_int_t rect;
-          cairo_region_get_rectangle (priv->visible_region, i, &rect);
+           for (i = 0; i < n_rects; i++)
+             {
+               cairo_rectangle_int_t rect;
+               cairo_region_get_rectangle (priv->visible_region, i, &rect);
 
-          cogl_rectangle_with_texture_coords (rect.x, rect.y,
-                                              rect.x + rect.width, rect.y + rect.height,
-                                              rect.x / priv->background->texture_width,
-                                              rect.y / priv->background->texture_height,
-                                              (rect.x + rect.width) / priv->background->texture_width,
-                                              (rect.y + rect.height) / priv->background->texture_height);
+               if (!gdk_rectangle_intersect (&actor_pixel_rect, &rect, &rect))
+                 continue;
+
+               paint_clipped_rectangle (fb, priv->pipeline, &rect, &priv->texture_area);
+             }
+
+           return;
         }
     }
-  else
+
+  paint_clipped_rectangle (fb, priv->pipeline, &actor_pixel_rect, &priv->texture_area);
+}
+
+static void
+meta_background_actor_set_property (GObject      *object,
+                                    guint         prop_id,
+                                    const GValue *value,
+                                    GParamSpec   *pspec)
+{
+  MetaBackgroundActor *self = META_BACKGROUND_ACTOR (object);
+  MetaBackgroundActorPrivate *priv = self->priv;
+
+  switch (prop_id)
     {
-      cogl_rectangle_with_texture_coords (0.0f, 0.0f,
-                                          width, height,
-                                          0.0f, 0.0f,
-                                          width / priv->background->texture_width,
-                                          height / priv->background->texture_height);
+    case PROP_META_SCREEN:
+      priv->screen = g_value_get_object (value);
+      break;
+    case PROP_MONITOR:
+      priv->monitor = g_value_get_int (value);
+      break;
+    case PROP_BACKGROUND:
+      meta_background_actor_set_background (self, g_value_get_object (value));
+      break;
+    case PROP_VIGNETTE:
+      meta_background_actor_set_vignette (self,
+                                          g_value_get_boolean (value),
+                                          priv->brightness,
+                                          priv->vignette_sharpness);
+      break;
+    case PROP_VIGNETTE_SHARPNESS:
+      meta_background_actor_set_vignette (self,
+                                          priv->vignette,
+                                          priv->brightness,
+                                          g_value_get_double (value));
+      break;
+    case PROP_BRIGHTNESS:
+      meta_background_actor_set_vignette (self,
+                                          priv->vignette,
+                                          g_value_get_double (value),
+                                          priv->vignette_sharpness);
+      break;
+    default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+      break;
+    }
+}
+
+static void
+meta_background_actor_get_property (GObject      *object,
+                                    guint         prop_id,
+                                    GValue       *value,
+                                    GParamSpec   *pspec)
+{
+  MetaBackgroundActorPrivate *priv = META_BACKGROUND_ACTOR (object)->priv;
+
+  switch (prop_id)
+    {
+    case PROP_META_SCREEN:
+      g_value_set_object (value, priv->screen);
+      break;
+    case PROP_MONITOR:
+      g_value_set_int (value, priv->monitor);
+      break;
+    case PROP_BACKGROUND:
+      g_value_set_object (value, priv->background);
+      break;
+    case PROP_VIGNETTE:
+      g_value_set_boolean (value, priv->vignette);
+      break;
+    case PROP_BRIGHTNESS:
+      g_value_set_double (value, priv->brightness);
+      break;
+    case PROP_VIGNETTE_SHARPNESS:
+      g_value_set_double (value, priv->vignette_sharpness);
+      break;
+    default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+      break;
     }
 }
 
@@ -353,11 +526,15 @@ static gboolean
 meta_background_actor_get_paint_volume (ClutterActor       *actor,
                                         ClutterPaintVolume *volume)
 {
-  MetaBackgroundActor *self = META_BACKGROUND_ACTOR (actor);
-  MetaBackgroundActorPrivate *priv = self->priv;
-  int width, height;
+  ClutterContent *content;
+  gfloat width, height;
 
-  meta_screen_get_size (priv->background->screen, &width, &height);
+  content = clutter_actor_get_content (actor);
+
+  if (!content)
+    return FALSE;
+
+  clutter_content_get_preferred_size (content, &width, &height);
 
   clutter_paint_volume_set_width (volume, width);
   clutter_paint_volume_set_height (volume, height);
@@ -366,92 +543,82 @@ meta_background_actor_get_paint_volume (ClutterActor       *actor,
 }
 
 static void
-meta_background_actor_set_dim_factor (MetaBackgroundActor *self,
-                                      gfloat               dim_factor)
-{
-  MetaBackgroundActorPrivate *priv = self->priv;
-
-  if (priv->dim_factor == dim_factor)
-    return;
-
-  priv->dim_factor = dim_factor;
-
-  clutter_actor_queue_redraw (CLUTTER_ACTOR (self));
-
-  g_object_notify_by_pspec (G_OBJECT (self), obj_props[PROP_DIM_FACTOR]);
-}
-
-static void
-meta_background_actor_get_property(GObject         *object,
-                                   guint            prop_id,
-                                   GValue          *value,
-                                   GParamSpec      *pspec)
-{
-  MetaBackgroundActor *self = META_BACKGROUND_ACTOR (object);
-  MetaBackgroundActorPrivate *priv = self->priv;
-
-  switch (prop_id)
-    {
-    case PROP_DIM_FACTOR:
-      g_value_set_float (value, priv->dim_factor);
-      break;
-    default:
-      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
-      break;
-    }
-}
-
-static void
-meta_background_actor_set_property(GObject         *object,
-                                   guint            prop_id,
-                                   const GValue    *value,
-                                   GParamSpec      *pspec)
-{
-  MetaBackgroundActor *self = META_BACKGROUND_ACTOR (object);
-
-  switch (prop_id)
-    {
-    case PROP_DIM_FACTOR:
-      meta_background_actor_set_dim_factor (self, g_value_get_float (value));
-      break;
-    default:
-      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
-      break;
-    }
-}
-
-static void
 meta_background_actor_class_init (MetaBackgroundActorClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
   ClutterActorClass *actor_class = CLUTTER_ACTOR_CLASS (klass);
-  GParamSpec *pspec;
+  GParamSpec *param_spec;
 
   g_type_class_add_private (klass, sizeof (MetaBackgroundActorPrivate));
 
   object_class->dispose = meta_background_actor_dispose;
-  object_class->get_property = meta_background_actor_get_property;
   object_class->set_property = meta_background_actor_set_property;
+  object_class->get_property = meta_background_actor_get_property;
 
   actor_class->get_preferred_width = meta_background_actor_get_preferred_width;
   actor_class->get_preferred_height = meta_background_actor_get_preferred_height;
-  actor_class->paint = meta_background_actor_paint;
   actor_class->get_paint_volume = meta_background_actor_get_paint_volume;
+  actor_class->paint = meta_background_actor_paint;
 
-  /**
-   * MetaBackgroundActor:dim-factor:
-   *
-   * Factor to dim the background by, between 0.0 (black) and 1.0 (original
-   * colors)
-   */
-  pspec = g_param_spec_float ("dim-factor",
-                              "Dim factor",
-                              "Factor to dim the background by",
-                              0.0, 1.0,
-                              1.0,
-                              G_PARAM_READWRITE);
-  obj_props[PROP_DIM_FACTOR] = pspec;
-  g_object_class_install_property (object_class, PROP_DIM_FACTOR, pspec);
+  param_spec = g_param_spec_object ("meta-screen",
+                                    "MetaScreen",
+                                    "MetaScreen",
+                                    META_TYPE_SCREEN,
+                                    G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY);
+
+  g_object_class_install_property (object_class,
+                                   PROP_META_SCREEN,
+                                   param_spec);
+
+  param_spec = g_param_spec_int ("monitor",
+                                 "monitor",
+                                 "monitor",
+                                 0, G_MAXINT, 0,
+                                 G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY);
+
+  g_object_class_install_property (object_class,
+                                   PROP_MONITOR,
+                                   param_spec);
+
+  param_spec = g_param_spec_object ("background",
+                                    "Background",
+                                    "MetaBackground object holding background parameters",
+                                    META_TYPE_BACKGROUND,
+                                    G_PARAM_READWRITE);
+
+  g_object_class_install_property (object_class,
+                                   PROP_BACKGROUND,
+                                   param_spec);
+
+  param_spec = g_param_spec_boolean ("vignette",
+                                     "Vignette",
+                                     "Whether vignette effect is enabled",
+                                     FALSE,
+                                     G_PARAM_READWRITE);
+
+  g_object_class_install_property (object_class,
+                                   PROP_VIGNETTE,
+                                   param_spec);
+
+  param_spec = g_param_spec_double ("brightness",
+                                    "Brightness",
+                                    "Brightness of vignette effect",
+                                    0.0, 1.0, 1.0,
+                                    G_PARAM_READWRITE);
+
+  g_object_class_install_property (object_class,
+                                   PROP_BRIGHTNESS,
+                                   param_spec);
+
+  param_spec = g_param_spec_double ("vignette-sharpness",
+                                    "Vignette Sharpness",
+                                    "Sharpness of vignette effect",
+                                    0.0, G_MAXDOUBLE, 0.0,
+                                    G_PARAM_READWRITE);
+
+  g_object_class_install_property (object_class,
+                                   PROP_VIGNETTE_SHARPNESS,
+                                   param_spec);
 }
 
 static void
@@ -462,115 +629,32 @@ meta_background_actor_init (MetaBackgroundActor *self)
   priv = self->priv = G_TYPE_INSTANCE_GET_PRIVATE (self,
                                                    META_TYPE_BACKGROUND_ACTOR,
                                                    MetaBackgroundActorPrivate);
-  priv->dim_factor = 1.0;
+
+  priv->vignette = FALSE;
+  priv->brightness = 1.0;
+  priv->vignette_sharpness = 0.0;
 }
 
 /**
  * meta_background_actor_new:
- * @screen: the #MetaScreen
+ * @monitor: Index of the monitor for which to draw the background
  *
- * Creates a new actor to draw the background for the given screen.
+ * Creates a new actor to draw the background for the given monitor.
  *
  * Return value: the newly created background actor
  */
 ClutterActor *
-meta_background_actor_new_for_screen (MetaScreen *screen)
+meta_background_actor_new (MetaScreen *screen,
+                           int         monitor)
 {
   MetaBackgroundActor *self;
-  MetaBackgroundActorPrivate *priv;
 
-  g_return_val_if_fail (META_IS_SCREEN (screen), NULL);
-
-  self = g_object_new (META_TYPE_BACKGROUND_ACTOR, NULL);
-  priv = self->priv;
-
-  priv->background = meta_screen_background_get (screen);
-  priv->background->actors = g_slist_prepend (priv->background->actors, self);
-
-  priv->material = meta_create_texture_material (NULL);
-
-  set_texture_on_actor (self);
-  update_wrap_mode_of_actor (self);
+  self = g_object_new (META_TYPE_BACKGROUND_ACTOR,
+                       "meta-screen", screen,
+                       "monitor", monitor,
+                       NULL);
 
   return CLUTTER_ACTOR (self);
-}
-
-/**
- * meta_background_actor_update:
- * @screen: a #MetaScreen
- *
- * Refetches the _XROOTPMAP_ID property for the root window and updates
- * the contents of the background actor based on that. There's no attempt
- * to optimize out pixmap values that don't change (since a root pixmap
- * could be replaced by with another pixmap with the same ID under some
- * circumstances), so this should only be called when we actually receive
- * a PropertyNotify event for the property.
- */
-LOCAL_SYMBOL void
-meta_background_actor_update (MetaScreen *screen)
-{
-  MetaScreenBackground *background;
-  MetaDisplay *display;
-  MetaCompositor *compositor;
-  Atom type;
-  int format;
-  gulong nitems;
-  gulong bytes_after;
-  guchar *data;
-  Pixmap root_pixmap_id;
-
-  background = meta_screen_background_get (screen);
-  display = meta_screen_get_display (screen);
-  compositor = meta_display_get_compositor (display);
-
-  root_pixmap_id = None;
-  if (!XGetWindowProperty (meta_display_get_xdisplay (display),
-                           meta_screen_get_xroot (screen),
-                           compositor->atom_x_root_pixmap,
-                           0, LONG_MAX,
-                           False,
-                           AnyPropertyType,
-                           &type, &format, &nitems, &bytes_after, &data) &&
-      type != None)
-  {
-     /* Got a property. */
-     if (type == XA_PIXMAP && format == 32 && nitems == 1)
-       {
-         /* Was what we expected. */
-         root_pixmap_id = *(Pixmap *)data;
-       }
-
-     XFree(data);
-  }
-
-  if (root_pixmap_id != None)
-    {
-      CoglHandle texture;
-      CoglContext *ctx = clutter_backend_get_cogl_context (clutter_get_default_backend ());
-      GError *error = NULL;
-
-      meta_error_trap_push (display);
-      texture = cogl_texture_pixmap_x11_new (ctx, root_pixmap_id, FALSE, &error);
-      meta_error_trap_pop (display);
-
-      if (texture != COGL_INVALID_HANDLE)
-        {
-          set_texture (background, texture);
-          cogl_handle_unref (texture);
-
-          background->have_pixmap = True;
-          return;
-        }
-      else
-        {
-          g_warning ("Failed to create background texture from pixmap: %s",
-                     error->message);
-          g_error_free (error);
-        }
-    }
-
-  background->have_pixmap = False;
-  set_texture_to_stage_color (background);
 }
 
 /**
@@ -592,40 +676,130 @@ meta_background_actor_set_visible_region (MetaBackgroundActor *self,
 
   priv = self->priv;
 
-  if (priv->visible_region)
-    {
-      cairo_region_destroy (priv->visible_region);
-      priv->visible_region = NULL;
-    }
+  g_clear_pointer (&priv->visible_region,
+                   (GDestroyNotify)
+                   cairo_region_destroy);
 
   if (visible_region)
-    {
-      cairo_rectangle_int_t screen_rect = { 0 };
-      meta_screen_get_size (priv->background->screen, &screen_rect.width, &screen_rect.height);
-
-      /* Doing the intersection here is probably unnecessary - MetaWindowGroup
-       * should never compute a visible area that's larger than the root screen!
-       * but it's not that expensive and adds some extra robustness.
-       */
-      priv->visible_region = cairo_region_create_rectangle (&screen_rect);
-      cairo_region_intersect (priv->visible_region, visible_region);
-    }
+    priv->visible_region = cairo_region_copy (visible_region);
 }
 
 /**
- * meta_background_actor_screen_size_changed:
- * @screen: a #MetaScreen
+ * meta_background_actor_get_visible_region:
+ * @self: a #MetaBackgroundActor
  *
- * Called by the compositor when the size of the #MetaScreen changes
+ * Return value (transfer full): a #cairo_region_t that represents the part of
+ * the background not obscured by other #MetaBackgroundActor or
+ * #MetaWindowActor objects.
  */
-LOCAL_SYMBOL void
-meta_background_actor_screen_size_changed (MetaScreen *screen)
+cairo_region_t *
+meta_background_actor_get_visible_region (MetaBackgroundActor *self)
 {
-  MetaScreenBackground *background = meta_screen_background_get (screen);
-  GSList *l;
+  MetaBackgroundActorPrivate *priv = self->priv;
+  ClutterActorBox content_box;
+  cairo_rectangle_int_t content_area = { 0 };
+  cairo_region_t *visible_region;
 
-  update_wrap_mode (background);
+  g_return_val_if_fail (META_IS_BACKGROUND_ACTOR (self), NULL);
 
-  for (l = background->actors; l; l = l->next)
-    clutter_actor_queue_relayout (l->data);
+  if (!priv->visible_region)
+      return NULL;
+
+  clutter_actor_get_content_box (CLUTTER_ACTOR (self), &content_box);
+
+  content_area.x = content_box.x1;
+  content_area.y = content_box.y1;
+  content_area.width = content_box.x2 - content_box.x1;
+  content_area.height = content_box.y2 - content_box.y1;
+
+  visible_region = cairo_region_create_rectangle (&content_area);
+  cairo_region_intersect (visible_region, priv->visible_region);
+
+  return visible_region;
+}
+
+static void
+invalidate_pipeline (MetaBackgroundActor *self,
+                     ChangedFlags         changed)
+{
+  MetaBackgroundActorPrivate *priv = self->priv;
+
+  priv->changed |= changed;
+}
+
+static void
+on_background_changed (MetaBackground      *background,
+                       MetaBackgroundActor *self)
+{
+  invalidate_pipeline (self, CHANGED_BACKGROUND);
+}
+
+void
+meta_background_actor_set_background (MetaBackgroundActor *self,
+                                      MetaBackground      *background)
+{
+  MetaBackgroundActorPrivate *priv;
+
+  g_return_if_fail (META_IS_BACKGROUND_ACTOR (self));
+  g_return_if_fail (background == NULL || META_IS_BACKGROUND (background));
+
+  priv = self->priv;
+
+  if (background == priv->background)
+    return;
+
+  if (priv->background)
+    {
+      g_signal_handlers_disconnect_by_func (priv->background,
+                                            (gpointer)on_background_changed,
+                                            self);
+      g_object_unref (priv->background);
+      priv->background = NULL;
+    }
+
+  if (background)
+    {
+      priv->background = g_object_ref (background);
+      g_signal_connect (priv->background, "changed",
+                        G_CALLBACK (on_background_changed), self);
+    }
+
+  invalidate_pipeline (self, CHANGED_BACKGROUND);
+  clutter_actor_queue_redraw (CLUTTER_ACTOR (self));
+}
+
+void
+meta_background_actor_set_vignette (MetaBackgroundActor *self,
+                                    gboolean             enabled,
+                                    double               brightness,
+                                    double               sharpness)
+{
+  MetaBackgroundActorPrivate *priv;
+  gboolean changed = FALSE;
+
+  g_return_if_fail (META_IS_BACKGROUND_ACTOR (self));
+  g_return_if_fail (brightness >= 0. && brightness <= 1.);
+  g_return_if_fail (sharpness >= 0.);
+
+  priv = self->priv;
+
+  enabled = enabled != FALSE;
+
+  if (enabled != priv->vignette)
+    {
+      priv->vignette = enabled;
+      invalidate_pipeline (self, CHANGED_EFFECTS);
+      changed = TRUE;
+    }
+
+  if (brightness != priv->brightness || sharpness != priv->vignette_sharpness)
+    {
+      priv->brightness = brightness;
+      priv->vignette_sharpness = sharpness;
+      invalidate_pipeline (self, CHANGED_VIGNETTE_PARAMETERS);
+      changed = TRUE;
+    }
+
+  if (changed)
+    clutter_actor_queue_redraw (CLUTTER_ACTOR (self));
 }

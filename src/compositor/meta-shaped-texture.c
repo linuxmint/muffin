@@ -1,11 +1,13 @@
 /*
  * shaped texture
  *
- * An actor to draw a texture clipped to a list of rectangles
+ * An actor to draw a masked texture.
  *
  * Authored By Neil Roberts  <neil@linux.intel.com>
+ * and Jasper St. Pierre <jstpierre@mecheye.net>
  *
  * Copyright (C) 2008 Intel Corporation
+ * Copyright (C) 2012 Red Hat, Inc.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -33,14 +35,12 @@
 
 #include <meta/meta-shaped-texture.h>
 #include "meta-texture-tower.h"
-#include "meta-texture-rectangle.h"
 #include "cogl-utils.h"
 
 #include <clutter/clutter.h>
 #include <cogl/cogl.h>
 #include <cogl/cogl-texture-pixmap-x11.h>
 #include <gdk/gdk.h> /* for gdk_rectangle_intersect() */
-#include <string.h>
 
 static void meta_shaped_texture_dispose  (GObject    *object);
 
@@ -58,8 +58,6 @@ static void meta_shaped_texture_get_preferred_height (ClutterActor *self,
                                                       gfloat       *min_height_p,
                                                       gfloat       *natural_height_p);
 
-static void meta_shaped_texture_dirty_mask (MetaShapedTexture *stex);
-
 static gboolean meta_shaped_texture_get_paint_volume (ClutterActor *self, ClutterPaintVolume *volume);
 
 G_DEFINE_TYPE (MetaShapedTexture, meta_shaped_texture,
@@ -73,19 +71,14 @@ struct _MetaShapedTexturePrivate
 {
   MetaTextureTower *paint_tower;
   Pixmap pixmap;
-  CoglHandle texture;
-  CoglHandle mask_texture;
-  CoglHandle material;
-  CoglHandle material_unshaped;
+  CoglTexturePixmapX11 *texture;
+  CoglTexture *mask_texture;
+  CoglPipeline *pipeline;
+  CoglPipeline *pipeline_unshaped;
 
   cairo_region_t *clip_region;
-  cairo_region_t *shape_region;
-
-  cairo_region_t *overlay_region;
-  cairo_path_t *overlay_path;
 
   guint tex_width, tex_height;
-  guint mask_width, mask_height;
 
   guint create_mipmaps : 1;
 };
@@ -114,12 +107,9 @@ meta_shaped_texture_init (MetaShapedTexture *self)
 
   priv = self->priv = META_SHAPED_TEXTURE_GET_PRIVATE (self);
 
-  priv->shape_region = NULL;
-  priv->overlay_path = NULL;
-  priv->overlay_region = NULL;
   priv->paint_tower = meta_texture_tower_new ();
-  priv->texture = COGL_INVALID_HANDLE;
-  priv->mask_texture = COGL_INVALID_HANDLE;
+  priv->texture = NULL;
+  priv->mask_texture = NULL;
   priv->create_mipmaps = TRUE;
 }
 
@@ -133,188 +123,14 @@ meta_shaped_texture_dispose (GObject *object)
     meta_texture_tower_free (priv->paint_tower);
   priv->paint_tower = NULL;
 
-  meta_shaped_texture_dirty_mask (self);
+  g_clear_pointer (&priv->pipeline, cogl_object_unref);
+  g_clear_pointer (&priv->pipeline_unshaped, cogl_object_unref);
+  g_clear_pointer (&priv->texture, cogl_object_unref);
 
-  if (priv->material != COGL_INVALID_HANDLE)
-    {
-      cogl_handle_unref (priv->material);
-      priv->material = COGL_INVALID_HANDLE;
-    }
-  if (priv->material_unshaped != COGL_INVALID_HANDLE)
-    {
-      cogl_handle_unref (priv->material_unshaped);
-      priv->material_unshaped = COGL_INVALID_HANDLE;
-    }
-  if (priv->texture != COGL_INVALID_HANDLE)
-    {
-      cogl_handle_unref (priv->texture);
-      priv->texture = COGL_INVALID_HANDLE;
-    }
-
-  meta_shaped_texture_set_shape_region (self, NULL);
+  meta_shaped_texture_set_mask_texture (self, NULL);
   meta_shaped_texture_set_clip_region (self, NULL);
-  meta_shaped_texture_set_overlay_path (self, NULL, NULL);
 
   G_OBJECT_CLASS (meta_shaped_texture_parent_class)->dispose (object);
-}
-
-static void
-meta_shaped_texture_dirty_mask (MetaShapedTexture *stex)
-{
-  MetaShapedTexturePrivate *priv = stex->priv;
-
-  if (priv->mask_texture != COGL_INVALID_HANDLE)
-    {
-      cogl_handle_unref (priv->mask_texture);
-      priv->mask_texture = COGL_INVALID_HANDLE;
-    }
-
-  if (priv->material != COGL_INVALID_HANDLE)
-    cogl_material_set_layer (priv->material, 1, COGL_INVALID_HANDLE);
-}
-
-static void
-install_overlay_path (MetaShapedTexture *stex,
-                      guchar            *mask_data,
-                      int                tex_width,
-                      int                tex_height,
-                      int                stride)
-{
-  MetaShapedTexturePrivate *priv = stex->priv;
-  int i, n_rects;
-  cairo_t *cr;
-  cairo_rectangle_int_t rect;
-  cairo_surface_t *surface;
-
-  if (priv->overlay_region == NULL)
-    return;
-
-  surface = cairo_image_surface_create_for_data (mask_data,
-                                                 CAIRO_FORMAT_A8,
-                                                 tex_width,
-                                                 tex_height,
-                                                 stride);
-
-  cr = cairo_create (surface);
-  cairo_set_operator (cr, CAIRO_OPERATOR_CLEAR);
-
-  n_rects = cairo_region_num_rectangles (priv->overlay_region);
-  for (i = 0; i < n_rects; i++)
-    {
-      cairo_region_get_rectangle (priv->overlay_region, i, &rect);
-      cairo_rectangle (cr, rect.x, rect.y, rect.width, rect.height);
-    }
-
-  cairo_fill_preserve (cr);
-  if (priv->overlay_path == NULL)
-    {
-      /* If we have an overlay region but not an overlay path, then we
-       * just need to clear the rectangles in the overlay region. */
-      goto out;
-    }
-
-  cairo_clip (cr);
-
-  cairo_set_operator (cr, CAIRO_OPERATOR_OVER);
-  cairo_set_source_rgba (cr, 1, 1, 1, 1);
-
-  cairo_append_path (cr, priv->overlay_path);
-  cairo_fill (cr);
-
- out:
-  cairo_destroy (cr);
-  cairo_surface_destroy (surface);
-}
-
-static void
-meta_shaped_texture_ensure_mask (MetaShapedTexture *stex)
-{
-  MetaShapedTexturePrivate *priv = stex->priv;
-  CoglHandle paint_tex;
-  guint tex_width, tex_height;
-
-  paint_tex = priv->texture;
-
-  if (paint_tex == COGL_INVALID_HANDLE)
-    return;
-
-  tex_width = cogl_texture_get_width (paint_tex);
-  tex_height = cogl_texture_get_height (paint_tex);
-
-  /* If the mask texture we have was created for a different size then
-     recreate it */
-  if (priv->mask_texture != COGL_INVALID_HANDLE
-      && (priv->mask_width != tex_width || priv->mask_height != tex_height))
-    meta_shaped_texture_dirty_mask (stex);
-
-  /* If we don't have a mask texture yet then create one */
-  if (priv->mask_texture == COGL_INVALID_HANDLE)
-    {
-      guchar *mask_data;
-      int i;
-      int n_rects;
-      int stride;
-
-      /* If we have no shape region and no (or an empty) overlay region, we
-       * don't need to create a full mask texture, so quit early. */
-      if (priv->shape_region == NULL &&
-          (priv->overlay_region == NULL ||
-           cairo_region_num_rectangles (priv->overlay_region) == 0))
-        {
-          return;
-        }
-
-      stride = cairo_format_stride_for_width (CAIRO_FORMAT_A8, tex_width);
-
-      /* Create data for an empty image */
-      mask_data = g_malloc0 (stride * tex_height);
-
-      n_rects = cairo_region_num_rectangles (priv->shape_region);
-
-      /* Fill in each rectangle. */
-      for (i = 0; i < n_rects; i ++)
-        {
-          cairo_rectangle_int_t rect;
-          cairo_region_get_rectangle (priv->shape_region, i, &rect);
-
-          gint x1 = rect.x, x2 = x1 + rect.width;
-          gint y1 = rect.y, y2 = y1 + rect.height;
-          guchar *p;
-
-          /* Clip the rectangle to the size of the texture */
-          x1 = CLAMP (x1, 0, (gint) tex_width - 1);
-          x2 = CLAMP (x2, x1, (gint) tex_width);
-          y1 = CLAMP (y1, 0, (gint) tex_height - 1);
-          y2 = CLAMP (y2, y1, (gint) tex_height);
-
-          /* Fill the rectangle */
-          for (p = mask_data + y1 * stride + x1;
-               y1 < y2;
-               y1++, p += stride)
-            memset (p, 255, x2 - x1);
-        }
-
-      install_overlay_path (stex, mask_data, tex_width, tex_height, stride);
-
-      if (meta_texture_rectangle_check (paint_tex))
-        priv->mask_texture = meta_texture_rectangle_new (tex_width, tex_height,
-                                                         COGL_PIXEL_FORMAT_A_8,
-                                                         COGL_PIXEL_FORMAT_A_8,
-                                                         stride,
-                                                         mask_data);
-      else
-        priv->mask_texture = meta_cogl_texture_new_from_data_wrapper (tex_width, tex_height,
-                                                                      COGL_TEXTURE_NONE,
-                                                                      COGL_PIXEL_FORMAT_A_8,
-                                                                      COGL_PIXEL_FORMAT_ANY,
-                                                                      stride,
-                                                                      mask_data);
-
-      g_free (mask_data);
-
-      priv->mask_width = tex_width;
-      priv->mask_height = tex_height;
-    }
 }
 
 static void
@@ -322,14 +138,14 @@ meta_shaped_texture_paint (ClutterActor *actor)
 {
   MetaShapedTexture *stex = (MetaShapedTexture *) actor;
   MetaShapedTexturePrivate *priv = stex->priv;
-  CoglHandle paint_tex;
+  CoglTexture *paint_tex;
   guint tex_width, tex_height;
   ClutterActorBox alloc;
 
-  static CoglHandle material_template = COGL_INVALID_HANDLE;
-  static CoglHandle material_unshaped_template = COGL_INVALID_HANDLE;
+  static CoglPipeline *pipeline_template = NULL;
+  static CoglPipeline *pipeline_unshaped_template = NULL;
 
-  CoglHandle material;
+  CoglPipeline *pipeline;
 
   if (priv->clip_region && cairo_region_is_empty (priv->clip_region))
     return;
@@ -355,9 +171,9 @@ meta_shaped_texture_paint (ClutterActor *actor)
   if (priv->create_mipmaps)
     paint_tex = meta_texture_tower_get_paint_texture (priv->paint_tower);
   else
-    paint_tex = priv->texture;
+    paint_tex = COGL_TEXTURE (priv->texture);
 
-  if (paint_tex == COGL_INVALID_HANDLE)
+  if (paint_tex == NULL)
     return;
 
   tex_width = priv->tex_width;
@@ -366,49 +182,51 @@ meta_shaped_texture_paint (ClutterActor *actor)
   if (tex_width == 0 || tex_height == 0) /* no contents yet */
     return;
 
-  if (priv->shape_region == NULL)
+  if (priv->mask_texture == NULL)
     {
-      /* No region means an unclipped shape. Use a single-layer texture. */
+      /* Use a single-layer texture if we don't have a mask. */
 
-      if (priv->material_unshaped == COGL_INVALID_HANDLE) 
+      if (priv->pipeline_unshaped == NULL)
         {
-          if (G_UNLIKELY (material_unshaped_template == COGL_INVALID_HANDLE))
-            material_unshaped_template = cogl_material_new ();
+          if (G_UNLIKELY (pipeline_unshaped_template == NULL))
+            {
+              CoglContext *ctx = clutter_backend_get_cogl_context (clutter_get_default_backend ());
+              pipeline_unshaped_template = cogl_pipeline_new (ctx);
+            }
 
-          priv->material_unshaped = cogl_material_copy (material_unshaped_template);
+          priv->pipeline_unshaped = cogl_pipeline_copy (pipeline_unshaped_template);
         }
-        material = priv->material_unshaped;
+        pipeline = priv->pipeline_unshaped;
     }
   else
     {
-      meta_shaped_texture_ensure_mask (stex);
+      if (priv->pipeline == NULL)
+        {
+    	    if (G_UNLIKELY (pipeline_template == NULL))
+    	      {
+    	        CoglContext *ctx = clutter_backend_get_cogl_context (clutter_get_default_backend ());
+              pipeline_template =  cogl_pipeline_new (ctx);
+              cogl_pipeline_set_layer_combine (pipeline_template, 1,
+    					                                 "RGBA = MODULATE (PREVIOUS, TEXTURE[A])",
+    					                                 NULL);
+    	      }
+	        priv->pipeline = cogl_pipeline_copy (pipeline_template);
+	      }
+      pipeline = priv->pipeline;
 
-      if (priv->material == COGL_INVALID_HANDLE)
-	{
-	   if (G_UNLIKELY (material_template == COGL_INVALID_HANDLE))
-	    {
-	      material_template =  cogl_material_new ();
-	      cogl_material_set_layer_combine (material_template, 1,
-					   "RGBA = MODULATE (PREVIOUS, TEXTURE[A])",
-					   NULL);
-	    }
-	  priv->material = cogl_material_copy (material_template);
-	}
-      material = priv->material;
-
-      cogl_material_set_layer (material, 1, priv->mask_texture);
+      cogl_pipeline_set_layer_texture (pipeline, 1, priv->mask_texture);
     }
 
-  cogl_material_set_layer (material, 0, paint_tex);
+  cogl_pipeline_set_layer_texture (pipeline, 0, paint_tex);
 
   {
     CoglColor color;
     guchar opacity = clutter_actor_get_paint_opacity (actor);
     cogl_color_set_from_4ub (&color, opacity, opacity, opacity, opacity);
-    cogl_material_set_color (material, &color);
+    cogl_pipeline_set_color (pipeline, &color);
   }
 
-  cogl_set_source (material);
+  cogl_set_source (pipeline);
 
   clutter_actor_get_allocation_box (actor, &alloc);
 
@@ -467,24 +285,24 @@ meta_shaped_texture_paint (ClutterActor *actor)
 
 static void
 meta_shaped_texture_pick (ClutterActor       *actor,
-			  const ClutterColor *color)
+			                    const ClutterColor *color)
 {
   MetaShapedTexture *stex = (MetaShapedTexture *) actor;
   MetaShapedTexturePrivate *priv = stex->priv;
 
   /* If there is no region then use the regular pick */
-  if (priv->shape_region == NULL)
+  if (priv->mask_texture == NULL)
     CLUTTER_ACTOR_CLASS (meta_shaped_texture_parent_class)
       ->pick (actor, color);
   else if (clutter_actor_should_pick_paint (actor))
     {
-      CoglHandle paint_tex;
+      CoglTexture *paint_tex;
       ClutterActorBox alloc;
       guint tex_width, tex_height;
 
-      paint_tex = priv->texture;
+      paint_tex = COGL_TEXTURE (priv->texture);
 
-      if (paint_tex == COGL_INVALID_HANDLE)
+      if (paint_tex == NULL)
         return;
 
       tex_width = cogl_texture_get_width (paint_tex);
@@ -492,8 +310,6 @@ meta_shaped_texture_pick (ClutterActor       *actor,
 
       if (tex_width == 0 || tex_height == 0) /* no contents yet */
         return;
-
-      meta_shaped_texture_ensure_mask (stex);
 
       cogl_set_source_color4ub (color->red, color->green, color->blue,
                                  color->alpha);
@@ -564,7 +380,7 @@ meta_shaped_texture_new (void)
 
 void
 meta_shaped_texture_set_create_mipmaps (MetaShapedTexture *stex,
-					gboolean           create_mipmaps)
+					                              gboolean           create_mipmaps)
 {
   MetaShapedTexturePrivate *priv;
 
@@ -576,17 +392,17 @@ meta_shaped_texture_set_create_mipmaps (MetaShapedTexture *stex,
 
   if (create_mipmaps != priv->create_mipmaps)
     {
-      CoglHandle base_texture;
+      CoglTexture *base_texture;
       priv->create_mipmaps = create_mipmaps;
       base_texture = create_mipmaps ?
-        priv->texture : COGL_INVALID_HANDLE;
+        COGL_TEXTURE (priv->texture) : NULL;
       meta_texture_tower_set_base_texture (priv->paint_tower, base_texture);
     }
 }
 
 void
-meta_shaped_texture_set_shape_region (MetaShapedTexture *stex,
-                                      cairo_region_t    *region)
+meta_shaped_texture_set_mask_texture (MetaShapedTexture *stex,
+                                      CoglTexture       *mask_texture)
 {
   MetaShapedTexturePrivate *priv;
 
@@ -594,38 +410,34 @@ meta_shaped_texture_set_shape_region (MetaShapedTexture *stex,
 
   priv = stex->priv;
 
-  if (priv->shape_region != NULL)
+  g_clear_pointer (&priv->mask_texture, cogl_object_unref);
+
+  if (mask_texture != NULL)
     {
-      cairo_region_destroy (priv->shape_region);
-      priv->shape_region = NULL;
+      priv->mask_texture = mask_texture;
+      cogl_object_ref (priv->mask_texture);
     }
 
-  if (region != NULL)
-    {
-      cairo_region_reference (region);
-      priv->shape_region = region;
-    }
-
-  meta_shaped_texture_dirty_mask (stex);
   clutter_actor_queue_redraw (CLUTTER_ACTOR (stex));
 }
 
 void
 meta_shaped_texture_update_area (MetaShapedTexture *stex,
-				 int                x,
-				 int                y,
-				 int                width,
-				 int                height)
+                                 int                x,
+                                 int                y,
+                                 int                width,
+                                 int                height)
 {
   MetaShapedTexturePrivate *priv;
   const cairo_rectangle_int_t clip = { x, y, width, height };
 
   priv = stex->priv;
 
-  if (priv->texture == COGL_INVALID_HANDLE)
+  if (priv->texture == NULL)
     return;
 
-  cogl_texture_pixmap_x11_update_area (priv->texture, x, y, width, height);
+  cogl_texture_pixmap_x11_update_area (priv->texture,
+                                       x, y, width, height);
 
   meta_texture_tower_update_area (priv->paint_tower, x, y, width, height);
 
@@ -633,8 +445,8 @@ meta_shaped_texture_update_area (MetaShapedTexture *stex,
 }
 
 static void
-set_cogl_texture (MetaShapedTexture *stex,
-                  CoglHandle         cogl_tex)
+set_cogl_texture (MetaShapedTexture    *stex,
+                  CoglTexturePixmapX11 *cogl_tex)
 {
   MetaShapedTexturePrivate *priv;
   guint width, height;
@@ -643,21 +455,21 @@ set_cogl_texture (MetaShapedTexture *stex,
 
   priv = stex->priv;
 
-  if (priv->texture != COGL_INVALID_HANDLE)
-    cogl_handle_unref (priv->texture);
+  if (priv->texture != NULL)
+    cogl_object_unref (priv->texture);
 
   priv->texture = cogl_tex;
 
-  if (priv->material != COGL_INVALID_HANDLE)
-    cogl_material_set_layer (priv->material, 0, cogl_tex);
+  if (priv->pipeline != NULL)
+    cogl_pipeline_set_layer_texture (priv->pipeline, 0, COGL_TEXTURE (cogl_tex));
 
-  if (priv->material_unshaped != COGL_INVALID_HANDLE)
-    cogl_material_set_layer (priv->material_unshaped, 0, cogl_tex);
+  if (priv->pipeline_unshaped != NULL)
+    cogl_pipeline_set_layer_texture (priv->pipeline_unshaped, 0, COGL_TEXTURE (cogl_tex));
 
-  if (cogl_tex != COGL_INVALID_HANDLE)
+  if (cogl_tex != NULL)
     {
-      width = cogl_texture_get_width (cogl_tex);
-      height = cogl_texture_get_height (cogl_tex);
+      width = cogl_texture_get_width (COGL_TEXTURE (cogl_tex));
+      height = cogl_texture_get_height (COGL_TEXTURE (cogl_tex));
 
       if (width != priv->tex_width ||
           height != priv->tex_height)
@@ -670,7 +482,7 @@ set_cogl_texture (MetaShapedTexture *stex,
     }
   else
     {
-      /* size changed to 0 going to an invalid handle */
+      /* size changed to 0 going to an inavlid texture */
       priv->tex_width = 0;
       priv->tex_height = 0;
       clutter_actor_queue_relayout (CLUTTER_ACTOR (stex));
@@ -706,10 +518,11 @@ meta_shaped_texture_set_pixmap (MetaShapedTexture *stex,
       set_cogl_texture (stex, cogl_texture_pixmap_x11_new (ctx, pixmap, FALSE, NULL));
     }
   else
-    set_cogl_texture (stex, COGL_INVALID_HANDLE);
+    set_cogl_texture (stex, NULL);
 
   if (priv->create_mipmaps)
-    meta_texture_tower_set_base_texture (priv->paint_tower, priv->texture);
+    meta_texture_tower_set_base_texture (priv->paint_tower,
+                                         COGL_TEXTURE (priv->texture));
 }
 
 /**
@@ -718,53 +531,11 @@ meta_shaped_texture_set_pixmap (MetaShapedTexture *stex,
  *
  * Returns: (transfer none): the unshaped texture
  */
-CoglHandle
+CoglTexture *
 meta_shaped_texture_get_texture (MetaShapedTexture *stex)
 {
-  g_return_val_if_fail (META_IS_SHAPED_TEXTURE (stex), COGL_INVALID_HANDLE);
-  return stex->priv->texture;
-}
-
-/**
- * meta_shaped_texture_set_overlay_path:
- * @stex: a #MetaShapedTexture
- * @overlay_region: A region containing the parts of the mask to overlay.
- *   All rectangles in this region are wiped clear to full transparency,
- *   and the overlay path is clipped to this region.
- * @overlay_path: (transfer full): This path will be painted onto the mask
- *   texture with a fully opaque source. Due to the lack of refcounting
- *   in #cairo_path_t, ownership of the path is assumed.
- */
-void
-meta_shaped_texture_set_overlay_path (MetaShapedTexture *stex,
-                                      cairo_region_t    *overlay_region,
-                                      cairo_path_t      *overlay_path)
-{
-  MetaShapedTexturePrivate *priv;
-
-  g_return_if_fail (META_IS_SHAPED_TEXTURE (stex));
-
-  priv = stex->priv;
-
-  if (priv->overlay_region != NULL)
-    {
-      cairo_region_destroy (priv->overlay_region);
-      priv->overlay_region = NULL;
-    }
-
-  if (priv->overlay_path != NULL)
-    {
-      cairo_path_destroy (priv->overlay_path);
-      priv->overlay_path = NULL;
-    }
-
-  cairo_region_reference (overlay_region);
-  priv->overlay_region = overlay_region;
-
-  /* cairo_path_t does not have refcounting. */
-  priv->overlay_path = overlay_path;
-
-  meta_shaped_texture_dirty_mask (stex);
+  g_return_val_if_fail (META_IS_SHAPED_TEXTURE (stex), NULL);
+  return COGL_TEXTURE (stex->priv->texture);
 }
 
 /**
@@ -821,13 +592,13 @@ cairo_surface_t *
 meta_shaped_texture_get_image (MetaShapedTexture     *stex,
                                cairo_rectangle_int_t *clip)
 {
-  CoglHandle texture, mask_texture;
+  CoglTexture *texture, *mask_texture;
   cairo_rectangle_int_t texture_rect = { 0, 0, 0, 0 };
   cairo_surface_t *surface;
 
   g_return_val_if_fail (META_IS_SHAPED_TEXTURE (stex), NULL);
 
-  texture = stex->priv->texture;
+  texture = COGL_TEXTURE (stex->priv->texture);
 
   if (texture == NULL)
     return NULL;
@@ -864,7 +635,7 @@ meta_shaped_texture_get_image (MetaShapedTexture     *stex,
     cogl_object_unref (texture);
 
   mask_texture = stex->priv->mask_texture;
-  if (mask_texture != COGL_INVALID_HANDLE)
+  if (mask_texture != NULL)
     {
       cairo_t *cr;
       cairo_surface_t *mask_surface;

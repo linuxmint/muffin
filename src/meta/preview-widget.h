@@ -44,6 +44,8 @@ struct _MetaPreview
 {
   GtkBin bin;
 
+  GtkStyleContext *style_context;
+
   MetaTheme *theme;
   char *title;
   MetaFrameType type;
@@ -77,10 +79,6 @@ void meta_preview_set_frame_flags   (MetaPreview            *preview,
                                      MetaFrameFlags          flags);
 void meta_preview_set_button_layout (MetaPreview            *preview,
                                      const MetaButtonLayout *button_layout);
-
-cairo_region_t * meta_preview_get_clip_region (MetaPreview *preview,
-                                               gint         new_window_width,
-                                               gint         new_window_height);
 
 GdkPixbuf* meta_preview_get_icon (void);
 GdkPixbuf* meta_preview_get_mini_icon (void);
