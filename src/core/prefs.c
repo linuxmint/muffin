@@ -54,7 +54,6 @@
 #define KEY_WORKSPACE_CYCLE "workspace-cycle"
 
 /* Keys from "foreign" schemas */
-#define KEY_GNOME_ACCESSIBILITY "toolkit-accessibility"
 #define KEY_GNOME_ANIMATIONS "enable-animations"
 #define KEY_GNOME_CURSOR_THEME "cursor-theme"
 #define KEY_GNOME_CURSOR_SIZE "cursor-size"
@@ -104,7 +103,6 @@ static gboolean auto_raise = FALSE;
 static gboolean auto_raise_delay = 500;
 static gboolean bell_is_visible = FALSE;
 static gboolean bell_is_audible = TRUE;
-static gboolean gnome_accessibility = FALSE;
 static gboolean gnome_animations = TRUE;
 static char *cursor_theme = NULL;
 static int   cursor_size = 24;
@@ -376,13 +374,6 @@ static MetaBoolPreference preferences_bool[] =
         META_PREF_AUDIBLE_BELL,
       },
       &bell_is_audible, /* FIXME: change the name: it's confusing */
-    },
-    {
-      { KEY_GNOME_ACCESSIBILITY,
-        SCHEMA_INTERFACE,
-        META_PREF_GNOME_ACCESSIBILITY,
-      },
-      &gnome_accessibility,
     },
     {
       { KEY_MOUSEWHEEL_ZOOM_ENABLED,
@@ -944,8 +935,6 @@ meta_prefs_init (void)
 
   /* Individual keys we watch outside of our schemas */
   settings = g_settings_new (SCHEMA_INTERFACE);
-  g_signal_connect (settings, "changed::" KEY_GNOME_ACCESSIBILITY,
-                    G_CALLBACK (settings_changed), NULL);
   g_signal_connect (settings, "changed::" KEY_GNOME_ANIMATIONS,
                     G_CALLBACK (settings_changed), NULL);
   g_signal_connect (settings, "changed::" KEY_GNOME_CURSOR_THEME,
@@ -1844,9 +1833,6 @@ meta_preference_to_string (MetaPreference pref)
     case META_PREF_VISUAL_BELL_TYPE:
       return "VISUAL_BELL_TYPE";
 
-    case META_PREF_GNOME_ACCESSIBILITY:
-      return "GNOME_ACCESSIBILTY";
-
     case META_PREF_GNOME_ANIMATIONS:
       return "GNOME_ANIMATIONS";
 
@@ -2357,12 +2343,6 @@ int
 meta_prefs_get_auto_raise_delay (void)
 {
   return auto_raise_delay;
-}
-
-gboolean
-meta_prefs_get_gnome_accessibility ()
-{
-  return gnome_accessibility;
 }
 
 gboolean
