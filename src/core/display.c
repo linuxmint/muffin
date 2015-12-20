@@ -142,6 +142,7 @@ enum
   GRAB_OP_END,
   ZOOM_SCROLL_IN,
   ZOOM_SCROLL_OUT,
+  BELL,
   LAST_SIGNAL
 };
 
@@ -295,6 +296,14 @@ meta_display_class_init (MetaDisplayClass *klass)
                   0,
                   NULL, NULL, NULL,
                   G_TYPE_NONE, 0);
+
+  display_signals[BELL] =
+    g_signal_new ("bell",
+                  G_TYPE_FROM_CLASS (klass),
+                  G_SIGNAL_RUN_LAST,
+                  0,
+                  NULL, NULL, NULL,
+                  G_TYPE_NONE, 1, META_TYPE_WINDOW);
 
   g_object_class_install_property (object_class,
                                    PROP_FOCUS_WINDOW,
@@ -5256,8 +5265,6 @@ static void
 prefs_changed_callback (MetaPreference pref,
                         void          *data)
 {
-  MetaDisplay *display = data;
-  
   /* It may not be obvious why we regrab on focus mode
    * change; it's because we handle focus clicks a
    * bit differently for the different focus modes.
@@ -5306,10 +5313,6 @@ prefs_changed_callback (MetaPreference pref,
         }
 
       g_slist_free (windows);
-    }
-  else if (pref == META_PREF_AUDIBLE_BELL)
-    {
-      meta_bell_set_audible (display, meta_prefs_bell_is_audible ());
     }
 }
 

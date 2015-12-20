@@ -64,4 +64,8 @@ void meta_workspace_set_builtin_struts (MetaWorkspace *workspace,
 MetaWorkspace *meta_workspace_get_neighbor (MetaWorkspace      *workspace,
                                             MetaMotionDirection direction);
 
+void meta_workspace_focus_default_window (MetaWorkspace *workspace,
+                                          MetaWindow    *not_this_one,
+                                          guint32        timestamp);
+
 #endif

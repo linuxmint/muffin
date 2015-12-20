@@ -25,7 +25,6 @@
 
 #include <config.h>
 #include "frame.h"
-#include "bell.h"
 #include <meta/errors.h>
 #include "keybindings-private.h"
 
@@ -183,9 +182,7 @@ meta_window_destroy_frame (MetaWindow *window)
   frame = window->frame;
 
   meta_frame_calc_borders (frame, &borders);
-  
-  meta_bell_notify_frame_destroy (frame);
-  
+
   /* Unparent the client window; it may be destroyed,
    * thus the error trap.
    */

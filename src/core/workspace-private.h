@@ -98,10 +98,6 @@ GList* meta_workspace_get_onscreen_region       (MetaWorkspace *workspace);
 GList* meta_workspace_get_onmonitor_region      (MetaWorkspace *workspace,
                                                  int            which_monitor);
 
-void meta_workspace_focus_default_window (MetaWorkspace *workspace,
-                                          MetaWindow    *not_this_one,
-                                          guint32        timestamp);
-
 MetaWorkspace* meta_workspace_get_neighbor (MetaWorkspace      *workspace,
                                             MetaMotionDirection direction);
 

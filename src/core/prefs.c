@@ -101,8 +101,6 @@ static gboolean application_based = FALSE;
 static gboolean disable_workarounds = FALSE;
 static gboolean auto_raise = FALSE;
 static gboolean auto_raise_delay = 500;
-static gboolean bell_is_visible = FALSE;
-static gboolean bell_is_audible = TRUE;
 static gboolean gnome_animations = TRUE;
 static char *cursor_theme = NULL;
 static int   cursor_size = 24;
@@ -116,7 +114,6 @@ static gboolean edge_tiling = FALSE;
 static gboolean force_fullscreen = TRUE;
 static unsigned int snap_modifier[2];
 
-static CDesktopVisualBellType visual_bell_type = C_DESKTOP_VISUAL_BELL_FULLSCREEN_FLASH;
 static MetaButtonLayout button_layout;
 
 /* NULL-terminated array */
@@ -252,13 +249,6 @@ static MetaEnumPreference preferences_enum[] =
       &focus_mode,
     },
     {
-      { "visual-bell-type",
-        SCHEMA_GENERAL,
-        META_PREF_VISUAL_BELL_TYPE,
-      },
-      &visual_bell_type,
-    },
-    {
       { "action-double-click-titlebar",
         SCHEMA_GENERAL,
         META_PREF_ACTION_DOUBLE_CLICK_TITLEBAR,
@@ -360,20 +350,6 @@ static MetaBoolPreference preferences_bool[] =
         META_PREF_AUTO_RAISE,
       },
       &auto_raise,
-    },
-    {
-      { "visual-bell",
-        SCHEMA_GENERAL,
-        META_PREF_VISUAL_BELL,
-      },
-      &bell_is_visible, /* FIXME: change the name: it's confusing */
-    },
-    {
-      { "audible-bell",
-        SCHEMA_GENERAL,
-        META_PREF_AUDIBLE_BELL,
-      },
-      &bell_is_audible, /* FIXME: change the name: it's confusing */
     },
     {
       { KEY_MOUSEWHEEL_ZOOM_ENABLED,
@@ -1824,15 +1800,6 @@ meta_preference_to_string (MetaPreference pref)
     case META_PREF_WORKSPACE_NAMES:
       return "WORKSPACE_NAMES";
 
-    case META_PREF_VISUAL_BELL:
-      return "VISUAL_BELL";
-
-    case META_PREF_AUDIBLE_BELL:
-      return "AUDIBLE_BELL";
-
-    case META_PREF_VISUAL_BELL_TYPE:
-      return "VISUAL_BELL_TYPE";
-
     case META_PREF_GNOME_ANIMATIONS:
       return "GNOME_ANIMATIONS";
 
@@ -2140,24 +2107,6 @@ void
 meta_prefs_get_button_layout (MetaButtonLayout *button_layout_p)
 {
   *button_layout_p = button_layout;
-}
-
-gboolean
-meta_prefs_get_visual_bell (void)
-{
-  return bell_is_visible;
-}
-
-gboolean
-meta_prefs_bell_is_audible (void)
-{
-  return bell_is_audible;
-}
-
-CDesktopVisualBellType
-meta_prefs_get_visual_bell_type (void)
-{
-  return visual_bell_type;
 }
 
 LOCAL_SYMBOL gboolean

@@ -299,6 +299,13 @@ typedef enum {
     META_WINDOW_TILE_TYPE_SNAPPED
 } MetaWindowTileType;
 
+typedef enum {
+    META_BELL_TYPE_NONE,
+    META_BELL_TYPE_STICKY_KEYS,
+    META_BELL_TYPE_SLOW_KEYS,
+    META_BELL_TYPE_BOUNCE_KEYS
+} MetaBellType;
+
 #define MAX_BUTTONS_PER_CORNER META_BUTTON_FUNCTION_LAST
 
 typedef struct _MetaButtonLayout MetaButtonLayout;

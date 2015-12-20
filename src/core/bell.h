@@ -36,7 +36,7 @@
 #include <X11/XKBlib.h>
 #endif
 #include "display-private.h"
-#include "frame.h"
+#include "window-private.h"
 
 #ifdef HAVE_XKB
 /**
@@ -51,17 +51,6 @@
  */
 void meta_bell_notify (MetaDisplay *display, XkbAnyEvent *xkb_ev);
 #endif
-
-/**
- * Turns the bell to audible or visual. This tells X what to do, but
- * not Muffin; you will need to set the "visual bell" pref for that.
- *
- * If the configure script found we had no XKB, this is a no-op.
- *
- * \param display  The display we're configuring
- * \param audible  True for an audible bell, false for a visual bell
- */
-void meta_bell_set_audible (MetaDisplay *display, gboolean audible);
 
 /**
  * Initialises the bell subsystem. This involves intialising
@@ -96,13 +85,3 @@ gboolean meta_bell_init (MetaDisplay *display);
  * we don't.
  */
 void meta_bell_shutdown (MetaDisplay *display);
-
-/**
- * Deals with a frame being destroyed. This is important because if we're
- * using a visual bell, we might be flashing the edges of the frame, and
- * so we'd have a timeout function waiting ready to un-flash them. If the
- * frame's going away, we can tell the timeout not to bother.
- *
- * \param frame  The frame which is being destroyed
- */
-void meta_bell_notify_frame_destroy (MetaFrame *frame);
