@@ -391,6 +391,13 @@ paint_clipped_rectangle (CoglFramebuffer       *fb,
                                             tx1, ty1, tx2, ty2);
 }
 
+static gboolean
+meta_background_actor_get_paint_volume (ClutterActor       *actor,
+                                        ClutterPaintVolume *volume)
+{
+  return clutter_paint_volume_set_from_allocation (volume, actor);
+}
+
 static void
 meta_background_actor_paint (ClutterActor *actor)
 {
@@ -520,26 +527,6 @@ meta_background_actor_get_property (GObject      *object,
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
       break;
     }
-}
-
-static gboolean
-meta_background_actor_get_paint_volume (ClutterActor       *actor,
-                                        ClutterPaintVolume *volume)
-{
-  ClutterContent *content;
-  gfloat width, height;
-
-  content = clutter_actor_get_content (actor);
-
-  if (!content)
-    return FALSE;
-
-  clutter_content_get_preferred_size (content, &width, &height);
-
-  clutter_paint_volume_set_width (volume, width);
-  clutter_paint_volume_set_height (volume, height);
-
-  return TRUE;
 }
 
 static void
