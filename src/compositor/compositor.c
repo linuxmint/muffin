@@ -518,21 +518,6 @@ static void
 redirect_windows (MetaCompositor *compositor,
                   MetaScreen     *screen)
 {
-  // MetaCompScreen *info;
-  // MetaDisplay    *display       = meta_screen_get_display (screen);
-  // Display        *xdisplay      = meta_display_get_xdisplay (display);
-  // int             screen_number = meta_screen_get_screen_number (screen);
-  // Window          xroot         = meta_screen_get_xroot (screen);
-  // Window          xwin;
-  // gint            width, height;
-  // XWindowAttributes attr;
-  // long            event_mask;
-  // guint           n_retries;
-  // guint           max_retries;
-
-  // /* Check if the screen is already managed */
-  // if (meta_screen_get_compositor_data (screen))
-  //   return;
   MetaDisplay *display       = meta_screen_get_display (screen);
   Display     *xdisplay      = meta_display_get_xdisplay (display);
   Window       xroot         = meta_screen_get_xroot (screen);
