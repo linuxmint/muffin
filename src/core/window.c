@@ -1429,6 +1429,7 @@ meta_window_new_with_attrs (MetaDisplay       *display,
     }
 
   g_signal_emit_by_name (window->screen, "window-entered-monitor", window->monitor->number, window);
+  g_signal_emit_by_name (window->screen, "window-added", window, window->monitor->number);
 
   /* Must add window to stack before doing move/resize, since the
    * window might have fullscreen size (i.e. should have been
@@ -1967,6 +1968,7 @@ meta_window_unmanage (MetaWindow  *window,
   meta_prefs_remove_listener (prefs_changed_callback, window);
 
   g_signal_emit (window, window_signals[UNMANAGED], 0);
+  g_signal_emit_by_name (window->screen, "window-removed", window);
 
   g_object_unref (window);
 }
@@ -4962,6 +4964,8 @@ meta_window_update_monitor (MetaWindow *window)
         g_signal_emit_by_name (window->screen, "window-left-monitor", old->number, window);
       g_signal_emit_by_name (window->screen, "window-entered-monitor", window->monitor->number, window);
 
+      g_signal_emit_by_name (window->screen, "window-monitor-changed", window, window->monitor->number);
+
       /* If we're changing monitors, we need to update the has_maximize_func flag,
        * as the working area has changed. */
       recalc_window_features (window);
@@ -6195,6 +6199,7 @@ meta_window_change_workspace_without_transients (MetaWindow    *window,
       meta_workspace_add_window (workspace, window);
       g_signal_emit (window, window_signals[WORKSPACE_CHANGED], 0,
                      old_workspace);
+      g_signal_emit_by_name (window->screen, "window-workspace-changed", window, window->workspace);
     }
 }
 

@@ -109,6 +109,10 @@ enum
   SNAP_OSD_SHOW,
   SNAP_OSD_HIDE,
   WORKSPACE_OSD_SHOW,
+  WINDOW_ADDED,
+  WINDOW_REMOVED,
+  WINDOW_MONITOR_CHANGED,
+  WINDOW_WORKSPACE_CHANGED,
 
   LAST_SIGNAL
 };
@@ -297,6 +301,45 @@ meta_screen_class_init (MetaScreenClass *klass)
                   0,
                   NULL, NULL, NULL,
                   G_TYPE_NONE, 0);
+
+  screen_signals[WINDOW_ADDED] =
+    g_signal_new ("window-added",
+                  G_TYPE_FROM_CLASS (klass),
+                  G_SIGNAL_RUN_LAST,
+                  0,
+                  NULL, NULL, NULL,
+                  G_TYPE_NONE, 2,
+                  META_TYPE_WINDOW,
+                  G_TYPE_INT);
+
+  screen_signals[WINDOW_REMOVED] =
+    g_signal_new ("window-removed",
+                  G_TYPE_FROM_CLASS (klass),
+                  G_SIGNAL_RUN_LAST,
+                  0,
+                  NULL, NULL, NULL,
+                  G_TYPE_NONE, 1,
+                  META_TYPE_WINDOW);
+
+  screen_signals[WINDOW_MONITOR_CHANGED] =
+    g_signal_new ("window-monitor-changed",
+                  G_TYPE_FROM_CLASS (klass),
+                  G_SIGNAL_RUN_LAST,
+                  0,
+                  NULL, NULL, NULL,
+                  G_TYPE_NONE, 2,
+                  META_TYPE_WINDOW,
+                  G_TYPE_INT);
+
+  screen_signals[WINDOW_WORKSPACE_CHANGED] =
+    g_signal_new ("window-workspace-changed",
+                  G_TYPE_FROM_CLASS (klass),
+                  G_SIGNAL_RUN_LAST,
+                  0,
+                  NULL, NULL, NULL,
+                  G_TYPE_NONE, 2,
+                  META_TYPE_WINDOW,
+                  META_TYPE_WORKSPACE);
 
   g_object_class_install_property (object_class,
                                    PROP_N_WORKSPACES,
