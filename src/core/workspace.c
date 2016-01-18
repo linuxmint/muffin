@@ -517,6 +517,42 @@ workspace_switch_sound(MetaWorkspace *from,
 #endif /* HAVE_LIBCANBERRA */
 }
 
+static MetaMotionDirection
+get_wrapped_horizontal_direction (gint from, gint to, gint num_workspaces)
+{
+  MetaMotionDirection ret = 0;
+  gboolean wrap = meta_prefs_get_workspace_cycle();
+
+  if (meta_ui_get_direction() == META_UI_DIRECTION_RTL)
+    {
+      if (from < to)
+        if (wrap)
+          ret = (to - from) <= ((num_workspaces - to) + from) ? META_MOTION_LEFT : META_MOTION_RIGHT;
+        else
+          ret = META_MOTION_LEFT;
+      else
+        if (wrap)
+          ret = (from - to) <= ((num_workspaces - from) + to) ? META_MOTION_RIGHT : META_MOTION_LEFT;
+        else
+          ret = META_MOTION_RIGHT;
+    }
+  else
+    {
+      if (from < to)
+        if (wrap)
+          ret = (to - from) <= ((num_workspaces - to) + from) ? META_MOTION_RIGHT : META_MOTION_LEFT;
+        else
+          ret = META_MOTION_RIGHT;
+      else
+        if (wrap)
+          ret = (from - to) <= ((num_workspaces - from) + to) ? META_MOTION_LEFT : META_MOTION_RIGHT;
+        else
+          ret = META_MOTION_LEFT;
+    }
+
+  return ret;
+}
+
 /**
  * meta_workspace_activate_with_focus:
  * @workspace: a #MetaWorkspace
@@ -629,20 +665,7 @@ meta_workspace_activate_with_focus (MetaWorkspace *workspace,
    meta_screen_calc_workspace_layout (workspace->screen, num_workspaces,
                                       new_space, &layout2);
 
-   if (meta_ui_get_direction() == META_UI_DIRECTION_RTL)
-     {
-       if (layout1.current_col > layout2.current_col)
-         direction = META_MOTION_RIGHT;
-       else if (layout1.current_col < layout2.current_col)
-         direction = META_MOTION_LEFT;
-     }
-   else
-    {
-       if (layout1.current_col < layout2.current_col)
-         direction = META_MOTION_RIGHT;
-       else if (layout1.current_col > layout2.current_col)
-         direction = META_MOTION_LEFT;
-    }
+   direction = get_wrapped_horizontal_direction (layout1.current_col, layout2.current_col, num_workspaces);
 
    if (layout1.current_row < layout2.current_row)
      {
