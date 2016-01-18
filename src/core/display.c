@@ -1906,7 +1906,8 @@ event_callback (XEvent   *event,
                */
               if (!frame_was_receiver)
                 {
-                  if (meta_prefs_get_raise_on_click ()) 
+                  if (meta_prefs_get_raise_on_click () &&
+                      !meta_ui_window_is_widget (display->active_screen->ui, modified))
                     meta_window_raise (window);
                   else
                     meta_topic (META_DEBUG_FOCUS,
@@ -1915,7 +1916,8 @@ event_callback (XEvent   *event,
                   /* Don't focus panels--they must explicitly request focus.
                    * See bug 160470
                    */
-		  if (window->type != META_WINDOW_DOCK)
+                  if (window->type != META_WINDOW_DOCK &&
+                      !meta_ui_window_is_widget (display->active_screen->ui, modified))
                     {
                       meta_topic (META_DEBUG_FOCUS,
                                   "Focusing %s due to unmodified button %u press (display.c)\n",
