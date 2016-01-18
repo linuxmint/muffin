@@ -518,10 +518,27 @@ workspace_switch_sound(MetaWorkspace *from,
 }
 
 static MetaMotionDirection
-get_wrapped_horizontal_direction (gint from, gint to, gint num_workspaces)
+get_wrapped_horizontal_direction (gint                from,
+                                  gint                to,
+                                  MetaMotionDirection suggested_dir,
+                                  gint                num_workspaces)
 {
   MetaMotionDirection ret = 0;
   gboolean wrap = meta_prefs_get_workspace_cycle();
+
+  if (suggested_dir != 0 && wrap)
+    {
+      if (meta_ui_get_direction () == META_UI_DIRECTION_RTL)
+        {
+          if (suggested_dir == META_MOTION_LEFT)
+            suggested_dir = META_MOTION_RIGHT;
+          else
+          if (suggested_dir == META_MOTION_RIGHT)
+            suggested_dir = META_MOTION_LEFT;
+        }
+
+      return suggested_dir;
+    }
 
   if (meta_ui_get_direction() == META_UI_DIRECTION_RTL)
     {
@@ -553,29 +570,11 @@ get_wrapped_horizontal_direction (gint from, gint to, gint num_workspaces)
   return ret;
 }
 
-/**
- * meta_workspace_activate_with_focus:
- * @workspace: a #MetaWorkspace
- * @focus_this: the #MetaWindow to be focused, or %NULL
- * @timestamp: timestamp for @focus_this
- *
- * Switches to @workspace and possibly activates the window @focus_this.
- *
- * The window @focus_this is activated by calling meta_window_activate()
- * which will unminimize it and transient parents, raise it and give it
- * the focus.
- *
- * If a window is currently being moved by the user, it will be
- * moved to @workspace.
- *
- * The advantage of calling this function instead of meta_workspace_activate()
- * followed by meta_window_activate() is that it happens as a unit, so
- * no other window gets focused first before @focus_this.
- */
-void
-meta_workspace_activate_with_focus (MetaWorkspace *workspace,
-                                    MetaWindow    *focus_this,
-                                    guint32        timestamp)
+static void
+meta_workspace_activate_internal (MetaWorkspace       *workspace,
+                                  MetaWindow          *focus_this,
+                                  MetaMotionDirection  suggested_dir,
+                                  guint32              timestamp)
 {
   MetaWorkspace  *old;
   MetaWindow     *move_window;
@@ -665,7 +664,7 @@ meta_workspace_activate_with_focus (MetaWorkspace *workspace,
    meta_screen_calc_workspace_layout (workspace->screen, num_workspaces,
                                       new_space, &layout2);
 
-   direction = get_wrapped_horizontal_direction (layout1.current_col, layout2.current_col, num_workspaces);
+   direction = get_wrapped_horizontal_direction (layout1.current_col, layout2.current_col, suggested_dir, num_workspaces);
 
    if (layout1.current_row < layout2.current_row)
      {
@@ -715,11 +714,55 @@ meta_workspace_activate_with_focus (MetaWorkspace *workspace,
    meta_screen_workspace_switched (screen, current_space, new_space, direction);
 }
 
+/**
+ * meta_workspace_activate_with_focus:
+ * @workspace: a #MetaWorkspace
+ * @focus_this: the #MetaWindow to be focused, or %NULL
+ * @timestamp: timestamp for @focus_this
+ *
+ * Switches to @workspace and possibly activates the window @focus_this.
+ *
+ * The window @focus_this is activated by calling meta_window_activate()
+ * which will unminimize it and transient parents, raise it and give it
+ * the focus.
+ *
+ * If a window is currently being moved by the user, it will be
+ * moved to @workspace.
+ *
+ * The advantage of calling this function instead of meta_workspace_activate()
+ * followed by meta_window_activate() is that it happens as a unit, so
+ * no other window gets focused first before @focus_this.
+ */
+void
+meta_workspace_activate_with_focus (MetaWorkspace *workspace,
+                                    MetaWindow    *focus_this,
+                                    guint32        timestamp)
+{
+  meta_workspace_activate_internal (workspace, focus_this, 0, timestamp);
+}
+
 void
 meta_workspace_activate (MetaWorkspace *workspace,
                          guint32        timestamp)
 {
-  meta_workspace_activate_with_focus (workspace, NULL, timestamp);
+  meta_workspace_activate_internal (workspace, NULL, 0, timestamp);
+}
+
+/**
+ * meta_workspace_activate_with_direction_hint:
+ * @workspace: a #MetaWorkspace
+ * @direction: the suggested #MetaMotionDirection
+ * @timestamp: timestamp for @focus_this
+ *
+ * Switches to @workspace in the specified @direction (if possible)
+ */
+
+void
+meta_workspace_activate_with_direction_hint (MetaWorkspace       *workspace,
+                                             MetaMotionDirection  direction,
+                                             guint32              timestamp)
+{
+  meta_workspace_activate_internal (workspace, NULL, direction, timestamp);
 }
 
 int

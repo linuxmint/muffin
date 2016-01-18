@@ -57,6 +57,9 @@ void meta_workspace_activate (MetaWorkspace *workspace, guint32 timestamp);
 void meta_workspace_activate_with_focus (MetaWorkspace *workspace,
                                          MetaWindow    *focus_this,
                                          guint32        timestamp);
+void meta_workspace_activate_with_direction_hint (MetaWorkspace       *workspace,
+                                                  MetaMotionDirection  direction,
+                                                  guint32              timestamp);
 
 void meta_workspace_update_window_hints (MetaWorkspace *workspace);
 void meta_workspace_set_builtin_struts (MetaWorkspace *workspace,
