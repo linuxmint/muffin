@@ -25,6 +25,7 @@
 #include <config.h>
 #endif
 #include "cogl-utils.h"
+#include <gdk/gdk.h>
 
 /**
  * meta_create_color_texture_4ub:
@@ -118,6 +119,9 @@ meta_create_texture_material (CoglHandle src_texture)
 static CoglContext *cogl_context = NULL;
 static gboolean supports_npot = FALSE;
 
+static gint screen_width = 0;
+static gint screen_height = 0;
+
 inline static gboolean
 hardware_supports_npot_sizes (void)
 {
@@ -129,6 +133,22 @@ hardware_supports_npot_sizes (void)
     supports_npot = cogl_has_feature (cogl_context, COGL_FEATURE_ID_TEXTURE_NPOT);
 
     return supports_npot;
+}
+
+inline static void
+clamp_sizes (gint *width,
+             gint *height)
+{
+    if (screen_width == 0)
+      {
+        GdkScreen *screen = gdk_screen_get_default ();
+
+        screen_width = gdk_screen_get_width (screen);
+        screen_height = gdk_screen_get_height (screen);
+      }
+
+    *width = MIN (*width, screen_width);
+    *height = MIN (*height, screen_height);
 }
 
 /**
@@ -149,6 +169,8 @@ meta_cogl_texture_new_from_data_wrapper                (int  width,
                                               const uint8_t *data)
 {
     CoglTexture *texture = NULL;
+
+    clamp_sizes (&width, &height);
 
     if (hardware_supports_npot_sizes ())
       {
@@ -225,6 +247,8 @@ meta_cogl_texture_new_with_size_wrapper           (int width,
                                        CoglPixelFormat internal_format)
 {
     CoglTexture *texture = NULL;
+
+    clamp_sizes (&width, &height);
 
     if (hardware_supports_npot_sizes ())
       {
