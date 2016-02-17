@@ -77,7 +77,7 @@ Section: libdevel
 Architecture: any
 Depends: ${misc:Depends},
          libmuffin0 (= ${binary:Version}),
-         gir1.2-muffin-3.0 (= ${binary:Version}),
+         gir1.2-meta-muffin-0.0 (= ${binary:Version}),
          libclutter-1.0-dev (>= 1.10.0),
          libgtk-3-dev (>= 3.9.12)
 Description: window and compositing manager (development files)
