@@ -99,9 +99,11 @@ Description: window and compositing manager (debugging symbols)
  .
  This package contains the debugging symbols.
 
-Package: gir1.2-muffin-3.0
+Package: gir1.2-meta-muffin-0.0
 Section: introspection
 Architecture: any
+Breaks: gir1.2-muffin-3.0
+Replaces: gir1.2-muffin-3.0
 Depends: ${gir:Depends},
          ${misc:Depends}
 Description: GObject introspection data for Muffin
