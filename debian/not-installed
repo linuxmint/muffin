@@ -1,0 +1,8 @@
+# libtool not installed
+usr/lib/*/libmuffin.la
+# gir file not installed
+usr/lib/*/muffin/*.gir
+# already installed in girepository
+usr/lib/*/muffin/Meta-Muffin.0.typelib
+# manpages are compressed
+usr/share/man/man1/*.1
