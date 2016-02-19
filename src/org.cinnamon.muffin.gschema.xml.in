@@ -38,6 +38,12 @@
       </_description>
     </key>
 
+    <key name="edge-resistance-window" type="b">
+      <default>true</default>
+      <summary>Enable windows edge resitance</summary>
+      <description>Determine whether the window edges can snap to each other.</description>
+    </key>
+
     <key name="dynamic-workspaces" type="b">
       <default>false</default>
       <_summary>Workspaces are managed dynamically</_summary>

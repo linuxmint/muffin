@@ -377,6 +377,9 @@ apply_edge_resistance (MetaWindow                *window,
   begin = CLAMP (begin, 0, last_edge);
   end   = CLAMP (end,   0, last_edge);
 
+  /* Edge resistance between windows can be disabled in gettings. */
+  gboolean window_edge_enabled = meta_prefs_get_edge_resistance_window ();
+
   /* Loop over all these edges we're moving past/to. */
   i = begin;
   while ((increasing  && i <= end) ||
@@ -385,6 +388,13 @@ apply_edge_resistance (MetaWindow                *window,
       gboolean  edges_align;
       MetaEdge *edge = g_array_index (edges, MetaEdge*, i);
       int       compare = xdir ? edge->rect.x : edge->rect.y;
+
+      /* Pass window edge resistance if disabled. */
+      if (edge->edge_type == META_EDGE_WINDOW && !window_edge_enabled)
+      {
+        i += increment;
+        continue;
+      }
 
       /* Find out if this edge is relevant */
       edges_align = meta_rectangle_edge_aligns (new_rect, edge)  ||
