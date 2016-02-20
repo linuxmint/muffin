@@ -29,6 +29,7 @@
  */
 
 #include <string.h>
+#include <stdlib.h>
 
 #include <GL/gl.h>
 #include <GL/glx.h>
@@ -161,6 +162,17 @@ check_gl_extensions (void)
     {
     case COGL_DRIVER_GL3:
       {
+
+        int major, minor;
+        gboolean version_ok = FALSE;
+
+        meta_gl_get_integerv (GL_MAJOR_VERSION, &major);
+        meta_gl_get_integerv (GL_MINOR_VERSION, &minor);
+
+        version_ok = (major >= 3) && (minor >= 0);
+
+        g_printerr ("openGL version %d.%d detected (GL3 Cogl Driver)\n", major, minor);
+
         int num_extensions, i;
         gboolean arb_sync = FALSE;
         gboolean x11_sync_object = FALSE;
@@ -177,12 +189,35 @@ check_gl_extensions (void)
               x11_sync_object = TRUE;
           }
 
-        return arb_sync && x11_sync_object;
+        return version_ok && arb_sync && x11_sync_object;
       }
     case COGL_DRIVER_GL:
       {
+        gboolean version_ok = FALSE;
+
+        const char *version_string = meta_gl_get_string (GL_VERSION);
+
+        /* From the spec:
+
+           The string returned starts with "<major version>.<minor version>".
+           Following the minor version, there can be another '.',
+           then a vendor-specific build number. The string may have more content,
+           which is completely vendor-specific (thus not a part of the OpenGL standard).
+
+           So, we can split this by . and care only about the first two substrings returned.
+           Anything else is dumped in the third substring.
+         */
+
+        gchar **split = g_strsplit (version_string, ".", 3);
+
+        g_printerr ("openGL version %s.%s detected (GL Cogl Driver)\n", split[0], split[1]);
+
+        version_ok = (g_strv_length (split) >= 2) && (atoi (split[0]) >= 3) && (atoi (split[1]) >= 0);
+        g_strfreev (split);
+
         const char *extensions = meta_gl_get_string (GL_EXTENSIONS);
-        return (extensions != NULL &&
+        return version_ok && 
+               (extensions != NULL &&
                 strstr (extensions, "GL_ARB_sync") != NULL &&
                 strstr (extensions, "GL_EXT_x11_sync_object") != NULL);
       }
@@ -215,7 +250,7 @@ load_required_symbols (void)
 
   if (!check_gl_extensions ())
     {
-      meta_verbose ("MetaSyncRing: couldn't find required GL extensions\n");
+      g_printerr ("MetaSyncRing disabled: couldn't find required GL extensions, or the minimum safe openGL version was not met\n");
       goto out;
     }
 
