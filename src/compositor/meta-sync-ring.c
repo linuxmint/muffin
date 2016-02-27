@@ -169,7 +169,7 @@ check_gl_extensions (void)
         meta_gl_get_integerv (GL_MAJOR_VERSION, &major);
         meta_gl_get_integerv (GL_MINOR_VERSION, &minor);
 
-        version_ok = (major >= 3) && (minor >= 0);
+        version_ok = (major >= 3);
 
         g_printerr ("openGL version %d.%d detected (GL3 Cogl Driver)\n", major, minor);
 
@@ -210,9 +210,13 @@ check_gl_extensions (void)
 
         gchar **split = g_strsplit (version_string, ".", 3);
 
-        g_printerr ("openGL version %s.%s detected (GL Cogl Driver)\n", split[0], split[1]);
+        if (g_strv_length (split) >= 2)
+          {
+            g_printerr ("openGL version %s.%s detected (GL Cogl Driver)\n", split[0], split[1]);
 
-        version_ok = (g_strv_length (split) >= 2) && (atoi (split[0]) >= 3) && (atoi (split[1]) >= 0);
+            version_ok = (atoi (split[0]) >= 3);
+          }
+
         g_strfreev (split);
 
         const char *extensions = meta_gl_get_string (GL_EXTENSIONS);
