@@ -1403,7 +1403,6 @@ LOCAL_SYMBOL void
 meta_window_actor_destroy (MetaWindowActor *self)
 {
   MetaWindow	      *window;
-  MetaCompScreen      *info;
   MetaWindowActorPrivate *priv;
   MetaWindowType window_type;
 
@@ -1412,13 +1411,6 @@ meta_window_actor_destroy (MetaWindowActor *self)
   window = priv->window;
   window_type = meta_window_get_window_type (window);
   meta_window_set_compositor_private (window, NULL);
-
-  /*
-   * We remove the window from internal lookup hashes and thus any other
-   * unmap events etc fail
-   */
-  info = meta_screen_get_compositor_data (priv->screen);
-  info->windows = g_list_remove (info->windows, (gconstpointer) self);
 
   if (window_type == META_WINDOW_DROPDOWN_MENU ||
       window_type == META_WINDOW_POPUP_MENU ||
