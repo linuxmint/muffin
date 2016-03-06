@@ -111,6 +111,7 @@ static int ui_scale = 1;
 static int min_window_opacity = 0;
 static gboolean resize_with_right_button = FALSE;
 static gboolean edge_tiling = FALSE;
+static gboolean edge_resistance_window = TRUE;
 static gboolean force_fullscreen = TRUE;
 static unsigned int snap_modifier[2];
 
@@ -378,6 +379,13 @@ static MetaBoolPreference preferences_bool[] =
         META_PREF_EDGE_TILING,
       },
       &edge_tiling,
+    },
+    {
+      { "edge-resistance-window",
+        SCHEMA_MUFFIN,
+        META_PREF_EDGE_RESISTANCE_WINDOW,
+      },
+      &edge_resistance_window,
     },
     {
       { KEY_LIVE_HIDDEN_WINDOWS,
@@ -1815,6 +1823,9 @@ meta_preference_to_string (MetaPreference pref)
     case META_PREF_EDGE_TILING:
       return "EDGE_TILING";
 
+    case META_PREF_EDGE_RESISTANCE_WINDOW:
+      return "EDGE_RESISTANCE_WINDOW";
+
     case META_PREF_FORCE_FULLSCREEN:
       return "FORCE_FULLSCREEN";
 
@@ -2304,6 +2315,12 @@ gboolean
 meta_prefs_get_edge_tiling ()
 {
   return edge_tiling;
+}
+
+gboolean
+meta_prefs_get_edge_resistance_window ()
+{
+  return edge_resistance_window;
 }
 
 MetaKeyBindingAction
