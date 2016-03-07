@@ -1,3 +1,16 @@
+muffin (2.8.5) rosa; urgency=medium
+
+  [ Michael Webster ]
+  * tiling:  account for gtk frame extents when evaluating whether a c-s-d window can be tiled or not.
+  * prefs.c: Update keybindings even when the new keybinding is empty - this prevents old built-in (muffin) keybindings from continuing to work even after they've been cleared.
+  * prefs: don't attach modal dialogs by default
+  * cogl wrappers: Perform a sanity check on the width/height request and clamp the sizes to a maximum of (x) screen size.
+  * display.c: prevent assertion errors when clicking out of window menus.
+  * Disable frame sync when used when OpenGL version used by the driver is < 3.0.
+  * meta-sync-ring.c: simplify openGL version check to only check the major version number. Make the COGL_DRIVER_GL check a bit safer.
+
+ -- Clement Lefebvre <root@linuxmint.com>  Mon, 07 Mar 2016 17:13:48 +0000
+
 muffin (2.8.4) rosa; urgency=medium
 
   [ Michael Webster ]
