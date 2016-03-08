@@ -1838,6 +1838,15 @@ meta_preference_to_string (MetaPreference pref)
     case META_PREF_WORKSPACE_CYCLE:
       return "WORKSPACE_CYCLE";
 
+    case META_PREF_VISUAL_BELL:
+      return "VISUAL_BELL";
+
+    case META_PREF_AUDIBLE_BELL:
+      return "AUDIBLE_BELL";
+
+    case META_PREF_VISUAL_BELL_TYPE:
+      return "VISUAL_BELL_TYPE";
+
     case META_PREF_DRAGGABLE_BORDER_WIDTH:
       return "DRAGGABLE_BORDER_WIDTH";
 
@@ -1870,7 +1879,6 @@ meta_preference_to_string (MetaPreference pref)
 
     case META_PREF_MIN_WIN_OPACITY:
       return "MIN_WIN_OPACITY";
-
     }
 
   return "(unknown)";

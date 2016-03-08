@@ -5041,7 +5041,7 @@ meta_window_move_resize_internal (MetaWindow          *window,
   MetaRectangle new_rect;
   MetaRectangle old_rect;
 
-  if (!window->type == META_WINDOW_TOOLTIP) {
+  if (window->type != META_WINDOW_TOOLTIP) {
     g_return_if_fail (!window->override_redirect);
   }
 
@@ -5509,7 +5509,7 @@ meta_window_move (MetaWindow  *window,
 {
   MetaMoveResizeFlags flags;
 
-  if (!window->type == META_WINDOW_TOOLTIP) {
+  if (window->type != META_WINDOW_TOOLTIP) {
     g_return_if_fail (!window->override_redirect);
   }
 
