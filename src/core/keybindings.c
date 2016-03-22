@@ -1321,6 +1321,47 @@ meta_window_ungrab_all_keys (MetaWindow *window, guint32 timestamp)
     }
 }
 
+LOCAL_SYMBOL gboolean
+meta_window_resize_or_move_allowed (MetaWindow *window,
+              MetaDirection dir)
+{
+    if (!META_WINDOW_MAXIMIZED (window) && !META_WINDOW_TILED_OR_SNAPPED (window))
+      return TRUE;
+
+    switch (dir)
+      {
+        case META_DIRECTION_LEFT:
+            if (window->tile_mode == META_TILE_RIGHT  ||
+                window->tile_mode == META_TILE_URC    ||
+                window->tile_mode == META_TILE_LRC)
+                return TRUE;
+            break;
+        case META_DIRECTION_RIGHT:
+            if (window->tile_mode == META_TILE_LEFT   ||
+                window->tile_mode == META_TILE_ULC    ||
+                window->tile_mode == META_TILE_LLC)
+                return TRUE;
+            break;
+        case META_DIRECTION_UP:
+            if (window->tile_mode == META_TILE_BOTTOM ||
+                window->tile_mode == META_TILE_LLC    ||
+                window->tile_mode == META_TILE_LRC)
+                return TRUE;
+            break;
+        case META_DIRECTION_DOWN:
+            if (window->tile_mode == META_TILE_TOP    ||
+                window->tile_mode == META_TILE_ULC    ||
+                window->tile_mode == META_TILE_URC)
+                return TRUE;
+            break;
+        default:
+            return FALSE;
+      }
+
+      return FALSE;
+}
+
+
 static gboolean 
 is_modifier (MetaDisplay *display,
              unsigned int keycode)
@@ -1843,17 +1884,26 @@ process_keyboard_move_grab (MetaDisplay *display,
        * remaximize it.  In normal cases, we need to do a moveresize
        * now to get the position back to the original.
        */
-      if (window->shaken_loose)
-        meta_window_maximize (window,
-                              META_MAXIMIZE_HORIZONTAL |
-                              META_MAXIMIZE_VERTICAL);
+      if (window->shaken_loose) 
+        {
+          meta_window_maximize (window,
+                                META_MAXIMIZE_HORIZONTAL |
+                                META_MAXIMIZE_VERTICAL);
+        }
+      else if (window->tile_mode != META_TILE_NONE)
+        {
+          window->custom_snap_size = FALSE;
+          meta_window_real_tile (window, FALSE);
+        }
       else
-        meta_window_move_resize (display->grab_window,
-                                 TRUE,
-                                 display->grab_initial_window_pos.x,
-                                 display->grab_initial_window_pos.y,
-                                 display->grab_initial_window_pos.width,
-                                 display->grab_initial_window_pos.height);
+        {
+          meta_window_move_resize (display->grab_window,
+                                   TRUE,
+                                   display->grab_initial_window_pos.x,
+                                   display->grab_initial_window_pos.y,
+                                   display->grab_initial_window_pos.width,
+                                   display->grab_initial_window_pos.height);
+        }
     }
   
   /* When moving by increments, we still snap to edges if the move
@@ -1904,6 +1954,8 @@ process_keyboard_move_grab (MetaDisplay *display,
                   "Computed new window location %d,%d due to keypress\n",
                   x, y);
 
+      meta_window_tile (window, META_TILE_NONE, FALSE);
+
       meta_window_get_client_root_coords (window, &old_rect);
 
       meta_window_edge_resistance_for_move (window, 
@@ -1939,22 +1991,30 @@ process_keyboard_resize_grab_op_change (MetaDisplay *display,
         {
         case XK_Up:
         case XK_KP_Up:
-          display->grab_op = META_GRAB_OP_KEYBOARD_RESIZING_N;          
+          if (meta_window_resize_or_move_allowed (window, META_DIRECTION_UP)) {
+            display->grab_op = META_GRAB_OP_KEYBOARD_RESIZING_N;
+          }
           handled = TRUE;
           break;
         case XK_Down:
         case XK_KP_Down:
-          display->grab_op = META_GRAB_OP_KEYBOARD_RESIZING_S;
+          if (meta_window_resize_or_move_allowed (window, META_DIRECTION_DOWN)) {
+            display->grab_op = META_GRAB_OP_KEYBOARD_RESIZING_S;
+          }
           handled = TRUE;
           break;
         case XK_Left:
         case XK_KP_Left:
-          display->grab_op = META_GRAB_OP_KEYBOARD_RESIZING_W;
+          if (meta_window_resize_or_move_allowed (window, META_DIRECTION_LEFT)) {
+            display->grab_op = META_GRAB_OP_KEYBOARD_RESIZING_W;
+          }
           handled = TRUE;
           break;
         case XK_Right:
         case XK_KP_Right:
-          display->grab_op = META_GRAB_OP_KEYBOARD_RESIZING_E;
+          if (meta_window_resize_or_move_allowed (window, META_DIRECTION_RIGHT)) {
+            display->grab_op = META_GRAB_OP_KEYBOARD_RESIZING_E;
+          }
           handled = TRUE;
           break;
         }
@@ -1965,12 +2025,16 @@ process_keyboard_resize_grab_op_change (MetaDisplay *display,
         {
         case XK_Left:
         case XK_KP_Left:
-          display->grab_op = META_GRAB_OP_KEYBOARD_RESIZING_W;
+          if (meta_window_resize_or_move_allowed (window, META_DIRECTION_LEFT)) {
+            display->grab_op = META_GRAB_OP_KEYBOARD_RESIZING_W;
+          }
           handled = TRUE;
           break;
         case XK_Right:
         case XK_KP_Right:
-          display->grab_op = META_GRAB_OP_KEYBOARD_RESIZING_E;
+          if (meta_window_resize_or_move_allowed (window, META_DIRECTION_RIGHT)) {
+            display->grab_op = META_GRAB_OP_KEYBOARD_RESIZING_E;
+          }
           handled = TRUE;
           break;
         }
@@ -1981,12 +2045,16 @@ process_keyboard_resize_grab_op_change (MetaDisplay *display,
         {
         case XK_Left:
         case XK_KP_Left:
-          display->grab_op = META_GRAB_OP_KEYBOARD_RESIZING_W;
+          if (meta_window_resize_or_move_allowed (window, META_DIRECTION_LEFT)) {
+            display->grab_op = META_GRAB_OP_KEYBOARD_RESIZING_W;
+          }
           handled = TRUE;
           break;
         case XK_Right:
         case XK_KP_Right:
-          display->grab_op = META_GRAB_OP_KEYBOARD_RESIZING_E;
+          if (meta_window_resize_or_move_allowed (window, META_DIRECTION_RIGHT)) {
+            display->grab_op = META_GRAB_OP_KEYBOARD_RESIZING_E;
+          }
           handled = TRUE;
           break;
         }
@@ -1997,12 +2065,16 @@ process_keyboard_resize_grab_op_change (MetaDisplay *display,
         {
         case XK_Up:
         case XK_KP_Up:
-          display->grab_op = META_GRAB_OP_KEYBOARD_RESIZING_N;          
+          if (meta_window_resize_or_move_allowed (window, META_DIRECTION_UP)) {
+            display->grab_op = META_GRAB_OP_KEYBOARD_RESIZING_N;
+          }
           handled = TRUE;
           break;
         case XK_Down:
         case XK_KP_Down:
-          display->grab_op = META_GRAB_OP_KEYBOARD_RESIZING_S;
+          if (meta_window_resize_or_move_allowed (window, META_DIRECTION_DOWN)) {
+            display->grab_op = META_GRAB_OP_KEYBOARD_RESIZING_S;
+          }
           handled = TRUE;
           break;
         }
@@ -2013,12 +2085,16 @@ process_keyboard_resize_grab_op_change (MetaDisplay *display,
         {
         case XK_Up:
         case XK_KP_Up:
-          display->grab_op = META_GRAB_OP_KEYBOARD_RESIZING_N; 
+          if (meta_window_resize_or_move_allowed (window, META_DIRECTION_UP)) {
+            display->grab_op = META_GRAB_OP_KEYBOARD_RESIZING_N; 
+          }
           handled = TRUE;
           break;
         case XK_Down:
         case XK_KP_Down:
-          display->grab_op = META_GRAB_OP_KEYBOARD_RESIZING_S;
+          if (meta_window_resize_or_move_allowed (window, META_DIRECTION_DOWN)) {
+            display->grab_op = META_GRAB_OP_KEYBOARD_RESIZING_S;
+          }
           handled = TRUE;
           break;
         }
@@ -2088,7 +2164,10 @@ process_keyboard_resize_grab (MetaDisplay *display,
   width = window->rect.width;
   height = window->rect.height;
 
-  gravity = meta_resize_gravity_from_grab_op (display->grab_op);
+  if (window->tile_mode != META_TILE_NONE)
+    gravity = meta_resize_gravity_from_tile_mode (window->tile_mode);
+  else
+    gravity = meta_resize_gravity_from_grab_op (display->grab_op);
 
   smart_snap = (event->xkey.state & ShiftMask) != 0;
   
@@ -2615,9 +2694,6 @@ handle_tile_action (MetaDisplay    *display,
   if (new_mode == window->tile_mode)
     return;
 
-  if (!meta_window_can_tile (window, new_mode))
-    return;
-
   meta_window_tile (window, new_mode, snap);
 }
 
@@ -2732,6 +2808,12 @@ handle_begin_resize       (MetaDisplay    *display,
 {
   if (window->has_resize_func)
     {
+      if (window->tile_mode != META_TILE_NONE)
+        {
+          window->resize_tile_mode = window->tile_mode;
+          window->resizing_tile_type = window->tile_type;
+        }
+
       meta_window_begin_grab_op (window,
                                  META_GRAB_OP_KEYBOARD_RESIZING_UNKNOWN,
                                  FALSE,

@@ -417,6 +417,7 @@ gboolean meta_display_window_has_pending_pings (MetaDisplay        *display,
 						MetaWindow         *window);
 
 int meta_resize_gravity_from_grab_op (MetaGrabOp op);
+int meta_resize_gravity_from_tile_mode (MetaTileMode mode);
 
 gboolean meta_grab_op_is_moving   (MetaGrabOp op);
 gboolean meta_grab_op_is_resizing (MetaGrabOp op);

@@ -65,6 +65,10 @@ gboolean meta_window_grab_all_keys          (MetaWindow  *window,
                                              guint32      timestamp);
 void     meta_window_ungrab_all_keys        (MetaWindow  *window,
                                              guint32      timestamp);
+
+gboolean meta_window_resize_or_move_allowed (MetaWindow *window,
+                                             MetaDirection dir);
+
 gboolean meta_display_process_key_event     (MetaDisplay *display,
                                              MetaWindow  *window,
                                              XEvent      *event);
