@@ -3858,11 +3858,9 @@ meta_window_real_tile (MetaWindow *window, gboolean force)
 
   recalc_window_features (window);
 
-  normalize_tile_state (window);
-
   meta_screen_tile_preview_update (window->screen, FALSE);
 
-  if (window->display->compositor)
+  if (window->display->compositor && (window->resize_tile_mode == META_TILE_NONE))
     {
       MetaRectangle old_rect;
       MetaRectangle new_rect;
@@ -3886,6 +3884,8 @@ meta_window_real_tile (MetaWindow *window, gboolean force)
        */
       meta_window_queue (window, META_QUEUE_MOVE_RESIZE);
     }
+
+  normalize_tile_state (window);
 
   set_net_wm_state (window);
 
