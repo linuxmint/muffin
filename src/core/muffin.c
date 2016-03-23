@@ -69,6 +69,8 @@ main (int argc, char **argv)
   GOptionContext *ctx;
   GError *error = NULL;
 
+  g_setenv ("CLUTTER_BACKEND", "x11", TRUE);
+
   g_type_init ();
 
   ctx = meta_get_option_context ();
