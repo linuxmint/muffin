@@ -1064,12 +1064,9 @@ meta_screen_free (MetaScreen *screen,
   
   meta_display_grab (display);
 
-  if (screen->display->compositor)
-    {
-      meta_compositor_unmanage_screen (screen->display->compositor,
-				       screen);
-    }
-  
+  meta_compositor_unmanage_screen (screen->display->compositor,
+                                   screen);
+
   meta_display_unmanage_windows_for_screen (display, screen, timestamp);
   
   meta_prefs_remove_listener (prefs_changed_callback, screen);
@@ -3072,9 +3069,8 @@ meta_screen_resize (MetaScreen *screen,
   reload_monitor_infos (screen);
   set_desktop_geometry_hint (screen);
 
-  if (screen->display->compositor)
-    meta_compositor_sync_screen_size (screen->display->compositor,
-				      screen, width, height);
+  meta_compositor_sync_screen_size (screen->display->compositor,
+                                    screen, width, height);
 
   /* Queue a resize on all the windows */
   meta_screen_foreach_window (screen, meta_screen_resize_func, 0);

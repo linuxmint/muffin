@@ -884,10 +884,8 @@ meta_window_new_with_attrs (MetaDisplay       *display,
 	&& attrs->width == 1 && attrs->height == 1) ||
        xwindow == screen->wm_cm_selection_window ||
        xwindow == screen->guard_window ||
-       (display->compositor &&
-        xwindow == XCompositeGetOverlayWindow (display->xdisplay,
-					       screen->xroot)
-       )
+       xwindow == XCompositeGetOverlayWindow (display->xdisplay,
+                                              screen->xroot)
       )
      ) {
     meta_verbose ("Not managing our own windows\n");
@@ -1480,8 +1478,7 @@ meta_window_new_with_attrs (MetaDisplay       *display,
       set_net_wm_state (window);
     }
 
-  if (screen->display->compositor)
-    meta_compositor_add_window (screen->display->compositor, window);
+  meta_compositor_add_window (screen->display->compositor, window);
 
   /* Sync stack changes */
   meta_stack_thaw (window->screen->stack);
@@ -1700,14 +1697,11 @@ meta_window_unmanage (MetaWindow  *window,
 
   meta_verbose ("Unmanaging 0x%lx\n", window->xwindow);
 
-  if (window->display->compositor)
-    {
-      if (window->visible_to_compositor || meta_window_is_attached_dialog (window))
-        meta_compositor_hide_window (window->display->compositor, window,
-                                     META_COMP_EFFECT_DESTROY);
+  if (window->visible_to_compositor || meta_window_is_attached_dialog (window))
+    meta_compositor_hide_window (window->display->compositor, window,
+                                 META_COMP_EFFECT_DESTROY);
 
-      meta_compositor_remove_window (window->display->compositor, window);
-    }
+  meta_compositor_remove_window (window->display->compositor, window);
 
   if (window->display->window_with_menu == window)
     {
@@ -3215,33 +3209,29 @@ meta_window_show (MetaWindow *window)
   toplevel_now_mapped = meta_window_toplevel_is_mapped (window);
   if (toplevel_now_mapped != toplevel_was_mapped)
     {
-      if (window->display->compositor)
-        meta_compositor_window_mapped (window->display->compositor, window);
+      meta_compositor_window_mapped (window->display->compositor, window);
     }
 
   if (!window->visible_to_compositor)
     {
       window->visible_to_compositor = TRUE;
 
-      if (window->display->compositor)
+      MetaCompEffect effect = META_COMP_EFFECT_NONE;
+
+      switch (window->pending_compositor_effect)
         {
-          MetaCompEffect effect = META_COMP_EFFECT_NONE;
-
-          switch (window->pending_compositor_effect)
-            {
-            case META_COMP_EFFECT_CREATE:
-            case META_COMP_EFFECT_UNMINIMIZE:
-              effect = window->pending_compositor_effect;
-              break;
-            case META_COMP_EFFECT_NONE:
-            case META_COMP_EFFECT_DESTROY:
-            case META_COMP_EFFECT_MINIMIZE:
-              break;
-            }
-
-          meta_compositor_show_window (window->display->compositor,
-                                       window, effect);
+        case META_COMP_EFFECT_CREATE:
+        case META_COMP_EFFECT_UNMINIMIZE:
+          effect = window->pending_compositor_effect;
+          break;
+        case META_COMP_EFFECT_NONE:
+        case META_COMP_EFFECT_DESTROY:
+        case META_COMP_EFFECT_MINIMIZE:
+          break;
         }
+
+      meta_compositor_show_window (window->display->compositor,
+                                   window, effect);
     }
 
   /* We don't want to worry about all cases from inside
@@ -3322,25 +3312,22 @@ meta_window_hide (MetaWindow *window)
     {
       window->visible_to_compositor = FALSE;
 
-      if (window->display->compositor)
+      MetaCompEffect effect = META_COMP_EFFECT_NONE;
+
+      switch (window->pending_compositor_effect)
         {
-          MetaCompEffect effect = META_COMP_EFFECT_NONE;
-
-          switch (window->pending_compositor_effect)
-            {
-            case META_COMP_EFFECT_CREATE:
-            case META_COMP_EFFECT_UNMINIMIZE:
-            case META_COMP_EFFECT_NONE:
-              break;
-            case META_COMP_EFFECT_DESTROY:
-            case META_COMP_EFFECT_MINIMIZE:
-              effect = window->pending_compositor_effect;
-              break;
-            }
-
-          meta_compositor_hide_window (window->display->compositor,
-                                       window, effect);
+        case META_COMP_EFFECT_CREATE:
+        case META_COMP_EFFECT_UNMINIMIZE:
+        case META_COMP_EFFECT_NONE:
+          break;
+        case META_COMP_EFFECT_DESTROY:
+        case META_COMP_EFFECT_MINIMIZE:
+          effect = window->pending_compositor_effect;
+          break;
         }
+
+      meta_compositor_hide_window (window->display->compositor,
+                                   window, effect);
     }
 
   did_hide = FALSE;
@@ -3382,14 +3369,11 @@ meta_window_hide (MetaWindow *window)
   toplevel_now_mapped = meta_window_toplevel_is_mapped (window);
   if (toplevel_now_mapped != toplevel_was_mapped)
     {
-      if (window->display->compositor)
-        {
-          /* As above, we may be *mapping* live hidden windows */
-          if (toplevel_now_mapped)
-            meta_compositor_window_mapped (window->display->compositor, window);
-          else
-            meta_compositor_window_unmapped (window->display->compositor, window);
-        }
+      /* As above, we may be *mapping* live hidden windows */
+      if (toplevel_now_mapped)
+        meta_compositor_window_mapped (window->display->compositor, window);
+      else
+        meta_compositor_window_unmapped (window->display->compositor, window);
     }
 
   set_net_wm_state (window);
@@ -3681,43 +3665,35 @@ meta_window_maximize (MetaWindow        *window,
 	  return;
 	}
 
-      if ((window->tile_mode != META_TILE_NONE ||
-          window->last_tile_mode != META_TILE_NONE) &&
-    	  window->tile_mode != META_TILE_MAXIMIZE)
-        {
-          saved_rect = &window->saved_rect;
+    if ((window->tile_mode != META_TILE_NONE ||
+        window->last_tile_mode != META_TILE_NONE) &&
+        window->tile_mode != META_TILE_MAXIMIZE)
+      {
+        saved_rect = &window->saved_rect;
 
-          window->maximized_vertically = FALSE;
-        }
+        window->maximized_vertically = FALSE;
+      }
 
-      meta_window_maximize_internal (window,
-                                     directions,
-                                     saved_rect);
+    meta_window_maximize_internal (window,
+                                   directions,
+                                   saved_rect);
 
-      if (window->display->compositor)
-        {
-          MetaRectangle old_rect;
-	  MetaRectangle new_rect;
+    MetaRectangle old_rect;
+    MetaRectangle new_rect;
 
-	  meta_window_get_outer_rect (window, &old_rect);
+    meta_window_get_outer_rect (window, &old_rect);
 
-          meta_window_move_resize_now (window);
+    meta_window_move_resize_now (window);
 
-	  meta_window_get_outer_rect (window, &new_rect);
-          meta_compositor_maximize_window (window->display->compositor,
-                                           window,
-                                           &old_rect,
-					   &new_rect);
-        }
-      else
-        {
-          /* move_resize with new maximization constraints
-           */
-          meta_window_queue(window, META_QUEUE_MOVE_RESIZE);
-        }
+    meta_window_get_outer_rect (window, &new_rect);
+    meta_compositor_maximize_window (window->display->compositor,
+                                     window,
+                                     &old_rect,
+                                     &new_rect);
     }
-    meta_screen_tile_preview_hide (window->screen);
-    normalize_tile_state (window);
+
+  meta_screen_tile_preview_hide (window->screen);
+  normalize_tile_state (window);
 }
 
 /**
@@ -3860,7 +3836,7 @@ meta_window_real_tile (MetaWindow *window, gboolean force)
 
   meta_screen_tile_preview_update (window->screen, FALSE);
 
-  if (window->display->compositor && (window->resize_tile_mode == META_TILE_NONE))
+  if (window->resize_tile_mode == META_TILE_NONE)
     {
       MetaRectangle old_rect;
       MetaRectangle new_rect;
@@ -4073,11 +4049,11 @@ meta_window_unmaximize_internal (MetaWindow        *window,
        */
       ensure_size_hints_satisfied (&target_rect, &window->size_hints);
 
-      if (window->display->compositor && window->resizing_tile_type == META_WINDOW_TILE_TYPE_NONE)
+      if (window->resizing_tile_type == META_WINDOW_TILE_TYPE_NONE)
         {
           MetaRectangle old_rect, new_rect;
 
-	  meta_window_get_outer_rect (window, &old_rect);
+          meta_window_get_outer_rect (window, &old_rect);
 
           meta_window_move_resize_internal (window,
                                             META_IS_MOVE_ACTION | META_IS_RESIZE_ACTION,
@@ -4087,11 +4063,11 @@ meta_window_unmaximize_internal (MetaWindow        *window,
                                             target_rect.width,
                                             target_rect.height);
 
-	  meta_window_get_outer_rect (window, &new_rect);
+          meta_window_get_outer_rect (window, &new_rect);
           meta_compositor_unmaximize_window (window->display->compositor,
-					     window,
+                                             window,
                                              &old_rect,
-					     &new_rect);
+                                             &new_rect);
         }
       else
         {
@@ -5438,10 +5414,9 @@ meta_window_move_resize_internal (MetaWindow          *window,
                   newx, newy, window->rect.width, window->rect.height,
                   window->user_rect.x, window->user_rect.y,
                   window->user_rect.width, window->user_rect.height);
-      if (window->display->compositor)
-        meta_compositor_sync_window_geometry (window->display->compositor,
-                                              window,
-                                              did_placement);
+      meta_compositor_sync_window_geometry (window->display->compositor,
+                                            window,
+                                            did_placement);
     }
   else
     {
@@ -5778,8 +5753,7 @@ meta_window_configure_notify (MetaWindow      *window,
   if (!event->override_redirect && !event->send_event)
     meta_warning ("Unhandled change of windows override redirect status\n");
 
-  if (window->display->compositor)
-    meta_compositor_sync_window_geometry (window->display->compositor, window, FALSE);
+  meta_compositor_sync_window_geometry (window->display->compositor, window, FALSE);
 }
 
 LOCAL_SYMBOL void

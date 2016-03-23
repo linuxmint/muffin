@@ -1778,9 +1778,8 @@ event_callback (XEvent   *event,
                               window->desc);
                 }
 
-              if (display->compositor)
-                meta_compositor_window_shape_changed (display->compositor,
-                                                      window);
+              meta_compositor_window_shape_changed (display->compositor,
+                                                    window);
             }
         }
       else
@@ -2346,8 +2345,7 @@ event_callback (XEvent   *event,
       /* NB: override redirect windows wont cause a map request so we
        * watch out for map notifies against any root windows too if a
        * compositor is enabled: */
-      if (display->compositor && window == NULL
-	  && meta_display_screen_for_root (display, event->xmap.event))
+      if (window == NULL && meta_display_screen_for_root (display, event->xmap.event))
         {
           window = meta_window_new (display, event->xmap.window,
                                     FALSE);
@@ -2722,7 +2720,7 @@ event_callback (XEvent   *event,
       break;
     }
 
-  if (display->compositor && !bypass_compositor)
+  if (!bypass_compositor)
     {
       if (meta_compositor_process_event (display->compositor,
                                          event,
