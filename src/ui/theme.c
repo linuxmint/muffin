@@ -5964,7 +5964,7 @@ meta_gtk_widget_get_font_desc (GtkWidget *widget,
   g_return_val_if_fail (gtk_widget_get_realized (widget), NULL);
 
   style = gtk_widget_get_style_context (widget);
-  gtk_style_context_get (style, GTK_STATE_FLAG_NORMAL,
+  gtk_style_context_get (style, gtk_style_context_get_state (style),
                          GTK_STYLE_PROPERTY_FONT, &font_desc,
                          NULL);
 
