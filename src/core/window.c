@@ -1817,12 +1817,6 @@ meta_window_unmanage (MetaWindow  *window,
       window->tile_type != META_WINDOW_TILE_TYPE_NONE)
     unmaximize_window_before_freeing (window);
 
-  /* The XReparentWindow call in meta_window_destroy_frame() moves the
-   * window so we need to send a configure notify; see bug 399552.  (We
-   * also do this just in case a window got unmaximized.)
-   */
-  send_configure_notify (window);
-
   meta_window_unqueue (window, META_QUEUE_CALC_SHOWING |
                                META_QUEUE_MOVE_RESIZE |
                                META_QUEUE_UPDATE_ICON);
@@ -1859,7 +1853,15 @@ meta_window_unmanage (MetaWindow  *window,
   meta_window_destroy_sync_request_alarm (window);
 
   if (window->frame)
-    meta_window_destroy_frame (window);
+    {
+      /* The XReparentWindow call in meta_window_destroy_frame() moves the
+       * window so we need to send a configure notify; see bug 399552.  (We
+       * also do this just in case a window got unmaximized.)
+       */
+      send_configure_notify (window);
+
+      meta_window_destroy_frame (window);
+    }
 
   /* If an undecorated window is being withdrawn, that will change the
    * stack as presented to the compositing manager, without actually
@@ -5027,9 +5029,7 @@ meta_window_move_resize_internal (MetaWindow          *window,
   MetaRectangle new_rect;
   MetaRectangle old_rect;
 
-  if (window->type != META_WINDOW_TOOLTIP) {
-    g_return_if_fail (!window->override_redirect);
-  }
+  g_return_if_fail (!window->override_redirect);
 
   is_configure_request = (flags & META_IS_CONFIGURE_REQUEST) != 0;
   do_gravity_adjust = (flags & META_DO_GRAVITY_ADJUST) != 0;
@@ -5494,9 +5494,7 @@ meta_window_move (MetaWindow  *window,
 {
   MetaMoveResizeFlags flags;
 
-  if (window->type != META_WINDOW_TOOLTIP) {
-    g_return_if_fail (!window->override_redirect);
-  }
+  g_return_if_fail (!window->override_redirect);
 
   flags = (user_op ? META_IS_USER_ACTION : 0) | META_IS_MOVE_ACTION;
 
@@ -7598,6 +7596,8 @@ static void
 send_configure_notify (MetaWindow *window)
 {
   XEvent event;
+
+  g_assert (!window->override_redirect);
 
   /* from twm */
 
