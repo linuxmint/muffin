@@ -4,133 +4,87 @@ Upstream-Contact: Linux Mint Project <root@linuxmint.com>
 Source: https://github.com/linuxmint/muffin
 
 Files: *
-Copyright:  2001-2008, Havoc Pennington, Red Hat, Inc., and others
-            2002-2004, 2009-2011, Red Hat, Inc
-            2002,      The Gnome Foundation
-            2007,      The GNOME Project
-            2002,      Ross Burton
-            2004-2006, Elijah Newren
-            2001,      Dominik Vogt, Matthias Clasen, and fvwm2 team
-            2003-2004, Rob Adams
-            2002,      Sun Microsystems, Inc.
-            1986-1998, The Open Group
-            1987,      Digital Equipment Corporation
-            2001,      Anders Carlsson
-            2008-2009, Thomas Thurman
-            1995-2000, 2005-2006, GTK+ Team
-            1988,      Wyse Technology, Inc.,
-            2007-2008, Iain Holmes
-            2000-2001, Eazel, Inc.
-            2001,      Ximian, Inc.
-            2002,      Gaute Lindkvist
-            2002,      James M. Cape
-            2002,      Garrett LeSage
-            2002,      Tuomas Kuosmanen
-            2002,      Jorn Baayen
-            1997-2000, Dan Pascu and Alfredo Kojima
-            1999-2007, Free Software Foundation, Inc.
-            1995-1997, Ulrich Drepper
-            1994,      X Consortium
-            2004-2008, Rodney Dawes
-            2004,      Scott James Remnant
-            2002,      Simos Xenitellis
-            2003-2006, Miloslav Trmac
-            2008,      GNOME i18n Project for Vietnamese
-            2003-2006, Sharif FarsiWeb, Inc.
-            2003,      Åsmund Skjæveland.
-            2005-2006, Canonical Ltd. and Rosetta Contributors
-            2004-2006, Adam Weinberger and the GNOME Foundation
-            2004,      Kakilik Project Croatiann team
-            2007-2008, OpenedHand
-            2008-2012, Intel Corporation
-            2008,      Matthew Allum
-            2003, Keith Packard
-            2005-2007, Olivier Fourdan
-            1987, Digital Equipment Corporation
-            1987-1988, 1998 The Open Group
-            2004-2005, Tom Tromey
-            2004-2005, Carsten Schaar
-            2010, Milan Bouchet-Valat
-            2009, Sander Dijkhuis
-            2012 Clement Lefebvre
-            2010-2011 Florian Müllner
-            2011, 2012 Jasper St. Pierre
-            2012 Nelson Marques
-            2012 Owen W. Taylor
-            2011 Rui Matos
+Copyright: 1997-2000, Dan Pascu and Alfredo Kojima
+           2001, Dominik Vogt, Matthias Clasen, and fvwm2 team
+           2004-2006, Elijah Newren
+           2010, Florian Müllner
+           1989-1991, Free Software Foundation, Inc
+           1995-2000, GTK+ Team
+           2001, Havoc Pennington
+           2001, Havoc Pennington (based on GDK code
+           2001, Havoc Pennington, 99% copied from wrlib in
+           2001, Havoc Pennington, Anders Carlsson
+           2001, Havoc Pennington, error trapping inspired by GDK
+           2008, Iain Holmes
+           2008, Intel Corp
+           2011-2012, Intel Corporation
+           2002, Jorn Baayen <jorn@nl.linux.org>
+           2003, Keith Packard
+           2008, Matthew Allum
+           Matthias Clasen, Dominik Vogt
+           2010, Milan Bouchet-Valat
+           2005-2007, Olivier Fourdan
+           Owen
+           2002, Red Hat Inc
+           2010, Red Hat, Inc
+           Red Hat. So
+           2003, Rob Adams
+           2009, Sander Dijkhuis
+           2002, Sun Microsystems
+           2002, Sun Microsystems Inc
+           2008, Thomas Thurman
+           Tom Tromey, Carsten Schaar
+           2004-2006, Adam Weinberger and the GNOME Foundation
+           2005, Canonical Ltd
+           2006, Canonical Ltd. and Rosetta Contributors
+           Croatiann team
+           2003, Free Software Foundation
+           2003-2008, Free Software Foundation Inc
+           2009, Free Software Foundation, Inc
+           2009, GNOME i18n Project for Vietnamese
+           2001-2008, Havoc Pennington, Red Hat, Inc, og andre
+           2001-2008, Havoc Pennington, Red Hat, Inc. dy inšyja
+           2001-2002, Havoc Pennington, Red Hat, Inc. və başqaları
+           2001-2008, Havoc Pennington, Red Hat, Inc., ac eraill
+           2001-2007, Havoc Pennington, Red Hat, Inc., and others
+           2001-2002, Havoc Pennington, Red Hat, Inc., àti àwọn mìíràn
+           2001-2002, Havoc Pennington, Red Hat, Inc., da saura
+           2001-2008, Havoc Pennington, Red Hat, Inc., e të tjerë
+           2001-2002, Havoc Pennington, Red Hat, Inc., et des ôtes
+           2001-2008, Havoc Pennington, Red Hat, Inc., hag all
+           2001-2002, Havoc Pennington, Red Hat, Inc., i ostali
+           2001-2002, Havoc Pennington, Red Hat, Inc., nakwa ndị ọzọ
+           2001-2002, Havoc Pennington, Red Hat, Inc., og
+           2001-2002, Havoc Pennington, Red Hat, Inc., sy ireo hafa
+           2001-2002, Havoc Pennington, Red Hat, Inc., ба бусад
+           2001-2002, Havoc Pennington, Red Hat, Inc., և այլոք
+           2001-2008, Havoc Pennington, Red Hat, Inc., व इतर
+           2003-2006, Miloslav Trmac <mitr@volny.cz>
+           2007, Rosetta Contributors and Canonical Ltd 2007
+           2011, Rosetta Contributors and Canonical Ltd 2011
+           2003-2006, Sharif FarsiWeb, Inc
+           2002, Simos Xenitellis
+           2011, Swecha Telugu Localisation Team <localization@swecha.net>
+           2004-2005, The Free Software Foundation
+           2007-2011, The GNOME Project
+           2002, The Gnome Foundation
+           2008, Thomas Thurman
+           2001-2012, metacity
+           2002-2011, the author(s) of muffin
+           2003, Åsmund Skjæveland
+           2001-2007, हावोक पेनिङटोन, रेड ह्याट, संस्था., र अन्य
+           2001-2008, হ্যাভক পেনিংটন, Red Hat, Inc., ও অন্যান্যদের
+           2001-2002, হ্যাভোক পেনিংটন, রেড হ্যাট্, ইন্‍কর্পোরেট এবং অন্যান্য
 License: GPL-2+
 
-
-Files: src/ui/metaaccellabel.*
-Copyright: 1995-1997, Peter Mattis, Spencer Kimball and Josh MacDonald
-           1998, Tim Janik
-           2002, Red Hat, Inc.
-License: LGPL-2+
-
-
-Files: src/core/async-getprop.* src/core/testasyncgetprop.c
-Copyright: 2002 Havoc Pennington
-           1986, 1998 The Open Group
-License: MIT
-
-
-Files: src/core/muffin-Xatomtype.h
-Copyright: 1987, 1998 The Open Group
-           1987, Digital Equipment Corporation
-License: MIT
-
-
-Files: debian/*
-Copyright: 2012, Nicolas Bourdaud <nicolas.bourdaud@gmail.com>
-           2012, Laszlo Boszormenyi (GCS) <gcs@debian.hu>
-           2011-2012, Michael Biebl
-           2011-2012, Sjoerd Simons
-           2012 Clement Lefebvre
-           2012 Gwendal Le Bihan
-License: GPL-2+
-
-
-
-License: GPL-2+
- This package is free software; you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation; either version 2 of the License, or
- (at your option) any later version.
- .
- This package is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
- .
- You should have received a copy of the GNU General Public License
- along with this package; if not, write to the Free Software
- Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
- .
- On Debian systems, the complete text of the GNU General
- Public License can be found in `/usr/share/common-licenses/GPL-2'.
-
-
-License: LGPL-2+
- This library is free software; you can redistribute it and/or
- modify it under the terms of the GNU Lesser General Public
- License as published by the Free Software Foundation; either
- version 2 of the License, or (at your option) any later version.
- .
- This library is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the GNU
- Lesser General Public License for more details.
- .
- You should have received a copy of the GNU Lesser General Public
- License along with this library; if not, write to the
- Free Software Foundation, Inc., 51 Franklin Street - Suite 500,
- Boston, MA 02110-1335, USA.
- .
- On Debian systems, the complete text of the GNU Lesser General
- Public License can be found in `/usr/share/common-licenses/LGPL-2'.
-
-
-License: MIT
+Files: src/core/async-getprop.c
+       src/core/async-getprop.h
+       src/core/muffin-Xatomtype.h
+       src/core/testasyncgetprop.c
+Copyright: 1987, Digital Equipment Corporation, Maynard, Massachusetts
+           2002, Havoc Pennington
+           1986-1998, The Open Group
+License: MIT/X11
  Permission to use, copy, modify, distribute, and sell this software
  and its documentation for any purpose is hereby granted without
  fee, provided that the above copyright notice appear in all copies
@@ -151,3 +105,188 @@ License: MIT
  Except as contained in this notice, the name of The Open Group shall not be
  used in advertising or otherwise to promote the sale, use or other dealings
  in this Software without prior written authorization from The Open Group.
+
+Files: src/ui/metaaccellabel.c
+       src/ui/metaaccellabel.h
+Copyright: 1995-1997, Peter Mattis, Spencer Kimball and Josh MacDonald
+           2002, Red Hat, Inc
+           1998, Tim Janik
+License: LGPL-2+
+
+Files: src/core/xprops.c
+Copyright: 1987, Digital Equipment Corporation, Maynard, Massachusetts
+           2001, Havoc Pennington
+           2002, Red Hat Inc
+           1987-1998, The Open Group
+           1988, Wyse Technology, Inc., San Jose, Ca
+License: GPL-2+_MIT/X11
+ This program is free software; you can redistribute it and/or
+ modify it under the terms of the GNU General Public License as
+ published by the Free Software Foundation; either version 2 of the
+ License, or (at your option) any later version.
+ .
+ This program is distributed in the hope that it will be useful, but
+ WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ General Public License for more details.
+ .
+ You should have received a copy of the GNU General Public License
+ along with this program; if not, write to the Free Software
+ Foundation, Inc., 51 Franklin Street - Suite 500, Boston, MA
+ 02110-1335, USA.
+ .
+ ***********************************************************************
+                        All Rights Reserved
+ .
+ Permission to use, copy, modify, and distribute this software and its
+ documentation for any purpose and without fee is hereby granted,
+ provided that the above copyright notice appear in all copies and that
+ both that copyright notice and this permission notice appear in
+ supporting documentation, and that the name Digital not be
+ used in advertising or publicity pertaining to distribution of the
+ software without specific, written prior permission.
+ .
+ DIGITAL AND WYSE DISCLAIM ALL WARRANTIES WITH REGARD TO THIS SOFTWARE,
+ INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, IN NO
+ EVENT SHALL DIGITAL OR WYSE BE LIABLE FOR ANY SPECIAL, INDIRECT OR
+ CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF
+ USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+ OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+ PERFORMANCE OF THIS SOFTWARE.
+ .
+ ***********************************************************************
+ .
+ Permission to use, copy, modify, distribute, and sell this software and its
+ documentation for any purpose is hereby granted without fee, provided that
+ the above copyright notice appear in all copies and that both that
+ copyright notice and this permission notice appear in supporting
+ documentation.
+ .
+ The above copyright notice and this permission notice shall be included
+ in all copies or substantial portions of the Software.
+ .
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+ OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+ IN NO EVENT SHALL THE OPEN GROUP BE LIABLE FOR ANY CLAIM, DAMAGES OR
+ OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+ OTHER DEALINGS IN THE SOFTWARE.
+ .
+ Except as contained in this notice, the name of The Open Group shall
+ not be used in advertising or otherwise to promote the sale, use or
+ other dealings in this Software without prior written authorization
+ from The Open Group.
+ .
+ On Debian systems, the complete text of the GNU General Public License
+ version 2 can be found in `/usr/share/common-licenses/GPL-2'.
+
+Files: po/tk.po
+Copyright: 2004, Free Software Foundation
+           2001-2002, Havoc Pennington, Red Hat, Inc., and others
+           2004, Kakilik Project <kakilik.sourceforge.net>
+License: GPL
+ This file is distributed under the terms of GNU General Public License (GPL)
+ .
+ On Debian systems, the complete text of the GNU General Public License can be
+ found in `/usr/share/common-licenses/GPL'.
+
+Files: po/Makefile.in.in
+Copyright: 2004-2008, Rodney Dawes <dobey.pwns@gmail.com>
+           1995-1997, Ulrich Drepper <drepper@gnu.ai.mit.edu>
+License: Permissive
+ This file may be copied and used freely without restrictions.  It may
+ be used in projects which are not available under a GNU Public License,
+ but which still want to provide support for the GNU gettext functionality.
+
+Files: po/rw.po
+Copyright: 2005, Free Software Foundation, Inc
+           2001-2002, Havoc Pennington, Red Hat, Inc., and others
+License: MPL-1.1_GPL-2+_LGPL-2.1+
+ ***** BEGIN LICENSE BLOCK *****
+ Version: MPL 1.1/GPL 2.0/LGPL 2.1
+ .
+ The contents of this file are subject to the Mozilla Public License Version
+ 1.1 (the "License"); you may not use this file except in compliance with
+ the License. You may obtain a copy of the License at
+ http://www.mozilla.org/MPL/
+ .
+ Software distributed under the License is distributed on an "AS IS" basis,
+ WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ for the specific language governing rights and limitations under the
+ License.
+ .
+ The Original Code is Mozilla Communicator client code, released
+ March 31, 1998.
+ .
+ The Initial Developer of the Original Code is
+ Netscape Communications Corporation.
+ Portions created by the Initial Developer are Copyright (C) 1998-1999
+ the Initial Developer. All Rights Reserved.
+ .
+ Contributor(s):
+ .
+ Alternatively, the contents of this file may be used under the terms of
+ either of the GNU General Public License Version 2 or later (the "GPL"),
+ or the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+ in which case the provisions of the GPL or the LGPL are applicable instead
+ of those above. If you wish to allow use of your version of this file only
+ under the terms of either the GPL or the LGPL, and not to allow others to
+ use your version of this file under the terms of the MPL, indicate your
+ decision by deleting the provisions above and replace them with the notice
+ and other provisions required by the GPL or the LGPL. If you do not delete
+ the provisions above, a recipient may use your version of this file under
+ the terms of any one of the MPL, the GPL or the LGPL.
+ .
+ ***** END LICENSE BLOCK *****
+ .
+ On Debian systems, the complete text of the GNU General Public License
+ version 2 can be found in `/usr/share/common-licenses/GPL-2', likewise, the
+ complete text of the GNU Lesser General Public License version 2.1 can be
+ found in `/usr/share/common-licenses/LGPL-2.1'.
+
+Files: debian/*
+Copyright: 2012, Nicolas Bourdaud <nicolas.bourdaud@gmail.com>
+           2012, Laszlo Boszormenyi (GCS) <gcs@debian.hu>
+           2011-2012, Michael Biebl
+           2011-2012, Sjoerd Simons
+           2012 Clement Lefebvre
+           2012 Gwendal Le Bihan
+License: GPL-2+
+
+License: GPL-2+
+ This package is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation; either version 2 of the License, or
+ (at your option) any later version.
+ .
+ This package is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+ .
+ You should have received a copy of the GNU General Public License
+ along with this package; if not, write to the Free Software
+ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
+ .
+ On Debian systems, the complete text of the GNU General Public License
+ version 2 can be found in `/usr/share/common-licenses/GPL-2'.
+
+License: LGPL-2+
+ This library is free software; you can redistribute it and/or
+ modify it under the terms of the GNU Lesser General Public
+ License as published by the Free Software Foundation; either
+ version 2 of the License, or (at your option) any later version.
+ .
+ This library is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.    See the GNU
+ Lesser General Public License for more details.
+ .
+ You should have received a copy of the GNU Lesser General Public
+ License along with this library; if not, write to the
+ Free Software Foundation, Inc., 51 Franklin Street - Suite 500,
+ Boston, MA 02110-1335, USA.
+ .
+ On Debian systems, the complete text of the GNU Lesser General
+ Public License can be found in `/usr/share/common-licenses/LGPL-2'.
