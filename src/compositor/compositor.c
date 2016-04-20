@@ -1230,30 +1230,6 @@ meta_compositor_sync_stack (MetaCompositor  *compositor,
 }
 
 void
-meta_compositor_window_mapped (MetaCompositor *compositor,
-                               MetaWindow     *window)
-{
-  MetaWindowActor *window_actor = META_WINDOW_ACTOR (meta_window_get_compositor_private (window));
-  DEBUG_TRACE ("meta_compositor_window_mapped\n");
-  if (!window_actor)
-    return;
-
-  meta_window_actor_mapped (window_actor);
-}
-
-void
-meta_compositor_window_unmapped (MetaCompositor *compositor,
-                                 MetaWindow     *window)
-{
-  MetaWindowActor *window_actor = META_WINDOW_ACTOR (meta_window_get_compositor_private (window));
-  DEBUG_TRACE ("meta_compositor_window_unmapped\n");
-  if (!window_actor)
-    return;
-
-  meta_window_actor_unmapped (window_actor);
-}
-
-void
 meta_compositor_sync_window_geometry (MetaCompositor *compositor,
 				      MetaWindow *window,
                                       gboolean did_placement)

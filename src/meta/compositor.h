@@ -106,15 +106,6 @@ gboolean meta_compositor_process_event (MetaCompositor *compositor,
  * the visible state. The window is resized *before* the call, so
  * it may be necessary to readjust the display based on the old_rect
  * to start the animation.
- *
- * window_mapped() and window_unmapped() are notifications when the
- * toplevel window (frame or client window) is mapped or unmapped.
- * That is, when the result of meta_window_toplevel_is_mapped()
- * changes. The main use of this is to drop resources when a window
- * is unmapped. A window will always be mapped before show_window()
- * is called and will not be unmapped until after hide_window() is
- * called. If the live_hidden_windows preference is set, windows will
- * never be unmapped.
  */
 
 void meta_compositor_add_window    (MetaCompositor *compositor,
@@ -143,10 +134,6 @@ void meta_compositor_unmaximize_window (MetaCompositor      *compositor,
                                         MetaRectangle       *old_rect,
                                         MetaRectangle       *new_rect);
 
-void meta_compositor_window_mapped        (MetaCompositor *compositor,
-                                           MetaWindow     *window);
-void meta_compositor_window_unmapped      (MetaCompositor *compositor,
-                                           MetaWindow     *window);
 void meta_compositor_sync_window_geometry (MetaCompositor *compositor,
                                            MetaWindow     *window,
                                            gboolean        did_placement);
