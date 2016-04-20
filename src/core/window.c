@@ -2318,7 +2318,7 @@ implement_showing (MetaWindow *window,
        * so we should place the window even if we're hiding it rather
        * than showing it.
        */
-      if (!window->placed && meta_prefs_get_live_hidden_windows ())
+      if (!window->placed)
         meta_window_force_placement (window);
 
       meta_window_hide (window);
@@ -3190,15 +3190,12 @@ meta_window_show (MetaWindow *window)
       if (map_client_window (window))
         did_show = TRUE;
 
-      if (meta_prefs_get_live_hidden_windows ())
+      if (window->hidden)
         {
-          if (window->hidden)
-            {
-              meta_stack_freeze (window->screen->stack);
-              window->hidden = FALSE;
-              meta_stack_thaw (window->screen->stack);
-              did_show = TRUE;
-            }
+          meta_stack_freeze (window->screen->stack);
+          window->hidden = FALSE;
+          meta_stack_thaw (window->screen->stack);
+          did_show = TRUE;
         }
 
       if (window->iconic)
@@ -3334,32 +3331,19 @@ meta_window_hide (MetaWindow *window)
 
   did_hide = FALSE;
 
-  if (meta_prefs_get_live_hidden_windows ())
-    {
-      /* If this is the first time that we've calculating the showing
-       * state of the window, the frame and client window might not
-       * yet be mapped, so we need to map them now */
-      map_frame (window);
-      map_client_window (window);
+  /* If this is the first time that we've calculating the showing
+   * state of the window, the frame and client window might not
+   * yet be mapped, so we need to map them now */
+  map_frame (window);
+  map_client_window (window);
 
-      if (!window->hidden)
-        {
-          meta_stack_freeze (window->screen->stack);
-          window->hidden = TRUE;
-          meta_stack_thaw (window->screen->stack);
-
-          did_hide = TRUE;
-        }
-    }
-  else
+  if (!window->hidden)
     {
-      /* Unmapping the frame is enough to make the window disappear,
-       * but we need to hide the window itself so the client knows
-       * it has been hidden */
-      if (unmap_frame (window))
-        did_hide = TRUE;
-      if (unmap_client_window (window, " (hiding)"))
-        did_hide = TRUE;
+      meta_stack_freeze (window->screen->stack);
+      window->hidden = TRUE;
+      meta_stack_thaw (window->screen->stack);
+
+      did_hide = TRUE;
     }
 
   if (!window->iconic)
