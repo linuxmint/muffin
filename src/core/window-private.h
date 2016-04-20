@@ -558,7 +558,6 @@ MetaWindow* meta_window_new_with_attrs     (MetaDisplay       *display,
                                             XWindowAttributes *attrs);
 void        meta_window_unmanage           (MetaWindow  *window,
                                             guint32      timestamp);
-void        meta_window_calc_showing       (MetaWindow  *window);
 void        meta_window_queue              (MetaWindow  *window,
                                             guint queuebits);
 void        meta_window_real_tile          (MetaWindow        *window,
