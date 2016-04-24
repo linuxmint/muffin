@@ -143,6 +143,7 @@ MetaMaximizeFlags meta_window_get_maximized (MetaWindow *window);
 gboolean          meta_window_is_fullscreen (MetaWindow *window);
 gboolean          meta_window_is_monitor_sized (MetaWindow *window);
 gboolean          meta_window_is_on_primary_monitor (MetaWindow *window);
+gint             *meta_window_get_all_monitors (MetaWindow *window, gsize *length);
 
 gboolean meta_window_is_demanding_attention (MetaWindow *window);
 gboolean meta_window_is_urgent (MetaWindow *window);
