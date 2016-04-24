@@ -1,3 +1,33 @@
+muffin (3.0.0) sarah; urgency=medium
+
+  [ Michael Webster ]
+  * tiling: couple fixes. - wait to update window properties on tiled windows  until after the   window has been resized. - Remove the tiling property when a window is no longer tiled. - Remove a redundant check in the tiling keyboard handler.
+  * window.c: Fix maximization state when using tile hotkeys, clean up tile flags fully when the window is restored to normal.
+  * tiling: restore ability to resize tiled windows (from previous commit.)  Instead of first 'normalizing' the window temporarily, then restoring the tile state once the grab is complete, perform the resize while the window remains fully tiled.
+  * tiling:  Fix mouse/keyboard resizing
+  * Enable tiling from a non-drag-initiated mouse move (for instance, via hotkey or titlebar menu)
+  * keybindings.c: Get correct gravity during keyboard resize
+  * window.c: don't animate the end of a tile resizing.
+  * core: assume we always have a compositor
+  * muffin.c: Fix executable from crashing when x11 isn't explicitly set as the clutter backend.  We do this for cinnamon itself in cinnamon's main.c - it needs to be set before g_type_init.
+
+  [ itzexor ]
+  * theme.c: get style context state instead of using GTK_STATE_FLAG_NORMAL gtk 3.20 complains if the state passed doesn't match the context's current state. This quiets a lot of log spam when window focus changes.
+  * window.c: don't send configure notifies for OR windows this causes popup placement issues with gtk 3.20 as described in the mutter commit this is based on. the assertion is left out, as we still need to send configure notifies for OR windows in other cases.
+
+  [ JosephMcc ]
+  * prefs: Remove the live-hidden-windows preference. It's hardcoded to TRUE anyway
+  * Pull some upstream changes for mapping and unmapping windows GNOME/mutter@7cdf558 https://github.com/GNOME/mutter/commit/31afdd4debc9dd6494d292c2fcaefa0081cc81b3 https://github.com/GNOME/mutter/commit/604d2155ba7a2a227f3cc7efda1314c9a28fa0ce
+  * compositor: Rework handling of our top_window_group
+  * Improve tracking of fullscreen windows Based on https://github.com/GNOME/gnome-shell/commit/6119b447469c71c36b15c0d0fa8c1cfa24289778
+
+  [ Fantu ]
+  * update debian/copyright
+  * Fix ppc64el packages build
+  * Removed unneeded postinst and prerm files
+
+ -- Clement Lefebvre <root@linuxmint.com>  Sun, 24 Apr 2016 12:24:06 +0100
+
 muffin (2.8.5) rosa; urgency=medium
 
   [ Michael Webster ]
