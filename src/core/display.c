@@ -4937,6 +4937,9 @@ meta_resize_gravity_from_tile_mode (MetaTileMode mode)
       case META_TILE_LRC:
         gravity = SouthEastGravity;
         break;
+      case META_TILE_MAXIMIZE:
+        gravity = CenterGravity;
+        break;
       default:
         break;
     }
