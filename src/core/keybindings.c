@@ -2690,11 +2690,21 @@ handle_tile_action (MetaDisplay    *display,
                   action == META_KEYBINDING_ACTION_PUSH_SNAP_UP ||
                   action == META_KEYBINDING_ACTION_PUSH_SNAP_DOWN;
 
-  MetaTileMode new_mode = get_new_tile_mode (mode, window->tile_mode);
+  MetaTileMode new_mode = get_new_tile_mode (mode, META_WINDOW_MAXIMIZED (window) ?
+                                                       META_TILE_MAXIMIZE : window->tile_mode);
   if (new_mode == window->tile_mode)
     return;
 
-  meta_window_tile (window, new_mode, snap);
+  if (new_mode == META_TILE_MAXIMIZE)
+    {
+      meta_window_maximize (window,
+                            META_MAXIMIZE_HORIZONTAL |
+                            META_MAXIMIZE_VERTICAL);
+    }
+  else
+    {
+      meta_window_tile (window, new_mode, snap);
+    }
 }
 
 static void
