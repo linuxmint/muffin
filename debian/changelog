@@ -1,3 +1,12 @@
+muffin (3.0.1) sarah; urgency=medium
+
+  [ Michael Webster ]
+  * display.c: handle META_TILE_MAXIMIZE in meta_resize_gravity_from_tile_mode().
+  * tiling: Fix resizing of partially maximized windows -
+  * frames.c: don't infinite loop on the variants GList.  Make variable names less similar.
+
+ -- Clement Lefebvre <root@linuxmint.com>  Fri, 06 May 2016 14:34:44 +0100
+
 muffin (3.0.0) sarah; urgency=medium
 
   [ Michael Webster ]
