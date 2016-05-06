@@ -234,20 +234,20 @@ static void
 update_style_contexts (MetaFrames *frames)
 {
   GtkStyleContext *style;
-  GList *variants, *variant;
+  GList *variant_list, *variant;
 
   if (frames->normal_style)
     g_object_unref (frames->normal_style);
   frames->normal_style = create_style_context (frames, NULL);
 
-  variants = g_hash_table_get_keys (frames->style_variants);
-  for (variant = variants; variant; variant = variants->next)
+  variant_list = g_hash_table_get_keys (frames->style_variants);
+  for (variant = variant_list; variant; variant = variant->next)
     {
       style = create_style_context (frames, (char *)variant->data);
       g_hash_table_insert (frames->style_variants,
                            g_strdup (variant->data), style);
     }
-  g_list_free (variants);
+  g_list_free (variant_list);
 }
 
 static void
