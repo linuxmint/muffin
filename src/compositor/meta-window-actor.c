@@ -2113,8 +2113,8 @@ meta_window_actor_process_damage (MetaWindowActor    *self,
       MetaRectangle window_rect;
       meta_window_get_outer_rect (priv->window, &window_rect);
 
-      if (window_rect.x == event->area.x &&
-          window_rect.y == event->area.y &&
+      if (event->area.x == 0 &&
+          event->area.y == 0 &&
           window_rect.width == event->area.width &&
           window_rect.height == event->area.height)
         priv->full_damage_frames_count++;
