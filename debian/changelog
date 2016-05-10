@@ -1,3 +1,10 @@
+muffin (3.0.2) sarah; urgency=medium
+
+  [ Michael Webster ]
+  * window.c: Handle META_TILE_MAXIMIZE in update_tile_mode, and move its call to handle both moving and resizing.  This prevents strange resize behavior when you move a window to an upper tile region without tiling it. Its tile state becomes inconsistent, and an attempt to resize it vertically ends up resizing in the wrong (or both) directions.
+
+ -- Clement Lefebvre <root@linuxmint.com>  Tue, 10 May 2016 16:31:52 +0100
+
 muffin (3.0.1) sarah; urgency=medium
 
   [ Michael Webster ]
