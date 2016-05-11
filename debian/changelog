@@ -1,3 +1,10 @@
+muffin (3.0.3) sarah; urgency=medium
+
+  [ Michael Webster ]
+  * meta-window-actor.c: put META_WINDOW_DND-type windows in the regular window group (xdndHandler.js in cinnamon expects it there)
+
+ -- Clement Lefebvre <root@linuxmint.com>  Wed, 11 May 2016 14:15:10 +0100
+
 muffin (3.0.2) sarah; urgency=medium
 
   [ Michael Webster ]
