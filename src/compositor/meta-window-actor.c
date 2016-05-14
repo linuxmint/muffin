@@ -1336,6 +1336,9 @@ meta_window_actor_should_unredirect (MetaWindowActor *self)
   MetaWindow *metaWindow = meta_window_actor_get_meta_window (self);
   MetaWindowActorPrivate *priv = self->priv;
 
+  if (meta_window_actor_is_destroyed (self))
+    return FALSE;
+
   if (meta_window_requested_dont_bypass_compositor (metaWindow))
     return FALSE;
 
