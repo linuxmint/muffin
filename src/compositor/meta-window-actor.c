@@ -1063,7 +1063,12 @@ meta_window_actor_queue_frame_drawn (MetaWindowActor *self,
                                      gboolean         no_delay_frame)
 {
   MetaWindowActorPrivate *priv = self->priv;
-  FrameData *frame = g_slice_new0 (FrameData);
+  FrameData *frame;
+
+  if (meta_window_actor_is_destroyed (self))
+    return;
+
+  frame = g_slice_new0 (FrameData);
 
   priv->needs_frame_drawn = TRUE;
 
@@ -2447,6 +2452,9 @@ meta_window_actor_pre_paint (MetaWindowActor *self)
   MetaWindowActorPrivate *priv = self->priv;
   GList *l;
 
+  if (meta_window_actor_is_destroyed (self))
+    return;
+
   meta_window_actor_handle_updates (self);
 
   for (l = priv->frames; l != NULL; l = l->next)
@@ -2467,6 +2475,9 @@ meta_window_actor_post_paint (MetaWindowActor *self)
   MetaWindowActorPrivate *priv = self->priv;
 
   priv->repaint_scheduled = FALSE;
+
+  if (meta_window_actor_is_destroyed (self))
+    return;
 
   if (priv->needs_frame_drawn)
     {
@@ -2555,6 +2566,9 @@ meta_window_actor_frame_complete (MetaWindowActor *self,
 {
   MetaWindowActorPrivate *priv = self->priv;
   GList *l;
+
+  if (meta_window_actor_is_destroyed (self))
+    return;
 
   for (l = priv->frames; l;)
     {
