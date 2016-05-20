@@ -413,9 +413,6 @@ if test "x$enable_debug" = "xyes"; then
 	CFLAGS="$CFLAGS -g -O"
 fi
 
-# For fix-meta-rectangle.py
-AM_PATH_PYTHON([2.5])
-
 # Use gnome-doc-utils:
 GNOME_DOC_INIT([0.8.0])
 
