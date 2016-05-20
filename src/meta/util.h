@@ -161,6 +161,7 @@ guint meta_later_add    (MetaLaterType  when,
                          gpointer       data,
                          GDestroyNotify notify);
 void  meta_later_remove (guint          later_id);
+void  meta_pre_exec_close_fds(void);
 
 #endif /* META_UTIL_H */
 
