@@ -67,8 +67,6 @@ struct _MetaWindowActorPrivate
 
   guint8            opacity;
 
-  gchar *           desc;
-
   /* If the window is shaped, a region that matches the shape */
   cairo_region_t   *shape_region;
   /* A rectangular region with the visible extents of the window */
@@ -363,9 +361,6 @@ window_decorated_notify (MetaWindow *mw,
       priv->damage = None;
     }
 
-  g_free (priv->desc);
-  priv->desc = NULL;
-
   priv->xwindow = new_xwindow;
 
   /*
@@ -526,11 +521,6 @@ meta_window_actor_dispose (GObject *object)
 static void
 meta_window_actor_finalize (GObject *object)
 {
-  MetaWindowActor        *self = META_WINDOW_ACTOR (object);
-  MetaWindowActorPrivate *priv = self->priv;
-
-  g_free (priv->desc);
-
   G_OBJECT_CLASS (meta_window_actor_parent_class)->finalize (object);
 }
 
@@ -929,25 +919,6 @@ gboolean
 meta_window_actor_is_override_redirect (MetaWindowActor *self)
 {
   return meta_window_is_override_redirect (self->priv->window);
-}
-
-const char *meta_window_actor_get_description (MetaWindowActor *self)
-{
-  /*
-   * For windows managed by the WM, we just defer to the WM for the window
-   * description. For override-redirect windows, we create the description
-   * ourselves, but only on demand.
-   */
-  if (self->priv->window)
-    return meta_window_get_description (self->priv->window);
-
-  if (G_UNLIKELY (self->priv->desc == NULL))
-    {
-      self->priv->desc = g_strdup_printf ("Override Redirect (0x%x)",
-                                         (guint) self->priv->xwindow);
-    }
-
-  return self->priv->desc;
 }
 
 /**
