@@ -1,3 +1,26 @@
+muffin (3.0.4) sarah; urgency=medium
+
+  [ brownsr ]
+  * remove unnecessary check https://github.com/GNOME/mutter/commit/9ca00d5cce2c5783c377b4df8b3f6820f9f357b0
+  * remove unused variable https://github.com/GNOME/mutter/commit/a6f206f07cf2fe7bc0c71ca5e571345f848efdbc#diff-5d2e6395ac2f32aae711a05663b64d18
+  * remove unused field https://github.com/GNOME/mutter/commit/73dbb4b9a52c651868057590e71616e8a5b726b2#diff-5d2e6395ac2f32aae711a05663b64d18
+  * remove unused description https://github.com/GNOME/mutter/commit/51acc3ee3178754b16b17362bb9b0395ef9a4e9b#diff-5d2e6395ac2f32aae711a05663b64d18   please check to see this looks right for muffin.  No regressions seen
+
+  [ itzexor ]
+  * autoconf: remove unneeded check for python python has never been used in muffin, this is a remnant from a workaround that was introduced to mutter in 2010, and removed before muffin was forked.
+
+  [ brownsr ]
+  * use g_clear_pointer to clean up finalization code https://github.com/GNOME/mutter/commit/079dd60e3d5cd6a6e1070f89f4f7277423bda727#diff-5d2e6395ac2f32aae711a05663b64d18
+  * window-actor: Remove custom region destruction methods with g_clear_p… …ointer https://github.com/GNOME/mutter/commit/53534b4ded26a392cce9b565de8b5d81cc904a0e#diff-5d2e6395ac2f32aae711a05663b64d18
+
+  [ Michael Webster ]
+  * constraints.c: ignore snapped windows whe maximizing desktop windows.
+
+  [ brownsr ]
+  * window-actor: fix leaked frame list https://github.com/GNOME/mutter/commit/4d437e32e069d348e9ff55bdaf34cfec60b0c7e3
+
+ -- Clement Lefebvre <root@linuxmint.com>  Fri, 20 May 2016 13:10:14 +0100
+
 muffin (3.0.3) sarah; urgency=medium
 
   [ Michael Webster ]
