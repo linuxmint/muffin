@@ -147,8 +147,8 @@ clamp_sizes (gint *width,
         screen_height = gdk_screen_get_height (screen);
       }
 
-    *width = MIN (*width, screen_width);
-    *height = MIN (*height, screen_height);
+    *width = MIN (*width, screen_width * 2);
+    *height = MIN (*height, screen_height * 2);
 }
 
 /**
