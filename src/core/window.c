@@ -4760,6 +4760,11 @@ meta_window_updates_are_frozen (MetaWindow *window)
 
   if (window->sync_request_serial < window->sync_request_wait_serial)
     return TRUE;
+
+  if (window->type == META_WINDOW_TOOLTIP &&
+      window->rect.x == 0 &&
+      window->rect.y == 0)
+    return TRUE;
 #endif
 
   return FALSE;
