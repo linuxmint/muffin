@@ -38,6 +38,7 @@
 #include "keybindings-private.h"
 #include "workspace-private.h"
 #include <meta/errors.h>
+#include "window-private.h"
 #include "edge-resistance.h"
 #include "ui.h"
 #include "frame.h"
@@ -2455,6 +2456,13 @@ handle_move_to (MetaDisplay    *display,
   } else {
     new_y = outer.y;
   }
+
+  if (window->has_custom_frame_extents)
+    {
+      const GtkBorder *extents = &window->custom_frame_extents;
+      new_x -= extents->left;
+      new_y -= extents->top;
+    }
 
   meta_window_move_frame (window,
                           TRUE,
