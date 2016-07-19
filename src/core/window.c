@@ -242,6 +242,9 @@ meta_window_finalize (GObject *object)
   if (window->frame_bounds)
     cairo_region_destroy (window->frame_bounds);
 
+  if (window->opaque_region)
+    cairo_region_destroy (window->opaque_region);
+
   meta_icon_cache_free (&window->icon_cache);
 
   g_free (window->sm_client_id);
@@ -3637,7 +3640,29 @@ meta_window_get_all_monitors (MetaWindow *window, gsize *length)
 }
 
 /**
-* meta_window_is_monitor_sized:
+ * meta_window_is_screen_sized:
+ *
+ * Return value: %TRUE if the window is occupies the
+ *               the whole screen (all monitors).
+ */
+gboolean
+meta_window_is_screen_sized (MetaWindow *window)
+{
+  MetaRectangle window_rect;
+  int screen_width, screen_height;
+
+  meta_screen_get_size (window->screen, &screen_width, &screen_height);
+  meta_window_get_outer_rect (window, &window_rect);
+
+  if (window_rect.x == 0 && window_rect.y == 0 &&
+      window_rect.width == screen_width && window_rect.height == screen_height)
+    return TRUE;
+
+  return FALSE;
+}
+
+/**
+ * meta_window_is_monitor_sized:
  *
  * Return value: %TRUE if the window is occupies an entire monitor or
  *               the whole screen.
@@ -3648,18 +3673,14 @@ meta_window_is_monitor_sized (MetaWindow *window)
   if (window->fullscreen)
     return TRUE;
 
+  if (meta_window_is_screen_sized (window))
+    return TRUE;
+
   if (window->override_redirect)
     {
       MetaRectangle window_rect, monitor_rect;
-      int screen_width, screen_height;
 
-      meta_screen_get_size (window->screen, &screen_width, &screen_height);
       meta_window_get_outer_rect (window, &window_rect);
-
-      if (window_rect.x == 0 && window_rect.y == 0 &&
-          window_rect.width == screen_width && window_rect.height == screen_height)
-        return TRUE;
-
       meta_screen_get_monitor_geometry (window->screen, window->monitor->number, &monitor_rect);
 
       if (meta_rectangle_equal (&window_rect, &monitor_rect))
@@ -3688,7 +3709,7 @@ meta_window_is_on_primary_monitor (MetaWindow *window)
 gboolean
 meta_window_requested_bypass_compositor (MetaWindow *window)
 {
-  return window->bypass_compositor;
+  return window->bypass_compositor == _NET_WM_BYPASS_COMPOSITOR_HINT_ON;
 }
 
 /**
@@ -3699,7 +3720,7 @@ meta_window_requested_bypass_compositor (MetaWindow *window)
 gboolean
 meta_window_requested_dont_bypass_compositor (MetaWindow *window)
 {
-  return window->dont_bypass_compositor;
+  return window->bypass_compositor == _NET_WM_BYPASS_COMPOSITOR_HINT_OFF;
 }
 
 static void
@@ -7816,6 +7837,64 @@ meta_window_update_net_wm_type (MetaWindow *window)
   meta_window_recalc_window_type (window);
 }
 
+void
+meta_window_update_opaque_region (MetaWindow *window)
+{
+  cairo_region_t *opaque_region = NULL;
+  gulong *region = NULL;
+  int nitems;
+
+  g_clear_pointer (&window->opaque_region, cairo_region_destroy);
+
+  if (meta_prop_get_cardinal_list (window->display,
+                                   window->xwindow,
+                                   window->display->atom__NET_WM_OPAQUE_REGION,
+                                   &region, &nitems))
+    {
+      cairo_rectangle_int_t *rects;
+      int i, rect_index, nrects;
+
+      if (nitems % 4 != 0)
+        {
+          meta_verbose ("_NET_WM_OPAQUE_REGION does not have a list of 4-tuples.");
+          goto out;
+        }
+
+      /* empty region */
+      if (nitems == 0)
+        goto out;
+
+      nrects = nitems / 4;
+
+      rects = g_new (cairo_rectangle_int_t, nrects);
+
+      rect_index = 0;
+      i = 0;
+      while (i < nitems)
+        {
+          cairo_rectangle_int_t *rect = &rects[rect_index];
+
+          rect->x = region[i++];
+          rect->y = region[i++];
+          rect->width = region[i++];
+          rect->height = region[i++];
+
+          rect_index++;
+        }
+
+      opaque_region = cairo_region_create_rectangles (rects, nrects);
+
+      g_free (rects);
+    }
+
+ out:
+  window->opaque_region = opaque_region;
+  meta_XFree (region);
+
+  if (window->display->compositor)
+    meta_compositor_window_shape_changed (window->display->compositor, window);
+}
+
 static void
 redraw_icon (MetaWindow *window)
 {
@@ -10272,7 +10351,14 @@ get_work_area_monitor (MetaWindow    *window,
               area->x, area->y, area->width, area->height);
 }
 
-LOCAL_SYMBOL void
+/**
+ * meta_window_get_work_area_current_monitor:
+ * @window: a #MetaWindow
+ * @area: (out): a location to store the work area
+ *
+ * Get the work area for the monitor @window is currently on.
+ */
+void
 meta_window_get_work_area_current_monitor (MetaWindow    *window,
                                            MetaRectangle *area)
 {
@@ -10285,7 +10371,16 @@ meta_window_get_work_area_current_monitor (MetaWindow    *window,
                                          area);
 }
 
-LOCAL_SYMBOL void
+/**
+ * meta_window_get_work_area_for_monitor:
+ * @window: a #MetaWindow
+ * @which_monitor: a moniotr to get the work area for
+ * @area: (out): a location to store the work area
+ *
+ * Get the work area for @window, given the monitor index
+ * @which_monitor.
+ */
+void
 meta_window_get_work_area_for_monitor (MetaWindow    *window,
                                        int            which_monitor,
                                        MetaRectangle *area)
@@ -10297,7 +10392,14 @@ meta_window_get_work_area_for_monitor (MetaWindow    *window,
                          which_monitor);
 }
 
-LOCAL_SYMBOL void
+/**
+ * meta_window_get_work_area_all_monitors:
+ * @window: a #MetaWindow
+ * @area: (out): a location to store the work area
+ *
+ * Get the work area for all monitors for @window.
+ */
+ void
 meta_window_get_work_area_all_monitors (MetaWindow    *window,
                                         MetaRectangle *area)
 {

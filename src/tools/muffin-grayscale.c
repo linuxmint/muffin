@@ -80,9 +80,7 @@ main (int argc, char **argv)
       g_printerr ("specify a single image on the command line\n");
       return 1;
     }
-
-  g_type_init ();
-  
+ 
   err = NULL;
   pixbuf = gdk_pixbuf_new_from_file (argv[1], &err);
   if (err != NULL)

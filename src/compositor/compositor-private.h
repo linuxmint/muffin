@@ -18,7 +18,6 @@ struct _MetaCompositor
   MetaDisplay    *display;
 
   Atom            atom_x_root_pixmap;
-  Atom            atom_x_set_root;
   Atom            atom_net_wm_window_opacity;
   guint           pre_paint_func_id;
   guint           post_paint_func_id;
@@ -45,7 +44,6 @@ struct _MetaCompScreen
 
   ClutterActor          *stage, *bottom_window_group, *window_group, *overlay_group, *top_window_group;
   ClutterActor          *background_actor;
-  ClutterActor		*hidden_group;
   GList                 *windows;
   GHashTable            *windows_by_xid;
   Window                 output;

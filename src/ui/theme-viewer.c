@@ -852,7 +852,8 @@ main (int argc, char **argv)
                     G_CALLBACK (gtk_main_quit), NULL);
 
   gtk_widget_realize (window);
-  style = gtk_widget_get_style_context (window);
+
+  style = meta_theme_create_style_context (gtk_widget_get_screen (window), NULL);
   gtk_style_context_get (style, GTK_STATE_FLAG_NORMAL,
                          GTK_STYLE_PROPERTY_FONT, &font_desc,
                          NULL);
@@ -927,13 +928,12 @@ get_flags (GtkWidget *widget)
 }
 
 static int
-get_text_height (GtkWidget *widget)
+get_text_height (GtkWidget       *widget,
+                 GtkStyleContext *style)
 {
-  GtkStyleContext *style;
   PangoFontDescription *font_desc;
   int text_height;
 
-  style = gtk_widget_get_style_context (widget);
   gtk_style_context_get (style, GTK_STATE_FLAG_NORMAL,
                          GTK_STYLE_PROPERTY_FONT, &font_desc,
                          NULL);
@@ -958,6 +958,7 @@ static void
 run_theme_benchmark (void)
 {
   GtkWidget* widget;
+  GtkStyleContext *style_context;
   cairo_surface_t *pixmap;
   MetaFrameBorders borders;
   MetaButtonState button_states[META_BUTTON_TYPE_LAST] =
@@ -981,10 +982,12 @@ run_theme_benchmark (void)
   
   widget = gtk_window_new (GTK_WINDOW_TOPLEVEL);
   gtk_widget_realize (widget);
+
+  style_context = meta_theme_create_style_context (gtk_widget_get_screen (widget), NULL);
   
   meta_theme_get_frame_borders (global_theme,
                                 META_FRAME_TYPE_NORMAL,
-                                get_text_height (widget),
+                                get_text_height (widget, style_context),
                                 get_flags (widget),
                                 &borders);
   
@@ -1027,13 +1030,13 @@ run_theme_benchmark (void)
       cr = cairo_create (pixmap);
 
       meta_theme_draw_frame (global_theme,
-                             widget,
+                             style_context,
                              cr,
                              META_FRAME_TYPE_NORMAL,
                              get_flags (widget),
                              client_width, client_height,
                              layout,
-                             get_text_height (widget),
+                             get_text_height (widget, style_context),
                              &button_layout,
                              button_states,
                              meta_preview_get_mini_icon (),
@@ -1061,6 +1064,7 @@ run_theme_benchmark (void)
 
   g_timer_destroy (timer);
   g_object_unref (G_OBJECT (layout));
+  g_object_unref (style_context);
   gtk_widget_destroy (widget);
 
 #undef ITERATIONS

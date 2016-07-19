@@ -8,6 +8,7 @@ SUBDIRS=wm-tester tools compositor/plugins
 AM_CPPFLAGS=								\
 	-DCLUTTER_ENABLE_EXPERIMENTAL_API \
 	-DCOGL_ENABLE_EXPERIMENTAL_API \
+    -DCOGL_ENABLE_EXPERIMENTAL_2_0_API      \
 	$(MUFFIN_CFLAGS)						\
 	-I$(srcdir)							\
 	-I$(srcdir)/core						\
@@ -40,12 +41,19 @@ libmuffin_la_SOURCES =				\
 	core/boxes.c				\
 	core/boxes-private.h			\
 	meta/boxes.h				\
+    compositor/clutter-utils.c      \
+    compositor/clutter-utils.h      \
 	compositor/cogl-utils.c			\
 	compositor/cogl-utils.h			\
 	compositor/compositor.c			\
 	compositor/compositor-private.h		\
+    compositor/meta-background.c        \
+    compositor/meta-background-private.h	\
 	compositor/meta-background-actor.c	\
 	compositor/meta-background-actor-private.h	\
+	compositor/meta-background-image.c	\
+    compositor/meta-background-group.c  \
+    compositor/meta-background-group-private.h  \
 	compositor/meta-module.c		\
 	compositor/meta-module.h		\
 	compositor/meta-plugin.c		\
@@ -69,7 +77,10 @@ libmuffin_la_SOURCES =				\
 	compositor/region-utils.c		\
 	compositor/region-utils.h		\
 	meta/compositor.h			\
+    meta/meta-background.h          \
 	meta/meta-background-actor.h		\
+	meta/meta-background-image.h		\
+    meta/meta-background-group.h        \
 	meta/meta-plugin.h			\
 	meta/meta-shadow-factory.h		\
 	meta/meta-window-actor.h		\
@@ -167,7 +178,10 @@ libmuffininclude_base_headers =		\
 	meta/group.h				\
 	meta/keybindings.h			\
 	meta/main.h				\
+	meta/meta-background.h			\
 	meta/meta-background-actor.h		\
+	meta/meta-background-image.h		\
+    meta/meta-background-group.h        \
 	meta/meta-plugin.h			\
 	meta/meta-shaped-texture.h		\
 	meta/meta-shadow-factory.h		\
@@ -225,7 +239,7 @@ typelib_DATA = Meta-$(api_version).typelib
 INTROSPECTION_GIRS = Meta-$(api_version).gir
 
 Meta-$(api_version).gir: libmuffin.la
-@META_GIR@_INCLUDES = GObject-2.0 CDesktopEnums-3.0 Gdk-3.0 Gtk-3.0 Clutter-1.0 xlib-2.0 xfixes-4.0
+@META_GIR@_INCLUDES = GObject-2.0 CDesktopEnums-3.0 Gdk-3.0 Gtk-3.0 Clutter-1.0 xlib-2.0 xfixes-4.0 Cogl-1.0
 @META_GIR@_PACKAGES = clutter-1.0 gtk+-3.0
 @META_GIR@_CFLAGS = $(AM_CPPFLAGS)
 @META_GIR@_LIBS = libmuffin.la

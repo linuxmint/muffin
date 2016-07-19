@@ -55,6 +55,7 @@
 
 #include <config.h>
 #include "theme-private.h"
+#include "frames.h" /* for META_TYPE_FRAMES */
 #include <meta/util.h>
 #include <meta/gradient.h>
 #include <meta/prefs.h>
@@ -616,7 +617,7 @@ strip_button (MetaButtonSpace *func_rects[MAX_BUTTONS_PER_CORNER],
   return FALSE; /* did not strip anything */
 }
 
-LOCAL_SYMBOL void
+static void
 meta_frame_layout_calc_geometry (const MetaFrameLayout  *layout,
                                  int                     text_height,
                                  MetaFrameFlags          flags,
@@ -3681,7 +3682,6 @@ fill_env (MetaPositionExprEnv *env,
 static void
 meta_draw_op_draw_with_env (const MetaDrawOp    *op,
                             GtkStyleContext     *style_gtk,
-                            GtkWidget           *widget,
                             cairo_t             *cr,
                             const MetaDrawInfo  *info,
                             MetaRectangle        rect,
@@ -4091,8 +4091,8 @@ meta_draw_op_draw_with_env (const MetaDrawOp    *op,
         d_rect.height = parse_size_unchecked (op->data.op_list.height, env);
 
         meta_draw_op_list_draw_with_style (op->data.op_list.op_list,
-                                           style_gtk, widget, cr, info,
-                                d_rect);
+                                           style_gtk, cr, info,
+                                           d_rect);
       }
       break;
 
@@ -4129,8 +4129,8 @@ meta_draw_op_draw_with_env (const MetaDrawOp    *op,
             while (tile.y < (ry + rheight))
               {
                 meta_draw_op_list_draw_with_style (op->data.tile.op_list,
-                                                   style_gtk, widget, cr, info,
-                                        tile);
+                                                   style_gtk, cr, info,
+                                                   tile);
 
                 tile.y += tile.height;
               }
@@ -4150,7 +4150,6 @@ meta_draw_op_draw_with_env (const MetaDrawOp    *op,
 LOCAL_SYMBOL void
 meta_draw_op_draw_with_style (const MetaDrawOp    *op,
                               GtkStyleContext     *style_gtk,
-                              GtkWidget           *widget,
                               cairo_t             *cr,
                               const MetaDrawInfo  *info,
                               MetaRectangle        logical_region)
@@ -4159,21 +4158,10 @@ meta_draw_op_draw_with_style (const MetaDrawOp    *op,
 
   fill_env (&env, info, logical_region);
 
-  meta_draw_op_draw_with_env (op, style_gtk, widget, cr,
+  meta_draw_op_draw_with_env (op, style_gtk, cr,
                               info, logical_region,
                               &env);
 
-}
-
-LOCAL_SYMBOL void
-meta_draw_op_draw (const MetaDrawOp    *op,
-                   GtkWidget           *widget,
-                   cairo_t             *cr,
-                   const MetaDrawInfo  *info,
-                   MetaRectangle        logical_region)
-{
-  meta_draw_op_draw_with_style (op, gtk_widget_get_style_context (widget),
-                                widget, cr, info, logical_region);
 }
 
 /**
@@ -4230,7 +4218,6 @@ meta_draw_op_list_unref (MetaDrawOpList *op_list)
 LOCAL_SYMBOL void
 meta_draw_op_list_draw_with_style  (const MetaDrawOpList *op_list,
                                     GtkStyleContext      *style_gtk,
-                                    GtkWidget            *widget,
                                     cairo_t              *cr,
                                     const MetaDrawInfo   *info,
                                     MetaRectangle         rect)
@@ -4277,25 +4264,13 @@ meta_draw_op_list_draw_with_style  (const MetaDrawOpList *op_list,
       else if (gdk_cairo_get_clip_rectangle (cr, NULL))
         {
           meta_draw_op_draw_with_env (op,
-                                      style_gtk, widget, cr, info,
+                                      style_gtk, cr, info,
                                       rect,
                                       &env);
         }
     }
 
   cairo_restore (cr);
-}
-
-LOCAL_SYMBOL void
-meta_draw_op_list_draw  (const MetaDrawOpList *op_list,
-                         GtkWidget            *widget,
-                         cairo_t              *cr,
-                         const MetaDrawInfo   *info,
-                         MetaRectangle         rect)
-
-{
-  meta_draw_op_list_draw_with_style (op_list, gtk_widget_get_style_context (widget), widget,
-                                     cr, info, rect);
 }
 
 LOCAL_SYMBOL void
@@ -4676,10 +4651,9 @@ button_rect (MetaButtonType           type,
     }
 }
 
-LOCAL_SYMBOL LOCAL_SYMBOL void
+static void
 meta_frame_style_draw_with_style (MetaFrameStyle          *style,
                                   GtkStyleContext         *style_gtk,
-                                  GtkWidget               *widget,
                                   cairo_t                 *cr,
                                   const MetaFrameGeometry *fgeom,
                                   int                      client_width,
@@ -4849,7 +4823,6 @@ meta_frame_style_draw_with_style (MetaFrameStyle          *style,
               m_rect = meta_rect (rect.x, rect.y, rect.width, rect.height);
               meta_draw_op_list_draw_with_style (op_list,
                                                  style_gtk,
-                                                 widget,
                                                  cr,
                                                  &draw_info,
                                                  m_rect);
@@ -4891,7 +4864,6 @@ meta_frame_style_draw_with_style (MetaFrameStyle          *style,
 
                       meta_draw_op_list_draw_with_style (op_list,
                                                          style_gtk,
-                                                         widget,
                                                          cr,
                                                          &draw_info,
                                                          m_rect);
@@ -4917,25 +4889,6 @@ meta_frame_style_draw_with_style (MetaFrameStyle          *style,
 
       ++i;
     }
-}
-
-LOCAL_SYMBOL void
-meta_frame_style_draw (MetaFrameStyle          *style,
-                       GtkWidget               *widget,
-                       cairo_t                 *cr,
-                       const MetaFrameGeometry *fgeom,
-                       int                      client_width,
-                       int                      client_height,
-                       PangoLayout             *title_layout,
-                       int                      text_height,
-                       MetaButtonState          button_states[META_BUTTON_TYPE_LAST],
-                       GdkPixbuf               *mini_icon,
-                       GdkPixbuf               *icon)
-{
-  meta_frame_style_draw_with_style (style, gtk_widget_get_style_context (widget), widget,
-                                    cr, fgeom, client_width, client_height,
-                                    title_layout, text_height,
-                                    button_states, mini_icon, icon);
 }
 
 LOCAL_SYMBOL MetaFrameStyleSet*
@@ -5561,21 +5514,54 @@ meta_theme_get_title_scale (MetaTheme     *theme,
   return style->layout->title_scale;
 }
 
-LOCAL_SYMBOL void
-meta_theme_draw_frame_with_style (MetaTheme              *theme,
-                                  GtkStyleContext        *style_gtk,
-                                  GtkWidget              *widget,
-                                  cairo_t                *cr,
-                                  MetaFrameType           type,
-                                  MetaFrameFlags          flags,
-                                  int                     client_width,
-                                  int                     client_height,
-                                  PangoLayout            *title_layout,
-                                  int                     text_height,
-                                  const MetaButtonLayout *button_layout,
-                                  MetaButtonState         button_states[META_BUTTON_TYPE_LAST],
-                                  GdkPixbuf              *mini_icon,
-                                  GdkPixbuf              *icon)
+GtkStyleContext *
+meta_theme_create_style_context (GdkScreen   *screen,
+                                 const gchar *variant)
+{
+  GtkWidgetPath *path;
+  GtkStyleContext *style;
+  char *theme_name;
+
+  g_object_get (gtk_settings_get_for_screen (screen),
+                "gtk-theme-name", &theme_name,
+                NULL);
+
+  style = gtk_style_context_new ();
+  path = gtk_widget_path_new ();
+  gtk_widget_path_append_type (path, META_TYPE_FRAMES);
+  gtk_widget_path_iter_add_class (path, -1, GTK_STYLE_CLASS_BACKGROUND);
+  gtk_style_context_set_path (style, path);
+  gtk_widget_path_unref (path);
+
+  if (theme_name && *theme_name)
+    {
+      GtkCssProvider *provider;
+
+      provider = gtk_css_provider_get_named (theme_name, variant);
+      gtk_style_context_add_provider (style,
+                                      GTK_STYLE_PROVIDER (provider),
+                                      GTK_STYLE_PROVIDER_PRIORITY_SETTINGS);
+    }
+
+  g_free (theme_name);
+
+  return style;
+}
+
+void
+meta_theme_draw_frame (MetaTheme              *theme,
+                       GtkStyleContext        *style_gtk,
+                       cairo_t                *cr,
+                       MetaFrameType           type,
+                       MetaFrameFlags          flags,
+                       int                     client_width,
+                       int                     client_height,
+                       PangoLayout            *title_layout,
+                       int                     text_height,
+                       const MetaButtonLayout *button_layout,
+                       MetaButtonState         button_states[META_BUTTON_TYPE_LAST],
+                       GdkPixbuf              *mini_icon,
+                       GdkPixbuf              *icon)
 {
   MetaFrameGeometry fgeom;
   MetaFrameStyle *style;
@@ -5599,36 +5585,12 @@ meta_theme_draw_frame_with_style (MetaTheme              *theme,
 
   meta_frame_style_draw_with_style (style,
                                     style_gtk,
-                                    widget,
                                     cr,
                                     &fgeom,
                                     client_width, client_height,
                                     title_layout,
                                     text_height,
                                     button_states,
-                                    mini_icon, icon);
-}
-
-void
-meta_theme_draw_frame (MetaTheme              *theme,
-                       GtkWidget              *widget,
-                       cairo_t                *cr,
-                       MetaFrameType           type,
-                       MetaFrameFlags          flags,
-                       int                     client_width,
-                       int                     client_height,
-                       PangoLayout            *title_layout,
-                       int                     text_height,
-                       const MetaButtonLayout *button_layout,
-                       MetaButtonState         button_states[META_BUTTON_TYPE_LAST],
-                       GdkPixbuf              *mini_icon,
-                       GdkPixbuf              *icon)
-{
-  meta_theme_draw_frame_with_style (theme, gtk_widget_get_style_context (widget), widget,
-                                    cr, type,flags,
-                                    client_width, client_height,
-                                    title_layout, text_height,
-                                    button_layout, button_states,
                                     mini_icon, icon);
 }
 
@@ -6026,34 +5988,6 @@ meta_color_component_from_string (const char *str)
     return META_GTK_COLOR_LAST;
 }
 
-LOCAL_SYMBOL const char*
-meta_color_component_to_string (MetaGtkColorComponent component)
-{
-  switch (component)
-    {
-    case META_GTK_COLOR_FG:
-      return "fg";
-    case META_GTK_COLOR_BG:
-      return "bg";
-    case META_GTK_COLOR_LIGHT:
-      return "light";
-    case META_GTK_COLOR_DARK:
-      return "dark";
-    case META_GTK_COLOR_MID:
-      return "mid";
-    case META_GTK_COLOR_TEXT:
-      return "text";
-    case META_GTK_COLOR_BASE:
-      return "base";
-    case META_GTK_COLOR_TEXT_AA:
-      return "text_aa";
-    case META_GTK_COLOR_LAST:
-      break;
-    }
-
-  return "<unknown>";
-}
-
 LOCAL_SYMBOL MetaButtonState
 meta_button_state_from_string (const char *str)
 {
@@ -6209,42 +6143,6 @@ meta_frame_piece_from_string (const char *str)
     return META_FRAME_PIECE_OVERLAY;
   else
     return META_FRAME_PIECE_LAST;
-}
-
-LOCAL_SYMBOL const char*
-meta_frame_piece_to_string (MetaFramePiece piece)
-{
-  switch (piece)
-    {
-    case META_FRAME_PIECE_ENTIRE_BACKGROUND:
-      return "entire_background";
-    case META_FRAME_PIECE_TITLEBAR:
-      return "titlebar";
-    case META_FRAME_PIECE_TITLEBAR_MIDDLE:
-      return "titlebar_middle";
-    case META_FRAME_PIECE_LEFT_TITLEBAR_EDGE:
-      return "left_titlebar_edge";
-    case META_FRAME_PIECE_RIGHT_TITLEBAR_EDGE:
-      return "right_titlebar_edge";
-    case META_FRAME_PIECE_TOP_TITLEBAR_EDGE:
-      return "top_titlebar_edge";
-    case META_FRAME_PIECE_BOTTOM_TITLEBAR_EDGE:
-      return "bottom_titlebar_edge";
-    case META_FRAME_PIECE_TITLE:
-      return "title";
-    case META_FRAME_PIECE_LEFT_EDGE:
-      return "left_edge";
-    case META_FRAME_PIECE_RIGHT_EDGE:
-      return "right_edge";
-    case META_FRAME_PIECE_BOTTOM_EDGE:
-      return "bottom_edge";
-    case META_FRAME_PIECE_OVERLAY:
-      return "overlay";
-    case META_FRAME_PIECE_LAST:
-      break;
-    }
-
-  return "<unknown>";
 }
 
 LOCAL_SYMBOL MetaFrameState
@@ -6436,24 +6334,6 @@ meta_gradient_type_from_string (const char *str)
     return META_GRADIENT_LAST;
 }
 
-LOCAL_SYMBOL const char*
-meta_gradient_type_to_string (MetaGradientType type)
-{
-  switch (type)
-    {
-    case META_GRADIENT_VERTICAL:
-      return "vertical";
-    case META_GRADIENT_HORIZONTAL:
-      return "horizontal";
-    case META_GRADIENT_DIAGONAL:
-      return "diagonal";
-    case META_GRADIENT_LAST:
-      break;
-    }
-
-  return "<unknown>";
-}
-
 LOCAL_SYMBOL GtkStateFlags
 meta_gtk_state_from_string (const char *str)
 {
@@ -6477,48 +6357,6 @@ meta_gtk_state_from_string (const char *str)
     return -1; /* hack */
 }
 
-LOCAL_SYMBOL const char*
-meta_gtk_state_to_string (GtkStateFlags state)
-{
-  switch (state)
-    {
-    case GTK_STATE_FLAG_NORMAL:
-      return "NORMAL";
-    case GTK_STATE_FLAG_PRELIGHT:
-      return "PRELIGHT";
-    case GTK_STATE_FLAG_ACTIVE:
-      return "ACTIVE";
-    case GTK_STATE_FLAG_SELECTED:
-      return "SELECTED";
-    case GTK_STATE_FLAG_INSENSITIVE:
-      return "INSENSITIVE";
-    case GTK_STATE_FLAG_INCONSISTENT:
-      return "INCONSISTENT";
-    case GTK_STATE_FLAG_FOCUSED:
-      return "FOCUSED";
-    case GTK_STATE_FLAG_BACKDROP:
-      return "BACKDROP";
-#if GTK_MAJOR_VERSION > 3 || (GTK_MAJOR_VERSION == 3 && GTK_MINOR_VERSION >= 7)
-    case GTK_STATE_FLAG_DIR_LTR:
-      return "DIR_LTR";
-    case GTK_STATE_FLAG_DIR_RTL:
-      return "DIR_RTL";
-#endif
-#if GTK_MAJOR_VERSION > 3 || (GTK_MAJOR_VERSION == 3 && GTK_MINOR_VERSION >= 12)
-    case GTK_STATE_FLAG_LINK:
-      return "LINK";
-    case GTK_STATE_FLAG_VISITED:
-      return "VISITED";
-#endif
-#if GTK_MAJOR_VERSION > 3 || (GTK_MAJOR_VERSION == 3 && GTK_MINOR_VERSION >= 14)
-    case GTK_STATE_FLAG_CHECKED:
-      return "CHECKED";
-#endif
-    }
-
-  return "<unknown>";
-}
-
 LOCAL_SYMBOL GtkShadowType
 meta_gtk_shadow_from_string (const char *str)
 {
@@ -6534,26 +6372,6 @@ meta_gtk_shadow_from_string (const char *str)
     return GTK_SHADOW_ETCHED_OUT;
   else
     return -1;
-}
-
-LOCAL_SYMBOL const char*
-meta_gtk_shadow_to_string (GtkShadowType shadow)
-{
-  switch (shadow)
-    {
-    case GTK_SHADOW_NONE:
-      return "none";
-    case GTK_SHADOW_IN:
-      return "in";
-    case GTK_SHADOW_OUT:
-      return "out";
-    case GTK_SHADOW_ETCHED_IN:
-      return "etched_in";
-    case GTK_SHADOW_ETCHED_OUT:
-      return "etched_out";
-    }
-
-  return "<unknown>";
 }
 
 LOCAL_SYMBOL GtkArrowType
@@ -6573,26 +6391,6 @@ meta_gtk_arrow_from_string (const char *str)
     return -1;
 }
 
-LOCAL_SYMBOL const char*
-meta_gtk_arrow_to_string (GtkArrowType arrow)
-{
-  switch (arrow)
-    {
-    case GTK_ARROW_UP:
-      return "up";
-    case GTK_ARROW_DOWN:
-      return "down";
-    case GTK_ARROW_LEFT:
-      return "left";
-    case GTK_ARROW_RIGHT:
-      return "right";
-    case GTK_ARROW_NONE:
-      return "none";
-    }
-
-  return "<unknown>";
-}
-
 /*
  * Returns a fill_type from a string.  The inverse of
  * meta_image_fill_type_to_string().
@@ -6609,27 +6407,6 @@ meta_image_fill_type_from_string (const char *str)
     return META_IMAGE_FILL_SCALE;
   else
     return -1;
-}
-
-/*
- * Returns a string representation of a fill_type.  The inverse of
- * meta_image_fill_type_from_string().
- *
- * \param fill_type  the fill type
- * \result  a string representing that type
- */
-LOCAL_SYMBOL const char*
-meta_image_fill_type_to_string (MetaImageFillType fill_type)
-{
-  switch (fill_type)
-    {
-    case META_IMAGE_FILL_TILE:
-      return "tile";
-    case META_IMAGE_FILL_SCALE:
-      return "scale";
-    }
-  
-  return "<unknown>";
 }
 
 /*
