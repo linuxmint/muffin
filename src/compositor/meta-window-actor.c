@@ -887,7 +887,7 @@ meta_window_actor_get_texture (MetaWindowActor *self)
 gboolean
 meta_window_actor_is_destroyed (MetaWindowActor *self)
 {
-  return self->priv->disposed;
+  return self->priv->disposed || self->priv->needs_destroy;
 }
 
 gboolean
@@ -1006,7 +1006,12 @@ meta_window_actor_queue_frame_drawn (MetaWindowActor *self,
                                      gboolean         no_delay_frame)
 {
   MetaWindowActorPrivate *priv = self->priv;
-  FrameData *frame = g_slice_new0 (FrameData);
+  FrameData *frame;
+
+  if (meta_window_actor_is_destroyed (self))
+    return;
+
+  frame = g_slice_new0 (FrameData);
 
   priv->needs_frame_drawn = TRUE;
 
@@ -1278,6 +1283,9 @@ meta_window_actor_should_unredirect (MetaWindowActor *self)
 {
   MetaWindow *metaWindow = meta_window_actor_get_meta_window (self);
   MetaWindowActorPrivate *priv = self->priv;
+
+  if (meta_window_actor_is_destroyed (self))
+    return FALSE;
 
   if (meta_window_requested_dont_bypass_compositor (metaWindow))
     return FALSE;
@@ -2014,8 +2022,8 @@ meta_window_actor_process_damage (MetaWindowActor    *self,
       MetaRectangle window_rect;
       meta_window_get_outer_rect (priv->window, &window_rect);
 
-      if (window_rect.x == event->area.x &&
-          window_rect.y == event->area.y &&
+      if (event->area.x == 0 &&
+          event->area.y == 0 &&
           window_rect.width == event->area.width &&
           window_rect.height == event->area.height)
         priv->full_damage_frames_count++;
@@ -2337,6 +2345,9 @@ meta_window_actor_pre_paint (MetaWindowActor *self)
   MetaWindowActorPrivate *priv = self->priv;
   GList *l;
 
+  if (meta_window_actor_is_destroyed (self))
+    return;
+
   meta_window_actor_handle_updates (self);
 
   for (l = priv->frames; l != NULL; l = l->next)
@@ -2357,6 +2368,9 @@ meta_window_actor_post_paint (MetaWindowActor *self)
   MetaWindowActorPrivate *priv = self->priv;
 
   priv->repaint_scheduled = FALSE;
+
+  if (meta_window_actor_is_destroyed (self))
+    return;
 
   if (priv->needs_frame_drawn)
     {
@@ -2445,6 +2459,9 @@ meta_window_actor_frame_complete (MetaWindowActor *self,
 {
   MetaWindowActorPrivate *priv = self->priv;
   GList *l;
+
+  if (meta_window_actor_is_destroyed (self))
+    return;
 
   for (l = priv->frames; l;)
     {
