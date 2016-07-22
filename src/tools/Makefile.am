@@ -3,7 +3,7 @@
 icondir=$(pkgdatadir)/icons
 icon_DATA=muffin-window-demo.png
 
-AM_CPPFLAGS=@MUFFIN_WINDOW_DEMO_CFLAGS@ @MUFFIN_MESSAGE_CFLAGS@ \
+AM_CPPFLAGS=$(WARN_CFLAGS) @MUFFIN_WINDOW_DEMO_CFLAGS@ @MUFFIN_MESSAGE_CFLAGS@ \
 	-I$(top_srcdir)/src \
 	-DMUFFIN_ICON_DIR=\"$(pkgdatadir)/icons\" \
 	-DMUFFIN_LOCALEDIR=\"$(prefix)/@DATADIRNAME@/locale\"

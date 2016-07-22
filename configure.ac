@@ -11,6 +11,7 @@ m4_define([muffin_plugin_api_version], [3])
 
 AC_INIT([muffin], [muffin_version],
         [https://github.com/linuxmint/muffin/issues])
+AX_IS_RELEASE([git-directory])
 
 AC_CONFIG_SRCDIR(src/core/display.c)
 AC_CONFIG_HEADERS(config.h)
@@ -33,7 +34,7 @@ MUFFIN_PLUGIN_DIR="$libdir/$PACKAGE/plugins"
 AC_SUBST(MUFFIN_PLUGIN_DIR)
 
 # Honor aclocal flags
-AC_SUBST(ACLOCAL_AMFLAGS, "\${ACLOCAL_FLAGS}")
+AC_SUBST([ACLOCAL_AMFLAGS], ["-I $ac_macro_dir \${ACLOCAL_FLAGS}"])
 
 GETTEXT_PACKAGE=muffin
 AC_SUBST(GETTEXT_PACKAGE)
@@ -96,6 +97,7 @@ AC_ARG_ENABLE(verbose-mode,
   AC_HELP_STRING([--disable-verbose-mode],
                  [disable muffin's ability to do verbose logging, for embedded/size-sensitive custom builds]),,
   enable_verbose_mode=yes)
+dnl '
 
 if test x$enable_verbose_mode = xyes; then
     AC_DEFINE(WITH_VERBOSE_MODE,1,[Build with verbose mode support])
@@ -110,11 +112,14 @@ AC_ARG_ENABLE(sm,
   AC_HELP_STRING([--disable-sm],
                  [disable muffin's session management support, for embedded/size-sensitive custom non-GNOME builds]),,
   enable_sm=auto)
+dnl '
+
 
 AC_ARG_ENABLE(startup-notification,
   AC_HELP_STRING([--disable-startup-notification],
                  [disable muffin's startup notification support, for embedded/size-sensitive custom non-GNOME builds]),,
   enable_startup_notification=auto)
+dnl '
 
 AC_ARG_WITH(libcanberra,
   AC_HELP_STRING([--without-libcanberra],
@@ -125,11 +130,13 @@ AC_ARG_ENABLE(xsync,
   AC_HELP_STRING([--disable-xsync],
                  [disable muffin's use of the XSync extension]),,
   enable_xsync=auto)
+dnl '
 
 AC_ARG_ENABLE(shape,
   AC_HELP_STRING([--disable-shape],
                  [disable muffin's use of the shaped window extension]),,
   enable_shape=auto)
+dnl '
 
 ## try definining HAVE_BACKTRACE
 AC_CHECK_HEADERS(execinfo.h, [AC_CHECK_FUNCS(backtrace)])
@@ -240,6 +247,7 @@ AC_ARG_ENABLE(xinerama,
   AC_HELP_STRING([--disable-xinerama],
                  [disable muffin's use of the Xinerama extension]),
   try_xinerama=$enable_xinerama,try_xinerama=yes)
+dnl '
 
 use_solaris_xinerama=no
 use_xfree_xinerama=no
@@ -423,66 +431,7 @@ AC_CHECK_DECL([GL_EXT_x11_sync_object],
               [AC_MSG_ERROR([GL_EXT_x11_sync_object definition not found, please update your GL headers])],
               [#include <GL/glx.h>])
 
-#### Warnings (last since -Werror can disturb other tests)
-
-# Stay command-line compatible with the gnome-common configure option. Here
-# minimum/yes/maximum are the same, however.
-AC_ARG_ENABLE(compile_warnings,
-  AS_HELP_STRING([--enable-compile-warnings=@<:@no/minimum/yes/maximum/error@:>@],[Turn on compiler warnings]),,
-  enable_compile_warnings=yes)
-
-changequote(,)dnl
-if test "$enable_compile_warnings" != no ; then
-  if test "x$GCC" = "xyes"; then
-    case " $CFLAGS " in
-    *[\ \	]-Wall[\ \	]*) ;;
-    *) CFLAGS="$CFLAGS -Wall" ;;
-    esac
-
-#   case " $CFLAGS " in
-#   *[\ \	]-Wshadow[\ \	]*) ;;
-#   *) CFLAGS="$CFLAGS -Wshadow" ;;
-#   esac
-
-    case " $CFLAGS " in
-    *[\ \	]-Wchar-subscripts[\ \	]*) ;;
-    *) CFLAGS="$CFLAGS -Wchar-subscripts" ;;
-    esac
-
-    case " $CFLAGS " in
-    *[\ \	]-Wmissing-declarations[\ \	]*) ;;
-    *) CFLAGS="$CFLAGS -Wmissing-declarations" ;;
-    esac
-
-    case " $CFLAGS " in
-    *[\ \	]-Wmissing-prototypes[\ \	]*) ;;
-    *) CFLAGS="$CFLAGS -Wmissing-prototypes" ;;
-    esac
-
-    case " $CFLAGS " in
-    *[\ \	]-Wnested-externs[\ \	]*) ;;
-    *) CFLAGS="$CFLAGS -Wnested-externs" ;;
-    esac
-
-    case " $CFLAGS " in
-    *[\ \	]-Wpointer-arith[\ \	]*) ;;
-    *) CFLAGS="$CFLAGS -Wpointer-arith" ;;
-    esac
-
-    case " $CFLAGS " in
-    *[\ \	]-Wsign-compare[\ \	]*) ;;
-    *) CFLAGS="$CFLAGS -Wsign-compare" ;;
-    esac
-
-    if test "$enable_compile_warnings" = error; then
-      case " $CFLAGS " in
-      *[\ \	]-Werror[\ \	]*) ;;
-      *) CFLAGS="$CFLAGS -Werror -Wno-error=deprecated-declarations" ;;
-      esac
-    fi
-  fi
-fi
-changequote([,])dnl
+AX_COMPILER_FLAGS([WARN_CFLAGS],[WARN_LDFLAGS])
 
 AC_CONFIG_FILES([
 Makefile
