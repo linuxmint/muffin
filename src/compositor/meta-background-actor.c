@@ -42,6 +42,8 @@
 #include <meta/errors.h>
 #include "meta-background-actor-private.h"
 
+#define FADE_DURATION 1500
+
 /* We allow creating multiple MetaBackgroundActors for the same MetaScreen to
  * allow different rendering options to be set for different copies.
  * But we want to share the same underlying CoglTexture for efficiency and
@@ -67,9 +69,11 @@ struct _MetaScreenBackground
 struct _MetaBackgroundActorPrivate
 {
   MetaScreenBackground *background;
-  CoglHandle material;
+  ClutterActor *top_actor;
+  ClutterActor *bottom_actor;
   cairo_region_t *visible_region;
   float dim_factor;
+  gboolean transition_running;
 };
 
 enum
@@ -144,7 +148,8 @@ update_wrap_mode_of_actor (MetaBackgroundActor *self)
 {
   MetaBackgroundActorPrivate *priv = self->priv;
 
-  cogl_material_set_layer_wrap_mode (priv->material, 0, priv->background->wrap_mode);
+  meta_background_set_layer_wrap_mode (META_BACKGROUND (priv->top_actor), priv->background->wrap_mode);
+  meta_background_set_layer_wrap_mode (META_BACKGROUND (priv->bottom_actor), priv->background->wrap_mode);
 }
 
 static void
@@ -169,17 +174,61 @@ update_wrap_mode (MetaScreenBackground *background)
 }
 
 static void
+cancel_transitions (MetaBackgroundActor *self)
+{
+  MetaBackgroundActorPrivate *priv = self->priv;
+
+  clutter_actor_remove_all_transitions (priv->top_actor);
+  clutter_actor_set_opacity (priv->top_actor, 255);
+  meta_background_set_layer (META_BACKGROUND (priv->bottom_actor), priv->background->texture);
+  
+  priv->transition_running = FALSE;
+}
+
+static void
+on_trasition_complete (ClutterActor *actor,
+                       gpointer      user_data)
+{
+  MetaBackgroundActor *self = (MetaBackgroundActor *)user_data;
+  MetaBackgroundActorPrivate *priv = self->priv;
+
+  meta_background_set_layer (META_BACKGROUND (priv->bottom_actor), priv->background->texture);
+  priv->transition_running = FALSE;
+}
+
+static void
+set_texture_on_actors (MetaBackgroundActor *self)
+{
+  MetaBackgroundActorPrivate *priv = self->priv;
+
+  meta_background_set_layer (META_BACKGROUND (priv->bottom_actor), priv->background->texture);
+  meta_background_set_layer (META_BACKGROUND (priv->top_actor), priv->background->texture);
+
+  clutter_actor_queue_redraw (CLUTTER_ACTOR (self));
+}
+
+static void
 set_texture_on_actor (MetaBackgroundActor *self)
 {
   MetaBackgroundActorPrivate *priv = self->priv;
-  MetaDisplay *display = meta_screen_get_display (priv->background->screen);
 
-  /* This may trigger destruction of an old texture pixmap, which, if
-   * the underlying X pixmap is already gone has the tendency to trigger
-   * X errors inside DRI. For safety, trap errors */
-  meta_error_trap_push (display);
-  cogl_material_set_layer (priv->material, 0, priv->background->texture);
-  meta_error_trap_pop (display);
+  if (priv->transition_running)
+    cancel_transitions (self);
+
+  clutter_actor_set_opacity (CLUTTER_ACTOR (priv->top_actor), 0);
+  meta_background_set_layer (META_BACKGROUND (priv->top_actor), priv->background->texture);
+
+  priv->transition_running = TRUE;
+
+  clutter_actor_save_easing_state (priv->top_actor);
+  clutter_actor_set_easing_duration (priv->top_actor, FADE_DURATION);
+  clutter_actor_set_opacity (priv->top_actor, 255);
+  clutter_actor_restore_easing_state (priv->top_actor);
+
+  g_signal_connect (priv->top_actor,
+                    "transitions-completed",
+                    G_CALLBACK (on_trasition_complete),
+                    self);
 
   clutter_actor_queue_redraw (CLUTTER_ACTOR (self));
 }
@@ -254,12 +303,6 @@ meta_background_actor_dispose (GObject *object)
       priv->background = NULL;
     }
 
-  if (priv->material != COGL_INVALID_HANDLE)
-    {
-      cogl_handle_unref (priv->material);
-      priv->material = COGL_INVALID_HANDLE;
-    }
-
   G_OBJECT_CLASS (meta_background_actor_parent_class)->dispose (object);
 }
 
@@ -300,55 +343,6 @@ meta_background_actor_get_preferred_height (ClutterActor *actor,
     *natural_height_p = height;
 }
 
-static void
-meta_background_actor_paint (ClutterActor *actor)
-{
-  MetaBackgroundActor *self = META_BACKGROUND_ACTOR (actor);
-  MetaBackgroundActorPrivate *priv = self->priv;
-  guint8 opacity = clutter_actor_get_paint_opacity (actor);
-  guint8 color_component;
-  int width, height;
-
-  meta_screen_get_size (priv->background->screen, &width, &height);
-
-  color_component = (int)(0.5 + opacity * priv->dim_factor);
-
-  cogl_material_set_color4ub (priv->material,
-                              color_component,
-                              color_component,
-                              color_component,
-                              opacity);
-
-  cogl_set_source (priv->material);
-
-  if (priv->visible_region)
-    {
-      int n_rectangles = cairo_region_num_rectangles (priv->visible_region);
-      int i;
-
-      for (i = 0; i < n_rectangles; i++)
-        {
-          cairo_rectangle_int_t rect;
-          cairo_region_get_rectangle (priv->visible_region, i, &rect);
-
-          cogl_rectangle_with_texture_coords (rect.x, rect.y,
-                                              rect.x + rect.width, rect.y + rect.height,
-                                              rect.x / priv->background->texture_width,
-                                              rect.y / priv->background->texture_height,
-                                              (rect.x + rect.width) / priv->background->texture_width,
-                                              (rect.y + rect.height) / priv->background->texture_height);
-        }
-    }
-  else
-    {
-      cogl_rectangle_with_texture_coords (0.0f, 0.0f,
-                                          width, height,
-                                          0.0f, 0.0f,
-                                          width / priv->background->texture_width,
-                                          height / priv->background->texture_height);
-    }
-}
-
 static gboolean
 meta_background_actor_get_paint_volume (ClutterActor       *actor,
                                         ClutterPaintVolume *volume)
@@ -382,10 +376,10 @@ meta_background_actor_set_dim_factor (MetaBackgroundActor *self,
 }
 
 static void
-meta_background_actor_get_property(GObject         *object,
-                                   guint            prop_id,
-                                   GValue          *value,
-                                   GParamSpec      *pspec)
+meta_background_actor_get_property (GObject         *object,
+                                    guint            prop_id,
+                                    GValue          *value,
+                                    GParamSpec      *pspec)
 {
   MetaBackgroundActor *self = META_BACKGROUND_ACTOR (object);
   MetaBackgroundActorPrivate *priv = self->priv;
@@ -402,10 +396,10 @@ meta_background_actor_get_property(GObject         *object,
 }
 
 static void
-meta_background_actor_set_property(GObject         *object,
-                                   guint            prop_id,
-                                   const GValue    *value,
-                                   GParamSpec      *pspec)
+meta_background_actor_set_property (GObject         *object,
+                                    guint            prop_id,
+                                    const GValue    *value,
+                                    GParamSpec      *pspec)
 {
   MetaBackgroundActor *self = META_BACKGROUND_ACTOR (object);
 
@@ -435,7 +429,6 @@ meta_background_actor_class_init (MetaBackgroundActorClass *klass)
 
   actor_class->get_preferred_width = meta_background_actor_get_preferred_width;
   actor_class->get_preferred_height = meta_background_actor_get_preferred_height;
-  actor_class->paint = meta_background_actor_paint;
   actor_class->get_paint_volume = meta_background_actor_get_paint_volume;
 
   /**
@@ -463,10 +456,11 @@ meta_background_actor_init (MetaBackgroundActor *self)
                                                    META_TYPE_BACKGROUND_ACTOR,
                                                    MetaBackgroundActorPrivate);
   priv->dim_factor = 1.0;
+  priv->transition_running = FALSE;
 }
 
 /**
- * meta_background_actor_new:
+ * meta_background_actor_new_for_screen:
  * @screen: the #MetaScreen
  *
  * Creates a new actor to draw the background for the given screen.
@@ -487,9 +481,12 @@ meta_background_actor_new_for_screen (MetaScreen *screen)
   priv->background = meta_screen_background_get (screen);
   priv->background->actors = g_slist_prepend (priv->background->actors, self);
 
-  priv->material = meta_create_texture_material (NULL);
+  priv->bottom_actor = meta_background_new (screen);
+  clutter_actor_add_child (CLUTTER_ACTOR (self), priv->bottom_actor);
+  priv->top_actor = meta_background_new (screen);
+  clutter_actor_add_child (CLUTTER_ACTOR (self), priv->top_actor);
 
-  set_texture_on_actor (self);
+  set_texture_on_actors (self);
   update_wrap_mode_of_actor (self);
 
   return CLUTTER_ACTOR (self);
@@ -531,17 +528,17 @@ meta_background_actor_update (MetaScreen *screen)
                            False,
                            AnyPropertyType,
                            &type, &format, &nitems, &bytes_after, &data) &&
-      type != None)
-  {
-     /* Got a property. */
-     if (type == XA_PIXMAP && format == 32 && nitems == 1)
-       {
-         /* Was what we expected. */
-         root_pixmap_id = *(Pixmap *)data;
-       }
+                           type != None)
+    {
+      /* Got a property. */
+      if (type == XA_PIXMAP && format == 32 && nitems == 1)
+        {
+          /* Was what we expected. */
+          root_pixmap_id = *(Pixmap *)data;
+        }
 
-     XFree(data);
-  }
+      XFree(data);
+    }
 
   if (root_pixmap_id != None)
     {
@@ -592,24 +589,7 @@ meta_background_actor_set_visible_region (MetaBackgroundActor *self,
 
   priv = self->priv;
 
-  if (priv->visible_region)
-    {
-      cairo_region_destroy (priv->visible_region);
-      priv->visible_region = NULL;
-    }
-
-  if (visible_region)
-    {
-      cairo_rectangle_int_t screen_rect = { 0 };
-      meta_screen_get_size (priv->background->screen, &screen_rect.width, &screen_rect.height);
-
-      /* Doing the intersection here is probably unnecessary - MetaWindowGroup
-       * should never compute a visible area that's larger than the root screen!
-       * but it's not that expensive and adds some extra robustness.
-       */
-      priv->visible_region = cairo_region_create_rectangle (&screen_rect);
-      cairo_region_intersect (priv->visible_region, visible_region);
-    }
+  meta_background_set_visible_region (META_BACKGROUND (priv->top_actor), visible_region);
 }
 
 /**

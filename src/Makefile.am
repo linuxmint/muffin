@@ -44,6 +44,8 @@ libmuffin_la_SOURCES =				\
 	compositor/cogl-utils.h			\
 	compositor/compositor.c			\
 	compositor/compositor-private.h		\
+	compositor/meta-background.c 		\
+	compositor/meta-background.h 		\
 	compositor/meta-background-actor.c	\
 	compositor/meta-background-actor-private.h	\
 	compositor/meta-module.c		\
