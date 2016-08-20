@@ -277,7 +277,7 @@ set_texture_to_stage_color (MetaScreenBackground *background)
   ClutterColor color;
   CoglHandle texture;
 
-  clutter_stage_get_color (CLUTTER_STAGE (stage), &color);
+  clutter_actor_get_background_color (stage, &color);
 
   /* Slicing will prevent COGL from using hardware texturing for
    * the tiled 1x1 pixmap, and will cause it to draw the window
