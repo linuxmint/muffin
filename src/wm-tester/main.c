@@ -200,36 +200,42 @@ set_up_icon_windows (void)
       GtkWidget *w;
       GtkWidget *c;
       GList *icons;
+      GtkIconTheme *theme;
       GdkPixbuf *pix;
       
       w = gtk_window_new (GTK_WINDOW_TOPLEVEL);
       c = gtk_button_new_with_label ("Icon window");
       gtk_container_add (GTK_CONTAINER (w), c);
 
+      theme = gtk_icon_theme_get_default ();
+
       icons = NULL;
 
-      pix = gtk_widget_render_icon (w,
-                                    GTK_STOCK_SAVE,
-                                    GTK_ICON_SIZE_LARGE_TOOLBAR,
-                                    NULL);
+      pix = gtk_icon_theme_load_icon (theme,
+                                      "document-save",
+                                      24,
+                                      0,
+                                      NULL);
       
       icons = g_list_append (icons, pix);
 
       if (i % 2)
         {
-          pix = gtk_widget_render_icon (w,
-                                        GTK_STOCK_SAVE,
-                                        GTK_ICON_SIZE_DIALOG,
-                                        NULL);
+          pix = gtk_icon_theme_load_icon (theme,
+                                          "document-save",
+                                          48,
+                                          0,
+                                          NULL);
           icons = g_list_append (icons, pix);
         }
 
       if (i % 3)
         {
-          pix = gtk_widget_render_icon (w,
-                                        GTK_STOCK_SAVE,
-                                        GTK_ICON_SIZE_MENU,
-                                        NULL);
+          pix = gtk_icon_theme_load_icon (theme,
+                                          "document-save",
+                                          16,
+                                          0,
+                                          NULL);
           icons = g_list_append (icons, pix);
         }
 

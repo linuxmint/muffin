@@ -85,7 +85,7 @@ main (int argc, char **argv)
 					ATTACH_1,
 					"Attach to 2",
 					ATTACH_2,
-					GTK_STOCK_QUIT,
+					"Quit",
 					GTK_RESPONSE_CLOSE,
 					NULL);
   gtk_dialog_set_response_sensitive (GTK_DIALOG (dialog), DESTROY_PARENT, FALSE);
