@@ -594,18 +594,6 @@ meta_gdk_pixbuf_get_from_pixmap (Pixmap       xpixmap,
   return retval;
 }
 
-LOCAL_SYMBOL void
-meta_ui_push_delay_exposes (MetaUI *ui)
-{
-  meta_frames_push_delay_exposes (ui->frames);
-}
-
-LOCAL_SYMBOL void
-meta_ui_pop_delay_exposes  (MetaUI *ui)
-{
-  meta_frames_pop_delay_exposes (ui->frames);
-}
-
 LOCAL_SYMBOL GdkPixbuf*
 meta_ui_get_default_window_icon (MetaUI *ui)
 {
