@@ -102,10 +102,6 @@ struct _MetaFrames
   GHashTable *style_variants;
 
   int expose_delay_count;
-
-  int invalidate_cache_timeout_id;
-  GList *invalidate_frames;
-  GHashTable *cache;
 };
 
 struct _MetaFramesClass
