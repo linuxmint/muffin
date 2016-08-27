@@ -658,21 +658,16 @@ meta_compositor_manage_screen (MetaCompositor *compositor,
 
   info->window_group = meta_window_group_new (screen);
   info->background_actor = meta_background_actor_new_for_screen (screen);
-  info->bottom_window_group = clutter_group_new();
-  info->overlay_group = clutter_group_new ();
+  info->bottom_window_group = clutter_actor_new();
+  info->overlay_group = clutter_actor_new ();
   info->top_window_group = meta_window_group_new (screen);
-  info->hidden_group = clutter_group_new ();
+  info->hidden_group = clutter_actor_new ();
 
-  clutter_container_add (CLUTTER_CONTAINER (info->window_group),
-                         info->background_actor,
-                         NULL);
-
-  clutter_container_add (CLUTTER_CONTAINER (info->stage),
-                         info->window_group,
-                         info->top_window_group,
-                         info->overlay_group,
-			 info->hidden_group,
-                         NULL);
+  clutter_actor_add_child (info->window_group, info->background_actor);
+  clutter_actor_add_child (info->stage, info->window_group);
+  clutter_actor_add_child (info->stage, info->top_window_group);
+  clutter_actor_add_child (info->stage, info->overlay_group);
+  clutter_actor_add_child (info->stage, info->hidden_group);
 
   clutter_actor_hide (info->hidden_group);
 
@@ -1082,7 +1077,7 @@ sync_actor_stacking (MetaCompScreen *info)
    * little effort to make sure we actually need to restack before
    * we go ahead and do it */
 
-  children = clutter_container_get_children (CLUTTER_CONTAINER (info->window_group));
+  children = clutter_actor_get_children (info->window_group);
   reordered = FALSE;
 
   old = children;
@@ -1130,12 +1125,14 @@ sync_actor_stacking (MetaCompScreen *info)
 
   for (tmp = g_list_last (info->windows); tmp != NULL; tmp = tmp->prev)
     {
-      MetaWindowActor *window_actor = tmp->data;
+      ClutterActor *actor = tmp->data;
 
-      clutter_actor_lower_bottom (CLUTTER_ACTOR (window_actor));
+      if (clutter_actor_get_parent (actor) == info->window_group)
+        clutter_actor_set_child_below_sibling (info->window_group, actor, NULL);
     }
 
-  clutter_actor_lower_bottom (info->background_actor);
+  if (clutter_actor_get_parent (info->background_actor) == info->window_group)
+    clutter_actor_set_child_below_sibling (info->window_group, info->background_actor, NULL);
 }
 
 void
@@ -1535,21 +1532,11 @@ meta_enable_unredirect_for_screen (MetaScreen *screen)
 #define FLASH_TIME_MS 50
 
 static void
-flash_out_completed (ClutterAnimation *animation,
-                     ClutterActor     *flash)
+flash_out_completed (ClutterTimeline *timeline,
+                     gpointer         user_data)
 {
+  ClutterActor *flash = CLUTTER_ACTOR (user_data);
   clutter_actor_destroy (flash);
-}
-
-static void
-flash_in_completed (ClutterAnimation *animation,
-                    ClutterActor     *flash)
-{
-  clutter_actor_animate (flash, CLUTTER_EASE_IN_QUAD,
-                         FLASH_TIME_MS,
-                         "opacity", 0,
-                         "signal-after::completed", flash_out_completed, flash,
-                         NULL);
 }
 
 void
@@ -1558,22 +1545,31 @@ meta_compositor_flash_screen (MetaCompositor *compositor,
 {
   ClutterActor *stage;
   ClutterActor *flash;
-  ClutterColor black = { 0, 0, 0, 255 };
+  ClutterTransition *transition;
   gfloat width, height;
 
   stage = meta_get_stage_for_screen (screen);
   clutter_actor_get_size (stage, &width, &height);
 
-  flash = clutter_rectangle_new_with_color (&black);
+  flash = clutter_actor_new ();
+  clutter_actor_set_background_color (flash, CLUTTER_COLOR_Black);
   clutter_actor_set_size (flash, width, height);
   clutter_actor_set_opacity (flash, 0);
-  clutter_container_add_actor (CLUTTER_CONTAINER (stage), flash);
+  clutter_actor_add_child (stage, flash);
 
-  clutter_actor_animate (flash, CLUTTER_EASE_OUT_QUAD,
-                         FLASH_TIME_MS,
-                         "opacity", 192,
-                         "signal-after::completed", flash_in_completed, flash,
-                         NULL);
+  clutter_actor_save_easing_state (flash);
+  clutter_actor_set_easing_mode (flash, CLUTTER_EASE_IN_QUAD);
+  clutter_actor_set_easing_duration (flash, FLASH_TIME_MS);
+  clutter_actor_set_opacity (flash, 192);
+
+  transition = clutter_actor_get_transition (flash, "opacity");
+  clutter_timeline_set_auto_reverse (CLUTTER_TIMELINE (transition), TRUE);
+  clutter_timeline_set_repeat_count (CLUTTER_TIMELINE (transition), 2);
+
+  g_signal_connect (transition, "finished",
+                    G_CALLBACK (flash_out_completed), flash);
+
+  clutter_actor_restore_easing_state (flash);
 }
 
 void
