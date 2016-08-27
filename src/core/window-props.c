@@ -1685,51 +1685,25 @@ reload_bypass_compositor (MetaWindow    *window,
                           MetaPropValue *value,
                           gboolean       initial)
 {
-  gboolean requested_value = FALSE;
-  gboolean current_value = window->bypass_compositor;
+  int requested_value = 0;
+  int current_value = window->bypass_compositor;
 
   if (value->type != META_PROP_VALUE_INVALID)
     {
-      requested_value = ((int) value->v.cardinal == 1);
-      meta_verbose ("Request to bypass compositor for window %s.\n", window->desc);
+      requested_value = (int) value->v.cardinal;
     }
 
   if (requested_value == current_value)
     return;
 
-  if (requested_value && window->dont_bypass_compositor)
-    {
-      meta_verbose ("Setting bypass and dont compositor for same window (%s) makes no sense, ignoring.\n", window->desc);
-      return;
-    }
+  if (requested_value == _NET_WM_BYPASS_COMPOSITOR_HINT_ON)
+    meta_verbose ("Request to bypass compositor for window %s.\n", window->desc);
+  else if (requested_value == _NET_WM_BYPASS_COMPOSITOR_HINT_OFF)
+    meta_verbose ("Request to don't bypass compositor for window %s.\n", window->desc);
+  else if (requested_value != _NET_WM_BYPASS_COMPOSITOR_HINT_AUTO)
+    return;
 
   window->bypass_compositor = requested_value;
-}
-
-static void
-reload_dont_bypass_compositor (MetaWindow    *window,
-                               MetaPropValue *value,
-                               gboolean       initial)
-{
-  gboolean requested_value = FALSE;
-  gboolean current_value = window->dont_bypass_compositor;
-
-  if (value->type != META_PROP_VALUE_INVALID)
-    {
-      requested_value = ((int) value->v.cardinal == 1);
-      meta_verbose ("Request to don't bypass compositor for window %s.\n", window->desc);
-    }
-
-  if (requested_value == current_value)
-    return;
-
-  if (requested_value && window->bypass_compositor)
-    {
-      meta_verbose ("Setting bypass and dont compositor for same window (%s) makes no sense, ignoring.\n", window->desc);
-      return;
-    }
-
-  window->dont_bypass_compositor = requested_value;
 }
 
 #define RELOAD_STRING(var_name, propname) \
@@ -1828,8 +1802,7 @@ meta_display_init_window_prop_hooks (MetaDisplay *display)
     { display->atom__NET_WM_WINDOW_TYPE, META_PROP_VALUE_INVALID, reload_net_wm_window_type,  FALSE, TRUE },
     { display->atom__NET_WM_STRUT,         META_PROP_VALUE_INVALID, reload_struts,            FALSE, FALSE },
     { display->atom__NET_WM_STRUT_PARTIAL, META_PROP_VALUE_INVALID, reload_struts,            FALSE, FALSE },
-    { display->atom__NET_WM_BYPASS_COMPOSITOR, META_PROP_VALUE_CARDINAL,  reload_bypass_compositor, FALSE, FALSE },
-    { display->atom__NET_WM_DONT_BYPASS_COMPOSITOR, META_PROP_VALUE_CARDINAL,  reload_dont_bypass_compositor, FALSE, FALSE },
+    { display->atom__NET_WM_BYPASS_COMPOSITOR, META_PROP_VALUE_CARDINAL,  reload_bypass_compositor, TRUE, TRUE },
     { 0 },
   };
 
