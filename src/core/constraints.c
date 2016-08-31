@@ -875,7 +875,6 @@ constrain_maximization (MetaWindow         *window,
         g_slist_free (snapped_windows_as_struts);
       } else {
           target_size = info->current;
-          meta_window_extend_by_frame (window, &target_size, info->borders);
           meta_rectangle_expand_to_avoiding_struts (&target_size,
                                                     &info->entire_monitor,
                                                     direction,
@@ -883,7 +882,8 @@ constrain_maximization (MetaWindow         *window,
       }
    }
   /* Now make target_size = maximized size of client window */
-  meta_window_unextend_by_frame (window, &target_size, info->borders);
+  if (!meta_window_is_client_decorated(window))
+    meta_window_unextend_by_frame (window, &target_size, info->borders);
 
   /* Check min size constraints; max size constraints are ignored for maximized
    * windows, as per bug 327543.
