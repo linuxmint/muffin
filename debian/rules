@@ -25,9 +25,7 @@ override_dh_autoreconf:
 
 override_dh_auto_configure:
 	dh_auto_configure -- --disable-static \
-	                     --enable-startup-notification=yes \
-	                     --disable-silent-rules \
-			     --enable-gtk-doc
+	                     --disable-silent-rules
 
 override_dh_girepository:
 	dh_girepository /usr/lib/$(DEB_HOST_MULTIARCH)/muffin
@@ -35,8 +33,15 @@ override_dh_girepository:
 override_dh_strip:
 	dh_strip --dbg-package=muffin-dbg
 
-override_dh_installdocs:
-	dh_installdocs --link-doc=muffin-common
-
 override_dh_install:
 	dh_install -X.la --fail-missing
+
+run_dh_acc:
+	# The package needs to be installed (@ in autopkgtest)
+	for in_file in debian/*.acc.in; do \
+	    out_file=$${in_file%.in}; \
+	    sed 's/\$${DEB_HOST_MULTIARCH}/'"$(DEB_HOST_MULTIARCH)"'/' \
+		"$${in_file}" > "$${out_file}"; \
+	done
+
+	dh_acc
