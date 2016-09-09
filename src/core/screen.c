@@ -113,6 +113,7 @@ enum
   WINDOW_REMOVED,
   WINDOW_MONITOR_CHANGED,
   WINDOW_WORKSPACE_CHANGED,
+  WINDOW_SKIP_TASKBAR_CHANGED,
   IN_FULLSCREEN_CHANGED,
 
   LAST_SIGNAL
@@ -341,6 +342,15 @@ meta_screen_class_init (MetaScreenClass *klass)
                   G_TYPE_NONE, 2,
                   META_TYPE_WINDOW,
                   META_TYPE_WORKSPACE);
+
+  screen_signals[WINDOW_SKIP_TASKBAR_CHANGED] =
+    g_signal_new ("window-skip-taskbar-changed",
+                  G_TYPE_FROM_CLASS (klass),
+                  G_SIGNAL_RUN_LAST,
+                  0,
+                  NULL, NULL, NULL,
+                  G_TYPE_NONE, 1,
+                  META_TYPE_WINDOW);
 
   screen_signals[IN_FULLSCREEN_CHANGED] =
     g_signal_new ("in-fullscreen-changed",

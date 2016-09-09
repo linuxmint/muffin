@@ -8360,6 +8360,7 @@ recalc_window_features (MetaWindow *window)
   gboolean old_has_resize_func;
   gboolean old_has_shade_func;
   gboolean old_always_sticky;
+  gboolean old_skip_taskbar;
 
   old_has_close_func = window->has_close_func;
   old_has_minimize_func = window->has_minimize_func;
@@ -8367,6 +8368,7 @@ recalc_window_features (MetaWindow *window)
   old_has_resize_func = window->has_resize_func;
   old_has_shade_func = window->has_shade_func;
   old_always_sticky = window->always_sticky;
+  old_skip_taskbar = window->skip_taskbar;
 
   /* Use MWM hints initially */
   window->decorated = window->mwm_decorated;
@@ -8576,6 +8578,9 @@ recalc_window_features (MetaWindow *window)
 
   if (window->has_resize_func != old_has_resize_func)
     g_object_notify (G_OBJECT (window), "resizeable");
+
+  if (old_skip_taskbar != window->skip_taskbar)
+    g_signal_emit_by_name (window->screen, "window-skip-taskbar-changed", window);
 
   /* FIXME perhaps should ensure if we don't have a shade func,
    * we aren't shaded, etc.
