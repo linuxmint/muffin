@@ -4,6 +4,7 @@ Priority: optional
 Maintainer: Linux Mint <root@linuxmint.com>
 Build-Depends: debhelper (>= 9),
                dh-autoreconf,
+               autoconf-archive,
                intltool (>= 0.34.90),
                libgtk-3-dev (>= 3.9.12),
                libcanberra-gtk3-dev,

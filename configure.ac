@@ -11,7 +11,7 @@ m4_define([muffin_plugin_api_version], [3])
 
 AC_INIT([muffin], [muffin_version],
         [https://github.com/linuxmint/muffin/issues])
-AX_IS_RELEASE([git-directory])
+AX_IS_RELEASE([always])
 
 AC_CONFIG_SRCDIR(src/core/display.c)
 AC_CONFIG_HEADERS(config.h)
