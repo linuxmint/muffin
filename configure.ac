@@ -11,7 +11,8 @@ m4_define([muffin_plugin_api_version], [3])
 
 AC_INIT([muffin], [muffin_version],
         [https://github.com/linuxmint/muffin/issues])
-AX_IS_RELEASE([always])
+
+m4_ifdef([AX_IS_RELEASE], [AX_IS_RELEASE([always])])
 
 AC_CONFIG_SRCDIR(src/core/display.c)
 AC_CONFIG_HEADERS(config.h)
@@ -431,7 +432,8 @@ AC_CHECK_DECL([GL_EXT_x11_sync_object],
               [AC_MSG_ERROR([GL_EXT_x11_sync_object definition not found, please update your GL headers])],
               [#include <GL/glx.h>])
 
-AX_COMPILER_FLAGS([WARN_CFLAGS],[WARN_LDFLAGS])
+m4_ifdef([AX_COMPILER_FLAGS],
+         [AX_COMPILER_FLAGS([WARN_CFLAGS],[WARN_LDFLAGS])])
 
 AC_CONFIG_FILES([
 Makefile
