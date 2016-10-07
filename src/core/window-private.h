@@ -153,6 +153,7 @@ struct _MetaWindow
 
   char *startup_id;
   char *muffin_hints;
+  char *flatpak_id;
   char *gtk_theme_variant;
   char *gtk_application_id;
   char *gtk_unique_bus_name;
@@ -840,6 +841,8 @@ void meta_window_extend_by_frame (MetaWindow              *window,
 void meta_window_unextend_by_frame (MetaWindow              *window,
                                     MetaRectangle           *rect,
                                     const MetaFrameBorders  *borders);
+
+uint32_t meta_window_get_client_pid (MetaWindow *window);
 
 void meta_window_get_client_area_rect (const MetaWindow      *window,
                                        cairo_rectangle_int_t *rect);

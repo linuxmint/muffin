@@ -52,6 +52,8 @@
 
 #include <X11/Xatom.h>
 #include <X11/Xlibint.h> /* For display->resource_mask */
+#include <X11/Xlib-xcb.h>
+#include <xcb/res.h>
 #include <string.h>
 #include <math.h>
 
@@ -265,6 +267,7 @@ meta_window_finalize (GObject *object)
   g_free (window->icon_name);
   g_free (window->theme_icon_name);
   g_free (window->desc);
+  g_free (window->flatpak_id);
   g_free (window->gtk_theme_variant);
   g_free (window->gtk_application_id);
   g_free (window->gtk_unique_bus_name);
@@ -758,6 +761,27 @@ sync_client_window_mapped (MetaWindow *window)
   meta_error_trap_pop (window->display);
 }
 
+static void
+meta_window_update_flatpak_id (MetaWindow *window)
+{
+  uint32_t pid = meta_window_get_client_pid (window);
+  g_autoptr(GKeyFile) key_file = NULL;
+  g_autofree char *info_filename = NULL;
+
+  g_clear_pointer (&window->flatpak_id, g_free);
+
+  if (pid == 0)
+    return;
+
+  key_file = g_key_file_new ();
+  info_filename = g_strdup_printf ("/proc/%u/root/.flatpak-info", pid);
+
+  if (!g_key_file_load_from_file (key_file, info_filename, G_KEY_FILE_NONE, NULL))
+    return;
+
+  window->flatpak_id = g_key_file_get_string (key_file, "Application", "name", NULL);
+}
+
 LOCAL_SYMBOL MetaWindow*
 meta_window_new (MetaDisplay *display,
                  Window       xwindow,
@@ -1131,6 +1155,7 @@ meta_window_new_with_attrs (MetaDisplay       *display,
 
   window->screen = screen;
 
+  meta_window_update_flatpak_id (window);
   window->desc = g_strdup_printf ("0x%lx", window->xwindow);
 
   window->override_redirect = attrs->override_redirect;
@@ -11601,6 +11626,30 @@ meta_window_get_wm_class_instance (MetaWindow *window)
 }
 
 /**
+ * meta_window_get_flatpak_id:
+ * @window: a #MetaWindow
+ *
+ * Return value: (transfer none): the Flatpak application ID or %NULL
+ **/
+const char *
+meta_window_get_flatpak_id (MetaWindow *window)
+{
+  return window->flatpak_id;
+}
+
+/**
+ * meta_window_get_gtk_theme_variant:
+ * @window: a #MetaWindow
+ *
+ * Return value: (transfer none): the theme variant or %NULL
+ **/
+const char *
+meta_window_get_gtk_theme_variant (MetaWindow *window)
+{
+  return window->gtk_theme_variant;
+}
+
+/**
  * meta_window_get_gtk_application_id:
  * @window: a #MetaWindow
  *
@@ -11768,6 +11817,52 @@ Window
 meta_window_get_transient_for_as_xid (MetaWindow *window)
 {
   return window->xtransient_for;
+}
+
+/**
+ * meta_window_get_client_pid:
+ * @window: a #MetaWindow
+ *
+ * Returns the pid of the process that created this window, if available
+ * to the windowing system.
+ *
+ * Return value: the pid, or 0 if not known.
+ */
+uint32_t
+meta_window_get_client_pid (MetaWindow *window)
+{
+  MetaDisplay *display = window->display;
+  xcb_connection_t *xcb = XGetXCBConnection (display->xdisplay);
+  xcb_res_client_id_spec_t spec = { 0 };
+  xcb_res_query_client_ids_cookie_t cookie;
+  xcb_res_query_client_ids_reply_t *reply = NULL;
+
+  spec.client = window->xwindow;
+  spec.mask = XCB_RES_CLIENT_ID_MASK_LOCAL_CLIENT_PID;
+
+  cookie = xcb_res_query_client_ids (xcb, 1, &spec);
+  reply = xcb_res_query_client_ids_reply (xcb, cookie, NULL);
+
+  if (reply == NULL)
+    return 0;
+
+  uint32_t pid = 0, *value;
+  xcb_res_client_id_value_iterator_t it;
+  for (it = xcb_res_query_client_ids_ids_iterator (reply);
+       it.rem;
+       xcb_res_client_id_value_next (&it))
+    {
+      spec = it.data->spec;
+      if (spec.mask & XCB_RES_CLIENT_ID_MASK_LOCAL_CLIENT_PID)
+        {
+          value = xcb_res_client_id_value_value (it.data);
+          pid = *value;
+          break;
+        }
+    }
+
+  free (reply);
+  return pid;
 }
 
 /**
