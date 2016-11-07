@@ -1,3 +1,45 @@
+muffin (3.2.0) serena; urgency=medium
+
+  [ itzexor ]
+  * meta-window-actor: fix unredirect heuristic Damage coordinates are relative to the drawable not to the screen. So we have to check whether x and y are 0 and not window_rect.x/y otherwise the herustic will never trigger for windows on monitors whos x and y are not 0.
+  * meta-window-actor: Consider needs_destroy in is_destroyed() According to the documentation, the method returns "whether the X window that the actor was displaying has been destroyed" - that is very much true when we delay the actual actor destruction for a destroy animation, so update the method accordingly.
+  * meta-window-actor: Do not request unredirection when destroyed WindowActors can outlive their corresponding window to animate unmap. Unredirecting the actor does not make sense in that case, so make sure to not request it.
+  * window-actor: Skip frame-sync when the corresponding window is gone https://git.gnome.org/browse/mutter/commit/?id=8d53ae8
+
+  [ Maximiliano Curia ]
+  * Migrate away from gnome-common deprecated vars and macros
+
+  [ brownsr ]
+  * remove deprecated unnecessary g_type_init calls
+
+  [ itzexor ]
+  * meta-window-actor: Change unredirection hints to match spec changes
+  * x11/window-props: Initialize bypass compositor hint
+
+  [ JosephMcc ]
+  * backgrounds: Add a simple crossfade effect on bg transitions
+  * backgrounds: Clean up a couple things
+  * compositor: Clean up a bunch of deprecated clutter functionality
+  * wm-tester: Clean up gtk deprecations
+  * Remove old references to tooltips
+  * frames: Remove expose_delayed
+
+  [ Lars Mueller ]
+  * Don't remove client-side frame extents when maximizing Fixing Cinnamon#5343
+
+  [ Michael Webster ]
+  * Add screen signal for skip_taskbar window hint changes.  This is needed by the window list applet in Cinnamon to know when to remove (or add) an item in the window list.
+  * cogl-utils.c: Don't skip error parameters.
+  * meta-window-actor.c: Only override the unredirect heuristic with our unredirect-fullscreen-windows preference.  This is based on a few assumptions:
+
+  [ Clement Lefebvre ]
+  * Fixed build
+
+  [ Maximiliano Curia ]
+  * Make AX_ macros optional
+
+ -- Clement Lefebvre <root@linuxmint.com>  Mon, 07 Nov 2016 10:49:02 +0000
+
 muffin (3.0.5) sarah; urgency=medium
 
   [ JosephMcc ]
