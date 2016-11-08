@@ -8414,6 +8414,42 @@ recalc_window_features (MetaWindow *window)
   if (meta_window_is_attached_dialog (window))
     window->border_only = TRUE;
 
+  if (window->hide_titlebar_when_maximized &&
+      META_WINDOW_MAXIMIZED (window))
+    {
+      if (window->type != META_FRAME_TYPE_BORDER)
+        {
+          window->type = META_FRAME_TYPE_BORDER;
+          gboolean old_decorated = window->decorated;
+          window->decorated = FALSE;
+          GObject  *object = G_OBJECT (window);
+
+          if (!window->override_redirect)
+	    set_net_wm_state (window);
+
+          /* Update frame */
+          if (window->decorated)
+            meta_window_ensure_frame (window);
+          else
+            meta_window_destroy_frame (window);
+
+          /* update stacking constraints */
+          meta_window_update_layer (window);
+
+          meta_window_grab_keys (window);
+
+          g_object_freeze_notify (object);
+
+          if (old_decorated != window->decorated)
+            g_object_notify (object, "decorated");
+
+          g_object_notify (object, "window-type");
+
+          g_object_thaw_notify (object);
+        }
+    }
+
+
   if (window->type == META_WINDOW_DESKTOP ||
       window->type == META_WINDOW_DOCK ||
       window->override_redirect)
@@ -11243,6 +11279,27 @@ meta_window_is_skip_taskbar (MetaWindow *window)
   g_return_val_if_fail (META_IS_WINDOW (window), FALSE);
 
   return window->skip_taskbar;
+}
+
+/**
+ * meta_window_set_hide_titlebar_when_maximized:
+ * @window: A #MetaWindow B #gboolean
+ *
+ * Sets whether this window should be hidden when maximized.
+ */
+void
+meta_window_set_hide_titlebar_when_maximized (MetaWindow *window, gboolean hide)
+{
+  g_return_val_if_fail (META_IS_WINDOW (window), FALSE);
+
+  window->hide_titlebar_when_maximized = hide;
+  if (META_WINDOW_MAXIMIZED (window))
+    {
+      meta_window_queue (window, META_QUEUE_MOVE_RESIZE);
+
+      if (window->frame)
+        meta_ui_update_frame_style (window->screen->ui, window->frame->xwindow);
+    }
 }
 
 /**
