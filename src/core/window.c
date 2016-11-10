@@ -8113,8 +8113,7 @@ is_ime_popup (MetaWindow *window)
 {
     const gchar *icon = window->icon_name;
     const gchar *wc_name = meta_window_get_wm_class (window);
-    gboolean is_target_name = g_strcmp0 (wc_name, "Main.py") == 0 ||
-                              g_strcmp0 (wc_name, "Ibus-ui-gtk3") == 0;
+    gboolean is_target_name = g_strcmp0 (wc_name, "Main.py") == 0;
 
     gboolean deco = meta_window_get_frame (window) != NULL;
 
