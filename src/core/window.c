@@ -8360,7 +8360,8 @@ set_allowed_actions_hint (MetaWindow *window)
  * Sets whether this window should be hidden the titlebar when maximized.
  */
 void
-meta_window_set_hide_titlebar_when_maximized (MetaWindow *window, gboolean hide)
+meta_window_set_hide_titlebar_when_maximized (MetaWindow *window,
+                                              gboolean    hide)
 {
   g_return_val_if_fail (META_IS_WINDOW (window), FALSE);
 
@@ -8404,10 +8405,10 @@ meta_window_set_hide_titlebar (MetaWindow *window, gboolean hide)
  */
 gboolean
 meta_window_is_titlebar_hide (MetaWindow *window) {
-   if (!meta_window_is_client_decorated (window))
-        return ((window->hide_titlebar_when_maximized &&
-           META_WINDOW_MAXIMIZED (window)) ||
-           window->hide_titlebar);
+  if (!meta_window_is_client_decorated (window))
+    return ((window->hide_titlebar_when_maximized &&
+             META_WINDOW_MAXIMIZED (window)) ||
+             window->hide_titlebar);
   return FALSE;
 }
 
@@ -8477,12 +8478,9 @@ recalc_window_features (MetaWindow *window)
   if (window->type == META_WINDOW_TOOLBAR)
     window->decorated = FALSE;
 
-  if (meta_window_is_attached_dialog (window))
+  if (meta_window_is_attached_dialog (window) ||
+      meta_window_is_titlebar_hide (window))
     window->border_only = TRUE;
-
-  /* We don't want buttons */
-  if (meta_window_is_titlebar_hide (window))
-      window->border_only = TRUE;
 
   if (window->type == META_WINDOW_DESKTOP ||
       window->type == META_WINDOW_DOCK ||
