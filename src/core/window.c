@@ -3489,6 +3489,9 @@ meta_window_maximize_internal (MetaWindow        *window,
     window->force_save_user_rect = FALSE;
 
   recalc_window_features (window);
+  if (window->hide_titlebar_when_maximized)
+    meta_window_queue (window,
+                       META_QUEUE_MOVE_RESIZE);
   set_net_wm_state (window);
 
   if (window->monitor->in_fullscreen)
@@ -4021,6 +4024,10 @@ meta_window_unmaximize_internal (MetaWindow        *window,
       meta_screen_update_snapped_windows (window->screen);
 
       recalc_window_features (window);
+      if (window->hide_titlebar_when_maximized)
+        meta_window_queue (window,
+                           META_QUEUE_MOVE_RESIZE);
+
       set_net_wm_state (window);
       if (!window->monitor->in_fullscreen)
         meta_screen_queue_check_fullscreen (window->screen);
@@ -5017,7 +5024,7 @@ meta_window_move_resize_internal (MetaWindow          *window,
   did_placement = !window->placed && window->calc_placement;
 
   meta_window_constrain (window,
-                         window->frame ? &borders : NULL,
+                         window->frame && !meta_window_is_titlebar_hide (window) ? &borders : NULL,
                          flags,
                          gravity,
                          &old_rect,
@@ -8345,6 +8352,65 @@ set_allowed_actions_hint (MetaWindow *window)
 #undef MAX_N_ACTIONS
 }
 
+/**
+ * meta_window_set_hide_titlebar_when_maximized:
+ * @window: a #MetaWindow
+ * @hide: a #gboolean
+ *
+ * Sets whether this window should be hidden the titlebar when maximized.
+ */
+void
+meta_window_set_hide_titlebar_when_maximized (MetaWindow *window, gboolean hide)
+{
+  g_return_val_if_fail (META_IS_WINDOW (window), FALSE);
+
+  window->hide_titlebar_when_maximized = hide;
+  if (META_WINDOW_MAXIMIZED (window))
+    {
+      if (window->frame)
+        meta_ui_update_frame_style (window->screen->ui, window->frame->xwindow);
+
+      meta_window_queue (window, META_QUEUE_MOVE_RESIZE);
+    }
+}
+
+/**
+ * meta_window_set_hide_titlebar:
+ * @window: a #MetaWindow 
+ * @hide: a #gboolean
+ *
+ * Sets whether this window should be hidden the titlebar.
+ */
+void
+meta_window_set_hide_titlebar (MetaWindow *window, gboolean hide)
+{
+  g_return_val_if_fail (META_IS_WINDOW (window), FALSE);
+
+  window->hide_titlebar = hide;
+
+  if (window->frame)
+    meta_ui_update_frame_style (window->screen->ui, window->frame->xwindow);
+
+  meta_window_queue (window, META_QUEUE_MOVE_RESIZE);
+}
+
+/**
+ * meta_window_is_titlebar_hide:
+ * @window: A #MetaWindow
+ *
+ * Gets the state of the window titlebar, if is hidden or not.
+ *
+ * Return value: %TRUE if the window titlebar is hidde.
+ */
+gboolean
+meta_window_is_titlebar_hide (MetaWindow *window) {
+   if (!meta_window_is_client_decorated (window))
+        return ((window->hide_titlebar_when_maximized &&
+           META_WINDOW_MAXIMIZED (window)) ||
+           window->hide_titlebar);
+  return FALSE;
+}
+
 LOCAL_SYMBOL void
 meta_window_recalc_features (MetaWindow *window)
 {
@@ -8413,6 +8479,10 @@ recalc_window_features (MetaWindow *window)
 
   if (meta_window_is_attached_dialog (window))
     window->border_only = TRUE;
+
+  /* We don't want buttons */
+  if (meta_window_is_titlebar_hide (window))
+      window->border_only = TRUE;
 
   if (window->type == META_WINDOW_DESKTOP ||
       window->type == META_WINDOW_DOCK ||
