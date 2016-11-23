@@ -1,3 +1,9 @@
+muffin (3.2.1) serena; urgency=medium
+
+  * window groups: Don't assign IM popups to META_WINDOW_POPUP_MENU
+
+ -- Clement Lefebvre <root@linuxmint.com>  Wed, 23 Nov 2016 12:16:25 +0000
+
 muffin (3.2.0) serena; urgency=medium
 
   [ itzexor ]
