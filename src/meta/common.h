@@ -430,5 +430,14 @@ typedef enum
   META_PLACEMENT_MODE_CENTER
 } MetaPlacementMode;
 
+/*
+ * Background transition
+ */
+typedef enum
+{
+  META_BACKGROUND_TRANSITION_NONE,
+  META_BACKGROUND_TRANSITION_FADEIN,
+  META_BACKGROUND_TRANSITION_BLEND
+} MetaBackgroundTransition;
 
 #endif

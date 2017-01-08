@@ -6,6 +6,12 @@
     <value value="3" nick="center"/>
   </enum>
 
+  <enum id="background_transition">
+    <value value="0" nick="none"/>
+    <value value="1" nick="fade-in"/>
+    <value value="2" nick="blend"/>
+  </enum>
+
   <schema id="org.cinnamon.muffin" path="/org/cinnamon/muffin/"
           gettext-domain="@GETTEXT_DOMAIN">
 
@@ -155,6 +161,16 @@
       "manual" means that the user must manually place the new window
       with the mouse or keyboard; "center" means that the system places
       new windows in the center of the desktop.</_description>
+    </key>
+
+    <key name="background-transition" enum="background_transition">
+      <default>'blend'</default>
+      <_summary>Background transition</_summary>
+      <_description>The type of animation performed when changing background.
+      "none" means no animation at all.
+      "fade-in" means the old background switches to black and the new background appears with a fade-in effect.
+      "blend" means the old background disappears as the new background appears with a fade-in effect.
+      </_description>
     </key>
 
     <child name="keybindings" schema="org.cinnamon.muffin.keybindings"/>

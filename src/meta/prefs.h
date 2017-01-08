@@ -76,6 +76,7 @@ typedef enum
   META_PREF_INVERT_WORKSPACE_FLIP_DIRECTION,
   META_PREF_TILE_MAXIMIZE,
   META_PREF_PLACEMENT_MODE,
+  META_PREF_BACKGROUND_TRANSITION,
   META_PREF_MIN_WIN_OPACITY,
   META_PREF_MOUSE_ZOOM_ENABLED,
   META_PREF_MOUSE_BUTTON_ZOOM_MODS
@@ -347,5 +348,7 @@ gboolean           meta_prefs_bell_is_audible      (void);
 CDesktopVisualBellType meta_prefs_get_visual_bell_type (void);
 
 MetaPlacementMode meta_prefs_get_placement_mode (void);
+
+MetaBackgroundTransition meta_prefs_get_background_transition (void);
 
 #endif

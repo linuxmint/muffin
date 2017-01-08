@@ -211,26 +211,46 @@ static void
 set_texture_on_actor (MetaBackgroundActor *self)
 {
   MetaBackgroundActorPrivate *priv = self->priv;
+  MetaBackgroundTransition background_transition;
 
   if (priv->transition_running)
     cancel_transitions (self);
 
-  clutter_actor_set_opacity (CLUTTER_ACTOR (priv->top_actor), 0);
-  meta_background_set_layer (META_BACKGROUND (priv->top_actor), priv->background->texture);
+  background_transition = meta_prefs_get_background_transition();
 
-  priv->transition_running = TRUE;
+  if (background_transition == META_BACKGROUND_TRANSITION_NONE)
+  {
+    // NO TRANSITION
+    clutter_actor_set_opacity (CLUTTER_ACTOR (priv->bottom_actor), 0);
+    meta_background_set_layer (META_BACKGROUND (priv->top_actor), priv->background->texture);
+    on_transition_complete (priv->top_actor, self);
+  }
+  else
+  {
+    if (background_transition == META_BACKGROUND_TRANSITION_FADEIN)
+    {
+      // FADE_IN TRANSITION
+      clutter_actor_set_opacity (CLUTTER_ACTOR (priv->bottom_actor), 0);
+    }
 
-  clutter_actor_save_easing_state (priv->top_actor);
-  clutter_actor_set_easing_duration (priv->top_actor, FADE_DURATION);
-  clutter_actor_set_opacity (priv->top_actor, 255);
-  clutter_actor_restore_easing_state (priv->top_actor);
+    // BLEND TRANSITION
+    clutter_actor_set_opacity (CLUTTER_ACTOR (priv->top_actor), 0);
+    meta_background_set_layer (META_BACKGROUND (priv->top_actor), priv->background->texture);
 
-  g_signal_connect (priv->top_actor,
-                    "transitions-completed",
-                    G_CALLBACK (on_transition_complete),
-                    self);
+    priv->transition_running = TRUE;
 
-  clutter_actor_queue_redraw (CLUTTER_ACTOR (self));
+    clutter_actor_save_easing_state (priv->top_actor);
+    clutter_actor_set_easing_duration (priv->top_actor, FADE_DURATION);
+    clutter_actor_set_opacity (priv->top_actor, 255);
+    clutter_actor_restore_easing_state (priv->top_actor);
+
+    g_signal_connect (priv->top_actor,
+                      "transitions-completed",
+                      G_CALLBACK (on_transition_complete),
+                      self);
+
+    clutter_actor_queue_redraw (CLUTTER_ACTOR (self));
+  }
 }
 
 static void

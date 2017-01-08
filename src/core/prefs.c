@@ -159,6 +159,7 @@ static void     init_workspace_names      (void);
 
 static MetaPlacementMode placement_mode = META_PLACEMENT_MODE_AUTOMATIC;
 
+static MetaBackgroundTransition background_transition = META_BACKGROUND_TRANSITION_BLEND;
 
 typedef struct
 {
@@ -281,6 +282,13 @@ static MetaEnumPreference preferences_enum[] =
         META_PREF_PLACEMENT_MODE,
       },
       &placement_mode,
+    },
+    {
+      { "background-transition",
+        SCHEMA_MUFFIN,
+        META_PREF_BACKGROUND_TRANSITION,
+      },
+      &background_transition,
     },
     { { NULL, 0, 0 }, NULL },
   };
@@ -1865,6 +1873,9 @@ meta_preference_to_string (MetaPreference pref)
     case META_PREF_PLACEMENT_MODE:
       return "PLACEMENT_MODE";
 
+    case META_PREF_BACKGROUND_TRANSITION:
+      return "BACKGROUND_TRANSITION";
+
     case META_PREF_MIN_WIN_OPACITY:
       return "MIN_WIN_OPACITY";
     }
@@ -2441,6 +2452,12 @@ MetaPlacementMode
 meta_prefs_get_placement_mode (void)
 {
   return placement_mode;
+}
+
+MetaBackgroundTransition
+meta_prefs_get_background_transition (void)
+{
+  return background_transition;
 }
 
 gint
