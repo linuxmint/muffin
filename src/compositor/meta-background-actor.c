@@ -186,7 +186,7 @@ cancel_transitions (MetaBackgroundActor *self)
 }
 
 static void
-on_trasition_complete (ClutterActor *actor,
+on_transition_complete (ClutterActor *actor,
                        gpointer      user_data)
 {
   MetaBackgroundActor *self = (MetaBackgroundActor *)user_data;
@@ -227,7 +227,7 @@ set_texture_on_actor (MetaBackgroundActor *self)
 
   g_signal_connect (priv->top_actor,
                     "transitions-completed",
-                    G_CALLBACK (on_trasition_complete),
+                    G_CALLBACK (on_transition_complete),
                     self);
 
   clutter_actor_queue_redraw (CLUTTER_ACTOR (self));
