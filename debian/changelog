@@ -1,3 +1,14 @@
+muffin (3.2.2) serena; urgency=medium
+
+  [ Michael Webster ]
+  * debian/control: Hardcode muffin-common dependencies - the generated .substvars file spits out a newer version of sgml-base than we have here (1.28 vs 1.26).
+
+  [ Clement Lefebvre ]
+  * Fix typo
+  * Make background transitions configurable
+
+ -- Clement Lefebvre <root@linuxmint.com>  Sun, 08 Jan 2017 15:17:23 +0000
+
 muffin (3.2.1) serena; urgency=medium
 
   * window groups: Don't assign IM popups to META_WINDOW_POPUP_MENU
