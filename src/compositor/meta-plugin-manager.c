@@ -149,6 +149,16 @@ meta_plugin_manager_event_simple (MetaPluginManager *plugin_mgr,
                 klass->minimize (plugin, actor);
             }
             break;
+        case META_PLUGIN_UNMINIMIZE:
+            if (klass->unminimize)
+            {
+              retval = TRUE;
+              meta_plugin_manager_kill_window_effects (plugin_mgr, actor);
+
+              _meta_plugin_effect_started (plugin);
+              klass->unminimize (plugin, actor);
+            }
+            break;
         case META_PLUGIN_MAP:
             if (klass->map)
             {

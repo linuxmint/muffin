@@ -69,6 +69,9 @@ struct _MetaPluginClass
   void (*minimize)         (MetaPlugin         *plugin,
                             MetaWindowActor    *actor);
 
+  void (*unminimize)       (MetaPlugin         *plugin,
+                            MetaWindowActor    *actor);
+
   void (*maximize)         (MetaPlugin         *plugin,
                             MetaWindowActor    *actor,
                             gint                x,
@@ -244,6 +247,10 @@ meta_plugin_switch_workspace_completed (MetaPlugin *plugin);
 void
 meta_plugin_minimize_completed (MetaPlugin      *plugin,
                                 MetaWindowActor *actor);
+
+void
+meta_plugin_unminimize_completed (MetaPlugin      *plugin,
+                                  MetaWindowActor *actor);
 
 void
 meta_plugin_maximize_completed (MetaPlugin      *plugin,
