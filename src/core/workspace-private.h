@@ -90,10 +90,6 @@ void           meta_workspace_relocate_windows (MetaWorkspace *workspace,
 
 void meta_workspace_invalidate_work_area (MetaWorkspace *workspace);
 
-
-void meta_workspace_get_work_area_for_monitor   (MetaWorkspace *workspace,
-                                                 int            which_monitor,
-                                                 MetaRectangle *area);
 GList* meta_workspace_get_onscreen_region       (MetaWorkspace *workspace);
 GList* meta_workspace_get_onmonitor_region      (MetaWorkspace *workspace,
                                                  int            which_monitor);
@@ -104,7 +100,3 @@ MetaWorkspace* meta_workspace_get_neighbor (MetaWorkspace      *workspace,
 const char* meta_workspace_get_name (MetaWorkspace *workspace);
 
 #endif
-
-
-
-
