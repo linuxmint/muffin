@@ -583,10 +583,6 @@ void        meta_window_unshade            (MetaWindow  *window,
                                             guint32      timestamp);
 void        meta_window_adjust_opacity     (MetaWindow  *window,
                                             gboolean     increase);
-void        meta_window_change_workspace   (MetaWindow  *window,
-                                            MetaWorkspace *workspace);
-void        meta_window_stick              (MetaWindow  *window);
-void        meta_window_unstick            (MetaWindow  *window);
 
 void        meta_window_make_fullscreen_internal (MetaWindow    *window);
 void        meta_window_make_fullscreen    (MetaWindow  *window);
@@ -598,14 +594,6 @@ void        meta_window_update_fullscreen_monitors (MetaWindow    *window,
                                                     unsigned long  right);
 
 /* args to move are window pos, not frame pos */
-void        meta_window_move               (MetaWindow  *window,
-                                            gboolean     user_op,
-                                            int          root_x_nw,
-                                            int          root_y_nw);
-void        meta_window_resize             (MetaWindow  *window,
-                                            gboolean     user_op,
-                                            int          w,
-                                            int          h);
 void        meta_window_move_resize        (MetaWindow  *window,
                                             gboolean     user_op,
                                             int          root_x_nw,
