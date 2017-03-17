@@ -98,9 +98,6 @@ GList* meta_workspace_get_onscreen_region       (MetaWorkspace *workspace);
 GList* meta_workspace_get_onmonitor_region      (MetaWorkspace *workspace,
                                                  int            which_monitor);
 
-MetaWorkspace* meta_workspace_get_neighbor (MetaWorkspace      *workspace,
-                                            MetaMotionDirection direction);
-
 const char* meta_workspace_get_name (MetaWorkspace *workspace);
 
 #endif
