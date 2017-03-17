@@ -1199,7 +1199,16 @@ meta_workspace_recalc_for_snapped_windows (MetaWorkspace *workspace)
     g_list_free (window_list);
 }
 
-LOCAL_SYMBOL void
+/**
+ * meta_workspace_get_work_area_for_monitor:
+ * @workspace: a #MetaWorkspace
+ * @which_monitor: a monitor index
+ * @area: (out): location to store the work area
+ *
+ * Stores the work area for @which_monitor on @workspace
+ * in @area.
+ */
+void
 meta_workspace_get_work_area_for_monitor (MetaWorkspace *workspace,
                                           int            which_monitor,
                                           MetaRectangle *area)
