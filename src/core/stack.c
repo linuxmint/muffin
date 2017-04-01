@@ -286,17 +286,6 @@ is_focused_foreach (MetaWindow *window,
   return TRUE;
 }
 
-static gboolean
-windows_on_different_monitor (MetaWindow *a,
-                              MetaWindow *b)
-{
-  if (a->screen != b->screen)
-    return TRUE;
-
-  return meta_screen_get_monitor_for_window (a->screen, a) !=
-    meta_screen_get_monitor_for_window (b->screen, b);
-}
-
 /* Get layer ignoring any transient or group relationships */
 static MetaStackLayer
 get_standalone_layer (MetaWindow *window)
@@ -333,14 +322,6 @@ get_standalone_layer (MetaWindow *window)
 
       if (window->wm_state_below)
         layer = META_LAYER_BOTTOM;
-      else if (window->fullscreen &&
-               (focused_transient ||
-                window == window->display->expected_focus_window ||
-                window->display->expected_focus_window == NULL ||
-                (window->display->expected_focus_window != NULL &&
-                 windows_on_different_monitor (window,
-                                               window->display->expected_focus_window))))
-        layer = META_LAYER_FULLSCREEN;
       else if (window->wm_state_above)
         layer = META_LAYER_TOP;
       else
