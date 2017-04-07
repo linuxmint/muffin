@@ -140,6 +140,8 @@ static void meta_window_move_between_rects (MetaWindow          *window,
 static void unmaximize_window_before_freeing (MetaWindow        *window);
 static void unminimize_window_and_all_transient_parents (MetaWindow *window);
 
+static void meta_window_update_monitor (MetaWindow *window);
+
 static void notify_tile_type (MetaWindow *window);
 
 static void normalize_tile_state (MetaWindow *window);
@@ -4807,6 +4809,12 @@ meta_window_update_for_monitors_changed (MetaWindow *window)
 {
   const MetaMonitorInfo *old, *new;
   int i;
+
+  if (window->override_redirect)
+    {
+      meta_window_update_monitor (window);
+      return;
+    }
 
   old = window->monitor;
 
