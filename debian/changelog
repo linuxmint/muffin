@@ -1,3 +1,19 @@
+muffin (3.4.0) sonya; urgency=medium
+
+  [ leigh123linux ]
+  * change to sys/wait.h
+
+  [ JosephMcc ]
+  * Make meta_workspace_get_work_area_for_monitor public and introspectable
+  * keybindings: Remove redundant function declarations
+  * window: Remove duplicate function declarations
+  * workspace: Remove duplicate function declaration
+
+  [ Rowan Thorpe ]
+  * Fix meta_screen_get_monitor_geometry override redirect (#283)
+
+ -- Clement Lefebvre <root@linuxmint.com>  Wed, 03 May 2017 13:36:53 +0100
+
 muffin (3.2.2) serena; urgency=medium
 
   [ Michael Webster ]
