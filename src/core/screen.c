@@ -3146,7 +3146,7 @@ queue_windows_showing (MetaScreen *screen)
    * active_workspace's window list, because the active_workspace's
    * window list may not contain the on_all_workspace windows.
    */
-  windows = meta_display_list_windows (screen->display, META_LIST_DEFAULT);
+  windows = meta_display_list_windows (screen->display, META_LIST_INCLUDE_OVERRIDE_REDIRECT);
 
   tmp = windows;
   while (tmp != NULL)
