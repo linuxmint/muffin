@@ -145,9 +145,7 @@ gboolean  meta_ui_window_should_not_cause_focus (Display *xdisplay,
 char*     meta_text_property_to_utf8 (Display             *xdisplay,
                                       const XTextProperty *prop);
 
-void     meta_ui_set_current_theme (const char *name,
-                                    gboolean    force_reload);
-gboolean meta_ui_have_a_theme      (void);
+void     meta_ui_set_current_theme (const char *name);
 
 /* Not a real key symbol but means "key above the tab key"; this is
  * used as the default keybinding for cycle_group.

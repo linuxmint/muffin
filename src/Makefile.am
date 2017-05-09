@@ -3,7 +3,7 @@
 
 lib_LTLIBRARIES = libmuffin.la
 
-SUBDIRS=wm-tester tools compositor/plugins
+SUBDIRS=compositor/plugins
 
 NULL =
 
@@ -102,8 +102,6 @@ libmuffin_la_SOURCES =				\
 	core/display.c				\
 	core/display-private.h			\
 	meta/display.h				\
-	ui/draw-workspace.c			\
-	ui/draw-workspace.h			\
 	core/edge-resistance.c			\
 	core/edge-resistance.h			\
 	core/errors.c				\
@@ -112,8 +110,6 @@ libmuffin_la_SOURCES =				\
 	core/eventqueue.h			\
 	core/frame.c				\
 	core/frame.h				\
-	ui/gradient.c				\
-	meta/gradient.h				\
 	core/group-private.h			\
 	core/group-props.c			\
 	core/group-props.h			\
@@ -163,13 +159,10 @@ libmuffin_la_SOURCES =				\
 	ui/metaaccellabel.h			\
 	ui/resizepopup.c			\
 	ui/resizepopup.h			\
-	ui/theme-parser.c			\
 	ui/theme.c				\
 	meta/theme.h				\
 	ui/theme-private.h			\
 	ui/ui.c					\
-	meta/preview-widget.h			\
-	ui/preview-widget.c			\
 	$(muffin_built_sources) \
 	$(NULL)
 
@@ -193,7 +186,6 @@ libmuffininclude_base_headers =		\
 	meta/compositor.h			\
 	meta/display.h				\
 	meta/errors.h				\
-	meta/gradient.h				\
 	meta/group.h				\
 	meta/keybindings.h			\
 	meta/main.h				\
@@ -213,7 +205,6 @@ libmuffininclude_base_headers =		\
 # Excluded from scanning for introspection but installed
 # atomnames.h: macros cause problems for scanning process
 libmuffininclude_extra_headers =		\
-	meta/preview-widget.h			\
 	meta/atomnames.h
 
 libmuffinincludedir = $(includedir)/muffin/meta
@@ -221,11 +212,6 @@ libmuffinincludedir = $(includedir)/muffin/meta
 libmuffininclude_HEADERS =			\
 	$(libmuffininclude_base_headers)	\
 	$(libmuffininclude_extra_headers)
-
-muffin_theme_viewer_SOURCES=  \
-	ui/theme-viewer.c
-
-bin_PROGRAMS=muffin muffin-theme-viewer
 
 muffin_SOURCES = core/muffin.c
 muffin_LDADD = $(MUFFIN_LIBS) libmuffin.la
@@ -285,10 +271,7 @@ Meta-$(api_version).gir: libmuffin.la
 
 endif
 
-muffin_theme_viewer_LDADD= $(MUFFIN_LIBS) libmuffin.la
-
 testboxes_SOURCES = core/testboxes.c core/boxes.c core/util.c
-testgradient_SOURCES = ui/testgradient.c
 testasyncgetprop_SOURCES = core/testasyncgetprop.c core/async-getprop.c
 
 # NO-OP: work around the fact that source code tested by the programs are
@@ -296,10 +279,9 @@ testasyncgetprop_SOURCES = core/testasyncgetprop.c core/async-getprop.c
 testasyncgetprop_CFLAGS = $(WARN_CFLAGS) $(AM_CFLAGS)
 testboxes_CFLAGS = $(WARN_CFLAGS) $(AM_CFLAGS)
 
-noinst_PROGRAMS=testboxes testgradient testasyncgetprop
+noinst_PROGRAMS=testboxes testasyncgetprop
 
 testboxes_LDADD = $(MUFFIN_LIBS) $(top_builddir)/clutter/clutter/libmuffin-clutter-$(MUFFIN_PLUGIN_API_VERSION).la
-testgradient_LDADD = $(MUFFIN_LIBS) libmuffin.la
 testasyncgetprop_LDADD = $(MUFFIN_LIBS)
 
 

@@ -72,7 +72,6 @@ gboolean meta_display_grabbed_event_is_action (MetaDisplay         *display,
 gboolean meta_display_process_key_event     (MetaDisplay *display,
                                              MetaWindow  *window,
                                              XEvent      *event);
-void     meta_set_keybindings_disabled      (gboolean     setting);
 void     meta_display_process_mapping_event (MetaDisplay *display,
                                              XEvent      *event);
 

@@ -1,4 +1,3 @@
-usr/bin
 usr/lib/*/muffin/plugins
 usr/lib/muffin/muffin-restart-helper
 usr/share/applications
