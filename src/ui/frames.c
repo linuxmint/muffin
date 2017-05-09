@@ -179,70 +179,41 @@ prefs_changed_callback (MetaPreference pref,
     }
 }
 
-static GtkStyleContext *
-create_style_context (MetaFrames  *frames,
-                      const gchar *variant)
-{
-  GtkStyleContext *style;
-  GdkScreen *screen;
-  char *theme_name;
-
-  screen = gtk_widget_get_screen (GTK_WIDGET (frames));
-  g_object_get (gtk_settings_get_for_screen (screen),
-                "gtk-theme-name", &theme_name,
-                NULL);
-
-  style = gtk_style_context_new ();
-  gtk_style_context_set_path (style,
-                              gtk_widget_get_path (GTK_WIDGET (frames)));
-
-  if (theme_name && *theme_name)
-    {
-      GtkCssProvider *provider;
-
-      provider = gtk_css_provider_get_named (theme_name, variant);
-      gtk_style_context_add_provider (style,
-                                      GTK_STYLE_PROVIDER (provider),
-                                      GTK_STYLE_PROVIDER_PRIORITY_SETTINGS);
-    }
-
-  g_free (theme_name);
-
-  return style;
-}
-
-static GtkStyleContext *
+static MetaStyleInfo *
 meta_frames_get_theme_variant (MetaFrames  *frames,
                                const gchar *variant)
 {
-  GtkStyleContext *style;
+  MetaStyleInfo *style_info;
 
-  style = g_hash_table_lookup (frames->style_variants, variant);
-  if (style == NULL)
+  style_info = g_hash_table_lookup (frames->style_variants, variant);
+  if (style_info == NULL)
     {
-      style = create_style_context (frames, variant);
-      g_hash_table_insert (frames->style_variants, g_strdup (variant), style);
+      style_info = meta_theme_create_style_info (gtk_widget_get_screen (GTK_WIDGET (frames)), variant);
+      g_hash_table_insert (frames->style_variants, g_strdup (variant), style_info);
     }
 
-  return style;
+  return style_info;
 }
 
 static void
 update_style_contexts (MetaFrames *frames)
 {
-  GtkStyleContext *style;
+  MetaStyleInfo *style_info;
   GList *variant_list, *variant;
+  GdkScreen *screen;
+
+  screen = gtk_widget_get_screen (GTK_WIDGET (frames));
 
   if (frames->normal_style)
-    g_object_unref (frames->normal_style);
-  frames->normal_style = create_style_context (frames, NULL);
+    meta_style_info_unref (frames->normal_style);
+  frames->normal_style = meta_theme_create_style_info (screen, NULL);
 
   variant_list = g_hash_table_get_keys (frames->style_variants);
   for (variant = variant_list; variant; variant = variant->next)
     {
-      style = create_style_context (frames, (char *)variant->data);
+      style_info = meta_theme_create_style_info (screen, (char *)variant->data);
       g_hash_table_insert (frames->style_variants,
-                           g_strdup (variant->data), style);
+                           g_strdup (variant->data), style_info);
     }
   g_list_free (variant_list);
 }
@@ -259,7 +230,7 @@ meta_frames_init (MetaFrames *frames)
   frames->cache = g_hash_table_new (g_direct_hash, g_direct_equal);
 
   frames->style_variants = g_hash_table_new_full (g_str_hash, g_str_equal,
-                                                  g_free, g_object_unref);
+                                                  g_free, (GDestroyNotify)meta_style_info_unref);
 
   update_style_contexts (frames);
 
@@ -302,7 +273,7 @@ meta_frames_destroy (GtkWidget *object)
 
   if (frames->normal_style)
     {
-      g_object_unref (frames->normal_style);
+      meta_style_info_unref (frames->normal_style);
       frames->normal_style = NULL;
     }
 
@@ -423,15 +394,14 @@ queue_recalc_func (gpointer key, gpointer value, gpointer data)
   invalidate_whole_window (frames, frame);
   meta_core_queue_frame_resize (GDK_DISPLAY_XDISPLAY (gdk_display_get_default ()),
                                 frame->xwindow);
-  if (frame->layout)
+  if (frame->text_layout)
     {
       /* save title to recreate layout */
       g_free (frame->title);
       
-      frame->title = g_strdup (pango_layout_get_text (frame->layout));
+      frame->title = g_strdup (pango_layout_get_text (frame->text_layout));
 
-      g_object_unref (G_OBJECT (frame->layout));
-      frame->layout = NULL;
+      g_clear_object (&frame->text_layout);
     }
 }
 
@@ -505,54 +475,48 @@ meta_frames_ensure_layout (MetaFrames  *frames,
   GtkWidget *widget;
   MetaFrameFlags flags;
   MetaFrameType type;
-  MetaFrameStyle *style;
+  MetaFrameLayout *layout;
 
   widget = GTK_WIDGET (frames);
 
   g_return_if_fail (gtk_widget_get_realized (widget));
-      
+
   meta_core_get (GDK_DISPLAY_XDISPLAY (gdk_display_get_default ()), frame->xwindow,
                  META_CORE_GET_FRAME_FLAGS, &flags,
                  META_CORE_GET_FRAME_TYPE, &type,
                  META_CORE_GET_END);
 
-  style = meta_theme_get_frame_style (meta_theme_get_current (),
-                                      type, flags);
+  layout = meta_theme_get_frame_layout (meta_theme_get_default (), type, flags);
 
-  if (style != frame->cache_style)
+  if (layout != frame->cache_layout)
     {
-      if (frame->layout)
+      if (frame->text_layout)
         {
           /* save title to recreate layout */
           g_free (frame->title);
-          
-          frame->title = g_strdup (pango_layout_get_text (frame->layout));
 
-          g_object_unref (G_OBJECT (frame->layout));
-          frame->layout = NULL;
+          frame->title = g_strdup (pango_layout_get_text (frame->text_layout));
+
+          g_clear_object (&frame->text_layout);
         }
     }
 
-  frame->cache_style = style;
-  
-  if (frame->layout == NULL)
+  frame->cache_layout = layout;
+
+  if (frame->text_layout == NULL)
     {
       gpointer key, value;
       PangoFontDescription *font_desc;
-      double scale;
       int size;
-      
-      scale = meta_theme_get_title_scale (meta_theme_get_current (),
-                                          type,
-                                          flags);
-      
-      frame->layout = gtk_widget_create_pango_layout (widget, frame->title);
 
-      pango_layout_set_ellipsize (frame->layout, PANGO_ELLIPSIZE_END);
-      pango_layout_set_auto_dir (frame->layout, FALSE);
-      
-      font_desc = meta_gtk_widget_get_font_desc (widget, scale,
-                                                 meta_prefs_get_titlebar_font ());
+      frame->text_layout = gtk_widget_create_pango_layout (widget, frame->title);
+
+      pango_layout_set_ellipsize (frame->text_layout, PANGO_ELLIPSIZE_END);
+      pango_layout_set_auto_dir (frame->text_layout, FALSE);
+      pango_layout_set_single_paragraph_mode (frame->text_layout, TRUE);
+
+      font_desc = meta_style_info_create_font_desc (frame->style_info);
+      meta_frame_layout_apply_scale (layout, font_desc);
 
       size = pango_font_description_get_size (font_desc);
 
@@ -572,10 +536,10 @@ meta_frames_ensure_layout (MetaFrames  *frames,
                                 GINT_TO_POINTER (size),
                                 GINT_TO_POINTER (frame->text_height));
         }
-      
-      pango_layout_set_font_description (frame->layout, 
+
+      pango_layout_set_font_description (frame->text_layout,
                                          font_desc);
-      
+
       pango_font_description_free (font_desc);
 
       /* Save some RAM */
@@ -605,7 +569,8 @@ meta_frames_calc_geometry (MetaFrames        *frames,
 
   meta_prefs_get_button_layout (&button_layout);
   
-  meta_theme_calc_geometry (meta_theme_get_current (),
+  meta_theme_calc_geometry (meta_theme_get_default (),
+                            frame->style_info,
                             type,
                             frame->text_height,
                             flags,
@@ -653,8 +618,8 @@ meta_frames_attach_style (MetaFrames  *frames,
   gboolean has_frame;
   char *variant = NULL;
 
-  if (frame->style != NULL)
-    g_object_unref (frame->style);
+  if (frame->style_info != NULL)
+    meta_style_info_unref (frame->style_info);
 
   meta_core_get (GDK_DISPLAY_XDISPLAY (gdk_display_get_default ()),
                  frame->xwindow,
@@ -663,10 +628,10 @@ meta_frames_attach_style (MetaFrames  *frames,
                  META_CORE_GET_END);
 
   if (variant == NULL || strcmp(variant, "normal") == 0)
-    frame->style = g_object_ref (frames->normal_style);
+    frame->style_info = meta_style_info_ref (frames->normal_style);
   else
-    frame->style = g_object_ref (meta_frames_get_theme_variant (frames,
-                                                                variant));
+    frame->style_info = meta_style_info_ref (meta_frames_get_theme_variant (frames,
+                                                                            variant));
 }
 
 LOCAL_SYMBOL void
@@ -679,25 +644,25 @@ meta_frames_manage_window (MetaFrames *frames,
   g_assert (window);
 
   frame = g_new (MetaUIFrame, 1);
-  
+
   frame->window = window;
 
   gdk_window_set_user_data (frame->window, frames);
 
-  frame->style = NULL;
+  frame->style_info = NULL;
 
   /* Don't set event mask here, it's in frame.c */
-  
+
   frame->xwindow = xwindow;
-  frame->cache_style = NULL;
-  frame->layout = NULL;
+  frame->cache_layout = NULL;
+  frame->text_layout = NULL;
   frame->text_height = -1;
   frame->title = NULL;
   frame->shape_applied = FALSE;
   frame->prelit_control = META_FRAME_CONTROL_NONE;
 
   meta_core_grab_buttons (GDK_DISPLAY_XDISPLAY (gdk_display_get_default ()), frame->xwindow);
-  
+
   g_hash_table_replace (frames->frames, &frame->xwindow, frame);
 }
 
@@ -728,12 +693,12 @@ meta_frames_unmanage_window (MetaFrames *frames,
       
       g_hash_table_remove (frames->frames, &frame->xwindow);
 
-      g_object_unref (frame->style);
+      meta_style_info_unref (frame->style_info);
 
       gdk_window_destroy (frame->window);
 
-      if (frame->layout)
-        g_object_unref (G_OBJECT (frame->layout));
+      if (frame->text_layout)
+        g_object_unref (G_OBJECT (frame->text_layout));
 
       if (frame->title)
         g_free (frame->title);
@@ -755,20 +720,14 @@ meta_frames_lookup_window (MetaFrames *frames,
   return frame;
 }
 
-LOCAL_SYMBOL void
-meta_frames_get_borders (MetaFrames *frames,
-                         Window xwindow,
-                         MetaFrameBorders *borders)
+static void
+meta_ui_frame_get_borders (MetaFrames *frames,
+                           MetaUIFrame *frame,
+                           MetaFrameBorders *borders)
 {
   MetaFrameFlags flags;
-  MetaUIFrame *frame;
   MetaFrameType type;
-  
-  frame = meta_frames_lookup_window (frames, xwindow);
 
-  if (frame == NULL)
-    meta_bug ("No such frame 0x%lx\n", xwindow);
-  
   meta_core_get (GDK_DISPLAY_XDISPLAY (gdk_display_get_default ()), frame->xwindow,
                  META_CORE_GET_FRAME_FLAGS, &flags,
                  META_CORE_GET_FRAME_TYPE, &type,
@@ -783,25 +742,38 @@ meta_frames_get_borders (MetaFrames *frames,
    * by the core move/resize code to decide on the client
    * window size
    */
-  meta_theme_get_frame_borders (meta_theme_get_current (),
+  meta_theme_get_frame_borders (meta_theme_get_default (),
+                                frame->style_info,
                                 type,
                                 frame->text_height,
                                 flags,
                                 borders);
 }
 
-LOCAL_SYMBOL void
-meta_frames_get_corner_radiuses (MetaFrames *frames,
-                                 Window      xwindow,
-                                 float      *top_left,
-                                 float      *top_right,
-                                 float      *bottom_left,
-                                 float      *bottom_right)
+void
+meta_frames_get_borders (MetaFrames *frames,
+                         Window xwindow,
+                         MetaFrameBorders *borders)
 {
   MetaUIFrame *frame;
-  MetaFrameGeometry fgeom;
 
   frame = meta_frames_lookup_window (frames, xwindow);
+
+  if (frame == NULL)
+    meta_bug ("No such frame 0x%lx\n", xwindow);
+
+  meta_ui_frame_get_borders (frames, frame, borders);
+}
+
+static void
+meta_ui_frame_get_corner_radiuses (MetaFrames  *frames,
+                                   MetaUIFrame *frame,
+                                   float       *top_left,
+                                   float       *top_right,
+                                   float       *bottom_left,
+                                   float       *bottom_right)
+{
+  MetaFrameGeometry fgeom;
 
   meta_frames_calc_geometry (frames, frame, &fgeom);
 
@@ -822,6 +794,22 @@ meta_frames_get_corner_radiuses (MetaFrames *frames,
     *bottom_left = fgeom.bottom_left_corner_rounded_radius + sqrt(fgeom.bottom_left_corner_rounded_radius);
   if (bottom_right)
     *bottom_right = fgeom.bottom_right_corner_rounded_radius + sqrt(fgeom.bottom_right_corner_rounded_radius);
+}
+
+void
+meta_frames_get_corner_radiuses (MetaFrames *frames,
+                                 Window      xwindow,
+                                 float      *top_left,
+                                 float      *top_right,
+                                 float      *bottom_left,
+                                 float      *bottom_right)
+{
+  MetaUIFrame *frame;
+
+  frame = meta_frames_lookup_window (frames, xwindow);
+
+  meta_ui_frame_get_corner_radiuses (frames, frame, top_left, top_right,
+                                     bottom_left, bottom_right);
 }
 
 /* The client rectangle surrounds client window; it subtracts both
@@ -1013,11 +1001,7 @@ meta_frames_set_title (MetaFrames *frames,
   g_free (frame->title);
   frame->title = g_strdup (title);
   
-  if (frame->layout)
-    {
-      g_object_unref (frame->layout);
-      frame->layout = NULL;
-    }
+  g_clear_object (&frame->text_layout);
 
   invalidate_whole_window (frames, frame);
 }
@@ -2028,7 +2012,8 @@ populate_cache (MetaFrames *frames,
       return;
     }
   
-  meta_theme_get_frame_borders (meta_theme_get_current (),
+  meta_theme_get_frame_borders (meta_theme_get_default (),
+                                frame->style_info,
                                 frame_type,
                                 frame->text_height,
                                 frame_flags,
@@ -2146,7 +2131,7 @@ subtract_client_area (cairo_region_t *region,
                  META_CORE_GET_CLIENT_WIDTH, &area.width,
                  META_CORE_GET_CLIENT_HEIGHT, &area.height,
                  META_CORE_GET_END);
-  meta_theme_get_frame_borders (meta_theme_get_current (),
+  meta_theme_get_frame_borders (meta_theme_get_default (), frame->style_info,
                                 type, frame->text_height, flags, 
                                 &borders);
 
@@ -2249,11 +2234,9 @@ meta_frames_paint (MetaFrames   *frames,
                    MetaUIFrame  *frame,
                    cairo_t      *cr)
 {
-  GtkWidget *widget;
   MetaFrameFlags flags;
   MetaFrameType type;
   GdkPixbuf *mini_icon;
-  GdkPixbuf *icon;
   int w, h;
   MetaButtonState button_states[META_BUTTON_TYPE_LAST];
   Window grab_frame;
@@ -2262,7 +2245,6 @@ meta_frames_paint (MetaFrames   *frames,
   MetaGrabOp grab_op;
   Display *display;
   
-  widget = GTK_WIDGET (frames);
   display = GDK_DISPLAY_XDISPLAY (gdk_display_get_default ());
 
   for (i = 0; i < META_BUTTON_TYPE_LAST; i++)
@@ -2350,7 +2332,6 @@ meta_frames_paint (MetaFrames   *frames,
                  META_CORE_GET_FRAME_FLAGS, &flags,
                  META_CORE_GET_FRAME_TYPE, &type,
                  META_CORE_GET_MINI_ICON, &mini_icon,
-                 META_CORE_GET_ICON, &icon,
                  META_CORE_GET_CLIENT_WIDTH, &w,
                  META_CORE_GET_CLIENT_HEIGHT, &h,
                  META_CORE_GET_END);
@@ -2359,18 +2340,17 @@ meta_frames_paint (MetaFrames   *frames,
 
   meta_prefs_get_button_layout (&button_layout);
 
-  meta_theme_draw_frame_with_style (meta_theme_get_current (),
-                                    frame->style,
-                                    widget,
-                                    cr,
-                                    type,
-                                    flags,
-                                    w, h,
-                                    frame->layout,
-                                    frame->text_height,
-                                    &button_layout,
-                                    button_states,
-                                    mini_icon, icon);
+  meta_theme_draw_frame (meta_theme_get_default (),
+                         frame->style_info,
+                         cr,
+                         type,
+                         flags,
+                         w, h,
+                         frame->text_layout,
+                         frame->text_height,
+                         &button_layout,
+                         button_states,
+                         mini_icon);
 }
 
 static gboolean

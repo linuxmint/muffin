@@ -146,8 +146,6 @@ AM_GLIB_GNU_GETTEXT
 
 ## here we get the flags we'll actually use
 PKG_CHECK_MODULES(ALL, glib-2.0 >= 2.37.3)
-PKG_CHECK_MODULES(MUFFIN_MESSAGE, gtk+-3.0)
-PKG_CHECK_MODULES(MUFFIN_WINDOW_DEMO, gtk+-3.0)
 
 # Unconditionally use this dir to avoid a circular dep with gnomecc
 GNOME_KEYBINDINGS_KEYSDIR="${datadir}/gnome-control-center/keybindings"
@@ -365,9 +363,6 @@ if test "x$found_xsync" = "xyes"; then
 fi
 
 MUFFIN_LIBS="$MUFFIN_LIBS $XSYNC_LIBS $RANDR_LIBS $SHAPE_LIBS $X_LIBS $X_PRE_LIBS -lX11 $X_EXTRA_LIBS -lm"
-MUFFIN_MESSAGE_LIBS="$MUFFIN_MESSAGE_LIBS $X_LIBS $X_PRE_LIBS -lX11 $X_EXTRA_LIBS"
-MUFFIN_WINDOW_DEMO_LIBS="$MUFFIN_WINDOW_DEMO_LIBS $X_LIBS $X_PRE_LIBS -lX11 $X_EXTRA_LIBS -lm"
-MUFFIN_PROPS_LIBS="$MUFFIN_PROPS_LIBS $X_LIBS $X_PRE_LIBS -lX11 $X_EXTRA_LIBS"
 
 found_sm=no
 case "$MUFFIN_LIBS" in
@@ -443,10 +438,8 @@ doc/man/Makefile
 doc/reference/Makefile
 doc/reference/muffin-docs.sgml
 src/Makefile
-src/wm-tester/Makefile
 src/libmuffin.pc
 src/muffin-plugins.pc
-src/tools/Makefile
 src/compositor/plugins/Makefile
 po/Makefile.in
 ])

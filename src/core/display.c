@@ -80,14 +80,6 @@
 #include <string.h>
 #include <unistd.h>
 
-#define GRAB_OP_IS_WINDOW_SWITCH(g)                     \
-        (g == META_GRAB_OP_KEYBOARD_TABBING_NORMAL  ||  \
-         g == META_GRAB_OP_KEYBOARD_TABBING_DOCK    ||  \
-         g == META_GRAB_OP_KEYBOARD_TABBING_GROUP   ||  \
-         g == META_GRAB_OP_KEYBOARD_ESCAPING_NORMAL ||  \
-         g == META_GRAB_OP_KEYBOARD_ESCAPING_DOCK   ||  \
-         g == META_GRAB_OP_KEYBOARD_ESCAPING_GROUP)
-
 /*
  * \defgroup pings Pings
  *
@@ -1303,13 +1295,6 @@ grab_op_is_keyboard (MetaGrabOp op)
     case META_GRAB_OP_KEYBOARD_RESIZING_NE:
     case META_GRAB_OP_KEYBOARD_RESIZING_SW:
     case META_GRAB_OP_KEYBOARD_RESIZING_NW:
-    case META_GRAB_OP_KEYBOARD_TABBING_NORMAL:
-    case META_GRAB_OP_KEYBOARD_TABBING_DOCK:
-    case META_GRAB_OP_KEYBOARD_TABBING_GROUP:
-    case META_GRAB_OP_KEYBOARD_ESCAPING_NORMAL:
-    case META_GRAB_OP_KEYBOARD_ESCAPING_DOCK:
-    case META_GRAB_OP_KEYBOARD_ESCAPING_GROUP:
-    case META_GRAB_OP_KEYBOARD_WORKSPACE_SWITCHING:
     case META_GRAB_OP_COMPOSITOR:
       return TRUE;
 
@@ -1864,18 +1849,6 @@ event_callback (XEvent   *event,
                       (display->grab_window ?
                        display->grab_window->desc : 
                        "none"));
-          if (GRAB_OP_IS_WINDOW_SWITCH (display->grab_op))
-            {
-              MetaScreen *screen;
-              meta_topic (META_DEBUG_WINDOW_OPS, 
-                          "Syncing to old stack positions.\n");
-              screen = 
-                meta_display_screen_for_root (display, event->xany.window);
-
-              if (screen!=NULL)
-                meta_stack_set_positions (screen->stack,
-                                          display->grab_old_window_stacking);
-            }
 
           if (display->grab_window->tile_mode == META_TILE_NONE)
               meta_display_end_grab_op (display,
@@ -2618,28 +2591,7 @@ event_callback (XEvent   *event,
                     }
                 }
               else if (event->xclient.message_type ==
-                       display->atom__MUFFIN_RELOAD_THEME_MESSAGE)
-                {
-                  meta_verbose ("Received reload theme request\n");
-                  meta_ui_set_current_theme (meta_prefs_get_theme (),
-                                             TRUE);
-                  meta_display_retheme_all ();
-                }
-              else if (event->xclient.message_type ==
-                       display->atom__MUFFIN_SET_KEYBINDINGS_MESSAGE)
-                {
-                  meta_verbose ("Received set keybindings request = %d\n",
-                                (int) event->xclient.data.l[0]);
-                  meta_set_keybindings_disabled (!event->xclient.data.l[0]);
-                }
-              else if (event->xclient.message_type ==
-                       display->atom__MUFFIN_TOGGLE_VERBOSE)
-                {
-                  meta_verbose ("Received toggle verbose message\n");
-                  meta_set_verbose (!meta_is_verbose ());
-                }
-	      else if (event->xclient.message_type ==
-		       display->atom_WM_PROTOCOLS) 
+		                   display->atom_WM_PROTOCOLS) 
 		{
                   meta_verbose ("Received WM_PROTOCOLS message\n");
                   
@@ -3732,16 +3684,6 @@ meta_display_begin_grab_op (MetaDisplay *display,
   g_assert (display->grab_window != NULL || display->grab_screen != NULL);
   g_assert (display->grab_op != META_GRAB_OP_NONE);
 
-  /* Save the old stacking */
-  if (GRAB_OP_IS_WINDOW_SWITCH (display->grab_op))
-    {
-      meta_topic (META_DEBUG_WINDOW_OPS,
-                  "Saving old stack positions; old pointer was %p.\n",
-                  display->grab_old_window_stacking);
-      display->grab_old_window_stacking = 
-        meta_stack_get_positions (screen->stack);
-    }
-
   if (display->grab_window)
     {
       meta_window_refresh_resize_popup (display->grab_window);
@@ -3817,15 +3759,6 @@ meta_display_end_grab_op (MetaDisplay *display,
         meta_window_raise (display->grab_window);
     }
 
-  if (GRAB_OP_IS_WINDOW_SWITCH (display->grab_op) ||
-      display->grab_op == META_GRAB_OP_KEYBOARD_WORKSPACE_SWITCHING)
-    {
-      /* If the ungrab here causes an EnterNotify, ignore it for
-       * sloppy focus
-       */
-      display->ungrab_should_not_cause_focus_window = display->grab_xwindow;
-    }
-  
   /* If this was a move or resize clear out the edge cache */
   if (meta_grab_op_is_resizing (display->grab_op) || 
       meta_grab_op_is_moving (display->grab_op))
