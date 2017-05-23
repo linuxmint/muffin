@@ -1,5 +1,6 @@
 # Flag build for parallelism; see https://savannah.gnu.org/patch/?6905
 .AUTOPARALLEL:
+AUTOMAKE_OPTIONS = subdir-objects
 
 lib_LTLIBRARIES = libmuffin.la
 
