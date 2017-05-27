@@ -323,6 +323,12 @@ meta_background_actor_dispose (GObject *object)
       priv->background = NULL;
     }
 
+  if (priv->top_actor != NULL)
+    priv->top_actor = NULL;
+
+  if (priv->bottom_actor != NULL)
+    priv->bottom_actor = NULL;
+
   G_OBJECT_CLASS (meta_background_actor_parent_class)->dispose (object);
 }
 
@@ -609,7 +615,8 @@ meta_background_actor_set_visible_region (MetaBackgroundActor *self,
 
   priv = self->priv;
 
-  meta_background_set_visible_region (META_BACKGROUND (priv->top_actor), visible_region);
+  if (priv->top_actor != NULL)
+    meta_background_set_visible_region (META_BACKGROUND (priv->top_actor), visible_region);
 }
 
 /**
