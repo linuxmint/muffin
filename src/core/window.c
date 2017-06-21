@@ -12046,3 +12046,33 @@ meta_window_tile (MetaWindow *window,
 
   return TRUE;
 }
+
+/**
+ * meta_window_get_icon_name:
+ * @window: a #MetaWindow
+ *
+ * Returns the currently set icon name or icon path for the window.
+ *
+ * Note:
+ *
+ * This will currently only be non-NULL for GTK3 apps that have
+ * called gdk_window_set_icon_name() on their GdkWindow.  Also beware,
+ * this is a repurposing of _NET_WM_ICON_NAME from "the title of the
+ * iconified application" to "the name or path of the icon we want to
+ * let Cinnamon know about."
+ */
+const char *
+meta_window_get_icon_name (MetaWindow *window)
+{
+    g_return_val_if_fail (META_IS_WINDOW (window), NULL);
+
+    /* icon_name and title being the same means our client program
+     * didn't set an icon name for its window.  To simplify the logic
+     * for Cinnamon, return NULL instead.
+     */
+    if (g_strcmp0 (window->icon_name, window->title) == 0) {
+        return NULL;
+    }
+
+    return window->icon_name;
+}
