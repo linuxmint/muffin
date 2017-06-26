@@ -240,6 +240,22 @@ reload_wm_client_machine (MetaWindow    *window,
                 window->wm_client_machine ? window->wm_client_machine : "unset");
 }
 
+
+static void
+reload_theme_icon_name (MetaWindow    *window,
+                        MetaPropValue *value,
+                        gboolean       initial)
+{
+  g_free (window->theme_icon_name);
+  window->theme_icon_name = NULL;
+
+  if (value->type != META_PROP_VALUE_INVALID)
+    window->theme_icon_name = g_strdup (value->v.str);
+
+  meta_verbose ("Window theme icon name or path is \"%s\"\n",
+                window->theme_icon_name ? window->theme_icon_name : "unset");
+}
+
 static void
 complain_about_broken_client (MetaWindow    *window,
                               MetaPropValue *value,
@@ -1803,6 +1819,8 @@ meta_display_init_window_prop_hooks (MetaDisplay *display)
     { display->atom__NET_WM_STRUT,         META_PROP_VALUE_INVALID, reload_struts,            FALSE, FALSE },
     { display->atom__NET_WM_STRUT_PARTIAL, META_PROP_VALUE_INVALID, reload_struts,            FALSE, FALSE },
     { display->atom__NET_WM_BYPASS_COMPOSITOR, META_PROP_VALUE_CARDINAL,  reload_bypass_compositor, TRUE, TRUE },
+    { display->atom__NET_WM_XAPP_ICON_NAME, META_PROP_VALUE_UTF8,     reload_theme_icon_name, TRUE,  TRUE },
+
     { 0 },
   };
 

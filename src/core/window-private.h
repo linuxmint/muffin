@@ -119,6 +119,8 @@ struct _MetaWindow
   char *title;
 
   char *icon_name;
+
+  char *theme_icon_name;
   GdkPixbuf *icon;
   GdkPixbuf *mini_icon;
   MetaIconCache icon_cache;
