@@ -5339,6 +5339,12 @@ prefs_changed_callback (MetaPreference pref,
         {
           MetaWindow *w = tmp->data;
           meta_display_ungrab_window_buttons (display, w->xwindow);
+
+          if (w->frame)
+            {
+              meta_display_ungrab_window_buttons (display, w->frame->xwindow);
+            }
+
           meta_display_ungrab_focus_window_button (display, w);
           tmp = tmp->next;
         }
@@ -5361,6 +5367,11 @@ prefs_changed_callback (MetaPreference pref,
             {
               meta_display_grab_focus_window_button (display, w);
               meta_display_grab_window_buttons (display, w->xwindow);
+
+              if (w->frame)
+                {
+                  meta_display_grab_window_buttons (display, w->frame->xwindow);
+                }
             }
           tmp = tmp->next;
         }
