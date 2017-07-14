@@ -1082,9 +1082,13 @@ meta_set_normal_hints (MetaWindow *window,
 {
   int x, y, w, h;
   double minr, maxr;
+  gint ui_scale;
+
   /* Some convenience vars */
   int minw, minh, maxw, maxh;   /* min/max width/height                      */
   int basew, baseh, winc, hinc; /* base width/height, width/height increment */
+
+  ui_scale = meta_prefs_get_ui_scale ();
 
   /* Save the last ConfigureRequest, which we put here.
    * Values here set in the hints are supposed to
@@ -1184,8 +1188,8 @@ meta_set_normal_hints (MetaWindow *window,
     }
   else
     {
-      window->size_hints.width_inc = 1;
-      window->size_hints.height_inc = 1;
+      window->size_hints.width_inc = ui_scale;
+      window->size_hints.height_inc = ui_scale;
       window->size_hints.flags |= PResizeInc;
     }
 
@@ -1228,51 +1232,51 @@ meta_set_normal_hints (MetaWindow *window,
   /*** Lots of sanity checking ***/
 
   /* Verify all min & max hints are at least 1 pixel */
-  if (window->size_hints.min_width < 1)
+  if (window->size_hints.min_width < ui_scale)
     {
       /* someone is on crack */
       meta_topic (META_DEBUG_GEOMETRY,
                   "Window %s sets min width to 0, which makes no sense\n",
                   window->desc);
-      window->size_hints.min_width = 1;
+      window->size_hints.min_width = ui_scale;
     }
-  if (window->size_hints.max_width < 1)
+  if (window->size_hints.max_width < ui_scale)
     {
       /* another cracksmoker */
       meta_topic (META_DEBUG_GEOMETRY,
                   "Window %s sets max width to 0, which makes no sense\n",
                   window->desc);
-      window->size_hints.max_width = 1;
+      window->size_hints.max_width = ui_scale;
     }
-  if (window->size_hints.min_height < 1)
+  if (window->size_hints.min_height < ui_scale)
     {
       /* another cracksmoker */
       meta_topic (META_DEBUG_GEOMETRY,
                   "Window %s sets min height to 0, which makes no sense\n",
                   window->desc);
-      window->size_hints.min_height = 1;
+      window->size_hints.min_height = ui_scale;
     }
-  if (window->size_hints.max_height < 1)
+  if (window->size_hints.max_height < ui_scale)
     {
       /* another cracksmoker */
       meta_topic (META_DEBUG_GEOMETRY,
                   "Window %s sets max height to 0, which makes no sense\n",
                   window->desc);
-      window->size_hints.max_height = 1;
+      window->size_hints.max_height = ui_scale;
     }
 
   /* Verify size increment hints are at least 1 pixel */
-  if (window->size_hints.width_inc < 1)
+  if (window->size_hints.width_inc < ui_scale)
     {
       /* app authors find so many ways to smoke crack */
-      window->size_hints.width_inc = 1;
-      meta_topic (META_DEBUG_GEOMETRY, "Corrected 0 width_inc to 1\n");
+      window->size_hints.width_inc = ui_scale;
+      meta_topic (META_DEBUG_GEOMETRY, "Corrected too-small width_inc to window scale factor\n");
     }
-  if (window->size_hints.height_inc < 1)
+  if (window->size_hints.height_inc < ui_scale)
     {
       /* another cracksmoker */
-      window->size_hints.height_inc = 1;
-      meta_topic (META_DEBUG_GEOMETRY, "Corrected 0 height_inc to 1\n");
+      window->size_hints.height_inc = ui_scale;
+      meta_topic (META_DEBUG_GEOMETRY, "Corrected too-small height_inc to window scale factor\n");
     }
   /* divide by 0 cracksmokers; note that x & y in (min|max)_aspect are
    * numerator & denominator

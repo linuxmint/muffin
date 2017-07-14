@@ -10583,11 +10583,17 @@ meta_window_refresh_resize_popup (MetaWindow *window)
 
   if (window->display->grab_resize_popup == NULL)
     {
-      if (window->size_hints.width_inc > 1 ||
-          window->size_hints.height_inc > 1)
-        window->display->grab_resize_popup =
-          meta_ui_resize_popup_new (window->display->xdisplay,
-                                    window->screen->number);
+      gint scale;
+
+      scale = meta_prefs_get_ui_scale ();
+
+      if (window->size_hints.width_inc > scale ||
+          window->size_hints.height_inc > scale)
+        {
+          window->display->grab_resize_popup =
+            meta_ui_resize_popup_new (window->display->xdisplay,
+                                      window->screen->number);
+        }
     }
 
   if (window->display->grab_resize_popup != NULL)
