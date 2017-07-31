@@ -177,6 +177,7 @@ item(_NET_WM_STATE_FOCUSED)
 item(_NET_WM_BYPASS_COMPOSITOR)
 item(_NET_WM_FRAME_DRAWN)
 item(_NET_WM_FRAME_TIMINGS)
+item(_NET_WM_XAPP_ICON_NAME)
 
 #if 0
 /* We apparently never use: */

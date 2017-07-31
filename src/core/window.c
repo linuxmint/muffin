@@ -1110,6 +1110,7 @@ meta_window_new_with_attrs (MetaDisplay       *display,
   window->icon = NULL;
   window->mini_icon = NULL;
   meta_icon_cache_init (&window->icon_cache);
+  window->theme_icon_name = NULL;
   window->wm_hints_pixmap = None;
   window->wm_hints_mask = None;
   window->wm_hints_urgent = FALSE;
@@ -12051,4 +12052,26 @@ meta_window_tile (MetaWindow *window,
   }
 
   return TRUE;
+}
+
+/**
+ * meta_window_get_icon_name:
+ * @window: a #MetaWindow
+ *
+ * Returns the currently set icon name or icon path for the window.
+ *
+ * Note:
+ *
+ * This will currently only be non-NULL for programs that use XAppGtkWindow
+ * in place of GtkWindow and use xapp_gtk_window_set_icon_name() or 
+ * set_icon_from_file().  These methods will need to be used explicitly in
+ * C programs, but for introspection use you should not need to treat it any
+ * differently (except for using the correct window class.)
+ */
+const char *
+meta_window_get_icon_name (MetaWindow *window)
+{
+    g_return_val_if_fail (META_IS_WINDOW (window), NULL);
+
+    return window->theme_icon_name;
 }
