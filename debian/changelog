@@ -1,3 +1,22 @@
+muffin (3.4.1) sonya; urgency=medium
+
+  [ leigh123linux ]
+  * remove aclocal from autogen.sh as autoreconf calls it (#285)
+
+  [ JosephMcc ]
+  * meta-background-actor: Fix a warning when dispose is run multiple times
+
+  [ Michael Webster ]
+  * core/util.c: Replace "Window manager" with "Cinnamon" for better logging clarity.
+  * add an issue template
+  * display.c: Re-set the button grabs on the frame xwindow as well as the client window, when the preferences change.
+  * window, window-props: Include window scale factor into a window's size hint sanity checks and the resize popup visibility check.
+
+  [ Jose Marino ]
+  * keybindings: fix erratic raise_or_lower behavior
+
+ -- Clement Lefebvre <root@linuxmint.com>  Tue, 08 Aug 2017 13:11:49 +0200
+
 muffin (3.4.0) sonya; urgency=medium
 
   [ leigh123linux ]
