@@ -178,6 +178,8 @@ item(_NET_WM_BYPASS_COMPOSITOR)
 item(_NET_WM_FRAME_DRAWN)
 item(_NET_WM_FRAME_TIMINGS)
 item(_NET_WM_XAPP_ICON_NAME)
+item(_NET_WM_XAPP_PROGRESS)
+item(_NET_WM_XAPP_PROGRESS_PULSE)
 
 #if 0
 /* We apparently never use: */

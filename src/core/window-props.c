@@ -240,7 +240,6 @@ reload_wm_client_machine (MetaWindow    *window,
                 window->wm_client_machine ? window->wm_client_machine : "unset");
 }
 
-
 static void
 reload_theme_icon_name (MetaWindow    *window,
                         MetaPropValue *value,
@@ -254,6 +253,70 @@ reload_theme_icon_name (MetaWindow    *window,
 
   meta_verbose ("Window theme icon name or path is \"%s\"\n",
                 window->theme_icon_name ? window->theme_icon_name : "unset");
+}
+
+static void
+reload_progress (MetaWindow    *window,
+                 MetaPropValue *value,
+                 gboolean       initial)
+{
+  if (value->type != META_PROP_VALUE_INVALID)
+    {
+      if (window->progress != value->v.cardinal)
+        {
+          window->progress = value->v.cardinal;
+          g_object_notify (window, "progress");
+
+          meta_topic (META_DEBUG_WINDOW_STATE,
+                      "Read XAppGtkWindow progress prop %u for %s\n",
+                      window->progress, window->desc);
+        }
+    }
+  else
+    {
+      if (window->progress != 0)
+        {
+          window->progress = 0;
+          g_object_notify (window, "progress");
+
+          meta_topic (META_DEBUG_WINDOW_STATE,
+                      "Read XAppGtkWindow progress prop %u for %s\n",
+                      window->progress, window->desc);
+        }
+    }
+}
+
+static void
+reload_progress_pulse (MetaWindow    *window,
+                       MetaPropValue *value,
+                       gboolean       initial)
+{
+  if (value->type != META_PROP_VALUE_INVALID)
+    {
+      gboolean new_val = value->v.cardinal == 1;
+
+      if (window->progress_pulse != new_val)
+        {
+          window->progress_pulse = new_val;
+          g_object_notify (window, "progress-pulse");
+
+          meta_topic (META_DEBUG_WINDOW_STATE,
+                      "Read XAppGtkWindow progress-pulse prop %s for %s\n",
+                      window->progress_pulse ? "TRUE" : "FALSE", window->desc);
+        }
+    }
+  else
+    {
+      if (window->progress_pulse)
+        {
+          window->progress_pulse = FALSE;
+          g_object_notify (window, "progress-pulse");
+
+          meta_topic (META_DEBUG_WINDOW_STATE,
+                      "Read XAppGtkWindow progress-pulse prop %s for %s\n",
+                      window->progress_pulse ? "TRUE" : "FALSE", window->desc);
+        }
+    }
 }
 
 static void
@@ -1824,7 +1887,8 @@ meta_display_init_window_prop_hooks (MetaDisplay *display)
     { display->atom__NET_WM_STRUT_PARTIAL, META_PROP_VALUE_INVALID, reload_struts,            FALSE, FALSE },
     { display->atom__NET_WM_BYPASS_COMPOSITOR, META_PROP_VALUE_CARDINAL,  reload_bypass_compositor, TRUE, TRUE },
     { display->atom__NET_WM_XAPP_ICON_NAME, META_PROP_VALUE_UTF8,     reload_theme_icon_name, TRUE,  TRUE },
-
+    { display->atom__NET_WM_XAPP_PROGRESS, META_PROP_VALUE_CARDINAL, reload_progress,         TRUE,  TRUE },
+    { display->atom__NET_WM_XAPP_PROGRESS_PULSE, META_PROP_VALUE_CARDINAL, reload_progress_pulse, TRUE,  TRUE },
     { 0 },
   };
 

@@ -120,7 +120,12 @@ struct _MetaWindow
 
   char *icon_name;
 
+/* XAppGtkWindow */
   char *theme_icon_name;
+  guint progress;
+  guint progress_pulse : 1;
+/* /XappGtkWindow */
+
   GdkPixbuf *icon;
   GdkPixbuf *mini_icon;
   MetaIconCache icon_cache;
