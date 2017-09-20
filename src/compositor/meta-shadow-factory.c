@@ -127,17 +127,17 @@ static guint signals[LAST_SIGNAL] = { 0 };
 /* The first element in this array also defines the default parameters
  * for newly created classes */
 static MetaShadowClassInfo default_shadow_classes[] = {
-  { "normal",       { 6, -1, 0, 3, 210 }, { 3, -1, 0, 3, 128 } },
-  { "dialog",       { 6, -1, 0, 3, 210 }, { 3, -1, 0, 3, 128 } },
-  { "modal_dialog", { 6, -1, 0, 1, 210 }, { 3, -1, 0, 3, 128 } },
-  { "utility",      { 3, -1, 0, 1, 210 }, { 3, -1, 0, 1, 128 } },
-  { "border",       { 6, -1, 0, 3, 210 }, { 3, -1, 0, 3, 128 } },
-  { "menu",         { 6, -1, 0, 3, 210 }, { 3, -1, 0, 0, 128 } },
+  { "normal",       { 6, -1, 0, 3, 205 }, { 3, -1, 0, 3, 128 } },
+  { "dialog",       { 6, -1, 0, 3, 205 }, { 3, -1, 0, 3, 128 } },
+  { "modal_dialog", { 6, -1, 0, 1, 205 }, { 3, -1, 0, 3, 128 } },
+  { "utility",      { 3, -1, 0, 1, 205 }, { 3, -1, 0, 1, 128 } },
+  { "border",       { 6, -1, 0, 3, 205 }, { 3, -1, 0, 3, 128 } },
+  { "menu",         { 6, -1, 0, 3, 205 }, { 3, -1, 0, 0, 128 } },
 
   { "popup-menu",    { 1, -1, 0, 1, 128 }, { 1, -1, 0, 1, 128 } },
 
   { "dropdown-menu", { 1, 10, 0, 1, 128 }, { 1, 10, 0, 1, 128 } },
-  { "attached",      { 6, -1, 0, 1, 210 }, { 3, -1, 0, 3, 128 } }
+  { "attached",      { 6, -1, 0, 1, 205 }, { 3, -1, 0, 3, 128 } }
 };
 
 G_DEFINE_TYPE (MetaShadowFactory, meta_shadow_factory, G_TYPE_OBJECT);
