@@ -873,7 +873,11 @@ size_hints_from_results (GetPropertyResults *results,
     return FALSE;
 
   if (results->n_items < OldNumPropSizeElements)
-    return FALSE;
+    {
+      XFree (results->prop);
+      results->prop = NULL;
+      return FALSE;
+    }
 
   raw = (xPropSizeHints*) results->prop;
 
