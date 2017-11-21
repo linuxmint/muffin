@@ -547,7 +547,7 @@ get_wrapped_horizontal_direction (gint                from,
           ret = (to - from) <= ((num_workspaces - to) + from) ? META_MOTION_LEFT : META_MOTION_RIGHT;
         else
           ret = META_MOTION_LEFT;
-      else
+      else if (from > to)
         if (wrap)
           ret = (from - to) <= ((num_workspaces - from) + to) ? META_MOTION_RIGHT : META_MOTION_LEFT;
         else
@@ -560,7 +560,7 @@ get_wrapped_horizontal_direction (gint                from,
           ret = (to - from) <= ((num_workspaces - to) + from) ? META_MOTION_RIGHT : META_MOTION_LEFT;
         else
           ret = META_MOTION_RIGHT;
-      else
+      else if (from > to)
         if (wrap)
           ret = (from - to) <= ((num_workspaces - from) + to) ? META_MOTION_LEFT : META_MOTION_RIGHT;
         else
