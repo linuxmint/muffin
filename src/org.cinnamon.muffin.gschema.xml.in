@@ -123,15 +123,6 @@
       </_description>
     </key>
 
-    <key name="button-layout" type="s">
-      <default>":minimize,maximize,close"</default>
-      <summary>Arrangement of buttons on the titlebar</summary>
-      <description>
-        This key overrides the key in org.cinnamon.desktop.wm.preferences when
-        running Cinnamon.
-      </description>
-    </key>
-
     <key name="invert-workspace-flip-direction" type="b">
       <default>false</default>
       <_summary>Inverts the direction the left and right arrows take you when
