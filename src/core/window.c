@@ -142,8 +142,6 @@ static void unminimize_window_and_all_transient_parents (MetaWindow *window);
 
 static void meta_window_update_monitor (MetaWindow *window);
 
-static void notify_tile_type (MetaWindow *window);
-
 static void normalize_tile_state (MetaWindow *window);
 
 static unsigned int get_mask_from_snap_keysym (MetaWindow *window);
@@ -3484,7 +3482,6 @@ meta_window_maximize_internal (MetaWindow        *window,
 
   meta_window_set_tile_type (window, META_WINDOW_TILE_TYPE_NONE);
   window->tile_mode = META_TILE_NONE;
-  notify_tile_type (window);
   normalize_tile_state (window);
 
   if (maximize_horizontally && maximize_vertically)
@@ -3712,14 +3709,6 @@ meta_window_requested_dont_bypass_compositor (MetaWindow *window)
 }
 
 static void
-notify_tile_type (MetaWindow *window)
-{
-  g_object_freeze_notify (G_OBJECT (window));
-  g_object_notify (G_OBJECT (window), "tile-type");
-  g_object_thaw_notify (G_OBJECT (window));
-}
-
-static void
 normalize_tile_state (MetaWindow *window)
 {
   window->snap_queued = FALSE;
@@ -3790,8 +3779,6 @@ meta_window_real_tile (MetaWindow *window, gboolean force)
 
   meta_screen_tile_preview_hide (window->screen);
   meta_window_get_outer_rect (window, &window->snapped_rect);
-
-  notify_tile_type (window);
 }
 
 static gboolean
@@ -3880,7 +3867,6 @@ unmaximize_window_before_freeing (MetaWindow        *window)
   if (window->tile_type != META_WINDOW_TILE_TYPE_NONE) {
     meta_window_set_tile_type (window, META_WINDOW_TILE_TYPE_NONE);
     meta_screen_update_snapped_windows (window->screen);
-    notify_tile_type (window);
   }
 
   if (window->withdrawn)                /* See bug #137185 */
@@ -3935,7 +3921,7 @@ meta_window_unmaximize_internal (MetaWindow        *window,
       window->last_tile_mode = META_TILE_NONE;
       window->tile_mode = META_TILE_NONE;
       window->resizing_tile_type = META_WINDOW_TILE_TYPE_NONE;
-      window->tile_type = META_WINDOW_TILE_TYPE_NONE;
+      meta_window_set_tile_type (window, META_WINDOW_TILE_TYPE_NONE);
 
       meta_window_get_work_area_for_monitor (window, window->monitor->number, &work_area);
 
@@ -4020,10 +4006,6 @@ meta_window_unmaximize_internal (MetaWindow        *window,
           window->display->grab_anchor_window_pos = window->user_rect;
         }
 
-      if (window->tile_type != META_WINDOW_TILE_TYPE_NONE) {
-          meta_window_set_tile_type (window, META_WINDOW_TILE_TYPE_NONE);
-          notify_tile_type (window);
-      }
       if (window->resizing_tile_type == META_WINDOW_TILE_TYPE_NONE)
           window->custom_snap_size = FALSE;
 
@@ -11881,6 +11863,9 @@ meta_window_set_tile_type (MetaWindow        *window,
 
     if (window->tile_type != type) {
         window->tile_type = type;
+        g_object_freeze_notify (G_OBJECT (window));
+        g_object_notify (G_OBJECT (window), "tile-type");
+        g_object_thaw_notify (G_OBJECT (window));
     }
 }
 
