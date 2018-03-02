@@ -377,13 +377,12 @@ reload_gtk_frame_extents (MetaWindow    *window,
       else
         {
           GtkBorder *extents = &window->custom_frame_extents;
-          gint scale = meta_prefs_get_ui_scale ();
 
           window->has_custom_frame_extents = TRUE;
-          extents->left   = (int)value->v.cardinal_list.cardinals[0] * scale;
-          extents->right  = (int)value->v.cardinal_list.cardinals[1] * scale;
-          extents->top    = (int)value->v.cardinal_list.cardinals[2] * scale;
-          extents->bottom = (int)value->v.cardinal_list.cardinals[3] * scale;
+          extents->left   = (int)value->v.cardinal_list.cardinals[0];
+          extents->right  = (int)value->v.cardinal_list.cardinals[1];
+          extents->top    = (int)value->v.cardinal_list.cardinals[2];
+          extents->bottom = (int)value->v.cardinal_list.cardinals[3];
         }
     }
   else
