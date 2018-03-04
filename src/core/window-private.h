@@ -101,6 +101,13 @@ typedef enum {
   _NET_WM_BYPASS_COMPOSITOR_HINT_OFF = 2,
 } MetaBypassCompositorHintValue;
 
+typedef enum
+{
+  META_EDGE_CONSTRAINT_NONE    = 0,
+  META_EDGE_CONSTRAINT_WINDOW  = 1,
+  META_EDGE_CONSTRAINT_MONITOR = 2,
+} MetaEdgeConstraint;
+
 struct _MetaWindow
 {
   GObject parent_instance;
@@ -201,6 +208,12 @@ struct _MetaWindow
    * that to toggle between normal/tiled or maximized/tiled states. */
   guint saved_maximize : 1;
   int tile_monitor_number;
+
+  /* 0 - top
+   * 1 - right
+   * 2 - bottom
+   * 3 - left */
+  MetaEdgeConstraint edge_constraints[4];
 
   /* Whether we're shaded */
   guint shaded : 1;
