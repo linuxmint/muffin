@@ -2248,7 +2248,9 @@ set_net_wm_state (MetaWindow *window)
     meta_error_trap_pop (window->display);
   }
 
+  meta_error_trap_push (window->display);
   update_gtk_edge_constraints (window);
+  meta_error_trap_pop (window->display);
 }
 
 LOCAL_SYMBOL gboolean
@@ -5331,8 +5333,6 @@ meta_window_move_resize_internal (MetaWindow          *window,
     force_save_user_window_placement (window);
   else if (is_user_action)
     save_user_window_placement (window);
-
-  update_gtk_edge_constraints (window);
 
   if (need_move_frame || need_resize_frame ||
       need_move_client || need_resize_client ||
