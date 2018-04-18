@@ -146,6 +146,14 @@ meta_background_paint (ClutterActor *actor)
     }
 }
 
+static gboolean
+meta_background_get_paint_volume (ClutterActor       *actor,
+                                        ClutterPaintVolume *volume)
+{
+  return clutter_paint_volume_set_from_allocation (volume, actor);
+}
+
+
 static void
 meta_background_class_init (MetaBackgroundClass *klass)
 {
@@ -158,6 +166,7 @@ meta_background_class_init (MetaBackgroundClass *klass)
 
   actor_class->get_preferred_width = meta_background_get_preferred_width;
   actor_class->get_preferred_height = meta_background_get_preferred_height;
+  actor_class->get_paint_volume = meta_background_get_paint_volume;
   actor_class->paint = meta_background_paint;
 }
 
