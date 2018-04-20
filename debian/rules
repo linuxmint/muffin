@@ -35,8 +35,5 @@ override_dh_girepository:
 override_dh_strip:
 	dh_strip --dbg-package=muffin-dbg
 
-override_dh_installdocs:
-	dh_installdocs --link-doc=muffin-common
-
 override_dh_install:
 	dh_install -X.la --fail-missing
