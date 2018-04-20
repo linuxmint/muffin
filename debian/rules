@@ -18,7 +18,7 @@ ifeq (ppc64el,$(filter $(DEB_BUILD_ARCH),ppc64el))
 endif
 
 %:
-	dh  $@ --with autoreconf,gir
+	dh  $@ --with gir
 
 override_dh_autoreconf:
 	NOCONFIGURE=1 dh_autoreconf --as-needed ./autogen.sh
