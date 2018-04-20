@@ -1,3 +1,37 @@
+muffin (3.8.0) tara; urgency=medium
+
+  [ Michael Webster ]
+  * debian/control: remove libgconf2-dev from build deps (not used)
+
+  [ Clement Lefebvre ]
+  * Add CI configuration
+  * Remove gsettings key org.cinnamon.muffin button-layout
+
+  [ JosephMcc ]
+  * Fix an issue where window turns to a solid colored rectangle during the destroy animation
+
+  [ Clement Lefebvre ]
+  * window: Stop updating layers on focus changes
+  * window: Do not unfocus on new window
+
+  [ itzexor ]
+  * window.c: always notify when tile-type property changes
+
+  [ Andrew Gunsch ]
+  * Fixes workspace animation direction for grid systems. (#303)
+
+  [ Michael Webster ]
+  * window-props.c: Don't scale GTK_FRAME_EXTENTS, it comes already-scaled from Gtk   (as of gtk 3.15.1)
+  * MetaWindow: Support gtk edge constraints (restores csd-window resizing while tiled or snapped.)
+  * atomnames.h: Move xapp atoms to non-EWMH list (they're actually named wrong but it's sort of late now.)
+  * window.c: catch X errors when setting gtk constraints.  An error can occur when closing a tiled csd window.  It's likely that because of how closing occurs on these type windows (we respond to it, we don't initiate it) that the XID may be invalid by the time we move to update its properties.
+
+  [ itzexor ]
+  * meta-window-group: Report a paint volume
+  * meta-background: Report a paint volume
+
+ -- Clement Lefebvre <root@linuxmint.com>  Fri, 20 Apr 2018 12:15:33 +0100
+
 muffin (3.6.0) sylvia; urgency=medium
 
   [ Simon Brown ]
