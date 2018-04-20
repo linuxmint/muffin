@@ -5,8 +5,7 @@ Maintainer: Linux Mint <root@linuxmint.com>
 Build-Depends:
  autoconf-archive,
  automake,
- debhelper (>= 9),
- dh-autoreconf,
+ debhelper (>= 10),
  gnome-doc-utils (>= 0.8),
  gnome-pkg-tools (>= 0.10),
  gobject-introspection (>= 0.9.12-5~),
