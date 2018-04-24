@@ -1,8 +1,8 @@
 /* Muffin window types/properties demo app */
 
-/* 
+/*
  * Copyright (C) 2002 Havoc Pennington
- * 
+ *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
  * published by the Free Software Foundation; either version 2 of the
@@ -12,12 +12,14 @@
  * WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street - Suite 500, Boston, MA
  * 02110-1335, USA.
  */
+
+#include "config.h"
 
 #include <gtk/gtk.h>
 #include <gdk/gdkx.h>
@@ -36,7 +38,7 @@ set_gdk_window_struts (GdkWindow *window,
                        int        bottom)
 {
   long vals[12];
-  
+
   vals[0] = left;
   vals[1] = right;
   vals[2] = top;
@@ -76,7 +78,7 @@ on_realize_set_struts (GtkWindow *window,
   right = GPOINTER_TO_INT (g_object_get_data (G_OBJECT (window), "meta-strut-right"));
   top = GPOINTER_TO_INT (g_object_get_data (G_OBJECT (window), "meta-strut-top"));
   bottom = GPOINTER_TO_INT (g_object_get_data (G_OBJECT (window), "meta-strut-bottom"));
-  
+
   set_gdk_window_struts (gtk_widget_get_window (widget),
                          left, right, top, bottom);
 }
@@ -120,15 +122,15 @@ set_gdk_window_type (GdkWindow  *window,
                      const char *type)
 {
   Atom atoms[2] = { None, None };
-  
+
   atoms[0] = XInternAtom (GDK_WINDOW_XDISPLAY (window),
                           type, False);
-  
+
   XChangeProperty (GDK_WINDOW_XDISPLAY (window),
                    GDK_WINDOW_XID (window),
                    XInternAtom (GDK_WINDOW_XDISPLAY (window), "_NET_WM_WINDOW_TYPE", False),
                    XA_ATOM, 32, PropModeReplace,
-                   (guchar *)atoms, 
+                   (guchar *)atoms,
                    1);
 }
 
@@ -146,7 +148,7 @@ on_realize_set_type (GtkWindow *window,
   type = g_object_get_data (G_OBJECT (window), "meta-window-type");
 
   g_return_if_fail (type != NULL);
-  
+
   set_gdk_window_type (gtk_widget_get_window (widget),
                        type);
 }
@@ -164,7 +166,7 @@ set_gtk_window_type (GtkWindow  *window,
   g_signal_handlers_disconnect_by_func (G_OBJECT (window),
                                         on_realize_set_type,
                                         NULL);
-                                
+
   g_signal_connect_after (G_OBJECT (window),
                           "realize",
                           G_CALLBACK (on_realize_set_type),
@@ -190,7 +192,7 @@ on_realize_set_border_only (GtkWindow *window,
   widget = GTK_WIDGET (window);
 
   g_return_if_fail (gtk_widget_get_realized (widget));
-  
+
   set_gdk_window_border_only (gtk_widget_get_window (widget));
 }
 
@@ -204,7 +206,7 @@ set_gtk_window_border_only (GtkWindow  *window)
   g_signal_handlers_disconnect_by_func (G_OBJECT (window),
                                         on_realize_set_border_only,
                                         NULL);
-                                
+
   g_signal_connect_after (G_OBJECT (window),
                           "realize",
                           G_CALLBACK (on_realize_set_border_only),
@@ -220,7 +222,7 @@ main (int argc, char **argv)
   GList *list;
   GdkPixbuf *pixbuf;
   GError *err;
-  
+
   gtk_init (&argc, &argv);
 
   err = NULL;
@@ -229,7 +231,7 @@ main (int argc, char **argv)
   if (pixbuf)
     {
       list = g_list_prepend (NULL, pixbuf);
-      
+
       gtk_window_set_default_icon_list (list);
       g_list_free (list);
       g_object_unref (G_OBJECT (pixbuf));
@@ -239,11 +241,11 @@ main (int argc, char **argv)
       g_printerr ("Could not load icon: %s\n", err->message);
       g_error_free (err);
     }
-  
+
   do_appwindow ();
 
   gtk_main ();
-  
+
   return 0;
 }
 
@@ -258,7 +260,7 @@ make_dialog (GtkWidget *parent,
 {
   GtkWidget *dialog;
   char *str;
-  
+
   dialog = gtk_message_dialog_new (parent ? GTK_WINDOW (parent) : NULL,
                                    GTK_DIALOG_DESTROY_WITH_PARENT,
                                    GTK_MESSAGE_INFO,
@@ -270,11 +272,11 @@ make_dialog (GtkWidget *parent,
   str = g_strdup_printf ("%d dialog", depth);
   gtk_window_set_title (GTK_WINDOW (dialog), str);
   g_free (str);
-  
+
   gtk_dialog_add_button (GTK_DIALOG (dialog),
                          "Open child dialog",
                          GTK_RESPONSE_ACCEPT);
-  
+
   /* Close dialog on user response */
   g_signal_connect (G_OBJECT (dialog),
                     "response",
@@ -283,7 +285,7 @@ make_dialog (GtkWidget *parent,
 
   g_object_set_data (G_OBJECT (dialog), "depth",
                      GINT_TO_POINTER (depth));
-  
+
   gtk_widget_show (dialog);
 }
 
@@ -318,7 +320,7 @@ modal_dialog_cb (GtkAction           *action,
                  gpointer             callback_data)
 {
   GtkWidget *dialog;
-  
+
   dialog = gtk_message_dialog_new (GTK_WINDOW (callback_data),
                                    GTK_DIALOG_DESTROY_WITH_PARENT,
                                    GTK_MESSAGE_INFO,
@@ -326,7 +328,7 @@ modal_dialog_cb (GtkAction           *action,
                                    "Here is a MODAL dialog");
 
   set_gtk_window_type (GTK_WINDOW (dialog), "_NET_WM_WINDOW_TYPE_MODAL_DIALOG");
-  
+
   gtk_dialog_run (GTK_DIALOG (dialog));
 
   gtk_widget_destroy (dialog);
@@ -346,13 +348,13 @@ utility_cb (GtkAction           *action,
   GtkWidget *window;
   GtkWidget *vbox;
   GtkWidget *button;
-  
+
   window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
   set_gtk_window_type (GTK_WINDOW (window), "_NET_WM_WINDOW_TYPE_UTILITY");
   gtk_window_set_title (GTK_WINDOW (window), "Utility");
-  
+
   gtk_window_set_transient_for (GTK_WINDOW (window), GTK_WINDOW (callback_data));
-  
+
   vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
 
   gtk_container_add (GTK_CONTAINER (window), vbox);
@@ -368,7 +370,7 @@ utility_cb (GtkAction           *action,
 
   button = gtk_button_new_with_mnemonic ("_D button");
   gtk_box_pack_start (GTK_BOX (vbox), button, FALSE, FALSE, 0);
-  
+
   gtk_widget_show_all (window);
 }
 
@@ -379,20 +381,20 @@ toolbar_cb (GtkAction           *action,
   GtkWidget *window;
   GtkWidget *vbox;
   GtkWidget *label;
-  
+
   window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
   set_gtk_window_type (GTK_WINDOW (window), "_NET_WM_WINDOW_TYPE_TOOLBAR");
   gtk_window_set_title (GTK_WINDOW (window), "Toolbar");
-  
+
   gtk_window_set_transient_for (GTK_WINDOW (window), GTK_WINDOW (callback_data));
-  
+
   vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
 
   gtk_container_add (GTK_CONTAINER (window), vbox);
 
   label = gtk_label_new ("FIXME this needs a resize grip, etc.");
   gtk_box_pack_start (GTK_BOX (vbox), label, FALSE, FALSE, 0);
-  
+
   gtk_widget_show_all (window);
 }
 
@@ -403,20 +405,20 @@ menu_cb (GtkAction           *action,
   GtkWidget *window;
   GtkWidget *vbox;
   GtkWidget *label;
-  
+
   window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
   set_gtk_window_type (GTK_WINDOW (window), "_NET_WM_WINDOW_TYPE_MENU");
   gtk_window_set_title (GTK_WINDOW (window), "Menu");
-  
+
   gtk_window_set_transient_for (GTK_WINDOW (window), GTK_WINDOW (callback_data));
-  
+
   vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
 
   gtk_container_add (GTK_CONTAINER (window), vbox);
 
   label = gtk_label_new ("FIXME this isn't a menu.");
   gtk_box_pack_start (GTK_BOX (vbox), label, FALSE, FALSE, 0);
-  
+
   gtk_widget_show_all (window);
 }
 
@@ -427,17 +429,17 @@ override_redirect_cb (GtkAction           *action,
   GtkWidget *window;
   GtkWidget *vbox;
   GtkWidget *label;
-  
+
   window = gtk_window_new (GTK_WINDOW_POPUP);
   gtk_window_set_title (GTK_WINDOW (window), "Override Redirect");
-  
+
   vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
 
   gtk_container_add (GTK_CONTAINER (window), vbox);
 
   label = gtk_label_new ("This is an override\nredirect window\nand should not be managed");
   gtk_box_pack_start (GTK_BOX (vbox), label, FALSE, FALSE, 0);
-  
+
   gtk_widget_show_all (window);
 }
 
@@ -448,20 +450,20 @@ border_only_cb (GtkAction           *action,
   GtkWidget *window;
   GtkWidget *vbox;
   GtkWidget *label;
-  
+
   window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
   set_gtk_window_border_only (GTK_WINDOW (window));
   gtk_window_set_title (GTK_WINDOW (window), "Border only");
-  
+
   gtk_window_set_transient_for (GTK_WINDOW (window), GTK_WINDOW (callback_data));
-  
+
   vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
 
   gtk_container_add (GTK_CONTAINER (window), vbox);
 
   label = gtk_label_new ("This window is supposed to have a border but no titlebar.");
   gtk_box_pack_start (GTK_BOX (vbox), label, FALSE, FALSE, 0);
-  
+
   gtk_widget_show_all (window);
 }
 
@@ -473,17 +475,17 @@ changing_icon_cb (GtkAction           *action,
   GtkWidget *window;
   GtkWidget *vbox;
   GtkWidget *label;
-  
+
   window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
   gtk_window_set_title (GTK_WINDOW (window), "Changing Icon");
-  
+
   vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
 
   gtk_container_add (GTK_CONTAINER (window), vbox);
 
   label = gtk_label_new ("This window has an icon that changes over time");
   gtk_box_pack_start (GTK_BOX (vbox), label, FALSE, FALSE, 0);
-  
+
   gtk_widget_show_all (window);
 }
 #endif
@@ -513,7 +515,7 @@ focus_out_event_cb (GtkWidget *window,
   widget = GTK_WIDGET (data);
 
   gtk_label_set_text (GTK_LABEL (widget), "Not focused");
-  
+
   return TRUE;
 }
 
@@ -521,7 +523,7 @@ static GtkWidget*
 focus_label (GtkWidget *window)
 {
   GtkWidget *label;
-  
+
   label = gtk_label_new ("Not focused");
 
   g_signal_connect (G_OBJECT (window), "focus_in_event",
@@ -529,7 +531,7 @@ focus_label (GtkWidget *window)
 
   g_signal_connect (G_OBJECT (window), "focus_out_event",
                     G_CALLBACK (focus_out_event_cb), label);
-  
+
   return label;
 }
 
@@ -540,20 +542,20 @@ splashscreen_cb (GtkAction           *action,
   GtkWidget *window;
   GtkWidget *image;
   GtkWidget *vbox;
-  
+
   window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
   set_gtk_window_type (GTK_WINDOW (window), "_NET_WM_WINDOW_TYPE_SPLASHSCREEN");
   gtk_window_set_title (GTK_WINDOW (window), "Splashscreen");
-  
+
   vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
-  
+
   image = gtk_image_new_from_stock (GTK_STOCK_DIALOG_INFO, GTK_ICON_SIZE_DIALOG);
   gtk_box_pack_start (GTK_BOX (vbox), image, FALSE, FALSE, 0);
 
-  gtk_box_pack_start (GTK_BOX (vbox), focus_label (window), FALSE, FALSE, 0);  
-  
+  gtk_box_pack_start (GTK_BOX (vbox), focus_label (window), FALSE, FALSE, 0);
+
   gtk_container_add (GTK_CONTAINER (window), vbox);
-  
+
   gtk_widget_show_all (window);
 }
 
@@ -580,7 +582,7 @@ make_dock (int type)
   switch (type)
     {
     case DOCK_LEFT:
-    case DOCK_RIGHT:      
+    case DOCK_RIGHT:
       box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
       break;
     case DOCK_TOP:
@@ -593,18 +595,18 @@ make_dock (int type)
 
   window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
   set_gtk_window_type (GTK_WINDOW (window), "_NET_WM_WINDOW_TYPE_DOCK");
-  
+
   image = gtk_image_new_from_stock (GTK_STOCK_DIALOG_INFO, GTK_ICON_SIZE_DIALOG);
-  gtk_box_pack_start (GTK_BOX (box), image, FALSE, FALSE, 0);  
-  
-  gtk_box_pack_start (GTK_BOX (box), focus_label (window), FALSE, FALSE, 0);  
+  gtk_box_pack_start (GTK_BOX (box), image, FALSE, FALSE, 0);
+
+  gtk_box_pack_start (GTK_BOX (box), focus_label (window), FALSE, FALSE, 0);
 
   button = gtk_button_new_with_label ("Close");
   gtk_box_pack_start (GTK_BOX (box), button, FALSE, FALSE, 0);
 
   g_signal_connect_swapped (G_OBJECT (button), "clicked",
                             G_CALLBACK (gtk_widget_destroy), window);
-  
+
   gtk_container_add (GTK_CONTAINER (window), box);
 
 #define DOCK_SIZE 48
@@ -616,7 +618,7 @@ make_dock (int type)
       set_gtk_window_struts (window, DOCK_SIZE, 0, 0, 0);
       gtk_window_set_title (GTK_WINDOW (window), "LeftDock");
       break;
-    case DOCK_RIGHT:      
+    case DOCK_RIGHT:
       gtk_widget_set_size_request (window, DOCK_SIZE, 400);
       gtk_window_move (GTK_WINDOW (window), gdk_screen_width () - DOCK_SIZE, 200);
       set_gtk_window_struts (window, 0, DOCK_SIZE, 0, 0);
@@ -637,7 +639,7 @@ make_dock (int type)
     case DOCK_ALL:
       break;
     }
-  
+
   gtk_widget_show_all (window);
 }
 
@@ -683,25 +685,25 @@ desktop_cb (GtkAction           *action,
   GtkWidget *window;
   GtkWidget *label;
   GdkRGBA desktop_color;
-  
+
   window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
   set_gtk_window_type (GTK_WINDOW (window), "_NET_WM_WINDOW_TYPE_DESKTOP");
   gtk_window_set_title (GTK_WINDOW (window), "Desktop");
   gtk_widget_set_size_request (window,
                                gdk_screen_width (), gdk_screen_height ());
   gtk_window_move (GTK_WINDOW (window), 0, 0);
-  
+
   desktop_color.red = 0.32;
   desktop_color.green = 0.46;
   desktop_color.blue = 0.65;
   desktop_color.alpha = 1.0;
 
   gtk_widget_override_background_color (window, 0, &desktop_color);
-  
+
   label = focus_label (window);
-  
+
   gtk_container_add (GTK_CONTAINER (window), label);
-  
+
   gtk_widget_show_all (window);
 }
 
@@ -739,7 +741,7 @@ toggle_aspect_ratio (GtkAction *action,
                                    widget,
 				   &geom,
 				   GDK_HINT_ASPECT);
-				   
+
 }
 
 static void
@@ -758,7 +760,7 @@ clicked_toolbar_cb (GtkWidget *button,
                     gpointer   data)
 {
   GtkWidget *dialog;
-  
+
   dialog = gtk_message_dialog_new (GTK_WINDOW (data),
                                    GTK_DIALOG_DESTROY_WITH_PARENT,
                                    GTK_MESSAGE_INFO,
@@ -770,7 +772,7 @@ clicked_toolbar_cb (GtkWidget *button,
                     "response",
                     G_CALLBACK (gtk_widget_destroy),
                     NULL);
-  
+
   gtk_widget_show (dialog);
 }
 
@@ -782,7 +784,7 @@ update_statusbar (GtkTextBuffer *buffer,
   gint row, col;
   gint count;
   GtkTextIter iter;
-  
+
   gtk_statusbar_pop (statusbar, 0); /* clear any previous message, underflow is allowed */
 
   count = gtk_text_buffer_get_char_count (buffer);
@@ -916,7 +918,7 @@ do_appwindow (void)
   GtkTextBuffer *buffer;
   GtkActionGroup *action_group;
   GtkUIManager *ui_manager;
-      
+
   /* Create the toplevel window
    */
 
@@ -926,20 +928,20 @@ do_appwindow (void)
 
   window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
   gtk_window_set_title (GTK_WINDOW (window), "Application Window");
-  
+
   g_signal_connect (G_OBJECT (window), "destroy",
                     G_CALLBACK (destroy_cb), NULL);
-      
+
   grid = gtk_grid_new ();
 
   gtk_widget_set_vexpand (grid, TRUE);
   gtk_widget_set_hexpand (grid, TRUE);
 
   gtk_container_add (GTK_CONTAINER (window), grid);
-      
+
   /* Create the menubar
    */
-      
+
   contents = gtk_text_view_new ();
 
   action_group = gtk_action_group_new ("mainmenu");
@@ -988,10 +990,10 @@ do_appwindow (void)
 
   gtk_window_set_default_size (GTK_WINDOW (window),
                                200, 200);
-      
+
   gtk_text_view_set_wrap_mode (GTK_TEXT_VIEW (contents),
                                PANGO_WRAP_WORD);
-      
+
   gtk_container_add (GTK_CONTAINER (sw),
                      contents);
 
@@ -1024,7 +1026,7 @@ do_appwindow (void)
                             "Be sure to tear off the menu and toolbar, those are also "
                             "a special kind of window.",
                             -1);
-      
+
   g_signal_connect_object (buffer,
                            "changed",
                            G_CALLBACK (update_statusbar),
@@ -1036,7 +1038,7 @@ do_appwindow (void)
                            G_CALLBACK (mark_set_callback),
                            statusbar,
                            0);
-      
+
   update_statusbar (buffer, GTK_STATUSBAR (statusbar));
 
   gtk_widget_show_all (window);

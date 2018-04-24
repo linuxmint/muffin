@@ -21,6 +21,8 @@
  * 02110-1335, USA.
  */
 
+#include "config.h"
+
 #include <meta/meta-plugin.h>
 #include <meta/window.h>
 
