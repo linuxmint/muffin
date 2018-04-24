@@ -22,6 +22,8 @@
 #ifndef META_COMPOSITOR_H
 #define META_COMPOSITOR_H
 
+#include "config.h"
+
 #include <glib.h>
 #include <X11/Xlib.h>
 
