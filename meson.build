@@ -11,6 +11,7 @@ project_url = 'https://github.com/linuxmint/muffin'
 
 i18n = import('i18n')
 gnome = import('gnome')
+pkgconfig = import('pkgconfig')
 cc = meson.get_compiler('c')
 conf = configuration_data()
 

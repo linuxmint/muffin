@@ -228,32 +228,54 @@ testasyncgetprop = executable('testasyncgetprop',
 )
 
 
-#
-# @INTLTOOL_DESKTOP_RULE@
-#
-# desktopfilesdir=$(datadir)/applications
-# desktopfiles_in_files=muffin.desktop.in
-# desktopfiles_files=$(desktopfiles_in_files:.desktop.in=.desktop)
-# desktopfiles_DATA = $(desktopfiles_files)
-#
-# gsettings_SCHEMAS = org.cinnamon.muffin.gschema.xml
-# @INTLTOOL_XML_NOMERGE_RULE@
-# @GSETTINGS_RULES@
-#
-# IMAGES=stock_maximize.png stock_minimize.png stock_delete.png
-#
-#
-# BUILT_SOURCES = inlinepixbufs.h
-# CLEANFILES =					\
-# 	inlinepixbufs.h				\
-# 	muffin.desktop				\
-# 	org.cinnamon.muffin.gschema.xml		\
-# 	$(xml_DATA)				\
-# 	$(muffin_built_sources)			\
-# 	$(typelib_DATA)				\
-# 	$(gir_DATA)
-#
-#
-# pkgconfigdir = $(libdir)/pkgconfig
-#
-# pkgconfig_DATA = libmuffin.pc muffin-plugins.pc
+
+
+i18n.merge_file(
+  input : 'muffin.desktop.in',
+  output: 'muffin.desktop',
+  type: 'desktop',
+  po_dir: po_dir,
+  install: true,
+  install_dir: join_paths(get_option('datadir'), 'applications'),
+)
+
+i18n.merge_file(
+  input : 'org.cinnamon.muffin.gschema.xml.in',
+  output: 'org.cinnamon.muffin.gschema.xml',
+  po_dir: po_dir,
+  install: true,
+  install_dir: join_paths(get_option('datadir'), 'applications'),
+)
+
+pkgconfig.generate(
+  name: 'libmuffin',
+  description: 'Muffin window manager library',
+  version: meson.project_version(),
+  libraries: libmuffin,
+  subdirs: 'muffin',
+  requires: [
+    cinn_desktop,
+    gtk,
+    clutter,
+    x11lib,
+  ],
+  variables: [
+    'girdir=${libdir}/muffin',
+    'typelibdir=${libdir}/muffin',
+  ],
+)
+
+pkgconfig.generate(
+  name: 'muffin-plugins',
+  description: 'Dev parameters for muffin plugins',
+  version: meson.project_version(),
+  libraries: [],
+  subdirs: [],
+  requires: [
+
+  ],
+  variables: [
+    'plugindir=#TODO',
+    'libgnome_serverdir=#TODO',
+  ],
+)
