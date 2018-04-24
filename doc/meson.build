@@ -1,0 +1,2 @@
+subdir('man')
+subdir('reference')
