@@ -178,26 +178,35 @@ conf.set('HAVE_BACKTRACE', cc.has_function('backtrace'))
 
 zenity = find_program('zenity')
 ###############################################################################
+# Paths
+datadir    = join_paths(get_option('datadir'))))
+pkgdatadir = join_paths(get_option('datadir')),meson.project_name()))
+icon_dir   = join_paths(get_option('datadir')),meson.project_name(),'icons'))
+pkglibdir  = join_paths(get_option('libdir')), meson.project_name()))
+plugin_dir = join_paths(get_option('libdir')), meson.project_name(), 'plugins'))
+libexecdir = join_paths(get_option('libexecdir')))
+localedir  = join_paths(get_option('localedir')))
+
+conf.set_quoted('MUFFIN_DATADIR',   join_paths(get_option('prefix'), datadir)
+conf.set_quoted('MUFFIN_ICON_DIR',  join_paths(get_option('prefix'), icon_dir)
+conf.set_quoted('MUFFIN_LIBEXECDIR',join_paths(get_option('prefix'), libexecdir)
+conf.set_quoted('MUFFIN_LOCALEDIR', join_paths(get_option('prefix'), localedir)
+conf.set_quoted('MUFFIN_PKGDATADIR',join_paths(get_option('prefix'), pkgdatadir)
+conf.set_quoted('MUFFIN_PKGLIBDIR', join_paths(get_option('prefix'), pkglibdir)
+conf.set_quoted('MUFFIN_PLUGIN_DIR',join_paths(get_option('prefix'), plugin_dir)
+
 # Build options
 
-conf.set_quoted('PACKAGE', meson.project_name())
-conf.set_quoted('VERSION', meson.project_version())
+conf.set_quoted('PACKAGE',      meson.project_name())
+conf.set_quoted('VERSION',      meson.project_version())
+conf.set_quoted('G_LOG_DOMAIN', meson.project_name())
+
 version = meson.project_version().split('.')
 conf.set('MUFFIN_MAJOR_VERSION',     version[0].to_int())
 conf.set('MUFFIN_MICRO_VERSION',     version[1].to_int())
 conf.set('MUFFIN_MINOR_VERSION',     version[2].to_int())
 conf.set('MUFFIN_PLUGIN_API_VERSION',plugin_api_version)
 
-abs_datadir = join_paths(get_option('prefix'), get_option('datadir'))
-conf.set_quoted('G_LOG_DOMAIN',     join_paths('muffin'))
-conf.set_quoted('HOST_ALIAS',       join_paths('@HOST_ALIAS@'))
-conf.set_quoted('MUFFIN_DATADIR',   join_paths(abs_datadir))
-conf.set_quoted('MUFFIN_ICON_DIR',  join_paths(abs_datadir,meson.project_name(),'icons'))
-conf.set_quoted('MUFFIN_LIBEXECDIR',join_paths('$(libexecdir)'))
-conf.set_quoted('MUFFIN_LOCALEDIR', join_paths('$(prefix)/@DATADIRNAME@/locale'))
-conf.set_quoted('MUFFIN_PKGDATADIR',join_paths(abs_datadir,meson.project_name()))
-conf.set_quoted('MUFFIN_PKGLIBDIR', join_paths('$(pkglibdir)'))
-conf.set_quoted('MUFFIN_PLUGIN_DIR',join_paths('@MUFFIN_PLUGIN_DIR@'))
 
 conf.set('CLUTTER_ENABLE_EXPERIMENTAL_API', 1)
 conf.set('COGL_ENABLE_EXPERIMENTAL_API',    1)
@@ -221,11 +230,6 @@ configure_file(
 )
 
 
-
-# AC_PATH_PROG(GDK_PIXBUF_CSOURCE, gdk-pixbuf-csource, no)
-# if test x"$GDK_PIXBUF_CSOURCE" = xno; then
-#   AC_MSG_ERROR([gdk-pixbuf-csource executable not found in your path - should be installed with GTK])
-# fi
 
 rootInclude = include_directories('.')
 
