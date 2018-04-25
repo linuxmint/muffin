@@ -46,6 +46,7 @@ xext        = dependency('xext')
 xfixes      = dependency('xfixes')
 xrandr      = dependency('xrandr')
 xrender     = dependency('xrender')
+ice         = dependency('ice')
 
 gobject_intr= dependency('gobject-introspection-1.0', version: '>=0.9.2')
 conf.set('HAVE_INTROSPECTION', gobject_intr.found())
@@ -150,6 +151,7 @@ x_libs = [
   xfixes,
   xrandr,
   xrender,
+  ice,
 
   xinerama,
 ]
@@ -206,8 +208,10 @@ conf.set('LOCAL_SYMBOL', '__attribute__ ((visibility ("hidden")))')
 conf.set('API_EXPORTED', '__attribute__ ((visibility ("default")))')
 
 
-add_project_arguments(
-  '-DHAVE_CONFIG_H',
+add_project_arguments([
+    '-DHAVE_CONFIG_H',
+    '-Wno-deprecated-declarations',
+  ],
   language: 'c',
 )
 
@@ -227,8 +231,8 @@ rootInclude = include_directories('.')
 
 subdir('po')
 subdir('src')
-# subdir('data')
-# subdir('doc')
+subdir('data')
+subdir('doc')
 
 
 final_message = [

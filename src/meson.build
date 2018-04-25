@@ -127,6 +127,12 @@ muffin_deps = [
   cinn_desktop,
   startup_notif,
   gobject_intr,
+  math,
+  x_libs,
+  # xsync,
+  sm,
+  gl,
+  libcanberra,
 ]
 
 libmuffin = shared_library('muffin',
@@ -138,9 +144,6 @@ libmuffin = shared_library('muffin',
 install_headers(libmuffin_headers + libmuffin_headers_nointrospect,
   subdir: 'muffin/meta',
 )
-
-# -lclutter-glx-1.0
-
 
 
 muffin = executable('muffin',
@@ -224,6 +227,7 @@ testasyncgetprop = executable('testasyncgetprop',
   link_with: libmuffin,
   dependencies: [
     gtk,
+    x_libs,
   ],
 )
 
