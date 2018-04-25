@@ -1,3 +1,5 @@
+if get_option('gtk-doc')
+
 # TODO:
 # * generate tree_index.sgml
 # * use configure_file when meson is fixed
@@ -71,3 +73,5 @@ gnome.gtkdoc('muffin',
   # scan_args: [ '--rebuild-types', '--rebuild-sections' ],
   src_dir: join_paths(meson.source_root(), 'src'),
 )
+
+endif

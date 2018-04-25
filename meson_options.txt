@@ -1,4 +1,4 @@
-option('gtk-doc',             type: 'boolean', value: true, description: 'use gtk-doc to build documentation')
+option('gtk-doc',             type: 'boolean', value: false,description: 'use gtk-doc to build documentation')
 option('libcanberra',         type: 'boolean', value: true, description: 'libcanberra for playing sounds')
 option('shape',               type: 'boolean', value: true, description: 'use the shaped window extension')
 option('sm',                  type: 'boolean', value: true, description: 'session management support')
