@@ -67,70 +67,6 @@ _cogl_util_one_at_a_time_mix (unsigned int hash)
   return hash;
 }
 
-/* The 'ffs' function is part of C99 so it isn't always available */
-#ifndef HAVE_FFS
-
-int
-_cogl_util_ffs (int num)
-{
-  int i = 1;
-
-  if (num == 0)
-    return 0;
-
-  while ((num & 1) == 0)
-    {
-      num >>= 1;
-      i++;
-    }
-
-  return i;
-}
-#endif /* HAVE_FFS */
-
-/* The 'ffsl' is non-standard but when building with GCC we'll use its
-   builtin instead */
-#ifndef COGL_UTIL_HAVE_BUILTIN_FFSL
-
-int
-_cogl_util_ffsl_wrapper (long int num)
-{
-  int i = 1;
-
-  if (num == 0)
-    return 0;
-
-  while ((num & 1) == 0)
-    {
-      num >>= 1;
-      i++;
-    }
-
-  return i;
-}
-
-#endif /* COGL_UTIL_HAVE_BUILTIN_FFSL */
-
-#ifndef COGL_UTIL_HAVE_BUILTIN_POPCOUNTL
-
-const unsigned char
-_cogl_util_popcount_table[256] =
-  {
-    0, 1, 1, 2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 4, 1, 2, 2, 3, 2, 3, 3, 4,
-    2, 3, 3, 4, 3, 4, 4, 5, 1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5,
-    2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6, 1, 2, 2, 3, 2, 3, 3, 4,
-    2, 3, 3, 4, 3, 4, 4, 5, 2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6,
-    2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6, 3, 4, 4, 5, 4, 5, 5, 6,
-    4, 5, 5, 6, 5, 6, 6, 7, 1, 2, 2, 3, 2, 3, 3, 4, 2, 3, 3, 4, 3, 4, 4, 5,
-    2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6, 2, 3, 3, 4, 3, 4, 4, 5,
-    3, 4, 4, 5, 4, 5, 5, 6, 3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7,
-    2, 3, 3, 4, 3, 4, 4, 5, 3, 4, 4, 5, 4, 5, 5, 6, 3, 4, 4, 5, 4, 5, 5, 6,
-    4, 5, 5, 6, 5, 6, 6, 7, 3, 4, 4, 5, 4, 5, 5, 6, 4, 5, 5, 6, 5, 6, 6, 7,
-    4, 5, 5, 6, 5, 6, 6, 7, 5, 6, 6, 7, 6, 7, 7, 8
-  };
-
-#endif /* COGL_UTIL_HAVE_BUILTIN_POPCOUNTL */
-
 /* tests/conform/test-bitmask.c tests some cogl internals and includes this
  * file directly but since these functions depend on other internal Cogl
  * symbols we hide them from test-bitmask.c
@@ -260,27 +196,5 @@ _cogl_util_pixel_format_from_masks (unsigned long r_mask,
 
   return image_format;
 }
-
-#ifndef HAVE_MEMMEM
-
-char *
-_cogl_util_memmem (const void *haystack,
-                   size_t haystack_len,
-                   const void *needle,
-                   size_t needle_len)
-{
-  size_t i;
-
-  if (needle_len > haystack_len)
-    return NULL;
-
-  for (i = 0; i <= haystack_len - needle_len; i++)
-    if (!memcmp ((const char *) haystack + i, needle, needle_len))
-      return (char *) haystack + i;
-
-  return NULL;
-}
-
-#endif /* HAVE_MEMMEM */
 
 #endif /* _COGL_IN_TEST_BITMASK */

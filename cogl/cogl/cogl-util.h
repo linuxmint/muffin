@@ -114,75 +114,17 @@ _cogl_util_one_at_a_time_hash (unsigned int hash,
 unsigned int
 _cogl_util_one_at_a_time_mix (unsigned int hash);
 
-/* These two builtins are available since GCC 3.4 */
-#if __GNUC__ > 3 || (__GNUC__ == 3 && __GNUC_MINOR__ >= 4)
-#define COGL_UTIL_HAVE_BUILTIN_FFSL
-#define COGL_UTIL_HAVE_BUILTIN_POPCOUNTL
-#define COGL_UTIL_HAVE_BUILTIN_CLZ
-#endif
 
-/* The 'ffs' function is part of C99 so it isn't always available */
-#ifdef HAVE_FFS
 #define _cogl_util_ffs ffs
-#else
-int
-_cogl_util_ffs (int num);
-#endif
-
-/* The 'ffsl' function is non-standard but GCC has a builtin for it
-   since 3.4 which we can use */
-#ifdef COGL_UTIL_HAVE_BUILTIN_FFSL
 #define _cogl_util_ffsl __builtin_ffsl
-#else
-/* If ints and longs are the same size we can just use ffs. Hopefully
-   the compiler will optimise away this conditional */
-#define _cogl_util_ffsl(x)                                              \
-  (sizeof (long int) == sizeof (int) ? _cogl_util_ffs ((int) x) :       \
-   _cogl_util_ffsl_wrapper (x))
-int
-_cogl_util_ffsl_wrapper (long int num);
-#endif /* COGL_UTIL_HAVE_BUILTIN_FFSL */
 
 static inline unsigned int
 _cogl_util_fls (unsigned int n)
 {
-#ifdef COGL_UTIL_HAVE_BUILTIN_CLZ
    return n == 0 ? 0 : sizeof (unsigned int) * 8 - __builtin_clz (n);
-#else
-   unsigned int v = 1;
-
-   if (n == 0)
-      return 0;
-
-   while (n >>= 1)
-       v++;
-
-   return v;
-#endif
 }
 
-#ifdef COGL_UTIL_HAVE_BUILTIN_POPCOUNTL
 #define _cogl_util_popcountl __builtin_popcountl
-#else
-extern const unsigned char _cogl_util_popcount_table[256];
-
-/* There are many ways of doing popcount but doing a table lookup
-   seems to be the most robust against different sizes for long. Some
-   pages seem to claim it's the fastest method anyway. */
-static inline int
-_cogl_util_popcountl (unsigned long num)
-{
-  int i;
-  int sum = 0;
-
-  /* Let's hope GCC will unroll this loop.. */
-  for (i = 0; i < sizeof (num); i++)
-    sum += _cogl_util_popcount_table[(num >> (i * 8)) & 0xff];
-
-  return sum;
-}
-
-#endif /* COGL_UTIL_HAVE_BUILTIN_POPCOUNTL */
 
 #define _COGL_RETURN_IF_FAIL(EXPR) g_return_if_fail(EXPR)
 #define _COGL_RETURN_VAL_IF_FAIL(EXPR, VAL) g_return_val_if_fail(EXPR, VAL)
@@ -222,15 +164,7 @@ _cogl_util_pixel_format_from_masks (unsigned long r_mask,
 #define _COGL_STATIC_ASSERT(EXPRESSION, MESSAGE) \
   _Static_assert (EXPRESSION, MESSAGE);
 
-#ifdef HAVE_MEMMEM
 #define _cogl_util_memmem memmem
-#else
-char *
-_cogl_util_memmem (const void *haystack,
-                   size_t haystack_len,
-                   const void *needle,
-                   size_t needle_len);
-#endif
 
 static inline void
 _cogl_util_scissor_intersect (int rect_x0,
