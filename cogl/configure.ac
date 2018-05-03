@@ -402,22 +402,6 @@ AS_IF([test "x$enable_cogl_pango" = "xyes"],
 )
 
 dnl     ============================================================
-dnl     Should cogl-path be built?
-dnl     ============================================================
-
-AC_ARG_ENABLE(
-  [cogl-path],
-  [AC_HELP_STRING([--enable-cogl-path=@<:@no/yes@:>@], [Enable 2D path support @<:@default=yes@:>@])],
-  [],
-  enable_cogl_path=yes
-)
-AS_IF([test "x$enable_cogl_path" = "xyes"],
-      [
-        COGL_DEFINES_SYMBOLS="$COGL_DEFINES_SYMBOLS COGL_HAS_COGL_PATH_SUPPORT"
-      ]
-)
-
-dnl     ============================================================
 dnl     Choose image loading backend
 dnl     ============================================================
 COGL_PKG_REQUIRES="$COGL_PKG_REQUIRES gdk-pixbuf-2.0 >= gdk_pixbuf_req_version"
@@ -828,8 +812,6 @@ AS_IF([test "x$enable_cogl_pango" = "xyes"],
 )
 AM_CONDITIONAL([BUILD_COGL_PANGO], [test "x$enable_cogl_pango" = "xyes"])
 
-AM_CONDITIONAL([BUILD_COGL_PATH], [test "x$enable_cogl_path" = "xyes"])
-
 dnl ================================================================
 dnl Misc program dependencies.
 dnl ================================================================
@@ -1002,7 +984,6 @@ fi
 echo "        Build libcogl-gles2 GLES 2.0 frontend api: ${enable_cogl_gles2}"
 echo "        Image backend: ${COGL_IMAGE_BACKEND}"
 echo "        Cogl Pango: ${enable_cogl_pango}"
-echo "        Cogl Path: ${enable_cogl_path}"
 
 # Compiler/Debug related flags
 echo ""

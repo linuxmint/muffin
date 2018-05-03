@@ -69,11 +69,9 @@ test_sources = \
 	test-fence.c \
 	$(NULL)
 
-if BUILD_COGL_PATH
 test_sources += \
 	test-path.c \
 	test-path-clip.c
-endif
 
 test_conformance_SOURCES = $(common_sources) $(test_sources)
 
@@ -133,9 +131,7 @@ test_conformance_LDADD = \
 	$(COGL_DEP_LIBS) \
 	$(top_builddir)/cogl/libmuffin-cogl-$(MUFFIN_PLUGIN_API_VERSION).la \
 	$(LIBM)
-if BUILD_COGL_PATH
 test_conformance_LDADD += $(top_builddir)/cogl-path/libmuffin-cogl-path-$(MUFFIN_PLUGIN_API_VERSION).la
-endif
 test_conformance_LDFLAGS = -export-dynamic
 
 # XXX: uncomment when tests get fixed

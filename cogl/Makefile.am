@@ -2,9 +2,7 @@ SUBDIRS = test-fixtures
 
 SUBDIRS += cogl
 
-if BUILD_COGL_PATH
 SUBDIRS += cogl-path
-endif
 
 if BUILD_COGL_PANGO
 SUBDIRS += cogl-pango
