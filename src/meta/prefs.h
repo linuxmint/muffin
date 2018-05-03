@@ -128,7 +128,7 @@ const char*                 meta_prefs_get_window_screenshot_command (void);
 
 const char*                 meta_prefs_get_terminal_command   (void);
 
-void                        meta_prefs_get_button_layout (MetaButtonLayout *button_layout);
+void                        meta_prefs_get_button_layout (MetaButtonLayout *button_layout_p);
 
 /* Double, right, middle click can be configured to any titlebar meta-action */
 CDesktopTitlebarAction      meta_prefs_get_action_double_click_titlebar (void);
