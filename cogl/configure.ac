@@ -633,39 +633,6 @@ AM_CONDITIONAL(SUPPORT_GLX, [test "x$SUPPORT_GLX" = "xyes"])
 EGL_PLATFORM_COUNT=0
 
 AC_ARG_ENABLE(
-  [kms-egl-platform],
-  [AC_HELP_STRING([--enable-kms-egl-platform=@<:@no/yes@:>@], [Enable support for the KMS egl platform @<:@default=no@:>@])],
-  [],
-  enable_kms_egl_platform=no
-)
-AS_IF([test "x$enable_kms_egl_platform" = "xyes"],
-      [
-        EGL_PLATFORM_COUNT=$((EGL_PLATFORM_COUNT+1))
-        NEED_EGL=yes
-        EGL_PLATFORMS="$EGL_PLATFORMS kms"
-
-        PKG_CHECK_EXISTS([gbm],
-                         [
-                           COGL_PKG_REQUIRES="$COGL_PKG_REQUIRES gbm"
-                           COGL_PKG_REQUIRES="$COGL_PKG_REQUIRES libdrm"
-                         ],
-                         [AC_MSG_ERROR([Unable to locate required libgbm library for the KMS egl platform])])
-
-        GBM_VERSION=`$PKG_CONFIG --modversion gbm`
-        GBM_MAJOR=`echo $GBM_VERSION | cut -d'.' -f1`
-        GBM_MINOR=`echo $GBM_VERSION | cut -d'.' -f2`
-        GBM_MICRO=`echo $GBM_VERSION | cut -d'.' -f3 | sed 's/-.*//'`
-
-        AC_DEFINE_UNQUOTED([COGL_GBM_MAJOR], [$GBM_MAJOR], [The major version for libgbm])
-        AC_DEFINE_UNQUOTED([COGL_GBM_MINOR], [$GBM_MINOR], [The minor version for libgbm])
-        AC_DEFINE_UNQUOTED([COGL_GBM_MICRO], [$GBM_MICRO], [The micro version for libgbm])
-
-        COGL_DEFINES_SYMBOLS="$COGL_DEFINES_SYMBOLS COGL_HAS_EGL_PLATFORM_KMS_SUPPORT"
-      ])
-AM_CONDITIONAL(SUPPORT_EGL_PLATFORM_KMS,
-               [test "x$enable_kms_egl_platform" = "xyes"])
-
-AC_ARG_ENABLE(
   [wayland-egl-server],
   [AC_HELP_STRING([--enable-wayland-egl-server=@<:@no/yes@:>@], [Enable server side wayland support @<:@default=no@:>@])],
   [],

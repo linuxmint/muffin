@@ -87,11 +87,6 @@ EGLDisplay      clutter_egl_display             (void);
 CLUTTER_AVAILABLE_IN_1_6
 EGLDisplay      clutter_egl_get_egl_display     (void);
 
-#ifdef COGL_HAS_EGL_PLATFORM_KMS_SUPPORT
-CLUTTER_AVAILABLE_IN_1_18
-void            clutter_egl_set_kms_fd          (int fd);
-#endif
-
 CLUTTER_AVAILABLE_IN_1_20
 void            clutter_egl_freeze_master_clock (void);
 CLUTTER_AVAILABLE_IN_1_20
