@@ -4,9 +4,7 @@ SUBDIRS += cogl
 
 SUBDIRS += cogl-path
 
-if BUILD_COGL_PANGO
 SUBDIRS += cogl-pango
-endif
 
 if BUILD_COGL_GLES2
 SUBDIRS += cogl-gles2

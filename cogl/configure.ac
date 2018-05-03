@@ -385,21 +385,8 @@ AM_PATH_GLIB_2_0([glib_req_version],
 
 COGL_PKG_REQUIRES="$COGL_PKG_REQUIRES gobject-2.0 gmodule-no-export-2.0"
 
-dnl     ============================================================
-dnl     Should cogl-pango be built?
-dnl     ============================================================
+COGL_PANGO_PKG_REQUIRES="$COGL_PANGO_PKG_REQUIRES pangocairo >= pangocairo_req_version"
 
-AC_ARG_ENABLE(
-  [cogl-pango],
-  [AC_HELP_STRING([--enable-cogl-pango=@<:@no/yes@:>@], [Enable pango support @<:@default=yes@:>@])],
-  [],
-  enable_cogl_pango=yes
-)
-AS_IF([test "x$enable_cogl_pango" = "xyes"],
-      [
-	COGL_PANGO_PKG_REQUIRES="$COGL_PANGO_PKG_REQUIRES pangocairo >= pangocairo_req_version"
-      ]
-)
 
 dnl     ============================================================
 dnl     Choose image loading backend
@@ -807,10 +794,7 @@ if test -n "$COGL_PKG_REQUIRES"; then
 fi
 AC_SUBST(COGL_PANGO_PKG_REQUIRES)
 
-AS_IF([test "x$enable_cogl_pango" = "xyes"],
-  [PKG_CHECK_MODULES(COGL_PANGO_DEP, [$COGL_PANGO_PKG_REQUIRES])]
-)
-AM_CONDITIONAL([BUILD_COGL_PANGO], [test "x$enable_cogl_pango" = "xyes"])
+PKG_CHECK_MODULES(COGL_PANGO_DEP, [$COGL_PANGO_PKG_REQUIRES])
 
 dnl ================================================================
 dnl Misc program dependencies.
@@ -983,7 +967,6 @@ echo "        Wayland compositor support: ${enable_wayland_egl_server}"
 fi
 echo "        Build libcogl-gles2 GLES 2.0 frontend api: ${enable_cogl_gles2}"
 echo "        Image backend: ${COGL_IMAGE_BACKEND}"
-echo "        Cogl Pango: ${enable_cogl_pango}"
 
 # Compiler/Debug related flags
 echo ""
