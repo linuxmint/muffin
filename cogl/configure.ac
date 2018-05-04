@@ -405,83 +405,6 @@ EGL_CHECKED=no
 
 enabled_drivers=""
 
-HAVE_GLES1=0
-AC_ARG_ENABLE(
-  [gles1],
-  [AC_HELP_STRING([--enable-gles1=@<:@no/yes@:>@], [Enable support for OpenGL-ES 1.1 @<:@default=no@:>@])],
-  [],
-  enable_gles1=no
-)
-AS_IF([test "x$enable_gles1" = "xyes"],
-      [
-        enabled_drivers="$enabled_drivers gles1"
-
-        cogl_gl_headers="GLES/gl.h GLES/glext.h"
-
-        AC_DEFINE([HAVE_COGL_GLES], 1, [Have GLES 1.1 for rendering])
-        COGL_DEFINES_SYMBOLS="$COGL_DEFINES_SYMBOLS COGL_HAS_GLES CLUTTER_COGL_HAS_GLES"
-        COGL_DEFINES_SYMBOLS="$COGL_DEFINES_SYMBOLS COGL_HAS_GLES1"
-        HAVE_GLES1=1
-
-        PKG_CHECK_EXISTS([glesv1_cm],
-          [COGL_PKG_REQUIRES_GL="$COGL_PKG_REQUIRES_GL glesv1_cm"
-           COGL_GLES1_LIBNAME="libGLESv1_CM.so"
-          ],
-          [
-            # We have to check the two headers independently as GLES/glext.h
-            # needs to include GLES/gl.h to have the GL types defined (eg.
-            # GLenum).
-            AC_CHECK_HEADER([GLES/gl.h],
-                            [],
-                            [AC_MSG_ERROR([Unable to locate GLES/gl.h])])
-            AC_CHECK_HEADER([GLES/glext.h],
-                            [],
-                            [AC_MSG_ERROR([Unable to locate GLES/glext.h])],
-                            [#include <GLES/gl.h>])
-
-            # Early implementations provided only a GLES/egl.h while Khronos's
-            # implementer guide now states EGL/egl.h is the One. Some
-            # implementations keep a GLES/egl.h wrapper around EGL/egl.h for
-            # backward compatibility while others provide EGL/egl.h only.
-            AC_CHECK_HEADERS([GLES/egl.h EGL/egl.h])
-
-            AS_IF([test "x$ac_cv_header_GLES_egl_h" = "xyes"],
-                  [COGL_EGL_INCLUDES="#include <GLES/egl.h>"],
-                  [test "x$ac_cv_header_EGL_egl_h" = "xyes"],
-                  [
-                    COGL_EGL_INCLUDES="#include <EGL/egl.h>"
-                  ],
-                  [AC_MSG_ERROR([Unable to locate EGL header])])
-            AC_SUBST([COGL_EGL_INCLUDES])
-
-            AC_CHECK_HEADERS([EGL/eglext.h],
-                             [COGL_EGL_INCLUDES="$COGL_EGL_INCLUDE
-#include <EGL/eglext.h>"],
-                             [],
-                             [$COGL_EGL_INCLUDES])
-
-            # Check for a GLES 1.x Common Profile library with/without EGL.
-            #
-            # Note: historically GLES 1 libraries shipped with the
-            # EGL and GLES symbols all bundled in one library. Now
-            # the Khronos Implementers Guide defines two naming
-            # schemes: -lGLES_CM should be used for a library that
-            # bundles the GLES and EGL API together and -lGLESv1_CM
-            # would be used for a standalone GLES API.
-            AC_CHECK_LIB(GLES_CM, [eglInitialize],
-              [COGL_GLES1_LIBNAME="libGLES_CM.so"],
-              [
-                AC_CHECK_LIB(GLESv1_CM, [glFlush],
-                  [COGL_GLES1_LIBNAME="libGLESv1_CM.so"
-                   NEED_SEPARATE_EGL=yes
-                  ],
-                  [AC_MSG_ERROR([Unable to locate required GLES 1.x Common Profile library])])
-              ])
-
-            EGL_CHECKED=yes
-          ])
-      ])
-
 HAVE_GLES2=0
 AC_ARG_ENABLE(
   [gles2],
@@ -560,10 +483,6 @@ AC_ARG_WITH([gl-libname],
             [AS_HELP_STRING([--with-gl-libname],
                             override the name of the GL library to dlopen)],
             [COGL_GL_LIBNAME="$withval"])
-AC_ARG_WITH([gles1-libname],
-            [AS_HELP_STRING([--with-gles1-libname],
-                            override the name of the GLESv1 library to dlopen)],
-            [COGL_GLES1_LIBNAME="$withval"])
 AC_ARG_WITH([gles2-libname],
             [AS_HELP_STRING([--with-gles2-libname],
                             override the name of the GLESv2 library to dlopen)],
@@ -580,8 +499,6 @@ AM_CONDITIONAL(HAVE_COGL_DEFAULT_DRIVER,
 
 AC_SUBST([COGL_GL_LIBNAME])
 AC_SUBST([HAVE_GL])
-AC_SUBST([COGL_GLES1_LIBNAME])
-AC_SUBST([HAVE_GLES1])
 AC_SUBST([COGL_GLES2_LIBNAME])
 AC_SUBST([HAVE_GLES2])
 AC_SUBST([COGL_DEFAULT_DRIVER])

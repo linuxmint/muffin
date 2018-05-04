@@ -438,8 +438,7 @@ flush_depth_state (CoglContext *ctx,
       ctx->depth_writing_enabled_cache = depth_writing_enabled;
     }
 
-  if (ctx->driver != COGL_DRIVER_GLES1 &&
-      (ctx->depth_range_near_cache != depth_state->range_near ||
+  if ((ctx->depth_range_near_cache != depth_state->range_near ||
        ctx->depth_range_far_cache != depth_state->range_far))
     {
       if (_cogl_has_private_feature (ctx, COGL_PRIVATE_FEATURE_GL_EMBEDDED))
@@ -520,59 +519,51 @@ _cogl_pipeline_flush_color_blend_alpha_depth_state (
         &authority->big_state->blend_state;
 
       /* GLES 1 only has glBlendFunc */
-      if (ctx->driver == COGL_DRIVER_GLES1)
-        {
-          GE (ctx, glBlendFunc (blend_state->blend_src_factor_rgb,
-                                blend_state->blend_dst_factor_rgb));
-        }
 #if defined(HAVE_COGL_GLES2) || defined(HAVE_COGL_GL)
-      else
+      if (blend_factor_uses_constant (blend_state->blend_src_factor_rgb) ||
+          blend_factor_uses_constant (blend_state
+                                      ->blend_src_factor_alpha) ||
+          blend_factor_uses_constant (blend_state->blend_dst_factor_rgb) ||
+          blend_factor_uses_constant (blend_state->blend_dst_factor_alpha))
         {
-          if (blend_factor_uses_constant (blend_state->blend_src_factor_rgb) ||
-              blend_factor_uses_constant (blend_state
-                                          ->blend_src_factor_alpha) ||
-              blend_factor_uses_constant (blend_state->blend_dst_factor_rgb) ||
-              blend_factor_uses_constant (blend_state->blend_dst_factor_alpha))
-            {
-              float red =
-                cogl_color_get_red_float (&blend_state->blend_constant);
-              float green =
-                cogl_color_get_green_float (&blend_state->blend_constant);
-              float blue =
-                cogl_color_get_blue_float (&blend_state->blend_constant);
-              float alpha =
-                cogl_color_get_alpha_float (&blend_state->blend_constant);
+          float red =
+            cogl_color_get_red_float (&blend_state->blend_constant);
+          float green =
+            cogl_color_get_green_float (&blend_state->blend_constant);
+          float blue =
+            cogl_color_get_blue_float (&blend_state->blend_constant);
+          float alpha =
+            cogl_color_get_alpha_float (&blend_state->blend_constant);
 
 
-              GE (ctx, glBlendColor (red, green, blue, alpha));
-            }
-
-          if (ctx->glBlendEquationSeparate &&
-              blend_state->blend_equation_rgb !=
-              blend_state->blend_equation_alpha)
-            GE (ctx,
-                glBlendEquationSeparate (blend_state->blend_equation_rgb,
-                                         blend_state->blend_equation_alpha));
-          else
-            GE (ctx, glBlendEquation (blend_state->blend_equation_rgb));
-
-          if (ctx->glBlendFuncSeparate &&
-              (blend_state->blend_src_factor_rgb !=
-               blend_state->blend_src_factor_alpha ||
-               (blend_state->blend_dst_factor_rgb !=
-                blend_state->blend_dst_factor_alpha)))
-            GE (ctx, glBlendFuncSeparate (blend_state->blend_src_factor_rgb,
-                                          blend_state->blend_dst_factor_rgb,
-                                          blend_state->blend_src_factor_alpha,
-                                          blend_state->blend_dst_factor_alpha));
-          else
-            GE (ctx, glBlendFunc (blend_state->blend_src_factor_rgb,
-                                  blend_state->blend_dst_factor_rgb));
+          GE (ctx, glBlendColor (red, green, blue, alpha));
         }
-#endif
-    }
 
-#if defined (HAVE_COGL_GL) || defined (HAVE_COGL_GLES)
+      if (ctx->glBlendEquationSeparate &&
+          blend_state->blend_equation_rgb !=
+          blend_state->blend_equation_alpha)
+        GE (ctx,
+            glBlendEquationSeparate (blend_state->blend_equation_rgb,
+                                     blend_state->blend_equation_alpha));
+      else
+        GE (ctx, glBlendEquation (blend_state->blend_equation_rgb));
+
+      if (ctx->glBlendFuncSeparate &&
+          (blend_state->blend_src_factor_rgb !=
+           blend_state->blend_src_factor_alpha ||
+           (blend_state->blend_dst_factor_rgb !=
+            blend_state->blend_dst_factor_alpha)))
+        GE (ctx, glBlendFuncSeparate (blend_state->blend_src_factor_rgb,
+                                      blend_state->blend_dst_factor_rgb,
+                                      blend_state->blend_src_factor_alpha,
+                                      blend_state->blend_dst_factor_alpha));
+      else
+        GE (ctx, glBlendFunc (blend_state->blend_src_factor_rgb,
+                              blend_state->blend_dst_factor_rgb));
+    }
+#endif
+
+#ifdef HAVE_COGL_GL
 
   if (_cogl_has_private_feature (ctx, COGL_PRIVATE_FEATURE_ALPHA_TEST))
     {
@@ -769,7 +760,7 @@ get_max_activateable_texture_units (void)
         }
 #endif
 
-#if defined (HAVE_COGL_GL) || defined (HAVE_COGL_GLES)
+#ifdef HAVE_COGL_GL
       if (_cogl_has_private_feature (ctx, COGL_PRIVATE_FEATURE_GL_FIXED))
         {
           /* GL_MAX_TEXTURE_UNITS defines the number of units that are
@@ -914,7 +905,7 @@ flush_layers_common_gl_state_cb (CoglPipelineLayer *layer, void *user_data)
    * this point we can't currently tell if we are using the fixed or
    * glsl progend.
    */
-#if defined (HAVE_COGL_GLES) || defined (HAVE_COGL_GL)
+#ifdef HAVE_COGL_GL
   if (_cogl_has_private_feature (ctx, COGL_PRIVATE_FEATURE_GL_FIXED) &&
       (layers_difference & COGL_PIPELINE_LAYER_STATE_POINT_SPRITE_COORDS))
     {

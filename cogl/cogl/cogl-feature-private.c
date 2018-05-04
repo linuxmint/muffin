@@ -58,9 +58,6 @@ _cogl_feature_check (CoglRenderer *renderer,
 
   switch (driver)
     {
-    case COGL_DRIVER_GLES1:
-      gles_availability = COGL_EXT_IN_GLES;
-      break;
     case COGL_DRIVER_GLES2:
       gles_availability = COGL_EXT_IN_GLES2;
 

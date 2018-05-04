@@ -390,19 +390,6 @@ _cogl_pipeline_fragend_fixed_end (CoglPipeline *pipeline,
 
           GE (ctx, glFogfv (GL_FOG_COLOR, fogColor));
 
-          if (ctx->driver == COGL_DRIVER_GLES1)
-            switch (fog_state->mode)
-              {
-              case COGL_FOG_MODE_LINEAR:
-                gl_mode = GL_LINEAR;
-                break;
-              case COGL_FOG_MODE_EXPONENTIAL:
-                gl_mode = GL_EXP;
-                break;
-              case COGL_FOG_MODE_EXPONENTIAL_SQUARED:
-                gl_mode = GL_EXP2;
-                break;
-              }
           /* TODO: support other modes for GLES2 */
 
           /* NB: GLES doesn't have glFogi */

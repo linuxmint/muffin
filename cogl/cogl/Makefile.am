@@ -358,11 +358,9 @@ cogl_sources_c = \
 	cogl-poll-private.h			\
 	cogl-poll.c				\
 	gl-prototypes/cogl-all-functions.h	\
-	gl-prototypes/cogl-gles1-functions.h	\
 	gl-prototypes/cogl-gles2-functions.h	\
 	gl-prototypes/cogl-core-functions.h	\
 	gl-prototypes/cogl-in-gles-core-functions.h	\
-	gl-prototypes/cogl-in-gles1-core-functions.h	\
 	gl-prototypes/cogl-in-gles2-core-functions.h	\
 	gl-prototypes/cogl-fixed-functions.h	\
 	gl-prototypes/cogl-glsl-functions.h	\

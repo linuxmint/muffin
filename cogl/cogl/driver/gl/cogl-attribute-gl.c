@@ -66,7 +66,7 @@ toggle_builtin_attribute_enabled_cb (int bit_num, void *user_data)
                             (context, COGL_PRIVATE_FEATURE_GL_FIXED),
                             FALSE);
 
-#if defined (HAVE_COGL_GL) || defined (HAVE_COGL_GLES)
+#ifdef HAVE_COGL_GL
   {
     CoglBool enabled = _cogl_bitmask_get (state->new_bits, bit_num);
     GLenum cap;
@@ -105,7 +105,7 @@ toggle_texcood_attribute_enabled_cb (int bit_num, void *user_data)
                             (context, COGL_PRIVATE_FEATURE_GL_FIXED),
                             FALSE);
 
-#if defined (HAVE_COGL_GL) || defined (HAVE_COGL_GLES)
+#ifdef HAVE_COGL_GL
   {
     CoglBool enabled = _cogl_bitmask_get (state->new_bits, bit_num);
 

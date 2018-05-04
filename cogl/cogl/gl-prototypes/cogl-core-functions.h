@@ -60,7 +60,7 @@
    available */
 COGL_EXT_BEGIN (core,
                 0, 0,
-                COGL_EXT_IN_GLES | COGL_EXT_IN_GLES2,
+                COGL_EXT_IN_GLES2,
                 "\0",
                 "\0")
 COGL_EXT_FUNCTION (void, glBindTexture,

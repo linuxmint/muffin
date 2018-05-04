@@ -60,7 +60,7 @@
    supports fixed-function (ie, GL and GLES1.1) */
 COGL_EXT_BEGIN (fixed_function_core,
                 0, 0,
-                COGL_EXT_IN_GLES,
+                0,
                 "\0",
                 "\0")
 COGL_EXT_FUNCTION (void, glAlphaFunc,

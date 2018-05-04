@@ -721,7 +721,7 @@ _cogl_texture_2d_gl_generate_mipmap (CoglTexture2D *tex_2d)
      GL_GENERATE_MIPMAP and reuploading the first pixel */
   if (cogl_has_feature (ctx, COGL_FEATURE_ID_OFFSCREEN))
     _cogl_texture_gl_generate_mipmaps (COGL_TEXTURE (tex_2d));
-#if defined(HAVE_COGL_GLES) || defined(HAVE_COGL_GL)
+#ifdef HAVE_COGL_GL
   else
     {
       _cogl_bind_gl_texture_transient (GL_TEXTURE_2D,

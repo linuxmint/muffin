@@ -1,8 +1,5 @@
 /* Have GL for rendering */
 #undef HAVE_COGL_GL
 
-/* Have GLES 1.1 for rendering */
-#undef HAVE_COGL_GLES
-
 /* Have GLES 2.0 for rendering */
 #undef HAVE_COGL_GLES2

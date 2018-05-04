@@ -409,8 +409,6 @@ _cogl_program_flush_uniforms (CoglProgram *program,
 
   _COGL_GET_CONTEXT (ctx, NO_RETVAL);
 
-  _COGL_RETURN_IF_FAIL (ctx->driver != COGL_DRIVER_GLES1);
-
   for (i = 0; i < program->custom_uniforms->len; i++)
     {
       uniform = &g_array_index (program->custom_uniforms,

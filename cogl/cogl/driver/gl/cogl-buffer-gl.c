@@ -107,8 +107,7 @@ update_hints_to_gl_enum (CoglBuffer *buffer)
     case COGL_BUFFER_UPDATE_HINT_STREAM:
       /* OpenGL ES 1.1 only knows about STATIC_DRAW and DYNAMIC_DRAW */
 #if defined(HAVE_COGL_GL) || defined(HAVE_COGL_GLES2)
-      if (buffer->context->driver != COGL_DRIVER_GLES1)
-        return GL_STREAM_DRAW;
+      return GL_STREAM_DRAW;
 #else
       return GL_DYNAMIC_DRAW;
 #endif

@@ -58,7 +58,6 @@
 
 COGL_EXT_BEGIN (only_in_both_gles,
                 4, 1,
-                COGL_EXT_IN_GLES |
                 COGL_EXT_IN_GLES2,
                 "ARB\0",
                 "ES2_compatibility\0")
@@ -70,7 +69,6 @@ COGL_EXT_END ()
 
 COGL_EXT_BEGIN (only_in_both_gles_and_gl_1_3,
                 1, 3,
-                COGL_EXT_IN_GLES |
                 COGL_EXT_IN_GLES2,
                 "\0",
                 "\0")
@@ -99,7 +97,6 @@ COGL_EXT_END ()
 
 COGL_EXT_BEGIN (only_in_both_gles_and_gl_1_5,
                 1, 5,
-                COGL_EXT_IN_GLES |
                 COGL_EXT_IN_GLES2,
                 "\0",
                 "\0")
@@ -108,7 +105,6 @@ COGL_EXT_FUNCTION (void, glGetBufferParameteriv,
 COGL_EXT_END ()
 
 COGL_EXT_BEGIN (vbos, 1, 5,
-                COGL_EXT_IN_GLES |
                 COGL_EXT_IN_GLES2,
                 "ARB\0",
                 "vertex_buffer_object\0")
@@ -138,7 +134,6 @@ COGL_EXT_END ()
 /* Available in GL 1.3, the multitexture extension or GLES. These are
    required */
 COGL_EXT_BEGIN (multitexture_part0, 1, 3,
-                COGL_EXT_IN_GLES |
                 COGL_EXT_IN_GLES2,
                 "ARB\0",
                 "multitexture\0")

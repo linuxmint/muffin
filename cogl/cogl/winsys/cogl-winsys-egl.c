@@ -265,8 +265,6 @@ egl_attributes_from_framebuffer_config (CoglDisplay *display,
   attributes[i++] = ((renderer->driver == COGL_DRIVER_GL ||
                       renderer->driver == COGL_DRIVER_GL3) ?
                      EGL_OPENGL_BIT :
-                     renderer->driver == COGL_DRIVER_GLES1 ?
-                     EGL_OPENGL_ES_BIT :
                      EGL_OPENGL_ES2_BIT);
 
   if (config->samples_per_pixel)
