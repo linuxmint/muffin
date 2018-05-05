@@ -4132,7 +4132,6 @@ meta_window_make_fullscreen_internal (MetaWindow  *window)
       window->force_save_user_rect = FALSE;
 
       meta_stack_freeze (window->screen->stack);
-      meta_window_update_layer (window);
 
       meta_window_raise (window);
       meta_stack_thaw (window->screen->stack);
@@ -4198,7 +4197,7 @@ meta_window_unmake_fullscreen (MetaWindow  *window)
        */
       force_save_user_window_placement (window);
 
-      meta_window_update_layer (window);
+      meta_screen_queue_check_fullscreen (window->screen);
 
       meta_stack_tracker_queue_sync_stack (window->screen->stack_tracker);
       g_object_notify (G_OBJECT (window), "fullscreen");
