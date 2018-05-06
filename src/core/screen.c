@@ -3824,8 +3824,7 @@ check_fullscreen_func (gpointer data)
           if (meta_window_is_monitor_sized (window))
             covers_monitors = TRUE;
         }
-      else if (window->maximized_horizontally &&
-               window->maximized_vertically)
+      else
         {
           int monitor_index = meta_window_get_monitor (window);
           /* + 1 to avoid NULL */
