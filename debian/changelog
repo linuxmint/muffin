@@ -1,3 +1,27 @@
+muffin (3.8.1) tara; urgency=medium
+
+  [ Michael Webster ]
+  * prefs: Fix introspection for meta_prefs_get_button_layout()
+  * Remove META_LAYER_FULLSCREEN
+
+  [ Germán Franco ]
+  * Make MetaButtonLayout usable from introspection (#318)
+
+  [ Fabio Fantoni ]
+  * debian: wrap-and-sort -bst
+  * improve debian/control
+  * debian/rules: don't run configure twice
+  * add debian/not-installed
+  * circleci: remove mint18 job
+  * Bump debhelper build-dep and compat to 10
+  * update debian/copyright
+  * debian/rules: remove override_dh_installdocs
+
+  [ Michael Webster ]
+  * screen.c: Redefine a fullscreen monitor as one where there is a (#317)
+
+ -- Clement Lefebvre <root@linuxmint.com>  Sun, 06 May 2018 15:13:58 +0100
+
 muffin (3.8.0) tara; urgency=medium
 
   [ Michael Webster ]
