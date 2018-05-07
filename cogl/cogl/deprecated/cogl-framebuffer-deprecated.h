@@ -49,7 +49,7 @@ COGL_BEGIN_DECLS
  *                   #CoglFramebuffer arguments so this stack of
  *                   framebuffers shouldn't be used anymore.
  */
-COGL_DEPRECATED_IN_1_16
+COGL_DEPRECATED
 void
 cogl_set_framebuffer (CoglFramebuffer *buffer);
 
@@ -134,7 +134,7 @@ cogl_set_framebuffer (CoglFramebuffer *buffer);
  *                   #CoglFramebuffer arguments so this stack of
  *                   framebuffers shouldn't be used anymore.
  */
-COGL_DEPRECATED_IN_1_16
+COGL_DEPRECATED
 void
 cogl_push_framebuffer (CoglFramebuffer *buffer);
 
@@ -149,7 +149,7 @@ cogl_push_framebuffer (CoglFramebuffer *buffer);
  *                   #CoglFramebuffer arguments so this stack of
  *                   framebuffers shouldn't be used anymore.
  */
-COGL_DEPRECATED_IN_1_16
+COGL_DEPRECATED
 void
 cogl_pop_framebuffer (void);
 
@@ -169,7 +169,7 @@ cogl_pop_framebuffer (void);
  *                   #CoglFramebuffer arguments so this stack of
  *                   framebuffers shouldn't be used anymore.
  */
-COGL_DEPRECATED_IN_1_16
+COGL_DEPRECATED
 void
 cogl_set_draw_buffer (CoglBufferTarget target,
                       CoglHandle offscreen);
@@ -183,7 +183,7 @@ cogl_set_draw_buffer (CoglBufferTarget target,
  *                   #CoglFramebuffer arguments so this stack of
  *                   framebuffers shouldn't be used anymore.
  */
-COGL_DEPRECATED_IN_1_16
+COGL_DEPRECATED
 void
 cogl_push_draw_buffer (void);
 
@@ -196,7 +196,7 @@ cogl_push_draw_buffer (void);
  *                   #CoglFramebuffer arguments so this stack of
  *                   framebuffers shouldn't be used anymore.
  */
-COGL_DEPRECATED_IN_1_16
+COGL_DEPRECATED
 void
 cogl_pop_draw_buffer (void);
 
@@ -224,7 +224,7 @@ cogl_pop_draw_buffer (void);
  *
  * Deprecated: 1.16: Use cogl_framebuffer_read_pixels() instead
  */
-COGL_DEPRECATED_IN_1_16_FOR (cogl_framebuffer_read_pixels)
+COGL_DEPRECATED_FOR (cogl_framebuffer_read_pixels)
 void
 cogl_read_pixels (int x,
                   int y,
@@ -256,7 +256,7 @@ cogl_read_pixels (int x,
  * Stability: unstable
  * Deprecated 1.18: Removed since it is misleading
  */
-COGL_DEPRECATED_IN_1_18
+COGL_DEPRECATED
 CoglPixelFormat
 cogl_framebuffer_get_color_format (CoglFramebuffer *framebuffer);
 

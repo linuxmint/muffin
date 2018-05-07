@@ -51,7 +51,7 @@ COGL_BEGIN_DECLS
  * Deprecated: 1.18: Use specific constructors such as
  *                   cogl_texture_2d_new_with_size()
  */
-COGL_DEPRECATED_IN_1_18_FOR(cogl_texture_2d_new_with_size__OR__cogl_texture_2d_sliced_new_with_size)
+COGL_DEPRECATED_FOR (cogl_texture_2d_new_with_size__OR__cogl_texture_2d_sliced_new_with_size)
 CoglTexture *
 cogl_texture_new_with_size (unsigned int width,
                             unsigned int height,
@@ -81,7 +81,7 @@ cogl_texture_new_with_size (unsigned int width,
  * Deprecated: 1.18: Use specific constructors such as
  *                   cogl_texture_2d_new_from_file()
  */
-COGL_DEPRECATED_IN_1_18_FOR(cogl_texture_2d_new_from_file__OR__cogl_texture_2d_sliced_new_from_file)
+COGL_DEPRECATED_FOR (cogl_texture_2d_new_from_file__OR__cogl_texture_2d_sliced_new_from_file)
 CoglTexture *
 cogl_texture_new_from_file (const char       *filename,
                             CoglTextureFlags   flags,
@@ -115,7 +115,7 @@ cogl_texture_new_from_file (const char       *filename,
  * Deprecated: 1.18: Use specific constructors such as
  *                   cogl_texture_2d_new_from_data()
  */
-COGL_DEPRECATED_IN_1_18_FOR(cogl_texture_2d_new_from_data__OR__cogl_texture_2d_sliced_new_from_data)
+COGL_DEPRECATED_FOR (cogl_texture_2d_new_from_data__OR__cogl_texture_2d_sliced_new_from_data)
 CoglTexture *
 cogl_texture_new_from_data (int width,
                             int height,
@@ -153,7 +153,7 @@ cogl_texture_new_from_data (int width,
  * Deprecated: 1.18: Use specific constructors such as
  *                   cogl_texture_2d_new_from_foreign()
  */
-COGL_DEPRECATED_IN_1_18_FOR(cogl_texture_2d_new_from_foreign)
+COGL_DEPRECATED_FOR (cogl_texture_2d_new_from_foreign)
 CoglTexture *
 cogl_texture_new_from_foreign (unsigned int gl_handle,
                                unsigned int gl_target,
@@ -179,7 +179,7 @@ cogl_texture_new_from_foreign (unsigned int gl_handle,
  * Deprecated: 1.18: Use specific constructors such as
  *                   cogl_texture_2d_new_from_bitmap()
  */
-COGL_DEPRECATED_IN_1_18_FOR(cogl_texture_2d_new_from_bitmap__OR__cogl_texture_2d_sliced_new_from_bitmap)
+COGL_DEPRECATED_FOR (cogl_texture_2d_new_from_bitmap__OR__cogl_texture_2d_sliced_new_from_bitmap)
 CoglTexture *
 cogl_texture_new_from_bitmap (CoglBitmap *bitmap,
                               CoglTextureFlags flags,
@@ -210,7 +210,7 @@ cogl_texture_new_from_bitmap (CoglBitmap *bitmap,
  * Since: 1.2
  * Deprecated: 1.18: Use cogl_sub_texture_new()
  */
-COGL_DEPRECATED_IN_1_18_FOR(cogl_sub_texture_new)
+COGL_DEPRECATED_FOR (cogl_sub_texture_new)
 CoglTexture *
 cogl_texture_new_from_sub_texture (CoglTexture *full_texture,
                                    int sub_x,

@@ -34,8 +34,6 @@
 #include <math.h>
 #include <stdlib.h>
 
-#define COGL_VERSION_MIN_REQUIRED COGL_VERSION_1_4
-
 #include "cogl-i18n-private.h"
 #include "cogl-debug.h"
 #include "cogl-util.h"

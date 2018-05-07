@@ -36,7 +36,7 @@
 COGL_BEGIN_DECLS
 
 #define cogl_clutter_check_extension cogl_clutter_check_extension_CLUTTER
-COGL_DEPRECATED_IN_1_16
+COGL_DEPRECATED
 CoglBool
 cogl_clutter_check_extension (const char *name, const char *ext);
 

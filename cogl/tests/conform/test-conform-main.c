@@ -119,8 +119,6 @@ main (int argc, char **argv)
             TEST_REQUIREMENT_GLSL,
             0);
 
-  ADD_TEST (test_version, 0, 0);
-
   ADD_TEST (test_alpha_test, 0, 0);
 
   ADD_TEST (test_map_buffer_range, TEST_REQUIREMENT_MAP_WRITE, 0);
