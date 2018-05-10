@@ -3639,8 +3639,20 @@ meta_window_get_all_monitors (MetaWindow *window, gsize *length)
     {
       MetaRectangle *monitor_rect = &window->screen->monitor_infos[i].rect;
 
-      if (meta_rectangle_overlap (&window_rect, monitor_rect))
-        g_array_append_val (monitors, i);
+      if (window->fullscreen)
+        {
+          if (meta_rectangle_contains_rect (&window_rect, monitor_rect))
+            {
+              g_array_append_val (monitors, i);
+            }
+        }
+      else
+        {
+          if (meta_rectangle_overlap (&window_rect, monitor_rect))
+            {
+              g_array_append_val (monitors, i);
+            }
+        }
     }
 
   if (length)
