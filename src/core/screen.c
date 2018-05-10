@@ -3797,9 +3797,10 @@ check_fullscreen_func (gpointer data)
 
   screen->check_fullscreen_later = 0;
 
-  /* We consider a monitor in fullscreen if it contains a fullscreen window;
-   * however we make an exception for maximized windows above the fullscreen
-   * one, as in that case window+chrome fully obscure the fullscreen window.
+  /* We consider a monitor in fullscreen if it contains a fullscreen window that
+   * is the current top-most window in that monitor.  If any window (other than a
+   * dock/toolbar type) is above the fullscreen window, the monitor is no longer
+   * considered to be in fullscreen
    */
   for (window = meta_stack_get_top (screen->stack);
        window;
@@ -3824,7 +3825,10 @@ check_fullscreen_func (gpointer data)
           if (meta_window_is_monitor_sized (window))
             covers_monitors = TRUE;
         }
-      else
+      /* Any window type except dock/toolbar that comes before a fullscreen one
+       * will preempt fullscreen for that monitor. */
+      else if (window->type != META_WINDOW_DOCK &&
+               window->type != META_WINDOW_TOOLBAR)
         {
           int monitor_index = meta_window_get_monitor (window);
           /* + 1 to avoid NULL */
