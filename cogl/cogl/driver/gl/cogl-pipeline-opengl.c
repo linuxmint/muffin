@@ -289,10 +289,6 @@ _cogl_use_fragment_program (GLuint gl_program, CoglPipelineProgramType type)
           GE( ctx, glDisable (GL_FRAGMENT_PROGRAM_ARB) );
 #endif
           break;
-
-        case COGL_PIPELINE_PROGRAM_TYPE_FIXED:
-          /* don't need to to anything */
-          break;
         }
 
       /* ... and enable the new type */
@@ -305,7 +301,6 @@ _cogl_use_fragment_program (GLuint gl_program, CoglPipelineProgramType type)
           break;
 
         case COGL_PIPELINE_PROGRAM_TYPE_GLSL:
-        case COGL_PIPELINE_PROGRAM_TYPE_FIXED:
           /* don't need to to anything */
           break;
         }
@@ -353,10 +348,6 @@ _cogl_use_vertex_program (GLuint gl_program, CoglPipelineProgramType type)
           /* It doesn't make sense to enable ARBfp for the vertex program */
           g_assert_not_reached ();
           break;
-
-        case COGL_PIPELINE_PROGRAM_TYPE_FIXED:
-          /* don't need to to anything */
-          break;
         }
 
       /* ... and enable the new type */
@@ -368,7 +359,6 @@ _cogl_use_vertex_program (GLuint gl_program, CoglPipelineProgramType type)
           break;
 
         case COGL_PIPELINE_PROGRAM_TYPE_GLSL:
-        case COGL_PIPELINE_PROGRAM_TYPE_FIXED:
           /* don't need to to anything */
           break;
         }

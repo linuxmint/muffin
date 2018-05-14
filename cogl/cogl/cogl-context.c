@@ -373,8 +373,8 @@ cogl_context_new (CoglDisplay *display,
   context->max_texture_units = -1;
   context->max_activateable_texture_units = -1;
 
-  context->current_fragment_program_type = COGL_PIPELINE_PROGRAM_TYPE_FIXED;
-  context->current_vertex_program_type = COGL_PIPELINE_PROGRAM_TYPE_FIXED;
+  context->current_fragment_program_type = COGL_PIPELINE_PROGRAM_TYPE_GLSL;
+  context->current_vertex_program_type = COGL_PIPELINE_PROGRAM_TYPE_GLSL;
   context->current_gl_program = 0;
 
   context->current_gl_dither_enabled = TRUE;

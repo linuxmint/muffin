@@ -173,16 +173,8 @@ cogl_driver_sources += \
 	driver/gl/cogl-pipeline-fragend-glsl-private.h \
 	driver/gl/gl/cogl-pipeline-fragend-arbfp.c \
 	driver/gl/gl/cogl-pipeline-fragend-arbfp-private.h \
-	driver/gl/gl/cogl-pipeline-progend-fixed-arbfp.c \
-	driver/gl/gl/cogl-pipeline-progend-fixed-arbfp-private.h \
-	driver/gl/cogl-pipeline-fragend-fixed.c \
-	driver/gl/cogl-pipeline-fragend-fixed-private.h \
 	driver/gl/cogl-pipeline-vertend-glsl.c \
 	driver/gl/cogl-pipeline-vertend-glsl-private.h \
-	driver/gl/cogl-pipeline-vertend-fixed.c \
-	driver/gl/cogl-pipeline-vertend-fixed-private.h \
-	driver/gl/cogl-pipeline-progend-fixed.c \
-	driver/gl/cogl-pipeline-progend-fixed-private.h \
 	driver/gl/cogl-pipeline-progend-glsl.c \
 	driver/gl/cogl-pipeline-progend-glsl-private.h \
 	$(NULL)
