@@ -4890,8 +4890,10 @@ meta_window_update_monitor (MetaWindow *window)
           window->screen->active_workspace != window->workspace)
         meta_window_change_workspace (window, window->screen->active_workspace);
 
-      if (old)
+      if (old) {
+        meta_screen_queue_check_fullscreen (window->screen);
         g_signal_emit_by_name (window->screen, "window-left-monitor", old->number, window);
+      }
       g_signal_emit_by_name (window->screen, "window-entered-monitor", window->monitor->number, window);
 
       g_signal_emit_by_name (window->screen, "window-monitor-changed", window, window->monitor->number);
