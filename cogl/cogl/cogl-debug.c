@@ -79,7 +79,6 @@ static const GDebugKey cogl_behavioural_debug_keys[] = {
   { "disable-atlas", COGL_DEBUG_DISABLE_ATLAS },
   { "disable-shared-atlas", COGL_DEBUG_DISABLE_SHARED_ATLAS },
   { "disable-texturing", COGL_DEBUG_DISABLE_TEXTURING},
-  { "disable-arbfp", COGL_DEBUG_DISABLE_ARBFP},
   { "disable-glsl", COGL_DEBUG_DISABLE_GLSL},
   { "disable-blending", COGL_DEBUG_DISABLE_BLENDING},
   { "disable-npot-textures", COGL_DEBUG_DISABLE_NPOT_TEXTURES},

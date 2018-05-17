@@ -148,31 +148,6 @@ COGL_EXT_FUNCTION (void, glBlitFramebuffer,
                     GLenum                filter))
 COGL_EXT_END ()
 
-/* ARB_fragment_program */
-COGL_EXT_BEGIN (arbfp, 255, 255,
-                0, /* not in either GLES */
-                "ARB\0",
-                "fragment_program\0")
-COGL_EXT_FUNCTION (void, glGenPrograms,
-                   (GLsizei               n,
-                    GLuint               *programs))
-COGL_EXT_FUNCTION (void, glDeletePrograms,
-                   (GLsizei               n,
-                    GLuint               *programs))
-COGL_EXT_FUNCTION (void, glBindProgram,
-                   (GLenum                target,
-                    GLuint                program))
-COGL_EXT_FUNCTION (void, glProgramString,
-                   (GLenum                target,
-                    GLenum                format,
-                    GLsizei               len,
-                    const void           *program))
-COGL_EXT_FUNCTION (void, glProgramLocalParameter4fv,
-                   (GLenum                target,
-                    GLuint                index,
-                    GLfloat              *params))
-COGL_EXT_END ()
-
 COGL_EXT_BEGIN (EGL_image, 255, 255,
                 0, /* not in either GLES */
                 "OES\0",

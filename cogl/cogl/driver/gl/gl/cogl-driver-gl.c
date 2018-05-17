@@ -518,12 +518,6 @@ _cogl_driver_update_features (CoglContext *ctx,
     COGL_FLAGS_SET (private_features,
                     COGL_PRIVATE_FEATURE_BLEND_CONSTANT, TRUE);
 
-  if (ctx->glGenPrograms)
-    {
-      flags |= COGL_FEATURE_SHADERS_ARBFP;
-      COGL_FLAGS_SET (ctx->features, COGL_FEATURE_ID_ARBFP, TRUE);
-    }
-
   if (ctx->glCreateProgram)
     {
       flags |= COGL_FEATURE_SHADERS_GLSL;

@@ -88,7 +88,7 @@ printf $TITLE_FORMAT "Test"
 
 if test $HAVE_GL -eq 1; then
   GL_FORMAT=" %6s %8s %7s %6s %6s"
-  printf "$GL_FORMAT" GL+ARBFP" "GL+GLSL" "GL-NPT" "GL3"
+  printf "$GL_FORMAT" "GL+GLSL" "GL-NPT" "GL3"
 fi
 if test $HAVE_GLES2 -eq 1; then
   GLES2_FORMAT=" %6s %7s"
@@ -136,7 +136,6 @@ do
   printf $TITLE_FORMAT "$test:"
   if test $HAVE_GL -eq 1; then
     printf "$GL_FORMAT" \
-      "`get_status $gl_arbfp_result`" \
       "`get_status $gl_glsl_result`" \
       "`get_status $gl_npot_result`" \
       "`get_status $gl3_result`"

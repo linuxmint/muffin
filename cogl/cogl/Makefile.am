@@ -171,8 +171,6 @@ cogl_driver_sources += \
 	driver/gl/cogl-pipeline-opengl-private.h \
 	driver/gl/cogl-pipeline-fragend-glsl.c \
 	driver/gl/cogl-pipeline-fragend-glsl-private.h \
-	driver/gl/gl/cogl-pipeline-fragend-arbfp.c \
-	driver/gl/gl/cogl-pipeline-fragend-arbfp-private.h \
 	driver/gl/cogl-pipeline-vertend-glsl.c \
 	driver/gl/cogl-pipeline-vertend-glsl-private.h \
 	driver/gl/cogl-pipeline-progend-glsl.c \

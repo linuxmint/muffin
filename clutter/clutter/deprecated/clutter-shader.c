@@ -70,8 +70,6 @@ struct _ClutterShaderPrivate
 {
   guint       compiled         : 1; /* Shader is bound to the GL context */
   guint       is_enabled       : 1;
-  guint       vertex_is_glsl   : 1;
-  guint       fragment_is_glsl : 1;
 
   gchar      *vertex_source;        /* GLSL source for vertex shader */
   gchar      *fragment_source;      /* GLSL source for fragment shader */
@@ -108,10 +106,10 @@ clutter_shader_release_internal (ClutterShader *shader)
 
   g_assert (priv->program != COGL_INVALID_HANDLE);
 
-  if (priv->vertex_is_glsl && priv->vertex_shader != COGL_INVALID_HANDLE)
+  if (priv->vertex_shader != COGL_INVALID_HANDLE)
     cogl_handle_unref (priv->vertex_shader);
 
-  if (priv->fragment_is_glsl && priv->fragment_shader != COGL_INVALID_HANDLE)
+  if (priv->fragment_shader != COGL_INVALID_HANDLE)
     cogl_handle_unref (priv->fragment_shader);
 
   if (priv->program != COGL_INVALID_HANDLE)
@@ -350,7 +348,6 @@ clutter_shader_set_source (ClutterShader     *shader,
                            gssize             length)
 {
   ClutterShaderPrivate *priv = shader->priv;
-  gboolean is_glsl = FALSE;
 
   if (length < 0)
     length = strlen (data);
@@ -363,12 +360,9 @@ clutter_shader_set_source (ClutterShader     *shader,
   if (clutter_shader_is_compiled (shader))
     clutter_shader_release (shader);
 
-  is_glsl = !g_str_has_prefix (data, "!!ARBfp");
-
   CLUTTER_NOTE (SHADER,
-                "setting %s shader (GLSL:%s, len:%" G_GSSIZE_FORMAT ")",
+                "setting %s shader (len:%" G_GSSIZE_FORMAT ")",
                 shader_type == CLUTTER_VERTEX_SHADER ? "vertex" : "fragment",
-                is_glsl ? "yes" : "no",
                 length);
 
   switch (shader_type)
@@ -377,7 +371,6 @@ clutter_shader_set_source (ClutterShader     *shader,
       free (priv->fragment_source);
 
       priv->fragment_source = g_strndup (data, length);
-      priv->fragment_is_glsl = is_glsl;
       g_object_notify_by_pspec (G_OBJECT (shader), obj_props[PROP_FRAGMENT_SOURCE]);
       break;
 
@@ -385,7 +378,6 @@ clutter_shader_set_source (ClutterShader     *shader,
       free (priv->vertex_source);
 
       priv->vertex_source = g_strndup (data, length);
-      priv->vertex_is_glsl = is_glsl;
       g_object_notify_by_pspec (G_OBJECT (shader), obj_props[PROP_VERTEX_SOURCE]);
       break;
     }
@@ -538,7 +530,7 @@ bind_glsl_shader (ClutterShader  *self,
 
   priv->program = cogl_create_program ();
 
-  if (priv->vertex_is_glsl && priv->vertex_source != COGL_INVALID_HANDLE)
+  if (priv->vertex_source != COGL_INVALID_HANDLE)
     {
       res = clutter_shader_glsl_bind (self,
                                       CLUTTER_VERTEX_SHADER,
@@ -551,7 +543,7 @@ bind_glsl_shader (ClutterShader  *self,
         }
     }
 
-  if (priv->fragment_is_glsl && priv->fragment_source != COGL_INVALID_HANDLE)
+  if (priv->fragment_source != COGL_INVALID_HANDLE)
     {
       res = clutter_shader_glsl_bind (self,
                                       CLUTTER_FRAGMENT_SHADER,
@@ -596,18 +588,6 @@ clutter_shader_compile (ClutterShader  *shader,
 
   if (priv->compiled)
     return priv->compiled;
-
-  if ((priv->vertex_source != COGL_INVALID_HANDLE && !priv->vertex_is_glsl) ||
-      (priv->fragment_source != COGL_INVALID_HANDLE && !priv->fragment_is_glsl))
-    {
-      /* XXX: Could remove this check, since we only advertise support for GLSL
-       * shaders anyways. */
-      g_set_error (error, CLUTTER_SHADER_ERROR,
-                   CLUTTER_SHADER_ERROR_NO_ASM,
-                   "ASM shaders not supported");
-      priv->compiled = FALSE;
-      return priv->compiled;
-    }
 
   if (!clutter_feature_available (CLUTTER_FEATURE_SHADERS_GLSL))
     {

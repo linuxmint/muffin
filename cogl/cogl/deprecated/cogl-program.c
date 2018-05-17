@@ -112,10 +112,7 @@ cogl_program_attach_shader (CoglHandle program_handle,
   program = program_handle;
   shader = shader_handle;
 
-  /* Only one shader is allowed if the type is ARBfp */
-  if (shader->language == COGL_SHADER_LANGUAGE_ARBFP)
-    _COGL_RETURN_IF_FAIL (program->attached_shaders == NULL);
-  else if (shader->language == COGL_SHADER_LANGUAGE_GLSL)
+  if (shader->language == COGL_SHADER_LANGUAGE_GLSL)
     _COGL_RETURN_IF_FAIL (_cogl_program_get_language (program) ==
                       COGL_SHADER_LANGUAGE_GLSL);
 
@@ -346,59 +343,6 @@ cogl_program_uniform_matrix (int uniform_no,
   _cogl_boxed_value_set_matrix (&uniform->value, size, count, transpose, value);
 }
 
-/* ARBfp local parameters can be referenced like:
- *
- * "program.local[5]"
- *                ^14char offset (after whitespace is stripped)
- */
-static int
-get_local_param_index (const char *uniform_name)
-{
-  char *input = g_strdup (uniform_name);
-  int i;
-  char *p = input;
-  char *endptr;
-  int _index;
-
-  for (i = 0; input[i] != '\0'; i++)
-    if (input[i] != '_' && input[i] != '\t')
-      *p++ = input[i];
-  input[i] = '\0';
-
-  _COGL_RETURN_VAL_IF_FAIL (strncmp ("program.local[", input, 14) == 0, -1);
-
-  _index = g_ascii_strtoull (input + 14, &endptr, 10);
-  _COGL_RETURN_VAL_IF_FAIL (endptr != input + 14, -1);
-  _COGL_RETURN_VAL_IF_FAIL (*endptr == ']', -1);
-
-  _COGL_RETURN_VAL_IF_FAIL (_index >= 0, -1);
-
-  free (input);
-
-  return _index;
-}
-
-#ifdef HAVE_COGL_GL
-
-static void
-_cogl_program_flush_uniform_arbfp (GLint location,
-                                   CoglBoxedValue *value)
-{
-  _COGL_GET_CONTEXT (ctx, NO_RETVAL);
-
-  if (value->type != COGL_BOXED_NONE)
-    {
-      _COGL_RETURN_IF_FAIL (value->type == COGL_BOXED_FLOAT);
-      _COGL_RETURN_IF_FAIL (value->size == 4);
-      _COGL_RETURN_IF_FAIL (value->count == 1);
-
-      GE( ctx, glProgramLocalParameter4fv (GL_FRAGMENT_PROGRAM_ARB, location,
-                                           value->v.float_value) );
-    }
-}
-
-#endif /* HAVE_COGL_GL */
-
 void
 _cogl_program_flush_uniforms (CoglProgram *program,
                               GLuint gl_program,
@@ -422,9 +366,6 @@ _cogl_program_flush_uniforms (CoglProgram *program,
                   COGL_SHADER_LANGUAGE_GLSL)
                 uniform->location =
                   ctx->glGetUniformLocation (gl_program, uniform->name);
-              else
-                uniform->location =
-                  get_local_param_index (uniform->name);
 
               uniform->location_valid = TRUE;
             }
@@ -439,13 +380,6 @@ _cogl_program_flush_uniforms (CoglProgram *program,
                   _cogl_boxed_value_set_uniform (ctx,
                                                  uniform->location,
                                                  &uniform->value);
-                  break;
-
-                case COGL_SHADER_LANGUAGE_ARBFP:
-#ifdef HAVE_COGL_GL
-                  _cogl_program_flush_uniform_arbfp (uniform->location,
-                                                     &uniform->value);
-#endif
                   break;
                 }
             }

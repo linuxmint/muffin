@@ -130,11 +130,6 @@ OPT (DISABLE_TEXTURING,
      "disable-texturing",
      N_("Disable texturing"),
      N_("Disable texturing any primitives"))
-OPT (DISABLE_ARBFP,
-     N_("Root Cause"),
-     "disable-arbfp",
-     N_("Disable arbfp"),
-     N_("Disable use of ARB fragment programs"))
 OPT (DISABLE_GLSL,
      N_("Root Cause"),
      "disable-glsl",
@@ -160,7 +155,7 @@ OPT (SHOW_SOURCE,
      N_("Cogl Tracing"),
      "show-source",
      N_("Show source"),
-     N_("Show generated ARBfp/GLSL source code"))
+     N_("Show generated GLSL source code"))
 OPT (OPENGL,
      N_("Cogl Tracing"),
      "opengl",
@@ -175,7 +170,7 @@ OPT (DISABLE_BLENDING,
      N_("Root Cause"),
      "disable-program-caches",
      N_("Disable program caches"),
-     N_("Disable fallback caches for arbfp and glsl programs"))
+     N_("Disable fallback caches for glsl programs"))
 OPT (DISABLE_FAST_READ_PIXEL,
      N_("Root Cause"),
      "disable-fast-read-pixel",

@@ -62,14 +62,6 @@ _cogl_shader_free (CoglShader *shader)
      released! Do that separately before this! */
   _COGL_GET_CONTEXT (ctx, NO_RETVAL);
 
-#ifdef HAVE_COGL_GL
-  if (shader->language == COGL_SHADER_LANGUAGE_ARBFP)
-    {
-      if (shader->gl_handle)
-        GE (ctx, glDeletePrograms (1, &shader->gl_handle));
-    }
-  else
-#endif
     if (shader->gl_handle)
       GE (ctx, glDeleteShader (shader->gl_handle));
 
@@ -108,18 +100,8 @@ delete_shader (CoglShader *shader)
 {
   _COGL_GET_CONTEXT (ctx, NO_RETVAL);
 
-#ifdef HAVE_COGL_GL
-  if (shader->language == COGL_SHADER_LANGUAGE_ARBFP)
-    {
-      if (shader->gl_handle)
-        GE (ctx, glDeletePrograms (1, &shader->gl_handle));
-    }
-  else
-#endif
-    {
-      if (shader->gl_handle)
-        GE (ctx, glDeleteShader (shader->gl_handle));
-    }
+  if (shader->gl_handle)
+    GE (ctx, glDeleteShader (shader->gl_handle));
 
   shader->gl_handle = 0;
 
@@ -143,13 +125,7 @@ cogl_shader_source (CoglHandle   handle,
     return;
 
   shader = handle;
-
-#ifdef HAVE_COGL_GL
-  if (strncmp (source, "!!ARBfp1.0", 10) == 0)
-    language = COGL_SHADER_LANGUAGE_ARBFP;
-  else
-#endif
-    language = COGL_SHADER_LANGUAGE_GLSL;
+  language = COGL_SHADER_LANGUAGE_GLSL;
 
   /* Delete the old object if the language is changing... */
   if (G_UNLIKELY (language != shader->language) &&
@@ -164,19 +140,6 @@ cogl_shader_source (CoglHandle   handle,
 void
 cogl_shader_compile (CoglHandle handle)
 {
-  CoglShader *shader;
-
-  _COGL_GET_CONTEXT (ctx, NO_RETVAL);
-
-  if (!cogl_is_shader (handle))
-    return;
-
-#ifdef HAVE_COGL_GL
-  shader = handle;
-  if (shader->language == COGL_SHADER_LANGUAGE_ARBFP)
-    _cogl_shader_compile_real (handle, NULL);
-#endif
-
   /* XXX: For GLSL we don't actually compile anything until the shader
    * gets used so we have an opportunity to add some boilerplate to
    * the shader.
@@ -192,110 +155,69 @@ _cogl_shader_compile_real (CoglHandle handle,
                            CoglPipeline *pipeline)
 {
   CoglShader *shader = handle;
+  GLenum gl_type;
+  GLint status;
 
   _COGL_GET_CONTEXT (ctx, NO_RETVAL);
 
-#ifdef HAVE_COGL_GL
-  if (shader->language == COGL_SHADER_LANGUAGE_ARBFP)
+  if (shader->gl_handle)
     {
-#ifdef COGL_GL_DEBUG
-      GLenum gl_error;
-#endif
+      CoglPipeline *prev = shader->compilation_pipeline;
 
-      if (shader->gl_handle)
+      /* XXX: currently the only things that will affect the
+       * boilerplate for user shaders, apart from driver features,
+       * are the pipeline layer-indices and texture-unit-indices
+       */
+      if (pipeline == prev ||
+          _cogl_pipeline_layer_and_unit_numbers_equal (prev, pipeline))
         return;
-
-      GE (ctx, glGenPrograms (1, &shader->gl_handle));
-
-      GE (ctx, glBindProgram (GL_FRAGMENT_PROGRAM_ARB, shader->gl_handle));
-
-      if (G_UNLIKELY (COGL_DEBUG_ENABLED (COGL_DEBUG_SHOW_SOURCE)))
-        g_message ("user ARBfp program:\n%s", shader->source);
-
-#ifdef COGL_GL_DEBUG
-      _cogl_gl_util_clear_gl_errors (ctx);
-#endif
-      ctx->glProgramString (GL_FRAGMENT_PROGRAM_ARB,
-                            GL_PROGRAM_FORMAT_ASCII_ARB,
-                            strlen (shader->source),
-                            shader->source);
-#ifdef COGL_GL_DEBUG
-      gl_error = _cogl_gl_util_get_error (ctx);
-      if (gl_error != GL_NO_ERROR)
-        {
-          g_warning ("%s: GL error (%d): Failed to compile ARBfp:\n%s\n%s",
-                     G_STRLOC,
-                     gl_error,
-                     shader->source,
-                     ctx->glGetString (GL_PROGRAM_ERROR_STRING_ARB));
-        }
-#endif
     }
-  else
-#endif
+
+  if (shader->gl_handle)
+    delete_shader (shader);
+
+  switch (shader->type)
     {
-      GLenum gl_type;
-      GLint status;
+    case COGL_SHADER_TYPE_VERTEX:
+      gl_type = GL_VERTEX_SHADER;
+      break;
+    case COGL_SHADER_TYPE_FRAGMENT:
+      gl_type = GL_FRAGMENT_SHADER;
+      break;
+    default:
+      g_assert_not_reached ();
+      break;
+    }
 
-      if (shader->gl_handle)
-        {
-          CoglPipeline *prev = shader->compilation_pipeline;
+  shader->gl_handle = ctx->glCreateShader (gl_type);
 
-          /* XXX: currently the only things that will affect the
-           * boilerplate for user shaders, apart from driver features,
-           * are the pipeline layer-indices and texture-unit-indices
-           */
-          if (pipeline == prev ||
-              _cogl_pipeline_layer_and_unit_numbers_equal (prev, pipeline))
-            return;
-        }
+  _cogl_glsl_shader_set_source_with_boilerplate (ctx,
+                                                 shader->gl_handle,
+                                                 gl_type,
+                                                 pipeline,
+                                                 1,
+                                                 (const char **)
+                                                  &shader->source,
+                                                 NULL);
 
-      if (shader->gl_handle)
-        delete_shader (shader);
+  GE (ctx, glCompileShader (shader->gl_handle));
 
-      switch (shader->type)
-        {
-        case COGL_SHADER_TYPE_VERTEX:
-          gl_type = GL_VERTEX_SHADER;
-          break;
-        case COGL_SHADER_TYPE_FRAGMENT:
-          gl_type = GL_FRAGMENT_SHADER;
-          break;
-        default:
-          g_assert_not_reached ();
-          break;
-        }
+  shader->compilation_pipeline = cogl_object_ref (pipeline);
 
-      shader->gl_handle = ctx->glCreateShader (gl_type);
+  GE (ctx, glGetShaderiv (shader->gl_handle, GL_COMPILE_STATUS, &status));
+  if (!status)
+    {
+      char buffer[512];
+      int len = 0;
 
-      _cogl_glsl_shader_set_source_with_boilerplate (ctx,
-                                                     shader->gl_handle,
-                                                     gl_type,
-                                                     pipeline,
-                                                     1,
-                                                     (const char **)
-                                                      &shader->source,
-                                                     NULL);
+      ctx->glGetShaderInfoLog (shader->gl_handle, 511, &len, buffer);
+      buffer[len] = '\0';
 
-      GE (ctx, glCompileShader (shader->gl_handle));
-
-      shader->compilation_pipeline = cogl_object_ref (pipeline);
-
-      GE (ctx, glGetShaderiv (shader->gl_handle, GL_COMPILE_STATUS, &status));
-      if (!status)
-        {
-          char buffer[512];
-          int len = 0;
-
-          ctx->glGetShaderInfoLog (shader->gl_handle, 511, &len, buffer);
-          buffer[len] = '\0';
-
-          g_warning ("Failed to compile GLSL program:\n"
-                     "src:\n%s\n"
-                     "error:\n%s\n",
-                     shader->source,
-                     buffer);
-        }
+      g_warning ("Failed to compile GLSL program:\n"
+                 "src:\n%s\n"
+                 "error:\n%s\n",
+                 shader->source,
+                 buffer);
     }
 }
 

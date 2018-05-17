@@ -63,10 +63,6 @@
 #include <string.h>
 #include <stdlib.h>
 
-#ifdef HAVE_COGL_GL
-#include "cogl-pipeline-fragend-arbfp-private.h"
-#endif
-
 /* These aren't defined in the GLES headers */
 #ifndef GL_POINT_SPRITE
 #define GL_POINT_SPRITE 0x8861
@@ -112,12 +108,6 @@ _cogl_init_feature_overrides (CoglContext *ctx)
 
   if (G_UNLIKELY (COGL_DEBUG_ENABLED (COGL_DEBUG_DISABLE_PBOS)))
     COGL_FLAGS_SET (ctx->private_features, COGL_PRIVATE_FEATURE_PBOS, FALSE);
-
-  if (G_UNLIKELY (COGL_DEBUG_ENABLED (COGL_DEBUG_DISABLE_ARBFP)))
-    {
-      ctx->feature_flags &= ~COGL_FEATURE_SHADERS_ARBFP;
-      COGL_FLAGS_SET (ctx->features, COGL_FEATURE_ID_ARBFP, FALSE);
-    }
 
   if (G_UNLIKELY (COGL_DEBUG_ENABLED (COGL_DEBUG_DISABLE_GLSL)))
     {

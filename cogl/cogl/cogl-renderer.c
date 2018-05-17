@@ -787,8 +787,7 @@ cogl_renderer_get_n_fragment_texture_units (CoglRenderer *renderer)
   _COGL_GET_CONTEXT (ctx, 0);
 
 #if defined (HAVE_COGL_GL) || defined (HAVE_COGL_GLES2)
-  if (cogl_has_feature (ctx, COGL_FEATURE_ID_GLSL) ||
-      cogl_has_feature (ctx, COGL_FEATURE_ID_ARBFP))
+  if (cogl_has_feature (ctx, COGL_FEATURE_ID_GLSL))
     GE (ctx, glGetIntegerv (GL_MAX_TEXTURE_IMAGE_UNITS, &n));
 #endif
 

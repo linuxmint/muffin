@@ -41,7 +41,6 @@ typedef struct _CoglShader CoglShader;
 typedef enum
 {
   COGL_SHADER_LANGUAGE_GLSL,
-  COGL_SHADER_LANGUAGE_ARBFP
 } CoglShaderLanguage;
 
 struct _CoglShader

@@ -49,21 +49,7 @@
 
 #include <glib.h>
 
-#ifdef HAVE_COGL_GL
-
-#define COGL_PIPELINE_PROGEND_GLSL        0
-#define COGL_PIPELINE_N_PROGENDS          1
-
-#define COGL_PIPELINE_VERTEND_GLSL  0
-#define COGL_PIPELINE_N_VERTENDS    1
-
-#define COGL_PIPELINE_FRAGEND_ARBFP 0
-#define COGL_PIPELINE_FRAGEND_GLSL  1
-#define COGL_PIPELINE_N_FRAGENDS    2
-
-#else /* HAVE_COGL_GL */
-
-#ifdef HAVE_COGL_GLES2
+#if defined(HAVE_COGL_GL) || defined(HAVE_COGL_GLES2)
 
 #define COGL_PIPELINE_PROGEND_GLSL 0
 #define COGL_PIPELINE_VERTEND_GLSL 0
@@ -73,13 +59,11 @@
 #define COGL_PIPELINE_N_VERTENDS    1
 #define COGL_PIPELINE_N_FRAGENDS    1
 
-#else /* HAVE_COGL_GLES2 */
+#else /* defined(HAVE_COGL_GL) || defined(HAVE_COGL_GLES2) */
 
 #error No drivers defined
 
-#endif /* HAVE_COGL_GLES2 */
-
-#endif /* HAVE_COGL_GL */
+#endif /* defined(HAVE_COGL_GL) || defined(HAVE_COGL_GLES2) */
 
 #define COGL_PIPELINE_PROGEND_DEFAULT    0
 #define COGL_PIPELINE_PROGEND_UNDEFINED  3
@@ -553,7 +537,6 @@ typedef struct
 typedef enum
 {
   COGL_PIPELINE_PROGRAM_TYPE_GLSL = 1,
-  COGL_PIPELINE_PROGRAM_TYPE_ARBFP,
 } CoglPipelineProgramType;
 
 extern const CoglPipelineFragend *
