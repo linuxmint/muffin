@@ -535,9 +535,6 @@ try_creating_renderbuffers (CoglContext *ctx,
 
       /* WebGL adds a GL_DEPTH_STENCIL_ATTACHMENT and requires that we
        * use the GL_DEPTH_STENCIL format. */
-#ifdef HAVE_COGL_WEBGL
-      format = GL_DEPTH_STENCIL;
-#else
       /* Although GL_OES_packed_depth_stencil is mostly equivalent to
        * GL_EXT_packed_depth_stencil, one notable difference is that
        * GL_OES_packed_depth_stencil doesn't allow GL_DEPTH_STENCIL to
@@ -554,7 +551,6 @@ try_creating_renderbuffers (CoglContext *ctx,
             NULL);
           format = GL_DEPTH24_STENCIL8;
         }
-#endif
 
       /* Create a renderbuffer for depth and stenciling */
       GE (ctx, glGenRenderbuffers (1, &gl_depth_stencil_handle));
@@ -570,12 +566,6 @@ try_creating_renderbuffers (CoglContext *ctx,
       GE (ctx, glBindRenderbuffer (GL_RENDERBUFFER, 0));
 
 
-#ifdef HAVE_COGL_WEBGL
-      GE (ctx, glFramebufferRenderbuffer (GL_FRAMEBUFFER,
-                                          GL_DEPTH_STENCIL_ATTACHMENT,
-                                          GL_RENDERBUFFER,
-                                          gl_depth_stencil_handle));
-#else
       GE (ctx, glFramebufferRenderbuffer (GL_FRAMEBUFFER,
                                           GL_STENCIL_ATTACHMENT,
                                           GL_RENDERBUFFER,
@@ -584,7 +574,6 @@ try_creating_renderbuffers (CoglContext *ctx,
                                           GL_DEPTH_ATTACHMENT,
                                           GL_RENDERBUFFER,
                                           gl_depth_stencil_handle));
-#endif
       renderbuffers =
         g_list_prepend (renderbuffers,
                         GUINT_TO_POINTER (gl_depth_stencil_handle));
@@ -872,12 +861,10 @@ _cogl_offscreen_gl_allocate (CoglOffscreen *offscreen,
       (
        /* NB: WebGL introduces a DEPTH_STENCIL_ATTACHMENT and doesn't
         * need an extension to handle _FLAG_DEPTH_STENCIL */
-#ifndef HAVE_COGL_WEBGL
        (_cogl_has_private_feature
         (ctx, COGL_PRIVATE_FEATURE_EXT_PACKED_DEPTH_STENCIL) ||
         _cogl_has_private_feature
         (ctx, COGL_PRIVATE_FEATURE_OES_PACKED_DEPTH_STENCIL)) &&
-#endif
        try_creating_fbo (ctx,
                          offscreen->texture,
                          offscreen->texture_level,

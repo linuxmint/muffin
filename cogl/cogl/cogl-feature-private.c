@@ -64,9 +64,6 @@ _cogl_feature_check (CoglRenderer *renderer,
       break;
     case COGL_DRIVER_ANY:
       g_assert_not_reached ();
-    case COGL_DRIVER_WEBGL:
-      /* FIXME: WebGL should probably have its own COGL_EXT_IN_WEBGL flag */
-      break;
     case COGL_DRIVER_NOP:
     case COGL_DRIVER_GL:
     case COGL_DRIVER_GL3:

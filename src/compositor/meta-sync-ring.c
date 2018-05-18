@@ -230,7 +230,6 @@ check_gl_extensions (void)
     case  COGL_DRIVER_ANY:
     case  COGL_DRIVER_NOP:
     case  COGL_DRIVER_GLES2:
-    case  COGL_DRIVER_WEBGL:
       break;
     default:
       break;
