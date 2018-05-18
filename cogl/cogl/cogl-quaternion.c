@@ -39,9 +39,7 @@
  * 3D Maths Primer for Graphics and Game Development ISBN-10: 1556229119
  */
 
-#ifdef HAVE_CONFIG_H
 #include "cogl-config.h"
-#endif
 
 #include <cogl-util.h>
 #include <cogl-quaternion.h>

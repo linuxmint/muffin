@@ -31,9 +31,7 @@
  *  Neil Roberts   <neil@linux.intel.com>
  */
 
-#ifdef HAVE_CONFIG_H
 #include "cogl-config.h"
-#endif
 
 #include "cogl-private.h"
 #include "cogl-util.h"
