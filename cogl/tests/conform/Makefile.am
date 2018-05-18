@@ -134,9 +134,8 @@ test_conformance_LDADD = \
 test_conformance_LDADD += $(top_builddir)/cogl-path/libmuffin-cogl-path-$(MUFFIN_PLUGIN_API_VERSION).la
 test_conformance_LDFLAGS = -export-dynamic
 
-# XXX: uncomment when tests get fixed
-#test: wrappers
-#	@$(top_srcdir)/tests/run-tests.sh $(abs_builddir)/../config.env $(abs_builddir)/test-conformance$(EXEEXT)
+test: wrappers
+	@$(top_srcdir)/tests/run-tests.sh $(abs_builddir)/../config.env $(abs_builddir)/test-conformance$(EXEEXT)
 
 # XXX: we could prevent the conformance test suite from running
 #      by simply defining this variable conditionally

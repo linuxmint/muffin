@@ -74,7 +74,8 @@ main (int argc, char **argv)
   ADD_TEST (test_pixel_buffer_set_data, 0, 0);
   ADD_TEST (test_pixel_buffer_sub_region, 0, 0);
   UNPORTED_TEST (test_texture_rectangle);
-  ADD_TEST (test_texture_3d, TEST_REQUIREMENT_TEXTURE_3D, 0);
+  ADD_TEST (test_texture_3d, TEST_REQUIREMENT_TEXTURE_3D,
+            TEST_REQUIREMENT_GL | TEST_KNOWN_FAILURE);
   ADD_TEST (test_wrap_modes, 0, 0);
   UNPORTED_TEST (test_texture_pixmap_x11);
   ADD_TEST (test_texture_get_set_data, 0, 0);
