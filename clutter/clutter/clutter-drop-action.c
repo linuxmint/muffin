@@ -58,9 +58,7 @@
  * #ClutterDropAction is available since Clutter 1.8
  */
 
-#ifdef HAVE_CONFIG_H
 #include "clutter-build-config.h"
-#endif
 
 #include "clutter-drop-action.h"
 

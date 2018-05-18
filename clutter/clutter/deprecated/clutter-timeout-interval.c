@@ -21,9 +21,7 @@
  * License along with this library. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifdef HAVE_CONFIG_H
 #include "clutter-build-config.h"
-#endif
 
 #define CLUTTER_DISABLE_DEPRECATION_WARNINGS
 

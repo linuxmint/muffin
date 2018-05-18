@@ -30,9 +30,7 @@
  * across the whole API.
  */
 
-#ifdef HAVE_CONFIG_H
 #include "clutter-build-config.h"
-#endif
 
 #include "clutter-types.h"
 #include "clutter-private.h"

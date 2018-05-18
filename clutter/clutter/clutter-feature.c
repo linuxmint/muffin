@@ -37,9 +37,7 @@
  * See also cogl_get_features() and #CoglFeatureFlags
  */
 
-#ifdef HAVE_CONFIG_H
 #include "clutter-build-config.h"
-#endif
 
 #include <stdlib.h>
 #include <string.h>

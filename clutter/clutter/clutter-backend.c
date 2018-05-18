@@ -38,9 +38,7 @@
  * #ClutterBackend is available since Clutter 0.4
  */
 
-#ifdef HAVE_CONFIG_H
 #include "clutter-build-config.h"
-#endif
 
 #define CLUTTER_ENABLE_EXPERIMENTAL_API
 

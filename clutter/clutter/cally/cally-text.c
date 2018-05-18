@@ -39,9 +39,7 @@
  *
  */
 
-#ifdef HAVE_CONFIG_H
 #include "clutter-build-config.h"
-#endif
 
 #include "cally-text.h"
 #include "cally-actor-private.h"

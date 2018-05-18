@@ -52,9 +52,7 @@
  * #ClutterFlowLayout is available since Clutter 1.2
  */
 
-#ifdef HAVE_CONFIG_H
 #include "clutter-build-config.h"
-#endif
 
 #include <math.h>
 

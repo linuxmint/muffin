@@ -35,9 +35,7 @@
  *   #ClutterState instead.
  */
 
-#ifdef HAVE_CONFIG_H
 #include "clutter-build-config.h"
-#endif
 
 #include <math.h>
 

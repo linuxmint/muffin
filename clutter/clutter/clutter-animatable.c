@@ -45,9 +45,7 @@
  * #ClutterAnimatable is available since Clutter 1.0
  */
 
-#ifdef HAVE_CONFIG_H
 #include "clutter-build-config.h"
-#endif
 
 #define CLUTTER_DISABLE_DEPRECATION_WARNINGS
 

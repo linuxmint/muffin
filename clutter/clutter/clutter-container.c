@@ -26,9 +26,7 @@
  * Author: Emmanuele Bassi <ebassi@openedhand.com>
  */
 
-#ifdef HAVE_CONFIG_H
 #include "clutter-build-config.h"
-#endif
 
 #include <stdarg.h>
 #include <glib-object.h>

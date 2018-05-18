@@ -178,9 +178,7 @@
  * ]|
  */
 
-#ifdef HAVE_CONFIG_H
 #include "clutter-build-config.h"
-#endif
 
 #include <gobject/gvaluecollector.h>
 #include <string.h>

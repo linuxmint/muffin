@@ -38,9 +38,7 @@
  * available any accessible object.
  */
 
-#ifdef HAVE_CONFIG_H
 #include "clutter-build-config.h"
-#endif
 
 #include <stdlib.h>
 #include <string.h>
