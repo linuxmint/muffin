@@ -478,7 +478,7 @@ _cogl_texture_driver_size_supported (CoglContext *ctx,
 
   if (gl_target == GL_TEXTURE_2D)
     proxy_target = GL_PROXY_TEXTURE_2D;
-#if HAVE_COGL_GL
+#ifdef HAVE_COGL_GL
   else if (gl_target == GL_TEXTURE_RECTANGLE_ARB)
     proxy_target = GL_PROXY_TEXTURE_RECTANGLE_ARB;
 #endif
