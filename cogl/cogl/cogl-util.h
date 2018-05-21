@@ -40,9 +40,7 @@
 #include <stdio.h>
 
 /* Double check that config.h has been included */
-#if (!defined (PACKAGE_NAME) && \
-     !defined (_COGL_IN_TEST_BITMASK) && \
-     !defined(COGL_ENABLE_MUFFIN_API))
+#ifndef COGL_CONFIG_H_INCLUDED
 #error "cogl-config.h must be included before including cogl-util.h"
 #endif
 

@@ -673,6 +673,8 @@ AC_SUBST(COGL_EXTRA_LDFLAGS)
 MAINTAINER_CFLAGS=
 AC_SUBST(MAINTAINER_CFLAGS)
 
+AC_DEFINE([COGL_CONFIG_H_INCLUDED], 1, [cogl-config.h was included])
+
 AC_OUTPUT(
 Makefile
 test-fixtures/Makefile
