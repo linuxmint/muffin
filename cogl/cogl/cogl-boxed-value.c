@@ -34,7 +34,7 @@
 
 #include "cogl-boxed-value.h"
 #include "cogl-context-private.h"
-#include "cogl-util-gl-private.h"
+#include "driver/gl/cogl-util-gl-private.h"
 
 CoglBool
 _cogl_boxed_value_equal (const CoglBoxedValue *bva,

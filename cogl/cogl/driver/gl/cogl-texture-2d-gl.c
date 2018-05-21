@@ -39,12 +39,12 @@
 #include "cogl-private.h"
 #include "cogl-texture-private.h"
 #include "cogl-texture-2d-gl.h"
-#include "cogl-texture-2d-gl-private.h"
 #include "cogl-texture-2d-private.h"
-#include "cogl-texture-gl-private.h"
-#include "cogl-pipeline-opengl-private.h"
 #include "cogl-error-private.h"
-#include "cogl-util-gl-private.h"
+#include "driver/gl/cogl-texture-2d-gl-private.h"
+#include "driver/gl/cogl-texture-gl-private.h"
+#include "driver/gl/cogl-pipeline-opengl-private.h"
+#include "driver/gl/cogl-util-gl-private.h"
 
 #if defined (COGL_HAS_EGL_SUPPORT)
 

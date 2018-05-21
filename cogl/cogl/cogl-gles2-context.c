@@ -43,15 +43,15 @@
 #include "cogl-context-private.h"
 #include "cogl-display-private.h"
 #include "cogl-framebuffer-private.h"
-#include "cogl-framebuffer-gl-private.h"
 #include "cogl-onscreen-template-private.h"
 #include "cogl-renderer-private.h"
 #include "cogl-swap-chain-private.h"
 #include "cogl-texture-2d-gl.h"
 #include "cogl-texture-2d-private.h"
-#include "cogl-pipeline-opengl-private.h"
 #include "cogl-error-private.h"
 #include "cogl-gtype-private.h"
+#include "driver/gl/cogl-framebuffer-gl-private.h"
+#include "driver/gl/cogl-pipeline-opengl-private.h"
 
 static void _cogl_gles2_context_free (CoglGLES2Context *gles2_context);
 

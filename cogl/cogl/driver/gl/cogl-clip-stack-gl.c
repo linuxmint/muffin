@@ -35,11 +35,11 @@
 #include "cogl-config.h"
 
 #include "cogl-context-private.h"
-#include "cogl-util-gl-private.h"
 #include "cogl-primitives-private.h"
-#include "cogl-pipeline-opengl-private.h"
-#include "cogl-clip-stack-gl-private.h"
 #include "cogl-primitive-private.h"
+#include "driver/gl/cogl-util-gl-private.h"
+#include "driver/gl/cogl-pipeline-opengl-private.h"
+#include "driver/gl/cogl-clip-stack-gl-private.h"
 
 #ifndef GL_CLIP_PLANE0
 #define GL_CLIP_PLANE0 0x3000

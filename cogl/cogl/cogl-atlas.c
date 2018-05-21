@@ -38,11 +38,11 @@
 #include "cogl-texture-2d-private.h"
 #include "cogl-texture-2d-sliced.h"
 #include "cogl-texture-driver.h"
-#include "cogl-pipeline-opengl-private.h"
 #include "cogl-debug.h"
 #include "cogl-framebuffer-private.h"
 #include "cogl-blit.h"
 #include "cogl-private.h"
+#include "driver/gl/cogl-pipeline-opengl-private.h"
 
 #include <stdlib.h>
 

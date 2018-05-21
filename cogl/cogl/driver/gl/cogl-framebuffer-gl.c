@@ -31,13 +31,13 @@
 #include "cogl-config.h"
 
 #include "cogl-context-private.h"
-#include "cogl-util-gl-private.h"
 #include "cogl-framebuffer-private.h"
-#include "cogl-framebuffer-gl-private.h"
-#include "cogl-buffer-gl-private.h"
 #include "cogl-error-private.h"
-#include "cogl-texture-gl-private.h"
 #include "cogl-texture-private.h"
+#include "driver/gl/cogl-util-gl-private.h"
+#include "driver/gl/cogl-framebuffer-gl-private.h"
+#include "driver/gl/cogl-buffer-gl-private.h"
+#include "driver/gl/cogl-texture-gl-private.h"
 
 #include <glib.h>
 #include <string.h>

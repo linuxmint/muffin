@@ -35,9 +35,9 @@
 #include "cogl-config.h"
 
 #include "cogl-context-private.h"
-#include "cogl-util-gl-private.h"
 #include "cogl-glsl-shader-private.h"
 #include "cogl-glsl-shader-boilerplate.h"
+#include "driver/gl/cogl-util-gl-private.h"
 
 #include <string.h>
 

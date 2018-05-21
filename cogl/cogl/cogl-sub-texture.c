@@ -42,8 +42,8 @@
 #include "cogl-texture-driver.h"
 #include "cogl-texture-rectangle-private.h"
 #include "cogl-texture-2d.h"
-#include "cogl-texture-gl-private.h"
 #include "cogl-gtype-private.h"
+#include "driver/gl/cogl-texture-gl-private.h"
 
 #include <string.h>
 #include <math.h>

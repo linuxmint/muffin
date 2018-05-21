@@ -34,7 +34,6 @@
 
 #include "cogl-i18n-private.h"
 #include "cogl-util.h"
-#include "cogl-winsys-private.h"
 #include "cogl-feature-private.h"
 #include "cogl-context-private.h"
 #include "cogl-framebuffer.h"
@@ -46,18 +45,19 @@
 #include "cogl-private.h"
 #include "cogl-texture-2d-private.h"
 #include "cogl-texture-rectangle-private.h"
-#include "cogl-pipeline-opengl-private.h"
 #include "cogl-frame-info-private.h"
 #include "cogl-framebuffer-private.h"
 #include "cogl-onscreen-private.h"
 #include "cogl-swap-chain-private.h"
 #include "cogl-xlib-renderer.h"
 #include "cogl-util.h"
-#include "cogl-winsys-glx-private.h"
 #include "cogl-error-private.h"
 #include "cogl-poll-private.h"
 #include "cogl-version.h"
 #include "cogl-glx.h"
+#include "driver/gl/cogl-pipeline-opengl-private.h"
+#include "winsys/cogl-winsys-private.h"
+#include "winsys/cogl-winsys-glx-private.h"
 
 #include <stdlib.h>
 #include <sys/types.h>
@@ -142,7 +142,7 @@ typedef struct _CoglTexturePixmapGLX
 #define COGL_WINSYS_FEATURE_END()               \
   { NULL, 0 },                                  \
     };
-#include "cogl-winsys-glx-feature-functions.h"
+#include "winsys/cogl-winsys-glx-feature-functions.h"
 
 /* Define an array of features */
 #undef COGL_WINSYS_FEATURE_BEGIN
@@ -163,7 +163,7 @@ typedef struct _CoglTexturePixmapGLX
 
 static const CoglFeatureData winsys_feature_data[] =
   {
-#include "cogl-winsys-glx-feature-functions.h"
+#include "winsys/cogl-winsys-glx-feature-functions.h"
   };
 
 static CoglFuncPtr

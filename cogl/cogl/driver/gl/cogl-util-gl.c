@@ -35,7 +35,7 @@
 #include "cogl-types.h"
 #include "cogl-context-private.h"
 #include "cogl-error-private.h"
-#include "cogl-util-gl-private.h"
+#include "driver/gl/cogl-util-gl-private.h"
 
 #ifdef COGL_GL_DEBUG
 /* GL error to string conversion */

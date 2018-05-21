@@ -32,12 +32,9 @@
 
 #include "cogl-object.h"
 #include "cogl-private.h"
-#include "cogl-winsys-private.h"
-#include "winsys/cogl-winsys-stub-private.h"
 #include "cogl-profile.h"
 #include "cogl-util.h"
 #include "cogl-context-private.h"
-#include "cogl-util-gl-private.h"
 #include "cogl-display-private.h"
 #include "cogl-renderer-private.h"
 #include "cogl-journal-private.h"
@@ -46,7 +43,6 @@
 #include "cogl-texture-3d-private.h"
 #include "cogl-texture-rectangle-private.h"
 #include "cogl-pipeline-private.h"
-#include "cogl-pipeline-opengl-private.h"
 #include "cogl-framebuffer-private.h"
 #include "cogl-onscreen-private.h"
 #include "cogl-attribute-private.h"
@@ -55,8 +51,12 @@
 #include "cogl-config-private.h"
 #include "cogl-error-private.h"
 #include "cogl-gtype-private.h"
+#include "driver/gl/cogl-pipeline-opengl-private.h"
+#include "driver/gl/cogl-util-gl-private.h"
+#include "winsys/cogl-winsys-private.h"
+#include "winsys/cogl-winsys-stub-private.h"
 
-#include "cogl/deprecated/cogl-framebuffer-deprecated.h"
+#include "deprecated/cogl-framebuffer-deprecated.h"
 
 #include <string.h>
 #include <stdlib.h>

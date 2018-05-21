@@ -43,7 +43,6 @@
 #include "cogl-onscreen-template-private.h"
 #include "cogl-clip-stack.h"
 #include "cogl-journal-private.h"
-#include "cogl-winsys-private.h"
 #include "cogl-pipeline-state-private.h"
 #include "cogl-matrix-private.h"
 #include "cogl-primitive-private.h"
@@ -52,8 +51,9 @@
 #include "cogl-private.h"
 #include "cogl-primitives-private.h"
 #include "cogl-error-private.h"
-#include "cogl-texture-gl-private.h"
 #include "cogl-gtype-private.h"
+#include "driver/gl/cogl-texture-gl-private.h"
+#include "winsys/cogl-winsys-private.h"
 
 extern CoglObjectClass _cogl_onscreen_class;
 

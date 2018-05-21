@@ -41,13 +41,13 @@
 #include "cogl-bitmap-private.h"
 #include "cogl-texture-private.h"
 #include "cogl-pipeline.h"
-#include "cogl-pipeline-opengl-private.h"
 #include "cogl-context-private.h"
 #include "cogl-object-private.h"
 #include "cogl-primitives.h"
-#include "cogl-util-gl-private.h"
 #include "cogl-error-private.h"
-#include "cogl-texture-gl-private.h"
+#include "driver/gl/cogl-pipeline-opengl-private.h"
+#include "driver/gl/cogl-util-gl-private.h"
+#include "driver/gl/cogl-texture-gl-private.h"
 
 #include <string.h>
 #include <stdlib.h>

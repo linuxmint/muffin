@@ -38,23 +38,24 @@
 #include "cogl-private.h"
 #include "cogl-object.h"
 #include "cogl-context-private.h"
-#include "cogl-util-gl-private.h"
 #include "cogl-muffin.h"
 
 #include "cogl-renderer.h"
 #include "cogl-renderer-private.h"
 #include "cogl-display-private.h"
-#include "cogl-winsys-private.h"
-#include "cogl-winsys-stub-private.h"
 #include "cogl-config-private.h"
 #include "cogl-error-private.h"
 #include "cogl-gtype-private.h"
 
+#include "driver/gl/cogl-util-gl-private.h"
+#include "winsys/cogl-winsys-private.h"
+#include "winsys/cogl-winsys-stub-private.h"
+
 #ifdef COGL_HAS_EGL_PLATFORM_XLIB_SUPPORT
-#include "cogl-winsys-egl-x11-private.h"
+#include "winsys/cogl-winsys-egl-x11-private.h"
 #endif
 #ifdef COGL_HAS_GLX_SUPPORT
-#include "cogl-winsys-glx-private.h"
+#include "winsys/cogl-winsys-glx-private.h"
 #endif
 
 #ifdef COGL_HAS_XLIB_SUPPORT

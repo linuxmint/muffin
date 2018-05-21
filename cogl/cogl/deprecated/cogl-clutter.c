@@ -38,15 +38,15 @@
 #include "cogl-types.h"
 #include "cogl-private.h"
 #include "cogl-context-private.h"
-#include "cogl-winsys-private.h"
-#include "cogl-winsys-stub-private.h"
 #include "cogl-framebuffer-private.h"
 #include "cogl-onscreen-private.h"
 #ifdef COGL_HAS_XLIB_SUPPORT
 #include "cogl-clutter-xlib.h"
 #include "cogl-xlib-renderer.h"
 #endif
-#include "cogl-clutter.h"
+#include "winsys/cogl-winsys-private.h"
+#include "winsys/cogl-winsys-stub-private.h"
+#include "deprecated/cogl-clutter.h"
 
 CoglBool
 cogl_clutter_check_extension (const char *name, const char *ext)

@@ -34,7 +34,6 @@
 #include "cogl-config.h"
 
 #include "cogl-context-private.h"
-#include "cogl-util-gl-private.h"
 #include "cogl-matrix-stack.h"
 #include "cogl-framebuffer-private.h"
 #include "cogl-object-private.h"
@@ -42,6 +41,7 @@
 #include "cogl-matrix-private.h"
 #include "cogl-magazine-private.h"
 #include "cogl-gtype-private.h"
+#include "driver/gl/cogl-util-gl-private.h"
 
 static void _cogl_matrix_stack_free (CoglMatrixStack *stack);
 

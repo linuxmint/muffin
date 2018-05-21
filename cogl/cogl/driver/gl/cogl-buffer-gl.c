@@ -35,9 +35,9 @@
 #include "cogl-config.h"
 
 #include "cogl-context-private.h"
-#include "cogl-buffer-gl-private.h"
+#include "driver/gl/cogl-buffer-gl-private.h"
 #include "cogl-error-private.h"
-#include "cogl-util-gl-private.h"
+#include "driver/gl/cogl-util-gl-private.h"
 
 /*
  * GL/GLES compatibility defines for the buffer API:

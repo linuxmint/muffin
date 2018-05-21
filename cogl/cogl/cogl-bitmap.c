@@ -37,9 +37,9 @@
 #include "cogl-buffer-private.h"
 #include "cogl-pixel-buffer.h"
 #include "cogl-context-private.h"
-#include "cogl-buffer-gl-private.h"
 #include "cogl-error-private.h"
 #include "cogl-gtype-private.h"
+#include "driver/gl/cogl-buffer-gl-private.h"
 
 #include <string.h>
 

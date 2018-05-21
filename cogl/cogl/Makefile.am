@@ -13,11 +13,6 @@ DISTCLEANFILES =
 AM_CPPFLAGS = \
 	-I$(top_srcdir)				\
 	-I$(top_builddir)			\
-	-I$(srcdir)/deprecated			\
-	-I$(srcdir)/winsys 			\
-	-I$(srcdir)/driver/gl 			\
-	-I$(srcdir)/driver/gl/gl 		\
-	-I$(srcdir)/driver/gl/gles 		\
 	$(NULL)
 
 AM_CPPFLAGS += \

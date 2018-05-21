@@ -38,7 +38,6 @@
 #include "cogl-object.h"
 
 #include "cogl-pipeline-private.h"
-#include "cogl-pipeline-opengl-private.h"
 #include "cogl-pipeline-state-private.h"
 #include "cogl-pipeline-layer-state-private.h"
 #include "cogl-texture-private.h"
@@ -50,6 +49,7 @@
 #include "cogl-depth-state-private.h"
 #include "cogl1-context.h"
 #include "cogl-gtype-private.h"
+#include "driver/gl/cogl-pipeline-opengl-private.h"
 
 #include <glib.h>
 #include <glib/gprintf.h>
@@ -67,15 +67,15 @@ const CoglPipelineProgend *
 _cogl_pipeline_progends[MAX (COGL_PIPELINE_N_PROGENDS, 1)];
 
 #ifdef COGL_PIPELINE_FRAGEND_GLSL
-#include "cogl-pipeline-fragend-glsl-private.h"
+#include "driver/gl/cogl-pipeline-fragend-glsl-private.h"
 #endif
 
 #ifdef COGL_PIPELINE_VERTEND_GLSL
-#include "cogl-pipeline-vertend-glsl-private.h"
+#include "driver/gl/cogl-pipeline-vertend-glsl-private.h"
 #endif
 
 #ifdef COGL_PIPELINE_PROGEND_GLSL
-#include "cogl-pipeline-progend-glsl-private.h"
+#include "driver/gl/cogl-pipeline-progend-glsl-private.h"
 #endif
 
 COGL_OBJECT_DEFINE (Pipeline, pipeline);

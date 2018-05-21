@@ -37,23 +37,23 @@
 
 #include "cogl-util.h"
 #include "cogl-context-private.h"
-#include "cogl-util-gl-private.h"
 #include "cogl-pipeline-private.h"
-#include "cogl-pipeline-opengl-private.h"
 #include "cogl-offscreen.h"
+#include "driver/gl/cogl-util-gl-private.h"
+#include "driver/gl/cogl-pipeline-opengl-private.h"
 
 #ifdef COGL_PIPELINE_PROGEND_GLSL
 
 #include "cogl-context-private.h"
 #include "cogl-object-private.h"
-#include "cogl-program-private.h"
-#include "cogl-pipeline-fragend-glsl-private.h"
-#include "cogl-pipeline-vertend-glsl-private.h"
 #include "cogl-pipeline-cache.h"
 #include "cogl-pipeline-state-private.h"
 #include "cogl-attribute-private.h"
 #include "cogl-framebuffer-private.h"
-#include "cogl-pipeline-progend-glsl-private.h"
+#include "driver/gl/cogl-pipeline-fragend-glsl-private.h"
+#include "driver/gl/cogl-pipeline-vertend-glsl-private.h"
+#include "driver/gl/cogl-pipeline-progend-glsl-private.h"
+#include "deprecated/cogl-program-private.h"
 
 /* These are used to generalise updating some uniforms that are
    required when building for drivers missing some fixed function

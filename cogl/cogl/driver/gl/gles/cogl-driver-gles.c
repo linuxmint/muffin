@@ -33,15 +33,15 @@
 #include <string.h>
 
 #include "cogl-context-private.h"
-#include "cogl-util-gl-private.h"
 #include "cogl-feature-private.h"
 #include "cogl-renderer-private.h"
 #include "cogl-private.h"
-#include "cogl-framebuffer-gl-private.h"
-#include "cogl-texture-2d-gl-private.h"
-#include "cogl-attribute-gl-private.h"
-#include "cogl-clip-stack-gl-private.h"
-#include "cogl-buffer-gl-private.h"
+#include "driver/gl/cogl-util-gl-private.h"
+#include "driver/gl/cogl-framebuffer-gl-private.h"
+#include "driver/gl/cogl-texture-2d-gl-private.h"
+#include "driver/gl/cogl-attribute-gl-private.h"
+#include "driver/gl/cogl-clip-stack-gl-private.h"
+#include "driver/gl/cogl-buffer-gl-private.h"
 
 #ifndef GL_UNSIGNED_INT_24_8
 #define GL_UNSIGNED_INT_24_8 0x84FA

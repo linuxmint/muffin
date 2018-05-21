@@ -34,11 +34,11 @@
 #include <gmodule.h>
 
 #include "cogl-object-private.h"
-#include "cogl-winsys-private.h"
 #include "cogl-driver.h"
 #include "cogl-texture-driver.h"
 #include "cogl-context.h"
 #include "cogl-closure-list-private.h"
+#include "winsys/cogl-winsys-private.h"
 
 #ifdef COGL_HAS_XLIB_SUPPORT
 #include <X11/Xlib.h>

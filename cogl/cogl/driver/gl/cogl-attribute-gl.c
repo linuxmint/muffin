@@ -37,15 +37,15 @@
 #include <string.h>
 
 #include "cogl-private.h"
-#include "cogl-util-gl-private.h"
-#include "cogl-pipeline-opengl-private.h"
 #include "cogl-error-private.h"
 #include "cogl-context-private.h"
 #include "cogl-attribute.h"
 #include "cogl-attribute-private.h"
-#include "cogl-attribute-gl-private.h"
-#include "cogl-pipeline-progend-glsl-private.h"
-#include "cogl-buffer-gl-private.h"
+#include "driver/gl/cogl-attribute-gl-private.h"
+#include "driver/gl/cogl-buffer-gl-private.h"
+#include "driver/gl/cogl-pipeline-opengl-private.h"
+#include "driver/gl/cogl-pipeline-progend-glsl-private.h"
+#include "driver/gl/cogl-util-gl-private.h"
 
 typedef struct _ForeachChangedBitState
 {

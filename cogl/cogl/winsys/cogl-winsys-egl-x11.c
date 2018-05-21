@@ -35,20 +35,19 @@
 
 #include <X11/Xlib.h>
 
-#include "cogl-winsys-egl-x11-private.h"
-#include "cogl-winsys-egl-private.h"
 #include "cogl-xlib-renderer-private.h"
 #include "cogl-xlib-renderer.h"
 #include "cogl-framebuffer-private.h"
 #include "cogl-onscreen-private.h"
 #include "cogl-display-private.h"
 #include "cogl-renderer-private.h"
-
 #include "cogl-texture-pixmap-x11-private.h"
 #include "cogl-texture-2d-private.h"
 #include "cogl-texture-2d.h"
 #include "cogl-error-private.h"
 #include "cogl-poll-private.h"
+#include "winsys/cogl-winsys-egl-x11-private.h"
+#include "winsys/cogl-winsys-egl-private.h"
 
 #define COGL_ONSCREEN_X11_EVENT_MASK (StructureNotifyMask | ExposureMask)
 

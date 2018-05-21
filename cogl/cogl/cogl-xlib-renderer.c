@@ -39,9 +39,9 @@
 #include "cogl-renderer-private.h"
 #include "cogl-xlib-renderer-private.h"
 #include "cogl-x11-renderer-private.h"
-#include "cogl-winsys-private.h"
 #include "cogl-error-private.h"
 #include "cogl-poll-private.h"
+#include "winsys/cogl-winsys-private.h"
 
 #include <X11/Xlib.h>
 #include <X11/extensions/Xdamage.h>

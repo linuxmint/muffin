@@ -39,8 +39,6 @@
 #include "cogl-util.h"
 #include "cogl-context-private.h"
 #include "cogl-pipeline-private.h"
-#include "cogl-pipeline-opengl-private.h"
-#include "cogl-winsys-private.h"
 #include "cogl-framebuffer-private.h"
 #include "cogl-matrix-private.h"
 #include "cogl-journal-private.h"
@@ -54,8 +52,10 @@
 #include "cogl-private.h"
 #include "cogl1-context.h"
 #include "cogl-offscreen.h"
-#include "cogl-attribute-gl-private.h"
-#include "cogl-clutter.h"
+#include "driver/gl/cogl-pipeline-opengl-private.h"
+#include "driver/gl/cogl-attribute-gl-private.h"
+#include "winsys/cogl-winsys-private.h"
+#include "deprecated/cogl-clutter.h"
 
 #include "deprecated/cogl-framebuffer-deprecated.h"
 
