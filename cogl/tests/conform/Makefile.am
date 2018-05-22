@@ -135,7 +135,7 @@ test_conformance_LDADD += $(top_builddir)/cogl-path/libmuffin-cogl-path-$(MUFFIN
 test_conformance_LDFLAGS = -export-dynamic
 
 test: wrappers
-	@$(top_srcdir)/tests/run-tests.sh $(abs_builddir)/../config.env $(abs_builddir)/test-conformance$(EXEEXT)
+	@$(top_srcdir)/tests/run-tests.sh $(abs_builddir)/../config.env $(abs_builddir)/test-conformance$(EXEEXT) unit-tests
 
 # XXX: we could prevent the conformance test suite from running
 #      by simply defining this variable conditionally
@@ -164,7 +164,7 @@ conform.test:
 	echo "  GEN      $@"; \
 	echo "[Test]" > $@.tmp; \
 	echo "Type=session" >> $@.tmp; \
-	echo "Exec=sh -c \"cd $(libexecdir)/installed-tests/muffin-cogl/conform; ../run-tests.sh ../config.env ./test-conformance\"" >> $@.tmp; \
+	echo "Exec=sh -c \"cd $(libexecdir)/installed-tests/muffin-cogl/conform; ../run-tests.sh ../config.env ./test-conformance unit-tests\"" >> $@.tmp; \
 	mv $@.tmp $@
 
 CLEANFILES = conform.test

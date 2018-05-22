@@ -14,6 +14,9 @@ shift
 TEST_BINARY=$1
 shift
 
+UNIT_TESTS_FILE=$1
+shift
+
 . $ENVIRONMENT_CONFIG
 
 set +m
@@ -98,7 +101,12 @@ fi
 echo ""
 echo ""
 
-for test in `cat unit-tests`
+if [ ! -f $UNIT_TESTS_FILE ]; then
+  echo Missing unit-tests file
+  exit 1
+fi
+
+for test in `cat $UNIT_TESTS_FILE`
 do
   export COGL_DEBUG=
 
