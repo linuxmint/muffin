@@ -10,10 +10,6 @@ EXTRA_DIST =
 BUILT_SOURCES =
 
 AM_CPPFLAGS = \
-	-DCLUTTER_PREFIX=\""$(prefix)"\"	\
-	-DCLUTTER_LIBDIR=\""$(libdir)"\"	\
-	-DCLUTTER_DATADIR=\""$(datadir)"\"	\
-	-DCLUTTER_LOCALEDIR=\""$(localedir)"\"	\
 	-DCLUTTER_SYSCONFDIR=\""$(sysconfdir)"\" \
 	-DCLUTTER_COMPILATION=1			\
 	-DCOGL_DISABLE_DEPRECATION_WARNINGS	\
