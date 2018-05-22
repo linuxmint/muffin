@@ -51,16 +51,16 @@ G_BEGIN_DECLS
  */
 typedef struct _ClutterTimeoutPool    ClutterTimeoutPool;
 
-CLUTTER_DEPRECATED_IN_1_6
+CLUTTER_DEPRECATED
 ClutterTimeoutPool *clutter_timeout_pool_new    (gint                priority);
 
-CLUTTER_DEPRECATED_IN_1_6
+CLUTTER_DEPRECATED
 guint               clutter_timeout_pool_add    (ClutterTimeoutPool *pool,
                                                  guint               fps,
                                                  GSourceFunc         func,
                                                  gpointer            data,
                                                  GDestroyNotify      notify);
-CLUTTER_DEPRECATED_IN_1_6
+CLUTTER_DEPRECATED
 void                clutter_timeout_pool_remove (ClutterTimeoutPool *pool,
                                                  guint               id_);
 

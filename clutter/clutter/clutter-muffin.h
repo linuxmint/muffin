@@ -45,32 +45,32 @@ typedef enum _SyncMethod /* In order of priority */
                               use swap interval 0 + PRESENTATION_TIME. */
 } SyncMethod;
 
-CLUTTER_AVAILABLE_IN_MUFFIN
+CLUTTER_EXPORT
 SyncMethod _clutter_get_sync_method (void);
 
-CLUTTER_AVAILABLE_IN_MUFFIN
+CLUTTER_EXPORT
 void _clutter_set_sync_method (SyncMethod sync_method);
 
-CLUTTER_AVAILABLE_IN_MUFFIN
+CLUTTER_EXPORT
 void clutter_set_custom_backend_func (ClutterBackend *(* func) (void));
 
-CLUTTER_AVAILABLE_IN_MUFFIN
+CLUTTER_EXPORT
 gboolean        _clutter_get_sync_to_vblank     (void);
 
-CLUTTER_AVAILABLE_IN_MUFFIN
+CLUTTER_EXPORT
 void            _clutter_set_sync_to_vblank     (gboolean      sync_to_vblank);
 
-CLUTTER_AVAILABLE_IN_MUFFIN
+CLUTTER_EXPORT
 void clutter_master_clock_set_sync_method (SyncMethod method);
 
-CLUTTER_AVAILABLE_IN_MUFFIN
+CLUTTER_EXPORT
 void clutter_stage_x11_update_sync_state (ClutterStage *stage,
                                           SyncMethod    method);
 
-CLUTTER_AVAILABLE_IN_MUFFIN
+CLUTTER_EXPORT
 int64_t clutter_stage_get_frame_counter (ClutterStage *stage);
 
-CLUTTER_AVAILABLE_IN_MUFFIN
+CLUTTER_EXPORT
 void clutter_stage_capture_into (ClutterStage          *stage,
                                  gboolean               paint,
                                  cairo_rectangle_int_t *rect,

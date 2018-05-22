@@ -52,17 +52,17 @@ typedef int (*ClutterOpenDeviceCallback) (const char  *path,
 typedef void (*ClutterCloseDeviceCallback) (int          fd,
 					    gpointer     user_data);
 
-CLUTTER_AVAILABLE_IN_1_16
+CLUTTER_EXPORT
 void  clutter_evdev_set_device_callbacks (ClutterOpenDeviceCallback  open_callback,
                                           ClutterCloseDeviceCallback close_callback,
                                           gpointer                   user_data);
 
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 void  clutter_evdev_set_seat_id (const gchar *seat_id);
 
-CLUTTER_AVAILABLE_IN_1_10
+CLUTTER_EXPORT
 void  clutter_evdev_release_devices (void);
-CLUTTER_AVAILABLE_IN_1_10
+CLUTTER_EXPORT
 void  clutter_evdev_reclaim_devices (void);
 
 /**
@@ -91,7 +91,7 @@ typedef void (*ClutterPointerConstrainCallback) (ClutterInputDevice *device,
 						 float              *y,
 						 gpointer            user_data);
 
-CLUTTER_AVAILABLE_IN_1_16
+CLUTTER_EXPORT
 void  clutter_evdev_set_pointer_constrain_callback (ClutterDeviceManager            *evdev,
 						    ClutterPointerConstrainCallback  callback,
 						    gpointer                         user_data,
@@ -104,30 +104,30 @@ typedef void (*ClutterRelativeMotionFilter) (ClutterInputDevice *device,
                                              float              *dy,
                                              gpointer            user_data);
 
-CLUTTER_AVAILABLE_IN_MUFFIN
+CLUTTER_EXPORT
 void clutter_evdev_set_relative_motion_filter (ClutterDeviceManager       *evdev,
                                                ClutterRelativeMotionFilter filter,
                                                gpointer                    user_data);
 
-CLUTTER_AVAILABLE_IN_1_16
+CLUTTER_EXPORT
 void               clutter_evdev_set_keyboard_map   (ClutterDeviceManager *evdev,
 						     struct xkb_keymap    *keymap);
 
-CLUTTER_AVAILABLE_IN_1_18
+CLUTTER_EXPORT
 struct xkb_keymap * clutter_evdev_get_keyboard_map (ClutterDeviceManager *evdev);
 
-CLUTTER_AVAILABLE_IN_1_20
+CLUTTER_EXPORT
 void clutter_evdev_set_keyboard_layout_index (ClutterDeviceManager *evdev,
                                               xkb_layout_index_t    idx);
 
-CLUTTER_AVAILABLE_IN_MUFFIN
+CLUTTER_EXPORT
 xkb_layout_index_t clutter_evdev_get_keyboard_layout_index (ClutterDeviceManager *evdev);
 
-CLUTTER_AVAILABLE_IN_1_26
+CLUTTER_EXPORT
 void clutter_evdev_set_keyboard_numlock (ClutterDeviceManager *evdev,
                                          gboolean              numlock_state);
 
-CLUTTER_AVAILABLE_IN_1_18
+CLUTTER_EXPORT
 void clutter_evdev_set_keyboard_repeat (ClutterDeviceManager *evdev,
                                         gboolean              repeat,
                                         guint32               delay,
@@ -136,42 +136,42 @@ void clutter_evdev_set_keyboard_repeat (ClutterDeviceManager *evdev,
 typedef gboolean (* ClutterEvdevFilterFunc) (struct libinput_event *event,
                                              gpointer               data);
 
-CLUTTER_AVAILABLE_IN_1_20
+CLUTTER_EXPORT
 void clutter_evdev_add_filter    (ClutterEvdevFilterFunc func,
                                   gpointer               data,
                                   GDestroyNotify         destroy_notify);
-CLUTTER_AVAILABLE_IN_1_20
+CLUTTER_EXPORT
 void clutter_evdev_remove_filter (ClutterEvdevFilterFunc func,
                                   gpointer               data);
-CLUTTER_AVAILABLE_IN_1_20
+CLUTTER_EXPORT
 struct libinput_device * clutter_evdev_input_device_get_libinput_device (ClutterInputDevice *device);
 
-CLUTTER_AVAILABLE_IN_1_20
+CLUTTER_EXPORT
 gint32 clutter_evdev_event_sequence_get_slot (const ClutterEventSequence *sequence);
 
-CLUTTER_AVAILABLE_IN_1_20
+CLUTTER_EXPORT
 void clutter_evdev_warp_pointer (ClutterInputDevice   *pointer_device,
                                  guint32               time_,
                                  int                   x,
                                  int                   y);
 
-CLUTTER_AVAILABLE_IN_1_26
+CLUTTER_EXPORT
 guint32 clutter_evdev_event_get_event_code (const ClutterEvent *event);
 
-CLUTTER_AVAILABLE_IN_1_26
+CLUTTER_EXPORT
 guint64 clutter_evdev_event_get_time_usec (const ClutterEvent *event);
 
-CLUTTER_AVAILABLE_IN_1_26
+CLUTTER_EXPORT
 gboolean clutter_evdev_event_get_relative_motion (const ClutterEvent *event,
                                                   double             *dx,
                                                   double             *dy,
                                                   double             *dx_unaccel,
                                                   double             *dy_unaccel);
 
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 void clutter_evdev_input_device_tool_set_pressure_curve (ClutterInputDeviceTool *tool,
                                                          gdouble                 curve[4]);
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 void clutter_evdev_input_device_tool_set_button_code    (ClutterInputDeviceTool *tool,
                                                          guint                   button,
                                                          guint                   evcode);

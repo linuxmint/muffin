@@ -51,7 +51,6 @@
 #include "clutter-stage-manager-private.h"
 #include "clutter-stage-private.h"
 #include "clutter-stage-window.h"
-#include "clutter-version.h"
 #include "clutter-device-manager-private.h"
 
 #define CLUTTER_DISABLE_DEPRECATION_WARNINGS

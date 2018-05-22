@@ -106,28 +106,28 @@ struct _ClutterBehaviourPathClass
   void (*_clutter_path_4) (void);
 };
 
-CLUTTER_DEPRECATED_IN_1_6
+CLUTTER_DEPRECATED
 GType clutter_behaviour_path_get_type (void) G_GNUC_CONST;
 
-CLUTTER_DEPRECATED_IN_1_6_FOR(clutter_actor_animate)
+CLUTTER_DEPRECATED_FOR(clutter_actor_animate)
 ClutterBehaviour *clutter_behaviour_path_new          (ClutterAlpha         *alpha,
                                                        ClutterPath          *path);
 
-CLUTTER_DEPRECATED_IN_1_6_FOR(clutter_actor_animate)
+CLUTTER_DEPRECATED_FOR(clutter_actor_animate)
 ClutterBehaviour *clutter_behaviour_path_new_with_description
                                                       (ClutterAlpha         *alpha,
                                                        const gchar          *desc);
 
-CLUTTER_DEPRECATED_IN_1_6_FOR(clutter_actor_animate)
+CLUTTER_DEPRECATED_FOR(clutter_actor_animate)
 ClutterBehaviour *clutter_behaviour_path_new_with_knots
                                                       (ClutterAlpha         *alpha,
                                                        const ClutterKnot    *knots,
                                                        guint                 n_knots);
 
-CLUTTER_DEPRECATED_IN_1_6
+CLUTTER_DEPRECATED
 void              clutter_behaviour_path_set_path     (ClutterBehaviourPath *pathb,
                                                        ClutterPath          *path);
-CLUTTER_DEPRECATED_IN_1_6
+CLUTTER_DEPRECATED
 ClutterPath *     clutter_behaviour_path_get_path     (ClutterBehaviourPath *pathb);
 
 G_END_DECLS

@@ -1,51 +1,7 @@
-# clutter package version number, (as distinct from shared library version)
-# An odd micro number indicates in-progress development from Git
-# An even micro number indicates a released version
-#
-# Making a point release:
-# - increase clutter_micro_version to the next even number
-# - increase clutter_interface_age to the next even number
-# After the release:
-# - increase clutter_micro_version to the next odd number
-# - increase clutter_interface_version to the next odd number
-m4_define([clutter_major_version], [1])
-m4_define([clutter_minor_version], [26])
-m4_define([clutter_micro_version], [1])
-
-# • for stable releases: increase the interface age by 1 for each release;
-#   if the API changes, set to 0. interface_age and binary_age are used to
-#   create the soname of the shared object:
-#
-#  (<minor> * 100 + <micro>) - <interface_age>
-#
-# this allows using the same soname for different micro-releases in case
-# no API was added or deprecated. for instance:
-#
-#   clutter 1.2.0  -> 100 * 2 + 0  = 200, interface age = 0 -> 200
-#   clutter 1.2.2  -> 100 * 2 + 2  = 202, interface age = 2 -> 200
-#   clutter 1.2.4  -> 100 * 2 + 4  = 204, interface age = 4 -> 200
-#   [ API addition, deprecation ]
-#   clutter 1.2.6  -> 100 * 2 + 6  = 206, interface age = 0 -> 206
-#   clutter 1.2.8  -> 100 * 2 + 8  = 208, interface age = 2 -> 206
-#   clutter 1.2.10 -> 100 * 2 + 10 = 210, interface age = 4 -> 206
-#   ...
-#
-# • for development releases: keep clutter_interface_age to 0
-m4_define([clutter_interface_age], [1])
-
-m4_define([clutter_binary_age], [m4_eval(100 * clutter_minor_version + clutter_micro_version)])
-
-m4_define([clutter_release_status],
-          [m4_if(m4_eval(clutter_micro_version % 2), [1], [git],
-                 [m4_if(m4_eval(clutter_minor_version % 2), [1], [snapshot],
-                                                                 [release])])])
-
-m4_define([clutter_version], [clutter_major_version.clutter_minor_version.clutter_micro_version])
-
 AC_PREREQ([2.63])
 
 AC_INIT([clutter],
-        [clutter_version],
+        [0.1],
         [http://bugzilla.gnome.org/enter_bug.cgi?product=clutter],
         [clutter],
         [http://www.clutter-project.org])
@@ -66,23 +22,7 @@ AC_ARG_VAR([MUFFIN_PLUGIN_API_VERSION])
 AS_IF([test "x$MUFFIN_VERSION" = "x"],
       [AC_MSG_ERROR([Clutter can only be configured by muffin])],)
 
-AC_SUBST([CLUTTER_MAJOR_VERSION],  [clutter_major_version])
-AC_SUBST([CLUTTER_MINOR_VERSION],  [clutter_minor_version])
-AC_SUBST([CLUTTER_MICRO_VERSION],  [clutter_micro_version])
-AC_SUBST([CLUTTER_VERSION],        [clutter_version])
-AC_SUBST([CLUTTER_RELEASE_STATUS], [clutter_release_status])
-
-m4_define([lt_current],  [m4_eval(100 * clutter_minor_version + clutter_micro_version - clutter_interface_age)])
-m4_define([lt_revision], [clutter_interface_age])
-m4_define([lt_age],      [m4_eval(clutter_binary_age - clutter_interface_age)])
-CLUTTER_LT_CURRENT=lt_current
-CLUTTER_LT_REV=lt_revision
-CLUTTER_LT_AGE=lt_age
-CLUTTER_LT_VERSION="$CLUTTER_LT_CURRENT:$CLUTTER_LT_REV:$CLUTTER_LT_AGE"
-CLUTTER_LT_LDFLAGS="-avoid-version"
-AC_SUBST([CLUTTER_LT_CURRENT],  [lt_current])
-AC_SUBST([CLUTTER_LT_REVISION], [lt_revision])
-AC_SUBST([CLUTTER_LT_VERSION],  [$CLUTTER_LT_VERSION])
+AC_DEFINE_UNQUOTED(MUTTER_VERSION, "$MUTTER_VERSION", [Mutter version])
 
 AC_PROG_SED
 
@@ -91,8 +31,6 @@ dnl = Preliminary platform checks =============================================
 AC_CANONICAL_HOST
 
 AC_DEFINE([OS_LINUX], [1], [Define to 1 if building for Linux])
-
-AC_SUBST(CLUTTER_LT_LDFLAGS)
 
 AC_CACHE_SAVE
 
@@ -565,7 +503,7 @@ AM_CONDITIONAL([PIXBUF_TESTS], [test "x$pixbuf_tests" = "xyes"])
 
 dnl === Enable debug level ====================================================
 
-m4_define([debug_default], [m4_if(m4_eval(clutter_minor_version % 2), [1], [yes], [minimum])])
+m4_define([debug_default], [minimum])
 AC_ARG_ENABLE([debug],
               [AS_HELP_STRING([--enable-debug=@<:@no/minimum/yes@:>@],
                               [Control Clutter debugging level @<:@default=]debug_default[@:>@])],
@@ -594,10 +532,7 @@ AC_SUBST(CLUTTER_DEBUG_CFLAGS)
 dnl === Enable deprecation guards ==================================================
 
 m4_define([deprecated_default],
-          [m4_if(m4_eval(clutter_minor_version % 2),
-                 [1],
-                 [no],
-                 [yes])])
+          [yes])
 
 AC_ARG_ENABLE([deprecated],
               [AS_HELP_STRING([--enable-deprecated=@<:@no/yes@:>@],
@@ -626,7 +561,7 @@ dnl === Enable strict compiler flags ==========================================
 
 # use strict compiler flags only when building from git; the rules for
 # distcheck will take care of turning this on when making a release
-m4_define([maintainer_flags_default], [m4_if(m4_eval(clutter_micro_version % 2), [1], [yes], [no])])
+m4_define([maintainer_flags_default], [no])
 AC_ARG_ENABLE([maintainer-flags],
               [AS_HELP_STRING([--enable-maintainer-flags=@<:@no/yes/error@:>@],
                               [Use strict compiler flags @<:@default=]maintainer_flags_default[@:>@])],
@@ -811,7 +746,6 @@ AC_CONFIG_FILES([
 
 	clutter/Makefile
         clutter/clutter-config.h
-	clutter/clutter-version.h
 	clutter/muffin-clutter-$MUFFIN_PLUGIN_API_VERSION.pc:clutter/muffin-clutter.pc.in
 
 	tests/Makefile

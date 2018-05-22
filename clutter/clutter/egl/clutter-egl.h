@@ -84,12 +84,12 @@ EGLDisplay      clutter_egl_display             (void);
  *
  * Since: 1.6
  */
-CLUTTER_AVAILABLE_IN_1_6
+CLUTTER_EXPORT
 EGLDisplay      clutter_egl_get_egl_display     (void);
 
-CLUTTER_AVAILABLE_IN_1_20
+CLUTTER_EXPORT
 void            clutter_egl_freeze_master_clock (void);
-CLUTTER_AVAILABLE_IN_1_20
+CLUTTER_EXPORT
 void            clutter_egl_thaw_master_clock   (void);
 
 G_END_DECLS

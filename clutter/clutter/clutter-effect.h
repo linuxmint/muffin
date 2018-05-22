@@ -91,38 +91,38 @@ struct _ClutterEffectClass
   void (* _clutter_effect6) (void);
 };
 
-CLUTTER_AVAILABLE_IN_1_4
+CLUTTER_EXPORT
 GType clutter_effect_get_type (void) G_GNUC_CONST;
 
-CLUTTER_AVAILABLE_IN_1_8
+CLUTTER_EXPORT
 void    clutter_effect_queue_repaint    (ClutterEffect *effect);
 
 /*
  * ClutterActor API
  */
 
-CLUTTER_AVAILABLE_IN_1_4
+CLUTTER_EXPORT
 void           clutter_actor_add_effect            (ClutterActor  *self,
                                                     ClutterEffect *effect);
-CLUTTER_AVAILABLE_IN_1_4
+CLUTTER_EXPORT
 void           clutter_actor_add_effect_with_name  (ClutterActor  *self,
                                                     const gchar   *name,
                                                     ClutterEffect *effect);
-CLUTTER_AVAILABLE_IN_1_4
+CLUTTER_EXPORT
 void           clutter_actor_remove_effect         (ClutterActor  *self,
                                                     ClutterEffect *effect);
-CLUTTER_AVAILABLE_IN_1_4
+CLUTTER_EXPORT
 void           clutter_actor_remove_effect_by_name (ClutterActor  *self,
                                                     const gchar   *name);
-CLUTTER_AVAILABLE_IN_1_4
+CLUTTER_EXPORT
 GList *        clutter_actor_get_effects           (ClutterActor  *self);
-CLUTTER_AVAILABLE_IN_1_4
+CLUTTER_EXPORT
 ClutterEffect *clutter_actor_get_effect            (ClutterActor  *self,
                                                     const gchar   *name);
-CLUTTER_AVAILABLE_IN_1_4
+CLUTTER_EXPORT
 void           clutter_actor_clear_effects         (ClutterActor  *self);
 
-CLUTTER_AVAILABLE_IN_1_10
+CLUTTER_EXPORT
 gboolean       clutter_actor_has_effects           (ClutterActor  *self);
 
 G_END_DECLS

@@ -118,7 +118,7 @@ struct _ClutterBackendX11Class
   ClutterBackendClass parent_class;
 };
 
-CLUTTER_AVAILABLE_IN_MUFFIN
+CLUTTER_EXPORT
 GType clutter_backend_x11_get_type (void) G_GNUC_CONST;
 
 ClutterBackend *clutter_backend_x11_new (void);

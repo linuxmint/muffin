@@ -43,7 +43,6 @@
 #include "clutter-marshal.h"
 #include "clutter-debug.h"
 #include "clutter-private.h"
-#include "clutter-version.h"  
 
 #include "deprecated/clutter-stage-manager.h"
 

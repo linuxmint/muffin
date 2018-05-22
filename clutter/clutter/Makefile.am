@@ -355,10 +355,6 @@ built_source_h = \
 DISTCLEANFILES += clutter-config.h
 EXTRA_DIST += clutter-config.h.in
 
-# version header
-DISTCLEANFILES += clutter-version.h
-EXTRA_DIST += clutter-version.h.in clutter-version.h
-
 # key symbol update script
 EXTRA_DIST += clutter-keysyms-update.pl
 
@@ -585,7 +581,7 @@ pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = $(pc_files)
 DISTCLEANFILES += $(pc_files)
 
-clutter_include_HEADERS = $(source_h) clutter.h clutter-version.h clutter-autocleanups.h clutter-muffin.h
+clutter_include_HEADERS = $(source_h) clutter.h clutter-autocleanups.h clutter-muffin.h
 nodist_clutter_include_HEADERS = clutter-config.h $(built_source_h)
 
 clutter_deprecated_HEADERS = $(deprecated_h)

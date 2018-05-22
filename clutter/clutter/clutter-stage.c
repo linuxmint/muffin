@@ -72,7 +72,6 @@
 #include "clutter-private.h"
 #include "clutter-stage-manager-private.h"
 #include "clutter-stage-private.h"
-#include "clutter-version.h" 	/* For flavour */
 #include "clutter-private.h"
 
 #include "cogl/cogl.h"
