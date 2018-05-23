@@ -76,7 +76,7 @@
 #include <cogl/cogl.h>
 #include <cogl-pango/cogl-pango.h>
 
-#include "cally.h" /* For accessibility support */
+#include "cally/cally.h" /* For accessibility support */
 
 /* main context */
 static ClutterMainContext *ClutterCntx       = NULL;

@@ -16,7 +16,6 @@ AM_CPPFLAGS = \
 	-DG_LOG_DOMAIN=\"Clutter\" 		\
 	-I$(top_srcdir) 			\
 	-I$(top_srcdir)/clutter			\
-	-I$(top_srcdir)/clutter/cally		\
 	-I$(top_builddir)			\
 	-I$(top_builddir)/clutter		\
 	-I$(top_srcdir)/../cogl			\
@@ -439,9 +438,6 @@ backend_source_c_priv += $(x11_source_c_priv)
 # the list of files we want to introspect on X11
 x11_introspection = $(x11_source_c) $(x11_source_h)
 
-clutterx11_includedir = $(clutter_includedir)/x11
-clutterx11_include_HEADERS = $(x11_source_h)
-
 muffin-clutter-x11-@MUFFIN_PLUGIN_API_VERSION@.pc: muffin-clutter-$(MUFFIN_PLUGIN_API_VERSION).pc
 	$(QUIET_GEN)cp -f $< $(@F)
 
@@ -490,9 +486,6 @@ backend_source_c_priv += $(evdev_c_priv)
 backend_source_h_priv += $(evdev_h_priv)
 backend_source_h += $(evdev_h)
 
-clutterevdev_includedir = $(clutter_includedir)/evdev
-clutterevdev_include_HEADERS = $(evdev_h)
-
 backend_source_c += evdev/clutter-xkb-utils.c
 backend_source_h_priv += evdev/clutter-xkb-utils.h
 
@@ -512,15 +505,10 @@ backend_source_h += $(wayland_compositor_source_h)
 backend_source_c += \
 	wayland/clutter-wayland-surface.c
 
-wayland_compositor_includedir = $(clutter_includedir)/wayland
-wayland_compositor_include_HEADERS = $(wayland_compositor_source_h)
-
 backend_source_h += $(egl_source_h)
 backend_source_c += $(egl_source_c)
 backend_source_h_priv += $(egl_source_h_priv)
 
-clutteregl_includedir = $(clutter_includedir)/egl
-clutteregl_include_HEADERS = $(egl_source_h)
 endif # SUPPORT_WAYLAND
 
 # cally
@@ -555,9 +543,6 @@ cally_sources_c = \
 cally_sources_private = \
 	cally/cally-actor-private.h	\
 	$(NULL)
-
-cally_includedir = $(clutter_base_includedir)/cally
-cally_include_HEADERS = $(cally_sources_h)
 
 # general build rules:
 # you should not need to modify anything below this point
