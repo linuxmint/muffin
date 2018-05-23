@@ -698,8 +698,6 @@ AS_IF([test "x$use_gcov" = "xyes"],
           AC_MSG_ERROR([Could not find genhtml from the LTP package])
         fi
 
-        AC_DEFINE(HAVE_GCOV, 1, [Whether you have gcov])
-
         dnl Remove all optimization flags from CFLAGS
         changequote({,})
         CFLAGS=`echo "$CFLAGS" | $SED -e 's/-O[0-9]*//g'`
@@ -727,12 +725,6 @@ dnl === Conformance test suite ================================================
 
 GLIB_TESTS
 
-AC_ARG_ENABLE([examples],
-              [AS_HELP_STRING([--enable-examples], [Whether examples should be built])],
-              [],
-              [enable_examples=no])
-AM_CONDITIONAL(BUILD_EXAMPLES, [test "x$enable_examples" = "xyes"])
-
 dnl ===========================================================================
 
 AC_CONFIG_FILES([
@@ -752,8 +744,6 @@ AC_CONFIG_FILES([
 	tests/interactive/wrapper.sh
 	tests/micro-bench/Makefile
 	tests/performance/Makefile
-
-        examples/Makefile
 ])
 
 AC_OUTPUT
@@ -789,7 +779,6 @@ if test "x$pixbuf_tests" = "xyes"; then
 echo "        Build tests using GDK-Pixbuf: ${pixbuf_tests}"
 fi
 echo "        Install test suites: ${enable_installed_tests}"
-echo "        Build examples: ${enable_examples}"
 
 # Clutter backend related flags
 echo ""
