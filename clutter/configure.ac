@@ -29,9 +29,6 @@ AC_PROG_SED
 dnl = Preliminary platform checks =============================================
 
 AC_CANONICAL_HOST
-
-AC_DEFINE([OS_LINUX], [1], [Define to 1 if building for Linux])
-
 AC_CACHE_SAVE
 
 dnl = Dependencies =========================================================
