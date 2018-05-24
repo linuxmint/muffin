@@ -57,10 +57,7 @@
 #include <cogl/winsys/cogl-texture-pixmap-x11.h>
 
 #include <X11/extensions/Xdamage.h>
-
-#if HAVE_XCOMPOSITE
 #include <X11/extensions/Xcomposite.h>
-#endif
 
 enum
 {
@@ -960,7 +957,6 @@ clutter_x11_texture_pixmap_set_window (ClutterX11TexturePixmap *texture,
   if (dpy == NULL)
     return;
 
-#if HAVE_XCOMPOSITE
   priv = texture->priv;
 
   if (priv->window == window && automatic == priv->window_redirect_automatic)
@@ -1024,8 +1020,6 @@ clutter_x11_texture_pixmap_set_window (ClutterX11TexturePixmap *texture,
                                                    attr.width, attr.height,
                                                    attr.override_redirect);
   g_object_unref (texture);
-
-#endif /* HAVE_XCOMPOSITE */
 }
 
 static void

@@ -199,7 +199,6 @@ translate_device_classes (Display             *xdisplay,
                                     (XIValuatorClassInfo *) class_info);
           break;
 
-#ifdef HAVE_XINPUT_2_2
         case XIScrollClass:
           {
             XIScrollClassInfo *scroll_info = (XIScrollClassInfo *) class_info;
@@ -223,7 +222,6 @@ translate_device_classes (Display             *xdisplay,
                                                    scroll_info->increment);
           }
           break;
-#endif /* HAVE_XINPUT_2_2 */
 
         default:
           break;
@@ -237,7 +235,6 @@ is_touch_device (XIAnyClassInfo         **classes,
                  ClutterInputDeviceType  *device_type,
                  guint                   *n_touch_points)
 {
-#ifdef HAVE_XINPUT_2_2
   guint i;
 
   for (i = 0; i < n_classes; i++)
@@ -261,7 +258,6 @@ is_touch_device (XIAnyClassInfo         **classes,
           return TRUE;
         }
     }
-#endif
 
   return FALSE;
 }
@@ -771,11 +767,9 @@ get_event_stage (ClutterEventTranslator *translator,
     case XI_ButtonPress:
     case XI_ButtonRelease:
     case XI_Motion:
-#ifdef HAVE_XINPUT_2_2
     case XI_TouchBegin:
     case XI_TouchUpdate:
     case XI_TouchEnd:
-#endif /* HAVE_XINPUT_2_2 */
       {
         XIDeviceEvent *xev = (XIDeviceEvent *) xi_event;
 
@@ -1037,7 +1031,6 @@ clutter_device_manager_xi2_select_stage_events (ClutterDeviceManager *manager,
   XISetMask (mask, XI_Enter);
   XISetMask (mask, XI_Leave);
 
-#ifdef HAVE_XINPUT_2_2
   /* enable touch event support if we're running on XInput 2.2 */
   if (backend_x11->xi_minor >= 2)
     {
@@ -1045,7 +1038,6 @@ clutter_device_manager_xi2_select_stage_events (ClutterDeviceManager *manager,
       XISetMask (mask, XI_TouchUpdate);
       XISetMask (mask, XI_TouchEnd);
     }
-#endif /* HAVE_XINPUT_2_2 */
 
   xi_event_mask.deviceid = XIAllMasterDevices;
   xi_event_mask.mask = mask;
@@ -1472,11 +1464,7 @@ clutter_device_manager_xi2_translate_event (ClutterEventTranslator *translator,
                           "invalid",
                           event->scroll.x,
                           event->scroll.y,
-#ifdef HAVE_XINPUT_2_2
                           (xev->flags & XIPointerEmulated) ? "yes" : "no"
-#else
-                          "no"
-#endif
                           );
             break;
 
@@ -1522,11 +1510,7 @@ clutter_device_manager_xi2_translate_event (ClutterEventTranslator *translator,
                           event->button.x,
                           event->button.y,
                           event->button.axes != NULL ? "yes" : "no",
-#ifdef HAVE_XINPUT_2_2
                           (xev->flags & XIPointerEmulated) ? "yes" : "no"
-#else
-                          "no"
-#endif
                           );
             break;
           }
@@ -1534,10 +1518,8 @@ clutter_device_manager_xi2_translate_event (ClutterEventTranslator *translator,
         if (source_device != NULL && device->stage != NULL)
           _clutter_input_device_set_stage (source_device, device->stage);
 
-#ifdef HAVE_XINPUT_2_2
         if (xev->flags & XIPointerEmulated)
           _clutter_event_set_pointer_emulated (event, TRUE);
-#endif /* HAVE_XINPUT_2_2 */
 
         if (xi_event->evtype == XI_ButtonPress)
           _clutter_stage_x11_set_user_time (stage_x11, event->button.time);
@@ -1627,10 +1609,8 @@ clutter_device_manager_xi2_translate_event (ClutterEventTranslator *translator,
         if (source_device != NULL && device->stage != NULL)
           _clutter_input_device_set_stage (source_device, device->stage);
 
-#ifdef HAVE_XINPUT_2_2
         if (xev->flags & XIPointerEmulated)
           _clutter_event_set_pointer_emulated (event, TRUE);
-#endif /* HAVE_XINPUT_2_2 */
 
         CLUTTER_NOTE (EVENT, "motion: win:0x%x device:%d '%s' (x:%.2f, y:%.2f, axes:%s)",
                       (unsigned int) stage_x11->xwin,
@@ -1644,7 +1624,6 @@ clutter_device_manager_xi2_translate_event (ClutterEventTranslator *translator,
       }
       break;
 
-#ifdef HAVE_XINPUT_2_2
     case XI_TouchBegin:
       {
         XIDeviceEvent *xev = (XIDeviceEvent *) xi_event;
@@ -1756,7 +1735,6 @@ clutter_device_manager_xi2_translate_event (ClutterEventTranslator *translator,
         retval = CLUTTER_TRANSLATE_QUEUE;
       }
       break;
-#endif /* HAVE_XINPUT_2_2 */
 
     case XI_Enter:
     case XI_Leave:

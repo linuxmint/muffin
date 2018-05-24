@@ -42,13 +42,8 @@
 
 #include "xsettings/xsettings-common.h"
 
-#if HAVE_XCOMPOSITE
 #include <X11/extensions/Xcomposite.h>
-#endif
-
-#if HAVE_XINPUT_2
 #include <X11/extensions/XInput2.h>
-#endif
 
 #include <cogl/cogl.h>
 #include <cogl/cogl-xlib.h>
@@ -241,7 +236,6 @@ clutter_backend_x11_create_device_manager (ClutterBackendX11 *backend_x11)
   ClutterEventTranslator *translator;
   ClutterBackend *backend;
 
-#ifdef HAVE_XINPUT_2
   if (clutter_enable_xinput)
     {
       int event_base, first_event, first_error;
@@ -270,7 +264,6 @@ clutter_backend_x11_create_device_manager (ClutterBackendX11 *backend_x11)
     }
 
   if (backend_x11->device_manager == NULL)
-#endif /* HAVE_XINPUT_2 */
     {
       CLUTTER_NOTE (BACKEND, "Creating Core device manager");
       backend_x11->has_xinput = FALSE;
@@ -517,14 +510,12 @@ static const GOptionEntry entries[] =
     G_OPTION_ARG_NONE, &clutter_synchronise,
     N_("Make X calls synchronous"), NULL
   },
-#ifdef HAVE_XINPUT_2
   {
     "disable-xinput", 0,
     G_OPTION_FLAG_REVERSE,
     G_OPTION_ARG_NONE, &clutter_enable_xinput,
     N_("Disable XInput support"), NULL
   },
-#endif /* HAVE_XINPUT_2 */
   { NULL }
 };
 
@@ -1218,7 +1209,6 @@ clutter_x11_get_input_devices (void)
 gboolean
 clutter_x11_has_xinput (void)
 {
-#ifdef HAVE_XINPUT_2
  ClutterBackend *backend = clutter_get_default_backend ();
 
   if (backend == NULL)
@@ -1234,9 +1224,6 @@ clutter_x11_has_xinput (void)
     }
 
   return CLUTTER_BACKEND_X11 (backend)->has_xinput;
-#else
-  return FALSE;
-#endif
 }
 
 /**
@@ -1250,7 +1237,6 @@ clutter_x11_has_xinput (void)
 gboolean
 clutter_x11_has_composite_extension (void)
 {
-#if HAVE_XCOMPOSITE
   static gboolean have_composite = FALSE, done_check = FALSE;
   int error = 0, event = 0;
   Display *dpy;
@@ -1281,9 +1267,6 @@ clutter_x11_has_composite_extension (void)
   done_check = TRUE;
 
   return have_composite;
-#else
-  return FALSE;
-#endif /* HAVE_XCOMPOSITE */
 }
 
 /**

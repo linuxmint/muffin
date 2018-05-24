@@ -21,7 +21,7 @@
 
 #include <clutter/clutter.h>
 
-#if defined CLUTTER_WINDOWING_X11 && HAVE_XINPUT_2_2
+#ifdef CLUTTER_WINDOWING_X11
 
 #include <stdio.h>
 #include <string.h>
@@ -355,12 +355,12 @@ error:
   return 0;
 }
 
-#endif /* defined CLUTTER_WINDOWING_X11 && HAVE_XINPUT_2_2 */
+#endif /* CLUTTER_WINDOWING_X11 */
 
 static void
 events_touch (void)
 {
-#if defined CLUTTER_WINDOWING_X11 && HAVE_XINPUT_2_2
+#ifdef CLUTTER_WINDOWING_X11
   ClutterActor *stage;
   State state;
 
@@ -384,7 +384,7 @@ events_touch (void)
     g_print ("end result: %s\n", state.pass ? "pass" : "FAIL");
 
   g_assert (state.pass);
-#endif /* defined CLUTTER_WINDOWING_X11 && HAVE_XINPUT_2_2 */
+#endif /* CLUTTER_WINDOWING_X11 */
 }
 
 CLUTTER_TEST_SUITE (

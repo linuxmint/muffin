@@ -283,13 +283,11 @@ AS_IF([test "x$SUPPORT_X11" = "x1"],
               [AC_MSG_ERROR([not found])]
         )
 
-        # XCOMPOSITE (optional)
+        # XCOMPOSITE (required)
         AC_MSG_CHECKING([for XCOMPOSITE extension >= $XCOMPOSITE_REQ_VERSION])
         PKG_CHECK_EXISTS([xcomposite >= $XCOMPOSITE_REQ_VERSION], [have_xcomposite=yes], [have_xcomposite=no])
         AS_IF([test "x$have_xcomposite" = "xyes"],
               [
-                AC_DEFINE(HAVE_XCOMPOSITE, [1], [Define to 1 if we have the XCOMPOSITE X extension])
-
                 X11_LIBS="$X11_LIBS -lXcomposite"
                 X11_PC_FILES="$X11_PC_FILES xcomposite >= $XCOMPOSITE_REQ_VERSION"
                 X11_EXTS="$X11_EXTS xcomposite"
@@ -333,61 +331,25 @@ AS_IF([test "x$SUPPORT_X11" = "x1"],
         CPPFLAGS="$clutter_save_CPPFLAGS"
         LIBS="$clutter_save_LIBS"
 
-        # XI (optional)
-        AC_ARG_ENABLE([xinput],
-                      [AS_HELP_STRING([--enable-xinput], [Use the XI X extension])],
-                      [],
-                      [enable_xinput=yes])
+        PKG_CHECK_EXISTS([xi], [have_xinput=yes], AC_MSG_ERROR([XI support not found]))
+        AC_CHECK_HEADERS([X11/extensions/XInput2.h],
+                         [],
+                         AC_MSG_ERROR([XI2 not found]))
+        AC_CHECK_FUNC([XIAllowTouchEvents],
+                      [
+                       AC_CHECK_MEMBER([XIScrollClassInfo.number],
+                                       [],
+                                       AC_MSG_ERROR([XIScrollClasSInfo.number member missing in XI2]),
+                                       [[#include <X11/extensions/XInput2.h>]])
+                      ])
+        LIBS="$clutter_save_LIBS"
 
-        AS_IF([test "x$enable_xinput" = "xyes"],
-              [
-                PKG_CHECK_EXISTS([xi], [have_xinput=yes], [have_xinput=no])
-              ],
-              [
-                have_xinput=no
-              ])
+        X11_LIBS="$X11_LIBS $XINPUT_LIBS"
+        X11_PC_FILES="$X11_PC_FILES xi"
 
-        AS_CASE([$have_xinput],
-
-                [yes],
-                [
-                  AC_CHECK_HEADERS([X11/extensions/XInput2.h],
-                                   [
-                                     have_xinput2=yes
-                                     AC_DEFINE([HAVE_XINPUT_2],
-                                               [1],
-                                               [Define to 1 if XI2 is available])
-                                   ])
-
-                  clutter_save_LIBS="$LIBS"
-                  LIBS="$LIBS -lXi"
-
-                  AC_CHECK_FUNC([XIAllowTouchEvents],
-                                [
-                                  AC_CHECK_MEMBER([XIScrollClassInfo.number],
-                                                  [
-                                                    have_xinput_2_2=yes
-                                                    AC_DEFINE([HAVE_XINPUT_2_2], [1], [Define to 1 if XInput 2.2 is available])
-                                                  ],
-                                                  [have_xinput_2_2=no],
-                                                  [[#include <X11/extensions/XInput2.h>]])])
-
-                  LIBS="$clutter_save_LIBS"
-
-                  X11_LIBS="$X11_LIBS $XINPUT_LIBS"
-                  X11_PC_FILES="$X11_PC_FILES xi"
-
-                  AS_IF([test "x$have_xinput_2_2" = "xyes"],
-                        [X11_EXTS="$X11_EXTS xi2.2"],
-                        [X11_EXTS="$X11_EXTS xi2.0"])
-                ],
-
-                [no],
-                [have_xinput2=no],
-
-                [*],
-                [AC_MSG_ERROR([Invalid argument for --enable-xinput])]
-        )
+        AS_IF([test "x$have_xinput_2_2" = "xyes"],
+              [X11_EXTS="$X11_EXTS xi2.2"],
+              [X11_EXTS="$X11_EXTS xi2.0"])
 
         # XKB
         clutter_save_CPPFLAGS="$CPPFLAGS"
@@ -396,14 +358,9 @@ AS_IF([test "x$SUPPORT_X11" = "x1"],
         clutter_save_LIBS="$LIBS"
         LIBS="$LIBS $X11_LIBS"
 
-        have_xkb=no
         AC_CHECK_FUNC([XkbQueryExtension],
-                      [
-                        AC_DEFINE(HAVE_XKB, 1, [Define to use XKB extension])
-                        have_xkb=yes
-
-                        X11_EXTS="$X11_EXTS xkb"
-                      ])
+                      [],
+                      [AC_MSG_ERROR([XKB support not found])])
 
         CPPFLAGS="$clutter_save_CPPFLAGS"
         LIBS="$clutter_save_LIBS"
