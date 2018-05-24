@@ -151,9 +151,8 @@ AS_IF([test "x$enable_wayland_egl_server" = "xyes"],
       [
         CLUTTER_BACKENDS="$CLUTTER_BACKENDS egl"
         SUPPORT_EGL=1
-        AC_DEFINE([CLUTTER_EGL_BACKEND_GENERIC], [1], [Use Generic EGL backend])
 
-        BACKEND_PC_FILES="$BACKEND_PC_FILES wayland-egl wayland-server libdrm gbm"
+        BACKEND_PC_FILES="$BACKEND_PC_FILES wayland-egl wayland-server"
 
         SUPPORT_WAYLAND_COMPOSITOR=1
         CLUTTER_CONFIG_DEFINES="$CLUTTER_CONFIG_DEFINES
