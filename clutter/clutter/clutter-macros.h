@@ -90,9 +90,7 @@
 #define CLUTTER_PRIVATE_FIELD(x)        clutter_private_ ## x
 #endif
 
-#ifndef _CLUTTER_EXTERN
-#define _CLUTTER_EXTERN extern
-#endif
+#define _CLUTTER_EXTERN __attribute__((visibility("default"))) extern
 
 #if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6) || \
   __clang_major__ > 3 || (__clang_major__ == 3 && __clang_minor__ >= 4)

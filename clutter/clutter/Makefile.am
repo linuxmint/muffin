@@ -14,6 +14,7 @@ AM_CPPFLAGS = \
 	-DCLUTTER_COMPILATION=1			\
 	-DCOGL_DISABLE_DEPRECATION_WARNINGS	\
 	-DG_LOG_DOMAIN=\"Clutter\" 		\
+	-fvisibility=hidden			\
 	-I$(top_srcdir) 			\
 	-I$(top_srcdir)/clutter			\
 	-I$(top_builddir)			\
@@ -23,7 +24,6 @@ AM_CPPFLAGS = \
 	-I$(top_builddir)/../cogl/cogl		\
 	$(CLUTTER_DEPRECATED_CFLAGS)		\
 	$(CLUTTER_DEBUG_CFLAGS)			\
-	$(CLUTTER_HIDDEN_VISIBILITY_CFLAGS)	\
 	$(NULL)
 
 AM_CFLAGS = $(CLUTTER_CFLAGS) $(MAINTAINER_CFLAGS)
