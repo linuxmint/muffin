@@ -3491,15 +3491,17 @@ meta_window_maximize_internal (MetaWindow        *window,
   window->tile_mode = META_TILE_NONE;
   normalize_tile_state (window);
 
-  if (maximize_horizontally && maximize_vertically)
-    window->saved_maximize = TRUE;
-
   window->maximized_horizontally =
     window->maximized_horizontally || maximize_horizontally;
   window->maximized_vertically =
     window->maximized_vertically   || maximize_vertically;
   if (maximize_horizontally || maximize_vertically)
     window->force_save_user_rect = FALSE;
+
+  if (window->maximized_horizontally && window->maximized_vertically)
+  {
+    window->saved_maximize = TRUE;
+  }
 
   /* Update the edge constraints */
   update_edge_constraints (window);;
