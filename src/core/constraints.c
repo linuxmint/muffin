@@ -442,25 +442,6 @@ setup_constraint_info (ConstraintInfo      *info,
     meta_workspace_get_onmonitor_region (cur_workspace, 
                                          monitor_info->number);
 
-  /* Workaround braindead legacy apps that don't know how to
-   * fullscreen themselves properly.
-   */
-  if (meta_prefs_get_force_fullscreen() &&
-      (window->decorated && !meta_window_is_client_decorated (window)) &&
-      meta_rectangle_equal (new, &monitor_info->rect) &&
-      window->has_fullscreen_func &&
-      !window->fullscreen)
-    {
-      /*
-      meta_topic (META_DEBUG_GEOMETRY,
-      */
-      meta_warning (
-                  "Treating resize request of legacy application %s as a "
-                  "fullscreen request\n",
-                  window->desc);
-      meta_window_make_fullscreen_internal (window);
-    }
-
   /* Log all this information for debugging */
   meta_topic (META_DEBUG_GEOMETRY,
               "Setting up constraint info:\n"
