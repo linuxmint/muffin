@@ -103,9 +103,6 @@ struct _MetaShapedTexturePrivate
   cairo_region_t *shape_region;
   cairo_region_t *opaque_region;
 
-  cairo_region_t *overlay_region;
-  cairo_path_t *overlay_path;
-
   guint tex_width, tex_height;
   guint mask_width, mask_height;
 
@@ -150,8 +147,6 @@ meta_shaped_texture_init (MetaShapedTexture *self)
   priv = self->priv = META_SHAPED_TEXTURE_GET_PRIVATE (self);
 
   priv->shape_region = NULL;
-  priv->overlay_path = NULL;
-  priv->overlay_region = NULL;
   priv->paint_tower = meta_texture_tower_new ();
   priv->texture = NULL;
   priv->mask_texture = NULL;
@@ -365,14 +360,10 @@ meta_shaped_texture_ensure_mask (MetaShapedTexture *stex)
       int n_rects;
       int stride;
 
-      /* If we have no shape region and no (or an empty) overlay region, we
-       * don't need to create a full mask texture, so quit early. */
-      if (priv->shape_region == NULL &&
-          (priv->overlay_region == NULL ||
-           cairo_region_num_rectangles (priv->overlay_region) == 0))
-        {
-          return;
-        }
+      /* If we have no shape region, we don't need to create
+       * a full mask texture, so quit early. */
+      if (priv->shape_region == NULL)
+        return;
 
       if (priv->shape_region == NULL)
         return;
@@ -409,8 +400,6 @@ meta_shaped_texture_ensure_mask (MetaShapedTexture *stex)
                y1++, p += stride)
             memset (p, 255, x2 - x1);
         }
-
-      install_overlay_path (stex, mask_data, tex_width, tex_height, stride);
 
       if (meta_texture_rectangle_check (paint_tex))
         priv->mask_texture = meta_cogl_rectangle_new (tex_width, tex_height,

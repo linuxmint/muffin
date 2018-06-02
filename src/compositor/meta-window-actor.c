@@ -2277,17 +2277,6 @@ meta_window_actor_sync_visibility (MetaWindowActor *self)
     }
 }
 
-static inline void
-set_integral_bounding_rect (cairo_rectangle_int_t *rect,
-                            double x, double y,
-                            double width, double height)
-{
-  rect->x = floor(x);
-  rect->y = floor(y);
-  rect->width = ceil(x + width) - rect->x;
-  rect->height = ceil(y + height) - rect->y;
-}
-
 static void
 update_corners (MetaWindowActor   *self)
 {
