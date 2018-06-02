@@ -2487,7 +2487,6 @@ scan_visible_region (guchar         *mask_data,
 
 static void
 build_and_scan_frame_mask (MetaWindowActor       *self,
-                           MetaFrameBorders      *borders,
                            cairo_rectangle_int_t *client_area,
                            cairo_region_t        *shape_region)
 {
@@ -2533,7 +2532,7 @@ build_and_scan_frame_mask (MetaWindowActor       *self,
       gdk_cairo_region (cr, frame_paint_region);
       cairo_clip (cr);
 
-      install_corners (priv->window, borders, cr);
+      meta_frame_get_mask (priv->window->frame, cr);
 
       cairo_surface_flush (surface);
       scanned_region = scan_visible_region (mask_data, stride, frame_paint_region);
@@ -2675,7 +2674,7 @@ check_needs_reshape (MetaWindowActor *self)
        * and scans the mask looking for all opaque pixels,
        * adding it to region.
        */
-      build_and_scan_frame_mask (self, &borders, &client_area, region);
+      build_and_scan_frame_mask (self, &client_area, region);
     }
 
   if (priv->window->frame)

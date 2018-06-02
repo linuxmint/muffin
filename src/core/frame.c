@@ -365,19 +365,6 @@ meta_frame_clear_cached_borders (MetaFrame *frame)
   frame->borders_cached = FALSE;
 }
 
-LOCAL_SYMBOL void
-meta_frame_get_corner_radiuses (MetaFrame *frame,
-                                float     *top_left,
-                                float     *top_right,
-                                float     *bottom_left,
-                                float     *bottom_right)
-{
-  meta_ui_get_corner_radiuses (frame->window->screen->ui,
-                               frame->xwindow,
-                               top_left, top_right,
-                               bottom_left, bottom_right);
-}
-
 LOCAL_SYMBOL gboolean
 meta_frame_sync_to_window (MetaFrame *frame,
                            int        resize_gravity,
@@ -419,6 +406,14 @@ meta_frame_get_frame_bounds (MetaFrame *frame)
                                    frame->xwindow,
                                    frame->rect.width,
                                    frame->rect.height);
+}
+
+void
+meta_frame_get_mask (MetaFrame                    *frame,
+                     cairo_t                      *cr)
+{
+  meta_ui_get_frame_mask (frame->window->screen->ui, frame->xwindow,
+                          frame->rect.width, frame->rect.height, cr);
 }
 
 LOCAL_SYMBOL void
