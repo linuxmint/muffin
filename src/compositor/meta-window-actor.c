@@ -18,6 +18,7 @@
 #include <clutter/x11/clutter-x11.h>
 #include <cogl/winsys/cogl-texture-pixmap-x11.h>
 #include <gdk/gdk.h> /* for gdk_rectangle_union() */
+#include <string.h>
 
 #include <meta/display.h>
 #include <meta/errors.h>
@@ -30,6 +31,7 @@
 #include "meta-shaped-texture-private.h"
 #include "meta-shadow-factory-private.h"
 #include "meta-window-actor-private.h"
+#include "meta-texture-rectangle.h"
 
 enum {
   POSITION_CHANGED,
@@ -2379,6 +2381,84 @@ update_corners (MetaWindowActor   *self)
 }
 
 static void
+generate_mask (MetaWindowActor  *self,
+               MetaFrameBorders *borders,
+               cairo_region_t   *shape_region)
+{
+  MetaWindowActorPrivate *priv = self->priv;
+  guchar *mask_data;
+  guint tex_width, tex_height;
+  CoglHandle paint_tex, mask_texture;
+  int i;
+  int n_rects;
+  int stride;
+
+  paint_tex = meta_shaped_texture_get_texture (META_SHAPED_TEXTURE (priv->actor));
+  if (paint_tex == COGL_INVALID_HANDLE)
+    return;
+
+  tex_width = cogl_texture_get_width (paint_tex);
+  tex_height = cogl_texture_get_height (paint_tex);
+
+  stride = cairo_format_stride_for_width (CAIRO_FORMAT_A8, tex_width);
+
+  /* Create data for an empty image */
+  mask_data = g_malloc0 (stride * tex_height);
+
+  n_rects = cairo_region_num_rectangles (shape_region);
+
+  /* Fill in each rectangle. */
+  for (i = 0; i < n_rects; i ++)
+    {
+      cairo_rectangle_int_t rect;
+      cairo_region_get_rectangle (shape_region, i, &rect);
+
+      gint x1 = rect.x, x2 = x1 + rect.width;
+      gint y1 = rect.y, y2 = y1 + rect.height;
+      guchar *p;
+
+      /* Clip the rectangle to the size of the texture */
+      x1 = CLAMP (x1, 0, (gint) tex_width - 1);
+      x2 = CLAMP (x2, x1, (gint) tex_width);
+      y1 = CLAMP (y1, 0, (gint) tex_height - 1);
+      y2 = CLAMP (y2, y1, (gint) tex_height);
+
+      /* Fill the rectangle */
+      for (p = mask_data + y1 * stride + x1;
+           y1 < y2;
+           y1++, p += stride)
+        memset (p, 255, x2 - x1);
+    }
+
+  if (meta_texture_rectangle_check (paint_tex))
+    {
+      mask_texture = meta_texture_rectangle_new (tex_width, tex_height,
+                                                 COGL_PIXEL_FORMAT_A_8,
+                                                 COGL_PIXEL_FORMAT_A_8,
+                                                 stride,
+                                                 mask_data);
+    }
+  else
+    {
+      /* Note: we don't allow slicing for this texture because we
+       * need to use it with multi-texturing which doesn't support
+       * sliced textures */
+      mask_texture = cogl_texture_new_from_data (tex_width, tex_height,
+                                                 COGL_TEXTURE_NO_SLICING,
+                                                 COGL_PIXEL_FORMAT_A_8,
+                                                 COGL_PIXEL_FORMAT_ANY,
+                                                 stride,
+                                                 mask_data);
+    }
+
+  meta_shaped_texture_set_mask_texture (META_SHAPED_TEXTURE (priv->actor),
+                                        mask_texture);
+  cogl_handle_unref (mask_texture);
+
+  g_free (mask_data);
+}
+
+static void
 check_needs_reshape (MetaWindowActor *self)
 {
   MetaWindowActorPrivate *priv = self->priv;
@@ -2470,6 +2550,7 @@ check_needs_reshape (MetaWindowActor *self)
 
   meta_shaped_texture_set_shape_region (META_SHAPED_TEXTURE (priv->actor),
                                         region);
+  generate_mask (self, &borders, region);
 
   if (priv->window->frame)
     update_corners (self);

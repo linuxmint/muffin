@@ -1,7 +1,7 @@
 /*
  * shaped texture
  *
- * An actor to draw a texture clipped to a list of rectangles
+ * An actor to draw a masked texture.
  *
  * Authored By Neil Roberts  <neil@linux.intel.com>
  *
@@ -42,7 +42,6 @@
 #include <cogl/cogl.h>
 #include <cogl/winsys/cogl-texture-pixmap-x11.h>
 #include <gdk/gdk.h> /* for gdk_rectangle_intersect() */
-#include <string.h>
 
 /* MAX_MIPMAPPING_FPS needs to be as small as possible for the best GPU
  * performance, but higher than the refresh rate of commonly slow updating
@@ -104,7 +103,6 @@ struct _MetaShapedTexturePrivate
   cairo_region_t *opaque_region;
 
   guint tex_width, tex_height;
-  guint mask_width, mask_height;
 
   gint64 prev_invalidation, last_invalidation;
   guint fast_updates;
@@ -146,7 +144,6 @@ meta_shaped_texture_init (MetaShapedTexture *self)
 
   priv = self->priv = META_SHAPED_TEXTURE_GET_PRIVATE (self);
 
-  priv->shape_region = NULL;
   priv->paint_tower = meta_texture_tower_new ();
   priv->texture = NULL;
   priv->mask_texture = NULL;
@@ -783,8 +780,8 @@ meta_shaped_texture_set_create_mipmaps (MetaShapedTexture *stex,
 }
 
 void
-meta_shaped_texture_set_shape_region (MetaShapedTexture *stex,
-                                      cairo_region_t    *region)
+meta_shaped_texture_set_mask_texture (MetaShapedTexture *stex,
+                                      CoglHandle         mask_texture)
 {
   MetaShapedTexturePrivate *priv;
 
@@ -792,16 +789,16 @@ meta_shaped_texture_set_shape_region (MetaShapedTexture *stex,
 
   priv = stex->priv;
 
-  if (priv->shape_region != NULL)
+  if (priv->mask_texture != COGL_INVALID_HANDLE)
     {
-      cairo_region_destroy (priv->shape_region);
-      priv->shape_region = NULL;
+      cogl_handle_unref (priv->mask_texture);
+      priv->mask_texture = COGL_INVALID_HANDLE;
     }
 
-  if (region != NULL)
+  if (mask_texture != COGL_INVALID_HANDLE)
     {
-      cairo_region_reference (region);
-      priv->shape_region = region;
+      priv->mask_texture = mask_texture;
+      cogl_handle_ref (priv->mask_texture);
     }
 }
 
