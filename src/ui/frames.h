@@ -89,7 +89,7 @@ struct _MetaUIFrame
 struct _MetaFrames
 {
   GtkWindow parent_instance;
-  
+
   GHashTable *text_heights;
 
   GHashTable *frames;
@@ -98,10 +98,6 @@ struct _MetaFrames
 
   MetaStyleInfo *normal_style;
   GHashTable *style_variants;
-
-  int invalidate_cache_timeout_id;
-  GList *invalidate_frames;
-  GHashTable *cache;
 };
 
 struct _MetaFramesClass
