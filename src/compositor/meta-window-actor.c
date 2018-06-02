@@ -2581,6 +2581,7 @@ check_needs_reshape (MetaWindowActor *self)
   MetaDisplay *display = meta_screen_get_display (screen);
   cairo_region_t *region = NULL;
   cairo_rectangle_int_t client_area;
+  gboolean needs_mask;
 
   if ((!priv->window->mapped && !priv->window->shaded) || !priv->needs_reshape)
     return;
@@ -2630,6 +2631,9 @@ check_needs_reshape (MetaWindowActor *self)
         }
     }
 #endif
+
+  needs_mask = (region != NULL) || (priv->window->frame != NULL);
+
   if (region == NULL)
     {
       /* If we don't have a shape on the server, that means that
@@ -2665,7 +2669,14 @@ check_needs_reshape (MetaWindowActor *self)
    * and scans the mask looking for all opaque pixels,
    * adding it to region.
    */
-  build_and_scan_frame_mask (self, &borders, &client_area, region);
+  if (needs_mask)
+    {
+      /* This takes the region, generates a mask using GTK+
+       * and scans the mask looking for all opaque pixels,
+       * adding it to region.
+       */
+      build_and_scan_frame_mask (self, &borders, &client_area, region);
+    }
 
   if (priv->window->frame)
     update_corners (self);
@@ -2673,7 +2684,6 @@ check_needs_reshape (MetaWindowActor *self)
   meta_window_actor_reset_mask_texture (self, priv->window->fullscreen);
 
   meta_window_actor_update_shape_region (self, region);
-
   cairo_region_destroy (region);
 
   priv->needs_reshape = FALSE;
