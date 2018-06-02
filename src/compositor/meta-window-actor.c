@@ -2280,7 +2280,7 @@ check_needs_reshape (MetaWindowActor *self)
   MetaScreen *screen = priv->screen;
   MetaDisplay *display = meta_screen_get_display (screen);
   MetaFrameBorders borders;
-  cairo_region_t *region;
+  cairo_region_t *region = NULL;
   cairo_rectangle_int_t client_area;
 
   if (!priv->needs_reshape)
@@ -2310,7 +2310,6 @@ check_needs_reshape (MetaWindowActor *self)
       Display *xdisplay = meta_display_get_xdisplay (display);
       XRectangle *rects;
       int n_rects, ordering;
-      cairo_rectangle_int_t *cairo_rects = NULL;
 
       meta_error_trap_push (display);
       rects = XShapeGetRectangles (xdisplay,
@@ -2323,7 +2322,7 @@ check_needs_reshape (MetaWindowActor *self)
       if (rects)
         {
           int i;
-          cairo_rects = g_new (cairo_rectangle_int_t, n_rects);
+          cairo_rectangle_int_t *cairo_rects = g_new (cairo_rectangle_int_t, n_rects);
           for (i = 0; i < n_rects; i ++)
             {
               cairo_rects[i].x = rects[i].x + client_area.x;
@@ -2331,14 +2330,14 @@ check_needs_reshape (MetaWindowActor *self)
               cairo_rects[i].width = rects[i].width;
               cairo_rects[i].height = rects[i].height;
             }
-          XFree (rects);
-        }
 
-      region = cairo_region_create_rectangles (cairo_rects, n_rects);
-      g_free (cairo_rects);
+          XFree (rects);
+          region = cairo_region_create_rectangles (cairo_rects, n_rects);
+          g_free (cairo_rects);
+        }
     }
-  else
 #endif
+  if (region == NULL)
     {
       /* If we don't have a shape on the server, that means that
        * we have an implicit shape of one rectangle covering the
