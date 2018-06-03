@@ -3635,7 +3635,15 @@ meta_window_get_all_monitors (MetaWindow *window, gsize *length)
   int i;
 
   monitors = g_array_new (FALSE, FALSE, sizeof (int));
-  meta_window_get_outer_rect (window, &window_rect);
+
+  if (meta_window_is_client_decorated (window))
+    {
+      window_rect = window->rect;
+    }
+  else
+    {
+      meta_window_get_outer_rect (window, &window_rect);
+    }
 
   for (i = 0; i < window->screen->n_monitor_infos; i++)
     {
