@@ -1076,12 +1076,6 @@ meta_frames_button_press_event (GtkWidget      *widget,
        control == META_FRAME_CONTROL_UNMAXIMIZE ||
        control == META_FRAME_CONTROL_MINIMIZE ||
        control == META_FRAME_CONTROL_DELETE ||
-       control == META_FRAME_CONTROL_SHADE ||
-       control == META_FRAME_CONTROL_UNSHADE ||
-       control == META_FRAME_CONTROL_ABOVE ||
-       control == META_FRAME_CONTROL_UNABOVE ||
-       control == META_FRAME_CONTROL_STICK ||
-       control == META_FRAME_CONTROL_UNSTICK ||
        control == META_FRAME_CONTROL_MENU))
     {
       MetaGrabOp op = META_GRAB_OP_NONE;
@@ -1102,24 +1096,6 @@ meta_frames_button_press_event (GtkWidget      *widget,
           break;
         case META_FRAME_CONTROL_MENU:
           op = META_GRAB_OP_CLICKING_MENU;
-          break;
-        case META_FRAME_CONTROL_SHADE:
-          op = META_GRAB_OP_CLICKING_SHADE;
-          break;
-        case META_FRAME_CONTROL_UNSHADE:
-          op = META_GRAB_OP_CLICKING_UNSHADE;
-          break;
-        case META_FRAME_CONTROL_ABOVE:
-          op = META_GRAB_OP_CLICKING_ABOVE;
-          break;
-        case META_FRAME_CONTROL_UNABOVE:
-          op = META_GRAB_OP_CLICKING_UNABOVE;
-          break;
-        case META_FRAME_CONTROL_STICK:
-          op = META_GRAB_OP_CLICKING_STICK;
-          break;
-        case META_FRAME_CONTROL_UNSTICK:
-          op = META_GRAB_OP_CLICKING_UNSTICK;
           break;
         default:
           g_assert_not_reached ();
@@ -1355,48 +1331,6 @@ meta_frames_button_release_event    (GtkWidget           *widget,
           meta_core_end_grab_op (display, event->time);
           break;
 
-        case META_GRAB_OP_CLICKING_SHADE:
-          if (control == META_FRAME_CONTROL_SHADE)
-            meta_core_shade (display, frame->xwindow, event->time);
-          
-          meta_core_end_grab_op (display, event->time);
-          break;
- 
-        case META_GRAB_OP_CLICKING_UNSHADE:
-          if (control == META_FRAME_CONTROL_UNSHADE)
-            meta_core_unshade (display, frame->xwindow, event->time);
-
-          meta_core_end_grab_op (display, event->time);
-          break;
-
-        case META_GRAB_OP_CLICKING_ABOVE:
-          if (control == META_FRAME_CONTROL_ABOVE)
-            meta_core_make_above (display, frame->xwindow);
-          
-          meta_core_end_grab_op (display, event->time);
-          break;
- 
-        case META_GRAB_OP_CLICKING_UNABOVE:
-          if (control == META_FRAME_CONTROL_UNABOVE)
-            meta_core_unmake_above (display, frame->xwindow);
-
-          meta_core_end_grab_op (display, event->time);
-          break;
-
-        case META_GRAB_OP_CLICKING_STICK:
-          if (control == META_FRAME_CONTROL_STICK)
-            meta_core_stick (display, frame->xwindow);
-
-          meta_core_end_grab_op (display, event->time);
-          break;
- 
-        case META_GRAB_OP_CLICKING_UNSTICK:
-          if (control == META_FRAME_CONTROL_UNSTICK)
-            meta_core_unstick (display, frame->xwindow);
-
-          meta_core_end_grab_op (display, event->time);
-          break;
-          
         default:
           break;
         }
@@ -1443,18 +1377,6 @@ meta_ui_frame_update_prelit_control (MetaUIFrame     *frame,
       break;
     case META_FRAME_CONTROL_UNMAXIMIZE:
       break;
-    case META_FRAME_CONTROL_SHADE:
-      break;
-    case META_FRAME_CONTROL_UNSHADE:
-      break;
-    case META_FRAME_CONTROL_ABOVE:
-      break;
-    case META_FRAME_CONTROL_UNABOVE:
-      break;
-    case META_FRAME_CONTROL_STICK:
-      break;
-    case META_FRAME_CONTROL_UNSTICK:
-      break;
     case META_FRAME_CONTROL_RESIZE_SE:
       cursor = META_CURSOR_SE_RESIZE;
       break;
@@ -1492,12 +1414,6 @@ meta_ui_frame_update_prelit_control (MetaUIFrame     *frame,
     case META_FRAME_CONTROL_MINIMIZE:
     case META_FRAME_CONTROL_MAXIMIZE:
     case META_FRAME_CONTROL_DELETE:
-    case META_FRAME_CONTROL_SHADE:
-    case META_FRAME_CONTROL_UNSHADE:
-    case META_FRAME_CONTROL_ABOVE:
-    case META_FRAME_CONTROL_UNABOVE:
-    case META_FRAME_CONTROL_STICK:
-    case META_FRAME_CONTROL_UNSTICK:
     case META_FRAME_CONTROL_UNMAXIMIZE:
       /* leave control set */
       break;
@@ -1570,19 +1486,7 @@ meta_frames_motion_notify_event     (GtkWidget           *widget,
                ((control == META_FRAME_CONTROL_MAXIMIZE ||
                  control == META_FRAME_CONTROL_UNMAXIMIZE) &&
                 (grab_op == META_GRAB_OP_CLICKING_MAXIMIZE ||
-                 grab_op == META_GRAB_OP_CLICKING_UNMAXIMIZE)) ||
-               (control == META_FRAME_CONTROL_SHADE &&
-                grab_op == META_GRAB_OP_CLICKING_SHADE) ||
-               (control == META_FRAME_CONTROL_UNSHADE &&
-                grab_op == META_GRAB_OP_CLICKING_UNSHADE) ||
-               (control == META_FRAME_CONTROL_ABOVE &&
-                grab_op == META_GRAB_OP_CLICKING_ABOVE) ||
-               (control == META_FRAME_CONTROL_UNABOVE &&
-                grab_op == META_GRAB_OP_CLICKING_UNABOVE) ||
-               (control == META_FRAME_CONTROL_STICK &&
-                grab_op == META_GRAB_OP_CLICKING_STICK) ||
-               (control == META_FRAME_CONTROL_UNSTICK &&
-                grab_op == META_GRAB_OP_CLICKING_UNSTICK)))
+                 grab_op == META_GRAB_OP_CLICKING_UNMAXIMIZE))))
            control = META_FRAME_CONTROL_NONE;
         
         /* Update prelit control and cursor */
@@ -1793,7 +1697,7 @@ meta_ui_frame_paint (MetaUIFrame  *frame,
   MetaButtonLayout button_layout;
   MetaGrabOp grab_op;
   Display *display;
-  
+
   display = GDK_DISPLAY_XDISPLAY (gdk_display_get_default ());
 
   for (i = 0; i < META_BUTTON_TYPE_LAST; i++)
@@ -1803,7 +1707,7 @@ meta_ui_frame_paint (MetaUIFrame  *frame,
   grab_op = meta_core_get_grab_op (display);
   if (grab_frame != frame->xwindow)
     grab_op = META_GRAB_OP_NONE;
-  
+
   /* Set prelight state */
   switch (frame->prelit_control)
     {
@@ -1830,42 +1734,6 @@ meta_ui_frame_paint (MetaUIFrame  *frame,
         button_states[META_BUTTON_TYPE_MAXIMIZE] = META_BUTTON_STATE_PRESSED;
       else
         button_states[META_BUTTON_TYPE_MAXIMIZE] = META_BUTTON_STATE_PRELIGHT;
-      break;
-    case META_FRAME_CONTROL_SHADE:
-      if (grab_op == META_GRAB_OP_CLICKING_SHADE)
-        button_states[META_BUTTON_TYPE_SHADE] = META_BUTTON_STATE_PRESSED;
-      else
-        button_states[META_BUTTON_TYPE_SHADE] = META_BUTTON_STATE_PRELIGHT;
-      break;
-    case META_FRAME_CONTROL_UNSHADE:
-      if (grab_op == META_GRAB_OP_CLICKING_UNSHADE)
-        button_states[META_BUTTON_TYPE_UNSHADE] = META_BUTTON_STATE_PRESSED;
-      else
-        button_states[META_BUTTON_TYPE_UNSHADE] = META_BUTTON_STATE_PRELIGHT;
-      break;
-    case META_FRAME_CONTROL_ABOVE:
-      if (grab_op == META_GRAB_OP_CLICKING_ABOVE)
-        button_states[META_BUTTON_TYPE_ABOVE] = META_BUTTON_STATE_PRESSED;
-      else
-        button_states[META_BUTTON_TYPE_ABOVE] = META_BUTTON_STATE_PRELIGHT;
-      break;
-    case META_FRAME_CONTROL_UNABOVE:
-      if (grab_op == META_GRAB_OP_CLICKING_UNABOVE)
-        button_states[META_BUTTON_TYPE_UNABOVE] = META_BUTTON_STATE_PRESSED;
-      else
-        button_states[META_BUTTON_TYPE_UNABOVE] = META_BUTTON_STATE_PRELIGHT;
-      break;
-    case META_FRAME_CONTROL_STICK:
-      if (grab_op == META_GRAB_OP_CLICKING_STICK)
-        button_states[META_BUTTON_TYPE_STICK] = META_BUTTON_STATE_PRESSED;
-      else
-        button_states[META_BUTTON_TYPE_STICK] = META_BUTTON_STATE_PRELIGHT;
-      break;
-    case META_FRAME_CONTROL_UNSTICK:
-      if (grab_op == META_GRAB_OP_CLICKING_UNSTICK)
-        button_states[META_BUTTON_TYPE_UNSTICK] = META_BUTTON_STATE_PRESSED;
-      else
-        button_states[META_BUTTON_TYPE_UNSTICK] = META_BUTTON_STATE_PRELIGHT;
       break;
     case META_FRAME_CONTROL_DELETE:
       if (grab_op == META_GRAB_OP_CLICKING_DELETE)
@@ -1966,24 +1834,6 @@ control_rect (MetaFrameControl control,
     case META_FRAME_CONTROL_UNMAXIMIZE:
       rect = &fgeom->max_rect.visible;
       break;
-    case META_FRAME_CONTROL_SHADE:
-      rect = &fgeom->shade_rect.visible;
-      break;
-    case META_FRAME_CONTROL_UNSHADE:
-      rect = &fgeom->unshade_rect.visible;
-      break;
-    case META_FRAME_CONTROL_ABOVE:
-      rect = &fgeom->above_rect.visible;
-      break;
-    case META_FRAME_CONTROL_UNABOVE:
-      rect = &fgeom->unabove_rect.visible;
-      break;
-    case META_FRAME_CONTROL_STICK:
-      rect = &fgeom->stick_rect.visible;
-      break;
-    case META_FRAME_CONTROL_UNSTICK:
-      rect = &fgeom->unstick_rect.visible;
-      break;
     case META_FRAME_CONTROL_RESIZE_SE:
       break;
     case META_FRAME_CONTROL_RESIZE_S:
@@ -2033,7 +1883,7 @@ get_control (MetaUIFrame *frame,
 
   if (POINT_IN_RECT (x, y, client))
     return META_FRAME_CONTROL_CLIENT_AREA;
-  
+
   if (POINT_IN_RECT (x, y, fgeom.close_rect.clickable))
     return META_FRAME_CONTROL_DELETE;
 
@@ -2073,36 +1923,6 @@ get_control (MetaUIFrame *frame,
         return META_FRAME_CONTROL_UNMAXIMIZE;
       else
         return META_FRAME_CONTROL_MAXIMIZE;
-    }
-      
-  if (POINT_IN_RECT (x, y, fgeom.shade_rect.clickable))
-    {
-      return META_FRAME_CONTROL_SHADE;
-    }
-
-  if (POINT_IN_RECT (x, y, fgeom.unshade_rect.clickable))
-    {
-      return META_FRAME_CONTROL_UNSHADE;
-    }
-
-  if (POINT_IN_RECT (x, y, fgeom.above_rect.clickable))
-    {
-      return META_FRAME_CONTROL_ABOVE;
-    }
-
-  if (POINT_IN_RECT (x, y, fgeom.unabove_rect.clickable))
-    {
-      return META_FRAME_CONTROL_UNABOVE;
-    }
-
-  if (POINT_IN_RECT (x, y, fgeom.stick_rect.clickable))
-    {
-      return META_FRAME_CONTROL_STICK;
-    }
-
-  if (POINT_IN_RECT (x, y, fgeom.unstick_rect.clickable))
-    {
-      return META_FRAME_CONTROL_UNSTICK;
     }
 
   /* South resize always has priority over north resize,

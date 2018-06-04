@@ -269,12 +269,6 @@ typedef enum
   META_BUTTON_FUNCTION_MINIMIZE,
   META_BUTTON_FUNCTION_MAXIMIZE,
   META_BUTTON_FUNCTION_CLOSE,
-  META_BUTTON_FUNCTION_SHADE,
-  META_BUTTON_FUNCTION_ABOVE,
-  META_BUTTON_FUNCTION_STICK,
-  META_BUTTON_FUNCTION_UNSHADE,
-  META_BUTTON_FUNCTION_UNABOVE,
-  META_BUTTON_FUNCTION_UNSTICK,
   META_BUTTON_FUNCTION_LAST
 } MetaButtonFunction;
 
@@ -309,10 +303,10 @@ typedef enum {
 /* Keep array size in sync with MAX_BUTTONS_PER_CORNER */
 /**
  * MetaButtonLayout:
- * @left_buttons: (array fixed-size=10):
- * @right_buttons: (array fixed-size=10):
- * @left_buttons_has_spacer: (array fixed-size=10):
- * @right_buttons_has_spacer: (array fixed-size=10):
+ * @left_buttons: (array fixed-size=5):
+ * @right_buttons: (array fixed-size=5):
+ * @left_buttons_has_spacer: (array fixed-size=5):
+ * @right_buttons_has_spacer: (array fixed-size=5):
  */
 typedef struct _MetaButtonLayout MetaButtonLayout;
 struct _MetaButtonLayout
