@@ -26,6 +26,7 @@
 
 /* Don't include gtk.h or gdk.h here */
 #include <meta/common.h>
+#include <meta/types.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <cairo.h>
@@ -33,6 +34,7 @@
 #include <gdk-pixbuf/gdk-pixbuf.h>
 
 typedef struct _MetaUI MetaUI;
+typedef struct _MetaUIFrame MetaUIFrame;
 
 typedef gboolean (* MetaEventFunc) (XEvent *xevent, gpointer data);
 
@@ -61,27 +63,18 @@ void meta_ui_theme_get_frame_borders (MetaUI *ui,
                                       MetaFrameType      type,
                                       MetaFrameFlags     flags,
                                       MetaFrameBorders *borders);
-void meta_ui_get_frame_borders (MetaUI *ui,
-                                Window frame_xwindow,
-                                MetaFrameBorders *borders);
 
-void meta_ui_get_frame_mask (MetaUI *ui,
-                             Window frame_xwindow,
-                             guint width,
-                             guint height,
-                             cairo_t *cr);
-
-Window meta_ui_create_frame_window (MetaUI *ui,
+MetaUIFrame * meta_ui_create_frame (MetaUI *ui,
                                     Display *xdisplay,
+                                    MetaWindow *meta_window,
                                     Visual *xvisual,
-				    gint x,
-				    gint y,
-				    gint width,
-				    gint height,
-				    gint screen_no,
+                                    gint x,
+                                    gint y,
+                                    gint width,
+                                    gint height,
+                                    gint screen_no,
                                     gulong *create_serial);
-void meta_ui_destroy_frame_window (MetaUI *ui,
-				   Window  xwindow);
+
 void meta_ui_move_resize_frame (MetaUI *ui,
 				Window frame,
 				int x,
@@ -94,24 +87,6 @@ void meta_ui_map_frame   (MetaUI *ui,
                           Window  xwindow);
 void meta_ui_unmap_frame (MetaUI *ui,
                           Window  xwindow);
-
-cairo_region_t *meta_ui_get_frame_bounds (MetaUI  *ui,
-                                          Window   xwindow,
-                                          int      window_width,
-                                          int      window_height);
-
-void meta_ui_queue_frame_draw (MetaUI *ui,
-                               Window xwindow);
-
-void meta_ui_set_frame_title (MetaUI *ui,
-                              Window xwindow,
-                              const char *title);
-
-void meta_ui_update_frame_style (MetaUI  *ui,
-                                 Window   window);
-
-void meta_ui_repaint_frame (MetaUI *ui,
-                            Window xwindow);
 
 MetaWindowMenu* meta_ui_window_menu_new   (MetaUI             *ui,
                                            Window              client_xwindow,

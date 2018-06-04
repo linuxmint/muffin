@@ -1,7 +1,5 @@
 /* -*- mode: C; c-file-style: "gnu"; indent-tabs-mode: nil; -*- */
 
-/* Metacity Theme Rendering */
-
 /*
  * Copyright (C) 2001 Havoc Pennington
  *
@@ -19,38 +17,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street - Suite 500, Boston, MA
  * 02110-1335, USA.
- */
-
-/**
- * SECTION:theme
- * @short_description: Making Metacity look pretty
- *
- * The window decorations drawn by Metacity are described by files on disk
- * known internally as "themes" (externally as "window border themes" on
- * http://art.gnome.org/themes/metacity/ or "Metacity themes"). This file
- * contains most of the code necessary to support themes; it does not
- * contain the XML parser, which is in theme-parser.c.
- *
- * \bug This is a big file with lots of different subsystems, which might
- * be better split out into separate files.
- */
-
-/*
- * \defgroup tokenizer   The theme expression tokenizer
- *
- * Themes can use a simple expression language to represent the values of
- * things. This is the tokeniser used for that language.
- *
- * \bug We could remove almost all this code by using GScanner instead,
- * but we would also have to find every expression in every existing theme
- * we could and make sure the parse trees were the same.
- */
-
-/*
- * \defgroup parser  The theme expression parser
- *
- * Themes can use a simple expression language to represent the values of
- * things. This is the parser used for that language.
  */
 
 #include <config.h>
@@ -481,8 +447,9 @@ meta_frame_layout_calc_geometry (MetaFrameLayout        *layout,
 
   width = client_width + borders.total.left + borders.total.right;
 
-  height = ((flags & META_FRAME_SHADED) ? 0: client_height) +
-    borders.total.top + borders.total.bottom;
+  height = borders.total.top + borders.total.bottom;
+  if (!(flags & META_FRAME_SHADED))
+    height += client_height;
 
   fgeom->width = width;
   fgeom->height = height;
@@ -848,7 +815,9 @@ meta_frame_layout_draw_with_style (MetaFrameLayout         *layout,
   GdkRectangle titlebar_rect;
   GdkRectangle button_rect;
   const MetaFrameBorders *borders;
-  int scale = meta_theme_get_window_scaling_factor ();
+  cairo_surface_t *frame_surface;
+  double xscale, yscale;
+  int scale;
 
   /* We opt out of GTK+/Clutter's HiDPI handling, so we have to do the scaling
    * ourselves; the nitty-gritty is a bit confusing, so here is an overview:
@@ -860,8 +829,14 @@ meta_frame_layout_draw_with_style (MetaFrameLayout         *layout,
    *  - for drawing, we scale the canvas to have GTK+ render elements (borders,
    *    radii, ...) at the correct scale - as a result, we have to "unscale"
    *    the geometry again to not apply the scaling twice
+   *  - As per commit e36b629c GTK expects the device scale to be set and match
+   *    the final scaling or the surface caching won't take this in account
+   *    breaking -gtk-scaled items.
    */
-  cairo_scale (cr, scale, scale);
+  scale = meta_theme_get_window_scaling_factor ();
+  frame_surface = cairo_get_target (cr);
+  cairo_surface_get_device_scale (frame_surface, &xscale, &yscale);
+  cairo_surface_set_device_scale (frame_surface, scale, scale);
 
   borders = &fgeom->borders;
 
@@ -992,8 +967,8 @@ meta_frame_layout_draw_with_style (MetaFrameLayout         *layout,
               float width, height;
               int x, y;
 
-              width = gdk_pixbuf_get_width (pixbuf) / scale;
-              height = gdk_pixbuf_get_height (pixbuf) / scale;
+              width = gdk_pixbuf_get_width (pixbuf);
+              height = gdk_pixbuf_get_height (pixbuf);
               x = button_rect.x + (button_rect.width - layout->icon_size) / 2;
               y = button_rect.y + (button_rect.height - layout->icon_size) / 2;
 
@@ -1013,6 +988,8 @@ meta_frame_layout_draw_with_style (MetaFrameLayout         *layout,
         gtk_style_context_remove_class (style, button_class);
       gtk_style_context_set_state (style, state);
     }
+
+  cairo_surface_set_device_scale (frame_surface, xscale, yscale);
 }
 
 /**
@@ -1087,8 +1064,7 @@ meta_theme_free (MetaTheme *theme)
 
 MetaFrameLayout*
 meta_theme_get_frame_layout (MetaTheme     *theme,
-                             MetaFrameType  type,
-                             MetaFrameFlags flags)
+                             MetaFrameType  type)
 {
   g_return_val_if_fail (type < META_FRAME_TYPE_LAST, NULL);
 

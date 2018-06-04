@@ -111,12 +111,6 @@ meta_core_get (Display *xdisplay,
       case META_CORE_GET_CLIENT_XWINDOW:
         *((Window*)answer) = window->xwindow;
         break;
-      case META_CORE_GET_FRAME_FLAGS:
-        *((MetaFrameFlags*)answer) = meta_frame_get_flags (window->frame);
-        break; 
-      case META_CORE_GET_FRAME_TYPE:
-        *((MetaFrameType*)answer) = meta_window_get_frame_type (window);
-        break;
       case META_CORE_GET_MINI_ICON:
         *((GdkPixbuf**)answer) = window->mini_icon;
         break;
@@ -144,6 +138,9 @@ meta_core_get (Display *xdisplay,
       case META_CORE_GET_FRAME_HEIGHT:
         *((gint*)answer) = window->frame->rect.height;
         break;
+      case META_CORE_GET_FRAME_RECT:
+          *((MetaRectangle*)answer) = window->frame->rect;
+          break;
       case META_CORE_GET_THEME_VARIANT:
         *((char**)answer) = window->gtk_theme_variant;
         break;
@@ -838,3 +835,9 @@ meta_invalidate_default_icons (void)
   g_slist_free (windows);
 }
 
+void
+meta_retheme_all (void)
+{
+  if (meta_get_display ())
+    meta_display_retheme_all ();
+}
