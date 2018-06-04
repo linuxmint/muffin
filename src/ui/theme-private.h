@@ -131,20 +131,13 @@ struct _MetaFrameGeometry
 
   /* used for a memset hack */
 #define ADDRESS_OF_BUTTON_RECTS(fgeom) (((char*)(fgeom)) + G_STRUCT_OFFSET (MetaFrameGeometry, close_rect))
-#define LENGTH_OF_BUTTON_RECTS (G_STRUCT_OFFSET (MetaFrameGeometry, unstick_rect) + sizeof (GdkRectangle) - G_STRUCT_OFFSET (MetaFrameGeometry, close_rect))
-  
+#define LENGTH_OF_BUTTON_RECTS (G_STRUCT_OFFSET (MetaFrameGeometry, menu_rect) + sizeof (GdkRectangle) - G_STRUCT_OFFSET (MetaFrameGeometry, close_rect))
+
   /* The button rects (if changed adjust memset hack) */
   MetaButtonSpace close_rect;
   MetaButtonSpace max_rect;
   MetaButtonSpace min_rect;
   MetaButtonSpace menu_rect;
-  MetaButtonSpace shade_rect;
-  MetaButtonSpace above_rect;
-  MetaButtonSpace stick_rect;
-  MetaButtonSpace unshade_rect;
-  MetaButtonSpace unabove_rect;
-  MetaButtonSpace unstick_rect;
-
   /* End of button rects (if changed adjust memset hack) */
 
   /* Saved button layout */
@@ -173,12 +166,6 @@ typedef enum
   META_BUTTON_TYPE_MAXIMIZE,
   META_BUTTON_TYPE_MINIMIZE,
   META_BUTTON_TYPE_MENU,
-  META_BUTTON_TYPE_SHADE,
-  META_BUTTON_TYPE_ABOVE,
-  META_BUTTON_TYPE_STICK,
-  META_BUTTON_TYPE_UNSHADE,
-  META_BUTTON_TYPE_UNABOVE,
-  META_BUTTON_TYPE_UNSTICK,
   META_BUTTON_TYPE_LAST
 } MetaButtonType;
 
