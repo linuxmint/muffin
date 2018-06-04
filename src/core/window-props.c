@@ -620,9 +620,7 @@ set_window_title (MetaWindow *window,
   g_free (str);
 
   if (window->frame)
-    meta_ui_set_frame_title (window->screen->ui,
-                             window->frame->xwindow,
-                             window->title);
+    meta_frame_update_title (window->frame);
 
   g_object_notify (G_OBJECT (window), "title");
 }
@@ -1942,7 +1940,7 @@ reload_gtk_theme_variant (MetaWindow    *window,
       window->gtk_theme_variant = g_strdup (requested_variant);
 
       if (window->frame)
-        meta_ui_update_frame_style (window->screen->ui, window->frame->xwindow);
+        meta_frame_update_style (window->frame);
     }
 }
 

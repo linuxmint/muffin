@@ -46,13 +46,13 @@ meta_window_ensure_frame (MetaWindow *window)
   XSetWindowAttributes attrs;
   Visual *visual;
   gulong create_serial;
-  
+
   if (window->frame)
     return;
-  
+
   /* See comment below for why this is required. */
   meta_display_grab (window->display);
-  
+
   frame = g_new (MetaFrame, 1);
 
   frame->window = window;
@@ -77,7 +77,7 @@ meta_window_ensure_frame (MetaWindow *window)
   meta_verbose ("Frame geometry %d,%d  %dx%d\n",
                 frame->rect.x, frame->rect.y,
                 frame->rect.width, frame->rect.height);
-  
+
   /* Default depth/visual handles clients with weird visuals; they can
    * always be children of the root depth/visual obviously, but
    * e.g. DRI games can't be children of a parent that has the same
@@ -86,7 +86,7 @@ meta_window_ensure_frame (MetaWindow *window)
    * We look for an ARGB visual if we can find one, otherwise use
    * the default of NULL.
    */
-  
+
   /* Special case for depth 32 windows (assumed to be ARGB),
    * we use the window's visual. Otherwise we just use the system visual.
    */
@@ -94,16 +94,19 @@ meta_window_ensure_frame (MetaWindow *window)
     visual = window->xvisual;
   else
     visual = NULL;
-  
-  frame->xwindow = meta_ui_create_frame_window (window->screen->ui,
-                                                window->display->xdisplay,
-                                                visual,
-                                                frame->rect.x,
-                                                frame->rect.y,
-						frame->rect.width,
-						frame->rect.height,
-						frame->window->screen->number,
-                                                &create_serial);
+
+  frame->ui_frame = meta_ui_create_frame (window->screen->ui,
+                                          window->display->xdisplay,
+                                          frame->window,
+                                          visual,
+                                          frame->rect.x,
+                                          frame->rect.y,
+                                          frame->rect.width,
+                                          frame->rect.height,
+                                          frame->window->screen->number,
+                                          &create_serial);
+  frame->xwindow = frame->ui_frame->xwindow;
+
   meta_stack_tracker_record_add (window->screen->stack_tracker,
                                  frame->xwindow,
                                  create_serial);
@@ -112,7 +115,7 @@ meta_window_ensure_frame (MetaWindow *window)
   attrs.event_mask = EVENT_MASK;
   XChangeWindowAttributes (window->display->xdisplay,
 			   frame->xwindow, CWEventMask, &attrs);
-  
+
   meta_display_register_x_window (window->display, &frame->xwindow, window);
 
   /* Reparent the client window; it may be destroyed,
@@ -147,19 +150,15 @@ meta_window_ensure_frame (MetaWindow *window)
                    window->rect.y);
   /* FIXME handle this error */
   meta_error_trap_pop (window->display);
-  
+
   /* stick frame to the window */
   window->frame = frame;
 
   /* Now that frame->xwindow is registered with window, we can set its
    * style and background.
    */
-  meta_ui_update_frame_style (window->screen->ui, frame->xwindow);
-  
-  if (window->title)
-    meta_ui_set_frame_title (window->screen->ui,
-                             window->frame->xwindow,
-                             window->title);
+  meta_frame_update_style (frame);
+  meta_frame_update_title (frame);
 
   /* Move keybindings to frame instead of window */
   meta_window_grab_keys (window);
@@ -212,7 +211,7 @@ meta_window_destroy_frame (MetaWindow *window)
                    window->frame->rect.y + borders.invisible.top);
   meta_error_trap_pop (window->display);
 
-  meta_ui_destroy_frame_window (window->screen->ui, frame->xwindow);
+  meta_ui_frame_unmanage (frame->ui_frame);
 
   meta_display_unregister_x_window (window->display,
                                     frame->xwindow);
@@ -367,8 +366,6 @@ meta_frame_clear_cached_borders (MetaFrame *frame)
 
 LOCAL_SYMBOL gboolean
 meta_frame_sync_to_window (MetaFrame *frame,
-                           int        resize_gravity,
-                           gboolean   need_move,
                            gboolean   need_resize)
 {
   meta_topic (META_DEBUG_GEOMETRY,
@@ -378,22 +375,19 @@ meta_frame_sync_to_window (MetaFrame *frame,
               frame->rect.x + frame->rect.width,
               frame->rect.y + frame->rect.height);
 
-  meta_ui_move_resize_frame (frame->window->screen->ui,
-			     frame->xwindow,
-			     frame->rect.x,
-			     frame->rect.y,
-			     frame->rect.width,
-			     frame->rect.height);
+  meta_ui_frame_move_resize (frame->ui_frame,
+                             frame->rect.x,
+                             frame->rect.y,
+                             frame->rect.width,
+                             frame->rect.height);
 
   if (need_resize)
     {
       /* If we're interactively resizing the frame, repaint
        * it immediately so we don't start to lag.
        */
-      if (frame->window->display->grab_window ==
-          frame->window)
-        meta_ui_repaint_frame (frame->window->screen->ui,
-                               frame->xwindow);
+      if (frame->window->display->grab_window == frame->window)
+        meta_ui_frame_repaint (frame->ui_frame);
     }
 
   return need_resize;
@@ -402,25 +396,20 @@ meta_frame_sync_to_window (MetaFrame *frame,
 LOCAL_SYMBOL cairo_region_t *
 meta_frame_get_frame_bounds (MetaFrame *frame)
 {
-  return meta_ui_get_frame_bounds (frame->window->screen->ui,
-                                   frame->xwindow,
-                                   frame->rect.width,
-                                   frame->rect.height);
+  return meta_ui_frame_get_bounds (frame->ui_frame);
 }
 
 void
 meta_frame_get_mask (MetaFrame                    *frame,
                      cairo_t                      *cr)
 {
-  meta_ui_get_frame_mask (frame->window->screen->ui, frame->xwindow,
-                          frame->rect.width, frame->rect.height, cr);
+  meta_ui_frame_get_mask (frame->ui_frame, cr);
 }
 
 LOCAL_SYMBOL void
 meta_frame_queue_draw (MetaFrame *frame)
 {
-  meta_ui_queue_frame_draw (frame->window->screen->ui,
-                            frame->xwindow);
+  meta_ui_frame_queue_draw (frame->ui_frame);
 }
 
 LOCAL_SYMBOL void
@@ -446,4 +435,17 @@ LOCAL_SYMBOL Window
 meta_frame_get_xwindow (MetaFrame *frame)
 {
   return frame->xwindow;
+}
+
+void
+meta_frame_update_style (MetaFrame *frame)
+{
+  meta_ui_frame_update_style (frame->ui_frame);
+}
+
+void
+meta_frame_update_title (MetaFrame *frame)
+{
+  if (frame->window->title)
+    meta_ui_frame_set_title (frame->ui_frame, frame->window->title);
 }

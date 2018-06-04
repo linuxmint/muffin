@@ -37,8 +37,6 @@ typedef enum
   META_CORE_GET_CLIENT_WIDTH,
   META_CORE_GET_CLIENT_HEIGHT,
   META_CORE_GET_CLIENT_XWINDOW,
-  META_CORE_GET_FRAME_FLAGS,
-  META_CORE_GET_FRAME_TYPE,
   META_CORE_GET_MINI_ICON,
   META_CORE_GET_ICON,
   META_CORE_GET_X,
@@ -48,6 +46,7 @@ typedef enum
   META_CORE_GET_FRAME_Y,
   META_CORE_GET_FRAME_WIDTH,
   META_CORE_GET_FRAME_HEIGHT,
+  META_CORE_GET_FRAME_RECT,
   META_CORE_GET_THEME_VARIANT,
   META_CORE_GET_SCREEN_WIDTH,
   META_CORE_GET_SCREEN_HEIGHT,
@@ -217,6 +216,7 @@ void       meta_core_set_screen_cursor (Display *xdisplay,
 void meta_core_increment_event_serial (Display *display);
 
 void meta_invalidate_default_icons (void);
+void meta_retheme_all (void);
 
 #endif
 

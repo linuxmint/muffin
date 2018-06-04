@@ -3828,8 +3828,7 @@ meta_window_real_tile (MetaWindow *window, gboolean force)
                                    &new_rect);
 
       if (window->frame)
-        meta_ui_queue_frame_draw (window->screen->ui,
-                                  window->frame->xwindow);
+        meta_frame_queue_draw (window->frame);
     }
   else
     {
@@ -5326,9 +5325,7 @@ meta_window_move_resize_internal (MetaWindow          *window,
     meta_window_set_gravity (window, StaticGravity);
 
   if (configure_frame_first && window->frame)
-    frame_shape_changed = meta_frame_sync_to_window (window->frame,
-                                                     gravity,
-                                                     need_move_frame, need_resize_frame);
+    frame_shape_changed = meta_frame_sync_to_window (window->frame, need_resize_frame);
 
   values.border_width = 0;
   values.x = client_move_x;
@@ -5369,9 +5366,7 @@ meta_window_move_resize_internal (MetaWindow          *window,
     }
 
   if (!configure_frame_first && window->frame)
-    frame_shape_changed = meta_frame_sync_to_window (window->frame,
-                                                     gravity,
-                                                     need_move_frame, need_resize_frame);
+    frame_shape_changed = meta_frame_sync_to_window (window->frame, need_resize_frame);
 
   /* Put gravity back to be nice to lesser window managers */
   if (use_static_gravity)
@@ -8029,7 +8024,7 @@ redraw_icon (MetaWindow *window)
    * instead of the whole frame.
    */
   if (window->frame)
-    meta_ui_queue_frame_draw (window->screen->ui, window->frame->xwindow);
+    meta_frame_queue_draw (window->frame);
 }
 
 LOCAL_SYMBOL void
