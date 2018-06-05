@@ -830,12 +830,17 @@ meta_window_actor_has_shadow (MetaWindowActor *self)
       )
     return TRUE;
 
+  if (meta_window_is_client_decorated (priv->window))
+    {
+      return FALSE;
+    }
+
 #if 0
   if (window_type == META_WINDOW_TOOLTIP)
     return TRUE;
 #endif
 
-  return FALSE;
+  return TRUE;
 }
 
 /**
