@@ -3808,7 +3808,7 @@ check_fullscreen_func (gpointer data)
     {
       gboolean covers_monitors = FALSE;
 
-      if (window->screen != screen || window->hidden)
+      if (window->screen != screen || window->hidden || window->xtransient_for)
         continue;
 
       if (window->fullscreen)
