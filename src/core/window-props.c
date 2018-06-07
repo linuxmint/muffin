@@ -1636,6 +1636,60 @@ reload_wm_hints (MetaWindow    *window,
   meta_window_queue (window, META_QUEUE_UPDATE_ICON | META_QUEUE_MOVE_RESIZE);
 }
 
+typedef struct
+{
+  MetaWindow *window;
+  Window transient_for_xid;
+} FindByLeaderData;
+
+static void
+find_window_by_client_leader (MetaScreen *screen,
+                              MetaWindow *window,
+                              gpointer user_data)
+{
+    FindByLeaderData *data = (FindByLeaderData *) user_data;
+
+    if (data->window != NULL)
+      {
+        return;
+      }
+
+    if (window->xclient_leader == None)
+      {
+        return;
+      }
+
+    if (window->xclient_leader == data->transient_for_xid)
+      {
+        data->window = window;
+      }
+}
+
+static MetaWindow *
+lookup_parent_by_client_leader (MetaWindow *transient,
+                                Window      xtransient_for)
+{
+    MetaWindow *parent;
+    FindByLeaderData *data;
+
+    data = g_new0 (FindByLeaderData, 1);
+
+    data->transient_for_xid = xtransient_for;
+
+    meta_screen_foreach_window (transient->screen,
+                                (MetaScreenWindowFunc) find_window_by_client_leader,
+                                data);
+
+    if (data != NULL)
+    {
+      parent = data->window;
+    }
+
+    g_free (data);
+
+    return parent;
+}
+
 static void
 reload_transient_for (MetaWindow    *window,
                       MetaPropValue *value,
@@ -1649,12 +1703,31 @@ reload_transient_for (MetaWindow    *window,
       transient_for = value->v.xwindow;
 
       parent = meta_display_lookup_x_window (window->display, transient_for);
+
       if (!parent)
         {
-          meta_warning (_("Invalid WM_TRANSIENT_FOR window 0x%lx specified "
-                          "for %s.\n"),
-                        transient_for, window->desc);
-          transient_for = None;
+          /* QT programs appear to set the transient-for hint to the program's WM_CLIENT_LEADER
+           * instead of the toplevel window's xid.  This causes muffin to throw out their transient
+           * state.  Since we know the client leader id of existing windows, we can do a quick search
+           * and match up to the correct parent so our stacking and fullscreen detection code works
+           * properly */
+
+          parent = lookup_parent_by_client_leader (window, transient_for);
+
+          if (parent)
+            {
+              transient_for = parent->xwindow;
+
+              meta_verbose ("WM_TRANSIENT_FOR was parent window 0x%lx's WM_CLIENT_LEADER. "
+                            "using the xid instead for %s.\n", transient_for, window->desc);
+            }
+          else
+            {
+              meta_warning (_("Invalid WM_TRANSIENT_FOR window 0x%lx specified "
+                              "for %s.\n"),
+                            transient_for, window->desc);
+              transient_for = None;
+            }
         }
 
       /* Make sure there is not a loop */
