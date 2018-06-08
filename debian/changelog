@@ -1,3 +1,28 @@
+muffin (3.8.2) tara; urgency=medium
+
+  [ Michael Webster ]
+  * utils: Fix zenity dialog - don't use monospace for the heading, don't italicize the info text, force a wider dialog window.
+  * window.c: Change behavior of meta_window_get_all_monitors() to return only those monitors of a fullscreen window that are completely covered by the window.
+  * screen.c: Ignore dock-type windows when determining fullscreen window coverage on a monitor.
+
+  [ itzexor ]
+  * window.c: queue a fullscreen check when a window leaves a monitor
+
+  [ Michael Webster ]
+  * window: Move legacy fullscreen workaround out of constraints and into meta_window_move_resize_request.
+  * window.c: set the "saved_maximize" internal state based on the resulting state of the window after a maximize call, not the directions that were requested for the call.
+  * window.c: Always use the full window extents (including invisible) when running meta_window_get_all_monitors() on CSD windows.
+  * meta-window-actor.c: Default to using shadows on windows.
+
+  [ Clement Lefebvre ]
+  * Software rendering: Don't remove shadows
+
+  [ Michael Webster ]
+  * screen.c: Ignore transient windows when working thru the stack figuring out if a monitor is fullscreened or not.
+  * window-props.c: when reloading the transient_for property, if the given window id is not found, search existing windows' client leader ids for a match, and assign the match's window as the transient parent instead. (this seems to be typical for QT apps)
+
+ -- Clement Lefebvre <root@linuxmint.com>  Fri, 08 Jun 2018 11:50:32 +0100
+
 muffin (3.8.1) tara; urgency=medium
 
   [ Michael Webster ]
