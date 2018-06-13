@@ -1638,6 +1638,52 @@ process_modifier_key (MetaDisplay *display,
   return FALSE;
 }
 
+/* Checks to see if a given XEvent matches key combinations for the
+ * given keybinding action.  This can be useful in cases where we're
+ * bypassing the default event handler (display.c) due to a grab, but
+ * we still want to allow specific keybindings to work, or at least be
+ * responded to in some manner.
+ *
+ * FIXME: This is a pretty braindead function.  It seems to work fine
+ * with modifier-only shortcuts (like left-ctrl, left-alt) but without
+ * more filtering here, having a modifier-only set for one shortcut, and
+ * another shortcut that uses that modifier plus another key, would not
+ * work together in instances where this function is used, since when
+ * we ordinarily process modifier-only actions, we do so on the *release*
+ * event.  The press event is used to first identify a match for that
+ * modifier plus a normal key.  This keeps collisions such as this from
+ * occurring in normal shortcut processing.
+ * (see: meta_display_process_key_event)
+ *
+ * This also only works with built-in keybindings, as custom keybindings
+ * have no #MetaKeyBindingAction associated with them.
+ *
+ * For now, these limitations are acceptable, since we only use this
+ * privately in muffin, and only in select places (for now, workspace
+ * switching during a drag-move.)
+ *
+ * Returns whether or not the mask and keycode in the event match one of
+ * the given action's currently defined shortcuts.
+ */
+LOCAL_SYMBOL gboolean
+meta_display_grabbed_event_is_action (MetaDisplay         *display,
+                                      XEvent              *event,
+                                      MetaKeyBindingAction action)
+{
+    MetaKeyBindingAction matched;
+
+    if (event->type != KeyPress)
+      {
+        return FALSE;
+      }
+
+    matched = meta_display_get_keybinding_action (display,
+                                                  event->xkey.keycode,
+                                                  event->xkey.state);
+
+    return (matched == action);
+}
+
 /* Handle a key event. May be called recursively: some key events cause
  * grabs to be ended and then need to be processed again in their own
  * right. This cannot cause infinite recursion because we never call
