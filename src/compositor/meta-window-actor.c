@@ -820,7 +820,8 @@ meta_window_actor_has_shadow (MetaWindowActor *self)
    * Don't put shadow around DND icon windows
    */
   if (window_type == META_WINDOW_DND ||
-      window_type == META_WINDOW_DESKTOP)
+      window_type == META_WINDOW_DESKTOP ||
+      window_type == META_WINDOW_DOCK)
     return FALSE;
 
   if (window_type == META_WINDOW_MENU
