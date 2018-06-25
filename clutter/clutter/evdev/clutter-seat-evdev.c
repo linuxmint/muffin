@@ -309,7 +309,7 @@ clutter_seat_evdev_notify_key (ClutterSeatEvdev   *seat,
   else
     {
       changed_state = 0;
-      clutter_event_set_flags (event, CLUTTER_EVENT_FLAG_SYNTHETIC);
+      clutter_event_set_flags (event, CLUTTER_EVENT_FLAG_REPEATED);
     }
 
   queue_event (event);

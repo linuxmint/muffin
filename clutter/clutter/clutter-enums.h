@@ -761,6 +761,7 @@ typedef enum { /*< prefix=CLUTTER_DRAG >*/
  * ClutterEventFlags:
  * @CLUTTER_EVENT_NONE: No flag set
  * @CLUTTER_EVENT_FLAG_SYNTHETIC: Synthetic event
+ * @CLUTTER_EVENT_FLAG_REPEATED: Auto-repeated event
  *
  * Flags for the #ClutterEvent
  *
@@ -769,7 +770,8 @@ typedef enum { /*< prefix=CLUTTER_DRAG >*/
 typedef enum { /*< flags prefix=CLUTTER_EVENT >*/
   CLUTTER_EVENT_NONE              = 0,
   CLUTTER_EVENT_FLAG_SYNTHETIC    = 1 << 0,
-  CLUTTER_EVENT_FLAG_INPUT_METHOD = 1 << 1
+  CLUTTER_EVENT_FLAG_INPUT_METHOD = 1 << 1,
+  CLUTTER_EVENT_FLAG_REPEATED     = 1 << 2
 } ClutterEventFlags;
 
 /**
