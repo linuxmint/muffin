@@ -1784,7 +1784,7 @@ selection_paint (ClutterText *self)
       CoglColor cogl_color = { 0, };
       CoglFramebuffer *fb;
 
-      fb = _clutter_actor_get_active_framebuffer (actor);
+      fb = cogl_get_draw_framebuffer ();
       if (G_UNLIKELY (fb == NULL))
         return;
 
@@ -2393,13 +2393,7 @@ clutter_text_paint (ClutterActor *self)
   float alloc_width;
   float alloc_height;
 
-  /* FIXME: this should not be needed, but apparently the text-cache
-   * test unit manages to get in a situation where the active frame
-   * buffer is NULL
-   */
-  fb = _clutter_actor_get_active_framebuffer (self);
-  if (fb == NULL)
-    fb = cogl_get_draw_framebuffer ();
+  fb = cogl_get_draw_framebuffer ();
 
   /* Note that if anything in this paint method changes it needs to be
      reflected in the get_paint_volume implementation which is tightly
