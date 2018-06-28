@@ -89,11 +89,8 @@ int64_t cogl_frame_info_get_frame_counter (CoglFrameInfo *info);
  * Gets the presentation time for the frame. This is the time at which
  * the frame became visible to the user.
  *
- * The presentation time measured in nanoseconds is based on a
- * monotonic time source. The time source is not necessarily
- * correlated with system/wall clock time and may represent the time
- * elapsed since some undefined system event such as when the system
- * last booted.
+ * The presentation time measured in nanoseconds, is based on
+ * cogl_get_clock_time().
  *
  * <note>Linux kernel version less that 3.8 can result in
  * non-monotonic timestamps being reported when using a drm based
