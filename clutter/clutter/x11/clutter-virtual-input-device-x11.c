@@ -32,6 +32,8 @@
 
 #include "clutter-virtual-input-device.h"
 #include "x11/clutter-virtual-input-device-x11.h"
+#include "x11/clutter-backend-x11.h"
+#include "x11/clutter-keymap-x11.h"
 
 struct _ClutterVirtualInputDeviceX11
 {
@@ -135,11 +137,25 @@ clutter_virtual_input_device_x11_notify_keyval (ClutterVirtualInputDevice *virtu
 						uint32_t                   keyval,
 						ClutterKeyState            key_state)
 {
-  KeyCode keycode;
+  ClutterBackendX11 *backend_x11 = CLUTTER_BACKEND_X11 (clutter_get_default_backend ());
+  ClutterKeymapX11 *keymap = backend_x11->keymap;
+  uint32_t keycode, level;
 
-  keycode = XKeysymToKeycode (clutter_x11_get_default_display (), keyval);
+  if (!clutter_keymap_x11_keycode_for_keyval (keymap, keyval, &keycode, &level))
+    {
+      g_warning ("No keycode found for keyval %x in current group", keyval);
+      return;
+    }
+
+  if (key_state == CLUTTER_KEY_STATE_PRESSED)
+    clutter_keymap_x11_latch_modifiers (keymap, level, TRUE);
+
   XTestFakeKeyEvent (clutter_x11_get_default_display (),
-                     keycode, key_state == CLUTTER_KEY_STATE_PRESSED, 0);
+                     (KeyCode) keycode,
+                     key_state == CLUTTER_KEY_STATE_PRESSED, 0);
+
+  if (key_state == CLUTTER_KEY_STATE_RELEASED)
+    clutter_keymap_x11_latch_modifiers (keymap, level, FALSE);
 }
 
 static void
