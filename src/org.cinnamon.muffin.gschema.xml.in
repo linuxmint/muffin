@@ -25,6 +25,14 @@
       </_description>
     </key>
 
+    <key name="ignore-hide-titlebar-when-maximized" type="b">
+      <default>false</default>
+      <_summary>Ignore client requests to hide the window's titlebar when maximized.</_summary>
+      <_description>
+        If true, causes the _GTK_HIDE_TITLEBAR_WHEN_MAXIMIZED hint to be ignored by muffin.  Most apps that utilize this should (one would hope) use the hint responsibly, but this will allow it to be overridden just in case.
+      </_description>
+    </key>
+
     <key name="edge-tiling" type="b">
       <default>true</default>
       <_summary>Enable edge tiling and snapping</_summary>

@@ -1146,6 +1146,8 @@ meta_window_new_with_attrs (MetaDisplay       *display,
   window->has_focus = FALSE;
   window->attached_focus_window = NULL;
 
+  window->hide_titlebar_when_maximized = FALSE;
+
   window->maximized_horizontally = FALSE;
   window->maximized_vertically = FALSE;
   window->tile_type = META_WINDOW_TILE_TYPE_NONE;
@@ -6636,6 +6638,7 @@ meta_window_move_resize_request (MetaWindow *window,
     * the monitor.
     */
     if (meta_prefs_get_force_fullscreen() &&
+        !window->hide_titlebar_when_maximized &&
         (window->decorated && !meta_window_is_client_decorated (window)) &&
         meta_rectangle_equal (&rect, &monitor_rect) &&
         window->has_fullscreen_func &&
@@ -11801,7 +11804,8 @@ meta_window_get_frame_type (MetaWindow *window)
       /* can't add border if undecorated */
       return META_FRAME_TYPE_LAST;
     }
-  else if ((window->border_only && base_type != META_FRAME_TYPE_ATTACHED))
+  else if ((window->border_only && base_type != META_FRAME_TYPE_ATTACHED) ||
+           (window->hide_titlebar_when_maximized && META_WINDOW_MAXIMIZED (window)))
     {
       /* override base frame type */
       return META_FRAME_TYPE_BORDER;

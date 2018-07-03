@@ -39,6 +39,7 @@ typedef enum
   META_PREF_FOCUS_MODE,
   META_PREF_FOCUS_NEW_WINDOWS,
   META_PREF_ATTACH_MODAL_DIALOGS,
+  META_PREF_IGNORE_HIDE_TITLEBAR_WHEN_MAXIMIZED,
   META_PREF_RAISE_ON_CLICK,
   META_PREF_ACTION_DOUBLE_CLICK_TITLEBAR,
   META_PREF_ACTION_MIDDLE_CLICK_TITLEBAR,
@@ -105,6 +106,7 @@ guint                       meta_prefs_get_mouse_button_menu  (void);
 CDesktopFocusMode           meta_prefs_get_focus_mode         (void);
 CDesktopFocusNewWindows     meta_prefs_get_focus_new_windows  (void);
 gboolean                    meta_prefs_get_attach_modal_dialogs (void);
+gboolean                    meta_prefs_get_ignore_hide_titlebar_when_maximized (void);
 gboolean                    meta_prefs_get_raise_on_click     (void);
 const char*                 meta_prefs_get_theme              (void);
 /* returns NULL if GTK default should be used */

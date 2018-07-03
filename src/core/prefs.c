@@ -87,6 +87,7 @@ static CDesktopFocusMode focus_mode = C_DESKTOP_FOCUS_MODE_CLICK;
 static CDesktopFocusNewWindows focus_new_windows = C_DESKTOP_FOCUS_NEW_WINDOWS_SMART;
 static gboolean raise_on_click = TRUE;
 static gboolean attach_modal_dialogs = FALSE;
+static gboolean ignore_hide_titlebar_when_maximized = FALSE;
 static char* current_theme = NULL;
 static int num_workspaces = 4;
 static gboolean workspace_cycle = FALSE;
@@ -301,6 +302,13 @@ static MetaBoolPreference preferences_bool[] =
         META_PREF_ATTACH_MODAL_DIALOGS,
       },
       &attach_modal_dialogs,
+    },
+    {
+      { "ignore-hide-titlebar-when-maximized",
+        SCHEMA_MUFFIN,
+        META_PREF_IGNORE_HIDE_TITLEBAR_WHEN_MAXIMIZED,
+      },
+      &ignore_hide_titlebar_when_maximized,
     },
     {
       { "raise-on-click",
@@ -1226,6 +1234,12 @@ gboolean
 meta_prefs_get_attach_modal_dialogs (void)
 {
   return attach_modal_dialogs;
+}
+
+gboolean
+meta_prefs_get_ignore_hide_titlebar_when_maximized (void)
+{
+  return ignore_hide_titlebar_when_maximized;
 }
 
 gboolean
