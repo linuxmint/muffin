@@ -405,32 +405,11 @@ else
   fi
 fi
 
-dnl === Enable GDK-Pixbuf in tests ============================================
+dnl === Check for GDK-Pixbuf in tests =========================================
 
-m4_define([pixbuf_default], [yes])
-AC_ARG_ENABLE([gdk-pixbuf],
-              [AS_HELP_STRING([--enable-gdk-pixbuf=@<:@no/yes@:>@],
-                              [Enable tests using GDK-Pixbuf @<:@default=]pixbuf_default[@:>@])],
-              [enable_pixbuf=$enable_val],
-              [enable_pixbuf=pixbuf_default])
-
-AS_CASE([$enable_pixbuf],
-
-        [yes],
-        [
-          PKG_CHECK_MODULES([GDK_PIXBUF], [gdk-pixbuf-2.0])
-          AC_SUBST(GDK_PIXBUF_CFLAGS)
-          AC_SUBST(GDK_PIXBUF_LIBS)
-          pixbuf_tests=yes
-        ],
-
-        [no],
-        [
-          pixbuf_tests=no
-        ]
-)
-
-AM_CONDITIONAL([PIXBUF_TESTS], [test "x$pixbuf_tests" = "xyes"])
+PKG_CHECK_MODULES([GDK_PIXBUF], [gdk-pixbuf-2.0])
+AC_SUBST(GDK_PIXBUF_CFLAGS)
+AC_SUBST(GDK_PIXBUF_LIBS)
 
 dnl === Enable debug level ====================================================
 

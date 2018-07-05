@@ -44,15 +44,11 @@ UNIT_TESTS = \
 	test-keyframe-transition.c \
 	test-bind-constraint.c \
 	test-touch-events.c \
-	test-rotate-zoom.c
+	test-rotate-zoom.c \
+	test-image.c
 
 if X11_TESTS
 UNIT_TESTS += test-pixmap.c
-endif
-
-if PIXBUF_TESTS
-UNIT_TESTS += \
-	test-image.c
 endif
 
 SHEXT = $(EXEEXT)
