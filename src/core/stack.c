@@ -274,35 +274,11 @@ meta_stack_update_window_tile_matches (MetaStack     *stack,
   g_list_free (windows);
 }
 
-static gboolean
-is_focused_foreach (MetaWindow *window,
-                    void       *data)
-{
-  if (window == window->display->expected_focus_window)
-    {
-      *((gboolean*) data) = TRUE;
-      return FALSE;
-    }
-  return TRUE;
-}
-
-static gboolean
-windows_on_different_monitor (MetaWindow *a,
-                              MetaWindow *b)
-{
-  if (a->screen != b->screen)
-    return TRUE;
-
-  return meta_screen_get_monitor_for_window (a->screen, a) !=
-    meta_screen_get_monitor_for_window (b->screen, b);
-}
-
 /* Get layer ignoring any transient or group relationships */
 static MetaStackLayer
 get_standalone_layer (MetaWindow *window)
 {
   MetaStackLayer layer;
-  gboolean focused_transient = FALSE;
 
   switch (window->type)
     {
@@ -327,20 +303,8 @@ get_standalone_layer (MetaWindow *window)
       layer = META_LAYER_OVERRIDE_REDIRECT;
       break;
     default:       
-      meta_window_foreach_transient (window,
-                                     is_focused_foreach,
-                                     &focused_transient);
-
       if (window->wm_state_below)
         layer = META_LAYER_BOTTOM;
-      else if (window->fullscreen &&
-               (focused_transient ||
-                window == window->display->expected_focus_window ||
-                window->display->expected_focus_window == NULL ||
-                (window->display->expected_focus_window != NULL &&
-                 windows_on_different_monitor (window,
-                                               window->display->expected_focus_window))))
-        layer = META_LAYER_FULLSCREEN;
       else if (window->wm_state_above)
         layer = META_LAYER_TOP;
       else
@@ -395,8 +359,6 @@ get_maximum_layer_in_group (MetaWindow *window)
 static void
 compute_layer (MetaWindow *window)
 {
-  MetaStackLayer old_layer = window->layer;
-
   window->layer = get_standalone_layer (window);
   
   /* We can only do promotion-due-to-group for dialogs and other
@@ -432,10 +394,6 @@ compute_layer (MetaWindow *window)
   meta_topic (META_DEBUG_STACK, "Window %s on layer %u type = %u has_focus = %d\n",
               window->desc, window->layer,
               window->type, window->has_focus);
-
-  if (window->layer != old_layer &&
-      (old_layer == META_LAYER_FULLSCREEN || window->layer == META_LAYER_FULLSCREEN))
-    meta_screen_queue_check_fullscreen (window->screen);
 }
 
 /* Front of the layer list is the topmost window,
@@ -996,6 +954,8 @@ stack_do_resort (MetaStack *stack)
       
   stack->sorted = g_list_sort (stack->sorted,
                                (GCompareFunc) compare_window_position);
+
+  meta_screen_queue_check_fullscreen (stack->screen);
 
   stack->need_resort = FALSE;
 }

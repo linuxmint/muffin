@@ -108,13 +108,21 @@ delete_ping_timeout_func (MetaDisplay *display,
 
   /* Translators: %s is a window title */
   if (window_title)
-    tmp = g_markup_printf_escaped (_("<tt>%s</tt> is not responding."),
-                                   window_title);
+    {
+      // FIXME: Didn't want to lose translations for this.. needed to remove the
+      // monospace tt but it's part of the translation.  Cancel them out for now.
+      gchar *unmarkup_title = g_markup_printf_escaped("</tt>%s<tt>", window_title);
+
+      tmp = g_strdup_printf (_("<tt>%s</tt> is not responding."),
+                             unmarkup_title);
+
+      g_free (unmarkup_title);
+    }
   else
     tmp = g_strdup (_("Application is not responding."));
 
   window_content = g_strdup_printf (
-      "<big><b>%s</b></big>\n\n<i>%s</i>",
+      "<big><b>%s</b></big>\n\n%s",
       tmp,
       _("You may choose to wait a short while for it to "
         "continue or force the application to quit entirely."));

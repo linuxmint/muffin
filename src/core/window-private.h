@@ -161,6 +161,7 @@ struct _MetaWindow
   char *gtk_app_menu_object_path;
   char *gtk_menubar_object_path;
   
+  int hide_titlebar_when_maximized;
   int net_wm_pid;
   
   Window xtransient_for;

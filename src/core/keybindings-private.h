@@ -65,6 +65,10 @@ void     meta_window_ungrab_all_keys        (MetaWindow  *window,
 gboolean meta_window_resize_or_move_allowed (MetaWindow *window,
                                              MetaDirection dir);
 
+gboolean meta_display_grabbed_event_is_action (MetaDisplay         *display,
+                                               XEvent              *event,
+                                               MetaKeyBindingAction action);
+
 gboolean meta_display_process_key_event     (MetaDisplay *display,
                                              MetaWindow  *window,
                                              XEvent      *event);

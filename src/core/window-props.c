@@ -1637,6 +1637,93 @@ reload_wm_hints (MetaWindow    *window,
 }
 
 static void
+reload_gtk_hide_titlebar_when_maximized (MetaWindow    *window,
+                                         MetaPropValue *value,
+                                         gboolean       initial)
+{
+  gboolean requested_value = FALSE;
+  gboolean current_value = window->hide_titlebar_when_maximized;
+
+  if (meta_prefs_get_ignore_hide_titlebar_when_maximized ())
+    {
+      return;
+    }
+
+  if (value->type != META_PROP_VALUE_INVALID)
+    {
+      requested_value = ((int) value->v.cardinal == 1);
+      meta_verbose ("Request to hide titlebar for window %s.\n", window->desc);
+    }
+
+  if (requested_value == current_value)
+    return;
+
+  window->hide_titlebar_when_maximized = requested_value;
+
+  if (META_WINDOW_MAXIMIZED (window))
+    {
+      meta_window_queue (window, META_QUEUE_MOVE_RESIZE);
+
+      if (window->frame)
+        meta_ui_update_frame_style (window->screen->ui, window->frame->xwindow);
+    }
+}
+
+typedef struct
+{
+  MetaWindow *window;
+  Window transient_for_xid;
+} FindByLeaderData;
+
+static void
+find_window_by_client_leader (MetaScreen *screen,
+                              MetaWindow *window,
+                              gpointer user_data)
+{
+    FindByLeaderData *data = (FindByLeaderData *) user_data;
+
+    if (data->window != NULL)
+      {
+        return;
+      }
+
+    if (window->xclient_leader == None)
+      {
+        return;
+      }
+
+    if (window->xclient_leader == data->transient_for_xid)
+      {
+        data->window = window;
+      }
+}
+
+static MetaWindow *
+lookup_parent_by_client_leader (MetaWindow *transient,
+                                Window      xtransient_for)
+{
+    MetaWindow *parent;
+    FindByLeaderData *data;
+
+    data = g_new0 (FindByLeaderData, 1);
+
+    data->transient_for_xid = xtransient_for;
+
+    meta_screen_foreach_window (transient->screen,
+                                (MetaScreenWindowFunc) find_window_by_client_leader,
+                                data);
+
+    if (data != NULL)
+    {
+      parent = data->window;
+    }
+
+    g_free (data);
+
+    return parent;
+}
+
+static void
 reload_transient_for (MetaWindow    *window,
                       MetaPropValue *value,
                       gboolean       initial)
@@ -1649,12 +1736,31 @@ reload_transient_for (MetaWindow    *window,
       transient_for = value->v.xwindow;
 
       parent = meta_display_lookup_x_window (window->display, transient_for);
+
       if (!parent)
         {
-          meta_warning (_("Invalid WM_TRANSIENT_FOR window 0x%lx specified "
-                          "for %s.\n"),
-                        transient_for, window->desc);
-          transient_for = None;
+          /* QT programs appear to set the transient-for hint to the program's WM_CLIENT_LEADER
+           * instead of the toplevel window's xid.  This causes muffin to throw out their transient
+           * state.  Since we know the client leader id of existing windows, we can do a quick search
+           * and match up to the correct parent so our stacking and fullscreen detection code works
+           * properly */
+
+          parent = lookup_parent_by_client_leader (window, transient_for);
+
+          if (parent)
+            {
+              transient_for = parent->xwindow;
+
+              meta_verbose ("WM_TRANSIENT_FOR was parent window 0x%lx's WM_CLIENT_LEADER. "
+                            "using the xid instead for %s.\n", transient_for, window->desc);
+            }
+          else
+            {
+              meta_warning (_("Invalid WM_TRANSIENT_FOR window 0x%lx specified "
+                              "for %s.\n"),
+                            transient_for, window->desc);
+              transient_for = None;
+            }
         }
 
       /* Make sure there is not a loop */
@@ -1865,7 +1971,8 @@ meta_display_init_window_prop_hooks (MetaDisplay *display)
     { display->atom__NET_WM_STATE,     META_PROP_VALUE_ATOM_LIST, reload_net_wm_state,     TRUE,  FALSE },
     { display->atom__MOTIF_WM_HINTS,   META_PROP_VALUE_MOTIF_HINTS, reload_mwm_hints,      TRUE,  FALSE },
     { XA_WM_TRANSIENT_FOR,             META_PROP_VALUE_WINDOW,    reload_transient_for,    TRUE,  FALSE },
-    { display->atom__GTK_THEME_VARIANT, META_PROP_VALUE_UTF8,     reload_gtk_theme_variant, TRUE, FALSE },    
+    { display->atom__GTK_THEME_VARIANT, META_PROP_VALUE_UTF8,     reload_gtk_theme_variant, TRUE, FALSE },
+    { display->atom__GTK_HIDE_TITLEBAR_WHEN_MAXIMIZED, META_PROP_VALUE_CARDINAL,     reload_gtk_hide_titlebar_when_maximized, TRUE, FALSE },
     { display->atom__GTK_APPLICATION_ID,               META_PROP_VALUE_UTF8,         reload_gtk_application_id,               TRUE, FALSE },
     { display->atom__GTK_UNIQUE_BUS_NAME,              META_PROP_VALUE_UTF8,         reload_gtk_unique_bus_name,              TRUE, FALSE },
     { display->atom__GTK_APPLICATION_OBJECT_PATH,      META_PROP_VALUE_UTF8,         reload_gtk_application_object_path,      TRUE, FALSE },

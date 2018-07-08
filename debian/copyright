@@ -1,4 +1,4 @@
-Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: muffin
 Upstream-Contact: Linux Mint Project <root@linuxmint.com>
 Source: https://github.com/linuxmint/muffin
@@ -77,12 +77,14 @@ Copyright: 1997-2000, Dan Pascu and Alfredo Kojima
            2001-2002, হ্যাভোক পেনিংটন, রেড হ্যাট্, ইন্‍কর্পোরেট এবং অন্যান্য
 License: GPL-2+
 
-Files: src/core/async-getprop.c
+Files: src/compositor/meta-sync-ring.c
+       src/core/async-getprop.c
        src/core/async-getprop.h
        src/core/muffin-Xatomtype.h
        src/core/testasyncgetprop.c
 Copyright: 1987, Digital Equipment Corporation, Maynard, Massachusetts
            2002, Havoc Pennington
+           2011, NVIDIA Corporation
            1986-1998, The Open Group
 License: MIT/X11
  Permission to use, copy, modify, distribute, and sell this software

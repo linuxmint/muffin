@@ -18,10 +18,10 @@ ifeq (ppc64el,$(filter $(DEB_BUILD_ARCH),ppc64el))
 endif
 
 %:
-	dh  $@ --with autoreconf,gir
+	dh  $@ --with gir
 
 override_dh_autoreconf:
-	dh_autoreconf --as-needed ./autogen.sh
+	NOCONFIGURE=1 dh_autoreconf --as-needed ./autogen.sh
 
 override_dh_auto_configure:
 	dh_auto_configure -- --disable-static \
@@ -34,9 +34,6 @@ override_dh_girepository:
 
 override_dh_strip:
 	dh_strip --dbg-package=muffin-dbg
-
-override_dh_installdocs:
-	dh_installdocs --link-doc=muffin-common
 
 override_dh_install:
 	dh_install -X.la --fail-missing

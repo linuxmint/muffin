@@ -647,6 +647,8 @@ meta_show_dialog (const char *type,
   append_argument (args, "");
   append_argument (args, "--text");
   append_argument (args, message);
+  append_argument (args, "--width");
+  append_argument (args, "400");
 
   if (timeout)
     {

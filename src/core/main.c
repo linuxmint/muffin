@@ -465,7 +465,6 @@ meta_init (void)
 	/* Clutter envs not set, since they won't work after Clutter init */
     g_setenv ("CINNAMON_SOFTWARE_RENDERING", "1", FALSE);
     g_setenv ("CINNAMON_SLOWDOWN_FACTOR", "0.0001", FALSE);
-    g_setenv ("MUFFIN_NO_SHADOWS", "1", FALSE);
     meta_warning ("Software rendering detected: %s\n", renderer);
   }
 }

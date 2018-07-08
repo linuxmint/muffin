@@ -87,6 +87,7 @@ static CDesktopFocusMode focus_mode = C_DESKTOP_FOCUS_MODE_CLICK;
 static CDesktopFocusNewWindows focus_new_windows = C_DESKTOP_FOCUS_NEW_WINDOWS_SMART;
 static gboolean raise_on_click = TRUE;
 static gboolean attach_modal_dialogs = FALSE;
+static gboolean ignore_hide_titlebar_when_maximized = FALSE;
 static char* current_theme = NULL;
 static int num_workspaces = 4;
 static gboolean workspace_cycle = FALSE;
@@ -301,6 +302,13 @@ static MetaBoolPreference preferences_bool[] =
         META_PREF_ATTACH_MODAL_DIALOGS,
       },
       &attach_modal_dialogs,
+    },
+    {
+      { "ignore-hide-titlebar-when-maximized",
+        SCHEMA_MUFFIN,
+        META_PREF_IGNORE_HIDE_TITLEBAR_WHEN_MAXIMIZED,
+      },
+      &ignore_hide_titlebar_when_maximized,
     },
     {
       { "raise-on-click",
@@ -1229,6 +1237,12 @@ meta_prefs_get_attach_modal_dialogs (void)
 }
 
 gboolean
+meta_prefs_get_ignore_hide_titlebar_when_maximized (void)
+{
+  return ignore_hide_titlebar_when_maximized;
+}
+
+gboolean
 meta_prefs_get_raise_on_click (void)
 {
   /* Force raise_on_click on for click-to-focus, as requested by Havoc
@@ -1584,8 +1598,11 @@ button_layout_handler (GVariant *value,
       g_strfreev (buttons);
     }
 
-  new_layout.left_buttons[i] = META_BUTTON_FUNCTION_LAST;
-  new_layout.left_buttons_has_spacer[i] = FALSE;
+  for (; i < MAX_BUTTONS_PER_CORNER; i++)
+    {
+      new_layout.left_buttons[i] = META_BUTTON_FUNCTION_LAST;
+      new_layout.left_buttons_has_spacer[i] = FALSE;
+    }
 
   i = 0;
   if (sides != NULL && sides[0] != NULL && sides[1] != NULL)
@@ -1643,8 +1660,11 @@ button_layout_handler (GVariant *value,
       g_strfreev (buttons);
     }
 
-  new_layout.right_buttons[i] = META_BUTTON_FUNCTION_LAST;
-  new_layout.right_buttons_has_spacer[i] = FALSE;
+  for (; i < MAX_BUTTONS_PER_CORNER; i++)
+    {
+      new_layout.right_buttons[i] = META_BUTTON_FUNCTION_LAST;
+      new_layout.right_buttons_has_spacer[i] = FALSE;
+    }
 
   g_strfreev (sides);
   
@@ -2121,6 +2141,12 @@ meta_prefs_change_workspace_name (int         num,
                         g_variant_builder_end (&builder));
 }
 
+/**
+  * meta_prefs_get_button_layout:
+  * @button_layout_p: (out): the #MetaButtonLayout
+  *
+  * Returns the titlebar button definitions.
+  */
 void
 meta_prefs_get_button_layout (MetaButtonLayout *button_layout_p)
 {

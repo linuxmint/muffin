@@ -1146,6 +1146,8 @@ meta_window_new_with_attrs (MetaDisplay       *display,
   window->has_focus = FALSE;
   window->attached_focus_window = NULL;
 
+  window->hide_titlebar_when_maximized = FALSE;
+
   window->maximized_horizontally = FALSE;
   window->maximized_vertically = FALSE;
   window->tile_type = META_WINDOW_TILE_TYPE_NONE;
@@ -3491,15 +3493,17 @@ meta_window_maximize_internal (MetaWindow        *window,
   window->tile_mode = META_TILE_NONE;
   normalize_tile_state (window);
 
-  if (maximize_horizontally && maximize_vertically)
-    window->saved_maximize = TRUE;
-
   window->maximized_horizontally =
     window->maximized_horizontally || maximize_horizontally;
   window->maximized_vertically =
     window->maximized_vertically   || maximize_vertically;
   if (maximize_horizontally || maximize_vertically)
     window->force_save_user_rect = FALSE;
+
+  if (window->maximized_horizontally && window->maximized_vertically)
+  {
+    window->saved_maximize = TRUE;
+  }
 
   /* Update the edge constraints */
   update_edge_constraints (window);;
@@ -3633,14 +3637,34 @@ meta_window_get_all_monitors (MetaWindow *window, gsize *length)
   int i;
 
   monitors = g_array_new (FALSE, FALSE, sizeof (int));
-  meta_window_get_outer_rect (window, &window_rect);
+
+  if (meta_window_is_client_decorated (window))
+    {
+      window_rect = window->rect;
+    }
+  else
+    {
+      meta_window_get_outer_rect (window, &window_rect);
+    }
 
   for (i = 0; i < window->screen->n_monitor_infos; i++)
     {
       MetaRectangle *monitor_rect = &window->screen->monitor_infos[i].rect;
 
-      if (meta_rectangle_overlap (&window_rect, monitor_rect))
-        g_array_append_val (monitors, i);
+      if (window->fullscreen)
+        {
+          if (meta_rectangle_contains_rect (&window_rect, monitor_rect))
+            {
+              g_array_append_val (monitors, i);
+            }
+        }
+      else
+        {
+          if (meta_rectangle_overlap (&window_rect, monitor_rect))
+            {
+              g_array_append_val (monitors, i);
+            }
+        }
     }
 
   if (length)
@@ -4132,7 +4156,6 @@ meta_window_make_fullscreen_internal (MetaWindow  *window)
       window->force_save_user_rect = FALSE;
 
       meta_stack_freeze (window->screen->stack);
-      meta_window_update_layer (window);
 
       meta_window_raise (window);
       meta_stack_thaw (window->screen->stack);
@@ -4198,7 +4221,7 @@ meta_window_unmake_fullscreen (MetaWindow  *window)
        */
       force_save_user_window_placement (window);
 
-      meta_window_update_layer (window);
+      meta_screen_queue_check_fullscreen (window->screen);
 
       meta_stack_tracker_queue_sync_stack (window->screen->stack_tracker);
       g_object_notify (G_OBJECT (window), "fullscreen");
@@ -4879,8 +4902,10 @@ meta_window_update_monitor (MetaWindow *window)
           window->screen->active_workspace != window->workspace)
         meta_window_change_workspace (window, window->screen->active_workspace);
 
-      if (old)
+      if (old) {
+        meta_screen_queue_check_fullscreen (window->screen);
         g_signal_emit_by_name (window->screen, "window-left-monitor", old->number, window);
+      }
       g_signal_emit_by_name (window->screen, "window-entered-monitor", window->monitor->number, window);
 
       g_signal_emit_by_name (window->screen, "window-monitor-changed", window, window->monitor->number);
@@ -6595,6 +6620,40 @@ meta_window_move_resize_request (MetaWindow *window,
     flags |= META_IS_RESIZE_ACTION;
 
   if (flags & (META_IS_MOVE_ACTION | META_IS_RESIZE_ACTION))
+  {
+    MetaRectangle rect, monitor_rect;
+
+    rect.x = x;
+    rect.y = y;
+    rect.width = width;
+    rect.height = height;
+
+    meta_screen_get_monitor_geometry (window->screen, window->monitor->number, &monitor_rect);
+
+    /* Workaround braindead legacy apps that don't know how to
+    * fullscreen themselves properly - don't get fooled by
+    * windows which hide their titlebar when maximized or which are
+    * client decorated; that's not the same as fullscreen, even
+    * if there are no struts making the workarea smaller than
+    * the monitor.
+    */
+    if (meta_prefs_get_force_fullscreen() &&
+        !window->hide_titlebar_when_maximized &&
+        (window->decorated && !meta_window_is_client_decorated (window)) &&
+        meta_rectangle_equal (&rect, &monitor_rect) &&
+        window->has_fullscreen_func &&
+        !window->fullscreen)
+      {
+        /*
+       meta_topic (META_DEBUG_GEOMETRY,
+        */
+        meta_warning (
+                    "Treating resize request of legacy application %s as a "
+                    "fullscreen request\n",
+                    window->desc);
+        meta_window_make_fullscreen_internal (window);
+      }
+
     meta_window_move_resize_internal (window,
                                       flags,
                                       gravity,
@@ -6602,7 +6661,7 @@ meta_window_move_resize_request (MetaWindow *window,
                                       y,
                                       width,
                                       height);
-
+  }
   /* window->user_rect exists to allow "snapping-back" the window if a
    * new strut is set (causing the window to move) and then the strut
    * is later removed without the user moving the window in the
@@ -10173,6 +10232,7 @@ meta_window_handle_mouse_grab_op_event (MetaWindow *window,
     }
 }
 
+
 LOCAL_SYMBOL void
 meta_window_handle_keyboard_grab_op_event (MetaWindow *window,
                                            XEvent     *event)
@@ -10206,7 +10266,11 @@ meta_window_handle_keyboard_grab_op_event (MetaWindow *window,
                 }
                 guint motion_left = meta_prefs_get_invert_flip_direction () ? META_MOTION_RIGHT : META_MOTION_LEFT;
                 guint motion_right = meta_prefs_get_invert_flip_direction () ? META_MOTION_LEFT : META_MOTION_RIGHT;
-                if (event->type == KeyPress && keysym == XK_Left) {
+                if ((event->type == KeyPress && keysym == XK_Left) ||
+                    meta_display_grabbed_event_is_action (window->display,
+                                                          event,
+                                                          META_KEYBINDING_ACTION_WORKSPACE_LEFT))
+                  {
                     MetaWorkspace *target_workspace = meta_workspace_get_neighbor (window->screen->active_workspace,
                                                                                    motion_left);
                     if (target_workspace)
@@ -10216,8 +10280,12 @@ meta_window_handle_keyboard_grab_op_event (MetaWindow *window,
                         if (old_ws_index != meta_workspace_index (window->screen->active_workspace))
                           g_signal_emit_by_name (window->screen, "show-workspace-osd", NULL);
                       }
-                }
-                if (event->type == KeyPress && keysym == XK_Right) {
+                  }
+                if ((event->type == KeyPress && keysym == XK_Right) ||
+                    meta_display_grabbed_event_is_action (window->display,
+                                                          event,
+                                                          META_KEYBINDING_ACTION_WORKSPACE_RIGHT))
+                  {
                     MetaWorkspace *target_workspace = meta_workspace_get_neighbor (window->screen->active_workspace,
                                                                                    motion_right);
                     if (target_workspace)
@@ -10227,7 +10295,7 @@ meta_window_handle_keyboard_grab_op_event (MetaWindow *window,
                         if (old_ws_index != meta_workspace_index (window->screen->active_workspace))
                           g_signal_emit_by_name (window->screen, "show-workspace-osd", NULL);
                       }
-                }
+                  }
               }
             }
         }
@@ -11736,7 +11804,8 @@ meta_window_get_frame_type (MetaWindow *window)
       /* can't add border if undecorated */
       return META_FRAME_TYPE_LAST;
     }
-  else if ((window->border_only && base_type != META_FRAME_TYPE_ATTACHED))
+  else if ((window->border_only && base_type != META_FRAME_TYPE_ATTACHED) ||
+           (window->hide_titlebar_when_maximized && META_WINDOW_MAXIMIZED (window)))
     {
       /* override base frame type */
       return META_FRAME_TYPE_BORDER;
