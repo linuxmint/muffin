@@ -4,7 +4,7 @@ CONFIGURE_EXTRA_FLAGS = \
 	--prefix=/usr \
 	--libdir=/usr/lib/$(DEB_HOST_MULTIARCH) \
 	--libexecdir=/usr/lib/$(DEB_HOST_MULTIARCH)/muffin \
-	-D gtk_doc=true \
+	-D gtk-doc=true \
 	-D startup-notification=true
 
 
