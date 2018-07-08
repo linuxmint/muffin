@@ -1,7 +1,7 @@
 project('muffin',
   'c',
   version: '3.8.2',
-  meson_version: '>=0.46.0',
+  meson_version: '>=0.41.0',
 )
 project_url = 'https://github.com/linuxmint/muffin'
 

@@ -12,6 +12,58 @@ muffinAllInclude = include_directories(
   'ui',
 )
 
+
+libmuffin_headers = [
+  'meta/boxes.h',
+  'meta/common.h',
+  'meta/compositor-muffin.h',
+  'meta/compositor.h',
+  'meta/display.h',
+  'meta/errors.h',
+  'meta/gradient.h',
+  'meta/group.h',
+  'meta/keybindings.h',
+  'meta/main.h',
+  'meta/meta-background-actor.h',
+  'meta/meta-plugin.h',
+  'meta/meta-shadow-factory.h',
+  'meta/meta-shaped-texture.h',
+  'meta/meta-window-actor.h',
+  'meta/prefs.h',
+  'meta/screen.h',
+  'meta/theme.h',
+  'meta/types.h',
+  'meta/util.h',
+  'meta/window.h',
+  'meta/workspace.h',
+]
+libmuffin_headers_nointrospect = [
+  'meta/atomnames.h',
+  'meta/preview-widget.h',
+]
+
+muffin_enum_sources = gnome.mkenums(
+  'muffin-enum-types',
+  c_template: 'muffin-enum-types.c.in',
+  h_template: 'muffin-enum-types.h.in',
+  sources: libmuffin_headers,
+)
+
+# Gdk pixbuf csource
+
+inlinepixbufs_h = configure_file(
+  output: 'inlinepixbufs.h',
+  command: [
+    find_program('gdk-pixbuf-csource'),
+    '--raw', '--build-list',
+    'stock_maximize_data',  join_paths(meson.current_source_dir(), 'stock_maximize.png'),
+    'stock_minimize_data',  join_paths(meson.current_source_dir(), 'stock_minimize.png'),
+    'stock_delete_data',    join_paths(meson.current_source_dir(), 'stock_delete.png'),
+  ],
+  capture: true,
+)
+
+
 libmuffin_sources = [
   'compositor/cogl-utils.c',
   'compositor/compositor.c',
@@ -67,57 +119,9 @@ libmuffin_sources = [
   'ui/theme-parser.c',
   'ui/theme.c',
   'ui/ui.c',
+  muffin_enum_sources,
+  inlinepixbufs_h,
 ]
-
-libmuffin_headers = [
-  'meta/boxes.h',
-  'meta/common.h',
-  'meta/compositor-muffin.h',
-  'meta/compositor.h',
-  'meta/display.h',
-  'meta/errors.h',
-  'meta/gradient.h',
-  'meta/group.h',
-  'meta/keybindings.h',
-  'meta/main.h',
-  'meta/meta-background-actor.h',
-  'meta/meta-plugin.h',
-  'meta/meta-shadow-factory.h',
-  'meta/meta-shaped-texture.h',
-  'meta/meta-window-actor.h',
-  'meta/prefs.h',
-  'meta/screen.h',
-  'meta/theme.h',
-  'meta/types.h',
-  'meta/util.h',
-  'meta/window.h',
-  'meta/workspace.h',
-]
-libmuffin_headers_nointrospect = [
-  'meta/atomnames.h',
-  'meta/preview-widget.h',
-]
-
-libmuffin_sources += gnome.mkenums(
-  'muffin-enum-types',
-  c_template: 'muffin-enum-types.c.in',
-  h_template: 'muffin-enum-types.h.in',
-  sources: libmuffin_headers,
-)
-
-# Gdk pixbuf csource
-
-libmuffin_sources += configure_file(
-  output: 'inlinepixbufs.h',
-  command: [
-    find_program('gdk-pixbuf-csource'),
-    '--raw', '--build-list',
-    'stock_maximize_data',  join_paths(meson.current_source_dir(), 'stock_maximize.png'),
-    'stock_minimize_data',  join_paths(meson.current_source_dir(), 'stock_minimize.png'),
-    'stock_delete_data',    join_paths(meson.current_source_dir(), 'stock_delete.png'),
-  ],
-  capture: true,
-)
 
 
 muffin_deps = [
@@ -161,46 +165,6 @@ muffin_theme_viewer = executable('muffin-theme-viewer',
     gtk,
   ],
 )
-
-
-
-# if HAVE_INTROSPECTION
-# include $(INTROSPECTION_MAKEFILE)
-#
-# # Since we don't make any guarantees about stability and we don't support
-# # parallel install, there's no real reason to change directories, filenames,
-# # etc. as we change the Muffin tarball version.
-# #
-# # Change the api_version to a muffin specific number since setting it to
-# # 3.0 causes major dependency issues with mutter on distributions which
-# # auto generate typelib dependencies in RPMS
-# api_version = Muffin.0
-# #api_version = 3.0
-#
-# # These files are in package-private directories, even though they may be used
-# # by plugins.  If you're writing a plugin, use g-ir-compiler --add-include-path
-# # and g-ir-compiler --includedir.
-# girdir = $(pkglibdir)
-# gir_DATA = Meta-$(api_version).gir
-#
-# typelibdir = $(pkglibdir)
-# typelib_DATA = Meta-$(api_version).typelib
-#
-# INTROSPECTION_GIRS = Meta-$(api_version).gir
-#
-# Meta-$(api_version).gir: libmuffin.la
-# @META_GIR@_INCLUDES = GObject-2.0 CDesktopEnums-3.0 Gdk-3.0 Gtk-3.0 Clutter-1.0 xlib-2.0 xfixes-4.0
-# @META_GIR@_PACKAGES = clutter-1.0 gtk+-3.0
-# @META_GIR@_CFLAGS = $(AM_CPPFLAGS)
-# @META_GIR@_LIBS = libmuffin.la
-# @META_GIR@_FILES =				\
-# 	muffin-enum-types.h			\
-# 	$(libmuffininclude_base_headers)	\
-# 	$(filter %.c,$(libmuffin_la_SOURCES))
-# @META_GIR@_SCANNERFLAGS = $(WARN_SCANNERFLAGS) --warn-all --warn-error
-#
-# endif
-
 
 testboxes = executable('testboxes',
   [ 'core/testboxes.c', 'core/boxes.c', 'core/util.c', ],
@@ -257,12 +221,21 @@ pkgconfig.generate(
   version: meson.project_version(),
   libraries: libmuffin,
   subdirs: 'muffin',
-  requires: [
-    cinn_desktop,
-    gtk,
-    clutter,
-    x11lib,
-  ],
+  requires: (
+    meson.version().version_compare('>=0.46')
+    ? [
+      cinn_desktop,
+      gtk,
+      clutter,
+      x11lib,
+    ]
+    : [
+      'cinnamon-desktop',
+      'gtk+-3.0',
+      'clutter-1.0',
+      'x11',
+    ]
+  ),
   variables: [
     'girdir=${libdir}/muffin',
     'typelibdir=${libdir}/muffin',
@@ -282,4 +255,29 @@ pkgconfig.generate(
     'plugindir=#TODO',
     'libgnome_serverdir=#TODO',
   ],
+)
+
+
+gnome.generate_gir(libmuffin,
+  namespace: 'Meta',
+  nsversion: 'Muffin.0',
+  identifier_prefix: 'Meta',
+  symbol_prefix: 'meta',
+
+  sources: [
+    libmuffin_headers,
+    libmuffin_sources,
+  ],
+
+  includes: [
+    'CDesktopEnums-3.0',
+    'Clutter-1.0',
+    'Gdk-3.0',
+    'GObject-2.0',
+    'Gtk-3.0',
+    'xfixes-4.0',
+    'xlib-2.0',
+  ],
+
+  install: true,
 )
