@@ -65,7 +65,7 @@ configure_file(
 )
 gtkdoc_mainfile = join_paths(meson.current_build_dir(), 'muffin-docs.sgml')
 
-if meson.version().version_compare('<0.47.0') or true
+if meson.version().version_compare('<0.47.0')
   new_gtkdoc_mainfile = join_paths(meson.current_source_dir(), 'muffin-docs.sgml')
   run_command([
     'mv', gtkdoc_mainfile, new_gtkdoc_mainfile
