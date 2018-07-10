@@ -63,9 +63,19 @@ configure_file(
   output: 'muffin-docs.sgml',
   configuration: docsconf,
 )
+gtkdoc_mainfile = join_paths(meson.current_build_dir(), 'muffin-docs.sgml')
+
+if meson.version().version_compare('<0.47.0') or true
+  new_gtkdoc_mainfile = join_paths(meson.current_source_dir(), 'muffin-docs.sgml')
+  run_command([
+    'mv', gtkdoc_mainfile, new_gtkdoc_mainfile
+  ])
+  gtkdoc_mainfile = new_gtkdoc_mainfile
+endif
+
 
 gnome.gtkdoc('muffin',
-  main_sgml: join_paths(meson.current_build_dir(), 'muffin-docs.sgml'),
+  main_sgml: gtkdoc_mainfile,
   content_files: [
     'muffin-overview.xml',
     'running-muffin.xml',
