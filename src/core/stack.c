@@ -1034,7 +1034,7 @@ raise_window_relative_to_managed_windows (MetaScreen *screen,
         {
           MetaWindow *other = meta_display_lookup_x_window (screen->display,
                                                             children[i]);
-          if (other != NULL && !other->override_redirect)
+          if (other != NULL && !other->override_redirect && !other->unmanaging)
             {
               XWindowChanges changes;
 
@@ -1098,6 +1098,7 @@ stack_sync_to_server (MetaStack *stack)
   GList *tmp;
   GArray *all_hidden;
   int n_override_redirect = 0;
+  int n_unmanaging = 0;
   
   /* Bail out if frozen */
   if (stack->freeze_count > 0)
@@ -1127,6 +1128,12 @@ stack_sync_to_server (MetaStack *stack)
     {
       MetaWindow *w = tmp->data;
       Window top_level_window;
+
+      if (w->unmanaging)
+        {
+          n_unmanaging ++;
+          continue;
+        }
       
       meta_topic (META_DEBUG_STACK, "%u:%d - %s ",
 		  w->layer, w->stack_position, w->desc);
@@ -1159,7 +1166,7 @@ stack_sync_to_server (MetaStack *stack)
   meta_pop_no_msg_prefix ();
 
   /* All windows should be in some stacking order */
-  if (stacked->len != stack->windows->len - n_override_redirect)
+  if (stacked->len != stack->windows->len - n_override_redirect - n_unmanaging)
     meta_bug ("%u windows stacked, %u windows exist in stack\n",
               stacked->len, stack->windows->len);
   
