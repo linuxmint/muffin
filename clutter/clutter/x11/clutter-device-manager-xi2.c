@@ -1271,6 +1271,9 @@ clutter_device_manager_xi2_translate_event (ClutterEventTranslator *translator,
                                       ? CLUTTER_KEY_PRESS
                                       : CLUTTER_KEY_RELEASE;
 
+        if (xev->evtype == XI_KeyPress && xev->flags & XIKeyRepeat)
+          clutter_event_set_flags (event, CLUTTER_EVENT_FLAG_REPEATED);
+
         event->key.time = xev->time;
         event->key.stage = stage;
 	_clutter_input_device_xi2_translate_state (event, &xev->mods, &xev->buttons, &xev->group);
