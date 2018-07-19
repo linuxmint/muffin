@@ -61,17 +61,17 @@ G_END_DECLS
 /* Coglbox private declaration
  *--------------------------------------------------*/
 
-G_DEFINE_TYPE (TestCoglbox, test_coglbox, CLUTTER_TYPE_ACTOR);
-
-#define TEST_COGLBOX_GET_PRIVATE(obj) \
-(G_TYPE_INSTANCE_GET_PRIVATE ((obj), TEST_TYPE_COGLBOX, TestCoglboxPrivate))
-
 struct _TestCoglboxPrivate
 {
   CoglHandle texhand_id;
   CoglHandle texture_id;
   CoglHandle offscreen_id;
 };
+
+G_DEFINE_TYPE_WITH_PRIVATE (TestCoglbox, test_coglbox, CLUTTER_TYPE_ACTOR);
+
+#define TEST_COGLBOX_GET_PRIVATE(obj) \
+(G_TYPE_INSTANCE_GET_PRIVATE ((obj), TEST_TYPE_COGLBOX, TestCoglboxPrivate))
 
 /* Coglbox implementation
  *--------------------------------------------------*/
@@ -290,8 +290,6 @@ test_coglbox_class_init (TestCoglboxClass *klass)
 
   actor_class->map            = test_coglbox_map;
   actor_class->paint          = test_coglbox_paint;
-
-  g_type_class_add_private (gobject_class, sizeof (TestCoglboxPrivate));
 }
 
 static ClutterActor*
