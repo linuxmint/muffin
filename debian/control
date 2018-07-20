@@ -20,6 +20,7 @@ Build-Depends:
  libgtk-3-dev (>= 3.9.12),
  libice-dev,
  libpango1.0-dev (>= 1.14.0),
+ libjson-glib-dev,
  libsm-dev,
  libstartup-notification0-dev (>= 0.7),
  libx11-dev,

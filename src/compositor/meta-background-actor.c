@@ -31,7 +31,7 @@
 
 #include <config.h>
 
-#include <cogl/cogl-texture-pixmap-x11.h>
+#include <cogl/winsys/cogl-texture-pixmap-x11.h>
 
 #include <clutter/clutter.h>
 

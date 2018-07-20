@@ -16,6 +16,7 @@ m4_ifdef([AX_IS_RELEASE], [AX_IS_RELEASE([always])])
 
 AC_CONFIG_SRCDIR(src/core/display.c)
 AC_CONFIG_HEADERS(config.h)
+AC_CONFIG_SUBDIRS([cogl clutter])
 
 AC_CONFIG_MACRO_DIR(m4)
 AM_INIT_AUTOMAKE([1.11 no-dist-gzip dist-xz tar-ustar subdir-objects])
@@ -25,11 +26,16 @@ AM_MAINTAINER_MODE([enable])
 MUFFIN_MAJOR_VERSION=muffin_major_version
 MUFFIN_MINOR_VERSION=muffin_minor_version
 MUFFIN_MICRO_VERSION=muffin_micro_version
+MUFFIN_VERSION=muffin_version
 MUFFIN_PLUGIN_API_VERSION=muffin_plugin_api_version
 AC_SUBST(MUFFIN_MAJOR_VERSION)
 AC_SUBST(MUFFIN_MINOR_VERSION)
 AC_SUBST(MUFFIN_MICRO_VERSION)
+AC_SUBST(MUFFIN_VERSION)
 AC_SUBST(MUFFIN_PLUGIN_API_VERSION)
+
+# Make the muffin versions visible to the cogl and clutter subdirs
+export MUFFIN_PLUGIN_API_VERSION MUFFIN_VERSION
 
 MUFFIN_PLUGIN_DIR="$libdir/$PACKAGE/plugins"
 AC_SUBST(MUFFIN_PLUGIN_DIR)
@@ -40,6 +46,12 @@ AC_SUBST([ACLOCAL_AMFLAGS], ["-I $ac_macro_dir \${ACLOCAL_FLAGS}"])
 GETTEXT_PACKAGE=muffin
 AC_SUBST(GETTEXT_PACKAGE)
 AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE,"$GETTEXT_PACKAGE",[Name of default gettext domain])
+
+# Debian / Ubuntu set this flag to 'no' in libtool, causing linking errors
+# (i.e when linking against muffin-clutter). Not to explicitly redefine such
+# deps, we enable this flag for everybody.
+link_all_deplibs=yes
+link_all_deplibs_CXX=yes
 
 IT_PROG_INTLTOOL([0.34.90])
 AC_PROG_CC
@@ -78,17 +90,14 @@ fi
 CANBERRA_GTK=libcanberra-gtk3
 CANBERRA_GTK_VERSION=0.26
 
-CLUTTER_PACKAGE=clutter-1.0
-
 MUFFIN_PC_MODULES="
    gtk+-3.0 >= 3.9.12
    gio-2.0 >= 2.25.10
    pango >= 1.14.0
    cairo >= 1.10.0
+   json-glib-1.0
    cinnamon-desktop >= 2.4.0
    xcomposite >= 0.3 xfixes xrender xdamage
-   $CLUTTER_PACKAGE >= 1.14.3
-   cogl-1.0 >= 1.13.3
    gl
 "
 
@@ -231,10 +240,6 @@ if test x$have_xcursor = xyes; then
 fi
 
 PKG_CHECK_MODULES(MUFFIN, $MUFFIN_PC_MODULES)
-
-# This is used for plugins
-AC_SUBST(CLUTTER_PACKAGE)
-PKG_CHECK_MODULES(CLUTTER, $CLUTTER_PACKAGE)
 
 AC_PATH_XTRA
 
@@ -452,6 +457,14 @@ po/Makefile.in
 ])
 
 AC_OUTPUT
+
+COGL_PC_VERSION=$(grep Version: cogl/cogl/muffin-cogl-$MUFFIN_PLUGIN_API_VERSION.pc|awk '{ print $2; }')
+AS_IF([test "x$COGL_PC_VERSION" != "x$MUFFIN_VERSION"],
+      [AC_MSG_ERROR([muffin-cogl pkg-config file not updated, rerun ./configure])])
+
+CLUTTER_PC_VERSION=$(grep Version: clutter/clutter/muffin-clutter-$MUFFIN_PLUGIN_API_VERSION.pc|awk '{ print $2; }')
+AS_IF([test "x$CLUTTER_PC_VERSION" != "x$MUFFIN_VERSION"],
+      [AC_MSG_ERROR([muffin-clutter pkg-config file not updated, rerun ./configure])])
 
 if test x$enable_verbose_mode = xno; then
         echo "*** WARNING WARNING WARNING WARNING WARNING"

@@ -38,7 +38,7 @@
 
 #include <clutter/clutter.h>
 #include <cogl/cogl.h>
-#include <cogl/cogl-texture-pixmap-x11.h>
+#include <cogl/winsys/cogl-texture-pixmap-x11.h>
 #include <gdk/gdk.h> /* for gdk_rectangle_intersect() */
 #include <string.h>
 

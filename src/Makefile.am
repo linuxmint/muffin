@@ -5,15 +5,31 @@ lib_LTLIBRARIES = libmuffin.la
 
 SUBDIRS=wm-tester tools compositor/plugins
 
+NULL =
+
 AM_CPPFLAGS=								\
-	-DCLUTTER_ENABLE_EXPERIMENTAL_API \
+	-DCLUTTER_ENABLE_COMPOSITOR_API					\
+	-DCLUTTER_ENABLE_EXPERIMENTAL_API				\
 	-DCOGL_ENABLE_EXPERIMENTAL_API \
+	-DCOGL_ENABLE_EXPERIMENTAL_2_0_API                              \
+	-DCOGL_ENABLE_MUFFIN_API					\
+	-DCLUTTER_DISABLE_DEPRECATION_WARNINGS				\
+	-DCOGL_DISABLE_DEPRECATION_WARNINGS				\
 	$(WARN_CFLAGS)							\
 	$(MUFFIN_CFLAGS)						\
 	-I$(srcdir)							\
 	-I$(srcdir)/core						\
 	-I$(srcdir)/ui							\
 	-I$(srcdir)/compositor						\
+	-I$(top_srcdir)/cogl						\
+	-I$(top_srcdir)/cogl/cogl					\
+	-I$(top_srcdir)/cogl/cogl/winsys				\
+	-I$(top_builddir)/cogl/cogl					\
+	-I$(top_builddir)/cogl						\
+	-I$(top_srcdir)/clutter						\
+	-I$(top_srcdir)/clutter/clutter					\
+	-I$(top_builddir)/clutter					\
+	-I$(top_builddir)/clutter/clutter				\
 	-DMUFFIN_LIBEXECDIR=\"$(libexecdir)\"				\
 	-DHOST_ALIAS=\"@HOST_ALIAS@\"					\
 	-DMUFFIN_LOCALEDIR=\"$(prefix)/@DATADIRNAME@/locale\"		\
@@ -152,10 +168,15 @@ libmuffin_la_SOURCES =				\
 	ui/ui.c					\
 	meta/preview-widget.h			\
 	ui/preview-widget.c			\
-	$(muffin_built_sources)
+	$(muffin_built_sources) \
+	$(NULL)
 
-libmuffin_la_LDFLAGS = $(WARN_LDFLAGS) -no-undefined
-libmuffin_la_LIBADD  = $(MUFFIN_LIBS) -lclutter-glx-1.0
+libmuffin_la_LDFLAGS = $(WARN_LDFLAGS) -no-undefined -export-symbols-regex "^(meta|ag)_.*"
+libmuffin_la_LIBADD  = \
+  $(MUFFIN_LIBS) \
+	-lclutter-glx-1.0 \
+	$(top_builddir)/clutter/clutter/libmuffin-clutter-$(MUFFIN_PLUGIN_API_VERSION).la \
+	$(NULL)
 
 # Headers installed for plugins; introspected information will
 # be extracted into Muffin-<version>.gir
@@ -209,9 +230,9 @@ include $(INTROSPECTION_MAKEFILE)
 # Since we don't make any guarantees about stability and we don't support
 # parallel install, there's no real reason to change directories, filenames,
 # etc. as we change the Muffin tarball version.
-# 
+#
 # Change the api_version to a muffin specific number since setting it to
-# 3.0 causes major dependency issues with mutter on distributions which
+# 3.0 causes major dependency issues with muffin on distributions which
 # auto generate typelib dependencies in RPMS
 api_version = Muffin.0
 #api_version = 3.0
@@ -226,10 +247,22 @@ typelibdir = $(pkglibdir)
 typelib_DATA = Meta-$(api_version).typelib
 
 INTROSPECTION_GIRS = Meta-$(api_version).gir
+INTROSPECTION_SCANNER_ARGS =					\
+	--add-include-path=$(top_builddir)/clutter/clutter	\
+	--add-include-path=$(top_builddir)/cogl/cogl		\
+	--add-include-path=$(top_builddir)/cogl/cogl-pango	\
+	$(NULL)
+INTROSPECTION_COMPILER_ARGS =					\
+	--includedir=$(top_builddir)/clutter/clutter		\
+	--includedir=$(top_builddir)/cogl/cogl			\
+	--includedir=$(top_builddir)/cogl/cogl-pango		\
+	$(NULL)
+INTROSPECTION_SCANNER_ENV = \
+	PKG_CONFIG_PATH=$(top_builddir)/clutter/clutter/:$(top_builddir)/cogl/cogl/:$(top_builddir)/cogl/cogl-pango/:$${PKG_CONFIG_PATH}
 
 Meta-$(api_version).gir: libmuffin.la
-@META_GIR@_INCLUDES = GObject-2.0 CDesktopEnums-3.0 Gdk-3.0 Gtk-3.0 Clutter-1.0 xlib-2.0 xfixes-4.0
-@META_GIR@_PACKAGES = clutter-1.0 gtk+-3.0
+@META_GIR@_INCLUDES = GObject-2.0 CDesktopEnums-3.0 Gdk-3.0 Gtk-3.0 Clutter-$(MUFFIN_PLUGIN_API_VERSION) xlib-2.0 xfixes-4.0
+@META_GIR@_PACKAGES = gtk+-3.0
 @META_GIR@_CFLAGS = $(AM_CPPFLAGS)
 @META_GIR@_LIBS = libmuffin.la
 @META_GIR@_FILES =				\
@@ -253,7 +286,7 @@ testboxes_CFLAGS = $(WARN_CFLAGS) $(AM_CFLAGS)
 
 noinst_PROGRAMS=testboxes testgradient testasyncgetprop
 
-testboxes_LDADD = $(MUFFIN_LIBS)
+testboxes_LDADD = $(MUFFIN_LIBS) $(top_builddir)/clutter/clutter/libmuffin-clutter-$(MUFFIN_PLUGIN_API_VERSION).la
 testgradient_LDADD = $(MUFFIN_LIBS) libmuffin.la
 testasyncgetprop_LDADD = $(MUFFIN_LIBS)
 
