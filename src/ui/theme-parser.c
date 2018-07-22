@@ -4347,7 +4347,19 @@ meta_theme_load (const char *theme_name,
   /* We try all supported major versions from current to oldest */
   for (major_version = THEME_MAJOR_VERSION; (major_version > 0); major_version--)
     {
-      /* We try first in home dir, XDG_DATA_DIRS, then system dir for themes */
+      /* We try first in XDG_DATA_HOME, home dir, XDG_DATA_DIRS, then system dir for themes */
+
+      /* user data dir */
+      theme_dir = g_build_filename (g_get_user_data_dir (),
+                                    "themes",
+                                    theme_name,
+                                    THEME_SUBDIR,
+                                    NULL);
+
+      retval = load_theme (theme_dir, theme_name, major_version, &error);
+      g_free (theme_dir);
+      if (!keep_trying (&error))
+        goto out;
 
       /* Try home dir for themes */
       theme_dir = g_build_filename (g_get_home_dir (),
