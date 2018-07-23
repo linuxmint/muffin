@@ -170,18 +170,7 @@ clutter_stage_cogl_schedule_update (ClutterStageWindow *stage_window,
 
   now = g_get_monotonic_time ();
 
-  /* This has been seen on Ironlake + X11 + DRI3 systems.
-   * TODO: Investigate more, but this workaround also works fine...
-   */
-  if (stage_cogl->pending_swaps > 4 && !stage_cogl->broken_driver)
-    {
-      g_warning ("BUG: Runaway pending swap count. This may be a bug in your "
-                 "graphics driver, or in mutter.");
-      stage_cogl->broken_driver = TRUE;
-    }
-
   if (sync_delay < 0 ||
-      stage_cogl->broken_driver ||
       stage_cogl->last_presentation_time <= 0 ||
       stage_cogl->refresh_rate <= 0.0)
     {
