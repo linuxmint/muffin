@@ -70,7 +70,7 @@ muffinlib_LTLIBRARIES = libmuffin-cogl-path-@MUFFIN_PLUGIN_API_VERSION@.la
 libmuffin_cogl_path_@MUFFIN_PLUGIN_API_VERSION@_la_SOURCES = $(source_c) $(source_h)
 nodist_libmuffin_cogl_path_@MUFFIN_PLUGIN_API_VERSION@_la_SOURCES = $(BUILT_SOURCES)
 libmuffin_cogl_path_@MUFFIN_PLUGIN_API_VERSION@_la_CFLAGS = $(COGL_DEP_CFLAGS) $(COGL_EXTRA_CFLAGS) $(MAINTAINER_CFLAGS)
-libmuffin_cogl_path_@MUFFIN_PLUGIN_API_VERSION@_la_LIBADD = $(top_builddir)/cogl/libmuffin-cogl-$(MUFFIN_PLUGIN_API_VERSION).la
+libmuffin_cogl_path_@MUFFIN_PLUGIN_API_VERSION@_la_LIBADD = $(top_builddir)/cogl/libmuffin-cogl-$(MUFFIN_PLUGIN_API_VERSION).la -lm
 libmuffin_cogl_path_@MUFFIN_PLUGIN_API_VERSION@_la_LIBADD += $(COGL_DEP_LIBS) $(COGL_EXTRA_LDFLAGS)
 libmuffin_cogl_path_@MUFFIN_PLUGIN_API_VERSION@_la_LDFLAGS = \
 	-export-dynamic \
