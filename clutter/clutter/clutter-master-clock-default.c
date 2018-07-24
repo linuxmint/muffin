@@ -39,6 +39,7 @@
 #include "clutter-private.h"
 #include "clutter-stage-manager-private.h"
 #include "clutter-stage-private.h"
+#include "clutter-mutter.h"
 
 #ifdef CLUTTER_ENABLE_DEBUG
 #define clutter_warn_if_over_budget(master_clock,start_time,section)    G_STMT_START  { \
@@ -614,7 +615,9 @@ clutter_master_clock_default_init (ClutterMasterClockDefault *self)
   source = clutter_clock_source_new (self);
   self->source = source;
 
-  self->preferred_sync_method = SYNC_PRESENTATION_TIME;
+  self->preferred_sync_method = _clutter_get_sync_to_vblank () ?
+                                SYNC_PRESENTATION_TIME :
+                                SYNC_NONE;
   self->active_sync_method = self->preferred_sync_method;
 
   self->idle = FALSE;
