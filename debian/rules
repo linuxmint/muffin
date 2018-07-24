@@ -33,7 +33,8 @@ override_dh_auto_configure:
 	  --disable-wayland-egl-server \
 	  --disable-kms-egl-platform \
 	  --disable-wayland \
-	  --disable-native-backend
+	  --disable-native-backend \
+		--enable-debug
 
 override_dh_girepository:
 	dh_girepository /usr/lib/$(DEB_HOST_MULTIARCH)/muffin

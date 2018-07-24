@@ -101,6 +101,7 @@ CANBERRA_GTK_VERSION=0.26
 MUFFIN_PC_MODULES="
    gtk+-3.0 >= 3.9.12
    gio-unix-2.0 >= 2.35.1
+   glib-2.0
    pango >= 1.14.0
    cairo >= 1.10.0
    json-glib-1.0

@@ -13,8 +13,6 @@ AM_CPPFLAGS=								\
 	-DCOGL_ENABLE_EXPERIMENTAL_API \
 	-DCOGL_ENABLE_EXPERIMENTAL_2_0_API                              \
 	-DCOGL_ENABLE_MUFFIN_API					\
-	-DCLUTTER_DISABLE_DEPRECATION_WARNINGS				\
-	-DCOGL_DISABLE_DEPRECATION_WARNINGS				\
 	$(WARN_CFLAGS)							\
 	$(MUFFIN_CFLAGS)						\
 	-I$(srcdir)							\
@@ -174,8 +172,12 @@ libmuffin_la_SOURCES =				\
 libmuffin_la_LDFLAGS = $(WARN_LDFLAGS) -no-undefined -export-symbols-regex "^(meta|ag)_.*"
 libmuffin_la_LIBADD  = \
   $(MUFFIN_LIBS) \
-	-lclutter-glx-1.0 \
 	$(top_builddir)/clutter/clutter/libmuffin-clutter-$(MUFFIN_PLUGIN_API_VERSION).la \
+	$(top_builddir)/cogl/cogl/libmuffin-cogl-$(MUFFIN_PLUGIN_API_VERSION).la \
+	$(top_builddir)/cogl/cogl-pango/libmuffin-cogl-pango-$(MUFFIN_PLUGIN_API_VERSION).la \
+	$(top_builddir)/cogl/cogl-path/libmuffin-cogl-path-$(MUFFIN_PLUGIN_API_VERSION).la \
+	-lm \
+	-lglib-2.0 \
 	$(NULL)
 
 # Headers installed for plugins; introspected information will
@@ -222,7 +224,7 @@ muffin_theme_viewer_SOURCES=  \
 bin_PROGRAMS=muffin muffin-theme-viewer
 
 muffin_SOURCES = core/muffin.c
-muffin_LDADD = $(MUFFIN_LIBS) libmuffin.la -lclutter-glx-1.0
+muffin_LDADD = $(MUFFIN_LIBS) libmuffin.la
 
 if HAVE_INTROSPECTION
 include $(INTROSPECTION_MAKEFILE)
@@ -251,17 +253,19 @@ INTROSPECTION_SCANNER_ARGS =					\
 	--add-include-path=$(top_builddir)/clutter/clutter	\
 	--add-include-path=$(top_builddir)/cogl/cogl		\
 	--add-include-path=$(top_builddir)/cogl/cogl-pango	\
+	--add-include-path=$(top_builddir)/cogl/cogl-path	\
 	$(NULL)
 INTROSPECTION_COMPILER_ARGS =					\
 	--includedir=$(top_builddir)/clutter/clutter		\
 	--includedir=$(top_builddir)/cogl/cogl			\
 	--includedir=$(top_builddir)/cogl/cogl-pango		\
+	--includedir=$(top_builddir)/cogl/cogl-path		\
 	$(NULL)
 INTROSPECTION_SCANNER_ENV = \
-	PKG_CONFIG_PATH=$(top_builddir)/clutter/clutter/:$(top_builddir)/cogl/cogl/:$(top_builddir)/cogl/cogl-pango/:$${PKG_CONFIG_PATH}
+	PKG_CONFIG_PATH=$(top_builddir)/clutter/clutter/:$(top_builddir)/cogl/cogl/:$(top_builddir)/cogl/cogl-pango/:$(top_builddir)/cogl/cogl-path/:$${PKG_CONFIG_PATH}
 
 Meta-$(api_version).gir: libmuffin.la
-@META_GIR@_INCLUDES = GObject-2.0 CDesktopEnums-3.0 Gdk-3.0 Gtk-3.0 Clutter-$(MUFFIN_PLUGIN_API_VERSION) xlib-2.0 xfixes-4.0
+@META_GIR@_INCLUDES = GObject-2.0 CDesktopEnums-3.0 Gdk-3.0 Gtk-3.0 Cogl-$(MUFFIN_PLUGIN_API_VERSION) Clutter-$(MUFFIN_PLUGIN_API_VERSION) xlib-2.0 xfixes-4.0
 @META_GIR@_PACKAGES = gtk+-3.0
 @META_GIR@_CFLAGS = $(AM_CPPFLAGS)
 @META_GIR@_LIBS = libmuffin.la
