@@ -356,3 +356,18 @@ muffin-enum-types.c: stamp-muffin-enum-types.h muffin-enum-types.c.in
 	  $(libmuffininclude_base_headers) ) >> xgen-tetc && \
 	cp xgen-tetc muffin-enum-types.c && \
 	rm -f xgen-tetc
+
+compat_libs="clutter cogl cogl-pango cogl-path"
+
+install-exec-local:
+	test -z "$(pkglibdir)" || $(MKDIR_P) "$(DESTDIR)$(pkglibdir)"
+	for lib in `echo $(compat_libs)`; do \
+	  (cd $(DESTDIR)$(libdir) && \
+	    rm -f libmuffin-$$lib-0.so; \
+	  ) ; \
+	  (cd $(DESTDIR)$(libdir) && \
+	    { ln -s -f muffin/libmuffin-$$lib-0.so libmuffin-$$lib-0.so || \
+	      { rm -f libmuffin-$$lib-0.so && ln -s muffin/libmuffin-$$lib-0.so libmuffin-$$lib-0.so; }; \
+	    } \
+	  ) ; \
+	done
