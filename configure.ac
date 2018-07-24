@@ -7,7 +7,7 @@ m4_define([muffin_micro_version], [2])
 m4_define([muffin_version],
           [muffin_major_version.muffin_minor_version.muffin_micro_version])
 
-m4_define([muffin_plugin_api_version], [3])
+m4_define([muffin_plugin_api_version], [0])
 
 AC_INIT([muffin], [muffin_version],
         [https://github.com/linuxmint/muffin/issues])
@@ -22,6 +22,8 @@ AC_CONFIG_MACRO_DIR(m4)
 AM_INIT_AUTOMAKE([1.11 no-dist-gzip dist-xz tar-ustar subdir-objects])
 m4_ifdef([AM_SILENT_RULES],[AM_SILENT_RULES([yes])],)
 AM_MAINTAINER_MODE([enable])
+
+AC_GNU_SOURCE
 
 MUFFIN_MAJOR_VERSION=muffin_major_version
 MUFFIN_MINOR_VERSION=muffin_minor_version
@@ -47,6 +49,9 @@ GETTEXT_PACKAGE=muffin
 AC_SUBST(GETTEXT_PACKAGE)
 AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE,"$GETTEXT_PACKAGE",[Name of default gettext domain])
 
+LT_PREREQ([2.2.6])
+LT_INIT([disable-static])
+
 # Debian / Ubuntu set this flag to 'no' in libtool, causing linking errors
 # (i.e when linking against muffin-clutter). Not to explicitly redefine such
 # deps, we enable this flag for everybody.
@@ -57,12 +62,15 @@ IT_PROG_INTLTOOL([0.34.90])
 AC_PROG_CC
 AM_PROG_CC_C_O
 AC_ISC_POSIX
+AC_PROG_INSTALL
+AC_PROG_SED
 AC_HEADER_STDC
 AC_LIBTOOL_WIN32_DLL
 AM_PROG_LIBTOOL
+PKG_PROG_PKG_CONFIG([0.21])
 
 # Sets GLIB_GENMARSHAL and GLIB_MKENUMS
-AM_PATH_GLIB_2_0()
+AM_PATH_GLIB_2_0([2.53.2])
 
 #### Integer sizes
 
@@ -92,13 +100,27 @@ CANBERRA_GTK_VERSION=0.26
 
 MUFFIN_PC_MODULES="
    gtk+-3.0 >= 3.9.12
-   gio-2.0 >= 2.25.10
+   gio-unix-2.0 >= 2.35.1
    pango >= 1.14.0
    cairo >= 1.10.0
    json-glib-1.0
    cinnamon-desktop >= 2.4.0
-   xcomposite >= 0.3 xfixes xrender xdamage
+   xcomposite >= 0.3
+   xcursor
+   xdamage
+   xext
+   xfixes
+   xi >= 1.6.0
+   xkbfile
+   xkeyboard-config
+   xkbcommon >= 0.4.3
+   xkbcommon-x11
+   xrender
+   x11-xcb
+   xcb-randr
+   xcb-res
    gl
+   egl
 "
 
 GLIB_GSETTINGS
