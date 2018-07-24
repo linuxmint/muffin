@@ -54,6 +54,14 @@
 #define clutter_warn_if_over_budget(master_clock,start_time,section)
 #endif
 
+typedef enum _SyncMethod /* In order of priority */
+{                        /* WORKS      LATENCY      SMOOTHNESS           */
+  SYNC_NONE = 0,         /* Always     High         Poor                 */
+  SYNC_FALLBACK,         /* Always     Medium       Medium               */
+  SYNC_SWAP_THROTTLING,  /* Sometimes  Medium-high  Good, sometimes best */
+  SYNC_PRESENTATION_TIME /* Sometimes  Low          Good, sometimes best */
+} SyncMethod;
+
 typedef struct _ClutterClockSource              ClutterClockSource;
 
 struct _ClutterMasterClockDefault
@@ -62,6 +70,8 @@ struct _ClutterMasterClockDefault
 
   /* the list of timelines handled by the clock */
   GSList *timelines;
+
+  SyncMethod preferred_sync_method, active_sync_method;
 
   /* the current state of the clock, in usecs */
   gint64 cur_tick;
@@ -208,19 +218,16 @@ master_clock_list_ready_stages (ClutterMasterClockDefault *master_clock)
   result = NULL;
   for (l = stages; l != NULL; l = l->next)
     {
-      gint64 update_time = _clutter_stage_get_update_time (l->data);
+      gint64 update_time = -1;
+
+      if (master_clock->active_sync_method == SYNC_PRESENTATION_TIME)
+        update_time = _clutter_stage_get_update_time (l->data);
+
       /* We carefully avoid to update stages that aren't mapped, because
        * they have nothing to render and this could cause a deadlock with
        * some of the SwapBuffers implementations (in particular
        * GLX_INTEL_swap_event is not emitted if nothing was rendered).
-       *
-       * Also, if a stage has a swap-buffers pending we don't want to draw
-       * to it in case the driver may block the CPU while it waits for the
-       * next backbuffer to become available.
        */
-
-      if (update_time < 0)  /* No stage-specific time? Use best available.. */
-        update_time = master_clock_next_frame_time (master_clock);
 
       if (clutter_actor_is_mapped (l->data) &&
           update_time <= master_clock->cur_tick)
@@ -266,19 +273,27 @@ master_clock_next_frame_time (ClutterMasterClockDefault *master_clock)
 {
   gint64 next, now, interval;
 
-  /* Option (a): Use hardware presentation times where possible. */
-  next = master_clock_get_hw_update_time (master_clock);
-  if (next >= 0)
-    return next;
+  if (master_clock->preferred_sync_method >= SYNC_PRESENTATION_TIME)
+    {
+      next = master_clock_get_hw_update_time (master_clock);
+      if (next >= 0)
+        {
+          master_clock->active_sync_method = SYNC_PRESENTATION_TIME;
+          return next;
+        }
+    }
 
   now = g_source_get_time (master_clock->source);
 
-  /* The next two options won't work until this is initialized. */
-  if (!master_clock->prev_tick)
-    return now;
+  if (!master_clock->prev_tick ||
+      master_clock->preferred_sync_method == SYNC_NONE)
+    {
+      master_clock->active_sync_method = SYNC_NONE;
+      return now;
+    }
 
-  /* Option (b): Rely on the backend throtting drawing to vblank. */
-  if (clutter_feature_available (CLUTTER_FEATURE_SYNC_TO_VBLANK))
+  if (master_clock->preferred_sync_method >= SYNC_SWAP_THROTTLING &&
+      clutter_feature_available (CLUTTER_FEATURE_SYNC_TO_VBLANK))
     {
       /* Inch forward as little as possible so as to try and find the
        * phase of COGL_WINSYS_FEATURE_SWAP_THROTTLE without sleeping so long
@@ -290,11 +305,12 @@ master_clock_next_frame_time (ClutterMasterClockDefault *master_clock)
        * milliseconds in the backend anyway.
        */
       interval = 1000;
+      master_clock->active_sync_method = SYNC_SWAP_THROTTLING;
     }
   else
     {
-      /* Option (c): Create our own fake throttling */
       interval = 1000000 / clutter_get_default_frame_rate ();
+      master_clock->active_sync_method = SYNC_FALLBACK;
     }
 
   next = master_clock->prev_tick + interval;
@@ -597,6 +613,9 @@ clutter_master_clock_default_init (ClutterMasterClockDefault *self)
 
   source = clutter_clock_source_new (self);
   self->source = source;
+
+  self->preferred_sync_method = SYNC_PRESENTATION_TIME;
+  self->active_sync_method = self->preferred_sync_method;
 
   self->idle = FALSE;
   self->ensure_next_iteration = FALSE;
