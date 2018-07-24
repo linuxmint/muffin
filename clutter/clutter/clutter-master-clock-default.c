@@ -56,11 +56,11 @@
 #endif
 
 typedef enum _SyncMethod /* In order of priority */
-{                        /* WORKS      LATENCY      SMOOTHNESS           */
-  SYNC_NONE = 0,         /* Always     High         Poor                 */
-  SYNC_FALLBACK,         /* Always     Medium       Medium               */
-  SYNC_SWAP_THROTTLING,  /* Sometimes  Medium-high  Good, sometimes best */
-  SYNC_PRESENTATION_TIME /* Sometimes  Low          Good, sometimes best */
+{                        /* WORKS      LATENCY      SMOOTHNESS             */
+  SYNC_NONE = 0,         /* Always     High         Poor                   */
+  SYNC_FALLBACK,         /* Always     Medium       Medium                 */
+  SYNC_SWAP_THROTTLING,  /* Sometimes  Medium-high  Medium, sometimes best */
+  SYNC_PRESENTATION_TIME /* Sometimes  Low          Good, sometimes best   */
 } SyncMethod;
 
 typedef struct _ClutterClockSource              ClutterClockSource;
@@ -293,27 +293,28 @@ master_clock_next_frame_time (ClutterMasterClockDefault *master_clock)
       return now;
     }
 
+  /* When we have sync-to-vblank, we count on swap-buffer requests (or
+   * swap-buffer-complete events if supported in the backend) to throttle our
+   * frame rate so no additional delay is needed to start the next frame.
+   *
+   * If the master-clock has become idle due to no timeline progression causing
+   * redraws then we can no longer rely on vblank synchronization because the
+   * last real stage update/redraw may have happened a long time ago and so we
+   * fallback to polling for timeline progressions every 1/frame_rate seconds.
+   *
+   * (NB: if there aren't even any timelines running then the master clock will
+   * be completely stopped in master_clock_is_running())
+   */
   if (master_clock->preferred_sync_method >= SYNC_SWAP_THROTTLING &&
-      clutter_feature_available (CLUTTER_FEATURE_SYNC_TO_VBLANK))
+      clutter_feature_available (CLUTTER_FEATURE_SYNC_TO_VBLANK) &&
+      !master_clock->idle)
     {
-      /* Inch forward as little as possible so as to try and find the
-       * phase of COGL_WINSYS_FEATURE_SWAP_THROTTLE without sleeping so long
-       * that we miss the vblank interval. Using clutter_get_default_frame_rate
-       * is not acceptable here because it would cause us to miss frames on
-       * displays that are >60.00Hz. 1ms is a good choice because that's the
-       * finest resolution that clutter timelines understand. And because we
-       * have CLUTTER_FEATURE_SYNC_TO_VBLANK we will soon sleep for several
-       * milliseconds in the backend anyway.
-       */
-      interval = 1000;
       master_clock->active_sync_method = SYNC_SWAP_THROTTLING;
-    }
-  else
-    {
-      interval = 1000000 / clutter_get_default_frame_rate ();
-      master_clock->active_sync_method = SYNC_FALLBACK;
+      return now;
     }
 
+  master_clock->active_sync_method = SYNC_FALLBACK;
+  interval = 1000000 / clutter_get_default_frame_rate ();
   next = master_clock->prev_tick + interval;
   if (next < (now - interval))  /* Too old? Must have been sleeping. */
     next = now;
