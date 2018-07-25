@@ -70,7 +70,7 @@ AM_PROG_LIBTOOL
 PKG_PROG_PKG_CONFIG([0.21])
 
 # Sets GLIB_GENMARSHAL and GLIB_MKENUMS
-AM_PATH_GLIB_2_0([2.53.2])
+AM_PATH_GLIB_2_0()
 
 #### Integer sizes
 
@@ -100,7 +100,7 @@ CANBERRA_GTK_VERSION=0.26
 
 MUFFIN_PC_MODULES="
    gtk+-3.0 >= 3.9.12
-   gio-unix-2.0 >= 2.35.1
+   gio-2.0 >= 2.25.10
    glib-2.0
    pango >= 1.14.0
    cairo >= 1.10.0
