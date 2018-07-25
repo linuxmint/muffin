@@ -1335,17 +1335,17 @@ meta_pre_paint_func (gpointer data)
   MetaWindowActor *top_window;
   MetaWindowActor *expected_unredirected_window = NULL;
 
-  if (info->onscreen == NULL)
-    {
-      info->onscreen = COGL_ONSCREEN (cogl_get_draw_framebuffer ());
-      info->frame_closure = cogl_onscreen_add_frame_callback (info->onscreen,
-                                                              frame_callback,
-                                                              info,
-                                                              NULL);
-    }
+  // if (info->onscreen == NULL)
+  //   {
+  //     info->onscreen = COGL_ONSCREEN (cogl_get_draw_framebuffer ());
+  //     info->frame_closure = cogl_onscreen_add_frame_callback (info->onscreen,
+  //                                                             frame_callback,
+  //                                                             info,
+  //                                                             NULL);
+  //   }
 
   if (info->windows == NULL)
-    return TRUE;;
+    return TRUE;
 
   top_window = g_list_last (info->windows)->data;
 

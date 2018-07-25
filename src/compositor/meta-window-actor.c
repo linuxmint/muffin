@@ -2345,6 +2345,7 @@ void
 meta_window_actor_pre_paint (MetaWindowActor *self)
 {
   MetaWindowActorPrivate *priv = self->priv;
+  ClutterActor *stage = clutter_actor_get_stage(self);
   GList *l;
 
   if (meta_window_actor_is_destroyed (self))
@@ -2358,8 +2359,7 @@ meta_window_actor_pre_paint (MetaWindowActor *self)
 
       if (frame->frame_counter == 0)
         {
-          CoglOnscreen *onscreen = COGL_ONSCREEN (cogl_get_draw_framebuffer());
-          frame->frame_counter = cogl_onscreen_get_frame_counter (onscreen);
+          frame->frame_counter = clutter_stage_get_frame_counter (stage);
         }
     }
 }

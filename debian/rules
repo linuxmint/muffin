@@ -31,7 +31,6 @@ override_dh_auto_configure:
 		--enable-gtk-doc \
 		--disable-wayland-egl-platform \
 	  --disable-wayland-egl-server \
-	  --disable-kms-egl-platform \
 	  --disable-wayland \
 	  --disable-native-backend \
 		--enable-debug
