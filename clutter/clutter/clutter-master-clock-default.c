@@ -56,11 +56,17 @@
 #endif
 
 typedef enum _SyncMethod /* In order of priority */
-{                        /* WORKS      LATENCY      SMOOTHNESS             */
+{                        /* SUPPORTED  LATENCY      SMOOTHNESS             */
   SYNC_NONE = 0,         /* Always     High         Poor                   */
   SYNC_FALLBACK,         /* Always     Medium       Medium                 */
-  SYNC_SWAP_THROTTLING,  /* Sometimes  Medium-high  Medium, sometimes best */
-  SYNC_PRESENTATION_TIME /* Sometimes  Low          Good, sometimes best   */
+  SYNC_SWAP_THROTTLING,  /* Usually    Medium-high  Medium, sometimes best */
+  SYNC_PRESENTATION_TIME /* Usually    Low          Good, sometimes best   */
+                         /* ^ As you can see SWAP_THROTTLING doesn't add much
+                              value. And it does create the the very real
+                              risk of blocking the main loop for up to 16ms
+                              at a time. So it might be a good idea to retire
+                              it in future and instead just make the backends
+                              use swap interval 0 + PRESENTATION_TIME. */
 } SyncMethod;
 
 typedef struct _ClutterClockSource              ClutterClockSource;
