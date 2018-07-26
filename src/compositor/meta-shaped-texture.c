@@ -299,7 +299,6 @@ meta_shaped_texture_ensure_mask (MetaShapedTexture *stex)
       if (meta_texture_rectangle_check (paint_tex))
         priv->mask_texture = meta_texture_rectangle_new (tex_width, tex_height,
                                                          COGL_PIXEL_FORMAT_A_8,
-                                                         COGL_PIXEL_FORMAT_A_8,
                                                          stride,
                                                          mask_data);
       else

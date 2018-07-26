@@ -366,8 +366,6 @@ texture_tower_create_texture (MetaTextureTower *tower,
         meta_texture_rectangle_new (width, height,
                                     /* data format */
                                     TEXTURE_FORMAT,
-                                    /* internal cogl format */
-                                    TEXTURE_FORMAT,
                                     /* rowstride */
                                     width * 4,
                                     /* data */
