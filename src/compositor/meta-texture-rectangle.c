@@ -28,11 +28,10 @@
 #include <clutter/clutter.h>
 #include "meta-texture-rectangle.h"
 
-LOCAL_SYMBOL CoglTexture *
+CoglTexture *
 meta_texture_rectangle_new (unsigned int width,
                             unsigned int height,
                             CoglPixelFormat format,
-                            CoglPixelFormat internal_format,
                             unsigned int rowstride,
                             const guint8 *data)
 {
@@ -42,14 +41,8 @@ meta_texture_rectangle_new (unsigned int width,
     clutter_backend_get_cogl_context (backend);
   CoglTextureRectangle *tex_rect;
 
-#if COGL_VERSION_CHECK (1, 17, 2)
   tex_rect = cogl_texture_rectangle_new_with_size (context, width, height);
-#else
-  tex_rect = cogl_texture_rectangle_new_with_size (context,
-                                                   width, height,
-                                                   internal_format,
-                                                   NULL);
-#endif
+
   if (tex_rect == NULL)
     return NULL;
 
