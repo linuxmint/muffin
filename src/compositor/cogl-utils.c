@@ -180,9 +180,6 @@ meta_cogl_texture_new_from_data_wrapper                (int  width,
 
         texture = COGL_TEXTURE (cogl_texture_2d_new_from_data (cogl_context, width, height,
                                                                format,
-#if COGL_VERSION < COGL_VERSION_ENCODE (1, 18, 0)
-                                                               COGL_PIXEL_FORMAT_ANY,
-#endif
                                                                rowstride,
                                                                data,
                                                                &error));
@@ -226,9 +223,6 @@ meta_cogl_texture_new_from_file_wrapper         (const char *filename,
       {
         texture = COGL_TEXTURE (cogl_texture_2d_new_from_file (cogl_context,
                                                                filename,
-#if COGL_VERSION < COGL_VERSION_ENCODE (1, 18, 0)
-                                                               COGL_PIXEL_FORMAT_ANY,
-#endif
                                                                &error));
       }
     else
@@ -271,9 +265,6 @@ meta_cogl_texture_new_with_size_wrapper           (int width,
         texture = COGL_TEXTURE (cogl_texture_2d_new_with_size (cogl_context,
                                                                width,
                                                                height
-#if COGL_VERSION < COGL_VERSION_ENCODE (1, 18, 0)
-                                                              ,CLUTTER_CAIRO_FORMAT_ARGB32
-#endif
                                                               ));
       }
     else

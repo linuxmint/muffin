@@ -366,20 +366,18 @@ texture_tower_create_texture (MetaTextureTower *tower,
   if ((!is_power_of_two (width) || !is_power_of_two (height)) &&
       meta_texture_rectangle_check (tower->textures[level - 1]))
     {
-      tower->textures[level] =
-        meta_texture_rectangle_new (width, height,
-                                    /* data format */
-                                    TEXTURE_FORMAT,
-                                    /* rowstride */
-                                    width * 4,
-                                    /* data */
-                                    NULL);
+      ClutterBackend *backend = clutter_get_default_backend ();
+      CoglContext *context = clutter_backend_get_cogl_context (backend);
+      CoglTextureRectangle *texture_rectangle;
+
+      texture_rectangle = cogl_texture_rectangle_new_with_size (context, width, height);
+      tower->textures[level] = COGL_TEXTURE (texture_rectangle);
     }
   else
     {
-      tower->textures[level] = meta_cogl_texture_new_with_size_wrapper (width, height,
-                                                                        COGL_TEXTURE_NO_AUTO_MIPMAP,
-                                                                        TEXTURE_FORMAT);
+      tower->textures[level] = cogl_texture_new_with_size (width, height,
+                                                           COGL_TEXTURE_NO_AUTO_MIPMAP,
+                                                           TEXTURE_FORMAT);
     }
 
   tower->invalid[level].x1 = 0;
