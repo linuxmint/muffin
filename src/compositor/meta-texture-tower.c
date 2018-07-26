@@ -391,7 +391,7 @@ texture_tower_create_texture (MetaTextureTower *tower,
 }
 
 static void
-texture_tower_revalidate_fbo (MetaTextureTower *tower,
+texture_tower_revalidate (MetaTextureTower *tower,
                               int               level)
 {
   CoglTexture *source_texture = tower->textures[level - 1];
@@ -438,13 +438,6 @@ texture_tower_revalidate_fbo (MetaTextureTower *tower,
                                             (2. * invalid->y2) / source_texture_height);
 
   cogl_object_unref (pipeline);
-}
-
-static void
-texture_tower_revalidate (MetaTextureTower *tower,
-                          int               level)
-{
-  texture_tower_revalidate_fbo (tower, level);
 
   tower->invalid[level].x1 = tower->invalid[level].x2 = 0;
   tower->invalid[level].y1 = tower->invalid[level].y2 = 0;
