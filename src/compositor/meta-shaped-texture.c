@@ -624,7 +624,8 @@ meta_shaped_texture_update_area (MetaShapedTexture *stex,
   if (priv->texture == COGL_INVALID_HANDLE)
     return;
 
-  cogl_texture_pixmap_x11_update_area (priv->texture, x, y, width, height);
+  cogl_texture_pixmap_x11_update_area (COGL_TEXTURE_PIXMAP_X11 (priv->texture),
+                                       x, y, width, height);
 
   meta_texture_tower_update_area (priv->paint_tower, x, y, width, height);
 
