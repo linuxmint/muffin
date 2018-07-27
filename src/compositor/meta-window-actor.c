@@ -2345,7 +2345,7 @@ void
 meta_window_actor_pre_paint (MetaWindowActor *self)
 {
   MetaWindowActorPrivate *priv = self->priv;
-  ClutterActor *stage = clutter_actor_get_stage(self);
+  ClutterActor *stage = clutter_actor_get_stage(priv->actor);
   GList *l;
 
   if (meta_window_actor_is_destroyed (self))
