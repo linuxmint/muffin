@@ -97,6 +97,7 @@ static CDesktopTitlebarAction action_right_click_titlebar = C_DESKTOP_TITLEBAR_A
 static CDesktopTitlebarScrollAction action_scroll_titlebar = C_DESKTOP_TITLEBAR_SCROLL_ACTION_NONE;
 static gboolean dynamic_workspaces = FALSE;
 static gboolean unredirect_fullscreen_windows = FALSE;
+static gboolean sync_to_vblank = TRUE;
 static gboolean application_based = FALSE;
 static gboolean disable_workarounds = FALSE;
 static gboolean auto_raise = FALSE;
@@ -344,6 +345,13 @@ static MetaBoolPreference preferences_bool[] =
         META_PREF_UNREDIRECT_FULLSCREEN_WINDOWS,
       },
       &unredirect_fullscreen_windows,
+    },
+    {
+      { "sync-to-vblank",
+        SCHEMA_MUFFIN,
+        META_PREF_SYNC_TO_VBLANK,
+      },
+      &sync_to_vblank,
     },
     {
       { "application-based",
@@ -1744,6 +1752,12 @@ meta_prefs_get_unredirect_fullscreen_windows (void)
 }
 
 gboolean
+meta_prefs_get_sync_to_vblank (void)
+{
+  return sync_to_vblank;
+}
+
+gboolean
 meta_prefs_get_application_based (void)
 {
   return FALSE; /* For now, we never want this to do anything */
@@ -1877,6 +1891,9 @@ meta_preference_to_string (MetaPreference pref)
 
     case META_PREF_UNREDIRECT_FULLSCREEN_WINDOWS:
       return "UNREDIRECT_FULLSCREEN_WINDOWS";
+
+    case META_PREF_SYNC_TO_VBLANK:
+      return "SYNC_TO_VBLANK";
 
     case META_PREF_SNAP_MODIFIER:
       return "SNAP_MODIFIER";

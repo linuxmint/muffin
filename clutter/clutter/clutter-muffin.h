@@ -38,6 +38,9 @@ CLUTTER_AVAILABLE_IN_MUFFIN
 gboolean        _clutter_get_sync_to_vblank     (void);
 
 CLUTTER_AVAILABLE_IN_MUFFIN
+void            _clutter_set_sync_to_vblank     (gboolean      sync_to_vblank);
+
+CLUTTER_AVAILABLE_IN_MUFFIN
 int64_t clutter_stage_get_frame_counter (ClutterStage *stage);
 
 CLUTTER_AVAILABLE_IN_MUFFIN
