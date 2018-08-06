@@ -185,6 +185,26 @@ clutter_virtual_input_device_evdev_notify_absolute_motion (ClutterVirtualInputDe
                                              NULL);
 }
 
+static int
+translate_to_evdev_button (int clutter_button)
+{
+  switch (clutter_button)
+    {
+    case CLUTTER_BUTTON_PRIMARY:
+      return BTN_LEFT;
+    case CLUTTER_BUTTON_SECONDARY:
+      return BTN_RIGHT;
+    case CLUTTER_BUTTON_MIDDLE:
+      return BTN_MIDDLE;
+    default:
+      /*
+       * For compatibility reasons, all additional buttons go after the old
+       * 4-7 scroll ones.
+       */
+      return clutter_button + (BTN_LEFT - 1) - 4;
+    }
+}
+
 static void
 clutter_virtual_input_device_evdev_notify_button (ClutterVirtualInputDevice *virtual_device,
                                                   uint64_t                   time_us,
@@ -194,30 +214,33 @@ clutter_virtual_input_device_evdev_notify_button (ClutterVirtualInputDevice *vir
   ClutterVirtualInputDeviceEvdev *virtual_evdev =
     CLUTTER_VIRTUAL_INPUT_DEVICE_EVDEV (virtual_device);
   int button_count;
+  int evdev_button;
 
   if (time_us == CLUTTER_CURRENT_TIME)
     time_us = g_get_monotonic_time ();
 
-  if (get_button_type (button) != EVDEV_BUTTON_TYPE_BUTTON)
+  evdev_button = translate_to_evdev_button (button);
+
+  if (get_button_type (evdev_button) != EVDEV_BUTTON_TYPE_BUTTON)
     {
       g_warning ("Unknown/invalid virtual device button 0x%x pressed",
-                 button);
+                 evdev_button);
       return;
     }
 
-  button_count = update_button_count (virtual_evdev, button, button_state);
+  button_count = update_button_count (virtual_evdev, evdev_button, button_state);
   if (button_count < 0 || button_count > 1)
     {
-      g_warning ("Received multiple virtual 0x%x button %s (ignoring)", button,
+      g_warning ("Received multiple virtual 0x%x button %s (ignoring)", evdev_button,
                  button_state == CLUTTER_BUTTON_STATE_PRESSED ? "presses" : "releases");
-      update_button_count (virtual_evdev, button, 1 - button_state);
+      update_button_count (virtual_evdev, evdev_button, 1 - button_state);
       return;
     }
 
   clutter_seat_evdev_notify_button (virtual_evdev->seat,
                                     virtual_evdev->device,
                                     time_us,
-                                    button,
+                                    evdev_button,
                                     button_state);
 }
 
