@@ -65,8 +65,6 @@ struct _CoglOnscreen
   void *foreign_update_mask_data;
 #endif
 
-  CoglBool swap_throttled;
-
   CoglList frame_closures;
 
   CoglBool resizable;

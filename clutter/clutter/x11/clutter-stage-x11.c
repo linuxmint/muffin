@@ -631,7 +631,6 @@ clutter_stage_x11_realize (ClutterStageWindow *stage_window)
 
   stage_x11->onscreen = cogl_onscreen_new (backend->cogl_context, width, height);
 
-  cogl_onscreen_set_swap_throttled (stage_x11->onscreen, TRUE);
 
   stage_x11->frame_closure =
     cogl_onscreen_add_frame_callback (stage_x11->onscreen,

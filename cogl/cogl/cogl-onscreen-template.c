@@ -64,7 +64,6 @@ cogl_onscreen_template_new (CoglSwapChain *swap_chain)
   else
     onscreen_template->config.swap_chain = cogl_swap_chain_new ();
 
-  onscreen_template->config.swap_throttled = TRUE;
   onscreen_template->config.need_stencil = TRUE;
   onscreen_template->config.samples_per_pixel = 0;
 
@@ -86,14 +85,6 @@ cogl_onscreen_template_set_samples_per_pixel (
                                         int samples_per_pixel)
 {
   onscreen_template->config.samples_per_pixel = samples_per_pixel;
-}
-
-void
-cogl_onscreen_template_set_swap_throttled (
-                                          CoglOnscreenTemplate *onscreen_template,
-                                          CoglBool throttled)
-{
-  onscreen_template->config.swap_throttled = throttled;
 }
 
 void

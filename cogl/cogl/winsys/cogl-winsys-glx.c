@@ -1687,13 +1687,7 @@ _cogl_winsys_onscreen_bind (CoglOnscreen *onscreen)
    * exclusive.
    */
   if (glx_renderer->glXSwapInterval)
-    {
-      CoglFramebuffer *fb = COGL_FRAMEBUFFER (onscreen);
-      if (fb->config.swap_throttled)
-        glx_renderer->glXSwapInterval (1);
-      else
-        glx_renderer->glXSwapInterval (0);
-    }
+    glx_renderer->glXSwapInterval (1);
 
   XSync (xlib_renderer->xdpy, False);
 
@@ -2076,16 +2070,8 @@ _cogl_winsys_onscreen_swap_region (CoglOnscreen *onscreen,
                                  framebuffer,
                                  COGL_FRAMEBUFFER_STATE_BIND);
 
-  if (framebuffer->config.swap_throttled)
-    {
-      have_counter = glx_display->have_vblank_counter;
-      can_wait = glx_display->can_vblank_wait;
-    }
-  else
-    {
-      have_counter = FALSE;
-      can_wait = FALSE;
-    }
+  have_counter = glx_display->have_vblank_counter;
+  can_wait = glx_display->can_vblank_wait;
 
   /* We need to ensure that all the rendering is done, otherwise
    * redraw operations that are slower than the framerate can
@@ -2252,71 +2238,66 @@ _cogl_winsys_onscreen_swap_buffers_with_damage (CoglOnscreen *onscreen,
 
   drawable = glx_onscreen->glxwin ? glx_onscreen->glxwin : xlib_onscreen->xwin;
 
-  if (framebuffer->config.swap_throttled)
+  have_counter = glx_display->have_vblank_counter;
+
+  if (glx_renderer->glXSwapInterval)
     {
-      have_counter = glx_display->have_vblank_counter;
-
-      if (glx_renderer->glXSwapInterval)
+      if (_cogl_has_private_feature (context, COGL_PRIVATE_FEATURE_THREADED_SWAP_WAIT))
         {
-          if (_cogl_has_private_feature (context, COGL_PRIVATE_FEATURE_THREADED_SWAP_WAIT))
-            {
-	      /* If we didn't wait for the GPU here, then it's easy to get the case
-	       * where there is a VBlank between the point where we get the vsync counter
-	       * and the point where the GPU is ready to actually perform the glXSwapBuffers(),
-	       * and the swap wait terminates at the first VBlank rather than the one
-	       * where the swap buffers happens. Calling glFinish() here makes this a
-	       * rare race since the GPU is already ready to swap when we call glXSwapBuffers().
-	       * The glFinish() also prevents any serious damage if the rare race happens,
-	       * since it will wait for the preceding glXSwapBuffers() and prevent us from
-	       * getting premanently ahead. (For NVIDIA drivers, glFinish() after glXSwapBuffers()
-	       * waits for the buffer swap to happen.)
-	       */
-              _cogl_winsys_wait_for_gpu (onscreen);
-              start_threaded_swap_wait (onscreen, _cogl_winsys_get_vsync_counter (context));
-            }
-        }
-      else
-        {
-          CoglBool can_wait = have_counter || glx_display->can_vblank_wait;
-
-          uint32_t end_frame_vsync_counter = 0;
-
-          /* If the swap_region API is also being used then we need to track
-           * the vsync counter for each swap request so we can manually
-           * throttle swap_region requests. */
-          if (have_counter)
-            end_frame_vsync_counter = _cogl_winsys_get_vsync_counter (context);
-
-          /* If we are going to wait for VBLANK manually, we not only
-           * need to flush out pending drawing to the GPU before we
-           * sleep, we need to wait for it to finish. Otherwise, we
-           * may end up with the situation:
-           *
-           *        - We finish drawing      - GPU drawing continues
-           *        - We go to sleep         - GPU drawing continues
-           * VBLANK - We call glXSwapBuffers - GPU drawing continues
-           *                                 - GPU drawing continues
-           *                                 - Swap buffers happens
-           *
-           * Producing a tear. Calling glFinish() first will cause us
-           * to properly wait for the next VBLANK before we swap. This
-           * obviously does not happen when we use _GLX_SWAP and let
-           * the driver do the right thing
+          /* If we didn't wait for the GPU here, then it's easy to get the case
+           * where there is a VBlank between the point where we get the vsync counter
+           * and the point where the GPU is ready to actually perform the glXSwapBuffers(),
+           * and the swap wait terminates at the first VBlank rather than the one
+           * where the swap buffers happens. Calling glFinish() here makes this a
+           * rare race since the GPU is already ready to swap when we call glXSwapBuffers().
+           * The glFinish() also prevents any serious damage if the rare race happens,
+           * since it will wait for the preceding glXSwapBuffers() and prevent us from
+           * getting premanently ahead. (For NVIDIA drivers, glFinish() after glXSwapBuffers()
+           * waits for the buffer swap to happen.)
            */
           _cogl_winsys_wait_for_gpu (onscreen);
-
-          if (have_counter && can_wait)
-            {
-              if (glx_onscreen->last_swap_vsync_counter ==
-                  end_frame_vsync_counter)
-                _cogl_winsys_wait_for_vblank (onscreen);
-            }
-          else if (can_wait)
-            _cogl_winsys_wait_for_vblank (onscreen);
+          start_threaded_swap_wait (onscreen, _cogl_winsys_get_vsync_counter (context));
         }
     }
   else
-    have_counter = FALSE;
+    {
+      CoglBool can_wait = have_counter || glx_display->can_vblank_wait;
+
+      uint32_t end_frame_vsync_counter = 0;
+
+      /* If the swap_region API is also being used then we need to track
+       * the vsync counter for each swap request so we can manually
+       * throttle swap_region requests. */
+      if (have_counter)
+        end_frame_vsync_counter = _cogl_winsys_get_vsync_counter (context);
+
+      /* If we are going to wait for VBLANK manually, we not only
+       * need to flush out pending drawing to the GPU before we
+       * sleep, we need to wait for it to finish. Otherwise, we
+       * may end up with the situation:
+       *
+       *        - We finish drawing      - GPU drawing continues
+       *        - We go to sleep         - GPU drawing continues
+       * VBLANK - We call glXSwapBuffers - GPU drawing continues
+       *                                 - GPU drawing continues
+       *                                 - Swap buffers happens
+       *
+       * Producing a tear. Calling glFinish() first will cause us
+       * to properly wait for the next VBLANK before we swap. This
+       * obviously does not happen when we use _GLX_SWAP and let
+       * the driver do the right thing
+       */
+      _cogl_winsys_wait_for_gpu (onscreen);
+
+      if (have_counter && can_wait)
+        {
+          if (glx_onscreen->last_swap_vsync_counter ==
+              end_frame_vsync_counter)
+            _cogl_winsys_wait_for_vblank (onscreen);
+        }
+      else if (can_wait)
+        _cogl_winsys_wait_for_vblank (onscreen);
+    }
 
   glx_renderer->glXSwapBuffers (xlib_renderer->xdpy, drawable);
 
@@ -2332,23 +2313,6 @@ _cogl_winsys_onscreen_x11_get_window_xid (CoglOnscreen *onscreen)
 {
   CoglOnscreenXlib *xlib_onscreen = onscreen->winsys;
   return xlib_onscreen->xwin;
-}
-
-static void
-_cogl_winsys_onscreen_update_swap_throttled (CoglOnscreen *onscreen)
-{
-  CoglContext *context = COGL_FRAMEBUFFER (onscreen)->context;
-  CoglContextGLX *glx_context = context->winsys;
-  CoglOnscreenGLX *glx_onscreen = onscreen->winsys;
-  CoglOnscreenXlib *xlib_onscreen = onscreen->winsys;
-  GLXDrawable drawable =
-    glx_onscreen->glxwin ? glx_onscreen->glxwin : xlib_onscreen->xwin;
-
-  if (glx_context->current_drawable != drawable)
-    return;
-
-  glx_context->current_drawable = 0;
-  _cogl_winsys_onscreen_bind (onscreen);
 }
 
 static void
@@ -3024,8 +2988,6 @@ static CoglWinsysVtable _cogl_winsys_vtable =
       _cogl_winsys_onscreen_swap_buffers_with_damage,
     .onscreen_swap_region = _cogl_winsys_onscreen_swap_region,
     .onscreen_get_buffer_age = _cogl_winsys_onscreen_get_buffer_age,
-    .onscreen_update_swap_throttled =
-      _cogl_winsys_onscreen_update_swap_throttled,
     .onscreen_x11_get_window_xid =
       _cogl_winsys_onscreen_x11_get_window_xid,
     .onscreen_set_visibility = _cogl_winsys_onscreen_set_visibility,

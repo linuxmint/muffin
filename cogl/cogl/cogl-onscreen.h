@@ -163,23 +163,6 @@ cogl_x11_onscreen_get_visual_xid (CoglOnscreen *onscreen);
 #endif /* COGL_HAS_X11 */
 
 /**
- * cogl_onscreen_set_swap_throttled:
- * @onscreen: A #CoglOnscreen framebuffer
- * @throttled: Whether swap throttling is wanted or not.
- *
- * Requests that the given @onscreen framebuffer should have swap buffer
- * requests (made using cogl_onscreen_swap_buffers()) throttled either by a
- * displays vblank period or perhaps some other mechanism in a composited
- * environment.
- *
- * Since: 1.8
- * Stability: unstable
- */
-void
-cogl_onscreen_set_swap_throttled (CoglOnscreen *onscreen,
-                                  CoglBool throttled);
-
-/**
  * cogl_onscreen_show:
  * @onscreen: The onscreen framebuffer to make visible
  *
@@ -554,9 +537,8 @@ typedef void (*CoglSwapBuffersNotify) (CoglFramebuffer *framebuffer,
  * registered callbacks will be called if this feature is not supported.</note>
  *
  * We recommend using this mechanism when available to manually throttle your
- * applications (in conjunction with  cogl_onscreen_set_swap_throttled()) so
- * your application will be able to avoid long blocks in the driver caused by
- * throttling when you request to swap buffers too quickly.
+ * applications so your application will be able to avoid long blocks in the
+ * driver caused by throttling when you request to swap buffers too quickly.
  *
  * Return value: a unique identifier that can be used to remove to remove
  *               the callback later.

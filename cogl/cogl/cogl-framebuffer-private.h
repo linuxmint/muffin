@@ -59,7 +59,6 @@ typedef struct
   CoglSwapChain *swap_chain;
   CoglBool need_stencil;
   int samples_per_pixel;
-  CoglBool swap_throttled;
   CoglBool depth_texture_enabled;
   CoglBool stereo_enabled;
 } CoglFramebufferConfig;

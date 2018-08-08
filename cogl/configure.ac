@@ -969,7 +969,6 @@ tests/Makefile
 tests/config.env
 tests/conform/Makefile
 tests/unit/Makefile
-tests/micro-perf/Makefile
 tests/data/Makefile
 )
 

@@ -146,11 +146,6 @@ _cogl_winsys_onscreen_swap_buffers_with_damage (CoglOnscreen *onscreen,
 }
 
 static void
-_cogl_winsys_onscreen_update_swap_throttled (CoglOnscreen *onscreen)
-{
-}
-
-static void
 _cogl_winsys_onscreen_set_visibility (CoglOnscreen *onscreen,
                                       CoglBool visibility)
 {
@@ -186,8 +181,6 @@ _cogl_winsys_stub_get_vtable (void)
       vtable.onscreen_bind = _cogl_winsys_onscreen_bind;
       vtable.onscreen_swap_buffers_with_damage =
         _cogl_winsys_onscreen_swap_buffers_with_damage;
-      vtable.onscreen_update_swap_throttled =
-        _cogl_winsys_onscreen_update_swap_throttled;
       vtable.onscreen_set_visibility = _cogl_winsys_onscreen_set_visibility;
 
       vtable_inited = TRUE;

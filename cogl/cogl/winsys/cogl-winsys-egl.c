@@ -729,10 +729,7 @@ bind_onscreen_with_context (CoglOnscreen *onscreen,
       CoglRenderer *renderer = context->display->renderer;
       CoglRendererEGL *egl_renderer = renderer->winsys;
 
-      if (fb->config.swap_throttled)
-        eglSwapInterval (egl_renderer->edpy, 1);
-      else
-        eglSwapInterval (egl_renderer->edpy, 0);
+      eglSwapInterval (egl_renderer->edpy, 1);
     }
 
   return status;
@@ -860,21 +857,6 @@ _cogl_winsys_onscreen_swap_buffers_with_damage (CoglOnscreen *onscreen,
 }
 
 static void
-_cogl_winsys_onscreen_update_swap_throttled (CoglOnscreen *onscreen)
-{
-  CoglContext *context = COGL_FRAMEBUFFER (onscreen)->context;
-  CoglDisplayEGL *egl_display = context->display->winsys;
-  CoglOnscreenEGL *egl_onscreen = onscreen->winsys;
-
-  if (egl_display->current_draw_surface != egl_onscreen->egl_surface)
-    return;
-
-  egl_display->current_draw_surface = EGL_NO_SURFACE;
-
-  _cogl_winsys_onscreen_bind (onscreen);
-}
-
-static void
 _cogl_winsys_save_context (CoglContext *ctx)
 {
   CoglContextEGL *egl_context = ctx->winsys;
@@ -990,8 +972,6 @@ static CoglWinsysVtable _cogl_winsys_vtable =
       _cogl_winsys_onscreen_swap_buffers_with_damage,
     .onscreen_swap_region = _cogl_winsys_onscreen_swap_region,
     .onscreen_get_buffer_age = _cogl_winsys_onscreen_get_buffer_age,
-    .onscreen_update_swap_throttled =
-      _cogl_winsys_onscreen_update_swap_throttled,
 
     /* CoglGLES2Context related methods */
     .save_context = _cogl_winsys_save_context,

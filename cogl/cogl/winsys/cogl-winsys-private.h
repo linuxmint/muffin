@@ -123,9 +123,6 @@ typedef struct _CoglWinsysVtable
                                         int n_rectangles);
 
   void
-  (*onscreen_update_swap_throttled) (CoglOnscreen *onscreen);
-
-  void
   (*onscreen_set_visibility) (CoglOnscreen *onscreen,
                               CoglBool visibility);
 

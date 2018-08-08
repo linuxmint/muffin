@@ -4,9 +4,9 @@ if UNIT_TESTS
 SUBDIRS += unit
 endif
 
-SUBDIRS += micro-perf data
+SUBDIRS += data
 
-DIST_SUBDIRS = conform unit micro-perf data
+DIST_SUBDIRS = conform unit data
 
 EXTRA_DIST = README test-launcher.sh run-tests.sh
 
