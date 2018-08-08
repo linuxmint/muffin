@@ -155,6 +155,15 @@
       </_description>
     </key>
 
+    <key name="button-layout" type="s">
+      <default>":minimize,maximize,close"</default>
+      <summary>Arrangement of buttons on the titlebar</summary>
+      <description>
+        Since Cinnamon 3.8, this key is obsolete and doesn't do anything anymore. The only reason it's still here is
+        because its absence makes Chromium crash at launch in Debian Stretch.
+      </description>
+    </key>
+
     <key name="invert-workspace-flip-direction" type="b">
       <default>false</default>
       <_summary>Inverts the direction the left and right arrows take you when
