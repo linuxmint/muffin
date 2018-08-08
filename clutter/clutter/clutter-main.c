@@ -261,16 +261,6 @@ clutter_config_read_from_key_file (GKeyFile *keyfile)
   else
     clutter_enable_accessibility = bool_value;
 
-  bool_value =
-    g_key_file_get_boolean (keyfile, ENVIRONMENT_GROUP,
-                            "SyncToVblank",
-                            &key_error);
-
-  if (key_error != NULL)
-    g_clear_error (&key_error);
-  else
-    clutter_sync_to_vblank = bool_value;
-
   int_value =
     g_key_file_get_integer (keyfile, ENVIRONMENT_GROUP,
                             "DefaultFps",
@@ -1493,10 +1483,6 @@ pre_parse_hook (GOptionContext  *context,
   env_string = g_getenv ("CLUTTER_FUZZY_PICK");
   if (env_string)
     clutter_use_fuzzy_picking = TRUE;
-
-  env_string = g_getenv ("CLUTTER_VBLANK");
-  if (g_strcmp0 (env_string, "none") == 0)
-    clutter_sync_to_vblank = FALSE;
 
   return _clutter_backend_pre_parse (backend, error);
 }
@@ -3664,12 +3650,6 @@ void
 _clutter_set_sync_to_vblank (gboolean sync_to_vblank)
 {
   clutter_sync_to_vblank = !!sync_to_vblank;
-}
-
-gboolean
-_clutter_get_sync_to_vblank (void)
-{
-  return clutter_sync_to_vblank;
 }
 
 void
