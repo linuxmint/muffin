@@ -2829,6 +2829,7 @@ clutter_text_im_focus (ClutterText *text)
                                            priv->input_purpose);
   clutter_input_focus_set_content_hints (priv->input_focus,
                                          priv->input_hints);
+  clutter_input_focus_set_can_show_preedit (priv->input_focus, TRUE);
   update_cursor_location (text);
 }
 
