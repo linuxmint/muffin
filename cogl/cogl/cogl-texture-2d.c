@@ -385,6 +385,7 @@ cogl_wayland_texture_2d_new_from_buffer (CoglContext *ctx,
       else
         return tex;
     }
+#ifdef COGL_HAS_EGL_SUPPORT
   else
     {
       int format, width, height;
@@ -439,6 +440,7 @@ cogl_wayland_texture_2d_new_from_buffer (CoglContext *ctx,
           return tex;
         }
     }
+#endif /* COGL_HAS_EGL_SUPPORT */
 
   _cogl_set_error (error,
                    COGL_SYSTEM_ERROR,

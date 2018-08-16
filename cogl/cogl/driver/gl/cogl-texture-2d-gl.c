@@ -576,7 +576,11 @@ _cogl_texture_2d_gl_allocate (CoglTexture *tex,
     case COGL_TEXTURE_SOURCE_TYPE_GL_FOREIGN:
       return allocate_from_gl_foreign (tex_2d, loader, error);
     case COGL_TEXTURE_SOURCE_TYPE_EGL_IMAGE_EXTERNAL:
+#if defined (COGL_HAS_EGL_SUPPORT)
       return allocate_custom_egl_image_external (tex_2d, loader, error);
+#else
+      g_return_val_if_reached (FALSE);
+#endif
     }
 
   g_return_val_if_reached (FALSE);
