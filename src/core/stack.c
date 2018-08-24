@@ -288,10 +288,14 @@ get_standalone_layer (MetaWindow *window)
 
     case META_WINDOW_DOCK:
       /* still experimenting here */
-      if (window->wm_state_below)
-        layer = META_LAYER_BOTTOM;
+      if (window->wm_state_below || (window->monitor && window->monitor->in_fullscreen))
+        {
+          layer = META_LAYER_BOTTOM;
+        }
       else
-        layer = META_LAYER_DOCK;
+        {
+          layer = META_LAYER_DOCK;
+        }
       break;
 
     case META_WINDOW_DROPDOWN_MENU:
