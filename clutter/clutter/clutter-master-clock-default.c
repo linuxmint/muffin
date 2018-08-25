@@ -69,8 +69,10 @@ struct _ClutterMasterClockDefault
   /* the previous state of the clock, in usecs, used to compute the delta */
   gint64 prev_tick;
 
+  /* the ideal frame interval in usecs (inverse of your max refresh rate) */
+  gint64 frame_interval;
+
 #ifdef CLUTTER_ENABLE_DEBUG
-  gint64 frame_budget;
   gint64 remaining_budget;
 #endif
 
@@ -264,6 +266,41 @@ master_clock_reschedule_stage_updates (ClutterMasterClockDefault *master_clock,
     }
 }
 
+static gint64
+estimate_next_presentation_time (ClutterMasterClockDefault *master_clock)
+{
+  gint64 frame_phase, now, now_phase, undershoot;
+
+  /* In future if this was updated from the backend's (maximum) refresh rate
+   * then that would fix: https://bugzilla.gnome.org/show_bug.cgi?id=781296
+   */
+  master_clock->frame_interval = G_USEC_PER_SEC /
+                                 clutter_get_default_frame_rate ();
+
+  now = g_source_get_time (master_clock->source);
+  now_phase = now % master_clock->frame_interval;
+
+  /* To be precise we would like to use:
+   *   frame_phase = a_recent_hardware_presentation_time % frame_interval;
+   * where hardware_presentation_time must be using the same clock as
+   * g_source_get_time. Unfortunately they're different clocks right now
+   * so we can't.
+   *   Alternatively, we could replace g_source_get_time in future with the
+   * current time in the clutter/cogl presentation clock, but that function
+   * also doesn't exist yet.
+   *   Until we can get either of those, zero is fine. It just means latency
+   * will be suboptimal by half a frame on average. We still get maximum
+   * smoothness this way...
+   */
+  frame_phase = 0;
+
+  undershoot = frame_phase - now_phase;
+  if (undershoot < 0)
+    undershoot += master_clock->frame_interval;
+
+  return now + undershoot;
+}
+
 /*
  * master_clock_next_frame_delay:
  * @master_clock: a #ClutterMasterClock
@@ -276,7 +313,8 @@ master_clock_reschedule_stage_updates (ClutterMasterClockDefault *master_clock,
 static gint
 master_clock_next_frame_delay (ClutterMasterClockDefault *master_clock)
 {
-  gint64 now, next;
+  gint64 now, target_presentation_time, ideal_render_start;  /* timestamps */
+  gint64 ideal_prerender_time, lateness;  /* deltas */
   gint swap_delay;
 
   if (!master_clock_is_running (master_clock))
@@ -307,46 +345,45 @@ master_clock_next_frame_delay (ClutterMasterClockDefault *master_clock)
       return 0;
     }
 
-  if (master_clock->prev_tick == 0)
-    {
-      /* If we weren't previously running, then draw the next frame
-       * immediately
-       */
-      CLUTTER_NOTE (SCHEDULER, "draw the first frame immediately");
-      return 0;
-    }
-
-  /* Otherwise, wait at least 1/frame_rate seconds since we last
-   * started a frame
-   */
   now = g_source_get_time (master_clock->source);
 
-  next = master_clock->prev_tick;
+  /* As first preference, try to carry on smoothly from the previous frame,
+   * even if that means we start rendering frame 2 before frame 1 has been
+   * presented. This is why we ignore estimate_next_presentation_time here...
+   */
+  target_presentation_time = master_clock->prev_tick +
+                             master_clock->frame_interval;
+  ideal_prerender_time = master_clock->frame_interval;
+  ideal_render_start = target_presentation_time - ideal_prerender_time;
+  lateness = now - ideal_render_start;
 
-  /* If time has gone backwards then there's no way of knowing how
-     long we should wait so let's just dispatch immediately */
-  if (now <= next)
+  /* If we just woke from idle then try to improve the smoothness of the first
+   * two frames some more. Otherwise the first frame would appear too old
+   * relative to the second frame.
+   */
+  if (lateness >= master_clock->frame_interval)
     {
-      CLUTTER_NOTE (SCHEDULER, "Time has gone backwards");
-
-      return 0;
+      target_presentation_time = estimate_next_presentation_time (master_clock);
+      ideal_render_start = target_presentation_time - ideal_prerender_time;
+      lateness = now - ideal_render_start;
     }
 
-  next += (1000000L / clutter_get_default_frame_rate ());
-
-  if (next <= now)
+  if (lateness > 0)
     {
-      CLUTTER_NOTE (SCHEDULER, "Less than %lu microsecs",
-                    1000000L / (gulong) clutter_get_default_frame_rate ());
-
+      CLUTTER_NOTE (SCHEDULER, "No wait required. We're already late.");
       return 0;
     }
   else
     {
-      CLUTTER_NOTE (SCHEDULER, "Waiting %" G_GINT64_FORMAT " msecs",
-                   (next - now) / 1000);
-
-      return (next - now) / 1000;
+      /* We +1 here to avoid premature dispatches that would otherwise occur
+       * repeatedly during the 1ms before 'ideal_render_start'. We don't care
+       * if this makes the final dispatch 1ms late because the smoothing
+       * algorithm corrects that, and it's much better than attempting to
+       * render more frames than the hardware can physically display...
+       */
+      gint millisec_delay = -lateness / 1000 + 1;
+      CLUTTER_NOTE (SCHEDULER, "Waiting %dms", millisec_delay);
+      return millisec_delay;
     }
 }
 
@@ -532,16 +569,34 @@ clutter_clock_dispatch (GSource     *source,
   ClutterMasterClockDefault *master_clock = clock_source->master_clock;
   gboolean stages_updated = FALSE;
   GSList *stages;
-
-  CLUTTER_NOTE (SCHEDULER, "Master clock [tick]");
+  gint64 smooth_tick;
 
   _clutter_threads_acquire_lock ();
 
   /* Get the time to use for this frame */
-  master_clock->cur_tick = g_source_get_time (source);
+  smooth_tick = estimate_next_presentation_time (master_clock);
+  if (smooth_tick <= master_clock->prev_tick)
+    {
+      /* Ordinarily this will never happen. But after we fix bug 781296, it
+       * could happen in the rare case when the ideal frame_interval changes,
+       * such as video mode switching or hotplugging monitors. As such it is
+       * not considered a bug (unless it's happening without mode switching
+       * or hotplugging).
+       */
+      CLUTTER_NOTE (SCHEDULER, "Master clock [tick] was premature (skipped)");
+      _clutter_threads_release_lock ();
+      return G_SOURCE_CONTINUE;
+    }
+
+  master_clock->cur_tick = smooth_tick;
+  if (master_clock->prev_tick)
+    CLUTTER_NOTE (SCHEDULER, "Master clock [tick] %+ldus",
+                  (long) (master_clock->cur_tick - master_clock->prev_tick));
+  else
+    CLUTTER_NOTE (SCHEDULER, "Master clock [tick] startup");
 
 #ifdef CLUTTER_ENABLE_DEBUG
-  master_clock->remaining_budget = master_clock->frame_budget;
+  master_clock->remaining_budget = master_clock->frame_interval;
 #endif
 
   /* We need to protect ourselves against stages being destroyed during
@@ -580,7 +635,7 @@ clutter_clock_dispatch (GSource     *source,
 
   _clutter_threads_release_lock ();
 
-  return TRUE;
+  return G_SOURCE_CONTINUE;
 }
 
 static void
@@ -612,10 +667,7 @@ clutter_master_clock_default_init (ClutterMasterClockDefault *self)
   self->idle = FALSE;
   self->ensure_next_iteration = FALSE;
   self->paused = FALSE;
-
-#ifdef CLUTTER_ENABLE_DEBUG
-  self->frame_budget = G_USEC_PER_SEC / 60;
-#endif
+  self->frame_interval = G_USEC_PER_SEC / 60; /* Will be refined at runtime */
 
   g_source_set_priority (source, CLUTTER_PRIORITY_REDRAW);
   g_source_set_can_recurse (source, FALSE);
