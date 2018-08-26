@@ -66,7 +66,7 @@ struct _MetaCompScreen
 };
 
 /* Wait 2ms after vblank before starting to draw next frame */
-#define META_SYNC_DELAY 2
+#define META_SYNC_DELAY 0
 
 void meta_switch_workspace_completed (MetaScreen    *screen);
 
