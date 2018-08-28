@@ -1533,6 +1533,7 @@ meta_enable_unredirect_for_screen (MetaScreen *screen)
 
 static void
 flash_out_completed (ClutterTimeline *timeline,
+                     gboolean         is_finished,
                      gpointer         user_data)
 {
   ClutterActor *flash = CLUTTER_ACTOR (user_data);
@@ -1566,7 +1567,7 @@ meta_compositor_flash_screen (MetaCompositor *compositor,
   clutter_timeline_set_auto_reverse (CLUTTER_TIMELINE (transition), TRUE);
   clutter_timeline_set_repeat_count (CLUTTER_TIMELINE (transition), 2);
 
-  g_signal_connect (transition, "finished",
+  g_signal_connect (transition, "stopped",
                     G_CALLBACK (flash_out_completed), flash);
 
   clutter_actor_restore_easing_state (flash);
