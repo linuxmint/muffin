@@ -308,6 +308,14 @@ _clutter_effect_get_paint_volume (ClutterEffect      *effect,
   return CLUTTER_EFFECT_GET_CLASS (effect)->get_paint_volume (effect, volume);
 }
 
+gboolean
+_clutter_effect_has_custom_paint_volume (ClutterEffect *effect)
+{
+  g_return_val_if_fail (CLUTTER_IS_EFFECT (effect), FALSE);
+
+  return CLUTTER_EFFECT_GET_CLASS (effect)->get_paint_volume != clutter_effect_real_get_paint_volume;
+}
+
 /**
  * clutter_effect_queue_repaint:
  * @effect: A #ClutterEffect which needs redrawing
