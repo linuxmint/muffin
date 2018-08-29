@@ -17505,7 +17505,7 @@ _clutter_actor_get_paint_volume_real (ClutterActor *self,
            */
           effects = _clutter_meta_group_peek_metas (priv->effects);
           for (l = effects;
-               l != NULL || (l != NULL && l->data != priv->current_effect);
+               l != NULL && l->data != priv->current_effect;
                l = l->next)
             {
               if (!_clutter_effect_get_paint_volume (l->data, pv))
