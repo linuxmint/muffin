@@ -85,6 +85,7 @@ void meta_shaped_texture_set_clip_region (MetaShapedTexture *stex,
 
 cairo_surface_t * meta_shaped_texture_get_image (MetaShapedTexture     *stex,
                                                  cairo_rectangle_int_t *clip);
+gboolean meta_shaped_texture_is_obscured (MetaShapedTexture *self);
 
 G_END_DECLS
 
