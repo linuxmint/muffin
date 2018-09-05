@@ -1138,16 +1138,18 @@ sync_actor_stacking (MetaCompScreen *info)
   if (!reordered)
     return;
 
+  ClutterActor *parent;
+
   for (tmp = g_list_last (info->windows); tmp != NULL; tmp = tmp->prev)
     {
       ClutterActor *actor = tmp->data;
 
-      if (clutter_actor_get_parent (actor) == info->window_group)
-        clutter_actor_set_child_below_sibling (info->window_group, actor, NULL);
+      parent = clutter_actor_get_parent (actor);
+      clutter_actor_set_child_below_sibling (parent, actor, NULL);
     }
 
-  if (clutter_actor_get_parent (info->background_actor) == info->window_group)
-    clutter_actor_set_child_below_sibling (info->window_group, info->background_actor, NULL);
+  parent = clutter_actor_get_parent (info->background_actor);
+  clutter_actor_set_child_below_sibling (parent, info->background_actor, NULL);
 }
 
 void
