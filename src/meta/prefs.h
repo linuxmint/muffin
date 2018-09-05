@@ -191,6 +191,7 @@ gint meta_prefs_get_ui_scale (void);
 typedef enum _MetaKeyBindingAction
 {
   META_KEYBINDING_ACTION_NONE = -1,
+  /* WARNING: Watch keybindings.c 'process_event' if you change these enums */
   META_KEYBINDING_ACTION_WORKSPACE_1,
   META_KEYBINDING_ACTION_WORKSPACE_2,
   META_KEYBINDING_ACTION_WORKSPACE_3,
