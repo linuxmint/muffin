@@ -1194,6 +1194,53 @@ notify_discrete_axis (ClutterSeatEvdev              *seat,
                                              scroll_source);
 }
 
+static void
+process_tablet_axis (ClutterDeviceManagerEvdev *manager_evdev,
+                     struct libinput_event     *event)
+{
+  struct libinput_device *libinput_device = libinput_event_get_device (event);
+  guint64 time;
+  double x, y, dx, dy, *axes;
+  gfloat stage_width, stage_height;
+  ClutterStage *stage;
+  ClutterInputDevice *device;
+  struct libinput_event_tablet_tool *tablet_event =
+    libinput_event_get_tablet_tool_event (event);
+  ClutterInputDeviceEvdev *evdev_device;
+
+  device = libinput_device_get_user_data (libinput_device);
+  evdev_device = CLUTTER_INPUT_DEVICE_EVDEV (device);
+
+  stage = _clutter_input_device_get_stage (device);
+  if (!stage)
+    return;
+
+  axes = translate_tablet_axes (tablet_event,
+                                evdev_device->last_tool);
+  if (!axes)
+    return;
+
+  stage_width = clutter_actor_get_width (CLUTTER_ACTOR (stage));
+  stage_height = clutter_actor_get_height (CLUTTER_ACTOR (stage));
+
+  time = libinput_event_tablet_tool_get_time_usec (tablet_event);
+
+  if (clutter_input_device_get_mapping_mode (device) == CLUTTER_INPUT_DEVICE_MAPPING_RELATIVE ||
+      clutter_input_device_tool_get_tool_type (evdev_device->last_tool) == CLUTTER_INPUT_DEVICE_TOOL_MOUSE ||
+      clutter_input_device_tool_get_tool_type (evdev_device->last_tool) == CLUTTER_INPUT_DEVICE_TOOL_LENS)
+    {
+      dx = libinput_event_tablet_tool_get_dx (tablet_event);
+      dy = libinput_event_tablet_tool_get_dy (tablet_event);
+      notify_relative_tool_motion (device, time, dx, dy, axes);
+    }
+  else
+    {
+      x = libinput_event_tablet_tool_get_x_transformed (tablet_event, stage_width);
+      y = libinput_event_tablet_tool_get_y_transformed (tablet_event, stage_height);
+      notify_absolute_motion (device, time, x, y, axes);
+    }
+}
+
 static gboolean
 process_device_event (ClutterDeviceManagerEvdev *manager_evdev,
                       struct libinput_event *event)
@@ -1578,46 +1625,7 @@ process_device_event (ClutterDeviceManagerEvdev *manager_evdev,
       }
     case LIBINPUT_EVENT_TABLET_TOOL_AXIS:
       {
-        guint64 time;
-        double x, y, dx, dy, *axes;
-        gfloat stage_width, stage_height;
-        ClutterStage *stage;
-        struct libinput_event_tablet_tool *tablet_event =
-          libinput_event_get_tablet_tool_event (event);
-        ClutterInputDeviceEvdev *evdev_device;
-
-        device = libinput_device_get_user_data (libinput_device);
-        evdev_device = CLUTTER_INPUT_DEVICE_EVDEV (device);
-
-        stage = _clutter_input_device_get_stage (device);
-        if (!stage)
-          break;
-
-        axes = translate_tablet_axes (tablet_event,
-                                      evdev_device->last_tool);
-        if (!axes)
-          break;
-
-        stage_width = clutter_actor_get_width (CLUTTER_ACTOR (stage));
-        stage_height = clutter_actor_get_height (CLUTTER_ACTOR (stage));
-
-        time = libinput_event_tablet_tool_get_time_usec (tablet_event);
-
-        if (clutter_input_device_get_mapping_mode (device) == CLUTTER_INPUT_DEVICE_MAPPING_RELATIVE ||
-            clutter_input_device_tool_get_tool_type (evdev_device->last_tool) == CLUTTER_INPUT_DEVICE_TOOL_MOUSE ||
-            clutter_input_device_tool_get_tool_type (evdev_device->last_tool) == CLUTTER_INPUT_DEVICE_TOOL_LENS)
-          {
-            dx = libinput_event_tablet_tool_get_dx (tablet_event);
-            dy = libinput_event_tablet_tool_get_dy (tablet_event);
-            notify_relative_tool_motion (device, time, dx, dy, axes);
-          }
-        else
-          {
-            x = libinput_event_tablet_tool_get_x_transformed (tablet_event, stage_width);
-            y = libinput_event_tablet_tool_get_y_transformed (tablet_event, stage_height);
-            notify_absolute_motion (device, time, x, y, axes);
-          }
-
+        process_tablet_axis (manager_evdev, event);
         break;
       }
     case LIBINPUT_EVENT_TABLET_TOOL_PROXIMITY:
@@ -1649,6 +1657,8 @@ process_device_event (ClutterDeviceManagerEvdev *manager_evdev,
           libinput_event_get_tablet_tool_event (event);
         guint tablet_button;
 
+        process_tablet_axis (manager_evdev, event);
+
         device = libinput_device_get_user_data (libinput_device);
         time_us = libinput_event_tablet_tool_get_time_usec (tablet_event);
         tablet_button = libinput_event_tablet_tool_get_button (tablet_event);
@@ -1673,8 +1683,15 @@ process_device_event (ClutterDeviceManagerEvdev *manager_evdev,
         button_state = libinput_event_tablet_tool_get_tip_state (tablet_event) ==
                        LIBINPUT_TABLET_TOOL_TIP_DOWN;
 
+        /* To avoid jumps on tip, notify axes before the tip down event
+           but after the tip up event */
+        if (button_state)
+          process_tablet_axis (manager_evdev, event);
+
         clutter_seat_evdev_notify_button (seat_from_device (device), device,
                                           time_us, BTN_TOUCH, button_state);
+        if (!button_state)
+          process_tablet_axis (manager_evdev, event);
         break;
       }
     case LIBINPUT_EVENT_TABLET_PAD_BUTTON:
