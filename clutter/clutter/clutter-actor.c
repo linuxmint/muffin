@@ -8870,6 +8870,7 @@ _clutter_actor_queue_redraw_full (ClutterActor       *self,
     {
       pv = volume;
       should_free_pv = FALSE;
+      self->priv->needs_paint_volume_update = TRUE;
     }
 
   self->priv->queue_redraw_entry =
