@@ -2362,7 +2362,7 @@ meta_window_actor_pre_paint (MetaWindowActor *self)
     {
       FrameData *frame = l->data;
 
-      if (frame->frame_counter == 0)
+      if (frame->frame_counter == -1)
         {
           frame->frame_counter = clutter_stage_get_frame_counter (stage);
         }
@@ -2407,6 +2407,87 @@ meta_window_actor_post_paint (MetaWindowActor *self)
       meta_error_trap_pop (display);
 
       priv->needs_frame_drawn = FALSE;
+    }
+}
+
+static void
+send_frame_timings (MetaWindowActor  *self,
+                    FrameData        *frame,
+                    CoglFrameInfo    *frame_info,
+                    gint64            presentation_time)
+{
+  MetaWindowActorPrivate *priv = self->priv;
+  MetaDisplay *display = meta_screen_get_display (priv->screen);
+  MetaWindow *window = meta_window_actor_get_meta_window (self);
+  Display *xdisplay = meta_display_get_xdisplay (display);
+  float refresh_rate;
+  int refresh_interval;
+
+  XClientMessageEvent ev = { 0, };
+
+  ev.type = ClientMessage;
+  ev.window = meta_window_get_xwindow (priv->window);
+  ev.message_type = display->atom__NET_WM_FRAME_TIMINGS;
+  ev.format = 32;
+  ev.data.l[0] = frame->sync_request_serial & G_GUINT64_CONSTANT(0xffffffff);
+  ev.data.l[1] = frame->sync_request_serial >> 32;
+
+  refresh_rate = window->monitor->refresh_rate;
+  /* 0.0 is a flag for not known, but sanity-check against other odd numbers */
+  if (refresh_rate >= 1.0)
+    refresh_interval = (int) (0.5 + 1000000 / refresh_rate);
+  else
+    refresh_interval = 0;
+
+  if (presentation_time != 0)
+    {
+      gint64 presentation_time_server = meta_compositor_monotonic_time_to_server_time (display,
+                                                                                       presentation_time);
+      gint64 presentation_time_offset = presentation_time_server - frame->frame_drawn_time;
+      if (presentation_time_offset == 0)
+        presentation_time_offset = 1;
+
+      if ((gint32)presentation_time_offset == presentation_time_offset)
+        ev.data.l[2] = presentation_time_offset;
+    }
+
+  ev.data.l[3] = refresh_interval;
+  ev.data.l[4] = 1000 * META_SYNC_DELAY;
+
+  meta_error_trap_push (display);
+  XSendEvent (xdisplay, ev.window, False, 0, (XEvent*) &ev);
+  XFlush (xdisplay);
+  meta_error_trap_pop (display);
+}
+
+void
+meta_window_actor_frame_complete (MetaWindowActor *self,
+                                  CoglFrameInfo   *frame_info,
+                                  gint64           presentation_time)
+{
+  MetaWindowActorPrivate *priv = self->priv;
+  GList *l;
+
+  if (meta_window_actor_is_destroyed (self))
+    return;
+
+  for (l = priv->frames; l;)
+    {
+      GList *l_next = l->next;
+      FrameData *frame = l->data;
+      gint64 frame_counter = frame_info->frame_counter;
+
+      if (frame->frame_counter != -1 && frame->frame_counter <= frame_counter)
+        {
+          if (frame->frame_drawn_time != 0)
+            {
+              priv->frames = g_list_delete_link (priv->frames, l);
+              send_frame_timings (self, frame, frame_info, presentation_time);
+              frame_data_free (frame);
+            }
+        }
+
+      l = l_next;
     }
 }
 

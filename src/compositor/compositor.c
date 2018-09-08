@@ -81,6 +81,12 @@
 /* #define DEBUG_TRACE g_print */
 #define DEBUG_TRACE(X)
 
+static void
+frame_callback (ClutterStage     *stage,
+                CoglFrameEvent    event,
+                ClutterFrameInfo *frame_info,
+                MetaCompScreen   *info);
+
 static inline gboolean
 composite_at_least_version (MetaDisplay *display, int maj, int min)
 {
@@ -629,6 +635,9 @@ meta_compositor_manage_screen (MetaCompositor *compositor,
   meta_screen_set_cm_selection (screen);
 
   info->stage = clutter_stage_new ();
+
+  g_signal_connect_after (CLUTTER_STAGE (info->stage), "presented",
+                          G_CALLBACK (frame_callback), info);
 
   g_signal_connect_after (CLUTTER_STAGE (info->stage), "after-paint",
                           G_CALLBACK (after_stage_paint), info);
@@ -1280,6 +1289,46 @@ meta_compositor_sync_screen_size (MetaCompositor  *compositor,
   meta_verbose ("Changed size for stage on screen %d to %dx%d\n",
 		meta_screen_get_screen_number (screen),
 		width, height);
+}
+
+static void
+frame_callback (ClutterStage     *stage,
+                CoglFrameEvent    event,
+                ClutterFrameInfo *frame_info,
+                MetaCompScreen   *info)
+{
+  GList *l;
+
+  if (event == COGL_FRAME_EVENT_COMPLETE)
+    {
+      gint64 presentation_time_cogl = frame_info->presentation_time;
+      gint64 presentation_time;
+
+      if (presentation_time_cogl != 0)
+        {
+          /* Cogl reports presentation in terms of its own clock, which is
+           * guaranteed to be in nanoseconds but with no specified base. The
+           * normal case with the open source GPU drivers on Linux 3.8 and
+           * newer is that the base of cogl_get_clock_time() is that of
+           * clock_gettime(CLOCK_MONOTONIC), so the same as g_get_monotonic_time),
+           * but there's no exposure of that through the API. clock_gettime()
+           * is fairly fast, so calling it twice and subtracting to get a
+           * nearly-zero number is acceptable, if a litle ugly.
+           */
+          gint64 current_cogl_time = cogl_get_clock_time (info->compositor->context);
+          gint64 current_monotonic_time = g_get_monotonic_time ();
+
+          presentation_time =
+            current_monotonic_time + (presentation_time_cogl - current_cogl_time) / 1000;
+        }
+      else
+        {
+          presentation_time = 0;
+        }
+
+      for (l = info->windows; l; l = l->next)
+        meta_window_actor_frame_complete (l->data, frame_info, presentation_time);
+    }
 }
 
 static gboolean
