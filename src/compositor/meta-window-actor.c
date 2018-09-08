@@ -2332,6 +2332,9 @@ meta_window_actor_handle_updates (MetaWindowActor *self)
       return;
     }
 
+  if (!priv->visible && !priv->needs_pixmap)
+    return;
+
   if (priv->received_damage)
     {
       meta_error_trap_push (display);
