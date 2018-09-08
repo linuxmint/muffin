@@ -48,6 +48,7 @@ struct _MetaMonitorInfo
   gboolean is_primary;
   gboolean in_fullscreen;
   XID output; /* The primary or first output for this crtc, None if no xrandr */
+  float refresh_rate;
 };
 
 typedef void (* MetaScreenWindowFunc) (MetaScreen *screen, MetaWindow *window,
