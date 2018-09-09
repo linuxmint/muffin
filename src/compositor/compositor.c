@@ -599,6 +599,22 @@ redirect_windows (MetaCompositor *compositor,
     }
 }
 
+LOCAL_SYMBOL void
+meta_compositor_toggle_send_frame_timings (MetaScreen *screen)
+{
+  MetaCompScreen *info = meta_screen_get_compositor_data (screen);
+  if (meta_prefs_get_send_frame_timings())
+    {
+      g_signal_connect_after (CLUTTER_STAGE (info->stage), "presented",
+                              G_CALLBACK (frame_callback), info);
+    }
+  else
+    {
+      g_signal_handlers_disconnect_by_func (CLUTTER_STAGE (info->stage),
+                                            frame_callback, NULL);
+    }
+}
+
 void
 meta_compositor_manage_screen (MetaCompositor *compositor,
                                MetaScreen     *screen)
@@ -636,8 +652,7 @@ meta_compositor_manage_screen (MetaCompositor *compositor,
 
   info->stage = clutter_stage_new ();
 
-  g_signal_connect_after (CLUTTER_STAGE (info->stage), "presented",
-                          G_CALLBACK (frame_callback), info);
+  meta_compositor_toggle_send_frame_timings(screen);
 
   g_signal_connect_after (CLUTTER_STAGE (info->stage), "after-paint",
                           G_CALLBACK (after_stage_paint), info);
