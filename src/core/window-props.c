@@ -1902,6 +1902,20 @@ reload_bypass_compositor (MetaWindow    *window,
   window->bypass_compositor = requested_value;
 }
 
+static void
+reload_window_opacity (MetaWindow    *window,
+                       MetaPropValue *value,
+                       gboolean       initial)
+
+{
+  int requested_value = 0xFF;
+
+  if (value->type != META_PROP_VALUE_INVALID)
+    requested_value = (int) value->v.cardinal;
+
+  meta_window_set_opacity (window, requested_value);
+}
+
 #define RELOAD_STRING(var_name, propname) \
   static void                                       \
   reload_ ## var_name (MetaWindow    *window,       \
@@ -2001,6 +2015,7 @@ meta_display_init_window_prop_hooks (MetaDisplay *display)
     { display->atom__NET_WM_STRUT,         META_PROP_VALUE_INVALID, reload_struts,            FALSE, FALSE },
     { display->atom__NET_WM_STRUT_PARTIAL, META_PROP_VALUE_INVALID, reload_struts,            FALSE, FALSE },
     { display->atom__NET_WM_BYPASS_COMPOSITOR, META_PROP_VALUE_CARDINAL,  reload_bypass_compositor, TRUE, TRUE },
+    { display->atom__NET_WM_WINDOW_OPACITY, META_PROP_VALUE_CARDINAL, reload_window_opacity,  TRUE, TRUE },
     { display->atom__NET_WM_XAPP_ICON_NAME, META_PROP_VALUE_UTF8,     reload_theme_icon_name, TRUE,  TRUE },
     { display->atom__NET_WM_XAPP_PROGRESS, META_PROP_VALUE_CARDINAL, reload_progress,         TRUE,  TRUE },
     { display->atom__NET_WM_XAPP_PROGRESS_PULSE, META_PROP_VALUE_CARDINAL, reload_progress_pulse, TRUE,  TRUE },

@@ -172,46 +172,6 @@ process_damage (MetaCompositor     *compositor,
   compositor->frame_has_updated_xsurfaces = TRUE;
 }
 
-static void
-process_property_notify (MetaCompositor	*compositor,
-                         XPropertyEvent *event,
-                         MetaWindow     *window)
-{
-  MetaWindowActor *window_actor;
-
-  if (event->atom == compositor->atom_x_root_pixmap)
-    {
-      GSList *l;
-
-      for (l = meta_display_get_screens (compositor->display); l; l = l->next)
-        {
-	  MetaScreen  *screen = l->data;
-          if (event->window == meta_screen_get_xroot (screen))
-            {
-              meta_background_actor_update (screen);
-              return;
-            }
-        }
-    }
-
-  if (window == NULL)
-    return;
-
-  window_actor = META_WINDOW_ACTOR (meta_window_get_compositor_private (window));
-  if (window_actor == NULL)
-    return;
-
-  /* Check for the opacity changing */
-  if (event->atom == compositor->atom_net_wm_window_opacity)
-    {
-      meta_window_actor_update_opacity (window_actor);
-      DEBUG_TRACE ("process_property_notify: net_wm_window_opacity\n");
-      return;
-    }
-
-  DEBUG_TRACE ("process_property_notify: unknown\n");
-}
-
 static Window
 get_output_window (MetaScreen *screen)
 {
@@ -870,6 +830,18 @@ meta_compositor_window_shape_changed (MetaCompositor *compositor,
   meta_window_actor_update_shape (window_actor);
 }
 
+void
+meta_compositor_window_opacity_changed (MetaCompositor *compositor,
+                                        MetaWindow     *window)
+{
+  MetaWindowActor *window_actor;
+  window_actor = META_WINDOW_ACTOR (meta_window_get_compositor_private (window));
+  if (!window_actor)
+    return;
+
+  meta_window_actor_update_opacity (window_actor);
+}
+
 /**
  * meta_compositor_process_event: (skip)
  *
@@ -928,29 +900,20 @@ meta_compositor_process_event (MetaCompositor *compositor,
         }
     }
 
-  switch (event->type)
-    {
-    case PropertyNotify:
-      process_property_notify (compositor, (XPropertyEvent *) event, window);
-      break;
+    if (event->type == meta_display_get_damage_event_base (compositor->display) + XDamageNotify)
+      {
+        /* Core code doesn't handle damage events, so we need to extract the MetaWindow
+          * ourselves
+          */
+        if (window == NULL)
+          {
+            Window xwin = ((XDamageNotifyEvent *) event)->drawable;
+            window = meta_display_lookup_x_window (compositor->display, xwin);
+          }
 
-    default:
-      if (event->type == meta_display_get_damage_event_base (compositor->display) + XDamageNotify)
-        {
-          /* Core code doesn't handle damage events, so we need to extract the MetaWindow
-           * ourselves
-           */
-          if (window == NULL)
-            {
-              Window xwin = ((XDamageNotifyEvent *) event)->drawable;
-              window = meta_display_lookup_x_window (compositor->display, xwin);
-            }
-
-	  DEBUG_TRACE ("meta_compositor_process_event (process_damage)\n");
-          process_damage (compositor, (XDamageNotifyEvent *) event, window);
-        }
-      break;
-    }
+        DEBUG_TRACE ("meta_compositor_process_event (process_damage)\n");
+        process_damage (compositor, (XDamageNotifyEvent *) event, window);
+      }
 
   if (compositor->have_x11_sync_object)
     meta_sync_ring_handle_event (event);
@@ -1452,9 +1415,7 @@ MetaCompositor *
 meta_compositor_new (MetaDisplay *display)
 {
   char *atom_names[] = {
-    "_XROOTPMAP_ID",
-    "_XSETROOT_ID",
-    "_NET_WM_WINDOW_OPACITY",
+    "_XROOTPMAP_ID"
   };
   Atom                   atoms[G_N_ELEMENTS(atom_names)];
   MetaCompositor        *compositor;
@@ -1480,8 +1441,6 @@ meta_compositor_new (MetaDisplay *display)
                     compositor);
 
   compositor->atom_x_root_pixmap = atoms[0];
-  compositor->atom_x_set_root = atoms[1];
-  compositor->atom_net_wm_window_opacity = atoms[2];
 
   compositor->pre_paint_func_id =
     clutter_threads_add_repaint_func_full (CLUTTER_REPAINT_FLAGS_PRE_PAINT,

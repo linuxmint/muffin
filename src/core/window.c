@@ -1302,6 +1302,8 @@ meta_window_new_with_attrs (MetaDisplay       *display,
    */
   window->stable_sequence = ++display->window_sequence_counter;
 
+  window->opacity = 0xFF;
+
   /* assign the window to its group, or create a new group if needed
    */
   window->group = NULL;
@@ -12393,4 +12395,14 @@ meta_window_get_icon_name (MetaWindow *window)
     g_return_val_if_fail (META_IS_WINDOW (window), NULL);
 
     return window->theme_icon_name;
+}
+
+void
+meta_window_set_opacity (MetaWindow *window,
+                         guint       opacity)
+{
+  window->opacity = opacity;
+
+  if (window->display->compositor)
+    meta_compositor_window_opacity_changed (window->display->compositor, window);
 }

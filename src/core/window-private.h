@@ -416,6 +416,9 @@ struct _MetaWindow
   /* if non-NULL, the opaque region _NET_WM_OPAQUE_REGION */
   cairo_region_t *opaque_region;
 
+  /* _NET_WM_WINDOW_OPACITY */
+  guint opacity;
+
   /* if TRUE, the we have the new form of sync request counter which
    * also handles application frames */
   guint extended_sync_request_counter : 1;
@@ -838,4 +841,6 @@ void meta_window_extend_by_frame (MetaWindow              *window,
 void meta_window_unextend_by_frame (MetaWindow              *window,
                                     MetaRectangle           *rect,
                                     const MetaFrameBorders  *borders);
+void meta_window_set_opacity              (MetaWindow *window,
+                                           guint       opacity);
 #endif

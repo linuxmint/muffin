@@ -65,8 +65,6 @@ struct _MetaWindowActorPrivate
 
   Damage            damage;
 
-  guint8            opacity;
-
   /* If the window is shaped, a region that matches the shape */
   cairo_region_t   *shape_region;
   /* The opaque region, from _NET_WM_OPAQUE_REGION, intersected with
@@ -283,7 +281,6 @@ meta_window_actor_init (MetaWindowActor *self)
   priv = self->priv = G_TYPE_INSTANCE_GET_PRIVATE (self,
 						   META_TYPE_WINDOW_ACTOR,
 						   MetaWindowActorPrivate);
-  priv->opacity = 0xff;
   priv->shadow_class = NULL;
   priv->has_desat_effect = FALSE;
 }
@@ -374,6 +371,15 @@ window_appears_focused_notify (MetaWindow *mw,
                                gpointer    data)
 {
   clutter_actor_queue_redraw (CLUTTER_ACTOR (data));
+}
+
+static gboolean
+is_non_opaque (MetaWindowActor *self)
+{
+  MetaWindowActorPrivate *priv = self->priv;
+  MetaWindow *window = priv->window;
+
+  return priv->argb32 || (window->opacity != 0xFF);
 }
 
 static void
@@ -683,7 +689,7 @@ clip_shadow_under_window (MetaWindowActor *self)
 {
   MetaWindowActorPrivate *priv = self->priv;
 
-  return (priv->argb32 || priv->opacity != 0xff) && priv->window->frame;
+  return is_non_opaque (self) && priv->window->frame;
 }
 
 static void
@@ -702,6 +708,7 @@ meta_window_actor_paint (ClutterActor *actor)
       MetaShadowParams params;
       cairo_rectangle_int_t shape_bounds;
       cairo_region_t *clip = priv->shadow_clip;
+      MetaWindow *window = priv->window;
 
       meta_window_actor_get_shape_bounds (self, &shape_bounds);
       meta_window_actor_get_shadow_params (self, appears_focused, &params);
@@ -725,7 +732,7 @@ meta_window_actor_paint (ClutterActor *actor)
                          params.y_offset + shape_bounds.y,
                          shape_bounds.width,
                          shape_bounds.height,
-                         (clutter_actor_get_paint_opacity (actor) * params.opacity * priv->opacity) / (255 * 255),
+                         (clutter_actor_get_paint_opacity (actor) * params.opacity * window->opacity) / (255 * 255),
                          clip,
                          clip_shadow_under_window (self)); /* clip_strictly - not just as an optimization */
 
@@ -810,11 +817,12 @@ meta_window_actor_has_shadow (MetaWindowActor *self)
     }
 
   /*
-   * Do not add shadows to ARGB windows; eventually we should generate a
-   * shadow from the input shape for such windows.
+   * Do not add shadows to non-opaque windows; eventually we should generate
+   * a shadow from the input shape for such windows.
    */
-  if (priv->argb32 || priv->opacity != 0xff)
+  if (is_non_opaque (self))
     return FALSE;
+
   /*
    * Add shadows to override redirect windows (e.g., Gtk menus).
    */
@@ -1300,7 +1308,7 @@ meta_window_actor_should_unredirect (MetaWindowActor *self)
   if (meta_window_requested_dont_bypass_compositor (metaWindow))
     return FALSE;
 
-  if (priv->opacity != 0xff)
+  if (metaWindow->opacity != 0xFF)
     return FALSE;
 
   if (metaWindow->has_shape)
@@ -1755,8 +1763,9 @@ LOCAL_SYMBOL cairo_region_t *
 meta_window_actor_get_obscured_region (MetaWindowActor *self)
 {
   MetaWindowActorPrivate *priv = self->priv;
+  MetaWindow *window = priv->window;
 
-  if (priv->back_pixmap && priv->opacity == 0xff)
+  if (priv->back_pixmap && window->opacity != 0xFF && !priv->window->shaded)
     {
       if (priv->opaque_region)
         return priv->opaque_region;
@@ -2526,23 +2535,8 @@ LOCAL_SYMBOL void
 meta_window_actor_update_opacity (MetaWindowActor *self)
 {
   MetaWindowActorPrivate *priv = self->priv;
-  MetaDisplay *display = meta_screen_get_display (priv->screen);
-  MetaCompositor *compositor = meta_display_get_compositor (display);
-  Window xwin = meta_window_get_xwindow (priv->window);
-  gulong value;
-  guint8 opacity;
-
-  if (meta_prop_get_cardinal (display, xwin,
-                              compositor->atom_net_wm_window_opacity,
-                              &value))
-    {
-      opacity = (guint8)((gfloat)value * 255.0 / ((gfloat)0xffffffff));
-    }
-  else
-    opacity = 255;
-
-  self->priv->opacity = opacity;
-  clutter_actor_set_opacity (self->priv->actor, opacity);
+  MetaWindow *window = priv->window;
+  clutter_actor_set_opacity (self->priv->actor, window->opacity);
 }
 
 void
