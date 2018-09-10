@@ -6675,6 +6675,32 @@ meta_window_move_resize_request (MetaWindow *window,
   save_user_window_placement (window);
 }
 
+static void
+restack_window (MetaWindow *window,
+                MetaWindow *sibling,
+                int         direction)
+{
+ switch (direction)
+   {
+   case Above:
+     if (sibling)
+       meta_window_stack_just_above (window, sibling);
+     else
+       meta_window_raise (window);
+     break;
+   case Below:
+     if (sibling)
+       meta_window_stack_just_below (window, sibling);
+     else
+       meta_window_lower (window);
+     break;
+   case TopIf:
+   case BottomIf:
+   case Opposite:
+     break;
+   }
+}
+
 LOCAL_SYMBOL gboolean
 meta_window_configure_request (MetaWindow *window,
                                XEvent     *event)
@@ -6705,10 +6731,7 @@ meta_window_configure_request (MetaWindow *window,
    * the stack looks).
    *
    * I'm pretty sure no interesting client uses TopIf, BottomIf, or
-   * Opposite anyway, so the only possible missing thing is
-   * Above/Below with a sibling set. For now we just pretend there's
-   * never a sibling set and always do the full raise/lower instead of
-   * the raise-just-above/below-sibling.
+   * Opposite anyway.
    */
   if (event->xconfigurerequest.value_mask & CWStackMode)
     {
@@ -6740,23 +6763,51 @@ meta_window_configure_request (MetaWindow *window,
         }
       else
         {
-          switch (event->xconfigurerequest.detail)
+          MetaWindow *sibling = NULL;
+          /* Handle Above/Below with a sibling set */
+          if (event->xconfigurerequest.above != None)
             {
-            case Above:
-              meta_window_raise (window);
-              break;
-            case Below:
-              meta_window_lower (window);
-              break;
-            case TopIf:
-            case BottomIf:
-            case Opposite:
-              break;
+              MetaDisplay *display;
+
+              display = meta_window_get_display (window);
+              sibling = meta_display_lookup_x_window (display,
+                                                      event->xconfigurerequest.above);
+              if (sibling == NULL)
+                return TRUE;
+
+              meta_topic (META_DEBUG_STACK,
+                      "xconfigure stacking request from window %s sibling %s stackmode %d\n",
+                      window->desc, sibling->desc, event->xconfigurerequest.detail);
             }
+          restack_window (window, sibling, event->xconfigurerequest.detail);
         }
     }
 
   return TRUE;
+}
+
+static void
+handle_net_restack_window (MetaDisplay *display,
+                           XEvent      *event)
+{
+  MetaWindow *window, *sibling = NULL;
+
+  /* Ignore if this does not come from a pager, see the WM spec
+   */
+  if (event->xclient.data.l[0] != 2)
+    return;
+
+  window = meta_display_lookup_x_window (display,
+                                         event->xclient.window);
+
+  if (window)
+    {
+      if (event->xclient.data.l[1])
+        sibling = meta_display_lookup_x_window (display,
+                                                event->xclient.data.l[1]);
+
+      restack_window (window, sibling, event->xclient.data.l[2]);
+    }
 }
 
 LOCAL_SYMBOL gboolean
@@ -7314,6 +7365,11 @@ meta_window_client_message (MetaWindow *window,
                                  y_root, GDK_BUTTON_SECONDARY,
                                  meta_display_get_current_time_roundtrip (display));
         }
+    }
+  else if (event->xclient.message_type ==
+           display->atom__NET_RESTACK_WINDOW)
+    {
+      handle_net_restack_window (display, event);
     }
 
   return FALSE;
@@ -11062,6 +11118,30 @@ meta_window_stack_just_below (MetaWindow *window,
       meta_topic (META_DEBUG_STACK,
                   "Window %s  was already below window %s.\n",
                   window->desc, below_this_one->desc);
+    }
+}
+
+void
+meta_window_stack_just_above (MetaWindow *window,
+                              MetaWindow *above_this_one)
+{
+  g_return_if_fail (window         != NULL);
+  g_return_if_fail (above_this_one != NULL);
+
+  if (window->stack_position < above_this_one->stack_position)
+    {
+      meta_topic (META_DEBUG_STACK,
+                  "Setting stack position of window %s to %d (making it above window %s).\n",
+                  window->desc,
+                  above_this_one->stack_position,
+                  above_this_one->desc);
+      meta_window_set_stack_position (window, above_this_one->stack_position);
+    }
+  else
+    {
+      meta_topic (META_DEBUG_STACK,
+                  "Window %s  was already above window %s.\n",
+                  window->desc, above_this_one->desc);
     }
 }
 
