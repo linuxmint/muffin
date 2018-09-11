@@ -217,11 +217,9 @@ get_output_window (MetaScreen *screen)
 {
   MetaDisplay *display = meta_screen_get_display (screen);
   Display     *xdisplay = meta_display_get_xdisplay (display);
-  Window       output, xroot;
+  Window       output;
   XWindowAttributes attr;
   long         event_mask;
-
-  xroot = meta_screen_get_xroot (screen);
 
   event_mask = FocusChangeMask |
                ExposureMask |
@@ -231,7 +229,7 @@ get_output_window (MetaScreen *screen)
                ButtonPressMask | ButtonReleaseMask |
                KeyPressMask | KeyReleaseMask;
 
-  output = XCompositeGetOverlayWindow (xdisplay, xroot);
+  output = display->composite_overlay_window;
 
   if (XGetWindowAttributes (xdisplay, output, &attr))
       {
