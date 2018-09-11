@@ -457,6 +457,7 @@ meta_display_open (void)
   GSList *tmp;
   int i;
   guint32 timestamp;
+  Window old_active_xwindow = None;
   char buf[257];
 
   /* A list of all atom names, so that we can intern them in one go. */
@@ -868,8 +869,12 @@ meta_display_open (void)
       return FALSE;
     }
 
-  /* We don't composite the windows here because they will be composited 
-     faster with the call to meta_screen_manage_all_windows further down 
+  meta_prop_get_window (the_display, ((MetaScreen*) the_display->screens->data)->xroot,
+                        the_display->atom__NET_ACTIVE_WINDOW,
+                        &old_active_xwindow);
+
+  /* We don't composite the windows here because they will be composited
+     faster with the call to meta_screen_manage_all_windows further down
      the code */
   enable_compositor (the_display, FALSE);
    
@@ -887,44 +892,23 @@ meta_display_open (void)
     }
 
   {
-    Window focus;
-    int ret_to;
-
-    /* kinda bogus because GetInputFocus has no possible errors */
     meta_error_trap_push (the_display);
 
-    /* FIXME: This is totally broken; see comment 9 of bug 88194 about this */
-    focus = None;
-    ret_to = RevertToPointerRoot;
-    XGetInputFocus (the_display->xdisplay, &focus, &ret_to);
-
-    /* Force a new FocusIn (does this work?) */
-
-    /* Use the same timestamp that was passed to meta_screen_new(),
-     * as it is the most recent timestamp.
-     */
-    if (focus == None || focus == PointerRoot)
-      /* Just focus the no_focus_window on the first screen */
-      meta_display_focus_the_no_focus_window (the_display,
-                                              the_display->screens->data,
-                                              timestamp);
-    else
+    if (old_active_xwindow != None)
       {
-        MetaWindow * window;
-        window  = meta_display_lookup_x_window (the_display, focus);
-        if (window)
-          meta_display_set_input_focus_window (the_display, window, FALSE, timestamp);
+        MetaWindow *old_active_window = meta_display_lookup_x_window (the_display, old_active_xwindow);
+        if (old_active_window)
+          meta_display_set_input_focus_window (the_display, old_active_window, FALSE, timestamp);
         else
-          /* Just focus the no_focus_window on the first screen */
-          meta_display_focus_the_no_focus_window (the_display,
-                                                  the_display->screens->data,
-                                                  timestamp);
+          meta_display_focus_the_no_focus_window (the_display, the_display->screens->data, timestamp);
       }
+    else
+      meta_display_focus_the_no_focus_window (the_display, the_display->screens->data, timestamp);
 
     meta_error_trap_pop (the_display);
   }
-  
-  meta_display_ungrab (the_display);  
+
+  meta_display_ungrab (the_display);
 
   /* Done opening new display */
   the_display->display_opening = FALSE;
@@ -4190,6 +4174,9 @@ meta_display_update_active_window_hint (MetaDisplay *display)
   GSList *tmp;
   
   gulong data[1];
+
+  if (display->closing)
+    return; /* Leave old value for a replacement */
 
   if (display->focus_window)
     data[0] = display->focus_window->xwindow;
