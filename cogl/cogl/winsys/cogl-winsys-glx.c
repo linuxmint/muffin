@@ -101,9 +101,9 @@ typedef struct _CoglOnscreenGLX
   CoglOnscreenXlib _parent;
   GLXDrawable glxwin;
   uint32_t last_swap_vsync_counter;
-  CoglBool pending_sync_notify;
-  CoglBool pending_complete_notify;
-  CoglBool pending_resize_notify;
+  uint32_t pending_sync_notify;
+  uint32_t pending_complete_notify;
+  uint32_t pending_resize_notify;
 
   GThread *swap_wait_thread;
   GQueue *swap_wait_queue;
@@ -349,35 +349,35 @@ flush_pending_notifications_cb (void *data,
     {
       CoglOnscreen *onscreen = COGL_ONSCREEN (framebuffer);
       CoglOnscreenGLX *glx_onscreen = onscreen->winsys;
-      CoglBool pending_sync_notify = glx_onscreen->pending_sync_notify;
-      CoglBool pending_complete_notify = glx_onscreen->pending_complete_notify;
 
-      /* If swap_region is called then notifying the sync event could
-       * potentially immediately queue a subsequent pending notify so
-       * we need to clear the flag before invoking the callback */
-      glx_onscreen->pending_sync_notify = FALSE;
-      glx_onscreen->pending_complete_notify = FALSE;
-
-      if (pending_sync_notify)
+      while (glx_onscreen->pending_sync_notify > 0 ||
+             glx_onscreen->pending_complete_notify > 0 ||
+             glx_onscreen->pending_resize_notify > 0)
         {
-          CoglFrameInfo *info = g_queue_peek_head (&onscreen->pending_frame_infos);
+          if (glx_onscreen->pending_sync_notify > 0)
+            {
+              CoglFrameInfo *info =
+                g_queue_peek_head (&onscreen->pending_frame_infos);
 
-          _cogl_onscreen_notify_frame_sync (onscreen, info);
-        }
+              _cogl_onscreen_notify_frame_sync (onscreen, info);
+              glx_onscreen->pending_sync_notify--;
+            }
 
-      if (pending_complete_notify)
-        {
-          CoglFrameInfo *info = g_queue_pop_head (&onscreen->pending_frame_infos);
+          if (glx_onscreen->pending_complete_notify > 0)
+            {
+              CoglFrameInfo *info =
+                g_queue_pop_head (&onscreen->pending_frame_infos);
 
-          _cogl_onscreen_notify_complete (onscreen, info);
+              _cogl_onscreen_notify_complete (onscreen, info);
+              cogl_object_unref (info);
+              glx_onscreen->pending_complete_notify--;
+            }
 
-          cogl_object_unref (info);
-        }
-
-      if (glx_onscreen->pending_resize_notify)
-        {
-          _cogl_onscreen_notify_resize (onscreen);
-          glx_onscreen->pending_resize_notify = FALSE;
+          if (glx_onscreen->pending_resize_notify > 0)
+            {
+              _cogl_onscreen_notify_resize (onscreen);
+              glx_onscreen->pending_resize_notify--;
+            }
         }
     }
 }
@@ -419,7 +419,7 @@ set_sync_pending (CoglOnscreen *onscreen)
                                       NULL);
     }
 
-  glx_onscreen->pending_sync_notify = TRUE;
+  glx_onscreen->pending_sync_notify++;
 }
 
 static void
@@ -442,7 +442,7 @@ set_complete_pending (CoglOnscreen *onscreen)
                                       NULL);
     }
 
-  glx_onscreen->pending_complete_notify = TRUE;
+  glx_onscreen->pending_complete_notify++;
 }
 
 static void
@@ -535,7 +535,7 @@ notify_resize (CoglContext *context,
                                       NULL);
     }
 
-  glx_onscreen->pending_resize_notify = TRUE;
+  glx_onscreen->pending_resize_notify++;
 
   if (!xlib_onscreen->is_foreign_xwin)
     {
