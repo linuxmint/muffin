@@ -12399,7 +12399,7 @@ meta_window_get_icon_name (MetaWindow *window)
 
 void
 meta_window_set_opacity (MetaWindow *window,
-                         guint       opacity)
+                         guint8      opacity)
 {
   window->opacity = opacity;
 
