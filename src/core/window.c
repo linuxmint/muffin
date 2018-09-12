@@ -7613,6 +7613,8 @@ process_property_notify (MetaWindow     *window,
 static void
 send_configure_notify (MetaWindow *window)
 {
+  g_return_if_fail (!window->override_redirect);
+
   XEvent event;
 
   /* from twm */
