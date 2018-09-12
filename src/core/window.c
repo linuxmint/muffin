@@ -5080,13 +5080,13 @@ meta_window_move_resize_internal (MetaWindow          *window,
       else
         new_h = window->rect.height + borders.total.top + borders.total.bottom;
 
-      frame_size_dx = new_w - window->frame->rect.width;
-      frame_size_dy = new_h - window->frame->rect.height;
-
-      need_resize_frame = (frame_size_dx != 0 || frame_size_dy != 0);
-
-      window->frame->rect.width = new_w;
-      window->frame->rect.height = new_h;
+      if (new_w != window->frame->rect.width ||
+          new_h != window->frame->rect.height)
+        {
+          need_resize_frame = TRUE;
+          window->frame->rect.width = new_w;
+          window->frame->rect.height = new_h;
+        }
 
       meta_topic (META_DEBUG_GEOMETRY,
                   "Calculated frame size %dx%d\n",
