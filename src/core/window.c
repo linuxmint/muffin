@@ -1316,6 +1316,9 @@ meta_window_new_with_attrs (MetaDisplay       *display,
 
   meta_window_update_net_wm_type (window);
 
+  if (window->decorated)
+    meta_window_ensure_frame (window);
+
   if (!window->override_redirect)
     meta_window_update_icon_now (window);
 
@@ -1377,9 +1380,6 @@ meta_window_new_with_attrs (MetaDisplay       *display,
   window->attached = meta_window_should_attach_to_parent (window);
   if (window->attached)
     recalc_window_features (window);
-
-  if (window->decorated)
-    meta_window_ensure_frame (window);
 
   meta_window_grab_keys (window);
   if (window->type != META_WINDOW_DOCK && !window->override_redirect)
@@ -1915,17 +1915,6 @@ meta_window_unmanage (MetaWindow  *window,
 
   meta_window_destroy_sync_request_alarm (window);
 
-  if (window->frame)
-    {
-      /* The XReparentWindow call in meta_window_destroy_frame() moves the
-       * window so we need to send a configure notify; see bug 399552.  (We
-       * also do this just in case a window got unmaximized.)
-       */
-      send_configure_notify (window);
-
-      meta_window_destroy_frame (window);
-    }
-
   /* If an undecorated window is being withdrawn, that will change the
    * stack as presented to the compositing manager, without actually
    * changing the stacking order of X windows.
@@ -2026,6 +2015,17 @@ meta_window_unmanage (MetaWindow  *window,
   meta_prefs_remove_listener (prefs_changed_callback, window);
 
   meta_screen_queue_check_fullscreen (window->screen);
+
+  if (window->frame)
+    {
+      /* The XReparentWindow call in meta_window_destroy_frame() moves the
+       * window so we need to send a configure notify; see bug 399552.  (We
+       * also do this just in case a window got unmaximized.)
+       */
+      send_configure_notify (window);
+
+      meta_window_destroy_frame (window);
+    }
 
   g_signal_emit (window, window_signals[UNMANAGED], 0);
   g_signal_emit_by_name (window->screen, "window-removed", window);
