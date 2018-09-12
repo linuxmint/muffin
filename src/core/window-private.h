@@ -794,7 +794,6 @@ void meta_window_update_icon_now (MetaWindow *window);
 
 void meta_window_update_role (MetaWindow *window);
 void meta_window_update_net_wm_type (MetaWindow *window);
-void meta_window_update_opaque_region (MetaWindow *window);
 void meta_window_update_for_monitors_changed (MetaWindow *window);
 void meta_window_update_on_all_workspaces (MetaWindow *window);
 
