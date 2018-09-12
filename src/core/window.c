@@ -5062,8 +5062,10 @@ meta_window_move_resize_internal (MetaWindow          *window,
   root_x_nw = new_rect.x;
   root_y_nw = new_rect.y;
 
-  if (w != window->rect.width ||
-      h != window->rect.height)
+  size_dx = w - window->rect.width;
+  size_dy = h - window->rect.height;
+
+  if (size_dx != 0 || size_dy != 0)
     need_resize_client = TRUE;
 
   window->rect.width = w;
