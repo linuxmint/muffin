@@ -70,7 +70,7 @@ void meta_shaped_texture_update_area (MetaShapedTexture *stex,
 void meta_shaped_texture_set_pixmap (MetaShapedTexture *stex,
                                      Pixmap             pixmap);
 
-CoglHandle meta_shaped_texture_get_texture (MetaShapedTexture *stex);
+CoglTexture *meta_shaped_texture_get_texture (MetaShapedTexture *stex);
 
 void meta_shaped_texture_set_shape_region (MetaShapedTexture *stex,
                                            cairo_region_t    *region);
