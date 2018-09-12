@@ -327,9 +327,8 @@ meta_shaped_texture_paint (ClutterActor *actor)
   guint tex_width, tex_height;
   ClutterActorBox alloc;
 
-  static CoglPipeline *pipeline_template = NULL;
-  static CoglPipeline *pipeline_unshaped_template = NULL;
-
+  CoglPipeline *pipeline_template = NULL;
+  CoglPipeline *pipeline_unshaped_template = NULL;
   CoglPipeline *pipeline;
 
   if (priv->clip_region && cairo_region_is_empty (priv->clip_region))
