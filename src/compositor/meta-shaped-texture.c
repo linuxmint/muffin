@@ -42,6 +42,20 @@
 #include <gdk/gdk.h> /* for gdk_rectangle_intersect() */
 #include <string.h>
 
+/* MAX_MIPMAPPING_FPS needs to be as small as possible for the best GPU
+ * performance, but higher than the refresh rate of commonly slow updating
+ * windows like top or a blinking cursor, so that such windows do get
+ * mipmapped.
+ */
+#define MAX_MIPMAPPING_FPS 5
+#define MIN_MIPMAP_AGE_USEC (G_USEC_PER_SEC / MAX_MIPMAPPING_FPS)
+
+/* MIN_FAST_UPDATES_BEFORE_UNMIPMAP allows windows to update themselves
+ * occasionally without causing mipmapping to be disabled, so long as such
+ * an update takes fewer update_area calls than:
+ */
+#define MIN_FAST_UPDATES_BEFORE_UNMIPMAP 20
+
 static void meta_shaped_texture_dispose  (GObject    *object);
 
 static void meta_shaped_texture_paint (ClutterActor       *actor);
@@ -88,6 +102,11 @@ struct _MetaShapedTexturePrivate
   guint tex_width, tex_height;
   guint mask_width, mask_height;
 
+  gint64 prev_invalidation, last_invalidation;
+  guint fast_updates;
+  guint remipmap_timeout_id;
+  gint64 earliest_remipmap;
+
   guint create_mipmaps : 1;
 };
 
@@ -129,6 +148,12 @@ meta_shaped_texture_dispose (GObject *object)
 {
   MetaShapedTexture *self = (MetaShapedTexture *) object;
   MetaShapedTexturePrivate *priv = self->priv;
+
+  if (priv->remipmap_timeout_id)
+    {
+      g_source_remove (priv->remipmap_timeout_id);
+      priv->remipmap_timeout_id = 0;
+    }
 
   if (priv->paint_tower)
     meta_texture_tower_free (priv->paint_tower);
@@ -317,15 +342,31 @@ meta_shaped_texture_ensure_mask (MetaShapedTexture *stex)
     }
 }
 
+static gboolean
+texture_is_idle_and_not_mipmapped (gpointer user_data)
+{
+  MetaShapedTexture *stex = META_SHAPED_TEXTURE (user_data);
+  MetaShapedTexturePrivate *priv = stex->priv;
+
+  if ((g_get_monotonic_time () - priv->earliest_remipmap) < 0)
+    return G_SOURCE_CONTINUE;
+
+  clutter_actor_queue_redraw (CLUTTER_ACTOR (stex));
+  priv->remipmap_timeout_id = 0;
+
+  return G_SOURCE_REMOVE;
+}
+
 static void
 meta_shaped_texture_paint (ClutterActor *actor)
 {
   MetaShapedTexture *stex = (MetaShapedTexture *) actor;
   MetaShapedTexturePrivate *priv = stex->priv;
   CoglContext *ctx = clutter_backend_get_cogl_context (clutter_get_default_backend ());
-  CoglTexture *paint_tex;
+  CoglTexture *paint_tex = NULL;
   guint tex_width, tex_height;
   ClutterActorBox alloc;
+  gint64 now = g_get_monotonic_time ();
 
   CoglPipeline *pipeline_template = NULL;
   CoglPipeline *pipeline_unshaped_template = NULL;
@@ -352,13 +393,34 @@ meta_shaped_texture_paint (ClutterActor *actor)
    * Setting the texture quality to high without SGIS_generate_mipmap
    * support for TFP textures will result in fallbacks to XGetImage.
    */
-  if (priv->create_mipmaps)
-    paint_tex = meta_texture_tower_get_paint_texture (priv->paint_tower);
-  else
-    paint_tex = priv->texture;
+  if (priv->create_mipmaps && priv->last_invalidation)
+    {
+      gint64 age = now - priv->last_invalidation;
+
+      if (age >= MIN_MIPMAP_AGE_USEC ||
+          priv->fast_updates < MIN_FAST_UPDATES_BEFORE_UNMIPMAP)
+        paint_tex = meta_texture_tower_get_paint_texture (priv->paint_tower);
+    }
 
   if (paint_tex == NULL)
-    return;
+    {
+      paint_tex = COGL_TEXTURE (priv->texture);
+
+      if (paint_tex == NULL)
+        return;
+
+      if (priv->create_mipmaps)
+        {
+          /* Minus 1000 to ensure we don't fail the age test in timeout */
+          priv->earliest_remipmap = now + MIN_MIPMAP_AGE_USEC - 1000;
+
+          if (!priv->remipmap_timeout_id)
+            priv->remipmap_timeout_id =
+              g_timeout_add (MIN_MIPMAP_AGE_USEC / 1000,
+                             texture_is_idle_and_not_mipmapped,
+                             stex);
+        }
+    }
 
   tex_width = priv->tex_width;
   tex_height = priv->tex_height;
@@ -650,6 +712,20 @@ meta_shaped_texture_update_area (MetaShapedTexture *stex,
                                        x, y, width, height);
 
   meta_texture_tower_update_area (priv->paint_tower, x, y, width, height);
+
+  priv->prev_invalidation = priv->last_invalidation;
+  priv->last_invalidation = g_get_monotonic_time ();
+
+  if (priv->prev_invalidation)
+    {
+      gint64 interval = priv->last_invalidation - priv->prev_invalidation;
+      gboolean fast_update = interval < MIN_MIPMAP_AGE_USEC;
+
+      if (!fast_update)
+        priv->fast_updates = 0;
+      else if (priv->fast_updates < MIN_FAST_UPDATES_BEFORE_UNMIPMAP)
+        priv->fast_updates++;
+    }
 
   clutter_actor_queue_redraw_with_clip (CLUTTER_ACTOR (stex), &clip);
 }
