@@ -703,15 +703,15 @@ meta_compositor_manage_screen (MetaCompositor *compositor,
       info->pending_input_region = None;
     }
 
-  clutter_actor_show (info->overlay_group);
-  clutter_actor_show (info->stage);
-
   /* Map overlay window before redirecting windows offscreen so we catch their
    * contents until we show the stage.
    */
   XMapWindow (xdisplay, info->output);
 
   redirect_windows (compositor, screen);
+
+  clutter_actor_show (info->overlay_group);
+  clutter_actor_show (info->stage);
 
   compositor->have_x11_sync_object = meta_sync_ring_init (xdisplay);
 }
