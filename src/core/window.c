@@ -265,7 +265,7 @@ meta_window_finalize (GObject *object)
   g_free (window->gtk_window_object_path);
   g_free (window->gtk_app_menu_object_path);
   g_free (window->gtk_menubar_object_path);
-  
+
   G_OBJECT_CLASS (meta_window_parent_class)->finalize (object);
 }
 
@@ -3826,7 +3826,7 @@ meta_window_can_tile_side_by_side (MetaWindow *window)
 {
   int monitor;
   MetaRectangle tile_area;
-  MetaFrameBorders borders;
+  MetaRectangle client_rect;
 
   if (!meta_window_can_tile_maximized (window))
     return FALSE;
@@ -3836,11 +3836,10 @@ meta_window_can_tile_side_by_side (MetaWindow *window)
 
   tile_area.width /= 2;
 
-  meta_frame_calc_borders (window->frame, &borders);
-  meta_window_unextend_by_frame (window, &tile_area, &borders);
+  meta_window_frame_rect_to_client_rect (window, &tile_area, &client_rect);
 
-  return tile_area.width >= window->size_hints.min_width &&
-         tile_area.height >= window->size_hints.min_height;
+  return client_rect.width >= window->size_hints.min_width &&
+         client_rect.height >= window->size_hints.min_height;
 }
 
 LOCAL_SYMBOL gboolean
@@ -3848,7 +3847,7 @@ meta_window_can_tile_top_bottom (MetaWindow *window)
 {
   int monitor;
   MetaRectangle tile_area;
-  MetaFrameBorders borders;
+  MetaRectangle client_rect;
 
   if (!meta_window_can_tile_maximized (window))
     return FALSE;
@@ -3858,11 +3857,10 @@ meta_window_can_tile_top_bottom (MetaWindow *window)
 
   tile_area.height /= 2;
 
-  meta_frame_calc_borders (window->frame, &borders);
-  meta_window_unextend_by_frame (window, &tile_area, &borders);
+  meta_window_frame_rect_to_client_rect (window, &tile_area, &client_rect);
 
-  return tile_area.width >= window->size_hints.min_width &&
-         tile_area.height >= window->size_hints.min_height;
+  return client_rect.width >= window->size_hints.min_width &&
+         client_rect.height >= window->size_hints.min_height;
 }
 
 LOCAL_SYMBOL gboolean
@@ -3870,7 +3868,7 @@ meta_window_can_tile_corner (MetaWindow *window)
 {
   int monitor;
   MetaRectangle tile_area;
-  MetaFrameBorders borders;
+  MetaRectangle client_rect;
 
   if (!meta_window_can_tile_maximized (window))
     return FALSE;
@@ -3881,11 +3879,10 @@ meta_window_can_tile_corner (MetaWindow *window)
   tile_area.width /= 2;
   tile_area.height /= 2;
 
-  meta_frame_calc_borders (window->frame, &borders);
-  meta_window_unextend_by_frame (window, &tile_area, &borders);
+  meta_window_frame_rect_to_client_rect (window, &tile_area, &client_rect);
 
-  return tile_area.width >= window->size_hints.min_width &&
-         tile_area.height >= window->size_hints.min_height;
+  return client_rect.width >= window->size_hints.min_width &&
+         client_rect.height >= window->size_hints.min_height;
 }
 
 static void
@@ -5545,18 +5542,10 @@ meta_window_move_resize_frame (MetaWindow  *window,
                                int          w,
                                int          h)
 {
-  MetaFrameBorders borders;
+  MetaRectangle rect = { root_x_nw, root_y_nw, w, h };
+  meta_window_frame_rect_to_client_rect (window, &rect, &rect);
 
-  meta_frame_calc_borders (window->frame, &borders);
-  /* offset by the distance between the origin of the window
-   * and the origin of the enclosing window decorations ( + border)
-   */
-  root_x_nw += borders.visible.left;
-  root_y_nw += borders.visible.top;
-  w -= borders.visible.left + borders.visible.right;
-  h -= borders.visible.top + borders.visible.bottom;
-
-  meta_window_move_resize (window, user_op, root_x_nw, root_y_nw, w, h);
+  meta_window_move_resize (window, user_op, rect.x, rect.y, rect.width, rect.height);
 }
 
 /**
@@ -5865,6 +5854,91 @@ meta_window_get_input_rect (const MetaWindow *window,
     *rect = window->frame->rect;
   else
     *rect = window->rect;
+}
+
+/**
+ * meta_window_client_rect_to_frame_rect:
+ * @window: a #MetaWindow
+ * @frame_rect: client rectangle in root coordinates
+ * @client_rect: (out): location to store the computed corresponding frame bounds.
+ *
+ * Converts a desired bounds of the client window - what is passed to meta_window_move_resize() -
+ * into the corresponding bounds of the window frame (excluding invisible borders
+ * and client side shadows.)
+ */
+void
+meta_window_client_rect_to_frame_rect (MetaWindow    *window,
+                                       MetaRectangle *frame_rect,
+                                       MetaRectangle *client_rect)
+{
+  if (!client_rect)
+    return;
+
+  *client_rect = *frame_rect;
+
+  if (window->frame)
+    {
+      MetaFrameBorders borders;
+      meta_frame_calc_borders (window->frame, &borders);
+
+      client_rect->x -= borders.visible.left;
+      client_rect->y -= borders.visible.top;
+      client_rect->width  += borders.visible.left + borders.visible.right;
+      client_rect->height += borders.visible.top  + borders.visible.bottom;
+    }
+  else
+    {
+      if (window->has_custom_frame_extents)
+        {
+          const GtkBorder *extents = &window->custom_frame_extents;
+          client_rect->x += extents->left;
+          client_rect->y += extents->top;
+          client_rect->width -= extents->left + extents->right;
+          client_rect->height -= extents->top + extents->bottom;
+        }
+    }
+}
+
+/**
+ * meta_window_frame_rect_to_client_rect:
+ * @window: a #MetaWindow
+ * @frame_rect: desired frame bounds for the window
+ * @client_rect: (out): location to store the computed corresponding client rectangle.
+ *
+ * Converts a desired frame bounds for a window into the bounds of the client
+ * window - what is passed to meta_window_move_resize().
+ */
+void
+meta_window_frame_rect_to_client_rect (MetaWindow    *window,
+                                       MetaRectangle *frame_rect,
+                                       MetaRectangle *client_rect)
+{
+  if (!client_rect)
+    return;
+
+  *client_rect = *frame_rect;
+
+  if (window->frame)
+    {
+      MetaFrameBorders borders;
+      meta_frame_calc_borders (window->frame, &borders);
+
+      client_rect->x += borders.visible.left;
+      client_rect->y += borders.visible.top;
+      client_rect->width  -= borders.visible.left + borders.visible.right;
+      client_rect->height -= borders.visible.top  + borders.visible.bottom;
+    }
+  else
+    {
+      if (window->has_custom_frame_extents)
+        {
+          const GtkBorder *extents = &window->custom_frame_extents;
+          client_rect->x -= extents->left;
+          client_rect->y -= extents->top;
+          client_rect->width += extents->left + extents->right;
+          client_rect->height += extents->top + extents->bottom;
+        }
+    }
 }
 
 /**
@@ -8549,18 +8623,13 @@ recalc_window_features (MetaWindow *window)
 
   if (window->has_maximize_func)
     {
-      MetaRectangle work_area;
-      MetaFrameBorders borders;
-      int min_frame_width, min_frame_height;
+      MetaRectangle work_area, client_rect;
 
       meta_window_get_work_area_current_monitor (window, &work_area);
-      meta_frame_calc_borders (window->frame, &borders);
+      meta_window_frame_rect_to_client_rect (window, &work_area, &client_rect);
 
-      min_frame_width = window->size_hints.min_width + borders.visible.left + borders.visible.right;
-      min_frame_height = window->size_hints.min_height + borders.visible.top + borders.visible.bottom;
-
-      if (min_frame_width >= work_area.width ||
-          min_frame_height >= work_area.height)
+      if (window->size_hints.min_width >= client_rect.width ||
+          window->size_hints.min_height >= client_rect.height)
         window->has_maximize_func = FALSE;
     }
 
@@ -9484,9 +9553,8 @@ update_move (MetaWindow  *window,
     if (window->tile_mode != META_TILE_NONE) {
         get_size_limits (window, NULL, FALSE, &min_size, &max_size);
         meta_window_get_current_tile_area (window, &target_size);
-        MetaFrameBorders borders;
-        meta_frame_calc_borders (window->frame, &borders);
-        meta_window_unextend_by_frame (window, &target_size, &borders);
+        MetaRectangle client_rect;
+        meta_window_frame_rect_to_client_rect (window, &target_size, &client_rect);
         hminbad = target_size.width < min_size.width;
         vminbad = target_size.height < min_size.height;
     }
@@ -9494,7 +9562,7 @@ update_move (MetaWindow  *window,
    * trigger it unwittingly, e.g. when shaking loose the window or moving
    * it to another monitor.
    */
-    
+
     if (!hminbad && !vminbad)
         meta_screen_tile_preview_update (window->screen,
                                          window->tile_mode != META_TILE_NONE &&
@@ -9727,7 +9795,7 @@ update_resize (MetaWindow *window,
         }
       else
         {
-          switch (window->tile_mode) 
+          switch (window->tile_mode)
             {
               case META_TILE_LEFT:
                 window->display->grab_op = META_GRAB_OP_KEYBOARD_RESIZING_E;
@@ -10590,6 +10658,15 @@ meta_window_is_client_decorated (MetaWindow *window)
    */
   return window->has_custom_frame_extents;
 }
+
+/* The main difference between the following two functions
+ * and meta_window_frame_rect_to_client_rect and
+ * meta_window_client_rect_to_frame_rect is they get the borders from
+ * an argument instead of using a fresh calculation. There seems to
+ * be a performance benefit to leaving these functions as-is, as they
+ * are now only used in constraints - which has been using
+ * cached borders.
+ */
 
 void
 meta_window_extend_by_frame (MetaWindow              *window,
@@ -12241,7 +12318,7 @@ meta_window_tile (MetaWindow *window,
  * Note:
  *
  * This will currently only be non-NULL for programs that use XAppGtkWindow
- * in place of GtkWindow and use xapp_gtk_window_set_icon_name() or 
+ * in place of GtkWindow and use xapp_gtk_window_set_icon_name() or
  * set_icon_from_file().  These methods will need to be used explicitly in
  * C programs, but for introspection use you should not need to treat it any
  * differently (except for using the correct window class.)
