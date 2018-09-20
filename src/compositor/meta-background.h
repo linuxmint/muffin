@@ -35,9 +35,9 @@ GType meta_background_get_type (void);
 ClutterActor * meta_background_new (MetaScreen *screen);
 
 void meta_background_set_layer           (MetaBackground       *self,
-                                          CoglHandle           texture);
+                                          CoglTexture          *texture);
 void meta_background_set_layer_wrap_mode (MetaBackground       *self,
-                                          CoglMaterialWrapMode  wrap_mode);
+                                          CoglPipelineWrapMode  wrap_mode);
 void meta_background_set_visible_region  (MetaBackground       *self,
                                           cairo_region_t       *visible_region);
 

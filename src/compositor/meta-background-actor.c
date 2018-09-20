@@ -61,8 +61,8 @@ struct _MetaScreenBackground
 
   float texture_width;
   float texture_height;
-  CoglHandle texture;
-  CoglMaterialWrapMode wrap_mode;
+  CoglTexture *texture;
+  CoglPipelineWrapMode wrap_mode;
   guint have_pixmap : 1;
 };
 
@@ -90,7 +90,7 @@ static GParamSpec *obj_props[PROP_LAST];
 G_DEFINE_TYPE (MetaBackgroundActor, meta_background_actor, CLUTTER_TYPE_ACTOR);
 
 static void set_texture                (MetaScreenBackground *background,
-                                        CoglHandle            texture);
+                                        CoglTexture          *texture);
 static void set_texture_to_stage_color (MetaScreenBackground *background);
 
 static void
@@ -105,7 +105,7 @@ on_notify_stage_color (GObject              *stage,
 static void
 free_screen_background (MetaScreenBackground *background)
 {
-  set_texture (background, COGL_INVALID_HANDLE);
+  set_texture (background, NULL);
 
   if (background->screen != NULL)
     {
@@ -165,9 +165,9 @@ update_wrap_mode (MetaScreenBackground *background)
    * side of the image via bilinear filtering.
    */
   if (width == background->texture_width && height == background->texture_height)
-    background->wrap_mode = COGL_MATERIAL_WRAP_MODE_CLAMP_TO_EDGE;
+    background->wrap_mode = COGL_PIPELINE_WRAP_MODE_CLAMP_TO_EDGE;
   else
-    background->wrap_mode = COGL_MATERIAL_WRAP_MODE_REPEAT;
+    background->wrap_mode = COGL_PIPELINE_WRAP_MODE_REPEAT;
 
   for (l = background->actors; l; l = l->next)
     update_wrap_mode_of_actor (l->data);
@@ -181,7 +181,7 @@ cancel_transitions (MetaBackgroundActor *self)
   clutter_actor_remove_all_transitions (priv->top_actor);
   clutter_actor_set_opacity (priv->top_actor, 255);
   meta_background_set_layer (META_BACKGROUND (priv->bottom_actor), priv->background->texture);
-  
+
   priv->transition_running = FALSE;
 }
 
@@ -255,7 +255,7 @@ set_texture_on_actor (MetaBackgroundActor *self)
 
 static void
 set_texture (MetaScreenBackground *background,
-             CoglHandle            texture)
+             CoglTexture          *texture)
 {
   MetaDisplay *display = meta_screen_get_display (background->screen);
   GSList *l;
@@ -264,15 +264,15 @@ set_texture (MetaScreenBackground *background,
    * the underlying X pixmap is already gone has the tendency to trigger
    * X errors inside DRI. For safety, trap errors */
   meta_error_trap_push (display);
-  if (background->texture != COGL_INVALID_HANDLE)
+  if (background->texture != NULL)
     {
-      cogl_handle_unref (background->texture);
-      background->texture = COGL_INVALID_HANDLE;
+      cogl_object_unref (background->texture);
+      background->texture = NULL;
     }
   meta_error_trap_pop (display);
 
-  if (texture != COGL_INVALID_HANDLE)
-    background->texture = cogl_handle_ref (texture);
+  if (texture != NULL)
+    background->texture = cogl_object_ref (texture);
 
   background->texture_width = cogl_texture_get_width (background->texture);
   background->texture_height = cogl_texture_get_height (background->texture);
@@ -295,7 +295,7 @@ set_texture_to_stage_color (MetaScreenBackground *background)
 {
   ClutterActor *stage = meta_get_stage_for_screen (background->screen);
   ClutterColor color;
-  CoglHandle texture;
+  CoglTexture *texture;
 
   clutter_actor_get_background_color (stage, &color);
 
@@ -306,7 +306,7 @@ set_texture_to_stage_color (MetaScreenBackground *background)
                                            color.blue, 0xff,
                                            COGL_TEXTURE_NO_SLICING);
   set_texture (background, texture);
-  cogl_handle_unref (texture);
+  cogl_object_unref (texture);
 }
 
 static void
@@ -575,10 +575,10 @@ meta_background_actor_update (MetaScreen *screen)
       texture = cogl_texture_pixmap_x11_new (compositor->context, root_pixmap_id, FALSE, &error);
       meta_error_trap_pop (display);
 
-      if (texture != COGL_INVALID_HANDLE)
+      if (texture != NULL)
         {
           set_texture (background, texture);
-          cogl_handle_unref (texture);
+          cogl_object_unref (texture);
 
           background->have_pixmap = True;
           return;

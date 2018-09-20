@@ -33,7 +33,7 @@
 struct _MetaBackgroundPrivate
 {
   MetaScreen *screen;
-  CoglHandle  material;
+  CoglPipeline  *pipeline;
 
   float texture_width;
   float texture_height;
@@ -51,10 +51,10 @@ meta_background_dispose (GObject *object)
 
   meta_background_set_visible_region (self, NULL);
 
-  if (priv->material != COGL_INVALID_HANDLE)
+  if (priv->pipeline != NULL)
     {
-      cogl_handle_unref (priv->material);
-      priv->material = COGL_INVALID_HANDLE;
+      cogl_object_unref (priv->pipeline);
+      priv->pipeline = NULL;
     }
 
   G_OBJECT_CLASS (meta_background_parent_class)->dispose (object);
@@ -110,13 +110,13 @@ meta_background_paint (ClutterActor *actor)
 
   color_component = (int)(0.5 + opacity);
 
-  cogl_material_set_color4ub (priv->material,
+  cogl_pipeline_set_color4ub (priv->pipeline,
                               color_component,
                               color_component,
                               color_component,
                               opacity);
 
-  cogl_set_source (priv->material);
+  cogl_set_source (priv->pipeline);
 
   if (priv->visible_region)
     {
@@ -189,14 +189,14 @@ meta_background_new (MetaScreen *screen)
   priv = self->priv;
 
   priv->screen = screen;
-  priv->material = meta_create_texture_material (NULL);
+  priv->pipeline = meta_create_texture_pipeline (NULL);
 
   return CLUTTER_ACTOR (self);
 }
 
 void
 meta_background_set_layer (MetaBackground *self,
-                           CoglHandle      texture)
+                           CoglTexture    *texture)
 {
   MetaBackgroundPrivate *priv = self->priv;
   MetaDisplay *display = meta_screen_get_display (priv->screen);
@@ -205,7 +205,7 @@ meta_background_set_layer (MetaBackground *self,
    * the underlying X pixmap is already gone has the tendency to trigger
    * X errors inside DRI. For safety, trap errors */
   meta_error_trap_push (display);
-  cogl_material_set_layer (priv->material, 0, texture);
+  cogl_pipeline_set_layer_texture (priv->pipeline, 0, texture);
   meta_error_trap_pop (display);
 
   priv->texture_width = cogl_texture_get_width (texture);
@@ -216,11 +216,11 @@ meta_background_set_layer (MetaBackground *self,
 
 void
 meta_background_set_layer_wrap_mode (MetaBackground       *self,
-                                     CoglMaterialWrapMode  wrap_mode)
+                                     CoglPipelineWrapMode  wrap_mode)
 {
   MetaBackgroundPrivate *priv = self->priv;
 
-  cogl_material_set_layer_wrap_mode (priv->material, 0, wrap_mode);
+  cogl_pipeline_set_layer_wrap_mode (priv->pipeline, 0, wrap_mode);
 }
 
 void
