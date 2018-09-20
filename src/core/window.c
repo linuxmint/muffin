@@ -1316,6 +1316,9 @@ meta_window_new_with_attrs (MetaDisplay       *display,
 
   meta_window_update_net_wm_type (window);
 
+  if (window->decorated)
+    meta_window_ensure_frame (window);
+
   if (!window->override_redirect)
     meta_window_update_icon_now (window);
 
@@ -1377,9 +1380,6 @@ meta_window_new_with_attrs (MetaDisplay       *display,
   window->attached = meta_window_should_attach_to_parent (window);
   if (window->attached)
     recalc_window_features (window);
-
-  if (window->decorated)
-    meta_window_ensure_frame (window);
 
   meta_window_grab_keys (window);
   if (window->type != META_WINDOW_DOCK && !window->override_redirect)
@@ -1915,17 +1915,6 @@ meta_window_unmanage (MetaWindow  *window,
 
   meta_window_destroy_sync_request_alarm (window);
 
-  if (window->frame)
-    {
-      /* The XReparentWindow call in meta_window_destroy_frame() moves the
-       * window so we need to send a configure notify; see bug 399552.  (We
-       * also do this just in case a window got unmaximized.)
-       */
-      send_configure_notify (window);
-
-      meta_window_destroy_frame (window);
-    }
-
   /* If an undecorated window is being withdrawn, that will change the
    * stack as presented to the compositing manager, without actually
    * changing the stacking order of X windows.
@@ -2026,6 +2015,17 @@ meta_window_unmanage (MetaWindow  *window,
   meta_prefs_remove_listener (prefs_changed_callback, window);
 
   meta_screen_queue_check_fullscreen (window->screen);
+
+  if (window->frame)
+    {
+      /* The XReparentWindow call in meta_window_destroy_frame() moves the
+       * window so we need to send a configure notify; see bug 399552.  (We
+       * also do this just in case a window got unmaximized.)
+       */
+      send_configure_notify (window);
+
+      meta_window_destroy_frame (window);
+    }
 
   g_signal_emit (window, window_signals[UNMANAGED], 0);
   g_signal_emit_by_name (window->screen, "window-removed", window);
@@ -5062,8 +5062,10 @@ meta_window_move_resize_internal (MetaWindow          *window,
   root_x_nw = new_rect.x;
   root_y_nw = new_rect.y;
 
-  if (w != window->rect.width ||
-      h != window->rect.height)
+  size_dx = w - window->rect.width;
+  size_dy = h - window->rect.height;
+
+  if (size_dx != 0 || size_dy != 0)
     need_resize_client = TRUE;
 
   window->rect.width = w;
@@ -5080,13 +5082,13 @@ meta_window_move_resize_internal (MetaWindow          *window,
       else
         new_h = window->rect.height + borders.total.top + borders.total.bottom;
 
-      frame_size_dx = new_w - window->frame->rect.width;
-      frame_size_dy = new_h - window->frame->rect.height;
-
-      need_resize_frame = (frame_size_dx != 0 || frame_size_dy != 0);
-
-      window->frame->rect.width = new_w;
-      window->frame->rect.height = new_h;
+      if (new_w != window->frame->rect.width ||
+          new_h != window->frame->rect.height)
+        {
+          need_resize_frame = TRUE;
+          window->frame->rect.width = new_w;
+          window->frame->rect.height = new_h;
+        }
 
       meta_topic (META_DEBUG_GEOMETRY,
                   "Calculated frame size %dx%d\n",
@@ -5308,18 +5310,6 @@ meta_window_move_resize_internal (MetaWindow          *window,
 
   if (mask != 0)
     {
-      {
-        int newx, newy;
-        meta_window_get_position (window, &newx, &newy);
-        meta_topic (META_DEBUG_GEOMETRY,
-                    "Syncing new client geometry %d,%d %dx%d, border: %s pos: %s size: %s\n",
-                    newx, newy,
-                    window->rect.width, window->rect.height,
-                    mask & CWBorderWidth ? "true" : "false",
-                    need_move_client ? "true" : "false",
-                    need_resize_client ? "true" : "false");
-      }
-
       meta_error_trap_push (window->display);
 
 #ifdef HAVE_XSYNC
@@ -6317,11 +6307,13 @@ update_gtk_edge_constraints (MetaWindow *window)
 
   meta_verbose ("Setting _GTK_EDGE_CONSTRAINTS to %lu\n", data[0]);
 
+  meta_error_trap_push (window->display);
   XChangeProperty (window->display->xdisplay,
                    window->xwindow,
                    window->display->atom__GTK_EDGE_CONSTRAINTS,
                    XA_CARDINAL, 32, PropModeReplace,
                    (guchar*) data, 1);
+  meta_error_trap_pop (window->display);
 }
 
 LOCAL_SYMBOL void
@@ -7611,6 +7603,8 @@ process_property_notify (MetaWindow     *window,
 static void
 send_configure_notify (MetaWindow *window)
 {
+  g_return_if_fail (!window->override_redirect);
+
   XEvent event;
 
   /* from twm */
