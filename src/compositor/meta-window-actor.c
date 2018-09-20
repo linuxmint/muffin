@@ -16,7 +16,7 @@
 #include <X11/extensions/Xrender.h>
 
 #include <clutter/x11/clutter-x11.h>
-#include <cogl/cogl-texture-pixmap-x11.h>
+#include <cogl/winsys/cogl-texture-pixmap-x11.h>
 #include <gdk/gdk.h> /* for gdk_rectangle_union() */
 
 #include <meta/display.h>
@@ -738,19 +738,16 @@ meta_window_actor_get_paint_volume (ClutterActor       *actor,
 {
   MetaWindowActor *self = META_WINDOW_ACTOR (actor);
   MetaWindowActorPrivate *priv = self->priv;
-  cairo_rectangle_int_t bounds;
   gboolean appears_focused = meta_window_appears_focused (priv->window);
-  ClutterVertex origin;
 
   /* The paint volume is computed before paint functions are called
    * so our bounds might not be updated yet. Force an update. */
   meta_window_actor_handle_updates (self);
 
-  meta_window_actor_get_shape_bounds (self, &bounds);
-
   if (appears_focused ? priv->focused_shadow : priv->unfocused_shadow)
     {
       cairo_rectangle_int_t shadow_bounds;
+      ClutterActorBox shadow_box;
 
       /* We could compute an full clip region as we do for the window
        * texture, but the shadow is relatively cheap to draw, and
@@ -760,16 +757,24 @@ meta_window_actor_get_paint_volume (ClutterActor       *actor,
        */
 
       meta_window_actor_get_shadow_bounds (self, appears_focused, &shadow_bounds);
-      gdk_rectangle_union (&bounds, &shadow_bounds, &bounds);
+      shadow_box.x1 = shadow_bounds.x;
+      shadow_box.x2 = shadow_bounds.x + shadow_bounds.width;
+      shadow_box.y1 = shadow_bounds.y;
+      shadow_box.y2 = shadow_bounds.y + shadow_bounds.height;
+
+      clutter_paint_volume_union_box (volume, &shadow_box);
     }
 
-  origin.x = bounds.x;
-  origin.y = bounds.y;
-  origin.z = 0.0f;
-  clutter_paint_volume_set_origin (volume, &origin);
+  if (priv->actor)
+    {
+      const ClutterPaintVolume *child_volume;
 
-  clutter_paint_volume_set_width (volume, bounds.width);
-  clutter_paint_volume_set_height (volume, bounds.height);
+      child_volume = clutter_actor_get_transformed_paint_volume (CLUTTER_ACTOR (priv->actor), actor);
+      if (!child_volume)
+        return FALSE;
+
+      clutter_paint_volume_union (volume, child_volume);
+    }
 
   return TRUE;
 }
@@ -1639,7 +1644,7 @@ meta_window_actor_new (MetaWindow *window)
 
   /* Hang our compositor window state off the MetaWindow for fast retrieval */
   meta_window_set_compositor_private (window, G_OBJECT (self));
-  
+
   if (window->type == META_WINDOW_DND)
     window_group = info->window_group;
   else if (window->layer == META_LAYER_OVERRIDE_REDIRECT)
@@ -1650,7 +1655,7 @@ meta_window_actor_new (MetaWindow *window)
     window_group = info->window_group;
 
   clutter_actor_add_child (window_group, CLUTTER_ACTOR (self));
-  
+
   clutter_actor_hide (CLUTTER_ACTOR (self));
 
   /* Initial position in the stack is arbitrary; stacking will be synced
@@ -2327,6 +2332,9 @@ meta_window_actor_handle_updates (MetaWindowActor *self)
       return;
     }
 
+  if (!priv->visible && !priv->needs_pixmap)
+    return;
+
   if (priv->received_damage)
     {
       meta_error_trap_push (display);
@@ -2345,6 +2353,7 @@ void
 meta_window_actor_pre_paint (MetaWindowActor *self)
 {
   MetaWindowActorPrivate *priv = self->priv;
+  ClutterActor *stage = clutter_actor_get_stage(priv->actor);
   GList *l;
 
   if (meta_window_actor_is_destroyed (self))
@@ -2356,10 +2365,9 @@ meta_window_actor_pre_paint (MetaWindowActor *self)
     {
       FrameData *frame = l->data;
 
-      if (frame->frame_counter == 0)
+      if (frame->frame_counter == -1)
         {
-          CoglOnscreen *onscreen = COGL_ONSCREEN (cogl_get_draw_framebuffer());
-          frame->frame_counter = cogl_onscreen_get_frame_counter (onscreen);
+          frame->frame_counter = clutter_stage_get_frame_counter (stage);
         }
     }
 }
@@ -2413,6 +2421,7 @@ send_frame_timings (MetaWindowActor  *self,
 {
   MetaWindowActorPrivate *priv = self->priv;
   MetaDisplay *display = meta_screen_get_display (priv->screen);
+  MetaWindow *window = meta_window_actor_get_meta_window (self);
   Display *xdisplay = meta_display_get_xdisplay (display);
   float refresh_rate;
   int refresh_interval;
@@ -2426,7 +2435,7 @@ send_frame_timings (MetaWindowActor  *self,
   ev.data.l[0] = frame->sync_request_serial & G_GUINT64_CONSTANT(0xffffffff);
   ev.data.l[1] = frame->sync_request_serial >> 32;
 
-  refresh_rate = cogl_frame_info_get_refresh_rate (frame_info);
+  refresh_rate = window->monitor->refresh_rate;
   /* 0.0 is a flag for not known, but sanity-check against other odd numbers */
   if (refresh_rate >= 1.0)
     refresh_interval = (int) (0.5 + 1000000 / refresh_rate);
@@ -2469,8 +2478,9 @@ meta_window_actor_frame_complete (MetaWindowActor *self,
     {
       GList *l_next = l->next;
       FrameData *frame = l->data;
+      gint64 frame_counter = frame_info->frame_counter;
 
-      if (frame->frame_counter == cogl_frame_info_get_frame_counter (frame_info))
+      if (frame->frame_counter != -1 && frame->frame_counter <= frame_counter)
         {
           if (frame->frame_drawn_time != 0)
             {

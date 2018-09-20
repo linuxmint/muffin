@@ -66,6 +66,22 @@
       </_description>
     </key>
 
+    <key name="sync-to-vblank" type="b">
+      <default>true</default>
+      <_summary>Enable vertical blanking interval</_summary>
+      <_description>
+        Determines whether or not VBLANK is enabled.
+      </_description>
+    </key>
+
+    <key name="send-frame-timings" type="b">
+      <default>true</default>
+      <_summary>Enable high-precision frame synchronization</_summary>
+      <_description>
+        Sends a _NET_WM_FRAME_TIMINGS message to the X server after each frame rendered to help keep frames synchronized.
+      </_description>
+    </key>
+
     <key name="workspace-cycle" type="b">
       <default>false</default>
       <_summary>Allow cycling through workspaces</_summary>

@@ -31,7 +31,7 @@
 
 #include <config.h>
 
-#include <cogl/cogl-texture-pixmap-x11.h>
+#include <cogl/winsys/cogl-texture-pixmap-x11.h>
 
 #include <clutter/clutter.h>
 
@@ -569,11 +569,10 @@ meta_background_actor_update (MetaScreen *screen)
   if (root_pixmap_id != None)
     {
       CoglHandle texture;
-      CoglContext *ctx = clutter_backend_get_cogl_context (clutter_get_default_backend ());
       GError *error = NULL;
 
       meta_error_trap_push (display);
-      texture = cogl_texture_pixmap_x11_new (ctx, root_pixmap_id, FALSE, &error);
+      texture = cogl_texture_pixmap_x11_new (compositor->context, root_pixmap_id, FALSE, &error);
       meta_error_trap_pop (display);
 
       if (texture != COGL_INVALID_HANDLE)

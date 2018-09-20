@@ -1,5 +1,5 @@
 
-SUBDIRS=src po doc data
+SUBDIRS=cogl clutter src po doc data
 
 EXTRA_DIST = HACKING MAINTAINERS rationales.txt
 

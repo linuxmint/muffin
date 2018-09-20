@@ -1,0 +1,24 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@/muffin
+includedir=@includedir@/muffin
+
+apiversion=@MUFFIN_PLUGIN_API_VERSION@
+requires=@CLUTTER_REQUIRES@ muffin-cogl-@MUFFIN_PLUGIN_API_VERSION@
+requires_private=@CLUTTER_REQUIRES_PRIVATE@
+backends=@CLUTTER_BACKENDS@
+
+# only kept for backward compatibility
+soname_infix=@CLUTTER_SONAME_INFIX@
+winsys=@CLUTTER_WINSYS@
+backend=@CLUTTER_WINSYS@
+cogl=deprecated
+cogl_driver=deprecated
+
+Name: Muffin Clutter
+Description: Muffin's Clutter Private Library
+Version: @MUFFIN_VERSION@
+Libs: -L${libdir} -lmuffin-clutter-${apiversion}
+Cflags: -I${includedir}/clutter-${apiversion}
+Requires: ${requires}
+Requires.private: ${requires_private}

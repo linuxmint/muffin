@@ -1,0 +1,13 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@/muffin
+includedir=@includedir@/muffin
+apiversion=@MUFFIN_PLUGIN_API_VERSION@
+requires=@COGL_PKG_REQUIRES@ muffin-cogl-@MUFFIN_PLUGIN_API_VERSION@
+
+Name: Cogl
+Description: A 2D path drawing library for Cogl
+Version: @MUFFIN_VERSION@
+Libs: -L${libdir} -lmuffin-cogl-path-@MUFFIN_PLUGIN_API_VERSION@
+Cflags: -I${includedir}/cogl
+Requires: ${requires}
