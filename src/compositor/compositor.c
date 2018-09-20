@@ -627,6 +627,8 @@ meta_compositor_manage_screen (MetaCompositor *compositor,
   XWindowAttributes attr;
   long            event_mask;
 
+  redirect_windows (compositor, screen);
+
   /* Check if the screen is already managed */
   if (meta_screen_get_compositor_data (screen))
     return;
@@ -733,8 +735,6 @@ meta_compositor_manage_screen (MetaCompositor *compositor,
    * contents until we show the stage.
    */
   XMapWindow (xdisplay, info->output);
-
-  redirect_windows (compositor, screen);
 
   compositor->have_x11_sync_object = meta_sync_ring_init (xdisplay);
 }
