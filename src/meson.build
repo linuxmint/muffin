@@ -1,6 +1,5 @@
 muffinInclude = include_directories('.')
 
-subdir('compositor/plugins')
 subdir('tools')
 subdir('wm-tester')
 
@@ -81,6 +80,7 @@ libmuffin_sources = [
   'compositor/meta-window-group.c',
   'compositor/meta-window-shape.c',
   'compositor/region-utils.c',
+  'compositor/plugins/default.c',
   'core/above-tab-keycode.c',
   'core/async-getprop.c',
   'core/bell.c',
@@ -165,6 +165,29 @@ muffin_theme_viewer = executable('muffin-theme-viewer',
     gtk,
   ],
 )
+
+gnome.generate_gir(libmuffin,
+  namespace: 'Meta',
+  nsversion: 'Muffin.0',
+  identifier_prefix: 'Meta',
+  symbol_prefix: 'meta',
+  includes: [
+    'GObject-2.0',
+    'CDesktopEnums-3.0',
+    'Gdk-3.0',
+    'Gtk-3.0',
+    'Clutter-1.0',
+    'xlib-2.0',
+    'xfixes-4.0',
+  ],
+  export_packages: [
+    'clutter-1.0',
+    'gtk+-3.0',
+  ],
+  sources: libmuffin_sources + libmuffin_headers,
+  install: true,
+)
+
 
 testboxes = executable('testboxes',
   [ 'core/testboxes.c', 'core/boxes.c', 'core/util.c', ],
