@@ -184,7 +184,10 @@ gnome.generate_gir(libmuffin,
     'clutter-1.0',
     'gtk+-3.0',
   ],
-  sources: libmuffin_sources + libmuffin_headers,
+  sources: [
+    libmuffin_sources,
+    libmuffin_headers,
+  ],
   install: true,
 )
 
@@ -278,29 +281,4 @@ pkgconfig.generate(
     'plugindir=#TODO',
     'libgnome_serverdir=#TODO',
   ],
-)
-
-
-gnome.generate_gir(libmuffin,
-  namespace: 'Meta',
-  nsversion: 'Muffin.0',
-  identifier_prefix: 'Meta',
-  symbol_prefix: 'meta',
-
-  sources: [
-    libmuffin_headers,
-    libmuffin_sources,
-  ],
-
-  includes: [
-    'CDesktopEnums-3.0',
-    'Clutter-1.0',
-    'Gdk-3.0',
-    'GObject-2.0',
-    'Gtk-3.0',
-    'xfixes-4.0',
-    'xlib-2.0',
-  ],
-
-  install: true,
 )
