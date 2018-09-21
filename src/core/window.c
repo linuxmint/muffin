@@ -247,6 +247,9 @@ meta_window_finalize (GObject *object)
   if (window->frame_bounds)
     cairo_region_destroy (window->frame_bounds);
 
+  if (window->opaque_region)
+    cairo_region_destroy (window->opaque_region);
+
   meta_icon_cache_free (&window->icon_cache);
 
   g_free (window->sm_client_id);
@@ -1298,6 +1301,8 @@ meta_window_new_with_attrs (MetaDisplay       *display,
    * for sorting.
    */
   window->stable_sequence = ++display->window_sequence_counter;
+
+  window->opacity = 0xFF;
 
   /* assign the window to its group, or create a new group if needed
    */
@@ -6667,6 +6672,32 @@ meta_window_move_resize_request (MetaWindow *window,
   save_user_window_placement (window);
 }
 
+static void
+restack_window (MetaWindow *window,
+                MetaWindow *sibling,
+                int         direction)
+{
+ switch (direction)
+   {
+   case Above:
+     if (sibling)
+       meta_window_stack_just_above (window, sibling);
+     else
+       meta_window_raise (window);
+     break;
+   case Below:
+     if (sibling)
+       meta_window_stack_just_below (window, sibling);
+     else
+       meta_window_lower (window);
+     break;
+   case TopIf:
+   case BottomIf:
+   case Opposite:
+     break;
+   }
+}
+
 LOCAL_SYMBOL gboolean
 meta_window_configure_request (MetaWindow *window,
                                XEvent     *event)
@@ -6697,10 +6728,7 @@ meta_window_configure_request (MetaWindow *window,
    * the stack looks).
    *
    * I'm pretty sure no interesting client uses TopIf, BottomIf, or
-   * Opposite anyway, so the only possible missing thing is
-   * Above/Below with a sibling set. For now we just pretend there's
-   * never a sibling set and always do the full raise/lower instead of
-   * the raise-just-above/below-sibling.
+   * Opposite anyway.
    */
   if (event->xconfigurerequest.value_mask & CWStackMode)
     {
@@ -6732,23 +6760,51 @@ meta_window_configure_request (MetaWindow *window,
         }
       else
         {
-          switch (event->xconfigurerequest.detail)
+          MetaWindow *sibling = NULL;
+          /* Handle Above/Below with a sibling set */
+          if (event->xconfigurerequest.above != None)
             {
-            case Above:
-              meta_window_raise (window);
-              break;
-            case Below:
-              meta_window_lower (window);
-              break;
-            case TopIf:
-            case BottomIf:
-            case Opposite:
-              break;
+              MetaDisplay *display;
+
+              display = meta_window_get_display (window);
+              sibling = meta_display_lookup_x_window (display,
+                                                      event->xconfigurerequest.above);
+              if (sibling == NULL)
+                return TRUE;
+
+              meta_topic (META_DEBUG_STACK,
+                      "xconfigure stacking request from window %s sibling %s stackmode %d\n",
+                      window->desc, sibling->desc, event->xconfigurerequest.detail);
             }
+          restack_window (window, sibling, event->xconfigurerequest.detail);
         }
     }
 
   return TRUE;
+}
+
+static void
+handle_net_restack_window (MetaDisplay *display,
+                           XEvent      *event)
+{
+  MetaWindow *window, *sibling = NULL;
+
+  /* Ignore if this does not come from a pager, see the WM spec
+   */
+  if (event->xclient.data.l[0] != 2)
+    return;
+
+  window = meta_display_lookup_x_window (display,
+                                         event->xclient.window);
+
+  if (window)
+    {
+      if (event->xclient.data.l[1])
+        sibling = meta_display_lookup_x_window (display,
+                                                event->xclient.data.l[1]);
+
+      restack_window (window, sibling, event->xclient.data.l[2]);
+    }
 }
 
 LOCAL_SYMBOL gboolean
@@ -7306,6 +7362,11 @@ meta_window_client_message (MetaWindow *window,
                                  y_root, GDK_BUTTON_SECONDARY,
                                  meta_display_get_current_time_roundtrip (display));
         }
+    }
+  else if (event->xclient.message_type ==
+           display->atom__NET_RESTACK_WINDOW)
+    {
+      handle_net_restack_window (display, event);
     }
 
   return FALSE;
@@ -11059,6 +11120,30 @@ meta_window_stack_just_below (MetaWindow *window,
     }
 }
 
+void
+meta_window_stack_just_above (MetaWindow *window,
+                              MetaWindow *above_this_one)
+{
+  g_return_if_fail (window         != NULL);
+  g_return_if_fail (above_this_one != NULL);
+
+  if (window->stack_position < above_this_one->stack_position)
+    {
+      meta_topic (META_DEBUG_STACK,
+                  "Setting stack position of window %s to %d (making it above window %s).\n",
+                  window->desc,
+                  above_this_one->stack_position,
+                  above_this_one->desc);
+      meta_window_set_stack_position (window, above_this_one->stack_position);
+    }
+  else
+    {
+      meta_topic (META_DEBUG_STACK,
+                  "Window %s  was already above window %s.\n",
+                  window->desc, above_this_one->desc);
+    }
+}
+
 /**
  * meta_window_get_user_time:
  *
@@ -12246,4 +12331,14 @@ meta_window_get_icon_name (MetaWindow *window)
     g_return_val_if_fail (META_IS_WINDOW (window), NULL);
 
     return window->theme_icon_name;
+}
+
+void
+meta_window_set_opacity (MetaWindow *window,
+                         guint8      opacity)
+{
+  window->opacity = opacity;
+
+  if (window->display->compositor)
+    meta_compositor_window_opacity_changed (window->display->compositor, window);
 }

@@ -18,8 +18,6 @@ struct _MetaCompositor
   MetaDisplay    *display;
 
   Atom            atom_x_root_pixmap;
-  Atom            atom_x_set_root;
-  Atom            atom_net_wm_window_opacity;
   guint           pre_paint_func_id;
   guint           post_paint_func_id;
 

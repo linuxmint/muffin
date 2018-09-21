@@ -665,6 +665,74 @@ reload_wm_name (MetaWindow    *window,
 }
 
 static void
+meta_window_set_opaque_region (MetaWindow     *window,
+                               cairo_region_t *region)
+{
+  if (cairo_region_equal (window->opaque_region, region))
+    return;
+
+  g_clear_pointer (&window->opaque_region, cairo_region_destroy);
+
+  if (region != NULL)
+    window->opaque_region = cairo_region_reference (region);
+
+  meta_compositor_window_shape_changed (window->display->compositor, window);
+}
+
+static void
+reload_opaque_region (MetaWindow    *window,
+                      MetaPropValue *value,
+                      gboolean       initial)
+{
+  cairo_region_t *opaque_region = NULL;
+
+  if (value->type != META_PROP_VALUE_INVALID)
+    {
+      gulong *region = value->v.cardinal_list.cardinals;
+      int nitems = value->v.cardinal_list.n_cardinals;
+
+      cairo_rectangle_int_t *rects;
+      int i, rect_index, nrects;
+
+      if (nitems % 4 != 0)
+        {
+          meta_verbose ("_NET_WM_OPAQUE_REGION does not have a list of 4-tuples.");
+          goto out;
+        }
+
+      /* empty region */
+      if (nitems == 0)
+        goto out;
+
+      nrects = nitems / 4;
+
+      rects = g_new (cairo_rectangle_int_t, nrects);
+
+      rect_index = 0;
+      i = 0;
+      while (i < nitems)
+        {
+          cairo_rectangle_int_t *rect = &rects[rect_index];
+
+          rect->x = region[i++];
+          rect->y = region[i++];
+          rect->width = region[i++];
+          rect->height = region[i++];
+
+          rect_index++;
+        }
+
+      opaque_region = cairo_region_create_rectangles (rects, nrects);
+
+      g_free (rects);
+    }
+
+ out:
+  meta_window_set_opaque_region (window, opaque_region);
+  cairo_region_destroy (opaque_region);
+}
+
+static void
 reload_muffin_hints (MetaWindow    *window,
                      MetaPropValue *value,
                      gboolean       initial)
@@ -1894,6 +1962,20 @@ reload_bypass_compositor (MetaWindow    *window,
   window->bypass_compositor = requested_value;
 }
 
+static void
+reload_window_opacity (MetaWindow    *window,
+                       MetaPropValue *value,
+                       gboolean       initial)
+
+{
+  guint8 opacity = 0xFF;
+
+  if (value->type != META_PROP_VALUE_INVALID)
+    opacity = (guint8)((gfloat)value->v.cardinal * 255.0 / ((gfloat)0xffffffff));
+
+  meta_window_set_opacity (window, opacity);
+}
+
 #define RELOAD_STRING(var_name, propname) \
   static void                                       \
   reload_ ## var_name (MetaWindow    *window,       \
@@ -1959,6 +2041,7 @@ meta_display_init_window_prop_hooks (MetaDisplay *display)
     { display->atom__NET_WM_PID,       META_PROP_VALUE_CARDINAL, reload_net_wm_pid,        TRUE,  TRUE },
     { XA_WM_NAME,                      META_PROP_VALUE_TEXT_PROPERTY, reload_wm_name,      TRUE,  TRUE },
     { display->atom__MUFFIN_HINTS,     META_PROP_VALUE_TEXT_PROPERTY, reload_muffin_hints, TRUE,  TRUE },
+    { display->atom__NET_WM_OPAQUE_REGION, META_PROP_VALUE_CARDINAL_LIST, reload_opaque_region, TRUE, TRUE },
     { display->atom__NET_WM_ICON_NAME, META_PROP_VALUE_UTF8,     reload_net_wm_icon_name,  TRUE,  FALSE },
     { XA_WM_ICON_NAME,                 META_PROP_VALUE_TEXT_PROPERTY, reload_wm_icon_name, TRUE,  FALSE },
     { display->atom__NET_WM_DESKTOP,   META_PROP_VALUE_CARDINAL, reload_net_wm_desktop,    TRUE,  FALSE },
@@ -1992,6 +2075,7 @@ meta_display_init_window_prop_hooks (MetaDisplay *display)
     { display->atom__NET_WM_STRUT,         META_PROP_VALUE_INVALID, reload_struts,            FALSE, FALSE },
     { display->atom__NET_WM_STRUT_PARTIAL, META_PROP_VALUE_INVALID, reload_struts,            FALSE, FALSE },
     { display->atom__NET_WM_BYPASS_COMPOSITOR, META_PROP_VALUE_CARDINAL,  reload_bypass_compositor, TRUE, TRUE },
+    { display->atom__NET_WM_WINDOW_OPACITY, META_PROP_VALUE_CARDINAL, reload_window_opacity,  TRUE, TRUE },
     { display->atom__NET_WM_XAPP_ICON_NAME, META_PROP_VALUE_UTF8,     reload_theme_icon_name, TRUE,  TRUE },
     { display->atom__NET_WM_XAPP_PROGRESS, META_PROP_VALUE_CARDINAL, reload_progress,         TRUE,  TRUE },
     { display->atom__NET_WM_XAPP_PROGRESS_PULSE, META_PROP_VALUE_CARDINAL, reload_progress_pulse, TRUE,  TRUE },

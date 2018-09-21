@@ -1577,44 +1577,6 @@ meta_display_queue_autoraise_callback (MetaDisplay *display,
   display->autoraise_window = window;
 }
 
-#if 0
-static void
-handle_net_restack_window (MetaDisplay* display,
-                           XEvent *event)
-{
-  MetaWindow *window;
-
-  window = meta_display_lookup_x_window (display,
-                                         event->xclient.window);
-
-  if (window)
-    {
-      /* FIXME: The EWMH includes a sibling for the restack request, but we
-       * (stupidly) don't currently support these types of raises.
-       *
-       * Also, unconditionally following these is REALLY stupid--we should
-       * combine this code with the stuff in
-       * meta_window_configure_request() which is smart about whether to
-       * follow the request or do something else (though not smart enough
-       * and is also too stupid to handle the sibling stuff).
-       */
-      switch (event->xclient.data.l[2])
-        {
-        case Above:
-          meta_window_raise (window);
-          break;
-        case Below:
-          meta_window_lower (window);
-          break;
-        case TopIf:
-        case BottomIf:
-        case Opposite:
-          break;          
-        }
-    }
-}
-#endif
-
 /*
  * This is the most important function in the whole program. It is the heart,
  * it is the nexus, it is the Grand Central Station of Muffin's world.
@@ -2480,11 +2442,6 @@ event_callback (XEvent   *event,
             else if (event->xproperty.atom ==
                      display->atom__NET_DESKTOP_NAMES)
               meta_screen_update_workspace_names (screen);
-#if 0
-            else if (event->xproperty.atom ==
-                     display->atom__NET_RESTACK_WINDOW)
-              handle_net_restack_window (display, event);
-#endif
 
             /* we just use this property as a sentinel to avoid
              * certain race conditions.  See the comment for the
