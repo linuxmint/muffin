@@ -84,6 +84,7 @@ struct _MetaDisplay
 
   Window leader_window;
   Window timestamp_pinging_window;
+  Window composite_overlay_window;
 
   /* Pull in all the names of atoms as fields; we will intern them when the
    * class is constructed.

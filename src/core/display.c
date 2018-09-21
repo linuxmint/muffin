@@ -549,6 +549,7 @@ meta_display_open (void)
   /* Offscreen unmapped window used for _NET_SUPPORTING_WM_CHECK,
    * created in screen_new
    */
+  the_display->composite_overlay_window = None;
   the_display->leader_window = None;
   the_display->timestamp_pinging_window = None;
 
@@ -868,6 +869,9 @@ meta_display_open (void)
       return FALSE;
     }
 
+  the_display->composite_overlay_window = XCompositeGetOverlayWindow (the_display->xdisplay,
+                                                                      ((MetaScreen*) the_display->screens->data)->xroot);
+
   /* We don't composite the windows here because they will be composited 
      faster with the call to meta_screen_manage_all_windows further down 
      the code */
@@ -1073,6 +1077,13 @@ meta_display_close (MetaDisplay *display,
 
   if (display->leader_window != None)
     XDestroyWindow (display->xdisplay, display->leader_window);
+  if (display->composite_overlay_window != None)
+    {
+      XCompositeReleaseOverlayWindow (display->xdisplay,
+                                      display->composite_overlay_window);
+
+      display->composite_overlay_window = None;
+    }
 
   XFlush (display->xdisplay);
 
