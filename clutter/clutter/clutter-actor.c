@@ -11182,9 +11182,11 @@ static void
 _clutter_actor_maybe_queue_relayout (ClutterActor *self)
 {
   ClutterActorPrivate *priv = self->priv;
+  ClutterActor *stage = _clutter_actor_get_stage_internal (self);
 
   if (priv->parent &&
-      (priv->parent->flags & CLUTTER_ACTOR_NO_LAYOUT))
+      (priv->parent->flags & CLUTTER_ACTOR_NO_LAYOUT) &&
+      CLUTTER_IS_ACTOR (stage))
     {
       clutter_actor_allocate_preferred_size (self, CLUTTER_ALLOCATION_NONE);
       clutter_actor_queue_redraw (self);
