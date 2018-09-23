@@ -9465,36 +9465,36 @@ update_move (MetaWindow  *window,
 
     window->mouse_on_edge = meta_window_mouse_on_edge (window, x, y);
 
-    if (meta_prefs_get_edge_tiling ()) {
-        if (window->current_proximity_zone != ZONE_NONE && !window->mouse_on_edge)
-            meta_screen_tile_hud_update (window->screen, TRUE, FALSE);
-        else
-            meta_screen_tile_hud_update (window->screen, TRUE, TRUE);
-    }
-
     MetaRectangle min_size, max_size, target_size;
     gboolean hminbad = FALSE;
     gboolean vminbad = FALSE;
     if (window->tile_mode != META_TILE_NONE) {
-        get_size_limits (window, NULL, FALSE, &min_size, &max_size);
-        meta_window_get_current_tile_area (window, &target_size);
-        MetaFrameBorders borders;
-        meta_frame_calc_borders (window->frame, &borders);
-        meta_window_unextend_by_frame (window, &target_size, &borders);
-        hminbad = target_size.width < min_size.width;
-        vminbad = target_size.height < min_size.height;
+      if (meta_prefs_get_edge_tiling ()) {
+        if (window->current_proximity_zone != ZONE_NONE && !window->mouse_on_edge)
+            meta_screen_tile_hud_update (window->screen, TRUE, FALSE);
+        else
+            meta_screen_tile_hud_update (window->screen, TRUE, TRUE);
+      }
+      get_size_limits (window, NULL, FALSE, &min_size, &max_size);
+      meta_window_get_current_tile_area (window, &target_size);
+      MetaFrameBorders borders;
+      meta_frame_calc_borders (window->frame, &borders);
+      meta_window_unextend_by_frame (window, &target_size, &borders);
+      hminbad = target_size.width < min_size.width;
+      vminbad = target_size.height < min_size.height;
+
+      /* Delay showing the tile preview slightly to make it more unlikely to
+        * trigger it unwittingly, e.g. when shaking loose the window or moving
+        * it to another monitor.
+        */
+
+        if (!hminbad && !vminbad)
+            meta_screen_tile_preview_update (window->screen,
+                                            window->tile_mode != META_TILE_NONE &&
+                                            !meta_screen_tile_preview_get_visible (window->screen));
+        else
+            meta_screen_tile_preview_hide (window->screen);
     }
-  /* Delay showing the tile preview slightly to make it more unlikely to
-   * trigger it unwittingly, e.g. when shaking loose the window or moving
-   * it to another monitor.
-   */
-    
-    if (!hminbad && !vminbad)
-        meta_screen_tile_preview_update (window->screen,
-                                         window->tile_mode != META_TILE_NONE &&
-                                         !meta_screen_tile_preview_get_visible (window->screen));
-    else
-        meta_screen_tile_preview_hide (window->screen);
 
   meta_window_get_client_root_coords (window, &old);
 
