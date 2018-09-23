@@ -39,7 +39,7 @@
 #include "clutter-private.h"
 #include "clutter-stage-manager-private.h"
 #include "clutter-stage-private.h"
-#include "clutter-mutter.h"
+#include "clutter-muffin.h"
 
 #ifdef CLUTTER_ENABLE_DEBUG
 #define clutter_warn_if_over_budget(master_clock,start_time,section)    G_STMT_START  { \
