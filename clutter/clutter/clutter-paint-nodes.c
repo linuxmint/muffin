@@ -820,8 +820,8 @@ clutter_text_node_draw (ClutterPaintNode *node)
             }
 
           cogl_pango_render_layout (tnode->layout,
-                                    op->op.texrect[0],
-                                    op->op.texrect[1],
+                                    op->op.texrect[4],
+                                    op->op.texrect[5],
                                     &tnode->color,
                                     0);
 
