@@ -85,4 +85,12 @@ void clutter_input_method_notify_key_event (ClutterInputMethod *im,
 CLUTTER_AVAILABLE_IN_MUFFIN
 void clutter_input_method_request_toggle_input_panel (ClutterInputMethod *im);
 
+CLUTTER_AVAILABLE_IN_MUTTER
+void clutter_input_method_forward_key (ClutterInputMethod *im,
+                                       uint32_t            keyval,
+                                       uint32_t            keycode,
+                                       uint32_t            state,
+                                       uint64_t            time_,
+                                       gboolean            press);
+
 #endif /* __CLUTTER_INPUT_METHOD_H__ */
