@@ -184,7 +184,10 @@ clutter_stage_cogl_schedule_update (ClutterStageWindow *stage_window,
 
   /* FIXME (?) - On X11 this is performing worse than swap throttling. */
 
-  refresh_interval = 0;//(gint64) (0.5 + 1000000 / stage_cogl->refresh_rate);
+  if (cogl_clutter_winsys_has_feature (COGL_WINSYS_FEATURE_SWAP_REGION))
+    refresh_interval = (gint64) (0.5 + 1000000 / stage_cogl->refresh_rate);
+  else
+    refresh_interval = 0;
 
   target_presentation_time = stage_cogl->last_presentation_time
                            + stage_cogl->pending_swaps * refresh_interval
