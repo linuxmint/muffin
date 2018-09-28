@@ -74,6 +74,9 @@ struct _MetaWindowActorPrivate
   /* The region we should clip to when painting the shadow */
   cairo_region_t   *shadow_clip;
 
+   /* The region that is visible, used to optimize out redraws */
+  cairo_region_t   *unobscured_region;
+
   /* Extracted size-invariant shape used for shadows */
   MetaWindowShape  *shadow_shape;
 
@@ -460,6 +463,7 @@ meta_window_actor_dispose (GObject *object)
 
   meta_window_actor_detach (self);
 
+  g_clear_pointer (&priv->unobscured_region, cairo_region_destroy);
   g_clear_pointer (&priv->shape_region, cairo_region_destroy);
   g_clear_pointer (&priv->bounding_region, cairo_region_destroy);
   g_clear_pointer (&priv->shadow_clip, cairo_region_destroy);
@@ -974,13 +978,12 @@ meta_window_actor_damage_all (MetaWindowActor *self)
   if (priv->needs_pixmap)
     return;
 
-  meta_shaped_texture_update_area (META_SHAPED_TEXTURE (priv->actor),
+  priv->needs_damage_all = FALSE;
+  priv->repaint_scheduled = meta_shaped_texture_update_area (META_SHAPED_TEXTURE (priv->actor),
                                    0, 0,
                                    cogl_texture_get_width (texture),
-                                   cogl_texture_get_height (texture));
-
-  priv->needs_damage_all = FALSE;
-  priv->repaint_scheduled = TRUE;
+                                   cogl_texture_get_height (texture),
+                                   clutter_actor_has_mapped_clones (priv->actor) ? NULL : priv->unobscured_region);
 }
 
 static void
@@ -1790,6 +1793,32 @@ dump_region (cairo_region_t *region)
 #endif
 
 /**
+ * meta_window_actor_set_unobscured_region:
+ * @self: a #MetaWindowActor
+ * @unobscured_region: the region of the screen that isn't completely
+ *  obscured.
+ *
+ * Provides a hint as to what areas of the window need to queue
+ * redraws when damaged. Regions not in @unobscured_region are completely obscured.
+ * Unlike meta_window_actor_set_clip_region(), the region here
+ * doesn't take into account any clipping that is in effect while drawing.
+ */
+void
+meta_window_actor_set_unobscured_region (MetaWindowActor *self,
+                                         cairo_region_t  *unobscured_region)
+{
+  MetaWindowActorPrivate *priv = self->priv;
+
+  if (priv->unobscured_region)
+    cairo_region_destroy (priv->unobscured_region);
+
+  if (unobscured_region)
+    priv->unobscured_region = cairo_region_copy (unobscured_region);
+  else
+    priv->unobscured_region = NULL;
+}
+
+/**
  * meta_window_actor_set_visible_region:
  * @self: a #MetaWindowActor
  * @visible_region: the region of the screen that isn't completely
@@ -2068,12 +2097,12 @@ meta_window_actor_process_damage (MetaWindowActor    *self,
   if (priv->needs_pixmap)
     return;
 
-  meta_shaped_texture_update_area (META_SHAPED_TEXTURE (priv->actor),
+  priv->repaint_scheduled = meta_shaped_texture_update_area (META_SHAPED_TEXTURE (priv->actor),
                                    event->area.x,
                                    event->area.y,
                                    event->area.width,
-                                   event->area.height);
-  priv->repaint_scheduled = TRUE;
+                                   event->area.height,
+                                   clutter_actor_has_mapped_clones (priv->actor) ? NULL : priv->unobscured_region);
 }
 
 LOCAL_SYMBOL void

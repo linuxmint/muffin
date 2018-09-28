@@ -693,12 +693,31 @@ meta_shaped_texture_is_obscured (MetaShapedTexture *self)
     return FALSE;
 }
 
-void
+/**
+ * meta_shaped_texture_update_area:
+ * @stex: #MetaShapedTexture
+ * @x: the x coordinate of the damaged area
+ * @y: the y coordinate of the damaged area
+ * @width: the width of the damaged area
+ * @height: the height of the damaged area
+ * @unobscured_region: The unobscured region of the window or %NULL if
+ * there is no valid one (like when the actor is transformed or
+ * has a mapped clone)
+ *
+ * Repairs the damaged area indicated by @x, @y, @width and @height
+ * and queues a redraw for the intersection @visibible_region and
+ * the damage area. If @visibible_region is %NULL a redraw will always
+ * get queued.
+ *
+ * Return value: Whether a redraw have been queued or not
+ */
+gboolean
 meta_shaped_texture_update_area (MetaShapedTexture *stex,
 				 int                x,
 				 int                y,
 				 int                width,
-				 int                height)
+				 int                height,
+				 cairo_region_t    *unobscured_region)
 {
   MetaShapedTexturePrivate *priv;
   const cairo_rectangle_int_t clip = { x, y, width, height };
@@ -706,7 +725,7 @@ meta_shaped_texture_update_area (MetaShapedTexture *stex,
   priv = stex->priv;
 
   if (priv->texture == NULL)
-    return;
+    return FALSE;
 
   cogl_texture_pixmap_x11_update_area (COGL_TEXTURE_PIXMAP_X11 (priv->texture),
                                        x, y, width, height);
@@ -727,7 +746,34 @@ meta_shaped_texture_update_area (MetaShapedTexture *stex,
         priv->fast_updates++;
     }
 
+  if (unobscured_region)
+    {
+      cairo_region_t *intersection;
+
+      if (cairo_region_is_empty (unobscured_region))
+        return FALSE;
+
+      intersection = cairo_region_copy (unobscured_region);
+      cairo_region_intersect_rectangle (intersection, &clip);
+
+      if (!cairo_region_is_empty (intersection))
+        {
+          cairo_rectangle_int_t damage_rect;
+          cairo_region_get_extents (intersection, &damage_rect);
+          clutter_actor_queue_redraw_with_clip (CLUTTER_ACTOR (stex), &damage_rect);
+          cairo_region_destroy (intersection);
+
+          return TRUE;
+        }
+
+      cairo_region_destroy (intersection);
+
+      return FALSE;
+    }
+
   clutter_actor_queue_redraw_with_clip (CLUTTER_ACTOR (stex), &clip);
+
+  return TRUE;
 }
 
 static void

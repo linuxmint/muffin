@@ -141,7 +141,7 @@ meta_window_group_cull_out (MetaWindowGroup *group,
           cairo_region_translate (unobscured_region, - x, - y);
           cairo_region_translate (clip_region, - x, - y);
 
-          //meta_window_actor_set_unobscured_region (window_actor, unobscured_region);
+          meta_window_actor_set_unobscured_region (window_actor, unobscured_region);
           meta_window_actor_set_visible_region (window_actor, clip_region);
 
           if (clutter_actor_get_paint_opacity (CLUTTER_ACTOR (window_actor)) == 0xff)
@@ -219,7 +219,7 @@ meta_window_group_paint (ClutterActor *actor)
 
   /* Start off by treating all windows as completely unobscured, so damage anywhere
    * in a window queues redraws, but confine it more below. */
-  /* clutter_actor_iter_init (&iter, actor);
+  clutter_actor_iter_init (&iter, actor);
   while (clutter_actor_iter_next (&iter, &child))
     {
       if (META_IS_WINDOW_ACTOR (child))
@@ -227,7 +227,7 @@ meta_window_group_paint (ClutterActor *actor)
           MetaWindowActor *window_actor = META_WINDOW_ACTOR (child);
           meta_window_actor_set_unobscured_region (window_actor, NULL);
         }
-    } */
+    }
 
   /* Normally we expect an actor to be drawn at it's position on the screen.
    * However, if we're inside the paint of a ClutterClone, that won't be the
@@ -249,6 +249,9 @@ meta_window_group_paint (ClutterActor *actor)
       return;
     }
 
+  paint_x_offset = paint_x_origin - actor_x_origin;
+  paint_y_offset = paint_y_origin - actor_y_origin;
+
   visible_rect.x = visible_rect.y = 0;
   visible_rect.width = clutter_actor_get_width (CLUTTER_ACTOR (stage));
   visible_rect.height = clutter_actor_get_height (CLUTTER_ACTOR (stage));
@@ -266,8 +269,6 @@ meta_window_group_paint (ClutterActor *actor)
 
   clip_region = cairo_region_create_rectangle (&clip_rect);
 
-  paint_x_offset = paint_x_origin - actor_x_origin;
-  paint_y_offset = paint_y_origin - actor_y_origin;
   cairo_region_translate (clip_region, -paint_x_offset, -paint_y_offset);
 
   if (info->unredirected_window != NULL)
