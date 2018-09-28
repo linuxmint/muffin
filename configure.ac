@@ -141,6 +141,16 @@ AC_ARG_ENABLE([gtk-doc],
                  [use gtk-doc to build documentation [[default=yes]]]),,
   enable_gtk_doc=yes)
 
+# prefixes for fixing gtk-doc references
+CAIRO_PREFIX="`$PKG_CONFIG --variable=prefix cairo`"
+GLIB_PREFIX="`$PKG_CONFIG --variable=prefix glib-2.0`"
+PANGO_PREFIX="/usr"
+ATK_PREFIX="`$PKG_CONFIG --variable=prefix atk`"
+AC_SUBST(CAIRO_PREFIX)
+AC_SUBST(GLIB_PREFIX)
+AC_SUBST(PANGO_PREFIX)
+AC_SUBST(ATK_PREFIX)
+
 AC_ARG_ENABLE(sm,
   AC_HELP_STRING([--disable-sm],
                  [disable muffin's session management support, for embedded/size-sensitive custom non-GNOME builds]),,
@@ -469,7 +479,10 @@ data/Makefile
 doc/Makefile
 doc/man/Makefile
 doc/reference/Makefile
-doc/reference/muffin-docs.sgml
+doc/reference/muffin/Makefile
+doc/reference/muffin/muffin-docs.sgml
+doc/reference/clutter/Makefile
+doc/reference/clutter/clutter-docs.xml
 src/Makefile
 src/wm-tester/Makefile
 src/libmuffin.pc
