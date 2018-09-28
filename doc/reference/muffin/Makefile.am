@@ -44,7 +44,16 @@ MKHTML_OPTIONS=
 
 # Extra options to supply to gtkdoc-fixref. Not normally needed.
 # e.g. FIXXREF_OPTIONS=--extra-dir=../gdk-pixbuf/html --extra-dir=../gdk/html
-FIXXREF_OPTIONS=
+FIXXREF_OPTIONS = \
+	--extra-dir=$(GLIB_PREFIX)/share/gtk-doc/html/glib \
+	--extra-dir=$(GLIB_PREFIX)/share/gtk-doc/html/gobject \
+	--extra-dir=$(CAIRO_PREFIX)/share/gtk-doc/html/cairo \
+	--extra-dir=$(PANGO_PREFIX)/share/gtk-doc/html/pango \
+	--extra-dir=$(GDK_PREFIX)/share/gtk-doc/html/gdk \
+	--extra-dir=$(ATK_PREFIX)/share/gtk-doc/html/atk \
+	--extra-dir=$(GDKPIXBUF_PREFIX)/share/gtk-doc/html/gdk-pixbuf \
+	--extra-dir=../cogl/html \
+	--extra-dir=../clutter/html
 
 # Used for dependencies. The docs will be rebuilt if any of these change.
 # e.g. HFILE_GLOB=$(top_srcdir)/gtk/*.h

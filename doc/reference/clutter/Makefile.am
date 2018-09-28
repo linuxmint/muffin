@@ -12,7 +12,8 @@ FIXXREF_OPTIONS = \
 	--extra-dir=$(CAIRO_PREFIX)/share/gtk-doc/html/cairo \
 	--extra-dir=$(PANGO_PREFIX)/share/gtk-doc/html/pango \
 	--extra-dir=$(GDK_PREFIX)/share/gtk-doc/html/gdk \
-	--extra-dir=$(ATK_PREFIX)/share/gtk-doc/html/atk
+	--extra-dir=$(ATK_PREFIX)/share/gtk-doc/html/atk \
+	--extra-dir=../cogl/html
 
 BUILT_HFILES = \
 	clutter-enum-types.h \

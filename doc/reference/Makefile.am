@@ -1,1 +1,1 @@
-SUBDIRS = clutter muffin
+SUBDIRS = cogl clutter muffin
