@@ -2390,13 +2390,8 @@ check_needs_reshape (MetaWindowActor *self)
     return;
 
   meta_shaped_texture_set_shape_region (META_SHAPED_TEXTURE (priv->actor), NULL);
-  g_clear_pointer (&priv->shape_region, cairo_region_destroy);;
-
-  if (priv->shadow_shape != NULL)
-    {
-      meta_window_shape_unref (priv->shadow_shape);
-      priv->shadow_shape = NULL;
-    }
+  g_clear_pointer (&priv->shape_region, cairo_region_destroy);
+  g_clear_pointer (&priv->shadow_shape, meta_window_shape_unref);
 
   meta_frame_calc_borders (priv->window->frame, &borders);
 
