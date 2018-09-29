@@ -1901,12 +1901,7 @@ meta_window_actor_get_obscured_region (MetaWindowActor *self)
   MetaWindowActorPrivate *priv = self->priv;
 
   if (priv->back_pixmap && priv->opacity == 0xff)
-    {
-      if (priv->opaque_region)
-        return priv->opaque_region;
-      else
-        return priv->bounding_region;
-    }
+    return priv->opaque_region;
   else
     return NULL;
 }
@@ -2392,6 +2387,7 @@ check_needs_reshape (MetaWindowActor *self)
   meta_shaped_texture_set_shape_region (META_SHAPED_TEXTURE (priv->actor), NULL);
   g_clear_pointer (&priv->shape_region, cairo_region_destroy);
   g_clear_pointer (&priv->shadow_shape, meta_window_shape_unref);
+  g_clear_pointer (&priv->opaque_region, cairo_region_destroy);
 
   meta_frame_calc_borders (priv->window->frame, &borders);
 
