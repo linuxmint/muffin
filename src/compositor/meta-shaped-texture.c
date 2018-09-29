@@ -744,8 +744,8 @@ meta_shaped_texture_set_create_mipmaps (MetaShapedTexture *stex,
     {
       CoglTexture *base_texture;
       priv->create_mipmaps = create_mipmaps;
-      base_texture = create_mipmaps ?
-        priv->texture : NULL;
+      base_texture = create_mipmaps ? priv->texture : NULL;
+
       meta_texture_tower_set_base_texture (priv->paint_tower, base_texture);
     }
 }
@@ -877,6 +877,7 @@ set_cogl_texture (MetaShapedTexture *stex,
 
   if (cogl_tex != NULL)
     {
+      cogl_object_ref (cogl_tex);
       width = cogl_texture_get_width (cogl_tex);
       height = cogl_texture_get_height (cogl_tex);
 
@@ -897,7 +898,13 @@ set_cogl_texture (MetaShapedTexture *stex,
       clutter_actor_queue_relayout (CLUTTER_ACTOR (stex));
     }
 
-  clutter_actor_queue_redraw (CLUTTER_ACTOR (stex));
+  /* NB: We don't queue a redraw of the actor here because we don't
+   * know how much of the buffer has changed with respect to the
+   * previous buffer. We only queue a redraw in response to surface
+   * damage. */
+
+  if (priv->create_mipmaps)
+    meta_texture_tower_set_base_texture (priv->paint_tower, cogl_tex);
 }
 
 /**
@@ -928,9 +935,6 @@ meta_shaped_texture_set_pixmap (MetaShapedTexture *stex,
     }
   else
     set_cogl_texture (stex, NULL);
-
-  if (priv->create_mipmaps)
-    meta_texture_tower_set_base_texture (priv->paint_tower, priv->texture);
 }
 
 /**
