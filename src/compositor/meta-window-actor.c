@@ -2627,7 +2627,6 @@ send_frame_timings (MetaWindowActor  *self,
                     CoglFrameInfo    *frame_info,
                     gint64            presentation_time)
 {
-  MetaWindowActorPrivate *priv = self->priv;
   MetaWindow *window = meta_window_actor_get_meta_window (self);
   float refresh_rate;
   int refresh_interval;
