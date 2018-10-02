@@ -1030,7 +1030,7 @@ fdwalk (int (*cb)(void *data, int fd), void *data)
 }
 #endif
 
-LOCAL_SYMBOL void
+void
 meta_pre_exec_close_fds(void)
 {
   fdwalk (set_cloexec, GINT_TO_POINTER(3));

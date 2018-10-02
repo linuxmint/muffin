@@ -1424,6 +1424,8 @@ static gboolean
 meta_post_paint_func (gpointer data)
 {
   MetaCompositor *compositor = data;
+  MetaScreen *screen = (MetaScreen*) compositor->display->screens->data;
+  MetaCompScreen *info = meta_screen_get_compositor_data (screen);
   CoglGraphicsResetStatus status;
 
   if (compositor->frame_has_updated_xsurfaces)
@@ -1442,7 +1444,7 @@ meta_post_paint_func (gpointer data)
 
     case COGL_GRAPHICS_RESET_STATUS_PURGED_CONTEXT_RESET:
       g_signal_emit_by_name (compositor->display, "gl-video-memory-purged");
-      clutter_actor_queue_redraw (CLUTTER_ACTOR (compositor->stage));
+      clutter_actor_queue_redraw (CLUTTER_ACTOR (info->stage));
       break;
 
     default:
