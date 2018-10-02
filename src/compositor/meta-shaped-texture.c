@@ -674,25 +674,6 @@ meta_shaped_texture_set_shape_region (MetaShapedTexture *stex,
   clutter_actor_queue_redraw (CLUTTER_ACTOR (stex));
 }
 
-static cairo_region_t *
-effective_unobscured_region (MetaShapedTexture *self)
-{
-  MetaShapedTexturePrivate *priv = self->priv;
-
-  return clutter_actor_has_mapped_clones (CLUTTER_ACTOR (self)) ? NULL : priv->unobscured_region;
-}
-
-gboolean
-meta_shaped_texture_is_obscured (MetaShapedTexture *self)
-{
-  cairo_region_t *unobscured_region = effective_unobscured_region (self);
-
-  if (unobscured_region)
-    return cairo_region_is_empty (unobscured_region);
-  else
-    return FALSE;
-}
-
 /**
  * meta_shaped_texture_update_area:
  * @stex: #MetaShapedTexture
