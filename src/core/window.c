@@ -6620,8 +6620,6 @@ meta_window_move_resize_request (MetaWindow *window,
     rect.width = width;
     rect.height = height;
 
-    meta_screen_get_monitor_geometry (window->screen, window->monitor->number, &monitor_rect);
-
     /* Workaround braindead legacy apps that don't know how to
     * fullscreen themselves properly - don't get fooled by
     * windows which hide their titlebar when maximized or which are
@@ -6629,21 +6627,26 @@ meta_window_move_resize_request (MetaWindow *window,
     * if there are no struts making the workarea smaller than
     * the monitor.
     */
-    if (meta_prefs_get_force_fullscreen() &&
-        !window->hide_titlebar_when_maximized &&
-        (window->decorated && !meta_window_is_client_decorated (window)) &&
-        meta_rectangle_equal (&rect, &monitor_rect) &&
-        window->has_fullscreen_func &&
-        !window->fullscreen)
+    if (window->monitor)
       {
-        /*
-       meta_topic (META_DEBUG_GEOMETRY,
-        */
-        meta_warning (
-                    "Treating resize request of legacy application %s as a "
-                    "fullscreen request\n",
-                    window->desc);
-        meta_window_make_fullscreen_internal (window);
+        meta_screen_get_monitor_geometry (window->screen, window->monitor->number, &monitor_rect);
+
+        if (meta_prefs_get_force_fullscreen() &&
+            !window->hide_titlebar_when_maximized &&
+            (window->decorated && !meta_window_is_client_decorated (window)) &&
+            meta_rectangle_equal (&rect, &monitor_rect) &&
+            window->has_fullscreen_func &&
+            !window->fullscreen)
+          {
+            /*
+          meta_topic (META_DEBUG_GEOMETRY,
+            */
+            meta_warning (
+                        "Treating resize request of legacy application %s as a "
+                        "fullscreen request\n",
+                        window->desc);
+            meta_window_make_fullscreen_internal (window);
+          }
       }
 
     meta_window_move_resize_internal (window,
