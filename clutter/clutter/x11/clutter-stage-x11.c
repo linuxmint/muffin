@@ -634,12 +634,11 @@ clutter_stage_x11_realize (ClutterStageWindow *stage_window)
   cogl_onscreen_set_swap_throttled (stage_x11->onscreen,
                                     _clutter_get_sync_to_vblank ());
 
-  if (cogl_clutter_winsys_has_feature (COGL_WINSYS_FEATURE_SWAP_REGION))
-    stage_x11->frame_closure =
-      cogl_onscreen_add_frame_callback (stage_x11->onscreen,
-                                        frame_cb,
-                                        stage_cogl,
-                                        NULL);
+  stage_x11->frame_closure =
+    cogl_onscreen_add_frame_callback (stage_x11->onscreen,
+                                      frame_cb,
+                                      stage_cogl,
+                                      NULL);
 
   if (stage_x11->legacy_view)
     g_object_set (G_OBJECT (stage_x11->legacy_view),
