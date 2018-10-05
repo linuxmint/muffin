@@ -475,6 +475,10 @@ AC_CHECK_DECL([GL_EXT_x11_sync_object],
 m4_ifdef([AX_COMPILER_FLAGS],
          [AX_COMPILER_FLAGS([WARN_CFLAGS],[WARN_LDFLAGS])])
 
+AC_ARG_ENABLE(clutter-doc,
+	[  --disable-clutter-doc		disable Clutter docs generation],,
+	clutter_doc=yes)
+
 AC_CONFIG_FILES([
 Makefile
 data/Makefile
@@ -483,8 +487,18 @@ doc/man/Makefile
 doc/reference/Makefile
 doc/reference/muffin/Makefile
 doc/reference/muffin/muffin-docs.sgml
-doc/reference/clutter/Makefile
-doc/reference/clutter/clutter-docs.xml
+])
+
+if test "x$clutter_doc" = "xno"; then
+	AC_CONFIG_FILES([
+    doc/reference/clutter/Makefile
+    doc/reference/clutter/clutter-docs.xml
+  ])
+fi
+
+AM_CONDITIONAL(CLUTTER_DOC, test "$clutter_doc" = "yes")
+
+AC_CONFIG_FILES([
 doc/reference/cogl/Makefile
 doc/reference/cogl/cogl-docs.xml
 src/Makefile
