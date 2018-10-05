@@ -29,6 +29,7 @@ override_dh_auto_configure:
 	  --enable-startup-notification=yes \
 	  --disable-silent-rules \
 		--enable-gtk-doc \
+		--disable-clutter-doc \
 		--disable-wayland-egl-platform \
 	  --disable-wayland-egl-server \
 	  --disable-kms-egl-platform  \
