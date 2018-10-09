@@ -909,6 +909,7 @@ set_cogl_texture (MetaShapedTexture *stex,
     {
       priv->tex_width = width;
       priv->tex_height = height;
+      meta_shaped_texture_dirty_mask (stex);
       clutter_actor_queue_relayout (CLUTTER_ACTOR (stex));
     }
 
