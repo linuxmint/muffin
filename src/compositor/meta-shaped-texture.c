@@ -552,7 +552,6 @@ meta_shaped_texture_paint (ClutterActor *actor)
   /* First, paint the unblended parts, which are part of the opaque region. */
   if (use_opaque_region)
     {
-      CoglPipeline *opaque_pipeline;
       cairo_region_t *region;
       int n_rects;
       int i;
@@ -569,7 +568,7 @@ meta_shaped_texture_paint (ClutterActor *actor)
 
       if (!cairo_region_is_empty (region))
         {
-          opaque_pipeline = get_unblended_pipeline (ctx);
+          CoglPipeline *opaque_pipeline = get_unblended_pipeline (ctx);
           cogl_pipeline_set_layer_texture (opaque_pipeline, 0, paint_tex);
           cogl_pipeline_set_layer_filters (opaque_pipeline, 0, filter, filter);
 
