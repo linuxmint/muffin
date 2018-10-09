@@ -650,54 +650,60 @@ meta_shaped_texture_paint (ClutterActor *actor)
 
 static void
 meta_shaped_texture_pick (ClutterActor       *actor,
-			  const ClutterColor *color)
+			                    const ClutterColor *color)
 {
+  if (!clutter_actor_should_pick_paint (actor))
+    return;
+
   MetaShapedTexture *stex = (MetaShapedTexture *) actor;
   MetaShapedTexturePrivate *priv = stex->priv;
+  ClutterActorIter iter;
+  ClutterActor *child;
 
   /* If there is no region then use the regular pick */
   if (priv->shape_region == NULL)
     CLUTTER_ACTOR_CLASS (meta_shaped_texture_parent_class)->pick (actor, color);
-  else if (clutter_actor_should_pick_paint (actor))
+  else
     {
-      CoglTexture *paint_tex;
-      ClutterActorBox alloc;
-      guint tex_width, tex_height;
+      int n_rects;
+      float *rectangles;
+      int i;
       CoglPipeline *pipeline;
       CoglContext *ctx;
       CoglFramebuffer *fb;
       CoglColor cogl_color;
 
-      paint_tex = priv->texture;
+      n_rects = cairo_region_num_rectangles (priv->shape_region);
+      rectangles = g_alloca (sizeof (float) * 4 * n_rects);
 
-      if (paint_tex == NULL)
-        return;
+      for (i = 0; i < n_rects; i++)
+        {
+          cairo_rectangle_int_t rect;
+          int pos = i * 4;
 
-      tex_width = cogl_texture_get_width (paint_tex);
-      tex_height = cogl_texture_get_height (paint_tex);
+          cairo_region_get_rectangle (priv->shape_region, i, &rect);
 
-      if (tex_width == 0 || tex_height == 0) /* no contents yet */
-        return;
+          rectangles[pos + 0] = rect.x;
+          rectangles[pos + 1] = rect.y;
+          rectangles[pos + 2] = rect.x + rect.width;
+          rectangles[pos + 3] = rect.y + rect.height;
+        }
 
       ctx = clutter_backend_get_cogl_context (clutter_get_default_backend ());
       fb = cogl_get_draw_framebuffer ();
 
-      meta_shaped_texture_ensure_mask (stex);
-
       cogl_color_init_from_4ub (&cogl_color, color->red, color->green, color->blue, color->alpha);
 
-      pipeline = get_masked_pipeline (ctx);
-      cogl_pipeline_set_layer_texture (pipeline, 1, priv->mask_texture);
+      pipeline = cogl_pipeline_new (ctx);
       cogl_pipeline_set_color (pipeline, &cogl_color);
-
-      clutter_actor_get_allocation_box (actor, &alloc);
-
-      cogl_framebuffer_draw_rectangle (fb, pipeline,
-                                       0, 0,
-                                       alloc.x2 - alloc.x1,
-                                       alloc.y2 - alloc.y1);
+      cogl_framebuffer_draw_rectangles (fb, pipeline, rectangles, n_rects);
       cogl_object_unref (pipeline);
     }
+
+  clutter_actor_iter_init (&iter, actor);
+
+  while (clutter_actor_iter_next (&iter, &child))
+    clutter_actor_paint (child);
 }
 
 static void
