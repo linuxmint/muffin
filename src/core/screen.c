@@ -54,6 +54,7 @@
 #ifdef HAVE_RANDR
 #include <X11/extensions/Xrandr.h>
 #endif
+#include <X11/extensions/Xcomposite.h>
 
 #include <X11/Xatom.h>
 #include <locale.h>
@@ -988,6 +989,8 @@ meta_screen_new (MetaDisplay *display,
   screen->starting_corner = META_SCREEN_TOPLEFT;
   screen->compositor_data = NULL;
   screen->guard_window = None;
+
+  screen->composite_overlay_window = XCompositeGetOverlayWindow (xdisplay, xroot);
 
   screen->monitor_infos = NULL;
   screen->n_monitor_infos = 0;

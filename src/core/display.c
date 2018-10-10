@@ -2387,7 +2387,9 @@ event_callback (XEvent   *event,
 
           screen = meta_display_screen_for_root (display,
                                                  event->xconfigure.event);
-          if (screen)
+          if (screen &&
+              event->xconfigure.event == screen->xroot &&
+              event->xconfigure.window != screen->composite_overlay_window)
             meta_stack_tracker_configure_event (screen->stack_tracker,
                                                 &event->xconfigure);
         }

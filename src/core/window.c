@@ -946,8 +946,7 @@ meta_window_new_with_attrs (MetaDisplay       *display,
 	&& attrs->width == 1 && attrs->height == 1) ||
        xwindow == screen->wm_cm_selection_window ||
        xwindow == screen->guard_window ||
-       xwindow == XCompositeGetOverlayWindow (display->xdisplay,
-                                              screen->xroot)
+       xwindow == screen->composite_overlay_window
       )
      ) {
     meta_verbose ("Not managing our own windows\n");

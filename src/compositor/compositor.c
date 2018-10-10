@@ -237,7 +237,7 @@ get_output_window (MetaScreen *screen)
                ButtonPressMask | ButtonReleaseMask |
                KeyPressMask | KeyReleaseMask;
 
-  output = XCompositeGetOverlayWindow (xdisplay, xroot);
+  output = screen->composite_overlay_window;
 
   if (XGetWindowAttributes (xdisplay, output, &attr))
       {
