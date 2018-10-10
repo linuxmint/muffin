@@ -252,11 +252,13 @@ meta_window_finalize (GObject *object)
   g_free (window->sm_client_id);
   g_free (window->wm_client_machine);
   g_free (window->startup_id);
+  g_free (window->muffin_hints);
   g_free (window->role);
   g_free (window->res_class);
   g_free (window->res_name);
   g_free (window->title);
   g_free (window->icon_name);
+  g_free (window->theme_icon_name);
   g_free (window->desc);
   g_free (window->gtk_theme_variant);
   g_free (window->gtk_application_id);
