@@ -199,4 +199,6 @@ void meta_display_keybinding_action_invoke_by_code (MetaDisplay  *display,
                                                     unsigned int  keycode,
                                                     unsigned long mask);
 
+void meta_display_restart (MetaDisplay *display);
+
 #endif

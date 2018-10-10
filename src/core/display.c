@@ -35,6 +35,7 @@
 #define _XOPEN_SOURCE 600 /* for gethostname() */
 
 #include <config.h>
+#include <errno.h>
 #include "display-private.h"
 #include <meta/util.h>
 #include <meta/main.h>
@@ -143,6 +144,7 @@ enum
   ZOOM_SCROLL_IN,
   ZOOM_SCROLL_OUT,
   BELL,
+  GL_VIDEO_MEMORY_PURGED,
   LAST_SIGNAL
 };
 
@@ -304,6 +306,14 @@ meta_display_class_init (MetaDisplayClass *klass)
                   0,
                   NULL, NULL, NULL,
                   G_TYPE_NONE, 1, META_TYPE_WINDOW);
+
+  display_signals[GL_VIDEO_MEMORY_PURGED] =
+    g_signal_new ("gl-video-memory-purged",
+                  G_TYPE_FROM_CLASS (klass),
+                  G_SIGNAL_RUN_LAST,
+                  0,
+                  NULL, NULL, NULL,
+                  G_TYPE_NONE, 0);
 
   g_object_class_install_property (object_class,
                                    PROP_FOCUS_WINDOW,
@@ -5657,4 +5667,52 @@ Window
 meta_display_get_leader_window (MetaDisplay *display)
 {
   return display->leader_window;
+}
+
+/**
+ * meta_display_restart:
+ * @display: a #MetaDisplay
+ *
+ * Restart the current process.  Only intended for development purposes.
+ */
+void
+meta_display_restart (MetaDisplay *display)
+{
+  GPtrArray *arr;
+  gsize len;
+
+  char *buf;
+  char *buf_p;
+  char *buf_end;
+  GError *error = NULL;
+
+  if (!g_file_get_contents ("/proc/self/cmdline", &buf, &len, &error))
+    {
+      g_warning ("Failed to get /proc/self/cmdline: %s", error->message);
+      return;
+    }
+
+  buf_end = buf+len;
+  arr = g_ptr_array_new ();
+  /* The cmdline file is NUL-separated */
+  for (buf_p = buf; buf_p < buf_end; buf_p = buf_p + strlen (buf_p) + 1)
+    g_ptr_array_add (arr, buf_p);
+
+  g_ptr_array_add (arr, NULL);
+
+  /* Close all file descriptors other than stdin/stdout/stderr, otherwise
+   * they will leak and stay open after the exec. In particular, this is
+   * important for file descriptors that represent mapped graphics buffer
+   * objects.
+   */
+  meta_pre_exec_close_fds ();
+
+  meta_display_unmanage_screen (display,
+                                (MetaScreen*) display->screens->data,
+                                meta_display_get_current_time (display));
+
+  execvp (arr->pdata[0], (char**)arr->pdata);
+  g_warning ("Failed to reexec: %s", g_strerror (errno));
+  g_ptr_array_free (arr, TRUE);
+  g_free (buf);
 }
