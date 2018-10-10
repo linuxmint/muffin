@@ -50,7 +50,9 @@ struct _ClutterStageCogl
 
   float refresh_rate;
   int pending_swaps;
+  int max_buffer_age;
 
+  gint64 last_update_time;
   gint64 last_presentation_time;
   gint64 update_time;
 

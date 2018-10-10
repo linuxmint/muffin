@@ -39,6 +39,7 @@
 #include "clutter-private.h"
 #include "clutter-stage-manager-private.h"
 #include "clutter-stage-private.h"
+#include "clutter-muffin.h"
 
 #ifdef CLUTTER_ENABLE_DEBUG
 #define clutter_warn_if_over_budget(master_clock,start_time,section)    G_STMT_START  { \
@@ -54,6 +55,20 @@
 #define clutter_warn_if_over_budget(master_clock,start_time,section)
 #endif
 
+typedef enum _SyncMethod /* In order of priority */
+{                        /* SUPPORTED  LATENCY      SMOOTHNESS             */
+  SYNC_NONE = 0,         /* Always     High         Poor                   */
+  SYNC_FALLBACK,         /* Always     Medium       Medium                 */
+  SYNC_SWAP_THROTTLING,  /* Usually    Medium-high  Medium, sometimes best */
+  SYNC_PRESENTATION_TIME /* Usually    Low          Good, sometimes best   */
+                         /* ^ As you can see SWAP_THROTTLING doesn't add much
+                              value. And it does create the the very real
+                              risk of blocking the main loop for up to 16ms
+                              at a time. So it might be a good idea to retire
+                              it in future and instead just make the backends
+                              use swap interval 0 + PRESENTATION_TIME. */
+} SyncMethod;
+
 typedef struct _ClutterClockSource              ClutterClockSource;
 
 struct _ClutterMasterClockDefault
@@ -63,16 +78,16 @@ struct _ClutterMasterClockDefault
   /* the list of timelines handled by the clock */
   GSList *timelines;
 
+  SyncMethod preferred_sync_method, active_sync_method;
+
   /* the current state of the clock, in usecs */
   gint64 cur_tick;
 
   /* the previous state of the clock, in usecs, used to compute the delta */
   gint64 prev_tick;
 
-  /* the ideal frame interval in usecs (inverse of your max refresh rate) */
-  gint64 frame_interval;
-
 #ifdef CLUTTER_ENABLE_DEBUG
+  gint64 frame_budget;
   gint64 remaining_budget;
 #endif
 
@@ -114,6 +129,8 @@ static GSourceFuncs clock_funcs = {
 };
 
 static void clutter_master_clock_iface_init (ClutterMasterClockIface *iface);
+
+static gint64 master_clock_next_frame_time (ClutterMasterClockDefault *);
 
 #define clutter_master_clock_default_get_type   _clutter_master_clock_default_get_type
 
@@ -164,8 +181,8 @@ master_clock_is_running (ClutterMasterClockDefault *master_clock)
   return FALSE;
 }
 
-static gint
-master_clock_get_swap_wait_time (ClutterMasterClockDefault *master_clock)
+static gint64
+master_clock_get_hw_update_time (ClutterMasterClockDefault *master_clock)
 {
   ClutterStageManager *stage_manager = clutter_stage_manager_get_default ();
   const GSList *stages, *l;
@@ -181,23 +198,7 @@ master_clock_get_swap_wait_time (ClutterMasterClockDefault *master_clock)
         min_update_time = update_time;
     }
 
-  if (min_update_time == -1)
-    {
-      return -1;
-    }
-  else
-    {
-      gint64 now = g_source_get_time (master_clock->source);
-      if (min_update_time < now)
-        {
-          return 0;
-        }
-      else
-        {
-          gint64 delay_us = min_update_time - now;
-          return (delay_us + 999) / 1000;
-        }
-    }
+  return min_update_time;
 }
 
 static void
@@ -224,23 +225,19 @@ master_clock_list_ready_stages (ClutterMasterClockDefault *master_clock)
   result = NULL;
   for (l = stages; l != NULL; l = l->next)
     {
-      gint64 update_time = _clutter_stage_get_update_time (l->data);
+      gint64 update_time = -1;
+
+      if (master_clock->active_sync_method == SYNC_PRESENTATION_TIME)
+        update_time = _clutter_stage_get_update_time (l->data);
+
       /* We carefully avoid to update stages that aren't mapped, because
        * they have nothing to render and this could cause a deadlock with
        * some of the SwapBuffers implementations (in particular
        * GLX_INTEL_swap_event is not emitted if nothing was rendered).
-       *
-       * Also, if a stage has a swap-buffers pending we don't want to draw
-       * to it in case the driver may block the CPU while it waits for the
-       * next backbuffer to become available.
-       *
-       * TODO: We should be able to identify if we are running triple or N
-       * buffered and in these cases we can still draw if there is 1 swap
-       * pending so we can hopefully always be ready to swap for the next
-       * vblank and really match the vsync frequency.
        */
+
       if (clutter_actor_is_mapped (l->data) &&
-          update_time != -1 && update_time <= master_clock->cur_tick)
+          update_time <= master_clock->cur_tick)
         result = g_slist_prepend (result, g_object_ref (l->data));
     }
 
@@ -266,39 +263,68 @@ master_clock_reschedule_stage_updates (ClutterMasterClockDefault *master_clock,
     }
 }
 
+/*
+ * master_clock_next_frame_time:
+ * @master_clock: a #ClutterMasterClock
+ *
+ * Computes the optimal next frame time for dispatching the master clock.
+ * Wherever possible this will be higher than master_clock->prev_tick.
+ *
+ * The goal here is to trigger dispatches as seldom as possible, but often
+ * enough to maintain full frame rate.
+ *
+ * Return value: A valid timestamp in microseconds. Never fails.
+ */
 static gint64
-estimate_next_presentation_time (ClutterMasterClockDefault *master_clock)
+master_clock_next_frame_time (ClutterMasterClockDefault *master_clock)
 {
-  gint64 frame_phase, now, now_phase, undershoot;
+  gint64 next, now, interval;
 
-  /* In future if this was updated from the backend's (maximum) refresh rate
-   * then that would fix: https://bugzilla.gnome.org/show_bug.cgi?id=781296
-   */
-  master_clock->frame_interval = G_USEC_PER_SEC /
-                                 clutter_get_default_frame_rate ();
+  if (master_clock->preferred_sync_method >= SYNC_PRESENTATION_TIME)
+    {
+      next = master_clock_get_hw_update_time (master_clock);
+      if (next >= 0)
+        {
+          master_clock->active_sync_method = SYNC_PRESENTATION_TIME;
+          return next;
+        }
+    }
 
   now = g_source_get_time (master_clock->source);
-  now_phase = now % master_clock->frame_interval;
 
-  /* To be precise we would like to use:
-   *   frame_phase = a_recent_hardware_presentation_time % frame_interval;
-   * where hardware_presentation_time must be using the same clock as
-   * g_source_get_time. Unfortunately they're different clocks right now
-   * so we can't.
-   *   Alternatively, we could replace g_source_get_time in future with the
-   * current time in the clutter/cogl presentation clock, but that function
-   * also doesn't exist yet.
-   *   Until we can get either of those, zero is fine. It just means latency
-   * will be suboptimal by half a frame on average. We still get maximum
-   * smoothness this way...
+  if (!master_clock->prev_tick ||
+      master_clock->preferred_sync_method == SYNC_NONE)
+    {
+      master_clock->active_sync_method = SYNC_NONE;
+      return now;
+    }
+
+  /* When we have sync-to-vblank, we count on swap-buffer requests (or
+   * swap-buffer-complete events if supported in the backend) to throttle our
+   * frame rate so no additional delay is needed to start the next frame.
+   *
+   * If the master-clock has become idle due to no timeline progression causing
+   * redraws then we can no longer rely on vblank synchronization because the
+   * last real stage update/redraw may have happened a long time ago and so we
+   * fallback to polling for timeline progressions every 1/frame_rate seconds.
+   *
+   * (NB: if there aren't even any timelines running then the master clock will
+   * be completely stopped in master_clock_is_running())
    */
-  frame_phase = 0;
+  if (master_clock->preferred_sync_method >= SYNC_SWAP_THROTTLING &&
+      clutter_feature_available (CLUTTER_FEATURE_SYNC_TO_VBLANK) &&
+      !master_clock->idle)
+    {
+      master_clock->active_sync_method = SYNC_SWAP_THROTTLING;
+      return now;
+    }
 
-  undershoot = frame_phase - now_phase;
-  if (undershoot < 0)
-    undershoot += master_clock->frame_interval;
-
-  return now + undershoot;
+  master_clock->active_sync_method = SYNC_FALLBACK;
+  interval = 1000000 / clutter_get_default_frame_rate ();
+  next = master_clock->prev_tick + interval;
+  if (next < (now - interval))  /* Too old? Must have been sleeping. */
+    next = now;
+  return next;
 }
 
 /*
@@ -313,78 +339,28 @@ estimate_next_presentation_time (ClutterMasterClockDefault *master_clock)
 static gint
 master_clock_next_frame_delay (ClutterMasterClockDefault *master_clock)
 {
-  gint64 now, target_presentation_time, ideal_render_start;  /* timestamps */
-  gint64 ideal_prerender_time, lateness;  /* deltas */
-  gint swap_delay;
+  gint64 now, next;
+  gint delay_ms;
 
   if (!master_clock_is_running (master_clock))
     return -1;
 
-  /* If all of the stages are busy waiting for a swap-buffers to complete
-   * then we wait for one to be ready.. */
-  swap_delay = master_clock_get_swap_wait_time (master_clock);
-  if (swap_delay != 0)
-    return swap_delay;
-
-  /* When we have sync-to-vblank, we count on swap-buffer requests (or
-   * swap-buffer-complete events if supported in the backend) to throttle our
-   * frame rate so no additional delay is needed to start the next frame.
-   *
-   * If the master-clock has become idle due to no timeline progression causing
-   * redraws then we can no longer rely on vblank synchronization because the
-   * last real stage update/redraw may have happened a long time ago and so we
-   * fallback to polling for timeline progressions every 1/frame_rate seconds.
-   *
-   * (NB: if there aren't even any timelines running then the master clock will
-   * be completely stopped in master_clock_is_running())
-   */
-  if (clutter_feature_available (CLUTTER_FEATURE_SYNC_TO_VBLANK) &&
-      !master_clock->idle)
-    {
-      CLUTTER_NOTE (SCHEDULER, "vblank available and updated stages");
-      return 0;
-    }
-
   now = g_source_get_time (master_clock->source);
+  next = master_clock_next_frame_time (master_clock);
 
-  /* As first preference, try to carry on smoothly from the previous frame,
-   * even if that means we start rendering frame 2 before frame 1 has been
-   * presented. This is why we ignore estimate_next_presentation_time here...
+  /* Round your microseconds UP to milliseconds! If we were to round down
+   * then we'd spend an entire millisecond per frame continuously
+   * dispatching without any throttling. Thus spinning the CPU at around 6%
+   * for a 60Hz display.
    */
-  target_presentation_time = master_clock->prev_tick +
-                             master_clock->frame_interval;
-  ideal_prerender_time = master_clock->frame_interval;
-  ideal_render_start = target_presentation_time - ideal_prerender_time;
-  lateness = now - ideal_render_start;
-
-  /* If we just woke from idle then try to improve the smoothness of the first
-   * two frames some more. Otherwise the first frame would appear too old
-   * relative to the second frame.
-   */
-  if (lateness >= master_clock->frame_interval)
-    {
-      target_presentation_time = estimate_next_presentation_time (master_clock);
-      ideal_render_start = target_presentation_time - ideal_prerender_time;
-      lateness = now - ideal_render_start;
-    }
-
-  if (lateness > 0)
-    {
-      CLUTTER_NOTE (SCHEDULER, "No wait required. We're already late.");
-      return 0;
-    }
+  if (next > now)
+    delay_ms = (next - now + 999) / 1000;  /* Always round up! */
   else
-    {
-      /* We +1 here to avoid premature dispatches that would otherwise occur
-       * repeatedly during the 1ms before 'ideal_render_start'. We don't care
-       * if this makes the final dispatch 1ms late because the smoothing
-       * algorithm corrects that, and it's much better than attempting to
-       * render more frames than the hardware can physically display...
-       */
-      gint millisec_delay = -lateness / 1000 + 1;
-      CLUTTER_NOTE (SCHEDULER, "Waiting %dms", millisec_delay);
-      return millisec_delay;
-    }
+    delay_ms = 0;
+
+  CLUTTER_NOTE (SCHEDULER, "Waiting %d ms", delay_ms);
+
+  return delay_ms;
 }
 
 static void
@@ -569,34 +545,16 @@ clutter_clock_dispatch (GSource     *source,
   ClutterMasterClockDefault *master_clock = clock_source->master_clock;
   gboolean stages_updated = FALSE;
   GSList *stages;
-  gint64 smooth_tick;
+
+  CLUTTER_NOTE (SCHEDULER, "Master clock [tick]");
 
   _clutter_threads_acquire_lock ();
 
   /* Get the time to use for this frame */
-  smooth_tick = estimate_next_presentation_time (master_clock);
-  if (smooth_tick <= master_clock->prev_tick)
-    {
-      /* Ordinarily this will never happen. But after we fix bug 781296, it
-       * could happen in the rare case when the ideal frame_interval changes,
-       * such as video mode switching or hotplugging monitors. As such it is
-       * not considered a bug (unless it's happening without mode switching
-       * or hotplugging).
-       */
-      CLUTTER_NOTE (SCHEDULER, "Master clock [tick] was premature (skipped)");
-      _clutter_threads_release_lock ();
-      return G_SOURCE_CONTINUE;
-    }
-
-  master_clock->cur_tick = smooth_tick;
-  if (master_clock->prev_tick)
-    CLUTTER_NOTE (SCHEDULER, "Master clock [tick] %+ldus",
-                  (long) (master_clock->cur_tick - master_clock->prev_tick));
-  else
-    CLUTTER_NOTE (SCHEDULER, "Master clock [tick] startup");
+  master_clock->cur_tick = master_clock_next_frame_time (master_clock);
 
 #ifdef CLUTTER_ENABLE_DEBUG
-  master_clock->remaining_budget = master_clock->frame_interval;
+  master_clock->remaining_budget = master_clock->frame_budget;
 #endif
 
   /* We need to protect ourselves against stages being destroyed during
@@ -635,7 +593,7 @@ clutter_clock_dispatch (GSource     *source,
 
   _clutter_threads_release_lock ();
 
-  return G_SOURCE_CONTINUE;
+  return TRUE;
 }
 
 static void
@@ -664,10 +622,18 @@ clutter_master_clock_default_init (ClutterMasterClockDefault *self)
   source = clutter_clock_source_new (self);
   self->source = source;
 
+  self->preferred_sync_method = _clutter_get_sync_to_vblank () ?
+                                SYNC_PRESENTATION_TIME :
+                                SYNC_NONE;
+  self->active_sync_method = self->preferred_sync_method;
+
   self->idle = FALSE;
   self->ensure_next_iteration = FALSE;
   self->paused = FALSE;
-  self->frame_interval = G_USEC_PER_SEC / 60; /* Will be refined at runtime */
+
+#ifdef CLUTTER_ENABLE_DEBUG
+  self->frame_budget = G_USEC_PER_SEC / 60;
+#endif
 
   g_source_set_priority (source, CLUTTER_PRIORITY_REDRAW);
   g_source_set_can_recurse (source, FALSE);
