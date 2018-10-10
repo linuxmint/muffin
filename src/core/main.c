@@ -74,7 +74,10 @@
 #include <unistd.h>
 
 #include <clutter/clutter.h>
-#include <clutter/x11/clutter-x11.h>
+#include "clutter/x11/clutter-x11.h"
+#include "cogl/cogl.h"
+#include "cogl/cogl-xlib.h"
+#include "cogl/winsys/cogl-winsys-glx-private.h"
 #include <GL/gl.h>
 
 #ifdef HAVE_INTROSPECTION
@@ -315,14 +318,40 @@ static GSourceFuncs event_funcs = {
 static void
 meta_clutter_init (void)
 {
-  clutter_x11_set_display (GDK_DISPLAY_XDISPLAY (gdk_display_get_default ()));
+  gboolean threaded_swap = meta_prefs_get_threaded_swap ();
+  Display *xdisplay = GDK_DISPLAY_XDISPLAY (gdk_display_get_default ());
+  clutter_x11_set_display (xdisplay);
+
+  /* XInitThreads() is needed to use the "threaded swap wait" functionality
+   * in Cogl. We call it here to hopefully call it before any other use of XLib.
+   */
+  if (threaded_swap)
+    XInitThreads();
+
   clutter_x11_disable_event_retrieval ();
-  
+
   if (CLUTTER_INIT_SUCCESS == clutter_init (NULL, NULL))
     {
       GSource *source = g_source_new (&event_funcs, sizeof (GSource));
       g_source_attach (source, NULL);
       g_source_unref (source);
+
+      if (threaded_swap)
+        {
+          CoglRenderer *renderer = cogl_renderer_new ();
+          cogl_renderer_set_custom_winsys (renderer, _cogl_winsys_glx_get_vtable (), NULL);
+          cogl_xlib_renderer_set_foreign_display (renderer, xdisplay);
+
+          cogl_xlib_renderer_request_reset_on_video_memory_purge (renderer, TRUE);
+
+          /* Set up things so that if the INTEL_swap_event extension is not present,
+            * but the driver is known to have good thread support, we use an extra
+            * thread and call glXWaitVideoSync() in the thread. This allows idles
+            * to work properly, even when Muffin is constantly redrawing new frames;
+            * otherwise, without INTEL_swap_event, we'll just block in glXSwapBuffers().
+            */
+          cogl_xlib_renderer_set_threaded_swap_wait_enabled (renderer, TRUE);
+        }
     }
   else
     {

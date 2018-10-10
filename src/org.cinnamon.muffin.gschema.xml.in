@@ -74,6 +74,14 @@
       </_description>
     </key>
 
+    <key name="threaded-swap" type="b">
+      <default>true</default>
+      <_summary>Enable threaded swap waiting</_summary>
+      <_description>
+        Determines whether or not Cogl uses a threaded implementation for waiting for swap events.
+      </_description>
+    </key>
+
     <key name="send-frame-timings" type="b">
       <default>true</default>
       <_summary>Enable high-precision frame synchronization</_summary>
