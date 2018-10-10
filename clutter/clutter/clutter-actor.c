@@ -11178,6 +11178,25 @@ clutter_actor_set_height (ClutterActor *self,
                                     height);
 }
 
+static void
+_clutter_actor_maybe_queue_relayout (ClutterActor *self)
+{
+  ClutterActorPrivate *priv = self->priv;
+  ClutterActor *stage = _clutter_actor_get_stage_internal (self);
+
+  if (priv->parent &&
+      (priv->parent->flags & CLUTTER_ACTOR_NO_LAYOUT) &&
+      CLUTTER_IS_ACTOR (stage))
+    {
+      clutter_actor_allocate_preferred_size (self, CLUTTER_ALLOCATION_NONE);
+      clutter_actor_queue_redraw (self);
+    }
+  else
+    {
+      clutter_actor_queue_relayout (self);
+    }
+}
+
 static inline void
 clutter_actor_set_x_internal (ClutterActor *self,
                               float         x)
@@ -11198,7 +11217,7 @@ clutter_actor_set_x_internal (ClutterActor *self,
 
   clutter_actor_notify_if_geometry_changed (self, &old);
 
-  clutter_actor_queue_relayout (self);
+  _clutter_actor_maybe_queue_relayout (self);
 }
 
 static inline void
@@ -11221,7 +11240,7 @@ clutter_actor_set_y_internal (ClutterActor *self,
 
   clutter_actor_notify_if_geometry_changed (self, &old);
 
-  clutter_actor_queue_relayout (self);
+  _clutter_actor_maybe_queue_relayout (self);
 }
 
 static void
@@ -11250,7 +11269,7 @@ clutter_actor_set_position_internal (ClutterActor       *self,
 
   clutter_actor_notify_if_geometry_changed (self, &old);
 
-  clutter_actor_queue_relayout (self);
+  _clutter_actor_maybe_queue_relayout (self);
 }
 
 /**
@@ -18381,6 +18400,10 @@ clutter_actor_set_margin_top (ClutterActor *self,
   g_return_if_fail (margin >= 0.f);
 
   info = _clutter_actor_get_layout_info_or_defaults (self);
+
+  if (info->margin.top == margin)
+    return;
+
   _clutter_actor_create_transition (self, obj_props[PROP_MARGIN_TOP],
                                     info->margin.top,
                                     margin);
@@ -18425,6 +18448,10 @@ clutter_actor_set_margin_bottom (ClutterActor *self,
   g_return_if_fail (margin >= 0.f);
 
   info = _clutter_actor_get_layout_info_or_defaults (self);
+
+  if (info->margin.bottom == margin)
+    return;
+
   _clutter_actor_create_transition (self, obj_props[PROP_MARGIN_BOTTOM],
                                     info->margin.bottom,
                                     margin);
@@ -18469,6 +18496,10 @@ clutter_actor_set_margin_left (ClutterActor *self,
   g_return_if_fail (margin >= 0.f);
 
   info = _clutter_actor_get_layout_info_or_defaults (self);
+
+  if (info->margin.left == margin)
+    return;
+
   _clutter_actor_create_transition (self, obj_props[PROP_MARGIN_LEFT],
                                     info->margin.left,
                                     margin);
@@ -18513,6 +18544,10 @@ clutter_actor_set_margin_right (ClutterActor *self,
   g_return_if_fail (margin >= 0.f);
 
   info = _clutter_actor_get_layout_info_or_defaults (self);
+
+  if (info->margin.right == margin)
+    return;
+
   _clutter_actor_create_transition (self, obj_props[PROP_MARGIN_RIGHT],
                                     info->margin.right,
                                     margin);
