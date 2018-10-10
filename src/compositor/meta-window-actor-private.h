@@ -65,6 +65,9 @@ void meta_window_actor_set_visible_region_beneath (MetaWindowActor *self,
                                                    cairo_region_t  *beneath_region);
 void meta_window_actor_reset_visible_regions      (MetaWindowActor *self);
 
+void meta_window_actor_set_unobscured_region      (MetaWindowActor *self,
+                                                   cairo_region_t  *unobscured_region);
+
 void meta_window_actor_effect_completed (MetaWindowActor *actor,
                                          gulong           event);
 
