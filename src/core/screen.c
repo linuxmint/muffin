@@ -1943,7 +1943,7 @@ meta_screen_tile_preview_update_timeout (gpointer data)
                                                                  snap_osd_timeout,
                                                                  screen);
     }
-    else
+    else if (screen->tile_preview_visible)
     {
         meta_compositor_hide_tile_preview (screen->display->compositor,
                                            screen);
@@ -1988,6 +1988,9 @@ meta_screen_tile_preview_hide (MetaScreen *screen)
     screen->tile_preview_timeout_id = 0;
   }
 
+  if (!screen->tile_preview_visible)
+    return;
+
   meta_compositor_hide_tile_preview (screen->display->compositor,
                                      screen);
   screen->tile_preview_visible = FALSE;
@@ -2029,7 +2032,7 @@ meta_screen_tile_hud_update_timeout (gpointer data)
                                                                  snap_osd_timeout,
                                                                  screen);
     }
-    else
+    else if (screen->tile_hud_visible)
     {
         meta_compositor_hide_hud_preview (screen->display->compositor,
                                           screen);
@@ -2085,6 +2088,9 @@ meta_screen_tile_hud_hide (MetaScreen *screen)
     g_source_remove (screen->tile_hud_timeout_id);
     screen->tile_hud_timeout_id = 0;
   }
+
+  if (!screen->tile_hud_visible)
+    return;
 
   meta_compositor_hide_hud_preview (screen->display->compositor,
                                     screen);
