@@ -74,6 +74,8 @@
 #include "clutter-debug.h"
 #include "clutter-private.h"
 #include "clutter-stage-private.h"
+#include "clutter-paint-volume-private.h"
+#include "clutter-actor-box-private.h"
 
 struct _ClutterOffscreenEffectPrivate
 {
@@ -84,8 +86,10 @@ struct _ClutterOffscreenEffectPrivate
   ClutterActor *actor;
   ClutterActor *stage;
 
-  gfloat x_offset;
-  gfloat y_offset;
+  ClutterVertex position;
+
+  int fbo_offset_x;
+  int fbo_offset_y;
 
   /* This is the calculated size of the fbo before being passed
      through create_texture(). This needs to be tracked separately so
@@ -95,16 +99,6 @@ struct _ClutterOffscreenEffectPrivate
   int fbo_height;
 
   gint old_opacity_override;
-
-  /* The matrix that was current the last time the fbo was updated. We
-     need to keep track of this to detect when we can reuse the
-     contents of the fbo without redrawing the actor. We need the
-     actual matrix rather than just detecting queued redraws on the
-     actor because any change in the parent hierarchy (even just a
-     translation) could cause the actor to look completely different
-     and it won't cause a redraw to be queued on the parent's
-     children. */
-  CoglMatrix last_matrix_drawn;
 };
 
 G_DEFINE_ABSTRACT_TYPE_WITH_PRIVATE (ClutterOffscreenEffect,
@@ -221,15 +215,15 @@ clutter_offscreen_effect_pre_paint (ClutterEffect *effect)
 {
   ClutterOffscreenEffect *self = CLUTTER_OFFSCREEN_EFFECT (effect);
   ClutterOffscreenEffectPrivate *priv = self->priv;
-  ClutterActorBox box;
+  ClutterActorBox raw_box, box;
   ClutterActor *stage;
-  CoglMatrix projection;
+  CoglMatrix projection, old_modelview, modelview;
+  const ClutterPaintVolume *volume;
   CoglColor transparent;
   gfloat stage_width, stage_height;
   gfloat fbo_width = -1, fbo_height = -1;
-  gfloat width, height;
-  gfloat xexpand, yexpand;
-  int texture_width, texture_height;
+  ClutterVertex local_offset = { 0.f, 0.f, 0.f };
+  gfloat old_viewport[4];
 
   if (!clutter_actor_meta_get_enabled (CLUTTER_ACTOR_META (effect)))
     return FALSE;
@@ -240,92 +234,81 @@ clutter_offscreen_effect_pre_paint (ClutterEffect *effect)
   stage = _clutter_actor_get_stage_internal (priv->actor);
   clutter_actor_get_size (stage, &stage_width, &stage_height);
 
-  /* The paint box is the bounding box of the actor's paint volume in
-   * stage coordinates. This will give us the size for the framebuffer
-   * we need to redirect its rendering offscreen and its position will
-   * be used to setup an offset viewport */
-  if (clutter_actor_get_paint_box (priv->actor, &box))
+  /* Get the minimal bounding box for what we want to paint, relative to the
+   * parent of priv->actor. Note that we may actually be painting a clone of
+   * priv->actor so we need to be careful to avoid querying the transformation
+   * of priv->actor (like clutter_actor_get_paint_box would). Just stay in
+   * local coordinates for now...
+   */
+  volume = clutter_actor_get_paint_volume (priv->actor);
+  if (volume)
     {
-      clutter_actor_box_get_size (&box, &fbo_width, &fbo_height);
-      clutter_actor_box_get_origin (&box, &priv->x_offset, &priv->y_offset);
+      ClutterPaintVolume mutable_volume;
 
-      fbo_width = MIN (fbo_width, stage_width);
-      fbo_height = MIN (fbo_height, stage_height);
+      _clutter_paint_volume_copy_static (volume, &mutable_volume);
+      _clutter_paint_volume_get_bounding_box (&mutable_volume, &raw_box);
+      clutter_paint_volume_free (&mutable_volume);
     }
   else
     {
-      fbo_width = stage_width;
-      fbo_height = stage_height;
+      clutter_actor_get_allocation_box (priv->actor, &raw_box);
     }
 
-  if (fbo_width == stage_width)
-    priv->x_offset = 0.0f;
-  if (fbo_height == stage_height)
-    priv->y_offset = 0.0f;
+  box = raw_box;
+  _clutter_actor_box_enlarge_for_effects (&box);
+
+  priv->fbo_offset_x = box.x1 - raw_box.x1;
+  priv->fbo_offset_y = box.y1 - raw_box.y1;
+
+  clutter_actor_box_get_size (&box, &fbo_width, &fbo_height);
 
   /* First assert that the framebuffer is the right size... */
   if (!update_fbo (effect, fbo_width, fbo_height))
     return FALSE;
 
-  texture_width = cogl_texture_get_width (priv->texture);
-  texture_height = cogl_texture_get_height (priv->texture);
-
-  /* get the current modelview matrix so that we can copy it to the
-   * framebuffer. We also store the matrix that was last used when we
-   * updated the FBO so that we can detect when we don't need to
-   * update the FBO to paint a second time */
-  cogl_get_modelview_matrix (&priv->last_matrix_drawn);
+  cogl_get_modelview_matrix (&old_modelview);
 
   /* let's draw offscreen */
   cogl_push_framebuffer (priv->offscreen);
 
-  /* Copy the modelview that would have been used if rendering onscreen */
-  cogl_set_modelview_matrix (&priv->last_matrix_drawn);
-
-  /* Set up the viewport so that it has the same size as the stage,
-   * but offset it so that the actor of interest lands on our
-   * framebuffer. */
-  clutter_actor_get_size (priv->stage, &width, &height);
-
-  /* Expand the viewport if the actor is partially off-stage,
-   * otherwise the actor will end up clipped to the stage viewport
+  /* We don't want the FBO contents to be transformed. That could waste memory
+   * (e.g. during zoom), or result in something that's not rectangular (clipped
+   * incorrectly). So drop the modelview matrix of the current paint chain.
+   * This is fine since paint_texture runs with the same modelview matrix,
+   * so it will come out correctly whenever that is used to put the FBO
+   * contents on screen...
    */
-  xexpand = 0.f;
-  if (priv->x_offset < 0.f)
-    xexpand = -priv->x_offset;
-  if (priv->x_offset + texture_width > width)
-    xexpand = MAX (xexpand, (priv->x_offset + texture_width) - width);
+  clutter_actor_get_transform (priv->stage, &modelview);
+  cogl_matrix_translate (&modelview,
+                         -priv->fbo_offset_x,
+                         -priv->fbo_offset_y,
+                         0.0f);
+  cogl_set_modelview_matrix (&modelview);
 
-  yexpand = 0.f;
-  if (priv->y_offset < 0.f)
-    yexpand = -priv->y_offset;
-  if (priv->y_offset + texture_height > height)
-    yexpand = MAX (yexpand, (priv->y_offset + texture_height) - height);
+  /* Save the original viewport for calculating priv->position */
+  _clutter_stage_get_viewport (CLUTTER_STAGE (priv->stage),
+                               &old_viewport[0],
+                               &old_viewport[1],
+                               &old_viewport[2],
+                               &old_viewport[3]);
 
-  /* Set the viewport */
-  cogl_set_viewport (-(priv->x_offset + xexpand), -(priv->y_offset + yexpand),
-                     width + (2 * xexpand), height + (2 * yexpand));
+  /* Set up the viewport so that it has the same size as the stage. */
+  cogl_set_viewport (0, 0, stage_width, stage_height);
 
   /* Copy the stage's projection matrix across to the framebuffer */
   _clutter_stage_get_projection_matrix (CLUTTER_STAGE (priv->stage),
                                         &projection);
 
-  /* If we've expanded the viewport, make sure to scale the projection
-   * matrix accordingly (as it's been initialised to work with the
-   * original viewport and not our expanded one).
+  /* Now save the global position of the effect (not just of the actor).
+   * It doesn't appear anyone actually uses this yet, but get_target_rect is
+   * documented as returning it. So we should...
    */
-  if (xexpand > 0.f || yexpand > 0.f)
-    {
-      gfloat new_width, new_height;
-
-      new_width = width + (2 * xexpand);
-      new_height = height + (2 * yexpand);
-
-      cogl_matrix_scale (&projection,
-                         width / new_width,
-                         height / new_height,
-                         1);
-    }
+  _clutter_util_fully_transform_vertices (&old_modelview,
+                                          &projection,
+                                          old_viewport,
+                                          &local_offset,
+                                          &priv->position,
+                                          1);
 
   cogl_set_projection_matrix (&projection);
 
@@ -382,13 +365,14 @@ clutter_offscreen_effect_paint_texture (ClutterOffscreenEffect *effect)
 
   cogl_push_matrix ();
 
-  /* Now reset the modelview to put us in stage coordinates so
-   * we can drawn the result of our offscreen render as a textured
-   * quad... */
-
-  cogl_matrix_init_identity (&modelview);
-  _clutter_actor_apply_modelview_transform (priv->stage, &modelview);
-  cogl_matrix_translate (&modelview, priv->x_offset, priv->y_offset, 0.0f);
+  /* The current modelview matrix is *almost* perfect already. It's only
+   * missing a correction for the expanded FBO and offset rendering within...
+   */
+  cogl_get_modelview_matrix (&modelview);
+  cogl_matrix_translate (&modelview,
+                         priv->fbo_offset_x,
+                         priv->fbo_offset_y,
+                         0.0f);
   cogl_set_modelview_matrix (&modelview);
 
   /* paint the target material; this is virtualized for
@@ -429,12 +413,10 @@ clutter_offscreen_effect_paint (ClutterEffect           *effect,
 
   cogl_get_modelview_matrix (&matrix);
 
-  /* If we've already got a cached image for the same matrix and the
-     actor hasn't been redrawn then we can just use the cached image
-     in the fbo */
-  if (priv->offscreen == NULL ||
-      (flags & CLUTTER_EFFECT_PAINT_ACTOR_DIRTY) ||
-      !cogl_matrix_equal (&matrix, &priv->last_matrix_drawn))
+  /* If we've already got a cached image and the actor hasn't been redrawn
+   * then we can just use the cached image in the FBO.
+   */
+  if (priv->offscreen == NULL || (flags & CLUTTER_EFFECT_PAINT_ACTOR_DIRTY))
     {
       /* Chain up to the parent paint method which will call the pre and
          post paint functions to update the image */
@@ -660,8 +642,8 @@ clutter_offscreen_effect_get_target_rect (ClutterOffscreenEffect *effect,
     return FALSE;
 
   clutter_rect_init (rect,
-                     priv->x_offset,
-                     priv->y_offset,
+                     priv->position.x,
+                     priv->position.y,
                      cogl_texture_get_width (priv->texture),
                      cogl_texture_get_height (priv->texture));
 
