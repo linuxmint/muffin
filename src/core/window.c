@@ -6065,15 +6065,12 @@ meta_window_focus (MetaWindow  *window,
       (window->shaded ||
        !(window->input || window->take_focus)))
     {
-      if (window->frame)
-        {
-          meta_topic (META_DEBUG_FOCUS,
-                      "Focusing frame of %s\n", window->desc);
-          meta_display_set_input_focus_window (window->display,
-                                               window,
-                                               TRUE,
-                                               timestamp);
-        }
+      meta_topic (META_DEBUG_FOCUS,
+                  "Focusing frame of %s\n", window->desc);
+      meta_display_set_input_focus_window (window->display,
+                                            window,
+                                            TRUE,
+                                            timestamp);
     }
   else
     {
@@ -6871,19 +6868,11 @@ meta_window_client_message (MetaWindow *window,
                                             space);
 
       if (workspace)
-        {
-          if (window->on_all_workspaces_requested)
-            meta_window_unstick (window);
-          meta_window_change_workspace (window, workspace);
-        }
+        meta_window_change_workspace (window, workspace);
       else if (space == (int) 0xFFFFFFFF)
-        {
-          meta_window_stick (window);
-        }
+        meta_window_stick (window);
       else
-        {
-          meta_verbose ("No such workspace %d for screen\n", space);
-        }
+        meta_verbose ("No such workspace %d for screen\n", space);
 
       meta_verbose ("Window %s now on_all_workspaces = %d\n",
                     window->desc, window->on_all_workspaces);
