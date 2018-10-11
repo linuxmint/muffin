@@ -180,6 +180,12 @@ update_fbo (ClutterEffect *effect, int fbo_width, int fbo_height)
       priv->texture = NULL;
     }
 
+  if (priv->offscreen != NULL)
+    {
+      cogl_handle_unref (priv->offscreen);
+      priv->offscreen = NULL;
+    }
+
   priv->texture =
     clutter_offscreen_effect_create_texture (self, fbo_width, fbo_height);
   if (priv->texture == NULL)
@@ -189,9 +195,6 @@ update_fbo (ClutterEffect *effect, int fbo_width, int fbo_height)
 
   priv->fbo_width = fbo_width;
   priv->fbo_height = fbo_height;
-
-  if (priv->offscreen != NULL)
-    cogl_handle_unref (priv->offscreen);
 
   priv->offscreen = cogl_offscreen_new_to_texture (priv->texture);
   if (priv->offscreen == NULL)
