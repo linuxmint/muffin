@@ -89,6 +89,10 @@ void meta_shaped_texture_set_opaque_region (MetaShapedTexture *stex,
 cairo_surface_t * meta_shaped_texture_get_image (MetaShapedTexture     *stex,
                                                  cairo_rectangle_int_t *clip);
 
+void meta_shaped_texture_ensure_mask (MetaShapedTexture *stex);
+
+void meta_shaped_texture_dirty_mask (MetaShapedTexture *stex);
+
 G_END_DECLS
 
 #endif /* __META_SHAPED_TEXTURE_H__ */

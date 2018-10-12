@@ -190,3 +190,23 @@ meta_cogl_texture_new_from_data_wrapper                (int  width,
 
     return texture;
 }
+
+CoglTexture *
+meta_cogl_rectangle_new (int width,
+                         int height,
+                         CoglPixelFormat format,
+                         int stride,
+                         const uint8_t *data)
+{
+  CoglTexture *texture = COGL_TEXTURE (cogl_texture_rectangle_new_with_size (cogl_context, width, height));
+  cogl_texture_set_components (texture, COGL_TEXTURE_COMPONENTS_A);
+  cogl_texture_set_region (texture,
+                           0, 0, /* src_x/y */
+                           0, 0, /* dst_x/y */
+                           width, height, /* dst_width/height */
+                           width, height, /* width/height */
+                           format,
+                           stride, data);
+
+  return texture;
+}

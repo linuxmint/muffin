@@ -73,8 +73,6 @@ static void meta_shaped_texture_get_preferred_height (ClutterActor *self,
                                                       gfloat       *min_height_p,
                                                       gfloat       *natural_height_p);
 
-static void meta_shaped_texture_dirty_mask (MetaShapedTexture *stex);
-
 static gboolean meta_shaped_texture_get_paint_volume (ClutterActor *self, ClutterPaintVolume *volume);
 
 G_DEFINE_TYPE (MetaShapedTexture, meta_shaped_texture,
@@ -108,6 +106,7 @@ struct _MetaShapedTexturePrivate
   gint64 earliest_remipmap;
 
   guint create_mipmaps : 1;
+  guint mask_needs_update : 1;
 };
 
 static void
@@ -141,6 +140,7 @@ meta_shaped_texture_init (MetaShapedTexture *self)
   priv->texture = NULL;
   priv->mask_texture = NULL;
   priv->create_mipmaps = TRUE;
+  priv->mask_needs_update = TRUE;
 }
 
 static void
@@ -254,17 +254,12 @@ paint_clipped_rectangle (CoglFramebuffer       *fb,
 
 }
 
-
-static void
+LOCAL_SYMBOL void
 meta_shaped_texture_dirty_mask (MetaShapedTexture *stex)
 {
   MetaShapedTexturePrivate *priv = stex->priv;
 
-  if (priv->mask_texture != NULL)
-    {
-      cogl_object_unref (priv->mask_texture);
-      priv->mask_texture = NULL;
-    }
+  g_clear_pointer (&priv->mask_texture, cogl_object_unref);
 }
 
 static void
@@ -320,7 +315,7 @@ install_overlay_path (MetaShapedTexture *stex,
   cairo_surface_destroy (surface);
 }
 
-static void
+LOCAL_SYMBOL void
 meta_shaped_texture_ensure_mask (MetaShapedTexture *stex)
 {
   MetaShapedTexturePrivate *priv = stex->priv;
@@ -338,8 +333,13 @@ meta_shaped_texture_ensure_mask (MetaShapedTexture *stex)
   /* If the mask texture we have was created for a different size then
      recreate it */
   if (priv->mask_texture != NULL
-      && (priv->mask_width != tex_width || priv->mask_height != tex_height))
-    meta_shaped_texture_dirty_mask (stex);
+      && (priv->mask_width != tex_width
+          || priv->mask_height != tex_height
+          || priv->mask_needs_update))
+    {
+      priv->mask_needs_update = FALSE;
+      meta_shaped_texture_dirty_mask (stex);
+    }
 
   /* If we don't have a mask texture yet then create one */
   if (priv->mask_texture == NULL)
@@ -391,10 +391,9 @@ meta_shaped_texture_ensure_mask (MetaShapedTexture *stex)
       install_overlay_path (stex, mask_data, tex_width, tex_height, stride);
 
       if (meta_texture_rectangle_check (paint_tex))
-        priv->mask_texture = meta_texture_rectangle_new (tex_width, tex_height,
-                                                         COGL_PIXEL_FORMAT_A_8,
-                                                         stride,
-                                                         mask_data);
+        priv->mask_texture = meta_cogl_rectangle_new (tex_width, tex_height,
+                                                        COGL_PIXEL_FORMAT_A_8,
+                                                        stride, mask_data);
       else
         priv->mask_texture = meta_cogl_texture_new_from_data_wrapper (tex_width, tex_height,
                                                                       COGL_TEXTURE_NONE,
@@ -598,13 +597,12 @@ meta_shaped_texture_paint (ClutterActor *actor)
     {
       CoglPipeline *blended_pipeline;
 
-      if (priv->shape_region == NULL)
+      if (priv->mask_texture == NULL)
         {
           blended_pipeline = get_unmasked_pipeline (ctx);
         }
       else
         {
-          meta_shaped_texture_ensure_mask (stex);
           blended_pipeline = get_masked_pipeline (ctx);
           cogl_pipeline_set_layer_texture (blended_pipeline, 1, priv->mask_texture);
           cogl_pipeline_set_layer_filters (blended_pipeline, 1, filter, filter);
@@ -795,7 +793,6 @@ meta_shaped_texture_set_shape_region (MetaShapedTexture *stex,
       priv->shape_region = region;
     }
 
-  meta_shaped_texture_dirty_mask (stex);
   clutter_actor_queue_redraw (CLUTTER_ACTOR (stex));
 }
 
@@ -908,12 +905,13 @@ set_cogl_texture (MetaShapedTexture *stex,
       height = 0;
     }
 
-  if (priv->tex_width != width ||
-      priv->tex_height != height)
+  priv->mask_needs_update = (priv->tex_width != width ||
+                             priv->tex_height != height);
+
+  if (priv->mask_needs_update)
     {
       priv->tex_width = width;
       priv->tex_height = height;
-      meta_shaped_texture_dirty_mask (stex);
       clutter_actor_queue_relayout (CLUTTER_ACTOR (stex));
     }
 
@@ -1007,8 +1005,6 @@ meta_shaped_texture_set_overlay_path (MetaShapedTexture *stex,
 
   /* cairo_path_t does not have refcounting. */
   priv->overlay_path = overlay_path;
-
-  meta_shaped_texture_dirty_mask (stex);
 }
 
 /**
