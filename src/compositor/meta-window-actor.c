@@ -883,6 +883,14 @@ meta_window_actor_has_shadow (MetaWindowActor *self)
    */
   if (priv->window->override_redirect)
     return TRUE;
+
+  /*
+   * If a window specifies that it has custom frame extents, that likely
+   * means that it is drawing a shadow itself. Don't draw our own.
+   */
+  if (priv->window->has_custom_frame_extents)
+    return FALSE;
+
   /*
    * Don't put shadow around DND icon windows
    */
