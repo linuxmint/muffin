@@ -1221,27 +1221,6 @@ is_frozen (MetaWindowActor *self)
   return self->priv->freeze_count ? TRUE : FALSE;
 }
 
-static void
-meta_window_actor_queue_create_pixmap (MetaWindowActor *self)
-{
-  MetaWindowActorPrivate *priv = self->priv;
-
-  priv->needs_pixmap = TRUE;
-
-  if (is_frozen (self))
-    return;
-
-  /* This will cause the compositor paint function to be run
-   * if the actor is visible or a clone of the actor is visible.
-   * if the actor isn't visible in any way, then we don't
-   * need to repair the window anyways, and can wait until
-   * the stage is redrawn for some other reason
-   *
-   * The compositor paint function repairs all windows.
-   */
-  clutter_actor_queue_redraw (priv->actor);
-}
-
 static gboolean
 is_freeze_thaw_effect (gulong event)
 {
@@ -1436,7 +1415,7 @@ meta_window_actor_detach (MetaWindowActor *self)
   XFreePixmap (xdisplay, priv->back_pixmap);
   priv->back_pixmap = None;
 
-  meta_window_actor_queue_create_pixmap (self);
+  priv->needs_pixmap = TRUE;
 }
 
 LOCAL_SYMBOL gboolean
@@ -1570,7 +1549,7 @@ meta_window_actor_sync_actor_geometry (MetaWindowActor *self,
 
   if (priv->size_changed)
     {
-      meta_window_actor_queue_create_pixmap (self);
+      priv->needs_pixmap = TRUE;
     }
 
   if (meta_window_actor_effect_in_progress (self))
@@ -1803,7 +1782,7 @@ meta_window_actor_new (MetaWindow *window)
   priv->last_width = -1;
   priv->last_height = -1;
 
-  meta_window_actor_queue_create_pixmap (self);
+  priv->needs_pixmap = TRUE;
 
   meta_window_actor_set_updates_frozen (self,
                                         meta_window_updates_are_frozen (priv->window));
