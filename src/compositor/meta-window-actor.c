@@ -118,6 +118,8 @@ struct _MetaWindowActorPrivate
   gint64            frame_drawn_time;
   guint             needs_frame_drawn      : 1;
 
+  guint             size_changed_id;
+
   guint		    needs_pixmap           : 1;
   guint             needs_reshape          : 1;
   guint             recompute_focused_shadow   : 1;
@@ -406,6 +408,26 @@ clutter_actor_opacity_notify (ClutterActor *actor,
 }
 
 static void
+texture_size_changed (MetaWindow *mw,
+                     gpointer    data)
+{
+  MetaWindowActor *self = META_WINDOW_ACTOR (data);
+
+  meta_window_actor_update_shape (self);
+
+  g_signal_emit (self, signals[SIZE_CHANGED], 0); // Compatibility
+}
+
+static void
+window_position_changed (MetaWindow *mw,
+                     gpointer    data)
+{
+  MetaWindowActor *self = META_WINDOW_ACTOR (data);
+
+  g_signal_emit (self, signals[POSITION_CHANGED], 0); // Compatibility
+}
+
+static void
 meta_window_actor_constructed (GObject *object)
 {
   MetaWindowActor        *self     = META_WINDOW_ACTOR (object);
@@ -429,6 +451,8 @@ meta_window_actor_constructed (GObject *object)
     {
       priv->actor = meta_shaped_texture_new ();
 
+      priv->size_changed_id = g_signal_connect (priv->actor, "size-changed",
+                                                G_CALLBACK (texture_size_changed), self);
       clutter_actor_add_child (CLUTTER_ACTOR (self), priv->actor);
 
       /*
@@ -439,11 +463,6 @@ meta_window_actor_constructed (GObject *object)
        * We will release it in dispose().
        */
       g_object_ref (priv->actor);
-
-      g_signal_connect (window, "notify::decorated",
-                        G_CALLBACK (window_decorated_notify), self);
-      g_signal_connect (window, "notify::appears-focused",
-                        G_CALLBACK (window_appears_focused_notify), self);
       g_signal_connect (self, "notify::opacity",
                         G_CALLBACK (clutter_actor_opacity_notify), NULL);
     }
@@ -453,6 +472,7 @@ meta_window_actor_constructed (GObject *object)
        * This is the case where existing window is gaining/loosing frame.
        * Just ensure the actor is top most (i.e., above shadow).
        */
+      g_signal_handler_disconnect (priv->actor, priv->size_changed_id);
       clutter_actor_set_child_above_sibling (CLUTTER_ACTOR (self), priv->actor, NULL);
     }
 
@@ -546,6 +566,13 @@ meta_window_actor_set_property (GObject      *object,
         if (priv->window)
           g_object_unref (priv->window);
         priv->window = g_value_dup_object (value);
+
+        g_signal_connect_object (priv->window, "notify::decorated",
+                                 G_CALLBACK (window_decorated_notify), self, 0);
+        g_signal_connect_object (priv->window, "notify::appears-focused",
+                                 G_CALLBACK (window_appears_focused_notify), self, 0);
+        g_signal_connect_object (priv->window, "position-changed",
+                                 G_CALLBACK (window_position_changed), self, 0);
       }
       break;
     case PROP_META_SCREEN:
@@ -1551,7 +1578,6 @@ meta_window_actor_sync_actor_geometry (MetaWindowActor *self,
   if (priv->size_changed)
     {
       priv->needs_pixmap = TRUE;
-      meta_window_actor_update_shape (self);
     }
 
   if (meta_window_actor_effect_in_progress (self))
@@ -1570,8 +1596,6 @@ meta_window_actor_sync_actor_geometry (MetaWindowActor *self,
       if (priv->frameless_geometry_updates < 3)
         meta_window_actor_reset_mask_texture (self, TRUE);
     }
-
-  g_signal_emit (self, signals[POSITION_CHANGED], 0);
 }
 
 void
@@ -1686,9 +1710,6 @@ meta_window_actor_maximize (MetaWindowActor    *self,
       self->priv->maximize_in_progress--;
       meta_window_actor_thaw (self);
     }
-
-  if (!self->priv->window->frame)
-    meta_shaped_texture_dirty_mask (META_SHAPED_TEXTURE (self->priv->actor));
 }
 
 LOCAL_SYMBOL void
@@ -1717,9 +1738,6 @@ meta_window_actor_unmaximize (MetaWindowActor   *self,
       self->priv->unmaximize_in_progress--;
       meta_window_actor_thaw (self);
     }
-
-    if (!self->priv->window->frame)
-      meta_shaped_texture_dirty_mask (META_SHAPED_TEXTURE (self->priv->actor));
 }
 
 LOCAL_SYMBOL void
@@ -1749,9 +1767,6 @@ meta_window_actor_tile (MetaWindowActor    *self,
       self->priv->tile_in_progress--;
       meta_window_actor_thaw (self);
     }
-
-  if (!self->priv->window->frame)
-    meta_shaped_texture_dirty_mask (META_SHAPED_TEXTURE (self->priv->actor));
 }
 
 LOCAL_SYMBOL MetaWindowActor *
@@ -2039,17 +2054,6 @@ check_needs_pixmap (MetaWindowActor *self)
        */
       if (G_UNLIKELY (!cogl_texture_pixmap_x11_is_using_tfp_extension (texture)))
         g_warning ("NOTE: Not using GLX TFP!\n");
-
-      /* ::size-changed is supposed to refer to meta_window_get_outer_rect().
-       * Emitting it here works pretty much OK because a new value of the
-       * *input* rect (which is the outer rect with the addition of invisible
-       * borders) forces a new pixmap and we get here. In the rare case where
-       * a change to the window size was exactly balanced by a change to the
-       * invisible borders, we would miss emitting the signal. We would also
-       * emit spurious signals when we get a new pixmap without a new size,
-       * but that should be mostly harmless.
-       */
-      g_signal_emit (self, signals[SIZE_CHANGED], 0);
     }
 
   priv->needs_pixmap = FALSE;
