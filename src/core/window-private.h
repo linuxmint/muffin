@@ -617,6 +617,7 @@ void        meta_window_update_fullscreen_monitors (MetaWindow    *window,
                                                     unsigned long  left,
                                                     unsigned long  right);
 
+
 /* args to move are window pos, not frame pos */
 void        meta_window_move_resize        (MetaWindow  *window,
                                             gboolean     user_op,
@@ -783,6 +784,8 @@ void meta_window_update_layer (MetaWindow *window);
 void meta_window_recalc_features    (MetaWindow *window);
 
 void meta_window_recalc_window_type (MetaWindow *window);
+
+void meta_window_frame_size_changed (MetaWindow *window);
 
 void meta_window_stack_just_below (MetaWindow *window,
                                    MetaWindow *below_this_one);
