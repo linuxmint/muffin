@@ -72,8 +72,6 @@ struct _MetaWindowActorPrivate
   /* The opaque region, from _NET_WM_OPAQUE_REGION, intersected with
    * the shape region. */
   cairo_region_t   *opaque_region;
-  /* A rectangular region with the visible extents of the window */
-  cairo_region_t   *bounding_region;
   /* The region we should clip to when painting the shadow */
   cairo_region_t   *shadow_clip;
 
@@ -85,7 +83,6 @@ struct _MetaWindowActorPrivate
 
   gint              last_width;
   gint              last_height;
-  MetaFrameBorders  last_borders;
 
   gint              freeze_count;
 
@@ -496,7 +493,6 @@ meta_window_actor_dispose (GObject *object)
   g_clear_pointer (&priv->unobscured_region, cairo_region_destroy);
   g_clear_pointer (&priv->shape_region, cairo_region_destroy);
   g_clear_pointer (&priv->opaque_region, cairo_region_destroy);
-  g_clear_pointer (&priv->bounding_region, cairo_region_destroy);
   g_clear_pointer (&priv->shadow_clip, cairo_region_destroy);
 
   g_clear_pointer (&priv->shadow_class, g_free);
@@ -670,8 +666,6 @@ meta_window_actor_get_shape_bounds (MetaWindowActor       *self,
    */
   if (priv->shape_region)
     cairo_region_get_extents (priv->shape_region, bounds);
-  else if (priv->bounding_region)
-    cairo_region_get_extents (priv->bounding_region, bounds);
   else
     bounds->x = bounds->y = bounds->width = bounds->height = 0;
 }
@@ -776,13 +770,12 @@ meta_window_actor_paint (ClutterActor *actor)
        */
       if (!clip && clip_shadow_under_window (self))
         {
-          cairo_region_t *frame_bounds = meta_window_get_frame_bounds (priv->window);
           cairo_rectangle_int_t bounds;
 
           meta_window_actor_get_shadow_bounds (self, appears_focused, &bounds);
           clip = cairo_region_create_rectangle (&bounds);
 
-          cairo_region_subtract (clip, frame_bounds);
+          cairo_region_subtract (clip, meta_window_get_frame_bounds (priv->window));
         }
 
       meta_shadow_paint (shadow,
@@ -1550,6 +1543,7 @@ meta_window_actor_sync_actor_geometry (MetaWindowActor *self,
   if (priv->size_changed)
     {
       priv->needs_pixmap = TRUE;
+      meta_window_actor_update_shape (self);
     }
 
   if (meta_window_actor_effect_in_progress (self))
@@ -1820,55 +1814,6 @@ meta_window_actor_new (MetaWindow *window)
 }
 
 static void
-meta_window_actor_update_bounding_region_and_borders (MetaWindowActor *self,
-                                                      int              width,
-                                                      int              height)
-{
-  MetaWindowActorPrivate *priv = self->priv;
-  MetaFrameBorders borders;
-  cairo_rectangle_int_t bounding_rectangle;
-
-  meta_frame_calc_borders (priv->window->frame, &borders);
-
-  bounding_rectangle.x = borders.invisible.left;
-  bounding_rectangle.y = borders.invisible.top;
-
-  width -= borders.invisible.left + borders.invisible.right;
-  height -= borders.invisible.top + borders.invisible.bottom;
-
-  bounding_rectangle.width = width;
-  bounding_rectangle.height = height;
-
-  if (priv->bounding_region != NULL)
-    {
-      cairo_rectangle_int_t old_bounding_rectangle;
-      cairo_region_get_extents (priv->bounding_region, &old_bounding_rectangle);
-
-      /* Because the bounding region doesn't include the invisible borders,
-       * we need to make sure that the border sizes haven't changed before
-       * short-circuiting early.
-       */
-      if (bounding_rectangle.width == old_bounding_rectangle.width &&
-          bounding_rectangle.height == old_bounding_rectangle.height &&
-          priv->last_borders.invisible.left == borders.invisible.left &&
-          priv->last_borders.invisible.right == borders.invisible.right &&
-          priv->last_borders.invisible.top == borders.invisible.top &&
-          priv->last_borders.invisible.bottom == borders.invisible.bottom)
-        return;
-    }
-
-  priv->last_borders = borders;
-
-  g_clear_pointer (&priv->bounding_region, cairo_region_destroy);
-
-  priv->bounding_region = cairo_region_create_rectangle (&bounding_rectangle);
-
-  meta_window_actor_update_shape (self);
-
-  g_signal_emit (self, signals[SIZE_CHANGED], 0);
-}
-
-static void
 meta_window_actor_update_shape_region (MetaWindowActor *self,
                                        cairo_region_t  *region)
 {
@@ -1879,20 +1824,6 @@ meta_window_actor_update_shape_region (MetaWindowActor *self,
   /* region must be non-null */
   priv->shape_region = region;
   cairo_region_reference (region);
-
-  /* Our "shape_region" is called the "bounding region" in the X Shape
-   * Extension Documentation.
-   *
-   * Our "bounding_region" is called the "bounding rectangle", which defines
-   * the shape of the window as if it the window was unshaped.
-   *
-   * The X Shape extension requires that the "bounding region" can never
-   * extend outside the "bounding rectangle", and says it must be implicitly
-   * clipped before rendering. The region we get back hasn't been clipped.
-   * We explicitly clip the region here.
-   */
-  if (priv->bounding_region != NULL)
-    cairo_region_intersect (priv->shape_region, priv->bounding_region);
 }
 
 /**
@@ -2008,10 +1939,8 @@ meta_window_actor_set_visible_region_beneath (MetaWindowActor *self,
       priv->shadow_clip = cairo_region_copy (beneath_region);
 
       if (clip_shadow_under_window (self))
-        {
-          cairo_region_t *frame_bounds = meta_window_get_frame_bounds (priv->window);
-          cairo_region_subtract (priv->shadow_clip, frame_bounds);
-        }
+        cairo_region_subtract (priv->shadow_clip,
+                                meta_window_get_frame_bounds (priv->window));
     }
 }
 
@@ -2083,7 +2012,6 @@ check_needs_pixmap (MetaWindowActor *self)
       if (priv->back_pixmap == None)
         {
           meta_verbose ("Unable to get named pixmap for %p\n", self);
-          meta_window_actor_update_bounding_region_and_borders (self, 0, 0);
           goto out;
         }
 
@@ -2104,9 +2032,16 @@ check_needs_pixmap (MetaWindowActor *self)
       if (G_UNLIKELY (!cogl_texture_pixmap_x11_is_using_tfp_extension (texture)))
         g_warning ("NOTE: Not using GLX TFP!\n");
 
-      meta_window_actor_update_bounding_region_and_borders (self,
-                                                            cogl_texture_get_width (texture),
-                                                            cogl_texture_get_height (texture));
+      /* ::size-changed is supposed to refer to meta_window_get_outer_rect().
+       * Emitting it here works pretty much OK because a new value of the
+       * *input* rect (which is the outer rect with the addition of invisible
+       * borders) forces a new pixmap and we get here. In the rare case where
+       * a change to the window size was exactly balanced by a change to the
+       * invisible borders, we would miss emitting the signal. We would also
+       * emit spurious signals when we get a new pixmap without a new size,
+       * but that should be mostly harmless.
+       */
+      g_signal_emit (self, signals[SIZE_CHANGED], 0);
     }
 
   priv->needs_pixmap = FALSE;
@@ -2167,8 +2102,6 @@ check_needs_shadow (MetaWindowActor *self)
         {
           if (priv->shape_region)
             priv->shadow_shape = meta_window_shape_new (priv->shape_region);
-          else if (priv->bounding_region)
-            priv->shadow_shape = meta_window_shape_new (priv->bounding_region);
         }
 
       if (priv->shadow_shape != NULL)
@@ -2381,7 +2314,7 @@ check_needs_reshape (MetaWindowActor *self)
   MetaScreen *screen = priv->screen;
   MetaDisplay *display = meta_screen_get_display (screen);
   MetaFrameBorders borders;
-  cairo_region_t *region;
+  cairo_region_t *region = NULL;
   cairo_rectangle_int_t client_area;
 
   if (!priv->needs_reshape)
@@ -2399,7 +2332,9 @@ check_needs_reshape (MetaWindowActor *self)
   client_area.width = priv->window->rect.width;
   client_area.height = priv->window->rect.height;
 
-  region = meta_window_get_frame_bounds (priv->window);
+  if (priv->window->frame)
+    region = meta_window_get_frame_bounds (priv->window);
+
   if (region != NULL)
     {
       /* This returns the window's internal frame bounds region,
@@ -2409,8 +2344,8 @@ check_needs_reshape (MetaWindowActor *self)
   else
     {
       /* If we have no region, we have no frame. We have no frame,
-       * so just use the bounding region instead */
-      region = cairo_region_copy (priv->bounding_region);
+       * so just use the client_area instead */
+      region = cairo_region_create_rectangle (&client_area);
     }
 
 #ifdef HAVE_SHAPE
