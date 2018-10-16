@@ -94,6 +94,7 @@ cogl_texture_new_with_size (unsigned int width,
       if (!cogl_texture_allocate (tex, &skip_error))
         {
           cogl_error_free (skip_error);
+          skip_error = NULL;
           cogl_object_unref (tex);
           tex = NULL;
         }
