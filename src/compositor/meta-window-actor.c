@@ -119,6 +119,7 @@ struct _MetaWindowActorPrivate
   guint             needs_frame_drawn      : 1;
 
   guint             size_changed_id;
+  guint             opacity_changed_id;
 
   guint		    needs_pixmap           : 1;
   guint             needs_reshape          : 1;
@@ -463,8 +464,8 @@ meta_window_actor_constructed (GObject *object)
        * We will release it in dispose().
        */
       g_object_ref (priv->actor);
-      g_signal_connect (self, "notify::opacity",
-                        G_CALLBACK (clutter_actor_opacity_notify), NULL);
+      priv->opacity_changed_id = g_signal_connect (self, "notify::opacity",
+                                                   G_CALLBACK (clutter_actor_opacity_notify), NULL);
     }
   else
     {
@@ -473,6 +474,7 @@ meta_window_actor_constructed (GObject *object)
        * Just ensure the actor is top most (i.e., above shadow).
        */
       g_signal_handler_disconnect (priv->actor, priv->size_changed_id);
+      g_signal_handler_disconnect (self, priv->opacity_changed_id);
       clutter_actor_set_child_above_sibling (CLUTTER_ACTOR (self), priv->actor, NULL);
     }
 
