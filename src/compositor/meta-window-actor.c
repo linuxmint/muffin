@@ -415,8 +415,6 @@ texture_size_changed (MetaWindow *mw,
 {
   MetaWindowActor *self = META_WINDOW_ACTOR (data);
 
-  meta_window_actor_update_shape (self);
-
   g_signal_emit (self, signals[SIZE_CHANGED], 0); // Compatibility
 }
 
@@ -1593,13 +1591,14 @@ meta_window_actor_sync_actor_geometry (MetaWindowActor *self,
   if (is_frozen (self) && !did_placement)
     return;
 
+  if (meta_window_actor_effect_in_progress (self))
+    return;
+
   if (priv->size_changed)
     {
       priv->needs_pixmap = TRUE;
+      meta_window_actor_update_shape (self);
     }
-
-  if (meta_window_actor_effect_in_progress (self))
-    return;
 
   clutter_actor_set_position (CLUTTER_ACTOR (self),
                               window_rect.x, window_rect.y);
