@@ -2617,9 +2617,6 @@ check_needs_reshape (MetaWindowActor *self)
 
   meta_window_get_client_area_rect (priv->window, &client_area);
 
-  meta_shaped_texture_set_mask_texture (META_SHAPED_TEXTURE (priv->actor), COGL_INVALID_HANDLE);
-  g_clear_pointer (&priv->shape_region, cairo_region_destroy);
-
 #ifdef HAVE_SHAPE
   if (priv->window->has_shape)
     {
