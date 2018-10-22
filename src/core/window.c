@@ -3993,6 +3993,15 @@ meta_window_unmaximize_internal (MetaWindow        *window,
       window->maximized_vertically =
         window->maximized_vertically   && !unmaximize_vertically;
 
+      /* Update the edge constraints */
+      update_edge_constraints (window);
+
+      /* recalc_features() will eventually clear the cached frame
+       * extents, but we need the correct frame extents in the code below,
+       * so invalidate the old frame extents manually up front.
+       */
+      meta_window_frame_size_changed (window);
+
       /* Unmaximize to the saved_rect position in the direction(s)
        * being unmaximized.
        */
@@ -4066,8 +4075,6 @@ meta_window_unmaximize_internal (MetaWindow        *window,
           window->custom_snap_size = FALSE;
 
       meta_screen_update_snapped_windows (window->screen);
-
-      update_edge_constraints (window);
 
       recalc_window_features (window);
       set_net_wm_state (window);
