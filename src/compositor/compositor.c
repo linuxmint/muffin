@@ -972,8 +972,10 @@ meta_compositor_process_event (MetaCompositor *compositor,
               window = meta_display_lookup_x_window (compositor->display, xwin);
             }
 
-	  DEBUG_TRACE ("meta_compositor_process_event (process_damage)\n");
-          process_damage (compositor, (XDamageNotifyEvent *) event, window);
+          DEBUG_TRACE ("meta_compositor_process_event (process_damage)\n");
+
+          if (window)
+            process_damage (compositor, (XDamageNotifyEvent *) event, window);
         }
       break;
     }
