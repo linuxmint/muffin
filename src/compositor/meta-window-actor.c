@@ -27,6 +27,7 @@
 #include "xprops.h"
 
 #include "compositor-private.h"
+#include "meta-shaped-texture-private.h"
 #include "meta-shadow-factory-private.h"
 #include "meta-window-actor-private.h"
 
@@ -1126,6 +1127,19 @@ meta_window_actor_freeze (MetaWindowActor *self)
 }
 
 static void
+update_area (MetaWindowActor *self,
+             int x, int y, int width, int height)
+{
+  MetaWindowActorPrivate *priv = self->priv;
+  CoglTexture *texture;
+
+  texture = meta_shaped_texture_get_texture (META_SHAPED_TEXTURE (priv->actor));
+
+  cogl_texture_pixmap_x11_update_area (COGL_TEXTURE_PIXMAP_X11 (texture),
+                                       x, y, width, height);
+}
+
+static void
 meta_window_actor_damage_all (MetaWindowActor *self)
 {
   MetaWindowActorPrivate *priv = self->priv;
@@ -1136,10 +1150,12 @@ meta_window_actor_damage_all (MetaWindowActor *self)
 
   texture = meta_shaped_texture_get_texture (META_SHAPED_TEXTURE (priv->actor));
 
-  if (priv->needs_pixmap)
+  if (!priv->window->mapped || priv->needs_pixmap)
     return;
 
   priv->needs_damage_all = FALSE;
+
+  update_area (self, 0, 0, cogl_texture_get_width (texture), cogl_texture_get_height (texture));
   priv->repaint_scheduled = meta_shaped_texture_update_area (META_SHAPED_TEXTURE (priv->actor),
                                    0, 0,
                                    cogl_texture_get_width (texture),
@@ -1225,7 +1241,7 @@ meta_window_actor_queue_frame_drawn (MetaWindowActor *self,
         {
           queue_send_frame_messages_timeout (self);
         }
-      else if (!priv->needs_pixmap)
+      else if (priv->window->mapped && !priv->needs_pixmap)
         {
           const cairo_rectangle_int_t clip = { 0, 0, 1, 1 };
           clutter_actor_queue_redraw_with_clip (priv->actor, &clip);
@@ -1438,8 +1454,8 @@ meta_window_actor_detach (MetaWindowActor *self)
    * you are supposed to be able to free a GLXPixmap after freeing the underlying
    * pixmap, but it certainly doesn't work with current DRI/Mesa
    */
-  meta_shaped_texture_set_pixmap (META_SHAPED_TEXTURE (priv->actor),
-                                  None);
+  meta_shaped_texture_set_texture (META_SHAPED_TEXTURE (priv->actor), NULL);
+
   cogl_flush();
 
   XFreePixmap (xdisplay, priv->back_pixmap);
@@ -1997,7 +2013,7 @@ check_needs_pixmap (MetaWindowActor *self)
   MetaCompositor      *compositor;
   Window               xwindow  = priv->xwindow;
 
-  if (!priv->needs_pixmap)
+  if (!priv->window->mapped || !priv->needs_pixmap)
     return;
 
   if (xwindow == meta_screen_get_xroot (screen) ||
@@ -2016,6 +2032,7 @@ check_needs_pixmap (MetaWindowActor *self)
 
   if (priv->back_pixmap == None)
     {
+      CoglContext *ctx = clutter_backend_get_cogl_context (clutter_get_default_backend ());
       CoglTexture *texture;
 
       meta_error_trap_push (display);
@@ -2044,10 +2061,7 @@ check_needs_pixmap (MetaWindowActor *self)
         meta_shaped_texture_set_create_mipmaps (META_SHAPED_TEXTURE (priv->actor),
                                                 FALSE);
 
-      meta_shaped_texture_set_pixmap (META_SHAPED_TEXTURE (priv->actor),
-                                      priv->back_pixmap);
-
-      texture = meta_shaped_texture_get_texture (META_SHAPED_TEXTURE (priv->actor));
+      texture = COGL_TEXTURE (cogl_texture_pixmap_x11_new (ctx, priv->back_pixmap, FALSE, NULL));
 
       /*
        * This only works *after* actually setting the pixmap, so we have to
@@ -2056,6 +2070,8 @@ check_needs_pixmap (MetaWindowActor *self)
        */
       if (G_UNLIKELY (!cogl_texture_pixmap_x11_is_using_tfp_extension (texture)))
         g_warning ("NOTE: Not using GLX TFP!\n");
+
+      meta_shaped_texture_set_texture (META_SHAPED_TEXTURE (priv->actor), texture);
     }
 
   priv->needs_pixmap = FALSE;
@@ -2077,6 +2093,9 @@ check_needs_shadow (MetaWindowActor *self)
   gboolean recompute_shadow;
   gboolean should_have_shadow;
   gboolean appears_focused;
+
+  if (!priv->window->mapped)
+    return;
 
   /* Calling meta_window_actor_has_shadow() here at every pre-paint is cheap
    * and avoids the need to explicitly handle window type changes, which
@@ -2186,9 +2205,10 @@ meta_window_actor_process_damage (MetaWindowActor    *self,
       return;
     }
 
-  if (priv->needs_pixmap)
+  if (!priv->window->mapped || priv->needs_pixmap)
     return;
 
+  update_area (self, event->area.x, event->area.y, event->area.width, event->area.height);
   priv->repaint_scheduled = meta_shaped_texture_update_area (META_SHAPED_TEXTURE (priv->actor),
                                    event->area.x,
                                    event->area.y,
@@ -2331,7 +2351,7 @@ check_needs_reshape (MetaWindowActor *self)
   cairo_region_t *region = NULL;
   cairo_rectangle_int_t client_area;
 
-  if (!priv->needs_reshape)
+  if (!priv->window->mapped || !priv->needs_reshape)
     return;
 
   meta_shaped_texture_set_shape_region (META_SHAPED_TEXTURE (priv->actor), NULL);

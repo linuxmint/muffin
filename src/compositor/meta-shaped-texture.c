@@ -35,6 +35,7 @@
 #include "clutter-utils.h"
 #include "meta-texture-tower.h"
 #include "meta-texture-rectangle.h"
+#include "meta-shaped-texture-private.h"
 #include "cogl-utils.h"
 
 #include <clutter/clutter.h>
@@ -845,9 +846,6 @@ meta_shaped_texture_update_area (MetaShapedTexture *stex,
   if (priv->texture == NULL)
     return FALSE;
 
-  cogl_texture_pixmap_x11_update_area (COGL_TEXTURE_PIXMAP_X11 (priv->texture),
-                                       x, y, width, height);
-
   meta_texture_tower_update_area (priv->paint_tower, x, y, width, height);
 
   priv->prev_invalidation = priv->last_invalidation;
@@ -942,33 +940,17 @@ set_cogl_texture (MetaShapedTexture *stex,
 }
 
 /**
- * meta_shaped_texture_set_pixmap:
+ * meta_shaped_texture_set_texture:
  * @stex: The #MetaShapedTexture
- * @pixmap: The pixmap you want the stex to assume
+ * @pixmap: The #CoglTexture to display
  */
 void
-meta_shaped_texture_set_pixmap (MetaShapedTexture *stex,
-                                Pixmap             pixmap)
+meta_shaped_texture_set_texture (MetaShapedTexture *stex,
+                                 CoglTexture       *texture)
 {
-  MetaShapedTexturePrivate *priv;
-
   g_return_if_fail (META_IS_SHAPED_TEXTURE (stex));
 
-  priv = stex->priv;
-
-  if (priv->pixmap == pixmap)
-    return;
-
-  priv->pixmap = pixmap;
-
-  if (pixmap != None)
-    {
-      CoglContext *ctx =
-        clutter_backend_get_cogl_context (clutter_get_default_backend ());
-      set_cogl_texture (stex, COGL_TEXTURE (cogl_texture_pixmap_x11_new (ctx, pixmap, FALSE, NULL)));
-    }
-  else
-    set_cogl_texture (stex, NULL);
+  set_cogl_texture (stex, texture);
 }
 
 /**
