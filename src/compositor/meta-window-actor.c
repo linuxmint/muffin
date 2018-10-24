@@ -2439,7 +2439,7 @@ check_needs_reshape (MetaWindowActor *self)
   meta_shaped_texture_set_shape_region (META_SHAPED_TEXTURE (priv->actor),
                                         region);
 
-  meta_window_actor_reset_mask_texture (self, FALSE);
+  meta_window_actor_reset_mask_texture (self, priv->window->fullscreen);
 
   meta_window_actor_update_shape_region (self, region);
 
