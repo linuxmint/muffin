@@ -198,6 +198,8 @@ static void do_send_frame_timings (MetaWindowActor  *self,
                                    gint             refresh_interval,
                                    gint64           presentation_time);
 
+static void refresh_corners (MetaWindowActor *self);
+
 G_DEFINE_TYPE (MetaWindowActor, meta_window_actor, CLUTTER_TYPE_ACTOR);
 
 static void
@@ -428,6 +430,16 @@ window_position_changed (MetaWindow *mw,
 }
 
 static void
+window_resizing (MetaWindow *mw,
+                 gpointer    data)
+{
+  MetaWindowActor *self = META_WINDOW_ACTOR (data);
+
+  if (self->priv->window->frame)
+    refresh_corners (self);
+}
+
+static void
 meta_window_actor_constructed (GObject *object)
 {
   MetaWindowActor        *self     = META_WINDOW_ACTOR (object);
@@ -574,6 +586,8 @@ meta_window_actor_set_property (GObject      *object,
                                  G_CALLBACK (window_appears_focused_notify), self, 0);
         g_signal_connect_object (priv->window, "position-changed",
                                  G_CALLBACK (window_position_changed), self, 0);
+        g_signal_connect_object (priv->window, "resizing",
+                                 G_CALLBACK (window_resizing), self, 0);
       }
       break;
     case PROP_META_SCREEN:
@@ -2338,6 +2352,14 @@ update_corners (MetaWindowActor   *self,
 
   cairo_region_destroy (corner_region);
 
+}
+
+static void
+refresh_corners (MetaWindowActor *self)
+{
+  MetaFrameBorders borders;
+  meta_frame_calc_borders (self->priv->window->frame, &borders);
+  update_corners (self, &borders);
 }
 
 static void

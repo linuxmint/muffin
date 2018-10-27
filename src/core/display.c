@@ -4229,6 +4229,7 @@ meta_display_queue_retheme_all_windows (MetaDisplay *display)
       if (window->frame)
         {
           meta_frame_queue_draw (window->frame);
+          meta_window_update_corners (window);
         }
       
       tmp = tmp->next;
