@@ -55,6 +55,12 @@
 #include <X11/XKBlib.h>
 #endif
 
+#if __GNUC__ >= 7
+#define DISABLE_GCC7_FALL_THRU_WARNING __attribute__ ((fallthrough))
+#else
+#define DISABLE_GCC7_FALL_THRU_WARNING ""
+#endif
+
 #define SCHEMA_MUFFIN_KEYBINDINGS "org.cinnamon.desktop.keybindings.wm"
 #define SCHEMA_MUFFIN "org.cinnamon.muffin"
 
@@ -1924,18 +1930,21 @@ process_mouse_move_resize_grab (MetaDisplay *display,
 
       case XK_KP_End:
         if (!numlock) break;
+        DISABLE_GCC7_FALL_THRU_WARNING;
       case XK_1:
         index = 0;
         break;
 
       case XK_KP_Down:
         if (!numlock) break;
+        DISABLE_GCC7_FALL_THRU_WARNING;
       case XK_2:
         index = 1;
         break;
 
       case XK_KP_Next:
         if (!numlock) break;
+        DISABLE_GCC7_FALL_THRU_WARNING;
       case XK_3:
         index = 2;
         break;
@@ -1946,12 +1955,14 @@ process_mouse_move_resize_grab (MetaDisplay *display,
           handle_workspace_shift (window, event, keysym);
           return TRUE;
         }
+        DISABLE_GCC7_FALL_THRU_WARNING;
       case XK_4:
         index = 3;
         break;
 
       case XK_KP_Begin:
         if (!numlock) break;
+        DISABLE_GCC7_FALL_THRU_WARNING;
       case XK_5:
         index = 4;
         break;
@@ -1962,30 +1973,35 @@ process_mouse_move_resize_grab (MetaDisplay *display,
           handle_workspace_shift (window, event, keysym);
           return TRUE;
         }
+        DISABLE_GCC7_FALL_THRU_WARNING;
       case XK_6:
         index = 5;
         break;
 
       case XK_KP_Home:
         if (!numlock) break;
+        DISABLE_GCC7_FALL_THRU_WARNING;
       case XK_7:
         index = 6;
         break;
 
       case XK_KP_Up:
         if (!numlock) break;
+        DISABLE_GCC7_FALL_THRU_WARNING;
       case XK_8:
         index = 7;
         break;
 
       case XK_KP_Prior:
         if (!numlock) break;
+        DISABLE_GCC7_FALL_THRU_WARNING;
       case XK_9:
         index = 8;
         break;
 
       case XK_KP_Insert:
         if (!numlock) break;
+        DISABLE_GCC7_FALL_THRU_WARNING;
       case XK_0:
         index = 9;
         break;
