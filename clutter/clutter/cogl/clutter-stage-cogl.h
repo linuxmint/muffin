@@ -61,6 +61,8 @@ struct _ClutterStageCogl
    * junk frames to start with. */
   unsigned int frame_count;
 
+  gint last_sync_delay;
+
   cairo_rectangle_int_t bounding_redraw_clip;
 
   guint initialized_redraw_clip : 1;
