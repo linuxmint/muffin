@@ -44,8 +44,8 @@
 
     <key name="edge-resistance-window" type="b">
       <default>true</default>
-      <summary>Enable windows edge resitance</summary>
-      <description>Determine whether the window edges can snap to each other.</description>
+      <summary>Enable window edge resistance</summary>
+      <description>Determine whether there is tension along other window and screen/monitor edges when dragging a window.</description>
     </key>
 
     <key name="dynamic-workspaces" type="b">
