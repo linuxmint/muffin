@@ -1946,7 +1946,7 @@ meta_screen_tile_preview_update_timeout (gpointer data)
                                                                  snap_osd_timeout,
                                                                  screen);
     }
-    else if (screen->tile_preview_visible)
+    else
     {
         meta_compositor_hide_tile_preview (screen->display->compositor,
                                            screen);
@@ -2035,7 +2035,7 @@ meta_screen_tile_hud_update_timeout (gpointer data)
                                                                  snap_osd_timeout,
                                                                  screen);
     }
-    else if (screen->tile_hud_visible)
+    else
     {
         meta_compositor_hide_hud_preview (screen->display->compositor,
                                           screen);
