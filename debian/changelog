@@ -1,3 +1,160 @@
+muffin (4.0.0) tessa; urgency=medium
+
+  [ Michael Webster ]
+  * window.c: Allow the user-defined workspace left/right shortcuts to be used when dragging a window in addition to the advertised arrow- left/right.
+  * meta-window-actor.c: Don't shadow dock type windows as a rule.
+  * window-props: Start respecting the _GTK_HIDE_TITLEBAR_WHEN_MAXIMIZED window hint.
+  * stack.c: Don't attempt to restack or raise windows that are in the process of being unmanaged.
+  * theme-parser.c: Look in XDG_DATA_HOME (.local/share) for themes.
+  * stack: Place dock windows below other windows when the monitor they're on is in fullscreen.
+
+  [ Jason Hicks ]
+  * texture-tower: Remove CPU codepath for mipmap generation
+  * tower: make sure not to blend when updating tower
+  * MetaTextureTower: actually mark revalidated levels as valid
+  * texture-tower: Fix error case in meta-texture-tower
+  * Update for Cogl API breaks
+  * Use correct cogl object types
+  * compositor: Handle fences in the frontend X connection (#338)
+  * compositor: map overlay window before redirecting windows (#340)
+  * compositor: sync stacking of window actors even if they're not parented to the window groups (#341)
+  * compositor: Fix ClutterTimeline usage (#342)
+  * Remove clutter version check
+  * compositor: Don't connect to the stage's paint signal
+  * compositor: Default to META_SYNC_DELAY == 0
+  * Integrate Clutter and Cogl into Muffin (WIP)
+  * Remove libclutter-1.0-dev from debian dependencies
+  * Update muffin dependencies, add options found in the Mutter tree
+  * Add missing math lib to cogl-path
+  * Remove cogl-1.0 from deps
+  * Symlink muffin libs to libdir, needed for gtkdoc-scan in cinnamon to finish
+  * Remove clutter-1.0 from Makefile.am, get muffin linking to its private libs
+  * Fix segfault on initialization
+  * Remove debug option, remove cogl onscreen related calls in meta_pre_paint_func
+  * Add missing macros for Clutter
+  * Update build dependencies
+  * Disable kms-egl-platform
+  * Update dependencies for LMDE
+  * Clutter: Update Makefile.am.marshal
+  * Clutter: Prevent assertion error from wayland function
+  * Fix clutter stage assertion errors
+  * Clutter: expose vblank mode to gsettings
+  * clutter: Deliver events sooner when possible
+  * clutter: Smooth out master clock to smooth visuals
+  * Fix up segfault fix, apply upstream patches for window syncing
+  * Remove meta_window_actor_frame_complete, frame_callback
+  * window-group: Decompose culling operations into two methods
+  * window-actor: Base the paint volume on our children, not our shape
+  * Don't cache the paint volume on non-clipped redraws
+  * screen: Get monitor refresh rates from xrandr
+  * meta-window-actor: Use the monitor refresh rate to get frame timings
+  * meta-window-actor: Don't process invisible windows that have a pixmap
+  * Add option to toggle frame timings
+  * cogl-winsys-glx: Fix frame notification race/leak
+  * Replace libmuffin-dev with libmuffin0
+  * Don't use cogl_onscreen_add_frame_callback for Nvidia
+
+  [ Clement Lefebvre ]
+  * Fix desktop background appearing during the login sequence
+
+  [ Jason Hicks ]
+  * Remove remaining deprecated Cogl 1.0 usage (#348)
+  * window: Various performance improvements (#349)
+  * shaped-texture: Disable mipmapping during animation (#353)
+  * Improve handling of tracking the old focused window during restart (#346)
+  * meta-shaped-texture: Don't queue redraws for obscured regions
+  * meta-window-actor: Throttle obscured frame synced apps
+  * Remove unused variable
+  * shaped-texture: Remove dead code
+
+  [ Adel Gadllah ]
+  * window_actor: Remove the frame_messages timeout in destroy
+
+  [ Jason Hicks ]
+  * window: Fix a couple leaks (#357)
+  * Double check whether the user time window was previously used (#358)
+  * clutter: Improve smoothness of visuals (#355)
+  * Only emit tiling-related signals when needed (#354)
+  * Avoid clutter_actor_queue_relayout in animations (#356)
+  * clutter: Fix offscreen-effect painting of clones (#360)
+  * Handle GL video memory purged errors (#363)
+  * screen: Fetch the COW window up-front (#365)
+  * Don't attempt to get monitor geometry on non-existent monitors (#366)
+  * window: Remove duplicated code (#367)
+  * Add threaded swap waiting (#368)
+  * gtk-doc: Add Clutter and Cogl references (#359)
+  * Cogl, Clutter: Avoid crashing when texture allocation fails (#370)
+
+  [ Michael Webster ]
+  * keybindings.c: Rework workspace navigation during a mouse move grab.
+  * keybindings.c: Squelch fall-thru warnings in GCC7+ from previous commit.  The fall-thru is intentional behavior in these cases.
+  * edge resistance: Disable all edge resistance when the pref is disabled.
+
+  [ Jasper St. Pierre ]
+  * shaped-texture: Remove an unnecessary set to NULL
+  * shaped-texture: Simplify pipeline creation
+  * shaped-texture: Use non-deprecated cogl APIs
+
+  [ Jason Hicks ]
+  * Support _NET_WM_OPAQUE_REGION
+  * compositor: Fix crash when adding a window with an opaque region
+  * window-actor: Use g_clear_pointer
+  * Fix up "Support _NET_WM_OPAQUE_REGION"
+  * window-props: Don't make another round-trip to fetch the opaque region
+
+  [ Jasper St. Pierre ]
+  * shaped-texture: Turn blending off when drawing entirely opaque regions
+  * shaped-texture: Prevent no clip region from being used as an empty clip region
+  * shaped-texture: Remove bad comment
+  * shaped-texture: Actually fetch rectangles from the blended_region
+
+  [ Pavel Vasin ]
+  * shaped-texture: Fix memory leak
+
+  [ Hans Petter Jansson ]
+  * shaped-texture: Use nearest-pixel interpolation if the texture is unscaled
+
+  [ Jason Hicks ]
+  * shaped-texture: Make sure to set the texture tower's texture
+
+  [ Jasper St. Pierre ]
+  * shaped-texture: Clean up code flow a bit
+  * shaped-texture: Clean up slightly
+  * shaped-texture: If we have too many rectangles, don't paint the opaque
+  * shaped-texture: Fix the logic when the blended region is empty
+
+  [ Owen W. Taylor ]
+  * Use meta_actor_painting_untransformed() for MetaShapedTexture
+
+  [ Jasper St. Pierre ]
+  * shaped-texture: Don't set a small minimum size
+  * shaped-texture: Clean up some internals
+  * shaped-texture: Repeat edge pixels instead of mirroring the image
+  * shaped-texture: Remove unnecessary copies of the pipeline
+
+  [ Jason Hicks ]
+  * shaped-texture: Invalidate mask texture when main texture changes size
+  * Fix Codacy warning
+  * Fix the input region not working properly
+  * Fix leak when resizing windows
+  * Don't set the mask texture on every paint
+  * window-actor: Don't queue a redraw when queueing a new pixmap
+  * window-actor: Remove the bounding region
+  * window-actor: Don't add shadows to popups if the toolkit does
+  * window-actor: Phase out the size/position changed signals, and connect to shaped texture's size changed signal
+  * window-actor: Give notify::opacity signal an ID
+  * window-actor: Move all buffer management and damage correction here
+  * MetaFrame: Cache borders
+  * Fix title bar artifacts on unmaximize
+  * Fix redraw issues when windows change size
+  * compositor: Don't call process_damage if the window is gone
+  * Fix redraw issues in some fullscreen applications
+  * Don't queue full stage relayouts when moving windows
+  * window: Make sure update_corners gets called after every resize, theme change
+  * Fix up tile signal optimization (#372)
+
+ -- Clement Lefebvre <root@linuxmint.com>  Sat, 03 Nov 2018 10:51:54 +0000
+
 muffin (3.8.2) tara; urgency=medium
 
   [ Michael Webster ]
