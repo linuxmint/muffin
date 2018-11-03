@@ -890,6 +890,9 @@ meta_compositor_window_shape_changed (MetaCompositor *compositor,
 {
   MetaWindowActor *window_actor;
   window_actor = META_WINDOW_ACTOR (meta_window_get_compositor_private (window));
+  if (!window_actor)
+    return;
+
   meta_window_actor_update_shape (window_actor);
 }
 
@@ -969,8 +972,10 @@ meta_compositor_process_event (MetaCompositor *compositor,
               window = meta_display_lookup_x_window (compositor->display, xwin);
             }
 
-	  DEBUG_TRACE ("meta_compositor_process_event (process_damage)\n");
-          process_damage (compositor, (XDamageNotifyEvent *) event, window);
+          DEBUG_TRACE ("meta_compositor_process_event (process_damage)\n");
+
+          if (window)
+            process_damage (compositor, (XDamageNotifyEvent *) event, window);
         }
       break;
     }

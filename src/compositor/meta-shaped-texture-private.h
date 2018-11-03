@@ -1,11 +1,12 @@
 /*
- * texture rectangle
+ * shaped texture
  *
- * A small utility function to help create a rectangle texture
+ * An actor to draw a texture clipped to a list of rectangles
  *
  * Authored By Neil Roberts  <neil@linux.intel.com>
  *
- * Copyright (C) 2011 Intel Corporation
+ * Copyright (C) 2008 Intel Corporation
+ *               2013 Red Hat, Inc.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -19,20 +20,17 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street - Suite 500, Boston, MA
- * 02110-1335, USA.
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
+ * 02111-1307, USA.
  */
 
-#ifndef __META_TEXTURE_RECTANGLE_H__
-#define __META_TEXTURE_RECTANGLE_H__
+#ifndef __META_SHAPED_TEXTURE_PRIVATE_H__
+#define __META_SHAPED_TEXTURE_PRIVATE_H__
 
-#include <cogl/cogl.h>
+#include <meta/meta-shaped-texture.h>
 
-G_BEGIN_DECLS
+ClutterActor *meta_shaped_texture_new (void);
+void meta_shaped_texture_set_texture (MetaShapedTexture *stex,
+                                      CoglTexture       *texture);
 
-gboolean
-meta_texture_rectangle_check (CoglTexture *texture);
-
-G_END_DECLS
-
-#endif /* __META_TEXTURE_RECTANGLE_H__ */
+#endif

@@ -41,4 +41,12 @@ CoglTexture * meta_cogl_texture_new_from_data_wrapper                (int  width
                                                                       int  rowstride,
                                                             const uint8_t *data);
 
+
+CoglTexture * meta_cogl_rectangle_new (int width,
+                                       int height,
+                                       CoglPixelFormat format,
+                                       int stride,
+                                       const uint8_t *data);
+
+
 #endif /* __META_COGL_UTILS_H__ */

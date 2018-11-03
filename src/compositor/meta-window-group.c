@@ -310,6 +310,9 @@ meta_window_group_class_init (MetaWindowGroupClass *klass)
 static void
 meta_window_group_init (MetaWindowGroup *window_group)
 {
+  ClutterActor *actor = CLUTTER_ACTOR (window_group);
+
+  clutter_actor_set_flags (actor, CLUTTER_ACTOR_NO_LAYOUT);
 }
 
 LOCAL_SYMBOL ClutterActor *

@@ -201,6 +201,9 @@ enum
   FOCUS,
   RAISED,
   UNMANAGED,
+  SIZE_CHANGED,
+  POSITION_CHANGED,
+  RESIZING,
 
   LAST_SIGNAL
 };
@@ -246,6 +249,9 @@ meta_window_finalize (GObject *object)
 
   if (window->frame_bounds)
     cairo_region_destroy (window->frame_bounds);
+
+  if (window->opaque_region)
+    cairo_region_destroy (window->opaque_region);
 
   meta_icon_cache_free (&window->icon_cache);
 
@@ -632,6 +638,30 @@ meta_window_class_init (MetaWindowClass *klass)
                   G_TYPE_FROM_CLASS (object_class),
                   G_SIGNAL_RUN_LAST,
                   G_STRUCT_OFFSET (MetaWindowClass, unmanaged),
+                  NULL, NULL, NULL,
+                  G_TYPE_NONE, 0);
+
+  window_signals[POSITION_CHANGED] =
+    g_signal_new ("position-changed",
+                  G_TYPE_FROM_CLASS (object_class),
+                  G_SIGNAL_RUN_LAST,
+                  0,
+                  NULL, NULL, NULL,
+                  G_TYPE_NONE, 0);
+
+  window_signals[SIZE_CHANGED] =
+    g_signal_new ("size-changed",
+                  G_TYPE_FROM_CLASS (object_class),
+                  G_SIGNAL_RUN_LAST,
+                  0,
+                  NULL, NULL, NULL,
+                  G_TYPE_NONE, 0);
+
+  window_signals[RESIZING] =
+    g_signal_new ("resizing",
+                  G_TYPE_FROM_CLASS (object_class),
+                  G_SIGNAL_RUN_LAST,
+                  0,
                   NULL, NULL, NULL,
                   G_TYPE_NONE, 0);
 
@@ -3972,6 +4002,15 @@ meta_window_unmaximize_internal (MetaWindow        *window,
       window->maximized_vertically =
         window->maximized_vertically   && !unmaximize_vertically;
 
+      /* Update the edge constraints */
+      update_edge_constraints (window);
+
+      /* recalc_features() will eventually clear the cached frame
+       * extents, but we need the correct frame extents in the code below,
+       * so invalidate the old frame extents manually up front.
+       */
+      meta_window_frame_size_changed (window);
+
       /* Unmaximize to the saved_rect position in the direction(s)
        * being unmaximized.
        */
@@ -4045,8 +4084,6 @@ meta_window_unmaximize_internal (MetaWindow        *window,
           window->custom_snap_size = FALSE;
 
       meta_screen_update_snapped_windows (window->screen);
-
-      update_edge_constraints (window);
 
       recalc_window_features (window);
       set_net_wm_state (window);
@@ -4130,6 +4167,7 @@ meta_window_set_above (MetaWindow *window,
   window->wm_state_above = new_value;
   meta_window_update_layer (window);
   set_net_wm_state (window);
+  meta_window_frame_size_changed (window);
   g_object_notify (G_OBJECT (window), "above");
 }
 
@@ -4270,6 +4308,7 @@ meta_window_shade (MetaWindow  *window,
       window->shaded = TRUE;
 
       meta_window_queue(window, META_QUEUE_MOVE_RESIZE | META_QUEUE_CALC_SHOWING);
+      meta_window_frame_size_changed (window);
 
       /* After queuing the calc showing, since _focus flushes it,
        * and we need to focus the frame
@@ -4295,6 +4334,7 @@ meta_window_unshade (MetaWindow  *window,
     {
       window->shaded = FALSE;
       meta_window_queue(window, META_QUEUE_MOVE_RESIZE | META_QUEUE_CALC_SHOWING);
+      meta_window_frame_size_changed (window);
 
       /* focus the window */
       meta_topic (META_DEBUG_FOCUS,
@@ -5350,6 +5390,12 @@ meta_window_move_resize_internal (MetaWindow          *window,
   else if (is_user_action)
     save_user_window_placement (window);
 
+  if (need_move_frame)
+    g_signal_emit (window, window_signals[POSITION_CHANGED], 0);
+
+  if (need_resize_client)
+    g_signal_emit (window, window_signals[SIZE_CHANGED], 0);
+
   if (need_move_frame || need_resize_frame ||
       need_move_client || need_resize_client ||
       did_placement)
@@ -6179,6 +6225,7 @@ window_stick_impl (MetaWindow  *window)
    */
   int old_workspace = meta_workspace_index (window->workspace);
   window->on_all_workspaces_requested = TRUE;
+  meta_window_frame_size_changed (window);
   meta_window_update_on_all_workspaces (window);
 
   meta_window_queue(window, META_QUEUE_CALC_SHOWING);
@@ -6195,6 +6242,7 @@ window_unstick_impl (MetaWindow  *window)
   /* Revert to window->workspaces */
 
   window->on_all_workspaces_requested = FALSE;
+  meta_window_frame_size_changed (window);
   meta_window_update_on_all_workspaces (window);
 
   /* We change ourselves to the active workspace, since otherwise you'd get
@@ -7308,6 +7356,7 @@ static void
 meta_window_appears_focused_changed (MetaWindow *window)
 {
   set_net_wm_state (window);
+  meta_window_frame_size_changed (window);
 
   g_object_notify (G_OBJECT (window), "appears-focused");
 
@@ -8332,6 +8381,13 @@ recalc_window_type (MetaWindow *window)
     }
 }
 
+void
+meta_window_frame_size_changed (MetaWindow *window)
+{
+  if (window->frame)
+    meta_frame_clear_cached_borders (window->frame);
+}
+
 static void
 set_allowed_actions_hint (MetaWindow *window)
 {
@@ -8636,6 +8692,8 @@ recalc_window_features (MetaWindow *window)
 
   if (window->has_resize_func != old_has_resize_func)
     g_object_notify (G_OBJECT (window), "resizeable");
+
+  meta_window_frame_size_changed (window);
 
   if (old_skip_taskbar != window->skip_taskbar)
     g_signal_emit_by_name (window->screen, "window-skip-taskbar-changed", window);
@@ -9923,7 +9981,10 @@ update_resize (MetaWindow *window,
   /* Store the latest resize time, if we actually resized. */
 
   if (window->rect.width != old.width || window->rect.height != old.height)
-    g_get_current_time (&window->display->grab_last_moveresize_time);
+    {
+      g_get_current_time (&window->display->grab_last_moveresize_time);
+      g_signal_emit (window, window_signals[RESIZING], 0);
+    }
 }
 
 typedef struct
@@ -12209,4 +12270,10 @@ meta_window_get_icon_name (MetaWindow *window)
     g_return_val_if_fail (META_IS_WINDOW (window), NULL);
 
     return window->theme_icon_name;
+}
+
+LOCAL_SYMBOL void
+meta_window_update_corners (MetaWindow *window)
+{
+  g_signal_emit (window, window_signals[RESIZING], 0);
 }

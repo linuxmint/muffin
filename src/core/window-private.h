@@ -413,6 +413,9 @@ struct _MetaWindow
   /* if non-NULL, the bounds of the window frame */
   cairo_region_t *frame_bounds;
 
+  /* if non-NULL, the opaque region _NET_WM_OPAQUE_REGION */
+  cairo_region_t *opaque_region;
+
   /* if TRUE, the we have the new form of sync request counter which
    * also handles application frames */
   guint extended_sync_request_counter : 1;
@@ -614,6 +617,7 @@ void        meta_window_update_fullscreen_monitors (MetaWindow    *window,
                                                     unsigned long  left,
                                                     unsigned long  right);
 
+
 /* args to move are window pos, not frame pos */
 void        meta_window_move_resize        (MetaWindow  *window,
                                             gboolean     user_op,
@@ -780,6 +784,8 @@ void meta_window_update_layer (MetaWindow *window);
 void meta_window_recalc_features    (MetaWindow *window);
 
 void meta_window_recalc_window_type (MetaWindow *window);
+
+void meta_window_frame_size_changed (MetaWindow *window);
 
 void meta_window_stack_just_below (MetaWindow *window,
                                    MetaWindow *below_this_one);
