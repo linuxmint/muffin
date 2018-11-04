@@ -479,6 +479,8 @@ AC_ARG_ENABLE(clutter-doc,
 	[  --disable-clutter-doc		disable Clutter docs generation],,
 	clutter_doc=yes)
 
+AM_CONDITIONAL(CLUTTER_DOC, test "$clutter_doc" = "yes")
+
 AC_CONFIG_FILES([
 Makefile
 data/Makefile
@@ -487,18 +489,8 @@ doc/man/Makefile
 doc/reference/Makefile
 doc/reference/muffin/Makefile
 doc/reference/muffin/muffin-docs.sgml
-])
-
-if test "x$clutter_doc" = "xno"; then
-	AC_CONFIG_FILES([
-    doc/reference/clutter/Makefile
-    doc/reference/clutter/clutter-docs.xml
-  ])
-fi
-
-AM_CONDITIONAL(CLUTTER_DOC, test "$clutter_doc" = "yes")
-
-AC_CONFIG_FILES([
+doc/reference/clutter/Makefile
+doc/reference/clutter/clutter-docs.xml
 doc/reference/cogl/Makefile
 doc/reference/cogl/cogl-docs.xml
 src/Makefile
@@ -546,4 +538,3 @@ muffin-$VERSION
 	Xsync:                    ${found_xsync}
 	Xcursor:                  ${have_xcursor}
 "
-
