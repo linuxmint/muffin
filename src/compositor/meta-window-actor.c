@@ -1741,6 +1741,9 @@ meta_window_actor_maximize (MetaWindowActor    *self,
       self->priv->maximize_in_progress--;
       meta_window_actor_thaw (self);
     }
+
+  if (self->priv->window->frame)
+    meta_window_actor_reset_mask_texture (self, TRUE);
 }
 
 LOCAL_SYMBOL void
