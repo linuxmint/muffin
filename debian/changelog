@@ -1,3 +1,13 @@
+muffin (4.0.1) tessa; urgency=medium
+
+  [ Eli Schwartz ]
+  * always process clutter Makefile.in (#374)
+
+  [ Jason Hicks ]
+  * window-actor: Queue mask texture update on maximize (#376)
+
+ -- Clement Lefebvre <root@linuxmint.com>  Mon, 12 Nov 2018 15:17:50 +0000
+
 muffin (4.0.0) tessa; urgency=medium
 
   [ Michael Webster ]
