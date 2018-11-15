@@ -8385,7 +8385,10 @@ void
 meta_window_frame_size_changed (MetaWindow *window)
 {
   if (window->frame)
-    meta_frame_clear_cached_borders (window->frame);
+    {
+      meta_frame_clear_cached_borders (window->frame);
+      g_signal_emit (window, window_signals[RESIZING], 0);
+    }
 }
 
 static void

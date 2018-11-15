@@ -2029,7 +2029,7 @@ check_needs_pixmap (MetaWindowActor *self)
   MetaCompositor      *compositor;
   Window               xwindow  = priv->xwindow;
 
-  if (!priv->window->mapped || !priv->needs_pixmap)
+  if ((!priv->window->mapped && !priv->window->shaded) || !priv->needs_pixmap)
     return;
 
   if (xwindow == meta_screen_get_xroot (screen) ||
@@ -2110,7 +2110,7 @@ check_needs_shadow (MetaWindowActor *self)
   gboolean should_have_shadow;
   gboolean appears_focused;
 
-  if (!priv->window->mapped)
+  if (!priv->window->mapped && !priv->window->shaded)
     return;
 
   /* Calling meta_window_actor_has_shadow() here at every pre-paint is cheap
@@ -2375,7 +2375,7 @@ check_needs_reshape (MetaWindowActor *self)
   cairo_region_t *region = NULL;
   cairo_rectangle_int_t client_area;
 
-  if (!priv->window->mapped || !priv->needs_reshape)
+  if ((!priv->window->mapped && !priv->window->shaded) || !priv->needs_reshape)
     return;
 
   meta_shaped_texture_set_shape_region (META_SHAPED_TEXTURE (priv->actor), NULL);
