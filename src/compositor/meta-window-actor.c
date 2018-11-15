@@ -84,6 +84,8 @@ struct _MetaWindowActorPrivate
 
   gint              last_width;
   gint              last_height;
+  gint              last_x;
+  gint              last_y;
 
   gint              freeze_count;
 
@@ -126,7 +128,8 @@ struct _MetaWindowActorPrivate
   guint             needs_reshape          : 1;
   guint             recompute_focused_shadow   : 1;
   guint             recompute_unfocused_shadow : 1;
-  guint		    size_changed           : 1;
+  guint             size_changed               : 1;
+  guint             position_changed           : 1;
   guint             updates_frozen         : 1;
 
   guint		    needs_destroy	   : 1;
@@ -1394,7 +1397,7 @@ meta_window_actor_effect_completed (MetaWindowActor *self,
      * the plugin fscked.
      */
     priv->map_in_progress--;
-
+    priv->position_changed = TRUE;
     if (priv->map_in_progress < 0)
       {
 	g_warning ("Error in map accounting.");
@@ -1595,6 +1598,14 @@ meta_window_actor_sync_actor_geometry (MetaWindowActor *self,
       priv->last_height = window_rect.height;
     }
 
+  if (priv->last_x != window_rect.x ||
+      priv->last_y != window_rect.y)
+    {
+      priv->position_changed = TRUE;
+      priv->last_x = window_rect.x;
+      priv->last_y = window_rect.y;
+    }
+
   /* Normally we want freezing a window to also freeze its position; this allows
    * windows to atomically move and resize together, either under app control,
    * or because the user is resizing from the left/top. But on initial placement
@@ -1612,14 +1623,21 @@ meta_window_actor_sync_actor_geometry (MetaWindowActor *self,
     {
       priv->needs_pixmap = TRUE;
       meta_window_actor_update_shape (self);
+      clutter_actor_set_size (CLUTTER_ACTOR (self),
+                              window_rect.width, window_rect.height);
     }
 
-  clutter_actor_set_position (CLUTTER_ACTOR (self),
-                              window_rect.x, window_rect.y);
-  clutter_actor_set_size (CLUTTER_ACTOR (self),
-                          window_rect.width, window_rect.height);
+  if (priv->position_changed)
+    {
+      MetaCompScreen *info;
+      clutter_actor_set_position (CLUTTER_ACTOR (self),
+                                  window_rect.x, window_rect.y);
 
-  if (!self->priv->window->frame)
+      info = meta_screen_get_compositor_data (priv->screen);
+      clutter_actor_queue_redraw (CLUTTER_ACTOR (info->window_group));
+    }
+
+  if (!self->priv->window->frame && (priv->size_changed || priv->position_changed))
     {
       if (priv->size_changed)
         priv->frameless_geometry_updates = 0;
@@ -1772,6 +1790,9 @@ meta_window_actor_unmaximize (MetaWindowActor   *self,
       self->priv->unmaximize_in_progress--;
       meta_window_actor_thaw (self);
     }
+
+  if (self->priv->window->frame)
+    meta_window_actor_reset_mask_texture (self, TRUE);
 }
 
 LOCAL_SYMBOL void
@@ -1801,6 +1822,9 @@ meta_window_actor_tile (MetaWindowActor    *self,
       self->priv->tile_in_progress--;
       meta_window_actor_thaw (self);
     }
+
+  if (self->priv->window->frame)
+    meta_window_actor_reset_mask_texture (self, TRUE);
 }
 
 LOCAL_SYMBOL MetaWindowActor *
@@ -1832,6 +1856,8 @@ meta_window_actor_new (MetaWindow *window)
 
   priv->last_width = -1;
   priv->last_height = -1;
+  priv->last_x = -1;
+  priv->last_y = -1;
 
   priv->needs_pixmap = TRUE;
 
@@ -2043,6 +2069,9 @@ check_needs_pixmap (MetaWindowActor *self)
       meta_window_actor_detach (self);
       priv->size_changed = FALSE;
     }
+
+  if (priv->position_changed)
+    priv->position_changed = FALSE;
 
   meta_error_trap_push (display);
 
