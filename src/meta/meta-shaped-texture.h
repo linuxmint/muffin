@@ -68,12 +68,11 @@ gboolean meta_shaped_texture_update_area (MetaShapedTexture *stex,
 
 CoglTexture *meta_shaped_texture_get_texture (MetaShapedTexture *stex);
 
+void meta_shaped_texture_set_shape_region (MetaShapedTexture *stex,
+                                           cairo_region_t    *region);
+
 void meta_shaped_texture_set_mask_texture (MetaShapedTexture *stex,
                                            CoglTexture       *mask_texture);
-
-void meta_shaped_texture_set_overlay_path (MetaShapedTexture *stex,
-                                           cairo_region_t    *overlay_region,
-                                           cairo_path_t      *overlay_path);
 
 void meta_shaped_texture_set_clip_region (MetaShapedTexture *stex,
 					  cairo_region_t    *clip_region);
@@ -83,8 +82,6 @@ void meta_shaped_texture_set_opaque_region (MetaShapedTexture *stex,
 
 cairo_surface_t * meta_shaped_texture_get_image (MetaShapedTexture     *stex,
                                                  cairo_rectangle_int_t *clip);
-
-void meta_shaped_texture_ensure_mask (MetaShapedTexture *stex);
 
 void meta_shaped_texture_dirty_mask (MetaShapedTexture *stex);
 

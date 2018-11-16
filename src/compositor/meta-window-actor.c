@@ -133,6 +133,7 @@ struct _MetaWindowActorPrivate
   guint             recompute_unfocused_shadow : 1;
   guint             size_changed               : 1;
   guint             position_changed           : 1;
+  guint             needs_mask                 : 1;
   guint             updates_frozen         : 1;
 
   guint		    needs_destroy	   : 1;
@@ -148,6 +149,8 @@ struct _MetaWindowActorPrivate
   guint             has_desat_effect : 1;
 
   guint             frameless_geometry_updates : 1;
+
+  cairo_rectangle_int_t client_area;
 };
 
 typedef struct _FrameData FrameData;
@@ -203,6 +206,9 @@ static void do_send_frame_timings (MetaWindowActor  *self,
                                    FrameData        *frame,
                                    gint             refresh_interval,
                                    gint64           presentation_time);
+
+static void build_and_scan_frame_mask (MetaWindowActor       *self,
+                                       cairo_region_t        *shape_region);
 
 G_DEFINE_TYPE (MetaWindowActor, meta_window_actor, CLUTTER_TYPE_ACTOR);
 
@@ -307,16 +313,16 @@ meta_window_actor_init (MetaWindowActor *self)
   priv->shadow_class = NULL;
   priv->has_desat_effect = FALSE;
   priv->frameless_geometry_updates = 3;
+  priv->needs_mask = TRUE;
 }
 
 static void
 meta_window_actor_reset_mask_texture (MetaWindowActor *self,
                                       gboolean force)
 {
-  MetaShapedTexture *stex = META_SHAPED_TEXTURE (self->priv->actor);
   if (force)
-    meta_shaped_texture_dirty_mask (stex);
-  meta_shaped_texture_ensure_mask (stex);
+    self->priv->needs_mask = TRUE;
+  build_and_scan_frame_mask (self, self->priv->shape_region);
 }
 
 static void
@@ -421,7 +427,7 @@ texture_size_changed (MetaWindow *mw,
 {
   MetaWindowActor *self = META_WINDOW_ACTOR (data);
 
-  g_signal_emit (self, signals[SIZE_CHANGED], 0); // Compatibility
+  g_signal_emit (self, signals[SIZE_CHANGED], 0);
 }
 
 static void
@@ -1598,6 +1604,7 @@ meta_window_actor_sync_actor_geometry (MetaWindowActor *self,
       priv->size_changed = TRUE;
       priv->last_width = window_rect.width;
       priv->last_height = window_rect.height;
+      priv->needs_mask = TRUE;
     }
 
   if (priv->last_x != window_rect.x ||
@@ -1624,9 +1631,9 @@ meta_window_actor_sync_actor_geometry (MetaWindowActor *self,
   if (priv->size_changed)
     {
       priv->needs_pixmap = TRUE;
-      meta_window_actor_update_shape (self);
       clutter_actor_set_size (CLUTTER_ACTOR (self),
                               window_rect.width, window_rect.height);
+      meta_window_actor_update_shape (self);
     }
 
   if (priv->position_changed)
@@ -1643,7 +1650,7 @@ meta_window_actor_sync_actor_geometry (MetaWindowActor *self,
             priv->frameless_geometry_updates = 0;
           priv->frameless_geometry_updates++;
           if (priv->frameless_geometry_updates < 3)
-            meta_window_actor_reset_mask_texture (self, TRUE);
+            priv->needs_mask = TRUE;
         }
 
       info = meta_screen_get_compositor_data (priv->screen);
@@ -1764,8 +1771,8 @@ meta_window_actor_maximize (MetaWindowActor    *self,
       meta_window_actor_thaw (self);
     }
 
-  if (self->priv->window->frame)
-    meta_window_actor_reset_mask_texture (self, TRUE);
+  if (!self->priv->window->frame)
+    self->priv->needs_mask = TRUE;
 }
 
 LOCAL_SYMBOL void
@@ -1795,8 +1802,8 @@ meta_window_actor_unmaximize (MetaWindowActor   *self,
       meta_window_actor_thaw (self);
     }
 
-  if (self->priv->window->frame)
-    meta_window_actor_reset_mask_texture (self, TRUE);
+  if (!self->priv->window->frame)
+    self->priv->needs_mask = TRUE;
 }
 
 LOCAL_SYMBOL void
@@ -1827,8 +1834,8 @@ meta_window_actor_tile (MetaWindowActor    *self,
       meta_window_actor_thaw (self);
     }
 
-  if (self->priv->window->frame)
-    meta_window_actor_reset_mask_texture (self, TRUE);
+  if (!self->priv->window->frame)
+    self->priv->needs_mask = TRUE;
 }
 
 LOCAL_SYMBOL MetaWindowActor *
@@ -2282,172 +2289,6 @@ meta_window_actor_sync_visibility (MetaWindowActor *self)
 
 #define TAU (2*M_PI)
 
-static void
-update_corners (MetaWindowActor   *self)
-{
-  MetaWindowActorPrivate *priv = self->priv;
-  MetaRectangle outer = priv->window->frame->rect;
-  MetaFrameBorders borders;
-  cairo_rectangle_int_t corner_rects[4];
-  cairo_region_t *corner_region;
-  cairo_path_t *corner_path;
-  float top_left, top_right, bottom_left, bottom_right;
-  float x, y;
-
-  /* need these to build a path */
-  cairo_t *cr;
-  cairo_surface_t *surface;
-
-  meta_frame_calc_borders (priv->window->frame, &borders);
-
-  outer.width -= borders.invisible.left + borders.invisible.right;
-  outer.height -= borders.invisible.top  + borders.invisible.bottom;
-
-  meta_frame_get_corner_radiuses (priv->window->frame,
-                                  &top_left,
-                                  &top_right,
-                                  &bottom_left,
-                                  &bottom_right);
-
-  /* Unfortunately, cairo does not allow us to create a context
-   * without a surface. Create a 0x0 image surface to "paint to"
-   * so we can get the path. */
-  surface = cairo_image_surface_create (CAIRO_FORMAT_A8,
-                                        0, 0);
-
-  cr = cairo_create (surface);
-
-  /* top left */
-  x = borders.invisible.left;
-  y = borders.invisible.top;
-
-  set_integral_bounding_rect (&corner_rects[0],
-                              x, y, top_left, top_left);
-
-  cairo_arc (cr,
-             x + top_left,
-             y + top_left,
-             top_left,
-             0, M_PI*2);
-
-
-  /* top right */
-  x = x + outer.width - top_right;
-
-  set_integral_bounding_rect (&corner_rects[1],
-                              x, y, top_right, top_right);
-
-  cairo_arc (cr,
-             x,
-             y + top_right,
-             top_right,
-             0, M_PI*2);
-
-  /* bottom right */
-  x = borders.invisible.left + outer.width - bottom_right;
-  y = y + outer.height - bottom_right;
-
-  set_integral_bounding_rect (&corner_rects[2],
-                              x, y, bottom_right, bottom_right);
-
-  cairo_arc (cr,
-             x,
-             y,
-             bottom_right,
-             0, M_PI*2);
-
-  /* bottom left */
-  x = borders.invisible.left;
-  y = borders.invisible.top + outer.height - bottom_left;
-
-  set_integral_bounding_rect (&corner_rects[3],
-                              x, y, bottom_left, bottom_left);
-
-  cairo_arc (cr,
-             x + bottom_left,
-             y,
-             bottom_left,
-             0, M_PI*2);
-
-  corner_path = cairo_copy_path (cr);
-
-  cairo_surface_destroy (surface);
-  cairo_destroy (cr);
-
-  corner_region = cairo_region_create_rectangles (corner_rects, 4);
-
-  meta_shaped_texture_set_overlay_path (META_SHAPED_TEXTURE (priv->actor),
-                                        corner_region, corner_path);
-
-  cairo_region_destroy (corner_region);
-
-}
-
-static void
-generate_mask (MetaWindowActor  *self,
-               MetaFrameBorders *borders,
-               cairo_region_t   *shape_region)
-{
-  float top_left, top_right, bottom_left, bottom_right;
-  int x, y;
-  MetaRectangle outer;
-
-  meta_frame_get_corner_radiuses (window->frame,
-                                  &top_left,
-                                  &top_right,
-                                  &bottom_left,
-                                  &bottom_right);
-
-  meta_window_get_outer_rect (window, &outer);
-
-  /* top left */
-  x = borders->invisible.left;
-  y = borders->invisible.top;
-
-  cairo_arc (cr,
-             x + top_left,
-             y + top_left,
-             top_left,
-             2 * TAU / 4,
-             3 * TAU / 4);
-
-  /* top right */
-  x = borders->invisible.left + outer.width - top_right;
-  y = borders->invisible.top;
-
-  cairo_arc (cr,
-             x,
-             y + top_right,
-             top_right,
-             3 * TAU / 4,
-             4 * TAU / 4);
-
-  /* bottom right */
-  x = borders->invisible.left + outer.width - bottom_right;
-  y = borders->invisible.top + outer.height - bottom_right;
-
-  cairo_arc (cr,
-             x,
-             y,
-             bottom_right,
-             0 * TAU / 4,
-             1 * TAU / 4);
-
-  /* bottom left */
-  x = borders->invisible.left;
-  y = borders->invisible.top + outer.height - bottom_left;
-
-  cairo_arc (cr,
-             x + bottom_left,
-             y,
-             bottom_left,
-             1 * TAU / 4,
-             2 * TAU / 4);
-
-  cairo_set_source_rgba (cr, 1, 1, 1, 1);
-  cairo_fill (cr);
-}
-
 static cairo_region_t *
 scan_visible_region (guchar         *mask_data,
                      int             stride,
@@ -2487,25 +2328,27 @@ scan_visible_region (guchar         *mask_data,
 
 static void
 build_and_scan_frame_mask (MetaWindowActor       *self,
-                           cairo_rectangle_int_t *client_area,
                            cairo_region_t        *shape_region)
 {
+  MetaWindowActorPrivate *priv = self->priv;
+  if (!priv->needs_mask)
+    return;
+
   ClutterBackend *backend;
   CoglContext *ctx;
-  MetaWindowActorPrivate *priv = self->priv;
+  MetaShapedTexture *stex = META_SHAPED_TEXTURE (priv->actor);
   guchar *mask_data;
   guint tex_width, tex_height;
   CoglTexture *paint_tex, *mask_texture;
   int stride;
   cairo_t *cr;
   cairo_surface_t *surface;
+  cairo_rectangle_int_t client_area;
+  gboolean needs_frame_mask = FALSE;
 
-  paint_tex = meta_shaped_texture_get_texture (META_SHAPED_TEXTURE (priv->actor));
+  paint_tex = meta_shaped_texture_get_texture (stex);
   if (paint_tex == NULL)
     return;
-
-  backend = clutter_get_default_backend ();
-  ctx = clutter_backend_get_cogl_context (backend);
 
   tex_width = cogl_texture_get_width (paint_tex);
   tex_height = cogl_texture_get_height (paint_tex);
@@ -2532,7 +2375,7 @@ build_and_scan_frame_mask (MetaWindowActor       *self,
 
       /* Make sure we don't paint the frame over the client window. */
       frame_paint_region = cairo_region_create_rectangle (&rect);
-      cairo_region_subtract_rectangle (frame_paint_region, client_area);
+      cairo_region_subtract_rectangle (frame_paint_region, &priv->client_area);
 
       gdk_cairo_region (cr, frame_paint_region);
       cairo_clip (cr);
@@ -2559,6 +2402,8 @@ build_and_scan_frame_mask (MetaWindowActor       *self,
   else
     {
       CoglError *error = NULL;
+      backend = clutter_get_default_backend ();
+      ctx = clutter_backend_get_cogl_context (backend);
 
       mask_texture = COGL_TEXTURE (cogl_texture_2d_new_from_data (ctx, tex_width, tex_height,
                                                                   COGL_PIXEL_FORMAT_A_8,
@@ -2577,6 +2422,8 @@ build_and_scan_frame_mask (MetaWindowActor       *self,
     cogl_object_unref (mask_texture);
 
   g_free (mask_data);
+
+  priv->needs_mask = FALSE;
 }
 
 static cairo_region_t *
@@ -2703,27 +2550,18 @@ check_needs_reshape (MetaWindowActor *self)
   else
     priv->opaque_region = cairo_region_reference (region);
 
-  meta_shaped_texture_set_shape_region (META_SHAPED_TEXTURE (priv->actor),
-                                        region);
+  meta_shaped_texture_set_shape_region (META_SHAPED_TEXTURE (priv->actor), region);
+  priv->client_area = client_area;
+
+  meta_window_actor_update_shape_region (self, region);
+
   /* This takes the region, generates a mask using GTK+
    * and scans the mask looking for all opaque pixels,
    * adding it to region.
    */
   if (needs_mask)
-    {
-      /* This takes the region, generates a mask using GTK+
-       * and scans the mask looking for all opaque pixels,
-       * adding it to region.
-       */
-      build_and_scan_frame_mask (self, &client_area, region);
-    }
+    meta_window_actor_reset_mask_texture (self, priv->window->fullscreen);
 
-  if (priv->window->frame)
-    update_corners (self);
-
-  meta_window_actor_reset_mask_texture (self, priv->window->fullscreen);
-
-  meta_window_actor_update_shape_region (self, region);
   cairo_region_destroy (region);
 
   priv->needs_reshape = FALSE;
