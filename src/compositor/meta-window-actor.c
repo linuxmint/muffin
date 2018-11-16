@@ -2490,17 +2490,22 @@ build_and_scan_frame_mask (MetaWindowActor       *self,
                            cairo_rectangle_int_t *client_area,
                            cairo_region_t        *shape_region)
 {
+  ClutterBackend *backend;
+  CoglContext *ctx;
   MetaWindowActorPrivate *priv = self->priv;
   guchar *mask_data;
   guint tex_width, tex_height;
-  CoglHandle paint_tex, mask_texture;
+  CoglTexture *paint_tex, *mask_texture;
   int stride;
   cairo_t *cr;
   cairo_surface_t *surface;
 
   paint_tex = meta_shaped_texture_get_texture (META_SHAPED_TEXTURE (priv->actor));
-  if (paint_tex == COGL_INVALID_HANDLE)
+  if (paint_tex == NULL)
     return;
+
+  backend = clutter_get_default_backend ();
+  ctx = clutter_backend_get_cogl_context (backend);
 
   tex_width = cogl_texture_get_width (paint_tex);
   tex_height = cogl_texture_get_height (paint_tex);
@@ -2553,22 +2558,43 @@ build_and_scan_frame_mask (MetaWindowActor       *self,
     }
   else
     {
-      /* Note: we don't allow slicing for this texture because we
-       * need to use it with multi-texturing which doesn't support
-       * sliced textures */
-      mask_texture = cogl_texture_new_from_data (tex_width, tex_height,
-                                                 COGL_TEXTURE_NO_SLICING,
-                                                 COGL_PIXEL_FORMAT_A_8,
-                                                 COGL_PIXEL_FORMAT_ANY,
-                                                 stride,
-                                                 mask_data);
+      CoglError *error = NULL;
+
+      mask_texture = COGL_TEXTURE (cogl_texture_2d_new_from_data (ctx, tex_width, tex_height,
+                                                                  COGL_PIXEL_FORMAT_A_8,
+                                                                  stride, mask_data, &error));
+
+      if (error)
+        {
+          g_warning ("Failed to allocate mask texture: %s", error->message);
+          cogl_error_free (error);
+        }
     }
 
   meta_shaped_texture_set_mask_texture (META_SHAPED_TEXTURE (priv->actor),
                                         mask_texture);
-  cogl_handle_unref (mask_texture);
+  if (mask_texture)
+    cogl_object_unref (mask_texture);
 
   g_free (mask_data);
+}
+
+static cairo_region_t *
+region_create_from_x_rectangles (const XRectangle *rects,
+                                 int n_rects)
+{
+  int i;
+  cairo_rectangle_int_t *cairo_rects = g_newa (cairo_rectangle_int_t, n_rects);
+
+  for (i = 0; i < n_rects; i ++)
+    {
+      cairo_rects[i].x = rects[i].x;
+      cairo_rects[i].y = rects[i].y;
+      cairo_rects[i].width = rects[i].width;
+      cairo_rects[i].height = rects[i].height;
+    }
+
+  return cairo_region_create_rectangles (cairo_rects, n_rects);
 }
 
 static void
@@ -2599,38 +2625,57 @@ check_needs_reshape (MetaWindowActor *self)
     {
       /* Translate the set of XShape rectangles that we
        * get from the X server to a cairo_region. */
-      Display *xdisplay = meta_display_get_xdisplay (display);
-      XRectangle *rects;
+      XRectangle *rects = NULL;
       int n_rects, ordering;
 
+      int x_bounding, y_bounding, x_clip, y_clip;
+      unsigned w_bounding, h_bounding, w_clip, h_clip;
+      int bounding_shaped, clip_shaped;
+
       meta_error_trap_push (display);
-      rects = XShapeGetRectangles (xdisplay,
-                                   priv->window->xwindow,
-                                   ShapeBounding,
-                                   &n_rects,
-                                   &ordering);
+      XShapeQueryExtents (display->xdisplay, priv->window->xwindow,
+                          &bounding_shaped, &x_bounding, &y_bounding,
+                          &w_bounding, &h_bounding,
+                          &clip_shaped, &x_clip, &y_clip,
+                          &w_clip, &h_clip);
+
+      if (bounding_shaped)
+        {
+          rects = XShapeGetRectangles (display->xdisplay,
+                                       priv->window->xwindow,
+                                       ShapeBounding,
+                                       &n_rects,
+                                       &ordering);
+        }
       meta_error_trap_pop (display);
 
       if (rects)
         {
-          int i;
-          cairo_rectangle_int_t *cairo_rects = g_new (cairo_rectangle_int_t, n_rects);
-          for (i = 0; i < n_rects; i ++)
-            {
-              cairo_rects[i].x = rects[i].x + client_area.x;
-              cairo_rects[i].y = rects[i].y + client_area.y;
-              cairo_rects[i].width = rects[i].width;
-              cairo_rects[i].height = rects[i].height;
-            }
-
+          region = region_create_from_x_rectangles (rects, n_rects);
           XFree (rects);
-          region = cairo_region_create_rectangles (cairo_rects, n_rects);
-          g_free (cairo_rects);
         }
     }
 #endif
 
   needs_mask = (region != NULL) || (priv->window->frame != NULL);
+
+  if (region != NULL)
+    {
+      /* The shape we get back from the client may have coordinates
+       * outside of the frame. The X SHAPE Extension requires that
+       * the overall shape the client provides never exceeds the
+       * "bounding rectangle" of the window -- the shape that the
+       * window would have gotten if it was unshaped. In our case,
+       * this is simply the client area.
+       */
+      cairo_region_intersect_rectangle (region, &client_area);
+      /* Some applications might explicitly set their bounding region
+       * to the client area. Detect these cases, and throw out the
+       * bounding region in this case for decorated windows. */
+      if (priv->window->decorated &&
+          cairo_region_contains_rectangle (region, &client_area) == CAIRO_REGION_OVERLAP_IN)
+        g_clear_pointer (&region, cairo_region_destroy);
+    }
 
   if (region == NULL)
     {

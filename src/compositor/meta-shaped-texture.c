@@ -781,7 +781,7 @@ meta_shaped_texture_set_create_mipmaps (MetaShapedTexture *stex,
 
 void
 meta_shaped_texture_set_mask_texture (MetaShapedTexture *stex,
-                                      CoglHandle         mask_texture)
+                                      CoglTexture       *mask_texture)
 {
   MetaShapedTexturePrivate *priv;
 
@@ -789,16 +789,12 @@ meta_shaped_texture_set_mask_texture (MetaShapedTexture *stex,
 
   priv = stex->priv;
 
-  if (priv->mask_texture != COGL_INVALID_HANDLE)
-    {
-      cogl_handle_unref (priv->mask_texture);
-      priv->mask_texture = COGL_INVALID_HANDLE;
-    }
+  g_clear_pointer (&priv->mask_texture, cogl_object_unref);
 
-  if (mask_texture != COGL_INVALID_HANDLE)
+  if (mask_texture != NULL)
     {
       priv->mask_texture = mask_texture;
-      cogl_handle_ref (priv->mask_texture);
+      cogl_object_ref (priv->mask_texture);
     }
 }
 
@@ -953,7 +949,7 @@ CoglTexture *
 meta_shaped_texture_get_texture (MetaShapedTexture *stex)
 {
   g_return_val_if_fail (META_IS_SHAPED_TEXTURE (stex), NULL);
-  return stex->priv->texture;
+  return COGL_TEXTURE (stex->priv->texture);
 }
 
 /**
