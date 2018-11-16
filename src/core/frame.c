@@ -348,9 +348,7 @@ meta_frame_calc_borders (MetaFrame        *frame,
     {
       if (!frame->borders_cached)
         {
-          meta_ui_get_frame_borders (frame->window->screen->ui,
-                                     frame->xwindow,
-                                     &frame->cached_borders);
+          meta_ui_frame_get_borders (frame->ui_frame, &frame->cached_borders);
           frame->borders_cached = TRUE;
         }
 
