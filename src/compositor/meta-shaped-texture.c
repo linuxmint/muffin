@@ -808,8 +808,6 @@ meta_shaped_texture_set_shape_region (MetaShapedTexture *stex,
       cairo_region_reference (region);
       priv->shape_region = region;
     }
-
-  clutter_actor_queue_redraw (CLUTTER_ACTOR (stex));
 }
 
 /**
