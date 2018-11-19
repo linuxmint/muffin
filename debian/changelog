@@ -1,3 +1,19 @@
+muffin (4.0.2) tessa; urgency=medium
+
+  [ Jason Hicks ]
+  * main: Reserve CLUTTER_PAINT for software rendering only (#379)
+  * window-actor: Fix window shading (#381)
+  * window-actor: Fix window artifacts on size/position change (#382)
+  * shaped-texture: Don't redraw when setting the shape region (#384)
+
+  [ Cobinja ]
+  * Fix VLC fullscreen controller position (#383)
+
+  [ Jason Hicks ]
+  * window: Implement _NET_RESTACK_WINDOW and XConfigureRequestEvent sibling (#386)
+
+ -- Clement Lefebvre <root@linuxmint.com>  Mon, 19 Nov 2018 09:56:39 +0000
+
 muffin (4.0.1) tessa; urgency=medium
 
   [ Eli Schwartz ]
