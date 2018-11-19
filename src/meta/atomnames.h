@@ -183,11 +183,7 @@ item(_NET_WM_BYPASS_COMPOSITOR)
 item(_NET_WM_OPAQUE_REGION)
 item(_NET_WM_FRAME_DRAWN)
 item(_NET_WM_FRAME_TIMINGS)
-
-#if 0
-/* We apparently never use: */
-/* item(_NET_RESTACK_WINDOW) */
-#endif
+item(_NET_RESTACK_WINDOW)
 
 /* eof atomnames.h */
 
