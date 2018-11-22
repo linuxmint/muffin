@@ -1,4 +1,4 @@
-SUBDIRS = cogl muffin
+SUBDIRS = muffin
 
 if CLUTTER_DOC
 SUBDIRS += clutter
