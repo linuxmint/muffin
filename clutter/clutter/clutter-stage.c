@@ -122,7 +122,6 @@ struct _ClutterStagePrivate
   ClutterActor *key_focused_actor;
 
   GQueue *event_queue;
-  guint event_flushing_idle_source;
 
   ClutterStageHint stage_hints;
 
@@ -873,19 +872,6 @@ clutter_stage_real_fullscreen (ClutterStage *stage)
                           CLUTTER_ALLOCATION_NONE);
 }
 
-static gboolean
-_clutter_stage_flush_events (gpointer user_data)
-{
-  ClutterStage *stage = CLUTTER_STAGE (user_data);
-  ClutterStagePrivate *priv = stage->priv;
-
-  priv->event_flushing_idle_source = 0;
-  _clutter_stage_process_queued_events (stage);
-
-  return G_SOURCE_REMOVE;
-}
-
-
 void
 _clutter_stage_queue_event (ClutterStage *stage,
                             ClutterEvent *event,
@@ -906,6 +892,13 @@ _clutter_stage_queue_event (ClutterStage *stage,
 
   g_queue_push_tail (priv->event_queue, event);
 
+  if (first_event)
+    {
+      ClutterMasterClock *master_clock = _clutter_master_clock_get_default ();
+      _clutter_master_clock_start_running (master_clock);
+      _clutter_stage_schedule_update (stage);
+    }
+
   /* if needed, update the state of the input device of the event.
    * we do it here to avoid calling the same code from every backend
    * event processing function
@@ -925,30 +918,6 @@ _clutter_stage_queue_event (ClutterStage *stage,
       _clutter_input_device_set_coords (device, sequence, event_x, event_y, stage);
       _clutter_input_device_set_state (device, event_state);
       _clutter_input_device_set_time (device, event_time);
-    }
-
-  if (!priv->throttle_motion_events)
-    {
-      if (!priv->event_flushing_idle_source)
-        {
-          /* Process events ASAP, but never at the expense of rendering
-           * performance. So a sufficiently fast machine will process all
-           * events synchronously. But in the worst case a slow machine will
-           * batch and throttle them to the refresh rate on the next master
-           * clock tick.
-           */
-          priv->event_flushing_idle_source =
-            g_idle_add_full (CLUTTER_PRIORITY_REDRAW + 1,
-                             _clutter_stage_flush_events,
-                             stage,
-                             NULL);
-        }
-    }
-  else if (first_event)
-    {
-      ClutterMasterClock *master_clock = _clutter_master_clock_get_default ();
-      _clutter_master_clock_start_running (master_clock);
-      _clutter_stage_schedule_update (stage);
     }
 }
 
@@ -1900,10 +1869,6 @@ clutter_stage_finalize (GObject *object)
   ClutterStage *stage = CLUTTER_STAGE (object);
   ClutterStagePrivate *priv = stage->priv;
 
-  if (priv->event_flushing_idle_source)
-    g_source_remove (priv->event_flushing_idle_source);
-
-
   g_queue_foreach (priv->event_queue, (GFunc) clutter_event_free, NULL);
   g_queue_free (priv->event_queue);
 
@@ -2348,7 +2313,7 @@ clutter_stage_init (ClutterStage *self)
   priv->is_user_resizable = FALSE;
   priv->is_cursor_visible = TRUE;
   priv->use_fog = FALSE;
-  priv->throttle_motion_events = FALSE;
+  priv->throttle_motion_events = TRUE;
   priv->min_size_changed = FALSE;
   priv->sync_delay = -1;
 
