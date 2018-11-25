@@ -25,6 +25,7 @@ override_dh_autoreconf:
 
 override_dh_auto_configure:
 	dh_auto_configure -- \
+	  --libexecdir="\$${prefix}/lib/muffin" \
 	  --disable-static \
 	  --enable-startup-notification=yes \
 	  --disable-silent-rules \

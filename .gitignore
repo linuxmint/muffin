@@ -108,6 +108,7 @@ src/muffin-enum-types.h
 src/muffin-enum-types.lo
 src/muffin-enum-types.o
 src/muffin-plugins.pc
+src/muffin-restart-helper
 src/muffin-theme-viewer
 src/muffin.desktop
 src/org.cinnamon.muffin.gschema.valid

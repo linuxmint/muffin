@@ -437,4 +437,6 @@ void meta_display_remove_autoraise_callback (MetaDisplay *display);
 /* In above-tab-keycode.c */
 guint meta_display_get_above_tab_keycode (MetaDisplay *display);
 
+void meta_display_notify_restart (MetaDisplay *display);
+
 #endif
