@@ -1459,7 +1459,7 @@ meta_post_paint_func (gpointer data)
          restart the process. Obviously we can't do this when we are
          a wayland compositor but in that case we shouldn't get here
          since we don't enable robustness in that case. */
-      meta_display_restart (compositor->display);
+      meta_restart ();
       break;
     }
 

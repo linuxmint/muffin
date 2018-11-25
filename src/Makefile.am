@@ -135,6 +135,7 @@ libmuffin_la_SOURCES =				\
 	meta/types.h				\
 	core/session.c				\
 	core/session.h				\
+	core/restart.c				\
 	core/stack.c				\
 	core/stack.h				\
 	core/stack-tracker.c			\
@@ -228,6 +229,10 @@ bin_PROGRAMS=muffin muffin-theme-viewer
 
 muffin_SOURCES = core/muffin.c
 muffin_LDADD = $(MUFFIN_LIBS) libmuffin.la
+
+libexec_PROGRAMS = muffin-restart-helper
+muffin_restart_helper_SOURCES = core/restart-helper.c
+muffin_restart_helper_LDADD = $(MUFFIN_LIBS)
 
 if HAVE_INTROSPECTION
 include $(INTROSPECTION_MAKEFILE)

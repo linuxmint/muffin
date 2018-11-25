@@ -145,6 +145,7 @@ enum
   ZOOM_SCROLL_OUT,
   BELL,
   GL_VIDEO_MEMORY_PURGED,
+  RESTART,
   LAST_SIGNAL
 };
 
@@ -309,6 +310,21 @@ meta_display_class_init (MetaDisplayClass *klass)
 
   display_signals[GL_VIDEO_MEMORY_PURGED] =
     g_signal_new ("gl-video-memory-purged",
+                  G_TYPE_FROM_CLASS (klass),
+                  G_SIGNAL_RUN_LAST,
+                  0,
+                  NULL, NULL, NULL,
+                  G_TYPE_NONE, 0);
+
+  /**
+   * MetaDisplay::restart:
+   * @display: the #MetaDisplay instance
+   *
+   * The ::restart signal is emitted to indicate that Muffin
+   * will restart the process.
+   */
+  display_signals[RESTART] =
+    g_signal_new ("restart",
                   G_TYPE_FROM_CLASS (klass),
                   G_SIGNAL_RUN_LAST,
                   0,
@@ -5635,14 +5651,8 @@ meta_display_get_leader_window (MetaDisplay *display)
   return display->leader_window;
 }
 
-/**
- * meta_display_restart:
- * @display: a #MetaDisplay
- *
- * Restart the current process.  Only intended for development purposes.
- */
-void
-meta_display_restart (MetaDisplay *display)
+static gboolean
+meta_display_restart_internal (MetaDisplay *display)
 {
   GPtrArray *arr;
   gsize len;
@@ -5655,7 +5665,7 @@ meta_display_restart (MetaDisplay *display)
   if (!g_file_get_contents ("/proc/self/cmdline", &buf, &len, &error))
     {
       g_warning ("Failed to get /proc/self/cmdline: %s", error->message);
-      return;
+      return FALSE;
     }
 
   buf_end = buf+len;
@@ -5681,4 +5691,25 @@ meta_display_restart (MetaDisplay *display)
   g_warning ("Failed to reexec: %s", g_strerror (errno));
   g_ptr_array_free (arr, TRUE);
   g_free (buf);
+  return FALSE;
+}
+
+LOCAL_SYMBOL void
+meta_display_notify_restart (MetaDisplay *display)
+{
+  g_signal_emit (display, display_signals[RESTART], 0);
+}
+
+/**
+ * meta_display_restart:
+ * @display: a #MetaDisplay
+ *
+ * Restart the current process.  Only intended for development purposes.
+ */
+void
+meta_display_restart (MetaDisplay *display)
+{
+  g_idle_add_full (G_PRIORITY_LOW,
+                   (GSourceFunc) meta_display_restart_internal,
+                   display, NULL);
 }
