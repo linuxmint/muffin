@@ -379,6 +379,12 @@ meta_shaped_texture_ensure_mask (MetaShapedTexture *stex)
       /* Create data for an empty image */
       mask_data = g_malloc0 (stride * tex_height);
 
+      if (priv->shape_region == NULL)
+        {
+          priv->mask_needs_update = TRUE;
+          return;
+        }
+
       n_rects = cairo_region_num_rectangles (priv->shape_region);
 
       /* Fill in each rectangle. */
