@@ -496,6 +496,21 @@ meta_window_actor_constructed (GObject *object)
   maybe_desaturate_window (CLUTTER_ACTOR (self));
 
   priv->shape_region = cairo_region_create();
+
+
+
+  /* Fix for the case when clients try to re-map their windows after re-decorating while
+     effects are enabled. For reasons currently unknown, the re-shape doesn't happen when
+     #meta_plugin_map_completed is called after a delay. #window_decorated_notify is not
+     always called on re-decoration, and when it is, its only called before the actor is
+     disposed in this case - we can't track after that.
+     FIXME: We should be able to check if window effects are enabled in muffin - regardless
+     if the effects are composed in Cinnamon. */
+  if (priv->window->frame != NULL &&
+      priv->window->decorated &&
+      !priv->window->pending_compositor_effect &&
+      !priv->window->unmaps_pending)
+    priv->needs_reshape = TRUE;
 }
 
 static void
@@ -1633,17 +1648,19 @@ meta_window_actor_sync_actor_geometry (MetaWindowActor *self,
       clutter_actor_set_position (CLUTTER_ACTOR (self),
                                   window_rect.x, window_rect.y);
 
+      /* Repaint the mask texture when frameless windows are shaken loose.
+         FIXME: window->shaken_loose is not TRUE for frameless windows. */
+      if (!priv->window->frame && priv->shape_region != NULL)
+        {
+          if (priv->size_changed)
+            priv->frameless_geometry_updates = 0;
+          priv->frameless_geometry_updates++;
+          if (priv->frameless_geometry_updates < 3)
+            meta_window_actor_reset_mask_texture (self, TRUE);
+        }
+
       info = meta_screen_get_compositor_data (priv->screen);
       clutter_actor_queue_redraw (CLUTTER_ACTOR (info->window_group));
-    }
-
-  if (!self->priv->window->frame && (priv->size_changed || priv->position_changed))
-    {
-      if (priv->size_changed)
-        priv->frameless_geometry_updates = 0;
-      priv->frameless_geometry_updates++;
-      if (priv->frameless_geometry_updates < 3)
-        meta_window_actor_reset_mask_texture (self, TRUE);
     }
 }
 
