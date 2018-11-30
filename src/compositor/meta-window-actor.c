@@ -480,6 +480,19 @@ meta_window_actor_constructed (GObject *object)
       g_object_ref (priv->actor);
       priv->opacity_changed_id = g_signal_connect (self, "notify::opacity",
                                                    G_CALLBACK (clutter_actor_opacity_notify), NULL);
+
+      /* Fix for the case when clients try to re-map their windows after re-decorating while
+         effects are enabled. For reasons currently unknown, the re-shape doesn't happen when
+         #meta_plugin_map_completed is called after a delay. #window_decorated_notify is not
+         always called on re-decoration, and when it is, its only called before the actor is
+         disposed in this case - we can't track after that.
+         FIXME: We should be able to check if window effects are enabled in muffin - regardless
+         if the effects are composed in Cinnamon. */
+      if (priv->window->frame != NULL &&
+          priv->window->decorated &&
+          !priv->window->pending_compositor_effect &&
+          !priv->window->unmaps_pending)
+        priv->needs_reshape = TRUE;
     }
   else
     {
@@ -496,19 +509,6 @@ meta_window_actor_constructed (GObject *object)
   maybe_desaturate_window (CLUTTER_ACTOR (self));
 
   priv->shape_region = cairo_region_create();
-
-  /* Fix for the case when clients try to re-map their windows after re-decorating while
-     effects are enabled. For reasons currently unknown, the re-shape doesn't happen when
-     #meta_plugin_map_completed is called after a delay. #window_decorated_notify is not
-     always called on re-decoration, and when it is, its only called before the actor is
-     disposed in this case - we can't track after that.
-     FIXME: We should be able to check if window effects are enabled in muffin - regardless
-     if the effects are composed in Cinnamon. */
-  if (priv->window->frame != NULL &&
-      priv->window->decorated &&
-      !priv->window->pending_compositor_effect &&
-      !priv->window->unmaps_pending)
-    priv->needs_reshape = TRUE;
 }
 
 static void
