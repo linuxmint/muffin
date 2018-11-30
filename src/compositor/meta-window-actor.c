@@ -497,8 +497,6 @@ meta_window_actor_constructed (GObject *object)
 
   priv->shape_region = cairo_region_create();
 
-
-
   /* Fix for the case when clients try to re-map their windows after re-decorating while
      effects are enabled. For reasons currently unknown, the re-shape doesn't happen when
      #meta_plugin_map_completed is called after a delay. #window_decorated_notify is not
