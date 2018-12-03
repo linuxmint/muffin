@@ -310,6 +310,16 @@ meta_workspace_remove (MetaWorkspace *workspace)
    */
 }
 
+static gboolean
+emit_window_added (MetaWindow *window)
+{
+  if (window == NULL || window->workspace == NULL)
+    return FALSE;
+
+  g_signal_emit (window->workspace, signals[WINDOW_ADDED], 0, window);
+  return FALSE;
+}
+
 LOCAL_SYMBOL void
 meta_workspace_add_window (MetaWorkspace *workspace,
                            MetaWindow    *window)
@@ -359,7 +369,7 @@ meta_workspace_add_window (MetaWorkspace *workspace,
    */
   meta_window_queue (window, META_QUEUE_CALC_SHOWING|META_QUEUE_MOVE_RESIZE);
 
-  g_signal_emit (workspace, signals[WINDOW_ADDED], 0, window);
+  clutter_threads_add_timeout (20, (GSourceFunc) emit_window_added, window);
   g_object_notify (G_OBJECT (workspace), "n-windows");
 }
 
