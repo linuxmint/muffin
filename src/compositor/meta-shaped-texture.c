@@ -374,12 +374,18 @@ meta_shaped_texture_ensure_mask (MetaShapedTexture *stex)
           return;
         }
 
+      if (priv->shape_region == NULL)
+        return;
+
+      n_rects = cairo_region_num_rectangles (priv->shape_region);
+
+      if (n_rects == 0)
+        return;
+
       stride = cairo_format_stride_for_width (CAIRO_FORMAT_A8, tex_width);
 
       /* Create data for an empty image */
       mask_data = g_malloc0 (stride * tex_height);
-
-      n_rects = cairo_region_num_rectangles (priv->shape_region);
 
       /* Fill in each rectangle. */
       for (i = 0; i < n_rects; i ++)
