@@ -882,7 +882,7 @@ typedef enum {
 /**
  * ClutterFeatureFlags:
  * @CLUTTER_FEATURE_TEXTURE_NPOT: Set if NPOTS textures supported.
- * @CLUTTER_FEATURE_SWAP_THROTTLE: Set if throttling swap is supported.
+ * @CLUTTER_FEATURE_SWAP_THROTTLE: Set if backend throttles buffer swaps.
  * @CLUTTER_FEATURE_TEXTURE_YUV: Set if YUV based textures supported.
  * @CLUTTER_FEATURE_TEXTURE_READ_PIXELS: Set if texture pixels can be read.
  * @CLUTTER_FEATURE_STAGE_STATIC: Set if stage size if fixed (i.e framebuffer)
