@@ -1,3 +1,12 @@
+muffin (4.0.4) tessa; urgency=medium
+
+  [ Jason Hicks ]
+  * shaped-texture: Return early if shape_region is NULL in ensure_mask (#389)
+  * window-actor: Fix the mask texture not updating after windows re-map after re-decoration (#390)
+  * Speed up window mapping (#391)
+
+ -- Clement Lefebvre <root@linuxmint.com>  Thu, 06 Dec 2018 13:14:14 +0000
+
 muffin (4.0.3) tessa; urgency=medium
 
   [ Jason Hicks ]
