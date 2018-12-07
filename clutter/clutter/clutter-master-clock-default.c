@@ -96,12 +96,6 @@ struct _ClutterMasterClockDefault
    */
   GSource *source;
 
-  /* If the master clock is idle that means it has
-   * fallen back to idle polling for timeline
-   * progressions and it may have been some time since
-   * the last real stage update.
-   */
-  guint idle : 1;
   guint ensure_next_iteration : 1;
 
   guint paused : 1;
@@ -299,21 +293,11 @@ master_clock_next_frame_time (ClutterMasterClockDefault *master_clock)
       return now;
     }
 
-  /* When we have sync-to-vblank, we count on swap-buffer requests (or
-   * swap-buffer-complete events if supported in the backend) to throttle our
+  /* We will usually have backend hardware features available to throttle our
    * frame rate so no additional delay is needed to start the next frame.
-   *
-   * If the master-clock has become idle due to no timeline progression causing
-   * redraws then we can no longer rely on vblank synchronization because the
-   * last real stage update/redraw may have happened a long time ago and so we
-   * fallback to polling for timeline progressions every 1/frame_rate seconds.
-   *
-   * (NB: if there aren't even any timelines running then the master clock will
-   * be completely stopped in master_clock_is_running())
    */
-  if (master_clock->preferred_sync_method >= SYNC_SWAP_THROTTLING &&
-      clutter_feature_available (CLUTTER_FEATURE_SYNC_TO_VBLANK) &&
-      !master_clock->idle)
+  if (master_clock->preferred_sync_method >= SYNC_SWAP_THROTTLING ||
+      clutter_feature_available (CLUTTER_FEATURE_SYNC_TO_VBLANK))
     {
       master_clock->active_sync_method = SYNC_SWAP_THROTTLING;
       return now;
@@ -543,7 +527,6 @@ clutter_clock_dispatch (GSource     *source,
 {
   ClutterClockSource *clock_source = (ClutterClockSource *) source;
   ClutterMasterClockDefault *master_clock = clock_source->master_clock;
-  gboolean stages_updated = FALSE;
   GSList *stages;
 
   CLUTTER_NOTE (SCHEDULER, "Master clock [tick]");
@@ -563,8 +546,6 @@ clutter_clock_dispatch (GSource     *source,
    */
   stages = master_clock_list_ready_stages (master_clock);
 
-  master_clock->idle = FALSE;
-
   /* Each frame is split into three separate phases: */
 
   /* 1. process all the events; each stage goes through its events queue
@@ -577,12 +558,7 @@ clutter_clock_dispatch (GSource     *source,
   master_clock_advance_timelines (master_clock);
 
   /* 3. relayout and redraw the stages */
-  stages_updated = master_clock_update_stages (master_clock, stages);
-
-  /* The master clock goes idle if no stages were updated and falls back
-   * to polling for timeline progressions... */
-  if (!stages_updated)
-    master_clock->idle = TRUE;
+  master_clock_update_stages (master_clock, stages);
 
   master_clock_reschedule_stage_updates (master_clock, stages);
 
@@ -627,7 +603,6 @@ clutter_master_clock_default_init (ClutterMasterClockDefault *self)
                                 SYNC_NONE;
   self->active_sync_method = self->preferred_sync_method;
 
-  self->idle = FALSE;
   self->ensure_next_iteration = FALSE;
   self->paused = FALSE;
 
