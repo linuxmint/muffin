@@ -203,7 +203,6 @@ enum
   UNMANAGED,
   SIZE_CHANGED,
   POSITION_CHANGED,
-  RESIZING,
 
   LAST_SIGNAL
 };
@@ -656,15 +655,6 @@ meta_window_class_init (MetaWindowClass *klass)
                   0,
                   NULL, NULL, NULL,
                   G_TYPE_NONE, 0);
-
-  window_signals[RESIZING] =
-    g_signal_new ("resizing",
-                  G_TYPE_FROM_CLASS (object_class),
-                  G_SIGNAL_RUN_LAST,
-                  0,
-                  NULL, NULL, NULL,
-                  G_TYPE_NONE, 0);
-
 }
 
 static void
@@ -8477,10 +8467,7 @@ void
 meta_window_frame_size_changed (MetaWindow *window)
 {
   if (window->frame)
-    {
-      meta_frame_clear_cached_borders (window->frame);
-      g_signal_emit (window, window_signals[RESIZING], 0);
-    }
+    meta_frame_clear_cached_borders (window->frame);
 }
 
 static void
@@ -10076,10 +10063,7 @@ update_resize (MetaWindow *window,
   /* Store the latest resize time, if we actually resized. */
 
   if (window->rect.width != old.width || window->rect.height != old.height)
-    {
-      g_get_current_time (&window->display->grab_last_moveresize_time);
-      g_signal_emit (window, window_signals[RESIZING], 0);
-    }
+    g_get_current_time (&window->display->grab_last_moveresize_time);
 }
 
 typedef struct
@@ -12389,10 +12373,4 @@ meta_window_get_icon_name (MetaWindow *window)
     g_return_val_if_fail (META_IS_WINDOW (window), NULL);
 
     return window->theme_icon_name;
-}
-
-LOCAL_SYMBOL void
-meta_window_update_corners (MetaWindow *window)
-{
-  g_signal_emit (window, window_signals[RESIZING], 0);
 }
