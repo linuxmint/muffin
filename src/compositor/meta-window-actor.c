@@ -201,8 +201,6 @@ static void do_send_frame_timings (MetaWindowActor  *self,
                                    gint             refresh_interval,
                                    gint64           presentation_time);
 
-static void refresh_corners (MetaWindowActor *self);
-
 G_DEFINE_TYPE (MetaWindowActor, meta_window_actor, CLUTTER_TYPE_ACTOR);
 
 static void
@@ -433,16 +431,6 @@ window_position_changed (MetaWindow *mw,
 }
 
 static void
-window_resizing (MetaWindow *mw,
-                 gpointer    data)
-{
-  MetaWindowActor *self = META_WINDOW_ACTOR (data);
-
-  if (self->priv->window->frame)
-    refresh_corners (self);
-}
-
-static void
 meta_window_actor_constructed (GObject *object)
 {
   MetaWindowActor        *self     = META_WINDOW_ACTOR (object);
@@ -602,8 +590,6 @@ meta_window_actor_set_property (GObject      *object,
                                  G_CALLBACK (window_appears_focused_notify), self, 0);
         g_signal_connect_object (priv->window, "position-changed",
                                  G_CALLBACK (window_position_changed), self, 0);
-        g_signal_connect_object (priv->window, "resizing",
-                                 G_CALLBACK (window_resizing), self, 0);
       }
       break;
     case PROP_META_SCREEN:
@@ -2303,11 +2289,11 @@ set_integral_bounding_rect (cairo_rectangle_int_t *rect,
 }
 
 static void
-update_corners (MetaWindowActor   *self,
-                MetaFrameBorders  *borders)
+update_corners (MetaWindowActor   *self)
 {
   MetaWindowActorPrivate *priv = self->priv;
-  MetaRectangle outer;
+  MetaRectangle outer = priv->window->frame->rect;
+  MetaFrameBorders borders;
   cairo_rectangle_int_t corner_rects[4];
   cairo_region_t *corner_region;
   cairo_path_t *corner_path;
@@ -2318,7 +2304,10 @@ update_corners (MetaWindowActor   *self,
   cairo_t *cr;
   cairo_surface_t *surface;
 
-  meta_window_get_outer_rect (priv->window, &outer);
+  meta_frame_calc_borders (priv->window->frame, &borders);
+
+  outer.width -= borders.invisible.left + borders.invisible.right;
+  outer.height -= borders.invisible.top  + borders.invisible.bottom;
 
   meta_frame_get_corner_radiuses (priv->window->frame,
                                   &top_left,
@@ -2335,8 +2324,8 @@ update_corners (MetaWindowActor   *self,
   cr = cairo_create (surface);
 
   /* top left */
-  x = borders->invisible.left;
-  y = borders->invisible.top;
+  x = borders.invisible.left;
+  y = borders.invisible.top;
 
   set_integral_bounding_rect (&corner_rects[0],
                               x, y, top_left, top_left);
@@ -2349,8 +2338,7 @@ update_corners (MetaWindowActor   *self,
 
 
   /* top right */
-  x = borders->invisible.left + outer.width - top_right;
-  y = borders->invisible.top;
+  x = x + outer.width - top_right;
 
   set_integral_bounding_rect (&corner_rects[1],
                               x, y, top_right, top_right);
@@ -2362,8 +2350,8 @@ update_corners (MetaWindowActor   *self,
              0, M_PI*2);
 
   /* bottom right */
-  x = borders->invisible.left + outer.width - bottom_right;
-  y = borders->invisible.top + outer.height - bottom_right;
+  x = borders.invisible.left + outer.width - bottom_right;
+  y = y + outer.height - bottom_right;
 
   set_integral_bounding_rect (&corner_rects[2],
                               x, y, bottom_right, bottom_right);
@@ -2375,8 +2363,8 @@ update_corners (MetaWindowActor   *self,
              0, M_PI*2);
 
   /* bottom left */
-  x = borders->invisible.left;
-  y = borders->invisible.top + outer.height - bottom_left;
+  x = borders.invisible.left;
+  y = borders.invisible.top + outer.height - bottom_left;
 
   set_integral_bounding_rect (&corner_rects[3],
                               x, y, bottom_left, bottom_left);
@@ -2402,20 +2390,11 @@ update_corners (MetaWindowActor   *self,
 }
 
 static void
-refresh_corners (MetaWindowActor *self)
-{
-  MetaFrameBorders borders;
-  meta_frame_calc_borders (self->priv->window->frame, &borders);
-  update_corners (self, &borders);
-}
-
-static void
 check_needs_reshape (MetaWindowActor *self)
 {
   MetaWindowActorPrivate *priv = self->priv;
   MetaScreen *screen = priv->screen;
   MetaDisplay *display = meta_screen_get_display (screen);
-  MetaFrameBorders borders;
   cairo_region_t *region = NULL;
   cairo_rectangle_int_t client_area;
 
@@ -2427,12 +2406,7 @@ check_needs_reshape (MetaWindowActor *self)
   g_clear_pointer (&priv->shadow_shape, meta_window_shape_unref);
   g_clear_pointer (&priv->opaque_region, cairo_region_destroy);
 
-  meta_frame_calc_borders (priv->window->frame, &borders);
-
-  client_area.x = borders.total.left;
-  client_area.y = borders.total.top;
-  client_area.width = priv->window->rect.width;
-  client_area.height = priv->window->rect.height;
+  meta_window_get_client_area_rect (priv->window, &client_area);
 
   if (priv->window->frame)
     region = meta_window_get_frame_bounds (priv->window);
@@ -2508,14 +2482,14 @@ check_needs_reshape (MetaWindowActor *self)
   meta_shaped_texture_set_shape_region (META_SHAPED_TEXTURE (priv->actor),
                                         region);
 
+  if (priv->window->frame)
+    update_corners (self);
+
   meta_window_actor_reset_mask_texture (self, priv->window->fullscreen);
 
   meta_window_actor_update_shape_region (self, region);
 
   cairo_region_destroy (region);
-
-  if (priv->window->frame)
-    update_corners (self, &borders);
 
   priv->needs_reshape = FALSE;
   meta_window_actor_invalidate_shadow (self);

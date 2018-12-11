@@ -840,4 +840,8 @@ void meta_window_extend_by_frame (MetaWindow              *window,
 void meta_window_unextend_by_frame (MetaWindow              *window,
                                     MetaRectangle           *rect,
                                     const MetaFrameBorders  *borders);
+
+void meta_window_get_client_area_rect (const MetaWindow      *window,
+                                       cairo_rectangle_int_t *rect);
+
 #endif

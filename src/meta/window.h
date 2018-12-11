@@ -187,5 +187,4 @@ MetaWindow *meta_window_get_tile_match (MetaWindow *window);
 gboolean meta_window_can_tile (MetaWindow *window, MetaTileMode mode);
 gboolean meta_window_tile (MetaWindow *window, MetaTileMode mode, gboolean snap);
 const char *meta_window_get_icon_name (MetaWindow *window);
-void meta_window_update_corners (MetaWindow *window);
 #endif
