@@ -69,15 +69,18 @@ Window         meta_frame_get_xwindow (MetaFrame *frame);
 void meta_frame_calc_borders      (MetaFrame        *frame,
                                    MetaFrameBorders *borders);
 
+void meta_frame_get_corner_radiuses (MetaFrame *frame,
+                                     float     *top_left,
+                                     float     *top_right,
+                                     float     *bottom_left,
+                                     float     *bottom_right);
+
 gboolean meta_frame_sync_to_window (MetaFrame         *frame,
                                     gboolean           need_resize);
 
 void meta_frame_clear_cached_borders (MetaFrame *frame);
 
 cairo_region_t *meta_frame_get_frame_bounds (MetaFrame *frame);
-
-void meta_frame_get_mask (MetaFrame *frame,
-                          cairo_t   *cr);
 
 void meta_frame_set_screen_cursor (MetaFrame	*frame,
 				   MetaCursor	cursor);

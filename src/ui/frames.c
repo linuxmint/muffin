@@ -593,6 +593,68 @@ meta_ui_frame_get_borders (MetaUIFrame *frame,
                                 borders);
 }
 
+void
+meta_frames_get_borders (MetaFrames *frames,
+                         Window xwindow,
+                         MetaFrameBorders *borders)
+{
+  MetaUIFrame *frame;
+
+  frame = meta_frames_lookup_window (frames, xwindow);
+
+  if (frame == NULL)
+    meta_bug ("No such frame 0x%lx\n", xwindow);
+
+  meta_ui_frame_get_borders (frames, frame, borders);
+}
+
+static void
+meta_ui_frame_get_corner_radiuses (MetaFrames  *frames,
+                                   MetaUIFrame *frame,
+                                   float       *top_left,
+                                   float       *top_right,
+                                   float       *bottom_left,
+                                   float       *bottom_right)
+{
+  MetaFrameGeometry fgeom;
+
+  meta_frames_calc_geometry (frames, frame, &fgeom);
+
+  /* For compatibility with the code in get_visible_rect(), there's
+   * a mysterious sqrt() added to the corner radiuses:
+   *
+   *   const float radius = sqrt(corner) + corner;
+   *
+   * It's unclear why the radius is calculated like this, but we
+   * need to be consistent with it.
+   */
+
+  if (top_left)
+    *top_left = fgeom.top_left_corner_rounded_radius + sqrt(fgeom.top_left_corner_rounded_radius);
+  if (top_right)
+    *top_right = fgeom.top_right_corner_rounded_radius + sqrt(fgeom.top_right_corner_rounded_radius);
+  if (bottom_left)
+    *bottom_left = fgeom.bottom_left_corner_rounded_radius + sqrt(fgeom.bottom_left_corner_rounded_radius);
+  if (bottom_right)
+    *bottom_right = fgeom.bottom_right_corner_rounded_radius + sqrt(fgeom.bottom_right_corner_rounded_radius);
+}
+
+void
+meta_frames_get_corner_radiuses (MetaFrames *frames,
+                                 Window      xwindow,
+                                 float      *top_left,
+                                 float      *top_right,
+                                 float      *bottom_left,
+                                 float      *bottom_right)
+{
+  MetaUIFrame *frame;
+
+  frame = meta_frames_lookup_window (frames, xwindow);
+
+  meta_ui_frame_get_corner_radiuses (frames, frame, top_left, top_right,
+                                     bottom_left, bottom_right);
+}
+
 /* The client rectangle surrounds client window; it subtracts both
  * the visible and invisible borders from the frame window's size.
  */

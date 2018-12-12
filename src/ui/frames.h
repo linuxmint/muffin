@@ -122,6 +122,13 @@ void meta_ui_frame_get_borders (MetaUIFrame      *frame,
 
 cairo_region_t * meta_ui_frame_get_bounds (MetaUIFrame *frame);
 
+void meta_frames_get_corner_radiuses (MetaFrames *frames,
+                                      Window      xwindow,
+                                      float      *top_left,
+                                      float      *top_right,
+                                      float      *bottom_left,
+                                      float      *bottom_right);
+
 void meta_ui_frame_get_mask (MetaUIFrame *frame,
                              cairo_t     *cr);
 

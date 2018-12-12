@@ -88,6 +88,31 @@ void meta_ui_map_frame   (MetaUI *ui,
 void meta_ui_unmap_frame (MetaUI *ui,
                           Window  xwindow);
 
+cairo_region_t *meta_ui_get_frame_bounds (MetaUI  *ui,
+                                          Window   xwindow,
+                                          int      window_width,
+                                          int      window_height);
+
+void meta_ui_get_corner_radiuses (MetaUI *ui,
+                                  Window  xwindow,
+                                  float  *top_left,
+                                  float  *top_right,
+                                  float  *bottom_left,
+                                  float  *bottom_right);
+
+void meta_ui_queue_frame_draw (MetaUI *ui,
+                               Window xwindow);
+
+void meta_ui_set_frame_title (MetaUI *ui,
+                              Window xwindow,
+                              const char *title);
+
+void meta_ui_update_frame_style (MetaUI  *ui,
+                                 Window   window);
+
+void meta_ui_repaint_frame (MetaUI *ui,
+                            Window xwindow);
+
 MetaWindowMenu* meta_ui_window_menu_new   (MetaUI             *ui,
                                            Window              client_xwindow,
                                            MetaMenuOp          ops,

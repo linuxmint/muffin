@@ -315,6 +315,28 @@ meta_ui_free (MetaUI *ui)
 }
 
 LOCAL_SYMBOL void
+meta_ui_get_frame_borders (MetaUI *ui,
+                           Window frame_xwindow,
+                           MetaFrameBorders *borders)
+{
+  meta_frames_get_borders (ui->frames, frame_xwindow,
+                           borders);
+}
+
+LOCAL_SYMBOL void
+meta_ui_get_corner_radiuses (MetaUI *ui,
+                             Window  xwindow,
+                             float  *top_left,
+                             float  *top_right,
+                             float  *bottom_left,
+                             float  *bottom_right)
+{
+  meta_frames_get_corner_radiuses (ui->frames, xwindow,
+                                   top_left, top_right,
+                                   bottom_left, bottom_right);
+}
+
+LOCAL_SYMBOL void
 set_background_none (Display *xdisplay,
                      Window   xwindow)
 {
