@@ -654,12 +654,11 @@ meta_frame_layout_calc_geometry (MetaFrameLayout        *layout,
               rect->clickable.width = button_width;
             }
 
-            rect->clickable.y = 0;
-            rect->clickable.height = button_height + button_y;
-          }
-        else
-          g_memmove (&(rect->clickable), &(rect->visible), sizeof(rect->clickable));
-
+          rect->clickable.y = 0;
+          rect->clickable.height = button_height + button_y;
+        }
+      else
+        g_memmove (&(rect->clickable), &(rect->visible), sizeof(rect->clickable));
 
       x = rect->visible.x + rect->visible.width + layout->button_margin.right * scale;
       if (i < n_left - 1)

@@ -27,6 +27,7 @@
 #include <math.h>
 #include <string.h>
 #include <meta/boxes.h>
+#include <meta/display.h>
 #include "frames.h"
 #include <meta/util.h>
 #include "core.h"
@@ -299,7 +300,7 @@ queue_recalc_func (gpointer key, gpointer value, gpointer data)
   MetaUIFrame *frame = value;
 
   invalidate_whole_window (frame);
-  meta_core_queue_frame_resize (GDK_DISPLAY_XDISPLAY (gdk_display_get_default ()),
+  meta_core_queue_frame_resize (meta_display_get_xdisplay (meta_get_display ()),
                                 frame->xwindow);
   g_clear_object (&frame->text_layout);
 }
@@ -427,11 +428,6 @@ meta_ui_frame_calc_geometry (MetaUIFrame       *frame,
   MetaFrameType type;
   MetaButtonLayout button_layout;
 
-  meta_core_get (GDK_DISPLAY_XDISPLAY (gdk_display_get_default ()), frame->xwindow,
-                 META_CORE_GET_CLIENT_WIDTH, &width,
-                 META_CORE_GET_CLIENT_HEIGHT, &height,
-                 META_CORE_GET_END);
-
   flags = meta_frame_get_flags (frame->meta_window->frame);
   type = meta_window_get_frame_type (frame->meta_window);
 
@@ -444,7 +440,8 @@ meta_ui_frame_calc_geometry (MetaUIFrame       *frame,
                             type,
                             frame->text_height,
                             flags,
-                            width, height,
+                            frame->meta_window->rect.width,
+                            frame->meta_window->rect.height,
                             &button_layout,
                             fgeom);
 }
@@ -491,11 +488,7 @@ meta_ui_frame_attach_style (MetaUIFrame *frame)
   if (frame->style_info != NULL)
     meta_style_info_unref (frame->style_info);
 
-  meta_core_get (GDK_DISPLAY_XDISPLAY (gdk_display_get_default ()),
-                 frame->xwindow,
-                 META_CORE_WINDOW_HAS_FRAME, &has_frame,
-                 META_CORE_GET_THEME_VARIANT, &variant,
-                 META_CORE_GET_END);
+  variant = frame->meta_window->gtk_theme_variant;
 
   if (variant == NULL || strcmp(variant, "normal") == 0)
     frame->style_info = meta_style_info_ref (frames->normal_style);
@@ -533,7 +526,7 @@ meta_frames_manage_window (MetaFrames *frames,
   frame->title = NULL;
   frame->prelit_control = META_FRAME_CONTROL_NONE;
 
-  meta_core_grab_buttons (GDK_DISPLAY_XDISPLAY (gdk_display_get_default ()), frame->xwindow);
+  meta_display_grab_window_buttons (meta_window->display, frame->xwindow);
 
   g_hash_table_replace (frames->frames, &frame->xwindow, frame);
 
@@ -546,7 +539,7 @@ meta_ui_frame_unmanage (MetaUIFrame *frame)
   MetaFrames *frames = frame->frames;
 
   /* restore the cursor */
-  meta_core_set_screen_cursor (GDK_DISPLAY_XDISPLAY (gdk_display_get_default ()),
+  meta_core_set_screen_cursor (meta_display_get_xdisplay (meta_get_display ()),
                                frame->xwindow,
                                META_CURSOR_DEFAULT);
 
@@ -605,7 +598,7 @@ meta_frames_get_borders (MetaFrames *frames,
   if (frame == NULL)
     meta_bug ("No such frame 0x%lx\n", xwindow);
 
-  meta_ui_frame_get_borders (frames, frame, borders);
+  meta_ui_frame_get_borders (frame, borders);
 }
 
 static void
@@ -618,7 +611,7 @@ meta_ui_frame_get_corner_radiuses (MetaFrames  *frames,
 {
   MetaFrameGeometry fgeom;
 
-  meta_frames_calc_geometry (frames, frame, &fgeom);
+  meta_ui_frame_calc_geometry (frame, &fgeom);
 
   /* For compatibility with the code in get_visible_rect(), there's
    * a mysterious sqrt() added to the corner radiuses:
@@ -869,7 +862,7 @@ meta_frame_titlebar_event (MetaUIFrame    *frame,
   MetaFrameFlags flags;
   Display *display;
 
-  display = GDK_DISPLAY_XDISPLAY (gdk_display_get_default ());
+  display = meta_display_get_xdisplay (meta_get_display ());
 
   flags = meta_frame_get_flags (frame->meta_window->frame);
 
@@ -1077,7 +1070,7 @@ meta_frames_button_press_event (GtkWidget      *widget,
   Display *display;
   
   frames = META_FRAMES (widget);
-  display = GDK_DISPLAY_XDISPLAY (gdk_display_get_default ());
+  display = meta_display_get_xdisplay (meta_get_display ());
 
   /* Remember that the display may have already done something with this event.
    * If so there's probably a GrabOp in effect.
@@ -1299,7 +1292,7 @@ meta_frames_button_press_event (GtkWidget      *widget,
 LOCAL_SYMBOL void
 meta_frames_notify_menu_hide (MetaFrames *frames)
 {
-  Display *display = GDK_DISPLAY_XDISPLAY (gdk_display_get_default ());
+  Display *display = meta_display_get_xdisplay (meta_get_display ());
   if (meta_core_get_grab_op (display) ==
       META_GRAB_OP_CLICKING_MENU)
     {
@@ -1332,8 +1325,8 @@ meta_frames_button_release_event    (GtkWidget           *widget,
   Display *display;
   
   frames = META_FRAMES (widget);
-  display = GDK_DISPLAY_XDISPLAY (gdk_display_get_default ());
-  
+  display = meta_display_get_xdisplay (meta_get_display ());
+
   frame = meta_frames_lookup_window (frames, GDK_WINDOW_XID (event->window));
   if (frame == NULL)
     return FALSE;
@@ -1466,9 +1459,7 @@ meta_ui_frame_update_prelit_control (MetaUIFrame     *frame,
     }        
 
   /* set/unset the prelight cursor */
-  meta_core_set_screen_cursor (GDK_DISPLAY_XDISPLAY (gdk_display_get_default ()),
-                               frame->xwindow,
-                               cursor);  
+  meta_frame_set_screen_cursor (frame->meta_window->frame, cursor);
 
   switch (control)
     {
@@ -1504,17 +1495,15 @@ meta_frames_motion_notify_event     (GtkWidget           *widget,
   MetaUIFrame *frame;
   MetaFrames *frames;
   MetaGrabOp grab_op;
-  Display *display;
-  
+
   frames = META_FRAMES (widget);
-  display = GDK_DISPLAY_XDISPLAY (gdk_window_get_display (event->window));
-  
+
   frame = meta_frames_lookup_window (frames, GDK_WINDOW_XID (event->window));
   if (frame == NULL)
     return FALSE;
 
-  grab_op = meta_core_get_grab_op (display);
-  
+  grab_op = frame->meta_window->display->grab_op;
+
   switch (grab_op)
     {
     case META_GRAB_OP_CLICKING_MENU:
@@ -1602,15 +1591,8 @@ get_visible_frame_border_region (MetaUIFrame *frame)
   MetaFrameFlags flags;
   MetaFrameType type;
   MetaFrameBorders borders;
-  Display *display;
-  int frame_width, frame_height;
-
-  display = GDK_DISPLAY_XDISPLAY (gdk_display_get_default ());
-
-  meta_core_get (display, frame->xwindow,
-                 META_CORE_GET_FRAME_WIDTH, &frame_width,
-                 META_CORE_GET_FRAME_HEIGHT, &frame_height,
-                 META_CORE_GET_END);
+  int frame_width = frame->meta_window->frame->rect.width;
+  int frame_height = frame->meta_window->frame->rect.height;
 
   flags = meta_frame_get_flags (frame->meta_window->frame);
   type = meta_window_get_frame_type (frame->meta_window);
@@ -1758,15 +1740,12 @@ meta_ui_frame_paint (MetaUIFrame  *frame,
   int i;
   MetaButtonLayout button_layout;
   MetaGrabOp grab_op;
-  Display *display;
-
-  display = GDK_DISPLAY_XDISPLAY (gdk_display_get_default ());
 
   for (i = 0; i < META_BUTTON_TYPE_LAST; i++)
     button_states[i] = META_BUTTON_STATE_NORMAL;
 
-  grab_frame = meta_core_get_grab_frame (display);
-  grab_op = meta_core_get_grab_op (display);
+  grab_frame = meta_core_get_grab_frame (frame->meta_window->display->xdisplay);
+  grab_op = frame->meta_window->display->grab_op;
   if (grab_frame != frame->xwindow)
     grab_op = META_GRAB_OP_NONE;
 
@@ -1807,11 +1786,9 @@ meta_ui_frame_paint (MetaUIFrame  *frame,
       break;
     }
 
-  meta_core_get (display, frame->xwindow,
-                 META_CORE_GET_MINI_ICON, &mini_icon,
-                 META_CORE_GET_CLIENT_WIDTH, &w,
-                 META_CORE_GET_CLIENT_HEIGHT, &h,
-                 META_CORE_GET_END);
+  mini_icon = frame->meta_window->mini_icon;
+  w = frame->meta_window->rect.width;
+  h = frame->meta_window->rect.height;
 
   flags = meta_frame_get_flags (frame->meta_window->frame);
   type = meta_window_get_frame_type (frame->meta_window);
@@ -1932,13 +1909,9 @@ get_control (MetaUIFrame *frame,
   MetaFrameGeometry fgeom;
   MetaFrameFlags flags;
   MetaFrameType type;
-  MetaWindow *window;
   gboolean has_vert, has_horiz, has_left, has_right, has_bottom, has_top;
   gboolean has_north_resize;
   cairo_rectangle_int_t client;
-
-  window = meta_core_get_window (GDK_DISPLAY_XDISPLAY (gdk_display_get_default ()),
-                                 frame->xwindow);
 
   meta_ui_frame_calc_geometry (frame, &fgeom);
   get_client_rect (&fgeom, &client);
@@ -1977,8 +1950,8 @@ get_control (MetaUIFrame *frame,
   if (POINT_IN_RECT (x, y, fgeom.max_rect.clickable))
     {
       if (flags & META_FRAME_MAXIMIZED &&
-          (META_WINDOW_TILED_TOP (window) ||
-           META_WINDOW_TILED_BOTTOM (window)))
+          (META_WINDOW_TILED_TOP (frame->meta_window) ||
+           META_WINDOW_TILED_BOTTOM (frame->meta_window)))
         return META_FRAME_CONTROL_MAXIMIZE;
 
       if (flags & META_FRAME_MAXIMIZED)
