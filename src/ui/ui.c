@@ -200,6 +200,12 @@ maybe_redirect_mouse_event (XEvent *xevent)
       gevent = gdk_event_new (GDK_MOTION_NOTIFY);
       gevent->motion.type = GDK_MOTION_NOTIFY;
       gevent->motion.window = g_object_ref (gdk_window);
+      gevent->motion.time = xevent->xbutton.time;
+      gevent->motion.x_root = xevent->xbutton.x_root;
+      gevent->motion.y_root = xevent->xbutton.y_root;
+
+      if (xevent->xbutton.button == 1)
+        gevent->motion.state |= GDK_BUTTON1_MASK;
       break;
     case EnterNotify:
     case LeaveNotify:

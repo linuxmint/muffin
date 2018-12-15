@@ -105,6 +105,12 @@ struct _MetaFrames
   GList *invalidate_frames;
   GHashTable *cache;
 
+  MetaGrabOp current_grab_op;
+  MetaUIFrame *grab_frame;
+  guint grab_button;
+  gdouble grab_x;
+  gdouble grab_y;
+
   Window grab_xwindow;
 };
 

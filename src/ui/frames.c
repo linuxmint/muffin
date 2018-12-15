@@ -1291,6 +1291,64 @@ meta_frame_scroll_wheel_event (MetaUIFrame     *frame,
 }
 
 static gboolean
+meta_frames_try_grab_op (MetaFrames  *frames,
+                         MetaUIFrame *frame,
+                         MetaGrabOp   op,
+                         gdouble      grab_x,
+                         gdouble      grab_y,
+                         guint32      time)
+{
+  Display *display;
+  gboolean ret;
+
+  display = GDK_DISPLAY_XDISPLAY (gdk_display_get_default ());
+  ret = meta_core_begin_grab_op (display,
+                                 frame->xwindow,
+                                 op,
+                                 FALSE,
+                                 TRUE,
+                                 frame->grab_button,
+                                 0,
+                                 time,
+                                 grab_x, grab_y);
+  if (!ret)
+    {
+      frames->current_grab_op = op;
+      frames->grab_frame = frame;
+      frames->grab_x = grab_x;
+      frames->grab_y = grab_y;
+    }
+
+  return ret;
+}
+
+static gboolean
+meta_frames_retry_grab_op (MetaFrames *frames,
+                           guint       time)
+{
+  Display *display;
+  MetaGrabOp op;
+
+  if (frames->current_grab_op == META_GRAB_OP_NONE)
+    return TRUE;
+
+  op = frames->current_grab_op;
+  frames->current_grab_op = META_GRAB_OP_NONE;
+  display = GDK_DISPLAY_XDISPLAY (gdk_display_get_default ());
+
+  return meta_core_begin_grab_op (display,
+                                  frames->grab_frame->xwindow,
+                                  op,
+                                  FALSE,
+                                  TRUE,
+                                  frames->grab_frame->grab_button,
+                                  0,
+                                  time,
+                                  frames->grab_x,
+                                  frames->grab_y);
+}
+
+static gboolean
 meta_frame_double_click_edge_event (MetaUIFrame        *frame,
                                     GdkEventButton     *event,
                                     MetaFrameControl    control)
@@ -1375,6 +1433,8 @@ meta_frames_button_press_event (GtkWidget      *widget,
 
   if (meta_core_get_grab_op (display) != META_GRAB_OP_NONE)
     return FALSE; /* already up to something */
+
+  frame->grab_button = event->button;
 
   if (event->button == 1 &&
       (control == META_FRAME_CONTROL_MAXIMIZE ||
@@ -1467,16 +1527,9 @@ meta_frames_button_press_event (GtkWidget      *widget,
           break;
         }
 
-      meta_core_begin_grab_op (display,
-                               frame->xwindow,
-                               op,
-                               TRUE,
-                               TRUE,
-                               event->button,
-                               0,
-                               event->time,
-                               event->x_root,
-                               event->y_root);
+      meta_frames_try_grab_op (frames, frame, op,
+                               event->x_root, event->y_root,
+                               event->time);
     }
   else if (control == META_FRAME_CONTROL_TITLE &&
            event->button == 1)
@@ -1488,17 +1541,11 @@ meta_frames_button_press_event (GtkWidget      *widget,
                      META_CORE_GET_END);
 
       if (flags & META_FRAME_ALLOWS_MOVE)
-        {          
-          meta_core_begin_grab_op (display,
-                                   frame->xwindow,
+        {
+          meta_frames_try_grab_op (frames, frame,
                                    META_GRAB_OP_MOVING,
-                                   TRUE,
-                                   TRUE,
-                                   event->button,
-                                   0,
-                                   event->time,
-                                   event->x_root,
-                                   event->y_root);
+                                   event->x_root, event->y_root,
+                                   event->time);
         }
     }
   else if (control == META_FRAME_CONTROL_TITLE &&
@@ -1529,7 +1576,8 @@ meta_frames_button_release_event    (GtkWidget           *widget,
   
   frames = META_FRAMES (widget);
   display = GDK_DISPLAY_XDISPLAY (gdk_display_get_default ());
-  
+  frames->current_grab_op = META_GRAB_OP_NONE;
+
   frame = meta_frames_lookup_window (frames, GDK_WINDOW_XID (event->window));
   if (frame == NULL)
     return FALSE;
@@ -1737,6 +1785,10 @@ meta_frames_motion_notify_event     (GtkWidget           *widget,
       /* Update prelit control and cursor */
       meta_frames_update_prelit_control (frames, frame, control);
     }
+
+  if ((event->state & GDK_BUTTON1_MASK) &&
+      frames->current_grab_op != META_GRAB_OP_NONE)
+    meta_frames_retry_grab_op (frames, event->time);
 
   return TRUE;
 }
