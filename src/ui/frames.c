@@ -421,7 +421,7 @@ queue_recalc_func (gpointer key, gpointer value, gpointer data)
   frame = value;
 
   invalidate_whole_window (frames, frame);
-  meta_core_queue_frame_resize (GDK_DISPLAY_XDISPLAY (gdk_display_get_default ()),
+  meta_core_queue_frame_resize (meta_display_get_xdisplay (meta_get_display ()),
                                 frame->xwindow);
   if (frame->layout)
     {
@@ -510,8 +510,8 @@ meta_frames_ensure_layout (MetaFrames  *frames,
   widget = GTK_WIDGET (frames);
 
   g_return_if_fail (gtk_widget_get_realized (widget));
-      
-  meta_core_get (GDK_DISPLAY_XDISPLAY (gdk_display_get_default ()), frame->xwindow,
+
+  meta_core_get (meta_display_get_xdisplay (meta_get_display ()), frame->xwindow,
                  META_CORE_GET_FRAME_FLAGS, &flags,
                  META_CORE_GET_FRAME_TYPE, &type,
                  META_CORE_GET_END);
@@ -593,8 +593,8 @@ meta_frames_calc_geometry (MetaFrames        *frames,
   MetaFrameFlags flags;
   MetaFrameType type;
   MetaButtonLayout button_layout;
-  
-  meta_core_get (GDK_DISPLAY_XDISPLAY (gdk_display_get_default ()), frame->xwindow,
+
+  meta_core_get (meta_display_get_xdisplay (meta_get_display ()), frame->xwindow,
                  META_CORE_GET_CLIENT_WIDTH, &width,
                  META_CORE_GET_CLIENT_HEIGHT, &height,
                  META_CORE_GET_FRAME_FLAGS, &flags,
@@ -656,7 +656,7 @@ meta_frames_attach_style (MetaFrames  *frames,
   if (frame->style != NULL)
     g_object_unref (frame->style);
 
-  meta_core_get (GDK_DISPLAY_XDISPLAY (gdk_display_get_default ()),
+  meta_core_get (meta_display_get_xdisplay (meta_get_display ()),
                  frame->xwindow,
                  META_CORE_WINDOW_HAS_FRAME, &has_frame,
                  META_CORE_GET_THEME_VARIANT, &variant,
@@ -697,8 +697,8 @@ meta_frames_manage_window (MetaFrames *frames,
   frame->prelit_control = META_FRAME_CONTROL_NONE;
   frame->button_state = META_BUTTON_STATE_NORMAL;
 
-  meta_core_grab_buttons (GDK_DISPLAY_XDISPLAY (gdk_display_get_default ()), frame->xwindow);
-  
+  meta_core_grab_buttons (meta_display_get_xdisplay (meta_get_display ()), frame->xwindow);
+
   g_hash_table_replace (frames->frames, &frame->xwindow, frame);
 }
 
@@ -718,7 +718,7 @@ meta_frames_unmanage_window (MetaFrames *frames,
       invalidate_all_caches (frames);
       
       /* restore the cursor */
-      meta_core_set_screen_cursor (GDK_DISPLAY_XDISPLAY (gdk_display_get_default ()),
+      meta_core_set_screen_cursor (meta_display_get_xdisplay (meta_get_display ()),
                                    frame->xwindow,
                                    META_CURSOR_DEFAULT);
 
@@ -768,8 +768,8 @@ meta_frames_get_borders (MetaFrames *frames,
 
   if (frame == NULL)
     meta_bug ("No such frame 0x%lx\n", xwindow);
-  
-  meta_core_get (GDK_DISPLAY_XDISPLAY (gdk_display_get_default ()), frame->xwindow,
+
+  meta_core_get (meta_display_get_xdisplay (meta_get_display ()), frame->xwindow,
                  META_CORE_GET_FRAME_FLAGS, &flags,
                  META_CORE_GET_FRAME_TYPE, &type,
                  META_CORE_GET_END);
@@ -1067,8 +1067,8 @@ meta_frame_titlebar_event (MetaUIFrame    *frame,
   MetaFrameFlags flags;
   Display *display;
 
-  display = GDK_DISPLAY_XDISPLAY (gdk_display_get_default ());
-  
+  display = meta_display_get_xdisplay (meta_get_display ());
+
   switch (action)
     {
     case C_DESKTOP_TITLEBAR_ACTION_TOGGLE_SHADE:
@@ -1285,7 +1285,7 @@ meta_frames_try_grab_op (MetaFrames  *frames,
   Display *display;
   gboolean ret;
 
-  display = GDK_DISPLAY_XDISPLAY (gdk_display_get_default ());
+  display = meta_display_get_xdisplay (meta_get_display ());
   ret = meta_core_begin_grab_op (display,
                                  frame->xwindow,
                                  op,
@@ -1318,7 +1318,7 @@ meta_frames_retry_grab_op (MetaFrames *frames,
 
   op = frames->current_grab_op;
   frames->current_grab_op = META_GRAB_OP_NONE;
-  display = GDK_DISPLAY_XDISPLAY (gdk_display_get_default ());
+  display = meta_display_get_xdisplay (meta_get_display ());
 
   return meta_core_begin_grab_op (display,
                                   frames->grab_frame->xwindow,
@@ -1363,7 +1363,7 @@ meta_frames_button_press_event (GtkWidget      *widget,
   Display *display;
   
   frames = META_FRAMES (widget);
-  display = GDK_DISPLAY_XDISPLAY (gdk_display_get_default ());
+  display = meta_display_get_xdisplay (meta_get_display ());
 
   /* Remember that the display may have already done something with this event.
    * If so there's probably a GrabOp in effect.
@@ -1559,7 +1559,7 @@ meta_frames_button_release_event    (GtkWidget           *widget,
   Display *display;
   
   frames = META_FRAMES (widget);
-  display = GDK_DISPLAY_XDISPLAY (gdk_display_get_default ());
+  display = meta_display_get_xdisplay (meta_get_display ());
   frames->current_grab_op = META_GRAB_OP_NONE;
 
   frame = meta_frames_lookup_window (frames, GDK_WINDOW_XID (event->window));
@@ -1695,7 +1695,7 @@ meta_frames_update_prelit_control (MetaFrames      *frames,
     }        
 
   /* set/unset the prelight cursor */
-  meta_core_set_screen_cursor (GDK_DISPLAY_XDISPLAY (gdk_display_get_default ()),
+  meta_core_set_screen_cursor (meta_display_get_xdisplay (meta_get_display ()),
                                frame->xwindow,
                                cursor);  
 
@@ -1748,10 +1748,19 @@ meta_frames_motion_notify_event     (GtkWidget           *widget,
   if (frame == NULL)
     return FALSE;
 
+  MetaDisplay *display = meta_get_display ();
+
   frames->last_motion_frame = frame;
 
-  gdk_window_get_device_position (frame->window, event->device,
-                                  &x, &y, NULL);
+  if (display->grab_op == META_GRAB_OP_MOVING)
+    gdk_window_get_device_position (frame->window, event->device,
+                                    &x, &y, NULL);
+  else
+    {
+      x = event->x;
+      y = event->y;
+    }
+
   control = get_control (frames, frame, x, y);
 
   if (frame->button_state == META_BUTTON_STATE_PRESSED)
@@ -1861,7 +1870,7 @@ populate_cache (MetaFrames *frames,
   MetaFrameFlags frame_flags;
   int i;
 
-  meta_core_get (GDK_DISPLAY_XDISPLAY (gdk_display_get_default ()),
+  meta_core_get (meta_display_get_xdisplay (meta_get_display ()),
                  frame->xwindow,
                  META_CORE_GET_FRAME_WIDTH, &frame_width,
                  META_CORE_GET_FRAME_HEIGHT, &frame_height,
@@ -1956,7 +1965,7 @@ clip_to_screen (cairo_region_t *region,
    * is crucial to handle huge client windows,
    * like "xterm -geometry 1000x1000"
    */
-  meta_core_get (GDK_DISPLAY_XDISPLAY (gdk_display_get_default ()),
+  meta_core_get (meta_display_get_xdisplay (meta_get_display ()),
                  frame->xwindow,
                  META_CORE_GET_FRAME_X, &frame_area.x,
                  META_CORE_GET_FRAME_Y, &frame_area.y,
@@ -1989,8 +1998,8 @@ subtract_client_area (cairo_region_t *region,
   MetaFrameBorders borders;
   cairo_region_t *tmp_region;
   Display *display;
-  
-  display = GDK_DISPLAY_XDISPLAY (gdk_display_get_default ());
+
+  display = meta_display_get_xdisplay (meta_get_display ());
 
   meta_core_get (display, frame->xwindow,
                  META_CORE_GET_FRAME_FLAGS, &flags,
@@ -2112,7 +2121,7 @@ meta_frames_paint (MetaFrames   *frames,
   Display *display;
   
   widget = GTK_WIDGET (frames);
-  display = GDK_DISPLAY_XDISPLAY (gdk_display_get_default ());
+  display = meta_display_get_xdisplay (meta_get_display ());
 
   for (i = 0; i < META_BUTTON_TYPE_LAST; i++)
     button_states[i] = META_BUTTON_STATE_NORMAL;
@@ -2306,7 +2315,7 @@ get_control (MetaFrames *frames,
   gboolean has_north_resize;
   cairo_rectangle_int_t client;
 
-  window = meta_core_get_window (GDK_DISPLAY_XDISPLAY (gdk_display_get_default ()),
+  window = meta_core_get_window (meta_display_get_xdisplay (meta_get_display ()),
                                  frame->xwindow);
 
   meta_window_get_client_area_rect (window, &client);
@@ -2325,7 +2334,7 @@ get_control (MetaFrames *frames,
   if (POINT_IN_RECT (x, y, fgeom.menu_rect.clickable))
     return META_FRAME_CONTROL_MENU;
 
-  meta_core_get (GDK_DISPLAY_XDISPLAY (gdk_display_get_default ()),
+  meta_core_get (meta_display_get_xdisplay (meta_get_display ()),
                  frame->xwindow,
                  META_CORE_GET_FRAME_FLAGS, &flags,
                  META_CORE_GET_FRAME_TYPE, &type,
