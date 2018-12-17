@@ -824,21 +824,6 @@ meta_frames_get_corner_radiuses (MetaFrames *frames,
     *bottom_right = fgeom.bottom_right_corner_rounded_radius + sqrt(fgeom.bottom_right_corner_rounded_radius);
 }
 
-/* The client rectangle surrounds client window; it subtracts both
- * the visible and invisible borders from the frame window's size.
- */
-static void
-get_client_rect (MetaFrameGeometry     *fgeom,
-                 int                    window_width,
-                 int                    window_height,
-                 cairo_rectangle_int_t *rect)
-{
-  rect->x = fgeom->borders.total.left;
-  rect->y = fgeom->borders.total.top;
-  rect->width = window_width - fgeom->borders.total.right - rect->x;
-  rect->height = window_height - fgeom->borders.total.bottom - rect->y;
-}
-
 /* The visible frame rectangle surrounds the visible portion of the
  * frame window; it subtracts only the invisible borders from the frame
  * window's size.
@@ -2324,12 +2309,13 @@ get_control (MetaFrames *frames,
   window = meta_core_get_window (GDK_DISPLAY_XDISPLAY (gdk_display_get_default ()),
                                  frame->xwindow);
 
-  meta_frames_calc_geometry (frames, frame, &fgeom);
-  get_client_rect (&fgeom, fgeom.width, fgeom.height, &client);
+  meta_window_get_client_area_rect (window, &client);
 
   if (POINT_IN_RECT (x, y, client))
     return META_FRAME_CONTROL_CLIENT_AREA;
-  
+
+  meta_frames_calc_geometry (frames, frame, &fgeom);
+
   if (POINT_IN_RECT (x, y, fgeom.close_rect.clickable))
     return META_FRAME_CONTROL_DELETE;
 
