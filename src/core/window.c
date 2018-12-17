@@ -158,7 +158,6 @@ static void update_gtk_edge_constraints (MetaWindow *window);
  */
 static gboolean idle_calc_showing (gpointer data);
 static gboolean idle_move_resize (gpointer data);
-static gboolean idle_update_icon (gpointer data);
 
 G_DEFINE_TYPE (MetaWindow, meta_window, G_TYPE_OBJECT);
 
@@ -168,8 +167,6 @@ enum {
   PROP_0,
 
   PROP_TITLE,
-  PROP_ICON,
-  PROP_MINI_ICON,
   PROP_DECORATED,
   PROP_FULLSCREEN,
   PROP_MAXIMIZED_HORIZONTALLY,
@@ -203,6 +200,7 @@ enum
   UNMANAGED,
   SIZE_CHANGED,
   POSITION_CHANGED,
+  ICON_CHANGED,
 
   LAST_SIGNAL
 };
@@ -240,19 +238,11 @@ meta_window_finalize (GObject *object)
 {
   MetaWindow *window = META_WINDOW (object);
 
-  if (window->icon)
-    g_object_unref (G_OBJECT (window->icon));
-
-  if (window->mini_icon)
-    g_object_unref (G_OBJECT (window->mini_icon));
-
   if (window->frame_bounds)
     cairo_region_destroy (window->frame_bounds);
 
   if (window->opaque_region)
     cairo_region_destroy (window->opaque_region);
-
-  meta_icon_cache_free (&window->icon_cache);
 
   g_free (window->sm_client_id);
   g_free (window->wm_client_machine);
@@ -288,12 +278,6 @@ meta_window_get_property(GObject         *object,
     {
     case PROP_TITLE:
       g_value_set_string (value, win->title);
-      break;
-    case PROP_ICON:
-      g_value_set_object (value, win->icon);
-      break;
-    case PROP_MINI_ICON:
-      g_value_set_object (value, win->mini_icon);
       break;
     case PROP_DECORATED:
       g_value_set_boolean (value, win->decorated);
@@ -400,21 +384,6 @@ meta_window_class_init (MetaWindowClass *klass)
                                                         "Title",
                                                         "The title of the window",
                                                         NULL,
-                                                        G_PARAM_READABLE));
-  g_object_class_install_property (object_class,
-                                   PROP_ICON,
-                                   g_param_spec_object ("icon",
-                                                        "Icon",
-                                                        "32 pixel sized icon",
-                                                        GDK_TYPE_PIXBUF,
-                                                        G_PARAM_READABLE));
-
-  g_object_class_install_property (object_class,
-                                   PROP_MINI_ICON,
-                                   g_param_spec_object ("mini-icon",
-                                                        "Mini Icon",
-                                                        "16 pixel sized icon",
-                                                        GDK_TYPE_PIXBUF,
                                                         G_PARAM_READABLE));
 
   g_object_class_install_property (object_class,
@@ -650,6 +619,14 @@ meta_window_class_init (MetaWindowClass *klass)
 
   window_signals[SIZE_CHANGED] =
     g_signal_new ("size-changed",
+                  G_TYPE_FROM_CLASS (object_class),
+                  G_SIGNAL_RUN_LAST,
+                  0,
+                  NULL, NULL, NULL,
+                  G_TYPE_NONE, 0);
+
+  window_signals[ICON_CHANGED] =
+    g_signal_new ("icon-changed",
                   G_TYPE_FROM_CLASS (object_class),
                   G_SIGNAL_RUN_LAST,
                   0,
@@ -1165,9 +1142,6 @@ meta_window_new_with_attrs (MetaDisplay       *display,
 
   window->title = NULL;
   window->icon_name = NULL;
-  window->icon = NULL;
-  window->mini_icon = NULL;
-  meta_icon_cache_init (&window->icon_cache);
   window->theme_icon_name = NULL;
   window->wm_hints_pixmap = None;
   window->wm_hints_mask = None;
@@ -1349,9 +1323,6 @@ meta_window_new_with_attrs (MetaDisplay       *display,
 
   if (window->decorated)
     meta_window_ensure_frame (window);
-
-  if (!window->override_redirect)
-    meta_window_update_icon_now (window);
 
   if (window->initially_iconic)
     {
@@ -1912,8 +1883,7 @@ meta_window_unmanage (MetaWindow  *window,
     unmaximize_window_before_freeing (window);
 
   meta_window_unqueue (window, META_QUEUE_CALC_SHOWING |
-                               META_QUEUE_MOVE_RESIZE |
-                               META_QUEUE_UPDATE_ICON);
+                               META_QUEUE_MOVE_RESIZE);
   meta_window_free_delete_dialog (window);
 
   if (window->workspace)
@@ -2438,8 +2408,8 @@ meta_window_calc_showing (MetaWindow  *window)
   implement_showing (window, meta_window_should_be_showing (window));
 }
 
-static guint queue_later[NUMBER_OF_QUEUES] = {0, 0, 0};
-static GSList *queue_pending[NUMBER_OF_QUEUES] = {NULL, NULL, NULL};
+static guint queue_later[NUMBER_OF_QUEUES] = {0, 0};
+static GSList *queue_pending[NUMBER_OF_QUEUES] = {NULL, NULL};
 
 static int
 stackcmp (gconstpointer a, gconstpointer b)
@@ -2608,7 +2578,7 @@ idle_calc_showing (gpointer data)
 
 #ifdef WITH_VERBOSE_MODE
 static const gchar* meta_window_queue_names[NUMBER_OF_QUEUES] =
-  {"calc_showing", "move_resize", "update_icon"};
+  {"calc_showing", "move_resize"};
 #endif
 
 static void
@@ -2677,15 +2647,13 @@ meta_window_queue (MetaWindow *window, guint queuebits)
           const MetaLaterType window_queue_later_when[NUMBER_OF_QUEUES] =
             {
               META_LATER_CALC_SHOWING,  /* CALC_SHOWING */
-              META_LATER_RESIZE,        /* MOVE_RESIZE */
-              META_LATER_BEFORE_REDRAW  /* UPDATE_ICON */
+              META_LATER_RESIZE         /* MOVE_RESIZE */
             };
 
           const GSourceFunc window_queue_later_handler[NUMBER_OF_QUEUES] =
             {
               idle_calc_showing,
-              idle_move_resize,
-              idle_update_icon,
+              idle_move_resize
             };
 
           /* If we're about to drop the window, there's no point in putting
@@ -8030,89 +7998,6 @@ redraw_icon (MetaWindow *window)
    */
   if (window->frame)
     meta_ui_queue_frame_draw (window->screen->ui, window->frame->xwindow);
-}
-
-LOCAL_SYMBOL void
-meta_window_update_icon_now (MetaWindow *window)
-{
-  GdkPixbuf *icon;
-  GdkPixbuf *mini_icon;
-
-  g_return_if_fail (!window->override_redirect);
-
-  icon = NULL;
-  mini_icon = NULL;
-
-  if (meta_read_icons (window->screen,
-                       window->xwindow,
-                       &window->icon_cache,
-                       window->wm_hints_pixmap,
-                       window->wm_hints_mask,
-                       &icon,
-                       META_ICON_WIDTH, META_ICON_HEIGHT,
-                       &mini_icon,
-                       META_MINI_ICON_WIDTH,
-                       META_MINI_ICON_HEIGHT))
-    {
-      if (window->icon)
-        g_object_unref (G_OBJECT (window->icon));
-
-      if (window->mini_icon)
-        g_object_unref (G_OBJECT (window->mini_icon));
-
-      window->icon = icon;
-      window->mini_icon = mini_icon;
-
-      g_object_freeze_notify (G_OBJECT (window));
-      g_object_notify (G_OBJECT (window), "icon");
-      g_object_notify (G_OBJECT (window), "mini-icon");
-      g_object_thaw_notify (G_OBJECT (window));
-
-      redraw_icon (window);
-    }
-
-  g_assert (window->icon);
-  g_assert (window->mini_icon);
-}
-
-static gboolean
-idle_update_icon (gpointer data)
-{
-  GSList *tmp;
-  GSList *copy;
-  guint queue_index = GPOINTER_TO_INT (data);
-
-  meta_topic (META_DEBUG_GEOMETRY, "Clearing the update_icon queue\n");
-
-  /* Work with a copy, for reentrancy. The allowed reentrancy isn't
-   * complete; destroying a window while we're in here would result in
-   * badness. But it's OK to queue/unqueue update_icons.
-   */
-  copy = g_slist_copy (queue_pending[queue_index]);
-  g_slist_free (queue_pending[queue_index]);
-  queue_pending[queue_index] = NULL;
-  queue_later[queue_index] = 0;
-
-  destroying_windows_disallowed += 1;
-
-  tmp = copy;
-  while (tmp != NULL)
-    {
-      MetaWindow *window;
-
-      window = tmp->data;
-
-      meta_window_update_icon_now (window);
-      window->is_in_queues &= ~META_QUEUE_UPDATE_ICON;
-
-      tmp = tmp->next;
-    }
-
-  g_slist_free (copy);
-
-  destroying_windows_disallowed -= 1;
-
-  return FALSE;
 }
 
 LOCAL_SYMBOL GList*

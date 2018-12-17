@@ -40,7 +40,6 @@
 #include "screen-private.h"
 #include <meta/util.h>
 #include "stack.h"
-#include "iconcache.h"
 #include <X11/Xutil.h>
 #include <cairo.h>
 #include <gdk-pixbuf/gdk-pixbuf.h>
@@ -56,8 +55,7 @@ typedef enum {
 
 typedef enum {
   META_QUEUE_CALC_SHOWING = 1 << 0,
-  META_QUEUE_MOVE_RESIZE  = 1 << 1,
-  META_QUEUE_UPDATE_ICON  = 1 << 2,
+  META_QUEUE_MOVE_RESIZE  = 1 << 1
 } MetaQueueType;
 
 /* edge zones for tiling/snapping identification
@@ -90,7 +88,7 @@ enum {
     ZONE_NONE
 };
 
-#define NUMBER_OF_QUEUES 3
+#define NUMBER_OF_QUEUES 2
 
 #define HUD_WIDTH 24
 #define CSD_TITLEBAR_HEIGHT 48
@@ -133,9 +131,6 @@ struct _MetaWindow
   guint progress_pulse : 1;
 /* /XappGtkWindow */
 
-  GdkPixbuf *icon;
-  GdkPixbuf *mini_icon;
-  MetaIconCache icon_cache;
   Pixmap wm_hints_pixmap;
   Pixmap wm_hints_mask;
   
@@ -795,8 +790,6 @@ void meta_window_stack_just_above (MetaWindow *window,
 
 void meta_window_set_user_time (MetaWindow *window,
                                 guint32     timestamp);
-
-void meta_window_update_icon_now (MetaWindow *window);
 
 void meta_window_update_role (MetaWindow *window);
 void meta_window_update_net_wm_type (MetaWindow *window);

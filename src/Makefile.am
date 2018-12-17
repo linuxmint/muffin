@@ -119,8 +119,6 @@ libmuffin_la_SOURCES =				\
 	core/group-props.h			\
 	core/group.c				\
 	meta/group.h				\
-	core/iconcache.c			\
-	core/iconcache.h			\
 	core/keybindings.c			\
 	core/keybindings-private.h		\
 	core/main.c				\

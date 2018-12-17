@@ -2407,14 +2407,6 @@ pos_eval_get_variable (PosToken                  *t,
         *result = env->top_height;
       else if (t->d.v.name_quark == env->theme->quark_bottom_height)
         *result = env->bottom_height;
-      else if (t->d.v.name_quark == env->theme->quark_mini_icon_width)
-        *result = env->mini_icon_width;
-      else if (t->d.v.name_quark == env->theme->quark_mini_icon_height)
-        *result = env->mini_icon_height;
-      else if (t->d.v.name_quark == env->theme->quark_icon_width)
-        *result = env->icon_width;
-      else if (t->d.v.name_quark == env->theme->quark_icon_height)
-        *result = env->icon_height;
       else if (t->d.v.name_quark == env->theme->quark_title_width)
         *result = env->title_width;
       else if (t->d.v.name_quark == env->theme->quark_title_height)
@@ -2452,14 +2444,6 @@ pos_eval_get_variable (PosToken                  *t,
         *result = env->top_height;
       else if (strcmp (t->d.v.name, "bottom_height") == 0)
         *result = env->bottom_height;
-      else if (strcmp (t->d.v.name, "mini_icon_width") == 0)
-        *result = env->mini_icon_width;
-      else if (strcmp (t->d.v.name, "mini_icon_height") == 0)
-        *result = env->mini_icon_height;
-      else if (strcmp (t->d.v.name, "icon_width") == 0)
-        *result = env->icon_width;
-      else if (strcmp (t->d.v.name, "icon_height") == 0)
-        *result = env->icon_height;
       else if (strcmp (t->d.v.name, "title_width") == 0)
         *result = env->title_width;
       else if (strcmp (t->d.v.name, "title_height") == 0)
@@ -3597,23 +3581,6 @@ draw_op_as_pixbuf (const MetaDrawOp    *op,
     case META_DRAW_GTK_VLINE:
       break;
 
-    case META_DRAW_ICON:
-      if (info->mini_icon &&
-          width <= gdk_pixbuf_get_width (info->mini_icon) &&
-          height <= gdk_pixbuf_get_height (info->mini_icon))
-        pixbuf = scale_and_alpha_pixbuf (info->mini_icon,
-                                         op->data.icon.alpha_spec,
-                                         op->data.icon.fill_type,
-                                         width, height,
-                                         FALSE, FALSE);
-      else if (info->icon)
-        pixbuf = scale_and_alpha_pixbuf (info->icon,
-                                         op->data.icon.alpha_spec,
-                                         op->data.icon.fill_type,
-                                         width, height,
-                                         FALSE, FALSE);
-      break;
-
     case META_DRAW_TITLE:
       break;
 
@@ -3655,11 +3622,6 @@ fill_env (MetaPositionExprEnv *env,
       env->frame_x_center = 0;
       env->frame_y_center = 0;
     }
-  
-  env->mini_icon_width = info->mini_icon ? gdk_pixbuf_get_width (info->mini_icon) : 0;
-  env->mini_icon_height = info->mini_icon ? gdk_pixbuf_get_height (info->mini_icon) : 0;
-  env->icon_width = info->icon ? gdk_pixbuf_get_width (info->icon) : 0;
-  env->icon_height = info->icon ? gdk_pixbuf_get_height (info->icon) : 0;
 
   env->title_width = info->title_layout_width;
   env->title_height = info->title_layout_height;
@@ -4686,9 +4648,7 @@ meta_frame_style_draw_with_style (MetaFrameStyle          *style,
                                   int                      client_height,
                                   PangoLayout             *title_layout,
                                   int                      text_height,
-                                  MetaButtonState          button_states[META_BUTTON_TYPE_LAST],
-                                  GdkPixbuf               *mini_icon,
-                                  GdkPixbuf               *icon)
+                                  MetaButtonState          button_states[META_BUTTON_TYPE_LAST])
 {
   int i, j;
   GdkRectangle visible_rect;
@@ -4753,8 +4713,6 @@ meta_frame_style_draw_with_style (MetaFrameStyle          *style,
     pango_layout_get_pixel_extents (title_layout,
                                     NULL, &logical_rect);
 
-  draw_info.mini_icon = mini_icon;
-  draw_info.icon = icon;
   draw_info.title_layout = title_layout;
   draw_info.title_layout_width = title_layout ? logical_rect.width : 0;
   draw_info.title_layout_height = title_layout ? logical_rect.height : 0;
@@ -4928,14 +4886,12 @@ meta_frame_style_draw (MetaFrameStyle          *style,
                        int                      client_height,
                        PangoLayout             *title_layout,
                        int                      text_height,
-                       MetaButtonState          button_states[META_BUTTON_TYPE_LAST],
-                       GdkPixbuf               *mini_icon,
-                       GdkPixbuf               *icon)
+                       MetaButtonState          button_states[META_BUTTON_TYPE_LAST])
 {
   meta_frame_style_draw_with_style (style, gtk_widget_get_style_context (widget), widget,
                                     cr, fgeom, client_width, client_height,
                                     title_layout, text_height,
-                                    button_states, mini_icon, icon);
+                                    button_states);
 }
 
 LOCAL_SYMBOL MetaFrameStyleSet*
@@ -5249,10 +5205,6 @@ meta_theme_new (void)
   theme->quark_right_width = g_quark_from_static_string ("right_width");
   theme->quark_top_height = g_quark_from_static_string ("top_height");
   theme->quark_bottom_height = g_quark_from_static_string ("bottom_height");
-  theme->quark_mini_icon_width = g_quark_from_static_string ("mini_icon_width");
-  theme->quark_mini_icon_height = g_quark_from_static_string ("mini_icon_height");
-  theme->quark_icon_width = g_quark_from_static_string ("icon_width");
-  theme->quark_icon_height = g_quark_from_static_string ("icon_height");
   theme->quark_title_width = g_quark_from_static_string ("title_width");
   theme->quark_title_height = g_quark_from_static_string ("title_height");
   theme->quark_frame_x_center = g_quark_from_static_string ("frame_x_center");
@@ -5573,9 +5525,7 @@ meta_theme_draw_frame_with_style (MetaTheme              *theme,
                                   PangoLayout            *title_layout,
                                   int                     text_height,
                                   const MetaButtonLayout *button_layout,
-                                  MetaButtonState         button_states[META_BUTTON_TYPE_LAST],
-                                  GdkPixbuf              *mini_icon,
-                                  GdkPixbuf              *icon)
+                                  MetaButtonState         button_states[META_BUTTON_TYPE_LAST])
 {
   MetaFrameGeometry fgeom;
   MetaFrameStyle *style;
@@ -5605,8 +5555,7 @@ meta_theme_draw_frame_with_style (MetaTheme              *theme,
                                     client_width, client_height,
                                     title_layout,
                                     text_height,
-                                    button_states,
-                                    mini_icon, icon);
+                                    button_states);
 }
 
 void
@@ -5620,16 +5569,13 @@ meta_theme_draw_frame (MetaTheme              *theme,
                        PangoLayout            *title_layout,
                        int                     text_height,
                        const MetaButtonLayout *button_layout,
-                       MetaButtonState         button_states[META_BUTTON_TYPE_LAST],
-                       GdkPixbuf              *mini_icon,
-                       GdkPixbuf              *icon)
+                       MetaButtonState         button_states[META_BUTTON_TYPE_LAST])
 {
   meta_theme_draw_frame_with_style (theme, gtk_widget_get_style_context (widget), widget,
                                     cr, type,flags,
                                     client_width, client_height,
                                     title_layout, text_height,
-                                    button_layout, button_states,
-                                    mini_icon, icon);
+                                    button_layout, button_states);
 }
 
 void

@@ -425,31 +425,8 @@ set_supported_hint (MetaScreen *screen)
                    XA_ATOM,
                    32, PropModeReplace,
                    (guchar*) atoms, G_N_ELEMENTS(atoms));
-  
-  return Success;
-}
 
-static int
-set_wm_icon_size_hint (MetaScreen *screen)
-{
-#define N_VALS 6
-  gulong vals[N_VALS];
-
-  /* min width, min height, max w, max h, width inc, height inc */
-  vals[0] = META_ICON_WIDTH;
-  vals[1] = META_ICON_HEIGHT;
-  vals[2] = META_ICON_WIDTH;
-  vals[3] = META_ICON_HEIGHT;
-  vals[4] = 0;
-  vals[5] = 0;
-  
-  XChangeProperty (screen->display->xdisplay, screen->xroot,
-                   screen->display->atom_WM_ICON_SIZE,
-                   XA_CARDINAL,
-                   32, PropModeReplace, (guchar*) vals, N_VALS);
-  
   return Success;
-#undef N_VALS
 }
 
 /* The list of monitors reported by the windowing system might include
@@ -1007,9 +984,7 @@ meta_screen_new (MetaDisplay *display,
                                   FocusChangeMask|KeyPressMask|KeyReleaseMask);
   XMapWindow (display->xdisplay, screen->no_focus_window);
   /* Done with no_focus_window stuff */
-  
-  set_wm_icon_size_hint (screen);
-  
+
   set_supported_hint (screen);
   
   set_wm_check_hint (screen);
