@@ -3770,8 +3770,9 @@ meta_display_end_grab_op (MetaDisplay *display,
 {
   meta_topic (META_DEBUG_WINDOW_OPS,
               "Ending grab op %u at time %u\n", display->grab_op, timestamp);
-  
-  if (display->grab_op == META_GRAB_OP_NONE)
+
+  if (display->grab_op == META_GRAB_OP_NONE ||
+      display->grab_op == META_GRAB_OP_COMPOSITOR)
     return;
 
   meta_compositor_grab_op_end (display->compositor);
