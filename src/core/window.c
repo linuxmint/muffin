@@ -8016,7 +8016,8 @@ meta_window_set_icon (MetaWindow *window,
 {
   GdkPixbuf *icon;
 
-  g_return_if_fail (!window->override_redirect);
+  if (window->override_redirect)
+    return FALSE;
 
   icon = NULL;
 
