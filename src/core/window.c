@@ -268,7 +268,7 @@ meta_window_finalize (GObject *object)
   g_free (window->gtk_window_object_path);
   g_free (window->gtk_app_menu_object_path);
   g_free (window->gtk_menubar_object_path);
-  
+
   G_OBJECT_CLASS (meta_window_parent_class)->finalize (object);
 }
 
@@ -8029,7 +8029,8 @@ meta_window_set_icon (MetaWindow *window,
                        &icon,
                        width, height))
     {
-      g_return_val_if_fail (icon != NULL, FALSE);
+      if (icon == NULL)
+        return FALSE;
 
       if (window->icon)
         g_object_unref (G_OBJECT (window->icon));
@@ -9789,7 +9790,7 @@ update_resize (MetaWindow *window,
         }
       else
         {
-          switch (window->tile_mode) 
+          switch (window->tile_mode)
             {
               case META_TILE_LEFT:
                 window->display->grab_op = META_GRAB_OP_KEYBOARD_RESIZING_E;
@@ -12293,7 +12294,7 @@ meta_window_tile (MetaWindow *window,
  * Note:
  *
  * This will currently only be non-NULL for programs that use XAppGtkWindow
- * in place of GtkWindow and use xapp_gtk_window_set_icon_name() or 
+ * in place of GtkWindow and use xapp_gtk_window_set_icon_name() or
  * set_icon_from_file().  These methods will need to be used explicitly in
  * C programs, but for introspection use you should not need to treat it any
  * differently (except for using the correct window class.)
