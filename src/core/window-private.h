@@ -40,6 +40,7 @@
 #include "screen-private.h"
 #include <meta/util.h>
 #include "stack.h"
+#include "iconcache.h"
 #include <X11/Xutil.h>
 #include <cairo.h>
 #include <gdk-pixbuf/gdk-pixbuf.h>
@@ -131,6 +132,8 @@ struct _MetaWindow
   guint progress_pulse : 1;
 /* /XappGtkWindow */
 
+  GdkPixbuf *icon;
+  MetaIconCache icon_cache;
   Pixmap wm_hints_pixmap;
   Pixmap wm_hints_mask;
   

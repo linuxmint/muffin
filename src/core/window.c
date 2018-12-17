@@ -167,6 +167,7 @@ enum {
   PROP_0,
 
   PROP_TITLE,
+  PROP_ICON,
   PROP_DECORATED,
   PROP_FULLSCREEN,
   PROP_MAXIMIZED_HORIZONTALLY,
@@ -238,11 +239,16 @@ meta_window_finalize (GObject *object)
 {
   MetaWindow *window = META_WINDOW (object);
 
+  if (window->icon)
+    g_object_unref (G_OBJECT (window->icon));
+
   if (window->frame_bounds)
     cairo_region_destroy (window->frame_bounds);
 
   if (window->opaque_region)
     cairo_region_destroy (window->opaque_region);
+
+  meta_icon_cache_free (&window->icon_cache);
 
   g_free (window->sm_client_id);
   g_free (window->wm_client_machine);
@@ -278,6 +284,9 @@ meta_window_get_property(GObject         *object,
     {
     case PROP_TITLE:
       g_value_set_string (value, win->title);
+      break;
+    case PROP_ICON:
+      g_value_set_object (value, win->icon);
       break;
     case PROP_DECORATED:
       g_value_set_boolean (value, win->decorated);
@@ -385,6 +394,14 @@ meta_window_class_init (MetaWindowClass *klass)
                                                         "The title of the window",
                                                         NULL,
                                                         G_PARAM_READABLE));
+  g_object_class_install_property (object_class,
+                                   PROP_ICON,
+                                   g_param_spec_object ("icon",
+                                                        "Icon",
+                                                        "32 pixel sized icon",
+                                                        GDK_TYPE_PIXBUF,
+                                                        G_PARAM_READABLE));
+
 
   g_object_class_install_property (object_class,
                                    PROP_DECORATED,
@@ -1142,6 +1159,8 @@ meta_window_new_with_attrs (MetaDisplay       *display,
 
   window->title = NULL;
   window->icon_name = NULL;
+  window->icon = NULL;
+  meta_icon_cache_init (&window->icon_cache);
   window->theme_icon_name = NULL;
   window->wm_hints_pixmap = None;
   window->wm_hints_mask = None;
@@ -2408,8 +2427,8 @@ meta_window_calc_showing (MetaWindow  *window)
   implement_showing (window, meta_window_should_be_showing (window));
 }
 
-static guint queue_later[NUMBER_OF_QUEUES] = {0, 0};
-static GSList *queue_pending[NUMBER_OF_QUEUES] = {NULL, NULL};
+static guint queue_later[NUMBER_OF_QUEUES] = {0, 0, 0};
+static GSList *queue_pending[NUMBER_OF_QUEUES] = {NULL, NULL, NULL};
 
 static int
 stackcmp (gconstpointer a, gconstpointer b)
@@ -2578,7 +2597,7 @@ idle_calc_showing (gpointer data)
 
 #ifdef WITH_VERBOSE_MODE
 static const gchar* meta_window_queue_names[NUMBER_OF_QUEUES] =
-  {"calc_showing", "move_resize"};
+  {"calc_showing", "move_resize", "update_icon"};
 #endif
 
 static void
@@ -2647,7 +2666,7 @@ meta_window_queue (MetaWindow *window, guint queuebits)
           const MetaLaterType window_queue_later_when[NUMBER_OF_QUEUES] =
             {
               META_LATER_CALC_SHOWING,  /* CALC_SHOWING */
-              META_LATER_RESIZE         /* MOVE_RESIZE */
+              META_LATER_RESIZE,        /* MOVE_RESIZE */
             };
 
           const GSourceFunc window_queue_later_handler[NUMBER_OF_QUEUES] =
@@ -7990,14 +8009,40 @@ meta_window_update_net_wm_type (MetaWindow *window)
   meta_window_recalc_window_type (window);
 }
 
-static void
-redraw_icon (MetaWindow *window)
+gboolean
+meta_window_set_icon (MetaWindow *window,
+                      int         width,
+                      int         height)
 {
-  /* We could probably be smart and just redraw the icon here,
-   * instead of the whole frame.
-   */
-  if (window->frame)
-    meta_ui_queue_frame_draw (window->screen->ui, window->frame->xwindow);
+  GdkPixbuf *icon;
+
+  g_return_if_fail (!window->override_redirect);
+
+  icon = NULL;
+
+  if (meta_read_icons (window->screen,
+                       window->xwindow,
+                       &window->icon_cache,
+                       window->wm_hints_pixmap,
+                       window->wm_hints_mask,
+                       &icon,
+                       width, height))
+    {
+      g_return_val_if_fail (icon != NULL, FALSE);
+
+      if (window->icon)
+        g_object_unref (G_OBJECT (window->icon));
+
+      window->icon = icon;
+
+      g_object_freeze_notify (G_OBJECT (window));
+      g_object_notify (G_OBJECT (window), "icon");
+      g_object_thaw_notify (G_OBJECT (window));
+
+      return TRUE;
+    }
+
+  return FALSE;
 }
 
 LOCAL_SYMBOL GList*

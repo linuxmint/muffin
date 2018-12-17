@@ -1704,6 +1704,10 @@ reload_wm_hints (MetaWindow    *window,
   if (!initial && window->wm_hints_urgent && !old_urgent)
     g_signal_emit_by_name (window->display, "window-marked-urgent", window);
 
+  meta_icon_cache_property_changed (&window->icon_cache,
+                                    window->display,
+                                    XA_WM_HINTS);
+
   meta_window_queue (window, META_QUEUE_MOVE_RESIZE);
 }
 
@@ -2048,8 +2052,8 @@ meta_display_init_window_prop_hooks (MetaDisplay *display)
     { display->atom__GTK_APPLICATION_ID,               META_PROP_VALUE_UTF8,         reload_gtk_application_id,               TRUE, FALSE },
     { display->atom__GTK_UNIQUE_BUS_NAME,              META_PROP_VALUE_UTF8,         reload_gtk_unique_bus_name,              TRUE, FALSE },
     { display->atom__GTK_APPLICATION_OBJECT_PATH,      META_PROP_VALUE_UTF8,         reload_gtk_application_object_path,      TRUE, FALSE },
-    { display->atom__GTK_WINDOW_OBJECT_PATH,           META_PROP_VALUE_UTF8,         reload_gtk_window_object_path,           TRUE, FALSE },
-    { display->atom__GTK_APP_MENU_OBJECT_PATH,         META_PROP_VALUE_UTF8,         reload_gtk_app_menu_object_path,         TRUE, FALSE },
+    { display->atom__GTK_WINDOW_OBJECT_PATH,           META_PROP_VALUE_UTF8,         reload_gtk_window_object_path,           TRUE, FALSE },    
+    { display->atom__GTK_APP_MENU_OBJECT_PATH,         META_PROP_VALUE_UTF8,         reload_gtk_app_menu_object_path,         TRUE, FALSE },    
     { display->atom__GTK_MENUBAR_OBJECT_PATH,          META_PROP_VALUE_UTF8,         reload_gtk_menubar_object_path,          TRUE, FALSE },
     { display->atom__GTK_FRAME_EXTENTS,                META_PROP_VALUE_CARDINAL_LIST,reload_gtk_frame_extents,                TRUE, FALSE },
     { display->atom__NET_WM_USER_TIME_WINDOW, META_PROP_VALUE_WINDOW, reload_net_wm_user_time_window, TRUE, FALSE },
