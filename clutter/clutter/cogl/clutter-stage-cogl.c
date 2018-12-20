@@ -184,18 +184,6 @@ clutter_stage_cogl_schedule_update (ClutterStageWindow *stage_window,
       return;
     }
 
-  /* We only extrapolate presentation times for 150ms  - this is somewhat
-   * arbitrary. The reasons it might not be accurate for larger times are
-   * that the refresh interval might be wrong or the vertical refresh
-   * might be downclocked if nothing is going on onscreen.
-   */
-  if (stage_cogl->last_presentation_time == 0||
-      stage_cogl->last_presentation_time < now - 150000)
-    {
-      stage_cogl->update_time = now;
-      return;
-    }
-
   refresh_rate = stage_cogl->refresh_rate;
   if (refresh_rate <= 0.0)
     refresh_rate = clutter_get_default_frame_rate ();
@@ -219,6 +207,9 @@ clutter_stage_cogl_schedule_update (ClutterStageWindow *stage_window,
     next_presentation_time += refresh_interval;
 
   stage_cogl->update_time = next_presentation_time - max_render_time_allowed;
+
+  if (stage_cogl->update_time == stage_cogl->last_update_time)
+    stage_cogl->update_time = stage_cogl->last_update_time + refresh_interval;
 }
 
 static gint64
@@ -237,6 +228,7 @@ clutter_stage_cogl_clear_update_time (ClutterStageWindow *stage_window)
 {
   ClutterStageCogl *stage_cogl = CLUTTER_STAGE_COGL (stage_window);
 
+  stage_cogl->last_update_time = stage_cogl->update_time;
   stage_cogl->update_time = -1;
 }
 
