@@ -202,7 +202,10 @@ clutter_stage_cogl_schedule_update (ClutterStageWindow *stage_window,
 
   refresh_interval = (gint64) (0.5 + G_USEC_PER_SEC / refresh_rate);
   if (refresh_interval == 0)
-    refresh_interval = 16667; /* 1/60th second */
+    {
+      stage_cogl->update_time = now;
+      return;
+    }
 
   min_render_time_allowed = refresh_interval / 2;
   max_render_time_allowed = refresh_interval - 1000 * sync_delay;
