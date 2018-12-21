@@ -114,6 +114,9 @@ struct _MetaFrames
   gdouble grab_y;
 
   Window grab_xwindow;
+  int last_window_rect_height;
+  int last_window_rect_width;
+  MetaFrameGeometry fgeom;
 };
 
 struct _MetaFramesClass

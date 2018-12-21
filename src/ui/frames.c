@@ -260,6 +260,8 @@ meta_frames_init (MetaFrames *frames)
 
   frames->style_variants = g_hash_table_new_full (g_str_hash, g_str_equal,
                                                   g_free, g_object_unref);
+  frames->last_window_rect_width = -1;
+  frames->last_window_rect_height = -1;
 
   update_style_contexts (frames);
 
@@ -587,10 +589,19 @@ meta_frames_calc_geometry (MetaFrames        *frames,
                            MetaUIFrame       *frame,
                            MetaFrameGeometry *fgeom)
 {
-  int width, height;
+  int width = frame->meta_window->rect.width;
+  int height = frame->meta_window->rect.height;
   MetaFrameFlags flags;
   MetaFrameType type;
   MetaButtonLayout button_layout;
+
+  /* Only calculate frame geometry if the window size has changed. */
+  if (frames->last_window_rect_width == width &&
+      frames->last_window_rect_height == height)
+    {
+      *fgeom = frames->fgeom;
+      return;
+    }
 
   flags = meta_frame_get_flags (frame->meta_window->frame);
   type = meta_window_get_frame_type (frame->meta_window);
@@ -603,10 +614,13 @@ meta_frames_calc_geometry (MetaFrames        *frames,
                             type,
                             frame->text_height,
                             flags,
-                            frame->meta_window->rect.width,
-                            frame->meta_window->rect.height,
+                            width,
+                            height,
                             &button_layout,
                             fgeom);
+  frames->fgeom = *fgeom;
+  frames->last_window_rect_width = width;
+  frames->last_window_rect_height = height;
 }
 
 LOCAL_SYMBOL MetaFrames*
