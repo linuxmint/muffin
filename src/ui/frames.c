@@ -260,6 +260,7 @@ meta_frames_init (MetaFrames *frames)
 
   frames->style_variants = g_hash_table_new_full (g_str_hash, g_str_equal,
                                                   g_free, g_object_unref);
+  frames->entered = FALSE;
   frames->last_window_rect_width = -1;
   frames->last_window_rect_height = -1;
 
@@ -1726,6 +1727,10 @@ meta_frames_motion_notify_event     (GtkWidget           *widget,
   int x, y;
 
   frames = META_FRAMES (widget);
+
+  if (!frames->entered)
+    return FALSE;
+
   frame = meta_frames_lookup_window (frames, GDK_WINDOW_XID (event->window));
   if (frame == NULL)
     return FALSE;
@@ -2183,6 +2188,8 @@ meta_frames_enter_notify_event      (GtkWidget           *widget,
   
   frames = META_FRAMES (widget);
 
+  frames->entered = TRUE;
+
   frame = meta_frames_lookup_window (frames, GDK_WINDOW_XID (event->window));
   if (frame == NULL)
     return FALSE;
@@ -2201,6 +2208,8 @@ meta_frames_leave_notify_event      (GtkWidget           *widget,
   MetaFrames *frames;
 
   frames = META_FRAMES (widget);
+
+  frames->entered = FALSE;
 
   frame = meta_frames_lookup_window (frames, GDK_WINDOW_XID (event->window));
   if (frame == NULL)
