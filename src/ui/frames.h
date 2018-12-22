@@ -118,6 +118,8 @@ struct _MetaFrames
   guint entered : 1;
   int last_window_rect_height;
   int last_window_rect_width;
+  int last_cursor_x;
+  int last_cursor_y;
   MetaFrameGeometry fgeom;
 };
 

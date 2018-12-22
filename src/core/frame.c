@@ -448,6 +448,12 @@ meta_frame_set_screen_cursor (MetaFrame	*frame,
     }
 }
 
+MetaCursor
+meta_frame_get_screen_cursor (MetaFrame	*frame)
+{
+  return frame->current_cursor;
+}
+
 LOCAL_SYMBOL Window
 meta_frame_get_xwindow (MetaFrame *frame)
 {

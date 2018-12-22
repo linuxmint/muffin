@@ -263,6 +263,8 @@ meta_frames_init (MetaFrames *frames)
   frames->entered = FALSE;
   frames->last_window_rect_width = -1;
   frames->last_window_rect_height = -1;
+  frames->last_cursor_x = -1;
+  frames->last_cursor_y = -1;
 
   update_style_contexts (frames);
 
@@ -1731,20 +1733,32 @@ meta_frames_motion_notify_event     (GtkWidget           *widget,
   if (!frames->entered)
     return FALSE;
 
+  x = event->x;
+  y = event->y;
+
   frame = meta_frames_lookup_window (frames, GDK_WINDOW_XID (event->window));
   if (frame == NULL)
     return FALSE;
 
   frames->last_motion_frame = frame;
 
-  if (frame->meta_window->display->grab_op == META_GRAB_OP_MOVING)
+  MetaCursor cursor = meta_frame_get_screen_cursor (frame->meta_window->frame);
+
+  if (frames->last_cursor_x == x && frames->last_cursor_y == y)
+    return FALSE;
+
+  frames->last_cursor_x = x;
+  frames->last_cursor_y = y;
+
+  if (frame->meta_window->display->grab_op == META_GRAB_OP_MOVING ||
+      (cursor != META_CURSOR_DEFAULT &&
+      (cursor == META_CURSOR_NORTH_RESIZE ||
+      cursor == META_CURSOR_NW_RESIZE ||
+      cursor == META_CURSOR_NE_RESIZE ||
+      cursor == META_CURSOR_WEST_RESIZE ||
+      cursor == META_CURSOR_EAST_RESIZE)))
     gdk_window_get_device_position (frame->window, event->device,
                                     &x, &y, NULL);
-  else
-    {
-      x = event->x;
-      y = event->y;
-    }
 
   control = get_control (frames, frame, x, y);
 
