@@ -598,11 +598,14 @@ meta_frames_calc_geometry (MetaFrames        *frames,
   MetaFrameType type;
   MetaButtonLayout button_layout;
 
-  /* Only calculate frame geometry if the window size has changed. */
+  /* Only calculate frame geometry if the window size has changed.
+     Tiled windows need an extra pass to not have artifacts. */
   if (frames->last_window_rect_width == width &&
-      frames->last_window_rect_height == height)
+      frames->last_window_rect_height == height &&
+      (frame->meta_window->tile_mode == META_TILE_NONE || frame->fgeom_count > 1))
     {
       *fgeom = frames->fgeom;
+      frame->fgeom_count = 0;
       return;
     }
 
@@ -621,9 +624,11 @@ meta_frames_calc_geometry (MetaFrames        *frames,
                             height,
                             &button_layout,
                             fgeom);
+
   frames->fgeom = *fgeom;
   frames->last_window_rect_width = width;
   frames->last_window_rect_height = height;
+  frame->fgeom_count++;
 }
 
 LOCAL_SYMBOL MetaFrames*
@@ -705,6 +710,7 @@ meta_frames_manage_window (MetaFrames *frames,
   frame->shape_applied = FALSE;
   frame->prelit_control = META_FRAME_CONTROL_NONE;
   frame->button_state = META_BUTTON_STATE_NORMAL;
+  frame->fgeom_count = 0;
 
   meta_display_grab_window_buttons (meta_window->display, frame->xwindow);
 

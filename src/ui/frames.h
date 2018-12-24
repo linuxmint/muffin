@@ -88,6 +88,8 @@ struct _MetaUIFrame
   MetaFrameControl prelit_control;
   MetaButtonState button_state;
   int grab_button;
+
+  int fgeom_count;
 };
 
 struct _MetaFrames
