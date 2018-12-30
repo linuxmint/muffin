@@ -5386,7 +5386,12 @@ meta_window_move_resize_internal (MetaWindow          *window,
     save_user_window_placement (window);
 
   if (need_move_frame)
-    g_signal_emit (window, window_signals[POSITION_CHANGED], 0);
+    {
+      if (window->position_changed_callback != NULL)
+        (window->position_changed_callback) (window);
+      else
+        g_signal_emit (window, window_signals[POSITION_CHANGED], 0);
+    }
 
   if (need_resize_client)
     g_signal_emit (window, window_signals[SIZE_CHANGED], 0);
@@ -12374,3 +12379,22 @@ meta_window_get_icon_name (MetaWindow *window)
 
     return window->theme_icon_name;
 }
+
+/**
+ * meta_window_set_position_changed_callback:
+ * @window: a #MetaWindow
+ * @callback (scope notified): callback
+ * @user_data (closure): user data
+ * @data_destroy: a #GDestroyNotify
+ *
+ * Sets the callback which will be invoked on position change.
+ */
+void
+meta_window_set_position_changed_callback (MetaWindow        *window,
+                                           MetaWindowCallback callback,
+                                           gpointer           user_data,
+                                           GDestroyNotify     data_destroy)
+{
+  window->position_changed_callback = callback;
+}
+

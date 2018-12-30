@@ -423,9 +423,9 @@ texture_size_changed (MetaWindow *mw,
 
 static void
 window_position_changed (MetaWindow *mw,
-                     gpointer    data)
+                         gpointer    data)
 {
-  MetaWindowActor *self = META_WINDOW_ACTOR (data);
+  MetaWindowActor *self = META_WINDOW_ACTOR (meta_window_get_compositor_private (mw));
 
   g_signal_emit (self, signals[POSITION_CHANGED], 0); // Compatibility
 }
@@ -588,8 +588,7 @@ meta_window_actor_set_property (GObject      *object,
                                  G_CALLBACK (window_decorated_notify), self, 0);
         g_signal_connect_object (priv->window, "notify::appears-focused",
                                  G_CALLBACK (window_appears_focused_notify), self, 0);
-        g_signal_connect_object (priv->window, "position-changed",
-                                 G_CALLBACK (window_position_changed), self, 0);
+        meta_window_set_position_changed_callback (priv->window, window_position_changed);
       }
       break;
     case PROP_META_SCREEN:
