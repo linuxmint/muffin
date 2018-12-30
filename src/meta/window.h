@@ -68,6 +68,14 @@ typedef struct _MetaWindowClass   MetaWindowClass;
 
 GType meta_window_get_type (void);
 
+/**
+ * MetaWindowCallback:
+ * @window: (closure): a #MetaWindow
+ *
+ * Callback type for MetaWindow
+ */
+typedef void (* MetaWindowCallback) (MetaWindow *window);
+
 MetaFrame *meta_window_get_frame (MetaWindow *window);
 gboolean meta_window_has_focus (MetaWindow *window);
 gboolean meta_window_appears_focused (MetaWindow *window);

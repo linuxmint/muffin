@@ -513,6 +513,8 @@ struct _MetaWindow
 
   /* Bypass compositor hints */
   guint bypass_compositor;
+
+  MetaWindowCallback position_changed_callback;
 };
 
 struct _MetaWindowClass
