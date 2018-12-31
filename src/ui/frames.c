@@ -811,12 +811,7 @@ meta_frames_get_corner_radiuses (MetaFrames *frames,
                                  float      *bottom_left,
                                  float      *bottom_right)
 {
-  MetaUIFrame *frame;
-  MetaFrameGeometry fgeom;
-
-  frame = meta_frames_lookup_window (frames, xwindow);
-
-  meta_frames_calc_geometry (frames, frame, &fgeom);
+  MetaFrameGeometry fgeom = frames->fgeom;
 
   /* For compatibility with the code in get_visible_rect(), there's
    * a mysterious sqrt() added to the corner radiuses:
@@ -984,6 +979,8 @@ meta_frames_move_resize_frame (MetaFrames *frames,
 
   if (old_width != width || old_height != height)
     invalidate_whole_window (frames, frame);
+
+  frames->last_window_rect_height = -1;
 }
 
 LOCAL_SYMBOL void
@@ -1057,8 +1054,8 @@ redraw_control (MetaFrames *frames,
 {
   MetaFrameGeometry fgeom;
   GdkRectangle *rect;
-  
-  meta_frames_calc_geometry (frames, frame, &fgeom);
+
+  fgeom = frames->fgeom;
 
   rect = control_rect (control, &fgeom);
 
