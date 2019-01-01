@@ -73,10 +73,6 @@ static void meta_frames_paint        (MetaFrames   *frames,
                                       MetaUIFrame  *frame,
                                       cairo_t      *cr);
 
-static void meta_frames_calc_geometry (MetaFrames        *frames,
-                                       MetaUIFrame         *frame,
-                                       MetaFrameGeometry *fgeom);
-
 static void meta_frames_ensure_layout (MetaFrames      *frames,
                                        MetaUIFrame     *frame);
 
@@ -261,8 +257,6 @@ meta_frames_init (MetaFrames *frames)
   frames->style_variants = g_hash_table_new_full (g_str_hash, g_str_equal,
                                                   g_free, g_object_unref);
   frames->entered = FALSE;
-  frames->last_window_rect_width = -1;
-  frames->last_window_rect_height = -1;
   frames->last_cursor_x = -1;
   frames->last_cursor_y = -1;
 
@@ -587,27 +581,23 @@ meta_frames_ensure_layout (MetaFrames  *frames,
     }
 }
 
-static void
-meta_frames_calc_geometry (MetaFrames        *frames,
-                           MetaUIFrame       *frame,
-                           MetaFrameGeometry *fgeom)
+void
+meta_frames_calc_geometry (MetaFrames *frames,
+                           Window      xwindow)
 {
+  MetaUIFrame *frame;
+
+  frame = g_hash_table_lookup (frames->frames, &xwindow);
+
+  if (frame == NULL)
+    return;
+
   int width = frame->meta_window->rect.width;
   int height = frame->meta_window->rect.height;
+  MetaFrameGeometry fgeom;
   MetaFrameFlags flags;
   MetaFrameType type;
   MetaButtonLayout button_layout;
-
-  /* Only calculate frame geometry if the window size has changed.
-     Tiled windows need an extra pass to not have artifacts. */
-  if (frames->last_window_rect_width == width &&
-      frames->last_window_rect_height == height &&
-      (frame->meta_window->tile_mode == META_TILE_NONE || frame->fgeom_count > 1))
-    {
-      *fgeom = frames->fgeom;
-      frame->fgeom_count = 0;
-      return;
-    }
 
   flags = meta_frame_get_flags (frame->meta_window->frame);
   type = meta_window_get_frame_type (frame->meta_window);
@@ -623,12 +613,8 @@ meta_frames_calc_geometry (MetaFrames        *frames,
                             width,
                             height,
                             &button_layout,
-                            fgeom);
-
-  frames->fgeom = *fgeom;
-  frames->last_window_rect_width = width;
-  frames->last_window_rect_height = height;
-  frame->fgeom_count++;
+                            &fgeom);
+  frame->fgeom = fgeom;
 }
 
 LOCAL_SYMBOL MetaFrames*
@@ -710,11 +696,12 @@ meta_frames_manage_window (MetaFrames *frames,
   frame->shape_applied = FALSE;
   frame->prelit_control = META_FRAME_CONTROL_NONE;
   frame->button_state = META_BUTTON_STATE_NORMAL;
-  frame->fgeom_count = 0;
 
   meta_display_grab_window_buttons (meta_window->display, frame->xwindow);
 
   g_hash_table_replace (frames->frames, &frame->xwindow, frame);
+
+  meta_frames_calc_geometry (frames, meta_window->xwindow);
 }
 
 LOCAL_SYMBOL void
@@ -811,7 +798,12 @@ meta_frames_get_corner_radiuses (MetaFrames *frames,
                                  float      *bottom_left,
                                  float      *bottom_right)
 {
-  MetaFrameGeometry fgeom = frames->fgeom;
+  MetaUIFrame *frame;
+
+  frame = meta_frames_lookup_window (frames, xwindow);
+
+  if (frame == NULL)
+    return;
 
   /* For compatibility with the code in get_visible_rect(), there's
    * a mysterious sqrt() added to the corner radiuses:
@@ -823,13 +815,13 @@ meta_frames_get_corner_radiuses (MetaFrames *frames,
    */
 
   if (top_left)
-    *top_left = fgeom.top_left_corner_rounded_radius + sqrt(fgeom.top_left_corner_rounded_radius);
+    *top_left = frame->fgeom.top_left_corner_rounded_radius + sqrt(frame->fgeom.top_left_corner_rounded_radius);
   if (top_right)
-    *top_right = fgeom.top_right_corner_rounded_radius + sqrt(fgeom.top_right_corner_rounded_radius);
+    *top_right = frame->fgeom.top_right_corner_rounded_radius + sqrt(frame->fgeom.top_right_corner_rounded_radius);
   if (bottom_left)
-    *bottom_left = fgeom.bottom_left_corner_rounded_radius + sqrt(fgeom.bottom_left_corner_rounded_radius);
+    *bottom_left = frame->fgeom.bottom_left_corner_rounded_radius + sqrt(frame->fgeom.bottom_left_corner_rounded_radius);
   if (bottom_right)
-    *bottom_right = fgeom.bottom_right_corner_rounded_radius + sqrt(fgeom.bottom_right_corner_rounded_radius);
+    *bottom_right = frame->fgeom.bottom_right_corner_rounded_radius + sqrt(frame->fgeom.bottom_right_corner_rounded_radius);
 }
 
 /* The visible frame rectangle surrounds the visible portion of the
@@ -949,15 +941,12 @@ meta_frames_get_frame_bounds (MetaFrames *frames,
                               int         window_height)
 {
   MetaUIFrame *frame;
-  MetaFrameGeometry fgeom;
 
   frame = meta_frames_lookup_window (frames, xwindow);
   g_return_val_if_fail (frame != NULL, NULL);
 
-  meta_frames_calc_geometry (frames, frame, &fgeom);
-
   return get_visible_region (frames, frame,
-                             &fgeom,
+                             &frame->fgeom,
                              window_width, window_height);
 }
 
@@ -980,7 +969,7 @@ meta_frames_move_resize_frame (MetaFrames *frames,
   if (old_width != width || old_height != height)
     invalidate_whole_window (frames, frame);
 
-  frames->last_window_rect_height = -1;
+  meta_frames_calc_geometry (frames, xwindow);
 }
 
 LOCAL_SYMBOL void
@@ -1052,12 +1041,9 @@ redraw_control (MetaFrames *frames,
                 MetaUIFrame *frame,
                 MetaFrameControl control)
 {
-  MetaFrameGeometry fgeom;
   GdkRectangle *rect;
 
-  fgeom = frames->fgeom;
-
-  rect = control_rect (control, &fgeom);
+  rect = control_rect (control, &frame->fgeom);
 
   gdk_window_invalidate_rect (frame->window, rect, FALSE);
   invalidate_cache (frames, frame);
@@ -1432,13 +1418,10 @@ meta_frames_button_press_event (GtkWidget      *widget,
 
       if (control == META_FRAME_CONTROL_MENU)
         {
-          MetaFrameGeometry fgeom;
           GdkRectangle *rect;
           int dx, dy;
-          
-          meta_frames_calc_geometry (frames, frame, &fgeom);
-          
-          rect = control_rect (META_FRAME_CONTROL_MENU, &fgeom);
+
+          rect = control_rect (META_FRAME_CONTROL_MENU, &frame->fgeom);
 
           /* get delta to convert to root coords */
           dx = event->x_root - event->x;
@@ -2313,7 +2296,6 @@ get_control (MetaFrames *frames,
              MetaUIFrame *frame,
              int x, int y)
 {
-  MetaFrameGeometry fgeom;
   MetaFrameFlags flags;
   MetaFrameType type;
   MetaWindow *window;
@@ -2328,15 +2310,13 @@ get_control (MetaFrames *frames,
   if (POINT_IN_RECT (x, y, client))
     return META_FRAME_CONTROL_CLIENT_AREA;
 
-  meta_frames_calc_geometry (frames, frame, &fgeom);
-
-  if (POINT_IN_RECT (x, y, fgeom.close_rect.clickable))
+  if (POINT_IN_RECT (x, y, frame->fgeom.close_rect.clickable))
     return META_FRAME_CONTROL_DELETE;
 
-  if (POINT_IN_RECT (x, y, fgeom.min_rect.clickable))
+  if (POINT_IN_RECT (x, y, frame->fgeom.min_rect.clickable))
     return META_FRAME_CONTROL_MINIMIZE;
 
-  if (POINT_IN_RECT (x, y, fgeom.menu_rect.clickable))
+  if (POINT_IN_RECT (x, y, frame->fgeom.menu_rect.clickable))
     return META_FRAME_CONTROL_MENU;
 
   flags = meta_frame_get_flags (window->frame);
@@ -2350,7 +2330,7 @@ get_control (MetaFrames *frames,
   has_right = (flags & META_FRAME_ALLOWS_RIGHT_RESIZE) != 0;
   has_bottom = (flags & META_FRAME_ALLOWS_BOTTOM_RESIZE) != 0;
 
-  if (POINT_IN_RECT (x, y, fgeom.title_rect))
+  if (POINT_IN_RECT (x, y, frame->fgeom.title_rect))
     {
       if (has_vert && y <= TOP_RESIZE_HEIGHT && has_north_resize)
         return META_FRAME_CONTROL_RESIZE_N;
@@ -2358,7 +2338,7 @@ get_control (MetaFrames *frames,
         return META_FRAME_CONTROL_TITLE;
     }
 
-  if (POINT_IN_RECT (x, y, fgeom.max_rect.clickable))
+  if (POINT_IN_RECT (x, y, frame->fgeom.max_rect.clickable))
     {
       if (flags & META_FRAME_MAXIMIZED &&
           (META_WINDOW_TILED_TOP (window) ||
@@ -2370,33 +2350,33 @@ get_control (MetaFrames *frames,
       else
         return META_FRAME_CONTROL_MAXIMIZE;
     }
-      
-  if (POINT_IN_RECT (x, y, fgeom.shade_rect.clickable))
+
+  if (POINT_IN_RECT (x, y, frame->fgeom.shade_rect.clickable))
     {
       return META_FRAME_CONTROL_SHADE;
     }
 
-  if (POINT_IN_RECT (x, y, fgeom.unshade_rect.clickable))
+  if (POINT_IN_RECT (x, y, frame->fgeom.unshade_rect.clickable))
     {
       return META_FRAME_CONTROL_UNSHADE;
     }
 
-  if (POINT_IN_RECT (x, y, fgeom.above_rect.clickable))
+  if (POINT_IN_RECT (x, y, frame->fgeom.above_rect.clickable))
     {
       return META_FRAME_CONTROL_ABOVE;
     }
 
-  if (POINT_IN_RECT (x, y, fgeom.unabove_rect.clickable))
+  if (POINT_IN_RECT (x, y, frame->fgeom.unabove_rect.clickable))
     {
       return META_FRAME_CONTROL_UNABOVE;
     }
 
-  if (POINT_IN_RECT (x, y, fgeom.stick_rect.clickable))
+  if (POINT_IN_RECT (x, y, frame->fgeom.stick_rect.clickable))
     {
       return META_FRAME_CONTROL_STICK;
     }
 
-  if (POINT_IN_RECT (x, y, fgeom.unstick_rect.clickable))
+  if (POINT_IN_RECT (x, y, frame->fgeom.unstick_rect.clickable))
     {
       return META_FRAME_CONTROL_UNSTICK;
     }
@@ -2405,8 +2385,8 @@ get_control (MetaFrames *frames,
    * in case of overlap.
    */
 
-  if (y >= (fgeom.height - fgeom.borders.total.bottom * CORNER_SIZE_MULT) &&
-      x >= (fgeom.width - fgeom.borders.total.right * CORNER_SIZE_MULT))
+  if (y >= (frame->fgeom.height - frame->fgeom.borders.total.bottom * CORNER_SIZE_MULT) &&
+      x >= (frame->fgeom.width - frame->fgeom.borders.total.right * CORNER_SIZE_MULT))
     {
       if ((has_vert && has_horiz) || (has_bottom && has_right))
         return META_FRAME_CONTROL_RESIZE_SE;
@@ -2415,8 +2395,8 @@ get_control (MetaFrames *frames,
       else if (has_right)
         return META_FRAME_CONTROL_RESIZE_E;
     }
-  else if (y >= (fgeom.height - fgeom.borders.total.bottom * CORNER_SIZE_MULT) &&
-           x <= fgeom.borders.total.left * CORNER_SIZE_MULT)
+  else if (y >= (frame->fgeom.height - frame->fgeom.borders.total.bottom * CORNER_SIZE_MULT) &&
+           x <= frame->fgeom.borders.total.left * CORNER_SIZE_MULT)
     {
       if ((has_vert && has_horiz) || (has_bottom && has_left))
         return META_FRAME_CONTROL_RESIZE_SW;
@@ -2425,8 +2405,8 @@ get_control (MetaFrames *frames,
       else if (has_left)
         return META_FRAME_CONTROL_RESIZE_W;
     }
-  else if (y < (fgeom.borders.invisible.top * CORNER_SIZE_MULT) &&
-           (x <= fgeom.borders.total.left * CORNER_SIZE_MULT) && has_north_resize)
+  else if (y < (frame->fgeom.borders.invisible.top * CORNER_SIZE_MULT) &&
+           (x <= frame->fgeom.borders.total.left * CORNER_SIZE_MULT) && has_north_resize)
     {
       if ((has_vert && has_horiz) || (has_top && has_left))
         return META_FRAME_CONTROL_RESIZE_NW;
@@ -2435,8 +2415,8 @@ get_control (MetaFrames *frames,
       else if (has_left)
         return META_FRAME_CONTROL_RESIZE_W;
     }
-  else if (y < (fgeom.borders.invisible.top * CORNER_SIZE_MULT) &&
-           x >= (fgeom.width - fgeom.borders.total.right  * CORNER_SIZE_MULT) && has_north_resize)
+  else if (y < (frame->fgeom.borders.invisible.top * CORNER_SIZE_MULT) &&
+           x >= (frame->fgeom.width - frame->fgeom.borders.total.right  * CORNER_SIZE_MULT) && has_north_resize)
     {
       if ((has_vert && has_horiz) || (has_top && has_right))
         return META_FRAME_CONTROL_RESIZE_NE;
@@ -2445,28 +2425,28 @@ get_control (MetaFrames *frames,
       else if (has_right)
         return META_FRAME_CONTROL_RESIZE_E;
     }
-  else if (y < (fgeom.borders.invisible.top + TOP_RESIZE_HEIGHT))
+  else if (y < (frame->fgeom.borders.invisible.top + TOP_RESIZE_HEIGHT))
     {
       if (has_top && has_north_resize)
         return META_FRAME_CONTROL_RESIZE_N;
     }
-  else if (y >= (fgeom.height - fgeom.borders.total.bottom))
+  else if (y >= (frame->fgeom.height - frame->fgeom.borders.total.bottom))
     {
       if (has_bottom)
         return META_FRAME_CONTROL_RESIZE_S;
     }
-  else if (x <= fgeom.borders.total.left)
+  else if (x <= frame->fgeom.borders.total.left)
     {
       if (has_left)
         return META_FRAME_CONTROL_RESIZE_W;
     }
-  else if (x >= (fgeom.width - fgeom.borders.total.right))
+  else if (x >= (frame->fgeom.width - frame->fgeom.borders.total.right))
     {
       if (has_right)
         return META_FRAME_CONTROL_RESIZE_E;
     }
 
-  if (y >= fgeom.borders.total.top)
+  if (y >= frame->fgeom.borders.total.top)
     return META_FRAME_CONTROL_NONE;
   else
     return META_FRAME_CONTROL_TITLE;

@@ -89,7 +89,7 @@ struct _MetaUIFrame
   MetaButtonState button_state;
   int grab_button;
 
-  int fgeom_count;
+  MetaFrameGeometry fgeom;
 };
 
 struct _MetaFrames
@@ -118,11 +118,8 @@ struct _MetaFrames
   Window grab_xwindow;
 
   guint entered : 1;
-  int last_window_rect_height;
-  int last_window_rect_width;
   int last_cursor_x;
   int last_cursor_y;
-  MetaFrameGeometry fgeom;
 };
 
 struct _MetaFramesClass
@@ -177,5 +174,8 @@ void meta_frames_queue_draw (MetaFrames *frames,
                              Window      xwindow);
 
 Window meta_frames_get_moving_frame (MetaFrames *frames);
+
+void meta_frames_calc_geometry (MetaFrames *frames,
+                                Window      xwindow);
 
 #endif
