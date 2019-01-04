@@ -145,6 +145,7 @@ struct _MetaWindowActorPrivate
   guint             has_desat_effect : 1;
 
   guint             reshapes;
+  guint             should_have_shadow : 1;
 };
 
 typedef struct _FrameData FrameData;
@@ -304,6 +305,7 @@ meta_window_actor_init (MetaWindowActor *self)
   priv->shadow_class = NULL;
   priv->has_desat_effect = FALSE;
   priv->reshapes = 0;
+  priv->should_have_shadow = FALSE;
 }
 
 static void
@@ -321,6 +323,9 @@ maybe_desaturate_window (ClutterActor *actor)
 {
   MetaWindowActor *window = META_WINDOW_ACTOR (actor);
   MetaWindowActorPrivate *priv = window->priv;
+
+  if (!priv->should_have_shadow)
+    return;
 
   guint8 opacity = clutter_actor_get_opacity (actor);
 
@@ -2111,6 +2116,7 @@ check_needs_shadow (MetaWindowActor *self)
    */
 
   should_have_shadow = meta_window_actor_has_shadow (self);
+  priv->should_have_shadow = should_have_shadow;
   appears_focused = meta_window_appears_focused (priv->window);
 
   if (appears_focused)
