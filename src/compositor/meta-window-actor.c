@@ -784,7 +784,7 @@ meta_window_actor_paint (ClutterActor *actor)
   MetaWindowActorPrivate *priv = self->priv;
   gboolean appears_focused = meta_window_appears_focused (priv->window);
   MetaShadow *shadow = appears_focused ? priv->focused_shadow : priv->unfocused_shadow;
-  if (g_getenv ("MUFFIN_NO_SHADOWS")) {
+  if (!priv->window->display->shadows_enabled) {
       shadow = NULL;
   }
 
@@ -1159,13 +1159,10 @@ meta_window_actor_damage_all (MetaWindowActor *self)
   MetaWindowActorPrivate *priv = self->priv;
   CoglTexture *texture;
 
-  if (!priv->needs_damage_all)
+  if (!priv->needs_damage_all || !priv->window->mapped || priv->needs_pixmap)
     return;
 
   texture = meta_shaped_texture_get_texture (META_SHAPED_TEXTURE (priv->actor));
-
-  if (!priv->window->mapped || priv->needs_pixmap)
-    return;
 
   priv->needs_damage_all = FALSE;
 
@@ -2129,7 +2126,7 @@ check_needs_pixmap (MetaWindowActor *self)
 static void
 check_needs_shadow (MetaWindowActor *self)
 {
-  if (g_getenv ("MUFFIN_NO_SHADOWS")) {
+  if (!self->priv->window->display->shadows_enabled) {
       return;
   }
 
