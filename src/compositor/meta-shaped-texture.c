@@ -508,17 +508,18 @@ meta_shaped_texture_paint (ClutterActor *actor)
 
   cairo_rectangle_int_t tex_rect = { 0, 0, tex_width, tex_height };
 
+  fb = cogl_get_draw_framebuffer ();
+
   /* Use nearest-pixel interpolation if the texture is unscaled. This
    * improves performance, especially with software rendering.
    */
 
   filter = COGL_PIPELINE_FILTER_LINEAR;
 
-  if (meta_actor_painting_untransformed (tex_width, tex_height, NULL, NULL))
+  if (meta_actor_painting_untransformed (fb, tex_width, tex_height, NULL, NULL))
     filter = COGL_PIPELINE_FILTER_NEAREST;
 
   ctx = clutter_backend_get_cogl_context (clutter_get_default_backend ());
-  fb = cogl_get_draw_framebuffer ();
 
   opacity = clutter_actor_get_paint_opacity (actor);
   clutter_actor_get_allocation_box (actor, &alloc);
