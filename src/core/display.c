@@ -869,7 +869,9 @@ meta_display_open (void)
   the_display->last_focus_time = timestamp;
   the_display->last_user_time = timestamp;
   the_display->compositor = NULL;
-  
+  the_display->shadows_enabled = g_getenv ("MUFFIN_NO_SHADOWS") == NULL;
+  the_display->debug_button_grabs = g_getenv ("MUFFIN_DEBUG_BUTTON_GRABS") != NULL;
+
   screens = NULL;
   
   i = 0;
@@ -1860,7 +1862,7 @@ event_callback (XEvent   *event,
           gboolean unmodified;
 
           grab_mask = display->window_grab_modifiers;
-          if (g_getenv ("MUFFIN_DEBUG_BUTTON_GRABS"))
+          if (display->debug_button_grabs)
             grab_mask |= ControlMask;
 
           /* Two possible sources of an unmodified event; one is a
@@ -3976,10 +3978,10 @@ meta_display_grab_window_buttons (MetaDisplay *display,
    * put one big error trap around the loop and avoid a bunch of
    * XSync()
    */
+  gboolean debug = display->debug_button_grabs;
 
   if (display->window_grab_modifiers != 0)
     {
-      gboolean debug = g_getenv ("MUFFIN_DEBUG_BUTTON_GRABS") != NULL;
       int i;
       for (i = 1; i < 4; i++)
         {
@@ -4012,7 +4014,6 @@ meta_display_grab_window_buttons (MetaDisplay *display,
 
   if (display->mouse_zoom_enabled && display->mouse_zoom_modifiers != 0)
     {
-      gboolean debug = g_getenv ("MUFFIN_DEBUG_BUTTON_GRABS") != NULL;
       int i;
       for (i = 4; i < 6; i++)
         {
@@ -4042,8 +4043,8 @@ meta_display_ungrab_window_buttons  (MetaDisplay *display,
 
   if (display->window_grab_modifiers == 0)
     return;
-  
-  debug = g_getenv ("MUFFIN_DEBUG_BUTTON_GRABS") != NULL;
+
+  debug = display->debug_button_grabs;
   i = 1;
   while (i < 4)
     {
