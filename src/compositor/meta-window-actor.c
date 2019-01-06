@@ -23,13 +23,35 @@
 #include <meta/errors.h>
 #include "frame.h"
 #include <meta/window.h>
-#include <meta/meta-shaped-texture.h>
 #include "xprops.h"
 
 #include "compositor-private.h"
-#include "meta-shaped-texture-private.h"
+#include "meta-texture-tower.h"
+#include "meta-texture-rectangle.h"
 #include "meta-shadow-factory-private.h"
 #include "meta-window-actor-private.h"
+
+#include "cogl-utils.h"
+#include "clutter-utils.h"
+#include <clutter/clutter.h>
+#include <cogl/cogl.h>
+#include <string.h>
+
+/* MAX_MIPMAPPING_FPS needs to be as small as possible for the best GPU
+ * performance, but higher than the refresh rate of commonly slow updating
+ * windows like top or a blinking cursor, so that such windows do get
+ * mipmapped.
+ */
+#define MAX_MIPMAPPING_FPS 5
+#define MIN_MIPMAP_AGE_USEC (G_USEC_PER_SEC / MAX_MIPMAPPING_FPS)
+#define MIPMAP_TIMEOUT (MIN_MIPMAP_AGE_USEC / 1000)
+#define MIPMAP_AGE_OFFSET (MIN_MIPMAP_AGE_USEC - 1000)
+
+/* MIN_FAST_UPDATES_BEFORE_UNMIPMAP allows windows to update themselves
+ * occasionally without causing mipmapping to be disabled, so long as such
+ * an update takes fewer update_area calls than:
+ */
+#define MIN_FAST_UPDATES_BEFORE_UNMIPMAP 20
 
 enum {
   POSITION_CHANGED,
@@ -62,7 +84,7 @@ struct _MetaWindowActorPrivate
   MetaShadow       *focused_shadow;
   MetaShadow       *unfocused_shadow;
 
-  Pixmap            back_pixmap;
+  Pixmap            pixmap;
 
   Damage            damage;
 
@@ -146,6 +168,26 @@ struct _MetaWindowActorPrivate
 
   guint             reshapes;
   guint             should_have_shadow : 1;
+
+  /* Shaped texture */
+  MetaTextureTower *paint_tower;
+  CoglTexture *texture;
+  CoglTexture *mask_texture;
+
+  cairo_region_t *clip_region;
+
+  cairo_region_t *overlay_region;
+  cairo_path_t *overlay_path;
+
+  guint tex_width, tex_height;
+
+  gint64 prev_invalidation, last_invalidation;
+  guint fast_updates;
+  guint remipmap_timeout_id;
+  gint64 earliest_remipmap;
+
+  guint create_mipmaps : 1;
+  guint mask_needs_update : 1;
 };
 
 typedef struct _FrameData FrameData;
@@ -186,6 +228,15 @@ static void meta_window_actor_get_property (GObject      *object,
 static void meta_window_actor_pick (ClutterActor       *actor,
 			                              const ClutterColor *color);
 static void meta_window_actor_paint (ClutterActor *actor);
+static void meta_window_actor_get_preferred_width (ClutterActor *self,
+                                                   gfloat        for_height,
+                                                   gfloat       *min_width_p,
+                                                   gfloat       *natural_width_p);
+
+static void meta_window_actor_get_preferred_height (ClutterActor *self,
+                                                    gfloat        for_width,
+                                                    gfloat       *min_height_p,
+                                                    gfloat       *natural_height_p);
 
 static gboolean meta_window_actor_get_paint_volume (ClutterActor       *actor,
                                                     ClutterPaintVolume *volume);
@@ -227,6 +278,8 @@ meta_window_actor_class_init (MetaWindowActorClass *klass)
   object_class->get_property = meta_window_actor_get_property;
   object_class->constructed  = meta_window_actor_constructed;
 
+  actor_class->get_preferred_width = meta_window_actor_get_preferred_width;
+  actor_class->get_preferred_height = meta_window_actor_get_preferred_height;
   actor_class->pick = meta_window_actor_pick;
   actor_class->paint = meta_window_actor_paint;
   actor_class->get_paint_volume = meta_window_actor_get_paint_volume;
@@ -304,22 +357,20 @@ meta_window_actor_init (MetaWindowActor *self)
   priv = self->priv = G_TYPE_INSTANCE_GET_PRIVATE (self,
 						   META_TYPE_WINDOW_ACTOR,
 						   MetaWindowActorPrivate);
+
+  priv->overlay_path = NULL;
+  priv->overlay_region = NULL;
+  priv->paint_tower = meta_texture_tower_new ();
+  priv->texture = NULL;
+  priv->mask_texture = NULL;
+  priv->create_mipmaps = TRUE;
+  priv->mask_needs_update = TRUE;
+
   priv->opacity = 0xff;
   priv->shadow_class = NULL;
   priv->has_desat_effect = FALSE;
   priv->reshapes = 0;
   priv->should_have_shadow = FALSE;
-}
-
-static void
-meta_window_actor_reset_mask_texture (MetaWindowActor *self,
-                                      cairo_region_t  *shape_region,
-                                      gboolean force)
-{
-  MetaShapedTexture *stex = META_SHAPED_TEXTURE (self->priv->actor);
-  if (force)
-    meta_shaped_texture_dirty_mask (stex);
-  meta_shaped_texture_ensure_mask (stex, shape_region, self->priv->window->frame != NULL);
 }
 
 static void
@@ -422,15 +473,6 @@ clutter_actor_opacity_notify (ClutterActor *actor,
 }
 
 static void
-texture_size_changed (MetaWindow *mw,
-                     gpointer    data)
-{
-  MetaWindowActor *self = META_WINDOW_ACTOR (data);
-
-  g_signal_emit (self, signals[SIZE_CHANGED], 0); // Compatibility
-}
-
-static void
 window_position_changed (MetaWindow *mw,
                      gpointer    data)
 {
@@ -459,14 +501,8 @@ meta_window_actor_constructed (GObject *object)
   if (format && format->type == PictTypeDirect && format->direct.alphaMask)
     priv->argb32 = TRUE;
 
-  if (!priv->actor)
+  if (!priv->texture)
     {
-      priv->actor = meta_shaped_texture_new ();
-
-      priv->size_changed_id = g_signal_connect (priv->actor, "size-changed",
-                                                G_CALLBACK (texture_size_changed), self);
-      clutter_actor_add_child (CLUTTER_ACTOR (self), priv->actor);
-
       /*
        * Since we are holding a pointer to this actor independently of the
        * ClutterContainer internals, and provide a public API to access it,
@@ -474,7 +510,6 @@ meta_window_actor_constructed (GObject *object)
        * via the container interface, we do not end up with a dangling pointer.
        * We will release it in dispose().
        */
-      g_object_ref (priv->actor);
       priv->opacity_changed_id = g_signal_connect (self, "notify::opacity",
                                                    G_CALLBACK (clutter_actor_opacity_notify), NULL);
 
@@ -498,7 +533,6 @@ meta_window_actor_constructed (GObject *object)
        */
       g_signal_handler_disconnect (priv->actor, priv->size_changed_id);
       g_signal_handler_disconnect (self, priv->opacity_changed_id);
-      clutter_actor_set_child_above_sibling (CLUTTER_ACTOR (self), priv->actor, NULL);
     }
 
   meta_window_actor_update_opacity (self);
@@ -535,6 +569,13 @@ meta_window_actor_dispose (GObject *object)
 
   meta_window_actor_detach (self);
 
+  g_clear_pointer (&priv->texture, cogl_object_unref);
+  g_clear_pointer (&priv->mask_texture, cogl_object_unref);
+  g_clear_pointer (&priv->clip_region, cairo_region_destroy);
+  g_clear_pointer (&priv->overlay_region, cairo_region_destroy);
+  g_clear_pointer (&priv->overlay_path, cairo_path_destroy);
+
+  g_clear_pointer (&priv->opaque_region, cairo_region_destroy);
   g_clear_pointer (&priv->unobscured_region, cairo_region_destroy);
   g_clear_pointer (&priv->shape_region, cairo_region_destroy);
   g_clear_pointer (&priv->opaque_region, cairo_region_destroy);
@@ -557,11 +598,6 @@ meta_window_actor_dispose (GObject *object)
   compositor->windows = g_list_remove (compositor->windows, (gconstpointer) self);
 
   g_clear_object (&priv->window);
-
-  /*
-   * Release the extra reference we took on the actor.
-   */
-  g_clear_object (&priv->actor);
 
   G_OBJECT_CLASS (meta_window_actor_parent_class)->dispose (object);
 }
@@ -843,6 +879,330 @@ meta_window_actor_pick (ClutterActor       *actor,
     clutter_actor_paint (child);
 }
 
+static gboolean
+texture_is_idle_and_not_mipmapped (gpointer data)
+{
+  MetaWindowActor *self = (MetaWindowActor *) data;
+
+  if (meta_window_actor_is_destroyed (self))
+    return G_SOURCE_REMOVE;
+
+  MetaWindowActorPrivate *priv = self->priv;
+
+  if ((g_get_monotonic_time () - priv->earliest_remipmap) < 0)
+    return G_SOURCE_CONTINUE;
+
+  clutter_actor_queue_redraw (CLUTTER_ACTOR (self));
+  priv->remipmap_timeout_id = 0;
+
+  return G_SOURCE_REMOVE;
+}
+
+static CoglPipeline *
+get_base_pipeline (CoglContext *ctx)
+{
+  static CoglPipeline *template = NULL;
+  if (G_UNLIKELY (template == NULL))
+    {
+      template = cogl_pipeline_new (ctx);
+      cogl_pipeline_set_layer_wrap_mode_s (template, 0, COGL_PIPELINE_WRAP_MODE_CLAMP_TO_EDGE);
+      cogl_pipeline_set_layer_wrap_mode_t (template, 0, COGL_PIPELINE_WRAP_MODE_CLAMP_TO_EDGE);
+      cogl_pipeline_set_layer_wrap_mode_s (template, 1, COGL_PIPELINE_WRAP_MODE_CLAMP_TO_EDGE);
+      cogl_pipeline_set_layer_wrap_mode_t (template, 1, COGL_PIPELINE_WRAP_MODE_CLAMP_TO_EDGE);
+    }
+  return template;
+}
+
+static CoglPipeline *
+get_unmasked_pipeline (CoglContext *ctx)
+{
+  return get_base_pipeline (ctx);
+}
+
+static CoglPipeline *
+get_masked_pipeline (CoglContext *ctx)
+{
+  static CoglPipeline *template = NULL;
+  if (G_UNLIKELY (template == NULL))
+    {
+      template = cogl_pipeline_copy (get_base_pipeline (ctx));
+      cogl_pipeline_set_layer_combine (template, 1,
+                                       "RGBA = MODULATE (PREVIOUS, TEXTURE[A])",
+                                       NULL);
+    }
+
+  return template;
+}
+
+static CoglPipeline *
+get_unblended_pipeline (CoglContext *ctx)
+{
+  static CoglPipeline *template = NULL;
+  if (G_UNLIKELY (template == NULL))
+    {
+      CoglColor color;
+      template = cogl_pipeline_copy (get_base_pipeline (ctx));
+      cogl_color_init_from_4ub (&color, 255, 255, 255, 255);
+      cogl_pipeline_set_blend (template,
+                               "RGBA = ADD (SRC_COLOR, 0)",
+                               NULL);
+      cogl_pipeline_set_color (template, &color);
+    }
+
+  return template;
+}
+
+static void
+paint_clipped_rectangle (CoglFramebuffer       *fb,
+                         CoglPipeline          *pipeline,
+                         cairo_rectangle_int_t *rect,
+                         ClutterActorBox       *alloc)
+{
+  float coords[8];
+  float x1, y1, x2, y2;
+
+  x1 = rect->x;
+  y1 = rect->y;
+  x2 = rect->x + rect->width;
+  y2 = rect->y + rect->height;
+
+  coords[0] = rect->x / (alloc->x2 - alloc->x1);
+  coords[1] = rect->y / (alloc->y2 - alloc->y1);
+  coords[2] = (rect->x + rect->width) / (alloc->x2 - alloc->x1);
+  coords[3] = (rect->y + rect->height) / (alloc->y2 - alloc->y1);
+
+  coords[4] = coords[0];
+  coords[5] = coords[1];
+  coords[6] = coords[2];
+  coords[7] = coords[3];
+
+  cogl_framebuffer_draw_multitextured_rectangle (fb, pipeline,
+                                                 x1, y1, x2, y2,
+                                                 &coords[0], 8);
+
+}
+
+static void
+texture_paint (ClutterActor *actor)
+{
+  MetaWindowActor *self = META_WINDOW_ACTOR (actor);
+  MetaWindowActorPrivate *priv = self->priv;
+  guint tex_width, tex_height;
+  guchar opacity;
+  CoglContext *ctx;
+  CoglFramebuffer *fb;
+  CoglTexture *paint_tex = NULL;
+  ClutterActorBox alloc;
+  CoglPipelineFilter filter;
+  cairo_region_t *clip = priv->clip_region;
+
+  if (clip && cairo_region_is_empty (clip))
+    return;
+
+  if (!CLUTTER_ACTOR_IS_REALIZED (actor))
+    clutter_actor_realize (actor);
+
+  /* The GL EXT_texture_from_pixmap extension does allow for it to be
+   * used together with SGIS_generate_mipmap, however this is very
+   * rarely supported. Also, even when it is supported there
+   * are distinct performance implications from:
+   *
+   *  - Updating mipmaps that we don't need
+   *  - Having to reallocate pixmaps on the server into larger buffers
+   *
+   * So, we just unconditionally use our mipmap emulation code. If we
+   * wanted to use SGIS_generate_mipmap, we'd have to  query COGL to
+   * see if it was supported (no API currently), and then if and only
+   * if that was the case, set the clutter texture quality to HIGH.
+   * Setting the texture quality to high without SGIS_generate_mipmap
+   * support for TFP textures will result in fallbacks to XGetImage.
+   */
+  if (priv->create_mipmaps && priv->last_invalidation)
+    {
+      gint64 now = g_get_monotonic_time ();
+      gint64 age = now - priv->last_invalidation;
+
+      if (age >= MIN_MIPMAP_AGE_USEC ||
+          priv->fast_updates < MIN_FAST_UPDATES_BEFORE_UNMIPMAP)
+        paint_tex = meta_texture_tower_get_paint_texture (priv->paint_tower);
+        if (!paint_tex)
+          paint_tex = priv->texture;
+      else
+        {
+          paint_tex = priv->texture;
+
+          /* Minus 1000 to ensure we don't fail the age test in timeout */
+          priv->earliest_remipmap = now + MIPMAP_AGE_OFFSET;
+
+          if (!priv->remipmap_timeout_id)
+            priv->remipmap_timeout_id =
+              g_timeout_add (MIPMAP_TIMEOUT,
+                            texture_is_idle_and_not_mipmapped,
+                            self);
+        }
+    }
+  else
+    paint_tex = priv->texture;
+
+  tex_width = priv->tex_width;
+  tex_height = priv->tex_height;
+
+  if (tex_width == 0 || tex_height == 0) /* no contents yet */
+    return;
+
+  cairo_rectangle_int_t tex_rect = { 0, 0, tex_width, tex_height };
+
+  fb = cogl_get_draw_framebuffer ();
+
+  /* Use nearest-pixel interpolation if the texture is unscaled. This
+   * improves performance, especially with software rendering.
+   */
+
+  filter = COGL_PIPELINE_FILTER_LINEAR;
+
+  if (meta_actor_painting_untransformed (fb, tex_width, tex_height, NULL, NULL))
+    filter = COGL_PIPELINE_FILTER_NEAREST;
+
+  ctx = clutter_backend_get_cogl_context (clutter_get_default_backend ());
+
+  opacity = clutter_actor_get_paint_opacity (actor);
+  clutter_actor_get_allocation_box (actor, &alloc);
+
+  cairo_region_t *blended_region;
+  gboolean use_opaque_region = (priv->opaque_region != NULL && opacity == 255);
+
+  if (use_opaque_region)
+    {
+      if (clip != NULL)
+        blended_region = cairo_region_copy (clip);
+      else
+        blended_region = cairo_region_create_rectangle (&tex_rect);
+
+      cairo_region_subtract (blended_region, priv->opaque_region);
+    }
+  else
+    {
+      if (clip != NULL)
+        blended_region = cairo_region_reference (clip);
+      else
+        blended_region = NULL;
+    }
+
+  /* Limit to how many separate rectangles we'll draw; beyond this just
+   * fall back and draw the whole thing */
+#define MAX_RECTS 16
+
+  if (blended_region != NULL)
+    {
+      int n_rects = cairo_region_num_rectangles (blended_region);
+      if (n_rects > MAX_RECTS)
+        {
+          /* Fall back to taking the fully blended path. */
+          use_opaque_region = FALSE;
+
+          cairo_region_destroy (blended_region);
+          blended_region = NULL;
+        }
+    }
+
+  /* First, paint the unblended parts, which are part of the opaque region. */
+  if (use_opaque_region)
+    {
+      cairo_region_t *region;
+      int n_rects;
+      int i;
+
+      if (clip != NULL)
+        {
+          region = cairo_region_copy (clip);
+          cairo_region_intersect (region, priv->opaque_region);
+        }
+      else
+        {
+          region = cairo_region_reference (priv->opaque_region);
+        }
+
+      if (!cairo_region_is_empty (region))
+        {
+          CoglPipeline *opaque_pipeline = get_unblended_pipeline (ctx);
+          cogl_pipeline_set_layer_texture (opaque_pipeline, 0, paint_tex);
+          cogl_pipeline_set_layer_filters (opaque_pipeline, 0, filter, filter);
+
+          n_rects = cairo_region_num_rectangles (region);
+          for (i = 0; i < n_rects; i++)
+            {
+              cairo_rectangle_int_t rect;
+              cairo_region_get_rectangle (region, i, &rect);
+              paint_clipped_rectangle (fb, opaque_pipeline, &rect, &alloc);
+            }
+        }
+
+      cairo_region_destroy (region);
+    }
+
+  /* Now, go ahead and paint the blended parts. */
+
+  /* We have three cases:
+   *   1) blended_region has rectangles - paint the rectangles.
+   *   2) blended_region is empty - don't paint anything
+   *   3) blended_region is NULL - paint fully-blended.
+   *
+   *   1) and 3) are the times where we have to paint stuff. This tests
+   *   for 1) and 3).
+   */
+  if (blended_region == NULL || !cairo_region_is_empty (blended_region))
+    {
+      CoglPipeline *blended_pipeline;
+
+      if (priv->mask_texture == NULL)
+        {
+          blended_pipeline = get_unmasked_pipeline (ctx);
+        }
+      else
+        {
+          blended_pipeline = get_masked_pipeline (ctx);
+          cogl_pipeline_set_layer_texture (blended_pipeline, 1, priv->mask_texture);
+          cogl_pipeline_set_layer_filters (blended_pipeline, 1, filter, filter);
+        }
+
+      cogl_pipeline_set_layer_texture (blended_pipeline, 0, paint_tex);
+      cogl_pipeline_set_layer_filters (blended_pipeline, 0, filter, filter);
+
+      CoglColor color;
+      cogl_color_init_from_4ub (&color, opacity, opacity, opacity, opacity);
+      cogl_pipeline_set_color (blended_pipeline, &color);
+
+      if (blended_region != NULL)
+        {
+          /* 1) blended_region is not empty. Paint the rectangles. */
+          int i;
+          int n_rects = cairo_region_num_rectangles (blended_region);
+
+          for (i = 0; i < n_rects; i++)
+            {
+              cairo_rectangle_int_t rect;
+              cairo_region_get_rectangle (blended_region, i, &rect);
+
+              if (!gdk_rectangle_intersect (&tex_rect, &rect, &rect))
+                continue;
+
+              paint_clipped_rectangle (fb, blended_pipeline, &rect, &alloc);
+            }
+        }
+      else
+        {
+          /* 3) blended_region is NULL. Do a full paint. */
+          cogl_framebuffer_draw_rectangle (fb, blended_pipeline,
+                                           0, 0,
+                                           alloc.x2 - alloc.x1,
+                                           alloc.y2 - alloc.y1);
+        }
+    }
+
+  if (blended_region != NULL)
+    cairo_region_destroy (blended_region);
+}
+
 static void
 meta_window_actor_paint (ClutterActor *actor)
 {
@@ -850,6 +1210,7 @@ meta_window_actor_paint (ClutterActor *actor)
   MetaWindowActorPrivate *priv = self->priv;
   gboolean appears_focused = meta_window_appears_focused (priv->window);
   MetaShadow *shadow = appears_focused ? priv->focused_shadow : priv->unfocused_shadow;
+
   if (!priv->window->display->shadows_enabled) {
       shadow = NULL;
   }
@@ -901,7 +1262,38 @@ meta_window_actor_paint (ClutterActor *actor)
         cairo_region_destroy (clip);
     }
 
-  CLUTTER_ACTOR_CLASS (meta_window_actor_parent_class)->paint (actor);
+  if (priv->texture)
+    texture_paint (actor);
+}
+
+static void
+meta_window_actor_get_preferred_width (ClutterActor *self,
+                                       gfloat        for_height,
+                                       gfloat       *min_width_p,
+                                       gfloat       *natural_width_p)
+{
+  MetaWindowActorPrivate *priv = META_WINDOW_ACTOR (self)->priv;
+
+  if (min_width_p)
+    *min_width_p = priv->tex_width;
+
+  if (natural_width_p)
+    *natural_width_p = priv->tex_width;
+}
+
+static void
+meta_window_actor_get_preferred_height (ClutterActor *self,
+                                        gfloat        for_width,
+                                        gfloat       *min_height_p,
+                                        gfloat       *natural_height_p)
+{
+  MetaWindowActorPrivate *priv = META_WINDOW_ACTOR (self)->priv;
+
+  if (min_height_p)
+    *min_height_p = priv->tex_height;
+
+  if (natural_height_p)
+    *natural_height_p = priv->tex_height;
 }
 
 static gboolean
@@ -937,16 +1329,8 @@ meta_window_actor_get_paint_volume (ClutterActor       *actor,
       clutter_paint_volume_union_box (volume, &shadow_box);
     }
 
-  if (priv->actor)
-    {
-      const ClutterPaintVolume *child_volume;
-
-      child_volume = clutter_actor_get_transformed_paint_volume (CLUTTER_ACTOR (priv->actor), actor);
-      if (!child_volume)
-        return FALSE;
-
-      clutter_paint_volume_union (volume, child_volume);
-    }
+  if (priv->texture)
+    return clutter_paint_volume_set_from_allocation (volume, self);
 
   return TRUE;
 }
@@ -1065,7 +1449,7 @@ meta_window_actor_get_meta_window (MetaWindowActor *self)
 ClutterActor *
 meta_window_actor_get_texture (MetaWindowActor *self)
 {
-  return self->priv->actor;
+  return CLUTTER_ACTOR (self);
 }
 
 /**
@@ -1206,6 +1590,66 @@ meta_window_actor_freeze (MetaWindowActor *self)
   self->priv->freeze_count++;
 }
 
+static gboolean
+meta_window_actor_update_area (MetaWindowActor *self,
+                               int              x,
+                               int              y,
+                               int              width,
+                               int              height,
+                               cairo_region_t  *unobscured_region)
+{
+  MetaWindowActorPrivate *priv = self->priv;
+  ClutterActor *actor = (ClutterActor *) self;
+  const cairo_rectangle_int_t clip = { x, y, width, height };
+
+  if (priv->texture == NULL)
+    return FALSE;
+
+  meta_texture_tower_update_area (priv->paint_tower, x, y, width, height);
+
+  priv->prev_invalidation = priv->last_invalidation;
+  priv->last_invalidation = g_get_monotonic_time ();
+
+  if (priv->prev_invalidation)
+    {
+      gint64 interval = priv->last_invalidation - priv->prev_invalidation;
+      gboolean fast_update = interval < MIN_MIPMAP_AGE_USEC;
+
+      if (!fast_update)
+        priv->fast_updates = 0;
+      else if (priv->fast_updates < MIN_FAST_UPDATES_BEFORE_UNMIPMAP)
+        priv->fast_updates++;
+    }
+
+  if (unobscured_region)
+    {
+      cairo_region_t *intersection;
+
+      if (cairo_region_is_empty (unobscured_region))
+        return FALSE;
+
+      intersection = cairo_region_copy (unobscured_region);
+      cairo_region_intersect_rectangle (intersection, &clip);
+
+      if (!cairo_region_is_empty (intersection))
+        {
+          cairo_rectangle_int_t damage_rect;
+          cairo_region_get_extents (intersection, &damage_rect);
+          clutter_actor_queue_redraw_with_clip (actor, &damage_rect);
+          cairo_region_destroy (intersection);
+          return TRUE;
+        }
+
+      cairo_region_destroy (intersection);
+      return FALSE;
+    }
+  else
+    {
+      clutter_actor_queue_redraw_with_clip (actor, &clip);
+      return TRUE;
+    }
+}
+
 static void
 update_area (MetaWindowActor *self,
              int x, int y, int width, int height)
@@ -1213,7 +1657,7 @@ update_area (MetaWindowActor *self,
   MetaWindowActorPrivate *priv = self->priv;
   CoglTexture *texture;
 
-  texture = meta_shaped_texture_get_texture (META_SHAPED_TEXTURE (priv->actor));
+  texture = priv->texture;
 
   cogl_texture_pixmap_x11_update_area (COGL_TEXTURE_PIXMAP_X11 (texture),
                                        x, y, width, height);
@@ -1228,16 +1672,16 @@ meta_window_actor_damage_all (MetaWindowActor *self)
   if (!priv->needs_damage_all || !priv->window->mapped || priv->needs_pixmap)
     return;
 
-  texture = meta_shaped_texture_get_texture (META_SHAPED_TEXTURE (priv->actor));
+  texture = priv->texture;
 
   priv->needs_damage_all = FALSE;
 
   update_area (self, 0, 0, cogl_texture_get_width (texture), cogl_texture_get_height (texture));
-  priv->repaint_scheduled = meta_shaped_texture_update_area (META_SHAPED_TEXTURE (priv->actor),
+  priv->repaint_scheduled = meta_window_actor_update_area (self,
                                    0, 0,
                                    cogl_texture_get_width (texture),
                                    cogl_texture_get_height (texture),
-                                   clutter_actor_has_mapped_clones (priv->actor) ? NULL : priv->unobscured_region);
+                                   clutter_actor_has_mapped_clones (self) ? NULL : priv->unobscured_region);
 }
 
 static void
@@ -1321,7 +1765,7 @@ meta_window_actor_queue_frame_drawn (MetaWindowActor *self,
       else if (priv->window->mapped && !priv->needs_pixmap)
         {
           const cairo_rectangle_int_t clip = { 0, 0, 1, 1 };
-          clutter_actor_queue_redraw_with_clip (priv->actor, &clip);
+          clutter_actor_queue_redraw_with_clip (CLUTTER_ACTOR (self), &clip);
           priv->repaint_scheduled = TRUE;
         }
     }
@@ -1428,7 +1872,7 @@ meta_window_actor_after_effects (MetaWindowActor *self)
   meta_window_actor_sync_actor_geometry (self, FALSE);
 
   if (priv->needs_pixmap)
-    clutter_actor_queue_redraw (priv->actor);
+    clutter_actor_queue_redraw (CLUTTER_ACTOR (self));
 }
 
 LOCAL_SYMBOL void
@@ -1511,6 +1955,51 @@ meta_window_actor_effect_completed (MetaWindowActor *self,
     meta_window_actor_after_effects (self);
 }
 
+static void
+set_cogl_texture (MetaWindowActor *self,
+                  CoglTexture     *cogl_tex)
+{
+  MetaWindowActorPrivate *priv = self->priv;
+  guint width, height;
+
+  if (priv->texture != NULL)
+    cogl_object_unref (priv->texture);
+  // g_clear_pointer (&priv->texture, cogl_object_unref);
+
+  priv->texture = cogl_tex;
+
+  if (cogl_tex != NULL)
+    {
+      width = cogl_texture_get_width (COGL_TEXTURE (cogl_tex));
+      height = cogl_texture_get_height (COGL_TEXTURE (cogl_tex));
+    }
+  else
+    {
+      width = 0;
+      height = 0;
+    }
+
+  priv->mask_needs_update = (priv->tex_width != width ||
+                             priv->tex_height != height);
+
+  if (priv->mask_needs_update)
+    {
+      priv->tex_width = width;
+      priv->tex_height = height;
+      g_clear_pointer (&priv->mask_texture, cogl_object_unref);
+      priv->needs_reshape = TRUE;
+      g_signal_emit (self, signals[SIZE_CHANGED], 0);
+    }
+
+  /* NB: We don't queue a redraw of the actor here because we don't
+   * know how much of the buffer has changed with respect to the
+   * previous buffer. We only queue a redraw in response to surface
+   * damage. */
+
+  if (priv->create_mipmaps)
+    meta_texture_tower_set_base_texture (priv->paint_tower, cogl_tex);
+}
+
 /* Called to drop our reference to a window backing pixmap that we
  * previously obtained with XCompositeNameWindowPixmap. We do this
  * when the window is unmapped or when we want to update to a new
@@ -1524,19 +2013,19 @@ meta_window_actor_detach (MetaWindowActor *self)
   MetaDisplay           *display  = meta_screen_get_display (screen);
   Display               *xdisplay = meta_display_get_xdisplay (display);
 
-  if (!priv->back_pixmap)
+  if (!priv->pixmap)
     return;
 
   /* Get rid of all references to the pixmap before freeing it; it's unclear whether
    * you are supposed to be able to free a GLXPixmap after freeing the underlying
    * pixmap, but it certainly doesn't work with current DRI/Mesa
    */
-  meta_shaped_texture_set_texture (META_SHAPED_TEXTURE (priv->actor), NULL);
+  set_cogl_texture (self, NULL);
 
   cogl_flush();
 
-  XFreePixmap (xdisplay, priv->back_pixmap);
-  priv->back_pixmap = None;
+  XFreePixmap (xdisplay, priv->pixmap);
+  priv->pixmap = None;
 
   priv->needs_pixmap = TRUE;
 }
@@ -1962,7 +2451,7 @@ meta_window_actor_get_obscured_region (MetaWindowActor *self)
 {
   MetaWindowActorPrivate *priv = self->priv;
 
-  if (priv->back_pixmap && priv->opacity == 0xff)
+  if (priv->pixmap && priv->opacity == 0xff)
     return priv->opaque_region;
   else
     return NULL;
@@ -2015,6 +2504,21 @@ meta_window_actor_set_unobscured_region (MetaWindowActor *self,
     priv->unobscured_region = NULL;
 }
 
+static void
+meta_window_actor_set_clip_region (MetaWindowActor *self,
+				                           cairo_region_t    *clip_region)
+{
+  MetaWindowActorPrivate *priv = self->priv;
+
+  if (priv->clip_region)
+    cairo_region_destroy (priv->clip_region);
+
+  if (clip_region)
+    priv->clip_region = cairo_region_copy (clip_region);
+  else
+    priv->clip_region = NULL;
+}
+
 /**
  * meta_window_actor_set_visible_region:
  * @self: a #MetaWindowActor
@@ -2031,8 +2535,7 @@ meta_window_actor_set_visible_region (MetaWindowActor *self,
 {
   MetaWindowActorPrivate *priv = self->priv;
 
-  meta_shaped_texture_set_clip_region (META_SHAPED_TEXTURE (priv->actor),
-                                       visible_region);
+  meta_window_actor_set_clip_region (self, visible_region);
 }
 
 /**
@@ -2077,9 +2580,26 @@ meta_window_actor_reset_visible_regions (MetaWindowActor *self)
 {
   MetaWindowActorPrivate *priv = self->priv;
 
-  meta_shaped_texture_set_clip_region (META_SHAPED_TEXTURE (priv->actor),
-                                       NULL);
+  meta_window_actor_set_clip_region (self, NULL);
   g_clear_pointer (&priv->shadow_clip, cairo_region_destroy);
+}
+
+static void
+meta_window_actor_set_create_mipmaps (MetaWindowActor *self,
+					                              gboolean         create_mipmaps)
+{
+  MetaWindowActorPrivate *priv = self->priv;
+
+  create_mipmaps = create_mipmaps != FALSE;
+
+  if (create_mipmaps != priv->create_mipmaps)
+    {
+      CoglTexture *base_texture;
+      priv->create_mipmaps = create_mipmaps;
+      base_texture = create_mipmaps ? priv->texture : NULL;
+
+      meta_texture_tower_set_base_texture (priv->paint_tower, base_texture);
+    }
 }
 
 static void
@@ -2110,14 +2630,14 @@ check_needs_pixmap (MetaWindowActor *self)
 
   meta_error_trap_push (display);
 
-  if (priv->back_pixmap == None)
+  if (priv->pixmap == None)
     {
       CoglContext *ctx = clutter_backend_get_cogl_context (clutter_get_default_backend ());
       CoglTexture *texture;
 
       meta_error_trap_push (display);
 
-      priv->back_pixmap = XCompositeNameWindowPixmap (xdisplay, xwindow);
+      priv->pixmap = XCompositeNameWindowPixmap (xdisplay, xwindow);
 
       if (meta_error_trap_pop_with_return (display) != Success)
         {
@@ -2128,20 +2648,19 @@ check_needs_pixmap (MetaWindowActor *self)
            * for any reason other than !viewable. That's unlikely, but maybe
            * we'll BadAlloc or something.)
            */
-          priv->back_pixmap = None;
+          priv->pixmap = None;
         }
 
-      if (priv->back_pixmap == None)
+      if (priv->pixmap == None)
         {
           meta_verbose ("Unable to get named pixmap for %p\n", self);
           goto out;
         }
 
       if (compositor->no_mipmaps)
-        meta_shaped_texture_set_create_mipmaps (META_SHAPED_TEXTURE (priv->actor),
-                                                FALSE);
+        meta_window_actor_set_create_mipmaps (self, FALSE);
 
-      texture = COGL_TEXTURE (cogl_texture_pixmap_x11_new (ctx, priv->back_pixmap, FALSE, NULL));
+      texture = COGL_TEXTURE (cogl_texture_pixmap_x11_new (ctx, priv->pixmap, FALSE, NULL));
 
       /*
        * This only works *after* actually setting the pixmap, so we have to
@@ -2151,7 +2670,7 @@ check_needs_pixmap (MetaWindowActor *self)
       if (G_UNLIKELY (!cogl_texture_pixmap_x11_is_using_tfp_extension (texture)))
         g_warning ("NOTE: Not using GLX TFP!\n");
 
-      meta_shaped_texture_set_texture (META_SHAPED_TEXTURE (priv->actor), texture);
+      set_cogl_texture (self, texture);
     }
 
   priv->needs_pixmap = FALSE;
@@ -2287,12 +2806,12 @@ meta_window_actor_process_damage (MetaWindowActor    *self,
     return;
 
   update_area (self, event->area.x, event->area.y, event->area.width, event->area.height);
-  priv->repaint_scheduled = meta_shaped_texture_update_area (META_SHAPED_TEXTURE (priv->actor),
+  priv->repaint_scheduled = meta_window_actor_update_area (self,
                                    event->area.x,
                                    event->area.y,
                                    event->area.width,
                                    event->area.height,
-                                   clutter_actor_has_mapped_clones (priv->actor) ? NULL : priv->unobscured_region);
+                                   clutter_actor_has_mapped_clones (self) ? NULL : priv->unobscured_region);
 }
 
 LOCAL_SYMBOL void
@@ -2327,8 +2846,6 @@ update_corners (MetaWindowActor   *self)
   MetaRectangle outer = priv->window->frame->rect;
   MetaFrameBorders borders;
   cairo_rectangle_int_t corner_rects[4];
-  cairo_region_t *corner_region;
-  cairo_path_t *corner_path;
   float top_left, top_right, bottom_left, bottom_right;
   float x, y;
 
@@ -2407,18 +2924,164 @@ update_corners (MetaWindowActor   *self)
              bottom_left,
              0, M_PI*2);
 
-  corner_path = cairo_copy_path (cr);
-
   cairo_surface_destroy (surface);
   cairo_destroy (cr);
 
-  corner_region = cairo_region_create_rectangles (corner_rects, 4);
+  g_clear_pointer (&priv->overlay_region, cairo_region_destroy);
+  g_clear_pointer (&priv->overlay_path, cairo_path_destroy);
 
-  meta_shaped_texture_set_overlay_path (META_SHAPED_TEXTURE (priv->actor),
-                                        corner_region, corner_path);
+  priv->overlay_region = cairo_region_create_rectangles (corner_rects, 4);
+  priv->overlay_path = cairo_copy_path (cr);
+}
 
-  cairo_region_destroy (corner_region);
+static void
+install_overlay_path (MetaWindowActor *self,
+                      guchar          *mask_data,
+                      int              tex_width,
+                      int              tex_height,
+                      int              stride)
+{
+  MetaWindowActorPrivate *priv = self->priv;
+  int i, n_rects;
+  cairo_t *cr;
+  cairo_rectangle_int_t rect;
+  cairo_surface_t *surface;
 
+  if (priv->overlay_region == NULL)
+    return;
+
+  surface = cairo_image_surface_create_for_data (mask_data,
+                                                 CAIRO_FORMAT_A8,
+                                                 tex_width,
+                                                 tex_height,
+                                                 stride);
+
+  cr = cairo_create (surface);
+  cairo_set_operator (cr, CAIRO_OPERATOR_CLEAR);
+
+  n_rects = cairo_region_num_rectangles (priv->overlay_region);
+  for (i = 0; i < n_rects; i++)
+    {
+      cairo_region_get_rectangle (priv->overlay_region, i, &rect);
+      cairo_rectangle (cr, rect.x, rect.y, rect.width, rect.height);
+    }
+
+  cairo_fill_preserve (cr);
+  if (priv->overlay_path == NULL)
+    {
+      /* If we have an overlay region but not an overlay path, then we
+       * just need to clear the rectangles in the overlay region. */
+      goto out;
+    }
+
+  cairo_clip (cr);
+
+  cairo_set_operator (cr, CAIRO_OPERATOR_OVER);
+  cairo_set_source_rgba (cr, 1, 1, 1, 1);
+
+  cairo_append_path (cr, priv->overlay_path);
+  cairo_fill (cr);
+
+ out:
+  cairo_destroy (cr);
+  cairo_surface_destroy (surface);
+}
+
+LOCAL_SYMBOL void
+meta_window_actor_ensure_mask (MetaWindowActor *self,
+                               cairo_region_t  *shape_region,
+                               gboolean         has_frame)
+{
+  MetaWindowActorPrivate *priv = self->priv;
+  CoglTexture *paint_tex;
+  guint tex_width, tex_height;
+
+  paint_tex = priv->texture;
+
+  if (paint_tex == NULL)
+    return;
+
+  tex_width = cogl_texture_get_width (paint_tex);
+  tex_height = cogl_texture_get_height (paint_tex);
+
+  /* If the mask texture we have was created for a different size then
+     recreate it */
+  if (priv->mask_texture != NULL && priv->mask_needs_update)
+    {
+      priv->mask_needs_update = FALSE;
+      g_clear_pointer (&priv->mask_texture, cogl_object_unref);
+    }
+
+  /* If we don't have a mask texture yet then create one */
+  if (priv->mask_texture == NULL)
+    {
+      guchar *mask_data;
+      int i;
+      int n_rects;
+      int stride;
+
+      /* If we have no shape region and no (or an empty) overlay region, we
+       * don't need to create a full mask texture, so quit early. */
+      if (shape_region == NULL &&
+          (priv->overlay_region == NULL ||
+           cairo_region_num_rectangles (priv->overlay_region) == 0))
+        {
+          return;
+        }
+
+      if (shape_region == NULL)
+        return;
+
+      n_rects = cairo_region_num_rectangles (shape_region);
+
+      if (n_rects == 0)
+        return;
+
+      stride = cairo_format_stride_for_width (CAIRO_FORMAT_A8, tex_width);
+
+      /* Create data for an empty image */
+      mask_data = g_malloc0 (stride * tex_height);
+
+      /* Fill in each rectangle. */
+      for (i = 0; i < n_rects; i ++)
+        {
+          cairo_rectangle_int_t rect;
+          cairo_region_get_rectangle (shape_region, i, &rect);
+
+          gint x1 = rect.x, x2 = x1 + rect.width;
+          gint y1 = rect.y, y2 = y1 + rect.height;
+          guchar *p;
+
+          /* Clip the rectangle to the size of the texture */
+          x1 = CLAMP (x1, 0, (gint) tex_width - 1);
+          x2 = CLAMP (x2, x1, (gint) tex_width);
+          y1 = CLAMP (y1, 0, (gint) tex_height - 1);
+          y2 = CLAMP (y2, y1, (gint) tex_height);
+
+          /* Fill the rectangle */
+          for (p = mask_data + y1 * stride + x1;
+               y1 < y2;
+               y1++, p += stride)
+            memset (p, 255, x2 - x1);
+        }
+
+      if (has_frame)
+        install_overlay_path (self, mask_data, tex_width, tex_height, stride);
+
+      if (meta_texture_rectangle_check (paint_tex))
+        priv->mask_texture = meta_cogl_rectangle_new (tex_width, tex_height,
+                                                        COGL_PIXEL_FORMAT_A_8,
+                                                        stride, mask_data);
+      else
+        priv->mask_texture = meta_cogl_texture_new_from_data_wrapper (tex_width, tex_height,
+                                                                      COGL_TEXTURE_NONE,
+                                                                      COGL_PIXEL_FORMAT_A_8,
+                                                                      COGL_PIXEL_FORMAT_ANY,
+                                                                      stride,
+                                                                      mask_data);
+
+      g_free (mask_data);
+    }
 }
 
 static void
@@ -2430,6 +3093,7 @@ check_needs_reshape (MetaWindowActor *self)
   cairo_region_t *region = NULL;
   cairo_rectangle_int_t *client_area;
   gboolean full_mask_reset = priv->window->fullscreen;
+  gboolean has_frame = priv->window->frame != NULL;
 
   if ((!priv->window->mapped && !priv->window->shaded) || !priv->needs_reshape)
     return;
@@ -2440,7 +3104,7 @@ check_needs_reshape (MetaWindowActor *self)
 
   client_area = &priv->window->client_area;
 
-  if (priv->window->frame)
+  if (has_frame)
     region = meta_window_get_frame_bounds (priv->window);
 
   if (region != NULL)
@@ -2511,15 +3175,19 @@ check_needs_reshape (MetaWindowActor *self)
   else
     priv->opaque_region = cairo_region_reference (region);
 
-  if (priv->window->frame)
+  if (has_frame)
     update_corners (self);
   else if (priv->window->has_shape && priv->reshapes == 1)
     full_mask_reset = TRUE;
   else if (priv->reshapes < 2)
     priv->reshapes++;
 
-  if (priv->window->frame != NULL || priv->window->has_shape)
-    meta_window_actor_reset_mask_texture (self, region, full_mask_reset);
+  if (has_frame || priv->window->has_shape)
+    {
+      if (full_mask_reset)
+        g_clear_pointer (&self->priv->mask_texture, cogl_object_unref);
+      meta_window_actor_ensure_mask (self, region, has_frame);
+    }
 
   meta_window_actor_update_shape_region (self, region);
 
@@ -2539,7 +3207,7 @@ meta_window_actor_update_shape (MetaWindowActor *self)
   if (is_frozen (self))
     return;
 
-  clutter_actor_queue_redraw (priv->actor);
+  clutter_actor_queue_redraw (CLUTTER_ACTOR (self));
 }
 
 LOCAL_SYMBOL void
@@ -2782,7 +3450,7 @@ meta_window_actor_update_opacity (MetaWindowActor *self)
     opacity = 255;
 
   self->priv->opacity = opacity;
-  clutter_actor_set_opacity (self->priv->actor, opacity);
+  clutter_actor_set_opacity (self, opacity);
 }
 
 void
@@ -2801,4 +3469,102 @@ meta_window_actor_set_updates_frozen (MetaWindowActor *self,
       else
         meta_window_actor_thaw (self);
     }
+}
+
+/**
+ * meta_window_actor_get_image:
+ * @self: A #MetaWindowActor
+ * @clip: A clipping rectangle, to help prevent extra processing.
+ * In the case that the clipping rectangle is partially or fully
+ * outside the bounds of the texture, the rectangle will be clipped.
+ *
+ * Flattens the two layers of the shaped texture into one ARGB32
+ * image by alpha blending the two images, and returns the flattened
+ * image.
+ *
+ * Returns: (transfer full): a new cairo surface to be freed with
+ * cairo_surface_destroy().
+ */
+cairo_surface_t *
+meta_window_actor_get_image (MetaWindowActor       *self,
+                             cairo_rectangle_int_t *clip)
+{
+  CoglTexture *texture, *mask_texture;
+  cairo_rectangle_int_t texture_rect = { 0, 0, 0, 0 };
+  cairo_surface_t *surface;
+
+  g_return_val_if_fail (META_IS_WINDOW_ACTOR (self), NULL);
+
+  texture = self->priv->texture;
+
+  if (texture == NULL)
+    return NULL;
+
+  texture_rect.width = cogl_texture_get_width (texture);
+  texture_rect.height = cogl_texture_get_height (texture);
+
+  if (clip != NULL)
+    {
+      /* GdkRectangle is just a typedef of cairo_rectangle_int_t,
+       * so we can use the gdk_rectangle_* APIs on these. */
+      if (!gdk_rectangle_intersect (&texture_rect, clip, clip))
+        return NULL;
+    }
+
+  if (clip != NULL)
+    texture = cogl_texture_new_from_sub_texture (texture,
+                                                 clip->x,
+                                                 clip->y,
+                                                 clip->width,
+                                                 clip->height);
+
+  surface = cairo_image_surface_create (CAIRO_FORMAT_ARGB32,
+                                        cogl_texture_get_width (texture),
+                                        cogl_texture_get_height (texture));
+
+  cogl_texture_get_data (texture, CLUTTER_CAIRO_FORMAT_ARGB32,
+                         cairo_image_surface_get_stride (surface),
+                         cairo_image_surface_get_data (surface));
+
+  cairo_surface_mark_dirty (surface);
+
+  if (clip != NULL)
+    cogl_object_unref (texture);
+
+  mask_texture = self->priv->mask_texture;
+  if (mask_texture != NULL)
+    {
+      cairo_t *cr;
+      cairo_surface_t *mask_surface;
+
+      if (clip != NULL)
+        mask_texture = cogl_texture_new_from_sub_texture (mask_texture,
+                                                          clip->x,
+                                                          clip->y,
+                                                          clip->width,
+                                                          clip->height);
+
+      mask_surface = cairo_image_surface_create (CAIRO_FORMAT_A8,
+                                                 cogl_texture_get_width (mask_texture),
+                                                 cogl_texture_get_height (mask_texture));
+
+      cogl_texture_get_data (mask_texture, COGL_PIXEL_FORMAT_A_8,
+                             cairo_image_surface_get_stride (mask_surface),
+                             cairo_image_surface_get_data (mask_surface));
+
+      cairo_surface_mark_dirty (mask_surface);
+
+      cr = cairo_create (surface);
+      cairo_set_source_surface (cr, mask_surface, 0, 0);
+      cairo_set_operator (cr, CAIRO_OPERATOR_DEST_IN);
+      cairo_paint (cr);
+      cairo_destroy (cr);
+
+      cairo_surface_destroy (mask_surface);
+
+      if (clip != NULL)
+        cogl_object_unref (mask_texture);
+    }
+
+  return surface;
 }
