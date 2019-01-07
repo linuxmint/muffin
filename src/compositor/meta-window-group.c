@@ -29,64 +29,6 @@ struct _MetaWindowGroup
 
 G_DEFINE_TYPE (MetaWindowGroup, meta_window_group, CLUTTER_TYPE_ACTOR);
 
-/* Help macros to scale from OpenGL <-1,1> coordinates system to
- * window coordinates ranging [0,window-size]. Borrowed from clutter-utils.c
- */
-#define MTX_GL_SCALE_X(x,w,v1,v2) ((((((x) / (w)) + 1.0f) / 2.0f) * (v1)) + (v2))
-#define MTX_GL_SCALE_Y(y,w,v1,v2) ((v1) - (((((y) / (w)) + 1.0f) / 2.0f) * (v1)) + (v2))
-
-/* Check if we're painting the MetaWindowGroup "untransformed". This can
- * differ from the result of actor_is_untransformed(window_group) if we're
- * inside a clone paint. The integer translation, if any, is returned.
- */
-static gboolean
-painting_untransformed (MetaWindowGroup *window_group,
-                        int             *x_origin,
-                        int             *y_origin)
-{
-  CoglMatrix modelview, projection, modelview_projection;
-  ClutterVertex vertices[4];
-  int width, height;
-  float viewport[4];
-  int i;
-
-  cogl_get_modelview_matrix (&modelview);
-  cogl_get_projection_matrix (&projection);
-
-  cogl_matrix_multiply (&modelview_projection,
-                        &projection,
-                        &modelview);
-
-  meta_screen_get_size (window_group->screen, &width, &height);
-
-  vertices[0].x = 0;
-  vertices[0].y = 0;
-  vertices[0].z = 0;
-  vertices[1].x = width;
-  vertices[1].y = 0;
-  vertices[1].z = 0;
-  vertices[2].x = 0;
-  vertices[2].y = height;
-  vertices[2].z = 0;
-  vertices[3].x = width;
-  vertices[3].y = height;
-  vertices[3].z = 0;
-
-  cogl_get_viewport (viewport);
-
-  for (i = 0; i < 4; i++)
-    {
-      float w = 1;
-      cogl_matrix_transform_point (&modelview_projection, &vertices[i].x, &vertices[i].y, &vertices[i].z, &w);
-      vertices[i].x = MTX_GL_SCALE_X (vertices[i].x, w,
-                                      viewport[2], viewport[0]);
-      vertices[i].y = MTX_GL_SCALE_Y (vertices[i].y, w,
-                                      viewport[3], viewport[1]);
-    }
-
-  return meta_actor_vertices_are_untransformed (vertices, width, height, x_origin, y_origin);
-}
-
 static void
 meta_window_group_cull_out (MetaWindowGroup *group,
                             ClutterActor    *unredirected_window,
@@ -213,10 +155,12 @@ meta_window_group_paint (ClutterActor *actor)
   int paint_x_offset, paint_y_offset;
   int paint_x_origin, paint_y_origin;
   int actor_x_origin, actor_y_origin;
+  int screen_width, screen_height;
 
   MetaWindowGroup *window_group = META_WINDOW_GROUP (actor);
   MetaCompositor *compositor = window_group->screen->display->compositor;
   ClutterActor *stage = CLUTTER_STAGE (compositor->stage);
+  meta_screen_get_size (window_group->screen, &screen_width, &screen_height);
 
   /* Start off by treating all windows as completely unobscured, so damage anywhere
    * in a window queues redraws, but confine it more below. */
@@ -243,7 +187,11 @@ meta_window_group_paint (ClutterActor *actor)
    * painting currently, and never worry about how actors are positioned
    * on the stage.
    */
-  if (!painting_untransformed (window_group, &paint_x_origin, &paint_y_origin) ||
+  if (!meta_actor_painting_untransformed (cogl_get_draw_framebuffer (),
+                                          screen_width,
+                                          screen_height,
+                                          &paint_x_origin,
+                                          &paint_y_origin) ||
       !meta_actor_is_untransformed (actor, &actor_x_origin, &actor_y_origin))
     {
       CLUTTER_ACTOR_CLASS (meta_window_group_parent_class)->paint (actor);
