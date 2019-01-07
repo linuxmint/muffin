@@ -176,9 +176,6 @@ struct _MetaWindowActorPrivate
 
   cairo_region_t *clip_region;
 
-  cairo_region_t *overlay_region;
-  cairo_path_t *overlay_path;
-
   guint tex_width, tex_height;
 
   gint64 prev_invalidation, last_invalidation;
@@ -358,8 +355,6 @@ meta_window_actor_init (MetaWindowActor *self)
 						   META_TYPE_WINDOW_ACTOR,
 						   MetaWindowActorPrivate);
 
-  priv->overlay_path = NULL;
-  priv->overlay_region = NULL;
   priv->paint_tower = meta_texture_tower_new ();
   priv->texture = NULL;
   priv->mask_texture = NULL;
@@ -578,8 +573,6 @@ meta_window_actor_dispose (GObject *object)
   g_clear_pointer (&priv->texture, cogl_object_unref);
   g_clear_pointer (&priv->mask_texture, cogl_object_unref);
   g_clear_pointer (&priv->clip_region, cairo_region_destroy);
-  g_clear_pointer (&priv->overlay_region, cairo_region_destroy);
-  g_clear_pointer (&priv->overlay_path, cairo_path_destroy);
 
   g_clear_pointer (&priv->opaque_region, cairo_region_destroy);
   g_clear_pointer (&priv->unobscured_region, cairo_region_destroy);
@@ -2959,71 +2952,11 @@ update_corners (MetaWindowActor   *self)
 
   cairo_surface_destroy (surface);
   cairo_destroy (cr);
-
-  g_clear_pointer (&priv->overlay_region, cairo_region_destroy);
-  g_clear_pointer (&priv->overlay_path, cairo_path_destroy);
-
-  priv->overlay_region = cairo_region_create_rectangles (corner_rects, 4);
-  priv->overlay_path = cairo_copy_path (cr);
 }
 
 static void
-install_overlay_path (MetaWindowActor *self,
-                      guchar          *mask_data,
-                      int              tex_width,
-                      int              tex_height,
-                      int              stride)
-{
-  MetaWindowActorPrivate *priv = self->priv;
-  int i, n_rects;
-  cairo_t *cr;
-  cairo_rectangle_int_t rect;
-  cairo_surface_t *surface;
-
-  if (priv->overlay_region == NULL)
-    return;
-
-  surface = cairo_image_surface_create_for_data (mask_data,
-                                                 CAIRO_FORMAT_A8,
-                                                 tex_width,
-                                                 tex_height,
-                                                 stride);
-
-  cr = cairo_create (surface);
-  cairo_set_operator (cr, CAIRO_OPERATOR_CLEAR);
-
-  n_rects = cairo_region_num_rectangles (priv->overlay_region);
-  for (i = 0; i < n_rects; i++)
-    {
-      cairo_region_get_rectangle (priv->overlay_region, i, &rect);
-      cairo_rectangle (cr, rect.x, rect.y, rect.width, rect.height);
-    }
-
-  cairo_fill_preserve (cr);
-  if (priv->overlay_path == NULL)
-    {
-      /* If we have an overlay region but not an overlay path, then we
-       * just need to clear the rectangles in the overlay region. */
-      goto out;
-    }
-
-  cairo_clip (cr);
-
-  cairo_set_operator (cr, CAIRO_OPERATOR_OVER);
-  cairo_set_source_rgba (cr, 1, 1, 1, 1);
-
-  cairo_append_path (cr, priv->overlay_path);
-  cairo_fill (cr);
-
- out:
-  cairo_destroy (cr);
-  cairo_surface_destroy (surface);
-}
-
-LOCAL_SYMBOL void
 meta_window_actor_ensure_mask (MetaWindowActor *self,
-                               cairo_region_t  *shape_region,
-                               gboolean         has_frame)
+                               cairo_region_t  *shape_region)
 {
   MetaWindowActorPrivate *priv = self->priv;
   CoglTexture *paint_tex;
@@ -3052,15 +2985,6 @@ meta_window_actor_ensure_mask (MetaWindowActor *self,
       int i;
       int n_rects;
       int stride;
-
-      /* If we have no shape region and no (or an empty) overlay region, we
-       * don't need to create a full mask texture, so quit early. */
-      if (shape_region == NULL &&
-          (priv->overlay_region == NULL ||
-           cairo_region_num_rectangles (priv->overlay_region) == 0))
-        {
-          return;
-        }
 
       if (shape_region == NULL)
         return;
@@ -3097,9 +3021,6 @@ meta_window_actor_ensure_mask (MetaWindowActor *self,
                y1++, p += stride)
             memset (p, 255, x2 - x1);
         }
-
-      if (has_frame)
-        install_overlay_path (self, mask_data, tex_width, tex_height, stride);
 
       if (meta_texture_rectangle_check (paint_tex))
         priv->mask_texture = meta_cogl_rectangle_new (tex_width, tex_height,
@@ -3219,7 +3140,7 @@ check_needs_reshape (MetaWindowActor *self)
     {
       if (full_mask_reset)
         g_clear_pointer (&self->priv->mask_texture, cogl_object_unref);
-      meta_window_actor_ensure_mask (self, region, has_frame);
+      meta_window_actor_ensure_mask (self, region);
     }
 
   meta_window_actor_update_shape_region (self, region);
