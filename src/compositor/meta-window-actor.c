@@ -1153,8 +1153,6 @@ update_area (MetaWindowActor *self,
 
   cogl_texture_pixmap_x11_update_area (COGL_TEXTURE_PIXMAP_X11 (texture),
                                        x, y, width, height);
-  priv->repaint_scheduled = meta_window_actor_update_area (self, x, y, width, height,
-                                                           unobscured_region);
 }
 
 static void
@@ -1630,7 +1628,6 @@ meta_window_actor_sync_actor_geometry (MetaWindowActor *self,
 
   if (priv->position_changed)
     {
-      MetaCompScreen *info;
       clutter_actor_set_position (CLUTTER_ACTOR (self),
                                   window_rect.x, window_rect.y);
 
@@ -1645,8 +1642,7 @@ meta_window_actor_sync_actor_geometry (MetaWindowActor *self,
             meta_window_actor_reset_mask_texture (self, TRUE);
         }
 
-      info = meta_screen_get_compositor_data (priv->screen);
-      clutter_actor_queue_redraw (CLUTTER_ACTOR (info->window_group));
+      clutter_actor_queue_redraw (CLUTTER_ACTOR (priv->window->display->compositor->window_group));
     }
 }
 
