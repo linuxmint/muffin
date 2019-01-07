@@ -1219,6 +1219,10 @@ meta_window_actor_paint (ClutterActor *actor)
     {
       gboolean appears_focused = meta_window_appears_focused (priv->window);
       MetaShadow *shadow = appears_focused ? priv->focused_shadow : priv->unfocused_shadow;
+
+      if (shadow == NULL)
+        goto out;
+
       MetaShadowParams params;
       cairo_rectangle_int_t shape_bounds;
       cairo_region_t *clip = priv->shadow_clip;
@@ -1252,6 +1256,7 @@ meta_window_actor_paint (ClutterActor *actor)
         cairo_region_destroy (clip);
     }
 
+ out:
   if (priv->texture)
     texture_paint (actor);
 }
