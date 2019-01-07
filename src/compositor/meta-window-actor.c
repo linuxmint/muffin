@@ -1297,21 +1297,56 @@ meta_window_actor_get_preferred_height (ClutterActor *self,
 }
 
 static gboolean
+is_move_resize (MetaWindowActor *self)
+{
+  MetaWindow *window = self->priv->window;
+  MetaDisplay *display = window->display;
+
+  if (display->grab_op == META_GRAB_OP_NONE)
+    return FALSE;
+
+  MetaGrabOp op = display->grab_op;
+
+  switch (op)
+    {
+      case META_GRAB_OP_MOVING:
+      case META_GRAB_OP_RESIZING_SE:
+      case META_GRAB_OP_RESIZING_S:
+      case META_GRAB_OP_RESIZING_SW:
+      case META_GRAB_OP_RESIZING_N:
+      case META_GRAB_OP_RESIZING_NE:
+      case META_GRAB_OP_RESIZING_NW:
+      case META_GRAB_OP_RESIZING_W:
+      case META_GRAB_OP_RESIZING_E:
+        return TRUE;
+      default:
+        return FALSE;
+    }
+}
+
+static gboolean
 meta_window_actor_get_paint_volume (ClutterActor       *actor,
                                     ClutterPaintVolume *volume)
 {
   MetaWindowActor *self = META_WINDOW_ACTOR (actor);
   MetaWindowActorPrivate *priv = self->priv;
+
+  if (!is_move_resize (self) && priv->texture)
+    return clutter_paint_volume_set_from_allocation (volume, self);
+
   gboolean appears_focused = meta_window_appears_focused (priv->window);
+  cairo_rectangle_int_t bounds;
+  ClutterVertex origin;
 
   /* The paint volume is computed before paint functions are called
    * so our bounds might not be updated yet. Force an update. */
   meta_window_actor_handle_updates (self);
 
+  meta_window_actor_get_shape_bounds (self, &bounds);
+
   if (appears_focused ? priv->focused_shadow : priv->unfocused_shadow)
     {
       cairo_rectangle_int_t shadow_bounds;
-      ClutterActorBox shadow_box;
 
       /* We could compute an full clip region as we do for the window
        * texture, but the shadow is relatively cheap to draw, and
@@ -1321,16 +1356,16 @@ meta_window_actor_get_paint_volume (ClutterActor       *actor,
        */
 
       meta_window_actor_get_shadow_bounds (self, appears_focused, &shadow_bounds);
-      shadow_box.x1 = shadow_bounds.x;
-      shadow_box.x2 = shadow_bounds.x + shadow_bounds.width;
-      shadow_box.y1 = shadow_bounds.y;
-      shadow_box.y2 = shadow_bounds.y + shadow_bounds.height;
-
-      clutter_paint_volume_union_box (volume, &shadow_box);
+      gdk_rectangle_union (&bounds, &shadow_bounds, &bounds);
     }
 
-  if (priv->texture)
-    return clutter_paint_volume_set_from_allocation (volume, self);
+  origin.x = bounds.x;
+  origin.y = bounds.y;
+  origin.z = 0.0f;
+  clutter_paint_volume_set_origin (volume, &origin);
+
+  clutter_paint_volume_set_width (volume, bounds.width);
+  clutter_paint_volume_set_height (volume, bounds.height);
 
   return TRUE;
 }
