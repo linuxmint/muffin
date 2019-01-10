@@ -982,7 +982,7 @@ texture_paint (ClutterActor *actor)
   guint tex_width, tex_height;
   guchar opacity;
   CoglContext *ctx;
-  CoglFramebuffer *fb;
+  CoglFramebuffer *fb = NULL;
   CoglTexture *paint_tex = NULL;
   ClutterActorBox alloc;
   CoglPipelineFilter filter;
@@ -1009,6 +1009,15 @@ texture_paint (ClutterActor *actor)
    * Setting the texture quality to high without SGIS_generate_mipmap
    * support for TFP textures will result in fallbacks to XGetImage.
    */
+
+  tex_width = priv->tex_width;
+  tex_height = priv->tex_height;
+
+  if (tex_width == 0 || tex_height == 0) /* no contents yet */
+    return;
+
+  fb = cogl_get_draw_framebuffer ();
+
   if (priv->create_mipmaps && priv->last_invalidation)
     {
       gint64 now = g_get_monotonic_time ();
@@ -1017,7 +1026,7 @@ texture_paint (ClutterActor *actor)
       if (age >= MIN_MIPMAP_AGE_USEC ||
           priv->fast_updates < MIN_FAST_UPDATES_BEFORE_UNMIPMAP)
         {
-          paint_tex = meta_texture_tower_get_paint_texture (priv->paint_tower);
+          paint_tex = meta_texture_tower_get_paint_texture (fb, priv->paint_tower);
           if (!paint_tex)
             paint_tex = priv->texture;
         }
@@ -1038,15 +1047,7 @@ texture_paint (ClutterActor *actor)
   else
     paint_tex = priv->texture;
 
-  tex_width = priv->tex_width;
-  tex_height = priv->tex_height;
-
-  if (tex_width == 0 || tex_height == 0) /* no contents yet */
-    return;
-
   cairo_rectangle_int_t tex_rect = { 0, 0, tex_width, tex_height };
-
-  fb = cogl_get_draw_framebuffer ();
 
   /* Use nearest-pixel interpolation if the texture is unscaled. This
    * improves performance, especially with software rendering.

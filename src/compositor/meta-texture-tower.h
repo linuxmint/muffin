@@ -62,7 +62,8 @@ void              meta_texture_tower_update_area       (MetaTextureTower *tower,
                                                         int               y,
                                                         int               width,
                                                         int               height);
-CoglTexture     *meta_texture_tower_get_paint_texture (MetaTextureTower *tower);
+CoglTexture     *meta_texture_tower_get_paint_texture (CoglFramebuffer *fb,
+                                                       MetaTextureTower *tower);
 
 G_BEGIN_DECLS
 
