@@ -143,7 +143,6 @@ struct _MetaWindowActorPrivate
   gint64            frame_drawn_time;
   guint             needs_frame_drawn      : 1;
 
-  guint             size_changed_id;
   guint             opacity_changed_id;
 
   guint		    needs_pixmap           : 1;
@@ -366,6 +365,7 @@ meta_window_actor_init (MetaWindowActor *self)
   priv->has_desat_effect = FALSE;
   priv->reshapes = 0;
   priv->should_have_shadow = FALSE;
+  priv->opacity_changed_id = 0;
 }
 
 static void
@@ -496,7 +496,7 @@ meta_window_actor_constructed (GObject *object)
   if (format && format->type == PictTypeDirect && format->direct.alphaMask)
     priv->argb32 = TRUE;
 
-  if (!priv->texture)
+  if (!priv->redecorating)
     {
       /*
        * Since we are holding a pointer to this actor independently of the
@@ -505,8 +505,9 @@ meta_window_actor_constructed (GObject *object)
        * via the container interface, we do not end up with a dangling pointer.
        * We will release it in dispose().
        */
-      priv->opacity_changed_id = g_signal_connect (self, "notify::opacity",
-                                                   G_CALLBACK (clutter_actor_opacity_notify), NULL);
+      if (!priv->opacity_changed_id)
+        priv->opacity_changed_id = g_signal_connect (self, "notify::opacity",
+                                                     G_CALLBACK (clutter_actor_opacity_notify), NULL);
 
       /* Fix for the case when clients try to re-map their windows after re-decorating while
          effects are enabled. For reasons currently unknown, the re-shape doesn't happen when
@@ -524,10 +525,12 @@ meta_window_actor_constructed (GObject *object)
     {
       /*
        * This is the case where existing window is gaining/loosing frame.
-       * Just ensure the actor is top most (i.e., above shadow).
        */
-      g_signal_handler_disconnect (priv->actor, priv->size_changed_id);
-      g_signal_handler_disconnect (self, priv->opacity_changed_id);
+      if (priv->opacity_changed_id)
+        {
+          g_signal_handler_disconnect (self, priv->opacity_changed_id);
+          priv->opacity_changed_id = 0;
+        }
     }
 
   meta_window_actor_update_opacity (self);
@@ -551,6 +554,12 @@ meta_window_actor_dispose (GObject *object)
 
   priv->disposed = TRUE;
 
+  if (priv->opacity_changed_id)
+    {
+      g_signal_handler_disconnect (self, priv->opacity_changed_id);
+      priv->opacity_changed_id = 0;
+    }
+
   if (priv->remipmap_timeout_id)
     {
       g_source_remove (priv->remipmap_timeout_id);
@@ -562,6 +571,8 @@ meta_window_actor_dispose (GObject *object)
       g_source_remove (priv->send_frame_messages_timer);
       priv->send_frame_messages_timer = 0;
     }
+
+  meta_window_set_position_changed_callback (priv->window, NULL);
 
   screen = priv->screen;
   display = screen->display;

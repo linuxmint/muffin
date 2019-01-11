@@ -5361,8 +5361,6 @@ meta_window_move_resize_internal (MetaWindow          *window,
     {
       if (window->position_changed_callback != NULL)
         (window->position_changed_callback) (window);
-      else
-        g_signal_emit (window, window_signals[POSITION_CHANGED], 0);
     }
 
   if (need_resize_client)
