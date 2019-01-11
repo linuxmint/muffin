@@ -584,6 +584,7 @@ meta_window_actor_dispose (GObject *object)
   g_clear_pointer (&priv->texture, cogl_object_unref);
   g_clear_pointer (&priv->mask_texture, cogl_object_unref);
   g_clear_pointer (&priv->clip_region, cairo_region_destroy);
+  g_clear_pointer (&priv->paint_tower, meta_texture_tower_free);
 
   g_clear_pointer (&priv->opaque_region, cairo_region_destroy);
   g_clear_pointer (&priv->unobscured_region, cairo_region_destroy);
