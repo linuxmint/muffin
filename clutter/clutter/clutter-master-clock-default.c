@@ -99,6 +99,7 @@ struct _ClutterMasterClockDefault
   guint ensure_next_iteration : 1;
 
   guint paused : 1;
+  guint sync_available : 1;
 };
 
 struct _ClutterClockSource
@@ -150,13 +151,19 @@ master_clock_is_running (ClutterMasterClockDefault *master_clock)
   ClutterStageManager *stage_manager = clutter_stage_manager_get_default ();
   const GSList *stages, *l;
 
-  stages = clutter_stage_manager_peek_stages (stage_manager);
-
   if (master_clock->paused)
     return FALSE;
 
   if (master_clock->timelines)
     return TRUE;
+
+  if (master_clock->ensure_next_iteration)
+    {
+      master_clock->ensure_next_iteration = FALSE;
+      return TRUE;
+    }
+
+  stages = stage_manager->stages;
 
   for (l = stages; l; l = l->next)
     {
@@ -164,12 +171,6 @@ master_clock_is_running (ClutterMasterClockDefault *master_clock)
           (_clutter_stage_has_queued_events (l->data) ||
            _clutter_stage_needs_update (l->data)))
         return TRUE;
-    }
-
-  if (master_clock->ensure_next_iteration)
-    {
-      master_clock->ensure_next_iteration = FALSE;
-      return TRUE;
     }
 
   return FALSE;
@@ -182,7 +183,7 @@ master_clock_get_hw_update_time (ClutterMasterClockDefault *master_clock)
   const GSList *stages, *l;
   gint64 min_update_time = -1;
 
-  stages = clutter_stage_manager_peek_stages (stage_manager);
+  stages = stage_manager->stages;;
 
   for (l = stages; l != NULL; l = l->next)
     {
@@ -201,7 +202,7 @@ master_clock_schedule_stage_updates (ClutterMasterClockDefault *master_clock)
   ClutterStageManager *stage_manager = clutter_stage_manager_get_default ();
   const GSList *stages, *l;
 
-  stages = clutter_stage_manager_peek_stages (stage_manager);
+  stages = stage_manager->stages;
 
   for (l = stages; l != NULL; l = l->next)
     _clutter_stage_schedule_update (l->data);
@@ -214,7 +215,7 @@ master_clock_list_ready_stages (ClutterMasterClockDefault *master_clock)
   const GSList *stages, *l;
   GSList *result;
 
-  stages = clutter_stage_manager_peek_stages (stage_manager);
+  stages = stage_manager->stages;;
 
   result = NULL;
   for (l = stages; l != NULL; l = l->next)
@@ -297,7 +298,7 @@ master_clock_next_frame_time (ClutterMasterClockDefault *master_clock)
    * frame rate so no additional delay is needed to start the next frame.
    */
   if (master_clock->preferred_sync_method >= SYNC_SWAP_THROTTLING ||
-      clutter_feature_available (CLUTTER_FEATURE_SYNC_TO_VBLANK))
+      master_clock->sync_available)
     {
       master_clock->active_sync_method = SYNC_SWAP_THROTTLING;
       return now;
@@ -342,7 +343,9 @@ master_clock_next_frame_delay (ClutterMasterClockDefault *master_clock)
   else
     delay_ms = 0;
 
+#ifdef CLUTTER_ENABLE_DEBUG
   CLUTTER_NOTE (SCHEDULER, "Waiting %d ms", delay_ms);
+#endif
 
   return delay_ms;
 }
@@ -482,15 +485,13 @@ clutter_clock_prepare (GSource *source,
   ClutterMasterClockDefault *master_clock = clock_source->master_clock;
   int delay;
 
-  _clutter_threads_acquire_lock ();
-
   if (G_UNLIKELY (clutter_paint_debug_flags &
                   CLUTTER_DEBUG_CONTINUOUS_REDRAW))
     {
       ClutterStageManager *stage_manager = clutter_stage_manager_get_default ();
       const GSList *stages, *l;
 
-      stages = clutter_stage_manager_peek_stages (stage_manager);
+      stages = stage_manager->stages;;
 
       /* Queue a full redraw on all of the stages */
       for (l = stages; l != NULL; l = l->next)
@@ -498,8 +499,6 @@ clutter_clock_prepare (GSource *source,
     }
 
   delay = master_clock_next_frame_delay (master_clock);
-
-  _clutter_threads_release_lock ();
 
   *timeout = delay;
 
@@ -513,9 +512,7 @@ clutter_clock_check (GSource *source)
   ClutterMasterClockDefault *master_clock = clock_source->master_clock;
   int delay;
 
-  _clutter_threads_acquire_lock ();
   delay = master_clock_next_frame_delay (master_clock);
-  _clutter_threads_release_lock ();
 
   return delay == 0;
 }
@@ -529,9 +526,9 @@ clutter_clock_dispatch (GSource     *source,
   ClutterMasterClockDefault *master_clock = clock_source->master_clock;
   GSList *stages;
 
+#ifdef CLUTTER_ENABLE_DEBUG
   CLUTTER_NOTE (SCHEDULER, "Master clock [tick]");
-
-  _clutter_threads_acquire_lock ();
+#endif
 
   /* Get the time to use for this frame */
   master_clock->cur_tick = master_clock_next_frame_time (master_clock);
@@ -566,8 +563,6 @@ clutter_clock_dispatch (GSource     *source,
   g_slist_free (stages);
 
   master_clock->prev_tick = master_clock->cur_tick;
-
-  _clutter_threads_release_lock ();
 
   return TRUE;
 }
@@ -605,6 +600,7 @@ clutter_master_clock_default_init (ClutterMasterClockDefault *self)
 
   self->ensure_next_iteration = FALSE;
   self->paused = FALSE;
+  self->sync_available = clutter_feature_available (CLUTTER_FEATURE_SYNC_TO_VBLANK);
 
 #ifdef CLUTTER_ENABLE_DEBUG
   self->frame_budget = G_USEC_PER_SEC / 60;
