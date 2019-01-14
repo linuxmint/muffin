@@ -1167,6 +1167,9 @@ meta_compositor_sync_stack (MetaCompositor  *compositor,
        * be at the front of at least one, hopefully it will be
        * near the front of the other.)
        */
+
+      meta_window_actor_check_obscured (actor);
+
       compositor->windows = g_list_prepend (compositor->windows, actor);
 
       stack = g_list_remove (stack, window);

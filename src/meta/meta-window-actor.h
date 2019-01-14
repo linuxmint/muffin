@@ -67,5 +67,7 @@ gboolean       meta_window_actor_showing_on_its_workspace (MetaWindowActor *self
 gboolean       meta_window_actor_is_destroyed (MetaWindowActor *self);
 cairo_surface_t * meta_window_actor_get_image (MetaWindowActor       *self,
                                                cairo_rectangle_int_t *clip);
+void meta_window_actor_set_obscured (MetaWindowActor *self,
+                                     gboolean obscured);
 
 #endif /* META_WINDOW_ACTOR_H */

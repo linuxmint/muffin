@@ -71,4 +71,6 @@ void meta_window_actor_set_unobscured_region      (MetaWindowActor *self,
 void meta_window_actor_effect_completed (MetaWindowActor *actor,
                                          gulong           event);
 
+void meta_window_actor_check_obscured (MetaWindowActor *self);
+
 #endif /* META_WINDOW_ACTOR_PRIVATE_H */
