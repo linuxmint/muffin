@@ -260,6 +260,9 @@ meta_frames_init (MetaFrames *frames)
   frames->last_cursor_x = -1;
   frames->last_cursor_y = -1;
 
+  frames->display = meta_get_display ();
+  frames->xdisplay = meta_display_get_xdisplay (frames->display);
+
   update_style_contexts (frames);
 
   gtk_widget_set_double_buffered (GTK_WIDGET (frames), FALSE);
@@ -420,8 +423,7 @@ queue_recalc_func (gpointer key, gpointer value, gpointer data)
   frame = value;
 
   invalidate_whole_window (frames, frame);
-  meta_core_queue_frame_resize (meta_display_get_xdisplay (meta_get_display ()),
-                                frame->xwindow);
+  meta_core_queue_frame_resize (frames->xdisplay, frame->xwindow);
   if (frame->layout)
     {
       /* save title to recreate layout */
@@ -720,7 +722,7 @@ meta_frames_unmanage_window (MetaFrames *frames,
       invalidate_all_caches (frames);
       
       /* restore the cursor */
-      meta_core_set_screen_cursor (meta_display_get_xdisplay (meta_get_display ()),
+      meta_core_set_screen_cursor (frames->xdisplay,
                                    frame->xwindow,
                                    META_CURSOR_DEFAULT);
 
@@ -1294,7 +1296,7 @@ meta_frames_retry_grab_op (MetaFrames *frames,
 
   op = frames->current_grab_op;
   frames->current_grab_op = META_GRAB_OP_NONE;
-  display = meta_display_get_xdisplay (meta_get_display ());
+  display = frames->xdisplay;
 
   return meta_core_begin_grab_op (display,
                                   frames->grab_frame->xwindow,
@@ -1339,7 +1341,7 @@ meta_frames_button_press_event (GtkWidget      *widget,
   Display *display;
   
   frames = META_FRAMES (widget);
-  display = meta_display_get_xdisplay (meta_get_display ());
+  display = frames->xdisplay;
 
   /* Remember that the display may have already done something with this event.
    * If so there's probably a GrabOp in effect.
@@ -1532,7 +1534,7 @@ meta_frames_button_release_event    (GtkWidget           *widget,
   Display *display;
   
   frames = META_FRAMES (widget);
-  display = meta_display_get_xdisplay (meta_get_display ());
+  display = frames->xdisplay;
   frames->current_grab_op = META_GRAB_OP_NONE;
 
   frame = meta_frames_lookup_window (frames, GDK_WINDOW_XID (event->window));
@@ -1855,7 +1857,7 @@ populate_cache (MetaFrames *frames,
   MetaFrameFlags frame_flags;
   int i;
 
-  meta_core_get (meta_display_get_xdisplay (meta_get_display ()),
+  meta_core_get (frames->xdisplay,
                  frame->xwindow,
                  META_CORE_GET_FRAME_WIDTH, &frame_width,
                  META_CORE_GET_FRAME_HEIGHT, &frame_height,

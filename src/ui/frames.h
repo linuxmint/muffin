@@ -115,6 +115,8 @@ struct _MetaFrames
   gdouble grab_x;
   gdouble grab_y;
 
+  MetaDisplay *display;
+  Display *xdisplay;
   Window grab_xwindow;
 
   guint entered : 1;
