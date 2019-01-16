@@ -556,6 +556,12 @@ meta_window_actor_dispose (GObject *object)
 
   priv->disposed = TRUE;
 
+  if (priv->remipmap_timeout_id)
+    {
+      g_source_remove (priv->remipmap_timeout_id);
+      priv->remipmap_timeout_id = 0;
+  }
+
   if (priv->send_frame_messages_timer != 0)
     {
       g_source_remove (priv->send_frame_messages_timer);
@@ -883,10 +889,6 @@ static gboolean
 texture_is_idle_and_not_mipmapped (gpointer data)
 {
   MetaWindowActor *self = (MetaWindowActor *) data;
-
-  if (meta_window_actor_is_destroyed (self))
-    return G_SOURCE_REMOVE;
-
   MetaWindowActorPrivate *priv = self->priv;
 
   if ((g_get_monotonic_time () - priv->earliest_remipmap) < 0)
@@ -1024,9 +1026,11 @@ texture_paint (ClutterActor *actor)
 
       if (age >= MIN_MIPMAP_AGE_USEC ||
           priv->fast_updates < MIN_FAST_UPDATES_BEFORE_UNMIPMAP)
-        paint_tex = meta_texture_tower_get_paint_texture (priv->paint_tower);
-        if (!paint_tex)
-          paint_tex = priv->texture;
+        {
+          paint_tex = meta_texture_tower_get_paint_texture (priv->paint_tower);
+          if (!paint_tex)
+            paint_tex = priv->texture;
+        }
       else
         {
           paint_tex = priv->texture;
