@@ -766,22 +766,19 @@ meta_window_actor_get_shape_bounds (MetaWindowActor       *self,
 
 static void
 meta_window_actor_get_shadow_bounds (MetaWindowActor       *self,
-                                     gboolean               appears_focused,
+                                     gboolean              appears_focused,
+                                     MetaShadowParams      *params,
+                                     cairo_rectangle_int_t *shape_bounds,
                                      cairo_rectangle_int_t *bounds)
 {
   MetaWindowActorPrivate *priv = self->priv;
   MetaShadow *shadow = appears_focused ? priv->focused_shadow : priv->unfocused_shadow;
-  cairo_rectangle_int_t shape_bounds;
-  MetaShadowParams params;
-
-  meta_window_actor_get_shape_bounds (self, &shape_bounds);
-  meta_window_actor_get_shadow_params (self, appears_focused, &params);
 
   meta_shadow_get_bounds (shadow,
-                          params.x_offset + shape_bounds.x,
-                          params.y_offset + shape_bounds.y,
-                          shape_bounds.width,
-                          shape_bounds.height,
+                          params->x_offset + shape_bounds->x,
+                          params->y_offset + shape_bounds->y,
+                          shape_bounds->width,
+                          shape_bounds->height,
                           bounds);
 }
 
@@ -1212,12 +1209,6 @@ meta_window_actor_paint (ClutterActor *actor)
 {
   MetaWindowActor *self = META_WINDOW_ACTOR (actor);
   MetaWindowActorPrivate *priv = self->priv;
-  gboolean appears_focused = meta_window_appears_focused (priv->window);
-  MetaShadow *shadow = appears_focused ? priv->focused_shadow : priv->unfocused_shadow;
-
-  if (!priv->window->display->shadows_enabled) {
-      shadow = NULL;
-  }
 
  /* This window got damage when obscured; we set up a timer
   * to send frame completion events, but since we're drawing
@@ -1231,8 +1222,10 @@ meta_window_actor_paint (ClutterActor *actor)
       assign_frame_counter_to_frames (self);
     }
 
-  if (shadow != NULL)
+  if (priv->window->display->shadows_enabled && priv->should_have_shadow)
     {
+      gboolean appears_focused = meta_window_appears_focused (priv->window);
+      MetaShadow *shadow = appears_focused ? priv->focused_shadow : priv->unfocused_shadow;
       MetaShadowParams params;
       cairo_rectangle_int_t shape_bounds;
       cairo_region_t *clip = priv->shadow_clip;
@@ -1247,7 +1240,7 @@ meta_window_actor_paint (ClutterActor *actor)
         {
           cairo_rectangle_int_t bounds;
 
-          meta_window_actor_get_shadow_bounds (self, appears_focused, &bounds);
+          meta_window_actor_get_shadow_bounds (self, appears_focused, &params, &shape_bounds, &bounds);
           clip = cairo_region_create_rectangle (&bounds);
 
           cairo_region_subtract (clip, meta_window_get_frame_bounds (priv->window));
@@ -1303,13 +1296,11 @@ meta_window_actor_get_preferred_height (ClutterActor *self,
 static gboolean
 is_move_resize (MetaWindowActor *self)
 {
-  MetaWindow *window = self->priv->window;
-  MetaDisplay *display = window->display;
-
-  if (display->grab_op == META_GRAB_OP_NONE)
-    return FALSE;
-
+  MetaDisplay *display = self->priv->window->display;
   MetaGrabOp op = display->grab_op;
+
+  if (op == META_GRAB_OP_NONE)
+    return FALSE;
 
   switch (op)
     {
@@ -1335,22 +1326,20 @@ meta_window_actor_get_paint_volume (ClutterActor       *actor,
   MetaWindowActor *self = META_WINDOW_ACTOR (actor);
   MetaWindowActorPrivate *priv = self->priv;
 
-  if (!is_move_resize (self) && priv->texture)
-    return clutter_paint_volume_set_from_allocation (volume, self);
+  if (!priv->should_have_shadow || !is_move_resize (self))
+    return clutter_paint_volume_set_from_allocation (volume, actor);
 
-  gboolean appears_focused = meta_window_appears_focused (priv->window);
-  cairo_rectangle_int_t bounds;
-  ClutterVertex origin;
-
-  /* The paint volume is computed before paint functions are called
-   * so our bounds might not be updated yet. Force an update. */
-  meta_window_actor_handle_updates (self);
-
-  meta_window_actor_get_shape_bounds (self, &bounds);
-
-  if (appears_focused ? priv->focused_shadow : priv->unfocused_shadow)
+  if (priv->focused_shadow != NULL || priv->unfocused_shadow != NULL)
     {
+      gboolean appears_focused = meta_window_appears_focused (priv->window);
+      /* The paint volume is computed before paint functions are called
+       * so our bounds might not be updated yet. Force an update. */
+      meta_window_actor_handle_updates (self);
+
+      cairo_rectangle_int_t bounds;
+      ClutterVertex origin;
       cairo_rectangle_int_t shadow_bounds;
+      MetaShadowParams params;
 
       /* We could compute an full clip region as we do for the window
        * texture, but the shadow is relatively cheap to draw, and
@@ -1359,19 +1348,23 @@ meta_window_actor_get_paint_volume (ClutterActor       *actor,
        * at all.
        */
 
-      meta_window_actor_get_shadow_bounds (self, appears_focused, &shadow_bounds);
+      meta_window_actor_get_shape_bounds (self, &bounds);
+      meta_window_actor_get_shadow_params (self, appears_focused, &params);
+      meta_window_actor_get_shadow_bounds (self, appears_focused, &params, &bounds, &shadow_bounds);
       gdk_rectangle_union (&bounds, &shadow_bounds, &bounds);
+
+      origin.x = bounds.x;
+      origin.y = bounds.y;
+      origin.z = 0.0f;
+      clutter_paint_volume_set_origin (volume, &origin);
+
+      clutter_paint_volume_set_width (volume, bounds.width);
+      clutter_paint_volume_set_height (volume, bounds.height);
+
+      return TRUE;
     }
 
-  origin.x = bounds.x;
-  origin.y = bounds.y;
-  origin.z = 0.0f;
-  clutter_paint_volume_set_origin (volume, &origin);
-
-  clutter_paint_volume_set_width (volume, bounds.width);
-  clutter_paint_volume_set_height (volume, bounds.height);
-
-  return TRUE;
+  return FALSE;
 }
 
 static gboolean
