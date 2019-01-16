@@ -144,7 +144,7 @@ struct _MetaWindowActorPrivate
 
   guint             has_desat_effect : 1;
 
-  guint             frameless_geometry_updates : 1;
+  guint             reshapes;
 };
 
 typedef struct _FrameData FrameData;
@@ -303,7 +303,7 @@ meta_window_actor_init (MetaWindowActor *self)
   priv->opacity = 0xff;
   priv->shadow_class = NULL;
   priv->has_desat_effect = FALSE;
-  priv->frameless_geometry_updates = 3;
+  priv->reshapes = 0;
 }
 
 static void
@@ -313,7 +313,7 @@ meta_window_actor_reset_mask_texture (MetaWindowActor *self,
   MetaShapedTexture *stex = META_SHAPED_TEXTURE (self->priv->actor);
   if (force)
     meta_shaped_texture_dirty_mask (stex);
-  meta_shaped_texture_ensure_mask (stex);
+  meta_shaped_texture_ensure_mask (stex, self->priv->window->frame != NULL);
 }
 
 static void
@@ -1625,19 +1625,6 @@ meta_window_actor_sync_actor_geometry (MetaWindowActor *self,
     {
       clutter_actor_set_position (CLUTTER_ACTOR (self),
                                   window_rect.x, window_rect.y);
-
-      /* Repaint the mask texture when frameless windows are shaken loose.
-         FIXME: window->shaken_loose is not TRUE for frameless windows. */
-      if (!priv->window->frame && priv->shape_region != NULL)
-        {
-          if (priv->size_changed)
-            priv->frameless_geometry_updates = 0;
-          priv->frameless_geometry_updates++;
-          if (priv->frameless_geometry_updates < 3)
-            meta_window_actor_reset_mask_texture (self, TRUE);
-        }
-
-      clutter_actor_queue_redraw (CLUTTER_ACTOR (priv->window->display->compositor->window_group));
     }
 }
 
@@ -1745,9 +1732,6 @@ meta_window_actor_maximize (MetaWindowActor    *self,
       self->priv->maximize_in_progress--;
       meta_window_actor_thaw (self);
     }
-
-  if (self->priv->window->frame)
-    meta_window_actor_reset_mask_texture (self, TRUE);
 }
 
 LOCAL_SYMBOL void
@@ -1776,9 +1760,6 @@ meta_window_actor_unmaximize (MetaWindowActor   *self,
       self->priv->unmaximize_in_progress--;
       meta_window_actor_thaw (self);
     }
-
-  if (self->priv->window->frame)
-    meta_window_actor_reset_mask_texture (self, TRUE);
 }
 
 LOCAL_SYMBOL void
@@ -1808,9 +1789,6 @@ meta_window_actor_tile (MetaWindowActor    *self,
       self->priv->tile_in_progress--;
       meta_window_actor_thaw (self);
     }
-
-  if (self->priv->window->frame)
-    meta_window_actor_reset_mask_texture (self, TRUE);
 }
 
 LOCAL_SYMBOL MetaWindowActor *
@@ -2379,6 +2357,7 @@ check_needs_reshape (MetaWindowActor *self)
   MetaDisplay *display = meta_screen_get_display (screen);
   cairo_region_t *region = NULL;
   cairo_rectangle_int_t client_area;
+  gboolean full_mask_reset = priv->window->fullscreen;
 
   if ((!priv->window->mapped && !priv->window->shaded) || !priv->needs_reshape)
     return;
@@ -2466,8 +2445,13 @@ check_needs_reshape (MetaWindowActor *self)
 
   if (priv->window->frame)
     update_corners (self);
+  else if (priv->window->has_shape && priv->reshapes == 1)
+    full_mask_reset = TRUE;
+  else if (priv->reshapes < 2)
+    priv->reshapes++;
 
-  meta_window_actor_reset_mask_texture (self, priv->window->fullscreen);
+  if (priv->window->frame != NULL || priv->window->has_shape)
+    meta_window_actor_reset_mask_texture (self, full_mask_reset);
 
   meta_window_actor_update_shape_region (self, region);
 
