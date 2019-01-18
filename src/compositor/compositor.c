@@ -649,6 +649,11 @@ meta_compositor_manage_screen (MetaCompositor *compositor,
   clutter_actor_add_child (compositor->stage, compositor->overlay_group);
   clutter_actor_add_child (compositor->stage, compositor->hidden_group);
 
+  clutter_actor_set_flags (compositor->background_actor, CLUTTER_ACTOR_NO_LAYOUT);
+  clutter_actor_set_flags (compositor->top_window_group, CLUTTER_ACTOR_NO_LAYOUT);
+  clutter_actor_set_flags (compositor->overlay_group, CLUTTER_ACTOR_NO_LAYOUT);
+  clutter_actor_set_flags (compositor->hidden_group, CLUTTER_ACTOR_NO_LAYOUT);
+
   clutter_actor_hide (compositor->hidden_group);
 
   compositor->plugin_mgr = meta_plugin_manager_new (screen);
