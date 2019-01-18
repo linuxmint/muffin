@@ -191,6 +191,35 @@ meta_cogl_texture_new_from_data_wrapper                (int  width,
     return texture;
 }
 
+static CoglTexture *
+meta_cogl_rectangle_new_compat (unsigned int width,
+                                unsigned int height,
+                                CoglPixelFormat format,
+                                unsigned int rowstride,
+                                const guint8 *data)
+{
+  ClutterBackend *backend = clutter_get_default_backend ();
+  CoglContext *context = clutter_backend_get_cogl_context (backend);
+  CoglTextureRectangle *tex_rect;
+
+  tex_rect = cogl_texture_rectangle_new_with_size (context, width, height);
+
+  if (tex_rect == NULL)
+    return NULL;
+
+  if (data)
+    cogl_texture_set_region (COGL_TEXTURE (tex_rect),
+                             0, 0, /* src_x/y */
+                             0, 0, /* dst_x/y */
+                             width, height, /* dst_width/height */
+                             width, height, /* width/height */
+                             format,
+                             rowstride,
+                             data);
+
+  return COGL_TEXTURE (tex_rect);
+}
+
 CoglTexture *
 meta_cogl_rectangle_new (int width,
                          int height,
@@ -198,6 +227,9 @@ meta_cogl_rectangle_new (int width,
                          int stride,
                          const uint8_t *data)
 {
+  if (!hardware_supports_npot_sizes ())
+    return meta_cogl_rectangle_new_compat (width, height, format,  stride, data);
+
   CoglTexture *texture = COGL_TEXTURE (cogl_texture_rectangle_new_with_size (cogl_context, width, height));
   cogl_texture_set_components (texture, COGL_TEXTURE_COMPONENTS_A);
   cogl_texture_set_region (texture,
