@@ -3817,11 +3817,11 @@ meta_window_real_tile (MetaWindow *window, gboolean force)
     {
       MetaRectangle old_rect;
       MetaRectangle new_rect;
-      meta_window_get_outer_rect (window, &old_rect);
+      meta_window_get_input_rect (window, &old_rect);
 
       meta_window_move_resize_now (window);
 
-      meta_window_get_outer_rect (window, &new_rect);
+      meta_window_get_input_rect (window, &new_rect);
       meta_compositor_tile_window (window->display->compositor,
                                    window,
                                    &old_rect,
