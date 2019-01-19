@@ -127,13 +127,13 @@ struct _MetaWindowActorPrivate
   /* List of FrameData for recent frames */
   GList            *frames;
 
-  guint		    visible                : 1;
-  guint		    argb32                 : 1;
-  guint		    disposed               : 1;
+  guint             visible                : 1;
+  guint             argb32                 : 1;
+  guint             disposed               : 1;
   guint             redecorating           : 1;
 
-  guint		    needs_damage_all       : 1;
-  guint		    received_damage        : 1;
+  guint             needs_damage_all       : 1;
+  guint             received_damage        : 1;
   guint             repaint_scheduled      : 1;
 
   /* If set, the client needs to be sent a _NET_WM_FRAME_DRAWN
@@ -142,7 +142,7 @@ struct _MetaWindowActorPrivate
   gint64            frame_drawn_time;
   guint             needs_frame_drawn      : 1;
 
-  guint		    needs_pixmap           : 1;
+  guint             needs_pixmap           : 1;
   guint             needs_reshape          : 1;
   guint             recompute_focused_shadow   : 1;
   guint             recompute_unfocused_shadow : 1;
@@ -150,7 +150,7 @@ struct _MetaWindowActorPrivate
   guint             position_changed           : 1;
   guint             updates_frozen         : 1;
 
-  guint		    needs_destroy	   : 1;
+  guint             needs_destroy     : 1;
 
   guint             no_shadow              : 1;
 
@@ -225,7 +225,7 @@ static void meta_window_actor_get_property (GObject      *object,
                                             GParamSpec   *pspec);
 
 static void meta_window_actor_pick (ClutterActor       *actor,
-			                              const ClutterColor *color);
+                                    const ClutterColor *color);
 static void meta_window_actor_paint (ClutterActor *actor);
 static void meta_window_actor_get_preferred_width (ClutterActor *self,
                                                    gfloat        for_height,
@@ -297,21 +297,21 @@ meta_window_actor_class_init (MetaWindowActorClass *klass)
                                    pspec);
 
   pspec = g_param_spec_pointer ("meta-screen",
-				"MetaScreen",
-				"MetaScreen",
-				G_PARAM_READWRITE | G_PARAM_CONSTRUCT);
+                                "MetaScreen",
+                                "MetaScreen",
+                                G_PARAM_READWRITE | G_PARAM_CONSTRUCT);
 
   g_object_class_install_property (object_class,
                                    PROP_META_SCREEN,
                                    pspec);
 
   pspec = g_param_spec_ulong ("x-window",
-			      "Window",
-			      "Window",
-			      0,
-			      G_MAXULONG,
-			      0,
-			      G_PARAM_READWRITE | G_PARAM_CONSTRUCT);
+                              "Window",
+                              "Window",
+                              0,
+                              G_MAXULONG,
+                              0,
+                              G_PARAM_READWRITE | G_PARAM_CONSTRUCT);
 
   g_object_class_install_property (object_class,
                                    PROP_X_WINDOW,
@@ -366,9 +366,8 @@ meta_window_actor_init (MetaWindowActor *self)
 {
   MetaWindowActorPrivate *priv;
 
-  priv = self->priv = G_TYPE_INSTANCE_GET_PRIVATE (self,
-						   META_TYPE_WINDOW_ACTOR,
-						   MetaWindowActorPrivate);
+  priv = self->priv = G_TYPE_INSTANCE_GET_PRIVATE (self, META_TYPE_WINDOW_ACTOR,
+                                                   MetaWindowActorPrivate);
 
   priv->paint_tower = meta_texture_tower_new ();
   priv->texture = NULL;
@@ -831,7 +830,7 @@ assign_frame_counter_to_frames (MetaWindowActor *self)
 
 static void
 meta_window_actor_pick (ClutterActor       *actor,
-			                  const ClutterColor *color)
+                        const ClutterColor *color)
 {
   MetaWindowActor *self = (MetaWindowActor *) actor;
   MetaWindowActorPrivate *priv = self->priv;
@@ -1820,7 +1819,7 @@ meta_window_actor_check_obscured (MetaWindowActor *self)
   if (!priv->unobscured_region)
     return;
 
-  /* Find out whether the window is completly obscured */
+  /* Find out whether the window is completely obscured */
   cairo_region_t *unobscured_window_region;
   unobscured_window_region = cairo_region_copy (priv->shape_region);
   cairo_region_intersect (unobscured_window_region, priv->unobscured_region);
@@ -1979,11 +1978,11 @@ meta_window_actor_effect_in_progress (MetaWindowActor *self)
 {
   MetaWindowActorPrivate *priv = self->priv;
   return (priv->minimize_in_progress ||
-	  priv->maximize_in_progress ||
-	  priv->unmaximize_in_progress ||
-	  priv->map_in_progress ||
-    priv->tile_in_progress ||
-	  priv->destroy_in_progress);
+          priv->maximize_in_progress ||
+          priv->unmaximize_in_progress ||
+          priv->map_in_progress ||
+          priv->tile_in_progress ||
+          priv->destroy_in_progress);
 }
 
 static gboolean
@@ -2088,65 +2087,65 @@ meta_window_actor_effect_completed (MetaWindowActor *self,
 
   switch (event)
   {
-  case META_PLUGIN_MINIMIZE:
-    {
-      priv->minimize_in_progress--;
-      if (priv->minimize_in_progress < 0)
-	{
-	  g_warning ("Error in minimize accounting.");
-	  priv->minimize_in_progress = 0;
-	}
-    }
-    break;
-  case META_PLUGIN_MAP:
-    /*
-     * Make sure that the actor is at the correct place in case
-     * the plugin fscked.
-     */
-    priv->map_in_progress--;
-    priv->position_changed = TRUE;
-    if (priv->map_in_progress < 0)
+    case META_PLUGIN_MINIMIZE:
       {
-	g_warning ("Error in map accounting.");
-	priv->map_in_progress = 0;
+        priv->minimize_in_progress--;
+        if (priv->minimize_in_progress < 0)
+          {
+            g_warning ("Error in minimize accounting.");
+            priv->minimize_in_progress = 0;
+          }
       }
-    break;
-  case META_PLUGIN_DESTROY:
-    priv->destroy_in_progress--;
+      break;
+    case META_PLUGIN_MAP:
+      /*
+      * Make sure that the actor is at the correct place in case
+      * the plugin fscked.
+      */
+      priv->map_in_progress--;
+      priv->position_changed = TRUE;
+      if (priv->map_in_progress < 0)
+        {
+          g_warning ("Error in map accounting.");
+          priv->map_in_progress = 0;
+        }
+      break;
+    case META_PLUGIN_DESTROY:
+      priv->destroy_in_progress--;
 
-    if (priv->destroy_in_progress < 0)
-      {
-	g_warning ("Error in destroy accounting.");
-	priv->destroy_in_progress = 0;
-      }
-    break;
-  case META_PLUGIN_UNMAXIMIZE:
-    priv->unmaximize_in_progress--;
-    if (priv->unmaximize_in_progress < 0)
-      {
-	g_warning ("Error in unmaximize accounting.");
-	priv->unmaximize_in_progress = 0;
-      }
-    break;
-  case META_PLUGIN_MAXIMIZE:
-    priv->maximize_in_progress--;
-    if (priv->maximize_in_progress < 0)
-      {
-	g_warning ("Error in maximize accounting.");
-	priv->maximize_in_progress = 0;
-      }
-    break;
-  case META_PLUGIN_TILE:
-    priv->tile_in_progress--;
-    if (priv->tile_in_progress < 0)
-      {
-    g_warning ("Error in tile accounting.");
-    priv->tile_in_progress = 0;
-      }
-    break;
-  case META_PLUGIN_SWITCH_WORKSPACE:
-    g_assert_not_reached ();
-    break;
+      if (priv->destroy_in_progress < 0)
+        {
+          g_warning ("Error in destroy accounting.");
+          priv->destroy_in_progress = 0;
+        }
+      break;
+    case META_PLUGIN_UNMAXIMIZE:
+      priv->unmaximize_in_progress--;
+      if (priv->unmaximize_in_progress < 0)
+        {
+          g_warning ("Error in unmaximize accounting.");
+          priv->unmaximize_in_progress = 0;
+        }
+      break;
+    case META_PLUGIN_MAXIMIZE:
+      priv->maximize_in_progress--;
+      if (priv->maximize_in_progress < 0)
+        {
+          g_warning ("Error in maximize accounting.");
+          priv->maximize_in_progress = 0;
+        }
+      break;
+    case META_PLUGIN_TILE:
+      priv->tile_in_progress--;
+      if (priv->tile_in_progress < 0)
+        {
+          g_warning ("Error in tile accounting.");
+          priv->tile_in_progress = 0;
+        }
+      break;
+    case META_PLUGIN_SWITCH_WORKSPACE:
+      g_assert_not_reached ();
+      break;
   }
 
   if (is_freeze_thaw_effect (event))
@@ -2568,7 +2567,7 @@ meta_window_actor_new (MetaWindow *window)
   MetaCompositor *compositor = screen->display->compositor;
   MetaWindowActor *self;
   MetaWindowActorPrivate *priv;
-  MetaFrame	*frame;
+  MetaFrame *frame;
   Window top_window;
   ClutterActor *window_group;
 
@@ -2790,7 +2789,7 @@ meta_window_actor_reset_visible_regions (MetaWindowActor *self)
 
 static void
 meta_window_actor_set_create_mipmaps (MetaWindowActor *self,
-					                              gboolean         create_mipmaps)
+                                      gboolean         create_mipmaps)
 {
   MetaWindowActorPrivate *priv = self->priv;
 
