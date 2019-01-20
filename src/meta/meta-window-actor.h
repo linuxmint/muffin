@@ -70,4 +70,7 @@ cairo_surface_t * meta_window_actor_get_image (MetaWindowActor       *self,
 void meta_window_actor_set_obscured (MetaWindowActor *self,
                                      gboolean obscured);
 
+void meta_window_actor_set_obscured_timed (MetaWindowActor *self,
+                                           gboolean         obscured);
+
 #endif /* META_WINDOW_ACTOR_H */

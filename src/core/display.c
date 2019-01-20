@@ -5723,3 +5723,10 @@ meta_display_update_sync_state (gboolean state)
 {
   meta_compositor_update_sync_state (the_display->compositor, state);
 }
+
+void
+meta_display_set_all_obscured (void)
+{
+    meta_compositor_set_all_obscured (the_display->compositor, FALSE);
+    meta_compositor_set_all_obscured (the_display->compositor, TRUE);
+}

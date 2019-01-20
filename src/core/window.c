@@ -1773,6 +1773,8 @@ meta_window_unmanage (MetaWindow  *window,
 
   meta_verbose ("Unmanaging 0x%lx\n", window->xwindow);
 
+  meta_display_set_all_obscured ();
+
   if (window->visible_to_compositor || meta_window_is_attached_dialog (window))
     meta_compositor_hide_window (window->display->compositor, window,
                                  META_COMP_EFFECT_DESTROY);
@@ -3309,6 +3311,8 @@ meta_window_minimize (MetaWindow  *window)
 {
   g_return_if_fail (!window->override_redirect);
 
+  meta_display_set_all_obscured ();
+
   if (!window->minimized)
     {
       window->minimized = TRUE;
@@ -3341,6 +3345,8 @@ void
 meta_window_unminimize (MetaWindow  *window)
 {
   g_return_if_fail (!window->override_redirect);
+
+  meta_display_set_all_obscured ();
 
   if (window->minimized)
     {
@@ -3751,6 +3757,8 @@ meta_window_real_tile (MetaWindow *window, gboolean force)
   if (window->tile_mode == META_TILE_NONE || (META_WINDOW_TILED_OR_SNAPPED (window) && !force))
     return;
 
+  meta_display_set_all_obscured ();
+
   if (window->last_tile_mode == META_TILE_NONE &&
       window->resizing_tile_type == META_WINDOW_TILE_TYPE_NONE &&
       !META_WINDOW_MAXIMIZED (window))
@@ -4081,6 +4089,8 @@ meta_window_unmaximize (MetaWindow        *window,
       meta_window_real_tile (window, FALSE);
       return;
     }
+
+  meta_display_set_all_obscured ();
 
   meta_window_unmaximize_internal (window, directions, &window->saved_rect,
                                    NorthWestGravity);
@@ -5488,6 +5498,8 @@ meta_window_move_frame (MetaWindow  *window,
 {
   int x = root_x_nw;
   int y = root_y_nw;
+
+  meta_display_set_all_obscured ();
 
   if (window->frame)
     {

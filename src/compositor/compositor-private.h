@@ -87,4 +87,10 @@ void meta_check_end_modal (MetaScreen *screen);
 void meta_compositor_update_sync_state (MetaCompositor *compositor,
                                         gboolean state);
 
+void meta_compositor_grab_op_begin (MetaCompositor *compositor);
+void meta_compositor_grab_op_end (MetaCompositor *compositor);
+
+void meta_compositor_set_all_obscured (MetaCompositor *compositor,
+                                       gboolean        obscured);
+
 #endif /* META_COMPOSITOR_PRIVATE_H */

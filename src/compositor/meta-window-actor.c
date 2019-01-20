@@ -68,8 +68,6 @@ struct _MetaWindowActorPrivate
   Window            xwindow;
   MetaScreen       *screen;
 
-  ClutterActor     *actor;
-
   /* MetaShadowFactory only caches shadows that are actually in use;
    * to avoid unnecessary recomputation we do two things: 1) we store
    * both a focused and unfocused shadow for the window. If the window
@@ -89,6 +87,7 @@ struct _MetaWindowActorPrivate
   Damage            damage;
 
   guint8            opacity;
+  CoglColor         color;
 
   /* If the window is shaped, a region that matches the shape */
   cairo_region_t   *shape_region;
@@ -168,8 +167,9 @@ struct _MetaWindowActorPrivate
   guint             reshapes;
   guint             should_have_shadow : 1;
   guint             obscured : 1;
-  guint             last_obscured : 1;
-  guint             obscured_override : 1;
+  guint             extend_obscured_timer : 1;
+  guint             obscured_lock : 1;
+  guint             reset_obscured_timeout_id;
   guint             clip_shadow : 1;
 
   /* Shaped texture */
@@ -206,7 +206,8 @@ enum
   PROP_X_WINDOW,
   PROP_X_WINDOW_ATTRIBUTES,
   PROP_NO_SHADOW,
-  PROP_SHADOW_CLASS
+  PROP_SHADOW_CLASS,
+  PROP_OBSCURED
 };
 
 #define DEFAULT_SHADOW_RADIUS 12
@@ -255,6 +256,8 @@ static void do_send_frame_timings (MetaWindowActor  *self,
                                    gint             refresh_interval,
                                    gint64           presentation_time);
 static gboolean clip_shadow_under_window (MetaWindowActor *self);
+static void set_obscured (MetaWindowActor *self,
+                          gboolean         obscured);
 
 G_DEFINE_TYPE (MetaWindowActor, meta_window_actor, CLUTTER_TYPE_ACTOR);
 
@@ -336,6 +339,16 @@ meta_window_actor_class_init (MetaWindowActorClass *klass)
                                    PROP_SHADOW_CLASS,
                                    pspec);
 
+  pspec = g_param_spec_boolean ("obscured",
+                                "Obscured",
+                                "Obscured state of the window",
+                                FALSE,
+                                G_PARAM_READABLE);
+
+  g_object_class_install_property (object_class,
+                                   PROP_OBSCURED,
+                                   pspec);
+
   signals[POSITION_CHANGED] =
     g_signal_new ("position-changed",
                   G_TYPE_FROM_CLASS (klass),
@@ -372,8 +385,8 @@ meta_window_actor_init (MetaWindowActor *self)
   priv->should_have_shadow = FALSE;
   priv->opacity_changed_id = 0;
   priv->obscured = FALSE;
-  priv->last_obscured = FALSE;
-  priv->obscured_override = FALSE;
+  priv->obscured_lock = FALSE;
+  priv->extend_obscured_timer = FALSE;
 }
 
 static void
@@ -468,17 +481,9 @@ window_appears_focused_notify (MetaWindow *mw,
   MetaWindowActorPrivate *priv = self->priv;
 
   if (priv->obscured)
-    priv->obscured = FALSE;
+    set_obscured (self, FALSE);
 
   clutter_actor_queue_redraw (CLUTTER_ACTOR (self));
-}
-
-static void
-clutter_actor_opacity_notify (ClutterActor *actor,
-                              GParamSpec   *arg1m,
-                              gpointer      data)
-{
-  maybe_desaturate_window (actor);
 }
 
 static void
@@ -530,17 +535,8 @@ meta_window_actor_constructed (GObject *object)
           !window->unmaps_pending)
         priv->needs_reshape = TRUE;
     }
-  else
-    {
-      /*
-       * This is the case where existing window is gaining/loosing frame.
-       */
-      if (priv->opacity_changed_id)
-        {
-          g_signal_handler_disconnect (self, priv->opacity_changed_id);
-          priv->opacity_changed_id = 0;
-        }
-    }
+  else if (priv->shape_region)
+    g_clear_pointer (&priv->shape_region, cairo_region_destroy);
 
   meta_window_actor_update_opacity (self);
   maybe_desaturate_window (CLUTTER_ACTOR (self));
@@ -580,6 +576,12 @@ meta_window_actor_dispose (GObject *object)
       g_source_remove (priv->send_frame_messages_timer);
       priv->send_frame_messages_timer = 0;
     }
+
+  if (priv->reset_obscured_timeout_id)
+    {
+      g_source_remove (priv->reset_obscured_timeout_id);
+      priv->reset_obscured_timeout_id = 0;
+  }
 
   meta_window_set_position_changed_callback (priv->window, NULL);
 
@@ -716,6 +718,9 @@ meta_window_actor_get_property (GObject      *object,
       break;
     case PROP_SHADOW_CLASS:
       g_value_set_string (value, priv->shadow_class);
+      break;
+    case PROP_OBSCURED:
+      g_value_set_boolean (value, priv->obscured);
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -1014,12 +1019,13 @@ texture_paint (ClutterActor *actor,
   if (clip && cairo_region_is_empty (clip))
     return;
 
+  cairo_region_t *opaque_region = priv->opaque_region;
   CoglContext *ctx;
   CoglFramebuffer *fb = NULL;
   CoglTexture *paint_tex = NULL;
+  CoglTexture *mask_texture = priv->mask_texture;
   ClutterActorBox alloc;
   CoglPipelineFilter filter;
-  gboolean obscured = priv->obscured;
 
   if (!CLUTTER_ACTOR_IS_REALIZED (actor))
     clutter_actor_realize (actor);
@@ -1046,8 +1052,7 @@ texture_paint (ClutterActor *actor,
     {
       gint64 now = g_get_monotonic_time ();
 
-      if (obscured ||
-          (now - priv->last_invalidation) >= MIN_MIPMAP_AGE_USEC ||
+      if ((now - priv->last_invalidation) >= MIN_MIPMAP_AGE_USEC ||
           priv->fast_updates < MIN_FAST_UPDATES_BEFORE_UNMIPMAP)
         {
           paint_tex = meta_texture_tower_get_paint_texture (fb, priv->paint_tower);
@@ -1087,20 +1092,20 @@ texture_paint (ClutterActor *actor,
   clutter_actor_get_allocation_box (actor, &alloc);
 
   cairo_region_t *blended_region;
-  gboolean use_opaque_region = (priv->opaque_region != NULL && opacity == 255);
+  gboolean use_opaque_region = (opaque_region && opacity == 255);
 
   if (use_opaque_region)
     {
-      if (clip != NULL)
+      if (clip)
         blended_region = cairo_region_copy (clip);
       else
         blended_region = cairo_region_create_rectangle (&tex_rect);
 
-      cairo_region_subtract (blended_region, priv->opaque_region);
+      cairo_region_subtract (blended_region, opaque_region);
     }
   else
     {
-      if (clip != NULL)
+      if (clip)
         blended_region = cairo_region_reference (clip);
       else
         blended_region = NULL;
@@ -1112,7 +1117,7 @@ texture_paint (ClutterActor *actor,
 
   int blended_n_rects = 0;
 
-  if (obscured && blended_region != NULL)
+  if (blended_region)
     {
       blended_n_rects = cairo_region_num_rectangles (blended_region);
       if (blended_n_rects > MAX_RECTS)
@@ -1132,14 +1137,14 @@ texture_paint (ClutterActor *actor,
       int n_rects;
       int i;
 
-      if (clip != NULL)
+      if (clip)
         {
           region = cairo_region_copy (clip);
-          cairo_region_intersect (region, priv->opaque_region);
+          cairo_region_intersect (region, opaque_region);
         }
       else
         {
-          region = cairo_region_reference (priv->opaque_region);
+          region = cairo_region_reference (opaque_region);
         }
 
       if (!cairo_region_is_empty (region))
@@ -1170,29 +1175,27 @@ texture_paint (ClutterActor *actor,
    *   1) and 3) are the times where we have to paint stuff. This tests
    *   for 1) and 3).
    */
-  if (blended_region == NULL || !cairo_region_is_empty (blended_region))
+  if (!blended_region || !cairo_region_is_empty (blended_region))
     {
       CoglPipeline *blended_pipeline;
 
-      if (priv->mask_texture == NULL)
+      if (!mask_texture)
         {
           blended_pipeline = get_unmasked_pipeline (ctx);
         }
       else
         {
           blended_pipeline = get_masked_pipeline (ctx);
-          cogl_pipeline_set_layer_texture (blended_pipeline, 1, priv->mask_texture);
+          cogl_pipeline_set_layer_texture (blended_pipeline, 1, mask_texture);
           cogl_pipeline_set_layer_filters (blended_pipeline, 1, filter, filter);
         }
 
       cogl_pipeline_set_layer_texture (blended_pipeline, 0, paint_tex);
       cogl_pipeline_set_layer_filters (blended_pipeline, 0, filter, filter);
 
-      CoglColor color;
-      cogl_color_init_from_4ub (&color, opacity, opacity, opacity, opacity);
-      cogl_pipeline_set_color (blended_pipeline, &color);
+      cogl_pipeline_set_color (blended_pipeline, &priv->color);
 
-      if (blended_region != NULL)
+      if (blended_region)
         {
           /* 1) blended_region is not empty. Paint the rectangles. */
           int i;
@@ -1220,7 +1223,7 @@ texture_paint (ClutterActor *actor,
         }
     }
 
-  if (blended_region != NULL)
+  if (blended_region)
     cairo_region_destroy (blended_region);
 }
 
@@ -1245,7 +1248,14 @@ meta_window_actor_paint (ClutterActor *actor)
       assign_frame_counter_to_frames (self);
     }
 
-  if (priv->window->display->shadows_enabled && priv->should_have_shadow && !priv->obscured)
+  /* Disable painting of obscured windows. The window's obscured
+     property will reset during move, resize, unmaximize, minimize,
+     and plugin events to ensure windows are always painting before
+     the user sees them. */
+  if (priv->obscured)
+    return;
+
+  if (priv->window->display->shadows_enabled && priv->should_have_shadow)
     {
       gboolean appears_focused = meta_window_appears_focused (priv->window);
       MetaShadow *shadow = appears_focused ? priv->focused_shadow : priv->unfocused_shadow;
@@ -1778,22 +1788,85 @@ meta_window_actor_thaw (MetaWindowActor *self)
     meta_window_actor_damage_all (self);
 }
 
+static void
+set_obscured (MetaWindowActor *self,
+              gboolean         obscured)
+{
+  MetaWindowActorPrivate *priv = self->priv;
+
+  if (obscured == priv->obscured || (!obscured && priv->obscured_lock))
+    return;
+
+  ClutterActor *actor = CLUTTER_ACTOR (self);
+
+  if (obscured)
+    {
+      if (priv->opacity_changed_id)
+        {
+          g_signal_handler_disconnect (self, priv->opacity_changed_id);
+          priv->opacity_changed_id = 0;
+        }
+      clutter_actor_set_reactive (actor, FALSE);
+      clutter_actor_set_offscreen_redirect (actor, CLUTTER_OFFSCREEN_REDIRECT_ALWAYS);
+    }
+  else
+    {
+      clutter_actor_set_reactive (actor, TRUE);
+      clutter_actor_set_offscreen_redirect (actor, CLUTTER_OFFSCREEN_REDIRECT_AUTOMATIC_FOR_OPACITY);
+      priv->opacity_changed_id = g_signal_connect (self, "notify::opacity",
+                                                   G_CALLBACK (clutter_actor_opacity_notify), NULL);
+    }
+
+  priv->obscured = obscured;
+}
+
 void
 meta_window_actor_check_obscured (MetaWindowActor *self)
 {
-  /* Find out whether the window is completly obscured */
   MetaWindowActorPrivate *priv = self->priv;
-  gboolean is_obscured = FALSE;
 
-  if (priv->unobscured_region && !priv->obscured_override)
+  if (priv->obscured_lock)
+    return;
+
+  /* Invisible (minimized) windows fail the cairo_region_intersect test,
+     so force the obscured property. */
+  if (!priv->visible)
     {
-      cairo_region_t *unobscured_window_region;
-      unobscured_window_region = cairo_region_copy (priv->shape_region);
-      cairo_region_intersect (unobscured_window_region, priv->unobscured_region);
-      is_obscured = cairo_region_is_empty (unobscured_window_region);
-      priv->obscured = is_obscured;
-      cairo_region_destroy (unobscured_window_region);
+      set_obscured (self, TRUE);
+      return;
     }
+
+  if (!priv->unobscured_region)
+    return;
+
+  /* Find out whether the window is completly obscured */
+  cairo_region_t *unobscured_window_region;
+  unobscured_window_region = cairo_region_copy (priv->shape_region);
+  cairo_region_intersect (unobscured_window_region, priv->unobscured_region);
+
+  set_obscured (self, cairo_region_is_empty (unobscured_window_region));
+
+  cairo_region_destroy (unobscured_window_region);
+}
+
+static gboolean
+reset_obscured (gpointer data)
+{
+  MetaWindowActor *self = (MetaWindowActor *) data;
+  MetaWindowActorPrivate *priv = self->priv;
+
+  if (priv->extend_obscured_timer)
+    {
+      priv->extend_obscured_timer = FALSE;
+      return G_SOURCE_CONTINUE;
+    }
+
+  priv->obscured_lock = FALSE;
+
+  meta_window_actor_check_obscured (self);
+
+  priv->reset_obscured_timeout_id = 0;
+  return G_SOURCE_REMOVE;
 }
 
 /**
@@ -1814,16 +1887,61 @@ meta_window_actor_set_obscured (MetaWindowActor *self,
 {
   MetaWindowActorPrivate *priv = self->priv;
 
-  priv->obscured_override = !obscured;
+  // If the timer is in progress when a plugin wants to override the obscured state,
+  // let it continue - this means a window operation is pending - which is always
+  // higher priority than the plugin.
+  if (priv->reset_obscured_timeout_id)
+    {
+      if (obscured)
+        {
+          priv->extend_obscured_timer = TRUE;
+          return;
+        }
 
+      priv->obscured_lock = FALSE;
+      g_source_remove (priv->reset_obscured_timeout_id);
+      priv->reset_obscured_timeout_id = 0;
+    }
+
+  // obscured_lock blocks state changes to the obscured property to prevent
+  // race conditions. We don't know much about the behavior of the cinnamon
+  // plugin from here, so give it higher priority than stack synchronizations.
   if (obscured)
     {
-      priv->obscured = priv->last_obscured;
+      priv->obscured_lock = FALSE;
+      meta_window_actor_check_obscured (self);
     }
   else
     {
-      priv->last_obscured = priv->obscured;
-      priv->obscured = obscured;
+      set_obscured (self, obscured);
+      priv->obscured_lock = TRUE;
+    }
+}
+
+void
+meta_window_actor_set_obscured_timed (MetaWindowActor *self,
+                                      gboolean         obscured)
+{
+  MetaWindowActorPrivate *priv = self->priv;
+
+  if (!priv->visible)
+    return;
+
+  // Timer in progress, extend it
+  if (priv->reset_obscured_timeout_id)
+    {
+      priv->extend_obscured_timer = TRUE;
+      return;
+    }
+
+  if (obscured)
+    {
+      priv->reset_obscured_timeout_id = g_timeout_add (500, (GSourceFunc) reset_obscured, self);
+    }
+  else
+    {
+      set_obscured (self, obscured);
+      priv->obscured_lock = TRUE;
     }
 }
 
@@ -2327,6 +2445,8 @@ meta_window_actor_show (MetaWindowActor   *self,
       !meta_prefs_get_desktop_effects () ||
       !start_simple_effect (self, event))
     {
+      if (priv->obscured)
+        set_obscured (self, FALSE);
       clutter_actor_show (CLUTTER_ACTOR (self));
       priv->redecorating = FALSE;
     }
@@ -2370,7 +2490,9 @@ meta_window_actor_hide (MetaWindowActor *self,
   if (event == 0 ||
       !meta_prefs_get_desktop_effects () ||
       !start_simple_effect (self, event))
-    clutter_actor_hide (CLUTTER_ACTOR (self));
+    {
+      clutter_actor_hide (CLUTTER_ACTOR (self));
+    }
 }
 
 LOCAL_SYMBOL void
@@ -2523,6 +2645,8 @@ meta_window_actor_new (MetaWindow *window)
    * before we first paint.
    */
   compositor->windows = g_list_append (compositor->windows, self);
+
+  clutter_actor_set_flags (CLUTTER_ACTOR (self), CLUTTER_ACTOR_NO_LAYOUT);
 
   return self;
 }
@@ -3465,11 +3589,16 @@ LOCAL_SYMBOL void
 meta_window_actor_update_opacity (MetaWindowActor *self)
 {
   MetaWindowActorPrivate *priv = self->priv;
+
+  if (priv->obscured)
+    return;
+
   MetaDisplay *display = priv->screen->display;
   MetaCompositor *compositor = display->compositor;
   Window xwin = priv->window->xwindow;
   gulong value;
   guint8 opacity;
+  CoglColor color;
 
   if (meta_prop_get_cardinal (display, xwin,
                               compositor->atom_net_wm_window_opacity,
@@ -3481,6 +3610,8 @@ meta_window_actor_update_opacity (MetaWindowActor *self)
     opacity = 255;
 
   priv->opacity = opacity;
+  cogl_color_init_from_4ub (&color, opacity, opacity, opacity, opacity);
+  priv->color = color;
   priv->clip_shadow = clip_shadow_under_window (self);
   clutter_actor_set_opacity (self, opacity);
 }
