@@ -85,7 +85,7 @@ meta_window_group_cull_out (MetaWindowGroup *group,
           cairo_region_translate (clip_region, - x, - y);
 
           meta_window_actor_set_unobscured_region (window_actor, unobscured_region);
-          meta_window_actor_set_visible_region (window_actor, clip_region);
+          meta_window_actor_set_clip_region (window_actor, clip_region);
 
           if (clutter_actor_get_paint_opacity (CLUTTER_ACTOR (window_actor)) == 0xff)
             {
@@ -97,7 +97,7 @@ meta_window_group_cull_out (MetaWindowGroup *group,
                 }
             }
 
-          meta_window_actor_set_visible_region_beneath (window_actor, clip_region);
+          meta_window_actor_set_clip_region_beneath (window_actor, clip_region);
 
           cairo_region_translate (unobscured_region, x, y);
           cairo_region_translate (clip_region, x, y);
