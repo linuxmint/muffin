@@ -81,4 +81,6 @@ void meta_shadow_factory_get_params (MetaShadowFactory *factory,
                                      gboolean           focused,
                                      MetaShadowParams  *params);
 
+void meta_compositor_on_shadow_factory_changed (void);
+
 #endif /* __META_SHADOW_FACTORY_H__ */

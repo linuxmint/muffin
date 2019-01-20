@@ -115,15 +115,6 @@ struct _MetaShadowFactoryClass
   GObjectClass parent_class;
 };
 
-enum
-{
-  CHANGED,
-
-  LAST_SIGNAL
-};
-
-static guint signals[LAST_SIGNAL] = { 0 };
-
 /* The first element in this array also defines the default parameters
  * for newly created classes */
 static MetaShadowClassInfo default_shadow_classes[] = {
@@ -443,14 +434,6 @@ meta_shadow_factory_class_init (MetaShadowFactoryClass *klass)
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
   object_class->finalize = meta_shadow_factory_finalize;
-
-  signals[CHANGED] =
-    g_signal_new ("changed",
-                  G_TYPE_FROM_CLASS (object_class),
-                  G_SIGNAL_RUN_LAST,
-                  0,
-                  NULL, NULL, NULL,
-                  G_TYPE_NONE, 0);
 }
 
 LOCAL_SYMBOL MetaShadowFactory *
@@ -1016,7 +999,7 @@ meta_shadow_factory_set_params (MetaShadowFactory *factory,
 
   *stored_params = *params;
 
-  g_signal_emit (factory, signals[CHANGED], 0);
+  meta_compositor_on_shadow_factory_changed ();
 }
 
 /**
