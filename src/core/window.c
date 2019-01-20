@@ -5385,7 +5385,7 @@ meta_window_move_resize_internal (MetaWindow          *window,
   else if (is_user_action)
     save_user_window_placement (window);
 
-  if (need_move_frame)
+  if (need_move_frame || need_move_client)
     g_signal_emit (window, window_signals[POSITION_CHANGED], 0);
 
   if (need_resize_client)
