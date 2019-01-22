@@ -635,8 +635,8 @@ fade_bytes (guchar *bytes,
  */
 static guchar *
 flip_buffer (guchar *buffer,
-	     int     width,
-             int     height)
+             guint   width,
+             guint   height)
 {
   /* Working in blocks increases cache efficiency, compared to reading
    * or writing an entire column at once */
@@ -644,14 +644,14 @@ flip_buffer (guchar *buffer,
 
   if (width == height)
     {
-      int i0, j0;
+      guint i0, j0;
 
       for (j0 = 0; j0 < height; j0 += BLOCK_SIZE)
 	for (i0 = 0; i0 <= j0; i0 += BLOCK_SIZE)
 	  {
-	    int max_j = MIN(j0 + BLOCK_SIZE, height);
-	    int max_i = MIN(i0 + BLOCK_SIZE, width);
-	    int i, j;
+	    guint max_j = MIN(j0 + BLOCK_SIZE, height);
+	    guint max_i = MIN(i0 + BLOCK_SIZE, width);
+	    guint i, j;
 
 	    if (i0 == j0)
 	      {
@@ -680,14 +680,14 @@ flip_buffer (guchar *buffer,
   else
     {
       guchar *new_buffer = g_malloc (height * width);
-      int i0, j0;
+      guint i0, j0;
 
       for (i0 = 0; i0 < width; i0 += BLOCK_SIZE)
         for (j0 = 0; j0 < height; j0 += BLOCK_SIZE)
 	  {
-	    int max_j = MIN(j0 + BLOCK_SIZE, height);
-	    int max_i = MIN(i0 + BLOCK_SIZE, width);
-	    int i, j;
+	    guint max_j = MIN(j0 + BLOCK_SIZE, height);
+	    guint max_i = MIN(i0 + BLOCK_SIZE, width);
+	    guint i, j;
 
             for (i = i0; i < max_i; i++)
               for (j = j0; j < max_j; j++)
