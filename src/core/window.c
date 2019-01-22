@@ -5893,6 +5893,13 @@ void
 meta_window_get_outer_rect (const MetaWindow *window,
                             MetaRectangle    *rect)
 {
+  *rect = window->outer_rect;
+}
+
+static void
+get_outer_rect (const MetaWindow *window,
+                MetaRectangle    *rect)
+{
   if (window->frame)
     {
       MetaFrameBorders borders;
@@ -5931,6 +5938,13 @@ meta_window_get_outer_rect (const MetaWindow *window,
 void
 meta_window_get_client_area_rect (const MetaWindow      *window,
                                   cairo_rectangle_int_t *rect)
+{
+  *rect = window->client_area;
+}
+
+static void
+get_client_area_rect (const MetaWindow      *window,
+                      cairo_rectangle_int_t *rect)
 {
   if (window->frame)
     {
@@ -8402,6 +8416,9 @@ meta_window_frame_size_changed (MetaWindow *window)
 {
   if (window->frame)
     meta_frame_clear_cached_borders (window->frame);
+
+  get_outer_rect (window, &window->outer_rect);
+  get_client_area_rect (window, &window->client_area);
 }
 
 static void
