@@ -1790,9 +1790,13 @@ set_obscured (MetaWindowActor *self,
 
       clutter_actor_set_reactive (actor, FALSE);
       clutter_actor_set_offscreen_redirect (actor, CLUTTER_OFFSCREEN_REDIRECT_ALWAYS);
+      meta_texture_tower_set_base_texture (priv->paint_tower, NULL);
     }
   else
     {
+      if (priv->texture)
+        meta_texture_tower_set_base_texture (priv->paint_tower, priv->texture);
+
       clutter_actor_set_reactive (actor, TRUE);
       clutter_actor_set_offscreen_redirect (actor, CLUTTER_OFFSCREEN_REDIRECT_AUTOMATIC_FOR_OPACITY);
     }
@@ -2197,6 +2201,24 @@ set_cogl_texture (MetaWindowActor *self,
     meta_texture_tower_set_base_texture (priv->paint_tower, cogl_tex);
 }
 
+void
+meta_window_actor_reset_texture (MetaWindowActor *self)
+{
+  MetaWindowActorPrivate *priv = self->priv;
+  CoglTexture *texture;
+
+  if (!priv->texture)
+    return;
+
+  texture = priv->texture;
+
+  /* Setting the texture to NULL will cause all the FBO's cached by the
+   * shaped texture's MetaTextureTower to be discarded and recreated.
+   */
+  set_cogl_texture (self, NULL);
+  set_cogl_texture (self, texture);
+}
+
 /* Called to drop our reference to a window backing pixmap that we
  * previously obtained with XCompositeNameWindowPixmap. We do this
  * when the window is unmapped or when we want to update to a new
@@ -2219,7 +2241,7 @@ meta_window_actor_detach (MetaWindowActor *self)
    */
   set_cogl_texture (self, NULL);
 
-  cogl_flush();
+  cogl_flush ();
 
   XFreePixmap (xdisplay, priv->pixmap);
   priv->pixmap = None;

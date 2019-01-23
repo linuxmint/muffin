@@ -1356,7 +1356,15 @@ meta_post_paint_func (gpointer data)
       break;
 
     case COGL_GRAPHICS_RESET_STATUS_PURGED_CONTEXT_RESET:
+      g_message ("Cogl indicated GL memory was purged - resetting textures.");
+
       g_signal_emit_by_name (compositor->display, "gl-video-memory-purged");
+
+      GList *l;
+
+      for (l = compositor->windows; l; l = l->next)
+        meta_window_actor_reset_texture (l->data);
+
       clutter_actor_queue_redraw (CLUTTER_ACTOR (compositor->stage));
       break;
 
