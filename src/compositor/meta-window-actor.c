@@ -1588,7 +1588,7 @@ queue_send_frame_messages_timeout (MetaWindowActor *self)
 gboolean
 meta_window_actor_is_override_redirect (MetaWindowActor *self)
 {
-  return meta_window_is_override_redirect (self->priv->window);
+  return self->priv->window->override_redirect;
 }
 
 /**
@@ -2404,7 +2404,7 @@ meta_window_actor_sync_actor_geometry (MetaWindowActor *self,
    * is shown, the map effect will go into effect and prevent further geometry
    * updates.
    */
-  if (priv->freeze_count && !did_placement || priv->obscured)
+  if ((priv->freeze_count || priv->obscured) && !did_placement)
     return;
 
   if (meta_window_actor_effect_in_progress (self))

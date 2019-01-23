@@ -816,7 +816,7 @@ meta_compositor_process_event (MetaCompositor *compositor,
       break;
 
     default:
-      if (event->type == meta_display_get_damage_event_base (compositor->display) + XDamageNotify)
+      if (event->type == compositor->display->damage_event_base + XDamageNotify)
         {
           /* Core code doesn't handle damage events, so we need to extract the MetaWindow
            * ourselves
@@ -1002,7 +1002,7 @@ meta_compositor_sync_stack (MetaCompositor  *compositor,
           if (!stack_actor)
             {
               meta_verbose ("Failed to find corresponding MetaWindowActor "
-                            "for window %s\n", meta_window_get_description (stack_window));
+                            "for window %s\n", stack_window->desc);
               stack = g_list_delete_link (stack, stack);
             }
           else

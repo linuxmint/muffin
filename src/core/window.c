@@ -3618,7 +3618,7 @@ meta_window_get_all_monitors (MetaWindow *window, gsize *length)
 
   monitors = g_array_new (FALSE, FALSE, sizeof (int));
 
-  if (meta_window_is_client_decorated (window))
+  if (window->has_custom_frame_extents)
     {
       window_rect = window->rect;
     }
@@ -4309,7 +4309,7 @@ LOCAL_SYMBOL void
 meta_window_adjust_opacity (MetaWindow   *window,
                             gboolean      increase)
 {
-  ClutterActor *actor = CLUTTER_ACTOR (meta_window_get_compositor_private (window));
+  ClutterActor *actor = CLUTTER_ACTOR (window->compositor_private);
 
   gint current_opacity, new_opacity;
 
@@ -4328,7 +4328,7 @@ meta_window_adjust_opacity (MetaWindow   *window,
 void
 meta_window_reset_opacity (MetaWindow *window)
 {
-    ClutterActor *actor = CLUTTER_ACTOR (meta_window_get_compositor_private (window));
+    ClutterActor *actor = CLUTTER_ACTOR (window->compositor_private);
 
     clutter_actor_set_opacity (actor, 255);
 }
@@ -4794,7 +4794,7 @@ static gboolean
 maybe_move_attached_dialog (MetaWindow *window,
                             void       *data)
 {
-  if (meta_window_is_attached_dialog (window))
+  if (window->attached)
     /* It ignores x,y for such a dialog  */
     meta_window_move (window, FALSE, 0, 0);
 
@@ -6671,7 +6671,7 @@ meta_window_move_resize_request (MetaWindow *window,
 
         if (meta_prefs_get_force_fullscreen() &&
             !window->hide_titlebar_when_maximized &&
-            (window->decorated && !meta_window_is_client_decorated (window)) &&
+            (window->decorated && !window->has_custom_frame_extents) &&
             meta_rectangle_equal (&rect, &monitor_rect) &&
             window->has_fullscreen_func &&
             !window->fullscreen)
@@ -6802,7 +6802,7 @@ meta_window_configure_request (MetaWindow *window,
             {
               MetaDisplay *display;
 
-              display = meta_window_get_display (window);
+              display = window->display;
               sibling = meta_display_lookup_x_window (display,
                                                       event->xconfigurerequest.above);
               if (sibling == NULL)
@@ -7373,7 +7373,7 @@ meta_window_client_message (MetaWindow *window,
   else if (event->xclient.message_type ==
            display->atom__GTK_SHOW_WINDOW_MENU)
     {
-      if (meta_window_is_client_decorated (window))
+      if (window->has_custom_frame_extents)
         {
           int x_root, y_root;
 
@@ -7436,7 +7436,7 @@ meta_window_propagate_focus_appearance (MetaWindow *window,
 
   child = window;
   parent = meta_window_get_transient_for (child);
-  while (parent && (!focused || meta_window_is_attached_dialog (child)))
+  while (parent && (!focused || child->attached))
     {
       gboolean child_focus_state_changed;
 
@@ -8542,7 +8542,7 @@ recalc_window_features (MetaWindow *window)
   if (window->type == META_WINDOW_TOOLBAR)
     window->decorated = FALSE;
 
-  if (meta_window_is_attached_dialog (window))
+  if (window->attached)
     window->border_only = TRUE;
 
   if (window->type == META_WINDOW_DESKTOP ||
@@ -8905,7 +8905,7 @@ meta_window_show_menu (MetaWindow *window,
   //ops |= (META_MENU_OP_DELETE | META_MENU_OP_MINIMIZE | META_MENU_OP_MOVE | META_MENU_OP_RESIZE | META_MENU_OP_MOVE_NEW);
   ops |= (META_MENU_OP_DELETE | META_MENU_OP_MINIMIZE | META_MENU_OP_MOVE | META_MENU_OP_RESIZE);
 
-  if (!meta_window_is_client_decorated (window) &&
+  if (!window->has_custom_frame_extents &&
       !meta_window_titlebar_is_onscreen (window) &&
       window->type != META_WINDOW_DOCK &&
       window->type != META_WINDOW_DESKTOP)
@@ -9728,7 +9728,7 @@ update_resize (MetaWindow *window,
    * changes apply to both sides, so that the dialog
    * remains centered to the parent.
    */
-  if (meta_window_is_attached_dialog (window))
+  if (window->attached)
     {
       dx *= 2;
       dy *= 2;
@@ -10631,7 +10631,7 @@ meta_window_extend_by_frame (MetaWindow              *window,
       rect->width  += borders->visible.left + borders->visible.right;
       rect->height += borders->visible.top + borders->visible.bottom;
     }
-  else if (meta_window_is_client_decorated (window))
+  else if (window->has_custom_frame_extents)
     {
       const GtkBorder *extents = &window->custom_frame_extents;
       rect->x += extents->left;
@@ -10653,7 +10653,7 @@ meta_window_unextend_by_frame (MetaWindow              *window,
       rect->width  -= borders->visible.left + borders->visible.right;
       rect->height -= borders->visible.top + borders->visible.bottom;
     }
-  else if (meta_window_is_client_decorated (window))
+  else if (window->has_custom_frame_extents)
     {
       const GtkBorder *extents = &window->custom_frame_extents;
       rect->x -= extents->left;
@@ -11845,7 +11845,7 @@ meta_window_get_frame_type (MetaWindow *window)
       break;
 
     case META_WINDOW_MODAL_DIALOG:
-      if (meta_window_is_attached_dialog (window))
+      if (window->attached)
         base_type = META_FRAME_TYPE_ATTACHED;
       else
         base_type = META_FRAME_TYPE_MODAL_DIALOG;
