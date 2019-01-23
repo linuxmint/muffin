@@ -467,12 +467,9 @@ window_decorated_notify (MetaWindow *mw,
   meta_window_actor_constructed (G_OBJECT (self));
 }
 
-static void
-window_appears_focused_notify (MetaWindow *mw,
-                               GParamSpec *arg1,
-                               gpointer    data)
+void
+meta_window_actor_appears_focused_notify (MetaWindowActor *self)
 {
-  MetaWindowActor *self = META_WINDOW_ACTOR (data);
   MetaWindowActorPrivate *priv = self->priv;
 
   if (priv->obscured)
@@ -481,13 +478,20 @@ window_appears_focused_notify (MetaWindow *mw,
   clutter_actor_queue_redraw (CLUTTER_ACTOR (self));
 }
 
-static void
-window_position_changed (MetaWindow *mw,
-                         gpointer    data)
+void
+meta_window_actor_type_notify (MetaWindowActor *self,
+                               gboolean    decoration_changed)
 {
-  MetaWindowActor *self = META_WINDOW_ACTOR (meta_window_get_compositor_private (mw));
+  MetaWindowActorPrivate *priv = self->priv;
 
-  g_signal_emit (self, signals[POSITION_CHANGED], 0); // Compatibility
+  if (decoration_changed)
+    window_decorated_notify (self);
+
+  if (priv->obscured && priv->window->type != META_WINDOW_NORMAL)
+    {
+      meta_window_actor_set_obscured_timed (self, FALSE, 0);
+      meta_window_actor_set_obscured_timed (self, TRUE, 1000);
+    }
 }
 
 static void
@@ -570,8 +574,6 @@ meta_window_actor_dispose (GObject *object)
       priv->reset_obscured_timeout_id = 0;
   }
 
-  meta_window_set_position_changed_callback (priv->window, NULL);
-
   screen = priv->screen;
   display = screen->display;
   xdisplay = display->xdisplay;
@@ -636,12 +638,6 @@ meta_window_actor_set_property (GObject      *object,
         if (priv->window)
           g_object_unref (priv->window);
         priv->window = g_value_dup_object (value);
-
-        g_signal_connect_object (priv->window, "notify::decorated",
-                                 G_CALLBACK (window_decorated_notify), self, 0);
-        g_signal_connect_object (priv->window, "notify::appears-focused",
-                                 G_CALLBACK (window_appears_focused_notify), self, 0);
-        meta_window_set_position_changed_callback (priv->window, window_position_changed);
       }
       break;
     case PROP_META_SCREEN:
@@ -2330,7 +2326,7 @@ meta_window_actor_destroy (MetaWindowActor *self)
 
   window = priv->window;
   window_type = window->type;
-  meta_window_set_compositor_private (window, NULL);
+  window->compositor_private = NULL;
 
   if (priv->send_frame_messages_timer != 0)
     {
@@ -2628,7 +2624,7 @@ meta_window_actor_new (MetaWindow *window)
   meta_window_actor_sync_actor_geometry (self, priv->window->placed);
 
   /* Hang our compositor window state off the MetaWindow for fast retrieval */
-  meta_window_set_compositor_private (window, G_OBJECT (self));
+  window->compositor_private = self;
 
   if (window->type == META_WINDOW_DND)
     window_group = compositor->window_group;

@@ -35,7 +35,7 @@
 #define META_WINDOW_PRIVATE_H
 
 #include <config.h>
-#include <meta/compositor.h>
+#include <compositor/compositor-private.h>
 #include <meta/window.h>
 #include "screen-private.h"
 #include <meta/util.h>
@@ -503,7 +503,7 @@ struct _MetaWindow
   /* maintained by group.c */
   MetaGroup *group;
 
-  GObject *compositor_private;
+  MetaWindowActor *compositor_private;
 
   /* Focused window that is (directly or indirectly) attached to this one */
   MetaWindow *attached_focus_window;
