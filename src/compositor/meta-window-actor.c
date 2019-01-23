@@ -181,7 +181,7 @@ struct _MetaWindowActorPrivate
 
   cairo_region_t *clip_region;
 
-  guint tex_width, tex_height;
+  int tex_width, tex_height;
 
   gint64 prev_invalidation, last_invalidation;
   guint fast_updates;
@@ -986,7 +986,7 @@ texture_paint (ClutterActor *actor,
 {
   MetaWindowActor *self = META_WINDOW_ACTOR (actor);
   MetaWindowActorPrivate *priv = self->priv;
-  guint tex_width, tex_height;
+  int tex_width, tex_height;
 
   tex_width = priv->tex_width;
   tex_height = priv->tex_height;
@@ -2171,7 +2171,7 @@ set_cogl_texture (MetaWindowActor *self,
                   CoglTexture     *cogl_tex)
 {
   MetaWindowActorPrivate *priv = self->priv;
-  guint width, height;
+  int width, height;
 
   if (priv->texture != NULL)
     cogl_object_unref (priv->texture);
@@ -3167,15 +3167,15 @@ meta_window_actor_ensure_mask (MetaWindowActor *self,
 {
   MetaWindowActorPrivate *priv = self->priv;
   CoglTexture *paint_tex;
-  guint tex_width, tex_height;
+  int tex_width, tex_height;
 
   paint_tex = priv->texture;
 
   if (paint_tex == NULL)
     return;
 
-  tex_width = cogl_texture_get_width (paint_tex);
-  tex_height = cogl_texture_get_height (paint_tex);
+  tex_width = priv->tex_width;
+  tex_height = priv->tex_height;
 
   /* If the mask texture we have was created for a different size then
      recreate it */
