@@ -2328,15 +2328,12 @@ ancestor_is_minimized (MetaWindow *window)
 gboolean
 meta_window_showing_on_its_workspace (MetaWindow *window)
 {
-  gboolean showing;
   gboolean is_desktop_or_dock;
   MetaWorkspace* workspace_of_window;
 
-  showing = TRUE;
-
   /* 1. See if we're minimized */
   if (window->minimized)
-    showing = FALSE;
+    return FALSE;
 
   /* 2. See if we're in "show desktop" mode */
   is_desktop_or_dock = FALSE;
@@ -2353,27 +2350,19 @@ meta_window_showing_on_its_workspace (MetaWindow *window)
   else /* This only seems to be needed for startup */
     workspace_of_window = NULL;
 
-  if (showing &&
-      workspace_of_window && workspace_of_window->showing_desktop &&
+  if (workspace_of_window && workspace_of_window->showing_desktop &&
       !is_desktop_or_dock)
-    {
-      meta_verbose ("We're showing the desktop on the workspace(s) that window %s is on\n",
-                    window->desc);
-      showing = FALSE;
-    }
+    return FALSE;
 
   /* 3. See if an ancestor is minimized (note that
    *    ancestor's "mapped" field may not be up to date
    *    since it's being computed in this same idle queue)
    */
 
-  if (showing)
-    {
-      if (ancestor_is_minimized (window))
-        showing = FALSE;
-    }
+  if (ancestor_is_minimized (window))
+    return FALSE;
 
-  return showing;
+  return TRUE;
 }
 
 LOCAL_SYMBOL gboolean
