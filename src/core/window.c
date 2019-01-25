@@ -11452,6 +11452,45 @@ meta_window_is_skip_taskbar (MetaWindow *window)
   return window->skip_taskbar;
 }
 
+gboolean
+meta_window_is_interesting (MetaWindow *window)
+{
+    if (window->override_redirect
+      || window->skip_taskbar)
+    return FALSE;
+
+  switch (window->type)
+    {
+      /* Definitely ignore these. */
+      case META_WINDOW_DESKTOP:
+      case META_WINDOW_DOCK:
+      case META_WINDOW_SPLASHSCREEN:
+      /* Should have already been handled by override_redirect above,
+       * but explicitly list here so we get the "unhandled enum"
+       * warning if in the future anything is added.*/
+      case META_WINDOW_DROPDOWN_MENU:
+      case META_WINDOW_POPUP_MENU:
+      case META_WINDOW_TOOLTIP:
+      case META_WINDOW_NOTIFICATION:
+      case META_WINDOW_COMBO:
+      case META_WINDOW_DND:
+      case META_WINDOW_OVERRIDE_OTHER:
+        return FALSE;
+      case META_WINDOW_NORMAL:
+      case META_WINDOW_DIALOG:
+      case META_WINDOW_MODAL_DIALOG:
+      case META_WINDOW_MENU:
+      case META_WINDOW_TOOLBAR:
+      case META_WINDOW_UTILITY:
+        break;
+      default:
+        g_warning ("meta_window_is_interesting: default reached");
+      break;
+    }
+
+  return TRUE;
+}
+
 /**
  * meta_window_get_rect:
  * @window: a #MetaWindow
