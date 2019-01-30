@@ -102,9 +102,8 @@ ensure_seat_slot_allocated (ClutterSeatEvdev *seat,
       int i;
 
       seat->n_alloc_touch_states += size_increase;
-      seat->touch_states = g_realloc_n (seat->touch_states,
-                                        seat->n_alloc_touch_states,
-                                        sizeof (ClutterTouchState *));
+      seat->touch_states = realloc (seat->touch_states,
+                                    seat->n_alloc_touch_states * sizeof (ClutterTouchState *));
       for (i = 0; i < size_increase; i++)
         seat->touch_states[seat->n_alloc_touch_states - (i + 1)] = NULL;
     }
