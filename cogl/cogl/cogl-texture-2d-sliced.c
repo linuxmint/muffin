@@ -174,7 +174,7 @@ _cogl_texture_2d_sliced_allocate_waste_buffer (CoglTexture2DSliced *tex_2ds,
       unsigned int right_size = first_y_span->size * last_x_span->waste;
       unsigned int bottom_size = first_x_span->size * last_y_span->waste;
 
-      waste_buf = g_malloc (MAX (right_size, bottom_size) * bpp);
+      waste_buf = malloc (MAX (right_size, bottom_size) * bpp);
     }
 
   return waste_buf;

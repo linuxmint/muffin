@@ -2013,7 +2013,7 @@ get_wire_line_indices (CoglContext *ctx,
   n_lines = get_line_count (mode, n_vertices_in);
 
   /* Note: we are using COGL_INDICES_TYPE_UNSIGNED_INT so 4 bytes per index. */
-  line_indices = g_malloc (4 * n_lines * 2);
+  line_indices = malloc (4 * n_lines * 2);
 
   pos = 0;
 

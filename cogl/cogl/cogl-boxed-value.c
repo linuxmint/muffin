@@ -159,11 +159,11 @@ _cogl_boxed_value_set_x (CoglBoxedValue *bv,
               bv->type != type)
             {
               free (bv->v.array);
-              bv->v.array = g_malloc (count * value_size);
+              bv->v.array = malloc (count * value_size);
             }
         }
       else
-        bv->v.array = g_malloc (count * value_size);
+        bv->v.array = malloc (count * value_size);
 
       if (transpose)
         {

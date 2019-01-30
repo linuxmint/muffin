@@ -197,7 +197,7 @@ cogl_get_rectangle_indices (CoglContext *ctx, int n_rectangles)
       /* Generate the byte array if we haven't already */
       if (ctx->rectangle_byte_indices == NULL)
         {
-          uint8_t *byte_array = g_malloc (256 / 4 * 6 * sizeof (uint8_t));
+          uint8_t *byte_array = malloc (256 / 4 * 6 * sizeof (uint8_t));
           uint8_t *p = byte_array;
           int i, vert_num = 0;
 
@@ -240,7 +240,7 @@ cogl_get_rectangle_indices (CoglContext *ctx, int n_rectangles)
             ctx->rectangle_short_indices_len *= 2;
 
           /* Over-allocate to generate a whole number of quads */
-          p = short_array = g_malloc ((ctx->rectangle_short_indices_len
+          p = short_array = malloc ((ctx->rectangle_short_indices_len
                                        + 5) / 6 * 6
                                       * sizeof (uint16_t));
 

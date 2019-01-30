@@ -17,7 +17,7 @@ typedef struct _TestState
 static CoglTexture *
 create_texture (TestUtilsTextureFlags flags)
 {
-  uint8_t *data = g_malloc (TEX_SIZE * TEX_SIZE * 4), *p = data;
+  uint8_t *data = malloc (TEX_SIZE * TEX_SIZE * 4), *p = data;
   CoglTexture *tex;
   int x, y;
 

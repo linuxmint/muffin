@@ -31,7 +31,7 @@ gen_tex_data (uint32_t color)
   uint8_t b = MASK_BLUE (color);
   uint8_t a = MASK_ALPHA (color);
 
-  tex_data = g_malloc (QUAD_WIDTH * QUAD_WIDTH * 4);
+  tex_data = malloc (QUAD_WIDTH * QUAD_WIDTH * 4);
 
   for (p = tex_data + QUAD_WIDTH * QUAD_WIDTH * 4; p > tex_data;)
     {

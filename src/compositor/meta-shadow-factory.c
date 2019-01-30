@@ -560,7 +560,7 @@ blur_rows (cairo_region_t   *convolve_region,
   int n_rectangles;
   guchar *tmp_buffer;
 
-  tmp_buffer = g_malloc (buffer_width);
+  tmp_buffer = malloc (buffer_width);
 
   n_rectangles = cairo_region_num_rectangles (convolve_region);
   for (i = 0; i < n_rectangles; i++)
@@ -662,7 +662,7 @@ flip_buffer (guchar *buffer,
     }
   else
     {
-      guchar *new_buffer = g_malloc (height * width);
+      guchar *new_buffer = malloc (height * width);
       int i0, j0;
 
       for (i0 = 0; i0 < width; i0 += BLOCK_SIZE)

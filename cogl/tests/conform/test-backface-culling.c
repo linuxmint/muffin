@@ -256,7 +256,7 @@ make_texture (void)
   guchar *tex_data, *p;
   CoglTexture *tex;
 
-  tex_data = g_malloc (TEXTURE_SIZE * TEXTURE_SIZE * 4);
+  tex_data = malloc (TEXTURE_SIZE * TEXTURE_SIZE * 4);
 
   for (p = tex_data + TEXTURE_SIZE * TEXTURE_SIZE * 4; p > tex_data;)
     {

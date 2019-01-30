@@ -633,7 +633,7 @@ get_texture_bits_via_copy (CoglTexture *texture,
   bpp = _cogl_pixel_format_get_bytes_per_pixel (dst_format);
 
   full_rowstride = bpp * full_tex_width;
-  full_bits = g_malloc (full_rowstride * full_tex_height);
+  full_bits = malloc (full_rowstride * full_tex_height);
 
   if (texture->vtable->get_data (texture,
                                  dst_format,

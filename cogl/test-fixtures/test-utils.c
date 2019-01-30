@@ -309,7 +309,7 @@ test_utils_check_region (CoglFramebuffer *test_fb,
 {
   uint8_t *pixels, *p;
 
-  pixels = p = g_malloc (width * height * 4);
+  pixels = p = malloc (width * height * 4);
   cogl_framebuffer_read_pixels (test_fb,
                                 x,
                                 y,

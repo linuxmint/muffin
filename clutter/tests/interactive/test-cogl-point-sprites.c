@@ -58,7 +58,7 @@ generate_round_texture (void)
   int x, y;
   CoglHandle tex;
 
-  p = data = g_malloc (TEXTURE_SIZE * TEXTURE_SIZE * 4);
+  p = data = malloc (TEXTURE_SIZE * TEXTURE_SIZE * 4);
 
   /* Generate a yellow circle which gets transparent towards the edges */
   for (y = 0; y < TEXTURE_SIZE; y++)

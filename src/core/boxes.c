@@ -39,7 +39,7 @@
 
 /* It would make sense to use GSlice here, but until we clean up the
  * rest of this file and the internal API to use these functions, we
- * leave it using g_malloc()/free() for consistency.
+ * leave it using malloc()/free() for consistency.
  */
 
 MetaRectangle *

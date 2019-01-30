@@ -37,7 +37,7 @@
 #include <glib.h>
 
 #define memRealloc g_realloc
-#define memAlloc   g_malloc
+#define memAlloc   malloc
 #define memFree    free
 #define memInit(x) 1
 

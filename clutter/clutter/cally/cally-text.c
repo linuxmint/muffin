@@ -1860,7 +1860,7 @@ _cally_misc_add_attribute (AtkAttributeSet *attrib_set,
                            gchar           *value)
 {
   AtkAttributeSet *return_set;
-  AtkAttribute *at = g_malloc (sizeof (AtkAttribute));
+  AtkAttribute *at = malloc (sizeof (AtkAttribute));
   at->name = g_strdup (atk_text_attribute_get_name (attr));
   at->value = value;
   return_set = g_slist_prepend(attrib_set, at);

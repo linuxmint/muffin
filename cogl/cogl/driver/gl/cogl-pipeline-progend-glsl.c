@@ -341,7 +341,7 @@ link_program (GLint gl_program)
 
       GE( ctx, glGetProgramiv (gl_program, GL_INFO_LOG_LENGTH, &log_length) );
 
-      log = g_malloc (log_length);
+      log = malloc (log_length);
 
       GE( ctx, glGetProgramInfoLog (gl_program, log_length,
                                     &out_log_length, log) );

@@ -701,7 +701,7 @@ _cogl_context_get_gl_extensions (CoglContext *context)
 
       context->glGetIntegerv (GL_NUM_EXTENSIONS, &num_extensions);
 
-      ret = g_malloc (sizeof (char *) * (num_extensions + 1));
+      ret = malloc (sizeof (char *) * (num_extensions + 1));
 
       for (i = 0; i < num_extensions; i++)
         {

@@ -174,7 +174,7 @@ test_pixel_buffer_set_data (void)
 
   stride = cogl_bitmap_get_rowstride (bitmap);
 
-  data = g_malloc (stride * BITMAP_SIZE);
+  data = malloc (stride * BITMAP_SIZE);
 
   generate_bitmap_data (data, stride);
 
@@ -211,7 +211,7 @@ static CoglTexture *
 create_white_texture (void)
 {
   CoglTexture2D *texture;
-  uint8_t *data = g_malloc (BITMAP_SIZE * BITMAP_SIZE * 4);
+  uint8_t *data = malloc (BITMAP_SIZE * BITMAP_SIZE * 4);
 
   memset (data, 255, BITMAP_SIZE * BITMAP_SIZE * 4);
 

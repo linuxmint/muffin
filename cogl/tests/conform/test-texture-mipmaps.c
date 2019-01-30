@@ -18,7 +18,7 @@ typedef struct _TestState
 static CoglHandle
 make_texture (void)
 {
-  guchar *tex_data = g_malloc (TEX_SIZE * TEX_SIZE * 3), *p = tex_data;
+  guchar *tex_data = malloc (TEX_SIZE * TEX_SIZE * 3), *p = tex_data;
   CoglHandle tex;
   int x, y;
 

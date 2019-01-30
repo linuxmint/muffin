@@ -123,7 +123,7 @@ cogl_pango_glyph_cache_new (CoglContext *ctx,
 {
   CoglPangoGlyphCache *cache;
 
-  cache = g_malloc (sizeof (CoglPangoGlyphCache));
+  cache = malloc (sizeof (CoglPangoGlyphCache));
 
   /* Note: as a rule we don't take references to a CoglContext
    * internally since */

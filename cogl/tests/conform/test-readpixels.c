@@ -43,7 +43,7 @@ on_paint (ClutterActor *actor, void *state)
    * verify is reading back grid of colors from a CoglOffscreen framebuffer
    */
 
-  data = g_malloc (FRAMEBUFFER_WIDTH * 4 * FRAMEBUFFER_HEIGHT);
+  data = malloc (FRAMEBUFFER_WIDTH * 4 * FRAMEBUFFER_HEIGHT);
   tex = test_utils_texture_new_from_data (FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT,
                                     TEST_UTILS_TEXTURE_NO_SLICING,
                                     COGL_PIXEL_FORMAT_RGBA_8888, /* data fmt */

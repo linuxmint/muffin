@@ -20,7 +20,7 @@ validate_result (TestState *state)
   /* The textures are setup so that when added together with the
      correct matrices then all of the pixels should be white. We can
      verify this by reading back the entire stage */
-  pixels = g_malloc (state->width * state->height * 4);
+  pixels = malloc (state->width * state->height * 4);
 
   cogl_framebuffer_read_pixels (test_fb, 0, 0, state->width, state->height,
                                 COGL_PIXEL_FORMAT_RGBA_8888_PRE,

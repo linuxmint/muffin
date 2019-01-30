@@ -162,7 +162,7 @@ clutter_text_buffer_normal_insert_text (ClutterTextBuffer *buffer,
         }
 
       /* Could be a password, so can't leave stuff in memory. */
-      et_new = g_malloc (pv->normal_text_size);
+      et_new = malloc (pv->normal_text_size);
       memcpy (et_new, pv->normal_text, MIN (prev_size, pv->normal_text_size));
       trash_area (pv->normal_text, prev_size);
       free (pv->normal_text);

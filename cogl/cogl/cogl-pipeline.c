@@ -1088,7 +1088,7 @@ _cogl_pipeline_copy_differences (CoglPipeline *dest,
       int i;
 
       big_state->uniforms_state.override_values =
-        g_malloc (n_overrides * sizeof (CoglBoxedValue));
+        malloc (n_overrides * sizeof (CoglBoxedValue));
 
       for (i = 0; i < n_overrides; i++)
         {

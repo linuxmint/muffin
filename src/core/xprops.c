@@ -441,7 +441,7 @@ meta_prop_get_utf8_string (MetaDisplay *display,
   return utf8_string_from_results (&results, str_p);
 }
 
-/* this one freakishly returns g_malloc memory */
+/* this one freakishly returns malloc memory */
 static gboolean
 utf8_list_from_results (GetPropertyResults *results,
                         char             ***str_p,
@@ -516,7 +516,7 @@ utf8_list_from_results (GetPropertyResults *results,
   return TRUE;
 }
 
-/* returns g_malloc not Xmalloc memory */
+/* returns malloc not Xmalloc memory */
 LOCAL_SYMBOL gboolean
 meta_prop_get_utf8_list (MetaDisplay   *display,
                          Window         xwindow,

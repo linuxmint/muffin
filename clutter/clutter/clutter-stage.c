@@ -1420,7 +1420,7 @@ read_pixels_to_file (char *filename_stem,
                                     filename_stem,
                                     read_count);
 
-  data = g_malloc (4 * width * height);
+  data = malloc (4 * width * height);
   cogl_read_pixels (x, y, width, height,
                     COGL_READ_PIXELS_COLOR_BUFFER,
                     CLUTTER_CAIRO_FORMAT_ARGB32,

@@ -21,7 +21,7 @@ static CoglTexture3D *
 create_texture_3d (CoglContext *context)
 {
   int x, y, z;
-  uint8_t *data = g_malloc (TEX_IMAGE_STRIDE * TEX_DEPTH);
+  uint8_t *data = malloc (TEX_IMAGE_STRIDE * TEX_DEPTH);
   uint8_t *p = data;
   CoglTexture3D *tex;
   CoglError *error = NULL;

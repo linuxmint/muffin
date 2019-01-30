@@ -85,7 +85,7 @@ _cogl_memory_sub_stack_alloc (size_t bytes)
 {
   CoglMemorySubStack *sub_stack = g_slice_new (CoglMemorySubStack);
   sub_stack->bytes = bytes;
-  sub_stack->data = g_malloc (bytes);
+  sub_stack->data = malloc (bytes);
   return sub_stack;
 }
 

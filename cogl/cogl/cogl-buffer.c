@@ -152,7 +152,7 @@ _cogl_buffer_initialize (CoglBuffer *buffer,
       buffer->vtable.unmap = malloc_unmap;
       buffer->vtable.set_data = malloc_set_data;
 
-      buffer->data = g_malloc (size);
+      buffer->data = malloc (size);
     }
   else
     {

@@ -409,12 +409,12 @@ _cogl_atlas_reserve_space (CoglAtlas             *atlas,
   /* Get an array of all the textures currently in the atlas. */
   data.n_textures = 0;
   if (atlas->map == NULL)
-    data.textures = g_malloc (sizeof (CoglAtlasRepositionData));
+    data.textures = malloc (sizeof (CoglAtlasRepositionData));
   else
     {
       unsigned int n_rectangles =
         _cogl_rectangle_map_get_n_rectangles (atlas->map);
-      data.textures = g_malloc (sizeof (CoglAtlasRepositionData) *
+      data.textures = malloc (sizeof (CoglAtlasRepositionData) *
                                 (n_rectangles + 1));
       _cogl_rectangle_map_foreach (atlas->map,
                                    _cogl_atlas_get_rectangles_cb,

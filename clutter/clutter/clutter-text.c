@@ -5045,7 +5045,7 @@ clutter_text_get_selection (ClutterText *self)
   end_offset = offset_to_bytes (text, end_index);
   len = end_offset - start_offset;
 
-  str = g_malloc (len + 1);
+  str = malloc (len + 1);
   g_utf8_strncpy (str, text + start_offset, end_index - start_index);
 
   return str;

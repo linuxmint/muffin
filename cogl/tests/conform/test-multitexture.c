@@ -68,7 +68,7 @@ make_texture (guchar ref)
   CoglHandle tex;
   guchar val;
 
-  tex_data = g_malloc (QUAD_WIDTH * QUAD_WIDTH * 16);
+  tex_data = malloc (QUAD_WIDTH * QUAD_WIDTH * 16);
 
   for (y = 0; y < QUAD_WIDTH * 2; y++)
     for (x = 0; x < QUAD_WIDTH * 2; x++)
