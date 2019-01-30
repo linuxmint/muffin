@@ -149,6 +149,9 @@ static unsigned int get_mask_from_snap_keysym (MetaWindow *window);
 static void update_edge_constraints (MetaWindow *window);
 static void update_gtk_edge_constraints (MetaWindow *window);
 
+static void get_outer_rect (const MetaWindow *window,
+                            MetaRectangle    *rect);
+
 /* Idle handlers for the three queues (run with meta_later_add()). The
  * "data" parameter in each case will be a GINT_TO_POINTER of the
  * index into the queue arrays to use.
@@ -3632,6 +3635,9 @@ meta_window_get_all_monitors (MetaWindow *window, gsize *length)
     }
   else
     {
+      if (window->fullscreen)
+        get_outer_rect (window, &window->outer_rect);
+
       window_rect = window->outer_rect;
     }
 
