@@ -153,7 +153,7 @@ main (int argc, char *argv[])
 
       clutter_actor_add_child (box, rect);
 
-      g_free (name);
+      free (name);
     }
 
   clutter_actor_show (stage);

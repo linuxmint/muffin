@@ -222,7 +222,7 @@ check_gl_extensions (void)
         g_strfreev (split);
 
         const char *extensions = meta_gl_get_string (GL_EXTENSIONS);
-        return version_ok && 
+        return version_ok &&
                (extensions != NULL &&
                 strstr (extensions, "GL_ARB_sync") != NULL &&
                 strstr (extensions, "GL_EXT_x11_sync_object") != NULL);
@@ -449,7 +449,7 @@ meta_sync_free (MetaSync *self)
   XSyncDestroyCounter (self->xdisplay, self->xcounter);
   XSyncDestroyAlarm (self->xdisplay, self->xalarm);
 
-  g_free (self);
+  free (self);
 }
 
 gboolean

@@ -377,7 +377,7 @@ meta_shadow_get_bounds  (MetaShadow            *shadow,
 static void
 meta_shadow_class_info_free (MetaShadowClassInfo *class_info)
 {
-  g_free ((char *)class_info->name);
+  free ((char *)class_info->name);
   g_slice_free (MetaShadowClassInfo, class_info);
 }
 
@@ -596,7 +596,7 @@ blur_rows (cairo_region_t   *convolve_region,
 	}
     }
 
-  g_free (tmp_buffer);
+  free (tmp_buffer);
 }
 
 static void
@@ -677,7 +677,7 @@ flip_buffer (guchar *buffer,
 		new_buffer[i * height + j] = buffer[j * width + i];
 	  }
 
-      g_free (buffer);
+      free (buffer);
 
       return new_buffer;
     }
@@ -789,7 +789,7 @@ make_shadow (MetaShadow     *shadow,
 
   cairo_region_destroy (row_convolve_region);
   cairo_region_destroy (column_convolve_region);
-  g_free (buffer);
+  free (buffer);
 
   shadow->pipeline = meta_create_texture_pipeline (shadow->texture);
 }

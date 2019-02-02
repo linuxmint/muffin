@@ -95,7 +95,7 @@ make_texture (void)
                                           TEXTURE_SIZE * 4,
                                           tex_data);
 
-  g_free (tex_data);
+  free (tex_data);
 
   if (cogl_test_verbose ())
     {

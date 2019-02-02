@@ -63,7 +63,7 @@ create_texture (int size)
                                               size * 4,
                                               data);
 
-  g_free (data);
+  free (data);
 
   return texture;
 }
@@ -108,7 +108,7 @@ verify_texture (CoglTexture *texture, int size)
         }
     }
 
-  g_free (data);
+  free (data);
 }
 
 void

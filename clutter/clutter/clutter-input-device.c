@@ -95,9 +95,9 @@ clutter_input_device_dispose (GObject *gobject)
 {
   ClutterInputDevice *device = CLUTTER_INPUT_DEVICE (gobject);
 
-  g_clear_pointer (&device->device_name, g_free);
-  g_clear_pointer (&device->vendor_id, g_free);
-  g_clear_pointer (&device->product_id, g_free);
+  g_clear_pointer (&device->device_name, free);
+  g_clear_pointer (&device->vendor_id, free);
+  g_clear_pointer (&device->product_id, free);
 
   if (device->associated != NULL)
     {

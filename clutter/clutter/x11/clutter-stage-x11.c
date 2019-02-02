@@ -773,7 +773,7 @@ clutter_stage_x11_set_title (ClutterStageWindow *stage_window,
 {
   ClutterStageX11 *stage_x11 = CLUTTER_STAGE_X11 (stage_window);
 
-  g_free (stage_x11->title);
+  free (stage_x11->title);
   stage_x11->title = g_strdup (title);
   set_wm_title (stage_x11);
 }
@@ -954,7 +954,7 @@ clutter_stage_x11_finalize (GObject *gobject)
 {
   ClutterStageX11 *stage_x11 = CLUTTER_STAGE_X11 (gobject);
 
-  g_free (stage_x11->title);
+  free (stage_x11->title);
 
   G_OBJECT_CLASS (clutter_stage_x11_parent_class)->finalize (gobject);
 }

@@ -156,7 +156,7 @@ cally_util_add_key_event_listener (AtkKeySnoopFunc  listener,
 
   if (!key_listener_list)
   {
-    key_listener_list = g_hash_table_new_full (NULL, NULL, NULL, g_free);
+    key_listener_list = g_hash_table_new_full (NULL, NULL, NULL, free);
 
     cally_util_simulate_snooper_install ();
   }
@@ -414,8 +414,8 @@ cally_key_snooper (ClutterActor *actor,
       consumed = g_hash_table_foreach_steal (new_hash, notify_hf, key_event);
       g_hash_table_destroy (new_hash);
 
-      g_free (key_event->string);
-      g_free (key_event);
+      free (key_event->string);
+      free (key_event);
     }
 
   return (consumed ? 1 : 0);

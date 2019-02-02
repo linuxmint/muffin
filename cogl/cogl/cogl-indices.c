@@ -218,7 +218,7 @@ cogl_get_rectangle_indices (CoglContext *ctx, int n_rectangles)
                                 byte_array,
                                 256 / 4 * 6);
 
-          g_free (byte_array);
+          free (byte_array);
         }
 
       return ctx->rectangle_byte_indices;
@@ -262,7 +262,7 @@ cogl_get_rectangle_indices (CoglContext *ctx, int n_rectangles)
                                 short_array,
                                 ctx->rectangle_short_indices_len);
 
-          g_free (short_array);
+          free (short_array);
         }
 
       return ctx->rectangle_short_indices;

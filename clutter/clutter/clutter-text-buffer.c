@@ -165,7 +165,7 @@ clutter_text_buffer_normal_insert_text (ClutterTextBuffer *buffer,
       et_new = g_malloc (pv->normal_text_size);
       memcpy (et_new, pv->normal_text, MIN (prev_size, pv->normal_text_size));
       trash_area (pv->normal_text, prev_size);
-      g_free (pv->normal_text);
+      free (pv->normal_text);
       pv->normal_text = et_new;
     }
 
@@ -265,7 +265,7 @@ clutter_text_buffer_finalize (GObject *obj)
   if (pv->normal_text)
     {
       trash_area (pv->normal_text, pv->normal_text_size);
-      g_free (pv->normal_text);
+      free (pv->normal_text);
       pv->normal_text = NULL;
       pv->normal_text_bytes = pv->normal_text_size = 0;
       pv->normal_text_chars = 0;

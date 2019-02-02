@@ -67,7 +67,7 @@ create_source_rect (void)
 
   g_assert (glGetError () == GL_NO_ERROR);
 
-  g_free (data);
+  free (data);
 
   tex = test_utils_texture_new_from_foreign (gl_tex,
                                        GL_TEXTURE_RECTANGLE_ARB,
@@ -105,7 +105,7 @@ create_source_2d (void)
                                     256 * 4,
                                     data);
 
-  g_free (data);
+  free (data);
 
   return tex;
 }
@@ -188,7 +188,7 @@ validate_result (TestState *state)
         p += 4;
       }
 
-  g_free (data);
+  free (data);
 
   /* Comment this out to see what the test paints */
   clutter_main_quit ();

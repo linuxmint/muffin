@@ -83,7 +83,7 @@ _cogl_atlas_free (CoglAtlas *atlas)
   g_hook_list_clear (&atlas->pre_reorganize_callbacks);
   g_hook_list_clear (&atlas->post_reorganize_callbacks);
 
-  g_free (atlas);
+  free (atlas);
 }
 
 typedef struct _CoglAtlasRepositionData
@@ -318,7 +318,7 @@ _cogl_atlas_create_texture (CoglAtlas *atlas,
 
       cogl_object_unref (clear_bmp);
 
-      g_free (clear_data);
+      free (clear_data);
     }
   else
     {
@@ -528,7 +528,7 @@ _cogl_atlas_reserve_space (CoglAtlas             *atlas,
       ret = TRUE;
     }
 
-  g_free (data.textures);
+  free (data.textures);
 
   _cogl_atlas_notify_post_reorganize (atlas);
 

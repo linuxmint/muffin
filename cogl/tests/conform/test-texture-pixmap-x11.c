@@ -125,7 +125,7 @@ check_paint (TestState *state, int x, int y, int scale)
           }
       }
 
-  g_free (data);
+  free (data);
 
   return update_value == 0x00;
 }

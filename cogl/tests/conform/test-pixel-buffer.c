@@ -184,7 +184,7 @@ test_pixel_buffer_set_data (void)
                         stride * (BITMAP_SIZE - 1) +
                         BITMAP_SIZE * 4);
 
-  g_free (data);
+  free (data);
 
   texture = create_texture_from_bitmap (bitmap);
   pipeline = create_pipeline_from_texture (texture);
@@ -223,7 +223,7 @@ create_white_texture (void)
                                            data,
                                            NULL); /* don't catch errors */
 
-  g_free (data);
+  free (data);
 
   return texture;
 }

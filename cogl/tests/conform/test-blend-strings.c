@@ -204,7 +204,7 @@ make_texture (uint32_t color)
                                           QUAD_WIDTH * 4,
                                           tex_data);
 
-  g_free (tex_data);
+  free (tex_data);
 
   return tex;
 }

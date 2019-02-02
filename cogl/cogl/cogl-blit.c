@@ -312,7 +312,7 @@ _cogl_blit_get_tex_data_blit (CoglBlitData *data,
 static void
 _cogl_blit_get_tex_data_end (CoglBlitData *data)
 {
-  g_free (data->image_data);
+  free (data->image_data);
 }
 
 /* These should be specified in order of preference */

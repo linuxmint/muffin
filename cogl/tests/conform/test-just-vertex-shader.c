@@ -73,7 +73,7 @@ paint_legacy (TestState *state)
     {
       char *log = cogl_shader_get_info_log (shader);
       g_warning ("Shader compilation failed:\n%s", log);
-      g_free (log);
+      free (log);
       g_assert_not_reached ();
     }
 
@@ -143,7 +143,7 @@ paint (TestState *state)
     {
       char *log = cogl_shader_get_info_log (shader);
       g_warning ("Shader compilation failed:\n%s", log);
-      g_free (log);
+      free (log);
       g_assert_not_reached ();
     }
 

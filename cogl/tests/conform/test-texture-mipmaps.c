@@ -39,7 +39,7 @@ make_texture (void)
                                     TEX_SIZE * 3,
                                     tex_data);
 
-  g_free (tex_data);
+  free (tex_data);
 
   return tex;
 }

@@ -167,7 +167,7 @@ clutter_actor_meta_finalize (GObject *gobject)
   if (priv->destroy_id != 0 && priv->actor != NULL)
     g_signal_handler_disconnect (priv->actor, priv->destroy_id);
 
-  g_free (priv->name);
+  free (priv->name);
 
   G_OBJECT_CLASS (clutter_actor_meta_parent_class)->finalize (gobject);
 }
@@ -257,7 +257,7 @@ clutter_actor_meta_set_name (ClutterActorMeta *meta,
   if (g_strcmp0 (meta->priv->name, name) == 0)
     return;
 
-  g_free (meta->priv->name);
+  free (meta->priv->name);
   meta->priv->name = g_strdup (name);
 
   g_object_notify_by_pspec (G_OBJECT (meta), obj_props[PROP_NAME]);

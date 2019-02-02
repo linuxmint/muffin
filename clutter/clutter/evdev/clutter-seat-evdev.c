@@ -846,7 +846,7 @@ clutter_seat_evdev_free (ClutterSeatEvdev *seat)
       g_object_unref (device);
     }
   g_slist_free (seat->devices);
-  g_free (seat->touch_states);
+  free (seat->touch_states);
 
   xkb_state_unref (seat->xkb);
 
@@ -855,7 +855,7 @@ clutter_seat_evdev_free (ClutterSeatEvdev *seat)
   if (seat->libinput_seat)
     libinput_seat_unref (seat->libinput_seat);
 
-  g_free (seat);
+  free (seat);
 }
 
 ClutterInputDevice *

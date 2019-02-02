@@ -38,7 +38,7 @@ on_tap (ClutterTapAction *action,
 
   str = g_strconcat ("Content gravity: ", gravities[cur_gravity].name, NULL);
   clutter_text_set_text (label, str);
-  g_free (str);
+  free (str);
 
   cur_gravity += 1;
 
@@ -98,7 +98,7 @@ main (int argc, char *argv[])
   clutter_actor_add_constraint (text, clutter_align_constraint_new (stage, CLUTTER_ALIGN_BOTH, 0.5));
   clutter_actor_add_child (stage, text);
 
-  g_free (str);
+  free (str);
 
   action = clutter_tap_action_new ();
   g_signal_connect (action, "tap", G_CALLBACK (on_tap), text);

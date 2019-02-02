@@ -141,7 +141,7 @@ _cogl_boxed_value_set_x (CoglBoxedValue *bv,
   if (count == 1)
     {
       if (bv->count > 1)
-        g_free (bv->v.array);
+        free (bv->v.array);
 
       if (transpose)
         _cogl_boxed_value_tranpose (bv->v.float_value,
@@ -158,7 +158,7 @@ _cogl_boxed_value_set_x (CoglBoxedValue *bv,
               bv->size != size ||
               bv->type != type)
             {
-              g_free (bv->v.array);
+              free (bv->v.array);
               bv->v.array = g_malloc (count * value_size);
             }
         }
@@ -280,7 +280,7 @@ void
 _cogl_boxed_value_destroy (CoglBoxedValue *bv)
 {
   if (bv->count > 1)
-    g_free (bv->v.array);
+    free (bv->v.array);
 }
 
 void

@@ -80,7 +80,7 @@ static ClutterActor *new_rect (gint r,
   hand = clutter_texture_new_from_file (file, &error);
   if (rectangle == NULL)
     g_error ("image load failed: %s", error->message);
-  g_free (file);
+  free (file);
   clutter_actor_set_size (hand, ACTOR_WIDTH,ACTOR_HEIGHT);
 
   clutter_actor_set_size (rectangle, ACTOR_WIDTH,ACTOR_HEIGHT);
@@ -128,7 +128,7 @@ main (gint    argc,
 
       clutter_state_set (layout_state, NULL, "active",
             actor, "delayed::x", CLUTTER_LINEAR,
-                                         ACTOR_WIDTH * 1.0 * ((TOTAL-1-i) % COLS), 
+                                         ACTOR_WIDTH * 1.0 * ((TOTAL-1-i) % COLS),
                                         ((row*1.0/ROWS))/2, (1.0-(row*1.0/ROWS))/2,
             actor, "delayed::y", CLUTTER_LINEAR,
                                          ACTOR_HEIGHT * 1.0 * ((TOTAL-1-i) / COLS),

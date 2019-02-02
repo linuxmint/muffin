@@ -50,7 +50,7 @@ on_paint (ClutterActor *actor, void *state)
                                     COGL_PIXEL_FORMAT_ANY, /* internal fmt */
                                     FRAMEBUFFER_WIDTH * 4, /* rowstride */
                                     data);
-  g_free (data);
+  free (data);
   offscreen = cogl_offscreen_new_with_texture (tex);
 
   cogl_push_framebuffer (offscreen);
@@ -78,7 +78,7 @@ on_paint (ClutterActor *actor, void *state)
   g_assert_cmpint (pixels[FRAMEBUFFER_WIDTH - 1], ==, 0xff00ff00);
   g_assert_cmpint (pixels[(FRAMEBUFFER_HEIGHT - 1) * FRAMEBUFFER_WIDTH], ==, 0xffff0000);
   g_assert_cmpint (pixels[(FRAMEBUFFER_HEIGHT - 1) * FRAMEBUFFER_WIDTH + FRAMEBUFFER_WIDTH - 1], ==, 0xffffffff);
-  g_free (pixels);
+  free (pixels);
 
   cogl_pop_framebuffer ();
   cogl_handle_unref (offscreen);
@@ -99,7 +99,7 @@ on_paint (ClutterActor *actor, void *state)
   g_assert_cmpint (pixels[FRAMEBUFFER_WIDTH - 1], ==, 0xff00ff00);
   g_assert_cmpint (pixels[(FRAMEBUFFER_HEIGHT - 1) * FRAMEBUFFER_WIDTH], ==, 0xffff0000);
   g_assert_cmpint (pixels[(FRAMEBUFFER_HEIGHT - 1) * FRAMEBUFFER_WIDTH + FRAMEBUFFER_WIDTH - 1], ==, 0xffffffff);
-  g_free (pixels);
+  free (pixels);
 
   /* Verify using BGR format */
 
@@ -120,7 +120,7 @@ on_paint (ClutterActor *actor, void *state)
   g_assert_cmpint (pixelsc[(FRAMEBUFFER_WIDTH - 1) * 3 + 1], ==, 0xff);
   g_assert_cmpint (pixelsc[(FRAMEBUFFER_WIDTH - 1) * 3 + 2], ==, 0x00);
 
-  g_free (pixelsc);
+  free (pixelsc);
 
   cogl_handle_unref (tex);
 

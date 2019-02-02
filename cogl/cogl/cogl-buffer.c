@@ -175,7 +175,7 @@ _cogl_buffer_fini (CoglBuffer *buffer)
   if (buffer->flags & COGL_BUFFER_FLAG_BUFFER_OBJECT)
     buffer->context->driver_vtable->buffer_destroy (buffer);
   else
-    g_free (buffer->data);
+    free (buffer->data);
 }
 
 unsigned int

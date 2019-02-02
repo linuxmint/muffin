@@ -160,7 +160,7 @@ _cogl_feature_check (CoglRenderer *renderer,
       func = _cogl_renderer_get_proc_address (renderer,
                                               full_function_name,
                                               in_core);
-      g_free (full_function_name);
+      free (full_function_name);
 
       if (func == NULL)
         goto error;

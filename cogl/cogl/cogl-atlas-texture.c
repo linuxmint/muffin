@@ -184,7 +184,7 @@ _cogl_atlas_texture_post_reorganize_cb (void *user_data)
             cogl_object_unref (data.textures[i]);
         }
 
-      g_free (data.textures);
+      free (data.textures);
     }
 
   /* Notify any listeners that an atlas has changed */

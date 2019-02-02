@@ -35,7 +35,7 @@ create_texture (TestUtilsTextureFlags flags)
                                           COGL_PIXEL_FORMAT_RGBA_8888_PRE,
                                           TEX_SIZE * 4,
                                           data);
-  g_free (data);
+  free (data);
 
   return tex;
 }

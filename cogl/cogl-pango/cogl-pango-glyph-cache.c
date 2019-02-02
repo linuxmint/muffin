@@ -182,7 +182,7 @@ cogl_pango_glyph_cache_free (CoglPangoGlyphCache *cache)
 
   g_hook_list_clear (&cache->reorganize_callbacks);
 
-  g_free (cache);
+  free (cache);
 }
 
 static void

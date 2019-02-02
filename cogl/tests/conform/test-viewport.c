@@ -40,7 +40,7 @@ assert_region_color (int x,
                   pixel[ALPHA] == alpha);
 #endif
       }
-  g_free (data);
+  free (data);
 }
 
 static void
@@ -216,7 +216,7 @@ on_paint (ClutterActor *actor, void *state)
                                     COGL_PIXEL_FORMAT_ANY, /* internal fmt */
                                     FRAMEBUFFER_WIDTH * 4, /* rowstride */
                                     data);
-  g_free (data);
+  free (data);
   offscreen = cogl_offscreen_new_with_texture (tex);
 
   cogl_push_framebuffer (offscreen);

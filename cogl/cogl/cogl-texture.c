@@ -182,7 +182,7 @@ _cogl_texture_free (CoglTexture *texture)
 {
   _cogl_texture_free_loader (texture);
 
-  g_free (texture);
+  free (texture);
 }
 
 CoglBool
@@ -654,7 +654,7 @@ get_texture_bits_via_copy (CoglTexture *texture,
   else
     ret = FALSE;
 
-  g_free (full_bits);
+  free (full_bits);
 
   return ret;
 }

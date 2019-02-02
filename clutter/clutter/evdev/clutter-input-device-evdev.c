@@ -250,7 +250,7 @@ clutter_input_device_evdev_free_pending_slow_key (gpointer data)
   clutter_event_free (slow_keys_event->event);
   if (slow_keys_event->timer)
     g_source_remove (slow_keys_event->timer);
-  g_free (slow_keys_event);
+  free (slow_keys_event);
 }
 
 static void
@@ -1368,9 +1368,9 @@ _clutter_input_device_evdev_new (ClutterDeviceManager *manager,
 
   libinput_device_set_user_data (libinput_device, device);
   libinput_device_ref (libinput_device);
-  g_free (vendor);
-  g_free (product);
-  g_free (node_path);
+  free (vendor);
+  free (product);
+  free (node_path);
 
   if (libinput_device_get_size (libinput_device, &width, &height) == 0)
     device->device_aspect_ratio = width / height;

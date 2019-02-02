@@ -176,7 +176,7 @@ _cogl_memory_stack_rewind (CoglMemoryStack *stack)
 static void
 _cogl_memory_sub_stack_free (CoglMemorySubStack *sub_stack)
 {
-  g_free (sub_stack->data);
+  free (sub_stack->data);
   g_slice_free (CoglMemorySubStack, sub_stack);
 }
 

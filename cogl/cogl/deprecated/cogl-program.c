@@ -72,10 +72,10 @@ _cogl_program_free (CoglProgram *program)
       CoglProgramUniform *uniform =
         &g_array_index (program->custom_uniforms, CoglProgramUniform, i);
 
-      g_free (uniform->name);
+      free (uniform->name);
 
       if (uniform->value.count > 1)
-        g_free (uniform->value.v.array);
+        free (uniform->value.v.array);
     }
 
   g_array_free (program->custom_uniforms, TRUE);
@@ -373,7 +373,7 @@ get_local_param_index (const char *uniform_name)
 
   _COGL_RETURN_VAL_IF_FAIL (_index >= 0, -1);
 
-  g_free (input);
+  free (input);
 
   return _index;
 }

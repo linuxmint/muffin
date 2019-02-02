@@ -627,7 +627,7 @@ verify_read_pixels (const PaintData *data)
                             data->fb_height * 3 / 4 * stride,
                             0xff0000ff);
 
-  g_free (buf);
+  free (buf);
 }
 
 void
@@ -759,7 +759,7 @@ verify_region (const CoglGLES2Vtable *gles2,
   for (p = buf + width * height * 4; p > buf; p -= 4)
     test_utils_compare_pixel (p - 4, expected_pixel);
 
-  g_free (buf);
+  free (buf);
 }
 
 void

@@ -750,7 +750,7 @@ pango_layout_get_line_after (PangoLayout     *layout,
  * atk_text_get_text_after_offset().
  *
  * Returns: a newly allocated string containing a slice of text
- *     from layout. Free with g_free().
+ *     from layout. Free with free().
  */
 static gchar *
 _gtk_pango_get_text_at (PangoLayout     *layout,
@@ -849,7 +849,7 @@ _gtk_pango_get_text_at (PangoLayout     *layout,
  * atk_text_get_text_before_offset().
  *
  * Returns: a newly allocated string containing a slice of text
- *     from layout. Free with g_free().
+ *     from layout. Free with free().
  */
 static gchar *
 _gtk_pango_get_text_before (PangoLayout     *layout,
@@ -950,7 +950,7 @@ _gtk_pango_get_text_before (PangoLayout     *layout,
  * atk_text_get_text_after_offset().
  *
  * Returns: a newly allocated string containing a slice of text
- *     from layout. Free with g_free().
+ *     from layout. Free with free().
  */
 static gchar *
 _gtk_pango_get_text_after (PangoLayout     *layout,

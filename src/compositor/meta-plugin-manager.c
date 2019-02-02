@@ -82,7 +82,7 @@ meta_plugin_manager_load (const gchar *plugin_name)
   meta_plugin_manager_set_plugin_type (meta_module_get_plugin_type (module));
 
   g_type_module_unuse (G_TYPE_MODULE (module));
-  g_free (path);
+  free (path);
 }
 
 MetaPluginManager *

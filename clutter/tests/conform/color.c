@@ -251,7 +251,7 @@ color_to_string (void)
   str = clutter_color_to_string (&color);
   g_assert_cmpstr (str, ==, "#cccccc22");
 
-  g_free (str);
+  free (str);
 }
 
 static void

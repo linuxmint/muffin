@@ -83,7 +83,7 @@ generate_round_texture (void)
                                     TEXTURE_SIZE * 4,
                                     data);
 
-  g_free (data);
+  free (data);
 
   return tex;
 }

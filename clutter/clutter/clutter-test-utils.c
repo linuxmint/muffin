@@ -220,7 +220,7 @@ clutter_test_add_data_full (const char     *test_path,
 
   g_test_add_data_func_full (test_path, data,
                              clutter_test_func_wrapper,
-                             g_free);
+                             free);
 }
 
 /**
@@ -262,10 +262,10 @@ clutter_test_run (void)
   int res;
 
   g_assert (test_environ != NULL);
-  
+
   res = g_test_run ();
 
-  g_free (test_environ);
+  free (test_environ);
 
   return res;
 }
@@ -389,7 +389,7 @@ clutter_test_check_actor_at_point (ClutterActor        *stage,
   if (press_id != 0)
     g_signal_handler_disconnect (stage, press_id);
 
-  g_free (data);
+  free (data);
 
   return *result == actor;
 }
@@ -460,8 +460,8 @@ clutter_test_check_color_at_point (ClutterActor       *stage,
            buffer[1] == color->green &&
            buffer[2] == color->blue;
 
-  g_free (data->result);
-  g_free (data);
+  free (data->result);
+  free (data);
 
   return retval;
 }

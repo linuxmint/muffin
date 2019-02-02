@@ -37,7 +37,7 @@ test_texture_no_allocate (void)
                                       tex_data,
                                       &error);
 
-  g_free (tex_data);
+  free (tex_data);
 
   /* It's ok if this causes an error, we just don't want it to
    * crash */

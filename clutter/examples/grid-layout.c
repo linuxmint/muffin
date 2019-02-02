@@ -189,7 +189,7 @@ changed_cb (ClutterActor *actor,
                            get_align_name (x_align),
                            get_align_name (y_align));
   clutter_text_set_text (CLUTTER_TEXT (text), label);
-  g_free (label);
+  free (label);
 }
 
 static void

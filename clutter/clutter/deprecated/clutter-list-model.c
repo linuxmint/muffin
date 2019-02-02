@@ -127,9 +127,9 @@ clutter_list_model_iter_get_value (ClutterModelIter *iter,
 
   if (!g_type_is_a (G_VALUE_TYPE (value), G_VALUE_TYPE (iter_value)))
     {
-      if (!g_value_type_compatible (G_VALUE_TYPE (value), 
+      if (!g_value_type_compatible (G_VALUE_TYPE (value),
                                     G_VALUE_TYPE (iter_value)) &&
-          !g_value_type_compatible (G_VALUE_TYPE (iter_value), 
+          !g_value_type_compatible (G_VALUE_TYPE (iter_value),
                                     G_VALUE_TYPE (value)))
         {
           g_warning ("%s: Unable to convert from %s to %s",
@@ -142,7 +142,7 @@ clutter_list_model_iter_get_value (ClutterModelIter *iter,
       if (!g_value_transform (iter_value, &real_value))
         {
           g_warning ("%s: Unable to make conversion from %s to %s",
-                     G_STRLOC, 
+                     G_STRLOC,
                      g_type_name (G_VALUE_TYPE (value)),
                      g_type_name (G_VALUE_TYPE (iter_value)));
           g_value_unset (&real_value);
@@ -150,7 +150,7 @@ clutter_list_model_iter_get_value (ClutterModelIter *iter,
 
       converted = TRUE;
     }
-  
+
   if (converted)
     {
       g_value_copy (&real_value, value);
@@ -180,9 +180,9 @@ clutter_list_model_iter_set_value (ClutterModelIter *iter,
 
   if (!g_type_is_a (G_VALUE_TYPE (value), G_VALUE_TYPE (iter_value)))
     {
-      if (!g_value_type_compatible (G_VALUE_TYPE (value), 
+      if (!g_value_type_compatible (G_VALUE_TYPE (value),
                                     G_VALUE_TYPE (iter_value)) &&
-          !g_value_type_compatible (G_VALUE_TYPE (iter_value), 
+          !g_value_type_compatible (G_VALUE_TYPE (iter_value),
                                     G_VALUE_TYPE (value)))
         {
           g_warning ("%s: Unable to convert from %s to %s\n",
@@ -195,7 +195,7 @@ clutter_list_model_iter_set_value (ClutterModelIter *iter,
       if (!g_value_transform (value, &real_value))
         {
           g_warning ("%s: Unable to make conversion from %s to %s\n",
-                     G_STRLOC, 
+                     G_STRLOC,
                      g_type_name (G_VALUE_TYPE (value)),
                      g_type_name (G_VALUE_TYPE (iter_value)));
           g_value_unset (&real_value);
@@ -203,7 +203,7 @@ clutter_list_model_iter_set_value (ClutterModelIter *iter,
 
       converted = TRUE;
     }
- 
+
   if (converted)
     {
       g_value_copy (&real_value, iter_value);
@@ -248,7 +248,7 @@ clutter_list_model_iter_is_first (ClutterModelIter *iter)
     }
 
   /* This is because the 'begin_iter' is always *before* the last valid
-   * iter, otherwise we'd have endless loops 
+   * iter, otherwise we'd have endless loops
    */
   end = g_sequence_iter_prev (end);
 
@@ -294,7 +294,7 @@ clutter_list_model_iter_is_last (ClutterModelIter *iter)
     }
 
   /* This is because the 'end_iter' is always *after* the last valid iter.
-   * Otherwise we'd have endless loops 
+   * Otherwise we'd have endless loops
    */
   end = g_sequence_iter_next (end);
 
@@ -394,7 +394,7 @@ clutter_list_model_iter_copy (ClutterModelIter *iter)
   ClutterListModelIter *iter_copy;
   ClutterModel *model;
   guint row;
- 
+
   iter_default = CLUTTER_LIST_MODEL_ITER (iter);
 
   model = clutter_model_iter_get_model (iter);
@@ -550,7 +550,7 @@ clutter_list_model_remove_row (ClutterModel *model,
       if (clutter_model_filter_row (model, pos))
         {
           if (pos == row)
-            {  
+            {
               ClutterModelIter *iter;
 
               iter = g_object_new (CLUTTER_TYPE_LIST_MODEL_ITER,
@@ -648,7 +648,7 @@ clutter_list_model_row_removed (ClutterModel     *model,
   for (i = 0; i < n_columns; i++)
     g_value_unset (&values[i]);
 
-  g_free (values);
+  free (values);
 
   g_sequence_remove (iter_default->seq_iter);
   iter_default->seq_iter = NULL;
@@ -672,7 +672,7 @@ clutter_list_model_finalize (GObject *gobject)
       for (i = 0; i < n_columns; i++)
         g_value_unset (&values[i]);
 
-      g_free (values);
+      free (values);
 
       iter = g_sequence_iter_next (iter);
     }
@@ -729,11 +729,11 @@ clutter_list_model_init (ClutterListModel *model)
  * @n_columns: number of columns in the model
  * @...: @n_columns number of #GType and string pairs
  *
- * Creates a new default model with @n_columns columns with the types 
+ * Creates a new default model with @n_columns columns with the types
  * and names passed in.
  *
  * For example:
- * 
+ *
  * <informalexample><programlisting>
  * model = clutter_list_model_new (3,
  *                                 G_TYPE_INT,      "Score",
@@ -770,7 +770,7 @@ clutter_list_model_new (guint n_columns,
   va_start (args, n_columns);
 
   for (i = 0; i < n_columns; i++)
-    { 
+    {
       GType type = va_arg (args, GType);
       const gchar *name = va_arg (args, gchar*);
 

@@ -43,7 +43,7 @@ assert_region_color (int x,
                   pixel[BLUE] == blue);
 #endif
       }
-  g_free (data);
+  free (data);
 }
 
 /* Creates a texture divided into 4 quads with colors arranged as follows:
@@ -93,7 +93,7 @@ make_texture (guchar ref)
                                     QUAD_WIDTH * 8,
                                     tex_data);
 
-  g_free (tex_data);
+  free (tex_data);
 
   return tex;
 }

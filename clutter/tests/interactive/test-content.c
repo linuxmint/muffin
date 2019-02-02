@@ -209,8 +209,8 @@ test_content_main (int argc, char *argv[])
       name = g_strconcat ("Box <", color, ">", NULL);
       clutter_actor_set_name (box, name);
 
-      g_free (name);
-      g_free (color);
+      free (name);
+      free (color);
 
       clutter_actor_set_background_color (box, &bg_color);
       clutter_actor_set_content (box, content);

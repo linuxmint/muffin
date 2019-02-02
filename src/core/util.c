@@ -2,10 +2,10 @@
 
 /* Muffin utilities */
 
-/* 
+/*
  * Copyright (C) 2001 Havoc Pennington
  * Copyright (C) 2005 Elijah Newren
- * 
+ *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
  * published by the Free Software Foundation; either version 2 of the
@@ -15,7 +15,7 @@
  * WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street - Suite 500, Boston, MA
@@ -70,11 +70,11 @@ meta_print_backtrace (void)
   int bt_size;
   int i;
   char **syms;
-  
+
   bt_size = backtrace (bt, 500);
 
   syms = backtrace_symbols (bt, bt_size);
-  
+
   i = 0;
   while (i < bt_size)
     {
@@ -109,7 +109,7 @@ ensure_logfile (void)
       char *tmpl;
       int fd;
       GError *err;
-      
+
       tmpl = g_strdup_printf ("muffin-%d-debug-log-XXXXXX",
                               (int) getpid ());
 
@@ -118,8 +118,8 @@ ensure_logfile (void)
                             &filename,
                             &err);
 
-      g_free (tmpl);
-      
+      free (tmpl);
+
       if (err != NULL)
         {
           meta_warning (_("Failed to open debug log: %s\n"),
@@ -127,9 +127,9 @@ ensure_logfile (void)
           g_error_free (err);
           return;
         }
-      
+
       logfile = fdopen (fd, "w");
-      
+
       if (logfile == NULL)
         {
           meta_warning (_("Failed to fdopen() log file %s: %s\n"),
@@ -140,8 +140,8 @@ ensure_logfile (void)
         {
           g_printerr (_("Opened log file %s\n"), filename);
         }
-      
-      g_free (filename);
+
+      free (filename);
     }
 }
 #endif
@@ -158,7 +158,7 @@ meta_set_verbose (gboolean setting)
 #ifndef WITH_VERBOSE_MODE
   if (setting)
     meta_fatal (_("Muffin was compiled without support for verbose mode\n"));
-#else 
+#else
   if (setting)
     ensure_logfile ();
 #endif
@@ -255,7 +255,7 @@ utf8_fputs (const char *str,
 {
   char *l;
   int retval;
-  
+
   l = g_locale_from_utf8 (str, -1, NULL, NULL, NULL);
 
   if (l == NULL)
@@ -263,7 +263,7 @@ utf8_fputs (const char *str,
   else
     retval = fputs (l, f);
 
-  g_free (l);
+  free (l);
 
   return retval;
 }
@@ -276,7 +276,7 @@ void
 meta_free_gslist_and_elements (GSList *list_to_deep_free)
 {
   g_slist_foreach (list_to_deep_free,
-                   (void (*)(gpointer,gpointer))&g_free, /* ew, for ugly */
+                   (void (*)(gpointer,gpointer))&free, /* ew, for ugly */
                    NULL);
   g_slist_free (list_to_deep_free);
 }
@@ -288,25 +288,25 @@ meta_debug_spew_real (const char *format, ...)
   va_list args;
   gchar *str;
   FILE *out;
-  
+
   g_return_if_fail (format != NULL);
 
   if (!is_debugging)
     return;
-  
+
   va_start (args, format);
   str = g_strdup_vprintf (format, args);
   va_end (args);
 
   out = logfile ? logfile : stderr;
-  
+
   if (no_prefix == 0)
     utf8_fputs ("muffin: ", out);
   utf8_fputs (str, out);
 
   fflush (out);
-  
-  g_free (str);
+
+  free (str);
 }
 #endif /* WITH_VERBOSE_MODE */
 
@@ -408,12 +408,12 @@ meta_topic_real_valist (MetaDebugTopic topic,
       ++sync_count;
       fprintf (out, "%d: ", sync_count);
     }
-  
+
   utf8_fputs (str, out);
-  
+
   fflush (out);
-  
-  g_free (str);
+
+  free (str);
 }
 
 void
@@ -437,7 +437,7 @@ meta_bug (const char *format, ...)
   FILE *out;
 
   g_return_if_fail (format != NULL);
-  
+
   va_start (args, format);
   str = g_strdup_vprintf (format, args);
   va_end (args);
@@ -453,11 +453,11 @@ meta_bug (const char *format, ...)
   utf8_fputs (str, out);
 
   fflush (out);
-  
-  g_free (str);
+
+  free (str);
 
   meta_print_backtrace ();
-  
+
   /* stop us in a debugger */
   abort ();
 }
@@ -468,9 +468,9 @@ meta_warning (const char *format, ...)
   va_list args;
   gchar *str;
   FILE *out;
-  
+
   g_return_if_fail (format != NULL);
-  
+
   va_start (args, format);
   str = g_strdup_vprintf (format, args);
   va_end (args);
@@ -486,8 +486,8 @@ meta_warning (const char *format, ...)
   utf8_fputs (str, out);
 
   fflush (out);
-  
-  g_free (str);
+
+  free (str);
 }
 
 void
@@ -496,9 +496,9 @@ meta_fatal (const char *format, ...)
   va_list args;
   gchar *str;
   FILE *out;
-  
+
   g_return_if_fail (format != NULL);
-  
+
   va_start (args, format);
   str = g_strdup_vprintf (format, args);
   va_end (args);
@@ -514,8 +514,8 @@ meta_fatal (const char *format, ...)
   utf8_fputs (str, out);
 
   fflush (out);
-  
-  g_free (str);
+
+  free (str);
 
   meta_exit (META_EXIT_ERROR);
 }
@@ -537,7 +537,7 @@ meta_pop_no_msg_prefix (void)
 void
 meta_exit (MetaExitCode code)
 {
-  
+
   exit (code);
 }
 
@@ -695,7 +695,7 @@ meta_show_dialog (const char *type,
     {
       gchar *env = g_strdup_printf("%d", transient_for);
       setenv ("WINDOWID", env, 1);
-      g_free (env);
+      free (env);
     }
 
   g_spawn_async (

@@ -481,7 +481,7 @@ _cogl_bitmap_convert_into_bitmap (CoglBitmap *src_bmp,
   _cogl_bitmap_unmap (src_bmp);
   _cogl_bitmap_unmap (dst_bmp);
 
-  g_free (tmp_row);
+  free (tmp_row);
 
   return TRUE;
 }
@@ -674,7 +674,7 @@ _cogl_bitmap_unpremult (CoglBitmap *bmp,
         }
     }
 
-  g_free (tmp_row);
+  free (tmp_row);
 
   _cogl_bitmap_unmap (bmp);
 
@@ -738,7 +738,7 @@ _cogl_bitmap_premult (CoglBitmap *bmp,
         }
     }
 
-  g_free (tmp_row);
+  free (tmp_row);
 
   _cogl_bitmap_unmap (bmp);
 

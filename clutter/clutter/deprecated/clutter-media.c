@@ -295,7 +295,7 @@ clutter_media_set_uri (ClutterMedia *media,
  *
  * Retrieves the URI from @media.
  *
- * Return value: the URI of the media stream. Use g_free()
+ * Return value: the URI of the media stream. Use free()
  *   to free the returned string
  *
  * Since: 0.2
@@ -319,8 +319,8 @@ clutter_media_get_uri (ClutterMedia *media)
  * @media: a #ClutterMedia
  * @playing: %TRUE to start playing
  *
- * Starts or stops playing of @media. 
- 
+ * Starts or stops playing of @media.
+
  * The implementation might be asynchronous, so the way to know whether
  * the actual playing state of the @media is to use the #GObject::notify
  * signal on the #ClutterMedia:playing property and then retrieve the
@@ -435,7 +435,7 @@ clutter_media_set_subtitle_uri (ClutterMedia *media,
  *
  * Retrieves the URI of the subtitle file in use.
  *
- * Return value: the URI of the subtitle file. Use g_free()
+ * Return value: the URI of the subtitle file. Use free()
  *   to free the returned string
  *
  * Since: 1.2
@@ -487,7 +487,7 @@ clutter_media_set_subtitle_font_name (ClutterMedia *media,
  *
  * Retrieves the font name currently used.
  *
- * Return value: a string containing the font name. Use g_free()
+ * Return value: a string containing the font name. Use free()
  *   to free the returned string
  *
  * Since: 1.2
@@ -648,7 +648,7 @@ clutter_media_set_filename (ClutterMedia *media,
 
       abs_path = g_build_filename (g_get_current_dir (), filename, NULL);
       uri = g_filename_to_uri (abs_path, NULL, &uri_error);
-      g_free (abs_path);
+      free (abs_path);
     }
   else
     uri = g_filename_to_uri (filename, NULL, &uri_error);
@@ -662,5 +662,5 @@ clutter_media_set_filename (ClutterMedia *media,
 
   clutter_media_set_uri (media, uri);
 
-  g_free (uri);
+  free (uri);
 }

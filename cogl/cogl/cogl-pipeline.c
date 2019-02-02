@@ -486,7 +486,7 @@ _cogl_pipeline_free (CoglPipeline *pipeline)
 
       for (i = 0; i < n_overrides; i++)
         _cogl_boxed_value_destroy (uniforms_state->override_values + i);
-      g_free (uniforms_state->override_values);
+      free (uniforms_state->override_values);
 
       _cogl_bitmask_destroy (&uniforms_state->override_mask);
       _cogl_bitmask_destroy (&uniforms_state->changed_mask);

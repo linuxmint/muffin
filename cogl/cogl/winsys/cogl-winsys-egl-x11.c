@@ -791,7 +791,7 @@ _cogl_winsys_texture_pixmap_x11_create (CoglTexturePixmapX11 *tex_pixmap)
                             attribs);
   if (egl_tex_pixmap->image == EGL_NO_IMAGE_KHR)
     {
-      g_free (egl_tex_pixmap);
+      free (egl_tex_pixmap);
       return FALSE;
     }
 
@@ -833,7 +833,7 @@ _cogl_winsys_texture_pixmap_x11_free (CoglTexturePixmapX11 *tex_pixmap)
     _cogl_egl_destroy_image (ctx, egl_tex_pixmap->image);
 
   tex_pixmap->winsys = NULL;
-  g_free (egl_tex_pixmap);
+  free (egl_tex_pixmap);
 }
 
 static CoglBool

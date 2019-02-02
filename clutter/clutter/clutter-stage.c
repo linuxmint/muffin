@@ -1433,8 +1433,8 @@ read_pixels_to_file (char *filename_stem,
   cairo_surface_write_to_png (surface, filename);
   cairo_surface_destroy (surface);
 
-  g_free (data);
-  g_free (filename);
+  free (data);
+  free (filename);
 
   read_count++;
 }
@@ -1551,7 +1551,7 @@ _clutter_stage_do_pick_on_view (ClutterStage     *stage,
 
       read_pixels_to_file (file_name, 0, 0, fb_width, fb_height);
 
-      g_free (file_name);
+      free (file_name);
     }
 
   /* Restore whether GL_DITHER was enabled */
@@ -1888,7 +1888,7 @@ clutter_stage_finalize (GObject *object)
   g_queue_foreach (priv->event_queue, (GFunc) clutter_event_free, NULL);
   g_queue_free (priv->event_queue);
 
-  g_free (priv->title);
+  free (priv->title);
 
   g_array_free (priv->paint_volume_stack, TRUE);
 
@@ -2933,7 +2933,7 @@ clutter_stage_hide_cursor (ClutterStage *stage)
  * and not guaranteed to hold any sensible value.
  *
  * Return value: (transfer full) (array): a pointer to newly allocated memory with the buffer
- *   or %NULL if the read failed. Use g_free() on the returned data
+ *   or %NULL if the read failed. Use free() on the returned data
  *   to release the resources it has allocated.
  */
 guchar *
@@ -3124,7 +3124,7 @@ clutter_stage_set_title (ClutterStage       *stage,
 
   priv = stage->priv;
 
-  g_free (priv->title);
+  free (priv->title);
   priv->title = g_strdup (title);
 
   impl = CLUTTER_STAGE_WINDOW (priv->impl);

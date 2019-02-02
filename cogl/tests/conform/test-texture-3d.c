@@ -64,7 +64,7 @@ create_texture_3d (CoglContext *context)
       g_assert_not_reached ();
     }
 
-  g_free (data);
+  free (data);
 
   return tex;
 }
@@ -157,7 +157,7 @@ draw_frame (TestState *state)
 
   cogl_primitive_draw (primitive, test_fb, pipeline);
 
-  g_free (verts);
+  free (verts);
 
   cogl_object_unref (primitive);
   cogl_object_unref (attributes[0]);

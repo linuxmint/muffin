@@ -208,7 +208,7 @@ clutter_config_read_from_key_file (GKeyFile *keyfile)
   else
     clutter_try_set_windowing_backend (str_value);
 
-  g_free (str_value);
+  free (str_value);
 
   str_value =
     g_key_file_get_string (keyfile, ENVIRONMENT_GROUP,
@@ -219,7 +219,7 @@ clutter_config_read_from_key_file (GKeyFile *keyfile)
   else
     clutter_set_allowed_drivers (str_value);
 
-  g_free (str_value);
+  free (str_value);
 
   bool_value =
     g_key_file_get_boolean (keyfile, ENVIRONMENT_GROUP,
@@ -296,7 +296,7 @@ clutter_config_read_from_key_file (GKeyFile *keyfile)
         clutter_text_direction = CLUTTER_TEXT_DIRECTION_LTR;
     }
 
-  g_free (str_value);
+  free (str_value);
 }
 
 #ifdef CLUTTER_ENABLE_DEBUG
@@ -322,7 +322,7 @@ clutter_debug_read_from_key_file (GKeyFile *keyfile)
   else
     g_clear_error (&key_error);
 
-  g_free (value);
+  free (value);
 
   value = g_key_file_get_value (keyfile, DEBUG_GROUP,
                                 "PaintDebug",
@@ -337,7 +337,7 @@ clutter_debug_read_from_key_file (GKeyFile *keyfile)
   else
     g_clear_error (&key_error);
 
-  g_free (value);
+  free (value);
 
   value = g_key_file_get_value (keyfile, DEBUG_GROUP,
                                 "PickDebug",
@@ -352,7 +352,7 @@ clutter_debug_read_from_key_file (GKeyFile *keyfile)
   else
     g_clear_error (&key_error);
 
-  g_free (value);
+  free (value);
 }
 #endif
 
@@ -397,7 +397,7 @@ clutter_config_read (void)
   if (g_file_test (config_path, G_FILE_TEST_EXISTS))
     clutter_config_read_from_file (config_path);
 
-  g_free (config_path);
+  free (config_path);
 
   config_path = g_build_filename (g_get_user_config_dir (),
                                   "clutter-1.0",
@@ -406,7 +406,7 @@ clutter_config_read (void)
   if (g_file_test (config_path, G_FILE_TEST_EXISTS))
     clutter_config_read_from_file (config_path);
 
-  g_free (config_path);
+  free (config_path);
 }
 
 /**
@@ -954,7 +954,7 @@ _clutter_threads_dispatch_free (gpointer data)
  *   return g_idle_add_full (G_PRIORITY_DEFAULT_IDLE,
  *                           idle_safe_callback,
  *                           closure,
- *                           g_free)
+ *                           free)
  * }
  *]|
  *
@@ -978,7 +978,7 @@ _clutter_threads_dispatch_free (gpointer data)
  *                           closure->text);
  *
  *   g_object_unref (closure->label);
- *   g_free (closure);
+ *   free (closure);
  *
  *   return FALSE;
  * }
@@ -3701,11 +3701,11 @@ _clutter_debug_messagev (const char *format,
     }
 
   fmt = g_strconcat (stamp, ":", format, NULL);
-  g_free (stamp);
+  free (stamp);
 
   g_logv (G_LOG_DOMAIN, G_LOG_LEVEL_MESSAGE, fmt, var_args);
 
-  g_free (fmt);
+  free (fmt);
 }
 
 void
@@ -3746,5 +3746,5 @@ _clutter_diagnostic_message (const char *format, ...)
   g_logv (G_LOG_DOMAIN, G_LOG_LEVEL_MESSAGE, fmt, args);
   va_end (args);
 
-  g_free (fmt);
+  free (fmt);
 }

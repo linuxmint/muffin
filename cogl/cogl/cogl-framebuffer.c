@@ -728,7 +728,7 @@ _cogl_offscreen_free (CoglOffscreen *offscreen)
   if (offscreen->depth_texture != NULL)
     cogl_object_unref (offscreen->depth_texture);
 
-  g_free (offscreen);
+  free (offscreen);
 }
 
 CoglBool
@@ -2082,7 +2082,7 @@ get_wire_line_indices (CoglContext *ctx,
                           line_indices,
                           *n_indices);
 
-  g_free (line_indices);
+  free (line_indices);
 
   return ret;
 }

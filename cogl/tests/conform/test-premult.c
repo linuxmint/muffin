@@ -66,7 +66,7 @@ make_texture (uint32_t color,
     cogl_texture_set_premultiplied (tex_2d, FALSE);
 
   cogl_object_unref (bmp);
-  g_free (tex_data);
+  free (tex_data);
 
   return tex_2d;
 }

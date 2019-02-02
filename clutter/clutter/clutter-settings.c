@@ -274,9 +274,9 @@ clutter_settings_finalize (GObject *gobject)
 {
   ClutterSettings *self = CLUTTER_SETTINGS (gobject);
 
-  g_free (self->font_name);
-  g_free (self->xft_hint_style);
-  g_free (self->xft_rgba);
+  free (self->font_name);
+  free (self->xft_hint_style);
+  free (self->xft_rgba);
 
   G_OBJECT_CLASS (clutter_settings_parent_class)->finalize (gobject);
 }
@@ -308,7 +308,7 @@ clutter_settings_set_property (GObject      *gobject,
       break;
 
     case PROP_FONT_NAME:
-      g_free (self->font_name);
+      free (self->font_name);
       self->font_name = g_value_dup_string (value);
       settings_update_font_name (self);
       break;
@@ -329,13 +329,13 @@ clutter_settings_set_property (GObject      *gobject,
       break;
 
     case PROP_FONT_HINT_STYLE:
-      g_free (self->xft_hint_style);
+      free (self->xft_hint_style);
       self->xft_hint_style = g_value_dup_string (value);
       settings_update_font_options (self);
       break;
 
     case PROP_FONT_RGBA:
-      g_free (self->xft_rgba);
+      free (self->xft_rgba);
       self->xft_rgba = g_value_dup_string (value);
       settings_update_font_options (self);
       break;
@@ -844,5 +844,5 @@ _clutter_settings_read_from_key_file (ClutterSettings *settings,
       g_value_unset (&value);
     }
 
-  g_free (pspecs);
+  free (pspecs);
 }

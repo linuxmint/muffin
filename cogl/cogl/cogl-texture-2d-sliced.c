@@ -389,7 +389,7 @@ _cogl_texture_2d_sliced_upload_bitmap (CoglTexture2DSliced *tex_2ds,
                                                      error))
             {
               if (waste_buf)
-                g_free (waste_buf);
+                free (waste_buf);
               return FALSE;
             }
 
@@ -419,14 +419,14 @@ _cogl_texture_2d_sliced_upload_bitmap (CoglTexture2DSliced *tex_2ds,
                                                   error)) /* dst_y */
             {
               if (waste_buf)
-                g_free (waste_buf);
+                free (waste_buf);
               return FALSE;
             }
         }
     }
 
   if (waste_buf)
-    g_free (waste_buf);
+    free (waste_buf);
 
   return TRUE;
 }
@@ -523,7 +523,7 @@ _cogl_texture_2d_sliced_upload_subregion (CoglTexture2DSliced *tex_2ds,
                                                      error))
             {
               if (waste_buf)
-                g_free (waste_buf);
+                free (waste_buf);
               return FALSE;
             }
 
@@ -538,14 +538,14 @@ _cogl_texture_2d_sliced_upload_subregion (CoglTexture2DSliced *tex_2ds,
                                                   error))
             {
               if (waste_buf)
-                g_free (waste_buf);
+                free (waste_buf);
               return FALSE;
             }
         }
     }
 
   if (waste_buf)
-    g_free (waste_buf);
+    free (waste_buf);
 
   return TRUE;
 }

@@ -98,7 +98,7 @@ on_button_press (ClutterActor       *actor,
                               n_easing_modes);
 
       clutter_text_set_text (CLUTTER_TEXT (easing_mode_label), text);
-      g_free (text);
+      free (text);
     }
   else if (event->button == CLUTTER_BUTTON_PRIMARY)
     {
@@ -250,7 +250,7 @@ test_easing_main (int argc, char *argv[])
   clutter_actor_add_constraint (label, clutter_align_constraint_new (stage, CLUTTER_ALIGN_Y_AXIS, 0.95));
   easing_mode_label = label;
 
-  g_free (text);
+  free (text);
 
   g_signal_connect (stage,
                     "button-press-event", G_CALLBACK (on_button_press),

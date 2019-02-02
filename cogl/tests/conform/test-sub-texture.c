@@ -89,7 +89,7 @@ create_test_texture (TestState *state)
                                        256 * 4,
                                        data,
                                        NULL);
-  g_free (data);
+  free (data);
 
   return tex;
 }
@@ -225,7 +225,7 @@ validate_result (TestState *state)
         g_assert (*(p++) == y + 20);
         p += 2;
       }
-  g_free (texture_data);
+  free (texture_data);
 
   /* Try reading back the texture data */
   sub_texture = cogl_sub_texture_new (test_ctx,
@@ -253,7 +253,7 @@ validate_result (TestState *state)
         g_assert (color == reference);
         p += 4;
       }
-  g_free (texture_data);
+  free (texture_data);
   cogl_object_unref (sub_texture);
 
   /* Create a 256x256 test texture */
@@ -268,7 +268,7 @@ validate_result (TestState *state)
                            0, 0, 32, 32, 64, 64, 256, 256,
                            COGL_PIXEL_FORMAT_RGBA_8888_PRE, 256 * 4,
                            texture_data);
-  g_free (texture_data);
+  free (texture_data);
   cogl_object_unref (sub_texture);
   /* Get the texture data */
   p = texture_data = g_malloc (256 * 256 * 4);
@@ -296,7 +296,7 @@ validate_result (TestState *state)
             g_assert ((*p++) == 255);
           }
       }
-  g_free (texture_data);
+  free (texture_data);
   cogl_object_unref (test_tex);
 }
 
