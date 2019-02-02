@@ -358,7 +358,7 @@ meta_sync_new (Display *xdisplay)
   MetaSync *self;
   XSyncAlarmAttributes attrs;
 
-  self = g_malloc0 (sizeof (MetaSync));
+  self = calloc (1, sizeof (MetaSync));
 
   self->xdisplay = xdisplay;
 

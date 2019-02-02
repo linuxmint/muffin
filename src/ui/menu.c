@@ -233,7 +233,7 @@ get_workspace_name_with_accel (Display *display,
        * Assume the worst case, that every character is a _.  We also
        * provide memory for " (_#)"
        */
-      new_name = g_malloc0 (strlen (name) * 2 + 6 + 1);
+      new_name = calloc (1, strlen (name) * 2 + 6 + 1);
 
       /*
        * Now iterate down the strings, adding '_' to escape as we go

@@ -189,7 +189,7 @@ cogl_context_new (CoglDisplay *display,
 #endif
 
   /* Allocate context memory */
-  context = g_malloc0 (sizeof (CoglContext));
+  context = calloc (1, sizeof (CoglContext));
 
   /* Convert the context into an object immediately in case any of the
      code below wants to verify that the context pointer is a valid

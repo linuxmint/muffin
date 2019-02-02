@@ -296,7 +296,7 @@ _cogl_atlas_create_texture (CoglAtlas *atlas,
       int bpp = _cogl_pixel_format_get_bytes_per_pixel (atlas->texture_format);
 
       /* Create a buffer of zeroes to initially clear the texture */
-      clear_data = g_malloc0 (width * height * bpp);
+      clear_data = calloc (1, width * height * bpp);
       clear_bmp = cogl_bitmap_new_for_data (ctx,
                                             width,
                                             height,

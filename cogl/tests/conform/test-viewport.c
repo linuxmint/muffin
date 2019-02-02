@@ -24,7 +24,7 @@ assert_region_color (int x,
                      uint8_t blue,
                      uint8_t alpha)
 {
-  uint8_t *data = g_malloc0 (width * height * 4);
+  uint8_t *data = calloc (1, width * height * 4);
   cogl_read_pixels (x, y, width, height,
                     COGL_READ_PIXELS_COLOR_BUFFER,
                     COGL_PIXEL_FORMAT_RGBA_8888_PRE,

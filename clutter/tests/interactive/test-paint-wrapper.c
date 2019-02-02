@@ -335,7 +335,7 @@ test_paint_wrapper_main (int argc, char *argv[])
 	clutter_behaviour_apply (oh->scaler_2, oh->hand[i]);
     }
 
-  oh->paint_guards = g_malloc0 (sizeof (gboolean) * n_hands);
+  oh->paint_guards = calloc (1, sizeof (gboolean) * n_hands);
 
   /* Add the group to the stage */
   clutter_container_add_actor (CLUTTER_CONTAINER (stage),

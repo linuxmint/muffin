@@ -2992,7 +2992,7 @@ clutter_stage_read_pixels (ClutterStage *stage,
   cogl_push_framebuffer (framebuffer);
   clutter_stage_do_paint_view (stage, view, &clip_rect);
 
-  pixels = g_malloc0 (clip_rect.width * clip_rect.height * 4);
+  pixels = calloc (1, clip_rect.width * clip_rect.height * 4);
   cogl_framebuffer_read_pixels (framebuffer,
                                 clip_rect.x, clip_rect.y,
                                 clip_rect.width, clip_rect.height,

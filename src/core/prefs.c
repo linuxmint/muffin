@@ -2060,7 +2060,7 @@ update_binding (MetaKeyPref *binding,
           continue;
         }
 
-      combo = g_malloc0 (sizeof (MetaKeyCombo));
+      combo = calloc (1, sizeof (MetaKeyCombo));
       combo->keysym = keysym;
       combo->keycode = keycode;
       combo->modifiers = mods;

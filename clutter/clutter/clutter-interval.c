@@ -578,7 +578,7 @@ clutter_interval_init (ClutterInterval *self)
   self->priv = clutter_interval_get_instance_private (self);
 
   self->priv->value_type = G_TYPE_INVALID;
-  self->priv->values = g_malloc0 (sizeof (GValue) * N_VALUES);
+  self->priv->values = calloc (1, sizeof (GValue) * N_VALUES);
 }
 
 static inline void

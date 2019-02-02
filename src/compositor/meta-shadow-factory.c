@@ -726,7 +726,7 @@ make_shadow (MetaShadow     *shadow,
   if (buffer_width < buffer_height && buffer_width > (3 * buffer_height) / 4)
     buffer_width = buffer_height;
 
-  buffer = g_malloc0 (buffer_width * buffer_height);
+  buffer = calloc (1, buffer_width * buffer_height);
 
   /* Blurring with multiple box-blur passes is fast, but (especially for
    * large shadow sizes) we can improve efficiency by restricting the blur

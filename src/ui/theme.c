@@ -1142,7 +1142,7 @@ meta_color_spec_new (MetaColorSpecType type)
       break;
     }
 
-  spec = g_malloc0 (size);
+  spec = calloc (1, size);
 
   spec->type = type;
 
@@ -2984,7 +2984,7 @@ meta_draw_op_new (MetaDrawType type)
       break;
     }
 
-  op = g_malloc0 (size);
+  op = calloc (1, size);
 
   op->type = type;
 

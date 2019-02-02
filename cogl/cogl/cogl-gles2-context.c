@@ -1581,7 +1581,7 @@ cogl_gles2_context_new (CoglContext *ctx, CoglError **error)
       return NULL;
     }
 
-  gles2_ctx = g_malloc0 (sizeof (CoglGLES2Context));
+  gles2_ctx = calloc (1, sizeof (CoglGLES2Context));
 
   gles2_ctx->context = ctx;
 
@@ -1602,7 +1602,7 @@ cogl_gles2_context_new (CoglContext *ctx, CoglError **error)
   gles2_ctx->front_face = GL_CCW;
   gles2_ctx->pack_alignment = 4;
 
-  gles2_ctx->vtable = g_malloc0 (sizeof (CoglGLES2Vtable));
+  gles2_ctx->vtable = calloc (1, sizeof (CoglGLES2Vtable));
 #define COGL_EXT_BEGIN(name, \
                        min_gl_major, min_gl_minor, \
                        gles_availability, \

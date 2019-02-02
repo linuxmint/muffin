@@ -68,7 +68,7 @@ on_paint (ClutterActor *actor, void *state)
   cogl_set_source_color4ub (0xff, 0xff, 0xff, 0xff);
   cogl_rectangle (0, 0, 1, -1);
 
-  pixels = g_malloc0 (FRAMEBUFFER_WIDTH * 4 * FRAMEBUFFER_HEIGHT);
+  pixels = calloc (1, FRAMEBUFFER_WIDTH * 4 * FRAMEBUFFER_HEIGHT);
   cogl_read_pixels (0, 0, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT,
                     COGL_READ_PIXELS_COLOR_BUFFER,
                     COGL_PIXEL_FORMAT_RGBA_8888_PRE,
@@ -89,7 +89,7 @@ on_paint (ClutterActor *actor, void *state)
   cogl_set_source_texture (tex);
   cogl_rectangle (-1, 1, 1, -1);
 
-  pixels = g_malloc0 (FRAMEBUFFER_WIDTH * 4 * FRAMEBUFFER_HEIGHT);
+  pixels = calloc (1, FRAMEBUFFER_WIDTH * 4 * FRAMEBUFFER_HEIGHT);
   cogl_read_pixels (0, 0, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT,
                     COGL_READ_PIXELS_COLOR_BUFFER,
                     COGL_PIXEL_FORMAT_RGBA_8888_PRE,
@@ -106,7 +106,7 @@ on_paint (ClutterActor *actor, void *state)
   cogl_set_source_texture (tex);
   cogl_rectangle (-1, 1, 1, -1);
 
-  pixelsc = g_malloc0 (FRAMEBUFFER_WIDTH * 3 * FRAMEBUFFER_HEIGHT);
+  pixelsc = calloc (1, FRAMEBUFFER_WIDTH * 3 * FRAMEBUFFER_HEIGHT);
   cogl_read_pixels (0, 0, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT,
                     COGL_READ_PIXELS_COLOR_BUFFER,
                     COGL_PIXEL_FORMAT_BGR_888,

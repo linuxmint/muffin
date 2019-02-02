@@ -268,10 +268,10 @@ init_quad_mesh (TestState *state)
    * are using degenerate triangles at the edges to link to the next row)
    */
   state->quad_mesh_verts =
-    g_malloc0 (sizeof (float) * 3 * (MESH_WIDTH + 1) * (MESH_HEIGHT + 1));
+    calloc (1, sizeof (float) * 3 * (MESH_WIDTH + 1) * (MESH_HEIGHT + 1));
 
   state->quad_mesh_colors =
-    g_malloc0 (sizeof (guint8) * 4 * (MESH_WIDTH + 1) * (MESH_HEIGHT + 1));
+    calloc (1, sizeof (guint8) * 4 * (MESH_WIDTH + 1) * (MESH_HEIGHT + 1));
 
   vert = state->quad_mesh_verts;
   color = state->quad_mesh_colors;
