@@ -28,6 +28,7 @@
 #error "Only <clutter/clutter.h> can be included directly."
 #endif
 
+#include <stdlib.h>
 #include <cairo.h>
 #include <cogl/cogl.h>
 #include <clutter/clutter-macros.h>
