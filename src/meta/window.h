@@ -74,6 +74,7 @@ gboolean meta_window_appears_focused (MetaWindow *window);
 gboolean meta_window_is_shaded (MetaWindow *window);
 gboolean meta_window_is_override_redirect (MetaWindow *window);
 gboolean meta_window_is_skip_taskbar (MetaWindow *window);
+gboolean meta_window_is_interesting (MetaWindow *window);
 MetaRectangle *meta_window_get_rect (MetaWindow *window);
 void meta_window_get_input_rect (const MetaWindow *window, MetaRectangle *rect);
 void meta_window_get_outer_rect (const MetaWindow *window, MetaRectangle *rect);
@@ -183,6 +184,15 @@ MetaFrameType meta_window_get_frame_type (MetaWindow *window);
 cairo_region_t *meta_window_get_frame_bounds (MetaWindow *window);
 
 MetaWindow *meta_window_get_tile_match (MetaWindow *window);
+
+gboolean meta_window_can_maximize (MetaWindow *window);
+gboolean meta_window_can_minimize (MetaWindow *window);
+gboolean meta_window_can_shade (MetaWindow *window);
+gboolean meta_window_can_close (MetaWindow *window);
+gboolean meta_window_is_always_on_all_workspaces (MetaWindow *window);
+gboolean meta_window_is_always_on_top (MetaWindow *window);
+gboolean meta_window_can_move (MetaWindow *window);
+gboolean meta_window_can_resize (MetaWindow *window);
 
 gboolean meta_window_can_tile (MetaWindow *window, MetaTileMode mode);
 gboolean meta_window_tile (MetaWindow *window, MetaTileMode mode, gboolean snap);

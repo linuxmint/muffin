@@ -2328,15 +2328,12 @@ ancestor_is_minimized (MetaWindow *window)
 gboolean
 meta_window_showing_on_its_workspace (MetaWindow *window)
 {
-  gboolean showing;
   gboolean is_desktop_or_dock;
   MetaWorkspace* workspace_of_window;
 
-  showing = TRUE;
-
   /* 1. See if we're minimized */
   if (window->minimized)
-    showing = FALSE;
+    return FALSE;
 
   /* 2. See if we're in "show desktop" mode */
   is_desktop_or_dock = FALSE;
@@ -2353,27 +2350,19 @@ meta_window_showing_on_its_workspace (MetaWindow *window)
   else /* This only seems to be needed for startup */
     workspace_of_window = NULL;
 
-  if (showing &&
-      workspace_of_window && workspace_of_window->showing_desktop &&
+  if (workspace_of_window && workspace_of_window->showing_desktop &&
       !is_desktop_or_dock)
-    {
-      meta_verbose ("We're showing the desktop on the workspace(s) that window %s is on\n",
-                    window->desc);
-      showing = FALSE;
-    }
+    return FALSE;
 
   /* 3. See if an ancestor is minimized (note that
    *    ancestor's "mapped" field may not be up to date
    *    since it's being computed in this same idle queue)
    */
 
-  if (showing)
-    {
-      if (ancestor_is_minimized (window))
-        showing = FALSE;
-    }
+  if (ancestor_is_minimized (window))
+    return FALSE;
 
-  return showing;
+  return TRUE;
 }
 
 LOCAL_SYMBOL gboolean
@@ -11452,6 +11441,45 @@ meta_window_is_skip_taskbar (MetaWindow *window)
   return window->skip_taskbar;
 }
 
+gboolean
+meta_window_is_interesting (MetaWindow *window)
+{
+    if (window->override_redirect
+      || window->skip_taskbar)
+    return FALSE;
+
+  switch (window->type)
+    {
+      /* Definitely ignore these. */
+      case META_WINDOW_DESKTOP:
+      case META_WINDOW_DOCK:
+      case META_WINDOW_SPLASHSCREEN:
+      /* Should have already been handled by override_redirect above,
+       * but explicitly list here so we get the "unhandled enum"
+       * warning if in the future anything is added.*/
+      case META_WINDOW_DROPDOWN_MENU:
+      case META_WINDOW_POPUP_MENU:
+      case META_WINDOW_TOOLTIP:
+      case META_WINDOW_NOTIFICATION:
+      case META_WINDOW_COMBO:
+      case META_WINDOW_DND:
+      case META_WINDOW_OVERRIDE_OTHER:
+        return FALSE;
+      case META_WINDOW_NORMAL:
+      case META_WINDOW_DIALOG:
+      case META_WINDOW_MODAL_DIALOG:
+      case META_WINDOW_MENU:
+      case META_WINDOW_TOOLBAR:
+      case META_WINDOW_UTILITY:
+        break;
+      default:
+        g_warning ("meta_window_is_interesting: default reached");
+      break;
+    }
+
+  return TRUE;
+}
+
 /**
  * meta_window_get_rect:
  * @window: a #MetaWindow
@@ -12176,6 +12204,54 @@ meta_window_mouse_on_edge (MetaWindow *window, gint x, gint y)
           y >= BOX_BOTTOM (work_area) - EXTREME_CONSTANT - down_shift;
 
     return ret;
+}
+
+gboolean
+meta_window_can_maximize (MetaWindow *window)
+{
+  return window->has_maximize_func;
+}
+
+gboolean
+meta_window_can_minimize (MetaWindow *window)
+{
+  return window->has_minimize_func;
+}
+
+gboolean
+meta_window_can_shade (MetaWindow *window)
+{
+  return window->has_shade_func;
+}
+
+gboolean
+meta_window_can_close (MetaWindow *window)
+{
+  return window->has_close_func;
+}
+
+gboolean
+meta_window_is_always_on_all_workspaces (MetaWindow *window)
+{
+  return window->always_sticky;
+}
+
+gboolean
+meta_window_is_always_on_top (MetaWindow *window)
+{
+  return window->wm_state_above;
+}
+
+gboolean
+meta_window_can_move (MetaWindow *window)
+{
+  return META_WINDOW_ALLOWS_MOVE (window);
+}
+
+gboolean
+meta_window_can_resize (MetaWindow *window)
+{
+  return META_WINDOW_ALLOWS_RESIZE (window);
 }
 
 /**
