@@ -8009,10 +8009,19 @@ meta_window_update_net_wm_type (MetaWindow *window)
   meta_window_recalc_window_type (window);
 }
 
+/**
+ * meta_window_create_icon:
+ * @window: a #MetaWindow
+ * @width: width
+ * @height: height
+ *
+ * Creates an icon for @window. This is intended to only be used for
+ * window-backed apps.
+ */
 gboolean
-meta_window_set_icon (MetaWindow *window,
-                      int         width,
-                      int         height)
+meta_window_create_icon (MetaWindow *window,
+                         int         width,
+                         int         height)
 {
   GdkPixbuf *icon;
 
@@ -8029,6 +8038,7 @@ meta_window_set_icon (MetaWindow *window,
                        &icon,
                        width, height))
     {
+      /* Cinnamon is handling the fallback icon case in CinnamonApp */
       if (icon == NULL)
         return FALSE;
 
