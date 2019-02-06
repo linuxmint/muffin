@@ -2252,8 +2252,6 @@ meta_frames_paint (MetaFrames   *frames,
   GtkWidget *widget;
   MetaFrameFlags flags;
   MetaFrameType type;
-  GdkPixbuf *mini_icon;
-  GdkPixbuf *icon;
   int w, h;
   MetaButtonState button_states[META_BUTTON_TYPE_LAST];
   Window grab_frame;
@@ -2349,8 +2347,6 @@ meta_frames_paint (MetaFrames   *frames,
   meta_core_get (display, frame->xwindow,
                  META_CORE_GET_FRAME_FLAGS, &flags,
                  META_CORE_GET_FRAME_TYPE, &type,
-                 META_CORE_GET_MINI_ICON, &mini_icon,
-                 META_CORE_GET_ICON, &icon,
                  META_CORE_GET_CLIENT_WIDTH, &w,
                  META_CORE_GET_CLIENT_HEIGHT, &h,
                  META_CORE_GET_END);
@@ -2369,8 +2365,7 @@ meta_frames_paint (MetaFrames   *frames,
                                     frame->layout,
                                     frame->text_height,
                                     &button_layout,
-                                    button_states,
-                                    mini_icon, icon);
+                                    button_states);
 }
 
 static gboolean

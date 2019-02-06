@@ -39,8 +39,6 @@ typedef enum
   META_CORE_GET_CLIENT_XWINDOW,
   META_CORE_GET_FRAME_FLAGS,
   META_CORE_GET_FRAME_TYPE,
-  META_CORE_GET_MINI_ICON,
-  META_CORE_GET_ICON,
   META_CORE_GET_X,
   META_CORE_GET_Y,
   META_CORE_GET_FRAME_WORKSPACE,
@@ -215,8 +213,6 @@ void       meta_core_set_screen_cursor (Display *xdisplay,
  * of the EnterNotify and the UnmapNotify.
  */
 void meta_core_increment_event_serial (Display *display);
-
-void meta_invalidate_default_icons (void);
 
 #endif
 

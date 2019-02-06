@@ -34,8 +34,6 @@
 
 typedef struct
 {
-  GdkPixbuf *icon;
-  GdkPixbuf *mini_icon;
   int x;
   int y;
   int width;

@@ -222,9 +222,7 @@ meta_preview_draw (GtkWidget *widget,
                              preview->layout,
                              preview->text_height,
                              &preview->button_layout,
-                             button_states,
-                             meta_preview_get_mini_icon (),
-                             meta_preview_get_icon ());
+                             button_states);
 
       cairo_restore (cr);
     }
@@ -400,72 +398,6 @@ meta_preview_set_button_layout (MetaPreview            *preview,
   preview->button_layout = *button_layout;  
   
   gtk_widget_queue_draw (GTK_WIDGET (preview));
-}
-
-GdkPixbuf*
-meta_preview_get_icon (void)
-{
-  static GdkPixbuf *default_icon = NULL;
-
-  if (default_icon == NULL)
-    {
-      GtkIconTheme *theme;
-      gboolean icon_exists;
-
-      theme = gtk_icon_theme_get_default ();
-
-      icon_exists = gtk_icon_theme_has_icon (theme, META_DEFAULT_ICON_NAME);
-
-      if (icon_exists)
-          default_icon = gtk_icon_theme_load_icon (theme,
-                                                   META_DEFAULT_ICON_NAME,
-                                                   META_ICON_WIDTH,
-                                                   0,
-                                                   NULL);
-      else
-          default_icon = gtk_icon_theme_load_icon (theme,
-                                                   "gtk-missing-image",
-                                                   META_ICON_WIDTH,
-                                                   0,
-                                                   NULL);
-
-      g_assert (default_icon);
-    }
-  
-  return default_icon;
-}
-
-GdkPixbuf*
-meta_preview_get_mini_icon (void)
-{
-  static GdkPixbuf *default_icon = NULL;
-
-  if (default_icon == NULL)
-    {
-      GtkIconTheme *theme;
-      gboolean icon_exists;
-
-      theme = gtk_icon_theme_get_default ();
-
-      icon_exists = gtk_icon_theme_has_icon (theme, META_DEFAULT_ICON_NAME);
-
-      if (icon_exists)
-          default_icon = gtk_icon_theme_load_icon (theme,
-                                                   META_DEFAULT_ICON_NAME,
-                                                   META_MINI_ICON_WIDTH,
-                                                   0,
-                                                   NULL);
-      else
-          default_icon = gtk_icon_theme_load_icon (theme,
-                                                   "gtk-missing-image",
-                                                   META_MINI_ICON_WIDTH,
-                                                   0,
-                                                   NULL);
-
-      g_assert (default_icon);
-    }
-  
-  return default_icon;
 }
 
 cairo_region_t *

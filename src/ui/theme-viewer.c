@@ -1035,10 +1035,7 @@ run_theme_benchmark (void)
                              layout,
                              get_text_height (widget),
                              &button_layout,
-                             button_states,
-                             meta_preview_get_mini_icon (),
-                             meta_preview_get_icon ());
-
+                             button_states);
       cairo_destroy (cr);
       cairo_surface_destroy (pixmap);
       

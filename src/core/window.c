@@ -158,7 +158,6 @@ static void update_gtk_edge_constraints (MetaWindow *window);
  */
 static gboolean idle_calc_showing (gpointer data);
 static gboolean idle_move_resize (gpointer data);
-static gboolean idle_update_icon (gpointer data);
 
 G_DEFINE_TYPE (MetaWindow, meta_window, G_TYPE_OBJECT);
 
@@ -169,7 +168,6 @@ enum {
 
   PROP_TITLE,
   PROP_ICON,
-  PROP_MINI_ICON,
   PROP_DECORATED,
   PROP_FULLSCREEN,
   PROP_MAXIMIZED_HORIZONTALLY,
@@ -203,6 +201,7 @@ enum
   UNMANAGED,
   SIZE_CHANGED,
   POSITION_CHANGED,
+  ICON_CHANGED,
 
   LAST_SIGNAL
 };
@@ -243,9 +242,6 @@ meta_window_finalize (GObject *object)
   if (window->icon)
     g_object_unref (G_OBJECT (window->icon));
 
-  if (window->mini_icon)
-    g_object_unref (G_OBJECT (window->mini_icon));
-
   if (window->frame_bounds)
     cairo_region_destroy (window->frame_bounds);
 
@@ -272,7 +268,7 @@ meta_window_finalize (GObject *object)
   g_free (window->gtk_window_object_path);
   g_free (window->gtk_app_menu_object_path);
   g_free (window->gtk_menubar_object_path);
-  
+
   G_OBJECT_CLASS (meta_window_parent_class)->finalize (object);
 }
 
@@ -291,9 +287,6 @@ meta_window_get_property(GObject         *object,
       break;
     case PROP_ICON:
       g_value_set_object (value, win->icon);
-      break;
-    case PROP_MINI_ICON:
-      g_value_set_object (value, win->mini_icon);
       break;
     case PROP_DECORATED:
       g_value_set_boolean (value, win->decorated);
@@ -409,13 +402,6 @@ meta_window_class_init (MetaWindowClass *klass)
                                                         GDK_TYPE_PIXBUF,
                                                         G_PARAM_READABLE));
 
-  g_object_class_install_property (object_class,
-                                   PROP_MINI_ICON,
-                                   g_param_spec_object ("mini-icon",
-                                                        "Mini Icon",
-                                                        "16 pixel sized icon",
-                                                        GDK_TYPE_PIXBUF,
-                                                        G_PARAM_READABLE));
 
   g_object_class_install_property (object_class,
                                    PROP_DECORATED,
@@ -650,6 +636,14 @@ meta_window_class_init (MetaWindowClass *klass)
 
   window_signals[SIZE_CHANGED] =
     g_signal_new ("size-changed",
+                  G_TYPE_FROM_CLASS (object_class),
+                  G_SIGNAL_RUN_LAST,
+                  0,
+                  NULL, NULL, NULL,
+                  G_TYPE_NONE, 0);
+
+  window_signals[ICON_CHANGED] =
+    g_signal_new ("icon-changed",
                   G_TYPE_FROM_CLASS (object_class),
                   G_SIGNAL_RUN_LAST,
                   0,
@@ -1166,7 +1160,6 @@ meta_window_new_with_attrs (MetaDisplay       *display,
   window->title = NULL;
   window->icon_name = NULL;
   window->icon = NULL;
-  window->mini_icon = NULL;
   meta_icon_cache_init (&window->icon_cache);
   window->theme_icon_name = NULL;
   window->wm_hints_pixmap = None;
@@ -1349,9 +1342,6 @@ meta_window_new_with_attrs (MetaDisplay       *display,
 
   if (window->decorated)
     meta_window_ensure_frame (window);
-
-  if (!window->override_redirect)
-    meta_window_update_icon_now (window);
 
   if (window->initially_iconic)
     {
@@ -1912,8 +1902,7 @@ meta_window_unmanage (MetaWindow  *window,
     unmaximize_window_before_freeing (window);
 
   meta_window_unqueue (window, META_QUEUE_CALC_SHOWING |
-                               META_QUEUE_MOVE_RESIZE |
-                               META_QUEUE_UPDATE_ICON);
+                               META_QUEUE_MOVE_RESIZE);
   meta_window_free_delete_dialog (window);
 
   if (window->workspace)
@@ -2667,14 +2656,12 @@ meta_window_queue (MetaWindow *window, guint queuebits)
             {
               META_LATER_CALC_SHOWING,  /* CALC_SHOWING */
               META_LATER_RESIZE,        /* MOVE_RESIZE */
-              META_LATER_BEFORE_REDRAW  /* UPDATE_ICON */
             };
 
           const GSourceFunc window_queue_later_handler[NUMBER_OF_QUEUES] =
             {
               idle_calc_showing,
-              idle_move_resize,
-              idle_update_icon,
+              idle_move_resize
             };
 
           /* If we're about to drop the window, there's no point in putting
@@ -8011,26 +7998,26 @@ meta_window_update_net_wm_type (MetaWindow *window)
   meta_window_recalc_window_type (window);
 }
 
-static void
-redraw_icon (MetaWindow *window)
-{
-  /* We could probably be smart and just redraw the icon here,
-   * instead of the whole frame.
-   */
-  if (window->frame)
-    meta_ui_queue_frame_draw (window->screen->ui, window->frame->xwindow);
-}
-
-LOCAL_SYMBOL void
-meta_window_update_icon_now (MetaWindow *window)
+/**
+ * meta_window_create_icon:
+ * @window: a #MetaWindow
+ * @width: width
+ * @height: height
+ *
+ * Creates an icon for @window. This is intended to only be used for
+ * window-backed apps.
+ */
+gboolean
+meta_window_create_icon (MetaWindow *window,
+                         int         width,
+                         int         height)
 {
   GdkPixbuf *icon;
-  GdkPixbuf *mini_icon;
 
-  g_return_if_fail (!window->override_redirect);
+  if (window->override_redirect)
+    return FALSE;
 
   icon = NULL;
-  mini_icon = NULL;
 
   if (meta_read_icons (window->screen,
                        window->xwindow,
@@ -8038,68 +8025,23 @@ meta_window_update_icon_now (MetaWindow *window)
                        window->wm_hints_pixmap,
                        window->wm_hints_mask,
                        &icon,
-                       META_ICON_WIDTH, META_ICON_HEIGHT,
-                       &mini_icon,
-                       META_MINI_ICON_WIDTH,
-                       META_MINI_ICON_HEIGHT))
+                       width, height))
     {
+      /* Cinnamon is handling the fallback icon case in CinnamonApp */
+      if (icon == NULL)
+        return FALSE;
+
       if (window->icon)
         g_object_unref (G_OBJECT (window->icon));
 
-      if (window->mini_icon)
-        g_object_unref (G_OBJECT (window->mini_icon));
-
       window->icon = icon;
-      window->mini_icon = mini_icon;
 
       g_object_freeze_notify (G_OBJECT (window));
       g_object_notify (G_OBJECT (window), "icon");
-      g_object_notify (G_OBJECT (window), "mini-icon");
       g_object_thaw_notify (G_OBJECT (window));
 
-      redraw_icon (window);
+      return TRUE;
     }
-
-  g_assert (window->icon);
-  g_assert (window->mini_icon);
-}
-
-static gboolean
-idle_update_icon (gpointer data)
-{
-  GSList *tmp;
-  GSList *copy;
-  guint queue_index = GPOINTER_TO_INT (data);
-
-  meta_topic (META_DEBUG_GEOMETRY, "Clearing the update_icon queue\n");
-
-  /* Work with a copy, for reentrancy. The allowed reentrancy isn't
-   * complete; destroying a window while we're in here would result in
-   * badness. But it's OK to queue/unqueue update_icons.
-   */
-  copy = g_slist_copy (queue_pending[queue_index]);
-  g_slist_free (queue_pending[queue_index]);
-  queue_pending[queue_index] = NULL;
-  queue_later[queue_index] = 0;
-
-  destroying_windows_disallowed += 1;
-
-  tmp = copy;
-  while (tmp != NULL)
-    {
-      MetaWindow *window;
-
-      window = tmp->data;
-
-      meta_window_update_icon_now (window);
-      window->is_in_queues &= ~META_QUEUE_UPDATE_ICON;
-
-      tmp = tmp->next;
-    }
-
-  g_slist_free (copy);
-
-  destroying_windows_disallowed -= 1;
 
   return FALSE;
 }
@@ -9847,7 +9789,7 @@ update_resize (MetaWindow *window,
         }
       else
         {
-          switch (window->tile_mode) 
+          switch (window->tile_mode)
             {
               case META_TILE_LEFT:
                 window->display->grab_op = META_GRAB_OP_KEYBOARD_RESIZING_E;
@@ -12438,7 +12380,7 @@ meta_window_tile (MetaWindow *window,
  * Note:
  *
  * This will currently only be non-NULL for programs that use XAppGtkWindow
- * in place of GtkWindow and use xapp_gtk_window_set_icon_name() or 
+ * in place of GtkWindow and use xapp_gtk_window_set_icon_name() or
  * set_icon_from_file().  These methods will need to be used explicitly in
  * C programs, but for introspection use you should not need to treat it any
  * differently (except for using the correct window class.)

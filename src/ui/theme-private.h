@@ -343,8 +343,6 @@ struct _MetaAlphaGradientSpec
 
 struct _MetaDrawInfo
 {
-  GdkPixbuf   *mini_icon;
-  GdkPixbuf   *icon;
   PangoLayout *title_layout;
   int title_layout_width;
   int title_layout_height;
@@ -893,10 +891,6 @@ struct _MetaTheme
   GQuark quark_right_width;
   GQuark quark_top_height;
   GQuark quark_bottom_height;
-  GQuark quark_mini_icon_width;
-  GQuark quark_mini_icon_height;
-  GQuark quark_icon_width;
-  GQuark quark_icon_height;
   GQuark quark_title_width;
   GQuark quark_title_height;
   GQuark quark_frame_x_center;
@@ -918,10 +912,6 @@ struct _MetaPositionExprEnv
   int title_height;
   int frame_x_center;
   int frame_y_center;
-  int mini_icon_width;
-  int mini_icon_height;
-  int icon_width;
-  int icon_height;
   /* Theme so we can look up constants */
   MetaTheme *theme;
 };
@@ -1038,9 +1028,7 @@ void meta_frame_style_draw (MetaFrameStyle          *style,
                             int                      client_height,
                             PangoLayout             *title_layout,
                             int                      text_height,
-                            MetaButtonState          button_states[META_BUTTON_TYPE_LAST],
-                            GdkPixbuf               *mini_icon,
-                            GdkPixbuf               *icon);
+                            MetaButtonState          button_states[META_BUTTON_TYPE_LAST]);
 
 
 void meta_frame_style_draw_with_style (MetaFrameStyle          *style,
@@ -1052,9 +1040,7 @@ void meta_frame_style_draw_with_style (MetaFrameStyle          *style,
                                        int                      client_height,
                                        PangoLayout             *title_layout,
                                        int                      text_height,
-                                       MetaButtonState          button_states[META_BUTTON_TYPE_LAST],
-                                       GdkPixbuf               *mini_icon,
-                                       GdkPixbuf               *icon);
+                                       MetaButtonState          button_states[META_BUTTON_TYPE_LAST]);
 
 
 gboolean       meta_frame_style_validate (MetaFrameStyle    *style,
@@ -1091,9 +1077,7 @@ void meta_theme_draw_frame (MetaTheme              *theme,
                             PangoLayout            *title_layout,
                             int                     text_height,
                             const MetaButtonLayout *button_layout,
-                            MetaButtonState         button_states[META_BUTTON_TYPE_LAST],
-                            GdkPixbuf              *mini_icon,
-                            GdkPixbuf              *icon);
+                            MetaButtonState         button_states[META_BUTTON_TYPE_LAST]);
 
 void meta_theme_draw_frame_with_style (MetaTheme              *theme,
                                        GtkStyleContext        *style_gtk,
@@ -1106,9 +1090,7 @@ void meta_theme_draw_frame_with_style (MetaTheme              *theme,
                                        PangoLayout            *title_layout,
                                        int                     text_height,
                                        const MetaButtonLayout *button_layout,
-                                       MetaButtonState         button_states[META_BUTTON_TYPE_LAST],
-                                       GdkPixbuf              *mini_icon,
-                                       GdkPixbuf              *icon);
+                                       MetaButtonState         button_states[META_BUTTON_TYPE_LAST]);
 
 void meta_theme_get_frame_borders (MetaTheme         *theme,
                                    MetaFrameType      type,

@@ -589,76 +589,6 @@ meta_gdk_pixbuf_get_from_pixmap (Pixmap       xpixmap,
   return retval;
 }
 
-LOCAL_SYMBOL GdkPixbuf*
-meta_ui_get_default_window_icon (MetaUI *ui)
-{
-  static GdkPixbuf *default_icon = NULL;
-
-  if (default_icon == NULL)
-    {
-      GtkIconTheme *theme;
-      gboolean icon_exists;
-
-      theme = gtk_icon_theme_get_default ();
-
-      icon_exists = gtk_icon_theme_has_icon (theme, META_DEFAULT_ICON_NAME);
-
-      if (icon_exists)
-          default_icon = gtk_icon_theme_load_icon (theme,
-                                                   META_DEFAULT_ICON_NAME,
-                                                   META_ICON_WIDTH,
-                                                   0,
-                                                   NULL);
-      else
-          default_icon = gtk_icon_theme_load_icon (theme,
-                                                   "image-missing",
-                                                   META_ICON_WIDTH,
-                                                   0,
-                                                   NULL);
-
-      g_assert (default_icon);
-    }
-
-  g_object_ref (G_OBJECT (default_icon));
-  
-  return default_icon;
-}
-
-LOCAL_SYMBOL GdkPixbuf*
-meta_ui_get_default_mini_icon (MetaUI *ui)
-{
-  static GdkPixbuf *default_icon = NULL;
-
-  if (default_icon == NULL)
-    {
-      GtkIconTheme *theme;
-      gboolean icon_exists;
-
-      theme = gtk_icon_theme_get_default ();
-
-      icon_exists = gtk_icon_theme_has_icon (theme, META_DEFAULT_ICON_NAME);
-
-      if (icon_exists)
-          default_icon = gtk_icon_theme_load_icon (theme,
-                                                   META_DEFAULT_ICON_NAME,
-                                                   META_MINI_ICON_WIDTH,
-                                                   0,
-                                                   NULL);
-      else
-          default_icon = gtk_icon_theme_load_icon (theme,
-                                                   "image-missing",
-                                                   META_MINI_ICON_WIDTH,
-                                                   0,
-                                                   NULL);
-
-      g_assert (default_icon);
-    }
-
-  g_object_ref (G_OBJECT (default_icon));
-  
-  return default_icon;
-}
-
 LOCAL_SYMBOL gboolean
 meta_ui_window_should_not_cause_focus (Display *xdisplay,
                                        Window   xwindow)
@@ -759,7 +689,6 @@ meta_ui_set_current_theme (const char *name,
                            gboolean    force_reload)
 {
   meta_theme_set_current (name, force_reload);
-  meta_invalidate_default_icons ();
 }
 
 LOCAL_SYMBOL gboolean

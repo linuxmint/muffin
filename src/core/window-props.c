@@ -340,10 +340,7 @@ static void
 reload_icon (MetaWindow    *window,
              Atom           atom)
 {
-  meta_icon_cache_property_changed (&window->icon_cache,
-                                    window->display,
-                                    atom);
-  meta_window_queue(window, META_QUEUE_UPDATE_ICON);
+  g_signal_emit_by_name (window, "icon-changed", window);
 }
 
 static void
@@ -1711,7 +1708,7 @@ reload_wm_hints (MetaWindow    *window,
                                     window->display,
                                     XA_WM_HINTS);
 
-  meta_window_queue (window, META_QUEUE_UPDATE_ICON | META_QUEUE_MOVE_RESIZE);
+  meta_window_queue (window, META_QUEUE_MOVE_RESIZE);
 }
 
 static void

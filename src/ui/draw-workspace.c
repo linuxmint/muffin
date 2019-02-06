@@ -77,8 +77,6 @@ draw_window (GtkWidget                   *widget,
              const GdkRectangle          *winrect,
              GtkStateFlags               state)
 {
-  GdkPixbuf *icon;
-  int icon_x, icon_y, icon_w, icon_h;
   gboolean is_active;
   GdkRGBA color;
   GtkStyleContext *style;
@@ -101,50 +99,6 @@ draw_window (GtkWidget                   *widget,
                    winrect->x + 1, winrect->y + 1,
                    MAX (0, winrect->width - 2), MAX (0, winrect->height - 2));
   cairo_fill (cr);
-
-
-  icon = win->icon;
-
-  icon_w = icon_h = 0;
-          
-  if (icon)
-    {              
-      icon_w = gdk_pixbuf_get_width (icon);
-      icon_h = gdk_pixbuf_get_height (icon);
-
-      /* If the icon is too big, fall back to mini icon.
-       * We don't arbitrarily scale the icon, because it's
-       * just too slow on my Athlon 850.
-       */
-      if (icon_w > (winrect->width - 2) ||
-          icon_h > (winrect->height - 2))
-        {
-          icon = win->mini_icon;
-          if (icon)
-            {
-              icon_w = gdk_pixbuf_get_width (icon);
-              icon_h = gdk_pixbuf_get_height (icon);
-        
-              /* Give up. */
-              if (icon_w > (winrect->width - 2) ||
-                  icon_h > (winrect->height - 2))
-                icon = NULL;
-            }
-        }
-    }
-
-  if (icon)
-    {
-      icon_x = winrect->x + (winrect->width - icon_w) / 2;
-      icon_y = winrect->y + (winrect->height - icon_h) / 2;
-      
-      cairo_save (cr);
-      gdk_cairo_set_source_pixbuf (cr, icon, icon_x, icon_y);
-      cairo_rectangle (cr, icon_x, icon_y, icon_w, icon_h);
-      cairo_clip (cr);
-      cairo_paint (cr);
-      cairo_restore (cr);
-    }
 
   gtk_style_context_get_color (style, state, &color);
   gdk_cairo_set_source_rgba (cr, &color);
