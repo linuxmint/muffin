@@ -497,14 +497,7 @@ meta_icon_cache_init (MetaIconCache *icon_cache)
   icon_cache->origin = USING_NO_ICON;
   icon_cache->prev_pixmap = None;
   icon_cache->prev_mask = None;
-#if 0
-  icon_cache->icon = NULL;
-  icon_cache->mini_icon = NULL;
-  icon_cache->ideal_width = -1; /* won't be a legit width */
-  icon_cache->ideal_height = -1;
-  icon_cache->ideal_mini_width = -1;
-  icon_cache->ideal_mini_height = -1;
-#endif
+
   icon_cache->want_fallback = TRUE;
   icon_cache->wm_hints_dirty = TRUE;
   icon_cache->kwm_win_icon_dirty = TRUE;
@@ -586,18 +579,6 @@ replace_cache (MetaIconCache *icon_cache,
   clear_icon_cache (icon_cache, FALSE);
 
   icon_cache->origin = origin;
-
-#if 0
-  if (new_icon)
-    g_object_ref (G_OBJECT (new_icon));
-
-  icon_cache->icon = new_icon;
-
-  if (new_mini_icon)
-    g_object_ref (G_OBJECT (new_mini_icon));
-
-  icon_cache->mini_icon = new_mini_icon;
-#endif
 }
 
 static GdkPixbuf*
@@ -677,21 +658,7 @@ meta_read_icons (MetaScreen     *screen,
 
   *iconp = NULL;
 
-#if 0
-  if (ideal_width != icon_cache->ideal_width ||
-      ideal_height != icon_cache->ideal_height ||
-      ideal_mini_width != icon_cache->ideal_mini_width ||
-      ideal_mini_height != icon_cache->ideal_mini_height)
-    clear_icon_cache (icon_cache, TRUE);
-
-  icon_cache->ideal_width = ideal_width;
-  icon_cache->ideal_height = ideal_height;
-  icon_cache->ideal_mini_width = ideal_mini_width;
-  icon_cache->ideal_mini_height = ideal_mini_height;
-#endif
-  
-  if (!meta_icon_cache_get_icon_invalidated (icon_cache))
-    return FALSE; /* we have no new info to use */
+  clear_icon_cache (icon_cache, TRUE);
 
   pixdata = NULL;
 
