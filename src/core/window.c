@@ -12237,19 +12237,19 @@ meta_window_is_always_on_all_workspaces (MetaWindow *window)
 }
 
 gboolean
-meta_window_is_above (MetaWindow *window)
+meta_window_is_always_on_top (MetaWindow *window)
 {
   return window->wm_state_above;
 }
 
 gboolean
-meta_window_allows_move (MetaWindow *window)
+meta_window_can_move (MetaWindow *window)
 {
   return META_WINDOW_ALLOWS_MOVE (window);
 }
 
 gboolean
-meta_window_allows_resize (MetaWindow *window)
+meta_window_can_resize (MetaWindow *window)
 {
   return META_WINDOW_ALLOWS_RESIZE (window);
 }
