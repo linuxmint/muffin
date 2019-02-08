@@ -2,9 +2,9 @@
 
 /* Metacity window frame manager widget */
 
-/* 
+/*
  * Copyright (C) 2001 Havoc Pennington
- * 
+ *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
  * published by the Free Software Foundation; either version 2 of the
@@ -14,7 +14,7 @@
  * WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street - Suite 500, Boston, MA
@@ -83,7 +83,7 @@ struct _MetaUIFrame
   int text_height;
   char *title; /* NULL once we have a layout */
   guint shape_applied : 1;
-  
+
   /* FIXME get rid of this, it can just be in the MetaFrames struct */
   MetaFrameControl prelit_control;
   MetaButtonState button_state;
@@ -95,12 +95,10 @@ struct _MetaUIFrame
 struct _MetaFrames
 {
   GtkWindow parent_instance;
-  
+
   GHashTable *text_heights;
 
   GHashTable *frames;
-
-  MetaUIFrame *last_motion_frame;
 
   GtkStyleContext *normal_style;
   GHashTable *style_variants;

@@ -728,9 +728,6 @@ meta_frames_unmanage_window (MetaFrames *frames,
 
       gdk_window_set_user_data (frame->window, NULL);
 
-      if (frames->last_motion_frame == frame)
-        frames->last_motion_frame = NULL;
-      
       g_hash_table_remove (frames->frames, &frame->xwindow);
 
       g_object_unref (frame->style);
@@ -1727,8 +1724,6 @@ meta_frames_motion_notify_event     (GtkWidget           *widget,
   frame = meta_frames_lookup_window (frames, GDK_WINDOW_XID (event->window));
   if (frame == NULL)
     return FALSE;
-
-  frames->last_motion_frame = frame;
 
   MetaCursor cursor = meta_frame_get_screen_cursor (frame->meta_window->frame);
 
