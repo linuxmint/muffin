@@ -1146,8 +1146,6 @@ update_area (MetaWindowActor *self,
 {
   MetaWindowActorPrivate *priv = self->priv;
   CoglTexture *texture;
-  cairo_region_t *unobscured_region = clutter_actor_has_mapped_clones (self) ? NULL
-    : priv->unobscured_region;
 
   texture = meta_shaped_texture_get_texture (META_SHAPED_TEXTURE (priv->actor));
 
