@@ -7,6 +7,8 @@
 
 #include <gdk/gdk.h> /* for gdk_rectangle_intersect() */
 
+#include <core/screen-private.h>
+
 #include "clutter-utils.h"
 #include "compositor-private.h"
 #include "meta-window-actor-private.h"
@@ -87,6 +89,8 @@ painting_untransformed (MetaWindowGroup *window_group,
 
 static void
 meta_window_group_cull_out (MetaWindowGroup *group,
+                            ClutterActor    *unredirected_window,
+                            gboolean         has_unredirected_window,
                             cairo_region_t  *unobscured_region,
                             cairo_region_t  *clip_region)
 {
@@ -101,13 +105,10 @@ meta_window_group_cull_out (MetaWindowGroup *group,
   clutter_actor_iter_init (&iter, actor);
   while (clutter_actor_iter_prev (&iter, &child))
     {
-      MetaCompScreen *info = meta_screen_get_compositor_data (group->screen);
-
       if (!CLUTTER_ACTOR_IS_VISIBLE (child))
         continue;
 
-      if (info->unredirected_window != NULL &&
-          child == CLUTTER_ACTOR (info->unredirected_window))
+      if (has_unredirected_window && child == unredirected_window)
         continue;
 
       /* If an actor has effects applied, then that can change the area
@@ -214,8 +215,8 @@ meta_window_group_paint (ClutterActor *actor)
   int actor_x_origin, actor_y_origin;
 
   MetaWindowGroup *window_group = META_WINDOW_GROUP (actor);
-  ClutterActor *stage = clutter_actor_get_stage (actor);
-  MetaCompScreen *info = meta_screen_get_compositor_data (window_group->screen);
+  MetaCompositor *compositor = window_group->screen->display->compositor;
+  ClutterActor *stage = CLUTTER_STAGE (compositor->stage);
 
   /* Start off by treating all windows as completely unobscured, so damage anywhere
    * in a window queues redraws, but confine it more below. */
@@ -253,8 +254,8 @@ meta_window_group_paint (ClutterActor *actor)
   paint_y_offset = paint_y_origin - actor_y_origin;
 
   visible_rect.x = visible_rect.y = 0;
-  visible_rect.width = clutter_actor_get_width (CLUTTER_ACTOR (stage));
-  visible_rect.height = clutter_actor_get_height (CLUTTER_ACTOR (stage));
+  visible_rect.width = clutter_actor_get_width (stage);
+  visible_rect.height = clutter_actor_get_height (stage);
 
   unobscured_region = cairo_region_create_rectangle (&visible_rect);
 
@@ -264,24 +265,28 @@ meta_window_group_paint (ClutterActor *actor)
    * sizes, we could intersect this with an accurate union of the
    * monitors to avoid painting shadows that are visible only in the
    * holes. */
-  clutter_stage_get_redraw_clip_bounds (CLUTTER_STAGE (stage),
-                                        &clip_rect);
+  clutter_stage_get_redraw_clip_bounds (stage, &clip_rect);
 
   clip_region = cairo_region_create_rectangle (&clip_rect);
 
   cairo_region_translate (clip_region, -paint_x_offset, -paint_y_offset);
 
-  if (info->unredirected_window != NULL)
+  gboolean has_unredirected_window = compositor->unredirected_window != NULL;
+  if (has_unredirected_window)
     {
       cairo_rectangle_int_t unredirected_rect;
-      MetaWindow *window = meta_window_actor_get_meta_window (info->unredirected_window);
+      MetaWindow *window = meta_window_actor_get_meta_window (compositor->unredirected_window);
 
       meta_window_get_outer_rect (window, (MetaRectangle *)&unredirected_rect);
       cairo_region_subtract_rectangle (unobscured_region, &unredirected_rect);
       cairo_region_subtract_rectangle (clip_region, &unredirected_rect);
     }
 
-  meta_window_group_cull_out (window_group, unobscured_region, clip_region);
+  meta_window_group_cull_out (window_group,
+                              CLUTTER_ACTOR (compositor->unredirected_window),
+                              has_unredirected_window,
+                              unobscured_region,
+                              clip_region);
 
   cairo_region_destroy (unobscured_region);
   cairo_region_destroy (clip_region);
