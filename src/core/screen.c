@@ -987,7 +987,6 @@ meta_screen_new (MetaDisplay *display,
   screen->columns_of_workspaces = -1;
   screen->vertical_workspaces = FALSE;
   screen->starting_corner = META_SCREEN_TOPLEFT;
-  screen->compositor_data = NULL;
   screen->guard_window = None;
 
   screen->composite_overlay_window = XCompositeGetOverlayWindow (xdisplay, xroot);
@@ -3665,23 +3664,6 @@ meta_screen_get_size (MetaScreen *screen,
 {
   *width = screen->rect.width;
   *height = screen->rect.height;
-}
-
-/**
- * meta_screen_get_compositor_data: (skip)
- *
- */
-gpointer
-meta_screen_get_compositor_data (MetaScreen *screen)
-{
-  return screen->compositor_data;
-}
-
-void
-meta_screen_set_compositor_data (MetaScreen *screen,
-                                 gpointer    compositor)
-{
-  screen->compositor_data = compositor;
 }
 
 void

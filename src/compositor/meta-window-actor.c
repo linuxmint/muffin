@@ -504,10 +504,10 @@ meta_window_actor_dispose (GObject *object)
 {
   MetaWindowActor        *self = META_WINDOW_ACTOR (object);
   MetaWindowActorPrivate *priv = self->priv;
-  MetaScreen             *screen;
-  MetaDisplay            *display;
-  Display                *xdisplay;
-  MetaCompScreen         *info;
+  MetaScreen *screen;
+  MetaDisplay *display;
+  Display *xdisplay;
+  MetaCompositor *compositor;
 
   if (priv->disposed)
     return;
@@ -520,10 +520,10 @@ meta_window_actor_dispose (GObject *object)
       priv->send_frame_messages_timer = 0;
     }
 
-  screen   = priv->screen;
-  display  = meta_screen_get_display (screen);
-  xdisplay = meta_display_get_xdisplay (display);
-  info     = meta_screen_get_compositor_data (screen);
+  screen = priv->screen;
+  display = screen->display;
+  xdisplay = display->xdisplay;
+  compositor = display->compositor;
 
   meta_window_actor_detach (self);
 
@@ -546,7 +546,7 @@ meta_window_actor_dispose (GObject *object)
       priv->damage = None;
     }
 
-  info->windows = g_list_remove (info->windows, (gconstpointer) self);
+  compositor->windows = g_list_remove (compositor->windows, (gconstpointer) self);
 
   g_clear_object (&priv->window);
 
@@ -759,7 +759,7 @@ static void
 assign_frame_counter_to_frames (MetaWindowActor *self)
 {
   MetaWindowActorPrivate *priv = self->priv;
-  ClutterStage *stage = clutter_actor_get_stage (CLUTTER_ACTOR (self));
+  ClutterStage *stage = priv->window->display->compositor->stage;
   GList *l;
 
   /* If the window is obscured, then we're expecting to deal with sending
@@ -1227,7 +1227,7 @@ meta_window_actor_queue_frame_drawn (MetaWindowActor *self,
 
   if (no_delay_frame)
     {
-      ClutterActor *stage = clutter_actor_get_stage (CLUTTER_ACTOR (self));
+      ClutterActor *stage = priv->window->display->compositor->stage;
       clutter_stage_skip_sync_delay (CLUTTER_STAGE (stage));
     }
 
@@ -1302,11 +1302,11 @@ start_simple_effect (MetaWindowActor *self,
                      gulong        event)
 {
   MetaWindowActorPrivate *priv = self->priv;
-  MetaCompScreen *info = meta_screen_get_compositor_data (priv->screen);
+  MetaCompositor *compositor = priv->screen->display->compositor;
   gint *counter = NULL;
   gboolean use_freeze_thaw = FALSE;
 
-  if (!info->plugin_mgr)
+  if (!compositor->plugin_mgr)
     return FALSE;
 
   switch (event)
@@ -1337,7 +1337,7 @@ start_simple_effect (MetaWindowActor *self,
 
   (*counter)++;
 
-  if (!meta_plugin_manager_event_simple (info->plugin_mgr,
+  if (!meta_plugin_manager_event_simple (compositor->plugin_mgr,
                                          self,
                                          event))
     {
@@ -1543,11 +1543,9 @@ meta_window_actor_set_redirected (MetaWindowActor *self, gboolean state)
 LOCAL_SYMBOL void
 meta_window_actor_destroy (MetaWindowActor *self)
 {
-  MetaWindow	      *window;
-  MetaWindowActorPrivate *priv;
+  MetaWindow *window;
+  MetaWindowActorPrivate *priv = self->priv;
   MetaWindowType window_type;
-
-  priv = self->priv;
 
   window = priv->window;
   window_type = meta_window_get_window_type (window);
@@ -1628,7 +1626,6 @@ meta_window_actor_sync_actor_geometry (MetaWindowActor *self,
 
   if (priv->position_changed)
     {
-      MetaCompScreen *info;
       clutter_actor_set_position (CLUTTER_ACTOR (self),
                                   window_rect.x, window_rect.y);
 
@@ -1643,8 +1640,7 @@ meta_window_actor_sync_actor_geometry (MetaWindowActor *self,
             meta_window_actor_reset_mask_texture (self, TRUE);
         }
 
-      info = meta_screen_get_compositor_data (priv->screen);
-      clutter_actor_queue_redraw (CLUTTER_ACTOR (info->window_group));
+      clutter_actor_queue_redraw (CLUTTER_ACTOR (priv->window->display->compositor->window_group));
     }
 }
 
@@ -1652,16 +1648,12 @@ void
 meta_window_actor_show (MetaWindowActor   *self,
                         MetaCompEffect     effect)
 {
-  MetaWindowActorPrivate *priv;
-  MetaCompScreen         *info;
-  gulong                  event;
-
-  priv = self->priv;
-  info = meta_screen_get_compositor_data (priv->screen);
+  MetaWindowActorPrivate *priv = self->priv;
+  gulong event;
 
   g_return_if_fail (!priv->visible);
 
-  self->priv->visible = TRUE;
+  priv->visible = TRUE;
 
   event = 0;
   switch (effect)
@@ -1681,7 +1673,7 @@ meta_window_actor_show (MetaWindowActor   *self,
     }
 
   if (priv->redecorating ||
-      info->switch_workspace_in_progress ||
+      priv->screen->display->compositor->switch_workspace_in_progress ||
       event == 0 ||
       !start_simple_effect (self, event))
     {
@@ -1694,12 +1686,9 @@ LOCAL_SYMBOL void
 meta_window_actor_hide (MetaWindowActor *self,
                         MetaCompEffect   effect)
 {
-  MetaWindowActorPrivate *priv;
-  MetaCompScreen         *info;
-  gulong                  event;
-
-  priv = self->priv;
-  info = meta_screen_get_compositor_data (priv->screen);
+  MetaWindowActorPrivate *priv = self->priv;
+  MetaCompositor *compositor = priv->screen->display->compositor;
+  gulong event;
 
   g_return_if_fail (priv->visible || (!priv->visible && meta_window_is_attached_dialog (priv->window)));
 
@@ -1709,7 +1698,7 @@ meta_window_actor_hide (MetaWindowActor *self,
    * hold off on hiding the window, and do it after the workspace
    * switch completes
    */
-  if (info->switch_workspace_in_progress)
+  if (compositor->switch_workspace_in_progress)
     return;
 
   event = 0;
@@ -1738,8 +1727,7 @@ meta_window_actor_maximize (MetaWindowActor    *self,
                             MetaRectangle      *old_rect,
                             MetaRectangle      *new_rect)
 {
-  MetaCompScreen *info = meta_screen_get_compositor_data (self->priv->screen);
-
+  MetaCompositor *compositor = self->priv->screen->display->compositor;
   /* The window has already been resized (in order to compute new_rect),
    * which by side effect caused the actor to be resized. Restore it to the
    * old size and position */
@@ -1749,8 +1737,8 @@ meta_window_actor_maximize (MetaWindowActor    *self,
   self->priv->maximize_in_progress++;
   meta_window_actor_freeze (self);
 
-  if (!info->plugin_mgr ||
-      !meta_plugin_manager_event_maximize (info->plugin_mgr,
+  if (!compositor->plugin_mgr ||
+      !meta_plugin_manager_event_maximize (compositor->plugin_mgr,
                                            self,
                                            META_PLUGIN_MAXIMIZE,
                                            new_rect->x, new_rect->y,
@@ -1770,7 +1758,7 @@ meta_window_actor_unmaximize (MetaWindowActor   *self,
                               MetaRectangle     *old_rect,
                               MetaRectangle     *new_rect)
 {
-  MetaCompScreen *info = meta_screen_get_compositor_data (self->priv->screen);
+  MetaCompositor *compositor = self->priv->screen->display->compositor;
 
   /* The window has already been resized (in order to compute new_rect),
    * which by side effect caused the actor to be resized. Restore it to the
@@ -1781,8 +1769,8 @@ meta_window_actor_unmaximize (MetaWindowActor   *self,
   self->priv->unmaximize_in_progress++;
   meta_window_actor_freeze (self);
 
-  if (!info->plugin_mgr ||
-      !meta_plugin_manager_event_maximize (info->plugin_mgr,
+  if (!compositor->plugin_mgr ||
+      !meta_plugin_manager_event_maximize (compositor->plugin_mgr,
                                            self,
                                            META_PLUGIN_UNMAXIMIZE,
                                            new_rect->x, new_rect->y,
@@ -1801,7 +1789,7 @@ meta_window_actor_tile (MetaWindowActor    *self,
                         MetaRectangle      *old_rect,
                         MetaRectangle      *new_rect)
 {
-  MetaCompScreen *info = meta_screen_get_compositor_data (self->priv->screen);
+  MetaCompositor *compositor = self->priv->screen->display->compositor;
 
   /* The window has already been resized (in order to compute new_rect),
    * which by side effect caused the actor to be resized. Restore it to the
@@ -1812,8 +1800,8 @@ meta_window_actor_tile (MetaWindowActor    *self,
   self->priv->tile_in_progress++;
   meta_window_actor_freeze (self);
 
-  if (!info->plugin_mgr ||
-      !meta_plugin_manager_event_maximize (info->plugin_mgr,
+  if (!compositor->plugin_mgr ||
+      !meta_plugin_manager_event_maximize (compositor->plugin_mgr,
                                            self,
                                            META_PLUGIN_TILE,
                                            new_rect->x, new_rect->y,
@@ -1831,9 +1819,9 @@ meta_window_actor_tile (MetaWindowActor    *self,
 LOCAL_SYMBOL MetaWindowActor *
 meta_window_actor_new (MetaWindow *window)
 {
-  MetaScreen	 	 *screen = meta_window_get_screen (window);
-  MetaCompScreen         *info = meta_screen_get_compositor_data (screen);
-  MetaWindowActor        *self;
+  MetaScreen *screen = window->screen;
+  MetaCompositor *compositor = screen->display->compositor;
+  MetaWindowActor *self;
   MetaWindowActorPrivate *priv;
   MetaFrame		 *frame;
   Window		  top_window;
@@ -1877,13 +1865,13 @@ meta_window_actor_new (MetaWindow *window)
   meta_window_set_compositor_private (window, G_OBJECT (self));
 
   if (window->type == META_WINDOW_DND)
-    window_group = info->window_group;
+    window_group = compositor->window_group;
   else if (window->layer == META_LAYER_OVERRIDE_REDIRECT)
-    window_group = info->top_window_group;
+    window_group = compositor->top_window_group;
   else if (window->type == META_WINDOW_DESKTOP)
-    window_group = info->bottom_window_group;
+    window_group = compositor->bottom_window_group;
   else
-    window_group = info->window_group;
+    window_group = compositor->window_group;
 
   clutter_actor_add_child (window_group, CLUTTER_ACTOR (self));
 
@@ -1892,7 +1880,7 @@ meta_window_actor_new (MetaWindow *window)
   /* Initial position in the stack is arbitrary; stacking will be synced
    * before we first paint.
    */
-  info->windows = g_list_append (info->windows, self);
+  compositor->windows = g_list_append (compositor->windows, self);
 
   return self;
 }
@@ -2048,22 +2036,19 @@ meta_window_actor_reset_visible_regions (MetaWindowActor *self)
 static void
 check_needs_pixmap (MetaWindowActor *self)
 {
-  MetaWindowActorPrivate *priv     = self->priv;
-  MetaScreen          *screen   = priv->screen;
-  MetaDisplay         *display  = meta_screen_get_display (screen);
-  Display             *xdisplay = meta_display_get_xdisplay (display);
-  MetaCompScreen      *info     = meta_screen_get_compositor_data (screen);
-  MetaCompositor      *compositor;
-  Window               xwindow  = priv->xwindow;
+  MetaWindowActorPrivate *priv = self->priv;
+  MetaScreen *screen = priv->screen;
+  MetaDisplay *display = screen->display;
+  Display *xdisplay = display->xdisplay;
+  MetaCompositor *compositor = display->compositor;
+  Window xwindow = priv->xwindow;
 
   if ((!priv->window->mapped && !priv->window->shaded) || !priv->needs_pixmap)
     return;
 
-  if (xwindow == meta_screen_get_xroot (screen) ||
-      xwindow == clutter_x11_get_stage_window (CLUTTER_STAGE (info->stage)))
+  if (xwindow == screen->xroot ||
+      xwindow == clutter_x11_get_stage_window (compositor->stage))
     return;
-
-  compositor = meta_display_get_compositor (display);
 
   if (priv->size_changed)
     {
@@ -2206,11 +2191,11 @@ meta_window_actor_process_damage (MetaWindowActor    *self,
                                   XDamageNotifyEvent *event)
 {
   MetaWindowActorPrivate *priv = self->priv;
-  MetaCompScreen *info = meta_screen_get_compositor_data (priv->screen);
+  MetaCompositor *compositor = priv->window->display->compositor;
 
   priv->received_damage = TRUE;
 
-  if (meta_window_is_fullscreen (priv->window) && g_list_last (info->windows)->data == self && !priv->unredirected)
+  if (meta_window_is_fullscreen (priv->window) && g_list_last (compositor->windows)->data == self && !priv->unredirected)
     {
       MetaRectangle window_rect;
       meta_window_get_outer_rect (priv->window, &window_rect);
