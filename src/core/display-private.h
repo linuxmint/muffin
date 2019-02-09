@@ -442,4 +442,6 @@ guint meta_display_get_above_tab_keycode (MetaDisplay *display);
 
 void meta_display_notify_restart (MetaDisplay *display);
 
+void meta_display_update_sync_state (gboolean state);
+
 #endif
