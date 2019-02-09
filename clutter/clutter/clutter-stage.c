@@ -1526,7 +1526,8 @@ _clutter_stage_do_pick_on_view (ClutterStage     *stage,
    * are drawn offscreen (as we never swap buffers)
   */
   context->pick_mode = mode;
-  _clutter_stage_paint_view (stage, view, NULL);
+  /* Paint without emitting AFTER_PAINT */
+  clutter_stage_do_paint_view (stage, view, NULL);
   context->pick_mode = CLUTTER_PICK_NONE;
 
   /* Read the color of the screen co-ords pixel. RGBA_8888_PRE is used
