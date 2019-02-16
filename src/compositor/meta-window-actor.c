@@ -182,6 +182,8 @@ static void meta_window_actor_get_property (GObject      *object,
                                             GValue       *value,
                                             GParamSpec   *pspec);
 
+static void meta_window_actor_pick (ClutterActor       *actor,
+			                              const ClutterColor *color);
 static void meta_window_actor_paint (ClutterActor *actor);
 
 static gboolean meta_window_actor_get_paint_volume (ClutterActor       *actor,
@@ -224,6 +226,7 @@ meta_window_actor_class_init (MetaWindowActorClass *klass)
   object_class->get_property = meta_window_actor_get_property;
   object_class->constructed  = meta_window_actor_constructed;
 
+  actor_class->pick = meta_window_actor_pick;
   actor_class->paint = meta_window_actor_paint;
   actor_class->get_paint_volume = meta_window_actor_get_paint_volume;
 
@@ -308,12 +311,13 @@ meta_window_actor_init (MetaWindowActor *self)
 
 static void
 meta_window_actor_reset_mask_texture (MetaWindowActor *self,
+                                      cairo_region_t  *shape_region,
                                       gboolean force)
 {
   MetaShapedTexture *stex = META_SHAPED_TEXTURE (self->priv->actor);
   if (force)
     meta_shaped_texture_dirty_mask (stex);
-  meta_shaped_texture_ensure_mask (stex, self->priv->window->frame != NULL);
+  meta_shaped_texture_ensure_mask (stex, shape_region, self->priv->window->frame != NULL);
 }
 
 static void
@@ -775,6 +779,64 @@ assign_frame_counter_to_frames (MetaWindowActor *self)
       if (frame->frame_counter == -1)
         frame->frame_counter = clutter_stage_get_frame_counter (stage);
     }
+}
+
+static void
+meta_window_actor_pick (ClutterActor       *actor,
+			                  const ClutterColor *color)
+{
+  if (!clutter_actor_should_pick_paint (actor))
+    return;
+
+  MetaWindowActor *self = (MetaWindowActor *) actor;
+  MetaWindowActorPrivate *priv = self->priv;
+  ClutterActorIter iter;
+  ClutterActor *child;
+
+  /* If there is no region then use the regular pick */
+  if (priv->shape_region == NULL)
+    CLUTTER_ACTOR_CLASS (meta_window_actor_parent_class)->pick (actor, color);
+  else
+    {
+      int n_rects;
+      float *rectangles;
+      int i;
+      CoglPipeline *pipeline;
+      CoglContext *ctx;
+      CoglFramebuffer *fb;
+      CoglColor cogl_color;
+
+      n_rects = cairo_region_num_rectangles (priv->shape_region);
+      rectangles = g_alloca (sizeof (float) * 4 * n_rects);
+
+      for (i = 0; i < n_rects; i++)
+        {
+          cairo_rectangle_int_t rect;
+          int pos = i * 4;
+
+          cairo_region_get_rectangle (priv->shape_region, i, &rect);
+
+          rectangles[pos + 0] = rect.x;
+          rectangles[pos + 1] = rect.y;
+          rectangles[pos + 2] = rect.x + rect.width;
+          rectangles[pos + 3] = rect.y + rect.height;
+        }
+
+      ctx = clutter_backend_get_cogl_context (clutter_get_default_backend ());
+      fb = cogl_get_draw_framebuffer ();
+
+      cogl_color_init_from_4ub (&cogl_color, color->red, color->green, color->blue, color->alpha);
+
+      pipeline = cogl_pipeline_new (ctx);
+      cogl_pipeline_set_color (pipeline, &cogl_color);
+      cogl_framebuffer_draw_rectangles (fb, pipeline, rectangles, n_rects);
+      cogl_object_unref (pipeline);
+    }
+
+  clutter_actor_iter_init (&iter, actor);
+
+  while (clutter_actor_iter_next (&iter, &child))
+    clutter_actor_paint (child);
 }
 
 static void
@@ -2362,7 +2424,6 @@ check_needs_reshape (MetaWindowActor *self)
   if ((!priv->window->mapped && !priv->window->shaded) || !priv->needs_reshape)
     return;
 
-  meta_shaped_texture_set_shape_region (META_SHAPED_TEXTURE (priv->actor), NULL);
   g_clear_pointer (&priv->shape_region, cairo_region_destroy);
   g_clear_pointer (&priv->shadow_shape, meta_window_shape_unref);
   g_clear_pointer (&priv->opaque_region, cairo_region_destroy);
@@ -2440,9 +2501,6 @@ check_needs_reshape (MetaWindowActor *self)
   else
     priv->opaque_region = cairo_region_reference (region);
 
-  meta_shaped_texture_set_shape_region (META_SHAPED_TEXTURE (priv->actor),
-                                        region);
-
   if (priv->window->frame)
     update_corners (self);
   else if (priv->window->has_shape && priv->reshapes == 1)
@@ -2451,7 +2509,7 @@ check_needs_reshape (MetaWindowActor *self)
     priv->reshapes++;
 
   if (priv->window->frame != NULL || priv->window->has_shape)
-    meta_window_actor_reset_mask_texture (self, full_mask_reset);
+    meta_window_actor_reset_mask_texture (self, region, full_mask_reset);
 
   meta_window_actor_update_shape_region (self, region);
 
