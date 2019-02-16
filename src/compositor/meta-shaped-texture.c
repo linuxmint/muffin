@@ -107,7 +107,6 @@ struct _MetaShapedTexturePrivate
   cairo_path_t *overlay_path;
 
   guint tex_width, tex_height;
-  guint mask_width, mask_height;
 
   gint64 prev_invalidation, last_invalidation;
   guint fast_updates;
@@ -332,7 +331,8 @@ install_overlay_path (MetaShapedTexture *stex,
 }
 
 LOCAL_SYMBOL void
-meta_shaped_texture_ensure_mask (MetaShapedTexture *stex)
+meta_shaped_texture_ensure_mask (MetaShapedTexture *stex,
+                                 gboolean           has_frame)
 {
   MetaShapedTexturePrivate *priv = stex->priv;
   CoglTexture *paint_tex;
@@ -348,10 +348,7 @@ meta_shaped_texture_ensure_mask (MetaShapedTexture *stex)
 
   /* If the mask texture we have was created for a different size then
      recreate it */
-  if (priv->mask_texture != NULL
-      && (priv->mask_width != tex_width
-          || priv->mask_height != tex_height
-          || priv->mask_needs_update))
+  if (priv->mask_texture != NULL && priv->mask_needs_update)
     {
       priv->mask_needs_update = FALSE;
       meta_shaped_texture_dirty_mask (stex);
@@ -410,7 +407,8 @@ meta_shaped_texture_ensure_mask (MetaShapedTexture *stex)
             memset (p, 255, x2 - x1);
         }
 
-      install_overlay_path (stex, mask_data, tex_width, tex_height, stride);
+      if (has_frame)
+        install_overlay_path (stex, mask_data, tex_width, tex_height, stride);
 
       if (meta_texture_rectangle_check (paint_tex))
         priv->mask_texture = meta_cogl_rectangle_new (tex_width, tex_height,
@@ -425,9 +423,6 @@ meta_shaped_texture_ensure_mask (MetaShapedTexture *stex)
                                                                       mask_data);
 
       g_free (mask_data);
-
-      priv->mask_width = tex_width;
-      priv->mask_height = tex_height;
     }
 }
 
