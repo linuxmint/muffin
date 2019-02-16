@@ -3721,6 +3721,8 @@ meta_display_begin_grab_op (MetaDisplay *display,
       meta_window_refresh_resize_popup (display->grab_window);
     }
 
+  meta_compositor_grab_op_begin (display->compositor);
+
   g_signal_emit (display, display_signals[GRAB_OP_BEGIN], 0,
                  screen, display->grab_window, display->grab_op);
   
@@ -3769,6 +3771,8 @@ meta_display_end_grab_op (MetaDisplay *display,
   
   if (display->grab_op == META_GRAB_OP_NONE)
     return;
+
+  meta_compositor_grab_op_end (display->compositor);
 
   g_signal_emit (display, display_signals[GRAB_OP_END], 0,
                  display->grab_screen, display->grab_window, display->grab_op);
