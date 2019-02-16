@@ -1611,20 +1611,11 @@ meta_compositor_grab_op_begin (MetaCompositor *compositor)
   // CLUTTER_ACTOR_NO_LAYOUT set on the window group improves responsiveness of windows,
   // but causes windows to flicker in and out of view sporadically on some configurations
   // while dragging windows. Make sure it is disabled during the grab.
-  MetaCompScreen *info = meta_screen_get_compositor_data (compositor->display->active_screen);
-
-  if (!info)
-    return NULL;
-  clutter_actor_unset_flags (info->window_group, CLUTTER_ACTOR_NO_LAYOUT);
+  clutter_actor_unset_flags (compositor->window_group, CLUTTER_ACTOR_NO_LAYOUT);
 }
 
 void
 meta_compositor_grab_op_end (MetaCompositor *compositor)
 {
-  MetaCompScreen *info = meta_screen_get_compositor_data (compositor->display->active_screen);
-
-  if (!info)
-    return NULL;
-
-  clutter_actor_set_flags (info->window_group, CLUTTER_ACTOR_NO_LAYOUT);
+  clutter_actor_set_flags (compositor->window_group, CLUTTER_ACTOR_NO_LAYOUT);
 }
