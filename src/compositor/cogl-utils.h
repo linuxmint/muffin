@@ -25,6 +25,7 @@
 
 #include <cogl/cogl.h>
 #include <clutter/clutter.h>
+#include <compositor/compositor-private.h>
 
 CoglTexture * meta_create_color_texture_4ub (guint8           red,
                                              guint8           green,

@@ -158,6 +158,8 @@ check_gl_extensions (void)
   cogl_display = cogl_context_get_display (cogl_context);
   cogl_renderer = cogl_display_get_renderer (cogl_display);
 
+  meta_cogl_hardware_supports_npot_sizes ();
+
   switch (cogl_renderer_get_driver (cogl_renderer))
     {
     case COGL_DRIVER_GL3:

@@ -366,11 +366,9 @@ texture_tower_create_texture (MetaTextureTower *tower,
   if ((!is_power_of_two (width) || !is_power_of_two (height)) &&
       meta_texture_rectangle_check (tower->textures[level - 1]))
     {
-      ClutterBackend *backend = clutter_get_default_backend ();
-      CoglContext *context = clutter_backend_get_cogl_context (backend);
       CoglTextureRectangle *texture_rectangle;
 
-      texture_rectangle = cogl_texture_rectangle_new_with_size (context, width, height);
+      texture_rectangle = cogl_texture_rectangle_new_with_size (meta_compositor_get_cogl_context (), width, height);
       tower->textures[level] = COGL_TEXTURE (texture_rectangle);
     }
   else
@@ -416,9 +414,7 @@ texture_tower_revalidate (MetaTextureTower *tower,
 
   if (!tower->pipeline_template)
     {
-      CoglContext *ctx =
-        clutter_backend_get_cogl_context (clutter_get_default_backend ());
-      tower->pipeline_template = cogl_pipeline_new (ctx);
+      tower->pipeline_template = cogl_pipeline_new (meta_compositor_get_cogl_context ());
       cogl_pipeline_set_blend (tower->pipeline_template, "RGBA = ADD (SRC_COLOR, 0)", NULL);
     }
 
