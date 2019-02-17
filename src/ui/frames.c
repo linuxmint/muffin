@@ -1711,6 +1711,7 @@ meta_frames_motion_notify_event     (GtkWidget           *widget,
   MetaUIFrame *frame;
   MetaFrames *frames;
   MetaFrameControl control;
+  Window xwindow;
   int x, y;
 
   frames = META_FRAMES (widget);
@@ -1718,10 +1719,11 @@ meta_frames_motion_notify_event     (GtkWidget           *widget,
   if (!frames->entered)
     return FALSE;
 
+  xwindow = GDK_WINDOW_XID (event->window);
   x = event->x;
   y = event->y;
 
-  frame = meta_frames_lookup_window (frames, GDK_WINDOW_XID (event->window));
+  frame = meta_frames_lookup_window (frames, xwindow);
   if (frame == NULL)
     return FALSE;
 
@@ -1740,8 +1742,10 @@ meta_frames_motion_notify_event     (GtkWidget           *widget,
       cursor == META_CURSOR_NE_RESIZE ||
       cursor == META_CURSOR_WEST_RESIZE ||
       cursor == META_CURSOR_EAST_RESIZE)))
-    gdk_window_get_device_position (frame->window, event->device,
-                                    &x, &y, NULL);
+    {
+      unsigned int mask;
+      meta_display_get_window_pointer (frames->display, xwindow, &x, &y, &mask);
+    }
 
   control = get_control (frames, frame, x, y);
 
