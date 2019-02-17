@@ -3574,16 +3574,21 @@ meta_window_maximize (MetaWindow        *window,
 
     MetaRectangle old_rect;
     MetaRectangle new_rect;
+    gboolean desktop_effects = meta_prefs_get_desktop_effects ();
 
-    meta_window_get_outer_rect (window, &old_rect);
+    if (desktop_effects)
+      meta_window_get_outer_rect (window, &old_rect);
 
     meta_window_move_resize_now (window);
 
-    meta_window_get_outer_rect (window, &new_rect);
-    meta_compositor_maximize_window (window->display->compositor,
-                                     window,
-                                     &old_rect,
-                                     &new_rect);
+    if (desktop_effects)
+      {
+        meta_window_get_outer_rect (window, &new_rect);
+        meta_compositor_maximize_window (window->display->compositor,
+                                        window,
+                                        &old_rect,
+                                        &new_rect);
+      }
     }
 
   meta_screen_tile_preview_hide (window->screen);
@@ -3782,15 +3787,21 @@ meta_window_real_tile (MetaWindow *window, gboolean force)
     {
       MetaRectangle old_rect;
       MetaRectangle new_rect;
-      meta_window_get_input_rect (window, &old_rect);
+      gboolean desktop_effects = meta_prefs_get_desktop_effects ();
+
+      if (desktop_effects)
+        meta_window_get_input_rect (window, &old_rect);
 
       meta_window_move_resize_now (window);
 
-      meta_window_get_input_rect (window, &new_rect);
-      meta_compositor_tile_window (window->display->compositor,
-                                   window,
-                                   &old_rect,
-                                   &new_rect);
+      if (desktop_effects)
+        {
+          meta_window_get_input_rect (window, &new_rect);
+          meta_compositor_tile_window (window->display->compositor,
+                                      window,
+                                      &old_rect,
+                                      &new_rect);
+        }
 
       if (window->frame)
         meta_ui_queue_frame_draw (window->screen->ui,
@@ -4000,8 +4011,10 @@ meta_window_unmaximize_internal (MetaWindow        *window,
       if (window->resizing_tile_type == META_WINDOW_TILE_TYPE_NONE)
         {
           MetaRectangle old_rect, new_rect;
+          gboolean desktop_effects = meta_prefs_get_desktop_effects ();
 
-          meta_window_get_outer_rect (window, &old_rect);
+          if (desktop_effects)
+            meta_window_get_outer_rect (window, &old_rect);
 
           meta_window_move_resize_internal (window,
                                             META_IS_MOVE_ACTION | META_IS_RESIZE_ACTION,
@@ -4011,11 +4024,14 @@ meta_window_unmaximize_internal (MetaWindow        *window,
                                             target_rect.width,
                                             target_rect.height);
 
-          meta_window_get_outer_rect (window, &new_rect);
-          meta_compositor_unmaximize_window (window->display->compositor,
-                                             window,
-                                             &old_rect,
-                                             &new_rect);
+          if (desktop_effects)
+            {
+              meta_window_get_outer_rect (window, &new_rect);
+              meta_compositor_unmaximize_window (window->display->compositor,
+                                                window,
+                                                &old_rect,
+                                                &new_rect);
+            }
         }
       else
         {
@@ -6136,8 +6152,6 @@ meta_window_focus (MetaWindow  *window,
 
   if (window->wm_state_demands_attention)
     meta_window_unset_demands_attention(window);
-
-/*  meta_effect_run_focus(window, NULL, NULL); */
 }
 
 static void

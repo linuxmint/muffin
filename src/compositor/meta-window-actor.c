@@ -482,13 +482,12 @@ meta_window_actor_constructed (GObject *object)
          effects are enabled. For reasons currently unknown, the re-shape doesn't happen when
          #meta_plugin_map_completed is called after a delay. #window_decorated_notify is not
          always called on re-decoration, and when it is, its only called before the actor is
-         disposed in this case - we can't track after that.
-         FIXME: We should be able to check if window effects are enabled in muffin - regardless
-         if the effects are composed in Cinnamon. */
-      if (priv->window->frame != NULL &&
-          priv->window->decorated &&
-          !priv->window->pending_compositor_effect &&
-          !priv->window->unmaps_pending)
+         disposed in this case - we can't track after that. */
+      if (meta_prefs_get_desktop_effects () &&
+          window->frame != NULL &&
+          window->decorated &&
+          !window->pending_compositor_effect &&
+          !window->unmaps_pending)
         priv->needs_reshape = TRUE;
     }
   else
@@ -1731,6 +1730,7 @@ meta_window_actor_show (MetaWindowActor   *self,
   if (priv->redecorating ||
       priv->screen->display->compositor->switch_workspace_in_progress ||
       event == 0 ||
+      !meta_prefs_get_desktop_effects () ||
       !start_simple_effect (self, event))
     {
       clutter_actor_show (CLUTTER_ACTOR (self));
@@ -1774,6 +1774,7 @@ meta_window_actor_hide (MetaWindowActor *self,
     }
 
   if (event == 0 ||
+      !meta_prefs_get_desktop_effects () ||
       !start_simple_effect (self, event))
     clutter_actor_hide (CLUTTER_ACTOR (self));
 }
