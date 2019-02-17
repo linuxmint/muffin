@@ -611,6 +611,28 @@ frame_cb (CoglOnscreen  *onscreen,
   _clutter_stage_cogl_presented (stage_cogl, frame_event, &clutter_frame_info);
 }
 
+void
+clutter_stage_x11_update_sync_state (ClutterStage *stage,
+                                     gint          state)
+{
+  ClutterStageWindow *stage_window;
+  ClutterStageX11 *stage_x11;
+
+  g_return_if_fail (stage != NULL);
+
+  if (_clutter_get_sync_to_vblank () == state)
+    return;
+
+  stage_window = CLUTTER_STAGE_WINDOW (_clutter_stage_get_window (CLUTTER_STAGE (stage)));
+  stage_x11 = CLUTTER_STAGE_X11 (stage_window);
+
+  g_return_if_fail (stage_x11->onscreen != NULL);
+
+  _clutter_set_sync_to_vblank (state);
+  cogl_onscreen_set_swap_throttled (stage_x11->onscreen, state);
+  clutter_master_clock_set_sync_method (state);
+}
+
 static gboolean
 clutter_stage_x11_realize (ClutterStageWindow *stage_window)
 {
