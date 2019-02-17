@@ -81,6 +81,8 @@
 /* #define DEBUG_TRACE g_print */
 #define DEBUG_TRACE(X)
 
+static MetaCompositor *compositor_global = NULL;
+
 static void
 frame_callback (ClutterStage     *stage,
                 CoglFrameEvent    event,
@@ -1367,13 +1369,12 @@ meta_post_paint_func (gpointer data)
   return TRUE;
 }
 
-static void
-on_shadow_factory_changed (MetaShadowFactory *factory,
-                           MetaCompositor    *compositor)
+void
+meta_compositor_on_shadow_factory_changed (void)
 {
   GList *l;
 
-  for (l = compositor->windows; l; l = l->next)
+  for (l = compositor_global->windows; l; l = l->next)
     meta_window_actor_invalidate_shadow (l->data);
 }
 
@@ -1408,11 +1409,6 @@ meta_compositor_new (MetaDisplay *display)
   XInternAtoms (xdisplay, atom_names, G_N_ELEMENTS (atom_names),
                 False, atoms);
 
-  g_signal_connect (meta_shadow_factory_get_default (),
-                    "changed",
-                    G_CALLBACK (on_shadow_factory_changed),
-                    compositor);
-
   compositor->atom_x_root_pixmap = atoms[0];
   compositor->atom_x_set_root = atoms[1];
   compositor->atom_net_wm_window_opacity = atoms[2];
@@ -1427,6 +1423,9 @@ meta_compositor_new (MetaDisplay *display)
                                            meta_post_paint_func,
                                            compositor,
                                            NULL);
+
+  compositor_global = compositor;
+
   return compositor;
 }
 
