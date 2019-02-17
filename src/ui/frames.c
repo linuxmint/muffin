@@ -259,6 +259,7 @@ meta_frames_init (MetaFrames *frames)
   frames->entered = FALSE;
   frames->last_cursor_x = -1;
   frames->last_cursor_y = -1;
+  frames->last_control = META_FRAME_CONTROL_NONE;
 
   frames->display = meta_get_display ();
   frames->xdisplay = meta_display_get_xdisplay (frames->display);
@@ -1712,6 +1713,7 @@ meta_frames_motion_notify_event     (GtkWidget           *widget,
   MetaFrames *frames;
   MetaFrameControl control;
   Window xwindow;
+  gboolean not_client_area;
   int x, y;
 
   frames = META_FRAMES (widget);
@@ -1720,14 +1722,13 @@ meta_frames_motion_notify_event     (GtkWidget           *widget,
     return FALSE;
 
   xwindow = GDK_WINDOW_XID (event->window);
-  x = event->x;
-  y = event->y;
 
   frame = meta_frames_lookup_window (frames, xwindow);
   if (frame == NULL)
     return FALSE;
 
-  MetaCursor cursor = meta_frame_get_screen_cursor (frame->meta_window->frame);
+  x = event->x;
+  y = event->y;
 
   if (frames->last_cursor_x == x && frames->last_cursor_y == y)
     return FALSE;
@@ -1735,19 +1736,19 @@ meta_frames_motion_notify_event     (GtkWidget           *widget,
   frames->last_cursor_x = x;
   frames->last_cursor_y = y;
 
-  if (frame->meta_window->display->grab_op == META_GRAB_OP_MOVING ||
-      (cursor != META_CURSOR_DEFAULT &&
-      (cursor == META_CURSOR_NORTH_RESIZE ||
-      cursor == META_CURSOR_NW_RESIZE ||
-      cursor == META_CURSOR_NE_RESIZE ||
-      cursor == META_CURSOR_WEST_RESIZE ||
-      cursor == META_CURSOR_EAST_RESIZE)))
+  control = get_control (frames, frame, x, y);
+  not_client_area = control != META_FRAME_CONTROL_CLIENT_AREA;
+
+  /* While using coordinates from the x event is fast, it's not always accurate,
+     so do a round-trip and get the coordinates again IF the cursor is not inside
+     the client area (user is interacting with the application). Our concerns here
+     are only with frame operations, which are not applicable in that case.*/
+  if (not_client_area)
     {
       unsigned int mask;
       meta_display_get_window_pointer (frames->display, xwindow, &x, &y, &mask);
+      control = get_control (frames, frame, x, y);
     }
-
-  control = get_control (frames, frame, x, y);
 
   if (frame->button_state == META_BUTTON_STATE_PRESSED)
     {
@@ -1759,11 +1760,13 @@ meta_frames_motion_notify_event     (GtkWidget           *widget,
           redraw_control (frames, frame, frame->prelit_control);
         }
     }
-  else
+  else if (not_client_area && control != frames->last_control)
     {
       /* Update prelit control and cursor */
       meta_frames_update_prelit_control (frames, frame, control);
     }
+
+  frames->last_control = control;
 
   if ((event->state & GDK_BUTTON1_MASK) &&
       frames->current_grab_op != META_GRAB_OP_NONE)

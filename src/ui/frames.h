@@ -117,6 +117,8 @@ struct _MetaFrames
   Display *xdisplay;
   Window grab_xwindow;
 
+  MetaFrameControl last_control;
+
   guint entered : 1;
   int last_cursor_x;
   int last_cursor_y;
