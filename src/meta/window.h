@@ -197,7 +197,6 @@ gboolean meta_window_can_resize (MetaWindow *window);
 gboolean meta_window_can_tile (MetaWindow *window, MetaTileMode mode);
 gboolean meta_window_tile (MetaWindow *window, MetaTileMode mode, gboolean snap);
 const char *meta_window_get_icon_name (MetaWindow *window);
-gboolean meta_window_create_icon (MetaWindow *window,
-                                  int         width,
-                                  int         height);
+GdkPixbuf *meta_window_create_icon (MetaWindow *window,
+                                    int         size);
 #endif

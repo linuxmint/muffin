@@ -167,7 +167,6 @@ enum {
   PROP_0,
 
   PROP_TITLE,
-  PROP_ICON,
   PROP_DECORATED,
   PROP_FULLSCREEN,
   PROP_MAXIMIZED_HORIZONTALLY,
@@ -285,9 +284,6 @@ meta_window_get_property(GObject         *object,
     case PROP_TITLE:
       g_value_set_string (value, win->title);
       break;
-    case PROP_ICON:
-      g_value_set_object (value, win->icon);
-      break;
     case PROP_DECORATED:
       g_value_set_boolean (value, win->decorated);
       break;
@@ -394,14 +390,6 @@ meta_window_class_init (MetaWindowClass *klass)
                                                         "The title of the window",
                                                         NULL,
                                                         G_PARAM_READABLE));
-  g_object_class_install_property (object_class,
-                                   PROP_ICON,
-                                   g_param_spec_object ("icon",
-                                                        "Icon",
-                                                        "32 pixel sized icon",
-                                                        GDK_TYPE_PIXBUF,
-                                                        G_PARAM_READABLE));
-
 
   g_object_class_install_property (object_class,
                                    PROP_DECORATED,
@@ -1160,6 +1148,7 @@ meta_window_new_with_attrs (MetaDisplay       *display,
   window->title = NULL;
   window->icon_name = NULL;
   window->icon = NULL;
+  window->icon_size = -1;
   meta_icon_cache_init (&window->icon_cache);
   window->theme_icon_name = NULL;
   window->wm_hints_pixmap = None;
@@ -8001,21 +7990,24 @@ meta_window_update_net_wm_type (MetaWindow *window)
 /**
  * meta_window_create_icon:
  * @window: a #MetaWindow
- * @width: width
- * @height: height
+ * @size: icon width and height
  *
  * Creates an icon for @window. This is intended to only be used for
  * window-backed apps.
+ *
+ * Return value: (transfer none): a #GdkPixbuf, or NULL.
  */
-gboolean
+GdkPixbuf *
 meta_window_create_icon (MetaWindow *window,
-                         int         width,
-                         int         height)
+                         int         size)
 {
   GdkPixbuf *icon;
 
   if (window->override_redirect)
-    return FALSE;
+    return NULL;
+
+  if (window->icon && size <= window->icon_size)
+    return window->icon;
 
   icon = NULL;
 
@@ -8025,25 +8017,22 @@ meta_window_create_icon (MetaWindow *window,
                        window->wm_hints_pixmap,
                        window->wm_hints_mask,
                        &icon,
-                       width, height))
+                       size, size))
     {
       /* Cinnamon is handling the fallback icon case in CinnamonApp */
       if (icon == NULL)
-        return FALSE;
+        return NULL;
 
       if (window->icon)
         g_object_unref (G_OBJECT (window->icon));
 
       window->icon = icon;
+      window->icon_size = size;
 
-      g_object_freeze_notify (G_OBJECT (window));
-      g_object_notify (G_OBJECT (window), "icon");
-      g_object_thaw_notify (G_OBJECT (window));
-
-      return TRUE;
+      return icon;
     }
 
-  return FALSE;
+  return NULL;
 }
 
 LOCAL_SYMBOL GList*

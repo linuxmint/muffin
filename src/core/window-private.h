@@ -134,6 +134,8 @@ struct _MetaWindow
 
   GdkPixbuf *icon;
   MetaIconCache icon_cache;
+  int icon_size;
+
   Pixmap wm_hints_pixmap;
   Pixmap wm_hints_mask;
   
