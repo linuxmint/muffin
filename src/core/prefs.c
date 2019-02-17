@@ -97,6 +97,7 @@ static CDesktopTitlebarAction action_right_click_titlebar = C_DESKTOP_TITLEBAR_A
 static CDesktopTitlebarScrollAction action_scroll_titlebar = C_DESKTOP_TITLEBAR_SCROLL_ACTION_NONE;
 static gboolean dynamic_workspaces = FALSE;
 static gboolean unredirect_fullscreen_windows = FALSE;
+static gboolean desktop_effects = TRUE;
 static gboolean sync_to_vblank = TRUE;
 static gboolean threaded_swap = TRUE;
 static gboolean send_frame_timings = TRUE;
@@ -347,6 +348,13 @@ static MetaBoolPreference preferences_bool[] =
         META_PREF_UNREDIRECT_FULLSCREEN_WINDOWS,
       },
       &unredirect_fullscreen_windows,
+    },
+    {
+      { "desktop-effects",
+        SCHEMA_MUFFIN,
+        META_PREF_DESKTOP_EFFECTS,
+      },
+      &desktop_effects,
     },
     {
       { "sync-to-vblank",
@@ -1765,6 +1773,12 @@ gboolean
 meta_prefs_get_unredirect_fullscreen_windows (void)
 {
   return unredirect_fullscreen_windows;
+}
+
+gboolean
+meta_prefs_get_desktop_effects (void)
+{
+  return desktop_effects;
 }
 
 gboolean
