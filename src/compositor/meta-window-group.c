@@ -8,7 +8,7 @@
 #include <gdk/gdk.h> /* for gdk_rectangle_intersect() */
 
 #include <core/screen-private.h>
-
+#include <core/window-private.h>
 #include "clutter-utils.h"
 #include "compositor-private.h"
 #include "meta-window-actor-private.h"
@@ -277,7 +277,10 @@ meta_window_group_paint (ClutterActor *actor)
       cairo_rectangle_int_t unredirected_rect;
       MetaWindow *window = meta_window_actor_get_meta_window (compositor->unredirected_window);
 
-      meta_window_get_outer_rect (window, (MetaRectangle *)&unredirected_rect);
+      unredirected_rect.x = window->outer_rect.x;
+      unredirected_rect.y = window->outer_rect.y;
+      unredirected_rect.width = window->outer_rect.width;
+      unredirected_rect.height = window->outer_rect.height;
       cairo_region_subtract_rectangle (unobscured_region, &unredirected_rect);
       cairo_region_subtract_rectangle (clip_region, &unredirected_rect);
     }

@@ -2620,7 +2620,7 @@ handle_move_to (MetaDisplay    *display,
 
   monitor = meta_screen_get_current_monitor (window->screen);
   meta_window_get_work_area_for_monitor (window, monitor, &work_area);
-  meta_window_get_outer_rect (window, &outer);
+  outer = window->outer_rect;
 
   if (direction & META_MOVE_TO_XCHANGE_FLAG) {
     new_x = work_area.x + (direction & META_MOVE_TO_RIGHT_FLAG ?
@@ -3108,7 +3108,7 @@ handle_move_to_monitor (MetaDisplay    *display,
   gint which = binding->handler->data;
   const MetaMonitorInfo *current, *new;
 
-  current = meta_screen_get_monitor_for_window (screen, window);
+  current = meta_screen_get_monitor_for_rect (screen, &window->outer_rect);
   new = meta_screen_get_monitor_neighbor (screen, current->number, which);
 
   if (new == NULL)
@@ -3142,15 +3142,12 @@ handle_raise_or_lower (MetaDisplay    *display,
 
   while (above)
     {
-      MetaRectangle tmp, win_rect, above_rect;
-      
+      MetaRectangle tmp;
+
       if (above->mapped && meta_window_should_be_showing(above))
         {
-          meta_window_get_outer_rect (window, &win_rect);
-          meta_window_get_outer_rect (above, &above_rect);
-          
           /* Check if obscured */
-          if (meta_rectangle_intersect (&win_rect, &above_rect, &tmp))
+          if (meta_rectangle_intersect (&window->outer_rect, &above->outer_rect, &tmp))
             {
               meta_window_raise (window);
               return;

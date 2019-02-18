@@ -724,14 +724,11 @@ meta_shape_cow_for_window (MetaScreen *screen,
       XserverRegion output_region;
       XRectangle screen_rect, window_bounds;
       int width, height;
-      MetaRectangle rect;
 
-      meta_window_get_outer_rect (metaWindow, &rect);
-
-      window_bounds.x = rect.x;
-      window_bounds.y = rect.y;
-      window_bounds.width = rect.width;
-      window_bounds.height = rect.height;
+      window_bounds.x = metaWindow->outer_rect.x;
+      window_bounds.y = metaWindow->outer_rect.y;
+      window_bounds.width = metaWindow->outer_rect.width;
+      window_bounds.height = metaWindow->outer_rect.height;
 
       meta_screen_get_size (screen, &width, &height);
       screen_rect.x = 0;

@@ -2198,17 +2198,6 @@ meta_screen_get_monitor_for_rect (MetaScreen    *screen,
   return &screen->monitor_infos[best_monitor];
 }
 
-LOCAL_SYMBOL const MetaMonitorInfo*
-meta_screen_get_monitor_for_window (MetaScreen *screen,
-                                    MetaWindow *window)
-{
-  MetaRectangle window_rect;
-  
-  meta_window_get_outer_rect (window, &window_rect);
-
-  return meta_screen_get_monitor_for_rect (screen, &window_rect);
-}
-
 int
 meta_screen_get_monitor_index_for_rect (MetaScreen    *screen,
                                         MetaRectangle *rect)

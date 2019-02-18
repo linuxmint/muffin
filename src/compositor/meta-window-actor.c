@@ -2250,13 +2250,10 @@ meta_window_actor_process_damage (MetaWindowActor    *self,
 
   if (meta_window_is_fullscreen (priv->window) && g_list_last (compositor->windows)->data == self)
     {
-      MetaRectangle window_rect;
-      meta_window_get_outer_rect (priv->window, &window_rect);
-
       if (event->area.x == 0 &&
           event->area.y == 0 &&
-          window_rect.width == event->area.width &&
-          window_rect.height == event->area.height)
+          priv->window->outer_rect.width == event->area.width &&
+          priv->window->outer_rect.height == event->area.height)
         priv->full_damage_frames_count++;
       else
         priv->full_damage_frames_count = 0;
