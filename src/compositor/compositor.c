@@ -1553,6 +1553,20 @@ meta_compositor_hide_hud_preview (MetaCompositor *compositor,
   meta_plugin_manager_hide_hud_preview (compositor->plugin_mgr);
 }
 
+MetaWindow *
+meta_compositor_get_window_for_xwindow (Window xwindow)
+{
+  GList *l;
+
+  for (l = compositor_global->windows; l; l = l->next)
+    {
+      MetaWindow *window = meta_window_actor_get_meta_window (l->data);
+      if (window->xwindow == xwindow)
+        return window;
+    }
+  return NULL;
+}
+
 /**
  * meta_compositor_monotonic_time_to_server_time:
  * @display: a #MetaDisplay

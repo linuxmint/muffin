@@ -30,6 +30,7 @@
 #include "menu.h"
 #include "core.h"
 #include "theme-private.h"
+#include "window-private.h"
 
 #include "inlinepixbufs.h"
 
@@ -110,6 +111,7 @@ maybe_redirect_mouse_event (XEvent *xevent)
   GdkEvent *gevent;
   GdkWindow *gdk_window;
   Window window;
+  MetaWindow *mw;
 
   switch (xevent->type)
     {
@@ -127,6 +129,11 @@ maybe_redirect_mouse_event (XEvent *xevent)
     default:
       return FALSE;
     }
+
+  mw = meta_compositor_get_window_for_xwindow (window);
+
+  if (!mw || !mw->frame)
+    return FALSE;
 
   gdisplay = gdk_x11_lookup_xdisplay (xevent->xany.display);
   ui = g_object_get_data (G_OBJECT (gdisplay), "meta-ui");

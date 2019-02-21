@@ -66,6 +66,8 @@ CoglContext * meta_compositor_get_cogl_context (void);
 
 void meta_switch_workspace_completed (MetaScreen    *screen);
 
+MetaWindow * meta_compositor_get_window_for_xwindow (Window xwindow);
+
 gboolean meta_begin_modal_for_plugin (MetaScreen       *screen,
                                       MetaPlugin       *plugin,
                                       Window            grab_window,

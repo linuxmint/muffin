@@ -1713,7 +1713,6 @@ meta_frames_motion_notify_event     (GtkWidget           *widget,
   MetaFrames *frames;
   MetaFrameControl control;
   Window xwindow;
-  gboolean not_client_area;
   int x, y;
 
   frames = META_FRAMES (widget);
@@ -1737,18 +1736,6 @@ meta_frames_motion_notify_event     (GtkWidget           *widget,
   frames->last_cursor_y = y;
 
   control = get_control (frames, frame, x, y);
-  not_client_area = control != META_FRAME_CONTROL_CLIENT_AREA;
-
-  /* While using coordinates from the x event is fast, it's not always accurate,
-     so do a round-trip and get the coordinates again IF the cursor is not inside
-     the client area (user is interacting with the application). Our concerns here
-     are only with frame operations, which are not applicable in that case.*/
-  if (not_client_area)
-    {
-      unsigned int mask;
-      meta_display_get_window_pointer (frames->display, xwindow, &x, &y, &mask);
-      control = get_control (frames, frame, x, y);
-    }
 
   if (frame->button_state == META_BUTTON_STATE_PRESSED)
     {
@@ -1760,7 +1747,7 @@ meta_frames_motion_notify_event     (GtkWidget           *widget,
           redraw_control (frames, frame, frame->prelit_control);
         }
     }
-  else if (not_client_area && control != frames->last_control)
+  else if (control != META_FRAME_CONTROL_CLIENT_AREA && control != frames->last_control)
     {
       /* Update prelit control and cursor */
       meta_frames_update_prelit_control (frames, frame, control);
