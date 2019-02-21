@@ -9,12 +9,12 @@
  * which the rest of the world is allowed to use.)
  */
 
-/* 
+/*
  * Copyright (C) 2001 Havoc Pennington
  * Copyright (C) 2002 Red Hat, Inc.
  * Copyright (C) 2003, 2004 Rob Adams
  * Copyright (C) 2004-2006 Elijah Newren
- * 
+ *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
  * published by the Free Software Foundation; either version 2 of the
@@ -24,7 +24,7 @@
  * WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street - Suite 500, Boston, MA
@@ -110,7 +110,7 @@ typedef enum
 struct _MetaWindow
 {
   GObject parent_instance;
-  
+
   MetaDisplay *display;
   MetaScreen *screen;
   const MetaMonitorInfo *monitor;
@@ -138,10 +138,10 @@ struct _MetaWindow
 
   Pixmap wm_hints_pixmap;
   Pixmap wm_hints_mask;
-  
+
   MetaWindowType type;
   Atom type_atom;
-  
+
   /* NOTE these five are not in UTF-8, we just treat them as random
    * binary data
    */
@@ -160,20 +160,20 @@ struct _MetaWindow
   char *gtk_window_object_path;
   char *gtk_app_menu_object_path;
   char *gtk_menubar_object_path;
-  
+
   int hide_titlebar_when_maximized;
   int net_wm_pid;
-  
+
   Window xtransient_for;
   Window xgroup_leader;
   Window xclient_leader;
 
   /* Initial workspace property */
-  int initial_workspace;  
-  
+  int initial_workspace;
+
   /* Initial timestamp property */
-  guint32 initial_timestamp;  
-  
+  guint32 initial_timestamp;
+
   /* Whether this is an override redirect window or not */
   guint override_redirect : 1;
 
@@ -233,7 +233,7 @@ struct _MetaWindow
    * these monitors.  If not, this is the single monitor which the window's
    * origin is on. */
   long fullscreen_monitors[4];
-  
+
   /* Whether we're trying to constrain the window to be fully onscreen */
   guint require_fully_onscreen : 1;
 
@@ -262,7 +262,7 @@ struct _MetaWindow
    * see also unmaps_pending
    */
   guint mapped : 1;
-  
+
   /* Whether window has been hidden from view by lowering it to the bottom
    * of window stack.
    */
@@ -288,23 +288,23 @@ struct _MetaWindow
 
   /* whether an initial workspace was explicitly set */
   guint initial_workspace_set : 1;
-  
+
   /* whether an initial timestamp was explicitly set */
   guint initial_timestamp_set : 1;
-  
+
   /* whether net_wm_user_time has been set yet */
   guint net_wm_user_time_set : 1;
 
   /* whether net_wm_icon_geometry has been set */
   guint icon_geometry_set: 1;
-  
+
   /* These are the flags from WM_PROTOCOLS */
   guint take_focus : 1;
   guint delete_window : 1;
   guint net_wm_ping : 1;
   /* Globally active / No input */
   guint input : 1;
-  
+
   /* MWM hints about features of window */
   guint mwm_decorated : 1;
   guint mwm_border_only : 1;
@@ -313,7 +313,7 @@ struct _MetaWindow
   guint mwm_has_maximize_func : 1;
   guint mwm_has_move_func : 1;
   guint mwm_has_resize_func : 1;
-  
+
   /* Computed features of window */
   guint decorated : 1;
   guint border_only : 1;
@@ -325,7 +325,7 @@ struct _MetaWindow
   guint has_move_func : 1;
   guint has_resize_func : 1;
   guint has_fullscreen_func : 1;
-  
+
   /* Weird "_NET_WM_STATE_MODAL" flag */
   guint wm_state_modal : 1;
 
@@ -343,7 +343,7 @@ struct _MetaWindow
 
   /* EWHH demands attention flag */
   guint wm_state_demands_attention : 1;
-  
+
   /* this flag tracks receipt of focus_in focus_out */
   guint has_focus : 1;
 
@@ -364,15 +364,15 @@ struct _MetaWindow
 
   /* Are we in meta_window_new()? */
   guint constructing : 1;
-  
+
   /* Are we in the various queues? (Bitfield: see META_WINDOW_IS_IN_QUEUE) */
   guint is_in_queues : NUMBER_OF_QUEUES;
- 
+
   /* Used by keybindings.c */
   guint keys_grabbed : 1;     /* normal keybindings grabbed */
   guint grab_on_frame : 1;    /* grabs are on the frame */
   guint all_keys_grabbed : 1; /* AnyKey grabbed */
-  
+
   /* Set if the reason for unmanaging the window is that
    * it was withdrawn
    */
@@ -397,7 +397,7 @@ struct _MetaWindow
 
   /* icon props have changed */
   guint need_reread_icon : 1;
-  
+
   /* if TRUE, window was maximized at start of current grab op */
   guint shaken_loose : 1;
 
@@ -432,7 +432,7 @@ struct _MetaWindow
   /* alarm monitoring client's _NET_WM_SYNC_REQUEST_COUNTER */
   XSyncAlarm sync_request_alarm;
 #endif
-  
+
   /* Number of UnmapNotify that are caused by us, if
    * we get UnmapNotify with none pending then the client
    * is withdrawing the window.
@@ -448,11 +448,11 @@ struct _MetaWindow
 
   /* window that gets updated net_wm_user_time values */
   Window user_time_window;
-  
+
   /* The size we set the window to last (i.e. what we believe
    * to be its actual size on the server). The x, y are
    * the actual server-side x,y so are relative to the frame
-   * (meaning that they just hold the frame width and height) 
+   * (meaning that they just hold the frame width and height)
    * or the root window (meaning they specify the location
    * of the top left of the inner window) as appropriate.
    */
@@ -496,7 +496,7 @@ struct _MetaWindow
   /* Managed by stack.c */
   MetaStackLayer layer;
   int stack_position; /* see comment in stack.h */
-  
+
   /* Current dialog open for this window */
   int dialog_pid;
 
@@ -788,6 +788,7 @@ void meta_window_recalc_features    (MetaWindow *window);
 void meta_window_recalc_window_type (MetaWindow *window);
 
 void meta_window_frame_size_changed (MetaWindow *window);
+void meta_window_update_rects (MetaWindow *window);
 
 void meta_window_stack_just_below (MetaWindow *window,
                                    MetaWindow *below_this_one);

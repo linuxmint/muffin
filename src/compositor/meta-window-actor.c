@@ -1686,6 +1686,7 @@ meta_window_actor_sync_actor_geometry (MetaWindowActor *self,
 
   if (priv->size_changed)
     {
+      meta_window_update_rects (priv->window);
       priv->needs_pixmap = TRUE;
       meta_window_actor_update_shape (self);
       clutter_actor_set_size (CLUTTER_ACTOR (self),
@@ -2427,7 +2428,7 @@ check_needs_reshape (MetaWindowActor *self)
   MetaScreen *screen = priv->screen;
   MetaDisplay *display = meta_screen_get_display (screen);
   cairo_region_t *region = NULL;
-  cairo_rectangle_int_t client_area;
+  cairo_rectangle_int_t *client_area;
   gboolean full_mask_reset = priv->window->fullscreen;
 
   if ((!priv->window->mapped && !priv->window->shaded) || !priv->needs_reshape)
@@ -2437,7 +2438,7 @@ check_needs_reshape (MetaWindowActor *self)
   g_clear_pointer (&priv->shadow_shape, meta_window_shape_unref);
   g_clear_pointer (&priv->opaque_region, cairo_region_destroy);
 
-  meta_window_get_client_area_rect (priv->window, &client_area);
+  client_area = &priv->window->client_area;
 
   if (priv->window->frame)
     region = meta_window_get_frame_bounds (priv->window);
@@ -2452,7 +2453,7 @@ check_needs_reshape (MetaWindowActor *self)
     {
       /* If we have no region, we have no frame. We have no frame,
        * so just use the client_area instead */
-      region = cairo_region_create_rectangle (&client_area);
+      region = cairo_region_create_rectangle (client_area);
     }
 
 #ifdef HAVE_SHAPE
@@ -2463,7 +2464,7 @@ check_needs_reshape (MetaWindowActor *self)
       int n_rects, ordering;
 
       /* Punch out client area. */
-      cairo_region_subtract_rectangle (region, &client_area);
+      cairo_region_subtract_rectangle (region, client_area);
 
       meta_error_trap_push (display);
       rects = XShapeGetRectangles (xdisplay,
@@ -2478,8 +2479,8 @@ check_needs_reshape (MetaWindowActor *self)
           int i;
           for (i = 0; i < n_rects; i ++)
             {
-              cairo_rectangle_int_t rect = { rects[i].x + client_area.x,
-                                             rects[i].y + client_area.y,
+              cairo_rectangle_int_t rect = { rects[i].x + client_area->x,
+                                             rects[i].y + client_area->y,
                                              rects[i].width,
                                              rects[i].height };
               cairo_region_union_rectangle (region, &rect);
@@ -2502,7 +2503,7 @@ check_needs_reshape (MetaWindowActor *self)
        * case, graphical glitches will occur.
        */
       priv->opaque_region = cairo_region_copy (priv->window->opaque_region);
-      cairo_region_translate (priv->opaque_region, client_area.x, client_area.y);
+      cairo_region_translate (priv->opaque_region, client_area->x, client_area->y);
       cairo_region_intersect (priv->opaque_region, region);
     }
   else if (priv->argb32)

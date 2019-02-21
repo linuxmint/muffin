@@ -8403,13 +8403,19 @@ recalc_window_type (MetaWindow *window)
 }
 
 void
+meta_window_update_rects (MetaWindow *window)
+{
+  get_outer_rect (window, &window->outer_rect);
+  get_client_area_rect (window, &window->client_area);
+}
+
+void
 meta_window_frame_size_changed (MetaWindow *window)
 {
   if (window->frame)
     meta_frame_clear_cached_borders (window->frame);
 
-  get_outer_rect (window, &window->outer_rect);
-  get_client_area_rect (window, &window->client_area);
+  meta_window_update_rects (window);
 }
 
 static void
