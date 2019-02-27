@@ -2296,7 +2296,7 @@ get_control (MetaFrames *frames,
 
   window = frame->meta_window;
 
-  meta_window_get_client_area_rect (window, &client);
+  client = window->client_area;
 
   if (POINT_IN_RECT (x, y, client))
     return META_FRAME_CONTROL_CLIENT_AREA;
