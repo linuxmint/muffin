@@ -466,11 +466,8 @@ meta_window_actor_decorated_notify (MetaWindowActor *self)
     }
 
   priv->xwindow = new_xwindow;
-
-  /*
-   * Recreate the contents.
-   */
-  meta_window_actor_constructed (G_OBJECT (self));
+  priv->damage = XDamageCreate (xdisplay, new_xwindow,
+                                XDamageReportBoundingBox);
 }
 
 void
@@ -505,30 +502,12 @@ meta_window_actor_constructed (GObject *object)
   if (format && format->type == PictTypeDirect && format->direct.alphaMask)
     priv->argb32 = TRUE;
 
-  if (!priv->redecorating)
-    {
-
-      /* Fix for the case when clients try to re-map their windows after re-decorating while
-         effects are enabled. For reasons currently unknown, the re-shape doesn't happen when
-         #meta_plugin_map_completed is called after a delay. #window_decorated_notify is not
-         always called on re-decoration, and when it is, its only called before the actor is
-         disposed in this case - we can't track after that. */
-      if (meta_prefs_get_desktop_effects () &&
-          window->frame != NULL &&
-          window->decorated &&
-          !window->pending_compositor_effect &&
-          !window->unmaps_pending)
-        priv->needs_reshape = TRUE;
-    }
-  else if (priv->shape_region)
-    g_clear_pointer (&priv->shape_region, cairo_region_destroy);
+  priv->shape_region = cairo_region_create();
 
   /* Opacity handling */
   meta_window_actor_update_opacity (self, 0);
   maybe_desaturate_window (actor, priv->opacity);
   priv->clip_shadow = clip_shadow_under_window (self);
-
-  priv->shape_region = cairo_region_create();
 }
 
 static void
