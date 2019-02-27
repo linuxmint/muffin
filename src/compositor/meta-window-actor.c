@@ -1378,12 +1378,12 @@ meta_window_actor_has_shadow (MetaWindowActor *self)
    * win and also prevents the unsightly effect of the shadow of maximized
    * window appearing on an adjacent window */
   if ((meta_window_get_maximized (priv->window) == (META_MAXIMIZE_HORIZONTAL | META_MAXIMIZE_VERTICAL)) ||
-      meta_window_is_fullscreen (priv->window))
+      priv->window->fullscreen)
     return FALSE;
 
   /* Don't shadow tiled windows of any type */
 
-  if (meta_window_get_tile_type (priv->window) != META_WINDOW_TILE_TYPE_NONE)
+  if (priv->window->tile_type != META_WINDOW_TILE_TYPE_NONE)
     return FALSE;
 
   /*
@@ -1392,7 +1392,7 @@ meta_window_actor_has_shadow (MetaWindowActor *self)
    */
   if (priv->window)
     {
-      if (meta_window_get_frame (priv->window))
+      if (priv->window->frame)
         return TRUE;
     }
 
@@ -1430,7 +1430,7 @@ meta_window_actor_has_shadow (MetaWindowActor *self)
       )
     return TRUE;
 
-  if (meta_window_is_client_decorated (priv->window))
+  if (priv->window->has_custom_frame_extents)
     {
       return FALSE;
     }
@@ -1590,7 +1590,7 @@ meta_window_actor_get_workspace (MetaWindowActor *self)
 
   priv = self->priv;
 
-  if (!priv->window || meta_window_is_on_all_workspaces (priv->window))
+  if (!priv->window || priv->window->on_all_workspaces)
     return -1;
 
   workspace = meta_window_get_workspace (priv->window);
@@ -1598,7 +1598,7 @@ meta_window_actor_get_workspace (MetaWindowActor *self)
   if (!workspace)
     return -1;
 
-  return meta_workspace_index (workspace);
+  return g_list_index (workspace->screen->workspaces, workspace);
 }
 
 gboolean
@@ -1686,11 +1686,15 @@ update_area (MetaWindowActor *self,
 {
   MetaWindowActorPrivate *priv = self->priv;
   CoglTexture *texture;
+  cairo_region_t *unobscured_region = clutter_actor_has_mapped_clones (self) ? NULL
+    : priv->unobscured_region;
 
   texture = priv->texture;
 
   cogl_texture_pixmap_x11_update_area (COGL_TEXTURE_PIXMAP_X11 (texture),
                                        x, y, width, height);
+  priv->repaint_scheduled = meta_window_actor_update_area (self, x, y, width, height,
+                                                           unobscured_region);
 }
 
 static void
@@ -1707,11 +1711,6 @@ meta_window_actor_damage_all (MetaWindowActor *self)
   priv->needs_damage_all = FALSE;
 
   update_area (self, 0, 0, cogl_texture_get_width (texture), cogl_texture_get_height (texture));
-  priv->repaint_scheduled = meta_window_actor_update_area (self,
-                                   0, 0,
-                                   cogl_texture_get_width (texture),
-                                   cogl_texture_get_height (texture),
-                                   clutter_actor_has_mapped_clones (self) ? NULL : priv->unobscured_region);
 }
 
 static void
@@ -1811,12 +1810,6 @@ meta_window_actor_effect_in_progress (MetaWindowActor *self)
 	  priv->map_in_progress ||
     priv->tile_in_progress ||
 	  priv->destroy_in_progress);
-}
-
-static gboolean
-is_frozen (MetaWindowActor *self)
-{
-  return self->priv->freeze_count ? TRUE : FALSE;
 }
 
 static gboolean
@@ -2076,13 +2069,15 @@ meta_window_actor_should_unredirect (MetaWindowActor *self)
   if (metaWindow->has_shape)
     return FALSE;
 
-  if (priv->argb32 && !meta_window_requested_bypass_compositor (metaWindow))
+  gboolean requested_bypass_compositor = meta_window_requested_bypass_compositor (metaWindow);
+
+  if (priv->argb32 && !requested_bypass_compositor)
     return FALSE;
 
   if (!meta_window_is_monitor_sized (metaWindow))
     return FALSE;
 
-  if (meta_window_requested_bypass_compositor (metaWindow))
+  if (requested_bypass_compositor)
     return TRUE;
 
   if (metaWindow->override_redirect)
@@ -2102,7 +2097,7 @@ meta_window_actor_set_redirected (MetaWindowActor *self, gboolean state)
   MetaDisplay *display = metaWindow->display;
 
   Display *xdisplay = display->xdisplay;
-  Window  xwin = meta_window_actor_get_x_window (self);
+  Window xwin = meta_window_actor_get_x_window (self);
 
   meta_error_trap_push (display);
 
@@ -2195,7 +2190,7 @@ meta_window_actor_sync_actor_geometry (MetaWindowActor *self,
    * is shown, the map effect will go into effect and prevent further geometry
    * updates.
    */
-  if (is_frozen (self) && !did_placement)
+  if (priv->freeze_count && !did_placement)
     return;
 
   if (meta_window_actor_effect_in_progress (self))
@@ -2837,12 +2832,6 @@ meta_window_actor_process_damage (MetaWindowActor    *self,
     return;
 
   update_area (self, event->area.x, event->area.y, event->area.width, event->area.height);
-  priv->repaint_scheduled = meta_window_actor_update_area (self,
-                                   event->area.x,
-                                   event->area.y,
-                                   event->area.width,
-                                   event->area.height,
-                                   clutter_actor_has_mapped_clones (self) ? NULL : priv->unobscured_region);
 }
 
 LOCAL_SYMBOL void
@@ -3163,7 +3152,7 @@ meta_window_actor_update_shape (MetaWindowActor *self)
 
   priv->needs_reshape = TRUE;
 
-  if (is_frozen (self))
+  if (priv->freeze_count)
     return;
 
   clutter_actor_queue_redraw (CLUTTER_ACTOR (self));
@@ -3177,7 +3166,7 @@ meta_window_actor_handle_updates (MetaWindowActor *self)
   MetaDisplay *display  = screen->display;
   Display *xdisplay = display->xdisplay;
 
-  if (is_frozen (self))
+  if (priv->freeze_count)
     {
       /* The window is frozen due to a pending animation: we'll wait until
        * the animation finishes to reshape and repair the window */
@@ -3383,7 +3372,7 @@ meta_window_actor_invalidate_shadow (MetaWindowActor *self)
   priv->recompute_focused_shadow = TRUE;
   priv->recompute_unfocused_shadow = TRUE;
 
-  if (is_frozen (self))
+  if (priv->freeze_count)
     return;
 
   clutter_actor_queue_redraw (CLUTTER_ACTOR (self));
