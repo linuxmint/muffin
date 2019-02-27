@@ -4347,7 +4347,7 @@ meta_window_adjust_opacity (MetaWindow   *window,
   }
 
   if (new_opacity != current_opacity) {
-    clutter_actor_set_opacity (actor, (guint8) new_opacity);
+    meta_compositor_update_opacity (actor, (guint8) new_opacity);
   }
 }
 

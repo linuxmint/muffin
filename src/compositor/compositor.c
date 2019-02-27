@@ -207,7 +207,7 @@ process_property_notify (MetaCompositor	*compositor,
   /* Check for the opacity changing */
   if (event->atom == compositor->atom_net_wm_window_opacity)
     {
-      meta_window_actor_update_opacity (window_actor);
+      meta_window_actor_update_opacity (window_actor, 0);
       DEBUG_TRACE ("process_property_notify: net_wm_window_opacity\n");
       return;
     }
@@ -1647,4 +1647,11 @@ meta_compositor_update_sync_state (MetaCompositor *compositor,
                                    gboolean state)
 {
   clutter_stage_x11_update_sync_state (compositor->stage, state);
+}
+
+void
+meta_compositor_update_opacity (ClutterActor    *actor,
+                                guint8           opacity)
+{
+  meta_window_actor_update_opacity (META_WINDOW_ACTOR (actor), opacity);
 }

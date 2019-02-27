@@ -49,7 +49,8 @@ void     meta_window_actor_sync_actor_geometry (MetaWindowActor *self,
                                                 gboolean         did_placement);
 void     meta_window_actor_sync_visibility     (MetaWindowActor *self);
 void     meta_window_actor_update_shape        (MetaWindowActor *self);
-void     meta_window_actor_update_opacity      (MetaWindowActor *self);
+void     meta_window_actor_update_opacity      (MetaWindowActor *self,
+                                                guint8           opacity);
 void     meta_window_actor_mapped              (MetaWindowActor *self);
 void     meta_window_actor_unmapped            (MetaWindowActor *self);
 void     meta_window_actor_set_updates_frozen  (MetaWindowActor *self,

@@ -530,7 +530,7 @@ meta_window_actor_constructed (GObject *object)
     g_clear_pointer (&priv->shape_region, cairo_region_destroy);
 
   /* Opacity handling */
-  meta_window_actor_update_opacity (self);
+  meta_window_actor_update_opacity (self, 0);
   maybe_desaturate_window (actor, priv->opacity);
   priv->clip_shadow = clip_shadow_under_window (self);
 
@@ -3556,8 +3556,9 @@ meta_window_actor_invalidate_shadow (MetaWindowActor *self)
   clutter_actor_queue_redraw (CLUTTER_ACTOR (self));
 }
 
-LOCAL_SYMBOL void
-meta_window_actor_update_opacity (MetaWindowActor *self)
+void
+meta_window_actor_update_opacity (MetaWindowActor *self,
+                                  guint8           opacity)
 {
   MetaWindowActorPrivate *priv = self->priv;
 
@@ -3565,20 +3566,23 @@ meta_window_actor_update_opacity (MetaWindowActor *self)
     return;
 
   ClutterActor *actor = CLUTTER_ACTOR (self);
-  MetaDisplay *display = priv->screen->display;
-  MetaCompositor *compositor = display->compositor;
-  Window xwin = priv->window->xwindow;
-  gulong value;
-  guint8 opacity;
 
-  if (meta_prop_get_cardinal (display, xwin,
-                              compositor->atom_net_wm_window_opacity,
-                              &value))
+  if (!opacity)
     {
-      opacity = (guint8)((gfloat)value * 255.0 / ((gfloat)0xffffffff));
+      MetaDisplay *display = priv->screen->display;
+      MetaCompositor *compositor = display->compositor;
+      Window xwin = priv->window->xwindow;
+      gulong value;
+
+      if (meta_prop_get_cardinal (display, xwin,
+                                  compositor->atom_net_wm_window_opacity,
+                                  &value))
+        {
+          opacity = (guint8)((gfloat)value * 255.0 / ((gfloat)0xffffffff));
+        }
+      else
+        opacity = 255;
     }
-  else
-    opacity = 255;
 
   priv->opacity = opacity;
 
