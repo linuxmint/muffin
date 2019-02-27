@@ -746,10 +746,9 @@ void
 meta_compositor_remove_window (MetaCompositor *compositor,
                                MetaWindow     *window)
 {
-  MetaWindowActor         *window_actor     = NULL;
+  MetaWindowActor *window_actor = window->compositor_private;
   MetaScreen *screen;
 
-  window_actor = window->compositor_private;
   if (!window_actor)
     return;
 
@@ -1464,7 +1463,7 @@ meta_compositor_set_all_obscured (MetaCompositor *compositor,
   GList *l;
 
   for (l = compositor->windows; l; l = l->next)
-    meta_window_actor_set_obscured_timed (l->data, obscured);
+    meta_window_actor_override_obscured_internal (l->data, obscured);
 }
 
 void

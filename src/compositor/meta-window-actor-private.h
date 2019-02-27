@@ -82,7 +82,7 @@ void meta_window_actor_appears_focused_notify (MetaWindowActor *self);
 void meta_window_actor_sync_actor_geometry (MetaWindowActor *self,
                                             gboolean         did_placement);
 
-void meta_window_actor_set_obscured_timed (MetaWindowActor *self,
-                                           gboolean         obscured);
+void meta_window_actor_override_obscured_internal (MetaWindowActor *self,
+                                                   gboolean         obscured);
 
 #endif /* META_WINDOW_ACTOR_PRIVATE_H */

@@ -167,6 +167,7 @@ struct _MetaWindowActorPrivate
   guint             obscured : 1;
   guint             extend_obscured_timer : 1;
   guint             obscured_lock : 1;
+  guint             public_obscured_lock : 1;
   guint             reset_obscured_timeout_id;
   guint             clip_shadow : 1;
 
@@ -1114,8 +1115,6 @@ texture_paint (ClutterActor *actor,
   if (use_opaque_region)
     {
       cairo_region_t *region;
-      int n_rects;
-      int i;
 
       if (clip)
         {
@@ -1129,6 +1128,9 @@ texture_paint (ClutterActor *actor,
 
       if (!cairo_region_is_empty (region))
         {
+          int n_rects;
+          int i;
+
           CoglPipeline *opaque_pipeline = get_unblended_pipeline (ctx);
           cogl_pipeline_set_layer_texture (opaque_pipeline, 0, paint_tex);
           cogl_pipeline_set_layer_filters (opaque_pipeline, 0, filter, filter);
@@ -1810,7 +1812,7 @@ meta_window_actor_check_obscured (MetaWindowActor *self)
       return;
     }
 
-  if (priv->obscured_lock)
+  if (priv->obscured_lock || priv->public_obscured_lock)
     return;
 
   /* Invisible (minimized) windows fail the cairo_region_intersect test,
@@ -1844,7 +1846,7 @@ reset_obscured (gpointer data)
   MetaWindowActor *self = (MetaWindowActor *) data;
   MetaWindowActorPrivate *priv = self->priv;
 
-  if (priv->extend_obscured_timer)
+  if (priv->extend_obscured_timer || priv->public_obscured_lock)
     {
       priv->extend_obscured_timer = FALSE;
       return G_SOURCE_CONTINUE;
@@ -1852,7 +1854,8 @@ reset_obscured (gpointer data)
 
   priv->obscured_lock = FALSE;
 
-  meta_window_actor_check_obscured (self);
+  if (!priv->window->has_focus)
+    meta_window_actor_check_obscured (self);
 
   priv->reset_obscured_timeout_id = 0;
   return G_SOURCE_REMOVE;
@@ -1876,42 +1879,26 @@ meta_window_actor_set_obscured (MetaWindowActor *self,
 {
   MetaWindowActorPrivate *priv = self->priv;
 
-  // If the timer is in progress when a plugin wants to override the obscured state,
-  // let it continue - this means a window operation is pending - which is always
-  // higher priority than the plugin.
-  if (priv->reset_obscured_timeout_id)
-    {
-      if (obscured)
-        {
-          priv->extend_obscured_timer = TRUE;
-          return;
-        }
-
-      priv->obscured_lock = FALSE;
-      g_source_remove (priv->reset_obscured_timeout_id);
-      priv->reset_obscured_timeout_id = 0;
-    }
-
   // obscured_lock blocks state changes to the obscured property to prevent
   // race conditions. We don't know much about the behavior of the cinnamon
   // plugin from here, so give it higher priority than stack synchronizations.
   if (obscured)
     {
-      priv->obscured_lock = FALSE;
+      priv->public_obscured_lock = FALSE;
       meta_window_actor_check_obscured (self);
     }
   else
     {
       set_obscured (self, obscured);
-      priv->obscured_lock = TRUE;
+      priv->public_obscured_lock = TRUE;
     }
 }
 
 #define OBSCURED_TIMEOUT 250
 
 void
-meta_window_actor_set_obscured_timed (MetaWindowActor *self,
-                                      gboolean         obscured)
+meta_window_actor_override_obscured_internal (MetaWindowActor *self,
+                                              gboolean         obscured)
 {
   MetaWindowActorPrivate *priv = self->priv;
 
@@ -2475,7 +2462,7 @@ meta_window_actor_hide (MetaWindowActor *self,
   MetaCompositor *compositor = priv->screen->display->compositor;
   gulong event;
 
-  g_return_if_fail (priv->visible || (!priv->visible && priv->window->attached));
+  g_return_if_fail (priv->visible || priv->window->attached);
 
   priv->visible = FALSE;
 
@@ -3249,8 +3236,6 @@ static void
 check_needs_reshape (MetaWindowActor *self)
 {
   MetaWindowActorPrivate *priv = self->priv;
-  MetaScreen *screen = priv->screen;
-  MetaDisplay *display = screen->display;
   cairo_region_t *region = NULL;
   cairo_rectangle_int_t *client_area;
   gboolean full_mask_reset = priv->window->fullscreen;
@@ -3284,6 +3269,7 @@ check_needs_reshape (MetaWindowActor *self)
 #ifdef HAVE_SHAPE
   if (priv->window->has_shape)
     {
+      MetaDisplay *display = priv->screen->display;
       Display *xdisplay = display->xdisplay;
       XRectangle *rects;
       int n_rects, ordering;

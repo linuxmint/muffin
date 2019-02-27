@@ -10390,8 +10390,8 @@ LOCAL_SYMBOL void
 meta_window_get_work_area_current_monitor (MetaWindow    *window,
                                            MetaRectangle *area)
 {
-  const MetaMonitorInfo *monitor = NULL;
-  monitor = meta_screen_get_monitor_for_rect (window->screen, &window->outer_rect);
+  const MetaMonitorInfo *monitor = meta_screen_get_monitor_for_rect (window->screen,
+                                                                     &window->outer_rect);
 
   meta_window_get_work_area_for_monitor (window,
                                          monitor->number,
