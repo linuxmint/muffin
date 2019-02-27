@@ -170,6 +170,10 @@ struct _MetaWindowActorPrivate
   guint             reset_obscured_timeout_id;
   guint             clip_shadow : 1;
 
+  guint             first_frame_drawn;
+  guint             first_frame_handler_queued;
+  guint             first_frame_drawn_id;
+
   /* Shaped texture */
   MetaTextureTower *paint_tower;
   CoglTexture *texture;
@@ -254,8 +258,6 @@ static void do_send_frame_timings (MetaWindowActor  *self,
                                    gint             refresh_interval,
                                    gint64           presentation_time);
 static gboolean clip_shadow_under_window (MetaWindowActor *self);
-static void set_obscured (MetaWindowActor *self,
-                          gboolean         obscured);
 
 G_DEFINE_TYPE (MetaWindowActor, meta_window_actor, CLUTTER_TYPE_ACTOR);
 
@@ -381,8 +383,14 @@ meta_window_actor_init (MetaWindowActor *self)
   priv->reshapes = 0;
   priv->should_have_shadow = FALSE;
   priv->obscured = FALSE;
-  priv->obscured_lock = FALSE;
   priv->extend_obscured_timer = FALSE;
+  priv->public_obscured_lock = FALSE;
+
+  // Don't start the obscured window optimization until the window is painting.
+  priv->obscured_lock = TRUE;
+  priv->first_frame_drawn_id = 0;
+  priv->first_frame_handler_queued = FALSE;
+  priv->first_frame_drawn = FALSE;
 }
 
 static void
@@ -421,14 +429,11 @@ maybe_desaturate_window (ClutterActor *actor,
     }
 }
 
-static void
-window_decorated_notify (MetaWindow *mw,
-                         GParamSpec *arg1,
-                         gpointer    data)
+void
+meta_window_actor_decorated_notify (MetaWindowActor *self)
 {
-  MetaWindowActor *self = META_WINDOW_ACTOR (data);
   MetaWindowActorPrivate *priv = self->priv;
-  MetaFrame *frame = mw->frame;
+  MetaFrame *frame = priv->window->frame;
   MetaScreen *screen = priv->screen;
   MetaDisplay *display = screen->display;
   Display *xdisplay = display->xdisplay;
@@ -443,7 +448,7 @@ window_decorated_notify (MetaWindow *mw,
   if (frame)
     new_xwindow = frame->xwindow;
   else
-    new_xwindow = mw->xwindow;
+    new_xwindow = priv->window->xwindow;
 
   meta_window_actor_detach (self);
 
@@ -476,22 +481,6 @@ meta_window_actor_appears_focused_notify (MetaWindowActor *self)
     set_obscured (self, FALSE);
 
   clutter_actor_queue_redraw (CLUTTER_ACTOR (self));
-}
-
-void
-meta_window_actor_type_notify (MetaWindowActor *self,
-                               gboolean    decoration_changed)
-{
-  MetaWindowActorPrivate *priv = self->priv;
-
-  if (decoration_changed)
-    window_decorated_notify (self);
-
-  if (priv->obscured && priv->window->type != META_WINDOW_NORMAL)
-    {
-      meta_window_actor_set_obscured_timed (self, FALSE, 0);
-      meta_window_actor_set_obscured_timed (self, TRUE, 1000);
-    }
 }
 
 static void
@@ -572,6 +561,12 @@ meta_window_actor_dispose (GObject *object)
     {
       g_source_remove (priv->reset_obscured_timeout_id);
       priv->reset_obscured_timeout_id = 0;
+  }
+
+  if (priv->first_frame_drawn_id)
+    {
+      g_source_remove (priv->first_frame_drawn_id);
+      priv->first_frame_drawn_id = 0;
   }
 
   screen = priv->screen;
@@ -773,6 +768,9 @@ meta_window_actor_get_shadow_bounds (MetaWindowActor       *self,
 {
   MetaWindowActorPrivate *priv = self->priv;
   MetaShadow *shadow = appears_focused ? priv->focused_shadow : priv->unfocused_shadow;
+
+  if (!shadow)
+    return;
 
   meta_shadow_get_bounds (shadow,
                           params->x_offset + shape_bounds->x,
@@ -1765,13 +1763,13 @@ meta_window_actor_thaw (MetaWindowActor *self)
     meta_window_actor_damage_all (self);
 }
 
-static void
+void
 set_obscured (MetaWindowActor *self,
               gboolean         obscured)
 {
   MetaWindowActorPrivate *priv = self->priv;
 
-  if (obscured == priv->obscured || (!obscured && priv->obscured_lock))
+  if (obscured == priv->obscured)
     return;
 
   ClutterActor *actor = CLUTTER_ACTOR (self);
@@ -1805,6 +1803,13 @@ meta_window_actor_check_obscured (MetaWindowActor *self)
 {
   MetaWindowActorPrivate *priv = self->priv;
 
+  if (!priv->first_frame_drawn)
+    {
+      if (priv->obscured)
+        set_obscured (self, FALSE);
+      return;
+    }
+
   if (priv->obscured_lock)
     return;
 
@@ -1812,7 +1817,8 @@ meta_window_actor_check_obscured (MetaWindowActor *self)
      so force the obscured property. */
   if (!priv->visible)
     {
-      set_obscured (self, TRUE);
+      if (!priv->obscured)
+        set_obscured (self, TRUE);
       return;
     }
 
@@ -1832,6 +1838,9 @@ meta_window_actor_check_obscured (MetaWindowActor *self)
 static gboolean
 reset_obscured (gpointer data)
 {
+  if (!data)
+    return G_SOURCE_REMOVE;
+
   MetaWindowActor *self = (MetaWindowActor *) data;
   MetaWindowActorPrivate *priv = self->priv;
 
@@ -1898,6 +1907,8 @@ meta_window_actor_set_obscured (MetaWindowActor *self,
     }
 }
 
+#define OBSCURED_TIMEOUT 250
+
 void
 meta_window_actor_set_obscured_timed (MetaWindowActor *self,
                                       gboolean         obscured)
@@ -1916,7 +1927,7 @@ meta_window_actor_set_obscured_timed (MetaWindowActor *self,
 
   if (obscured)
     {
-      priv->reset_obscured_timeout_id = g_timeout_add (500, (GSourceFunc) reset_obscured, self);
+      priv->reset_obscured_timeout_id = g_timeout_add (OBSCURED_TIMEOUT, (GSourceFunc) reset_obscured, self);
     }
   else
     {
@@ -2333,6 +2344,12 @@ meta_window_actor_destroy (MetaWindowActor *self)
       g_source_remove (priv->send_frame_messages_timer);
       priv->send_frame_messages_timer = 0;
     }
+
+  if (priv->first_frame_drawn_id)
+    {
+      g_source_remove (priv->first_frame_drawn_id);
+      priv->first_frame_drawn_id = 0;
+  }
 
   if (window_type == META_WINDOW_DROPDOWN_MENU ||
       window_type == META_WINDOW_POPUP_MENU ||
@@ -3432,6 +3449,23 @@ do_send_frame_drawn (MetaWindowActor *self, FrameData *frame)
   meta_error_trap_pop (display);
 }
 
+static gboolean
+first_frame_drawn (MetaWindowActor *self)
+{
+  if (!self)
+    return;
+
+  MetaWindowActorPrivate *priv = self->priv;
+
+  if (!priv)
+    return;
+
+  priv->first_frame_drawn = TRUE;
+  priv->first_frame_drawn_id = 0;
+  priv->obscured_lock = FALSE;
+
+  return G_SOURCE_REMOVE;
+}
 
 void
 meta_window_actor_post_paint (MetaWindowActor *self)
@@ -3461,6 +3495,12 @@ meta_window_actor_post_paint (MetaWindowActor *self)
         }
 
       priv->needs_frame_drawn = FALSE;
+    }
+
+  if (!priv->first_frame_handler_queued)
+    {
+      priv->first_frame_handler_queued = TRUE;
+      priv->first_frame_drawn_id = g_timeout_add (1000, (GSourceFunc) first_frame_drawn, self);
     }
 }
 

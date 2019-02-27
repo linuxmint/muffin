@@ -3222,7 +3222,7 @@ meta_window_hide (MetaWindow *window)
           break;
         }
 
-      meta_window_actor_hide (window->compositor_private, META_COMP_EFFECT_DESTROY);
+      meta_window_actor_hide (window->compositor_private, effect);
     }
 
   did_hide = FALSE;
@@ -3566,7 +3566,7 @@ meta_window_maximize (MetaWindow        *window,
 
     meta_window_move_resize_now (window);
 
-    if (desktop_effects)
+    if (desktop_effects && window->compositor_private)
       meta_window_actor_maximize (window->compositor_private, &old_rect, &window->outer_rect);
     }
 
@@ -3777,7 +3777,7 @@ meta_window_real_tile (MetaWindow *window, gboolean force)
 
       meta_window_move_resize_now (window);
 
-      if (desktop_effects)
+      if (desktop_effects && window->compositor_private)
         {
           meta_window_get_input_rect (window, &new_rect);
           meta_window_actor_tile (window->compositor_private, &old_rect, &new_rect);
@@ -4004,7 +4004,7 @@ meta_window_unmaximize_internal (MetaWindow        *window,
                                             target_rect.width,
                                             target_rect.height);
 
-          if (desktop_effects)
+          if (desktop_effects && window->compositor_private)
             meta_window_actor_unmaximize (window->compositor_private, &old_rect, &window->outer_rect);
         }
       else
@@ -7606,13 +7606,13 @@ meta_window_notify_focus (MetaWindow *window,
               !meta_prefs_get_raise_on_click())
             meta_display_ungrab_focus_window_button (window->display, window);
 
-          g_signal_emit (window, window_signals[FOCUS], 0);
-          g_object_notify (G_OBJECT (window->display), "focus-window");
-
           if (!window->attached_focus_window)
             meta_window_appears_focused_changed (window);
 
           meta_window_propagate_focus_appearance (window, TRUE);
+
+          g_signal_emit (window, window_signals[FOCUS], 0);
+          g_object_notify (G_OBJECT (window->display), "focus-window");
         }
     }
   else if (event->type == FocusOut ||
@@ -8377,13 +8377,9 @@ recalc_window_type (MetaWindow *window)
       g_object_freeze_notify (object);
 
       if (old_decorated != window->decorated)
-        g_object_notify (object, "decorated");
-
-      if (window->compositor_private)
-        meta_window_actor_type_notify (window->compositor_private, decoration_changed);
-
-      if (decoration_changed)
         {
+          if (window->compositor_private)
+            meta_window_actor_decorated_notify (window->compositor_private);
           g_object_notify (object, "decorated");
         }
 

@@ -859,6 +859,8 @@ meta_compositor_switch_workspace (MetaCompositor     *compositor,
   to_indx   = meta_workspace_index (to);
   from_indx = meta_workspace_index (from);
 
+  meta_display_set_all_obscured ();
+
   compositor->switch_workspace_in_progress++;
 
   if (!compositor->plugin_mgr ||
