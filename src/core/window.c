@@ -149,6 +149,9 @@ static unsigned int get_mask_from_snap_keysym (MetaWindow *window);
 static void update_edge_constraints (MetaWindow *window);
 static void update_gtk_edge_constraints (MetaWindow *window);
 
+static void get_outer_rect (const MetaWindow *window,
+                            MetaRectangle    *rect);
+
 /* Idle handlers for the three queues (run with meta_later_add()). The
  * "data" parameter in each case will be a GINT_TO_POINTER of the
  * index into the queue arrays to use.
@@ -1291,7 +1294,7 @@ meta_window_new_with_attrs (MetaDisplay       *display,
 
   window->compositor_private = NULL;
 
-  window->monitor = meta_screen_get_monitor_for_window (window->screen, window);
+  window->monitor = meta_screen_get_monitor_for_rect (window->screen, &window->outer_rect);
 
   window->tile_match = NULL;
 
@@ -2234,14 +2237,12 @@ set_net_wm_state (MetaWindow *window)
 
   if (window->tile_type != META_WINDOW_TILE_TYPE_NONE)
   {
-    MetaRectangle rect;
-    meta_window_get_outer_rect (window, &rect);
     data[0] = (unsigned long) window->tile_mode;
     data[1] = (unsigned long) window->tile_type;
-    data[2] = (unsigned long) rect.x;
-    data[3] = (unsigned long) rect.y;
-    data[4] = (unsigned long) rect.width;
-    data[5] = (unsigned long) rect.height;
+    data[2] = (unsigned long) window->outer_rect.x;
+    data[3] = (unsigned long) window->outer_rect.y;
+    data[4] = (unsigned long) window->outer_rect.width;
+    data[5] = (unsigned long) window->outer_rect.height;
     data[6] = (unsigned long) window->tile_monitor_number;
     data[7] = (unsigned long) window->custom_snap_size ? 1 : 0;
 
@@ -2923,15 +2924,6 @@ window_state_on_map (MetaWindow *window,
     }
 }
 
-static gboolean
-windows_overlap (const MetaWindow *w1, const MetaWindow *w2)
-{
-  MetaRectangle w1rect, w2rect;
-  meta_window_get_outer_rect (w1, &w1rect);
-  meta_window_get_outer_rect (w2, &w2rect);
-  return meta_rectangle_overlap (&w1rect, &w2rect);
-}
-
 /* Returns whether a new window would be covered by any
  * existing window on the same workspace that is set
  * to be "above" ("always on top").  A window that is not
@@ -2959,7 +2951,7 @@ window_would_be_covered (const MetaWindow *newbie)
       if (w->wm_state_above && w != newbie)
         {
           /* We have found a window that is "above". Perhaps it overlaps. */
-          if (windows_overlap (w, newbie))
+          if (meta_rectangle_overlap (&w->outer_rect, &newbie->outer_rect))
             {
               g_list_free (windows); /* clean up... */
               return TRUE; /* yes, it does */
@@ -3072,7 +3064,7 @@ meta_window_show (MetaWindow *window)
 
       takes_focus_on_map = FALSE;
 
-      overlap = windows_overlap (window, focus_window);
+      overlap = meta_rectangle_overlap (&window->outer_rect, &focus_window->outer_rect);
 
       /* We want alt tab to go to the denied-focus window */
       ensure_mru_position_after (window, focus_window);
@@ -3573,21 +3565,19 @@ meta_window_maximize (MetaWindow        *window,
                                    saved_rect);
 
     MetaRectangle old_rect;
-    MetaRectangle new_rect;
     gboolean desktop_effects = meta_prefs_get_desktop_effects ();
 
     if (desktop_effects)
-      meta_window_get_outer_rect (window, &old_rect);
+      old_rect = window->outer_rect;
 
     meta_window_move_resize_now (window);
 
     if (desktop_effects)
       {
-        meta_window_get_outer_rect (window, &new_rect);
         meta_compositor_maximize_window (window->display->compositor,
                                         window,
                                         &old_rect,
-                                        &new_rect);
+                                        &window->outer_rect);
       }
     }
 
@@ -3645,7 +3635,10 @@ meta_window_get_all_monitors (MetaWindow *window, gsize *length)
     }
   else
     {
-      meta_window_get_outer_rect (window, &window_rect);
+      if (window->fullscreen)
+        get_outer_rect (window, &window->outer_rect);
+
+      window_rect = window->outer_rect;
     }
 
   for (i = 0; i < window->screen->n_monitor_infos; i++)
@@ -3691,19 +3684,18 @@ meta_window_is_monitor_sized (MetaWindow *window)
 
   if (window->override_redirect)
     {
-      MetaRectangle window_rect, monitor_rect;
+      MetaRectangle monitor_rect;
       int screen_width, screen_height;
 
       meta_screen_get_size (window->screen, &screen_width, &screen_height);
-      meta_window_get_outer_rect (window, &window_rect);
 
-      if (window_rect.x == 0 && window_rect.y == 0 &&
-          window_rect.width == screen_width && window_rect.height == screen_height)
+      if (window->outer_rect.x == 0 && window->outer_rect.y == 0 &&
+          window->outer_rect.width == screen_width && window->outer_rect.height == screen_height)
         return TRUE;
 
       meta_screen_get_monitor_geometry (window->screen, window->monitor->number, &monitor_rect);
 
-      if (meta_rectangle_equal (&window_rect, &monitor_rect))
+      if (meta_rectangle_equal (&window->outer_rect, &monitor_rect))
         return TRUE;
     }
 
@@ -3819,7 +3811,7 @@ meta_window_real_tile (MetaWindow *window, gboolean force)
   set_net_wm_state (window);
 
   meta_screen_tile_preview_hide (window->screen);
-  meta_window_get_outer_rect (window, &window->snapped_rect);
+  window->snapped_rect = window->outer_rect;
 }
 
 static gboolean
@@ -4010,11 +4002,11 @@ meta_window_unmaximize_internal (MetaWindow        *window,
 
       if (window->resizing_tile_type == META_WINDOW_TILE_TYPE_NONE)
         {
-          MetaRectangle old_rect, new_rect;
+          MetaRectangle old_rect;
           gboolean desktop_effects = meta_prefs_get_desktop_effects ();
 
           if (desktop_effects)
-            meta_window_get_outer_rect (window, &old_rect);
+            old_rect = window->outer_rect;
 
           meta_window_move_resize_internal (window,
                                             META_IS_MOVE_ACTION | META_IS_RESIZE_ACTION,
@@ -4026,11 +4018,10 @@ meta_window_unmaximize_internal (MetaWindow        *window,
 
           if (desktop_effects)
             {
-              meta_window_get_outer_rect (window, &new_rect);
               meta_compositor_unmaximize_window (window->display->compositor,
                                                 window,
                                                 &old_rect,
-                                                &new_rect);
+                                                &window->outer_rect);
             }
         }
       else
@@ -4895,7 +4886,7 @@ meta_window_update_monitor (MetaWindow *window)
   const MetaMonitorInfo *old;
 
   old = window->monitor;
-  window->monitor = meta_screen_get_monitor_for_window (window->screen, window);
+  window->monitor = meta_screen_get_monitor_for_rect (window->screen, &window->outer_rect);
   if (old != window->monitor)
     {
       meta_window_update_on_all_workspaces (window);
@@ -5893,6 +5884,13 @@ void
 meta_window_get_outer_rect (const MetaWindow *window,
                             MetaRectangle    *rect)
 {
+  *rect = window->outer_rect;
+}
+
+static void
+get_outer_rect (const MetaWindow *window,
+                MetaRectangle    *rect)
+{
   if (window->frame)
     {
       MetaFrameBorders borders;
@@ -5931,6 +5929,13 @@ meta_window_get_outer_rect (const MetaWindow *window,
 void
 meta_window_get_client_area_rect (const MetaWindow      *window,
                                   cairo_rectangle_int_t *rect)
+{
+  *rect = window->client_area;
+}
+
+static void
+get_client_area_rect (const MetaWindow      *window,
+                      cairo_rectangle_int_t *rect)
 {
   if (window->frame)
     {
@@ -5990,7 +5995,7 @@ void
 meta_window_get_titlebar_rect (MetaWindow *window,
                                MetaRectangle *rect)
 {
-  meta_window_get_outer_rect (window, rect);
+  *rect = window->outer_rect;
 
   /* The returned rectangle is relative to the frame rect. */
   rect->x = 0;
@@ -8398,10 +8403,19 @@ recalc_window_type (MetaWindow *window)
 }
 
 void
+meta_window_update_rects (MetaWindow *window)
+{
+  get_outer_rect (window, &window->outer_rect);
+  get_client_area_rect (window, &window->client_area);
+}
+
+void
 meta_window_frame_size_changed (MetaWindow *window)
 {
   if (window->frame)
     meta_frame_clear_cached_borders (window->frame);
+
+  meta_window_update_rects (window);
 }
 
 static void
@@ -9015,7 +9029,6 @@ meta_window_show_menu (MetaWindow *window,
 LOCAL_SYMBOL void
 meta_window_shove_titlebar_onscreen (MetaWindow *window)
 {
-  MetaRectangle  outer_rect;
   GList         *onscreen_region;
   int            horiz_amount, vert_amount;
   int            newx, newy;
@@ -9027,15 +9040,14 @@ meta_window_shove_titlebar_onscreen (MetaWindow *window)
     return;
 
   /* Get the basic info we need */
-  meta_window_get_outer_rect (window, &outer_rect);
   onscreen_region = window->screen->active_workspace->screen_region;
 
   /* Extend the region (just in case the window is too big to fit on the
    * screen), then shove the window on screen, then return the region to
    * normal.
    */
-  horiz_amount = outer_rect.width;
-  vert_amount  = outer_rect.height;
+  horiz_amount = window->outer_rect.width;
+  vert_amount  = window->outer_rect.height;
   meta_rectangle_expand_region (onscreen_region,
                                 horiz_amount,
                                 horiz_amount,
@@ -9043,15 +9055,15 @@ meta_window_shove_titlebar_onscreen (MetaWindow *window)
                                 vert_amount);
   meta_rectangle_shove_into_region(onscreen_region,
                                    FIXED_DIRECTION_X,
-                                   &outer_rect);
+                                   &window->outer_rect);
   meta_rectangle_expand_region (onscreen_region,
                                 -horiz_amount,
                                 -horiz_amount,
                                 0,
                                 -vert_amount);
 
-  newx = outer_rect.x + window->frame->child_x;
-  newy = outer_rect.y + window->frame->child_y;
+  newx = window->outer_rect.x + window->frame->child_x;
+  newy = window->outer_rect.y + window->frame->child_y;
   meta_window_move_resize (window,
                            FALSE,
                            newx,
@@ -9076,7 +9088,7 @@ meta_window_titlebar_is_onscreen (MetaWindow *window)
     return FALSE;
 
   /* Get the rectangle corresponding to the titlebar */
-  meta_window_get_outer_rect (window, &titlebar_rect);
+  titlebar_rect = window->outer_rect;
   titlebar_rect.height = window->frame->child_y;
 
   /* Run through the spanning rectangles for the screen and see if one of
@@ -9482,7 +9494,7 @@ update_move (MetaWindow  *window,
       int monitor;
 
       window->tile_mode = META_TILE_NONE;
-      wmonitor = meta_screen_get_monitor_for_window (window->screen, window);
+      wmonitor = meta_screen_get_monitor_for_rect (window->screen, &window->outer_rect);
 
       for (monitor = 0; monitor < window->screen->n_monitor_infos; monitor++)
         {
@@ -10393,8 +10405,7 @@ meta_window_get_work_area_current_monitor (MetaWindow    *window,
                                            MetaRectangle *area)
 {
   const MetaMonitorInfo *monitor = NULL;
-  monitor = meta_screen_get_monitor_for_window (window->screen,
-                                                window);
+  monitor = meta_screen_get_monitor_for_rect (window->screen, &window->outer_rect);
 
   meta_window_get_work_area_for_monitor (window,
                                          monitor->number,
@@ -10856,15 +10867,13 @@ warp_grab_pointer (MetaWindow          *window,
                    int                 *x,
                    int                 *y)
 {
-  MetaRectangle  rect;
+  MetaRectangle  rect = window->outer_rect;
   MetaDisplay   *display;
 
   display = window->display;
 
   /* We may not have done begin_grab_op yet, i.e. may not be in a grab
    */
-
-  meta_window_get_outer_rect (window, &rect);
 
   switch (grab_op)
     {
@@ -11208,7 +11217,6 @@ meta_window_get_stable_sequence (MetaWindow *window)
 void
 meta_window_set_demands_attention (MetaWindow *window)
 {
-  MetaRectangle candidate_rect, other_rect;
   GList *stack = window->screen->stack->sorted;
   MetaWindow *other_window;
   gboolean obscured = FALSE;
@@ -11229,8 +11237,6 @@ meta_window_set_demands_attention (MetaWindow *window)
     }
   else
     {
-      meta_window_get_outer_rect (window, &candidate_rect);
-
       /* The stack is sorted with the top windows first. */
 
       while (stack != NULL && stack->data != window)
@@ -11242,9 +11248,7 @@ meta_window_set_demands_attention (MetaWindow *window)
               window->on_all_workspaces ||
               other_window->workspace == window->workspace)
             {
-              meta_window_get_outer_rect (other_window, &other_rect);
-
-              if (meta_rectangle_overlap (&candidate_rect, &other_rect))
+              if (meta_rectangle_overlap (&window->outer_rect, &other_window->outer_rect))
                 {
                   obscured = TRUE;
                   break;
@@ -12016,7 +12020,6 @@ meta_window_compute_tile_match (MetaWindow *window)
   if (match)
     {
       MetaWindow *above, *bottommost, *topmost;
-      MetaRectangle above_rect, bottommost_rect, topmost_rect;
 
       if (meta_stack_windows_cmp (window->screen->stack, match, window) > 0)
         {
@@ -12029,8 +12032,6 @@ meta_window_compute_tile_match (MetaWindow *window)
           bottommost = match;
         }
 
-      meta_window_get_outer_rect (bottommost, &bottommost_rect);
-      meta_window_get_outer_rect (topmost, &topmost_rect);
       /*
        * If there's a window stacked in between which is partially visible
        * behind the topmost tile we don't consider the tiles to match.
@@ -12044,10 +12045,8 @@ meta_window_compute_tile_match (MetaWindow *window)
               meta_window_get_workspace (above) != meta_window_get_workspace (window))
             continue;
 
-          meta_window_get_outer_rect (above, &above_rect);
-
-          if (meta_rectangle_overlap (&above_rect, &bottommost_rect) &&
-              meta_rectangle_overlap (&above_rect, &topmost_rect))
+          if (meta_rectangle_overlap (&above->outer_rect, &bottommost->outer_rect) &&
+              meta_rectangle_overlap (&above->outer_rect, &topmost->outer_rect))
             return;
         }
 

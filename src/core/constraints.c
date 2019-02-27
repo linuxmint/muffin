@@ -830,20 +830,19 @@ constrain_maximization (MetaWindow         *window,
         GList *tmp = window->screen->active_workspace->snapped_windows;
         GSList *snapped_windows_as_struts = NULL;
         while (tmp) {
-            if (tmp->data == window || META_WINDOW (tmp->data)->minimized ||
-                meta_window_get_monitor (window) != meta_window_get_monitor (META_WINDOW (tmp->data))) {
-                tmp = tmp->next;
-                continue;
-            }
-            MetaStrut *strut = g_slice_new0 (MetaStrut);
-            MetaSide side;
-            MetaRectangle rect;
-            meta_window_get_outer_rect (META_WINDOW (tmp->data), &rect);
-            side = meta_window_get_tile_side (META_WINDOW (tmp->data));
-            strut->rect = rect;
-            strut->side = side;
-            snapped_windows_as_struts = g_slist_prepend (snapped_windows_as_struts, strut);
-            tmp = tmp->next;
+          MetaWindow *tmp_window = META_WINDOW (tmp->data);
+          if (tmp->data == window || tmp_window->minimized ||
+              meta_window_get_monitor (window) != meta_window_get_monitor (tmp_window)) {
+              tmp = tmp->next;
+              continue;
+          }
+          MetaStrut *strut = g_slice_new0 (MetaStrut);
+          MetaSide side;
+          side = meta_window_get_tile_side (tmp_window);
+          strut->rect = tmp_window->outer_rect;
+          strut->side = side;
+          snapped_windows_as_struts = g_slist_prepend (snapped_windows_as_struts, strut);
+          tmp = tmp->next;
         }
 
         target_size = info->current;
@@ -908,7 +907,7 @@ constrain_tiling (MetaWindow         *window,
 {
   MetaRectangle target_size;
   MetaRectangle min_size, max_size;
-  MetaRectangle actual_position;
+  MetaRectangle actual_position = window->outer_rect;
   gboolean hminbad, vminbad;
   gboolean horiz_equal, vert_equal;
   gboolean constraint_already_satisfied;
@@ -927,8 +926,6 @@ constrain_tiling (MetaWindow         *window,
     meta_window_get_current_tile_area (window, &target_size);
   else
     return TRUE;
-
-  meta_window_get_outer_rect (window, &actual_position);
 
   if (window->custom_snap_size) {
       switch (window->tile_mode) {
