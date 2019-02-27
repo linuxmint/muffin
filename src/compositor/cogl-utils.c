@@ -26,6 +26,7 @@
 #endif
 #include <clutter/clutter.h>
 #include "cogl-utils.h"
+#include "meta-sync-ring.h"
 #include <meta/errors.h>
 
 #include <gdk/gdk.h>
@@ -84,13 +85,12 @@ meta_create_texture_pipeline (CoglTexture *src_texture)
   if (G_UNLIKELY (texture_pipeline_template == NULL))
     {
       CoglTexture *dummy_texture;
-      CoglContext *ctx = clutter_backend_get_cogl_context (clutter_get_default_backend ());
 
       dummy_texture = meta_create_color_texture_4ub (0xff, 0xff, 0xff, 0xff,
                                                      COGL_TEXTURE_NONE);
 
 
-      texture_pipeline_template = cogl_pipeline_new (ctx);
+      texture_pipeline_template = cogl_pipeline_new (meta_compositor_get_cogl_context ());
       cogl_pipeline_set_layer_texture (texture_pipeline_template, 0, dummy_texture);
       cogl_object_unref (dummy_texture);
     }
@@ -106,23 +106,22 @@ meta_create_texture_pipeline (CoglTexture *src_texture)
 /********************************************************************************************/
 /********************************* CoglTexture2d wrapper ************************************/
 
-static CoglContext *cogl_context = NULL;
 static gboolean supports_npot = FALSE;
+static gboolean npot_sizes_checked = FALSE;
 
 static gint screen_width = 0;
 static gint screen_height = 0;
 
-inline static gboolean
-hardware_supports_npot_sizes (void)
+gboolean
+meta_cogl_hardware_supports_npot_sizes (void)
 {
-    if (cogl_context != NULL)
-        return supports_npot;
-
-    ClutterBackend *backend = clutter_get_default_backend ();
-    cogl_context = clutter_backend_get_cogl_context (backend);
-    supports_npot = cogl_has_feature (cogl_context, COGL_FEATURE_ID_TEXTURE_NPOT);
-
+  if (npot_sizes_checked)
     return supports_npot;
+
+  supports_npot = cogl_has_feature (meta_compositor_get_cogl_context (), COGL_FEATURE_ID_TEXTURE_NPOT);
+  npot_sizes_checked = TRUE;
+
+  return supports_npot;
 }
 
 inline static void
@@ -162,11 +161,11 @@ meta_cogl_texture_new_from_data_wrapper                (int  width,
 
     clamp_sizes (&width, &height);
 
-    if (hardware_supports_npot_sizes ())
+    if (supports_npot)
       {
         CoglError *error = NULL;
 
-        texture = COGL_TEXTURE (cogl_texture_2d_new_from_data (cogl_context, width, height,
+        texture = COGL_TEXTURE (cogl_texture_2d_new_from_data (meta_compositor_get_cogl_context (), width, height,
                                                                format,
                                                                rowstride,
                                                                data,
@@ -227,10 +226,10 @@ meta_cogl_rectangle_new (int width,
                          int stride,
                          const uint8_t *data)
 {
-  if (!hardware_supports_npot_sizes ())
+  if (!supports_npot)
     return meta_cogl_rectangle_new_compat (width, height, format,  stride, data);
 
-  CoglTexture *texture = COGL_TEXTURE (cogl_texture_rectangle_new_with_size (cogl_context, width, height));
+  CoglTexture *texture = COGL_TEXTURE (cogl_texture_rectangle_new_with_size (meta_compositor_get_cogl_context (), width, height));
   cogl_texture_set_components (texture, COGL_TEXTURE_COMPONENTS_A);
   cogl_texture_set_region (texture,
                            0, 0, /* src_x/y */

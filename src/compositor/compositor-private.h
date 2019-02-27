@@ -62,6 +62,8 @@ struct _MetaCompositor
 /* Wait 2ms after vblank before starting to draw next frame */
 #define META_SYNC_DELAY 0
 
+CoglContext * meta_compositor_get_cogl_context (void);
+
 void meta_switch_workspace_completed (MetaScreen    *screen);
 
 gboolean meta_begin_modal_for_plugin (MetaScreen       *screen,
