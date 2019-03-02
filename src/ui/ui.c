@@ -469,20 +469,6 @@ meta_ui_map_frame   (MetaUI *ui,
 }
 
 LOCAL_SYMBOL void
-meta_ui_unmap_frame (MetaUI *ui,
-                     Window  xwindow)
-{
-  GdkWindow *window;
-  GdkDisplay *display;
-
-  display = gdk_x11_lookup_xdisplay (ui->xdisplay);
-  window = gdk_x11_window_lookup_for_display (display, xwindow);
-
-  if (window)
-    gdk_window_hide (window);
-}
-
-LOCAL_SYMBOL void
 meta_ui_update_frame_style (MetaUI  *ui,
                             Window   xwindow)
 {
