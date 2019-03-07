@@ -140,8 +140,6 @@ static void meta_window_move_between_rects (MetaWindow          *window,
 static void unmaximize_window_before_freeing (MetaWindow        *window);
 static void unminimize_window_and_all_transient_parents (MetaWindow *window);
 
-static void meta_window_update_monitor (MetaWindow *window);
-
 static void normalize_tile_state (MetaWindow *window);
 
 static unsigned int get_mask_from_snap_keysym (MetaWindow *window);
@@ -4866,7 +4864,7 @@ meta_window_update_for_monitors_changed (MetaWindow *window)
                                   &new->rect);
 }
 
-static void
+void
 meta_window_update_monitor (MetaWindow *window)
 {
   const MetaMonitorInfo *old;
@@ -5363,8 +5361,6 @@ meta_window_move_resize_internal (MetaWindow          *window,
     }
 
   meta_window_refresh_resize_popup (window);
-
-  meta_window_update_monitor (window);
 
   /* Invariants leaving this function are:
    *   a) window->rect and frame->rect reflect the actual

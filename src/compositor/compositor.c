@@ -1479,8 +1479,13 @@ meta_compositor_grab_op_begin (MetaCompositor *compositor)
 void
 meta_compositor_grab_op_end (MetaCompositor *compositor)
 {
+  MetaWindow *window = compositor->display->grab_window;
+
   clutter_actor_set_flags (compositor->window_group, CLUTTER_ACTOR_NO_LAYOUT);
   meta_compositor_set_all_obscured (compositor, TRUE);
+
+  meta_window_update_rects (window);
+  meta_window_update_monitor (window);
 }
 
 CoglContext *
