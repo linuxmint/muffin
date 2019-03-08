@@ -5568,6 +5568,9 @@ meta_window_move_to_monitor (MetaWindow  *window,
     window->tile_monitor_number = monitor;
 
   meta_window_move_between_rects (window, &old_area, &new_area);
+
+  meta_window_update_rects (window);
+  meta_window_update_monitor (window);
 }
 
 void
