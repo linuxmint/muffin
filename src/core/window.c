@@ -5557,6 +5557,8 @@ meta_window_move_to_monitor (MetaWindow  *window,
   if (monitor == window->monitor->number)
     return;
 
+  meta_display_set_all_obscured ();
+
   meta_window_get_work_area_for_monitor (window,
                                          window->monitor->number,
                                          &old_area);
