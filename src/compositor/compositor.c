@@ -113,9 +113,6 @@ meta_finish_workspace_switch (MetaCompositor *compositor)
    * Fix up stacking order in case the plugin messed it up.
    */
   sync_actor_stacking (compositor);
-
-/*   printf ("... FINISHED DESKTOP SWITCH\n"); */
-
 }
 
 LOCAL_SYMBOL void
@@ -131,6 +128,8 @@ meta_switch_workspace_completed (MetaScreen *screen)
 
   if (!compositor_global->switch_workspace_in_progress)
     meta_finish_workspace_switch (compositor_global);
+
+  meta_compositor_set_all_obscured (compositor_global, TRUE);
 }
 
 void
@@ -858,7 +857,7 @@ meta_compositor_switch_workspace (MetaCompositor     *compositor,
   to_indx   = meta_workspace_index (to);
   from_indx = meta_workspace_index (from);
 
-  meta_display_set_all_obscured ();
+  meta_compositor_set_all_obscured (compositor, FALSE);
 
   compositor->switch_workspace_in_progress++;
 
@@ -876,6 +875,7 @@ meta_compositor_switch_workspace (MetaCompositor     *compositor,
        * relative position toward the destkop window.
        */
       meta_finish_workspace_switch (compositor);
+      meta_compositor_set_all_obscured (compositor, TRUE);
     }
 }
 
