@@ -45,11 +45,11 @@ void meta_window_actor_get_shape_bounds (MetaWindowActor       *self,
                                           cairo_rectangle_int_t *bounds);
 
 gboolean meta_window_actor_effect_in_progress  (MetaWindowActor *self);
-void     meta_window_actor_sync_actor_geometry (MetaWindowActor *self,
-                                                gboolean         did_placement);
+
 void     meta_window_actor_sync_visibility     (MetaWindowActor *self);
 void     meta_window_actor_update_shape        (MetaWindowActor *self);
-void     meta_window_actor_update_opacity      (MetaWindowActor *self);
+void     meta_window_actor_update_opacity      (MetaWindowActor *self,
+                                                guint8           opacity);
 void     meta_window_actor_mapped              (MetaWindowActor *self);
 void     meta_window_actor_unmapped            (MetaWindowActor *self);
 void     meta_window_actor_set_updates_frozen  (MetaWindowActor *self,
@@ -59,10 +59,10 @@ void     meta_window_actor_queue_frame_drawn   (MetaWindowActor *self,
 
 cairo_region_t *meta_window_actor_get_obscured_region (MetaWindowActor *self);
 
-void meta_window_actor_set_visible_region         (MetaWindowActor *self,
-                                                   cairo_region_t  *visible_region);
-void meta_window_actor_set_visible_region_beneath (MetaWindowActor *self,
-                                                   cairo_region_t  *beneath_region);
+void meta_window_actor_set_clip_region         (MetaWindowActor *self,
+                                                cairo_region_t  *clip_region);
+void meta_window_actor_set_clip_region_beneath (MetaWindowActor *self,
+                                                cairo_region_t  *clip_region);
 void meta_window_actor_reset_visible_regions      (MetaWindowActor *self);
 
 void meta_window_actor_set_unobscured_region      (MetaWindowActor *self,
@@ -70,5 +70,19 @@ void meta_window_actor_set_unobscured_region      (MetaWindowActor *self,
 
 void meta_window_actor_effect_completed (MetaWindowActor *actor,
                                          gulong           event);
+
+void meta_window_actor_check_obscured (MetaWindowActor *self);
+void set_obscured (MetaWindowActor *self,
+                   gboolean         obscured);
+
+void meta_window_actor_reset_texture (MetaWindowActor *self);
+
+void meta_window_actor_decorated_notify (MetaWindowActor *self);
+void meta_window_actor_appears_focused_notify (MetaWindowActor *self);
+void meta_window_actor_sync_actor_geometry (MetaWindowActor *self,
+                                            gboolean         did_placement);
+
+void meta_window_actor_override_obscured_internal (MetaWindowActor *self,
+                                                   gboolean         obscured);
 
 #endif /* META_WINDOW_ACTOR_PRIVATE_H */

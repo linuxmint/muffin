@@ -683,7 +683,8 @@ meta_window_set_opaque_region (MetaWindow     *window,
   if (region != NULL)
     window->opaque_region = cairo_region_reference (region);
 
-  meta_compositor_window_shape_changed (window->display->compositor, window);
+  if (window->compositor_private)
+    meta_window_actor_update_shape (window->compositor_private);
 }
 
 static void
