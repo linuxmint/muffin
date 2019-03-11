@@ -97,12 +97,13 @@ meta_window_ensure_frame (MetaWindow *window)
   
   frame->xwindow = meta_ui_create_frame_window (window->screen->ui,
                                                 window->display->xdisplay,
+                                                frame->window,
                                                 visual,
                                                 frame->rect.x,
                                                 frame->rect.y,
-						frame->rect.width,
-						frame->rect.height,
-						frame->window->screen->number,
+                                                frame->rect.width,
+                                                frame->rect.height,
+                                                frame->window->screen->number,
                                                 &create_serial);
   meta_stack_tracker_record_add (window->screen->stack_tracker,
                                  frame->xwindow,

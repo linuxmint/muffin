@@ -2,10 +2,10 @@
 
 /* Muffin interface for talking to GTK+ UI module */
 
-/* 
+/*
  * Copyright (C) 2002 Havoc Pennington
  * stock icon code Copyright (C) 2002 Jorn Baayen <jorn@nl.linux.org>
- * 
+ *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
  * published by the Free Software Foundation; either version 2 of the
@@ -15,7 +15,7 @@
  * WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street - Suite 500, Boston, MA
@@ -30,6 +30,7 @@
 #include "menu.h"
 #include "core.h"
 #include "theme-private.h"
+#include "window-private.h"
 
 #include "inlinepixbufs.h"
 
@@ -110,6 +111,7 @@ maybe_redirect_mouse_event (XEvent *xevent)
   GdkEvent *gevent;
   GdkWindow *gdk_window;
   Window window;
+  MetaWindow *mw;
 
   switch (xevent->type)
     {
@@ -127,6 +129,11 @@ maybe_redirect_mouse_event (XEvent *xevent)
     default:
       return FALSE;
     }
+
+  mw = meta_compositor_get_window_for_xwindow (window);
+
+  if (!mw || !mw->frame)
+    return FALSE;
 
   gdisplay = gdk_x11_lookup_xdisplay (xevent->xany.display);
   ui = g_object_get_data (G_OBJECT (gdisplay), "meta-ui");
@@ -200,6 +207,14 @@ maybe_redirect_mouse_event (XEvent *xevent)
       gevent = gdk_event_new (GDK_MOTION_NOTIFY);
       gevent->motion.type = GDK_MOTION_NOTIFY;
       gevent->motion.window = g_object_ref (gdk_window);
+      gevent->motion.time = xevent->xbutton.time;
+      gevent->motion.x = xevent->xbutton.x;
+      gevent->motion.y = xevent->xbutton.y;
+      gevent->motion.x_root = xevent->xbutton.x_root;
+      gevent->motion.y_root = xevent->xbutton.y_root;
+
+      if (xevent->xbutton.button == 1)
+        gevent->motion.state |= GDK_BUTTON1_MASK;
       break;
     case EnterNotify:
     case LeaveNotify:
@@ -266,7 +281,7 @@ meta_ui_remove_event_func (Display       *xdisplay,
                            gpointer       data)
 {
   g_return_if_fail (ef != NULL);
-  
+
   gdk_window_remove_filter (NULL, filter_func, ef);
 
   g_free (ef);
@@ -350,12 +365,13 @@ set_background_none (Display *xdisplay,
 LOCAL_SYMBOL Window
 meta_ui_create_frame_window (MetaUI *ui,
                              Display *xdisplay,
+                             MetaWindow *meta_window,
                              Visual *xvisual,
-			     gint x,
-			     gint y,
-			     gint width,
-			     gint height,
-			     gint screen_no,
+                             gint x,
+                             gint y,
+                             gint width,
+                             gint height,
+                             gint screen_no,
                              gulong *create_serial)
 {
   GdkDisplay *display = gdk_x11_lookup_xdisplay (xdisplay);
@@ -364,7 +380,7 @@ meta_ui_create_frame_window (MetaUI *ui,
   gint attributes_mask;
   GdkWindow *window;
   GdkVisual *visual;
-  
+
   /* Default depth/visual handles clients with weird visuals; they can
    * always be children of the root depth/visual obviously, but
    * e.g. DRI games can't be children of a parent that has the same
@@ -414,8 +430,8 @@ meta_ui_create_frame_window (MetaUI *ui,
 
   gdk_window_resize (window, width, height);
   set_background_none (xdisplay, GDK_WINDOW_XID (window));
-  
-  meta_frames_manage_window (ui->frames, GDK_WINDOW_XID (window), window);
+
+  meta_frames_manage_window (ui->frames, meta_window, GDK_WINDOW_XID (window), window);
 
   return GDK_WINDOW_XID (window);
 }
@@ -450,20 +466,6 @@ meta_ui_map_frame   (MetaUI *ui,
 
   if (window)
     gdk_window_show_unraised (window);
-}
-
-LOCAL_SYMBOL void
-meta_ui_unmap_frame (MetaUI *ui,
-                     Window  xwindow)
-{
-  GdkWindow *window;
-  GdkDisplay *display;
-
-  display = gdk_x11_lookup_xdisplay (ui->xdisplay);
-  window = gdk_x11_window_lookup_for_display (display, xwindow);
-
-  if (window)
-    gdk_window_hide (window);
 }
 
 LOCAL_SYMBOL void
@@ -616,7 +618,7 @@ meta_text_property_to_utf8 (Display             *xdisplay,
   char **list;
   int count;
   char *retval;
-  
+
   list = NULL;
 
   display = gdk_x11_lookup_xdisplay (xdisplay);
@@ -634,7 +636,7 @@ meta_text_property_to_utf8 (Display             *xdisplay,
   retval = list[0];
   list[0] = g_strdup (""); /* something to free */
     }
-  
+
   g_strfreev (list);
 
   return retval;
@@ -758,24 +760,24 @@ meta_ui_parse_accelerator (const char          *accel,
   GdkModifierType gdk_mask = 0;
   guint gdk_sym = 0;
   guint gdk_code = 0;
-  
+
   *keysym = 0;
   *keycode = 0;
   *mask = 0;
 
   if (!accel[0] || strcmp (accel, "disabled") == 0)
     return TRUE;
-  
+
   meta_ui_accelerator_parse (accel, &gdk_sym, &gdk_code, &gdk_mask);
   if (gdk_mask == 0 && gdk_sym == 0 && gdk_code == 0)
     return FALSE;
 
   if (gdk_sym == None && gdk_code == 0)
     return FALSE;
-  
+
   if (gdk_mask & GDK_RELEASE_MASK) /* we don't allow this */
     return FALSE;
-  
+
   *keysym = gdk_sym;
   *keycode = gdk_code;
 
@@ -799,7 +801,7 @@ meta_ui_parse_accelerator (const char          *accel,
     *mask |= META_VIRTUAL_HYPER_MASK;
   if (gdk_mask & GDK_META_MASK)
     *mask |= META_VIRTUAL_META_MASK;
-  
+
   return TRUE;
 }
 
@@ -809,7 +811,7 @@ meta_ui_accelerator_name  (unsigned int        keysym,
                            MetaVirtualModifier mask)
 {
   GdkModifierType mods = 0;
-        
+
   if (keysym == 0 && mask == 0)
     {
       return g_strdup ("disabled");
@@ -847,19 +849,19 @@ meta_ui_parse_modifier (const char          *accel,
   GdkModifierType gdk_mask = 0;
   guint gdk_sym = 0;
   guint gdk_code = 0;
-  
+
   *mask = 0;
 
   if (accel == NULL || !accel[0] || strcmp (accel, "disabled") == 0)
     return TRUE;
-  
+
   meta_ui_accelerator_parse (accel, &gdk_sym, &gdk_code, &gdk_mask);
   if (gdk_mask == 0 && gdk_sym == 0 && gdk_code == 0)
     return FALSE;
 
   if (gdk_sym != None || gdk_code != 0)
     return FALSE;
-  
+
   if (gdk_mask & GDK_RELEASE_MASK) /* we don't allow this */
     return FALSE;
 
@@ -883,7 +885,7 @@ meta_ui_parse_modifier (const char          *accel,
     *mask |= META_VIRTUAL_HYPER_MASK;
   if (gdk_mask & GDK_META_MASK)
     *mask |= META_VIRTUAL_META_MASK;
-  
+
   return TRUE;
 }
 
@@ -942,7 +944,7 @@ meta_stock_icons_init (void)
       icon_set = gtk_icon_set_new_from_pixbuf (pixbuf);
       gtk_icon_factory_add (factory, items[i].stock_id, icon_set);
       gtk_icon_set_unref (icon_set);
-      
+
       g_object_unref (G_OBJECT (pixbuf));
     }
 
