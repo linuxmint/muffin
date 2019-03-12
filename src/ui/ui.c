@@ -112,12 +112,14 @@ maybe_redirect_mouse_event (XEvent *xevent)
   GdkWindow *gdk_window;
   Window window;
   MetaWindow *mw;
+  gboolean button_event = FALSE;
 
   switch (xevent->type)
     {
     case ButtonPress:
     case ButtonRelease:
       window = xevent->xbutton.window;
+      button_event = TRUE;
       break;
     case MotionNotify:
       window = xevent->xmotion.window;
@@ -130,10 +132,13 @@ maybe_redirect_mouse_event (XEvent *xevent)
       return FALSE;
     }
 
-  mw = meta_compositor_get_window_for_xwindow (window);
+  if (!button_event)
+    {
+      mw = meta_compositor_get_window_for_xwindow (window);
 
-  if (!mw || !mw->frame)
-    return FALSE;
+      if (!mw || !mw->frame)
+        return FALSE;
+    }
 
   gdisplay = gdk_x11_lookup_xdisplay (xevent->xany.display);
   ui = g_object_get_data (G_OBJECT (gdisplay), "meta-ui");
