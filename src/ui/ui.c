@@ -136,7 +136,7 @@ maybe_redirect_mouse_event (XEvent *xevent)
     {
       mw = meta_compositor_get_window_for_xwindow (window);
 
-      if (!mw || !mw->decorated)
+      if (!mw || !mw->frame)
         return FALSE;
     }
 
