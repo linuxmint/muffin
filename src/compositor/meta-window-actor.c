@@ -2399,7 +2399,19 @@ meta_window_actor_sync_actor_geometry (MetaWindowActor *self,
     return;
 
   if (meta_window_actor_effect_in_progress (self))
-    return;
+    {
+      /* Check to see if the actor dimensions match the input rect, so set_size is called once.
+         Otherwise, windows that map outside the stage area will have texture with artifacts. */
+      gfloat width, height;
+
+      clutter_actor_get_size (CLUTTER_ACTOR (self), &width, &height);
+
+      if ((int)width != window_rect.width ||
+          (int)height != window_rect.height)
+        clutter_actor_set_size (CLUTTER_ACTOR (self),
+                                window_rect.width, window_rect.height);
+      return;
+    }
 
   if (priv->size_changed)
     {
