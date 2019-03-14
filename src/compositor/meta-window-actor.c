@@ -3170,7 +3170,7 @@ meta_window_actor_ensure_mask (MetaWindowActor *self,
       stride = cairo_format_stride_for_width (CAIRO_FORMAT_A8, tex_width);
 
       /* Create data for an empty image */
-      mask_data = g_malloc0 (stride * tex_height);
+      mask_data = calloc (1, stride * tex_height);
 
       /* Fill in each rectangle. */
       for (i = 0; i < n_rects; i ++)
@@ -3207,7 +3207,7 @@ meta_window_actor_ensure_mask (MetaWindowActor *self,
                                                                       stride,
                                                                       mask_data);
 
-      g_free (mask_data);
+      free (mask_data);
     }
 }
 
