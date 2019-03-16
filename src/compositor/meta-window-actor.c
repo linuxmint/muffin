@@ -2294,6 +2294,11 @@ meta_window_actor_sync_actor_geometry (MetaWindowActor *self,
   MetaWindowActorPrivate *priv = self->priv;
   MetaRectangle window_rect;
 
+  /* This function will get called a lot when effects are enabled, including
+     outside the X event loop that controls rect caching. */
+  if (priv->effect_in_progress)
+    meta_window_update_rects (priv->window);
+
   meta_window_get_input_rect (priv->window, &window_rect);
 
   if (priv->last_width != window_rect.width ||
@@ -2326,13 +2331,14 @@ meta_window_actor_sync_actor_geometry (MetaWindowActor *self,
     {
       /* Check to see if the actor dimensions match the input rect, so set_size is called once.
          Otherwise, windows that map outside the stage area will have texture with artifacts. */
+      ClutterActor *actor = CLUTTER_ACTOR (self);
       gfloat width, height;
 
-      clutter_actor_get_size (CLUTTER_ACTOR (self), &width, &height);
+      clutter_actor_get_size (actor, &width, &height);
 
       if ((int)width != window_rect.width ||
           (int)height != window_rect.height)
-        clutter_actor_set_size (CLUTTER_ACTOR (self),
+        clutter_actor_set_size (actor,
                                 window_rect.width, window_rect.height);
       return;
     }
@@ -3381,17 +3387,26 @@ do_send_frame_drawn (MetaWindowActor *self, FrameData *frame)
 static gboolean
 first_frame_drawn (MetaWindowActor *self)
 {
+  MetaWindowActorPrivate *priv;
+
   if (!self)
     return;
 
-  MetaWindowActorPrivate *priv = self->priv;
+  priv = self->priv;
 
   if (!priv)
     return;
 
   priv->first_frame_drawn = TRUE;
   priv->first_frame_drawn_id = 0;
+
   priv->obscured_lock = FALSE;
+
+  if (priv->screen->display->desktop_effects)
+    {
+      priv->position_changed = TRUE;
+      meta_window_actor_sync_actor_geometry (self, TRUE);
+    }
 
   return G_SOURCE_REMOVE;
 }
