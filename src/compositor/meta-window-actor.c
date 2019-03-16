@@ -504,6 +504,8 @@ meta_window_actor_constructed (GObject *object)
 
   priv->shape_region = cairo_region_create();
 
+  clutter_actor_set_reactive (actor, FALSE);
+
   /* Opacity handling */
   meta_window_actor_update_opacity (self, 0);
   maybe_desaturate_window (actor, priv->opacity);
@@ -1763,7 +1765,6 @@ set_obscured (MetaWindowActor *self,
           priv->send_frame_messages_timer = 0;
         }
 
-      clutter_actor_set_reactive (actor, FALSE);
       clutter_actor_set_offscreen_redirect (actor, CLUTTER_OFFSCREEN_REDIRECT_ALWAYS);
       meta_texture_tower_set_base_texture (priv->paint_tower, NULL);
     }
@@ -1772,7 +1773,6 @@ set_obscured (MetaWindowActor *self,
       if (priv->texture)
         meta_texture_tower_set_base_texture (priv->paint_tower, priv->texture);
 
-      clutter_actor_set_reactive (actor, TRUE);
       clutter_actor_set_offscreen_redirect (actor, CLUTTER_OFFSCREEN_REDIRECT_AUTOMATIC_FOR_OPACITY);
     }
 
