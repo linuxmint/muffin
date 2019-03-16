@@ -48,8 +48,6 @@ gboolean meta_window_actor_effect_in_progress  (MetaWindowActor *self);
 
 void     meta_window_actor_sync_visibility     (MetaWindowActor *self);
 void     meta_window_actor_update_shape        (MetaWindowActor *self);
-void     meta_window_actor_update_opacity      (MetaWindowActor *self,
-                                                guint8           opacity);
 void     meta_window_actor_mapped              (MetaWindowActor *self);
 void     meta_window_actor_unmapped            (MetaWindowActor *self);
 void     meta_window_actor_set_updates_frozen  (MetaWindowActor *self,
@@ -72,8 +70,6 @@ void meta_window_actor_effect_completed (MetaWindowActor *actor,
                                          gulong           event);
 
 void meta_window_actor_check_obscured (MetaWindowActor *self);
-void set_obscured (MetaWindowActor *self,
-                   gboolean         obscured);
 
 void meta_window_actor_reset_texture (MetaWindowActor *self);
 

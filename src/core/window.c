@@ -4322,7 +4322,7 @@ meta_window_adjust_opacity (MetaWindow   *window,
   }
 
   if (new_opacity != current_opacity)
-    meta_window_actor_update_opacity (META_WINDOW_ACTOR (actor), (guint8) new_opacity);
+    meta_window_actor_set_opacity (META_WINDOW_ACTOR (actor), (guint8) new_opacity);
 }
 
 void

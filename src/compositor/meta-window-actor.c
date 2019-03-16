@@ -53,6 +53,8 @@
  */
 #define MIN_FAST_UPDATES_BEFORE_UNMIPMAP 20
 
+#define META_WINDOW_ACTOR_PARAM_ANIMATABLE (1 << G_PARAM_USER_SHIFT)
+
 enum {
   POSITION_CHANGED,
   SIZE_CHANGED,
@@ -210,7 +212,8 @@ enum
   PROP_X_WINDOW_ATTRIBUTES,
   PROP_NO_SHADOW,
   PROP_SHADOW_CLASS,
-  PROP_OBSCURED
+  PROP_OBSCURED,
+  PROP_OPACITY
 };
 
 #define DEFAULT_SHADOW_RADIUS 12
@@ -259,6 +262,9 @@ static void do_send_frame_timings (MetaWindowActor  *self,
                                    gint             refresh_interval,
                                    gint64           presentation_time);
 static gboolean clip_shadow_under_window (MetaWindowActor *self);
+
+static inline void set_obscured (MetaWindowActor *self,
+                                 gboolean         obscured);
 
 G_DEFINE_TYPE (MetaWindowActor, meta_window_actor, CLUTTER_TYPE_ACTOR);
 
@@ -318,6 +324,19 @@ meta_window_actor_class_init (MetaWindowActorClass *klass)
 
   g_object_class_install_property (object_class,
                                    PROP_X_WINDOW,
+                                   pspec);
+
+  pspec = g_param_spec_uint ("opacity",
+                             "Opacity",
+                             "Opacity of a window actor actor",
+                             0, 255,
+                             255,
+                             G_PARAM_READWRITE |
+                             G_PARAM_STATIC_STRINGS |
+                             META_WINDOW_ACTOR_PARAM_ANIMATABLE);
+
+  g_object_class_install_property (object_class,
+                                   PROP_OPACITY,
                                    pspec);
 
   pspec = g_param_spec_boolean ("no-shadow",
@@ -505,7 +524,7 @@ meta_window_actor_constructed (GObject *object)
   priv->shape_region = cairo_region_create();
 
   /* Opacity handling */
-  meta_window_actor_update_opacity (self, 0);
+  meta_window_actor_set_opacity (self, -1);
   maybe_desaturate_window (actor, priv->opacity);
   priv->clip_shadow = clip_shadow_under_window (self);
 }
@@ -621,6 +640,9 @@ meta_window_actor_set_property (GObject      *object,
     case PROP_X_WINDOW:
       priv->xwindow = g_value_get_ulong (value);
       break;
+    case PROP_OPACITY:
+      meta_window_actor_set_opacity (self, g_value_get_uint (value));
+      break;
     case PROP_NO_SHADOW:
       {
         gboolean newv = g_value_get_boolean (value);
@@ -670,6 +692,9 @@ meta_window_actor_get_property (GObject      *object,
       break;
     case PROP_X_WINDOW:
       g_value_set_ulong (value, priv->xwindow);
+      break;
+    case PROP_OPACITY:
+      g_value_set_uint (value, priv->opacity);
       break;
     case PROP_NO_SHADOW:
       g_value_set_boolean (value, priv->no_shadow);
@@ -1744,7 +1769,7 @@ meta_window_actor_thaw (MetaWindowActor *self)
     meta_window_actor_damage_all (self);
 }
 
-void
+static inline void
 set_obscured (MetaWindowActor *self,
               gboolean         obscured)
 {
@@ -3579,18 +3604,20 @@ meta_window_actor_invalidate_shadow (MetaWindowActor *self)
   clutter_actor_queue_redraw (CLUTTER_ACTOR (self));
 }
 
+#define OPACITY_TYPE_CARDINAL -1
+
 void
-meta_window_actor_update_opacity (MetaWindowActor *self,
-                                  guint8           opacity)
+meta_window_actor_set_opacity (MetaWindowActor *self,
+                               guint8           opacity)
 {
   MetaWindowActorPrivate *priv = self->priv;
 
-  if (priv->obscured)
+  if (priv->obscured && !priv->effect_in_progress)
     return;
 
   ClutterActor *actor = CLUTTER_ACTOR (self);
 
-  if (!opacity)
+  if (opacity == OPACITY_TYPE_CARDINAL)
     {
       MetaDisplay *display = priv->screen->display;
       MetaCompositor *compositor = display->compositor;
@@ -3611,7 +3638,6 @@ meta_window_actor_update_opacity (MetaWindowActor *self,
 
   cogl_color_init_from_4ub (&priv->color, opacity, opacity, opacity, opacity);
 
-  clutter_actor_set_opacity (actor, opacity);
   maybe_desaturate_window (actor, opacity);
   priv->clip_shadow = clip_shadow_under_window (self);
 }
