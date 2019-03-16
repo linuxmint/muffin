@@ -633,6 +633,9 @@ prefs_changed_callback (MetaPreference pref,
     case META_PREF_SYNC_TO_VBLANK:
       meta_display_update_sync_state (meta_prefs_get_sync_to_vblank());
       break;
+    case META_PREF_DESKTOP_EFFECTS:
+      meta_get_display ()->desktop_effects = meta_prefs_get_desktop_effects ();
+      break;
     default:
       /* handled elsewhere or otherwise */
       break;

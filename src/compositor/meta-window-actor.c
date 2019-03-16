@@ -401,6 +401,8 @@ meta_window_actor_init (MetaWindowActor *self)
   priv->first_frame_drawn_id = 0;
   priv->first_frame_handler_queued = FALSE;
   priv->first_frame_drawn = FALSE;
+
+  priv->visible = FALSE;
 }
 
 static void
@@ -2382,7 +2384,7 @@ meta_window_actor_show (MetaWindowActor   *self,
   if (priv->redecorating ||
       priv->screen->display->compositor->switch_workspace_in_progress ||
       event == 0 ||
-      !meta_prefs_get_desktop_effects () ||
+      !priv->screen->display->desktop_effects ||
       !start_simple_effect (self, event))
     {
       if (priv->obscured)
@@ -2428,7 +2430,7 @@ meta_window_actor_hide (MetaWindowActor *self,
     }
 
   if (event == 0 ||
-      !meta_prefs_get_desktop_effects () ||
+      !priv->screen->display->desktop_effects ||
       !start_simple_effect (self, event))
     {
       clutter_actor_hide (CLUTTER_ACTOR (self));

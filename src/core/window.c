@@ -3559,7 +3559,7 @@ meta_window_maximize (MetaWindow        *window,
                                    saved_rect);
 
     MetaRectangle old_rect;
-    gboolean desktop_effects = meta_prefs_get_desktop_effects ();
+    gboolean desktop_effects = window->display->desktop_effects;
 
     if (desktop_effects)
       old_rect = window->outer_rect;
@@ -3770,7 +3770,7 @@ meta_window_real_tile (MetaWindow *window, gboolean force)
     {
       MetaRectangle old_rect;
       MetaRectangle new_rect;
-      gboolean desktop_effects = meta_prefs_get_desktop_effects ();
+      gboolean desktop_effects = window->display->desktop_effects;
 
       if (desktop_effects)
         meta_window_get_input_rect (window, &old_rect);
@@ -3991,7 +3991,7 @@ meta_window_unmaximize_internal (MetaWindow        *window,
       if (window->resizing_tile_type == META_WINDOW_TILE_TYPE_NONE)
         {
           MetaRectangle old_rect;
-          gboolean desktop_effects = meta_prefs_get_desktop_effects ();
+          gboolean desktop_effects = window->display->desktop_effects;
 
           if (desktop_effects)
             old_rect = window->outer_rect;
