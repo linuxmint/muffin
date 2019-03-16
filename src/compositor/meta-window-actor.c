@@ -114,17 +114,7 @@ struct _MetaWindowActorPrivate
 
   char *            shadow_class;
 
-  /*
-   * These need to be counters rather than flags, since more plugins
-   * can implement same effect; the practicality of stacking effects
-   * might be dubious, but we have to at least handle it correctly.
-   */
-  gint              minimize_in_progress;
-  gint              maximize_in_progress;
-  gint              unmaximize_in_progress;
-  gint              tile_in_progress;
-  gint              map_in_progress;
-  gint              destroy_in_progress;
+  gint              effect_in_progress;
 
   /* List of FrameData for recent frames */
   GList            *frames;
@@ -1939,13 +1929,7 @@ meta_window_actor_queue_frame_drawn (MetaWindowActor *self,
 LOCAL_SYMBOL gboolean
 meta_window_actor_effect_in_progress (MetaWindowActor *self)
 {
-  MetaWindowActorPrivate *priv = self->priv;
-  return (priv->minimize_in_progress ||
-          priv->maximize_in_progress ||
-          priv->unmaximize_in_progress ||
-          priv->map_in_progress ||
-          priv->tile_in_progress ||
-          priv->destroy_in_progress);
+  return self->priv->effect_in_progress;
 }
 
 static gboolean
@@ -1976,39 +1960,18 @@ start_simple_effect (MetaWindowActor *self,
   if (!compositor->plugin_mgr)
     return FALSE;
 
-  switch (event)
-  {
-  case META_PLUGIN_MINIMIZE:
-    counter = &priv->minimize_in_progress;
-    break;
-  case META_PLUGIN_MAP:
-    counter = &priv->map_in_progress;
-    break;
-  case META_PLUGIN_DESTROY:
-    counter = &priv->destroy_in_progress;
-    break;
-  case META_PLUGIN_UNMAXIMIZE:
-  case META_PLUGIN_MAXIMIZE:
-  case META_PLUGIN_SWITCH_WORKSPACE:
-  case META_PLUGIN_TILE:
-    g_assert_not_reached ();
-    break;
-  }
-
-  g_assert (counter);
-
   use_freeze_thaw = is_freeze_thaw_effect (event);
 
   if (use_freeze_thaw)
     meta_window_actor_freeze (self);
 
-  (*counter)++;
+  priv->effect_in_progress++;
 
   if (!meta_plugin_manager_event_simple (compositor->plugin_mgr,
                                          self,
                                          event))
     {
-      (*counter)--;
+      priv->effect_in_progress--;
       if (use_freeze_thaw)
         meta_window_actor_thaw (self);
       return FALSE;
@@ -2048,63 +2011,22 @@ meta_window_actor_effect_completed (MetaWindowActor *self,
    * that the corresponding MetaWindow may have be been destroyed.
    * In this case priv->window will == NULL */
 
+  priv->effect_in_progress--;
+
+  if (priv->effect_in_progress < 0)
+    {
+      g_warning ("Error in effects accounting (%i)", event);
+      priv->effect_in_progress = 0;
+    }
+
   switch (event)
   {
     case META_PLUGIN_MINIMIZE:
-      {
-        priv->minimize_in_progress--;
-        if (priv->minimize_in_progress < 0)
-          {
-            g_warning ("Error in minimize accounting.");
-            priv->minimize_in_progress = 0;
-          }
-      }
-      break;
     case META_PLUGIN_MAP:
-      /*
-      * Make sure that the actor is at the correct place in case
-      * the plugin fscked.
-      */
-      priv->map_in_progress--;
-      priv->position_changed = TRUE;
-      if (priv->map_in_progress < 0)
-        {
-          g_warning ("Error in map accounting.");
-          priv->map_in_progress = 0;
-        }
-      break;
     case META_PLUGIN_DESTROY:
-      priv->destroy_in_progress--;
-
-      if (priv->destroy_in_progress < 0)
-        {
-          g_warning ("Error in destroy accounting.");
-          priv->destroy_in_progress = 0;
-        }
-      break;
     case META_PLUGIN_UNMAXIMIZE:
-      priv->unmaximize_in_progress--;
-      if (priv->unmaximize_in_progress < 0)
-        {
-          g_warning ("Error in unmaximize accounting.");
-          priv->unmaximize_in_progress = 0;
-        }
-      break;
     case META_PLUGIN_MAXIMIZE:
-      priv->maximize_in_progress--;
-      if (priv->maximize_in_progress < 0)
-        {
-          g_warning ("Error in maximize accounting.");
-          priv->maximize_in_progress = 0;
-        }
-      break;
     case META_PLUGIN_TILE:
-      priv->tile_in_progress--;
-      if (priv->tile_in_progress < 0)
-        {
-          g_warning ("Error in tile accounting.");
-          priv->tile_in_progress = 0;
-        }
       break;
     case META_PLUGIN_SWITCH_WORKSPACE:
       g_assert_not_reached ();
@@ -2114,7 +2036,7 @@ meta_window_actor_effect_completed (MetaWindowActor *self,
   if (is_freeze_thaw_effect (event))
     meta_window_actor_thaw (self);
 
-  if (!meta_window_actor_effect_in_progress (self))
+  if (!priv->effect_in_progress)
     meta_window_actor_after_effects (self);
 }
 
@@ -2302,7 +2224,7 @@ meta_window_actor_destroy (MetaWindowActor *self)
 
   priv->needs_destroy = TRUE;
 
-  if (!meta_window_actor_effect_in_progress (self))
+  if (!priv->effect_in_progress)
     clutter_actor_destroy (CLUTTER_ACTOR (self));
 }
 
@@ -2341,7 +2263,7 @@ meta_window_actor_sync_actor_geometry (MetaWindowActor *self,
   if ((priv->freeze_count || priv->obscured) && !did_placement)
     return;
 
-  if (meta_window_actor_effect_in_progress (self))
+  if (priv->effect_in_progress)
     return;
 
   if (priv->size_changed)
@@ -2449,14 +2371,15 @@ meta_window_actor_maximize (MetaWindowActor    *self,
                             MetaRectangle      *old_rect,
                             MetaRectangle      *new_rect)
 {
-  MetaCompositor *compositor = self->priv->screen->display->compositor;
+  MetaWindowActorPrivate *priv = self->priv;
+  MetaCompositor *compositor = priv->screen->display->compositor;
   /* The window has already been resized (in order to compute new_rect),
    * which by side effect caused the actor to be resized. Restore it to the
    * old size and position */
   clutter_actor_set_position (CLUTTER_ACTOR (self), old_rect->x, old_rect->y);
   clutter_actor_set_size (CLUTTER_ACTOR (self), old_rect->width, old_rect->height);
 
-  self->priv->maximize_in_progress++;
+  priv->effect_in_progress++;
   meta_window_actor_freeze (self);
 
   if (!compositor->plugin_mgr ||
@@ -2467,7 +2390,7 @@ meta_window_actor_maximize (MetaWindowActor    *self,
                                            new_rect->width, new_rect->height))
 
     {
-      self->priv->maximize_in_progress--;
+      priv->effect_in_progress--;
       meta_window_actor_thaw (self);
     }
 }
@@ -2477,7 +2400,8 @@ meta_window_actor_unmaximize (MetaWindowActor   *self,
                               MetaRectangle     *old_rect,
                               MetaRectangle     *new_rect)
 {
-  MetaCompositor *compositor = self->priv->screen->display->compositor;
+  MetaWindowActorPrivate *priv = self->priv;
+  MetaCompositor *compositor = priv->screen->display->compositor;
 
   /* The window has already been resized (in order to compute new_rect),
    * which by side effect caused the actor to be resized. Restore it to the
@@ -2485,7 +2409,7 @@ meta_window_actor_unmaximize (MetaWindowActor   *self,
   clutter_actor_set_position (CLUTTER_ACTOR (self), old_rect->x, old_rect->y);
   clutter_actor_set_size (CLUTTER_ACTOR (self), old_rect->width, old_rect->height);
 
-  self->priv->unmaximize_in_progress++;
+  priv->effect_in_progress++;
   meta_window_actor_freeze (self);
 
   if (!compositor->plugin_mgr ||
@@ -2495,7 +2419,7 @@ meta_window_actor_unmaximize (MetaWindowActor   *self,
                                            new_rect->x, new_rect->y,
                                            new_rect->width, new_rect->height))
     {
-      self->priv->unmaximize_in_progress--;
+      priv->effect_in_progress--;
       meta_window_actor_thaw (self);
     }
 }
@@ -2505,7 +2429,8 @@ meta_window_actor_tile (MetaWindowActor    *self,
                         MetaRectangle      *old_rect,
                         MetaRectangle      *new_rect)
 {
-  MetaCompositor *compositor = self->priv->screen->display->compositor;
+  MetaWindowActorPrivate *priv = self->priv;
+  MetaCompositor *compositor = priv->screen->display->compositor;
 
   /* The window has already been resized (in order to compute new_rect),
    * which by side effect caused the actor to be resized. Restore it to the
@@ -2513,7 +2438,7 @@ meta_window_actor_tile (MetaWindowActor    *self,
   clutter_actor_set_position (CLUTTER_ACTOR (self), old_rect->x, old_rect->y);
   clutter_actor_set_size (CLUTTER_ACTOR (self), old_rect->width, old_rect->height);
 
-  self->priv->tile_in_progress++;
+  priv->effect_in_progress++;
   meta_window_actor_freeze (self);
 
   if (!compositor->plugin_mgr ||
@@ -2524,7 +2449,7 @@ meta_window_actor_tile (MetaWindowActor    *self,
                                            new_rect->width, new_rect->height))
 
     {
-      self->priv->tile_in_progress--;
+      priv->effect_in_progress--;
       meta_window_actor_thaw (self);
     }
 }
