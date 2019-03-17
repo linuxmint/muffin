@@ -2118,9 +2118,6 @@ set_cogl_texture (MetaWindowActor *self,
     {
       priv->tex_width = width;
       priv->tex_height = height;
-
-      clutter_actor_set_size (CLUTTER_ACTOR (self), (float) width, (float) height);
-
       g_signal_emit (self, signals[SIZE_CHANGED], 0);
     }
 
@@ -2338,13 +2335,27 @@ meta_window_actor_sync_actor_geometry (MetaWindowActor *self,
     return;
 
   if (priv->effect_in_progress)
-    return;
+    {
+      /* Check to see if the actor dimensions match the input rect, so set_size is called once.
+         Otherwise, windows that map outside the stage area will have texture with artifacts. */
+      gfloat width, height;
+
+      clutter_actor_get_size (CLUTTER_ACTOR (self), &width, &height);
+
+      if ((int)width != window_rect.width ||
+          (int)height != window_rect.height)
+        clutter_actor_set_size (CLUTTER_ACTOR (self),
+                                window_rect.width, window_rect.height);
+      return;
+    }
 
   if (priv->size_changed)
     {
       meta_window_update_rects (priv->window);
       priv->needs_pixmap = TRUE;
       meta_window_actor_update_shape (self);
+      clutter_actor_set_size (CLUTTER_ACTOR (self),
+                              window_rect.width, window_rect.height);
     }
 
   if (priv->position_changed)
@@ -3385,12 +3396,12 @@ first_frame_drawn (MetaWindowActor *self)
   MetaWindowActorPrivate *priv;
 
   if (!self)
-    return G_SOURCE_REMOVE;
+    return;
 
   priv = self->priv;
 
   if (!priv)
-    return G_SOURCE_REMOVE;
+    return;
 
   priv->first_frame_drawn = TRUE;
   priv->first_frame_drawn_id = 0;
