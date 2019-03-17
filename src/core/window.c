@@ -5362,6 +5362,8 @@ meta_window_move_resize_internal (MetaWindow          *window,
 
   meta_window_refresh_resize_popup (window);
 
+  meta_window_update_monitor (window);
+
   /* Invariants leaving this function are:
    *   a) window->rect and frame->rect reflect the actual
    *      server-side size/pos of window->xwindow and frame->xwindow
