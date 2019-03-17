@@ -251,10 +251,10 @@ static void do_send_frame_timings (MetaWindowActor  *self,
                                    FrameData        *frame,
                                    gint             refresh_interval,
                                    gint64           presentation_time);
-static gboolean clip_shadow_under_window (MetaWindowActor *self);
+static inline gboolean clip_shadow_under_window (MetaWindowActor *self);
 
-static inline void set_obscured (MetaWindowActor *self,
-                                 gboolean         obscured);
+static void set_obscured (MetaWindowActor *self,
+                          gboolean         obscured);
 
 G_DEFINE_TYPE (MetaWindowActor, meta_window_actor, CLUTTER_TYPE_ACTOR);
 
@@ -789,7 +789,7 @@ meta_window_actor_get_shadow_bounds (MetaWindowActor       *self,
  * the right result, but looks OK. We also apply this approach to
  * windows set to be partially translucent with _NET_WM_WINDOW_OPACITY.
  */
-static gboolean
+static inline gboolean
 clip_shadow_under_window (MetaWindowActor *self)
 {
   MetaWindowActorPrivate *priv = self->priv;
@@ -1761,7 +1761,7 @@ meta_window_actor_thaw (MetaWindowActor *self)
     meta_window_actor_damage_all (self);
 }
 
-static inline void
+static void
 set_obscured (MetaWindowActor *self,
               gboolean         obscured)
 {
