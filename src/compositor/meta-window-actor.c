@@ -2078,7 +2078,14 @@ meta_window_actor_effect_completed (MetaWindowActor *self,
     meta_window_actor_thaw (self);
 
   if (!priv->effect_in_progress)
-    meta_window_actor_after_effects (self);
+    {
+      if (priv->screen->display->desktop_effects &&
+          priv->first_frame_drawn)
+        {
+          priv->position_changed = TRUE;
+        }
+      meta_window_actor_after_effects (self);
+    }
 }
 
 static void
