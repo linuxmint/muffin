@@ -2080,7 +2080,8 @@ meta_window_actor_effect_completed (MetaWindowActor *self,
   if (!priv->effect_in_progress)
     {
       if (priv->screen->display->desktop_effects &&
-          priv->first_frame_drawn)
+          priv->first_frame_drawn &&
+          event != META_PLUGIN_MAP)
         {
           priv->position_changed = TRUE;
         }
@@ -2335,19 +2336,7 @@ meta_window_actor_sync_actor_geometry (MetaWindowActor *self,
     return;
 
   if (priv->effect_in_progress)
-    {
-      /* Check to see if the actor dimensions match the input rect, so set_size is called once.
-         Otherwise, windows that map outside the stage area will have texture with artifacts. */
-      gfloat width, height;
-
-      clutter_actor_get_size (CLUTTER_ACTOR (self), &width, &height);
-
-      if ((int)width != window_rect.width ||
-          (int)height != window_rect.height)
-        clutter_actor_set_size (CLUTTER_ACTOR (self),
-                                window_rect.width, window_rect.height);
-      return;
-    }
+    return;
 
   if (priv->size_changed)
     {
@@ -3396,12 +3385,12 @@ first_frame_drawn (MetaWindowActor *self)
   MetaWindowActorPrivate *priv;
 
   if (!self)
-    return;
+    return G_SOURCE_REMOVE;
 
   priv = self->priv;
 
   if (!priv)
-    return;
+    return G_SOURCE_REMOVE;
 
   priv->first_frame_drawn = TRUE;
   priv->first_frame_drawn_id = 0;
@@ -3410,8 +3399,10 @@ first_frame_drawn (MetaWindowActor *self)
 
   if (priv->screen->display->desktop_effects)
     {
-      priv->position_changed = TRUE;
-      meta_window_actor_sync_actor_geometry (self, TRUE);
+      MetaRectangle rect;
+      meta_window_get_input_rect (priv->window, &rect);
+      clutter_actor_set_size (CLUTTER_ACTOR (self), rect.width, rect.height);
+      clutter_actor_set_position (CLUTTER_ACTOR (self), rect.x, rect.y);
     }
 
   return G_SOURCE_REMOVE;
@@ -3572,7 +3563,7 @@ meta_window_actor_set_opacity (MetaWindowActor *self,
 {
   MetaWindowActorPrivate *priv = self->priv;
 
-  if (priv->obscured && !priv->effect_in_progress)
+  if (priv->obscured)
     return;
 
   ClutterActor *actor = CLUTTER_ACTOR (self);
