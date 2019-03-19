@@ -1283,6 +1283,7 @@ meta_window_new_with_attrs (MetaDisplay       *display,
 
   window->compositor_private = NULL;
 
+  meta_window_update_rects (window);
   window->monitor = meta_screen_get_monitor_for_rect (window->screen, &window->outer_rect);
 
   window->tile_match = NULL;
