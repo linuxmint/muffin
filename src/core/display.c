@@ -519,6 +519,8 @@ meta_display_open (void)
    */
   the_display->name = g_strdup (XDisplayName (NULL));
   the_display->xdisplay = xdisplay;
+  the_display->gdk_display = gdk_display_get_default();
+
   if (gethostname (buf, sizeof(buf)-1) == 0)
     {
       buf[sizeof(buf)-1] = '\0';

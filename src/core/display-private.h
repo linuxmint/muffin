@@ -80,6 +80,7 @@ struct _MetaDisplay
   
   char *name;
   Display *xdisplay;
+  GdkDisplay *gdk_display;
   char *hostname;
 
   Window leader_window;

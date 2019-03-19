@@ -1005,7 +1005,7 @@ meta_screen_new (MetaDisplay *display,
   screen->keys_grabbed = FALSE;
   meta_screen_grab_keys (screen);
 
-  screen->ui = meta_ui_new (screen->display->xdisplay,
+  screen->ui = meta_ui_new (display,
                             screen->xscreen);
 
   screen->tile_preview_timeout_id = 0;

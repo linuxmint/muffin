@@ -30,6 +30,7 @@
 #include "menu.h"
 #include "core.h"
 #include "theme-private.h"
+#include "display-private.h"
 #include "window-private.h"
 
 #include "inlinepixbufs.h"
@@ -294,17 +295,17 @@ meta_ui_remove_event_func (Display       *xdisplay,
 }
 
 LOCAL_SYMBOL MetaUI*
-meta_ui_new (Display *xdisplay,
+meta_ui_new (MetaDisplay *display,
              Screen  *screen)
 {
   GdkDisplay *gdisplay;
   MetaUI *ui;
 
   ui = g_new0 (MetaUI, 1);
-  ui->xdisplay = xdisplay;
+  ui->xdisplay = display->xdisplay;
   ui->xscreen = screen;
 
-  gdisplay = gdk_x11_lookup_xdisplay (xdisplay);
+  gdisplay = display->gdk_display;
   g_assert (gdisplay == gdk_display_get_default ());
 
   ui->frames = meta_frames_new (XScreenNumberOfScreen (screen));
