@@ -1,3 +1,13 @@
+muffin (4.0.7) tessa; urgency=medium
+
+  [ Jason Hicks ]
+  * cogl-util: Use original meta_rectangle_new for older GPUs (#401)
+  * window: Pass the input rect to meta_compositor_tile_window (#411)
+  * Phase out MetaCompScreen (#424)
+  * window-actor: Fix partially visible frameless windows, some window flickering cases (#405)
+
+ -- Clement Lefebvre <root@linuxmint.com>  Thu, 21 Mar 2019 17:00:29 +0000
+
 muffin (4.0.6) tessa; urgency=medium
 
   * Re-add gsettings key org.cinnamon.muffin button-layout
