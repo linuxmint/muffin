@@ -517,8 +517,6 @@ meta_window_actor_constructed (GObject *object)
 
   /* Opacity handling */
   meta_window_actor_set_opacity (self, -1);
-  maybe_desaturate_window (actor, priv->opacity);
-  priv->clip_shadow = clip_shadow_under_window (self);
 }
 
 static void
