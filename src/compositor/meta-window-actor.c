@@ -244,8 +244,6 @@ static gboolean meta_window_actor_has_shadow (MetaWindowActor *self);
 
 static void meta_window_actor_handle_updates (MetaWindowActor *self);
 
-static void check_needs_reshape (MetaWindowActor *self);
-
 static void do_send_frame_drawn (MetaWindowActor *self, FrameData *frame);
 static void do_send_frame_timings (MetaWindowActor  *self,
                                    FrameData        *frame,
@@ -2770,7 +2768,7 @@ meta_window_actor_set_create_mipmaps (MetaWindowActor *self,
 }
 
 static void
-check_needs_pixmap (MetaWindowActor *self)
+process_pixmap (MetaWindowActor *self)
 {
   MetaWindowActorPrivate *priv = self->priv;
   MetaScreen *screen = priv->screen;
@@ -2778,9 +2776,6 @@ check_needs_pixmap (MetaWindowActor *self)
   Display *xdisplay = display->xdisplay;
   MetaCompositor *compositor = display->compositor;
   Window xwindow = priv->xwindow;
-
-  if ((!priv->window->mapped && !priv->window->shaded) || !priv->needs_pixmap)
-    return;
 
   if (xwindow == screen->xroot ||
       xwindow == clutter_x11_get_stage_window (compositor->stage))
@@ -2847,20 +2842,14 @@ check_needs_pixmap (MetaWindowActor *self)
 }
 
 static void
-check_needs_shadow (MetaWindowActor *self)
+process_shadow (MetaWindowActor *self)
 {
-  if (!self->priv->window->display->shadows_enabled)
-    return;
-
   MetaWindowActorPrivate *priv = self->priv;
   MetaShadow *old_shadow = NULL;
   MetaShadow **shadow_location;
   gboolean recompute_shadow;
   gboolean should_have_shadow;
   gboolean appears_focused;
-
-  if (!priv->window->mapped && !priv->window->shaded)
-    return;
 
   /* Calling meta_window_actor_has_shadow() here at every pre-paint is cheap
    * and avoids the need to explicitly handle window type changes, which
@@ -3175,16 +3164,13 @@ meta_window_actor_ensure_mask (MetaWindowActor *self,
 }
 
 static void
-check_needs_reshape (MetaWindowActor *self)
+process_shape_region (MetaWindowActor *self)
 {
   MetaWindowActorPrivate *priv = self->priv;
   cairo_region_t *region = NULL;
   cairo_rectangle_int_t *client_area;
   gboolean full_mask_reset = priv->window->fullscreen;
   gboolean has_frame = priv->window->frame != NULL;
-
-  if ((!priv->window->mapped && !priv->window->shaded) || !priv->needs_reshape)
-    return;
 
   g_clear_pointer (&priv->shape_region, cairo_region_destroy);
   g_clear_pointer (&priv->shadow_shape, meta_window_shape_unref);
@@ -3323,6 +3309,12 @@ meta_window_actor_handle_updates (MetaWindowActor *self)
   if (!priv->visible && !priv->needs_pixmap)
     return;
 
+  if (!priv->window->mapped && !priv->window->shaded)
+    {
+      /* Don't waste CPU time on pre-mature state. */
+      return;
+    }
+
   if (priv->received_damage)
     {
       meta_error_trap_push (display);
@@ -3332,9 +3324,14 @@ meta_window_actor_handle_updates (MetaWindowActor *self)
       priv->received_damage = FALSE;
     }
 
-  check_needs_pixmap (self);
-  check_needs_reshape (self);
-  check_needs_shadow (self);
+  if (priv->needs_pixmap)
+    process_pixmap (self);
+
+  if (priv->needs_reshape)
+    process_shape_region (self);
+
+  if (priv->window->display->shadows_enabled)
+    process_shadow (self);
 }
 
 void
