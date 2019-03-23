@@ -1433,12 +1433,6 @@ meta_window_actor_showing_on_its_workspace (MetaWindowActor *self)
 }
 
 static void
-meta_window_actor_freeze (MetaWindowActor *self)
-{
-  self->priv->freeze_count++;
-}
-
-static void
 meta_window_actor_update_area (MetaWindowActor *self,
                                int              x,
                                int              y,
@@ -1533,7 +1527,7 @@ meta_window_actor_thaw (MetaWindowActor *self)
 
   priv->freeze_count--;
 
-  if (priv->freeze_count < 0)
+  if (G_UNLIKELY (priv->freeze_count < 0))
     {
       g_warning ("Error in freeze/thaw accounting.");
       priv->freeze_count = 0;
@@ -1803,7 +1797,7 @@ start_simple_effect (MetaWindowActor *self,
   use_freeze_thaw = is_freeze_thaw_effect (event);
 
   if (use_freeze_thaw)
-    meta_window_actor_freeze (self);
+    priv->freeze_count++;
 
   priv->effect_in_progress++;
 
@@ -2254,7 +2248,7 @@ meta_window_actor_maximize (MetaWindowActor    *self,
   clutter_actor_set_size (CLUTTER_ACTOR (self), old_rect->width, old_rect->height);
 
   priv->effect_in_progress++;
-  meta_window_actor_freeze (self);
+  priv->freeze_count++;
 
   if (!compositor->plugin_mgr ||
       !meta_plugin_manager_event_maximize (compositor->plugin_mgr,
@@ -2284,7 +2278,7 @@ meta_window_actor_unmaximize (MetaWindowActor   *self,
   clutter_actor_set_size (CLUTTER_ACTOR (self), old_rect->width, old_rect->height);
 
   priv->effect_in_progress++;
-  meta_window_actor_freeze (self);
+  priv->freeze_count++;
 
   if (!compositor->plugin_mgr ||
       !meta_plugin_manager_event_maximize (compositor->plugin_mgr,
@@ -2313,7 +2307,7 @@ meta_window_actor_tile (MetaWindowActor    *self,
   clutter_actor_set_size (CLUTTER_ACTOR (self), old_rect->width, old_rect->height);
 
   priv->effect_in_progress++;
-  meta_window_actor_freeze (self);
+  priv->freeze_count++;
 
   if (!compositor->plugin_mgr ||
       !meta_plugin_manager_event_maximize (compositor->plugin_mgr,
@@ -2362,8 +2356,7 @@ meta_window_actor_new (MetaWindow *window)
 
   priv->needs_pixmap = TRUE;
 
-  meta_window_actor_set_updates_frozen (self,
-                                        meta_window_updates_are_frozen (priv->window));
+  meta_window_actor_set_updates_frozen (self, meta_window_updates_are_frozen (window));
 
   /* If a window doesn't start off with updates frozen, we should
    * we should send a _NET_WM_FRAME_DRAWN immediately after the first drawn.
@@ -3396,7 +3389,7 @@ meta_window_actor_set_updates_frozen (MetaWindowActor *self,
     {
       priv->updates_frozen = updates_frozen;
       if (updates_frozen)
-        meta_window_actor_freeze (self);
+        priv->freeze_count++;
       else
         meta_window_actor_thaw (self);
     }
