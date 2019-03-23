@@ -1186,6 +1186,7 @@ meta_window_new_with_attrs (MetaDisplay       *display,
   window->tab_unminimized = FALSE;
   window->iconic = FALSE;
   window->mapped = attrs->map_state != IsUnmapped;
+  window->compositor_mapped = FALSE;
   window->hidden = FALSE;
   window->visible_to_compositor = FALSE;
   window->pending_compositor_effect = effect;
@@ -5354,8 +5355,7 @@ meta_window_move_resize_internal (MetaWindow          *window,
       need_move_client || need_resize_client ||
       did_placement))
     {
-      meta_window_actor_sync_actor_geometry (window->compositor_private,
-                                             did_placement);
+      meta_window_actor_sync_actor_geometry (window->compositor_private);
     }
   else
     {
@@ -5702,7 +5702,7 @@ meta_window_configure_notify (MetaWindow      *window,
     meta_warning ("Unhandled change of windows override redirect status\n");
 
   if (window->compositor_private)
-    meta_window_actor_sync_actor_geometry (window->compositor_private, FALSE);
+    meta_window_actor_sync_actor_geometry (window->compositor_private);
 }
 
 LOCAL_SYMBOL void

@@ -262,6 +262,7 @@ struct _MetaWindow
    * see also unmaps_pending
    */
   guint mapped : 1;
+  guint compositor_mapped : 1;
 
   /* Whether window has been hidden from view by lowering it to the bottom
    * of window stack.

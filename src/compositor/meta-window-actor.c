@@ -238,7 +238,6 @@ static void meta_window_actor_get_preferred_height (ClutterActor *self,
 static gboolean meta_window_actor_get_paint_volume (ClutterActor       *actor,
                                                     ClutterPaintVolume *volume);
 
-
 static void     meta_window_actor_detach     (MetaWindowActor *self);
 static gboolean meta_window_actor_has_shadow (MetaWindowActor *self);
 
@@ -554,7 +553,7 @@ meta_window_actor_dispose (GObject *object)
     {
       g_source_remove (priv->first_frame_drawn_id);
       priv->first_frame_drawn_id = 0;
-  }
+    }
 
   screen = priv->screen;
   display = screen->display;
@@ -589,6 +588,8 @@ meta_window_actor_dispose (GObject *object)
     }
 
   compositor->windows = g_list_remove (compositor->windows, (gconstpointer) self);
+
+  priv->window->compositor_mapped = FALSE;
 
   g_clear_object (&priv->window);
 
@@ -1738,7 +1739,7 @@ meta_window_actor_thaw (MetaWindowActor *self)
     return;
 
   /* We sometimes ignore moves and resizes on frozen windows */
-  meta_window_actor_sync_actor_geometry (self, FALSE);
+  meta_window_actor_sync_actor_geometry (self);
 
   /* We do this now since we might be going right back into the
    * frozen state */
@@ -2026,7 +2027,7 @@ meta_window_actor_after_effects (MetaWindowActor *self)
     return;
 
   meta_window_actor_sync_visibility (self);
-  meta_window_actor_sync_actor_geometry (self, FALSE);
+  meta_window_actor_sync_actor_geometry (self);
 
   if (priv->needs_pixmap)
     clutter_actor_queue_redraw (CLUTTER_ACTOR (self));
@@ -2107,6 +2108,13 @@ set_cogl_texture (MetaWindowActor *self,
 
   if (priv->mask_needs_update)
     {
+      if (!priv->window->compositor_mapped)
+        {
+          priv->window->compositor_mapped = TRUE;
+
+          clutter_actor_set_size (CLUTTER_ACTOR (self), width, height);
+        }
+
       priv->tex_width = width;
       priv->tex_height = height;
       g_signal_emit (self, signals[SIZE_CHANGED], 0);
@@ -2286,16 +2294,11 @@ meta_window_actor_destroy (MetaWindowActor *self)
 }
 
 LOCAL_SYMBOL void
-meta_window_actor_sync_actor_geometry (MetaWindowActor *self,
-                                       gboolean         did_placement)
+meta_window_actor_sync_actor_geometry (MetaWindowActor *self)
 {
   MetaWindowActorPrivate *priv = self->priv;
   MetaRectangle window_rect;
-
-  /* This function will get called a lot when effects are enabled, including
-     outside the X event loop that controls rect caching. */
-  if (priv->effect_in_progress)
-    meta_window_update_rects (priv->window);
+  gboolean mapped = priv->window->compositor_mapped;
 
   meta_window_get_input_rect (priv->window, &window_rect);
 
@@ -2322,7 +2325,7 @@ meta_window_actor_sync_actor_geometry (MetaWindowActor *self,
    * is shown, the map effect will go into effect and prevent further geometry
    * updates.
    */
-  if ((priv->freeze_count || priv->obscured) && !did_placement)
+  if ((priv->freeze_count && mapped) || priv->obscured)
     return;
 
   if (priv->effect_in_progress)
@@ -2337,7 +2340,7 @@ meta_window_actor_sync_actor_geometry (MetaWindowActor *self,
                               window_rect.width, window_rect.height);
     }
 
-  if (priv->position_changed)
+  if (priv->position_changed || !mapped)
     {
       clutter_actor_set_position (CLUTTER_ACTOR (self),
                                   window_rect.x, window_rect.y);
@@ -2558,7 +2561,7 @@ meta_window_actor_new (MetaWindow *window)
   if (priv->window->extended_sync_request_counter && !priv->updates_frozen)
     meta_window_actor_queue_frame_drawn (self, FALSE);
 
-  meta_window_actor_sync_actor_geometry (self, priv->window->placed);
+  meta_window_actor_sync_actor_geometry (self);
 
   /* Hang our compositor window state off the MetaWindow for fast retrieval */
   window->compositor_private = self;
