@@ -9543,7 +9543,12 @@ update_move (MetaWindow  *window,
       if (meta_prefs_get_edge_tiling ())
         {
           if (window->current_proximity_zone != ZONE_NONE && !window->mouse_on_edge)
-            meta_screen_tile_hud_update (window->screen, TRUE, FALSE);
+            {
+              if (window->display->desktop_effects)
+                get_outer_rect (window, &window->outer_rect);
+
+              meta_screen_tile_hud_update (window->screen, TRUE, FALSE);
+            }
           else
             meta_screen_tile_hud_update (window->screen, TRUE, TRUE);
         }
