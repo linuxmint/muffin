@@ -951,13 +951,14 @@ sync_actor_stacking (MetaCompositor *compositor)
 
       if (!popup_window_visible && parent == compositor->top_window_group)
         {
-          switch (meta_window_actor_get_meta_window (META_WINDOW_ACTOR (actor))->type) {
-            case META_WINDOW_DROPDOWN_MENU:
-            case META_WINDOW_POPUP_MENU:
-            case META_WINDOW_COMBO:
-              popup_window_visible = TRUE;
-              break;
-          }
+          switch (meta_window_actor_get_meta_window (META_WINDOW_ACTOR (actor))->type)
+            {
+              case META_WINDOW_DROPDOWN_MENU:
+              case META_WINDOW_POPUP_MENU:
+              case META_WINDOW_COMBO:
+                popup_window_visible = TRUE;
+                break;
+            }
         }
 
       clutter_actor_set_child_below_sibling (parent, actor, NULL);
