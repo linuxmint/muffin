@@ -5355,7 +5355,7 @@ meta_window_move_resize_internal (MetaWindow          *window,
       need_move_client || need_resize_client ||
       did_placement))
     {
-      meta_window_actor_sync_actor_geometry (window->compositor_private);
+      meta_window_actor_sync_actor_geometry (window->compositor_private, did_placement);
     }
   else
     {
@@ -5702,7 +5702,7 @@ meta_window_configure_notify (MetaWindow      *window,
     meta_warning ("Unhandled change of windows override redirect status\n");
 
   if (window->compositor_private)
-    meta_window_actor_sync_actor_geometry (window->compositor_private);
+    meta_window_actor_sync_actor_geometry (window->compositor_private, FALSE);
 }
 
 LOCAL_SYMBOL void

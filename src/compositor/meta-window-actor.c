@@ -1739,7 +1739,7 @@ meta_window_actor_thaw (MetaWindowActor *self)
     return;
 
   /* We sometimes ignore moves and resizes on frozen windows */
-  meta_window_actor_sync_actor_geometry (self);
+  meta_window_actor_sync_actor_geometry (self, FALSE);
 
   /* We do this now since we might be going right back into the
    * frozen state */
@@ -2027,7 +2027,7 @@ meta_window_actor_after_effects (MetaWindowActor *self)
     return;
 
   meta_window_actor_sync_visibility (self);
-  meta_window_actor_sync_actor_geometry (self);
+  meta_window_actor_sync_actor_geometry (self, TRUE);
 
   if (priv->needs_pixmap)
     clutter_actor_queue_redraw (CLUTTER_ACTOR (self));
@@ -2294,11 +2294,11 @@ meta_window_actor_destroy (MetaWindowActor *self)
 }
 
 LOCAL_SYMBOL void
-meta_window_actor_sync_actor_geometry (MetaWindowActor *self)
+meta_window_actor_sync_actor_geometry (MetaWindowActor *self,
+                                       gboolean         did_placement)
 {
   MetaWindowActorPrivate *priv = self->priv;
   MetaRectangle window_rect;
-  gboolean mapped = priv->window->compositor_mapped;
 
   meta_window_get_input_rect (priv->window, &window_rect);
 
@@ -2311,7 +2311,8 @@ meta_window_actor_sync_actor_geometry (MetaWindowActor *self)
     }
 
   if (priv->last_x != window_rect.x ||
-      priv->last_y != window_rect.y)
+      priv->last_y != window_rect.y ||
+      did_placement)
     {
       priv->position_changed = TRUE;
       priv->last_x = window_rect.x;
@@ -2325,7 +2326,7 @@ meta_window_actor_sync_actor_geometry (MetaWindowActor *self)
    * is shown, the map effect will go into effect and prevent further geometry
    * updates.
    */
-  if ((priv->freeze_count && mapped) || priv->obscured)
+  if ((priv->freeze_count || priv->obscured) && !did_placement)
     return;
 
   if (priv->effect_in_progress)
@@ -2340,7 +2341,7 @@ meta_window_actor_sync_actor_geometry (MetaWindowActor *self)
                               window_rect.width, window_rect.height);
     }
 
-  if (priv->position_changed || !mapped)
+  if (priv->position_changed || did_placement)
     {
       clutter_actor_set_position (CLUTTER_ACTOR (self),
                                   window_rect.x, window_rect.y);
@@ -2561,7 +2562,7 @@ meta_window_actor_new (MetaWindow *window)
   if (priv->window->extended_sync_request_counter && !priv->updates_frozen)
     meta_window_actor_queue_frame_drawn (self, FALSE);
 
-  meta_window_actor_sync_actor_geometry (self);
+  meta_window_actor_sync_actor_geometry (self, priv->window->placed);
 
   /* Hang our compositor window state off the MetaWindow for fast retrieval */
   window->compositor_private = self;
