@@ -114,6 +114,8 @@ static void meta_window_actor_get_preferred_height (ClutterActor *self,
 static gboolean meta_window_actor_get_paint_volume (ClutterActor       *actor,
                                                     ClutterPaintVolume *volume);
 
+static void meta_window_actor_queue_relayout (ClutterActor *actor);
+
 static void     meta_window_actor_detach     (MetaWindowActor *self);
 static gboolean meta_window_actor_has_shadow (MetaWindowActor *self);
 
@@ -157,6 +159,7 @@ meta_window_actor_class_init (MetaWindowActorClass *klass)
   actor_class->pick = meta_window_actor_pick;
   actor_class->paint = meta_window_actor_paint;
   actor_class->get_paint_volume = meta_window_actor_get_paint_volume;
+  actor_class->queue_relayout = meta_window_actor_queue_relayout;
 
   pspec = g_param_spec_object ("meta-window",
                                "MetaWindow",
@@ -276,6 +279,7 @@ meta_window_actor_init (MetaWindowActor *self)
   priv->first_frame_drawn = FALSE;
 
   priv->visible = FALSE;
+  priv->initial_relayout = FALSE;
 }
 
 static void
@@ -386,7 +390,7 @@ meta_window_actor_constructed (GObject *object)
   if (format && format->type == PictTypeDirect && format->direct.alphaMask)
     priv->argb32 = TRUE;
 
-  priv->shape_region = cairo_region_create();
+  priv->shape_region = cairo_region_create ();
 
   /* Opacity handling */
   meta_window_actor_set_opacity (self, -1);
@@ -1183,6 +1187,27 @@ meta_window_actor_get_preferred_height (ClutterActor *self,
     *natural_height_p = priv->tex_height;
 }
 
+static void
+meta_window_actor_queue_relayout (ClutterActor *actor)
+{
+  MetaWindowActorPrivate *priv = META_WINDOW_ACTOR (actor)->priv;
+
+  if (priv->window->display->grab_op != META_GRAB_OP_NONE)
+    {
+      if (!priv->initial_relayout)
+        {
+          CLUTTER_ACTOR_CLASS (meta_window_actor_parent_class)->queue_relayout (
+            actor->priv->parent
+          );
+          priv->initial_relayout = TRUE;
+        }
+      else
+        CLUTTER_ACTOR_CLASS (meta_window_actor_parent_class)->queue_relayout (actor);
+    }
+
+  clutter_actor_queue_redraw (actor);
+}
+
 static gboolean
 is_move_resize (MetaWindowActor *self)
 {
@@ -1624,7 +1649,7 @@ meta_window_actor_thaw (MetaWindowActor *self)
   /* Since we ignore damage events while a window is frozen for certain effects
    * we may need to issue an update_area() covering the whole pixmap if we
    * don't know what real damage has happened. */
-  if (self->priv->needs_damage_all)
+  if (priv->needs_damage_all)
     meta_window_actor_damage_all (self);
 }
 
@@ -1945,15 +1970,7 @@ meta_window_actor_effect_completed (MetaWindowActor *self,
     meta_window_actor_thaw (self);
 
   if (!priv->effect_in_progress)
-    {
-      if (priv->screen->display->desktop_effects &&
-          priv->first_frame_drawn &&
-          event != META_PLUGIN_MAP)
-        {
-          priv->position_changed = TRUE;
-        }
-      meta_window_actor_after_effects (self);
-    }
+    meta_window_actor_after_effects (self);
 }
 
 static void
@@ -1984,11 +2001,17 @@ set_cogl_texture (MetaWindowActor *self,
 
   if (priv->mask_needs_update)
     {
+      ClutterActor *actor = CLUTTER_ACTOR (self);
+
+      if (width && height)
+        clutter_actor_set_size (actor, width, height);
+
       if (!priv->window->compositor_mapped)
         {
           priv->window->compositor_mapped = TRUE;
 
-          clutter_actor_set_size (CLUTTER_ACTOR (self), width, height);
+          clutter_actor_set_reactive (actor, FALSE);
+          clutter_actor_set_flags (actor, CLUTTER_ACTOR_NO_LAYOUT);
         }
 
       priv->tex_width = width;
@@ -2210,11 +2233,16 @@ meta_window_actor_sync_actor_geometry (MetaWindowActor *self,
 
   if (priv->size_changed)
     {
-      meta_window_update_rects (priv->window);
+      // Fix for steam resizing issue
+      if (!priv->window->has_shape)
+        meta_window_update_rects (priv->window);
+
       priv->needs_pixmap = TRUE;
       meta_window_actor_update_shape (self);
-      clutter_actor_set_size (CLUTTER_ACTOR (self),
-                              window_rect.width, window_rect.height);
+
+      if (!priv->window->compositor_mapped)
+        clutter_actor_set_size (CLUTTER_ACTOR (self),
+                                window_rect.width, window_rect.height);
     }
 
   if (priv->position_changed || did_placement)
@@ -2461,8 +2489,6 @@ meta_window_actor_new (MetaWindow *window)
    */
   compositor->windows = g_list_append (compositor->windows, self);
 
-  clutter_actor_set_flags (CLUTTER_ACTOR (self), CLUTTER_ACTOR_NO_LAYOUT);
-
   return self;
 }
 
@@ -2656,8 +2682,8 @@ process_pixmap (MetaWindowActor *self)
 
   if (priv->size_changed)
     {
-      meta_window_actor_detach (self);
       priv->size_changed = FALSE;
+      meta_window_actor_detach (self);
     }
 
   if (priv->position_changed)
@@ -3264,14 +3290,6 @@ first_frame_drawn (MetaWindowActor *self)
   priv->first_frame_drawn_id = 0;
 
   priv->obscured_lock = FALSE;
-
-  if (priv->screen->display->desktop_effects)
-    {
-      MetaRectangle rect;
-      meta_window_get_input_rect (priv->window, &rect);
-      clutter_actor_set_size (CLUTTER_ACTOR (self), rect.width, rect.height);
-      clutter_actor_set_position (CLUTTER_ACTOR (self), rect.x, rect.y);
-    }
 
   return G_SOURCE_REMOVE;
 }

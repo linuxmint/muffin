@@ -89,6 +89,7 @@ struct _MetaWindowActorPrivate
   guint size_changed : 1;
   guint position_changed : 1;
   guint updates_frozen : 1;
+  guint initial_relayout : 1;
 
   guint needs_destroy : 1;
 
