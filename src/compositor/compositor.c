@@ -1378,6 +1378,7 @@ meta_compositor_show_tile_preview (MetaCompositor *compositor,
                                    int            tile_monitor_number,
                                    guint          snap_queued)
 {
+  meta_window_update_rects (window);
   meta_plugin_manager_show_tile_preview (compositor->plugin_mgr,
                                           window, tile_rect, tile_monitor_number,
                                           snap_queued);
