@@ -1192,18 +1192,15 @@ meta_window_actor_queue_relayout (ClutterActor *actor)
 {
   MetaWindowActorPrivate *priv = META_WINDOW_ACTOR (actor)->priv;
 
-  if (priv->window->display->grab_op != META_GRAB_OP_NONE)
+  if (!priv->initial_relayout)
     {
-      if (!priv->initial_relayout)
-        {
-          CLUTTER_ACTOR_CLASS (meta_window_actor_parent_class)->queue_relayout (
-            actor->priv->parent
-          );
-          priv->initial_relayout = TRUE;
-        }
-      else
-        CLUTTER_ACTOR_CLASS (meta_window_actor_parent_class)->queue_relayout (actor);
+      CLUTTER_ACTOR_CLASS (meta_window_actor_parent_class)->queue_relayout (
+        actor->priv->parent
+      );
+      priv->initial_relayout = TRUE;
     }
+  else
+    CLUTTER_ACTOR_CLASS (meta_window_actor_parent_class)->queue_relayout (actor);
 
   clutter_actor_queue_redraw (actor);
 }
