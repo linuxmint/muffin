@@ -430,11 +430,14 @@ maybe_desaturate_window (ClutterActor *actor,
     }
 }
 
-void
-meta_window_actor_decorated_notify (MetaWindowActor *self)
+static void
+window_decorated_notify (MetaWindow *mw,
+                         GParamSpec *arg1,
+                         gpointer    data)
 {
+  MetaWindowActor *self = META_WINDOW_ACTOR (data);
   MetaWindowActorPrivate *priv = self->priv;
-  MetaFrame *frame = priv->window->frame;
+  MetaFrame *frame = mw->frame;
   MetaScreen *screen = priv->screen;
   MetaDisplay *display = screen->display;
   Display *xdisplay = display->xdisplay;
@@ -449,7 +452,7 @@ meta_window_actor_decorated_notify (MetaWindowActor *self)
   if (frame)
     new_xwindow = frame->xwindow;
   else
-    new_xwindow = priv->window->xwindow;
+    new_xwindow = mw->xwindow;
 
   meta_window_actor_detach (self);
 
@@ -470,15 +473,27 @@ meta_window_actor_decorated_notify (MetaWindowActor *self)
                                 XDamageReportBoundingBox);
 }
 
-void
-meta_window_actor_appears_focused_notify (MetaWindowActor *self)
+static void
+window_appears_focused_notify (MetaWindow *mw,
+                               GParamSpec *arg1,
+                               gpointer    data)
 {
+  MetaWindowActor *self = META_WINDOW_ACTOR (data);
   MetaWindowActorPrivate *priv = self->priv;
 
   if (priv->obscured)
     set_obscured (self, FALSE);
 
   clutter_actor_queue_redraw (CLUTTER_ACTOR (self));
+}
+
+static void
+window_position_changed (MetaWindow *mw,
+                         gpointer    data)
+{
+  MetaWindowActor *self = META_WINDOW_ACTOR (meta_window_get_compositor_private (mw));
+
+  g_signal_emit (self, signals[POSITION_CHANGED], 0); // Compatibility
 }
 
 static void
@@ -542,6 +557,8 @@ meta_window_actor_dispose (GObject *object)
       g_source_remove (priv->reset_obscured_timeout_id);
       priv->reset_obscured_timeout_id = 0;
   }
+
+  meta_window_set_position_changed_callback (priv->window, NULL);
 
   if (priv->first_frame_drawn_id)
     {
@@ -613,6 +630,12 @@ meta_window_actor_set_property (GObject      *object,
         if (priv->window)
           g_object_unref (priv->window);
         priv->window = g_value_dup_object (value);
+
+        g_signal_connect_object (priv->window, "notify::decorated",
+                                 G_CALLBACK (window_decorated_notify), self, 0);
+        g_signal_connect_object (priv->window, "notify::appears-focused",
+                                 G_CALLBACK (window_appears_focused_notify), self, 0);
+        meta_window_set_position_changed_callback (priv->window, window_position_changed);
       }
       break;
     case PROP_META_SCREEN:
@@ -1765,13 +1788,9 @@ set_obscured (MetaWindowActor *self,
 
       clutter_actor_set_reactive (actor, FALSE);
       clutter_actor_set_offscreen_redirect (actor, CLUTTER_OFFSCREEN_REDIRECT_ALWAYS);
-      meta_texture_tower_set_base_texture (priv->paint_tower, NULL);
     }
   else
     {
-      if (priv->texture)
-        meta_texture_tower_set_base_texture (priv->paint_tower, priv->texture);
-
       clutter_actor_set_reactive (actor, TRUE);
       clutter_actor_set_offscreen_redirect (actor, CLUTTER_OFFSCREEN_REDIRECT_AUTOMATIC_FOR_OPACITY);
     }
@@ -2174,24 +2193,6 @@ set_cogl_texture (MetaWindowActor *self,
     meta_texture_tower_set_base_texture (priv->paint_tower, cogl_tex);
 }
 
-void
-meta_window_actor_reset_texture (MetaWindowActor *self)
-{
-  MetaWindowActorPrivate *priv = self->priv;
-  CoglTexture *texture;
-
-  if (!priv->texture)
-    return;
-
-  texture = priv->texture;
-
-  /* Setting the texture to NULL will cause all the FBO's cached by the
-   * shaped texture's MetaTextureTower to be discarded and recreated.
-   */
-  set_cogl_texture (self, NULL);
-  set_cogl_texture (self, texture);
-}
-
 /* Called to drop our reference to a window backing pixmap that we
  * previously obtained with XCompositeNameWindowPixmap. We do this
  * when the window is unmapped or when we want to update to a new
@@ -2214,7 +2215,7 @@ meta_window_actor_detach (MetaWindowActor *self)
    */
   set_cogl_texture (self, NULL);
 
-  cogl_flush ();
+  cogl_flush();
 
   XFreePixmap (xdisplay, priv->pixmap);
   priv->pixmap = None;
@@ -2303,7 +2304,7 @@ meta_window_actor_destroy (MetaWindowActor *self)
 
   window = priv->window;
   window_type = window->type;
-  window->compositor_private = NULL;
+  meta_window_set_compositor_private (window, NULL);
 
   if (priv->send_frame_messages_timer != 0)
     {
@@ -2607,7 +2608,7 @@ meta_window_actor_new (MetaWindow *window)
   meta_window_actor_sync_actor_geometry (self, priv->window->placed);
 
   /* Hang our compositor window state off the MetaWindow for fast retrieval */
-  window->compositor_private = self;
+  meta_window_set_compositor_private (window, G_OBJECT (self));
 
   if (window->type == META_WINDOW_DND)
     window_group = compositor->window_group;
