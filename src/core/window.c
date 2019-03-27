@@ -8416,11 +8416,6 @@ recalc_window_type (MetaWindow *window)
 
       if (old_decorated != window->decorated)
         g_object_notify (object, "decorated");
-        // {
-        //   if (window->compositor_private)
-        //     meta_window_actor_decorated_notify (window->compositor_private);
-        //   g_object_notify (object, "decorated");
-        // }
 
       g_object_notify (object, "window-type");
 
