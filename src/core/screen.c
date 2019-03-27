@@ -1223,7 +1223,8 @@ meta_screen_composite_all_windows (MetaScreen *screen)
 
       meta_compositor_add_window (display->compositor, window);
       if (window->visible_to_compositor)
-        meta_window_actor_show (window->compositor_private, META_COMP_EFFECT_NONE);
+        meta_compositor_show_window (display->compositor, window,
+                                     META_COMP_EFFECT_NONE);
     }
 
   g_slist_free (windows);
