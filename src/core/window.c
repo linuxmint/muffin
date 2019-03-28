@@ -4334,11 +4334,11 @@ LOCAL_SYMBOL void
 meta_window_adjust_opacity (MetaWindow   *window,
                             gboolean      increase)
 {
-  ClutterActor *actor = CLUTTER_ACTOR (window->compositor_private);
+  MetaWindowActor *actor = META_WINDOW_ACTOR (window->compositor_private);
 
   gint current_opacity, new_opacity;
 
-  current_opacity = clutter_actor_get_opacity (actor);
+  current_opacity = meta_window_actor_get_opacity (actor);
 
   if (increase) {
     new_opacity = MIN (current_opacity + OPACITY_STEP, 255);
@@ -4346,17 +4346,14 @@ meta_window_adjust_opacity (MetaWindow   *window,
     new_opacity = MAX (current_opacity - OPACITY_STEP, MAX (0, meta_prefs_get_min_win_opacity ()));
   }
 
-  if (new_opacity != current_opacity) {
-    meta_compositor_update_opacity (actor, (guint8) new_opacity);
-  }
+  if (new_opacity != current_opacity)
+    meta_window_actor_set_opacity (actor, (guint8) new_opacity);
 }
 
 void
 meta_window_reset_opacity (MetaWindow *window)
 {
-    ClutterActor *actor = CLUTTER_ACTOR (window->compositor_private);
-
-    clutter_actor_set_opacity (actor, 255);
+  meta_window_actor_set_opacity (META_WINDOW_ACTOR (window->compositor_private), 255);
 }
 
 static gboolean

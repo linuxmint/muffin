@@ -95,7 +95,4 @@ void meta_compositor_grab_op_end (MetaCompositor *compositor);
 void meta_compositor_set_all_obscured (MetaCompositor *compositor,
                                        gboolean        obscured);
 
-void meta_compositor_update_opacity (ClutterActor *actor,
-                                     guint8        opacity);
-
 #endif /* META_COMPOSITOR_PRIVATE_H */

@@ -53,6 +53,8 @@
  */
 #define MIN_FAST_UPDATES_BEFORE_UNMIPMAP 20
 
+#define META_WINDOW_ACTOR_PARAM_ANIMATABLE (1 << G_PARAM_USER_SHIFT)
+
 enum {
   POSITION_CHANGED,
   SIZE_CHANGED,
@@ -210,7 +212,8 @@ enum
   PROP_X_WINDOW_ATTRIBUTES,
   PROP_NO_SHADOW,
   PROP_SHADOW_CLASS,
-  PROP_OBSCURED
+  PROP_OBSCURED,
+  PROP_OPACITY
 };
 
 #define DEFAULT_SHADOW_RADIUS 12
@@ -258,7 +261,9 @@ static void do_send_frame_timings (MetaWindowActor  *self,
                                    FrameData        *frame,
                                    gint             refresh_interval,
                                    gint64           presentation_time);
-static gboolean clip_shadow_under_window (MetaWindowActor *self);
+
+static void set_obscured (MetaWindowActor *self,
+                          gboolean         obscured);
 
 G_DEFINE_TYPE (MetaWindowActor, meta_window_actor, CLUTTER_TYPE_ACTOR);
 
@@ -318,6 +323,19 @@ meta_window_actor_class_init (MetaWindowActorClass *klass)
 
   g_object_class_install_property (object_class,
                                    PROP_X_WINDOW,
+                                   pspec);
+
+  pspec = g_param_spec_uint ("opacity",
+                             "Opacity",
+                             "Opacity of a window actor actor",
+                             0, 255,
+                             255,
+                             G_PARAM_READWRITE |
+                             G_PARAM_STATIC_STRINGS |
+                             META_WINDOW_ACTOR_PARAM_ANIMATABLE);
+
+  g_object_class_install_property (object_class,
+                                   PROP_OPACITY,
                                    pspec);
 
   pspec = g_param_spec_boolean ("no-shadow",
@@ -381,6 +399,7 @@ meta_window_actor_init (MetaWindowActor *self)
   priv->opacity = 0xff;
   priv->shadow_class = NULL;
   priv->has_desat_effect = FALSE;
+  priv->clip_shadow = FALSE;
   priv->reshapes = 0;
   priv->should_have_shadow = FALSE;
   priv->obscured = FALSE;
@@ -392,42 +411,6 @@ meta_window_actor_init (MetaWindowActor *self)
   priv->first_frame_drawn_id = 0;
   priv->first_frame_handler_queued = FALSE;
   priv->first_frame_drawn = FALSE;
-}
-
-static void
-maybe_desaturate_window (ClutterActor *actor,
-                         guint8        opacity)
-{
-  MetaWindowActor *self = META_WINDOW_ACTOR (actor);
-  MetaWindowActorPrivate *priv = self->priv;
-
-  if (!priv->should_have_shadow)
-    return;
-
-  if (opacity < 255)
-    {
-      if (priv->has_desat_effect)
-        {
-          return;
-        }
-      else
-        {
-          ClutterEffect *effect = clutter_desaturate_effect_new (0.0);
-          clutter_actor_add_effect_with_name (actor, "desaturate-for-transparency", effect);
-          priv->has_desat_effect = TRUE;
-        }
-    }
-  else
-    {
-      /* This is will tend to get called fairly often - opening new windows, various
-         events on the window, like minimizing... but it's inexpensive - if the ClutterActor
-         priv->effects is NULL, it simply returns.  By default cinnamon and muffin add no
-         other effects except the special case of dimmed windows (attached modal dialogs), which
-         isn't a frequent occurrence. */
-
-      clutter_actor_remove_effect_by_name (actor, "desaturate-for-transparency");
-      priv->has_desat_effect = FALSE;
-    }
 }
 
 static void
@@ -520,9 +503,7 @@ meta_window_actor_constructed (GObject *object)
   priv->shape_region = cairo_region_create();
 
   /* Opacity handling */
-  meta_window_actor_update_opacity (self, 0);
-  maybe_desaturate_window (actor, priv->opacity);
-  priv->clip_shadow = clip_shadow_under_window (self);
+  meta_window_actor_set_opacity (self, -1);
 }
 
 static void
@@ -644,6 +625,9 @@ meta_window_actor_set_property (GObject      *object,
     case PROP_X_WINDOW:
       priv->xwindow = g_value_get_ulong (value);
       break;
+    case PROP_OPACITY:
+      meta_window_actor_set_opacity (self, g_value_get_uint (value));
+      break;
     case PROP_NO_SHADOW:
       {
         gboolean newv = g_value_get_boolean (value);
@@ -693,6 +677,9 @@ meta_window_actor_get_property (GObject      *object,
       break;
     case PROP_X_WINDOW:
       g_value_set_ulong (value, priv->xwindow);
+      break;
+    case PROP_OPACITY:
+      g_value_set_uint (value, priv->opacity);
       break;
     case PROP_NO_SHADOW:
       g_value_set_boolean (value, priv->no_shadow);
@@ -781,26 +768,6 @@ meta_window_actor_get_shadow_bounds (MetaWindowActor       *self,
                           shape_bounds->width,
                           shape_bounds->height,
                           bounds);
-}
-
-/* If we have an ARGB32 window that we decorate with a frame, it's
- * probably something like a translucent terminal - something where
- * the alpha channel represents transparency rather than a shape.  We
- * don't want to show the shadow through the translucent areas since
- * the shadow is wrong for translucent windows (it should be
- * translucent itself and colored), and not only that, will /look/
- * horribly wrong - a misplaced big black blob. As a hack, what we
- * want to do is just draw the shadow as normal outside the frame, and
- * inside the frame draw no shadow.  This is also not even close to
- * the right result, but looks OK. We also apply this approach to
- * windows set to be partially translucent with _NET_WM_WINDOW_OPACITY.
- */
-static gboolean
-clip_shadow_under_window (MetaWindowActor *self)
-{
-  MetaWindowActorPrivate *priv = self->priv;
-
-  return (priv->argb32 || priv->opacity != 0xff) && priv->window->frame;
 }
 
 static void
@@ -3580,18 +3547,20 @@ meta_window_actor_invalidate_shadow (MetaWindowActor *self)
   clutter_actor_queue_redraw (CLUTTER_ACTOR (self));
 }
 
+#define OPACITY_TYPE_CARDINAL -1
+
 void
-meta_window_actor_update_opacity (MetaWindowActor *self,
-                                  guint8           opacity)
+meta_window_actor_set_opacity (MetaWindowActor *self,
+                               guint8           opacity)
 {
   MetaWindowActorPrivate *priv = self->priv;
 
   if (priv->obscured)
     return;
 
-  ClutterActor *actor = CLUTTER_ACTOR (self);
+  guint8 old_opacity = priv->opacity;
 
-  if (!opacity)
+  if (opacity == OPACITY_TYPE_CARDINAL)
     {
       MetaDisplay *display = priv->screen->display;
       MetaCompositor *compositor = display->compositor;
@@ -3608,13 +3577,66 @@ meta_window_actor_update_opacity (MetaWindowActor *self,
         opacity = 255;
     }
 
-  priv->opacity = opacity;
+  /* Only adjust opacity if it has changed, or if the window is younger
+     than one second after the first paint cycle. */
+  if (old_opacity != opacity || !priv->first_frame_drawn)
+    {
+      ClutterActor *actor = CLUTTER_ACTOR (self);
+      gboolean transparent;
 
-  cogl_color_init_from_4ub (&priv->color, opacity, opacity, opacity, opacity);
+      priv->opacity = opacity;
 
-  clutter_actor_set_opacity (actor, opacity);
-  maybe_desaturate_window (actor, opacity);
-  priv->clip_shadow = clip_shadow_under_window (self);
+      cogl_color_init_from_4ub (&priv->color, opacity, opacity, opacity, opacity);
+
+      clutter_actor_set_opacity (actor, opacity);
+
+      if (!priv->should_have_shadow)
+        return;
+
+      transparent = opacity != 255;
+
+      /* If we have an ARGB32 window that we decorate with a frame, it's
+       * probably something like a translucent terminal - something where
+       * the alpha channel represents transparency rather than a shape.  We
+       * don't want to show the shadow through the translucent areas since
+       * the shadow is wrong for translucent windows (it should be
+       * translucent itself and colored), and not only that, will /look/
+       * horribly wrong - a misplaced big black blob. As a hack, what we
+       * want to do is just draw the shadow as normal outside the frame, and
+       * inside the frame draw no shadow.  This is also not even close to
+       * the right result, but looks OK. We also apply this approach to
+       * windows set to be partially translucent with _NET_WM_WINDOW_OPACITY.
+       */
+      priv->clip_shadow = (priv->argb32 || transparent) && priv->window->frame;
+
+      if ((!priv->has_desat_effect && !transparent) ||
+          (priv->has_desat_effect && transparent))
+        return;
+
+      if (transparent)
+        {
+          ClutterEffect *effect = clutter_desaturate_effect_new (0.0);
+          clutter_actor_add_effect_with_name (actor, "desaturate-for-transparency", effect);
+          priv->has_desat_effect = TRUE;
+        }
+      else
+        {
+          /* This is will tend to get called fairly often - opening new windows, various
+             events on the window, like minimizing... but it's inexpensive - if the ClutterActor
+             priv->effects is NULL, it simply returns.  By default cinnamon and muffin add no
+             other effects except the special case of dimmed windows (attached modal dialogs), which
+             isn't a frequent occurrence. */
+
+          clutter_actor_remove_effect_by_name (actor, "desaturate-for-transparency");
+          priv->has_desat_effect = FALSE;
+        }
+    }
+}
+
+guint8
+meta_window_actor_get_opacity (MetaWindowActor *self)
+{
+  return self->priv->opacity;
 }
 
 void
