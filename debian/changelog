@@ -1,3 +1,35 @@
+muffin (4.0.7) unstable; urgency=medium
+
+  [ Jason Hicks ]
+  * cogl-util: Use original meta_rectangle_new for older GPUs (#401)
+  * window: Pass the input rect to meta_compositor_tile_window (#411)
+  * Improvements for Cinnamon's app system (#418)
+  * Clutter master clock improvements (#392)
+  * window: Remove some window icon properties and related processing (#399)
+  * Avoid usage of g_getenv in frequently called functions (#423)
+  * Phase out MetaCompScreen (#424)
+  * clutter-stage: Don't emit "after-paint" when picking (#412)
+  * window-actor: Fix partially visible frameless windows, some window flickering cases (#405)
+  * Stop caching the shape region in MetaShapedTexture (#406)
+  * window-actor: Only apply desaturation effect if window has a shadow (#408)
+  * shadow-factory: Replace the changed signal with a function call (#426)
+  * window: Cache icons if the size is <= icon_size, return a GdkPixbuf (#422)
+  * Support toggling vsync at runtime for better unredirection control (#425)
+  * window: Fix the position-changed signal not firing for CSD windows (#416)
+  * Move the desktop effects setting to Muffin (#428)
+  * Avoid getting context from Clutter in frequently called functions (#429)
+  * window: Cache the outer, client rects (#427)
+  * Various compositor improvements (#410)
+  * Improve sync between the cursor and frames (#397)
+  * ui: Don't apply CSD window filtering for button events (#435)
+  * screen: Ensure monitors update on monitor change (#439)
+  * screen: Update the rect cache on monitor change (#441)
+  * window: Update monitor state before showing the window (#444)
+  * compositor: Fix tiling placement (#447)
+  * Revert two commits from #410 (#448)
+
+ -- Clement Lefebvre <root@linuxmint.com>  Thu, 28 Mar 2019 11:13:30 +0000
+
 muffin (4.0.6) tessa; urgency=medium
 
   * Re-add gsettings key org.cinnamon.muffin button-layout
