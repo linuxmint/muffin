@@ -3956,12 +3956,12 @@ clutter_actor_paint (ClutterActor *self)
                   pick_mode == CLUTTER_PICK_NONE))
     _clutter_actor_draw_paint_volume (self);
 
-done:
   /* If we make it here then the actor has run through a complete
      paint run including all the effects so it's no longer dirty */
   if (pick_mode == CLUTTER_PICK_NONE)
     priv->is_dirty = FALSE;
 
+done:
   if (clip_set)
     {
       CoglFramebuffer *fb = _clutter_stage_get_active_framebuffer (stage);
