@@ -1636,7 +1636,7 @@ meta_window_actor_check_obscured (MetaWindowActor *self)
 {
   MetaWindowActorPrivate *priv = self->priv;
 
-  if (!priv->first_frame_drawn)
+  if (!priv->first_frame_drawn || priv->effect_in_progress)
     {
       if (priv->obscured)
         set_obscured (self, FALSE);
