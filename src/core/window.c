@@ -7426,9 +7426,7 @@ meta_window_appears_focused_changed (MetaWindow *window)
   if (window->frame)
     meta_frame_queue_draw (window->frame);
 
-  clutter_threads_add_idle_full (100,
-                                (GSourceFunc) meta_window_actor_appears_focused_notify,
-                                window->compositor_private, NULL);
+  meta_window_actor_appears_focused_notify (window->compositor_private);
 
   g_object_notify (G_OBJECT (window), "appears-focused");
 }
