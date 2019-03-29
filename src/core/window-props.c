@@ -675,15 +675,13 @@ static void
 meta_window_set_opaque_region (MetaWindow     *window,
                                cairo_region_t *region)
 {
-  if (cairo_region_equal (window->opaque_region, region))
-    return;
-
   g_clear_pointer (&window->opaque_region, cairo_region_destroy);
 
   if (region != NULL)
     window->opaque_region = cairo_region_reference (region);
 
-  meta_compositor_window_shape_changed (window->display->compositor, window);
+  if (window->compositor_private)
+    meta_window_actor_update_shape (window->compositor_private);
 }
 
 static void
@@ -735,7 +733,8 @@ reload_opaque_region (MetaWindow    *window,
     }
 
  out:
-  meta_window_set_opaque_region (window, opaque_region);
+  if (!cairo_region_equal (window->opaque_region, opaque_region))
+    meta_window_set_opaque_region (window, opaque_region);
   cairo_region_destroy (opaque_region);
 }
 
