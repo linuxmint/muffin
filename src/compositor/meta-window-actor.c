@@ -245,6 +245,7 @@ static void meta_window_actor_get_preferred_height (ClutterActor *self,
 static gboolean meta_window_actor_get_paint_volume (ClutterActor       *actor,
                                                     ClutterPaintVolume *volume);
 
+static void meta_window_actor_queue_relayout (ClutterActor *actor);
 
 static void     meta_window_actor_detach     (MetaWindowActor *self);
 static gboolean meta_window_actor_has_shadow (MetaWindowActor *self);
@@ -288,6 +289,7 @@ meta_window_actor_class_init (MetaWindowActorClass *klass)
   actor_class->pick = meta_window_actor_pick;
   actor_class->paint = meta_window_actor_paint;
   actor_class->get_paint_volume = meta_window_actor_get_paint_volume;
+  actor_class->queue_relayout = meta_window_actor_queue_relayout;
 
   pspec = g_param_spec_object ("meta-window",
                                "MetaWindow",
@@ -1316,6 +1318,16 @@ meta_window_actor_get_preferred_height (ClutterActor *self,
 
   if (natural_height_p)
     *natural_height_p = priv->tex_height;
+}
+
+static void
+meta_window_actor_queue_relayout (ClutterActor *actor)
+{
+  MetaWindowActorPrivate *priv = META_WINDOW_ACTOR (actor)->priv;
+
+  if (priv->size_changed || priv->position_changed)
+    CLUTTER_ACTOR_CLASS (meta_window_actor_parent_class)->queue_relayout (actor->priv->parent);
+  CLUTTER_ACTOR_CLASS (meta_window_actor_parent_class)->queue_relayout (actor);
 }
 
 static gboolean
