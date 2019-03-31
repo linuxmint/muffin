@@ -3380,9 +3380,9 @@ meta_window_actor_set_opacity (MetaWindowActor *self,
       Window xwin = priv->window->xwindow;
       gulong value;
 
-      if (meta_prop_get_cardinal (display, xwin,
-                                  compositor->atom_net_wm_window_opacity,
-                                  &value))
+      if (meta_prop_get_cardinal_with_atom_type (display, xwin,
+                                                 compositor->atom_net_wm_window_opacity,
+                                                 XA_CARDINAL, &value))
         {
           opacity = (guint8)((gfloat)value * 255.0 / ((gfloat)0xffffffff));
         }
