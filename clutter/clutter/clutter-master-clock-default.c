@@ -595,19 +595,19 @@ clutter_master_clock_set_sync_method (SyncMethod method)
     }
 
   master_clock_global->preferred_sync_method = method;
-  master_clock_global->active_sync_method = method;
 }
 
 static void
 clutter_master_clock_default_init (ClutterMasterClockDefault *self)
 {
-  GSource *source;
+  GSource *source = clutter_clock_source_new (self);
+  SyncMethod method = _clutter_get_sync_method ();
 
-  source = clutter_clock_source_new (self);
   self->source = source;
   master_clock_global = self;
 
-  clutter_master_clock_set_sync_method (_clutter_get_sync_method ());
+  self->active_sync_method = method;
+  clutter_master_clock_set_sync_method (method);
 
   self->ensure_next_iteration = FALSE;
   self->paused = FALSE;
