@@ -1838,7 +1838,6 @@ start_simple_effect (MetaWindowActor *self,
 {
   MetaWindowActorPrivate *priv = self->priv;
   MetaCompositor *compositor = priv->screen->display->compositor;
-  gint *counter = NULL;
   gboolean use_freeze_thaw = FALSE;
 
   if (!compositor->plugin_mgr)
@@ -1921,7 +1920,11 @@ meta_window_actor_effect_completed (MetaWindowActor *self,
     meta_window_actor_thaw (self);
 
   if (!priv->effect_in_progress)
-    meta_window_actor_after_effects (self);
+    {
+      if (event != META_PLUGIN_MAP)
+        priv->position_changed = TRUE;
+      meta_window_actor_after_effects (self);
+    }
 }
 
 static void
