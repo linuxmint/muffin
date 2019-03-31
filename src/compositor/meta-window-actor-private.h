@@ -37,6 +37,7 @@ struct _MetaWindowActorPrivate
   Damage damage;
 
   guint8 opacity;
+  guint opacity_queued;
   CoglColor color;
 
   /* If the window is shaped, a region that matches the shape */

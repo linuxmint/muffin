@@ -262,7 +262,8 @@ meta_window_actor_init (MetaWindowActor *self)
   priv->create_mipmaps = TRUE;
   priv->mask_needs_update = TRUE;
 
-  priv->opacity = 0xff;
+  priv->opacity = 0;
+  priv->opacity_queued = FALSE;
   priv->shadow_class = NULL;
   priv->has_desat_effect = FALSE;
   priv->clip_shadow = FALSE;
@@ -1621,14 +1622,21 @@ set_obscured (MetaWindowActor *self,
 
       clutter_actor_set_reactive (actor, FALSE);
       clutter_actor_set_offscreen_redirect (actor, CLUTTER_OFFSCREEN_REDIRECT_ALWAYS);
+      priv->obscured = TRUE;
     }
   else
     {
       clutter_actor_set_reactive (actor, TRUE);
       clutter_actor_set_offscreen_redirect (actor, CLUTTER_OFFSCREEN_REDIRECT_AUTOMATIC_FOR_OPACITY);
-    }
 
-  priv->obscured = obscured;
+      priv->obscured = FALSE;
+
+      if (priv->opacity_queued)
+        {
+          priv->opacity_queued = FALSE;
+          meta_window_actor_set_opacity (self, -1);
+        }
+    }
 }
 
 void
@@ -3357,9 +3365,10 @@ meta_window_actor_set_opacity (MetaWindowActor *self,
   MetaWindowActorPrivate *priv = self->priv;
 
   if (priv->obscured)
-    return;
-
-  guint8 old_opacity = priv->opacity;
+    {
+      priv->opacity_queued = TRUE;
+      return;
+    }
 
   if (opacity == OPACITY_TYPE_CARDINAL)
     {
@@ -3380,7 +3389,7 @@ meta_window_actor_set_opacity (MetaWindowActor *self,
 
   /* Only adjust opacity if it has changed, or if the window is younger
      than one second after the first paint cycle. */
-  if (old_opacity != opacity || !priv->first_frame_drawn)
+  if (priv->opacity != opacity || !priv->first_frame_drawn)
     {
       ClutterActor *actor = CLUTTER_ACTOR (self);
       gboolean transparent;
@@ -3410,8 +3419,7 @@ meta_window_actor_set_opacity (MetaWindowActor *self,
        */
       priv->clip_shadow = (priv->argb32 || transparent) && priv->window->frame;
 
-      if ((!priv->has_desat_effect && !transparent) ||
-          (priv->has_desat_effect && transparent))
+      if (priv->has_desat_effect == transparent)
         return;
 
       if (transparent)
