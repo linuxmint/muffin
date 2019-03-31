@@ -1327,7 +1327,8 @@ meta_window_actor_queue_relayout (ClutterActor *actor)
 
   if (priv->size_changed || priv->position_changed)
     CLUTTER_ACTOR_CLASS (meta_window_actor_parent_class)->queue_relayout (actor->priv->parent);
-  CLUTTER_ACTOR_CLASS (meta_window_actor_parent_class)->queue_relayout (actor);
+  else
+    CLUTTER_ACTOR_CLASS (meta_window_actor_parent_class)->queue_relayout (actor);
 }
 
 static gboolean
