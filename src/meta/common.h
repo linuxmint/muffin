@@ -454,4 +454,12 @@ typedef enum
   META_BACKGROUND_TRANSITION_BLEND
 } MetaBackgroundTransition;
 
+typedef enum
+{
+  META_SYNC_NONE = 0,
+  META_SYNC_FALLBACK,
+  META_SYNC_SWAP_THROTTLING,
+  META_SYNC_PRESENTATION_TIME
+} MetaSyncMethod;
+
 #endif

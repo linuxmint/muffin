@@ -2032,12 +2032,17 @@ meta_window_actor_should_unredirect (MetaWindowActor *self)
 
 static void
 fullscreen_sync_toggle (MetaWindowActor *self,
-                        gboolean state)
+                        gboolean         state)
 {
+  MetaSyncMethod method = meta_prefs_get_sync_method ();
+
   if (meta_prefs_get_unredirect_fullscreen_windows () &&
-      meta_prefs_get_sync_to_vblank ())
+      method != META_SYNC_NONE)
     {
-      clutter_stage_x11_update_sync_state (self->priv->window->display->compositor->stage, state);
+      clutter_stage_x11_update_sync_state (
+        self->priv->window->display->compositor->stage,
+        state ? method : META_SYNC_NONE
+      );
     }
 }
 

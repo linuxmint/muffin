@@ -55,20 +55,6 @@
 #define clutter_warn_if_over_budget(master_clock,start_time,section)
 #endif
 
-typedef enum _SyncMethod /* In order of priority */
-{                        /* SUPPORTED  LATENCY      SMOOTHNESS             */
-  SYNC_NONE = 0,         /* Always     High         Poor                   */
-  SYNC_FALLBACK,         /* Always     Medium       Medium                 */
-  SYNC_SWAP_THROTTLING,  /* Usually    Medium-high  Medium, sometimes best */
-  SYNC_PRESENTATION_TIME /* Usually    Low          Good, sometimes best   */
-                         /* ^ As you can see SWAP_THROTTLING doesn't add much
-                              value. And it does create the the very real
-                              risk of blocking the main loop for up to 16ms
-                              at a time. So it might be a good idea to retire
-                              it in future and instead just make the backends
-                              use swap interval 0 + PRESENTATION_TIME. */
-} SyncMethod;
-
 typedef struct _ClutterClockSource              ClutterClockSource;
 
 struct _ClutterMasterClockDefault
@@ -588,31 +574,24 @@ clutter_master_clock_default_class_init (ClutterMasterClockDefaultClass *klass)
 }
 
 void
-clutter_master_clock_set_sync_method (gint state)
+clutter_master_clock_set_sync_method (SyncMethod method)
 {
-  SyncMethod method;
-
-  switch (state)
+  switch (method)
     {
-      case 0:
-        method = SYNC_NONE;
+      case SYNC_NONE:
         g_message ("Sync method: NONE");
         break;
-      case 1:
-        method = SYNC_PRESENTATION_TIME;
+      case SYNC_PRESENTATION_TIME:
         g_message ("Sync method: PRESENTATION TIME");
         break;
-      case 2:
-        method = SYNC_FALLBACK;
+      case SYNC_FALLBACK:
         g_message ("Sync method: FALLBACK");
         break;
-      case 3:
-        method = SYNC_SWAP_THROTTLING;
+      case SYNC_SWAP_THROTTLING:
         g_message ("Sync method: SWAP THROTTLING");
         break;
       default:
-        method = SYNC_PRESENTATION_TIME;
-        g_warning ("Invalid sync state passed to clutter_master_clock_set_sync_method: %i", state);
+        g_warning ("Invalid sync state passed to clutter_master_clock_set_sync_method: %i", method);
     }
 
   master_clock_global->preferred_sync_method = method;
@@ -628,7 +607,7 @@ clutter_master_clock_default_init (ClutterMasterClockDefault *self)
   self->source = source;
   master_clock_global = self;
 
-  clutter_master_clock_set_sync_method (_clutter_get_sync_to_vblank ());
+  clutter_master_clock_set_sync_method (_clutter_get_sync_method ());
 
   self->ensure_next_iteration = FALSE;
   self->paused = FALSE;
