@@ -3359,7 +3359,7 @@ meta_window_actor_invalidate_shadow (MetaWindowActor *self)
   clutter_actor_queue_redraw (CLUTTER_ACTOR (self));
 }
 
-#define OPACITY_TYPE_CARDINAL -1
+static inline guint8 OPACITY_TYPE_CARDINAL = -1;
 
 void
 meta_window_actor_set_opacity (MetaWindowActor *self,
