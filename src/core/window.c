@@ -3689,18 +3689,20 @@ meta_window_is_monitor_sized (MetaWindow *window)
 
   if (window->override_redirect)
     {
-      MetaRectangle monitor_rect;
-      int screen_width, screen_height;
+      MetaScreen *screen = window->screen;
+      MetaRectangle *outer_rect = &window->outer_rect;
 
-      meta_screen_get_size (window->screen, &screen_width, &screen_height);
-
-      if (window->outer_rect.x == 0 && window->outer_rect.y == 0 &&
-          window->outer_rect.width == screen_width && window->outer_rect.height == screen_height)
+      if (outer_rect->x == 0 && outer_rect->y == 0 &&
+          outer_rect->width == screen->rect.width &&
+          outer_rect->height == screen->rect.height)
         return TRUE;
 
-      meta_screen_get_monitor_geometry (window->screen, window->monitor->number, &monitor_rect);
+      MetaRectangle *monitor_rect = &window->monitor->rect;
 
-      if (meta_rectangle_equal (&window->outer_rect, &monitor_rect))
+      if (monitor_rect->width == outer_rect->width &&
+          monitor_rect->height == outer_rect->height &&
+          monitor_rect->x == outer_rect->x &&
+          monitor_rect->y == outer_rect->y)
         return TRUE;
     }
 
