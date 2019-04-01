@@ -576,6 +576,9 @@ clutter_master_clock_default_class_init (ClutterMasterClockDefaultClass *klass)
 void
 clutter_master_clock_set_sync_method (SyncMethod method)
 {
+  const GSList *stages, *l;
+  ClutterStageManager *stage_manager = clutter_stage_manager_get_default ();
+
   switch (method)
     {
       case SYNC_NONE:
@@ -595,6 +598,13 @@ clutter_master_clock_set_sync_method (SyncMethod method)
     }
 
   master_clock_global->preferred_sync_method = method;
+
+  stages = stage_manager->stages;
+
+  for (l = stages; l; l = l->next)
+    {
+      _clutter_stage_clear_update_time (l->data);
+    }
 }
 
 static void
