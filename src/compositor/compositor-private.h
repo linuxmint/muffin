@@ -30,6 +30,7 @@ struct _MetaCompositor
   GList          *windows;
 
   MetaWindowActor *unredirected_window;
+  MetaWindowActor *top_window_actor;
 
   CoglContext    *context;
 
