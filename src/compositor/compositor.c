@@ -733,10 +733,9 @@ void
 meta_compositor_remove_window (MetaCompositor *compositor,
                                MetaWindow     *window)
 {
-  MetaWindowActor         *window_actor     = NULL;
+  MetaWindowActor *window_actor = window->compositor_private;
   MetaScreen *screen;
 
-  window_actor = window->compositor_private;
   if (!window_actor)
     return;
 
