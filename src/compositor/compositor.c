@@ -1088,6 +1088,30 @@ sync_actor_stacking (MetaCompositor *compositor)
   clutter_actor_set_child_below_sibling (parent, compositor->background_actor, NULL);
 }
 
+/*
+ * Find the top most window that is visible on the screen. The intention of
+ * this is to avoid offscreen windows that isn't actually part of the visible
+ * desktop (such as the UI frames override redirect window).
+ */
+static MetaWindowActor *
+get_top_visible_window_actor (MetaCompositor *compositor)
+{
+  GList *l;
+
+  for (l = g_list_last (compositor->windows); l; l = l->prev)
+    {
+      MetaWindowActor *actor = l->data;
+      MetaRectangle rect;
+
+      meta_window_get_input_rect (meta_window_actor_get_meta_window (actor), &rect);
+
+      if (meta_rectangle_overlap (&compositor->display->active_screen->rect, &rect))
+        return actor;
+    }
+
+  return NULL;
+}
+
 void
 meta_compositor_sync_stack (MetaCompositor  *compositor,
                             MetaScreen	    *screen,
@@ -1177,6 +1201,8 @@ meta_compositor_sync_stack (MetaCompositor  *compositor,
     }
 
   sync_actor_stacking (compositor);
+
+  compositor->top_window_actor = get_top_visible_window_actor (compositor);
 }
 
 void
@@ -1264,17 +1290,18 @@ meta_pre_paint_func (gpointer data)
   GList *l;
   MetaCompositor *compositor = data;
   GSList *screens = compositor->display->screens;
-  MetaWindowActor *top_window;
+  MetaWindowActor *top_window_actor = NULL;
   MetaWindowActor *expected_unredirected_window = NULL;
 
   if (compositor->windows == NULL)
     return TRUE;
 
-  top_window = g_list_last (compositor->windows)->data;
+  top_window_actor = compositor->top_window_actor;
 
-  if (meta_window_actor_should_unredirect (top_window) &&
+  if (top_window_actor &&
+      meta_window_actor_should_unredirect (top_window_actor) &&
       compositor->disable_unredirect_count == 0)
-    expected_unredirected_window = top_window;
+    expected_unredirected_window = top_window_actor;
 
   if (compositor->unredirected_window != expected_unredirected_window)
     {
@@ -1287,8 +1314,8 @@ meta_pre_paint_func (gpointer data)
       if (expected_unredirected_window != NULL)
         {
           meta_shape_cow_for_window (compositor->display->active_screen,
-                                     meta_window_actor_get_meta_window (top_window));
-          meta_window_actor_set_redirected (top_window, FALSE);
+                                     meta_window_actor_get_meta_window (top_window_actor));
+          meta_window_actor_set_redirected (top_window_actor, FALSE);
         }
 
       compositor->unredirected_window = expected_unredirected_window;
