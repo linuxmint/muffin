@@ -200,7 +200,7 @@ clutter_stage_cogl_schedule_update (ClutterStageWindow *stage_window,
   if (refresh_rate == 0.0)
     refresh_rate = 60.0;
 
-  refresh_interval = (gint64) (0.5 + 1000000 / refresh_rate);
+  refresh_interval = (gint64) (0.5 + G_USEC_PER_SEC / refresh_rate);
   if (refresh_interval == 0)
     refresh_interval = 16667; /* 1/60th second */
 
