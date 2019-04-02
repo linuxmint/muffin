@@ -197,8 +197,8 @@ clutter_stage_cogl_schedule_update (ClutterStageWindow *stage_window,
     }
 
   refresh_rate = stage_cogl->refresh_rate;
-  if (refresh_rate == 0.0)
-    refresh_rate = 60.0;
+  if (refresh_rate <= 0.0)
+    refresh_rate = clutter_get_default_frame_rate ();
 
   refresh_interval = (gint64) (0.5 + G_USEC_PER_SEC / refresh_rate);
   if (refresh_interval == 0)
