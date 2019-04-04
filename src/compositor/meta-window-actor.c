@@ -86,6 +86,8 @@ enum
 #define DEFAULT_SHADOW_X_OFFSET 0
 #define DEFAULT_SHADOW_Y_OFFSET 8
 
+static inline guint8 OPACITY_TYPE_CARDINAL = 256;
+
 static void meta_window_actor_dispose    (GObject *object);
 static void meta_window_actor_finalize   (GObject *object);
 static void meta_window_actor_constructed (GObject *object);
@@ -368,9 +370,6 @@ meta_window_actor_constructed (GObject *object)
     priv->argb32 = TRUE;
 
   priv->shape_region = cairo_region_create();
-
-  /* Opacity handling */
-  meta_window_actor_set_opacity (self, -1);
 }
 
 static void
@@ -1634,7 +1633,7 @@ set_obscured (MetaWindowActor *self,
       if (priv->opacity_queued)
         {
           priv->opacity_queued = FALSE;
-          meta_window_actor_set_opacity (self, -1);
+          meta_window_actor_set_opacity (self, 256);
         }
     }
 }
@@ -2406,6 +2405,9 @@ meta_window_actor_new (MetaWindow *window)
    * before we first paint.
    */
   compositor->windows = g_list_append (compositor->windows, self);
+
+  /* Opacity handling */
+  meta_window_actor_set_opacity (self, 256);
 
   clutter_actor_set_flags (CLUTTER_ACTOR (self), CLUTTER_ACTOR_NO_LAYOUT);
 
@@ -3358,8 +3360,6 @@ meta_window_actor_invalidate_shadow (MetaWindowActor *self)
 
   clutter_actor_queue_redraw (CLUTTER_ACTOR (self));
 }
-
-static inline guint8 OPACITY_TYPE_CARDINAL = -1;
 
 void
 meta_window_actor_set_opacity (MetaWindowActor *self,

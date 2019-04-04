@@ -206,7 +206,7 @@ process_property_notify (MetaCompositor	*compositor,
   /* Check for the opacity changing */
   if (event->atom == compositor->atom_net_wm_window_opacity)
     {
-      meta_window_actor_set_opacity (window_actor, -1);
+      meta_window_actor_set_opacity (window_actor, 256);
       return;
     }
 
