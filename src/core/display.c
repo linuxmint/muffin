@@ -5792,3 +5792,9 @@ meta_display_update_sync_state (MetaSyncMethod method)
 {
   meta_compositor_update_sync_state (the_display->compositor, method);
 }
+
+gboolean
+meta_display_popup_window_visible (MetaDisplay *display)
+{
+  return display->compositor->popup_window_visible;
+}
