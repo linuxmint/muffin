@@ -206,8 +206,7 @@ process_property_notify (MetaCompositor	*compositor,
   /* Check for the opacity changing */
   if (event->atom == compositor->atom_net_wm_window_opacity)
     {
-      meta_window_actor_update_opacity (window_actor, 0);
-      DEBUG_TRACE ("process_property_notify: net_wm_window_opacity\n");
+      meta_window_actor_set_opacity (window_actor, 256);
       return;
     }
 
@@ -1120,10 +1119,10 @@ meta_compositor_sync_stack (MetaCompositor  *compositor,
       while (old_stack)
         {
           old_actor = old_stack->data;
-          old_window = meta_window_actor_get_meta_window (old_actor);
+          old_window = old_actor->priv->window;
 
           if ((old_window->hidden || old_window->unmanaging) &&
-              !meta_window_actor_effect_in_progress (old_actor))
+              !old_actor->priv->effect_in_progress)
             {
               old_stack = g_list_delete_link (old_stack, old_stack);
               old_actor = NULL;
@@ -1292,7 +1291,7 @@ meta_pre_paint_func (gpointer data)
       if (expected_unredirected_window != NULL)
         {
           meta_shape_cow_for_window (compositor->display->active_screen,
-                                     meta_window_actor_get_meta_window (top_window));
+                                     top_window->priv->window);
           meta_window_actor_set_redirected (top_window, FALSE);
         }
 
@@ -1569,7 +1568,7 @@ meta_compositor_get_window_for_xwindow (Window xwindow)
 
   for (l = compositor_global->windows; l; l = l->next)
     {
-      MetaWindow *window = meta_window_actor_get_meta_window (l->data);
+      MetaWindow *window = META_WINDOW_ACTOR (l->data)->priv->window;
       if (window->xwindow == xwindow)
         return window;
     }
@@ -1669,9 +1668,3 @@ meta_compositor_update_sync_state (MetaCompositor *compositor,
   clutter_stage_x11_update_sync_state (compositor->stage, state);
 }
 
-void
-meta_compositor_update_opacity (ClutterActor    *actor,
-                                guint8           opacity)
-{
-  meta_window_actor_update_opacity (META_WINDOW_ACTOR (actor), opacity);
-}

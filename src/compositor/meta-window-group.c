@@ -89,11 +89,13 @@ meta_window_group_cull_out (MetaWindowGroup *group,
 
           if (clutter_actor_get_paint_opacity (CLUTTER_ACTOR (window_actor)) == 0xff)
             {
-              cairo_region_t *obscured_region = meta_window_actor_get_obscured_region (window_actor);
-              if (obscured_region)
+              MetaWindowActorPrivate *priv = window_actor->priv;
+              cairo_region_t *obscured_region = NULL;
+
+              if (priv->opaque_region && priv->pixmap && priv->opacity == 0xff)
                 {
-                  cairo_region_subtract (unobscured_region, obscured_region);
-                  cairo_region_subtract (clip_region, obscured_region);
+                  cairo_region_subtract (unobscured_region, priv->opaque_region);
+                  cairo_region_subtract (clip_region, priv->opaque_region);
                 }
             }
 
@@ -223,7 +225,7 @@ meta_window_group_paint (ClutterActor *actor)
   if (has_unredirected_window)
     {
       cairo_rectangle_int_t unredirected_rect;
-      MetaWindow *window = meta_window_actor_get_meta_window (compositor->unredirected_window);
+      MetaWindow *window = compositor->unredirected_window->priv->window;
 
       unredirected_rect.x = window->outer_rect.x;
       unredirected_rect.y = window->outer_rect.y;
