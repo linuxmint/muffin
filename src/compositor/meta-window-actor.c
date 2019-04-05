@@ -86,6 +86,8 @@ enum
 #define DEFAULT_SHADOW_X_OFFSET 0
 #define DEFAULT_SHADOW_Y_OFFSET 8
 
+static inline guint8 OPACITY_TYPE_CARDINAL = 256;
+
 static void meta_window_actor_dispose    (GObject *object);
 static void meta_window_actor_finalize   (GObject *object);
 static void meta_window_actor_constructed (GObject *object);
@@ -114,6 +116,7 @@ static void meta_window_actor_get_preferred_height (ClutterActor *self,
 static gboolean meta_window_actor_get_paint_volume (ClutterActor       *actor,
                                                     ClutterPaintVolume *volume);
 
+static void meta_window_actor_queue_relayout (ClutterActor *actor);
 
 static void     meta_window_actor_detach     (MetaWindowActor *self);
 static gboolean meta_window_actor_has_shadow (MetaWindowActor *self);
@@ -159,6 +162,7 @@ meta_window_actor_class_init (MetaWindowActorClass *klass)
   actor_class->pick = meta_window_actor_pick;
   actor_class->paint = meta_window_actor_paint;
   actor_class->get_paint_volume = meta_window_actor_get_paint_volume;
+  actor_class->queue_relayout = meta_window_actor_queue_relayout;
 
   pspec = g_param_spec_object ("meta-window",
                                "MetaWindow",
@@ -259,6 +263,8 @@ meta_window_actor_init (MetaWindowActor *self)
   priv->paint_tower = meta_texture_tower_new ();
   priv->texture = NULL;
   priv->mask_texture = NULL;
+  priv->tex_width = 0;
+  priv->tex_height = 0;
   priv->create_mipmaps = TRUE;
   priv->mask_needs_update = TRUE;
 
@@ -356,7 +362,7 @@ meta_window_actor_constructed (GObject *object)
   priv->shape_region = cairo_region_create();
 
   /* Opacity handling */
-  meta_window_actor_set_opacity (self, -1);
+  meta_window_actor_set_opacity (self, 256);
 }
 
 static void
@@ -1131,6 +1137,17 @@ meta_window_actor_get_preferred_height (ClutterActor *self,
     *natural_height_p = priv->tex_height;
 }
 
+static void
+meta_window_actor_queue_relayout (ClutterActor *actor)
+{
+  MetaWindowActorPrivate *priv = META_WINDOW_ACTOR (actor)->priv;
+
+  if (priv->size_changed || priv->position_changed)
+    CLUTTER_ACTOR_CLASS (meta_window_actor_parent_class)->queue_relayout (actor->priv->parent);
+  else
+    CLUTTER_ACTOR_CLASS (meta_window_actor_parent_class)->queue_relayout (actor);
+}
+
 static gboolean
 is_move_resize (MetaWindowActor *self)
 {
@@ -1615,7 +1632,7 @@ set_obscured (MetaWindowActor *self,
       if (priv->opacity_queued)
         {
           priv->opacity_queued = FALSE;
-          meta_window_actor_set_opacity (self, -1);
+          meta_window_actor_set_opacity (self, 256);
         }
     }
 }
@@ -2109,9 +2126,10 @@ meta_window_actor_sync_actor_geometry (MetaWindowActor *self,
       priv->last_height != window_rect.height)
     {
       priv->size_changed = TRUE;
-      priv->last_width = window_rect.width;
-      priv->last_height = window_rect.height;
     }
+
+  priv->last_width = window_rect.width;
+  priv->last_height = window_rect.height;
 
   if (priv->last_x != window_rect.x ||
       priv->last_y != window_rect.y)
@@ -2134,11 +2152,14 @@ meta_window_actor_sync_actor_geometry (MetaWindowActor *self,
   if (priv->effect_in_progress)
     return;
 
-  if (priv->size_changed)
+  if (priv->size_changed || !priv->first_frame_drawn)
     {
-      meta_window_update_rects (priv->window);
+      if (!priv->window->has_shape)
+        meta_window_update_rects (priv->window);
+
       priv->needs_pixmap = TRUE;
       meta_window_actor_update_shape (self);
+
       clutter_actor_set_size (CLUTTER_ACTOR (self),
                               window_rect.width, window_rect.height);
     }
@@ -2349,10 +2370,10 @@ meta_window_actor_new (MetaWindow *window)
 
   priv = self->priv;
 
-  priv->last_width = -1;
-  priv->last_height = -1;
-  priv->last_x = -1;
-  priv->last_y = -1;
+  priv->last_width = 0;
+  priv->last_height = 0;
+  priv->last_x = 0;
+  priv->last_y = 0;
 
   priv->needs_pixmap = TRUE;
 
@@ -2386,7 +2407,7 @@ meta_window_actor_new (MetaWindow *window)
   compositor->windows = g_list_append (compositor->windows, self);
 
   /* Opacity handling */
-  meta_window_actor_set_opacity (self, -1);
+  meta_window_actor_set_opacity (self, 256);
 
   clutter_actor_set_flags (CLUTTER_ACTOR (self), CLUTTER_ACTOR_NO_LAYOUT);
 
