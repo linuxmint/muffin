@@ -1222,7 +1222,7 @@ meta_screen_composite_all_windows (MetaScreen *screen)
       MetaWindow *window = tmp->data;
 
       meta_compositor_add_window (display->compositor, window);
-      if (window->visible_to_compositor)
+      if (window->visible_to_compositor && window->compositor_private)
         meta_window_actor_show (window->compositor_private, META_COMP_EFFECT_NONE);
     }
 
@@ -3065,7 +3065,13 @@ meta_screen_resize (MetaScreen *screen,
       MetaWindow *window = tmp->data;
 
       if (window->screen == screen)
-        meta_window_update_for_monitors_changed (window);
+        {
+          meta_window_update_rects (window);
+          meta_window_update_for_monitors_changed (window);
+
+          if (!window->override_redirect)
+            meta_window_update_monitor (window);
+        }
     }
 
   g_free (old_monitor_infos);

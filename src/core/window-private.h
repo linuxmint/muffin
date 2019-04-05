@@ -515,6 +515,7 @@ struct _MetaWindow
   guint bypass_compositor;
 
   MetaWindowCallback position_changed_callback;
+  MetaWindowCallback decorated_callback;
 };
 
 struct _MetaWindowClass

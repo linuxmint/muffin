@@ -616,16 +616,6 @@ meta_prop_get_window (MetaDisplay *display,
   return window_from_results (&results, window_p);
 }
 
-LOCAL_SYMBOL gboolean
-meta_prop_get_cardinal (MetaDisplay   *display,
-                        Window         xwindow,
-                        Atom           xatom,
-                        gulong        *cardinal_p)
-{
-  return meta_prop_get_cardinal_with_atom_type (display, xwindow, xatom,
-                                                XA_CARDINAL, cardinal_p);
-}
-
 static gboolean
 cardinal_with_atom_type_from_results (GetPropertyResults *results,
                                       Atom                prop_type,

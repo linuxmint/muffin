@@ -467,7 +467,7 @@ merge_spanning_rects_in_region (GList *region)
               delete_me = other;
             }
           /* If b contains a, just remove a */
-          else if (meta_rectangle_contains_rect (a, b))
+          else if (meta_rectangle_contains_rect (b, a))
             {
               delete_me = compare;
             }

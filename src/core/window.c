@@ -200,6 +200,7 @@ enum
   RAISED,
   UNMANAGED,
   SIZE_CHANGED,
+  POSITION_CHANGED,
   ICON_CHANGED,
 
   LAST_SIGNAL
@@ -611,6 +612,14 @@ meta_window_class_init (MetaWindowClass *klass)
                   G_TYPE_FROM_CLASS (object_class),
                   G_SIGNAL_RUN_LAST,
                   G_STRUCT_OFFSET (MetaWindowClass, unmanaged),
+                  NULL, NULL, NULL,
+                  G_TYPE_NONE, 0);
+
+  window_signals[POSITION_CHANGED] =
+    g_signal_new ("position-changed",
+                  G_TYPE_FROM_CLASS (object_class),
+                  G_SIGNAL_RUN_LAST,
+                  0,
                   NULL, NULL, NULL,
                   G_TYPE_NONE, 0);
 
@@ -1764,7 +1773,8 @@ meta_window_unmanage (MetaWindow  *window,
 
   meta_display_set_all_obscured ();
 
-  if (window->visible_to_compositor || meta_window_is_attached_dialog (window))
+  if (window->compositor_private &&
+      (window->visible_to_compositor || meta_window_is_attached_dialog (window)))
     meta_window_actor_hide (window->compositor_private, META_COMP_EFFECT_DESTROY);
 
   meta_compositor_remove_window (window->display->compositor, window);
@@ -3110,6 +3120,8 @@ meta_window_show (MetaWindow *window)
 
   if (!window->visible_to_compositor)
     {
+      meta_window_update_monitor (window);
+
       window->visible_to_compositor = TRUE;
 
       MetaCompEffect effect = META_COMP_EFFECT_NONE;
@@ -3126,7 +3138,8 @@ meta_window_show (MetaWindow *window)
           break;
         }
 
-      meta_window_actor_show (window->compositor_private, effect);
+      if (window->compositor_private)
+        meta_window_actor_show (window->compositor_private, effect);
     }
 
   /* We don't want to worry about all cases from inside
@@ -3220,7 +3233,8 @@ meta_window_hide (MetaWindow *window)
           break;
         }
 
-      meta_window_actor_hide (window->compositor_private, effect);
+      if (window->compositor_private)
+        meta_window_actor_hide (window->compositor_private, effect);
     }
 
   did_hide = FALSE;
@@ -3565,7 +3579,11 @@ meta_window_maximize (MetaWindow        *window,
     meta_window_move_resize_now (window);
 
     if (desktop_effects && window->compositor_private)
-      meta_window_actor_maximize (window->compositor_private, &old_rect, &window->outer_rect);
+      {
+        meta_window_actor_maximize (window->compositor_private,
+                                    &old_rect,
+                                    &window->outer_rect);
+      }
     }
 
   meta_screen_tile_preview_hide (window->screen);
@@ -3671,18 +3689,20 @@ meta_window_is_monitor_sized (MetaWindow *window)
 
   if (window->override_redirect)
     {
-      MetaRectangle monitor_rect;
-      int screen_width, screen_height;
+      MetaScreen *screen = window->screen;
+      MetaRectangle *outer_rect = &window->outer_rect;
 
-      meta_screen_get_size (window->screen, &screen_width, &screen_height);
-
-      if (window->outer_rect.x == 0 && window->outer_rect.y == 0 &&
-          window->outer_rect.width == screen_width && window->outer_rect.height == screen_height)
+      if (outer_rect->x == 0 && outer_rect->y == 0 &&
+          outer_rect->width == screen->rect.width &&
+          outer_rect->height == screen->rect.height)
         return TRUE;
 
-      meta_screen_get_monitor_geometry (window->screen, window->monitor->number, &monitor_rect);
+      MetaRectangle *monitor_rect = &window->monitor->rect;
 
-      if (meta_rectangle_equal (&window->outer_rect, &monitor_rect))
+      if (monitor_rect->width == outer_rect->width &&
+          monitor_rect->height == outer_rect->height &&
+          monitor_rect->x == outer_rect->x &&
+          monitor_rect->y == outer_rect->y)
         return TRUE;
     }
 
@@ -4003,7 +4023,11 @@ meta_window_unmaximize_internal (MetaWindow        *window,
                                             target_rect.height);
 
           if (desktop_effects && window->compositor_private)
-            meta_window_actor_unmaximize (window->compositor_private, &old_rect, &window->outer_rect);
+            {
+              meta_window_actor_unmaximize (window->compositor_private,
+                                            &old_rect,
+                                            &window->outer_rect);
+            }
         }
       else
         {
@@ -4307,11 +4331,11 @@ LOCAL_SYMBOL void
 meta_window_adjust_opacity (MetaWindow   *window,
                             gboolean      increase)
 {
-  ClutterActor *actor = CLUTTER_ACTOR (window->compositor_private);
+  MetaWindowActor *actor = META_WINDOW_ACTOR (window->compositor_private);
 
   gint current_opacity, new_opacity;
 
-  current_opacity = clutter_actor_get_opacity (actor);
+  current_opacity = meta_window_actor_get_opacity (actor);
 
   if (increase) {
     new_opacity = MIN (current_opacity + OPACITY_STEP, 255);
@@ -4320,15 +4344,13 @@ meta_window_adjust_opacity (MetaWindow   *window,
   }
 
   if (new_opacity != current_opacity)
-    meta_window_actor_update_opacity (META_WINDOW_ACTOR (actor), (guint8) new_opacity);
+    meta_window_actor_set_opacity (actor, (guint8) new_opacity);
 }
 
 void
 meta_window_reset_opacity (MetaWindow *window)
 {
-    ClutterActor *actor = CLUTTER_ACTOR (window->compositor_private);
-
-    clutter_actor_set_opacity (actor, 255);
+  meta_window_actor_set_opacity (META_WINDOW_ACTOR (window->compositor_private), 255);
 }
 
 static gboolean
@@ -4756,8 +4778,9 @@ send_sync_request (MetaWindow *window)
                                                    sync_request_timeout,
                                                    window);
 
-  meta_window_actor_set_updates_frozen (window->compositor_private,
-                                        meta_window_updates_are_frozen (window));
+  if (window->compositor_private)
+    meta_window_actor_set_updates_frozen (window->compositor_private,
+                                          meta_window_updates_are_frozen (window));
 }
 #endif
 
@@ -5355,10 +5378,6 @@ meta_window_move_resize_internal (MetaWindow          *window,
       meta_window_actor_sync_actor_geometry (window->compositor_private,
                                              did_placement);
     }
-  else
-    {
-      meta_topic (META_DEBUG_GEOMETRY, "Size/position not modified\n");
-    }
 
   meta_window_refresh_resize_popup (window);
 
@@ -5693,8 +5712,7 @@ meta_window_configure_notify (MetaWindow      *window,
   /* Whether an override-redirect window is considered fullscreen depends
    * on its geometry.
    */
-  if (window->override_redirect)
-    meta_screen_queue_check_fullscreen (window->screen);
+  meta_screen_queue_check_fullscreen (window->screen);
 
   if (!event->override_redirect && !event->send_event)
     meta_warning ("Unhandled change of windows override redirect status\n");
@@ -7407,11 +7425,12 @@ meta_window_appears_focused_changed (MetaWindow *window)
   set_net_wm_state (window);
   meta_window_frame_size_changed (window);
 
-  meta_window_actor_appears_focused_notify (window->compositor_private);
-  g_object_notify (G_OBJECT (window), "appears-focused");
-
   if (window->frame)
     meta_frame_queue_draw (window->frame);
+
+  meta_window_actor_appears_focused_notify (window->compositor_private);
+
+  g_object_notify (G_OBJECT (window), "appears-focused");
 }
 
 /**
@@ -7607,13 +7626,16 @@ meta_window_notify_focus (MetaWindow *window,
               !meta_prefs_get_raise_on_click())
             meta_display_ungrab_focus_window_button (window->display, window);
 
+          g_signal_emit (window, window_signals[FOCUS], 0);
+          g_object_notify (G_OBJECT (window->display), "focus-window");
+
           if (!window->attached_focus_window)
             meta_window_appears_focused_changed (window);
 
           meta_window_propagate_focus_appearance (window, TRUE);
 
-          g_signal_emit (window, window_signals[FOCUS], 0);
-          g_object_notify (G_OBJECT (window->display), "focus-window");
+          // g_signal_emit (window, window_signals[FOCUS], 0);
+          // g_object_notify (G_OBJECT (window->display), "focus-window");
         }
     }
   else if (event->type == FocusOut ||
@@ -8378,11 +8400,7 @@ recalc_window_type (MetaWindow *window)
       g_object_freeze_notify (object);
 
       if (old_decorated != window->decorated)
-        {
-          if (window->compositor_private)
-            meta_window_actor_decorated_notify (window->compositor_private);
-          g_object_notify (object, "decorated");
-        }
+        g_object_notify (object, "decorated");
 
       g_object_notify (object, "window-type");
 
@@ -10112,8 +10130,9 @@ meta_window_update_sync_request_counter (MetaWindow *window,
     }
 
   window->sync_request_serial = new_counter_value;
-  meta_window_actor_set_updates_frozen (window->compositor_private,
-                                        meta_window_updates_are_frozen (window));
+  if (window->compositor_private)
+    meta_window_actor_set_updates_frozen (window->compositor_private,
+                                          meta_window_updates_are_frozen (window));
 
   if (window == window->display->grab_window &&
       meta_grab_op_is_resizing (window->display->grab_op) &&
@@ -10144,7 +10163,7 @@ meta_window_update_sync_request_counter (MetaWindow *window,
    */
   window->disable_sync = FALSE;
 
-  if (needs_frame_drawn)
+  if (needs_frame_drawn && window->compositor_private)
     meta_window_actor_queue_frame_drawn (window->compositor_private, no_delay_frame);
 }
 #endif /* HAVE_XSYNC */
@@ -12373,3 +12392,4 @@ meta_window_get_icon_name (MetaWindow *window)
 
     return window->theme_icon_name;
 }
+

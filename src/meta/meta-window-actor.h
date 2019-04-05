@@ -65,6 +65,9 @@ ClutterActor *     meta_window_actor_get_texture          (MetaWindowActor *self
 gboolean           meta_window_actor_is_override_redirect (MetaWindowActor *self);
 gboolean       meta_window_actor_showing_on_its_workspace (MetaWindowActor *self);
 gboolean       meta_window_actor_is_destroyed (MetaWindowActor *self);
+void           meta_window_actor_set_opacity  (MetaWindowActor *self,
+                                               guint8           opacity);
+guint8 meta_window_actor_get_opacity (MetaWindowActor *self);
 cairo_surface_t * meta_window_actor_get_image (MetaWindowActor       *self,
                                                cairo_rectangle_int_t *clip);
 void meta_window_actor_set_obscured (MetaWindowActor *self,
