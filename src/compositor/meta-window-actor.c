@@ -358,6 +358,7 @@ meta_window_actor_constructed (GObject *object)
     priv->argb32 = TRUE;
 
   priv->shape_region = cairo_region_create();
+  clutter_actor_set_reactive (actor, FALSE);
 }
 
 static void
@@ -1613,13 +1614,11 @@ set_obscured (MetaWindowActor *self,
           priv->send_frame_messages_timer = 0;
         }
 
-      clutter_actor_set_reactive (actor, FALSE);
       clutter_actor_set_offscreen_redirect (actor, CLUTTER_OFFSCREEN_REDIRECT_ALWAYS);
       priv->obscured = TRUE;
     }
   else
     {
-      clutter_actor_set_reactive (actor, TRUE);
       clutter_actor_set_offscreen_redirect (actor, CLUTTER_OFFSCREEN_REDIRECT_AUTOMATIC_FOR_OPACITY);
 
       priv->obscured = FALSE;
