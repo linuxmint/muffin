@@ -1058,7 +1058,7 @@ meta_window_actor_paint (ClutterActor *actor)
 
   if (priv->window->display->shadows_enabled && priv->should_have_shadow)
     {
-      gboolean appears_focused = meta_window_appears_focused (priv->window);
+      gboolean appears_focused = priv->window->display->focus_window == priv->window;
       MetaShadow *shadow = appears_focused ? priv->focused_shadow : priv->unfocused_shadow;
 
       if (shadow == NULL)
@@ -1185,7 +1185,7 @@ meta_window_actor_get_paint_volume (ClutterActor       *actor,
 
   if (priv->focused_shadow != NULL || priv->unfocused_shadow != NULL)
     {
-      gboolean appears_focused = meta_window_appears_focused (priv->window);
+      gboolean appears_focused = priv->window->display->focus_window == priv->window;
       /* The paint volume is computed before paint functions are called
        * so our bounds might not be updated yet. Force an update. */
       meta_window_actor_handle_updates (self);
@@ -1225,7 +1225,8 @@ static gboolean
 meta_window_actor_has_shadow (MetaWindowActor *self)
 {
   MetaWindowActorPrivate *priv = self->priv;
-  MetaWindowType window_type = priv->window->type;
+  MetaWindow *window = priv->window;
+  MetaWindowType window_type = window->type;
 
   if (priv->no_shadow)
     return FALSE;
@@ -1233,24 +1234,22 @@ meta_window_actor_has_shadow (MetaWindowActor *self)
   /* Leaving out shadows for maximized and fullscreen windows is an effeciency
    * win and also prevents the unsightly effect of the shadow of maximized
    * window appearing on an adjacent window */
-  if ((meta_window_get_maximized (priv->window) == (META_MAXIMIZE_HORIZONTAL | META_MAXIMIZE_VERTICAL)) ||
+  if ((((window->maximized_horizontally ? META_MAXIMIZE_HORIZONTAL : 0) |
+      (window->maximized_vertically ? META_MAXIMIZE_VERTICAL : 0)) == (META_MAXIMIZE_HORIZONTAL | META_MAXIMIZE_VERTICAL)) ||
       priv->window->fullscreen)
     return FALSE;
 
   /* Don't shadow tiled windows of any type */
 
-  if (priv->window->tile_type != META_WINDOW_TILE_TYPE_NONE)
+  if (window->tile_type != META_WINDOW_TILE_TYPE_NONE)
     return FALSE;
 
   /*
    * Always put a shadow around windows with a frame - This should override
    * the restriction about not putting a shadow around ARGB windows.
    */
-  if (priv->window)
-    {
-      if (priv->window->frame)
-        return TRUE;
-    }
+  if (window && window->frame)
+    return TRUE;
 
   /*
    * Do not add shadows to ARGB windows; eventually we should generate a
@@ -1261,14 +1260,14 @@ meta_window_actor_has_shadow (MetaWindowActor *self)
   /*
    * Add shadows to override redirect windows (e.g., Gtk menus).
    */
-  if (priv->window->override_redirect)
+  if (window->override_redirect)
     return TRUE;
 
   /*
    * If a window specifies that it has custom frame extents, that likely
    * means that it is drawing a shadow itself. Don't draw our own.
    */
-  if (priv->window->has_custom_frame_extents)
+  if (window->has_custom_frame_extents)
     return FALSE;
 
   /*
@@ -1279,22 +1278,8 @@ meta_window_actor_has_shadow (MetaWindowActor *self)
       window_type == META_WINDOW_DOCK)
     return FALSE;
 
-  if (window_type == META_WINDOW_MENU
-#if 0
-      || window_type == META_WINDOW_DROPDOWN_MENU
-#endif
-      )
+  if (window_type == META_WINDOW_MENU)
     return TRUE;
-
-  if (priv->window->has_custom_frame_extents)
-    {
-      return FALSE;
-    }
-
-#if 0
-  if (window_type == META_WINDOW_TOOLTIP)
-    return TRUE;
-#endif
 
   return TRUE;
 }
@@ -1554,7 +1539,7 @@ meta_window_actor_damage_all (MetaWindowActor *self)
   MetaWindowActorPrivate *priv = self->priv;
   CoglTexture *texture;
 
-  if (!priv->needs_damage_all || !priv->window->mapped || priv->needs_pixmap)
+  if (!priv->window->mapped || priv->needs_pixmap)
     return;
 
   texture = priv->texture;
@@ -1591,7 +1576,7 @@ meta_window_actor_thaw (MetaWindowActor *self)
   /* Since we ignore damage events while a window is frozen for certain effects
    * we may need to issue an update_area() covering the whole pixmap if we
    * don't know what real damage has happened. */
-  if (self->priv->needs_damage_all)
+  if (priv->needs_damage_all)
     meta_window_actor_damage_all (self);
 }
 
@@ -2543,7 +2528,7 @@ meta_window_actor_set_clip_region_beneath (MetaWindowActor *self,
   if (!priv->should_have_shadow)
     return;
 
-  gboolean appears_focused = meta_window_appears_focused (priv->window);
+  gboolean appears_focused = priv->window->display->focus_window == priv->window;
 
   if (appears_focused ? priv->focused_shadow : priv->unfocused_shadow)
     {
@@ -2683,7 +2668,7 @@ process_shadow (MetaWindowActor *self)
 
   should_have_shadow = meta_window_actor_has_shadow (self);
   priv->should_have_shadow = should_have_shadow;
-  appears_focused = meta_window_appears_focused (priv->window);
+  appears_focused = priv->window->display->focus_window == priv->window;
 
   if (appears_focused)
     {
