@@ -546,6 +546,8 @@ meta_display_open (void)
   the_display->allow_terminal_deactivation = TRUE; /* Only relevant for when a
                                                   terminal has the focus */
 
+  the_display->desktop_effects = meta_prefs_get_desktop_effects ();
+
   the_display->rebuild_keybinding_idle_id = 0;
 
   the_display->sync_method = meta_prefs_get_sync_method();

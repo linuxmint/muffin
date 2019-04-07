@@ -282,6 +282,8 @@ meta_window_actor_init (MetaWindowActor *self)
   priv->first_frame_drawn_id = 0;
   priv->first_frame_handler_queued = FALSE;
   priv->first_frame_drawn = FALSE;
+
+  priv->visible = FALSE;
 }
 
 static void
