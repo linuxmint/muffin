@@ -203,7 +203,7 @@ meta_shadow_paint (MetaShadow     *shadow,
                    int             window_y,
                    int             window_width,
                    int             window_height,
-                   guint8          opacity,
+                   int             opacity,
                    cairo_region_t *clip,
                    gboolean        clip_strictly)
 {

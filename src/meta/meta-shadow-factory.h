@@ -49,7 +49,7 @@ struct _MetaShadowParams
   int top_fade;
   int x_offset;
   int y_offset;
-  guint8 opacity;
+  int opacity;
 };
 
 #define META_TYPE_SHADOW_FACTORY            (meta_shadow_factory_get_type ())

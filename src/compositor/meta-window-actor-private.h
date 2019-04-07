@@ -36,7 +36,7 @@ struct _MetaWindowActorPrivate
 
   Damage damage;
 
-  guint8 opacity;
+  int opacity;
   guint opacity_queued;
   CoglColor color;
 
