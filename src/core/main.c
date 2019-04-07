@@ -636,6 +636,9 @@ prefs_changed_callback (MetaPreference pref,
     case META_PREF_DESKTOP_EFFECTS:
       meta_get_display ()->desktop_effects = meta_prefs_get_desktop_effects ();
       break;
+    case META_PREF_DESKTOP_EFFECTS:
+      meta_get_display ()->desktop_effects = meta_prefs_get_desktop_effects ();
+      break;
     default:
       /* handled elsewhere or otherwise */
       break;
