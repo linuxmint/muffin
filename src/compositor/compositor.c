@@ -79,6 +79,11 @@
 
 static MetaCompositor *compositor_global = NULL;
 
+static gboolean on_move_throttled (MetaCompositor *compositor);
+static void determine_optimization_strategy_for_grab (MetaCompositor *compositor,
+                                                      MetaWindow     *grab_window,
+                                                      gboolean        from_grab);
+
 static void
 frame_callback (ClutterStage     *stage,
                 CoglFrameEvent    event,
@@ -1076,6 +1081,7 @@ meta_compositor_sync_stack (MetaCompositor  *compositor,
   sync_actor_stacking (compositor);
 
   compositor->top_window_actor = get_top_visible_window_actor (compositor);
+  compositor->length = g_list_length (compositor->windows);
 }
 
 void
@@ -1502,6 +1508,8 @@ meta_compositor_monotonic_time_to_server_time (MetaDisplay *display,
     return monotonic_time + compositor->server_time_offset;
 }
 
+/* When set to FALSE, windows are immediately obscured. When set to TRUE, we re-calculate
+   whether every window is obscured after 250ms of the state being locked at FALSE. */
 void
 meta_compositor_set_all_obscured (MetaCompositor *compositor,
                                   gboolean        obscured)
@@ -1512,14 +1520,90 @@ meta_compositor_set_all_obscured (MetaCompositor *compositor,
     meta_window_actor_override_obscured_internal (l->data, obscured);
 }
 
+static gboolean
+on_move_throttled (MetaCompositor *compositor)
+{
+  MetaWindow *grab_window = compositor->display->grab_window;
+  const MetaMonitorInfo *old_monitor;
+
+  if (!grab_window || compositor->display->grab_op == META_GRAB_OP_NONE)
+    return FALSE;
+
+  old_monitor = grab_window->monitor;
+
+  if (!old_monitor)
+    return FALSE;
+
+  meta_window_update_outer_rect (grab_window);
+  grab_window->monitor = meta_screen_get_monitor_for_rect (grab_window->screen, &grab_window->outer_rect);
+
+  if (grab_window->monitor != old_monitor)
+    determine_optimization_strategy_for_grab (compositor, grab_window, FALSE);
+
+  return TRUE;
+}
+
+static void
+determine_optimization_strategy_for_grab (MetaCompositor *compositor,
+                                          MetaWindow     *grab_window,
+                                          gboolean        from_grab)
+{
+  /* Typically MetaWindowActor tries to only paint windows when the user can see them,
+     and lets  everything paint when we're unsure if a window can be exposed unpainted.
+     However, in some cases we can estimate if that is possible, and if not, then no need
+     to disable the optimization. This improves the smoothness of window dragging if we're
+     able to not worry about windows being exposed. */
+  GList *grab_window_item = g_list_find (compositor->windows, grab_window->compositor_private);
+  GList *l;
+  gboolean grab_op_obscured_override = TRUE;
+
+  /* Start from the grab window and iterate in reverse so we are only
+     checking windows potentially underneath. */
+  for (l = grab_window_item; l; l = l->prev)
+    {
+      MetaWindow *prev_window = META_WINDOW_ACTOR (l->data)->priv->window;
+
+      /* Only windows on the same monitor can be underneath the grab window. */
+      if (prev_window->monitor != grab_window->monitor)
+        continue;
+
+      /* If the window is maximized, on the same monitor, and underneath, then we don't
+         need to disable the obscured optimization. The maximized window underneath cannot
+         be fully obscured. This only works per-monitor however, so this function
+         will be called on window monitor change. */
+      if (META_WINDOW_MAXIMIZED (prev_window))
+        {
+          grab_op_obscured_override = FALSE;
+          break;
+        }
+    }
+
+  if (grab_op_obscured_override)
+    meta_compositor_set_all_obscured (compositor, FALSE);
+  else if (!from_grab && grab_op_obscured_override != compositor->grab_op_obscured_override)
+    meta_compositor_set_all_obscured (compositor, TRUE);
+
+  if (from_grab)
+    g_timeout_add_full (1000, 500, (GSourceFunc) on_move_throttled, compositor, NULL);
+
+  compositor->grab_op_obscured_override = grab_op_obscured_override;
+}
+
 void
 meta_compositor_grab_op_begin (MetaCompositor *compositor)
 {
+  MetaWindow *grab_window = compositor->display->grab_window;
+
   // CLUTTER_ACTOR_NO_LAYOUT set on the window group improves responsiveness of windows,
   // but causes windows to flicker in and out of view sporadically on some configurations
-  // while dragging windows. Make sure it is disabled during the grab.
-  clutter_actor_unset_flags (compositor->window_group, CLUTTER_ACTOR_NO_LAYOUT);
-  meta_compositor_set_all_obscured (compositor, FALSE);
+  // while dragging windows when one window is open. Make sure it is disabled during the grab.
+  if (compositor->length < 2)
+    {
+      compositor->layout = TRUE;
+      clutter_actor_unset_flags (compositor->window_group, CLUTTER_ACTOR_NO_LAYOUT);
+    }
+
+  determine_optimization_strategy_for_grab (compositor, grab_window, TRUE);
 }
 
 void
@@ -1527,8 +1611,17 @@ meta_compositor_grab_op_end (MetaCompositor *compositor)
 {
   MetaWindow *window = compositor->display->grab_window;
 
-  clutter_actor_set_flags (compositor->window_group, CLUTTER_ACTOR_NO_LAYOUT);
-  meta_compositor_set_all_obscured (compositor, TRUE);
+  if (compositor->layout)
+    {
+      compositor->layout = FALSE;
+      clutter_actor_set_flags (compositor->window_group, CLUTTER_ACTOR_NO_LAYOUT);
+    }
+
+  if (compositor->grab_op_obscured_override)
+    {
+      compositor->grab_op_obscured_override = FALSE;
+      meta_compositor_set_all_obscured (compositor, TRUE);
+    }
 
   meta_window_update_rects (window);
   meta_window_update_monitor (window);

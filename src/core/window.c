@@ -8416,6 +8416,12 @@ meta_window_update_rects (MetaWindow *window)
 }
 
 void
+meta_window_update_outer_rect (MetaWindow *window)
+{
+  get_outer_rect (window, &window->outer_rect);
+}
+
+void
 meta_window_frame_size_changed (MetaWindow *window)
 {
   if (window->frame)
