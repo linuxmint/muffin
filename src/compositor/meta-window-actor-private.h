@@ -65,6 +65,7 @@ struct _MetaWindowActorPrivate
   char *shadow_class;
 
   gint effect_in_progress;
+  gint64 last_effect_time;
 
   /* List of FrameData for recent frames */
   GList *frames;
