@@ -4333,7 +4333,7 @@ meta_window_adjust_opacity (MetaWindow   *window,
 {
   MetaWindowActor *actor = META_WINDOW_ACTOR (window->compositor_private);
 
-  gint current_opacity, new_opacity;
+  int current_opacity, new_opacity;
 
   current_opacity = meta_window_actor_get_opacity (actor);
 
@@ -4344,7 +4344,7 @@ meta_window_adjust_opacity (MetaWindow   *window,
   }
 
   if (new_opacity != current_opacity)
-    meta_window_actor_set_opacity (actor, (guint8) new_opacity);
+    meta_window_actor_set_opacity (actor, new_opacity);
 }
 
 void
