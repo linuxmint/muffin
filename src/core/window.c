@@ -4754,12 +4754,8 @@ send_sync_request (MetaWindow *window)
   ev.message_type = window->display->atom_WM_PROTOCOLS;
   ev.format = 32;
   ev.data.l[0] = window->display->atom__NET_WM_SYNC_REQUEST;
-  /* FIXME: meta_display_get_current_time() is bad, but since calls
-   * come from meta_window_move_resize_internal (which in turn come
-   * from all over), I'm not sure what we can do to fix it.  Do we
-   * want to use _roundtrip, though?
-   */
-  ev.data.l[1] = meta_display_get_current_time (window->display);
+
+  ev.data.l[1] = window->display->current_time;
   ev.data.l[2] = wait_serial & G_GUINT64_CONSTANT(0xffffffff);
   ev.data.l[3] = wait_serial >> 32;
   ev.data.l[4] = window->extended_sync_request_counter ? 1 : 0;
