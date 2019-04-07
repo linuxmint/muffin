@@ -82,6 +82,7 @@ enum
   PROP_OPACITY
 };
 
+#define MINIMUM_SAFE_EFFECT_INTERVAL 300000
 #define DEFAULT_SHADOW_RADIUS 12
 #define DEFAULT_SHADOW_X_OFFSET 0
 #define DEFAULT_SHADOW_Y_OFFSET 8
@@ -1771,16 +1772,15 @@ static gboolean
 is_freeze_thaw_effect (gulong event)
 {
   switch (event)
-  {
-  case META_PLUGIN_DESTROY:
-  case META_PLUGIN_MAXIMIZE:
-  case META_PLUGIN_UNMAXIMIZE:
-  case META_PLUGIN_TILE:
-    return TRUE;
-    break;
-  default:
-    return FALSE;
-  }
+    {
+      case META_PLUGIN_MAXIMIZE:
+      case META_PLUGIN_UNMAXIMIZE:
+      case META_PLUGIN_TILE:
+        return TRUE;
+        break;
+      default:
+        return FALSE;
+    }
 }
 
 static gboolean
@@ -1848,34 +1848,16 @@ meta_window_actor_effect_completed (MetaWindowActor *self,
   priv->effect_in_progress--;
 
   if (priv->effect_in_progress < 0)
-    {
-      g_warning ("Error in effects accounting (%i)", event);
-      priv->effect_in_progress = 0;
-    }
+    priv->effect_in_progress = 0;
 
-  switch (event)
-  {
-    case META_PLUGIN_MINIMIZE:
-    case META_PLUGIN_MAP:
-    case META_PLUGIN_DESTROY:
-    case META_PLUGIN_UNMAXIMIZE:
-    case META_PLUGIN_MAXIMIZE:
-    case META_PLUGIN_TILE:
-      break;
-    case META_PLUGIN_SWITCH_WORKSPACE:
-      g_assert_not_reached ();
-      break;
-  }
+  if (event == META_PLUGIN_SWITCH_WORKSPACE)
+    return;
 
   if (is_freeze_thaw_effect (event))
     meta_window_actor_thaw (self);
 
   if (!priv->effect_in_progress)
-    {
-      if (event != META_PLUGIN_MAP)
-        priv->position_changed = TRUE;
-      meta_window_actor_after_effects (self);
-    }
+    meta_window_actor_after_effects (self);
 }
 
 static void
@@ -2125,13 +2107,12 @@ meta_window_actor_sync_actor_geometry (MetaWindowActor *self,
    * is shown, the map effect will go into effect and prevent further geometry
    * updates.
    */
-  if ((priv->freeze_count || priv->obscured) && !did_placement)
+  if ((priv->freeze_count && !did_placement) ||
+      priv->obscured ||
+      (priv->effect_in_progress && priv->first_frame_drawn))
     return;
 
-  if (priv->effect_in_progress)
-    return;
-
-  if (priv->size_changed || !priv->first_frame_drawn)
+  if (priv->size_changed)
     {
       if (!priv->window->has_shape || !priv->first_frame_handler_queued)
         meta_window_update_client_area_rect (window);
@@ -2162,30 +2143,43 @@ meta_window_actor_show (MetaWindowActor   *self,
   priv->visible = TRUE;
 
   event = 0;
-  switch (effect)
+
+  if (!priv->screen->display->compositor->switch_workspace_in_progress &&
+      priv->screen->display->desktop_effects &&
+      !priv->redecorating)
     {
-    case META_COMP_EFFECT_CREATE:
-      event = META_PLUGIN_MAP;
-      break;
-    case META_COMP_EFFECT_UNMINIMIZE:
-      /* FIXME: should have META_PLUGIN_UNMINIMIZE */
-      event = META_PLUGIN_MAP;
-      break;
-    case META_COMP_EFFECT_NONE:
-      break;
-    case META_COMP_EFFECT_DESTROY:
-    case META_COMP_EFFECT_MINIMIZE:
-      g_assert_not_reached();
+      gint64 now = g_get_monotonic_time ();
+
+      /* In most cases effects will not animate correctly for windows that map quickly,
+         such as an app restoring its windows. We could track this in Cinnamon, but in
+         this case we can save some CPU time and not activate the effect. */
+      if (now - priv->last_effect_time > MINIMUM_SAFE_EFFECT_INTERVAL)
+        {
+          switch (effect)
+            {
+              case META_COMP_EFFECT_CREATE:
+                event = META_PLUGIN_MAP;
+                break;
+              case META_COMP_EFFECT_UNMINIMIZE:
+                /* FIXME: should have META_PLUGIN_UNMINIMIZE */
+                event = META_PLUGIN_MAP;
+                break;
+              case META_COMP_EFFECT_NONE:
+                break;
+              case META_COMP_EFFECT_DESTROY:
+              case META_COMP_EFFECT_MINIMIZE:
+                g_assert_not_reached();
+            }
+        }
+
+      priv->last_effect_time = now;
     }
 
-  if (priv->redecorating ||
-      priv->screen->display->compositor->switch_workspace_in_progress ||
-      event == 0 ||
-      !meta_prefs_get_desktop_effects () ||
-      !start_simple_effect (self, event))
+  if (priv->obscured)
+    set_obscured (self, FALSE);
+
+  if (event == 0 || !start_simple_effect (self, event))
     {
-      if (priv->obscured)
-        set_obscured (self, FALSE);
       clutter_actor_show (CLUTTER_ACTOR (self));
       priv->redecorating = FALSE;
     }
@@ -2211,27 +2205,30 @@ meta_window_actor_hide (MetaWindowActor *self,
     return;
 
   event = 0;
-  switch (effect)
+
+  if (priv->screen->display->desktop_effects)
     {
-    case META_COMP_EFFECT_DESTROY:
-      event = META_PLUGIN_DESTROY;
-      break;
-    case META_COMP_EFFECT_MINIMIZE:
-      event = META_PLUGIN_MINIMIZE;
-      break;
-    case META_COMP_EFFECT_NONE:
-      break;
-    case META_COMP_EFFECT_UNMINIMIZE:
-    case META_COMP_EFFECT_CREATE:
-      g_assert_not_reached();
+      switch (effect)
+        {
+          case META_COMP_EFFECT_DESTROY:
+            event = META_PLUGIN_DESTROY;
+            break;
+          case META_COMP_EFFECT_MINIMIZE:
+            event = META_PLUGIN_MINIMIZE;
+            break;
+          case META_COMP_EFFECT_NONE:
+            break;
+          case META_COMP_EFFECT_UNMINIMIZE:
+          case META_COMP_EFFECT_CREATE:
+            g_assert_not_reached();
+        }
     }
 
-  if (event == 0 ||
-      !meta_prefs_get_desktop_effects () ||
-      !start_simple_effect (self, event))
-    {
-      clutter_actor_hide (CLUTTER_ACTOR (self));
-    }
+  if (event > 0)
+    start_simple_effect (self, event);
+
+  /* Hide the actor immediately, Cinnamon will clone it and continue the effect with the clone. */
+  clutter_actor_hide (CLUTTER_ACTOR (self));
 }
 
 LOCAL_SYMBOL void
