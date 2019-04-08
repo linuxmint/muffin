@@ -264,8 +264,6 @@ typedef CoglBool
 (*CoglPipelineLayerStateComparitor) (CoglPipelineLayer *authority0,
                                      CoglPipelineLayer *authority1);
 
-
-
 void
 _cogl_pipeline_init_default_layers (void);
 
@@ -376,9 +374,6 @@ _cogl_pipeline_layer_compare_differences (CoglPipelineLayer *layer0,
 CoglPipelineLayer *
 _cogl_pipeline_layer_get_authority (CoglPipelineLayer *layer,
                                     unsigned long difference);
-
-CoglTexture *
-_cogl_pipeline_layer_get_texture (CoglPipelineLayer *layer);
 
 int
 _cogl_pipeline_layer_get_unit_index (CoglPipelineLayer *layer);
