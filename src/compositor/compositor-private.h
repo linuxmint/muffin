@@ -57,7 +57,6 @@ struct _MetaCompositor
   guint           debug       : 1;
   guint           no_mipmaps  : 1;
   guint           layout;
-  guint           grab_op_obscured_override;
 
   gboolean frame_has_updated_xsurfaces;
   gboolean have_x11_sync_object;
