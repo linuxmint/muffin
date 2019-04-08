@@ -1262,7 +1262,7 @@ prefs_changed_callback (MetaPreference pref,
 
   if ((pref == META_PREF_NUM_WORKSPACES ||
        pref == META_PREF_DYNAMIC_WORKSPACES) &&
-      !meta_prefs_get_dynamic_workspaces ())
+      !(*screen->display->prefs->dynamic_workspaces))
     {
       /* GSettings doesn't provide timestamps, but luckily update_num_workspaces
        * often doesn't need it...
@@ -1605,7 +1605,7 @@ meta_screen_remove_workspace (MetaScreen *screen, MetaWorkspace *workspace,
 
   set_number_of_spaces_hint (screen, new_num);
 
-  if (!meta_prefs_get_dynamic_workspaces ())
+  if (!(*screen->display->prefs->dynamic_workspaces))
     meta_prefs_set_num_workspaces (new_num);
 
   update_net_desktop_layout (screen, new_num);
@@ -1666,7 +1666,7 @@ meta_screen_append_new_workspace (MetaScreen *screen, gboolean activate,
 
   set_number_of_spaces_hint (screen, new_num);
 
-  if (!meta_prefs_get_dynamic_workspaces ())
+  if (!(*screen->display->prefs->dynamic_workspaces))
     meta_prefs_set_num_workspaces (new_num);
 
   update_net_desktop_layout (screen, new_num);
@@ -1694,7 +1694,7 @@ update_num_workspaces (MetaScreen *screen,
   MetaWorkspace *last_remaining;
   gboolean need_change_space;
 
-  new_num = meta_prefs_get_num_workspaces ();
+  new_num = *screen->display->prefs->num_workspaces;
 
   g_assert (new_num > 0);
 

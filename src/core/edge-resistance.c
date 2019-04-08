@@ -348,7 +348,7 @@ apply_edge_resistance (MetaWindow                *window,
   const int TIMEOUT_RESISTANCE_LENGTH_MS_SCREEN   =   0;
 
   /* Edge resistance can be disabled in gettings. */
-  if (!meta_prefs_get_edge_resistance_window ())
+  if (!(*window->display->prefs->edge_resistance_window))
     return new_pos;
 
   /* Quit if no movement was specified */

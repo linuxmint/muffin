@@ -41,6 +41,7 @@
 #include "compositor-private.h"
 #include <meta/errors.h>
 #include "meta-background-actor-private.h"
+#include <core/screen-private.h>
 
 #define FADE_DURATION 1500
 
@@ -216,7 +217,7 @@ set_texture_on_actor (MetaBackgroundActor *self)
   if (priv->transition_running)
     cancel_transitions (self);
 
-  background_transition = meta_prefs_get_background_transition();
+  background_transition = *priv->background->screen->display->prefs->background_transition;
 
   if (background_transition == META_BACKGROUND_TRANSITION_NONE)
   {
