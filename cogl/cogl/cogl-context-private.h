@@ -360,7 +360,7 @@ struct _CoglContext
 };
 
 CoglContext *
-_cogl_context_get_default ();
+_cogl_context_get_default (void);
 
 const CoglWinsysVtable *
 _cogl_context_get_winsys (CoglContext *context);
