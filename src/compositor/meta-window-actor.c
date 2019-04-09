@@ -2156,8 +2156,8 @@ meta_window_actor_sync_actor_geometry (MetaWindowActor *self,
 
   if (priv->size_changed || !priv->first_frame_drawn)
     {
-      if (!priv->window->has_shape)
-        meta_window_update_rects (priv->window);
+      if (!priv->window->has_shape || !priv->first_frame_handler_queued)
+      meta_window_update_client_area_rect (priv->window);
 
       priv->needs_pixmap = TRUE;
       meta_window_actor_update_shape (self);
@@ -2990,19 +2990,20 @@ static void
 process_shape_region (MetaWindowActor *self)
 {
   MetaWindowActorPrivate *priv = self->priv;
+  MetaWindow *window = priv->window;
   cairo_region_t *region = NULL;
   cairo_rectangle_int_t *client_area;
-  gboolean full_mask_reset = priv->window->fullscreen;
-  gboolean has_frame = priv->window->frame != NULL;
+  gboolean full_mask_reset = window->fullscreen;
+  gboolean has_frame = window->frame != NULL;
 
   g_clear_pointer (&priv->shape_region, cairo_region_destroy);
   g_clear_pointer (&priv->shadow_shape, meta_window_shape_unref);
   g_clear_pointer (&priv->opaque_region, cairo_region_destroy);
 
-  client_area = &priv->window->client_area;
+  client_area = &window->client_area;
 
   if (has_frame)
-    region = meta_window_get_frame_bounds (priv->window);
+    region = meta_window_get_frame_bounds (window);
 
   if (region != NULL)
     {
@@ -3021,7 +3022,6 @@ process_shape_region (MetaWindowActor *self)
   if (priv->window->has_shape)
     {
       MetaDisplay *display = priv->screen->display;
-      Display *xdisplay = display->xdisplay;
       XRectangle *rects;
       int n_rects, ordering;
 
@@ -3029,8 +3029,8 @@ process_shape_region (MetaWindowActor *self)
       cairo_region_subtract_rectangle (region, client_area);
 
       meta_error_trap_push (display);
-      rects = XShapeGetRectangles (xdisplay,
-                                   priv->window->xwindow,
+      rects = XShapeGetRectangles (display->xdisplay,
+                                   window->xwindow,
                                    ShapeBounding,
                                    &n_rects,
                                    &ordering);
@@ -3052,7 +3052,7 @@ process_shape_region (MetaWindowActor *self)
     }
 #endif
 
-  if (priv->argb32 && priv->window->opaque_region != NULL)
+  if (priv->argb32 && window->opaque_region != NULL)
     {
       /* The opaque region is defined to be a part of the
        * window which ARGB32 will always paint with opaque
@@ -3064,7 +3064,7 @@ process_shape_region (MetaWindowActor *self)
        * to be undefined, and considered a client bug. In mutter's
        * case, graphical glitches will occur.
        */
-      priv->opaque_region = cairo_region_copy (priv->window->opaque_region);
+      priv->opaque_region = cairo_region_copy (window->opaque_region);
       cairo_region_translate (priv->opaque_region, client_area->x, client_area->y);
       cairo_region_intersect (priv->opaque_region, region);
     }
@@ -3075,12 +3075,12 @@ process_shape_region (MetaWindowActor *self)
 
   if (has_frame)
     update_corners (self);
-  else if (priv->window->has_shape && priv->reshapes == 1)
+  else if (window->has_shape && priv->reshapes == 1)
     full_mask_reset = TRUE;
   else if (priv->reshapes < 2)
     priv->reshapes++;
 
-  if (has_frame || priv->window->has_shape)
+  if (has_frame || window->has_shape)
     {
       if (full_mask_reset)
         g_clear_pointer (&self->priv->mask_texture, cogl_object_unref);

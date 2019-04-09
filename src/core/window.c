@@ -147,9 +147,6 @@ static unsigned int get_mask_from_snap_keysym (MetaWindow *window);
 static void update_edge_constraints (MetaWindow *window);
 static void update_gtk_edge_constraints (MetaWindow *window);
 
-static void get_outer_rect (const MetaWindow *window,
-                            MetaRectangle    *rect);
-
 /* Idle handlers for the three queues (run with meta_later_add()). The
  * "data" parameter in each case will be a GINT_TO_POINTER of the
  * index into the queue arrays to use.
@@ -3641,7 +3638,7 @@ meta_window_get_all_monitors (MetaWindow *window, gsize *length)
   else
     {
       if (window->fullscreen)
-        get_outer_rect (window, &window->outer_rect);
+        meta_window_update_outer_rect (window);
 
       window_rect = window->outer_rect;
     }
@@ -5590,7 +5587,7 @@ meta_window_move_to_monitor (MetaWindow  *window,
 
   meta_window_move_between_rects (window, &old_area, &new_area);
 
-  meta_window_update_rects (window);
+  meta_window_update_outer_rect (window);
   meta_window_update_monitor (window);
 }
 
@@ -5888,10 +5885,11 @@ meta_window_get_outer_rect (const MetaWindow *window,
   *rect = window->outer_rect;
 }
 
-static void
-get_outer_rect (const MetaWindow *window,
-                MetaRectangle    *rect)
+void
+meta_window_update_outer_rect (const MetaWindow *window)
 {
+  MetaRectangle *rect = &window->outer_rect;
+
   if (window->frame)
     {
       MetaFrameBorders borders;
@@ -5934,10 +5932,11 @@ meta_window_get_client_area_rect (const MetaWindow      *window,
   *rect = window->client_area;
 }
 
-static void
-get_client_area_rect (const MetaWindow      *window,
-                      cairo_rectangle_int_t *rect)
+void
+meta_window_update_client_area_rect (const MetaWindow *window)
 {
+  cairo_rectangle_int_t *rect = &window->client_area;
+
   if (window->frame)
     {
       rect->x = window->frame->child_x;
@@ -8409,25 +8408,13 @@ recalc_window_type (MetaWindow *window)
 }
 
 void
-meta_window_update_rects (MetaWindow *window)
-{
-  get_outer_rect (window, &window->outer_rect);
-  get_client_area_rect (window, &window->client_area);
-}
-
-void
-meta_window_update_outer_rect (MetaWindow *window)
-{
-  get_outer_rect (window, &window->outer_rect);
-}
-
-void
 meta_window_frame_size_changed (MetaWindow *window)
 {
   if (window->frame)
     meta_frame_clear_cached_borders (window->frame);
 
-  meta_window_update_rects (window);
+  meta_window_update_outer_rect (window);
+  meta_window_update_client_area_rect (window);
 }
 
 static void

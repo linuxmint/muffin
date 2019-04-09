@@ -1413,7 +1413,7 @@ meta_compositor_show_tile_preview (MetaCompositor *compositor,
                                    int            tile_monitor_number,
                                    guint          snap_queued)
 {
-  meta_window_update_rects (window);
+  meta_window_update_outer_rect (window);
   meta_plugin_manager_show_tile_preview (compositor->plugin_mgr,
                                           window, tile_rect, tile_monitor_number,
                                           snap_queued);
@@ -1550,7 +1550,7 @@ meta_compositor_grab_op_end (MetaCompositor *compositor)
 
   meta_compositor_set_all_obscured (compositor, TRUE);
 
-  meta_window_update_rects (window);
+  meta_window_update_outer_rect (window);
   meta_window_update_monitor (window);
 }
 

@@ -3071,7 +3071,7 @@ meta_screen_resize (MetaScreen *screen,
 
       if (window->screen == screen)
         {
-          meta_window_update_rects (window);
+          meta_window_update_outer_rect (window);
           meta_window_update_for_monitors_changed (window);
 
           if (!window->override_redirect)
