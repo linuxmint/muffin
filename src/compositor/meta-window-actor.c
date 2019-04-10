@@ -2507,56 +2507,6 @@ meta_window_actor_set_clip_region (MetaWindowActor *self,
     priv->clip_region = NULL;
 }
 
-/**
- * meta_window_actor_set_clip_region_beneath:
- * @self: a #MetaWindowActor
- * @visible_region: the region of the screen that isn't completely
- *  obscured beneath the main window texture.
- *
- * Provides a hint as to what areas need to be drawn *beneath*
- * the main window texture.  This is the relevant visible region
- * when drawing the shadow, properly accounting for areas of the
- * shadow hid by the window itself. This will be set before painting
- * then unset afterwards.
- */
-void
-meta_window_actor_set_clip_region_beneath (MetaWindowActor *self,
-                                           cairo_region_t  *clip_region)
-{
-  MetaWindowActorPrivate *priv = self->priv;
-
-  if (!priv->should_have_shadow)
-    return;
-
-  gboolean appears_focused = priv->window->display->focus_window == priv->window;
-
-  if (appears_focused ? priv->focused_shadow : priv->unfocused_shadow)
-    {
-      g_clear_pointer (&priv->shadow_clip, cairo_region_destroy);
-      priv->shadow_clip = cairo_region_copy (clip_region);
-
-      if (priv->clip_shadow)
-        cairo_region_subtract (priv->shadow_clip,
-                               priv->shape_region);
-    }
-}
-
-/**
- * meta_window_actor_reset_visible_regions:
- * @self: a #MetaWindowActor
- *
- * Unsets the regions set by meta_window_actor_reset_visible_region() and
- * meta_window_actor_reset_visible_region_beneath()
- */
-LOCAL_SYMBOL void
-meta_window_actor_reset_visible_regions (MetaWindowActor *self)
-{
-  MetaWindowActorPrivate *priv = self->priv;
-
-  meta_window_actor_set_clip_region (self, NULL);
-  g_clear_pointer (&priv->shadow_clip, cairo_region_destroy);
-}
-
 static void
 meta_window_actor_set_create_mipmaps (MetaWindowActor *self,
                                       gboolean         create_mipmaps)

@@ -1523,8 +1523,6 @@ meta_compositor_set_all_obscured (MetaCompositor *compositor,
 void
 meta_compositor_grab_op_begin (MetaCompositor *compositor)
 {
-  MetaWindow *grab_window = compositor->display->grab_window;
-
   // CLUTTER_ACTOR_NO_LAYOUT set on the window group improves responsiveness of windows,
   // but causes windows to flicker in and out of view sporadically on some configurations
   // while dragging windows when one window is open. Make sure it is disabled during the grab.
