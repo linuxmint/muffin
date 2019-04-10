@@ -2157,7 +2157,7 @@ meta_window_actor_sync_actor_geometry (MetaWindowActor *self,
   if (priv->size_changed || !priv->first_frame_drawn)
     {
       if (!priv->window->has_shape || !priv->first_frame_handler_queued)
-      meta_window_update_client_area_rect (priv->window);
+        meta_window_update_client_area_rect (priv->window);
 
       priv->needs_pixmap = TRUE;
       meta_window_actor_update_shape (self);
@@ -3000,7 +3000,7 @@ process_shape_region (MetaWindowActor *self)
   g_clear_pointer (&priv->shadow_shape, meta_window_shape_unref);
   g_clear_pointer (&priv->opaque_region, cairo_region_destroy);
 
-  client_area = &window->client_area;
+  client_area = window->client_area;
 
   if (has_frame)
     region = meta_window_get_frame_bounds (window);

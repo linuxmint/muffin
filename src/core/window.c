@@ -247,6 +247,7 @@ meta_window_finalize (GObject *object)
 
   meta_icon_cache_free (&window->icon_cache);
 
+  free (window->client_area);
   g_free (window->sm_client_id);
   g_free (window->wm_client_machine);
   g_free (window->startup_id);
@@ -1124,6 +1125,8 @@ meta_window_new_with_attrs (MetaDisplay       *display,
   window->rect.y = attrs->y;
   window->rect.width = attrs->width;
   window->rect.height = attrs->height;
+
+  window->client_area = g_new (cairo_rectangle_int_t, 1);
 
   /* And border width, size_hints are the "request" */
   window->border_width = attrs->border_width;
@@ -5929,13 +5932,13 @@ void
 meta_window_get_client_area_rect (const MetaWindow      *window,
                                   cairo_rectangle_int_t *rect)
 {
-  *rect = window->client_area;
+  rect = window->client_area;
 }
 
 void
 meta_window_update_client_area_rect (const MetaWindow *window)
 {
-  cairo_rectangle_int_t *rect = &window->client_area;
+  cairo_rectangle_int_t *rect = window->client_area;
 
   if (window->frame)
     {

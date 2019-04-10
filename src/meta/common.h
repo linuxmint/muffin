@@ -415,6 +415,12 @@ void meta_frame_borders_clear (MetaFrameBorders *self);
   (ycoord) >= (rect).y &&                   \
   (ycoord) <  ((rect).y + (rect).height))
 
+#define POINT_IN_RECT_POINTER(xcoord, ycoord, rect) \
+ ((xcoord) >= (rect)->x &&                   \
+  (xcoord) <  ((rect)->x + (rect)->width) &&  \
+  (ycoord) >= (rect)->y &&                   \
+  (ycoord) <  ((rect)->y + (rect)->height))
+
 /*
  * Layers a window can be in.
  * These MUST be in the order of stacking.

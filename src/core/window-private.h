@@ -458,7 +458,7 @@ struct _MetaWindow
    */
   MetaRectangle rect;
   MetaRectangle outer_rect;
-  cairo_rectangle_int_t client_area;
+  cairo_rectangle_int_t *client_area;
 
   gboolean has_custom_frame_extents;
   GtkBorder custom_frame_extents;
