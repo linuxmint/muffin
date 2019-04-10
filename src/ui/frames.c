@@ -28,6 +28,7 @@
 #include <string.h>
 #include <meta/boxes.h>
 #include "frames.h"
+#include "frame.h"
 #include <meta/util.h>
 #include "core.h"
 #include "menu.h"
@@ -1528,7 +1529,6 @@ meta_frames_button_release_event    (GtkWidget           *widget,
 {
   MetaUIFrame *frame;
   MetaFrames *frames;
-  MetaGrabOp op;
   Display *display;
   
   frames = META_FRAMES (widget);
