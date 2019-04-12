@@ -89,6 +89,7 @@ struct _MetaWindowActorPrivate
   guint recompute_unfocused_shadow : 1;
   guint size_changed : 1;
   guint position_changed : 1;
+  guint geometry_changed : 1;
   guint updates_frozen : 1;
 
   guint needs_destroy : 1;

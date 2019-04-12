@@ -1138,8 +1138,11 @@ meta_window_actor_queue_relayout (ClutterActor *actor)
 {
   MetaWindowActorPrivate *priv = META_WINDOW_ACTOR (actor)->priv;
 
-  if (priv->size_changed || priv->position_changed)
-    CLUTTER_ACTOR_CLASS (meta_window_actor_parent_class)->queue_relayout (actor);
+  if (priv->geometry_changed)
+    {
+      priv->geometry_changed = FALSE;
+      CLUTTER_ACTOR_CLASS (meta_window_actor_parent_class)->queue_relayout (actor);
+    }
 }
 
 static gboolean
@@ -2086,7 +2089,7 @@ meta_window_actor_sync_actor_geometry (MetaWindowActor *self,
   if (priv->last_width != window_rect->width ||
       priv->last_height != window_rect->height)
     {
-      priv->size_changed = TRUE;
+      priv->size_changed = priv->geometry_changed = TRUE;
     }
 
   priv->last_width = window_rect->width;
@@ -2095,7 +2098,7 @@ meta_window_actor_sync_actor_geometry (MetaWindowActor *self,
   if (priv->last_x != window_rect->x ||
       priv->last_y != window_rect->y)
     {
-      priv->position_changed = TRUE;
+      priv->position_changed = priv->geometry_changed = TRUE;
       priv->last_x = window_rect->x;
       priv->last_y = window_rect->y;
     }
