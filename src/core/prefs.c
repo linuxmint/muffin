@@ -940,7 +940,6 @@ MetaPrefsState*
 meta_prefs_get_default_state (void)
 {
   MetaPrefsState *prefs_state = g_new0 (MetaPrefsState, 1);
-  unsigned int snap_modifier[2];
 
   prefs_state->use_system_font = &use_system_font;
   prefs_state->titlebar_font = titlebar_font;
@@ -982,7 +981,6 @@ meta_prefs_get_default_state (void)
   prefs_state->edge_tiling = &edge_tiling;
   prefs_state->edge_resistance_window = &edge_resistance_window;
   prefs_state->force_fullscreen = &force_fullscreen;
-  prefs_state->snap_modifier = *snap_modifier;
   prefs_state->button_layout = &button_layout;
   prefs_state->workspaces_only_on_primary = &workspaces_only_on_primary;
   prefs_state->legacy_snap = &legacy_snap;

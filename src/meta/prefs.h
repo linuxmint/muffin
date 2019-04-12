@@ -385,7 +385,6 @@ typedef struct
   gboolean *edge_tiling;
   gboolean *edge_resistance_window;
   gboolean *force_fullscreen;
-  unsigned int *snap_modifier;
   MetaButtonLayout *button_layout;
   gboolean *workspaces_only_on_primary;
   gboolean *legacy_snap;
