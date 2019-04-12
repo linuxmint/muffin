@@ -1138,9 +1138,7 @@ meta_window_actor_queue_relayout (ClutterActor *actor)
 {
   MetaWindowActorPrivate *priv = META_WINDOW_ACTOR (actor)->priv;
 
-  if (priv->size_changed || priv->position_changed)
-    CLUTTER_ACTOR_CLASS (meta_window_actor_parent_class)->queue_relayout (actor->priv->parent);
-  else
+  if (priv->window->display->grab_window == priv->window)
     CLUTTER_ACTOR_CLASS (meta_window_actor_parent_class)->queue_relayout (actor);
 }
 
@@ -1152,7 +1150,7 @@ meta_window_actor_get_paint_volume (ClutterActor       *actor,
   MetaWindowActorPrivate *priv = self->priv;
 
   if (priv->obscured)
-    return FALSE;
+    return TRUE;
 
   if (!priv->should_have_shadow || priv->window->display->grab_op == META_GRAB_OP_NONE)
     return clutter_paint_volume_set_from_allocation (volume, actor);
@@ -1560,7 +1558,9 @@ set_obscured (MetaWindowActor *self,
 {
   MetaWindowActorPrivate *priv = self->priv;
 
-  if (obscured == priv->obscured)
+  if (obscured == priv->obscured ||
+      priv->obscured_lock ||
+      priv->public_obscured_lock)
     return;
 
   ClutterActor *actor = CLUTTER_ACTOR (self);
@@ -1602,12 +1602,10 @@ meta_window_actor_check_obscured (MetaWindowActor *self)
       return;
     }
 
-  if (priv->obscured_lock || priv->public_obscured_lock)
-    return;
-
   /* Invisible (minimized) windows fail the cairo_region_intersect test,
      so force the obscured property. */
-  if (!priv->visible)
+  if (!priv->visible ||
+      (!priv->window->on_all_workspaces && priv->window->workspace != priv->screen->active_workspace))
     {
       if (!priv->obscured)
         set_obscured (self, TRUE);
@@ -1644,7 +1642,8 @@ reset_obscured (gpointer data)
 
   priv->obscured_lock = FALSE;
 
-  if (!priv->window->has_focus)
+  if (!priv->window->has_focus &&
+      !priv->window->display->compositor->switch_workspace_in_progress)
     meta_window_actor_check_obscured (self);
 
   priv->reset_obscured_timeout_id = 0;
@@ -1681,6 +1680,7 @@ meta_window_actor_set_obscured (MetaWindowActor *self,
     {
       set_obscured (self, obscured);
       priv->public_obscured_lock = TRUE;
+      clutter_actor_queue_redraw (CLUTTER_ACTOR (self));
     }
 }
 
@@ -1710,6 +1710,7 @@ meta_window_actor_override_obscured_internal (MetaWindowActor *self,
     {
       set_obscured (self, obscured);
       priv->obscured_lock = TRUE;
+      clutter_actor_queue_redraw (CLUTTER_ACTOR (self));
     }
 }
 
@@ -2079,25 +2080,24 @@ meta_window_actor_sync_actor_geometry (MetaWindowActor *self,
                                        gboolean         did_placement)
 {
   MetaWindowActorPrivate *priv = self->priv;
-  MetaRectangle window_rect;
+  MetaWindow *window = priv->window;
+  MetaRectangle *window_rect = window->frame ? &window->frame->rect : &window->rect;
 
-  meta_window_get_input_rect (priv->window, &window_rect);
-
-  if (priv->last_width != window_rect.width ||
-      priv->last_height != window_rect.height)
+  if (priv->last_width != window_rect->width ||
+      priv->last_height != window_rect->height)
     {
       priv->size_changed = TRUE;
     }
 
-  priv->last_width = window_rect.width;
-  priv->last_height = window_rect.height;
+  priv->last_width = window_rect->width;
+  priv->last_height = window_rect->height;
 
-  if (priv->last_x != window_rect.x ||
-      priv->last_y != window_rect.y)
+  if (priv->last_x != window_rect->x ||
+      priv->last_y != window_rect->y)
     {
       priv->position_changed = TRUE;
-      priv->last_x = window_rect.x;
-      priv->last_y = window_rect.y;
+      priv->last_x = window_rect->x;
+      priv->last_y = window_rect->y;
     }
 
   /* Normally we want freezing a window to also freeze its position; this allows
@@ -2116,19 +2116,19 @@ meta_window_actor_sync_actor_geometry (MetaWindowActor *self,
   if (priv->size_changed || !priv->first_frame_drawn)
     {
       if (!priv->window->has_shape || !priv->first_frame_handler_queued)
-        meta_window_update_client_area_rect (priv->window);
+        meta_window_update_client_area_rect (window);
 
       priv->needs_pixmap = TRUE;
       meta_window_actor_update_shape (self);
 
       clutter_actor_set_size (CLUTTER_ACTOR (self),
-                              window_rect.width, window_rect.height);
+                              window_rect->width, window_rect->height);
     }
 
   if (priv->position_changed)
     {
       clutter_actor_set_position (CLUTTER_ACTOR (self),
-                                  window_rect.x, window_rect.y);
+                                  window_rect->x, window_rect->y);
     }
 }
 

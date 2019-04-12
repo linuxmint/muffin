@@ -117,6 +117,8 @@ meta_finish_workspace_switch (MetaCompositor *compositor)
    * Fix up stacking order in case the plugin messed it up.
    */
   sync_actor_stacking (compositor);
+
+  meta_compositor_set_all_obscured (compositor, TRUE);
 }
 
 LOCAL_SYMBOL void
@@ -134,8 +136,6 @@ meta_switch_workspace_completed (MetaScreen *screen)
 
   if (!compositor->switch_workspace_in_progress)
     meta_finish_workspace_switch (compositor);
-
-  meta_compositor_set_all_obscured (compositor_global, TRUE);
 }
 
 void
@@ -870,7 +870,6 @@ meta_compositor_switch_workspace (MetaCompositor     *compositor,
        * relative position toward the destkop window.
        */
       meta_finish_workspace_switch (compositor);
-      meta_compositor_set_all_obscured (compositor, TRUE);
     }
 }
 
@@ -1010,6 +1009,7 @@ meta_compositor_sync_stack (MetaCompositor  *compositor,
     {
       MetaWindowActor *old_actor = NULL, *stack_actor = NULL, *actor;
       MetaWindow *old_window = NULL, *stack_window = NULL, *window;
+      MetaWindowActorPrivate *priv;
 
       /* Find the remaining top actor in our existing stack (ignoring
        * windows that have been hidden and are no longer animating) */
@@ -1069,7 +1069,12 @@ meta_compositor_sync_stack (MetaCompositor  *compositor,
        * near the front of the other.)
        */
 
-      if (!actor->priv->unredirected)
+      priv = actor->priv;
+
+      if (!priv->unredirected &&
+          !priv->obscured_lock &&
+          !priv->public_obscured_lock &&
+          !compositor->switch_workspace_in_progress)
         meta_window_actor_check_obscured (actor);
 
       compositor->windows = g_list_prepend (compositor->windows, actor);
