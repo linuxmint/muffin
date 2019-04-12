@@ -1138,7 +1138,7 @@ meta_window_actor_queue_relayout (ClutterActor *actor)
 {
   MetaWindowActorPrivate *priv = META_WINDOW_ACTOR (actor)->priv;
 
-  if (priv->window->display->grab_window == priv->window)
+  if (priv->size_changed || priv->position_changed)
     CLUTTER_ACTOR_CLASS (meta_window_actor_parent_class)->queue_relayout (actor);
 }
 
