@@ -3120,6 +3120,8 @@ meta_window_show (MetaWindow *window)
 
   if (!window->visible_to_compositor)
     {
+      meta_window_update_outer_rect (window);
+      meta_window_update_client_area_rect (window);
       meta_window_update_monitor (window);
 
       window->visible_to_compositor = TRUE;
