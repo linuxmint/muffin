@@ -2148,31 +2148,21 @@ meta_window_actor_show (MetaWindowActor   *self,
       priv->screen->display->desktop_effects &&
       !priv->redecorating)
     {
-      gint64 now = g_get_monotonic_time ();
-
-      /* In most cases effects will not animate correctly for windows that map quickly,
-         such as an app restoring its windows. We could track this in Cinnamon, but in
-         this case we can save some CPU time and not activate the effect. */
-      if (now - priv->last_effect_time > MINIMUM_SAFE_EFFECT_INTERVAL)
+      switch (effect)
         {
-          switch (effect)
-            {
-              case META_COMP_EFFECT_CREATE:
-                event = META_PLUGIN_MAP;
-                break;
-              case META_COMP_EFFECT_UNMINIMIZE:
-                /* FIXME: should have META_PLUGIN_UNMINIMIZE */
-                event = META_PLUGIN_MAP;
-                break;
-              case META_COMP_EFFECT_NONE:
-                break;
-              case META_COMP_EFFECT_DESTROY:
-              case META_COMP_EFFECT_MINIMIZE:
-                g_assert_not_reached();
-            }
+          case META_COMP_EFFECT_CREATE:
+            event = META_PLUGIN_MAP;
+            break;
+          case META_COMP_EFFECT_UNMINIMIZE:
+            /* FIXME: should have META_PLUGIN_UNMINIMIZE */
+            event = META_PLUGIN_MAP;
+            break;
+          case META_COMP_EFFECT_NONE:
+            break;
+          case META_COMP_EFFECT_DESTROY:
+          case META_COMP_EFFECT_MINIMIZE:
+            g_assert_not_reached();
         }
-
-      priv->last_effect_time = now;
     }
 
   if (priv->obscured)
