@@ -1145,32 +1145,6 @@ meta_window_actor_queue_relayout (ClutterActor *actor)
 }
 
 static gboolean
-is_move_resize (MetaWindowActor *self)
-{
-  MetaDisplay *display = self->priv->window->display;
-  MetaGrabOp op = display->grab_op;
-
-  if (op == META_GRAB_OP_NONE)
-    return FALSE;
-
-  switch (op)
-    {
-      case META_GRAB_OP_MOVING:
-      case META_GRAB_OP_RESIZING_SE:
-      case META_GRAB_OP_RESIZING_S:
-      case META_GRAB_OP_RESIZING_SW:
-      case META_GRAB_OP_RESIZING_N:
-      case META_GRAB_OP_RESIZING_NE:
-      case META_GRAB_OP_RESIZING_NW:
-      case META_GRAB_OP_RESIZING_W:
-      case META_GRAB_OP_RESIZING_E:
-        return TRUE;
-      default:
-        return FALSE;
-    }
-}
-
-static gboolean
 meta_window_actor_get_paint_volume (ClutterActor       *actor,
                                     ClutterPaintVolume *volume)
 {
@@ -1180,7 +1154,7 @@ meta_window_actor_get_paint_volume (ClutterActor       *actor,
   if (priv->obscured)
     return FALSE;
 
-  if (!priv->should_have_shadow || !is_move_resize (self))
+  if (!priv->should_have_shadow || priv->window->display->grab_op == META_GRAB_OP_NONE)
     return clutter_paint_volume_set_from_allocation (volume, actor);
 
   if (priv->focused_shadow != NULL || priv->unfocused_shadow != NULL)
