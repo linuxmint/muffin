@@ -1208,7 +1208,7 @@ meta_window_actor_has_shadow (MetaWindowActor *self)
    * window appearing on an adjacent window */
   if ((((window->maximized_horizontally ? META_MAXIMIZE_HORIZONTAL : 0) |
       (window->maximized_vertically ? META_MAXIMIZE_VERTICAL : 0)) == (META_MAXIMIZE_HORIZONTAL | META_MAXIMIZE_VERTICAL)) ||
-      priv->window->fullscreen)
+      window->fullscreen)
     return FALSE;
 
   /* Don't shadow tiled windows of any type */
@@ -1220,7 +1220,7 @@ meta_window_actor_has_shadow (MetaWindowActor *self)
    * Always put a shadow around windows with a frame - This should override
    * the restriction about not putting a shadow around ARGB windows.
    */
-  if (window && window->frame)
+  if (window->frame)
     return TRUE;
 
   /*
