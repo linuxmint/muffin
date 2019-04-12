@@ -1081,7 +1081,6 @@ meta_compositor_sync_stack (MetaCompositor  *compositor,
   sync_actor_stacking (compositor);
 
   compositor->top_window_actor = get_top_visible_window_actor (compositor);
-  compositor->length = g_list_length (compositor->windows);
 }
 
 void
@@ -1525,13 +1524,8 @@ meta_compositor_grab_op_begin (MetaCompositor *compositor)
 {
   // CLUTTER_ACTOR_NO_LAYOUT set on the window group improves responsiveness of windows,
   // but causes windows to flicker in and out of view sporadically on some configurations
-  // while dragging windows when one window is open. Make sure it is disabled during the grab.
-  if (compositor->length < 4)
-    {
-      compositor->layout = TRUE;
-      clutter_actor_unset_flags (compositor->window_group, CLUTTER_ACTOR_NO_LAYOUT);
-    }
-
+  // while dragging windows. Make sure it is disabled during the grab.
+  clutter_actor_unset_flags (compositor->window_group, CLUTTER_ACTOR_NO_LAYOUT);
   meta_compositor_set_all_obscured (compositor, FALSE);
 }
 
@@ -1540,11 +1534,7 @@ meta_compositor_grab_op_end (MetaCompositor *compositor)
 {
   MetaWindow *window = compositor->display->grab_window;
 
-  if (compositor->layout)
-    {
-      compositor->layout = FALSE;
-      clutter_actor_set_flags (compositor->window_group, CLUTTER_ACTOR_NO_LAYOUT);
-    }
+  clutter_actor_set_flags (compositor->window_group, CLUTTER_ACTOR_NO_LAYOUT);
 
   meta_compositor_set_all_obscured (compositor, TRUE);
 
