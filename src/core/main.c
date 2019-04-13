@@ -492,7 +492,7 @@ meta_init (void)
 
   /* Load prefs */
   meta_prefs_init ();
-  _clutter_set_sync_to_vblank(meta_prefs_get_sync_to_vblank());
+  _clutter_set_sync_method (meta_prefs_get_sync_method ());
 
   /*
    * Clutter can only be initialized after the UI.
@@ -630,8 +630,8 @@ prefs_changed_callback (MetaPreference pref,
       meta_display_set_cursor_theme (meta_prefs_get_cursor_theme (),
 				     meta_prefs_get_cursor_size ());
       break;
-    case META_PREF_SYNC_TO_VBLANK:
-      meta_display_update_sync_state (meta_prefs_get_sync_to_vblank());
+    case META_PREF_SYNC_METHOD:
+      meta_display_update_sync_state (meta_prefs_get_sync_method ());
       break;
     default:
       /* handled elsewhere or otherwise */
