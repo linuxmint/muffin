@@ -71,7 +71,7 @@ restart_helper_read_line_callback (GObject      *source_object,
                     error ? error->message : NULL);
     }
   else
-    g_free (line); /* We don't actually care what the restart helper outputs */
+    free (line); /* We don't actually care what the restart helper outputs */
 
   g_object_unref (source_object);
 

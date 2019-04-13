@@ -283,7 +283,7 @@ destroy_program_state (void *user_data,
       if (program_state->program)
         GE( ctx, glDeleteProgram (program_state->program) );
 
-      g_free (program_state->unit_state);
+      free (program_state->unit_state);
 
       if (program_state->uniform_locations)
         g_array_free (program_state->uniform_locations, TRUE);
@@ -341,7 +341,7 @@ link_program (GLint gl_program)
 
       GE( ctx, glGetProgramiv (gl_program, GL_INFO_LOG_LENGTH, &log_length) );
 
-      log = g_malloc (log_length);
+      log = malloc (log_length);
 
       GE( ctx, glGetProgramInfoLog (gl_program, log_length,
                                     &out_log_length, log) );
@@ -349,7 +349,7 @@ link_program (GLint gl_program)
       g_warning ("Failed to link GLSL program:\n%.*s\n",
                  log_length, log);
 
-      g_free (log);
+      free (log);
     }
 }
 

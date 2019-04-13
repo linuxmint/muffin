@@ -2,11 +2,11 @@
 
 /* Metacity window frame manager widget */
 
-/* 
+/*
  * Copyright (C) 2001 Havoc Pennington
  * Copyright (C) 2003 Red Hat, Inc.
  * Copyright (C) 2005, 2006 Elijah Newren
- * 
+ *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
  * published by the Free Software Foundation; either version 2 of the
@@ -16,7 +16,7 @@
  * WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street - Suite 500, Boston, MA
@@ -134,7 +134,7 @@ meta_frames_class_init (MetaFramesClass *class)
   widget_class->style_updated = meta_frames_style_updated;
 
   widget_class->draw = meta_frames_draw;
-  widget_class->destroy_event = meta_frames_destroy_event;  
+  widget_class->destroy_event = meta_frames_destroy_event;
   widget_class->button_press_event = meta_frames_button_press_event;
   widget_class->button_release_event = meta_frames_button_release_event;
   widget_class->motion_notify_event = meta_frames_motion_notify_event;
@@ -206,7 +206,7 @@ create_style_context (MetaFrames  *frames,
                                       GTK_STYLE_PROVIDER_PRIORITY_SETTINGS);
     }
 
-  g_free (theme_name);
+  free (theme_name);
 
   return style;
 }
@@ -251,7 +251,7 @@ static void
 meta_frames_init (MetaFrames *frames)
 {
   frames->text_heights = g_hash_table_new (NULL, NULL);
-  
+
   frames->frames = g_hash_table_new (unsigned_long_hash, unsigned_long_equal);
 
   frames->invalidate_cache_timeout_id = 0;
@@ -259,8 +259,8 @@ meta_frames_init (MetaFrames *frames)
   frames->cache = g_hash_table_new (g_direct_hash, g_direct_equal);
 
   frames->style_variants = g_hash_table_new_full (g_str_hash, g_str_equal,
-                                                  g_free, g_object_unref);
 
+                                                  free, g_object_unref);
   update_style_contexts (frames);
 
   gtk_widget_set_double_buffered (GTK_WIDGET (frames), FALSE);
@@ -283,7 +283,7 @@ meta_frames_destroy (GtkWidget *object)
   GSList *winlist;
   GSList *tmp;
   MetaFrames *frames;
-  
+
   frames = META_FRAMES (object);
 
   winlist = NULL;
@@ -319,11 +319,11 @@ static void
 meta_frames_finalize (GObject *object)
 {
   MetaFrames *frames;
-  
+
   frames = META_FRAMES (object);
 
   meta_prefs_remove_listener (prefs_changed_callback, frames);
-  
+
   g_hash_table_destroy (frames->text_heights);
 
   invalidate_all_caches (frames);
@@ -331,7 +331,7 @@ meta_frames_finalize (GObject *object)
     g_source_remove (frames->invalidate_cache_timeout_id);
     frames->invalidate_cache_timeout_id = 0;
   }
-  
+
   g_assert (g_hash_table_size (frames->frames) == 0);
   g_hash_table_destroy (frames->frames);
   g_hash_table_destroy (frames->cache);
@@ -358,7 +358,7 @@ get_cache (MetaFrames *frames,
            MetaUIFrame *frame)
 {
   CachedPixels *pixels;
-  
+
   pixels = g_hash_table_lookup (frames->cache, frame);
 
   if (!pixels)
@@ -376,12 +376,12 @@ invalidate_cache (MetaFrames *frames,
 {
   CachedPixels *pixels = get_cache (frames, frame);
   int i;
-  
+
   for (i = 0; i < 4; i++)
     if (pixels->piece[i].pixmap)
       cairo_surface_destroy (pixels->piece[i].pixmap);
-  
-  g_free (pixels);
+
+  free (pixels);
   g_hash_table_remove (frames->cache, frame);
 }
 
@@ -396,7 +396,7 @@ invalidate_all_caches (MetaFrames *frames)
 
       invalidate_cache (frames, frame);
     }
-  
+
   g_list_free (frames->invalidate_frames);
   frames->invalidate_frames = NULL;
 }
@@ -405,7 +405,7 @@ static gboolean
 invalidate_cache_timeout (gpointer data)
 {
   MetaFrames *frames = data;
-  
+
   invalidate_all_caches (frames);
   frames->invalidate_cache_timeout_id = 0;
   return FALSE;
@@ -426,8 +426,8 @@ queue_recalc_func (gpointer key, gpointer value, gpointer data)
   if (frame->layout)
     {
       /* save title to recreate layout */
-      g_free (frame->title);
-      
+      free (frame->title);
+
       frame->title = g_strdup (pango_layout_get_text (frame->layout));
 
       g_object_unref (G_OBJECT (frame->layout));
@@ -443,7 +443,7 @@ meta_frames_font_changed (MetaFrames *frames)
       g_hash_table_destroy (frames->text_heights);
       frames->text_heights = g_hash_table_new (NULL, NULL);
     }
-  
+
   /* Queue a draw/resize on all frames */
   g_hash_table_foreach (frames->frames,
                         queue_recalc_func, frames);
@@ -524,8 +524,8 @@ meta_frames_ensure_layout (MetaFrames  *frames,
       if (frame->layout)
         {
           /* save title to recreate layout */
-          g_free (frame->title);
-          
+          free (frame->title);
+
           frame->title = g_strdup (pango_layout_get_text (frame->layout));
 
           g_object_unref (G_OBJECT (frame->layout));
@@ -534,23 +534,23 @@ meta_frames_ensure_layout (MetaFrames  *frames,
     }
 
   frame->cache_style = style;
-  
+
   if (frame->layout == NULL)
     {
       gpointer key, value;
       PangoFontDescription *font_desc;
       double scale;
       int size;
-      
+
       scale = meta_theme_get_title_scale (meta_theme_get_current (),
                                           type,
                                           flags);
-      
+
       frame->layout = gtk_widget_create_pango_layout (widget, frame->title);
 
       pango_layout_set_ellipsize (frame->layout, PANGO_ELLIPSIZE_END);
       pango_layout_set_auto_dir (frame->layout, FALSE);
-      
+
       font_desc = meta_gtk_widget_get_font_desc (widget, scale,
                                                  meta_prefs_get_titlebar_font ());
 
@@ -572,14 +572,14 @@ meta_frames_ensure_layout (MetaFrames  *frames,
                                 GINT_TO_POINTER (size),
                                 GINT_TO_POINTER (frame->text_height));
         }
-      
-      pango_layout_set_font_description (frame->layout, 
+
+      pango_layout_set_font_description (frame->layout,
                                          font_desc);
-      
+
       pango_font_description_free (font_desc);
 
       /* Save some RAM */
-      g_free (frame->title);
+      free (frame->title);
       frame->title = NULL;
     }
 }
@@ -604,7 +604,7 @@ meta_frames_calc_geometry (MetaFrames        *frames,
   meta_frames_ensure_layout (frames, frame);
 
   meta_prefs_get_button_layout (&button_layout);
-  
+
   meta_theme_calc_geometry (meta_theme_get_current (),
                             type,
                             frame->text_height,
@@ -679,7 +679,7 @@ meta_frames_manage_window (MetaFrames *frames,
   g_assert (window);
 
   frame = g_new (MetaUIFrame, 1);
-  
+
   frame->window = window;
 
   gdk_window_set_user_data (frame->window, frames);
@@ -687,7 +687,7 @@ meta_frames_manage_window (MetaFrames *frames,
   frame->style = NULL;
 
   /* Don't set event mask here, it's in frame.c */
-  
+
   frame->xwindow = xwindow;
   frame->cache_style = NULL;
   frame->layout = NULL;
@@ -715,7 +715,7 @@ meta_frames_unmanage_window (MetaFrames *frames,
        * is not actually referenced anymore
        */
       invalidate_all_caches (frames);
-      
+
       /* restore the cursor */
       meta_core_set_screen_cursor (GDK_DISPLAY_XDISPLAY (gdk_display_get_default ()),
                                    frame->xwindow,
@@ -735,10 +735,9 @@ meta_frames_unmanage_window (MetaFrames *frames,
       if (frame->layout)
         g_object_unref (G_OBJECT (frame->layout));
 
-      if (frame->title)
-        g_free (frame->title);
-      
-      g_free (frame);
+      free (frame->title);
+
+      free (frame);
     }
   else
     meta_warning ("Frame 0x%lx not managed, can't unmanage\n", xwindow);
@@ -763,7 +762,7 @@ meta_frames_get_borders (MetaFrames *frames,
   MetaFrameFlags flags;
   MetaUIFrame *frame;
   MetaFrameType type;
-  
+
   frame = meta_frames_lookup_window (frames, xwindow);
 
   if (frame == NULL)
@@ -777,7 +776,7 @@ meta_frames_get_borders (MetaFrames *frames,
   g_return_if_fail (type < META_FRAME_TYPE_LAST);
 
   meta_frames_ensure_layout (frames, frame);
-  
+
   /* We can't get the full geometry, because that depends on
    * the client window size and probably we're being called
    * by the core move/resize code to decide on the client
@@ -869,7 +868,7 @@ get_visible_region (MetaFrames        *frames,
 
   corners_region = cairo_region_create ();
   get_visible_frame_rect (fgeom, window_width, window_height, &frame_rect);
-  
+
   if (fgeom->top_left_corner_rounded_radius != 0)
     {
       const int corner = fgeom->top_left_corner_rounded_radius;
@@ -883,7 +882,7 @@ get_visible_region (MetaFrames        *frames,
           rect.y = frame_rect.y + i;
           rect.width = width;
           rect.height = 1;
-          
+
           cairo_region_union_rectangle (corners_region, &rect);
         }
     }
@@ -901,7 +900,7 @@ get_visible_region (MetaFrames        *frames,
           rect.y = frame_rect.y + i;
           rect.width = width;
           rect.height = 1;
-          
+
           cairo_region_union_rectangle (corners_region, &rect);
         }
     }
@@ -919,7 +918,7 @@ get_visible_region (MetaFrames        *frames,
           rect.y = frame_rect.y + frame_rect.height - i - 1;
           rect.width = width;
           rect.height = 1;
-          
+
           cairo_region_union_rectangle (corners_region, &rect);
         }
     }
@@ -937,11 +936,11 @@ get_visible_region (MetaFrames        *frames,
           rect.y = frame_rect.y + frame_rect.height - i - 1;
           rect.width = width;
           rect.height = 1;
-          
+
           cairo_region_union_rectangle (corners_region, &rect);
         }
     }
-  
+
   visible_region = cairo_region_create_rectangle (&frame_rect);
   cairo_region_subtract (visible_region, corners_region);
   cairo_region_destroy (corners_region);
@@ -978,7 +977,7 @@ meta_frames_move_resize_frame (MetaFrames *frames,
 {
   MetaUIFrame *frame = meta_frames_lookup_window (frames, xwindow);
   int old_width, old_height;
-  
+
   old_width = gdk_window_get_width (frame->window);
   old_height = gdk_window_get_height (frame->window);
 
@@ -993,7 +992,7 @@ meta_frames_queue_draw (MetaFrames *frames,
                         Window      xwindow)
 {
   MetaUIFrame *frame;
-  
+
   frame = meta_frames_lookup_window (frames, xwindow);
 
   invalidate_whole_window (frames, frame);
@@ -1005,14 +1004,14 @@ meta_frames_set_title (MetaFrames *frames,
                        const char *title)
 {
   MetaUIFrame *frame;
-  
+
   frame = meta_frames_lookup_window (frames, xwindow);
 
   g_assert (frame);
-  
-  g_free (frame->title);
+
+  free (frame->title);
   frame->title = g_strdup (title);
-  
+
   if (frame->layout)
     {
       g_object_unref (frame->layout);
@@ -1041,7 +1040,7 @@ meta_frames_repaint_frame (MetaFrames *frames,
                            Window      xwindow)
 {
   MetaUIFrame *frame;
-  
+
   frame = meta_frames_lookup_window (frames, xwindow);
 
   g_assert (frame);
@@ -1104,8 +1103,8 @@ meta_frame_titlebar_event (MetaUIFrame    *frame,
                                event->time);
           }
       }
-      break;          
-      
+      break;
+
     case C_DESKTOP_TITLEBAR_ACTION_TOGGLE_MAXIMIZE:
       {
         meta_core_get (display, frame->xwindow,
@@ -1191,7 +1190,7 @@ meta_frame_titlebar_event (MetaUIFrame    *frame,
     case C_DESKTOP_TITLEBAR_ACTION_NONE:
       /* Yaay, a sane user that doesn't use that other weird crap! */
       break;
-    
+
     case C_DESKTOP_TITLEBAR_ACTION_LOWER:
       meta_core_user_lower_and_unfocus (display,
                                         frame->xwindow,
@@ -1249,7 +1248,7 @@ meta_frame_titlebar_event (MetaUIFrame    *frame,
     case C_DESKTOP_TITLEBAR_SCROLL_ACTION_NONE:
       break;
     }
-  
+
   return TRUE;
 }
 
@@ -1258,7 +1257,7 @@ meta_frame_double_click_event (MetaUIFrame    *frame,
                                GdkEventButton *event)
 {
   int action = meta_prefs_get_action_double_click_titlebar ();
-  
+
   return meta_frame_titlebar_event (frame, event, action);
 }
 
@@ -1267,7 +1266,7 @@ meta_frame_middle_click_event (MetaUIFrame    *frame,
                                GdkEventButton *event)
 {
   int action = meta_prefs_get_action_middle_click_titlebar();
-  
+
   return meta_frame_titlebar_event (frame, event, action);
 }
 
@@ -1276,7 +1275,7 @@ meta_frame_right_click_event(MetaUIFrame     *frame,
                              GdkEventButton  *event)
 {
   int action = meta_prefs_get_action_right_click_titlebar();
-  
+
   return meta_frame_titlebar_event (frame, event, action);
 }
 
@@ -1318,14 +1317,14 @@ meta_frames_button_press_event (GtkWidget      *widget,
   MetaFrames *frames;
   MetaFrameControl control;
   Display *display;
-  
+
   frames = META_FRAMES (widget);
   display = GDK_DISPLAY_XDISPLAY (gdk_display_get_default ());
 
   /* Remember that the display may have already done something with this event.
    * If so there's probably a GrabOp in effect.
    */
-  
+
   frame = meta_frames_lookup_window (frames, GDK_WINDOW_XID (event->window));
   if (frame == NULL)
     return FALSE;
@@ -1343,13 +1342,13 @@ meta_frames_button_press_event (GtkWidget      *widget,
                   frame->xwindow);
       meta_core_user_focus (display,
                             frame->xwindow,
-                            event->time);      
+                            event->time);
     }
 
   /* don't do the rest of this if on client area */
   if (control == META_FRAME_CONTROL_CLIENT_AREA)
     return FALSE; /* not on the frame, just passed through from client */
-  
+
   /* We want to shade even if we have a GrabOp, since we'll have a move grab
    * if we double click the titlebar.
    */
@@ -1458,7 +1457,7 @@ meta_frames_button_press_event (GtkWidget      *widget,
           /* get delta to convert to root coords */
           dx = event->x_root - event->x;
           dy = event->y_root - event->y;
-          
+
           /* Align to the right end of the menu rectangle if RTL */
           if (meta_ui_get_direction() == META_UI_DIRECTION_RTL)
             dx += rect->width;
@@ -1482,9 +1481,9 @@ meta_frames_button_press_event (GtkWidget      *widget,
             control == META_FRAME_CONTROL_RESIZE_W))
     {
       MetaGrabOp op;
-      
+
       op = META_GRAB_OP_NONE;
-      
+
       switch (control)
         {
         case META_FRAME_CONTROL_RESIZE_SE:
@@ -1563,7 +1562,7 @@ meta_frames_button_press_event (GtkWidget      *widget,
     {
       return meta_frame_right_click_event (frame, event);
     }
-  
+
   return TRUE;
 }
 
@@ -1602,7 +1601,7 @@ meta_frames_button_release_event    (GtkWidget           *widget,
   MetaFrames *frames;
   MetaGrabOp op;
   Display *display;
-  
+
   frames = META_FRAMES (widget);
   display = GDK_DISPLAY_XDISPLAY (gdk_display_get_default ());
   
@@ -1718,7 +1717,7 @@ meta_frames_button_release_event    (GtkWidget           *widget,
        */
       meta_frames_update_prelit_control (frames, frame, control);
     }
-  
+
   return TRUE;
 }
 
@@ -1733,9 +1732,9 @@ meta_frames_update_prelit_control (MetaFrames      *frames,
 
   meta_verbose ("Updating prelit control from %u to %u\n",
                 frame->prelit_control, control);
-  
+
   cursor = META_CURSOR_DEFAULT;
-  
+
   switch (control)
     {
     case META_FRAME_CONTROL_CLIENT_AREA:
@@ -1790,7 +1789,7 @@ meta_frames_update_prelit_control (MetaFrames      *frames,
     case META_FRAME_CONTROL_RESIZE_E:
       cursor = META_CURSOR_EAST_RESIZE;
       break;
-    }        
+    }
 
   /* set/unset the prelight cursor */
   meta_core_set_screen_cursor (GDK_DISPLAY_XDISPLAY (gdk_display_get_default ()),
@@ -1816,7 +1815,7 @@ meta_frames_update_prelit_control (MetaFrames      *frames,
       /* Only prelight buttons */
       control = META_FRAME_CONTROL_NONE;
       break;
-    }      
+    }
 
   if (control == frame->prelit_control)
     return;
@@ -1937,7 +1936,7 @@ meta_frames_destroy_event           (GtkWidget           *widget,
   frame = meta_frames_lookup_window (frames, GDK_WINDOW_XID (event->window));
   if (frame == NULL)
     return FALSE;
-  
+
   return TRUE;
 }
 
@@ -1982,7 +1981,7 @@ generate_pixmap (MetaFrames            *frames,
   result = gdk_window_create_similar_surface (frame->window,
                                               CAIRO_CONTENT_COLOR,
                                               rect->width, rect->height);
-  
+
   cr = cairo_create (result);
   cairo_translate (cr, -rect->x, -rect->y);
 
@@ -2027,7 +2026,7 @@ populate_cache (MetaFrames *frames,
     {
       return;
     }
-  
+
   meta_theme_get_frame_borders (meta_theme_get_current (),
                                 frame_type,
                                 frame->text_height,
@@ -2079,12 +2078,12 @@ populate_cache (MetaFrames *frames,
       if (!piece->pixmap)
         piece->pixmap = generate_pixmap (frames, frame, &piece->rect);
     }
-  
+
   if (frames->invalidate_cache_timeout_id) {
     g_source_remove (frames->invalidate_cache_timeout_id);
     frames->invalidate_cache_timeout_id = 0;
   }
-  
+
   frames->invalidate_cache_timeout_id = g_timeout_add (1000, invalidate_cache_timeout, frames);
 
   if (!g_list_find (frames->invalidate_frames, frame))
@@ -2099,7 +2098,7 @@ clip_to_screen (cairo_region_t *region,
   cairo_rectangle_int_t frame_area;
   cairo_rectangle_int_t screen_area = { 0, 0, 0, 0 };
   cairo_region_t *tmp_region;
-  
+
   /* Chop off stuff outside the screen; this optimization
    * is crucial to handle huge client windows,
    * like "xterm -geometry 1000x1000"
@@ -2147,7 +2146,7 @@ subtract_client_area (cairo_region_t *region,
                  META_CORE_GET_CLIENT_HEIGHT, &area.height,
                  META_CORE_GET_END);
   meta_theme_get_frame_borders (meta_theme_get_current (),
-                                type, frame->text_height, flags, 
+                                type, frame->text_height, flags,
                                 &borders);
 
   area.x = borders.total.left;
@@ -2170,13 +2169,13 @@ cached_pixels_draw (CachedPixels   *pixels,
     {
       CachedFramePiece *piece;
       piece = &pixels->piece[i];
-      
+
       if (piece->pixmap)
         {
           cairo_set_source_surface (cr, piece->pixmap,
                                     piece->rect.x, piece->rect.y);
           cairo_paint (cr);
-          
+
           region_piece = cairo_region_create_rectangle (&piece->rect);
           cairo_region_subtract (region, region_piece);
           cairo_region_destroy (region_piece);
@@ -2208,11 +2207,11 @@ meta_frames_draw (GtkWidget *widget,
   populate_cache (frames, frame);
 
   region = cairo_region_create_rectangle (&clip);
-  
+
   pixels = get_cache (frames, frame);
 
   cached_pixels_draw (pixels, cr, region);
-  
+
   clip_to_screen (region, frame);
   subtract_client_area (region, frame);
 
@@ -2240,7 +2239,7 @@ meta_frames_draw (GtkWidget *widget,
     }
 
   cairo_region_destroy (region);
-  
+
   return TRUE;
 }
 
@@ -2259,7 +2258,7 @@ meta_frames_paint (MetaFrames   *frames,
   MetaButtonLayout button_layout;
   MetaGrabOp grab_op;
   Display *display;
-  
+
   widget = GTK_WIDGET (frames);
   display = GDK_DISPLAY_XDISPLAY (gdk_display_get_default ());
 
@@ -2375,7 +2374,7 @@ meta_frames_enter_notify_event      (GtkWidget           *widget,
   MetaUIFrame *frame;
   MetaFrames *frames;
   MetaFrameControl control;
-  
+
   frames = META_FRAMES (widget);
 
   frame = meta_frames_lookup_window (frames, GDK_WINDOW_XID (event->window));
@@ -2384,7 +2383,7 @@ meta_frames_enter_notify_event      (GtkWidget           *widget,
 
   control = get_control (frames, frame, event->x, event->y);
   meta_frames_update_prelit_control (frames, frame, control);
-  
+
   return TRUE;
 }
 
@@ -2402,7 +2401,7 @@ meta_frames_leave_notify_event      (GtkWidget           *widget,
     return FALSE;
 
   meta_frames_update_prelit_control (frames, frame, META_FRAME_CONTROL_NONE);
-  
+
   return TRUE;
 }
 
@@ -2411,7 +2410,7 @@ control_rect (MetaFrameControl control,
               MetaFrameGeometry *fgeom)
 {
   GdkRectangle *rect;
-  
+
   rect = NULL;
   switch (control)
     {

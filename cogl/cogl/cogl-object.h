@@ -93,7 +93,7 @@ cogl_object_unref (void *object);
  * static void
  * destroy_path_private_cb (void *data)
  * {
- *   g_free (data);
+ *   free (data);
  * }
  *
  * static void

@@ -699,7 +699,7 @@ clutter_text_create_layout_no_cache (ClutterText       *text,
   pango_layout_set_width (layout, width);
   pango_layout_set_height (layout, height);
 
-  g_free (contents);
+  free (contents);
 
   return layout;
 }
@@ -754,7 +754,7 @@ clutter_text_set_font_description_internal (ClutterText          *self,
   priv->font_desc = pango_font_description_copy (desc);
 
   /* update the font name string we use */
-  g_free (priv->font_name);
+  free (priv->font_name);
   priv->font_name = pango_font_description_to_string (priv->font_desc);
 
   clutter_text_dirty_cache (self);
@@ -794,7 +794,7 @@ clutter_text_settings_changed_cb (ClutterText *text)
       clutter_text_set_font_description_internal (text, font_desc, TRUE);
 
       pango_font_description_free (font_desc);
-      g_free (font_name);
+      free (font_name);
     }
 
   clutter_text_dirty_cache (text);
@@ -1102,7 +1102,7 @@ clutter_text_position_to_coords (ClutterText *self,
       else
         index_ = position * password_char_bytes;
 
-      g_free (text);
+      free (text);
       g_string_free (tmp, TRUE);
     }
 
@@ -1317,7 +1317,7 @@ clutter_text_set_markup_internal (ClutterText *self,
   if (text)
     {
       clutter_text_buffer_set_text (get_buffer (self), text, -1);
-      g_free (text);
+      free (text);
     }
 
   /* Store the new markup attributes */
@@ -1640,7 +1640,7 @@ clutter_text_finalize (GObject *gobject)
   clutter_text_dirty_paint_volume (self);
 
   clutter_text_set_buffer (self, NULL);
-  g_free (priv->font_name);
+  free (priv->font_name);
 
   g_clear_object (&priv->input_focus);
 
@@ -1732,10 +1732,10 @@ clutter_text_foreach_selection_rectangle (ClutterText              *self,
           func (self, &box, user_data);
         }
 
-      g_free (ranges);
+      free (ranges);
     }
 
-  g_free (utf8);
+  free (utf8);
 }
 
 static void
@@ -1846,7 +1846,7 @@ clutter_text_move_word_backward (ClutterText *self,
       while (retval > 0 && !log_attrs[retval].is_word_start)
         retval -= 1;
 
-      g_free (log_attrs);
+      free (log_attrs);
     }
 
   return retval;
@@ -1872,7 +1872,7 @@ clutter_text_move_word_forward (ClutterText *self,
       while (retval < n_chars && !log_attrs[retval].is_word_end)
         retval += 1;
 
-      g_free (log_attrs);
+      free (log_attrs);
     }
 
   return retval;
@@ -5007,7 +5007,7 @@ clutter_text_set_selection (ClutterText *self,
  * Retrieves the currently selected text.
  *
  * Return value: a newly allocated string containing the currently
- *   selected text, or %NULL. Use g_free() to free the returned
+ *   selected text, or %NULL. Use free() to free the returned
  *   string.
  *
  * Since: 1.0
@@ -5045,7 +5045,7 @@ clutter_text_get_selection (ClutterText *self)
   end_offset = offset_to_bytes (text, end_index);
   len = end_offset - start_offset;
 
-  str = g_malloc (len + 1);
+  str = malloc (len + 1);
   g_utf8_strncpy (str, text + start_offset, end_index - start_index);
 
   return str;
@@ -5338,7 +5338,7 @@ clutter_text_set_font_name (ClutterText *self,
 
 out:
   if (is_default_font)
-    g_free ((gchar *) font_name);
+    free ((gchar *) font_name);
 }
 
 /**
@@ -6305,7 +6305,7 @@ clutter_text_delete_chars (ClutterText *self,
  * The positions are specified in characters, not in bytes.
  *
  * Return value: a newly allocated string with the contents of
- *   the text actor between the specified positions. Use g_free()
+ *   the text actor between the specified positions. Use free()
  *   to free the resources when done
  *
  * Since: 1.0
@@ -6438,7 +6438,7 @@ clutter_text_set_preedit_string (ClutterText   *self,
 
   priv = self->priv;
 
-  g_free (priv->preedit_str);
+  free (priv->preedit_str);
   priv->preedit_str = NULL;
 
   if (priv->preedit_attrs != NULL)

@@ -19,7 +19,7 @@ state_base (TestConformSimpleFixture *fixture G_GNUC_UNUSED,
   if (g_test_verbose () && error)
     g_print ("Error: %s\n", error->message);
 
-  g_free (test_file);
+  free (test_file);
 
 #if GLIB_CHECK_VERSION (2, 20, 0)
   g_assert_no_error (error);
@@ -45,7 +45,7 @@ state_base (TestConformSimpleFixture *fixture G_GNUC_UNUSED,
   keys = clutter_state_get_keys (CLUTTER_STATE (state), "base", "clicked",
                                  clutter_script_get_object (script, "rect"),
                                  "opacity");
-  
+
   g_assert (keys != NULL);
   g_assert_cmpint (g_list_length (keys), ==, 1);
 
@@ -65,7 +65,7 @@ state_base (TestConformSimpleFixture *fixture G_GNUC_UNUSED,
 
   keys = clutter_state_get_keys (CLUTTER_STATE (state), "base", "clicked",
                                  NULL, NULL);
-  
+
   g_assert (keys != NULL);
   g_assert_cmpint (g_list_length (keys), ==, 2);
   g_list_free (keys);

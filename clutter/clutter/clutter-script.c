@@ -314,7 +314,7 @@ property_info_free (gpointer data)
       if (pinfo->pspec)
         g_param_spec_unref (pinfo->pspec);
 
-      g_free (pinfo->name);
+      free (pinfo->name);
 
       g_slice_free (PropertyInfo, pinfo);
     }
@@ -327,11 +327,11 @@ signal_info_free (gpointer data)
     {
       SignalInfo *sinfo = data;
 
-      g_free (sinfo->name);
-      g_free (sinfo->handler);
-      g_free (sinfo->object);
-      g_free (sinfo->state);
-      g_free (sinfo->target);
+      free (sinfo->name);
+      free (sinfo->handler);
+      free (sinfo->object);
+      free (sinfo->state);
+      free (sinfo->target);
 
       g_slice_free (SignalInfo, sinfo);
     }
@@ -344,9 +344,9 @@ object_info_free (gpointer data)
     {
       ObjectInfo *oinfo = data;
 
-      g_free (oinfo->id);
-      g_free (oinfo->class_name);
-      g_free (oinfo->type_func);
+      free (oinfo->id);
+      free (oinfo->class_name);
+      free (oinfo->type_func);
 
       g_list_foreach (oinfo->properties, (GFunc) property_info_free, NULL);
       g_list_free (oinfo->properties);
@@ -355,7 +355,7 @@ object_info_free (gpointer data)
       g_list_free (oinfo->signals);
 
       /* these are ids */
-      g_list_foreach (oinfo->children, (GFunc) g_free, NULL);
+      g_list_foreach (oinfo->children, (GFunc) free, NULL);
       g_list_free (oinfo->children);
 
       /* we unref top-level objects and leave the actors alone,
@@ -387,9 +387,9 @@ clutter_script_finalize (GObject *gobject)
   g_object_unref (priv->parser);
   g_hash_table_destroy (priv->objects);
   g_strfreev (priv->search_paths);
-  g_free (priv->filename);
+  free (priv->filename);
   g_hash_table_destroy (priv->states);
-  g_free (priv->translation_domain);
+  free (priv->translation_domain);
 
   G_OBJECT_CLASS (clutter_script_parent_class)->finalize (gobject);
 }
@@ -524,7 +524,7 @@ clutter_script_init (ClutterScript *script)
                                          NULL,
                                          object_info_free);
   priv->states = g_hash_table_new_full (g_str_hash, g_str_equal,
-                                        g_free,
+                                        free,
                                         (GDestroyNotify) g_object_unref);
 }
 
@@ -576,7 +576,7 @@ clutter_script_load_from_file (ClutterScript  *script,
 
   priv = script->priv;
 
-  g_free (priv->filename);
+  free (priv->filename);
   priv->filename = g_strdup (filename);
   priv->is_filename = TRUE;
   priv->last_merge_id += 1;
@@ -629,7 +629,7 @@ clutter_script_load_from_data (ClutterScript  *script,
 
   priv = script->priv;
 
-  g_free (priv->filename);
+  free (priv->filename);
   priv->filename = NULL;
   priv->is_filename = FALSE;
   priv->last_merge_id += 1;
@@ -731,7 +731,7 @@ clutter_script_get_objects_valist (ClutterScript *script,
   while (name)
     {
       GObject **obj = NULL;
-      
+
       obj = va_arg (args, GObject**);
 
       *obj = clutter_script_get_object (script, name);
@@ -848,7 +848,7 @@ clutter_script_unmerge_objects (ClutterScript *script,
   for (l = data.ids; l != NULL; l = l->next)
     g_hash_table_remove (priv->objects, l->data);
 
-  g_slist_foreach (data.ids, (GFunc) g_free, NULL);
+  g_slist_foreach (data.ids, (GFunc) free, NULL);
   g_slist_free (data.ids);
 
   clutter_script_ensure_objects (script);
@@ -903,7 +903,7 @@ clutter_script_ensure_objects (ClutterScript *script)
  * @script: a #ClutterScript
  * @type_name: name of the type to look up
  *
- * Looks up a type by name, using the virtual function that 
+ * Looks up a type by name, using the virtual function that
  * #ClutterScript has for that purpose. This function should
  * rarely be used.
  *
@@ -1011,7 +1011,7 @@ clutter_script_default_connect (ClutterScript *script,
  * This method invokes clutter_script_connect_signals_full() internally
  * and uses  #GModule's introspective features (by opening the current
  * module's scope) to look at the application's symbol table.
- * 
+ *
  * Note that this function will not work if #GModule is not supported by
  * the platform Clutter is running on.
  *
@@ -1042,7 +1042,7 @@ clutter_script_connect_signals (ClutterScript *script,
 
   g_module_close (cd->module);
 
-  g_free (cd);
+  free (cd);
 }
 
 typedef struct {
@@ -1067,7 +1067,7 @@ hook_data_free (gpointer data)
     {
       HookData *hook_data = data;
 
-      g_free (hook_data->target);
+      free (hook_data->target);
       g_slice_free (HookData, hook_data);
     }
 }
@@ -1358,7 +1358,7 @@ clutter_script_lookup_filename (ClutterScript *script,
             return retval;
           else
             {
-              g_free (retval);
+              free (retval);
               retval = NULL;
             }
         }
@@ -1369,15 +1369,15 @@ clutter_script_lookup_filename (ClutterScript *script,
     dirname = g_path_get_dirname (script->priv->filename);
   else
     dirname = g_get_current_dir ();
-  
+
   retval = g_build_filename (dirname, filename, NULL);
   if (!g_file_test (retval, G_FILE_TEST_EXISTS))
     {
-      g_free (retval);
+      free (retval);
       retval = NULL;
     }
-  
-  g_free (dirname);
+
+  free (dirname);
 
   return retval;
 }
@@ -1509,7 +1509,7 @@ clutter_script_set_translation_domain (ClutterScript *script,
   if (g_strcmp0 (domain, script->priv->translation_domain) == 0)
     return;
 
-  g_free (script->priv->translation_domain);
+  free (script->priv->translation_domain);
   script->priv->translation_domain = g_strdup (domain);
 
   g_object_notify_by_pspec (G_OBJECT (script), obj_props[PROP_TRANSLATION_DOMAIN]);
@@ -1543,7 +1543,7 @@ clutter_script_get_translation_domain (ClutterScript *script)
  * an "id" member
  *
  * Return value: a newly-allocated string containing the fake
- *   id. Use g_free() to free the resources allocated by the
+ *   id. Use free() to free the resources allocated by the
  *   returned value
  *
  */

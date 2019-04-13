@@ -2,10 +2,10 @@
 
 /* Muffin window deletion */
 
-/* 
+/*
  * Copyright (C) 2001, 2002 Havoc Pennington
  * Copyright (C) 2004 Elijah Newren
- * 
+ *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
  * published by the Free Software Foundation; either version 2 of the
@@ -15,7 +15,7 @@
  * WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street - Suite 500, Boston, MA
@@ -77,7 +77,7 @@ delete_ping_timeout_func (MetaDisplay *display,
   char *window_title;
   gchar *window_content, *tmp;
   GPid dialog_pid;
-  
+
   meta_topic (META_DEBUG_PING,
               "Got delete ping timeout for %s\n",
               window->desc);
@@ -99,7 +99,7 @@ delete_ping_timeout_func (MetaDisplay *display,
         window_title = NULL;
       else
         window_title = window->title;
-      g_free (tmp);
+      free (tmp);
     }
   else
     {
@@ -116,7 +116,7 @@ delete_ping_timeout_func (MetaDisplay *display,
       tmp = g_strdup_printf (_("<tt>%s</tt> is not responding."),
                              unmarkup_title);
 
-      g_free (unmarkup_title);
+      free (unmarkup_title);
     }
   else
     tmp = g_strdup (_("Application is not responding."));
@@ -134,8 +134,8 @@ delete_ping_timeout_func (MetaDisplay *display,
                       _("_Wait"), _("_Force Quit"), window->xwindow,
                       NULL, NULL);
 
-  g_free (window_content);
-  g_free (tmp);
+  free (window_content);
+  free (tmp);
 
   window->dialog_pid = dialog_pid;
   g_child_watch_add (dialog_pid, dialog_exited, window);
@@ -170,10 +170,10 @@ meta_window_delete (MetaWindow  *window,
                             delete_ping_reply_func,
                             delete_ping_timeout_func,
                             window);
-  
+
   if (window->has_focus)
     {
-      /* FIXME Clean this up someday 
+      /* FIXME Clean this up someday
        * http://bugzilla.gnome.org/show_bug.cgi?id=108706
        */
 #if 0
@@ -245,7 +245,7 @@ meta_window_present_delete_dialog (MetaWindow *window, guint32 timestamp)
   meta_topic (META_DEBUG_PING,
               "Presenting existing ping dialog for %s\n",
               window->desc);
-  
+
   if (window->dialog_pid >= 0)
     {
       GSList *windows;
@@ -254,7 +254,7 @@ meta_window_present_delete_dialog (MetaWindow *window, guint32 timestamp)
       /* Activate transient for window that belongs to
        * muffin-dialog
        */
-      
+
       windows = meta_display_list_windows (window->display, META_LIST_DEFAULT);
       tmp = windows;
       while (tmp != NULL)
@@ -268,7 +268,7 @@ meta_window_present_delete_dialog (MetaWindow *window, guint32 timestamp)
               meta_window_activate (w, timestamp);
               break;
             }
-          
+
           tmp = tmp->next;
         }
 

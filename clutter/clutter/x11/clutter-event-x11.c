@@ -127,7 +127,7 @@ _clutter_x11_event_source_new (ClutterBackendX11 *backend_x11)
   name = g_strdup_printf ("Clutter X11 Event (connection: %d)",
                           connection_number);
   g_source_set_name (source, name);
-  g_free (name);
+  free (name);
 
   event_source->backend = backend_x11;
   event_source->event_poll_fd.fd = connection_number;

@@ -160,7 +160,7 @@ script_child (void)
   g_assert (!focus_ret);
 
   g_object_unref (script);
-  g_free (test_file);
+  free (test_file);
 }
 
 static void
@@ -193,7 +193,7 @@ script_single (void)
   g_assert_cmpint (color.alpha, ==, 0xff);
 
   g_object_unref (script);
-  g_free (test_file);
+  free (test_file);
 }
 
 static void
@@ -231,7 +231,7 @@ script_implicit_alpha (void)
   g_assert_cmpint (clutter_timeline_get_duration (timeline), ==, 500);
 
   g_object_unref (script);
-  g_free (test_file);
+  free (test_file);
 }
 
 static void
@@ -257,7 +257,7 @@ script_object_property (void)
   g_assert (CLUTTER_IS_BIN_LAYOUT (manager));
 
   g_object_unref (script);
-  g_free (test_file);
+  free (test_file);
 }
 
 static void
@@ -284,7 +284,7 @@ script_named_object (void)
   g_assert (clutter_box_layout_get_vertical (CLUTTER_BOX_LAYOUT (manager)));
 
   g_object_unref (script);
-  g_free (test_file);
+  free (test_file);
 }
 
 static void
@@ -306,7 +306,7 @@ script_animation (void)
   g_assert (CLUTTER_IS_ANIMATION (animation));
 
   g_object_unref (script);
-  g_free (test_file);
+  free (test_file);
 }
 
 static void
@@ -412,7 +412,7 @@ script_margin (void)
   g_assert_cmpfloat (clutter_actor_get_margin_left (actor), ==, 40.0f);
 
   g_object_unref (script);
-  g_free (test_file);
+  free (test_file);
 }
 
 CLUTTER_TEST_SUITE (

@@ -31,7 +31,7 @@ create_texture (int size)
   /* Create a red, green or blue texture depending on the size */
   color = COLOR_FOR_SIZE (size);
 
-  p = data = g_malloc (size * size * 4);
+  p = data = malloc (size * size * 4);
 
   /* Fill the data with the color but fade the opacity out with
      increasing y coordinates so that we can see the blending it the
@@ -63,7 +63,7 @@ create_texture (int size)
                                               size * 4,
                                               data);
 
-  g_free (data);
+  free (data);
 
   return texture;
 }
@@ -77,7 +77,7 @@ verify_texture (CoglTexture *texture, int size)
 
   color = COLOR_FOR_SIZE (size);
 
-  p = data = g_malloc (size * size * 4);
+  p = data = malloc (size * size * 4);
 
   cogl_texture_get_data (texture,
                          COGL_PIXEL_FORMAT_RGBA_8888_PRE,
@@ -108,7 +108,7 @@ verify_texture (CoglTexture *texture, int size)
         }
     }
 
-  g_free (data);
+  free (data);
 }
 
 void

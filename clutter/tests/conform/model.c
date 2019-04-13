@@ -122,7 +122,7 @@ compare_iter (ClutterModelIter *iter,
   g_assert_cmpstr (foo, ==, expected_foo);
   g_assert_cmpint (bar, ==, expected_bar);
 
-  g_free (foo);
+  free (foo);
 }
 
 static void
@@ -191,7 +191,7 @@ list_model_filter (void)
                             COLUMN_BAR, i,
                             -1);
 
-      g_free (foo);
+      free (foo);
     }
 
   if (g_test_verbose ())
@@ -282,7 +282,7 @@ list_model_iterate (void)
                             COLUMN_BAR, i,
                             -1);
 
-      g_free (foo);
+      free (foo);
     }
 
   if (g_test_verbose ())
@@ -355,7 +355,7 @@ list_model_populate (void)
                             COLUMN_BAR, i,
                             -1);
 
-      g_free (foo);
+      free (foo);
     }
 
   g_object_unref (test_data.model);
@@ -474,7 +474,7 @@ list_model_row_changed (void)
                             COLUMN_BAR, i,
                             -1);
 
-      g_free (foo);
+      free (foo);
     }
 
   g_signal_connect (test_data.model, "row-changed",

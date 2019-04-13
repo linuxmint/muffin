@@ -249,24 +249,24 @@ meta_window_finalize (GObject *object)
 
   meta_icon_cache_free (&window->icon_cache);
 
-  g_free (window->sm_client_id);
-  g_free (window->wm_client_machine);
-  g_free (window->startup_id);
-  g_free (window->muffin_hints);
-  g_free (window->role);
-  g_free (window->res_class);
-  g_free (window->res_name);
-  g_free (window->title);
-  g_free (window->icon_name);
-  g_free (window->theme_icon_name);
-  g_free (window->desc);
-  g_free (window->gtk_theme_variant);
-  g_free (window->gtk_application_id);
-  g_free (window->gtk_unique_bus_name);
-  g_free (window->gtk_application_object_path);
-  g_free (window->gtk_window_object_path);
-  g_free (window->gtk_app_menu_object_path);
-  g_free (window->gtk_menubar_object_path);
+  free (window->sm_client_id);
+  free (window->wm_client_machine);
+  free (window->startup_id);
+  free (window->muffin_hints);
+  free (window->role);
+  free (window->res_class);
+  free (window->res_name);
+  free (window->title);
+  free (window->icon_name);
+  free (window->theme_icon_name);
+  free (window->desc);
+  free (window->gtk_theme_variant);
+  free (window->gtk_application_id);
+  free (window->gtk_unique_bus_name);
+  free (window->gtk_application_object_path);
+  free (window->gtk_window_object_path);
+  free (window->gtk_app_menu_object_path);
+  free (window->gtk_menubar_object_path);
 
   G_OBJECT_CLASS (meta_window_parent_class)->finalize (object);
 }
@@ -7913,7 +7913,7 @@ meta_window_update_role (MetaWindow *window)
   g_return_if_fail (!window->override_redirect);
 
   if (window->role)
-    g_free (window->role);
+    free (window->role);
   window->role = NULL;
 
   if (meta_prop_get_latin1_string (window->display, window->xwindow,

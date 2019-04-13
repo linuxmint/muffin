@@ -256,19 +256,19 @@ text_get_chars (void)
 
   chars = clutter_text_get_chars (text, 2, -1);
   g_assert_cmpstr (chars, ==, "abcdef11");
-  g_free (chars);
+  free (chars);
 
   chars = clutter_text_get_chars (text, 0, 8);
   g_assert_cmpstr (chars, ==, "00abcdef");
-  g_free (chars);
+  free (chars);
 
   chars = clutter_text_get_chars (text, 2, 8);
   g_assert_cmpstr (chars, ==, "abcdef");
-  g_free (chars);
+  free (chars);
 
   chars = clutter_text_get_chars (text, 8, 12);
   g_assert_cmpstr (chars, ==, "11");
-  g_free (chars);
+  free (chars);
 
   clutter_actor_destroy (CLUTTER_ACTOR (text));
 }

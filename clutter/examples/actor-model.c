@@ -42,7 +42,7 @@ example_menu_item_model_finalize (GObject *gobject)
 {
   ExampleMenuItemModel *self = (ExampleMenuItemModel *) gobject;
 
-  g_free (self->label);
+  free (self->label);
 
   G_OBJECT_CLASS (example_menu_item_model_parent_class)->finalize (gobject);
 }
@@ -58,7 +58,7 @@ example_menu_item_model_set_property (GObject      *gobject,
   switch (prop_id)
     {
     case MENU_ITEM_MODEL_PROP_LABEL:
-      g_free (self->label);
+      free (self->label);
       self->label = g_value_dup_string (value);
       break;
 
@@ -426,7 +426,7 @@ on_model_item_selection (GObject    *model_item,
   if (is_selected)
     g_print ("Item '%s' selected!\n", label);
 
-  g_free (label);
+  free (label);
 }
 
 static ClutterActor *
@@ -453,7 +453,7 @@ create_menu_actor (void)
                         NULL);
 
       g_object_unref (item);
-      g_free (label);
+      free (label);
     }
 
   /* Bind the list of menu item models to the menu actor; this will

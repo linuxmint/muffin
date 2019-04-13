@@ -445,7 +445,7 @@ clutter_backend_x11_post_parse (ClutterBackend  *backend,
   backend_x11->atom_NET_WM_NAME = atoms[9];
   backend_x11->atom_UTF8_STRING = atoms[10];
 
-  g_free (clutter_display_name);
+  free (clutter_display_name);
 
   CLUTTER_NOTE (BACKEND,
                 "X Display '%s'[%p] opened (screen:%d, root:%u, dpi:%f)",
@@ -542,7 +542,7 @@ clutter_backend_x11_finalize (GObject *gobject)
 {
   ClutterBackendX11 *backend_x11 = CLUTTER_BACKEND_X11 (gobject);
 
-  g_free (backend_x11->display_name);
+  free (backend_x11->display_name);
 
   clutter_x11_remove_filter (cogl_xlib_filter, gobject);
 
@@ -1175,7 +1175,7 @@ clutter_x11_remove_filter (ClutterX11FilterFunc func,
             g_slist_remove_link (backend_x11->event_filters, this);
 
           g_slist_free_1 (this);
-          g_free (filter);
+          free (filter);
 
           return;
         }
@@ -1437,7 +1437,7 @@ _clutter_x11_input_device_translate_screen_coord (ClutterInputDevice *device,
   ClutterAxisInfo *info;
   ClutterBackendX11 *backend_x11;
   gdouble width, scale, offset;
-  
+
   backend_x11 = CLUTTER_BACKEND_X11 (device->backend);
 
   if (device->axes == NULL || index_ >= device->axes->len)

@@ -95,7 +95,7 @@ cogl_snippet_set_declarations (CoglSnippet *snippet,
   if (!_cogl_snippet_modify (snippet))
     return;
 
-  g_free (snippet->declarations);
+  free (snippet->declarations);
   snippet->declarations = declarations ? g_strdup (declarations) : NULL;
 }
 
@@ -116,7 +116,7 @@ cogl_snippet_set_pre (CoglSnippet *snippet,
   if (!_cogl_snippet_modify (snippet))
     return;
 
-  g_free (snippet->pre);
+  free (snippet->pre);
   snippet->pre = pre ? g_strdup (pre) : NULL;
 }
 
@@ -137,7 +137,7 @@ cogl_snippet_set_replace (CoglSnippet *snippet,
   if (!_cogl_snippet_modify (snippet))
     return;
 
-  g_free (snippet->replace);
+  free (snippet->replace);
   snippet->replace = replace ? g_strdup (replace) : NULL;
 }
 
@@ -158,7 +158,7 @@ cogl_snippet_set_post (CoglSnippet *snippet,
   if (!_cogl_snippet_modify (snippet))
     return;
 
-  g_free (snippet->post);
+  free (snippet->post);
   snippet->post = post ? g_strdup (post) : NULL;
 }
 
@@ -179,9 +179,9 @@ _cogl_snippet_make_immutable (CoglSnippet *snippet)
 static void
 _cogl_snippet_free (CoglSnippet *snippet)
 {
-  g_free (snippet->declarations);
-  g_free (snippet->pre);
-  g_free (snippet->replace);
-  g_free (snippet->post);
+  free (snippet->declarations);
+  free (snippet->pre);
+  free (snippet->replace);
+  free (snippet->post);
   g_slice_free (CoglSnippet, snippet);
 }

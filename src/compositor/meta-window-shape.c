@@ -176,7 +176,7 @@ meta_window_shape_unref (MetaWindowShape *shape)
   shape->ref_count--;
   if (shape->ref_count == 0)
     {
-      g_free (shape->rectangles);
+      free (shape->rectangles);
       g_slice_free (MetaWindowShape, shape);
     }
 }

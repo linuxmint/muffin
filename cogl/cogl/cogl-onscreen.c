@@ -172,7 +172,7 @@ _cogl_onscreen_free (CoglOnscreen *onscreen)
   /* Chain up to parent */
   _cogl_framebuffer_free (framebuffer);
 
-  g_free (onscreen);
+  free (onscreen);
 }
 
 static void

@@ -41,7 +41,7 @@ test_thread_data_free (gpointer _data)
   g_clear_object (&data->flip);
   g_clear_object (&data->bounce);
 
-  g_free (data);
+  free (data);
 }
 
 static gboolean
@@ -114,8 +114,8 @@ update_label_idle (gpointer data)
   clutter_actor_set_width (update->thread_data->progress, width);
   clutter_actor_restore_easing_state (update->thread_data->progress);
 
-  g_free (text);
-  g_free (update);
+  free (text);
+  free (update);
 
   return G_SOURCE_REMOVE;
 }
@@ -235,7 +235,7 @@ main (int argc, char *argv[])
   clutter_actor_set_background_color (stage, CLUTTER_COLOR_Aluminium3);
   clutter_actor_set_size (stage, 600, 300);
   g_signal_connect (stage, "destroy", G_CALLBACK (clutter_main_quit), NULL);
-  
+
   count_label = clutter_text_new_with_text ("Mono 12", "Counter");
   clutter_actor_set_position (count_label, 350, 50);
   clutter_actor_add_child (stage, count_label);

@@ -269,7 +269,7 @@ meta_ui_remove_event_func (Display       *xdisplay,
   
   gdk_window_remove_filter (NULL, filter_func, ef);
 
-  g_free (ef);
+  free (ef);
   ef = NULL;
 }
 
@@ -311,7 +311,7 @@ meta_ui_free (MetaUI *ui)
   gdisplay = gdk_x11_lookup_xdisplay (ui->xdisplay);
   g_object_set_data (G_OBJECT (gdisplay), "meta-ui", NULL);
 
-  g_free (ui);
+  free (ui);
 }
 
 LOCAL_SYMBOL void
@@ -734,9 +734,9 @@ meta_ui_accelerator_parse (const char      *accel,
 
       gtk_accelerator_parse (replaced, NULL, keymask);
 
-      g_free (before);
-      g_free (after);
-      g_free (replaced);
+      free (before);
+      free (after);
+      free (replaced);
 
       *keysym = META_KEY_ABOVE_TAB;
       return;

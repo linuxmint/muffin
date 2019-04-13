@@ -857,7 +857,7 @@ clutter_text_node_serialize (ClutterPaintNode *node)
 
       str = g_strndup (text, 12);
       json_builder_add_string_value (builder, str);
-      g_free (str);
+      free (str);
     }
   else
     json_builder_add_string_value (builder, pango_layout_get_text (tnode->layout));

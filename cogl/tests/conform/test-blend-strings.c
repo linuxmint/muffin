@@ -184,7 +184,7 @@ make_texture (uint32_t color)
   uint8_t a = MASK_ALPHA (color);
   CoglTexture *tex;
 
-  tex_data = g_malloc (QUAD_WIDTH * QUAD_WIDTH * 4);
+  tex_data = malloc (QUAD_WIDTH * QUAD_WIDTH * 4);
 
   for (p = tex_data + QUAD_WIDTH * QUAD_WIDTH * 4; p > tex_data;)
     {
@@ -204,7 +204,7 @@ make_texture (uint32_t color)
                                           QUAD_WIDTH * 4,
                                           tex_data);
 
-  g_free (tex_data);
+  free (tex_data);
 
   return tex;
 }

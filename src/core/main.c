@@ -2,10 +2,10 @@
 
 /* Muffin main() */
 
-/* 
+/*
  * Copyright (C) 2001 Havoc Pennington
  * Copyright (C) 2006 Elijah Newren
- * 
+ *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
  * published by the Free Software Foundation; either version 2 of the
@@ -15,7 +15,7 @@
  * WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street - Suite 500, Boston, MA
@@ -26,12 +26,12 @@
  * SECTION:main
  * @title: Main
  * @short_description: Program startup.
- * 
+ *
  * Functions which parse the command-line arguments, create the display,
  * kick everything off and then close down Muffin when it's time to go.
  *
- * 
- * 
+ *
+ *
  * Muffin - a boring window manager for the adult in you
  *
  * Many window managers are like Marshmallow Froot Loops; Muffin
@@ -185,7 +185,7 @@ meta_print_self_identity (void)
   g_date_strftime (buf, sizeof (buf), "%x", &d);
   meta_verbose ("Muffin version %s running on %s\n",
     VERSION, buf);
-  
+
   /* Locale and encoding. */
   g_get_charset (&charset);
   meta_verbose ("Running in locale \"%s\" with encoding \"%s\"\n",
@@ -282,7 +282,7 @@ meta_get_option_context (void)
  * of the queue and dispatching them before we block for new events.
  */
 
-static gboolean 
+static gboolean
 event_prepare (GSource    *source,
                gint       *timeout_)
 {
@@ -291,7 +291,7 @@ event_prepare (GSource    *source,
   return clutter_events_pending ();
 }
 
-static gboolean 
+static gboolean
 event_check (GSource *source)
 {
   return clutter_events_pending ();
@@ -462,7 +462,7 @@ meta_init (void)
                     g_get_home_dir ());
 
   meta_print_self_identity ();
-  
+
 #ifdef HAVE_INTROSPECTION
   g_irepository_prepend_search_path (MUFFIN_PKGLIBDIR);
 #endif
@@ -470,15 +470,15 @@ meta_init (void)
   meta_set_syncing (opt_sync || (g_getenv ("MUFFIN_SYNC") != NULL));
 
   meta_select_display (opt_display_name);
-  
+
   if (opt_replace_wm)
     meta_set_replace_current_wm (TRUE);
 
   if (opt_save_file && opt_client_id)
     meta_fatal ("Can't specify both SM save file and SM client id\n");
-  
+
   meta_main_loop = g_main_loop_new (NULL, FALSE);
-  
+
   meta_ui_init ();
 
   /*
@@ -498,7 +498,7 @@ meta_init (void)
    * Clutter can only be initialized after the UI.
    */
   meta_clutter_init ();
-  
+
   const char *renderer = (const char *) glGetString (GL_RENDERER);
   if (strstr (renderer, "llvmpipe") ||
       strstr (renderer, "Rasterizer") ||
@@ -536,7 +536,7 @@ meta_run (void)
 
   if (g_getenv ("MUFFIN_G_FATAL_WARNINGS") != NULL)
     g_log_set_always_fatal (G_LOG_LEVEL_MASK);
-  
+
   meta_ui_set_current_theme (meta_prefs_get_theme (), FALSE);
 
   if (!meta_ui_have_a_theme ())
@@ -544,8 +544,8 @@ meta_run (void)
       meta_ui_set_current_theme ("Default", FALSE);
       meta_warning (_("Could not find theme %s. Falling back to default theme."), meta_prefs_get_theme ());
     }
- 
- 
+
+
   /* Connect to SM as late as possible - but before managing display,
    * or we might try to manage a window before we have the session
    * info
@@ -555,9 +555,9 @@ meta_run (void)
       if (opt_client_id == NULL)
         {
           const gchar *desktop_autostart_id;
-  
+
           desktop_autostart_id = g_getenv ("DESKTOP_AUTOSTART_ID");
- 
+
           if (desktop_autostart_id != NULL)
             opt_client_id = g_strdup (desktop_autostart_id);
         }
@@ -571,13 +571,13 @@ meta_run (void)
   /* Free memory possibly allocated by the argument parsing which are
    * no longer needed.
    */
-  g_free (opt_save_file);
-  g_free (opt_display_name);
-  g_free (opt_client_id);
+  free (opt_save_file);
+  free (opt_display_name);
+  free (opt_client_id);
 
   if (!meta_display_open ())
     meta_exit (META_EXIT_ERROR);
-  
+
   g_main_loop_run (meta_main_loop);
 
   meta_finalize ();

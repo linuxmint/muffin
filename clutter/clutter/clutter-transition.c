@@ -618,7 +618,7 @@ clutter_transition_set_from (ClutterTransition *transition,
   if (error != NULL)
     {
       g_warning ("%s: %s", G_STRLOC, error);
-      g_free (error);
+      free (error);
       return;
     }
 
@@ -671,7 +671,7 @@ clutter_transition_set_to (ClutterTransition *transition,
   if (error != NULL)
     {
       g_warning ("%s: %s", G_STRLOC, error);
-      g_free (error);
+      free (error);
       return;
     }
 

@@ -238,5 +238,5 @@ _cogl_pango_pipeline_cache_free (CoglPangoPipelineCache *cache)
 
   cogl_object_unref (cache->ctx);
 
-  g_free (cache);
+  free (cache);
 }

@@ -46,7 +46,7 @@ toggle_expand (ClutterActor *actor, ClutterEvent *event, ClutterBox *box)
   label = g_strdup_printf ("Expand = %d", x_expand);
   set_text (actor, label);
 
-  g_free (label);
+  free (label);
 }
 
 static const gchar *
@@ -88,7 +88,7 @@ randomise_align (ClutterActor *actor, ClutterEvent *event, ClutterBox *box)
                            get_alignment_name (x_align),
                            get_alignment_name (y_align));
   set_text (actor, label);
-  g_free (label);
+  free (label);
 }
 
 static void
@@ -190,7 +190,7 @@ test_table_layout_main (int argc, char *argv[])
   actor1 = create_text ("label 1", "#f66f");
   file = g_build_filename (TESTS_DATADIR, "redhand.png", NULL);
   actor2 = create_image (file, "#bbcf");
-  g_free (file);
+  free (file);
   actor3 = create_text ("label 3", "#6f6f");
   actor4 = create_text ("Expand = 1", "#66ff");
   actor5 = create_text ("label 5", "#f6ff");

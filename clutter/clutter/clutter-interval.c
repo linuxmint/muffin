@@ -398,7 +398,7 @@ clutter_interval_finalize (GObject *gobject)
   if (G_IS_VALUE (&priv->values[RESULT]))
     g_value_unset (&priv->values[RESULT]);
 
-  g_free (priv->values);
+  free (priv->values);
 
   G_OBJECT_CLASS (clutter_interval_parent_class)->finalize (gobject);
 }
@@ -445,7 +445,7 @@ clutter_interval_get_property (GObject    *gobject,
                                GParamSpec *pspec)
 {
   ClutterIntervalPrivate *priv;
-  
+
   priv = clutter_interval_get_instance_private (CLUTTER_INTERVAL (gobject));
 
   switch (prop_id)
@@ -578,7 +578,7 @@ clutter_interval_init (ClutterInterval *self)
   self->priv = clutter_interval_get_instance_private (self);
 
   self->priv->value_type = G_TYPE_INVALID;
-  self->priv->values = g_malloc0 (sizeof (GValue) * N_VALUES);
+  self->priv->values = calloc (1, sizeof (GValue) * N_VALUES);
 }
 
 static inline void
@@ -661,7 +661,7 @@ clutter_interval_set_initial_internal (ClutterInterval *interval,
        * given the error and calling g_value_unset() might lead to
        * undefined behaviour
        */
-      g_free (error);
+      free (error);
       return FALSE;
     }
 
@@ -690,7 +690,7 @@ clutter_interval_set_final_internal (ClutterInterval *interval,
        * given the error and calling g_value_unset() might lead to
        * undefined behaviour
        */
-      g_free (error);
+      free (error);
       return FALSE;
     }
 
@@ -715,7 +715,7 @@ clutter_interval_get_interval_valist (ClutterInterval *interval,
   if (error)
     {
       g_warning ("%s: %s", G_STRLOC, error);
-      g_free (error);
+      free (error);
       g_value_unset (&value);
       return;
     }
@@ -729,7 +729,7 @@ clutter_interval_get_interval_valist (ClutterInterval *interval,
   if (error)
     {
       g_warning ("%s: %s", G_STRLOC, error);
-      g_free (error);
+      free (error);
       g_value_unset (&value);
       return;
     }

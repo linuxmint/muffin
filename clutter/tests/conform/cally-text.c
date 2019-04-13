@@ -189,7 +189,7 @@ check_result (CallbackData *data)
       dump_attribute_set (attrs);
     }
 
-  g_free (text);
+  free (text);
   text = NULL;
 
   if (fail)
@@ -235,7 +235,7 @@ build_attribute_set (const gchar* first_attribute, ...)
     {
         if ((i> 0) && (i % 2 != 0))
           {
-            AtkAttribute *at = g_malloc (sizeof (AtkAttribute));
+            AtkAttribute *at = malloc (sizeof (AtkAttribute));
             at->name = g_strdup (name);
             at->value = g_strdup (value);
             return_set = g_slist_prepend (return_set, at);

@@ -196,5 +196,5 @@ _cogl_glsl_shader_set_source_with_boilerplate (CoglContext *ctx,
   GE( ctx, glShaderSource (shader_gl_handle, count,
                            (const char **) strings, lengths) );
 
-  g_free (version_string);
+  free (version_string);
 }
