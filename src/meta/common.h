@@ -416,6 +416,12 @@ void meta_frame_borders_clear (MetaFrameBorders *self);
   (ycoord) >= (rect).y &&                   \
   (ycoord) <  ((rect).y + (rect).height))
 
+#define POINT_IN_RECT_POINTER(xcoord, ycoord, rect) \
+ ((xcoord) >= (rect)->x &&                   \
+  (xcoord) <  ((rect)->x + (rect)->width) &&  \
+  (ycoord) >= (rect)->y &&                   \
+  (ycoord) <  ((rect)->y + (rect)->height))
+
 /*
  * Layers a window can be in.
  * These MUST be in the order of stacking.
@@ -454,5 +460,13 @@ typedef enum
   META_BACKGROUND_TRANSITION_FADEIN,
   META_BACKGROUND_TRANSITION_BLEND
 } MetaBackgroundTransition;
+
+typedef enum
+{
+  META_SYNC_NONE = 0,
+  META_SYNC_FALLBACK,
+  META_SYNC_SWAP_THROTTLING,
+  META_SYNC_PRESENTATION_TIME
+} MetaSyncMethod;
 
 #endif

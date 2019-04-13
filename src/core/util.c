@@ -374,6 +374,8 @@ topic_name (MetaDebugTopic topic)
       return "EDGE_RESISTANCE";
     case META_DEBUG_VERBOSE:
       return "VERBOSE";
+    default:
+      break;
     }
 
   return "WM";
@@ -913,6 +915,9 @@ meta_later_add (MetaLaterType  when,
       break;
     case META_LATER_IDLE:
       later->source = g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, call_idle_later, later, NULL);
+      break;
+    default:
+      g_warning ("Default reached in meta_later_add");
       break;
     }
 

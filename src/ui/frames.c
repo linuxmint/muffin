@@ -2292,13 +2292,10 @@ get_control (MetaFrames *frames,
   MetaWindow *window;
   gboolean has_vert, has_horiz, has_left, has_right, has_bottom, has_top;
   gboolean has_north_resize;
-  cairo_rectangle_int_t client;
 
   window = frame->meta_window;
 
-  client = window->client_area;
-
-  if (POINT_IN_RECT (x, y, client))
+  if (POINT_IN_RECT_POINTER (x, y, window->client_area))
     return META_FRAME_CONTROL_CLIENT_AREA;
 
   if (POINT_IN_RECT (x, y, frame->fgeom.close_rect.clickable))

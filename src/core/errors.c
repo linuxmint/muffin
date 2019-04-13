@@ -33,7 +33,7 @@
 #include "display-private.h"
 #include <errno.h>
 #include <stdlib.h>
-#include <gdk/gdk.h>
+#include <gdk/gdkx.h>
 
 /* In GTK+-3.0, the error trapping code was significantly rewritten. The new code
  * has some neat features (like knowing automatically if a sync is needed or not
@@ -50,23 +50,23 @@
 void
 meta_error_trap_push (MetaDisplay *display)
 {
-  gdk_error_trap_push ();
+  gdk_x11_display_error_trap_push (display->gdk_display);
 }
 
 void
 meta_error_trap_pop (MetaDisplay *display)
 {
-  gdk_error_trap_pop_ignored ();
+  gdk_x11_display_error_trap_pop_ignored (display->gdk_display);
 }
 
 void
 meta_error_trap_push_with_return (MetaDisplay *display)
 {
-  gdk_error_trap_push ();
+  gdk_x11_display_error_trap_push (display->gdk_display);
 }
 
 int
 meta_error_trap_pop_with_return  (MetaDisplay *display)
 {
-  return gdk_error_trap_pop ();
+  return gdk_x11_display_error_trap_pop (display->gdk_display);
 }

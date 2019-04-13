@@ -198,16 +198,15 @@ meta_rectangle_area (const MetaRectangle *rect)
  */
 gboolean
 meta_rectangle_intersect (const MetaRectangle *src1,
-			  const MetaRectangle *src2,
-			  MetaRectangle *dest)
+                          const MetaRectangle *src2,
+                          MetaRectangle *dest)
 {
   int dest_x, dest_y;
   int dest_w, dest_h;
   int return_val;
 
-  g_return_val_if_fail (src1 != NULL, FALSE);
-  g_return_val_if_fail (src2 != NULL, FALSE);
-  g_return_val_if_fail (dest != NULL, FALSE);
+  if (!src1 || !src2 || !dest)
+    g_warn_if_reached ();
 
   return_val = FALSE;
 
@@ -467,7 +466,7 @@ merge_spanning_rects_in_region (GList *region)
               delete_me = other;
             }
           /* If b contains a, just remove a */
-          else if (meta_rectangle_contains_rect (a, b))
+          else if (meta_rectangle_contains_rect (b, a))
             {
               delete_me = compare;
             }

@@ -39,6 +39,7 @@
 #include <meta/display.h>
 #include "keybindings-private.h"
 #include <meta/prefs.h>
+#include "ui.h"
 
 #ifdef HAVE_STARTUP_NOTIFICATION
 #include <libsn/sn.h>
@@ -80,10 +81,14 @@ struct _MetaDisplay
   
   char *name;
   Display *xdisplay;
+  GdkDisplay *gdk_display;
+  GdkDevice *gdk_device;
   char *hostname;
 
   Window leader_window;
   Window timestamp_pinging_window;
+
+  MetaUI *ui;
 
   /* Pull in all the names of atoms as fields; we will intern them when the
    * class is constructed.
@@ -299,6 +304,7 @@ struct _MetaDisplay
 #define META_DISPLAY_HAS_COMPOSITE(display) ((display)->have_composite)
 #define META_DISPLAY_HAS_DAMAGE(display) ((display)->have_damage)
 #define META_DISPLAY_HAS_XFIXES(display) ((display)->have_xfixes)
+  MetaSyncMethod sync_method;
 
   guint shadows_enabled : 1;
   guint debug_button_grabs : 1;
@@ -442,7 +448,7 @@ guint meta_display_get_above_tab_keycode (MetaDisplay *display);
 
 void meta_display_notify_restart (MetaDisplay *display);
 
-void meta_display_update_sync_state (gboolean state);
+void meta_display_update_sync_state (MetaSyncMethod method);
 
 void meta_display_set_all_obscured (void);
 

@@ -1005,7 +1005,7 @@ meta_screen_new (MetaDisplay *display,
   screen->keys_grabbed = FALSE;
   meta_screen_grab_keys (screen);
 
-  screen->ui = meta_ui_new (screen->display->xdisplay,
+  screen->ui = meta_ui_new (display,
                             screen->xscreen);
 
   screen->tile_preview_timeout_id = 0;
@@ -1222,7 +1222,7 @@ meta_screen_composite_all_windows (MetaScreen *screen)
       MetaWindow *window = tmp->data;
 
       meta_compositor_add_window (display->compositor, window);
-      if (window->visible_to_compositor)
+      if (window->visible_to_compositor && window->compositor_private)
         meta_window_actor_show (window->compositor_private, META_COMP_EFFECT_NONE);
     }
 
@@ -2142,7 +2142,7 @@ meta_screen_get_monitor_for_rect (MetaScreen    *screen,
   best_monitor = 0;
   monitor_score = -1;
 
-  rect_area = meta_rectangle_area (rect);
+  rect_area = rect->width * rect->height;
   for (i = 0; i < screen->n_monitor_infos; i++)
     {
       gboolean result;
@@ -2154,12 +2154,17 @@ meta_screen_get_monitor_for_rect (MetaScreen    *screen,
           result = meta_rectangle_intersect (&screen->monitor_infos[i].rect,
                                              rect,
                                              &dest);
-          cur = meta_rectangle_area (&dest);
+          cur = dest.width * dest.height;
         }
       else
         {
-          result = meta_rectangle_contains_rect (&screen->monitor_infos[i].rect,
-                                                 rect);
+          MetaRectangle *outer_rect = &screen->monitor_infos[i].rect;
+
+          result = (rect->x >= outer_rect->x &&
+                    rect->y >= outer_rect->y &&
+                    rect->x + rect->width  <= outer_rect->x + outer_rect->width &&
+                    rect->y + rect->height <= outer_rect->y + outer_rect->height);
+
           cur = rect_area;
         }
 
@@ -3065,7 +3070,13 @@ meta_screen_resize (MetaScreen *screen,
       MetaWindow *window = tmp->data;
 
       if (window->screen == screen)
-        meta_window_update_for_monitors_changed (window);
+        {
+          meta_window_update_outer_rect (window);
+          meta_window_update_for_monitors_changed (window);
+
+          if (!window->override_redirect)
+            meta_window_update_monitor (window);
+        }
     }
 
   free (old_monitor_infos);

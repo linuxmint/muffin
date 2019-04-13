@@ -675,9 +675,6 @@ static void
 meta_window_set_opaque_region (MetaWindow     *window,
                                cairo_region_t *region)
 {
-  if (cairo_region_equal (window->opaque_region, region))
-    return;
-
   g_clear_pointer (&window->opaque_region, cairo_region_destroy);
 
   if (region != NULL)
@@ -736,7 +733,8 @@ reload_opaque_region (MetaWindow    *window,
     }
 
  out:
-  meta_window_set_opaque_region (window, opaque_region);
+  if (!cairo_region_equal (window->opaque_region, opaque_region))
+    meta_window_set_opaque_region (window, opaque_region);
   cairo_region_destroy (opaque_region);
 }
 

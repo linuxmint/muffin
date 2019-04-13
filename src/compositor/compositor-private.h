@@ -30,6 +30,7 @@ struct _MetaCompositor
   GList          *windows;
 
   MetaWindowActor *unredirected_window;
+  MetaWindowActor *top_window_actor;
 
   CoglContext    *context;
 
@@ -57,6 +58,7 @@ struct _MetaCompositor
 
   gboolean frame_has_updated_xsurfaces;
   gboolean have_x11_sync_object;
+  gboolean popup_window_visible;
 };
 
 /* Wait 2ms after vblank before starting to draw next frame */
@@ -87,10 +89,7 @@ void meta_compositor_grab_op_end (MetaCompositor *compositor);
 void meta_check_end_modal (MetaScreen *screen);
 
 void meta_compositor_update_sync_state (MetaCompositor *compositor,
-                                        gboolean state);
-
-void meta_compositor_grab_op_begin (MetaCompositor *compositor);
-void meta_compositor_grab_op_end (MetaCompositor *compositor);
+                                        MetaSyncMethod  method);
 
 void meta_compositor_set_all_obscured (MetaCompositor *compositor,
                                        gboolean        obscured);

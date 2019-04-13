@@ -519,6 +519,9 @@ meta_display_open (void)
    */
   the_display->name = g_strdup (XDisplayName (NULL));
   the_display->xdisplay = xdisplay;
+  the_display->gdk_display = gdk_display_get_default();
+  the_display->gdk_device = gdk_seat_get_pointer (gdk_display_get_default_seat (the_display->gdk_display));
+
   if (gethostname (buf, sizeof(buf)-1) == 0)
     {
       buf[sizeof(buf)-1] = '\0';
@@ -544,6 +547,8 @@ meta_display_open (void)
                                                   terminal has the focus */
 
   the_display->rebuild_keybinding_idle_id = 0;
+
+  the_display->sync_method = meta_prefs_get_sync_method();
 
   /* FIXME copy the checks from GDK probably */
   the_display->static_gravity_works = g_getenv ("MUFFIN_USE_STATIC_GRAVITY") != NULL;
@@ -5784,9 +5789,9 @@ meta_display_restart (MetaDisplay *display)
 }
 
 void
-meta_display_update_sync_state (gboolean state)
+meta_display_update_sync_state (MetaSyncMethod method)
 {
-  meta_compositor_update_sync_state (the_display->compositor, state);
+  meta_compositor_update_sync_state (the_display->compositor, method);
 }
 
 void
@@ -5794,4 +5799,10 @@ meta_display_set_all_obscured (void)
 {
     meta_compositor_set_all_obscured (the_display->compositor, FALSE);
     meta_compositor_set_all_obscured (the_display->compositor, TRUE);
+}
+
+gboolean
+meta_display_popup_window_visible (MetaDisplay *display)
+{
+  return display->compositor->popup_window_visible;
 }

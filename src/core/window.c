@@ -147,9 +147,6 @@ static unsigned int get_mask_from_snap_keysym (MetaWindow *window);
 static void update_edge_constraints (MetaWindow *window);
 static void update_gtk_edge_constraints (MetaWindow *window);
 
-static void get_outer_rect (const MetaWindow *window,
-                            MetaRectangle    *rect);
-
 /* Idle handlers for the three queues (run with meta_later_add()). The
  * "data" parameter in each case will be a GINT_TO_POINTER of the
  * index into the queue arrays to use.
@@ -200,6 +197,7 @@ enum
   RAISED,
   UNMANAGED,
   SIZE_CHANGED,
+  POSITION_CHANGED,
   ICON_CHANGED,
 
   LAST_SIGNAL
@@ -249,6 +247,7 @@ meta_window_finalize (GObject *object)
 
   meta_icon_cache_free (&window->icon_cache);
 
+  free (window->client_area);
   free (window->sm_client_id);
   free (window->wm_client_machine);
   free (window->startup_id);
@@ -611,6 +610,14 @@ meta_window_class_init (MetaWindowClass *klass)
                   G_TYPE_FROM_CLASS (object_class),
                   G_SIGNAL_RUN_LAST,
                   G_STRUCT_OFFSET (MetaWindowClass, unmanaged),
+                  NULL, NULL, NULL,
+                  G_TYPE_NONE, 0);
+
+  window_signals[POSITION_CHANGED] =
+    g_signal_new ("position-changed",
+                  G_TYPE_FROM_CLASS (object_class),
+                  G_SIGNAL_RUN_LAST,
+                  0,
                   NULL, NULL, NULL,
                   G_TYPE_NONE, 0);
 
@@ -1118,6 +1125,8 @@ meta_window_new_with_attrs (MetaDisplay       *display,
   window->rect.y = attrs->y;
   window->rect.width = attrs->width;
   window->rect.height = attrs->height;
+
+  window->client_area = g_new (cairo_rectangle_int_t, 1);
 
   /* And border width, size_hints are the "request" */
   window->border_width = attrs->border_width;
@@ -1764,7 +1773,8 @@ meta_window_unmanage (MetaWindow  *window,
 
   meta_display_set_all_obscured ();
 
-  if (window->visible_to_compositor || meta_window_is_attached_dialog (window))
+  if (window->compositor_private &&
+      (window->visible_to_compositor || meta_window_is_attached_dialog (window)))
     meta_window_actor_hide (window->compositor_private, META_COMP_EFFECT_DESTROY);
 
   meta_compositor_remove_window (window->display->compositor, window);
@@ -3110,6 +3120,10 @@ meta_window_show (MetaWindow *window)
 
   if (!window->visible_to_compositor)
     {
+      meta_window_update_outer_rect (window);
+      meta_window_update_client_area_rect (window);
+      meta_window_update_monitor (window);
+
       window->visible_to_compositor = TRUE;
 
       MetaCompEffect effect = META_COMP_EFFECT_NONE;
@@ -3126,7 +3140,8 @@ meta_window_show (MetaWindow *window)
           break;
         }
 
-      meta_window_actor_show (window->compositor_private, effect);
+      if (window->compositor_private)
+        meta_window_actor_show (window->compositor_private, effect);
     }
 
   /* We don't want to worry about all cases from inside
@@ -3220,7 +3235,8 @@ meta_window_hide (MetaWindow *window)
           break;
         }
 
-      meta_window_actor_hide (window->compositor_private, effect);
+      if (window->compositor_private)
+        meta_window_actor_hide (window->compositor_private, effect);
     }
 
   did_hide = FALSE;
@@ -3565,7 +3581,11 @@ meta_window_maximize (MetaWindow        *window,
     meta_window_move_resize_now (window);
 
     if (desktop_effects && window->compositor_private)
-      meta_window_actor_maximize (window->compositor_private, &old_rect, &window->outer_rect);
+      {
+        meta_window_actor_maximize (window->compositor_private,
+                                    &old_rect,
+                                    &window->outer_rect);
+      }
     }
 
   meta_screen_tile_preview_hide (window->screen);
@@ -3623,7 +3643,7 @@ meta_window_get_all_monitors (MetaWindow *window, gsize *length)
   else
     {
       if (window->fullscreen)
-        get_outer_rect (window, &window->outer_rect);
+        meta_window_update_outer_rect (window);
 
       window_rect = window->outer_rect;
     }
@@ -3671,18 +3691,20 @@ meta_window_is_monitor_sized (MetaWindow *window)
 
   if (window->override_redirect)
     {
-      MetaRectangle monitor_rect;
-      int screen_width, screen_height;
+      MetaScreen *screen = window->screen;
+      MetaRectangle *outer_rect = &window->outer_rect;
 
-      meta_screen_get_size (window->screen, &screen_width, &screen_height);
-
-      if (window->outer_rect.x == 0 && window->outer_rect.y == 0 &&
-          window->outer_rect.width == screen_width && window->outer_rect.height == screen_height)
+      if (outer_rect->x == 0 && outer_rect->y == 0 &&
+          outer_rect->width == screen->rect.width &&
+          outer_rect->height == screen->rect.height)
         return TRUE;
 
-      meta_screen_get_monitor_geometry (window->screen, window->monitor->number, &monitor_rect);
+      MetaRectangle *monitor_rect = &window->monitor->rect;
 
-      if (meta_rectangle_equal (&window->outer_rect, &monitor_rect))
+      if (monitor_rect->width == outer_rect->width &&
+          monitor_rect->height == outer_rect->height &&
+          monitor_rect->x == outer_rect->x &&
+          monitor_rect->y == outer_rect->y)
         return TRUE;
     }
 
@@ -4003,7 +4025,11 @@ meta_window_unmaximize_internal (MetaWindow        *window,
                                             target_rect.height);
 
           if (desktop_effects && window->compositor_private)
-            meta_window_actor_unmaximize (window->compositor_private, &old_rect, &window->outer_rect);
+            {
+              meta_window_actor_unmaximize (window->compositor_private,
+                                            &old_rect,
+                                            &window->outer_rect);
+            }
         }
       else
         {
@@ -4307,11 +4333,11 @@ LOCAL_SYMBOL void
 meta_window_adjust_opacity (MetaWindow   *window,
                             gboolean      increase)
 {
-  ClutterActor *actor = CLUTTER_ACTOR (window->compositor_private);
+  MetaWindowActor *actor = META_WINDOW_ACTOR (window->compositor_private);
 
-  gint current_opacity, new_opacity;
+  int current_opacity, new_opacity;
 
-  current_opacity = clutter_actor_get_opacity (actor);
+  current_opacity = meta_window_actor_get_opacity (actor);
 
   if (increase) {
     new_opacity = MIN (current_opacity + OPACITY_STEP, 255);
@@ -4320,15 +4346,13 @@ meta_window_adjust_opacity (MetaWindow   *window,
   }
 
   if (new_opacity != current_opacity)
-    meta_window_actor_update_opacity (META_WINDOW_ACTOR (actor), (guint8) new_opacity);
+    meta_window_actor_set_opacity (actor, new_opacity);
 }
 
 void
 meta_window_reset_opacity (MetaWindow *window)
 {
-    ClutterActor *actor = CLUTTER_ACTOR (window->compositor_private);
-
-    clutter_actor_set_opacity (actor, 255);
+  meta_window_actor_set_opacity (META_WINDOW_ACTOR (window->compositor_private), 255);
 }
 
 static gboolean
@@ -4732,12 +4756,8 @@ send_sync_request (MetaWindow *window)
   ev.message_type = window->display->atom_WM_PROTOCOLS;
   ev.format = 32;
   ev.data.l[0] = window->display->atom__NET_WM_SYNC_REQUEST;
-  /* FIXME: meta_display_get_current_time() is bad, but since calls
-   * come from meta_window_move_resize_internal (which in turn come
-   * from all over), I'm not sure what we can do to fix it.  Do we
-   * want to use _roundtrip, though?
-   */
-  ev.data.l[1] = meta_display_get_current_time (window->display);
+
+  ev.data.l[1] = window->display->current_time;
   ev.data.l[2] = wait_serial & G_GUINT64_CONSTANT(0xffffffff);
   ev.data.l[3] = wait_serial >> 32;
   ev.data.l[4] = window->extended_sync_request_counter ? 1 : 0;
@@ -4756,8 +4776,9 @@ send_sync_request (MetaWindow *window)
                                                    sync_request_timeout,
                                                    window);
 
-  meta_window_actor_set_updates_frozen (window->compositor_private,
-                                        meta_window_updates_are_frozen (window));
+  if (window->compositor_private)
+    meta_window_actor_set_updates_frozen (window->compositor_private,
+                                          meta_window_updates_are_frozen (window));
 }
 #endif
 
@@ -5355,10 +5376,6 @@ meta_window_move_resize_internal (MetaWindow          *window,
       meta_window_actor_sync_actor_geometry (window->compositor_private,
                                              did_placement);
     }
-  else
-    {
-      meta_topic (META_DEBUG_GEOMETRY, "Size/position not modified\n");
-    }
 
   meta_window_refresh_resize_popup (window);
 
@@ -5571,7 +5588,7 @@ meta_window_move_to_monitor (MetaWindow  *window,
 
   meta_window_move_between_rects (window, &old_area, &new_area);
 
-  meta_window_update_rects (window);
+  meta_window_update_outer_rect (window);
   meta_window_update_monitor (window);
 }
 
@@ -5693,8 +5710,7 @@ meta_window_configure_notify (MetaWindow      *window,
   /* Whether an override-redirect window is considered fullscreen depends
    * on its geometry.
    */
-  if (window->override_redirect)
-    meta_screen_queue_check_fullscreen (window->screen);
+  meta_screen_queue_check_fullscreen (window->screen);
 
   if (!event->override_redirect && !event->send_event)
     meta_warning ("Unhandled change of windows override redirect status\n");
@@ -5870,10 +5886,11 @@ meta_window_get_outer_rect (const MetaWindow *window,
   *rect = window->outer_rect;
 }
 
-static void
-get_outer_rect (const MetaWindow *window,
-                MetaRectangle    *rect)
+void
+meta_window_update_outer_rect (const MetaWindow *window)
 {
+  MetaRectangle *rect = &window->outer_rect;
+
   if (window->frame)
     {
       MetaFrameBorders borders;
@@ -5913,13 +5930,14 @@ void
 meta_window_get_client_area_rect (const MetaWindow      *window,
                                   cairo_rectangle_int_t *rect)
 {
-  *rect = window->client_area;
+  rect = window->client_area;
 }
 
-static void
-get_client_area_rect (const MetaWindow      *window,
-                      cairo_rectangle_int_t *rect)
+void
+meta_window_update_client_area_rect (const MetaWindow *window)
 {
+  cairo_rectangle_int_t *rect = window->client_area;
+
   if (window->frame)
     {
       rect->x = window->frame->child_x;
@@ -7407,11 +7425,12 @@ meta_window_appears_focused_changed (MetaWindow *window)
   set_net_wm_state (window);
   meta_window_frame_size_changed (window);
 
-  meta_window_actor_appears_focused_notify (window->compositor_private);
-  g_object_notify (G_OBJECT (window), "appears-focused");
-
   if (window->frame)
     meta_frame_queue_draw (window->frame);
+
+  meta_window_actor_appears_focused_notify (window->compositor_private);
+
+  g_object_notify (G_OBJECT (window), "appears-focused");
 }
 
 /**
@@ -7607,13 +7626,16 @@ meta_window_notify_focus (MetaWindow *window,
               !meta_prefs_get_raise_on_click())
             meta_display_ungrab_focus_window_button (window->display, window);
 
+          g_signal_emit (window, window_signals[FOCUS], 0);
+          g_object_notify (G_OBJECT (window->display), "focus-window");
+
           if (!window->attached_focus_window)
             meta_window_appears_focused_changed (window);
 
           meta_window_propagate_focus_appearance (window, TRUE);
 
-          g_signal_emit (window, window_signals[FOCUS], 0);
-          g_object_notify (G_OBJECT (window->display), "focus-window");
+          // g_signal_emit (window, window_signals[FOCUS], 0);
+          // g_object_notify (G_OBJECT (window->display), "focus-window");
         }
     }
   else if (event->type == FocusOut ||
@@ -8378,11 +8400,7 @@ recalc_window_type (MetaWindow *window)
       g_object_freeze_notify (object);
 
       if (old_decorated != window->decorated)
-        {
-          if (window->compositor_private)
-            meta_window_actor_decorated_notify (window->compositor_private);
-          g_object_notify (object, "decorated");
-        }
+        g_object_notify (object, "decorated");
 
       g_object_notify (object, "window-type");
 
@@ -8391,19 +8409,13 @@ recalc_window_type (MetaWindow *window)
 }
 
 void
-meta_window_update_rects (MetaWindow *window)
-{
-  get_outer_rect (window, &window->outer_rect);
-  get_client_area_rect (window, &window->client_area);
-}
-
-void
 meta_window_frame_size_changed (MetaWindow *window)
 {
   if (window->frame)
     meta_frame_clear_cached_borders (window->frame);
 
-  meta_window_update_rects (window);
+  meta_window_update_outer_rect (window);
+  meta_window_update_client_area_rect (window);
 }
 
 static void
@@ -9334,6 +9346,9 @@ update_move (MetaWindow  *window,
   if (dx == 0 && dy == 0)
     return;
 
+    gboolean last_tile_mode_state = window->tile_mode;
+    gboolean last_mouse_on_edge_state = window->mouse_on_edge;
+
   /* Originally for detaching maximized windows, but we use this
    * for the zones at the sides of the monitor where trigger tiling
    * because it's about the right size
@@ -9536,7 +9551,8 @@ update_move (MetaWindow  *window,
   gboolean hminbad = FALSE;
   gboolean vminbad = FALSE;
 
-  if (window->tile_mode != META_TILE_NONE)
+  if (window->tile_mode != last_tile_mode_state ||
+      window->mouse_on_edge != last_mouse_on_edge_state)
     {
       if (meta_prefs_get_edge_tiling ())
         {
@@ -9546,25 +9562,32 @@ update_move (MetaWindow  *window,
             meta_screen_tile_hud_update (window->screen, TRUE, TRUE);
         }
 
-      get_size_limits (window, NULL, FALSE, &min_size, &max_size);
-      meta_window_get_current_tile_area (window, &target_size);
-      MetaFrameBorders borders;
-      meta_frame_calc_borders (window->frame, &borders);
-      meta_window_unextend_by_frame (window, &target_size, &borders);
-      hminbad = target_size.width < min_size.width;
-      vminbad = target_size.height < min_size.height;
-
-     /* Delay showing the tile preview slightly to make it more unlikely to
-      * trigger it unwittingly, e.g. when shaking loose the window or moving
-      * it to another monitor.
-      */
-
-      if (!hminbad && !vminbad)
-        meta_screen_tile_preview_update (window->screen,
-                                          window->tile_mode != META_TILE_NONE &&
-                                          !meta_screen_tile_preview_get_visible (window->screen));
+      if (window->tile_mode == META_TILE_NONE)
+        {
+          meta_screen_tile_preview_hide (window->screen);
+        }
       else
-        meta_screen_tile_preview_hide (window->screen);
+        {
+          get_size_limits (window, NULL, FALSE, &min_size, &max_size);
+          meta_window_get_current_tile_area (window, &target_size);
+          MetaFrameBorders borders;
+          meta_frame_calc_borders (window->frame, &borders);
+          meta_window_unextend_by_frame (window, &target_size, &borders);
+          hminbad = target_size.width < min_size.width;
+          vminbad = target_size.height < min_size.height;
+
+         /* Delay showing the tile preview slightly to make it more unlikely to
+          * trigger it unwittingly, e.g. when shaking loose the window or moving
+          * it to another monitor.
+          */
+
+          if (!hminbad && !vminbad)
+            meta_screen_tile_preview_update (window->screen,
+                                              window->tile_mode != META_TILE_NONE &&
+                                              !window->screen->tile_preview_visible);
+          else
+            meta_screen_tile_preview_hide (window->screen);
+        }
     }
 
   meta_window_get_client_root_coords (window, &old);
@@ -10112,8 +10135,9 @@ meta_window_update_sync_request_counter (MetaWindow *window,
     }
 
   window->sync_request_serial = new_counter_value;
-  meta_window_actor_set_updates_frozen (window->compositor_private,
-                                        meta_window_updates_are_frozen (window));
+  if (window->compositor_private)
+    meta_window_actor_set_updates_frozen (window->compositor_private,
+                                          meta_window_updates_are_frozen (window));
 
   if (window == window->display->grab_window &&
       meta_grab_op_is_resizing (window->display->grab_op) &&
@@ -10144,7 +10168,7 @@ meta_window_update_sync_request_counter (MetaWindow *window,
    */
   window->disable_sync = FALSE;
 
-  if (needs_frame_drawn)
+  if (needs_frame_drawn && window->compositor_private)
     meta_window_actor_queue_frame_drawn (window->compositor_private, no_delay_frame);
 }
 #endif /* HAVE_XSYNC */
@@ -12373,3 +12397,4 @@ meta_window_get_icon_name (MetaWindow *window)
 
     return window->theme_icon_name;
 }
+

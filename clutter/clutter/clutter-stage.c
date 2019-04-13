@@ -1464,8 +1464,6 @@ _clutter_stage_do_pick_on_view (ClutterStage     *stage,
   float viewport_offset_x;
   float viewport_offset_y;
 
-  priv = stage->priv;
-
   context = _clutter_context_get_default ();
   fb_scale = clutter_stage_view_get_scale (view);
   clutter_stage_view_get_layout (view, &view_layout);
