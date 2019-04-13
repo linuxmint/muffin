@@ -98,6 +98,7 @@ static gboolean clutter_disable_mipmap_text  = FALSE;
 static gboolean clutter_use_fuzzy_picking    = FALSE;
 static gboolean clutter_enable_accessibility = TRUE;
 static gboolean clutter_sync_to_vblank       = TRUE;
+SyncMethod clutter_sync_method               = SYNC_PRESENTATION_TIME;
 
 static guint clutter_default_fps             = 60;
 
@@ -3670,6 +3671,18 @@ gboolean
 _clutter_get_sync_to_vblank (void)
 {
   return clutter_sync_to_vblank;
+}
+
+void
+_clutter_set_sync_method (SyncMethod sync_method)
+{
+  clutter_sync_method = sync_method;
+}
+
+SyncMethod
+_clutter_get_sync_method (void)
+{
+  return clutter_sync_method;
 }
 
 void

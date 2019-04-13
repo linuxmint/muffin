@@ -304,6 +304,7 @@ struct _MetaDisplay
 #define META_DISPLAY_HAS_COMPOSITE(display) ((display)->have_composite)
 #define META_DISPLAY_HAS_DAMAGE(display) ((display)->have_damage)
 #define META_DISPLAY_HAS_XFIXES(display) ((display)->have_xfixes)
+  MetaSyncMethod sync_method;
 
   guint shadows_enabled : 1;
   guint debug_button_grabs : 1;
@@ -447,6 +448,6 @@ guint meta_display_get_above_tab_keycode (MetaDisplay *display);
 
 void meta_display_notify_restart (MetaDisplay *display);
 
-void meta_display_update_sync_state (gboolean state);
+void meta_display_update_sync_state (MetaSyncMethod method);
 
 #endif
