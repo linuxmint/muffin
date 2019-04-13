@@ -39,6 +39,7 @@
 #include <meta/display.h>
 #include "keybindings-private.h"
 #include <meta/prefs.h>
+#include "ui.h"
 
 #ifdef HAVE_STARTUP_NOTIFICATION
 #include <libsn/sn.h>
@@ -80,10 +81,14 @@ struct _MetaDisplay
   
   char *name;
   Display *xdisplay;
+  GdkDisplay *gdk_display;
+  GdkDevice *gdk_device;
   char *hostname;
 
   Window leader_window;
   Window timestamp_pinging_window;
+
+  MetaUI *ui;
 
   /* Pull in all the names of atoms as fields; we will intern them when the
    * class is constructed.
