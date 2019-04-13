@@ -27,6 +27,7 @@
 /* Don't include gtk.h or gdk.h here */
 #include <meta/common.h>
 #include <meta/types.h>
+#include <meta/display.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <cairo.h>
@@ -54,7 +55,7 @@ void meta_ui_remove_event_func (Display       *xdisplay,
                                 MetaEventFunc  func,
                                 gpointer       data);
 
-MetaUI* meta_ui_new (Display *xdisplay,
+MetaUI* meta_ui_new (MetaDisplay *display,
                      Screen  *screen);
 void    meta_ui_free (MetaUI *ui);
 
