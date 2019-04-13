@@ -21,7 +21,7 @@ static CoglTexture3D *
 create_texture_3d (CoglContext *context)
 {
   int x, y, z;
-  uint8_t *data = g_malloc (TEX_IMAGE_STRIDE * TEX_DEPTH);
+  uint8_t *data = malloc (TEX_IMAGE_STRIDE * TEX_DEPTH);
   uint8_t *p = data;
   CoglTexture3D *tex;
   CoglError *error = NULL;
@@ -64,7 +64,7 @@ create_texture_3d (CoglContext *context)
       g_assert_not_reached ();
     }
 
-  g_free (data);
+  free (data);
 
   return tex;
 }
@@ -157,7 +157,7 @@ draw_frame (TestState *state)
 
   cogl_primitive_draw (primitive, test_fb, pipeline);
 
-  g_free (verts);
+  free (verts);
 
   cogl_object_unref (primitive);
   cogl_object_unref (attributes[0]);

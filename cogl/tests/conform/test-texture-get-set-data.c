@@ -13,7 +13,7 @@ check_texture (int width, int height, TestUtilsTextureFlags flags)
   int rowstride;
   CoglBitmap *bmp;
 
-  p = data = g_malloc (width * height * 4);
+  p = data = malloc (width * height * 4);
   for (y = 0; y < height; y++)
     for (x = 0; x < width; x++)
       {
@@ -125,7 +125,7 @@ check_texture (int width, int height, TestUtilsTextureFlags flags)
       }
 
   cogl_object_unref (tex);
-  g_free (data);
+  free (data);
 }
 
 void

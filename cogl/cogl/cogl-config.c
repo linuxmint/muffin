@@ -69,7 +69,7 @@ _cogl_config_process (GKeyFile *key_file)
       _cogl_parse_debug_string (value,
                                 TRUE /* enable the flags */,
                                 TRUE /* ignore help option */);
-      g_free (value);
+      free (value);
     }
 
   value = g_key_file_get_string (key_file, "global", "COGL_NO_DEBUG", NULL);
@@ -78,7 +78,7 @@ _cogl_config_process (GKeyFile *key_file)
       _cogl_parse_debug_string (value,
                                 FALSE /* disable the flags */,
                                 TRUE /* ignore help option */);
-      g_free (value);
+      free (value);
     }
 
   for (i = 0; i < G_N_ELEMENTS (cogl_config_string_options); i++)
@@ -89,7 +89,7 @@ _cogl_config_process (GKeyFile *key_file)
       value = g_key_file_get_string (key_file, "global", conf_name, NULL);
       if (value)
         {
-          g_free (*variable);
+          free (*variable);
           *variable = value;
         }
     }
@@ -111,7 +111,7 @@ _cogl_config_read (void)
                                           filename,
                                           0,
                                           NULL);
-      g_free (filename);
+      free (filename);
       if (status)
         {
           _cogl_config_process (key_file);
@@ -126,7 +126,7 @@ _cogl_config_read (void)
                                       filename,
                                       0,
                                       NULL);
-  g_free (filename);
+  free (filename);
 
   if (status)
     _cogl_config_process (key_file);

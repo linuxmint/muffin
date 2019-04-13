@@ -164,7 +164,7 @@ _cogl_attribute_register_attribute_name (CoglContext *context,
   return name_state;
 
 error:
-  g_free (name_state);
+  free (name_state);
   return NULL;
 }
 

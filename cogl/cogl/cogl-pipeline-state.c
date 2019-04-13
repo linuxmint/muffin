@@ -1571,7 +1571,7 @@ _cogl_pipeline_override_uniform (CoglPipeline *pipeline,
               old_values + override_index,
               sizeof (CoglBoxedValue) * (old_size - override_index));
 
-      g_free (old_values);
+      free (old_values);
     }
 
   _cogl_boxed_value_init (uniforms_state->override_values + override_index);

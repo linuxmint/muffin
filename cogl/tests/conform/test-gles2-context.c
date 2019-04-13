@@ -609,7 +609,7 @@ static void
 verify_read_pixels (const PaintData *data)
 {
   int stride = data->fb_width * 4;
-  uint8_t *buf = g_malloc (data->fb_height * stride);
+  uint8_t *buf = malloc (data->fb_height * stride);
 
   data->gles2->glReadPixels (0, 0, /* x/y */
                              data->fb_width, data->fb_height,
@@ -627,7 +627,7 @@ verify_read_pixels (const PaintData *data)
                             data->fb_height * 3 / 4 * stride,
                             0xff0000ff);
 
-  g_free (buf);
+  free (buf);
 }
 
 void
@@ -752,14 +752,14 @@ verify_region (const CoglGLES2Vtable *gles2,
 {
   uint8_t *buf, *p;
 
-  buf = g_malloc (width * height * 4);
+  buf = malloc (width * height * 4);
 
   gles2->glReadPixels (x, y, width, height, GL_RGBA, GL_UNSIGNED_BYTE, buf);
 
   for (p = buf + width * height * 4; p > buf; p -= 4)
     test_utils_compare_pixel (p - 4, expected_pixel);
 
-  g_free (buf);
+  free (buf);
 }
 
 void

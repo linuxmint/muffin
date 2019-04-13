@@ -24,7 +24,7 @@
 
 /**
  * SECTION:clutter-actor
- * @short_description: The basic element of the scene graph 
+ * @short_description: The basic element of the scene graph
  *
  * The ClutterActor class is the basic element of the scene graph in Clutter,
  * and it encapsulates the position, size, and transformations of a node in
@@ -3206,7 +3206,7 @@ _clutter_actor_paint_cull_result (ClutterActor *self,
                                 0,
                                 &color,
                                 0);
-      g_free (label);
+      free (label);
       g_object_unref (layout);
     }
 }
@@ -4525,7 +4525,7 @@ clutter_actor_set_rotation_center_internal (ClutterActor        *self,
                                             ClutterRotateAxis    axis,
                                             const ClutterVertex *center)
 {
-  ClutterVertex v = CLUTTER_VERTEX_INIT_ZERO; 
+  ClutterVertex v = CLUTTER_VERTEX_INIT_ZERO;
   GObject *obj = G_OBJECT (self);
   ClutterTransformInfo *info;
 
@@ -5790,10 +5790,10 @@ clutter_actor_finalize (GObject *object)
                 _clutter_actor_get_debug_name ((ClutterActor *) object),
                 g_type_name (G_OBJECT_TYPE (object)));
 
-  g_free (priv->name);
+  free (priv->name);
 
 #ifdef CLUTTER_ENABLE_DEBUG
-  g_free (priv->debug_name);
+  free (priv->debug_name);
 #endif
 
   G_OBJECT_CLASS (clutter_actor_parent_class)->finalize (object);
@@ -11711,7 +11711,7 @@ clutter_actor_set_name (ClutterActor *self,
 {
   g_return_if_fail (CLUTTER_IS_ACTOR (self));
 
-  g_free (self->priv->name);
+  free (self->priv->name);
   self->priv->name = g_strdup (name);
 
   g_object_notify_by_pspec (G_OBJECT (self), obj_props[PROP_NAME]);
@@ -13930,7 +13930,7 @@ clutter_actor_get_anchor_point_gravity (ClutterActor *self)
  *
  * Since: 0.6
  *
- * Deprecated: 1.12: Use #ClutterActor:pivot-point and 
+ * Deprecated: 1.12: Use #ClutterActor:pivot-point and
  * clutter_actor_set_translation() instead.
  */
 void
@@ -13978,7 +13978,7 @@ clutter_actor_move_anchor_point (ClutterActor *self,
  *
  * Since: 0.6
  *
- * Deprecated: 1.12: Use #ClutterActor:pivot-point and 
+ * Deprecated: 1.12: Use #ClutterActor:pivot-point and
  * clutter_actor_set_translation() instead.
  */
 void
@@ -14030,7 +14030,7 @@ clutter_actor_move_anchor_point_from_gravity (ClutterActor   *self,
  *
  * Since: 0.6
  *
- * Deprecated: 1.12: Use #ClutterActor:pivot-point and 
+ * Deprecated: 1.12: Use #ClutterActor:pivot-point and
  * clutter_actor_set_translation() instead. E.g. For %CLUTTER_GRAVITY_CENTER set
  * pivot_point to (0.5,0.5) and the translation to (width/2,height/2).
  */
@@ -14555,7 +14555,7 @@ clutter_actor_set_custom_property (ClutterScriptable *scriptable,
                     name,
                     tmp);
 
-      g_free (tmp);
+      free (tmp);
     }
 #endif /* CLUTTER_ENABLE_DEBUG */
 
@@ -14725,7 +14725,7 @@ clutter_actor_find_property (ClutterAnimatable *animatable,
       pspec = g_object_class_find_property (klass, property_name);
     }
 
-  g_free (p_name);
+  free (p_name);
 
   return pspec;
 }
@@ -14747,7 +14747,7 @@ clutter_actor_get_initial_state (ClutterAnimatable *animatable,
   else
     g_object_get_property (G_OBJECT (animatable), property_name, initial);
 
-  g_free (p_name);
+  free (p_name);
 }
 
 /*
@@ -14921,7 +14921,7 @@ clutter_actor_set_final_state (ClutterAnimatable *animatable,
         }
     }
 
-  g_free (p_name);
+  free (p_name);
 }
 
 static void
@@ -15587,7 +15587,7 @@ update_pango_context (ClutterBackend *backend,
   pango_cairo_context_set_resolution (context, resolution);
 
   pango_font_description_free (font_desc);
-  g_free (font_name);
+  free (font_name);
 }
 
 /**
@@ -18860,7 +18860,7 @@ transition_closure_free (gpointer data)
       /* remove the reference added in add_transition_internal() */
       g_object_unref (clos->transition);
 
-      g_free (clos->name);
+      free (clos->name);
 
       g_slice_free (TransitionClosure, clos);
     }
@@ -18916,7 +18916,7 @@ on_transition_stopped (ClutterTransition *transition,
                  t_name,
                  is_finished);
 
-  g_free (t_name);
+  free (t_name);
 
   /* if it's the last transition then we clean up */
   if (g_hash_table_size (info->transitions) == 0)
@@ -19081,7 +19081,7 @@ _clutter_actor_create_transition (ClutterActor *actor,
   if (error != NULL)
     {
       g_critical ("%s: %s", G_STRLOC, error);
-      g_free (error);
+      free (error);
       goto out;
     }
 
@@ -19092,7 +19092,7 @@ _clutter_actor_create_transition (ClutterActor *actor,
     {
       g_critical ("%s: %s", G_STRLOC, error);
       g_value_unset (&initial);
-      g_free (error);
+      free (error);
       goto out;
     }
 
@@ -19151,8 +19151,8 @@ _clutter_actor_create_transition (ClutterActor *actor,
                         info->cur_state->easing_delay,
                         initial_v, final_v);
 
-          g_free (initial_v);
-          g_free (final_v);
+          free (initial_v);
+          free (final_v);
         }
 #endif /* CLUTTER_ENABLE_DEBUG */
 
@@ -19298,7 +19298,7 @@ clutter_actor_remove_transition (ClutterActor *self,
                      FALSE);
     }
 
-  g_free (t_name);
+  free (t_name);
 }
 
 /**

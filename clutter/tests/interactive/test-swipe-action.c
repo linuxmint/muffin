@@ -39,7 +39,7 @@ swept_cb (ClutterSwipeAction    *action,
       char *old_str = direction_str;
 
       direction_str = g_strconcat (direction_str, " up", NULL);
-      g_free (old_str);
+      free (old_str);
     }
 
   if (direction & CLUTTER_SWIPE_DIRECTION_DOWN)
@@ -47,7 +47,7 @@ swept_cb (ClutterSwipeAction    *action,
       char *old_str = direction_str;
 
       direction_str = g_strconcat (direction_str, " down", NULL);
-      g_free (old_str);
+      free (old_str);
     }
 
   if (direction & CLUTTER_SWIPE_DIRECTION_LEFT)
@@ -55,7 +55,7 @@ swept_cb (ClutterSwipeAction    *action,
       char *old_str = direction_str;
 
       direction_str = g_strconcat (direction_str, " left", NULL);
-      g_free (old_str);
+      free (old_str);
     }
 
   if (direction & CLUTTER_SWIPE_DIRECTION_RIGHT)
@@ -63,12 +63,12 @@ swept_cb (ClutterSwipeAction    *action,
       char *old_str = direction_str;
 
       direction_str = g_strconcat (direction_str, " right", NULL);
-      g_free (old_str);
+      free (old_str);
     }
 
   g_print ("swept: '%s': %s\n", clutter_actor_get_name (actor), direction_str);
 
-  g_free (direction_str);
+  free (direction_str);
 }
 
 static void

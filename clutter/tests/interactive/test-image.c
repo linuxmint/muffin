@@ -230,8 +230,8 @@ test_image_main (int argc, char *argv[])
       name = g_strconcat ("Box <", color, ">", NULL);
       clutter_actor_set_name (box, name);
 
-      g_free (name);
-      g_free (str);
+      free (name);
+      free (str);
 
       if ((i % 2) == 0)
         clutter_actor_set_content (box, color);

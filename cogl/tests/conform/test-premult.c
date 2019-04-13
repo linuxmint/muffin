@@ -31,7 +31,7 @@ gen_tex_data (uint32_t color)
   uint8_t b = MASK_BLUE (color);
   uint8_t a = MASK_ALPHA (color);
 
-  tex_data = g_malloc (QUAD_WIDTH * QUAD_WIDTH * 4);
+  tex_data = malloc (QUAD_WIDTH * QUAD_WIDTH * 4);
 
   for (p = tex_data + QUAD_WIDTH * QUAD_WIDTH * 4; p > tex_data;)
     {
@@ -66,7 +66,7 @@ make_texture (uint32_t color,
     cogl_texture_set_premultiplied (tex_2d, FALSE);
 
   cogl_object_unref (bmp);
-  g_free (tex_data);
+  free (tex_data);
 
   return tex_2d;
 }

@@ -947,7 +947,7 @@ cally_actor_action_set_description (AtkAction   *action,
   if (info == NULL)
       return FALSE;
 
-  g_free (info->description);
+  free (info->description);
   info->description = g_strdup (desc);
 
   return TRUE;
@@ -1236,9 +1236,9 @@ _cally_actor_destroy_action_info (gpointer action_info,
 
   g_assert (info != NULL);
 
-  g_free (info->name);
-  g_free (info->description);
-  g_free (info->keybinding);
+  free (info->name);
+  free (info->description);
+  free (info->keybinding);
 
   if (info->notify)
     info->notify (info->user_data);

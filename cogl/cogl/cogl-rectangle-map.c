@@ -703,7 +703,7 @@ _cogl_rectangle_map_free (CoglRectangleMap *map)
 
   g_array_free (map->stack, TRUE);
 
-  g_free (map);
+  free (map);
 }
 
 #if defined (COGL_ENABLE_DEBUG) && defined (HAVE_CAIRO)

@@ -61,7 +61,7 @@ check_block (int block_x, int block_y, int block_mask)
                                         (y + TEST_INSET) * BLOCK_SIZE);
 	      char *screen_pixel = g_strdup_printf ("#%06x", GUINT32_FROM_BE (*p) >> 8);
 	      g_assert_cmpstr (screen_pixel, ==, intended_pixel);
-	      g_free (screen_pixel);
+	      free (screen_pixel);
             }
       }
 }

@@ -63,7 +63,7 @@ typedef enum {
         if (G_UNLIKELY (CLUTTER_HAS_DEBUG (type))) {                     \
           gchar *_fmt = g_strdup_printf (__VA_ARGS__);                   \
           _clutter_debug_message ("[" #type "]:" G_STRLOC ": %s", _fmt); \
-          g_free (_fmt);                                                 \
+          free (_fmt);                                                 \
         }                                               } G_STMT_END
 #endif
 

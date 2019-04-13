@@ -63,29 +63,29 @@ test_atk_text (ClutterActor *actor)
   unichar = atk_text_get_character_at_offset (cally_text, 5);
   buf = g_ucs4_to_utf8 (&unichar, 1, NULL, NULL, NULL);
   g_print ("atk_text_get_character_at_offset(5): '%s' vs '%c'\n", buf, text[5]);
-  g_free (text); text = NULL;
-  g_free (buf); buf = NULL;
+  free (text); text = NULL;
+  free (buf); buf = NULL;
 
   text = atk_text_get_text_before_offset (cally_text,
                                           5, ATK_TEXT_BOUNDARY_WORD_END,
                                           &start, &end);
   g_print ("atk_text_get_text_before_offset: %s, %i, %i\n",
            text, start, end);
-  g_free (text); text = NULL;
+  free (text); text = NULL;
 
   text = atk_text_get_text_at_offset (cally_text,
                                       5, ATK_TEXT_BOUNDARY_WORD_END,
                                       &start, &end);
   g_print ("atk_text_get_text_at_offset: %s, %i, %i\n",
            text, start, end);
-  g_free (text); text = NULL;
+  free (text); text = NULL;
 
   text = atk_text_get_text_after_offset (cally_text,
                                          5, ATK_TEXT_BOUNDARY_WORD_END,
                                          &start, &end);
   g_print ("atk_text_get_text_after_offset: %s, %i, %i\n",
            text, start, end);
-  g_free (text); text = NULL;
+  free (text); text = NULL;
 
   pos = atk_text_get_caret_offset (cally_text);
   g_print ("atk_text_get_caret_offset: %i\n", pos);
@@ -100,7 +100,7 @@ test_atk_text (ClutterActor *actor)
 
   text = atk_text_get_selection (cally_text, 0, &start, &end);
   g_print ("atk_text_get_selection: %s, %i, %i\n", text, start, end);
-  g_free(text); text = NULL;
+  free(text); text = NULL;
 
   bool = atk_text_remove_selection (cally_text, 0);
   g_print ("atk_text_remove_selection (0): %i\n", bool);

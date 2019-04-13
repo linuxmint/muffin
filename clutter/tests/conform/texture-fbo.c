@@ -107,7 +107,7 @@ validate_part (TestState *state,
         g_assert_cmpint (pixels[1], ==, correct_color->green);
         g_assert_cmpint (pixels[2], ==, correct_color->blue);
 
-        g_free (pixels);
+        free (pixels);
       }
 }
 

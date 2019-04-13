@@ -251,7 +251,7 @@ test_copy (TestState *state)
                                           16, /* offset */
                                           2, /* components */
                                           COGL_ATTRIBUTE_TYPE_FLOAT);
-      g_free (name);
+      free (name);
     }
 
   prim_a = cogl_primitive_new_with_attributes (COGL_VERTICES_MODE_TRIANGLES,

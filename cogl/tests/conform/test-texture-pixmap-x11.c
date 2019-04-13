@@ -88,7 +88,7 @@ check_paint (TestState *state, int x, int y, int scale)
 {
   uint8_t *data, *p, update_value = 0;
 
-  p = data = g_malloc (PIXMAP_WIDTH * PIXMAP_HEIGHT * 4);
+  p = data = malloc (PIXMAP_WIDTH * PIXMAP_HEIGHT * 4);
 
   cogl_read_pixels (x, y, PIXMAP_WIDTH / scale, PIXMAP_HEIGHT / scale,
                     COGL_READ_PIXELS_COLOR_BUFFER,
@@ -125,7 +125,7 @@ check_paint (TestState *state, int x, int y, int scale)
           }
       }
 
-  g_free (data);
+  free (data);
 
   return update_value == 0x00;
 }

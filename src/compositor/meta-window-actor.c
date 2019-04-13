@@ -418,7 +418,7 @@ meta_window_actor_dispose (GObject *object)
   g_clear_pointer (&priv->opaque_region, cairo_region_destroy);
   g_clear_pointer (&priv->shadow_clip, cairo_region_destroy);
 
-  g_clear_pointer (&priv->shadow_class, g_free);
+  g_clear_pointer (&priv->shadow_class, free);
   g_clear_pointer (&priv->focused_shadow, meta_shadow_unref);
   g_clear_pointer (&priv->unfocused_shadow, meta_shadow_unref);
   g_clear_pointer (&priv->shadow_shape, meta_window_shape_unref);
@@ -497,7 +497,7 @@ meta_window_actor_set_property (GObject      *object,
         if (g_strcmp0 (newv, priv->shadow_class) == 0)
           return;
 
-        g_free (priv->shadow_class);
+        free (priv->shadow_class);
         priv->shadow_class = g_strdup (newv);
 
         meta_window_actor_invalidate_shadow (self);
@@ -2878,7 +2878,7 @@ meta_window_actor_ensure_mask (MetaWindowActor *self,
       stride = cairo_format_stride_for_width (CAIRO_FORMAT_A8, tex_width);
 
       /* Create data for an empty image */
-      mask_data = g_malloc0 (stride * tex_height);
+      mask_data = calloc (1, stride * tex_height);
 
       /* Fill in each rectangle. */
       for (i = 0; i < n_rects; i ++)
@@ -2915,7 +2915,7 @@ meta_window_actor_ensure_mask (MetaWindowActor *self,
                                                                       stride,
                                                                       mask_data);
 
-      g_free (mask_data);
+      free (mask_data);
     }
 }
 
