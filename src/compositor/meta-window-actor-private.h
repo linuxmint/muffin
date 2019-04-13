@@ -89,6 +89,7 @@ struct _MetaWindowActorPrivate
   guint recompute_unfocused_shadow : 1;
   guint size_changed : 1;
   guint position_changed : 1;
+  guint geometry_changed : 1;
   guint updates_frozen : 1;
 
   guint needs_destroy : 1;
@@ -185,9 +186,6 @@ cairo_region_t *meta_window_actor_get_obscured_region (MetaWindowActor *self);
 
 void meta_window_actor_set_clip_region         (MetaWindowActor *self,
                                                 cairo_region_t  *clip_region);
-void meta_window_actor_set_clip_region_beneath (MetaWindowActor *self,
-                                                cairo_region_t  *clip_region);
-void meta_window_actor_reset_visible_regions      (MetaWindowActor *self);
 
 void meta_window_actor_set_unobscured_region      (MetaWindowActor *self,
                                                    cairo_region_t  *unobscured_region);

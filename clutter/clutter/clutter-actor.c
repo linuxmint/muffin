@@ -18538,18 +18538,6 @@ clutter_actor_get_last_child (ClutterActor *self)
   return self->priv->last_child;
 }
 
-/* easy way to have properly named fields instead of the dummy ones
- * we use in the public structure
- */
-typedef struct _RealActorIter
-{
-  ClutterActor *root;           /* dummy1 */
-  ClutterActor *current;        /* dummy2 */
-  gpointer padding_1;           /* dummy3 */
-  gint age;                     /* dummy4 */
-  gpointer padding_2;           /* dummy5 */
-} RealActorIter;
-
 /**
  * clutter_actor_iter_init:
  * @iter: a #ClutterActorIter
