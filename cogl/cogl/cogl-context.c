@@ -189,7 +189,7 @@ cogl_context_new (CoglDisplay *display,
 #endif
 
   /* Allocate context memory */
-  context = g_malloc0 (sizeof (CoglContext));
+  context = calloc (1, sizeof (CoglContext));
 
   /* Convert the context into an object immediately in case any of the
      code below wants to verify that the context pointer is a valid
@@ -219,7 +219,7 @@ cogl_context_new (CoglDisplay *display,
       CoglRenderer *renderer = cogl_renderer_new ();
       if (!cogl_renderer_connect (renderer, error))
         {
-          g_free (context);
+          free (context);
           return NULL;
         }
 
@@ -232,7 +232,7 @@ cogl_context_new (CoglDisplay *display,
   if (!cogl_display_setup (display, error))
     {
       cogl_object_unref (display);
-      g_free (context);
+      free (context);
       return NULL;
     }
 
@@ -255,12 +255,12 @@ cogl_context_new (CoglDisplay *display,
   if (!winsys->context_init (context, error))
     {
       cogl_object_unref (display);
-      g_free (context);
+      free (context);
       return NULL;
     }
 
   context->attribute_name_states_hash =
-    g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
+    g_hash_table_new_full (g_str_hash, g_str_equal, free, free);
   context->attribute_name_index_map = NULL;
   context->n_attribute_names = 0;
 
@@ -270,7 +270,7 @@ cogl_context_new (CoglDisplay *display,
 
 
   context->uniform_names =
-    g_ptr_array_new_with_free_func ((GDestroyNotify) g_free);
+    g_ptr_array_new_with_free_func ((GDestroyNotify) free);
   context->uniform_name_hash = g_hash_table_new (g_str_hash, g_str_equal);
   context->n_uniform_names = 0;
 
@@ -625,7 +625,7 @@ _cogl_context_free (CoglContext *context)
 
   cogl_object_unref (context->display);
 
-  g_free (context);
+  free (context);
 }
 
 CoglContext *
@@ -701,7 +701,7 @@ _cogl_context_get_gl_extensions (CoglContext *context)
 
       context->glGetIntegerv (GL_NUM_EXTENSIONS, &num_extensions);
 
-      ret = g_malloc (sizeof (char *) * (num_extensions + 1));
+      ret = malloc (sizeof (char *) * (num_extensions + 1));
 
       for (i = 0; i < num_extensions; i++)
         {
@@ -763,7 +763,7 @@ _cogl_context_get_gl_extensions (CoglContext *context)
           continue;
 
         disabled:
-          g_free (*src);
+          free (*src);
           continue;
         }
 

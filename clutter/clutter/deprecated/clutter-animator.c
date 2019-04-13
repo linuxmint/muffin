@@ -1232,7 +1232,7 @@ clutter_animator_set (ClutterAnimator *animator,
       if (error)
         {
           g_warning ("%s: %s", G_STRLOC, error);
-          g_free (error);
+          free (error);
           break;
         }
 
@@ -1490,7 +1490,7 @@ clutter_animator_remove_key (ClutterAnimator *animator,
                              const gchar     *property_name,
                              gdouble          progress)
 {
-  clutter_animator_remove_key_internal (animator, object, property_name, 
+  clutter_animator_remove_key_internal (animator, object, property_name,
                                         progress, FALSE);
 }
 

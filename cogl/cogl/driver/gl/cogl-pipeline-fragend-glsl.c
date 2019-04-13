@@ -148,7 +148,7 @@ destroy_shader_state (void *user_data,
       if (shader_state->gl_shader)
         GE( ctx, glDeleteShader (shader_state->gl_shader) );
 
-      g_free (shader_state->unit_state);
+      free (shader_state->unit_state);
 
       g_slice_free (CoglPipelineShaderState, shader_state);
     }
@@ -495,10 +495,10 @@ ensure_texture_lookup_generated (CoglPipelineShaderState *shader_state,
 
   _cogl_pipeline_snippet_generate_code (&snippet_data);
 
-  g_free ((char *) snippet_data.chain_function);
-  g_free ((char *) snippet_data.final_name);
-  g_free ((char *) snippet_data.function_prefix);
-  g_free ((char *) snippet_data.argument_declarations);
+  free ((char *) snippet_data.chain_function);
+  free ((char *) snippet_data.final_name);
+  free ((char *) snippet_data.function_prefix);
+  free ((char *) snippet_data.argument_declarations);
 }
 
 static void
@@ -881,9 +881,9 @@ ensure_layer_generated (CoglPipeline *pipeline,
 
   _cogl_pipeline_snippet_generate_code (&snippet_data);
 
-  g_free ((char *) snippet_data.chain_function);
-  g_free ((char *) snippet_data.final_name);
-  g_free ((char *) snippet_data.function_prefix);
+  free ((char *) snippet_data.chain_function);
+  free ((char *) snippet_data.final_name);
+  free ((char *) snippet_data.function_prefix);
 
   g_string_append_printf (shader_state->source,
                           "  cogl_layer%i = cogl_generate_layer%i ();\n",

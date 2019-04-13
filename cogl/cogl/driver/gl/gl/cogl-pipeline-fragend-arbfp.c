@@ -145,7 +145,7 @@ destroy_shader_state (void *user_data,
           shader_state->gl_program = 0;
         }
 
-      g_free (shader_state->unit_state);
+      free (shader_state->unit_state);
 
       g_slice_free (CoglPipelineShaderState, shader_state);
     }

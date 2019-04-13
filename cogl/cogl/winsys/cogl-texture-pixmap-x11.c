@@ -308,7 +308,7 @@ _cogl_texture_pixmap_x11_new (CoglContext *ctxt,
                      &pixmap_width, &pixmap_height,
                      &pixmap_border_width, &tex_pixmap->depth))
     {
-      g_free (tex_pixmap);
+      free (tex_pixmap);
       _cogl_set_error (error,
                    COGL_TEXTURE_PIXMAP_X11_ERROR,
                    COGL_TEXTURE_PIXMAP_X11_ERROR_X11,
@@ -340,7 +340,7 @@ _cogl_texture_pixmap_x11_new (CoglContext *ctxt,
      it from the pixmap's root window */
   if (!XGetWindowAttributes (display, pixmap_root_window, &window_attributes))
     {
-      g_free (tex_pixmap);
+      free (tex_pixmap);
       _cogl_set_error (error,
                    COGL_TEXTURE_PIXMAP_X11_ERROR,
                    COGL_TEXTURE_PIXMAP_X11_ERROR_X11,

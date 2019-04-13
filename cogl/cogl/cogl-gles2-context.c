@@ -878,7 +878,7 @@ gl_shader_source_wrapper (GLuint shader,
       /* Note: we don't need to free the last entry in string_copy[]
        * because it is our static wrapper string... */
       for (i = 0; i < count; i++)
-        g_free (string_copy[i]);
+        free (string_copy[i]);
     }
   else
     gles2_ctx->context->glShaderSource (shader, count, string, length);
@@ -1539,9 +1539,9 @@ _cogl_gles2_context_free (CoglGLES2Context *gles2_context)
                                  NULL);
     }
 
-  g_free (gles2_context->vtable);
+  free (gles2_context->vtable);
 
-  g_free (gles2_context);
+  free (gles2_context);
 }
 
 static void
@@ -1581,7 +1581,7 @@ cogl_gles2_context_new (CoglContext *ctx, CoglError **error)
       return NULL;
     }
 
-  gles2_ctx = g_malloc0 (sizeof (CoglGLES2Context));
+  gles2_ctx = calloc (1, sizeof (CoglGLES2Context));
 
   gles2_ctx->context = ctx;
 
@@ -1591,7 +1591,7 @@ cogl_gles2_context_new (CoglContext *ctx, CoglError **error)
   gles2_ctx->winsys = winsys->context_create_gles2_context (ctx, error);
   if (gles2_ctx->winsys == NULL)
     {
-      g_free (gles2_ctx);
+      free (gles2_ctx);
       return NULL;
     }
 
@@ -1602,7 +1602,7 @@ cogl_gles2_context_new (CoglContext *ctx, CoglError **error)
   gles2_ctx->front_face = GL_CCW;
   gles2_ctx->pack_alignment = 4;
 
-  gles2_ctx->vtable = g_malloc0 (sizeof (CoglGLES2Vtable));
+  gles2_ctx->vtable = calloc (1, sizeof (CoglGLES2Vtable));
 #define COGL_EXT_BEGIN(name, \
                        min_gl_major, min_gl_minor, \
                        gles_availability, \

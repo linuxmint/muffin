@@ -389,8 +389,8 @@ path_test_get_description (CallbackData *data)
   if (strcmp (desc1, desc2))
     ret = FALSE;
 
-  g_free (desc1);
-  g_free (desc2);
+  free (desc1);
+  free (desc2);
 
   return ret;
 }

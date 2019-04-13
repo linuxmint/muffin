@@ -321,8 +321,8 @@ clutter_keyframe_transition_compute_value (ClutterTransition *transition,
                     to,
                     p, real_progress);
 
-      g_free (from);
-      g_free (to);
+      free (from);
+      free (to);
     }
 #endif /* CLUTTER_ENABLE_DEBUG */
 
@@ -593,7 +593,7 @@ clutter_keyframe_transition_set (ClutterKeyframeTransition *transition,
       if (error != NULL)
         {
           g_warning ("%s: %s", G_STRLOC, error);
-          g_free (error);
+          free (error);
           break;
         }
 

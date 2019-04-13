@@ -540,7 +540,7 @@ meta_window_actor_dispose (GObject *object)
   g_clear_pointer (&priv->opaque_region, cairo_region_destroy);
   g_clear_pointer (&priv->shadow_clip, cairo_region_destroy);
 
-  g_clear_pointer (&priv->shadow_class, g_free);
+  g_clear_pointer (&priv->shadow_class, free);
   g_clear_pointer (&priv->focused_shadow, meta_shadow_unref);
   g_clear_pointer (&priv->unfocused_shadow, meta_shadow_unref);
   g_clear_pointer (&priv->shadow_shape, meta_window_shape_unref);
@@ -625,7 +625,7 @@ meta_window_actor_set_property (GObject      *object,
         if (g_strcmp0 (newv, priv->shadow_class) == 0)
           return;
 
-        g_free (priv->shadow_class);
+        free (priv->shadow_class);
         priv->shadow_class = g_strdup (newv);
 
         meta_window_actor_invalidate_shadow (self);
@@ -2419,8 +2419,8 @@ update_corners (MetaWindowActor   *self)
   meta_shaped_texture_set_overlay_path (META_SHAPED_TEXTURE (priv->actor),
                                         corner_region, corner_path);
 
-  cairo_region_destroy (corner_region);
 
+  cairo_region_destroy (corner_region);
 }
 
 static void

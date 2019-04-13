@@ -29,7 +29,7 @@ static CoglTexture2D *
 create_source (TestState *state)
 {
   int dx, dy;
-  uint8_t *data = g_malloc (SOURCE_SIZE * SOURCE_SIZE * 4);
+  uint8_t *data = malloc (SOURCE_SIZE * SOURCE_SIZE * 4);
   CoglTexture2D *tex;
 
   /* Create a texture with a different coloured rectangle at each
@@ -67,7 +67,7 @@ static CoglTexture2D *
 create_test_texture (TestState *state)
 {
   CoglTexture2D *tex;
-  uint8_t *data = g_malloc (256 * 256 * 4), *p = data;
+  uint8_t *data = malloc (256 * 256 * 4), *p = data;
   int x, y;
 
   /* Create a texture that is 256x256 where the red component ranges
@@ -89,7 +89,7 @@ create_test_texture (TestState *state)
                                        256 * 4,
                                        data,
                                        NULL);
-  g_free (data);
+  free (data);
 
   return tex;
 }
@@ -169,7 +169,7 @@ validate_part (int xpos, int ypos,
 static uint8_t *
 create_update_data (void)
 {
-  uint8_t *data = g_malloc (256 * 256 * 4), *p = data;
+  uint8_t *data = malloc (256 * 256 * 4), *p = data;
   int x, y;
 
   /* Create some image data that is 256x256 where the blue component
@@ -212,7 +212,7 @@ validate_result (TestState *state)
                      corner_colors[division_num]);
 
   /* Sub sub texture */
-  p = texture_data = g_malloc (10 * 10 * 4);
+  p = texture_data = malloc (10 * 10 * 4);
   cogl_flush ();
   cogl_framebuffer_read_pixels (test_fb,
                                 0, SOURCE_SIZE * 2, 10, 10,
@@ -225,7 +225,7 @@ validate_result (TestState *state)
         g_assert (*(p++) == y + 20);
         p += 2;
       }
-  g_free (texture_data);
+  free (texture_data);
 
   /* Try reading back the texture data */
   sub_texture = cogl_sub_texture_new (test_ctx,
@@ -236,7 +236,7 @@ validate_result (TestState *state)
                                       SOURCE_SIZE / 2);
   tex_width = cogl_texture_get_width (sub_texture);
   tex_height = cogl_texture_get_height (sub_texture);
-  p = texture_data = g_malloc (tex_width * tex_height * 4);
+  p = texture_data = malloc (tex_width * tex_height * 4);
   cogl_texture_get_data (sub_texture,
                          COGL_PIXEL_FORMAT_RGBA_8888,
                          tex_width * 4,
@@ -253,7 +253,7 @@ validate_result (TestState *state)
         g_assert (color == reference);
         p += 4;
       }
-  g_free (texture_data);
+  free (texture_data);
   cogl_object_unref (sub_texture);
 
   /* Create a 256x256 test texture */
@@ -268,10 +268,10 @@ validate_result (TestState *state)
                            0, 0, 32, 32, 64, 64, 256, 256,
                            COGL_PIXEL_FORMAT_RGBA_8888_PRE, 256 * 4,
                            texture_data);
-  g_free (texture_data);
+  free (texture_data);
   cogl_object_unref (sub_texture);
   /* Get the texture data */
-  p = texture_data = g_malloc (256 * 256 * 4);
+  p = texture_data = malloc (256 * 256 * 4);
   cogl_texture_get_data (test_tex,
                          COGL_PIXEL_FORMAT_RGBA_8888_PRE,
                          256 * 4, texture_data);
@@ -296,7 +296,7 @@ validate_result (TestState *state)
             g_assert ((*p++) == 255);
           }
       }
-  g_free (texture_data);
+  free (texture_data);
   cogl_object_unref (test_tex);
 }
 

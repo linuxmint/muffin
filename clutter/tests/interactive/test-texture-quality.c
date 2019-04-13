@@ -79,10 +79,10 @@ test_texture_quality_main (int argc, char *argv[])
   if (error)
     g_error ("Unable to load image: %s", error->message);
 
-  g_free (file);
+  free (file);
 
   /* center the image */
-  clutter_actor_set_position (image, 
+  clutter_actor_set_position (image,
     (clutter_actor_get_width (stage) - clutter_actor_get_width (image))/2,
     (clutter_actor_get_height (stage) - clutter_actor_get_height (image))/2);
   clutter_container_add (CLUTTER_CONTAINER (stage), image, NULL);

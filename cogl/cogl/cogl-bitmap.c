@@ -236,7 +236,7 @@ _cogl_bitmap_new_with_malloc_buffer (CoglContext *context,
   cogl_object_set_user_data (COGL_OBJECT (bitmap),
                              &bitmap_free_key,
                              data,
-                             g_free);
+                             free);
 
   return bitmap;
 }

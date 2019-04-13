@@ -30,3 +30,4 @@
    intended for extra configuration that needs to be included by all
    Cogl source files. */
 
+#include <stdlib.h>

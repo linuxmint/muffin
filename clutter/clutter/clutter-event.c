@@ -1029,7 +1029,7 @@ clutter_event_get_event_sequence (const ClutterEvent *event)
 
 /**
  * clutter_event_get_device_id:
- * @event: a clutter event 
+ * @event: a clutter event
  *
  * Retrieves the events device id if set.
  *
@@ -1439,22 +1439,22 @@ clutter_event_free (ClutterEvent *event)
         {
         case CLUTTER_BUTTON_PRESS:
         case CLUTTER_BUTTON_RELEASE:
-          g_free (event->button.axes);
+          free (event->button.axes);
           break;
 
         case CLUTTER_MOTION:
-          g_free (event->motion.axes);
+          free (event->motion.axes);
           break;
 
         case CLUTTER_SCROLL:
-          g_free (event->scroll.axes);
+          free (event->scroll.axes);
           break;
 
         case CLUTTER_TOUCH_BEGIN:
         case CLUTTER_TOUCH_UPDATE:
         case CLUTTER_TOUCH_END:
         case CLUTTER_TOUCH_CANCEL:
-          g_free (event->touch.axes);
+          free (event->touch.axes);
           break;
 
         default:
@@ -1469,7 +1469,7 @@ clutter_event_free (ClutterEvent *event)
 /**
  * clutter_event_get:
  *
- * Pops an event off the event queue. Applications should not need to call 
+ * Pops an event off the event queue. Applications should not need to call
  * this.
  *
  * Return value: A #ClutterEvent or NULL if queue empty
@@ -1492,9 +1492,9 @@ clutter_event_get (void)
 
 /**
  * clutter_event_peek:
- * 
- * Returns a pointer to the first event from the event queue but 
- * does not remove it. 
+ *
+ * Returns a pointer to the first event from the event queue but
+ * does not remove it.
  *
  * Return value: (transfer none): A #ClutterEvent or NULL if queue empty.
  *
@@ -1506,7 +1506,7 @@ clutter_event_peek (void)
   ClutterMainContext *context = _clutter_context_get_default ();
 
   g_return_val_if_fail (context != NULL, NULL);
-  
+
   if (context->events_queue == NULL)
     return NULL;
 

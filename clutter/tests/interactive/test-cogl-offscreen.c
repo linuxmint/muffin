@@ -268,7 +268,7 @@ test_coglbox_init (TestCoglbox *self)
                                                  COGL_TEXTURE_NONE,
 						 COGL_PIXEL_FORMAT_ANY,
                                                  NULL);
-  g_free (file);
+  free (file);
 
   printf ("Creating texture with size\n");
   priv->texture_id = cogl_texture_new_with_size (200, 200,

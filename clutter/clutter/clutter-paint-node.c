@@ -173,7 +173,7 @@ clutter_paint_node_real_finalize (ClutterPaintNode *node)
 {
   ClutterPaintNode *iter;
 
-  g_free (node->name);
+  free (node->name);
 
   if (node->operations != NULL)
     {
@@ -306,7 +306,7 @@ clutter_paint_node_set_name (ClutterPaintNode *node,
 {
   g_return_if_fail (CLUTTER_IS_PAINT_NODE (node));
 
-  g_free (node->name);
+  free (node->name);
   node->name = g_strdup (name);
 }
 
@@ -1095,7 +1095,7 @@ _clutter_paint_node_dump_tree (ClutterPaintNode *node)
 
   g_print ("Render tree starting from %p:\n%s\n", node, str);
 
-  g_free (str);
+  free (str);
 #endif /* CLUTTER_ENABLE_DEBUG */
 }
 

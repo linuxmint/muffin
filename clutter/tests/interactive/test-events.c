@@ -168,7 +168,7 @@ static void
 key_focus_in_cb (ClutterActor *actor,
 		 gpointer      data)
 {
-  ClutterActor *focus_box = CLUTTER_ACTOR (data);  
+  ClutterActor *focus_box = CLUTTER_ACTOR (data);
 
   if (CLUTTER_IS_STAGE (actor))
     clutter_actor_hide (focus_box);
@@ -232,7 +232,7 @@ input_cb (ClutterActor *actor,
 	  ClutterEvent *event,
 	  gpointer      data)
 {
-  ClutterActor *stage = clutter_actor_get_stage (actor); 
+  ClutterActor *stage = clutter_actor_get_stage (actor);
   ClutterActor *source_actor = clutter_event_get_source (event);
   ClutterPoint position;
   gchar *state;
@@ -375,11 +375,11 @@ input_cb (ClutterActor *actor,
       return FALSE;
     }
 
-  g_free (state);
+  free (state);
 
   if (source_actor == actor)
     g_print (" *source*");
-  
+
   g_print ("\n");
 
   return FALSE;
@@ -398,13 +398,13 @@ test_events_main (int argc, char *argv[])
   clutter_actor_set_name (stage, "Stage");
   g_signal_connect (stage, "destroy", G_CALLBACK (clutter_main_quit), NULL);
   g_signal_connect (stage, "event", G_CALLBACK (input_cb), "stage");
-  g_signal_connect (stage, "fullscreen", 
+  g_signal_connect (stage, "fullscreen",
 		    G_CALLBACK (stage_state_cb), "fullscreen");
-  g_signal_connect (stage, "unfullscreen", 
+  g_signal_connect (stage, "unfullscreen",
 		    G_CALLBACK (stage_state_cb), "unfullscreen");
-  g_signal_connect (stage, "activate", 
+  g_signal_connect (stage, "activate",
 		    G_CALLBACK (stage_state_cb), "activate");
-  g_signal_connect (stage, "deactivate", 
+  g_signal_connect (stage, "deactivate",
 		    G_CALLBACK (stage_state_cb), "deactivate");
 
   focus_box = clutter_rectangle_new_with_color (CLUTTER_COLOR_Black);

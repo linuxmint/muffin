@@ -430,7 +430,7 @@ on_minimize_effect_complete (ClutterTimeline *timeline, EffectCompleteData *data
   /* Now notify the manager that we are done with this effect */
   meta_plugin_minimize_completed (plugin, window_actor);
 
-  g_free (data);
+  free (data);
 }
 
 /*
@@ -509,7 +509,7 @@ on_maximize_effect_complete (ClutterTimeline *timeline, EffectCompleteData *data
   /* Now notify the manager that we are done with this effect */
   meta_plugin_maximize_completed (plugin, window_actor);
 
-  g_free (data);
+  free (data);
 }
 
 /*
@@ -623,7 +623,7 @@ on_map_effect_complete (ClutterTimeline *timeline, EffectCompleteData *data)
   /* Now notify the manager that we are done with this effect */
   meta_plugin_map_completed (plugin, window_actor);
 
-  g_free (data);
+  free (data);
 }
 
 /*

@@ -226,7 +226,7 @@ test_cogl_multitexture_main (int argc, char *argv[])
   cogl_handle_unref (state->redhand_tex);
   cogl_handle_unref (state->light_tex0);
   cogl_handle_unref (state->light_tex1);
-  g_free (state);
+  free (state);
 
   return 0;
 }

@@ -253,7 +253,7 @@ read_rgb_icon (MetaDisplay   *display,
 static void
 free_pixels (guchar *pixels, gpointer data)
 {
-  g_free (pixels);
+  free (pixels);
 }
 
 static void
@@ -517,7 +517,7 @@ clear_icon_cache (MetaIconCache *icon_cache,
     g_object_unref (G_OBJECT (icon_cache->mini_icon));
   icon_cache->mini_icon = NULL;
 #endif
-  
+
   icon_cache->origin = USING_NO_ICON;
 
   if (dirty_all)
@@ -590,13 +590,13 @@ scaled_from_pixdata (guchar *pixdata,
 {
   GdkPixbuf *src;
   GdkPixbuf *dest;
-  
+
   src = gdk_pixbuf_new_from_data (pixdata,
                                   GDK_COLORSPACE_RGB,
                                   TRUE,
                                   8,
                                   w, h, w * 4,
-                                  free_pixels, 
+                                  free_pixels,
                                   NULL);
 
   if (src == NULL)
@@ -608,7 +608,7 @@ scaled_from_pixdata (guchar *pixdata,
       int size;
 
       size = MAX (w, h);
-      
+
       tmp = gdk_pixbuf_new (GDK_COLORSPACE_RGB, TRUE, 8, size, size);
 
       if (tmp)
@@ -617,16 +617,16 @@ scaled_from_pixdata (guchar *pixdata,
 	  gdk_pixbuf_copy_area (src, 0, 0, w, h,
 				tmp,
 				(size - w) / 2, (size - h) / 2);
-	  
+
 	  g_object_unref (src);
 	  src = tmp;
 	}
     }
-  
+
   if (w != new_w || h != new_h)
     {
       dest = gdk_pixbuf_scale_simple (src, new_w, new_h, GDK_INTERP_BILINEAR);
-      
+
       g_object_unref (G_OBJECT (src));
     }
   else

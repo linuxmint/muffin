@@ -603,7 +603,7 @@ clutter_animation_init (ClutterAnimation *self)
 
   self->priv->properties =
     g_hash_table_new_full (g_str_hash, g_str_equal,
-                           (GDestroyNotify) g_free,
+                           (GDestroyNotify) free,
                            (GDestroyNotify) g_object_unref);
 }
 
@@ -2013,7 +2013,7 @@ clutter_animation_setup_valist (ClutterAnimation *animation,
           if (error)
             {
               g_warning ("%s: %s", G_STRLOC, error);
-              g_free (error);
+              free (error);
               break;
             }
 

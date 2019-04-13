@@ -281,7 +281,7 @@ test_coglbox_init (TestCoglbox *self)
         g_warning ("Texture loading failed: <unknown>");
     }
 
-  g_free (file);
+  free (file);
 }
 
 static void

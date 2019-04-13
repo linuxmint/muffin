@@ -28,7 +28,7 @@ assert_region_color (int x,
                      uint8_t blue,
                      uint8_t alpha)
 {
-  uint8_t *data = g_malloc0 (width * height * 4);
+  uint8_t *data = calloc (1, width * height * 4);
   cogl_read_pixels (x, y, width, height,
                     COGL_READ_PIXELS_COLOR_BUFFER,
                     COGL_PIXEL_FORMAT_RGBA_8888_PRE,
@@ -43,7 +43,7 @@ assert_region_color (int x,
                   pixel[BLUE] == blue);
 #endif
       }
-  g_free (data);
+  free (data);
 }
 
 /* Creates a texture divided into 4 quads with colors arranged as follows:
@@ -68,7 +68,7 @@ make_texture (guchar ref)
   CoglHandle tex;
   guchar val;
 
-  tex_data = g_malloc (QUAD_WIDTH * QUAD_WIDTH * 16);
+  tex_data = malloc (QUAD_WIDTH * QUAD_WIDTH * 16);
 
   for (y = 0; y < QUAD_WIDTH * 2; y++)
     for (x = 0; x < QUAD_WIDTH * 2; x++)
@@ -93,7 +93,7 @@ make_texture (guchar ref)
                                     QUAD_WIDTH * 8,
                                     tex_data);
 
-  g_free (tex_data);
+  free (tex_data);
 
   return tex;
 }

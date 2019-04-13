@@ -38,7 +38,7 @@ static ClutterActor *new_rect (gint r,
   rectangle = clutter_texture_new_from_file (file, &error);
   if (rectangle == NULL)
     g_error ("image load failed: %s", error->message);
-  g_free (file);
+  free (file);
 
   clutter_actor_set_size (rectangle, 128, 128);
   clutter_color_free (color);

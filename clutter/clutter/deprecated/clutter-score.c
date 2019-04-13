@@ -149,7 +149,7 @@ static inline void clutter_score_clear (ClutterScore *score);
 
 G_DEFINE_TYPE_WITH_PRIVATE (ClutterScore, clutter_score, G_TYPE_OBJECT)
 
-static int score_signals[LAST_SIGNAL] = { 0 }; 
+static int score_signals[LAST_SIGNAL] = { 0 };
 
 /* Object */
 
@@ -160,7 +160,7 @@ clutter_score_set_property (GObject      *gobject,
 			    GParamSpec   *pspec)
 {
   ClutterScorePrivate *priv;
-  
+
   priv = clutter_score_get_instance_private (CLUTTER_SCORE (gobject));
 
   switch (prop_id)
@@ -454,7 +454,7 @@ destroy_entry (GNode                  *node,
         }
 
       g_object_unref (entry->timeline);
-      g_free (entry->marker);
+      free (entry->marker);
       g_slice_free (ClutterScoreEntry, entry);
 
       node->data = NULL;
@@ -646,7 +646,7 @@ on_timeline_completed (ClutterTimeline   *timeline,
   g_signal_handler_disconnect (timeline, entry->complete_id);
   entry->complete_id = 0;
 
-  CLUTTER_NOTE (SCHEDULER, "timeline [%p] ('%lu') completed", 
+  CLUTTER_NOTE (SCHEDULER, "timeline [%p] ('%lu') completed",
 		entry->timeline,
                 entry->id);
 
@@ -666,11 +666,11 @@ on_timeline_completed (ClutterTimeline   *timeline,
   if (g_hash_table_size (priv->running_timelines) == 0)
     {
       CLUTTER_NOTE (SCHEDULER, "looks like we finished");
-      
+
       g_signal_emit (entry->score, score_signals[COMPLETED], 0);
 
       clutter_score_stop (entry->score);
-      
+
       if (priv->loop)
         clutter_score_start (entry->score);
     }
@@ -827,7 +827,7 @@ clutter_score_pause (ClutterScore *score)
 
   priv = score->priv;
 
-  if (!clutter_score_is_playing (score)) 
+  if (!clutter_score_is_playing (score))
     return;
 
   g_hash_table_foreach (priv->running_timelines,
@@ -1021,7 +1021,7 @@ clutter_score_append_at_marker (ClutterScore    *score,
 
   entry->node = g_node_append_data (node, entry);
 
-  g_free (marker_reached_signal);
+  free (marker_reached_signal);
 
   priv->last_id += 1;
 

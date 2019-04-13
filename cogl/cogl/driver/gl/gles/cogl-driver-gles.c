@@ -289,7 +289,7 @@ _cogl_driver_update_features (CoglContext *context,
                  _cogl_context_get_gl_version (context),
                  all_extensions);
 
-      g_free (all_extensions);
+      free (all_extensions);
     }
 
   context->glsl_major = 1;
