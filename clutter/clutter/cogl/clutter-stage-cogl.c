@@ -48,6 +48,7 @@
 #include "clutter-main.h"
 #include "clutter-private.h"
 #include "clutter-stage-private.h"
+#include "clutter-muffin.h"
 
 typedef struct _ClutterStageViewCoglPrivate
 {
