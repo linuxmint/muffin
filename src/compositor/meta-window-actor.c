@@ -259,6 +259,7 @@ meta_window_actor_init (MetaWindowActor *self)
   priv = self->priv = G_TYPE_INSTANCE_GET_PRIVATE (self, META_TYPE_WINDOW_ACTOR,
                                                    MetaWindowActorPrivate);
 
+  priv->display = meta_get_display ();
   priv->paint_tower = meta_texture_tower_new ();
   priv->texture = NULL;
   priv->mask_texture = NULL;
@@ -293,8 +294,7 @@ window_decorated_notify (MetaWindow *mw)
   MetaWindowActor *self = META_WINDOW_ACTOR (mw->compositor_private);
   MetaWindowActorPrivate *priv = self->priv;
   MetaFrame *frame = mw->frame;
-  MetaScreen *screen = priv->screen;
-  MetaDisplay *display = screen->display;
+  MetaDisplay *display = priv->display;
   Display *xdisplay = display->xdisplay;
   Window new_xwindow;
 
@@ -345,8 +345,7 @@ meta_window_actor_constructed (GObject *object)
   MetaWindowActor *self = META_WINDOW_ACTOR (object);
   ClutterActor *actor = CLUTTER_ACTOR (self);
   MetaWindowActorPrivate *priv = self->priv;
-  MetaScreen *screen = priv->screen;
-  MetaDisplay *display = screen->display;
+  MetaDisplay *display = priv->display;
   Window xwindow = priv->xwindow;
   MetaWindow *window = priv->window;
   Display *xdisplay = display->xdisplay;
@@ -403,8 +402,7 @@ meta_window_actor_dispose (GObject *object)
       priv->first_frame_drawn_id = 0;
   }
 
-  screen = priv->screen;
-  display = screen->display;
+  display = priv->display;
   xdisplay = display->xdisplay;
   compositor = display->compositor;
 
@@ -627,7 +625,7 @@ static void
 assign_frame_counter_to_frames (MetaWindowActor *self)
 {
   MetaWindowActorPrivate *priv = self->priv;
-  ClutterStage *stage = priv->window->display->compositor->stage;
+  ClutterStage *stage = priv->display->compositor->stage;
   GList *l;
 
   /* If the window is obscured, then we're expecting to deal with sending
@@ -687,7 +685,7 @@ meta_window_actor_pick (ClutterActor       *actor,
           rectangles[pos + 3] = rect.y + rect.height;
         }
 
-      ctx = priv->window->display->compositor->context;
+      ctx = priv->display->compositor->context;
       fb = cogl_get_draw_framebuffer ();
 
       cogl_color_init_from_4ub (&cogl_color, color->red, color->green, color->blue, color->alpha);
@@ -890,7 +888,7 @@ texture_paint (ClutterActor *actor,
   if (meta_actor_painting_untransformed (fb, tex_width, tex_height, NULL, NULL))
     filter = COGL_PIPELINE_FILTER_NEAREST;
 
-  ctx = priv->window->display->compositor->context;
+  ctx = priv->display->compositor->context;
 
   clutter_actor_get_allocation_box (actor, &alloc);
 
@@ -1059,9 +1057,9 @@ meta_window_actor_paint (ClutterActor *actor)
       assign_frame_counter_to_frames (self);
     }
 
-  if (priv->window->display->shadows_enabled && priv->should_have_shadow)
+  if (priv->display->shadows_enabled && priv->should_have_shadow)
     {
-      gboolean appears_focused = priv->window->display->focus_window == priv->window;
+      gboolean appears_focused = priv->display->focus_window == priv->window;
       MetaShadow *shadow = appears_focused ? priv->focused_shadow : priv->unfocused_shadow;
 
       if (shadow == NULL)
@@ -1158,12 +1156,12 @@ meta_window_actor_get_paint_volume (ClutterActor       *actor,
   if (priv->obscured)
     return TRUE;
 
-  if (!priv->should_have_shadow || priv->window->display->grab_op == META_GRAB_OP_NONE)
+  if (!priv->should_have_shadow || priv->display->grab_op == META_GRAB_OP_NONE)
     return clutter_paint_volume_set_from_allocation (volume, actor);
 
   if (priv->focused_shadow != NULL || priv->unfocused_shadow != NULL)
     {
-      gboolean appears_focused = priv->window->display->focus_window == priv->window;
+      gboolean appears_focused = priv->display->focus_window == priv->window;
       /* The paint volume is computed before paint functions are called
        * so our bounds might not be updated yet. Force an update. */
       meta_window_actor_handle_updates (self);
@@ -1349,7 +1347,7 @@ queue_send_frame_messages_timeout (MetaWindowActor *self)
 {
   MetaWindowActorPrivate *priv = self->priv;
   MetaWindow *window = priv->window;
-  MetaDisplay *display = window->display;
+  MetaDisplay *display = priv->display;
   int64_t current_time;
   float refresh_rate;
   int interval, offset;
@@ -1643,7 +1641,7 @@ reset_obscured (gpointer data)
   priv->obscured_lock = FALSE;
 
   if (!priv->window->has_focus &&
-      !priv->window->display->compositor->switch_workspace_in_progress)
+      !priv->display->compositor->switch_workspace_in_progress)
     meta_window_actor_check_obscured (self);
 
   priv->reset_obscured_timeout_id = 0;
@@ -1735,7 +1733,7 @@ meta_window_actor_queue_frame_drawn (MetaWindowActor *self,
 
   if (no_delay_frame)
     {
-      ClutterActor *stage = priv->window->display->compositor->stage;
+      ClutterActor *stage = priv->display->compositor->stage;
       clutter_stage_skip_sync_delay (CLUTTER_STAGE (stage));
     }
 
@@ -1788,7 +1786,7 @@ start_simple_effect (MetaWindowActor *self,
                      gulong        event)
 {
   MetaWindowActorPrivate *priv = self->priv;
-  MetaCompositor *compositor = priv->screen->display->compositor;
+  MetaCompositor *compositor = priv->display->compositor;
   gboolean use_freeze_thaw = FALSE;
 
   if (!compositor->plugin_mgr)
@@ -1911,8 +1909,7 @@ static void
 meta_window_actor_detach (MetaWindowActor *self)
 {
   MetaWindowActorPrivate *priv = self->priv;
-  MetaScreen *screen = priv->screen;
-  MetaDisplay *display  = screen->display;
+  MetaDisplay *display  = priv->display;
   Display *xdisplay = display->xdisplay;
 
   if (!priv->pixmap)
@@ -1965,7 +1962,7 @@ meta_window_actor_should_unredirect (MetaWindowActor *self)
   if (window->override_redirect)
     return TRUE;
 
-  if (priv->does_full_damage && *window->display->prefs->unredirect_fullscreen_windows)
+  if (priv->does_full_damage && *priv->display->prefs->unredirect_fullscreen_windows)
     return TRUE;
 
   return FALSE;
@@ -1976,13 +1973,13 @@ fullscreen_sync_toggle (MetaWindowActor *self,
                         gboolean         state)
 {
   MetaWindowActorPrivate *priv = self->priv;
-  MetaSyncMethod method = *priv->window->display->prefs->sync_method;
+  MetaSyncMethod method = *priv->display->prefs->sync_method;
 
-  if (*priv->window->display->prefs->unredirect_fullscreen_windows &&
+  if (*priv->display->prefs->unredirect_fullscreen_windows &&
       method != META_SYNC_NONE)
     {
       clutter_stage_x11_update_sync_state (
-        priv->window->display->compositor->stage,
+        priv->display->compositor->stage,
         state ? method : META_SYNC_NONE
       );
     }
@@ -1992,8 +1989,7 @@ LOCAL_SYMBOL void
 meta_window_actor_set_redirected (MetaWindowActor *self, gboolean state)
 {
   MetaWindowActorPrivate *priv = self->priv;
-  MetaWindow *metaWindow = priv->window;
-  MetaDisplay *display = metaWindow->display;
+  MetaDisplay *display = priv->display;
 
   Display *xdisplay = display->xdisplay;
   Window xwin = meta_window_actor_get_x_window (self);
@@ -2026,7 +2022,7 @@ meta_window_actor_destroy (MetaWindowActor *self)
 {
   MetaWindow *window;
   MetaWindowActorPrivate *priv = self->priv;
-  MetaCompositor *compositor = priv->screen->display->compositor;
+  MetaCompositor *compositor = priv->display->compositor;
   MetaWindowType window_type;
 
   window = priv->window;
@@ -2144,8 +2140,8 @@ meta_window_actor_show (MetaWindowActor   *self,
 
   event = 0;
 
-  if (!priv->screen->display->compositor->switch_workspace_in_progress &&
-      priv->screen->display->desktop_effects &&
+  if (!priv->display->compositor->switch_workspace_in_progress &&
+      priv->display->desktop_effects &&
       !priv->redecorating)
     {
       switch (effect)
@@ -2180,7 +2176,7 @@ meta_window_actor_hide (MetaWindowActor *self,
                         MetaCompEffect   effect)
 {
   MetaWindowActorPrivate *priv = self->priv;
-  MetaCompositor *compositor = priv->screen->display->compositor;
+  MetaCompositor *compositor = priv->display->compositor;
   gulong event;
 
   g_return_if_fail (priv->visible || priv->window->attached);
@@ -2196,7 +2192,7 @@ meta_window_actor_hide (MetaWindowActor *self,
 
   event = 0;
 
-  if (priv->screen->display->desktop_effects)
+  if (priv->display->desktop_effects)
     {
       switch (effect)
         {
@@ -2227,7 +2223,7 @@ meta_window_actor_maximize (MetaWindowActor    *self,
                             MetaRectangle      *new_rect)
 {
   MetaWindowActorPrivate *priv = self->priv;
-  MetaCompositor *compositor = priv->screen->display->compositor;
+  MetaCompositor *compositor = priv->display->compositor;
   /* The window has already been resized (in order to compute new_rect),
    * which by side effect caused the actor to be resized. Restore it to the
    * old size and position */
@@ -2256,7 +2252,7 @@ meta_window_actor_unmaximize (MetaWindowActor   *self,
                               MetaRectangle     *new_rect)
 {
   MetaWindowActorPrivate *priv = self->priv;
-  MetaCompositor *compositor = priv->screen->display->compositor;
+  MetaCompositor *compositor = priv->display->compositor;
 
   /* The window has already been resized (in order to compute new_rect),
    * which by side effect caused the actor to be resized. Restore it to the
@@ -2285,7 +2281,7 @@ meta_window_actor_tile (MetaWindowActor    *self,
                         MetaRectangle      *new_rect)
 {
   MetaWindowActorPrivate *priv = self->priv;
-  MetaCompositor *compositor = priv->screen->display->compositor;
+  MetaCompositor *compositor = priv->display->compositor;
 
   /* The window has already been resized (in order to compute new_rect),
    * which by side effect caused the actor to be resized. Restore it to the
@@ -2508,7 +2504,7 @@ process_pixmap (MetaWindowActor *self)
 {
   MetaWindowActorPrivate *priv = self->priv;
   MetaScreen *screen = priv->screen;
-  MetaDisplay *display = screen->display;
+  MetaDisplay *display = priv->display;
   Display *xdisplay = display->xdisplay;
   MetaCompositor *compositor = display->compositor;
   Window xwindow = priv->xwindow;
@@ -2596,7 +2592,7 @@ process_shadow (MetaWindowActor *self)
 
   should_have_shadow = meta_window_actor_has_shadow (self);
   priv->should_have_shadow = should_have_shadow;
-  appears_focused = priv->window->display->focus_window == priv->window;
+  appears_focused = priv->display->focus_window == priv->window;
 
   if (appears_focused)
     {
@@ -2651,7 +2647,7 @@ meta_window_actor_process_damage (MetaWindowActor    *self,
                                   XDamageNotifyEvent *event)
 {
   MetaWindowActorPrivate *priv = self->priv;
-  MetaCompositor *compositor = priv->window->display->compositor;
+  MetaCompositor *compositor = priv->display->compositor;
 
   priv->received_damage = TRUE;
 
@@ -2934,7 +2930,7 @@ process_shape_region (MetaWindowActor *self)
 #ifdef HAVE_SHAPE
   if (priv->window->has_shape)
     {
-      MetaDisplay *display = priv->screen->display;
+      MetaDisplay *display = priv->display;
       XRectangle *rects;
       int n_rects, ordering;
 
@@ -3025,8 +3021,7 @@ LOCAL_SYMBOL void
 meta_window_actor_handle_updates (MetaWindowActor *self)
 {
   MetaWindowActorPrivate *priv = self->priv;
-  MetaScreen *screen   = priv->screen;
-  MetaDisplay *display  = screen->display;
+  MetaDisplay *display = priv->display;
   Display *xdisplay = display->xdisplay;
 
   if (priv->freeze_count)
@@ -3066,7 +3061,7 @@ meta_window_actor_handle_updates (MetaWindowActor *self)
   if (priv->needs_reshape)
     process_shape_region (self);
 
-  if (priv->window->display->shadows_enabled)
+  if (priv->display->shadows_enabled)
     process_shadow (self);
 }
 
@@ -3085,7 +3080,7 @@ static void
 do_send_frame_drawn (MetaWindowActor *self, FrameData *frame)
 {
   MetaWindowActorPrivate *priv = self->priv;
-  MetaDisplay *display = priv->screen->display;
+  MetaDisplay *display = priv->display;
   MetaWindow *window = priv->window;
   Display *xdisplay = display->xdisplay;
 
@@ -3172,7 +3167,7 @@ do_send_frame_timings (MetaWindowActor  *self,
                        gint64           presentation_time)
 {
   MetaWindowActorPrivate *priv = self->priv;
-  MetaDisplay *display = priv->screen->display;
+  MetaDisplay *display = priv->display;
   MetaWindow *window = priv->window;
   Display *xdisplay = display->xdisplay;
 
@@ -3289,7 +3284,7 @@ meta_window_actor_set_opacity (MetaWindowActor *self,
 
   if (opacity == OPACITY_TYPE_CARDINAL)
     {
-      MetaDisplay *display = priv->screen->display;
+      MetaDisplay *display = priv->display;
       MetaCompositor *compositor = display->compositor;
       Window xwin = priv->window->xwindow;
       gulong value;
