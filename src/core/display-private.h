@@ -308,6 +308,8 @@ struct _MetaDisplay
 
   guint shadows_enabled : 1;
   guint debug_button_grabs : 1;
+  guint desktop_effects : 1;
+  MetaPrefsState *prefs;
 };
 
 struct _MetaDisplayClass

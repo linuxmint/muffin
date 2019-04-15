@@ -2,10 +2,10 @@
 
 /* Muffin preferences */
 
-/* 
+/*
  * Copyright (C) 2001 Havoc Pennington
  * Copyright (C) 2006 Elijah Newren
- * 
+ *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
  * published by the Free Software Foundation; either version 2 of the
@@ -15,7 +15,7 @@
  * WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street - Suite 500, Boston, MA
@@ -343,6 +343,57 @@ typedef struct
   gboolean      builtin:1;
 } MetaKeyPref;
 
+typedef struct
+{
+  gboolean *use_system_font;
+  PangoFontDescription *titlebar_font;
+  MetaVirtualModifier *mouse_button_mods;
+  MetaVirtualModifier *mouse_button_zoom_mods;
+  gboolean *mouse_zoom_enabled;
+  CDesktopFocusMode *focus_mode;
+  CDesktopFocusNewWindows *focus_new_windows;
+  gboolean *raise_on_click;
+  gboolean *attach_modal_dialogs;
+  gboolean *ignore_hide_titlebar_when_maximized;
+  char *current_theme;
+  char **workspace_names;
+  int *num_workspaces;
+  gboolean *workspace_cycle;
+  CDesktopTitlebarAction *action_double_click_titlebar;
+  CDesktopTitlebarAction *action_middle_click_titlebar;
+  CDesktopTitlebarAction *action_right_click_titlebar;
+  CDesktopTitlebarScrollAction *action_scroll_titlebar;
+  gboolean *dynamic_workspaces;
+  gboolean *unredirect_fullscreen_windows;
+  gboolean *desktop_effects;
+  gboolean *sync_method;
+  gboolean *threaded_swap;
+  gboolean *send_frame_timings;
+  gboolean *application_based;
+  gboolean *disable_workarounds;
+  gboolean *auto_raise;
+  gboolean *auto_raise_delay;
+  gboolean *gnome_animations;
+  char *cursor_theme;
+  int *cursor_size;
+  int *draggable_border_width;
+  int *tile_hud_threshold;
+  int *resize_threshold;
+  int *ui_scale;
+  int *min_window_opacity;
+  gboolean *resize_with_right_button;
+  gboolean *edge_tiling;
+  gboolean *edge_resistance_window;
+  gboolean *force_fullscreen;
+  MetaButtonLayout *button_layout;
+  gboolean *workspaces_only_on_primary;
+  gboolean *legacy_snap;
+  gboolean *invert_workspace_flip;
+  gboolean *tile_maximize;
+  MetaPlacementMode *placement_mode;
+  MetaBackgroundTransition *background_transition;
+} MetaPrefsState;
+
 GType meta_key_binding_get_type    (void);
 
 GList *meta_prefs_get_keybindings (void);
@@ -360,5 +411,7 @@ CDesktopVisualBellType meta_prefs_get_visual_bell_type (void);
 MetaPlacementMode meta_prefs_get_placement_mode (void);
 
 MetaBackgroundTransition meta_prefs_get_background_transition (void);
+
+MetaPrefsState* meta_prefs_get_default_state (void);
 
 #endif

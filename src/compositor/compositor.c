@@ -535,7 +535,7 @@ LOCAL_SYMBOL void
 meta_compositor_toggle_send_frame_timings (MetaScreen *screen)
 {
   MetaCompositor *compositor = screen->display->compositor;
-  if (meta_prefs_get_send_frame_timings())
+  if (*compositor->display->prefs->send_frame_timings)
     {
       g_signal_connect_after (CLUTTER_STAGE (compositor->stage), "presented",
                               G_CALLBACK (frame_callback), compositor);

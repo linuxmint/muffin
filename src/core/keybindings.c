@@ -1831,16 +1831,17 @@ handle_workspace_shift (MetaWindow *window,
   MetaWorkspace *target_workspace;
   guint motion = META_MOTION_LEFT;
   gboolean should_handle = FALSE;
+  gboolean invert_workspace_flip = *window->display->prefs->invert_workspace_flip;
 
   if (keysym == XK_Left || keysym == XK_KP_Left)
     {
-      motion = meta_prefs_get_invert_flip_direction () ? META_MOTION_RIGHT : META_MOTION_LEFT;
+      motion = invert_workspace_flip ? META_MOTION_RIGHT : META_MOTION_LEFT;
       should_handle = TRUE;
     }
   else
   if (keysym == XK_Right || keysym == XK_KP_Right)
     {
-      motion = meta_prefs_get_invert_flip_direction () ? META_MOTION_LEFT : META_MOTION_RIGHT;
+      motion = invert_workspace_flip ? META_MOTION_LEFT : META_MOTION_RIGHT;
       should_handle = TRUE;
     }
 

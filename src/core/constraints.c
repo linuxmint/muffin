@@ -1488,7 +1488,7 @@ constrain_titlebar_visible (MetaWindow         *window,
   int bottom_amount;
   int horiz_amount_offscreen, vert_amount_offscreen;
   int horiz_amount_onscreen,  vert_amount_onscreen;
-  int scale = meta_prefs_get_ui_scale ();
+  int scale = *window->display->prefs->ui_scale;
 
   if (priority > PRIORITY_TITLEBAR_VISIBLE)
     return TRUE;
@@ -1576,7 +1576,7 @@ constrain_partially_onscreen (MetaWindow         *window,
   int top_amount, bottom_amount;
   int horiz_amount_offscreen, vert_amount_offscreen;
   int horiz_amount_onscreen,  vert_amount_onscreen;
-  int scale = meta_prefs_get_ui_scale ();
+  int scale = *window->display->prefs->ui_scale;
 
   if (priority > PRIORITY_PARTIALLY_VISIBLE_ON_WORKAREA)
     return TRUE;
