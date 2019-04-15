@@ -1179,6 +1179,7 @@ meta_pre_paint_func (gpointer data)
 
       if (expected_unredirected_window != NULL)
         {
+          meta_window_update_outer_rect (expected_unredirected_window->priv->window);
           meta_shape_cow_for_window (compositor->display->active_screen,
                                      top_window_actor->priv->window);
           meta_window_actor_set_redirected (top_window_actor, FALSE);
