@@ -805,7 +805,7 @@ meta_display_open (void)
 #ifdef HAVE_XCURSOR
   {
     XcursorSetTheme (the_display->xdisplay, the_display->prefs->cursor_theme);
-    XcursorSetDefaultSize (the_display->xdisplay, (*the_display->prefs->cursor_size));
+    XcursorSetDefaultSize (the_display->xdisplay, (*the_display->prefs->cursor_size) * (*the_display->prefs->ui_scale));
   }
 #else /* HAVE_XCURSOR */
   meta_verbose ("Not compiled with Xcursor support\n");
