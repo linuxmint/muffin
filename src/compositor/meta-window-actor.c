@@ -1151,12 +1151,22 @@ meta_window_actor_get_paint_volume (ClutterActor       *actor,
 {
   MetaWindowActor *self = META_WINDOW_ACTOR (actor);
   MetaWindowActorPrivate *priv = self->priv;
+  ClutterActorPrivate *actor_priv = actor->priv;
 
   if (priv->obscured)
     return TRUE;
 
-  if (!priv->should_have_shadow || priv->display->grab_op == META_GRAB_OP_NONE)
-    return clutter_paint_volume_set_from_allocation (volume, actor);
+  if ((!priv->should_have_shadow ||
+     (priv->window->has_shape && priv->display->grab_window != priv->window)) &&
+     priv->visible && !actor_priv->needs_allocation)
+    {
+      ClutterActorBox *box = &actor_priv->allocation;
+
+      clutter_paint_volume_set_width (volume, box->x2 - box->x1);
+      clutter_paint_volume_set_height (volume, box->y2 - box->y1);
+
+      return TRUE;
+    }
 
   if (priv->focused_shadow != NULL || priv->unfocused_shadow != NULL)
     {
@@ -1439,6 +1449,9 @@ meta_window_actor_update_area (MetaWindowActor *self,
 {
   MetaWindowActorPrivate *priv = self->priv;
 
+  if (!x && !y)
+    priv->needs_damage_all = FALSE;
+
   if (!priv->texture)
     {
       priv->repaint_scheduled = FALSE;
@@ -1503,22 +1516,6 @@ meta_window_actor_update_area (MetaWindowActor *self,
 }
 
 static void
-meta_window_actor_damage_all (MetaWindowActor *self)
-{
-  MetaWindowActorPrivate *priv = self->priv;
-  CoglTexture *texture;
-
-  if (!priv->window->mapped || priv->needs_pixmap)
-    return;
-
-  texture = priv->texture;
-
-  priv->needs_damage_all = FALSE;
-
-  meta_window_actor_update_area (self, 0, 0, cogl_texture_get_width (texture), cogl_texture_get_height (texture));
-}
-
-static void
 meta_window_actor_thaw (MetaWindowActor *self)
 {
   MetaWindowActorPrivate *priv = self->priv;
@@ -1545,8 +1542,16 @@ meta_window_actor_thaw (MetaWindowActor *self)
   /* Since we ignore damage events while a window is frozen for certain effects
    * we may need to issue an update_area() covering the whole pixmap if we
    * don't know what real damage has happened. */
-  if (priv->needs_damage_all)
-    meta_window_actor_damage_all (self);
+  if (priv->needs_damage_all &&
+      priv->window->mapped &&
+      !priv->needs_pixmap &&
+      !priv->unredirected)
+    {
+      CoglTexture *texture = priv->texture;
+      meta_window_actor_update_area (self, 0, 0,
+                                     cogl_texture_get_width (texture),
+                                     cogl_texture_get_height (texture));
+    }
 }
 
 void
@@ -2109,7 +2114,9 @@ meta_window_actor_sync_actor_geometry (MetaWindowActor *self,
 
   if (priv->size_changed)
     {
-      if (!priv->window->has_shape || !priv->first_frame_handler_queued)
+      if (!priv->window->has_shape ||
+          !priv->first_frame_handler_queued ||
+          priv->window->fullscreen)
         meta_window_update_client_area_rect (window);
 
       priv->needs_pixmap = TRUE;
