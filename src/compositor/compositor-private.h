@@ -11,10 +11,11 @@
 #include "meta-window-actor-private.h"
 #include <clutter/clutter.h>
 
+typedef struct _MetaCompScreen MetaCompScreen;
+
 struct _MetaCompositor
 {
   MetaDisplay    *display;
-  MetaScreen     *screen;
 
   Atom            atom_x_root_pixmap;
   Atom            atom_x_set_root;
@@ -22,28 +23,9 @@ struct _MetaCompositor
   guint           pre_paint_func_id;
   guint           post_paint_func_id;
 
-  ClutterActor   *stage, *shadow_src;
-  ClutterActor   *bottom_window_group, *window_group, *overlay_group, *top_window_group;
-  ClutterActor   *background_actor;
-  ClutterActor   *hidden_group;
-
-  GList          *windows;
-
-  MetaWindowActor *unredirected_window;
+  ClutterActor   *shadow_src;
 
   CoglContext    *context;
-
-  Window          output;
-
-  /* Used for unredirecting fullscreen windows */
-  guint           disable_unredirect_count;
-
-  /* Before we create the output window */
-  XserverRegion   pending_input_region;
-
-  gint            switch_workspace_in_progress;
-
-  MetaPluginManager *plugin_mgr;
 
   MetaPlugin     *modal_plugin;
 
@@ -57,6 +39,33 @@ struct _MetaCompositor
 
   gboolean frame_has_updated_xsurfaces;
   gboolean have_x11_sync_object;
+};
+
+struct _MetaCompScreen
+{
+  MetaCompositor        *compositor;
+  MetaScreen            *screen;
+
+  ClutterActor          *stage, *bottom_window_group, *window_group, *overlay_group, *top_window_group;
+  ClutterActor          *background_actor;
+  ClutterActor		*hidden_group;
+  GList                 *windows;
+  GHashTable            *windows_by_xid;
+  Window                 output;
+
+  CoglOnscreen          *onscreen;
+  CoglFrameClosure      *frame_closure;
+
+  /* Used for unredirecting fullscreen windows */
+  guint                   disable_unredirect_count;
+  MetaWindowActor             *unredirected_window;
+
+  /* Before we create the output window */
+  XserverRegion     pending_input_region;
+
+  gint                   switch_workspace_in_progress;
+
+  MetaPluginManager *plugin_mgr;
 };
 
 /* Wait 2ms after vblank before starting to draw next frame */
