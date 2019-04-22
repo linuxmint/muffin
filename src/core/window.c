@@ -9599,8 +9599,7 @@ update_move (MetaWindow  *window,
 
   meta_window_get_client_root_coords (window, &old);
 
-  if (*prefs->edge_resistance_window)
-    meta_window_update_outer_rect (window);
+  meta_window_update_outer_rect (window);
 
   /* Don't allow movement in the maximized directions or while tiled */
   if (window->maximized_horizontally || META_WINDOW_TILED_OR_SNAPPED (window))
