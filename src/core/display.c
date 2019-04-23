@@ -5832,6 +5832,12 @@ meta_display_set_all_obscured (void)
       return;
     }
 
+
+  /* At the lowest priority that ensures everything important has had a chance to run first,
+     check if all windows are obscured after 500ms while they are overriden as not obscured.
+     The longer this is delayed, the longer all windows are forced to paint.
+     TODO: Consider removing the timeout in meta_window_actor_override_obscured_internal that
+     is eventually called through MetaCompositor. Less timeouts, less CPU interruption. */
   g_timeout_add_full (1000, 500, (GSourceFunc) reset_all_obscured, the_display, NULL);
   obscured_timeout = TRUE;
 }
