@@ -11218,6 +11218,12 @@ meta_window_set_user_time (MetaWindow *window,
         window->display->allow_terminal_deactivation = FALSE;
     }
 
+  /* Redraw the window group when the user interacts with the screensaver.
+     override_window_on_top can only be true for META_WINDOW_OVERRIDE_OTHER type windows. */
+  if (window->compositor_private == window->display->compositor->top_window_actor &&
+      window->display->compositor->override_window_on_top)
+    clutter_actor_queue_redraw (window->display->compositor->window_group);
+
   g_object_notify (G_OBJECT (window), "user-time");
 }
 
