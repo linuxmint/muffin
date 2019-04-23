@@ -106,7 +106,8 @@ meta_window_group_cull_out (MetaWindowGroup *group,
        * as well for the same reason, but omitted for simplicity in the
        * hopes that no-one will do that.
        */
-      if (child->priv->effects)
+      if (child->priv->effects ||
+          child->priv->offscreen_redirect == CLUTTER_OFFSCREEN_REDIRECT_ALWAYS)
         continue;
 
       if (META_IS_WINDOW_ACTOR (child))

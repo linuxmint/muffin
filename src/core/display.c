@@ -165,6 +165,8 @@ static guint display_signals [LAST_SIGNAL] = { 0 };
  */
 static MetaDisplay *the_display = NULL;
 
+static guint obscured_timeout = 0;
+
 #ifdef WITH_VERBOSE_MODE
 static void   meta_spew_event           (MetaDisplay    *display,
                                          XEvent         *event);
@@ -5803,11 +5805,35 @@ meta_display_update_sync_state (MetaSyncMethod method)
   meta_compositor_update_sync_state (the_display->compositor, method);
 }
 
+static gboolean
+reset_all_obscured (MetaDisplay *display)
+{
+  if (!obscured_timeout)
+    {
+      obscured_timeout = TRUE;
+      return G_SOURCE_CONTINUE;
+    }
+
+  meta_compositor_set_all_obscured (display->compositor, TRUE);
+
+  obscured_timeout = FALSE;
+
+  return G_SOURCE_REMOVE;
+}
+
 void
 meta_display_set_all_obscured (void)
 {
-    meta_compositor_set_all_obscured (the_display->compositor, FALSE);
-    meta_compositor_set_all_obscured (the_display->compositor, TRUE);
+  meta_compositor_set_all_obscured (the_display->compositor, FALSE);
+
+  if (obscured_timeout)
+    {
+      obscured_timeout = FALSE;
+      return;
+    }
+
+  g_timeout_add_full (1000, 500, (GSourceFunc) reset_all_obscured, the_display, NULL);
+  obscured_timeout = TRUE;
 }
 
 gboolean
