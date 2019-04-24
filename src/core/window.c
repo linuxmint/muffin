@@ -9323,6 +9323,7 @@ update_move (MetaWindow  *window,
   int breakloose_threshold;
   MetaDisplay *display = window->display;
   MetaPrefsState *prefs = display->prefs;
+  gboolean last_snap_queued = window->snap_queued;
 
   display->grab_latest_motion_x = x;
   display->grab_latest_motion_y = y;
@@ -9559,7 +9560,8 @@ update_move (MetaWindow  *window,
   gboolean vminbad = FALSE;
 
   if (window->tile_mode != last_tile_mode_state ||
-      window->mouse_on_edge != last_mouse_on_edge_state)
+      window->mouse_on_edge != last_mouse_on_edge_state ||
+      window->snap_queued != last_snap_queued)
     {
       if (*prefs->edge_tiling)
         {
