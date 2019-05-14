@@ -788,6 +788,7 @@ meta_rectangle_expand_to_snapped_borders (MetaRectangle       *rect,
 {
   const GSList *strut_iter;
   gint x_c, y_c, max_x, max_y, min_x, min_y, fallback_x, fallback_y, fallback_width, fallback_height;
+  gboolean ulc = FALSE, llc = FALSE, urc = FALSE, lrc = FALSE;
 
   x_c = BOX_CENTER_X (*user_rect);
   y_c = BOX_TOP (*user_rect);
@@ -817,8 +818,6 @@ meta_rectangle_expand_to_snapped_borders (MetaRectangle       *rect,
         if (BOX_TOP (strut->rect) < max_y)
             max_y = BOX_TOP (strut->rect);
     } /* end loop over struts */
-
-  gboolean ulc = FALSE, llc = FALSE, urc = FALSE, lrc = FALSE;
 
 /* store safe fallback values if we end up with an impossible situation at the end */
   fallback_x = min_x;
