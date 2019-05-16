@@ -40,6 +40,7 @@
 
 #include <meta/util.h>
 
+#include "cogl-utils.h"
 #include "meta-sync-ring.h"
 
 /* Theory of operation:
