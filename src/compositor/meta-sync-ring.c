@@ -167,6 +167,9 @@ check_gl_extensions (void)
 
         int major, minor;
         gboolean version_ok = FALSE;
+        int num_extensions, i;
+        gboolean arb_sync = FALSE;
+        gboolean x11_sync_object = FALSE;
 
         meta_gl_get_integerv (GL_MAJOR_VERSION, &major);
         meta_gl_get_integerv (GL_MINOR_VERSION, &minor);
@@ -174,10 +177,6 @@ check_gl_extensions (void)
         version_ok = (major >= 3);
 
         g_printerr ("openGL version %d.%d detected (GL3 Cogl Driver)\n", major, minor);
-
-        int num_extensions, i;
-        gboolean arb_sync = FALSE;
-        gboolean x11_sync_object = FALSE;
 
         meta_gl_get_integerv (GL_NUM_EXTENSIONS, &num_extensions);
 
@@ -196,7 +195,7 @@ check_gl_extensions (void)
     case COGL_DRIVER_GL:
       {
         gboolean version_ok = FALSE;
-
+        const char *extensions;
         const char *version_string = meta_gl_get_string (GL_VERSION);
 
         /* From the spec:
@@ -221,12 +220,18 @@ check_gl_extensions (void)
 
         g_strfreev (split);
 
-        const char *extensions = meta_gl_get_string (GL_EXTENSIONS);
+        extensions = meta_gl_get_string (GL_EXTENSIONS);
         return version_ok &&
                (extensions != NULL &&
                 strstr (extensions, "GL_ARB_sync") != NULL &&
                 strstr (extensions, "GL_EXT_x11_sync_object") != NULL);
       }
+    case  COGL_DRIVER_ANY:
+    case  COGL_DRIVER_NOP:
+    case  COGL_DRIVER_GLES1:
+    case  COGL_DRIVER_GLES2:
+    case  COGL_DRIVER_WEBGL:
+      break;
     default:
       break;
     }
@@ -309,6 +314,9 @@ meta_sync_check_update_finished (MetaSync *self,
           meta_gl_delete_sync (self->gpu_fence);
           self->gpu_fence = 0;
         }
+      break;
+    case META_SYNC_STATE_READY:
+    case META_SYNC_STATE_RESET_PENDING:
       break;
     default:
       break;
