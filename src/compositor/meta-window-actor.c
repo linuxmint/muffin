@@ -1036,6 +1036,7 @@ meta_window_actor_paint (ClutterActor *actor)
   MetaWindowActor *self = META_WINDOW_ACTOR (actor);
   MetaWindowActorPrivate *priv = self->priv;
   int opacity = priv->opacity;
+  CoglFramebuffer *framebuffer;
 
   /* Disable painting of obscured windows. The window's obscured
      property will reset during move, resize, unmaximize, minimize,
@@ -1085,7 +1086,10 @@ meta_window_actor_paint (ClutterActor *actor)
           cairo_region_subtract (clip, priv->shape_region);
         }
 
+      framebuffer = cogl_get_draw_framebuffer ();
+
       meta_shadow_paint (shadow,
+                         framebuffer,
                          params.x_offset + shape_bounds.x,
                          params.y_offset + shape_bounds.y,
                          shape_bounds.width,
