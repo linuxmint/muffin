@@ -582,10 +582,9 @@ place_window_if_needed(MetaWindow     *window,
         }
       if (window->tile_after_placement)
         {
-          window->tile_after_placement = FALSE;
-
           gulong *tile_info = NULL;
           int nitems;
+          window->tile_after_placement = FALSE;
 
           if (meta_prop_get_cardinal_list (window->display,
                                            window->xwindow,
@@ -621,6 +620,7 @@ update_onscreen_requirements (MetaWindow     *window,
                               ConstraintInfo *info)
 {
   gboolean old;
+  MetaRectangle titlebar_rect;
 
   /* We only apply the various onscreen requirements to normal windows */
   if (window->type == META_WINDOW_DESKTOP ||
@@ -686,8 +686,6 @@ update_onscreen_requirements (MetaWindow     *window,
   /* Update whether we want future constraint runs to require the
    * titlebar to be visible.
    */
-
-  MetaRectangle titlebar_rect;
 
   meta_window_get_titlebar_rect (window, &titlebar_rect);
 
@@ -829,6 +827,9 @@ constrain_maximization (MetaWindow         *window,
       if (g_list_length (window->screen->active_workspace->snapped_windows) > 0) {
         GList *tmp = window->screen->active_workspace->snapped_windows;
         GSList *snapped_windows_as_struts = NULL;
+        MetaStrut *strut = NULL;
+        MetaSide side;
+
         while (tmp) {
           MetaWindow *tmp_window = META_WINDOW (tmp->data);
           if (tmp->data == window || tmp_window->minimized ||
@@ -836,8 +837,7 @@ constrain_maximization (MetaWindow         *window,
               tmp = tmp->next;
               continue;
           }
-          MetaStrut *strut = g_slice_new0 (MetaStrut);
-          MetaSide side;
+          strut = g_slice_new0 (MetaStrut);
           side = meta_window_get_tile_side (tmp_window);
           strut->rect = tmp_window->outer_rect;
           strut->side = side;
