@@ -300,7 +300,7 @@ meta_shadow_paint (MetaShadow     *shadow,
             {
               cogl_pipeline_set_color4ub (shadow->pipeline,
                                           opacity, opacity, opacity, opacity);
-//              cogl_set_source (shadow->pipeline); suspect not needed, but this line still there in mutter
+              cogl_set_source (shadow->pipeline);
               source_updated = TRUE;
             }
 
