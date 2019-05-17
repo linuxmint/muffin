@@ -86,7 +86,7 @@ meta_window_group_cull_out (MetaWindowGroup *group,
 
   while (iter_prev (&iter, &child))
     {
-      if (!CLUTTER_ACTOR_IS_VISIBLE (child) ||
+      if (!clutter_actor_is_visible (child) ||
           (has_unredirected_window && child == unredirected_window))
         continue;
 
@@ -224,10 +224,11 @@ meta_window_group_paint (ClutterActor *actor)
   int paint_x_offset, paint_y_offset;
   int paint_x_origin, paint_y_origin;
   int actor_x_origin, actor_y_origin;
+  gboolean has_unredirected_window;
 
   MetaWindowGroup *window_group = META_WINDOW_GROUP (actor);
   MetaCompositor *compositor = window_group->screen->display->compositor;
-  ClutterActor *stage = CLUTTER_STAGE (compositor->stage);
+  ClutterStage *stage = CLUTTER_STAGE (compositor->stage);
   MetaRectangle *screen_rect = &window_group->screen->rect;
 
   /* Normally we expect an actor to be drawn at it's position on the screen.
@@ -275,7 +276,7 @@ meta_window_group_paint (ClutterActor *actor)
 
   cairo_region_translate (clip_region, -paint_x_offset, -paint_y_offset);
 
-  gboolean has_unredirected_window = compositor->unredirected_window != NULL;
+  has_unredirected_window = compositor->unredirected_window != NULL;
   if (has_unredirected_window)
     {
       cairo_rectangle_int_t unredirected_rect;
