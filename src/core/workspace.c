@@ -1452,14 +1452,14 @@ focus_ancestor_or_top_window (MetaWorkspace *workspace,
 {
   MetaWindow *window = NULL;
   CDesktopFocusMode focus_mode = *workspace->screen->display->prefs->focus_mode;
-
+#ifdef WITH_VERBOSE_MODE
   if (not_this_one)
     meta_topic (META_DEBUG_FOCUS,
                 "Focusing MRU window excluding %s\n", not_this_one->desc);
   else
     meta_topic (META_DEBUG_FOCUS,
                 "Focusing MRU window\n");
-
+#endif
   /* First, check to see if we need to focus an ancestor of a window */
   if (not_this_one)
     {
