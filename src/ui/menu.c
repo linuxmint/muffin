@@ -373,6 +373,25 @@ meta_window_menu_new   (MetaFrames         *frames,
               gtk_check_menu_item_set_active (GTK_CHECK_MENU_ITEM (mi),
                                               active_workspace != 0xFFFFFFFF);
               break;
+            case META_MENU_OP_NONE:
+            case META_MENU_OP_DELETE:
+            case META_MENU_OP_MINIMIZE:
+            case META_MENU_OP_UNMAXIMIZE:
+            case META_MENU_OP_MAXIMIZE:
+            case META_MENU_OP_UNSHADE:
+            case META_MENU_OP_SHADE:
+            case META_MENU_OP_WORKSPACES:
+            case META_MENU_OP_MOVE:
+            case META_MENU_OP_RESIZE:
+            case META_MENU_OP_ABOVE:
+            case META_MENU_OP_UNABOVE:
+            case META_MENU_OP_MOVE_LEFT:
+            case META_MENU_OP_MOVE_RIGHT:
+            case META_MENU_OP_MOVE_UP:
+            case META_MENU_OP_MOVE_DOWN:
+            case META_MENU_OP_RECOVER:
+            case META_MENU_OP_MOVE_NEW:
+              break;
             default:
               break;
             }
@@ -412,15 +431,15 @@ meta_window_menu_new   (MetaFrames         *frames,
                   for (j = 0; j < n_workspaces; j++)
                     {
                       char *label;
-                      MenuData *md;
-                      unsigned int key;
-                      MetaVirtualModifier mods;
+                      MenuData *md1;
+                      unsigned int key1;
+                      MetaVirtualModifier mods1;
                       MenuItem moveitem;
                       GtkWidget *submi;
 
                       meta_core_get_menu_accelerator (META_MENU_OP_WORKSPACES,
                           j + 1,
-                          &key, &mods);
+                          &key1, &mods1);
 
                       label = get_workspace_name_with_accel (display, xroot, j);
 
@@ -434,10 +453,10 @@ meta_window_menu_new   (MetaFrames         *frames,
                       if ((active_workspace == (unsigned)j) && (ops & META_MENU_OP_UNSTICK))
                         gtk_widget_set_sensitive (submi, FALSE);
 
-                      md = g_new (MenuData, 1);
+                      md1 = g_new (MenuData, 1);
 
-                      md->menu = menu;
-                      md->op = META_MENU_OP_WORKSPACES;
+                      md1->menu = menu;
+                      md1->op = META_MENU_OP_WORKSPACES;
 
                       g_object_set_data (G_OBJECT (submi),
                           "workspace",
@@ -446,7 +465,7 @@ meta_window_menu_new   (MetaFrames         *frames,
                       g_signal_connect_data (G_OBJECT (submi),
                           "activate",
                           G_CALLBACK (activate_cb),
-                          md,
+                          md1,
                           (GClosureNotify) free, 0);
 
                       gtk_menu_shell_append (GTK_MENU_SHELL (submenu), submi);
