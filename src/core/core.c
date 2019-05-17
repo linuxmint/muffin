@@ -664,6 +664,8 @@ meta_core_get_menu_accelerator (MetaMenuOp           menu_op,
     case META_MENU_OP_RECOVER:
       /* No keybinding for this one */
       break;
+    default:
+      break;
     }
 
   if (name)
