@@ -963,23 +963,6 @@ sync_actor_stacking (MetaCompositor *compositor)
   clutter_actor_set_child_below_sibling (parent, compositor->background_actor, NULL);
 }
 
-static gboolean
-ensure_window_override_other_update (MetaCompositor *compositor)
-{
-  clutter_actor_queue_redraw (compositor->window_group);
-
-  // Basically, clutter needs to be active when the screensaver starts.
-  // When the first user time event (click or keypress) is initiated,
-  // we can kill this and only redraw on interaction.
-  if (!compositor->override_window_on_top || compositor->user_time_sent)
-    {
-      compositor->user_time_sent = FALSE;
-      return G_SOURCE_REMOVE;
-    }
-
-  return G_SOURCE_CONTINUE;
-}
-
 /*
  * Find the top most window that is visible on the screen. The intention of
  * this is to avoid offscreen windows that isn't actually part of the visible
@@ -1003,7 +986,6 @@ get_top_visible_window_actor (MetaCompositor *compositor)
             {
               compositor->override_window_on_top = TRUE;
               meta_compositor_set_all_obscured (compositor, FALSE);
-              g_timeout_add (500, (GSourceFunc) ensure_window_override_other_update, compositor);
             }
           else if (compositor->override_window_on_top)
             {

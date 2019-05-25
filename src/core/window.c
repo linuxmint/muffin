@@ -11222,10 +11222,7 @@ meta_window_set_user_time (MetaWindow *window,
      override_window_on_top can only be true for META_WINDOW_OVERRIDE_OTHER type windows. */
   if (window->compositor_private == window->display->compositor->top_window_actor &&
       window->display->compositor->override_window_on_top)
-    {
-      window->display->compositor->user_time_sent = TRUE;
-      clutter_actor_queue_redraw (window->display->compositor->window_group);
-    }
+    clutter_actor_queue_redraw (window->display->compositor->window_group);
 
   g_object_notify (G_OBJECT (window), "user-time");
 }
