@@ -224,7 +224,6 @@ meta_window_group_paint (ClutterActor *actor)
   cairo_rectangle_int_t visible_rect, clip_rect;
   int paint_x_offset, paint_y_offset;
   int paint_x_origin, paint_y_origin;
-  int actor_x_origin, actor_y_origin;
 
   MetaWindowGroup *window_group = META_WINDOW_GROUP (actor);
   MetaCompositor *compositor = window_group->screen->display->compositor;
@@ -244,19 +243,24 @@ meta_window_group_paint (ClutterActor *actor)
    * painting currently, and never worry about how actors are positioned
    * on the stage.
    */
-  if (!meta_actor_painting_untransformed (cogl_get_draw_framebuffer (),
-                                          screen_rect->width,
-                                          screen_rect->height,
-                                          &paint_x_origin,
-                                          &paint_y_origin) ||
-      !meta_actor_is_untransformed (actor, &actor_x_origin, &actor_y_origin))
+  if (clutter_actor_is_in_clone_paint (actor))
     {
-      CLUTTER_ACTOR_CLASS (meta_window_group_parent_class)->paint (actor);
-      return;
+      if (!meta_actor_painting_untransformed (cogl_get_draw_framebuffer (),
+                                              screen_rect->width,
+                                              screen_rect->height,
+                                              &paint_x_origin,
+                                              &paint_y_origin) ||
+          !meta_actor_is_untransformed (actor, NULL, NULL))
+        {
+          CLUTTER_ACTOR_CLASS (meta_window_group_parent_class)->paint (actor);
+          return;
+        }
     }
-
-  paint_x_offset = paint_x_origin - actor_x_origin;
-  paint_y_offset = paint_y_origin - actor_y_origin;
+  else
+    {
+      paint_x_origin = 0;
+      paint_y_origin = 0;
+    }
 
   visible_rect.x = visible_rect.y = 0;
   visible_rect.width = screen_rect->width;
