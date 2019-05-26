@@ -802,11 +802,13 @@ paint_clipped_rectangle (CoglFramebuffer       *fb,
 
 static void
 texture_paint (ClutterActor *actor,
-               int           opacity)
+               int           opacity,
+               CoglFramebuffer *framebuffer)
 {
   MetaWindowActor *self = META_WINDOW_ACTOR (actor);
   MetaWindowActorPrivate *priv = self->priv;
   int tex_width, tex_height;
+  CoglFramebuffer *fb = NULL;
 
   tex_width = priv->tex_width;
   tex_height = priv->tex_height;
@@ -821,7 +823,6 @@ texture_paint (ClutterActor *actor,
 
   cairo_region_t *opaque_region = priv->opaque_region;
   CoglContext *ctx;
-  CoglFramebuffer *fb = NULL;
   CoglTexture *paint_tex = NULL;
   CoglTexture *mask_texture = priv->mask_texture;
   ClutterActorBox alloc;
@@ -845,8 +846,11 @@ texture_paint (ClutterActor *actor,
    * Setting the texture quality to high without SGIS_generate_mipmap
    * support for TFP textures will result in fallbacks to XGetImage.
    */
-
-  fb = cogl_get_draw_framebuffer ();
+  if (framebuffer) /* can be set if there was shadow processing in the calling routine
+                      no point looking it up twice in this case */
+    fb = framebuffer;
+  else
+    fb = cogl_get_draw_framebuffer ();
 
   if (priv->create_mipmaps && priv->last_invalidation)
     {
@@ -1036,7 +1040,7 @@ meta_window_actor_paint (ClutterActor *actor)
   MetaWindowActor *self = META_WINDOW_ACTOR (actor);
   MetaWindowActorPrivate *priv = self->priv;
   int opacity = priv->opacity;
-  CoglFramebuffer *framebuffer;
+  CoglFramebuffer *framebuffer = NULL;
 
   /* Disable painting of obscured windows. The window's obscured
      property will reset during move, resize, unmaximize, minimize,
@@ -1104,7 +1108,7 @@ meta_window_actor_paint (ClutterActor *actor)
 
  out:
   if (priv->texture)
-    texture_paint (actor, opacity);
+    texture_paint (actor, opacity, framebuffer);
 }
 
 static void
