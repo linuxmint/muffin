@@ -323,11 +323,16 @@ meta_shadow_paint (MetaShadow      *shadow,
             {
               cairo_region_t *intersection;
               int n_rectangles, k;
+              float rects[32];  /* 4 co-ords + 4 texture co-ords. 4 sets */
+              int m=0;
 
               intersection = cairo_region_create_rectangle (&dest_rect);
               cairo_region_intersect (intersection, clip);
 
               n_rectangles = cairo_region_num_rectangles (intersection);
+
+              /* frequent values for n_rectangles are 1,2,4.  For n_rectangles between 2 and 4
+                 use the multiple rectangles call, else use the single rectangle call */
               for (k = 0; k < n_rectangles; k++)
                 {
                   cairo_rectangle_int_t rect;
@@ -348,12 +353,34 @@ meta_shadow_paint (MetaShadow      *shadow,
                   src_y2 = (src_y[j] * (dest_rect.y + dest_rect.height - (rect.y + rect.height)) +
                             src_y[j + 1] * (rect.y + rect.height - dest_rect.y)) / dest_rect.height;
 
-                  cogl_framebuffer_draw_textured_rectangle (framebuffer,
-                                                            shadow->pipeline,
-                                                            rect.x, rect.y,
-                                                            rect.x + rect.width, rect.y + rect.height,
-                                                            src_x1, src_y1, src_x2, src_y2);
-                }
+                  if (n_rectangles == 1 || n_rectangles > 4)
+                    {
+                      cogl_framebuffer_draw_textured_rectangle (framebuffer,
+                                                                shadow->pipeline,
+                                                                rect.x, rect.y,
+                                                                rect.x + rect.width, rect.y + rect.height,
+                                                                src_x1, src_y1, src_x2, src_y2);
+                    }
+                  else
+                    {
+                      rects[m++] = rect.x;
+                      rects[m++] = rect.y;
+                      rects[m++] = rect.x + rect.width;
+                      rects[m++] = rect.y + rect.height;
+
+                      rects[m++] = src_x1;
+                      rects[m++] = src_y1;
+                      rects[m++] = src_x2;
+                      rects[m++] = src_y2;
+                    }
+                  }
+                if (m > 0)
+                  {
+                    cogl_framebuffer_draw_textured_rectangles (framebuffer,
+                                                               shadow->pipeline,
+                                                               rects,
+                                                               n_rectangles);
+                  }
 
               cairo_region_destroy (intersection);
             }
