@@ -2223,7 +2223,8 @@ meta_window_actor_hide (MetaWindowActor *self,
     start_simple_effect (self, event);
 
   /* Hide the actor immediately, Cinnamon will clone it and continue the effect with the clone. */
-  clutter_actor_hide (CLUTTER_ACTOR (self));
+  if (event != META_PLUGIN_DESTROY)
+    clutter_actor_hide (CLUTTER_ACTOR (self));
 }
 
 LOCAL_SYMBOL void
