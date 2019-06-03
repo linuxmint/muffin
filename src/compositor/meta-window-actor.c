@@ -1575,12 +1575,14 @@ set_obscured (MetaWindowActor *self,
           priv->send_frame_messages_timer = 0;
         }
 
-      clutter_actor_set_offscreen_redirect (actor, CLUTTER_OFFSCREEN_REDIRECT_ALWAYS);
+      if (actor->priv->offscreen_redirect != CLUTTER_OFFSCREEN_REDIRECT_ALWAYS)
+        clutter_actor_set_offscreen_redirect (actor, CLUTTER_OFFSCREEN_REDIRECT_ALWAYS);
       priv->obscured = TRUE;
     }
   else
     {
-      clutter_actor_set_offscreen_redirect (actor, CLUTTER_OFFSCREEN_REDIRECT_AUTOMATIC_FOR_OPACITY);
+      if (actor->priv->offscreen_redirect != CLUTTER_OFFSCREEN_REDIRECT_AUTOMATIC_FOR_OPACITY)
+        clutter_actor_set_offscreen_redirect (actor, CLUTTER_OFFSCREEN_REDIRECT_AUTOMATIC_FOR_OPACITY);
 
       priv->obscured = FALSE;
 
@@ -1597,7 +1599,8 @@ meta_window_actor_check_obscured (MetaWindowActor *self)
 {
   MetaWindowActorPrivate *priv = self->priv;
 
-  if (!priv->first_frame_drawn)
+  if (!priv->first_frame_drawn ||
+      priv->window->type == META_WINDOW_OVERRIDE_OTHER)
     {
       if (priv->obscured)
         set_obscured (self, FALSE);
@@ -1979,6 +1982,9 @@ fullscreen_sync_toggle (MetaWindowActor *self,
   MetaWindowActorPrivate *priv = self->priv;
   MetaSyncMethod method = *priv->display->prefs->sync_method;
 
+  if (priv->window->type == META_WINDOW_OVERRIDE_OTHER)
+    return;
+
   if (*priv->display->prefs->unredirect_fullscreen_windows &&
       method != META_SYNC_NONE)
     {
@@ -2024,13 +2030,10 @@ meta_window_actor_set_redirected (MetaWindowActor *self, gboolean state)
 LOCAL_SYMBOL void
 meta_window_actor_destroy (MetaWindowActor *self)
 {
-  MetaWindow *window;
   MetaWindowActorPrivate *priv = self->priv;
   MetaCompositor *compositor = priv->display->compositor;
-  MetaWindowType window_type;
-
-  window = priv->window;
-  window_type = window->type;
+  MetaWindow *window = priv->window;
+  MetaWindowType window_type = window->type;
 
   if (self == compositor->top_window_actor)
     {
