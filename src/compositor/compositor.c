@@ -981,7 +981,20 @@ get_top_visible_window_actor (MetaCompositor *compositor)
       meta_window_get_input_rect (actor->priv->window, &rect);
 
       if (meta_rectangle_overlap (&compositor->display->active_screen->rect, &rect))
-        return actor;
+        {
+          if (actor->priv->window->type == META_WINDOW_OVERRIDE_OTHER)
+            {
+              compositor->override_window_on_top = TRUE;
+              meta_compositor_set_all_obscured (compositor, FALSE);
+            }
+          else if (compositor->override_window_on_top)
+            {
+              compositor->override_window_on_top = FALSE;
+              meta_compositor_set_all_obscured (compositor, TRUE);
+            }
+
+          return actor;
+        }
     }
 
   return NULL;
