@@ -1599,6 +1599,9 @@ meta_window_actor_check_obscured (MetaWindowActor *self)
 {
   MetaWindowActorPrivate *priv = self->priv;
 
+  if (!priv || !priv->window)
+    return;
+
   if (!priv->first_frame_drawn ||
       priv->window->type == META_WINDOW_OVERRIDE_OTHER)
     {
