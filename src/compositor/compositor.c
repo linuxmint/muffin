@@ -553,6 +553,7 @@ meta_compositor_manage_screen (MetaCompositor *compositor,
 {
   MetaDisplay    *display       = meta_screen_get_display (screen);
   Display        *xdisplay      = meta_display_get_xdisplay (display);
+  MetaWorkspace *startup_workspace = NULL;
   Window          xwin;
   gint            width, height;
   XWindowAttributes attr;
@@ -665,6 +666,11 @@ meta_compositor_manage_screen (MetaCompositor *compositor,
   XMapWindow (xdisplay, compositor->output);
 
   compositor->have_x11_sync_object = meta_sync_ring_init (xdisplay);
+
+  startup_workspace = meta_screen_get_workspace_by_index (screen, screen->startup_workspace_index);
+
+  if (startup_workspace != NULL)
+    meta_workspace_activate (startup_workspace, display->current_time);
 }
 
 void
