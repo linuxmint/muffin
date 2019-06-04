@@ -2092,19 +2092,19 @@ meta_window_actor_sync_actor_geometry (MetaWindowActor *self,
   if (priv->last_width != window_rect->width ||
       priv->last_height != window_rect->height)
     {
+      priv->last_width = window_rect->width;
+      priv->last_height = window_rect->height;
       priv->size_changed = priv->geometry_changed = TRUE;
     }
-
-  priv->last_width = window_rect->width;
-  priv->last_height = window_rect->height;
 
   if (priv->last_x != window_rect->x ||
       priv->last_y != window_rect->y)
     {
-      priv->position_changed = priv->geometry_changed = TRUE;
-      priv->last_x = window_rect->x;
-      priv->last_y = window_rect->y;
+        priv->last_x = window_rect->x;
+        priv->last_y = window_rect->y;
+        priv->position_changed = priv->geometry_changed = TRUE;
     }
+
 
   /* Normally we want freezing a window to also freeze its position; this allows
    * windows to atomically move and resize together, either under app control,
