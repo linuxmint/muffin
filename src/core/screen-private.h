@@ -85,6 +85,7 @@ struct _MetaScreen
   gboolean tile_hud_visible;
 
   MetaWorkspace *active_workspace;
+  gulong startup_workspace_index;
 
   /* This window holds the focus when we don't want to focus
    * any actual clients

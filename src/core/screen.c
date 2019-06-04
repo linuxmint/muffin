@@ -996,10 +996,12 @@ meta_screen_new (MetaDisplay *display,
 
   /* Get current workspace */
   current_workspace = 0;
-  if (meta_prop_get_cardinal (screen->display,
-                              screen->xroot,
-                              screen->display->atom__NET_CURRENT_DESKTOP,
-                              &current_workspace))
+
+  if (meta_prop_get_cardinal_with_atom_type (screen->display,
+                                             screen->xroot,
+                                             screen->display->atom__NET_CURRENT_DESKTOP,
+                                             XA_CARDINAL,
+                                             &current_workspace))
     meta_verbose ("Read existing _NET_CURRENT_DESKTOP = %d\n",
                   (int) current_workspace);
   else
@@ -1013,6 +1015,7 @@ meta_screen_new (MetaDisplay *display,
 
   set_workspace_names (screen);
 
+  screen->startup_workspace_index = current_workspace;
   screen->all_keys_grabbed = FALSE;
   screen->keys_grabbed = FALSE;
   meta_screen_grab_keys (screen);
@@ -1043,17 +1046,6 @@ meta_screen_new (MetaDisplay *display,
   screen->startup_sequences = NULL;
   screen->startup_sequence_timeout = 0;
 #endif
-
-  /* Switch to the _NET_CURRENT_DESKTOP workspace */
-  {
-    MetaWorkspace *space;
-    
-    space = meta_screen_get_workspace_by_index (screen,
-                                                current_workspace);
-    
-    if (space != NULL)
-      meta_workspace_activate (space, timestamp);
-  }
 
   meta_verbose ("Added screen %d ('%s') root 0x%lx\n",
                 screen->number, screen->screen_name, screen->xroot);
