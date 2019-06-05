@@ -4186,11 +4186,10 @@ meta_window_make_fullscreen_internal (MetaWindow  *window)
       /* For the auto-minimize feature, if we fail to get focus */
       meta_screen_queue_check_fullscreen (window->screen);
 
-      if (window->compositor_private)
-        window->compositor_private->priv->geometry_changed = TRUE;
-
       meta_stack_tracker_queue_sync_stack (window->screen->stack_tracker);
 
+      if (window->compositor_private)
+        window->compositor_private->priv->geometry_changed = TRUE;
       g_object_notify (G_OBJECT (window), "fullscreen");
     }
 }
@@ -4248,11 +4247,6 @@ meta_window_unmake_fullscreen (MetaWindow  *window)
       force_save_user_window_placement (window);
 
       meta_screen_queue_check_fullscreen (window->screen);
-
-      if (window->compositor_private)
-        window->compositor_private->priv->geometry_changed = TRUE;
-
-      meta_display_set_all_obscured ();
 
       meta_stack_tracker_queue_sync_stack (window->screen->stack_tracker);
       g_object_notify (G_OBJECT (window), "fullscreen");

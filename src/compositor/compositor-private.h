@@ -55,7 +55,6 @@ struct _MetaCompositor
   guint           show_redraw : 1;
   guint           debug       : 1;
   guint           no_mipmaps  : 1;
-  guint           override_window_on_top : 1;
 
   gboolean frame_has_updated_xsurfaces;
   gboolean have_x11_sync_object;
