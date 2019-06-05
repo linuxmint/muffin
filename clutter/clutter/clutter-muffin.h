@@ -66,26 +66,6 @@
 #include "deprecated/clutter-behaviour.h"
 #include "deprecated/clutter-container.h"
 
-typedef enum _SyncMethod /* In order of priority */
-{                        /* SUPPORTED  LATENCY      SMOOTHNESS             */
-  SYNC_NONE = 0,         /* Always     High         Poor                   */
-  SYNC_FALLBACK,         /* Always     Medium       Medium                 */
-  SYNC_SWAP_THROTTLING,  /* Usually    Medium-high  Medium, sometimes best */
-  SYNC_PRESENTATION_TIME /* Usually    Low          Good, sometimes best   */
-                         /* ^ As you can see SWAP_THROTTLING doesn't add much
-                              value. And it does create the the very real
-                              risk of blocking the main loop for up to 16ms
-                              at a time. So it might be a good idea to retire
-                              it in future and instead just make the backends
-                              use swap interval 0 + PRESENTATION_TIME. */
-} SyncMethod;
-
-CLUTTER_AVAILABLE_IN_MUFFIN
-SyncMethod _clutter_get_sync_method (void);
-
-CLUTTER_AVAILABLE_IN_MUFFIN
-void _clutter_set_sync_method (SyncMethod sync_method);
-
 CLUTTER_AVAILABLE_IN_MUFFIN
 void clutter_set_custom_backend_func (ClutterBackend *(* func) (void));
 
@@ -96,11 +76,11 @@ CLUTTER_AVAILABLE_IN_MUFFIN
 void            _clutter_set_sync_to_vblank     (gboolean      sync_to_vblank);
 
 CLUTTER_AVAILABLE_IN_MUFFIN
-void clutter_master_clock_set_sync_method (SyncMethod method);
+void clutter_master_clock_set_sync_method (gint state);
 
 CLUTTER_AVAILABLE_IN_MUFFIN
 void clutter_stage_x11_update_sync_state (ClutterStage *stage,
-                                          SyncMethod    method);
+                                          gint          state);
 
 CLUTTER_AVAILABLE_IN_MUFFIN
 int64_t clutter_stage_get_frame_counter (ClutterStage *stage);

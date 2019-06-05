@@ -89,7 +89,7 @@ void meta_compositor_grab_op_end (MetaCompositor *compositor);
 void meta_check_end_modal (MetaScreen *screen);
 
 void meta_compositor_update_sync_state (MetaCompositor *compositor,
-                                        MetaSyncMethod  method);
+                                        gboolean state);
 
 void meta_compositor_grab_op_begin (MetaCompositor *compositor);
 void meta_compositor_grab_op_end (MetaCompositor *compositor);
