@@ -805,8 +805,7 @@ meta_screen_new (MetaDisplay *display,
   Atom wm_sn_atom;
   char buf[128];
   guint32 manager_timestamp;
-  gulong current_workspace;
-  
+
   replace_current_wm = meta_get_replace_current_wm ();
 
   /* Only display->name, display->xdisplay, and display->error_traps
@@ -994,19 +993,6 @@ meta_screen_new (MetaDisplay *display,
 
   meta_screen_update_workspace_layout (screen);
 
-  /* Get current workspace */
-  current_workspace = 0;
-
-  if (meta_prop_get_cardinal_with_atom_type (screen->display,
-                                             screen->xroot,
-                                             screen->display->atom__NET_CURRENT_DESKTOP,
-                                             XA_CARDINAL,
-                                             &current_workspace))
-    meta_verbose ("Read existing _NET_CURRENT_DESKTOP = %d\n",
-                  (int) current_workspace);
-  else
-    meta_verbose ("No _NET_CURRENT_DESKTOP present\n");
-  
   /* Screens must have at least one workspace at all times,
    * so create that required workspace.
    */
@@ -1015,7 +1001,6 @@ meta_screen_new (MetaDisplay *display,
 
   set_workspace_names (screen);
 
-  screen->startup_workspace_index = current_workspace;
   screen->all_keys_grabbed = FALSE;
   screen->keys_grabbed = FALSE;
   meta_screen_grab_keys (screen);
