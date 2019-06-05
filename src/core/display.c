@@ -1752,8 +1752,8 @@ event_callback (XEvent   *event,
                               window->desc);
                 }
 
-              if (window->compositor_private)
-                meta_window_actor_update_shape (window->compositor_private);
+              meta_compositor_window_shape_changed (display->compositor,
+                                                    window);
             }
         }
       else
@@ -3596,7 +3596,7 @@ meta_display_begin_grab_op (MetaDisplay *display,
   /* If window is a modal dialog attached to its parent,
    * grab the parent instead for moving.
    */
-  if (window && window->attached &&
+  if (window && meta_window_is_attached_dialog (window) &&
       meta_grab_op_is_moving (op))
     grab_window = meta_window_get_transient_for (window);
 
@@ -5722,11 +5722,4 @@ void
 meta_display_update_sync_state (gboolean state)
 {
   meta_compositor_update_sync_state (the_display->compositor, state);
-}
-
-void
-meta_display_set_all_obscured (void)
-{
-    meta_compositor_set_all_obscured (the_display->compositor, FALSE);
-    meta_compositor_set_all_obscured (the_display->compositor, TRUE);
 }

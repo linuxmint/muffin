@@ -805,7 +805,8 @@ meta_screen_new (MetaDisplay *display,
   Atom wm_sn_atom;
   char buf[128];
   guint32 manager_timestamp;
-
+  gulong current_workspace;
+  
   replace_current_wm = meta_get_replace_current_wm ();
   
   /* Only display->name, display->xdisplay, and display->error_traps
@@ -993,6 +994,17 @@ meta_screen_new (MetaDisplay *display,
 
   meta_screen_update_workspace_layout (screen);
 
+  /* Get current workspace */
+  current_workspace = 0;
+  if (meta_prop_get_cardinal (screen->display,
+                              screen->xroot,
+                              screen->display->atom__NET_CURRENT_DESKTOP,
+                              &current_workspace))
+    meta_verbose ("Read existing _NET_CURRENT_DESKTOP = %d\n",
+                  (int) current_workspace);
+  else
+    meta_verbose ("No _NET_CURRENT_DESKTOP present\n");
+  
   /* Screens must have at least one workspace at all times,
    * so create that required workspace.
    */
@@ -1031,6 +1043,17 @@ meta_screen_new (MetaDisplay *display,
   screen->startup_sequences = NULL;
   screen->startup_sequence_timeout = 0;
 #endif
+
+  /* Switch to the _NET_CURRENT_DESKTOP workspace */
+  {
+    MetaWorkspace *space;
+    
+    space = meta_screen_get_workspace_by_index (screen,
+                                                current_workspace);
+    
+    if (space != NULL)
+      meta_workspace_activate (space, timestamp);
+  }
 
   meta_verbose ("Added screen %d ('%s') root 0x%lx\n",
                 screen->number, screen->screen_name, screen->xroot);
@@ -1224,7 +1247,8 @@ meta_screen_composite_all_windows (MetaScreen *screen)
 
       meta_compositor_add_window (display->compositor, window);
       if (window->visible_to_compositor)
-        meta_window_actor_show (window->compositor_private, META_COMP_EFFECT_NONE);
+        meta_compositor_show_window (display->compositor, window,
+                                     META_COMP_EFFECT_NONE);
     }
 
   g_slist_free (windows);

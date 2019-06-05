@@ -756,7 +756,7 @@ constrain_modal_dialog (MetaWindow         *window,
   MetaWindow *parent = meta_window_get_transient_for (window);
   gboolean constraint_already_satisfied;
 
-  if (!window->attached)
+  if (!meta_window_is_attached_dialog (window))
     return TRUE;
 
   x = parent->rect.x + (parent->rect.width / 2  - info->current.width / 2);
@@ -862,7 +862,7 @@ constrain_maximization (MetaWindow         *window,
       }
    }
   /* Now make target_size = maximized size of client window */
-  if (!window->has_custom_frame_extents)
+  if (!meta_window_is_client_decorated(window))
     meta_window_unextend_by_frame (window, &target_size, info->borders);
 
   /* Check min size constraints; max size constraints are ignored for maximized
@@ -1613,7 +1613,7 @@ constrain_partially_onscreen (MetaWindow         *window,
       bottom_amount = info->current.height + info->borders->visible.bottom;
       vert_amount_onscreen = info->borders->visible.top;
     }
-  else if (window->has_custom_frame_extents)
+  else if (meta_window_is_client_decorated (window))
     {
       top_amount = vert_amount_onscreen = CSD_TITLEBAR_HEIGHT * scale; /* Hardcoded for now, we don't get this from Gtk */
       bottom_amount = vert_amount_offscreen = MAX ((info->current.height - (vert_amount_onscreen * 2)), 0);

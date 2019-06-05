@@ -661,13 +661,13 @@ meta_workspace_activate_internal (MetaWorkspace       *workspace,
     * Notify the compositor that the active workspace is changing.
     */
    screen = workspace->screen;
-   display = screen->display;
-   comp = display->compositor;
+   display = meta_screen_get_display (screen);
+   comp = meta_display_get_compositor (display);
    direction = 0;
 
    current_space = meta_workspace_index (old);
    new_space     = meta_workspace_index (workspace);
-   num_workspaces = g_list_length (screen->workspaces);
+   num_workspaces = meta_screen_get_n_workspaces (workspace->screen);
    meta_screen_calc_workspace_layout (workspace->screen, num_workspaces,
                                       current_space, &layout1);
 
@@ -1305,7 +1305,7 @@ meta_workspace_get_neighbor (MetaWorkspace      *workspace,
   gboolean ltr, cycle;
 
   current_space = meta_workspace_index (workspace);
-  num_workspaces = g_list_length (workspace->screen->workspaces);
+  num_workspaces = meta_screen_get_n_workspaces (workspace->screen);
   meta_screen_calc_workspace_layout (workspace->screen, num_workspaces,
                                      current_space, &layout);
   cycle = meta_prefs_get_workspace_cycle();
