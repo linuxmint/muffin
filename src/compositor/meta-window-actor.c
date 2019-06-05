@@ -86,7 +86,7 @@ enum
 #define DEFAULT_SHADOW_X_OFFSET 0
 #define DEFAULT_SHADOW_Y_OFFSET 8
 
-static inline int OPACITY_TYPE_CARDINAL = 256;
+static inline guint8 OPACITY_TYPE_CARDINAL = 256;
 
 static void meta_window_actor_dispose    (GObject *object);
 static void meta_window_actor_finalize   (GObject *object);
@@ -193,14 +193,14 @@ meta_window_actor_class_init (MetaWindowActorClass *klass)
                                    PROP_X_WINDOW,
                                    pspec);
 
-  pspec = g_param_spec_int ("opacity",
-                            "Opacity",
-                            "Opacity of a window actor actor",
-                            0, 255,
-                            255,
-                            G_PARAM_READWRITE |
-                            G_PARAM_STATIC_STRINGS |
-                            META_WINDOW_ACTOR_PARAM_ANIMATABLE);
+  pspec = g_param_spec_uint ("opacity",
+                             "Opacity",
+                             "Opacity of a window actor actor",
+                             0, 255,
+                             255,
+                             G_PARAM_READWRITE |
+                             G_PARAM_STATIC_STRINGS |
+                             META_WINDOW_ACTOR_PARAM_ANIMATABLE);
 
   g_object_class_install_property (object_class,
                                    PROP_OPACITY,
@@ -476,7 +476,7 @@ meta_window_actor_set_property (GObject      *object,
       priv->xwindow = g_value_get_ulong (value);
       break;
     case PROP_OPACITY:
-      meta_window_actor_set_opacity (self, g_value_get_int (value));
+      meta_window_actor_set_opacity (self, g_value_get_uint (value));
       break;
     case PROP_NO_SHADOW:
       {
@@ -529,7 +529,7 @@ meta_window_actor_get_property (GObject      *object,
       g_value_set_ulong (value, priv->xwindow);
       break;
     case PROP_OPACITY:
-      g_value_set_int (value, priv->opacity);
+      g_value_set_uint (value, priv->opacity);
       break;
     case PROP_NO_SHADOW:
       g_value_set_boolean (value, priv->no_shadow);
@@ -802,7 +802,7 @@ paint_clipped_rectangle (CoglFramebuffer       *fb,
 
 static void
 texture_paint (ClutterActor *actor,
-               int           opacity)
+               guint8        opacity)
 {
   MetaWindowActor *self = META_WINDOW_ACTOR (actor);
   MetaWindowActorPrivate *priv = self->priv;
@@ -1035,7 +1035,7 @@ meta_window_actor_paint (ClutterActor *actor)
 {
   MetaWindowActor *self = META_WINDOW_ACTOR (actor);
   MetaWindowActorPrivate *priv = self->priv;
-  int opacity = priv->opacity;
+  guint8 opacity = priv->opacity;
 
   /* Disable painting of obscured windows. The window's obscured
      property will reset during move, resize, unmaximize, minimize,
@@ -3364,7 +3364,7 @@ meta_window_actor_invalidate_shadow (MetaWindowActor *self)
 
 void
 meta_window_actor_set_opacity (MetaWindowActor *self,
-                               int              opacity)
+                               guint8           opacity)
 {
   MetaWindowActorPrivate *priv = self->priv;
 
@@ -3385,7 +3385,7 @@ meta_window_actor_set_opacity (MetaWindowActor *self,
                                                  compositor->atom_net_wm_window_opacity,
                                                  XA_CARDINAL, &value))
         {
-          opacity = (int)((gfloat)value * 255.0 / ((gfloat)0xffffffff));
+          opacity = (guint8)((gfloat)value * 255.0 / ((gfloat)0xffffffff));
         }
       else
         opacity = 255;
@@ -3445,7 +3445,7 @@ meta_window_actor_set_opacity (MetaWindowActor *self,
     }
 }
 
-int
+guint8
 meta_window_actor_get_opacity (MetaWindowActor *self)
 {
   return self->priv->opacity;
