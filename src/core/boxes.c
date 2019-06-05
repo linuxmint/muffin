@@ -206,10 +206,7 @@ meta_rectangle_intersect (const MetaRectangle *src1,
   int return_val;
 
   if (!src1 || !src2 || !dest)
-    {
-      g_warn_if_reached ();
-      return FALSE;
-    }
+    g_warn_if_reached ();
 
   return_val = FALSE;
 
