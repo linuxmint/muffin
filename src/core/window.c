@@ -9400,7 +9400,7 @@ update_move (MetaWindow  *window,
                                                                      work_area,
                                                                      x,
                                                                      y,
-                                                                     (*prefs->tile_hud_threshold) * (*prefs->ui_scale));
+                                                                     *prefs->tile_hud_threshold);
 
       guint edge_zone = meta_window_get_current_zone (window,
                                                       monitor->rect,
@@ -9448,7 +9448,7 @@ update_move (MetaWindow  *window,
    * the threshold in the Y direction. Tiled windows can also be pulled
    * loose via X motion.
    */
-  breakloose_threshold = (*prefs->resize_threshold) * 2 * (*prefs->ui_scale);
+  breakloose_threshold = *prefs->resize_threshold * 2;
 
   if (window->tile_type == META_WINDOW_TILE_TYPE_SNAPPED)
     breakloose_threshold *= 2;
@@ -9633,7 +9633,7 @@ check_resize_unmaximize(MetaWindow *window,
   int threshold;
   MetaMaximizeFlags new_unmaximize;
 
-  threshold = (*window->display->prefs->resize_threshold) * (*window->display->prefs->ui_scale);
+  threshold = *window->display->prefs->resize_threshold;
   new_unmaximize = 0;
 
   if (window->maximized_horizontally ||
