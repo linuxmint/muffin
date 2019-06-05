@@ -17,7 +17,6 @@ struct _MetaWindowActorPrivate
   MetaWindow *window;
   Window xwindow;
   MetaScreen *screen;
-  MetaDisplay *display;
 
   /* MetaShadowFactory only caches shadows that are actually in use;
    * to avoid unnecessary recomputation we do two things: 1) we store
