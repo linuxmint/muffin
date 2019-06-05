@@ -5795,9 +5795,3 @@ meta_display_set_all_obscured (void)
     meta_compositor_set_all_obscured (the_display->compositor, FALSE);
     meta_compositor_set_all_obscured (the_display->compositor, TRUE);
 }
-
-gboolean
-meta_display_popup_window_visible (MetaDisplay *display)
-{
-  return display->compositor->popup_window_visible;
-}

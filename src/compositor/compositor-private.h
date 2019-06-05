@@ -58,7 +58,6 @@ struct _MetaCompositor
 
   gboolean frame_has_updated_xsurfaces;
   gboolean have_x11_sync_object;
-  gboolean popup_window_visible;
 };
 
 /* Wait 2ms after vblank before starting to draw next frame */
