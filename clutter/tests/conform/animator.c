@@ -99,7 +99,7 @@ animator_multi_properties (void)
   g_list_free (keys);
 
   g_object_unref (script);
-  free (test_file);
+  g_free (test_file);
 }
 
 static void
@@ -160,7 +160,7 @@ animator_properties (void)
 
   g_list_free (keys);
   g_object_unref (script);
-  free (test_file);
+  g_free (test_file);
 }
 
 static void
@@ -189,7 +189,7 @@ animator_base (void)
   g_assert_cmpint (duration, ==, 1000);
 
   g_object_unref (script);
-  free (test_file);
+  g_free (test_file);
 }
 
 CLUTTER_TEST_SUITE (

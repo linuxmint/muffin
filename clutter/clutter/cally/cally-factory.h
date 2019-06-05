@@ -93,7 +93,7 @@ type_as_function ## _factory_get_type (void)					\
     name = g_strconcat (g_type_name (type), "Factory", NULL);			\
     t = g_type_register_static (						\
 	    ATK_TYPE_OBJECT_FACTORY, name, &tinfo, 0);				\
-    free (name);								\
+    g_free (name);								\
   }										\
 										\
   return t;									\

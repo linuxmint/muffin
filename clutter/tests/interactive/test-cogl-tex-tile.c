@@ -146,7 +146,7 @@ test_coglbox_init (TestCoglbox *self)
                                                   COGL_TEXTURE_NONE,
                                                   COGL_PIXEL_FORMAT_ANY,
                                                   NULL);
-  free (file);
+  g_free (file);
 }
 
 static void

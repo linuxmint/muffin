@@ -367,5 +367,5 @@ _cogl_sampler_cache_free (CoglSamplerCache *cache)
 
   g_hash_table_destroy (cache->hash_table_cogl);
 
-  free (cache);
+  g_free (cache);
 }

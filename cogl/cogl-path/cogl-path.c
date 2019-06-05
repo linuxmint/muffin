@@ -95,7 +95,7 @@ _cogl_path_data_clear_vbos (CoglPathData *data)
       for (i = 0; i < data->stroke_n_attributes; i++)
         cogl_object_unref (data->stroke_attributes[i]);
 
-      free (data->stroke_attributes);
+      g_free (data->stroke_attributes);
 
       data->stroke_attribute_buffer = NULL;
     }

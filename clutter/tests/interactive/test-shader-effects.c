@@ -32,7 +32,7 @@ test_shader_effects_main (int argc, char *argv[])
   if (!hand)
     g_error("Unable to load '%s'", file);
 
-  free (file);
+  g_free (file);
 
   clutter_actor_set_position (hand, 326, 265);
   clutter_actor_add_effect_with_name (hand, "desaturate", clutter_desaturate_effect_new (0.75));
@@ -69,7 +69,7 @@ test_shader_effects_main (int argc, char *argv[])
                                        NULL);
 
   clutter_container_add (CLUTTER_CONTAINER (stage), rect, hand, label, NULL);
-
+  
   /* start the timeline and thus the animations */
   clutter_timeline_start (timeline);
 

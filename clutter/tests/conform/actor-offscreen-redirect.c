@@ -147,7 +147,7 @@ verify_results (Data *data,
   g_assert_cmpint (ABS ((int) expected_color_green - (int) pixel[1]), <=, 2);
   g_assert_cmpint (ABS ((int) expected_color_blue - (int) pixel[2]), <=, 2);
 
-  free (pixel);
+  g_free (pixel);
 }
 
 static void

@@ -71,7 +71,7 @@ create_label (void)
   label = clutter_text_new_with_text (font_name, str->str);
   clutter_text_set_color (CLUTTER_TEXT (label), &label_color);
 
-  free (font_name);
+  g_free (font_name);
   g_string_free (str, TRUE);
 
   return label;

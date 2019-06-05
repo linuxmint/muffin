@@ -91,7 +91,7 @@ _cogl_pipeline_cache_free (CoglPipelineCache *cache)
   _cogl_pipeline_hash_table_destroy (&cache->fragment_hash);
   _cogl_pipeline_hash_table_destroy (&cache->vertex_hash);
   _cogl_pipeline_hash_table_destroy (&cache->combined_hash);
-  free (cache);
+  g_free (cache);
 }
 
 CoglPipelineCacheEntry *
@@ -136,7 +136,7 @@ create_pipelines (CoglPipeline **pipelines,
                           NULL, /* declarations */
                           source);
 
-      free (source);
+      g_free (source);
 
       pipelines[i] = cogl_pipeline_new (test_ctx);
       cogl_pipeline_add_snippet (pipelines[i], snippet);

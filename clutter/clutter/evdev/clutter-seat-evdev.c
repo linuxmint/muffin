@@ -102,8 +102,9 @@ ensure_seat_slot_allocated (ClutterSeatEvdev *seat,
       int i;
 
       seat->n_alloc_touch_states += size_increase;
-      seat->touch_states = realloc (seat->touch_states,
-                                    seat->n_alloc_touch_states * sizeof (ClutterTouchState *));
+      seat->touch_states = g_realloc_n (seat->touch_states,
+                                        seat->n_alloc_touch_states,
+                                        sizeof (ClutterTouchState *));
       for (i = 0; i < size_increase; i++)
         seat->touch_states[seat->n_alloc_touch_states - (i + 1)] = NULL;
     }
@@ -845,7 +846,7 @@ clutter_seat_evdev_free (ClutterSeatEvdev *seat)
       g_object_unref (device);
     }
   g_slist_free (seat->devices);
-  free (seat->touch_states);
+  g_free (seat->touch_states);
 
   xkb_state_unref (seat->xkb);
 
@@ -854,7 +855,7 @@ clutter_seat_evdev_free (ClutterSeatEvdev *seat)
   if (seat->libinput_seat)
     libinput_seat_unref (seat->libinput_seat);
 
-  free (seat);
+  g_free (seat);
 }
 
 ClutterInputDevice *

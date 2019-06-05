@@ -216,7 +216,7 @@ _cogl_renderer_free (CoglRenderer *renderer)
 
   g_array_free (renderer->poll_fds, TRUE);
 
-  free (renderer);
+  g_free (renderer);
 }
 
 CoglRenderer *

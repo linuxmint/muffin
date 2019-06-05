@@ -97,7 +97,7 @@ test_keyframe_transition_main (int argc, char *argv[])
                         NULL);
       g_object_unref (group);
 
-      free (name);
+      g_free (name);
     }
 
   clutter_actor_show (stage);

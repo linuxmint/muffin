@@ -558,7 +558,7 @@ _cogl_winsys_context_deinit (CoglContext *context)
   if (egl_renderer->platform_vtable->context_deinit)
     egl_renderer->platform_vtable->context_deinit (context);
 
-  free (context->winsys);
+  g_free (context->winsys);
 }
 
 typedef struct _CoglGLES2ContextEGL

@@ -104,7 +104,7 @@ extern unsigned long _cogl_debug_flags[COGL_DEBUG_N_LONGS];
         if (G_UNLIKELY (COGL_DEBUG_ENABLED (COGL_DEBUG_##type))) {            \
           char *_fmt = g_strdup_printf (__VA_ARGS__);                         \
           _cogl_profile_trace_message ("[" #type "] " G_STRLOC " & %s", _fmt);\
-          free (_fmt);                                                      \
+          g_free (_fmt);                                                      \
         }                                           } G_STMT_END
 
 #endif /* __GNUC__ */

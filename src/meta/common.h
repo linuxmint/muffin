@@ -29,7 +29,6 @@
 #define META_COMMON_H
 
 /* Don't include core headers here */
-#include <stdlib.h>
 #include <X11/Xlib.h>
 #include <glib.h>
 #include <gtk/gtk.h>

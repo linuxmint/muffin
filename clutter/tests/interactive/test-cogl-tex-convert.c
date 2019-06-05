@@ -8,7 +8,7 @@
  *--------------------------------------------------*/
 
 G_BEGIN_DECLS
-
+  
 #define TEST_TYPE_COGLBOX test_coglbox_get_type()
 
 #define TEST_COGLBOX(obj) \
@@ -43,7 +43,7 @@ struct _TestCoglbox
   TestCoglboxPrivate *priv;
 };
 
-struct _TestCoglboxClass
+struct _TestCoglboxClass 
 {
   ClutterActorClass parent_class;
 
@@ -129,10 +129,10 @@ static void
 test_coglbox_dispose (GObject *object)
 {
   TestCoglboxPrivate *priv;
-
+  
   priv = TEST_COGLBOX_GET_PRIVATE (object);
   cogl_handle_unref (priv->cogl_tex_id);
-
+  
   G_OBJECT_CLASS (test_coglbox_parent_class)->dispose (object);
 }
 
@@ -151,26 +151,26 @@ test_coglbox_init (TestCoglbox *self)
                                 COGL_TEXTURE_NONE,
 				COGL_PIXEL_FORMAT_ANY,
                                 NULL);
-
+  
   priv->cogl_tex_id[1] =
     cogl_texture_new_from_file (file,
                                 COGL_TEXTURE_NONE,
 				COGL_PIXEL_FORMAT_BGRA_8888,
                                 NULL);
-
+  
   priv->cogl_tex_id[2] =
     cogl_texture_new_from_file (file,
                                 COGL_TEXTURE_NONE,
 				COGL_PIXEL_FORMAT_ARGB_8888,
                                 NULL);
-
+  
   priv->cogl_tex_id[3] =
     cogl_texture_new_from_file (file,
                                 COGL_TEXTURE_NONE,
 				COGL_PIXEL_FORMAT_G_8,
                                 NULL);
 
-  free (file);
+  g_free (file);
 }
 
 static void
@@ -180,9 +180,9 @@ test_coglbox_class_init (TestCoglboxClass *klass)
   ClutterActorClass *actor_class   = CLUTTER_ACTOR_CLASS (klass);
 
   gobject_class->finalize     = test_coglbox_finalize;
-  gobject_class->dispose      = test_coglbox_dispose;
+  gobject_class->dispose      = test_coglbox_dispose;  
   actor_class->paint          = test_coglbox_paint;
-
+  
   g_type_class_add_private (gobject_class, sizeof (TestCoglboxPrivate));
 }
 
@@ -197,10 +197,10 @@ test_cogl_tex_convert_main (int argc, char *argv[])
 {
   ClutterActor     *stage;
   ClutterActor     *coglbox;
-
+  
   if (clutter_init (&argc, &argv) != CLUTTER_INIT_SUCCESS)
     return 1;
-
+  
   /* Stage */
   stage = clutter_stage_new ();
   clutter_actor_set_size (stage, 400, 400);
@@ -210,11 +210,11 @@ test_cogl_tex_convert_main (int argc, char *argv[])
   /* Cogl Box */
   coglbox = test_coglbox_new ();
   clutter_container_add_actor (CLUTTER_CONTAINER (stage), coglbox);
-
+  
   clutter_actor_show_all (stage);
-
+  
   clutter_main ();
-
+  
   return 0;
 }
 

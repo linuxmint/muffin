@@ -24,7 +24,7 @@ make_source (void)
   if (!actor)
     g_error("pixbuf load failed: %s", error ? error->message : "Unknown");
 
-  free (file);
+  g_free (file);
 
   clutter_container_add_actor (CLUTTER_CONTAINER (source), actor);
 

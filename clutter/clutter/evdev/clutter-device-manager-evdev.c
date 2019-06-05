@@ -2694,7 +2694,7 @@ clutter_evdev_remove_filter (ClutterEvdevFilterFunc func,
         {
           if (filter->destroy_notify)
             filter->destroy_notify (filter->data);
-          free (filter);
+          g_free (filter);
           manager_evdev->priv->event_filters =
             g_slist_delete_link (manager_evdev->priv->event_filters, tmp_list);
           return;
@@ -2742,6 +2742,6 @@ clutter_evdev_warp_pointer (ClutterInputDevice   *pointer_device,
 void
 clutter_evdev_set_seat_id (const gchar *seat_id)
 {
-  free (evdev_seat_id);
+  g_free (evdev_seat_id);
   evdev_seat_id = g_strdup (seat_id);
 }

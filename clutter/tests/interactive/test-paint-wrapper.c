@@ -260,7 +260,7 @@ test_paint_wrapper_main (int argc, char *argv[])
   oh->scaler_1 = clutter_behaviour_scale_new (alpha, 0.5, 0.5, 1.0, 1.0);
   oh->scaler_2 = clutter_behaviour_scale_new (alpha, 1.0, 1.0, 0.5, 0.5);
 
-  real_hand = clutter_texture_new_from_file (TESTS_DATADIR
+  real_hand = clutter_texture_new_from_file (TESTS_DATADIR 
                                              G_DIR_SEPARATOR_S
                                              "redhand.png",
                                              &error);
@@ -335,7 +335,7 @@ test_paint_wrapper_main (int argc, char *argv[])
 	clutter_behaviour_apply (oh->scaler_2, oh->hand[i]);
     }
 
-  oh->paint_guards = calloc (1, sizeof (gboolean) * n_hands);
+  oh->paint_guards = g_malloc0 (sizeof (gboolean) * n_hands);
 
   /* Add the group to the stage */
   clutter_container_add_actor (CLUTTER_CONTAINER (stage),
@@ -356,9 +356,9 @@ test_paint_wrapper_main (int argc, char *argv[])
   g_object_unref (oh->scaler_1);
   g_object_unref (oh->scaler_2);
   g_object_unref (oh->timeline);
-  free (oh->paint_guards);
-  free (oh->hand);
-  free (oh);
+  g_free (oh->paint_guards);
+  g_free (oh->hand);
+  g_free (oh);
 
   return 0;
 }

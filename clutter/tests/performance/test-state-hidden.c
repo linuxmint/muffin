@@ -42,7 +42,7 @@ static ClutterActor *new_rect (gint r,
 
   gchar *file = g_build_filename (TESTS_DATA_DIR, "redhand.png", NULL);
 
-  free (file);
+  g_free (file);
   clutter_actor_set_size (rectangle, ACTOR_WIDTH,ACTOR_HEIGHT);
   clutter_color_free (color);
   clutter_container_add (CLUTTER_CONTAINER (group), rectangle, NULL);
@@ -87,7 +87,7 @@ main (gint    argc,
 
       clutter_state_set (layout_state, NULL, "active",
             actor, "delayed::x", CLUTTER_LINEAR,
-                                         ACTOR_WIDTH * 1.0 * ((TOTAL-1-i) % COLS),
+                                         ACTOR_WIDTH * 1.0 * ((TOTAL-1-i) % COLS), 
                                         ((row*1.0/ROWS))/2, (1.0-(row*1.0/ROWS))/2,
             actor, "delayed::y", CLUTTER_LINEAR,
                                          ACTOR_HEIGHT * 1.0 * ((TOTAL-1-i) / COLS),

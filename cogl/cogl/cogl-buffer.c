@@ -152,7 +152,7 @@ _cogl_buffer_initialize (CoglBuffer *buffer,
       buffer->vtable.unmap = malloc_unmap;
       buffer->vtable.set_data = malloc_set_data;
 
-      buffer->data = malloc (size);
+      buffer->data = g_malloc (size);
     }
   else
     {
@@ -175,7 +175,7 @@ _cogl_buffer_fini (CoglBuffer *buffer)
   if (buffer->flags & COGL_BUFFER_FLAG_BUFFER_OBJECT)
     buffer->context->driver_vtable->buffer_destroy (buffer);
   else
-    free (buffer->data);
+    g_free (buffer->data);
 }
 
 unsigned int

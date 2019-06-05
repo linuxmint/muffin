@@ -128,7 +128,7 @@ normal_contents (void)
   GtkWidget *sw;
   GtkActionGroup *action_group;
   GtkUIManager *ui_manager;
-
+      
   grid = gtk_grid_new ();
 
   /* Create the menubar
@@ -178,18 +178,18 @@ normal_contents (void)
 
   gtk_scrolled_window_set_shadow_type (GTK_SCROLLED_WINDOW (sw),
                                        GTK_SHADOW_IN);
-
+      
   gtk_grid_attach (GTK_GRID (grid),
                    sw,
                    0, 2, 1, 1);
 
   gtk_widget_set_hexpand (sw, TRUE);
   gtk_widget_set_vexpand (sw, TRUE);
-
+      
   contents = gtk_text_view_new ();
   gtk_text_view_set_wrap_mode (GTK_TEXT_VIEW (contents),
                                PANGO_WRAP_WORD);
-
+      
   gtk_container_add (GTK_CONTAINER (sw),
                      contents);
 
@@ -227,19 +227,19 @@ dialog_contents (void)
   GtkWidget *label;
   GtkWidget *image;
   GtkWidget *button;
-
+  
   vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
 
   action_area = gtk_button_box_new (GTK_ORIENTATION_HORIZONTAL);
 
   gtk_button_box_set_layout (GTK_BUTTON_BOX (action_area),
-                             GTK_BUTTONBOX_END);
+                             GTK_BUTTONBOX_END);  
 
   button = gtk_button_new_from_stock (GTK_STOCK_OK);
   gtk_box_pack_end (GTK_BOX (action_area),
                     button,
                     FALSE, TRUE, 0);
-
+  
   gtk_box_pack_end (GTK_BOX (vbox), action_area,
                     FALSE, TRUE, 0);
 
@@ -249,10 +249,10 @@ dialog_contents (void)
   image = gtk_image_new_from_stock (GTK_STOCK_DIALOG_INFO,
                                     GTK_ICON_SIZE_DIALOG);
   gtk_misc_set_alignment (GTK_MISC (image), 0.5, 0.0);
-
+  
   gtk_label_set_line_wrap (GTK_LABEL (label), TRUE);
   gtk_label_set_selectable (GTK_LABEL (label), TRUE);
-
+  
   hbox = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 6);
 
   gtk_box_pack_start (GTK_BOX (hbox), image,
@@ -288,11 +288,11 @@ utility_contents (void)
           char *str;
 
           str = g_strdup_printf ("_%c", (char) ('A' + 4*i + j));
-
+          
           button = gtk_button_new_with_mnemonic (str);
 
-          free (str);
-
+          g_free (str);
+          
           gtk_grid_attach (GTK_GRID (grid),
                            button,
                            i, j, 1, 1);
@@ -304,7 +304,7 @@ utility_contents (void)
     }
 
   gtk_widget_show_all (grid);
-
+  
   return grid;
 }
 
@@ -312,7 +312,7 @@ static GtkWidget*
 menu_contents (void)
 {
   GtkWidget *vbox;
-  GtkWidget *mi;
+  GtkWidget *mi;  
   int i;
   GtkWidget *frame;
 
@@ -328,16 +328,16 @@ menu_contents (void)
       char *str = g_strdup_printf (_("Fake menu item %d\n"), i + 1);
       mi = gtk_label_new (str);
       gtk_misc_set_alignment (GTK_MISC (mi), 0.0, 0.5);
-      free (str);
+      g_free (str);
       gtk_box_pack_start (GTK_BOX (vbox), mi, FALSE, FALSE, 0);
-
+      
       ++i;
     }
 
   gtk_container_add (GTK_CONTAINER (frame), vbox);
-
+  
   gtk_widget_show_all (frame);
-
+  
   return frame;
 }
 
@@ -356,19 +356,19 @@ border_only_contents (void)
   color.blue = 0.6;
   color.alpha = 1.0;
   gtk_widget_override_background_color (event_box, 0, &color);
-
+  
   vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
   gtk_container_set_border_width (GTK_CONTAINER (vbox), 3);
-
+  
   w = gtk_label_new (_("Border-only window"));
   gtk_box_pack_start (GTK_BOX (vbox), w, FALSE, FALSE, 0);
   w = gtk_button_new_with_label (_("Bar"));
   gtk_box_pack_start (GTK_BOX (vbox), w, FALSE, FALSE, 0);
 
   gtk_container_add (GTK_CONTAINER (event_box), vbox);
-
+  
   gtk_widget_show_all (event_box);
-
+  
   return event_box;
 }
 
@@ -405,7 +405,7 @@ get_window_contents (MetaFrameType  type,
     case META_FRAME_TYPE_ATTACHED:
       *title = _("Attached Modal Dialog");
       return dialog_contents ();
-
+      
     case META_FRAME_TYPE_LAST:
       g_assert_not_reached ();
       break;
@@ -428,7 +428,7 @@ get_window_flags (MetaFrameType type)
     META_FRAME_HAS_FOCUS |
     META_FRAME_ALLOWS_SHADE |
     META_FRAME_ALLOWS_MOVE;
-
+  
   switch (type)
     {
     case META_FRAME_TYPE_NORMAL:
@@ -455,12 +455,12 @@ get_window_flags (MetaFrameType type)
 
     case META_FRAME_TYPE_ATTACHED:
       break;
-
+      
     case META_FRAME_TYPE_LAST:
       g_assert_not_reached ();
       break;
-    }
-
+    }  
+  
   return flags;
 }
 
@@ -505,23 +505,23 @@ preview_collection (int font_size,
       GtkWidget *preview;
       PangoFontDescription *font_desc;
       double scale;
-
+      
       eventbox2 = gtk_event_box_new ();
-
+      
       preview = meta_preview_new ();
-
+      
       gtk_container_add (GTK_CONTAINER (eventbox2), preview);
-
+      
       meta_preview_set_frame_type (META_PREVIEW (preview), i);
       meta_preview_set_frame_flags (META_PREVIEW (preview),
                                     get_window_flags (i));
-
+            
       meta_preview_set_theme (META_PREVIEW (preview), global_theme);
-
+      
       contents = get_window_contents (i, &title);
-
+      
       meta_preview_set_title (META_PREVIEW (preview), title);
-
+      
       gtk_container_add (GTK_CONTAINER (preview), contents);
 
       if (i == META_FRAME_TYPE_MENU)
@@ -534,10 +534,10 @@ preview_collection (int font_size,
           xalign = 0.5;
           yalign = 0.5;
         }
-
+      
       align = gtk_alignment_new (0.0, 0.0, xalign, yalign);
       gtk_container_add (GTK_CONTAINER (align), eventbox2);
-
+      
       gtk_box_pack_start (GTK_BOX (box), align, TRUE, TRUE, 0);
 
       switch (font_size)
@@ -556,17 +556,17 @@ preview_collection (int font_size,
       if (scale != 1.0)
         {
           font_desc = pango_font_description_new ();
-
+          
           pango_font_description_set_size (font_desc,
                                            MAX (pango_font_description_get_size (base_desc) * scale, 1));
-
+          
           gtk_widget_override_font (preview, font_desc);
 
           pango_font_description_free (font_desc);
         }
-
+      
       previews[font_size*META_FRAME_TYPE_LAST + i] = preview;
-
+      
       ++i;
     }
 
@@ -595,13 +595,13 @@ init_layouts (void)
         }
       ++i;
     }
-
+  
 #ifndef ALLOW_DUPLICATE_BUTTONS
   i = 0;
   while (i <= MAX_BUTTONS_PER_CORNER)
     {
       int j;
-
+      
       j = 0;
       while (j < i)
         {
@@ -613,34 +613,34 @@ init_layouts (void)
           different_layouts[i].left_buttons[j-i] = (MetaButtonFunction) j;
           ++j;
         }
-
+      
       ++i;
     }
 
   /* Special extra case for no buttons on either side */
   different_layouts[i].left_buttons[0] = META_BUTTON_FUNCTION_LAST;
   different_layouts[i].right_buttons[0] = META_BUTTON_FUNCTION_LAST;
-
+  
 #else
   /* FIXME this code is if we allow duplicate buttons,
    * which we currently do not
    */
   int left;
   int i;
-
+  
   left = 0;
   i = 0;
 
   while (left < MAX_BUTTONS_PER_CORNER)
     {
       int right;
-
+      
       right = 0;
-
+      
       while (right < MAX_BUTTONS_PER_CORNER)
         {
           int j;
-
+          
           static MetaButtonFunction left_functions[MAX_BUTTONS_PER_CORNER] = {
             META_BUTTON_FUNCTION_MENU,
             META_BUTTON_FUNCTION_MINIMIZE,
@@ -655,7 +655,7 @@ init_layouts (void)
           };
 
           g_assert (i < BUTTON_LAYOUT_COMBINATIONS);
-
+          
           j = 0;
           while (j <= left)
             {
@@ -669,12 +669,12 @@ init_layouts (void)
               different_layouts[i].right_buttons[j] = right_functions[j];
               ++j;
             }
-
+          
           ++i;
-
+          
           ++right;
         }
-
+      
       ++left;
     }
 #endif
@@ -690,13 +690,13 @@ previews_of_button_layouts (void)
   GdkRGBA desktop_color;
   int i;
   GtkWidget *eventbox;
-
+  
   if (!initted)
     {
       init_layouts ();
       initted = TRUE;
     }
-
+  
   sw = gtk_scrolled_window_new (NULL, NULL);
   gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (sw),
                                   GTK_POLICY_AUTOMATIC,
@@ -727,33 +727,33 @@ previews_of_button_layouts (void)
       char *title;
 
       eventbox2 = gtk_event_box_new ();
-
+  
       preview = meta_preview_new ();
-
-      gtk_container_add (GTK_CONTAINER (eventbox2), preview);
-
+  
+      gtk_container_add (GTK_CONTAINER (eventbox2), preview);  
+  
       meta_preview_set_theme (META_PREVIEW (preview), global_theme);
 
       title = g_strdup_printf (_("Button layout test %d"), i+1);
       meta_preview_set_title (META_PREVIEW (preview), title);
-      free (title);
+      g_free (title);
 
       meta_preview_set_button_layout (META_PREVIEW (preview),
                                       &different_layouts[i]);
-
+  
       xalign = 0.5;
       yalign = 0.5;
-
+      
       align = gtk_alignment_new (0.0, 0.0, xalign, yalign);
       gtk_container_add (GTK_CONTAINER (align), eventbox2);
-
+  
       gtk_box_pack_start (GTK_BOX (box), align, TRUE, TRUE, 0);
 
       previews[META_FRAME_TYPE_LAST*FONT_SIZE_LAST + i] = preview;
-
+      
       ++i;
     }
-
+  
   return sw;
 }
 
@@ -762,11 +762,11 @@ benchmark_summary (void)
 {
   char *msg;
   GtkWidget *label;
-
+  
   msg = g_strdup_printf (_("%g milliseconds to draw one window frame"),
                          milliseconds_to_draw_frame);
   label = gtk_label_new (msg);
-  free (msg);
+  g_free (msg);
 
   return label;
 }
@@ -782,7 +782,7 @@ main (int argc, char **argv)
   clock_t start, end;
   GtkWidget *notebook;
   int i;
-
+  
   bindtextdomain (GETTEXT_PACKAGE, MUFFIN_LOCALEDIR);
   textdomain(GETTEXT_PACKAGE);
   bind_textdomain_codeset(GETTEXT_PACKAGE, "UTF-8");
@@ -799,7 +799,7 @@ main (int argc, char **argv)
       meta_set_debugging (TRUE);
       meta_set_verbose (TRUE);
     }
-
+  
   start = clock ();
   err = NULL;
   if (argc == 1)
@@ -826,7 +826,7 @@ main (int argc, char **argv)
            (end - start) / (double) CLOCKS_PER_SEC);
 
   run_theme_benchmark ();
-
+  
   window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
   gtk_window_set_default_size (GTK_WINDOW (window), 350, 350);
 
@@ -845,8 +845,8 @@ main (int argc, char **argv)
       gtk_window_set_title (GTK_WINDOW (window),
                             title);
 
-      free (title);
-    }
+      g_free (title);
+    }       
 
   g_signal_connect (G_OBJECT (window), "destroy",
                     G_CALLBACK (gtk_main_quit), NULL);
@@ -859,7 +859,7 @@ main (int argc, char **argv)
 
   g_assert (style);
   g_assert (font_desc);
-
+  
   notebook = gtk_notebook_new ();
   gtk_container_add (GTK_CONTAINER (window), notebook);
 
@@ -868,13 +868,13 @@ main (int argc, char **argv)
   gtk_notebook_append_page (GTK_NOTEBOOK (notebook),
                             collection,
                             gtk_label_new (_("Normal Title Font")));
-
+  
   collection = preview_collection (FONT_SIZE_SMALL,
                                    font_desc);
   gtk_notebook_append_page (GTK_NOTEBOOK (notebook),
                             collection,
                             gtk_label_new (_("Small Title Font")));
-
+  
   collection = preview_collection (FONT_SIZE_LARGE,
                                    font_desc);
   gtk_notebook_append_page (GTK_NOTEBOOK (notebook),
@@ -903,7 +903,7 @@ main (int argc, char **argv)
 
       ++i;
     }
-
+  
   gtk_widget_show_all (window);
 
   gtk_main ();
@@ -978,18 +978,18 @@ run_theme_benchmark (void)
   int client_height;
   cairo_t *cr;
   int inc;
-
+  
   widget = gtk_window_new (GTK_WINDOW_TOPLEVEL);
   gtk_widget_realize (widget);
-
+  
   meta_theme_get_frame_borders (global_theme,
                                 META_FRAME_TYPE_NORMAL,
                                 get_text_height (widget),
                                 get_flags (widget),
                                 &borders);
-
+  
   layout = create_title_layout (widget);
-
+  
   i = 0;
   while (i < MAX_BUTTONS_PER_CORNER)
     {
@@ -997,7 +997,7 @@ run_theme_benchmark (void)
       button_layout.right_buttons[i] = META_BUTTON_FUNCTION_LAST;
       ++i;
     }
-
+  
   button_layout.left_buttons[0] = META_BUTTON_FUNCTION_MENU;
 
   button_layout.right_buttons[0] = META_BUTTON_FUNCTION_MINIMIZE;
@@ -1012,7 +1012,7 @@ run_theme_benchmark (void)
   inc = 1000 / ITERATIONS; /* Increment to grow width/height,
                             * eliminates caching effects.
                             */
-
+  
   i = 0;
   while (i < ITERATIONS)
     {
@@ -1038,7 +1038,7 @@ run_theme_benchmark (void)
                              button_states);
       cairo_destroy (cr);
       cairo_surface_destroy (pixmap);
-
+      
       ++i;
       client_width += inc;
       client_height += inc;
@@ -1048,7 +1048,7 @@ run_theme_benchmark (void)
   g_timer_stop (timer);
 
   milliseconds_to_draw_frame = (g_timer_elapsed (timer, NULL) / (double) ITERATIONS) * 1000;
-
+  
   g_print (_("Drew %d frames in %g client-side seconds (%g milliseconds per frame) and %g seconds wall clock time including X server resources (%g milliseconds per frame)\n"),
            ITERATIONS,
            ((double)end - (double)start) / CLOCKS_PER_SEC,
@@ -1242,7 +1242,7 @@ run_position_expression_tests (void)
                  test->expr, test->expected_x, test->expected_y);
 
       err = NULL;
-
+      
       env.rect = meta_rect (test->rect.x, test->rect.y,
                             test->rect.width, test->rect.height);
       env.object_width = -1;

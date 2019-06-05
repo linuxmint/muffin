@@ -333,7 +333,7 @@ emit_vertex_buffer_geometry (CoglFramebuffer *fb,
                                 0, /* offset */
                                 verts,
                                 sizeof (CoglVertexP2T2) * n_verts);
-          free (verts);
+          g_free (verts);
         }
       else
         cogl_buffer_unmap (COGL_BUFFER (buffer));

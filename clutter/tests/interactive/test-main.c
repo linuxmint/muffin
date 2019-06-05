@@ -21,7 +21,7 @@ get_symbol_with_suffix (const char *unit_name,
 
   g_module_symbol (module, main_symbol_name, &func);
 
-  free (main_symbol_name);
+  g_free (main_symbol_name);
 
   return func;
 }
@@ -142,7 +142,7 @@ main (int argc, char **argv)
                    (int) (len - strlen (str)), " ",
                    str);
 
-          free (str);
+          g_free (str);
         }
 
       ret = EXIT_SUCCESS;
@@ -188,7 +188,7 @@ main (int argc, char **argv)
 
           g_print ("* %s:\n%s\n\n", unit_test, str);
 
-          free (str);
+          g_free (str);
 
           ret = EXIT_SUCCESS;
         }
@@ -205,12 +205,12 @@ main (int argc, char **argv)
 
           ret = unit_test_main (n_unit_names, unit_names);
 
-          free (unit_test);
+          g_free (unit_test);
 
           break;
         }
 
-      free (unit_test);
+      g_free (unit_test);
     }
 
 out:

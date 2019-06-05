@@ -817,7 +817,7 @@ clutter_layout_manager_child_set (ClutterLayoutManager *manager,
       if (error)
         {
           g_warning ("%s: %s", G_STRLOC, error);
-          free (error);
+          g_free (error);
           break;
         }
 
@@ -965,7 +965,7 @@ clutter_layout_manager_child_get (ClutterLayoutManager *manager,
       if (error)
         {
           g_warning ("%s: %s", G_STRLOC, error);
-          free (error);
+          g_free (error);
           g_value_unset (&value);
           break;
         }
@@ -1083,7 +1083,7 @@ clutter_layout_manager_find_child_property (ClutterLayoutManager *manager,
  * stored inside the #ClutterLayoutMeta sub-class used by @manager
  *
  * Return value: (transfer full) (array length=n_pspecs): the newly-allocated,
- *   %NULL-terminated array of #GParamSpec<!-- -->s. Use free() to free the
+ *   %NULL-terminated array of #GParamSpec<!-- -->s. Use g_free() to free the
  *   resources allocated for the array
  *
  * Since: 1.2

@@ -1066,7 +1066,7 @@ cogl_polygon (const CoglTextureVertex *vertices,
                                               2,
                                               COGL_ATTRIBUTE_TYPE_FLOAT);
 
-      free (allocated_name);
+      g_free (allocated_name);
     }
 
   if (use_color)

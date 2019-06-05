@@ -48,7 +48,7 @@ COGL_BEGIN_DECLS
  * Internally a CoglBitmask is a pointer. If the least significant bit
  * of the pointer is 1 then the rest of the bits are directly used as
  * part of the bitmask, otherwise it is a pointer to a GArray of
- * unsigned ints. This relies on the fact the malloc will return a
+ * unsigned ints. This relies on the fact the g_malloc will return a
  * pointer aligned to at least two bytes (so that the least
  * significant bit of the address is always 0). It also assumes that
  * the size of a pointer is always greater than or equal to the size

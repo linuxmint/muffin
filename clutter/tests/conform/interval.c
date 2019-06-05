@@ -107,7 +107,7 @@ interval_from_script (void)
   g_assert (G_VALUE_HOLDS (final, CLUTTER_TYPE_COLOR));
 
   g_object_unref (script);
-  free (test_file);
+  g_free (test_file);
 }
 
 CLUTTER_TEST_SUITE (

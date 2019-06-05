@@ -216,7 +216,7 @@ test_actors_main (int argc, char *argv[])
   if (real_hand == NULL)
     g_error ("image load failed: %s", error->message);
 
-  free (file);
+  g_free (file);
 
   /* create a new actor to hold other actors */
   oh->group = clutter_actor_new ();
@@ -309,8 +309,8 @@ test_actors_main (int argc, char *argv[])
   g_object_unref (oh->scaler_1);
   g_object_unref (oh->scaler_2);
   g_object_unref (oh->timeline);
-  free (oh->hand);
-  free (oh);
+  g_free (oh->hand);
+  g_free (oh);
 
   return EXIT_SUCCESS;
 }

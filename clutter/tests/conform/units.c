@@ -107,7 +107,7 @@ units_string (void)
   clutter_units_from_pt (&units, 24.0);
   string = clutter_units_to_string (&units);
   g_assert_cmpstr (string, ==, "24.0 pt");
-  free (string);
+  g_free (string);
 
   clutter_units_from_em (&units, 3.0);
   string = clutter_units_to_string (&units);
@@ -121,7 +121,7 @@ units_string (void)
   g_assert (clutter_units_get_unit_type (&units) == CLUTTER_UNIT_EM);
   g_assert_cmpint ((int) clutter_units_get_unit_value (&units), ==, 3);
 
-  free (string);
+  g_free (string);
 }
 
 CLUTTER_TEST_SUITE (

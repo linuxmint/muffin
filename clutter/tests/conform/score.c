@@ -60,28 +60,28 @@ score_base (TestConformSimpleFixture *fixture,
   timeline_1 = clutter_timeline_new (100);
   g_object_set_data_full (G_OBJECT (timeline_1),
                           "timeline-name", g_strdup ("Timeline 1"),
-                          free);
+                          g_free);
 
   timeline_2 = clutter_timeline_new (100);
   clutter_timeline_add_marker_at_time (timeline_2, "foo", 50);
   g_object_set_data_full (G_OBJECT (timeline_2),
                           "timeline-name", g_strdup ("Timeline 2"),
-                          free);
+                          g_free);
 
   timeline_3 = clutter_timeline_new (100);
   g_object_set_data_full (G_OBJECT (timeline_3),
                           "timeline-name", g_strdup ("Timeline 3"),
-                          free);
+                          g_free);
 
   timeline_4 = clutter_timeline_new (100);
   g_object_set_data_full (G_OBJECT (timeline_4),
                           "timeline-name", g_strdup ("Timeline 4"),
-                          free);
+                          g_free);
 
   timeline_5 = clutter_timeline_new (100);
   g_object_set_data_full (G_OBJECT (timeline_5),
                           "timeline-name", g_strdup ("Timeline 5"),
-                          free);
+                          g_free);
 
   score = clutter_score_new();
   g_signal_connect (score, "started",

@@ -162,11 +162,11 @@ test_script_main (int argc, char *argv[])
                "***   %s\n", error->message);
       g_error_free (error);
       g_object_unref (script);
-      free (file);
+      g_free (file);
       return EXIT_FAILURE;
     }
 
-  free (file);
+  g_free (file);
 
   merge_id = clutter_script_load_from_data (script, test_unmerge, -1, &error);
   if (error)

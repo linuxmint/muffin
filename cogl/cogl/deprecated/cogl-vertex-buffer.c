@@ -559,7 +559,7 @@ cogl_vertex_buffer_add (CoglHandle         handle,
     buffer->new_attributes =
       g_list_prepend (buffer->new_attributes, attribute);
 
-  free (cogl_attribute_name);
+  g_free (cogl_attribute_name);
 }
 
 static void
@@ -567,7 +567,7 @@ _cogl_vertex_buffer_attrib_free (CoglVertexBufferAttrib *attribute)
 {
   if (attribute->attribute)
     cogl_object_unref (attribute->attribute);
-  free (attribute->name_without_detail);
+  g_free (attribute->name_without_detail);
   g_slice_free (CoglVertexBufferAttrib, attribute);
 }
 
@@ -580,7 +580,7 @@ cogl_vertex_buffer_delete (CoglHandle handle,
   GQuark name = g_quark_from_string (cogl_attribute_name);
   GList *tmp;
 
-  free (cogl_attribute_name);
+  g_free (cogl_attribute_name);
 
   if (!cogl_is_vertex_buffer (handle))
     return;
@@ -621,7 +621,7 @@ set_attribute_enable (CoglHandle handle,
   GQuark name_quark = g_quark_from_string (cogl_attribute_name);
   GList *tmp;
 
-  free (cogl_attribute_name);
+  g_free (cogl_attribute_name);
 
   if (!cogl_is_vertex_buffer (handle))
     return;

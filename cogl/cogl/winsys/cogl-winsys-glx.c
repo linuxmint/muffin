@@ -1341,7 +1341,7 @@ _cogl_winsys_context_deinit (CoglContext *context)
   cogl_xlib_renderer_remove_filter (context->display->renderer,
                                     glx_event_filter_cb,
                                     context);
-  free (context->winsys);
+  g_free (context->winsys);
 }
 
 static CoglBool
@@ -1577,7 +1577,7 @@ _cogl_winsys_onscreen_deinit (CoglOnscreen *onscreen)
 
       _cogl_poll_renderer_remove_fd (context->display->renderer,
                                      glx_onscreen->swap_wait_pipe[0]);
-
+      
       close (glx_onscreen->swap_wait_pipe[0]);
       close (glx_onscreen->swap_wait_pipe[1]);
 
@@ -1971,7 +1971,7 @@ start_threaded_swap_wait (CoglOnscreen *onscreen,
       int i;
 
       ensure_ust_type (display->renderer, drawable);
-
+      
       if ((pipe (glx_onscreen->swap_wait_pipe) == -1))
         g_error ("Couldn't create pipe for swap notification: %s\n",
                  g_strerror (errno));
@@ -2742,7 +2742,7 @@ _cogl_winsys_texture_pixmap_x11_create (CoglTexturePixmapX11 *tex_pixmap)
   if (!try_create_glx_pixmap (ctx, tex_pixmap, FALSE))
     {
       tex_pixmap->winsys = NULL;
-      free (glx_tex_pixmap);
+      g_free (glx_tex_pixmap);
       return FALSE;
     }
 
@@ -2817,7 +2817,7 @@ _cogl_winsys_texture_pixmap_x11_free (CoglTexturePixmapX11 *tex_pixmap)
     cogl_object_unref (glx_tex_pixmap->right.glx_tex);
 
   tex_pixmap->winsys = NULL;
-  free (glx_tex_pixmap);
+  g_free (glx_tex_pixmap);
 }
 
 static CoglBool

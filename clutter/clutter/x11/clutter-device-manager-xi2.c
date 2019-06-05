@@ -444,7 +444,7 @@ create_device (ClutterDeviceManagerXI2 *manager_xi2,
       else
         source = CLUTTER_POINTER_DEVICE;
 
-      free (name);
+      g_free (name);
     }
 
   switch (info->use)
@@ -507,9 +507,9 @@ create_device (ClutterDeviceManagerXI2 *manager_xi2,
     clutter_input_device_xi2_ensure_wacom_info (retval, manager_xi2->wacom_db);
 #endif
 
-  free (vendor_id);
-  free (product_id);
-  free (node_path);
+  g_free (vendor_id);
+  g_free (product_id);
+  g_free (node_path);
 
   CLUTTER_NOTE (BACKEND, "Created device '%s' (id: %d, has-cursor: %s)",
                 info->name,
@@ -556,7 +556,7 @@ pad_passive_button_grab (ClutterInputDevice *device)
 
   clutter_x11_untrap_x_errors ();
 
-  free (xi_event_mask.mask);
+  g_free (xi_event_mask.mask);
 }
 
 static ClutterInputDevice *
@@ -738,7 +738,7 @@ translate_hierarchy_event (ClutterBackendX11       *backend_x11,
             {
               ClutterStage *stage = _clutter_input_device_get_stage (master);
               if (stage != NULL)
-                _clutter_stage_x11_events_device_changed (CLUTTER_STAGE_X11 (_clutter_stage_get_window (stage)),
+                _clutter_stage_x11_events_device_changed (CLUTTER_STAGE_X11 (_clutter_stage_get_window (stage)), 
                                                           master,
                                                           CLUTTER_DEVICE_MANAGER (manager_xi2));
             }
@@ -1053,7 +1053,7 @@ clutter_device_manager_xi2_select_stage_events (ClutterDeviceManager *manager,
 
   XISelectEvents (backend_x11->xdpy, stage_x11->xwin, &xi_event_mask, 1);
 
-  free (mask);
+  g_free (mask);
 }
 
 static guint
@@ -2071,7 +2071,7 @@ clutter_device_manager_xi2_class_init (ClutterDeviceManagerXI2Class *klass)
   gobject_class->set_property = clutter_device_manager_xi2_set_property;
 
   g_object_class_install_properties (gobject_class, PROP_LAST, obj_props);
-
+  
   manager_class = CLUTTER_DEVICE_MANAGER_CLASS (klass);
   manager_class->add_device = clutter_device_manager_xi2_add_device;
   manager_class->remove_device = clutter_device_manager_xi2_remove_device;

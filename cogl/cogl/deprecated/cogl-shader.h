@@ -335,7 +335,7 @@ cogl_shader_compile (CoglHandle handle);
  * debugging purposes.
  *
  * Return value: a newly allocated string containing the info log. Use
- *   free() to free it
+ *   g_free() to free it
  * Deprecated: 1.16: Use #CoglSnippet api
  */
 COGL_DEPRECATED_IN_1_16_FOR (cogl_snippet_)

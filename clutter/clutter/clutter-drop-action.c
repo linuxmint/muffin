@@ -111,7 +111,7 @@ drop_target_free (gpointer _data)
 
   g_signal_handler_disconnect (data->stage, data->capture_id);
   g_hash_table_destroy (data->actions);
-  free (data);
+  g_free (data);
 }
 
 static gboolean

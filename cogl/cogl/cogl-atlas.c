@@ -83,7 +83,7 @@ _cogl_atlas_free (CoglAtlas *atlas)
   g_hook_list_clear (&atlas->pre_reorganize_callbacks);
   g_hook_list_clear (&atlas->post_reorganize_callbacks);
 
-  free (atlas);
+  g_free (atlas);
 }
 
 typedef struct _CoglAtlasRepositionData
@@ -296,7 +296,7 @@ _cogl_atlas_create_texture (CoglAtlas *atlas,
       int bpp = _cogl_pixel_format_get_bytes_per_pixel (atlas->texture_format);
 
       /* Create a buffer of zeroes to initially clear the texture */
-      clear_data = calloc (1, width * height * bpp);
+      clear_data = g_malloc0 (width * height * bpp);
       clear_bmp = cogl_bitmap_new_for_data (ctx,
                                             width,
                                             height,
@@ -318,7 +318,7 @@ _cogl_atlas_create_texture (CoglAtlas *atlas,
 
       cogl_object_unref (clear_bmp);
 
-      free (clear_data);
+      g_free (clear_data);
     }
   else
     {
@@ -409,12 +409,12 @@ _cogl_atlas_reserve_space (CoglAtlas             *atlas,
   /* Get an array of all the textures currently in the atlas. */
   data.n_textures = 0;
   if (atlas->map == NULL)
-    data.textures = malloc (sizeof (CoglAtlasRepositionData));
+    data.textures = g_malloc (sizeof (CoglAtlasRepositionData));
   else
     {
       unsigned int n_rectangles =
         _cogl_rectangle_map_get_n_rectangles (atlas->map);
-      data.textures = malloc (sizeof (CoglAtlasRepositionData) *
+      data.textures = g_malloc (sizeof (CoglAtlasRepositionData) *
                                 (n_rectangles + 1));
       _cogl_rectangle_map_foreach (atlas->map,
                                    _cogl_atlas_get_rectangles_cb,
@@ -528,7 +528,7 @@ _cogl_atlas_reserve_space (CoglAtlas             *atlas,
       ret = TRUE;
     }
 
-  free (data.textures);
+  g_free (data.textures);
 
   _cogl_atlas_notify_post_reorganize (atlas);
 

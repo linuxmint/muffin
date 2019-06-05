@@ -134,8 +134,8 @@ clutter_shader_finalize (GObject *object)
 
   clutter_shaders_list = g_list_remove (clutter_shaders_list, object);
 
-  free (priv->fragment_source);
-  free (priv->vertex_source);
+  g_free (priv->fragment_source);
+  g_free (priv->vertex_source);
 
   G_OBJECT_CLASS (clutter_shader_parent_class)->finalize (object);
 }
@@ -374,7 +374,7 @@ clutter_shader_set_source (ClutterShader     *shader,
   switch (shader_type)
     {
     case CLUTTER_FRAGMENT_SHADER:
-      free (priv->fragment_source);
+      g_free (priv->fragment_source);
 
       priv->fragment_source = g_strndup (data, length);
       priv->fragment_is_glsl = is_glsl;
@@ -382,7 +382,7 @@ clutter_shader_set_source (ClutterShader     *shader,
       break;
 
     case CLUTTER_VERTEX_SHADER:
-      free (priv->vertex_source);
+      g_free (priv->vertex_source);
 
       priv->vertex_source = g_strndup (data, length);
       priv->vertex_is_glsl = is_glsl;
@@ -518,7 +518,7 @@ clutter_shader_glsl_bind (ClutterShader      *self,
                                                         : _("Fragment shader"),
                    log_buf);
 
-      free (log_buf);
+      g_free (log_buf);
 
       return FALSE;
     }

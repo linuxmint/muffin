@@ -125,7 +125,7 @@ clutter_backend_finalize (GObject *gobject)
 
   g_source_destroy (backend->cogl_source);
 
-  free (backend->font_name);
+  g_free (backend->font_name);
   clutter_backend_set_font_options (backend, NULL);
   g_clear_object (&backend->input_method);
 
@@ -155,7 +155,7 @@ get_units_per_em (ClutterBackend       *backend,
           font_desc = pango_font_description_from_string (font_name);
           free_font_desc = TRUE;
 
-          free (font_name);
+          g_free (font_name);
         }
     }
 
@@ -1170,7 +1170,7 @@ clutter_backend_get_font_name (ClutterBackend *backend)
   /* XXX yuck. but we return a const pointer, so we need to
    * store it in the backend
    */
-  free (backend->font_name);
+  g_free (backend->font_name);
   g_object_get (settings, "font-name", &backend->font_name, NULL);
 
   return backend->font_name;

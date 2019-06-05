@@ -157,7 +157,7 @@ test_utils_init (TestFlags requirement_flags,
     {
       char *debug = g_strconcat (g_getenv ("G_DEBUG"), ",fatal-warnings", NULL);
       g_setenv ("G_DEBUG", debug, TRUE);
-      free (debug);
+      g_free (debug);
     }
   else
     g_setenv ("G_DEBUG", "fatal-warnings", TRUE);
@@ -240,8 +240,8 @@ test_utils_compare_pixel_and_alpha (const uint8_t *screen_pixel,
 
       g_assert_cmpstr (screen_pixel_string, ==, expected_pixel_string);
 
-      free (screen_pixel_string);
-      free (expected_pixel_string);
+      g_free (screen_pixel_string);
+      g_free (expected_pixel_string);
     }
 }
 
@@ -261,8 +261,8 @@ test_utils_compare_pixel (const uint8_t *screen_pixel, uint32_t expected_pixel)
 
       g_assert_cmpstr (screen_pixel_string, ==, expected_pixel_string);
 
-      free (screen_pixel_string);
-      free (expected_pixel_string);
+      g_free (screen_pixel_string);
+      g_free (expected_pixel_string);
     }
 }
 
@@ -309,7 +309,7 @@ test_utils_check_region (CoglFramebuffer *test_fb,
 {
   uint8_t *pixels, *p;
 
-  pixels = p = malloc (width * height * 4);
+  pixels = p = g_malloc (width * height * 4);
   cogl_framebuffer_read_pixels (test_fb,
                                 x,
                                 y,
@@ -326,7 +326,7 @@ test_utils_check_region (CoglFramebuffer *test_fb,
         p += 4;
       }
 
-  free (pixels);
+  g_free (pixels);
 }
 
 CoglTexture *

@@ -5,7 +5,7 @@
 static CoglHandle
 make_texture (void)
 {
-  guint32 *data = malloc (100 * 100 * 4);
+  guint32 *data = g_malloc (100 * 100 * 4);
   int x;
   int y;
 
