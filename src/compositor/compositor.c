@@ -79,11 +79,6 @@
 
 static MetaCompositor *compositor_global = NULL;
 
-static gboolean on_move_throttled (MetaCompositor *compositor);
-static void determine_optimization_strategy_for_grab (MetaCompositor *compositor,
-                                                      MetaWindow     *grab_window,
-                                                      gboolean        from_grab);
-
 static void
 frame_callback (ClutterStage     *stage,
                 CoglFrameEvent    event,
@@ -117,8 +112,6 @@ meta_finish_workspace_switch (MetaCompositor *compositor)
    * Fix up stacking order in case the plugin messed it up.
    */
   sync_actor_stacking (compositor);
-
-  meta_compositor_set_all_obscured (compositor, TRUE);
 }
 
 LOCAL_SYMBOL void
@@ -136,6 +129,8 @@ meta_switch_workspace_completed (MetaScreen *screen)
 
   if (!compositor->switch_workspace_in_progress)
     meta_finish_workspace_switch (compositor);
+
+  meta_compositor_set_all_obscured (compositor_global, TRUE);
 }
 
 void
@@ -870,6 +865,7 @@ meta_compositor_switch_workspace (MetaCompositor     *compositor,
        * relative position toward the destkop window.
        */
       meta_finish_workspace_switch (compositor);
+      meta_compositor_set_all_obscured (compositor, TRUE);
     }
 }
 
@@ -1009,7 +1005,6 @@ meta_compositor_sync_stack (MetaCompositor  *compositor,
     {
       MetaWindowActor *old_actor = NULL, *stack_actor = NULL, *actor;
       MetaWindow *old_window = NULL, *stack_window = NULL, *window;
-      MetaWindowActorPrivate *priv;
 
       /* Find the remaining top actor in our existing stack (ignoring
        * windows that have been hidden and are no longer animating) */
@@ -1069,12 +1064,7 @@ meta_compositor_sync_stack (MetaCompositor  *compositor,
        * near the front of the other.)
        */
 
-      priv = actor->priv;
-
-      if (!priv->unredirected &&
-          !priv->obscured_lock &&
-          !priv->public_obscured_lock &&
-          !compositor->switch_workspace_in_progress)
+      if (!actor->priv->unredirected)
         meta_window_actor_check_obscured (actor);
 
       compositor->windows = g_list_prepend (compositor->windows, actor);
@@ -1417,7 +1407,7 @@ meta_compositor_show_tile_preview (MetaCompositor *compositor,
                                    int            tile_monitor_number,
                                    guint          snap_queued)
 {
-  meta_window_update_outer_rect (window);
+  meta_window_update_rects (window);
   meta_plugin_manager_show_tile_preview (compositor->plugin_mgr,
                                           window, tile_rect, tile_monitor_number,
                                           snap_queued);
@@ -1512,8 +1502,6 @@ meta_compositor_monotonic_time_to_server_time (MetaDisplay *display,
     return monotonic_time + compositor->server_time_offset;
 }
 
-/* When set to FALSE, windows are immediately obscured. When set to TRUE, we re-calculate
-   whether every window is obscured after 250ms of the state being locked at FALSE. */
 void
 meta_compositor_set_all_obscured (MetaCompositor *compositor,
                                   gboolean        obscured)
@@ -1540,10 +1528,9 @@ meta_compositor_grab_op_end (MetaCompositor *compositor)
   MetaWindow *window = compositor->display->grab_window;
 
   clutter_actor_set_flags (compositor->window_group, CLUTTER_ACTOR_NO_LAYOUT);
-
   meta_compositor_set_all_obscured (compositor, TRUE);
 
-  meta_window_update_outer_rect (window);
+  meta_window_update_rects (window);
   meta_window_update_monitor (window);
 }
 

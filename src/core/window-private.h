@@ -458,7 +458,7 @@ struct _MetaWindow
    */
   MetaRectangle rect;
   MetaRectangle outer_rect;
-  cairo_rectangle_int_t *client_area;
+  cairo_rectangle_int_t client_area;
 
   gboolean has_custom_frame_extents;
   GtkBorder custom_frame_extents;
@@ -791,8 +791,7 @@ void meta_window_recalc_features    (MetaWindow *window);
 void meta_window_recalc_window_type (MetaWindow *window);
 
 void meta_window_frame_size_changed (MetaWindow *window);
-void meta_window_update_client_area_rect (const MetaWindow *window);
-void meta_window_update_outer_rect (const MetaWindow *window);
+void meta_window_update_rects (MetaWindow *window);
 
 void meta_window_stack_just_below (MetaWindow *window,
                                    MetaWindow *below_this_one);

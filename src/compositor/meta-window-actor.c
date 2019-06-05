@@ -1058,7 +1058,7 @@ meta_window_actor_paint (ClutterActor *actor)
 
   if (priv->window->display->shadows_enabled && priv->should_have_shadow)
     {
-      gboolean appears_focused = priv->window->display->focus_window == priv->window;
+      gboolean appears_focused = meta_window_appears_focused (priv->window);
       MetaShadow *shadow = appears_focused ? priv->focused_shadow : priv->unfocused_shadow;
 
       if (shadow == NULL)
@@ -1138,10 +1138,35 @@ meta_window_actor_queue_relayout (ClutterActor *actor)
 {
   MetaWindowActorPrivate *priv = META_WINDOW_ACTOR (actor)->priv;
 
-  if (priv->geometry_changed)
+  if (priv->size_changed || priv->position_changed)
+    CLUTTER_ACTOR_CLASS (meta_window_actor_parent_class)->queue_relayout (actor->priv->parent);
+  else
+    CLUTTER_ACTOR_CLASS (meta_window_actor_parent_class)->queue_relayout (actor);
+}
+
+static gboolean
+is_move_resize (MetaWindowActor *self)
+{
+  MetaDisplay *display = self->priv->window->display;
+  MetaGrabOp op = display->grab_op;
+
+  if (op == META_GRAB_OP_NONE)
+    return FALSE;
+
+  switch (op)
     {
-      priv->geometry_changed = FALSE;
-      CLUTTER_ACTOR_CLASS (meta_window_actor_parent_class)->queue_relayout (actor);
+      case META_GRAB_OP_MOVING:
+      case META_GRAB_OP_RESIZING_SE:
+      case META_GRAB_OP_RESIZING_S:
+      case META_GRAB_OP_RESIZING_SW:
+      case META_GRAB_OP_RESIZING_N:
+      case META_GRAB_OP_RESIZING_NE:
+      case META_GRAB_OP_RESIZING_NW:
+      case META_GRAB_OP_RESIZING_W:
+      case META_GRAB_OP_RESIZING_E:
+        return TRUE;
+      default:
+        return FALSE;
     }
 }
 
@@ -1153,14 +1178,14 @@ meta_window_actor_get_paint_volume (ClutterActor       *actor,
   MetaWindowActorPrivate *priv = self->priv;
 
   if (priv->obscured)
-    return TRUE;
+    return FALSE;
 
-  if (!priv->should_have_shadow || priv->window->display->grab_op == META_GRAB_OP_NONE)
+  if (!priv->should_have_shadow || !is_move_resize (self))
     return clutter_paint_volume_set_from_allocation (volume, actor);
 
   if (priv->focused_shadow != NULL || priv->unfocused_shadow != NULL)
     {
-      gboolean appears_focused = priv->window->display->focus_window == priv->window;
+      gboolean appears_focused = meta_window_appears_focused (priv->window);
       /* The paint volume is computed before paint functions are called
        * so our bounds might not be updated yet. Force an update. */
       meta_window_actor_handle_updates (self);
@@ -1200,8 +1225,7 @@ static gboolean
 meta_window_actor_has_shadow (MetaWindowActor *self)
 {
   MetaWindowActorPrivate *priv = self->priv;
-  MetaWindow *window = priv->window;
-  MetaWindowType window_type = window->type;
+  MetaWindowType window_type = priv->window->type;
 
   if (priv->no_shadow)
     return FALSE;
@@ -1209,22 +1233,24 @@ meta_window_actor_has_shadow (MetaWindowActor *self)
   /* Leaving out shadows for maximized and fullscreen windows is an effeciency
    * win and also prevents the unsightly effect of the shadow of maximized
    * window appearing on an adjacent window */
-  if ((((window->maximized_horizontally ? META_MAXIMIZE_HORIZONTAL : 0) |
-      (window->maximized_vertically ? META_MAXIMIZE_VERTICAL : 0)) == (META_MAXIMIZE_HORIZONTAL | META_MAXIMIZE_VERTICAL)) ||
-      window->fullscreen)
+  if ((meta_window_get_maximized (priv->window) == (META_MAXIMIZE_HORIZONTAL | META_MAXIMIZE_VERTICAL)) ||
+      priv->window->fullscreen)
     return FALSE;
 
   /* Don't shadow tiled windows of any type */
 
-  if (window->tile_type != META_WINDOW_TILE_TYPE_NONE)
+  if (priv->window->tile_type != META_WINDOW_TILE_TYPE_NONE)
     return FALSE;
 
   /*
    * Always put a shadow around windows with a frame - This should override
    * the restriction about not putting a shadow around ARGB windows.
    */
-  if (window->frame)
-    return TRUE;
+  if (priv->window)
+    {
+      if (priv->window->frame)
+        return TRUE;
+    }
 
   /*
    * Do not add shadows to ARGB windows; eventually we should generate a
@@ -1235,14 +1261,14 @@ meta_window_actor_has_shadow (MetaWindowActor *self)
   /*
    * Add shadows to override redirect windows (e.g., Gtk menus).
    */
-  if (window->override_redirect)
+  if (priv->window->override_redirect)
     return TRUE;
 
   /*
    * If a window specifies that it has custom frame extents, that likely
    * means that it is drawing a shadow itself. Don't draw our own.
    */
-  if (window->has_custom_frame_extents)
+  if (priv->window->has_custom_frame_extents)
     return FALSE;
 
   /*
@@ -1253,8 +1279,22 @@ meta_window_actor_has_shadow (MetaWindowActor *self)
       window_type == META_WINDOW_DOCK)
     return FALSE;
 
-  if (window_type == META_WINDOW_MENU)
+  if (window_type == META_WINDOW_MENU
+#if 0
+      || window_type == META_WINDOW_DROPDOWN_MENU
+#endif
+      )
     return TRUE;
+
+  if (priv->window->has_custom_frame_extents)
+    {
+      return FALSE;
+    }
+
+#if 0
+  if (window_type == META_WINDOW_TOOLTIP)
+    return TRUE;
+#endif
 
   return TRUE;
 }
@@ -1514,7 +1554,7 @@ meta_window_actor_damage_all (MetaWindowActor *self)
   MetaWindowActorPrivate *priv = self->priv;
   CoglTexture *texture;
 
-  if (!priv->window->mapped || priv->needs_pixmap)
+  if (!priv->needs_damage_all || !priv->window->mapped || priv->needs_pixmap)
     return;
 
   texture = priv->texture;
@@ -1551,7 +1591,7 @@ meta_window_actor_thaw (MetaWindowActor *self)
   /* Since we ignore damage events while a window is frozen for certain effects
    * we may need to issue an update_area() covering the whole pixmap if we
    * don't know what real damage has happened. */
-  if (priv->needs_damage_all)
+  if (self->priv->needs_damage_all)
     meta_window_actor_damage_all (self);
 }
 
@@ -1561,9 +1601,7 @@ set_obscured (MetaWindowActor *self,
 {
   MetaWindowActorPrivate *priv = self->priv;
 
-  if (obscured == priv->obscured ||
-      priv->obscured_lock ||
-      priv->public_obscured_lock)
+  if (obscured == priv->obscured)
     return;
 
   ClutterActor *actor = CLUTTER_ACTOR (self);
@@ -1605,10 +1643,12 @@ meta_window_actor_check_obscured (MetaWindowActor *self)
       return;
     }
 
+  if (priv->obscured_lock || priv->public_obscured_lock)
+    return;
+
   /* Invisible (minimized) windows fail the cairo_region_intersect test,
      so force the obscured property. */
-  if (!priv->visible ||
-      (!priv->window->on_all_workspaces && priv->window->workspace != priv->screen->active_workspace))
+  if (!priv->visible)
     {
       if (!priv->obscured)
         set_obscured (self, TRUE);
@@ -1645,8 +1685,7 @@ reset_obscured (gpointer data)
 
   priv->obscured_lock = FALSE;
 
-  if (!priv->window->has_focus &&
-      !priv->window->display->compositor->switch_workspace_in_progress)
+  if (!priv->window->has_focus)
     meta_window_actor_check_obscured (self);
 
   priv->reset_obscured_timeout_id = 0;
@@ -1683,7 +1722,6 @@ meta_window_actor_set_obscured (MetaWindowActor *self,
     {
       set_obscured (self, obscured);
       priv->public_obscured_lock = TRUE;
-      clutter_actor_queue_redraw (CLUTTER_ACTOR (self));
     }
 }
 
@@ -1713,7 +1751,6 @@ meta_window_actor_override_obscured_internal (MetaWindowActor *self,
     {
       set_obscured (self, obscured);
       priv->obscured_lock = TRUE;
-      clutter_actor_queue_redraw (CLUTTER_ACTOR (self));
     }
 }
 
@@ -2101,24 +2138,25 @@ meta_window_actor_sync_actor_geometry (MetaWindowActor *self,
                                        gboolean         did_placement)
 {
   MetaWindowActorPrivate *priv = self->priv;
-  MetaWindow *window = priv->window;
-  MetaRectangle *window_rect = window->frame ? &window->frame->rect : &window->rect;
+  MetaRectangle window_rect;
 
-  if (priv->last_width != window_rect->width ||
-      priv->last_height != window_rect->height)
+  meta_window_get_input_rect (priv->window, &window_rect);
+
+  if (priv->last_width != window_rect.width ||
+      priv->last_height != window_rect.height)
     {
-      priv->size_changed = priv->geometry_changed = TRUE;
+      priv->size_changed = TRUE;
     }
 
-  priv->last_width = window_rect->width;
-  priv->last_height = window_rect->height;
+  priv->last_width = window_rect.width;
+  priv->last_height = window_rect.height;
 
-  if (priv->last_x != window_rect->x ||
-      priv->last_y != window_rect->y)
+  if (priv->last_x != window_rect.x ||
+      priv->last_y != window_rect.y)
     {
-      priv->position_changed = priv->geometry_changed = TRUE;
-      priv->last_x = window_rect->x;
-      priv->last_y = window_rect->y;
+      priv->position_changed = TRUE;
+      priv->last_x = window_rect.x;
+      priv->last_y = window_rect.y;
     }
 
   /* Normally we want freezing a window to also freeze its position; this allows
@@ -2136,8 +2174,8 @@ meta_window_actor_sync_actor_geometry (MetaWindowActor *self,
 
   if (priv->size_changed || !priv->first_frame_drawn)
     {
-      if (!priv->window->has_shape || !priv->first_frame_handler_queued)
-        meta_window_update_client_area_rect (window);
+      if (!priv->window->has_shape)
+        meta_window_update_rects (priv->window);
 
       priv->needs_pixmap = TRUE;
       meta_window_actor_update_shape (self);
@@ -2146,13 +2184,13 @@ meta_window_actor_sync_actor_geometry (MetaWindowActor *self,
         meta_display_set_all_obscured ();
 
       clutter_actor_set_size (CLUTTER_ACTOR (self),
-                              window_rect->width, window_rect->height);
+                              window_rect.width, window_rect.height);
     }
 
   if (priv->position_changed)
     {
       clutter_actor_set_position (CLUTTER_ACTOR (self),
-                                  window_rect->x, window_rect->y);
+                                  window_rect.x, window_rect.y);
     }
 }
 
@@ -2505,6 +2543,56 @@ meta_window_actor_set_clip_region (MetaWindowActor *self,
     priv->clip_region = NULL;
 }
 
+/**
+ * meta_window_actor_set_clip_region_beneath:
+ * @self: a #MetaWindowActor
+ * @visible_region: the region of the screen that isn't completely
+ *  obscured beneath the main window texture.
+ *
+ * Provides a hint as to what areas need to be drawn *beneath*
+ * the main window texture.  This is the relevant visible region
+ * when drawing the shadow, properly accounting for areas of the
+ * shadow hid by the window itself. This will be set before painting
+ * then unset afterwards.
+ */
+void
+meta_window_actor_set_clip_region_beneath (MetaWindowActor *self,
+                                           cairo_region_t  *clip_region)
+{
+  MetaWindowActorPrivate *priv = self->priv;
+
+  if (!priv->should_have_shadow)
+    return;
+
+  gboolean appears_focused = meta_window_appears_focused (priv->window);
+
+  if (appears_focused ? priv->focused_shadow : priv->unfocused_shadow)
+    {
+      g_clear_pointer (&priv->shadow_clip, cairo_region_destroy);
+      priv->shadow_clip = cairo_region_copy (clip_region);
+
+      if (priv->clip_shadow)
+        cairo_region_subtract (priv->shadow_clip,
+                               priv->shape_region);
+    }
+}
+
+/**
+ * meta_window_actor_reset_visible_regions:
+ * @self: a #MetaWindowActor
+ *
+ * Unsets the regions set by meta_window_actor_reset_visible_region() and
+ * meta_window_actor_reset_visible_region_beneath()
+ */
+LOCAL_SYMBOL void
+meta_window_actor_reset_visible_regions (MetaWindowActor *self)
+{
+  MetaWindowActorPrivate *priv = self->priv;
+
+  meta_window_actor_set_clip_region (self, NULL);
+  g_clear_pointer (&priv->shadow_clip, cairo_region_destroy);
+}
+
 static void
 meta_window_actor_set_create_mipmaps (MetaWindowActor *self,
                                       gboolean         create_mipmaps)
@@ -2616,7 +2704,7 @@ process_shadow (MetaWindowActor *self)
 
   should_have_shadow = meta_window_actor_has_shadow (self);
   priv->should_have_shadow = should_have_shadow;
-  appears_focused = priv->window->display->focus_window == priv->window;
+  appears_focused = meta_window_appears_focused (priv->window);
 
   if (appears_focused)
     {
@@ -2923,20 +3011,19 @@ static void
 process_shape_region (MetaWindowActor *self)
 {
   MetaWindowActorPrivate *priv = self->priv;
-  MetaWindow *window = priv->window;
   cairo_region_t *region = NULL;
   cairo_rectangle_int_t *client_area;
-  gboolean full_mask_reset = window->fullscreen;
-  gboolean has_frame = window->frame != NULL;
+  gboolean full_mask_reset = priv->window->fullscreen;
+  gboolean has_frame = priv->window->frame != NULL;
 
   g_clear_pointer (&priv->shape_region, cairo_region_destroy);
   g_clear_pointer (&priv->shadow_shape, meta_window_shape_unref);
   g_clear_pointer (&priv->opaque_region, cairo_region_destroy);
 
-  client_area = window->client_area;
+  client_area = &priv->window->client_area;
 
   if (has_frame)
-    region = meta_window_get_frame_bounds (window);
+    region = meta_window_get_frame_bounds (priv->window);
 
   if (region != NULL)
     {
@@ -2955,6 +3042,7 @@ process_shape_region (MetaWindowActor *self)
   if (priv->window->has_shape)
     {
       MetaDisplay *display = priv->screen->display;
+      Display *xdisplay = display->xdisplay;
       XRectangle *rects;
       int n_rects, ordering;
 
@@ -2962,8 +3050,8 @@ process_shape_region (MetaWindowActor *self)
       cairo_region_subtract_rectangle (region, client_area);
 
       meta_error_trap_push (display);
-      rects = XShapeGetRectangles (display->xdisplay,
-                                   window->xwindow,
+      rects = XShapeGetRectangles (xdisplay,
+                                   priv->window->xwindow,
                                    ShapeBounding,
                                    &n_rects,
                                    &ordering);
@@ -2985,7 +3073,7 @@ process_shape_region (MetaWindowActor *self)
     }
 #endif
 
-  if (priv->argb32 && window->opaque_region != NULL)
+  if (priv->argb32 && priv->window->opaque_region != NULL)
     {
       /* The opaque region is defined to be a part of the
        * window which ARGB32 will always paint with opaque
@@ -2997,7 +3085,7 @@ process_shape_region (MetaWindowActor *self)
        * to be undefined, and considered a client bug. In mutter's
        * case, graphical glitches will occur.
        */
-      priv->opaque_region = cairo_region_copy (window->opaque_region);
+      priv->opaque_region = cairo_region_copy (priv->window->opaque_region);
       cairo_region_translate (priv->opaque_region, client_area->x, client_area->y);
       cairo_region_intersect (priv->opaque_region, region);
     }
@@ -3008,12 +3096,12 @@ process_shape_region (MetaWindowActor *self)
 
   if (has_frame)
     update_corners (self);
-  else if (window->has_shape && priv->reshapes == 1)
+  else if (priv->window->has_shape && priv->reshapes == 1)
     full_mask_reset = TRUE;
   else if (priv->reshapes < 2)
     priv->reshapes++;
 
-  if (has_frame || window->has_shape)
+  if (has_frame || priv->window->has_shape)
     {
       if (full_mask_reset)
         g_clear_pointer (&self->priv->mask_texture, cogl_object_unref);

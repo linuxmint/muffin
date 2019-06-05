@@ -2142,7 +2142,7 @@ meta_screen_get_monitor_for_rect (MetaScreen    *screen,
   best_monitor = 0;
   monitor_score = -1;
 
-  rect_area = rect->width * rect->height;
+  rect_area = meta_rectangle_area (rect);
   for (i = 0; i < screen->n_monitor_infos; i++)
     {
       gboolean result;
@@ -2154,17 +2154,12 @@ meta_screen_get_monitor_for_rect (MetaScreen    *screen,
           result = meta_rectangle_intersect (&screen->monitor_infos[i].rect,
                                              rect,
                                              &dest);
-          cur = dest.width * dest.height;
+          cur = meta_rectangle_area (&dest);
         }
       else
         {
-          MetaRectangle *outer_rect = &screen->monitor_infos[i].rect;
-
-          result = (rect->x >= outer_rect->x &&
-                    rect->y >= outer_rect->y &&
-                    rect->x + rect->width  <= outer_rect->x + outer_rect->width &&
-                    rect->y + rect->height <= outer_rect->y + outer_rect->height);
-
+          result = meta_rectangle_contains_rect (&screen->monitor_infos[i].rect,
+                                                 rect);
           cur = rect_area;
         }
 
@@ -3071,7 +3066,7 @@ meta_screen_resize (MetaScreen *screen,
 
       if (window->screen == screen)
         {
-          meta_window_update_outer_rect (window);
+          meta_window_update_rects (window);
           meta_window_update_for_monitors_changed (window);
 
           if (!window->override_redirect)

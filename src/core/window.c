@@ -147,6 +147,9 @@ static unsigned int get_mask_from_snap_keysym (MetaWindow *window);
 static void update_edge_constraints (MetaWindow *window);
 static void update_gtk_edge_constraints (MetaWindow *window);
 
+static void get_outer_rect (const MetaWindow *window,
+                            MetaRectangle    *rect);
+
 /* Idle handlers for the three queues (run with meta_later_add()). The
  * "data" parameter in each case will be a GINT_TO_POINTER of the
  * index into the queue arrays to use.
@@ -247,7 +250,6 @@ meta_window_finalize (GObject *object)
 
   meta_icon_cache_free (&window->icon_cache);
 
-  free (window->client_area);
   g_free (window->sm_client_id);
   g_free (window->wm_client_machine);
   g_free (window->startup_id);
@@ -1125,8 +1127,6 @@ meta_window_new_with_attrs (MetaDisplay       *display,
   window->rect.y = attrs->y;
   window->rect.width = attrs->width;
   window->rect.height = attrs->height;
-
-  window->client_area = g_new (cairo_rectangle_int_t, 1);
 
   /* And border width, size_hints are the "request" */
   window->border_width = attrs->border_width;
@@ -3120,8 +3120,6 @@ meta_window_show (MetaWindow *window)
 
   if (!window->visible_to_compositor)
     {
-      meta_window_update_outer_rect (window);
-      meta_window_update_client_area_rect (window);
       meta_window_update_monitor (window);
 
       window->visible_to_compositor = TRUE;
@@ -3643,7 +3641,7 @@ meta_window_get_all_monitors (MetaWindow *window, gsize *length)
   else
     {
       if (window->fullscreen)
-        meta_window_update_outer_rect (window);
+        get_outer_rect (window, &window->outer_rect);
 
       window_rect = window->outer_rect;
     }
@@ -5588,7 +5586,7 @@ meta_window_move_to_monitor (MetaWindow  *window,
 
   meta_window_move_between_rects (window, &old_area, &new_area);
 
-  meta_window_update_outer_rect (window);
+  meta_window_update_rects (window);
   meta_window_update_monitor (window);
 }
 
@@ -5886,11 +5884,10 @@ meta_window_get_outer_rect (const MetaWindow *window,
   *rect = window->outer_rect;
 }
 
-void
-meta_window_update_outer_rect (const MetaWindow *window)
+static void
+get_outer_rect (const MetaWindow *window,
+                MetaRectangle    *rect)
 {
-  MetaRectangle *rect = &window->outer_rect;
-
   if (window->frame)
     {
       MetaFrameBorders borders;
@@ -5930,14 +5927,13 @@ void
 meta_window_get_client_area_rect (const MetaWindow      *window,
                                   cairo_rectangle_int_t *rect)
 {
-  rect = window->client_area;
+  *rect = window->client_area;
 }
 
-void
-meta_window_update_client_area_rect (const MetaWindow *window)
+static void
+get_client_area_rect (const MetaWindow      *window,
+                      cairo_rectangle_int_t *rect)
 {
-  cairo_rectangle_int_t *rect = window->client_area;
-
   if (window->frame)
     {
       rect->x = window->frame->child_x;
@@ -8409,13 +8405,19 @@ recalc_window_type (MetaWindow *window)
 }
 
 void
+meta_window_update_rects (MetaWindow *window)
+{
+  get_outer_rect (window, &window->outer_rect);
+  get_client_area_rect (window, &window->client_area);
+}
+
+void
 meta_window_frame_size_changed (MetaWindow *window)
 {
   if (window->frame)
     meta_frame_clear_cached_borders (window->frame);
 
-  meta_window_update_outer_rect (window);
-  meta_window_update_client_area_rect (window);
+  meta_window_update_rects (window);
 }
 
 static void
