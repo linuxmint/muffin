@@ -256,12 +256,10 @@ filter_func (GdkXEvent *xevent,
              GdkEvent *event,
              gpointer data)
 {
-  MetaDisplay *display = (MetaDisplay*) ef->data;
-
-  g_return_val_if_fail (ef != NULL && ef->data != NULL && display != NULL && !display->closing, GDK_FILTER_CONTINUE);
+  g_return_val_if_fail (ef != NULL, GDK_FILTER_CONTINUE);
 
   if ((* ef->func) (xevent, ef->data) ||
-      maybe_redirect_mouse_event (display, xevent))
+      maybe_redirect_mouse_event ((MetaDisplay*)ef->data, xevent))
     return GDK_FILTER_REMOVE;
   else
     return GDK_FILTER_CONTINUE;
