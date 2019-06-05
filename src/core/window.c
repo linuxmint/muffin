@@ -4187,9 +4187,6 @@ meta_window_make_fullscreen_internal (MetaWindow  *window)
       meta_screen_queue_check_fullscreen (window->screen);
 
       meta_stack_tracker_queue_sync_stack (window->screen->stack_tracker);
-
-      if (window->compositor_private)
-        window->compositor_private->priv->geometry_changed = TRUE;
       g_object_notify (G_OBJECT (window), "fullscreen");
     }
 }
