@@ -9975,8 +9975,6 @@ update_resize (MetaWindow *window,
 
   g_assert (gravity >= 0);
 
-  meta_window_update_outer_rect (window);
-
   /* Do any edge resistance/snapping */
   meta_window_edge_resistance_for_resize (window,
                                           old.width,
