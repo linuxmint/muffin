@@ -326,8 +326,8 @@ find_most_freespace (MetaWindow *window,
   frame_size_top  = borders ? borders->visible.top : 0;
 
   meta_window_get_work_area_current_monitor (focus_window, &work_area);
-  avoid = focus_window->outer_rect;
-  outer = window->outer_rect;
+  meta_window_get_outer_rect (focus_window, &avoid);
+  meta_window_get_outer_rect (window, &outer);
 
   /* Find the areas of choosing the various sides of the focus window */
   max_width  = MIN (avoid.width, outer.width);
@@ -453,6 +453,7 @@ rectangle_overlaps_some_window (MetaRectangle *rect,
   while (tmp != NULL)
     {
       MetaWindow *other = tmp->data;
+      MetaRectangle other_rect;      
 
       switch (other->type)
         {
@@ -475,7 +476,9 @@ rectangle_overlaps_some_window (MetaRectangle *rect,
         case META_WINDOW_UTILITY:
         case META_WINDOW_TOOLBAR:
         case META_WINDOW_MENU:
-          if (meta_rectangle_intersect (rect, &other->outer_rect, &dest))
+          meta_window_get_outer_rect (other, &other_rect);
+          
+          if (meta_rectangle_intersect (rect, &other_rect, &dest))
             return TRUE;
           break;
         }
@@ -650,11 +653,13 @@ find_first_fit (MetaWindow *window,
     while (tmp != NULL)
       {
         MetaWindow *w = tmp->data;
-        MetaRectangle outer_rect = w->outer_rect;
+        MetaRectangle outer_rect;
 
+        meta_window_get_outer_rect (w, &outer_rect);
+      
         rect.x = outer_rect.x;
         rect.y = outer_rect.y + outer_rect.height;
-
+      
         if (meta_rectangle_contains_rect (&work_area, &rect) &&
             !rectangle_overlaps_some_window (&rect, below_sorted))
           {
@@ -679,11 +684,13 @@ find_first_fit (MetaWindow *window,
     while (tmp != NULL)
       {
         MetaWindow *w = tmp->data;
-        MetaRectangle outer_rect = w->outer_rect;
-
+        MetaRectangle outer_rect;
+   
+        meta_window_get_outer_rect (w, &outer_rect);
+     
         rect.x = outer_rect.x + outer_rect.width;
         rect.y = outer_rect.y;
-
+   
         if (meta_rectangle_contains_rect (&work_area, &rect) &&
             !rectangle_overlaps_some_window (&rect, right_sorted))
           {
@@ -957,15 +964,17 @@ meta_window_place (MetaWindow        *window,
       !window->fullscreen)
     {
       MetaRectangle workarea;
+      MetaRectangle outer;
 
       meta_window_get_work_area_for_monitor (window,
                                              xi->number,
-                                             &workarea);
-
+                                             &workarea);      
+      meta_window_get_outer_rect (window, &outer);
+      
       /* If the window is bigger than the screen, then automaximize.  Do NOT
        * auto-maximize the directions independently.  See #419810.
        */
-      if (window->outer_rect.width >= workarea.width && window->outer_rect.height >= workarea.height)
+      if (outer.width >= workarea.width && outer.height >= workarea.height)
         {
           window->maximize_horizontally_after_placement = TRUE;
           window->maximize_vertically_after_placement = TRUE;
