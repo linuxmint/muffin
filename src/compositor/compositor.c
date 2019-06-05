@@ -1165,7 +1165,6 @@ meta_pre_paint_func (gpointer data)
   top_window_actor = compositor->top_window_actor;
 
   if (top_window_actor &&
-      top_window_actor->priv &&
       meta_window_actor_should_unredirect (top_window_actor) &&
       compositor->disable_unredirect_count == 0)
     expected_unredirected_window = top_window_actor;
