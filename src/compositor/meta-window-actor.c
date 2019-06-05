@@ -3310,11 +3310,18 @@ meta_window_actor_set_opacity (MetaWindowActor *self,
   if (priv->opacity != opacity || !priv->first_frame_drawn)
     {
       ClutterActor *actor = CLUTTER_ACTOR (self);
-      gboolean transparent = opacity != 255;
+      gboolean transparent;
 
       priv->opacity = opacity;
 
       cogl_color_init_from_4ub (&priv->color, opacity, opacity, opacity, opacity);
+
+      clutter_actor_set_opacity (actor, opacity);
+
+      if (!priv->should_have_shadow)
+        return;
+
+      transparent = opacity != 255;
 
       /* If we have an ARGB32 window that we decorate with a frame, it's
        * probably something like a translucent terminal - something where
@@ -3328,11 +3335,9 @@ meta_window_actor_set_opacity (MetaWindowActor *self,
        * the right result, but looks OK. We also apply this approach to
        * windows set to be partially translucent with _NET_WM_WINDOW_OPACITY.
        */
-      priv->clip_shadow = priv->window->frame && (priv->argb32 || transparent);
+      priv->clip_shadow = (priv->argb32 || transparent) && priv->window->frame;
 
-      clutter_actor_set_opacity (actor, opacity);
-
-      if (!priv->should_have_shadow || priv->has_desat_effect == transparent)
+      if (priv->has_desat_effect == transparent)
         return;
 
       if (transparent)
