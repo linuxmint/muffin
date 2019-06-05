@@ -2203,31 +2203,27 @@ meta_window_actor_hide (MetaWindowActor *self,
     return;
 
   event = 0;
-
-  if (priv->display->desktop_effects)
+  switch (effect)
     {
-      switch (effect)
-        {
-          case META_COMP_EFFECT_DESTROY:
-            event = META_PLUGIN_DESTROY;
-            break;
-          case META_COMP_EFFECT_MINIMIZE:
-            event = META_PLUGIN_MINIMIZE;
-            break;
-          case META_COMP_EFFECT_NONE:
-            break;
-          case META_COMP_EFFECT_UNMINIMIZE:
-          case META_COMP_EFFECT_CREATE:
-            g_assert_not_reached();
-        }
+    case META_COMP_EFFECT_DESTROY:
+      event = META_PLUGIN_DESTROY;
+      break;
+    case META_COMP_EFFECT_MINIMIZE:
+      event = META_PLUGIN_MINIMIZE;
+      break;
+    case META_COMP_EFFECT_NONE:
+      break;
+    case META_COMP_EFFECT_UNMINIMIZE:
+    case META_COMP_EFFECT_CREATE:
+      g_assert_not_reached();
     }
 
-  if (event > 0)
-    start_simple_effect (self, event);
-
-  /* Hide the actor immediately, Cinnamon will clone it and continue the effect with the clone. */
-  if (event != META_PLUGIN_DESTROY && event != META_PLUGIN_MINIMIZE)
-    clutter_actor_hide (CLUTTER_ACTOR (self));
+  if (event == 0 ||
+      !priv->display->desktop_effects ||
+      !start_simple_effect (self, event))
+    {
+      clutter_actor_hide (CLUTTER_ACTOR (self));
+    }
 }
 
 LOCAL_SYMBOL void
