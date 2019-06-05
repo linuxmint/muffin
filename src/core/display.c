@@ -1752,8 +1752,8 @@ event_callback (XEvent   *event,
                               window->desc);
                 }
 
-              meta_compositor_window_shape_changed (display->compositor,
-                                                    window);
+              if (window->compositor_private)
+                meta_window_actor_update_shape (window->compositor_private);
             }
         }
       else

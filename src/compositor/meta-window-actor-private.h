@@ -45,8 +45,7 @@ void meta_window_actor_get_shape_bounds (MetaWindowActor       *self,
                                           cairo_rectangle_int_t *bounds);
 
 gboolean meta_window_actor_effect_in_progress  (MetaWindowActor *self);
-void     meta_window_actor_sync_actor_geometry (MetaWindowActor *self,
-                                                gboolean         did_placement);
+
 void     meta_window_actor_sync_visibility     (MetaWindowActor *self);
 void     meta_window_actor_update_shape        (MetaWindowActor *self);
 void     meta_window_actor_update_opacity      (MetaWindowActor *self,
@@ -76,7 +75,13 @@ void meta_window_actor_check_obscured (MetaWindowActor *self);
 void set_obscured (MetaWindowActor *self,
                    gboolean         obscured);
 
+void meta_window_actor_reset_texture (MetaWindowActor *self);
+
 void meta_window_actor_decorated_notify (MetaWindowActor *self);
+void meta_window_actor_appears_focused_notify (MetaWindowActor *self);
+void meta_window_actor_sync_actor_geometry (MetaWindowActor *self,
+                                            gboolean         did_placement);
+
 void meta_window_actor_override_obscured_internal (MetaWindowActor *self,
                                                    gboolean         obscured);
 
