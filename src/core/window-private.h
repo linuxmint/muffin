@@ -503,7 +503,7 @@ struct _MetaWindow
   /* maintained by group.c */
   MetaGroup *group;
 
-  MetaWindowActor *compositor_private;
+  GObject *compositor_private;
 
   /* Focused window that is (directly or indirectly) attached to this one */
   MetaWindow *attached_focus_window;
@@ -515,7 +515,6 @@ struct _MetaWindow
   guint bypass_compositor;
 
   MetaWindowCallback position_changed_callback;
-  MetaWindowCallback decorated_callback;
 };
 
 struct _MetaWindowClass

@@ -197,9 +197,8 @@ void meta_window_actor_effect_completed (MetaWindowActor *actor,
 
 void meta_window_actor_check_obscured (MetaWindowActor *self);
 
+void meta_window_actor_decorated_notify (MetaWindowActor *self);
 void meta_window_actor_override_obscured_internal (MetaWindowActor *self,
                                                    gboolean         obscured);
-
-void meta_window_actor_appears_focused_notify (MetaWindowActor *self);
 
 #endif /* META_WINDOW_ACTOR_PRIVATE_H */

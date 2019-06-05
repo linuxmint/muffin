@@ -287,9 +287,11 @@ meta_window_actor_init (MetaWindowActor *self)
 }
 
 static void
-window_decorated_notify (MetaWindow *mw)
+window_decorated_notify (MetaWindow *mw,
+                         GParamSpec *arg1,
+                         gpointer    data)
 {
-  MetaWindowActor *self = META_WINDOW_ACTOR (mw->compositor_private);
+  MetaWindowActor *self = META_WINDOW_ACTOR (data);
   MetaWindowActorPrivate *priv = self->priv;
   MetaFrame *frame = mw->frame;
   MetaScreen *screen = priv->screen;
@@ -327,15 +329,27 @@ window_decorated_notify (MetaWindow *mw)
                                 XDamageReportBoundingBox);
 }
 
-void
-meta_window_actor_appears_focused_notify (MetaWindowActor *self)
+static void
+window_appears_focused_notify (MetaWindow *mw,
+                               GParamSpec *arg1,
+                               gpointer    data)
 {
+  MetaWindowActor *self = META_WINDOW_ACTOR (data);
   MetaWindowActorPrivate *priv = self->priv;
 
   if (priv->obscured)
     set_obscured (self, FALSE);
 
   clutter_actor_queue_redraw (CLUTTER_ACTOR (self));
+}
+
+static void
+window_position_changed (MetaWindow *mw,
+                         gpointer    data)
+{
+  MetaWindowActor *self = META_WINDOW_ACTOR (meta_window_get_compositor_private (mw));
+
+  g_signal_emit (self, signals[POSITION_CHANGED], 0); // Compatibility
 }
 
 static void
@@ -394,6 +408,8 @@ meta_window_actor_dispose (GObject *object)
       g_source_remove (priv->reset_obscured_timeout_id);
       priv->reset_obscured_timeout_id = 0;
   }
+
+  meta_window_set_position_changed_callback (priv->window, NULL);
 
   if (priv->first_frame_drawn_id)
     {
@@ -468,6 +484,9 @@ meta_window_actor_set_property (GObject      *object,
 
         g_signal_connect_object (priv->window, "notify::decorated",
                                  G_CALLBACK (window_decorated_notify), self, 0);
+        g_signal_connect_object (priv->window, "notify::appears-focused",
+                                 G_CALLBACK (window_appears_focused_notify), self, 0);
+        meta_window_set_position_changed_callback (priv->window, window_position_changed);
       }
       break;
     case PROP_META_SCREEN:
@@ -2075,7 +2094,7 @@ meta_window_actor_destroy (MetaWindowActor *self)
 
   window = priv->window;
   window_type = window->type;
-  window->compositor_private = NULL;
+  meta_window_set_compositor_private (window, NULL);
 
   if (priv->send_frame_messages_timer != 0)
     {
@@ -2359,11 +2378,11 @@ meta_window_actor_new (MetaWindow *window)
 
   meta_verbose ("add window: Meta %p, xwin 0x%x\n", window, (guint)top_window);
 
-  self = window->compositor_private = g_object_new (META_TYPE_WINDOW_ACTOR,
-                                                    "meta-window",   window,
-                                                    "x-window",      top_window,
-                                                    "meta-screen",   screen,
-                                                    NULL);
+  self = g_object_new (META_TYPE_WINDOW_ACTOR,
+                       "meta-window",         window,
+                       "x-window",            top_window,
+                       "meta-screen",         screen,
+                       NULL);
 
   priv = self->priv;
 
@@ -2384,6 +2403,9 @@ meta_window_actor_new (MetaWindow *window)
     meta_window_actor_queue_frame_drawn (self, FALSE);
 
   meta_window_actor_sync_actor_geometry (self, priv->window->placed);
+
+  /* Hang our compositor window state off the MetaWindow for fast retrieval */
+  meta_window_set_compositor_private (window, G_OBJECT (self));
 
   if (window->type == META_WINDOW_DND)
     window_group = compositor->window_group;
@@ -3430,11 +3452,12 @@ meta_window_actor_set_opacity (MetaWindowActor *self,
         }
       else
         {
-          /* This will tend to get called fairly often - opening new windows, various
+          /* This is will tend to get called fairly often - opening new windows, various
              events on the window, like minimizing... but it's inexpensive - if the ClutterActor
              priv->effects is NULL, it simply returns.  By default cinnamon and muffin add no
              other effects except the special case of dimmed windows (attached modal dialogs), which
              isn't a frequent occurrence. */
+
           clutter_actor_remove_effect_by_name (actor, "desaturate-for-transparency");
           priv->has_desat_effect = FALSE;
         }
