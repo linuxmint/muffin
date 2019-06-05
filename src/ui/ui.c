@@ -30,7 +30,6 @@
 #include "menu.h"
 #include "core.h"
 #include "theme-private.h"
-#include "display-private.h"
 #include "window-private.h"
 
 #include "inlinepixbufs.h"
@@ -103,10 +102,10 @@ meta_ui_get_display (void)
  */
 
 static gboolean
-maybe_redirect_mouse_event (MetaDisplay *display,
-                            XEvent      *xevent)
+maybe_redirect_mouse_event (XEvent *xevent)
 {
   GdkDisplay *gdisplay;
+  GdkDeviceManager *gmanager;
   GdkDevice *gdevice;
   MetaUI *ui;
   GdkEvent *gevent;
@@ -141,8 +140,8 @@ maybe_redirect_mouse_event (MetaDisplay *display,
         return FALSE;
     }
 
-  gdisplay = display->gdk_display;
-  ui = display->ui;
+  gdisplay = gdk_x11_lookup_xdisplay (xevent->xany.display);
+  ui = g_object_get_data (G_OBJECT (gdisplay), "meta-ui");
   if (!ui)
     return FALSE;
 
@@ -150,7 +149,8 @@ maybe_redirect_mouse_event (MetaDisplay *display,
   if (gdk_window == NULL)
     return FALSE;
 
-  gdevice = display->gdk_device;
+  gmanager = gdk_display_get_device_manager (gdisplay);
+  gdevice = gdk_device_manager_get_client_pointer (gmanager);
 
   /* If GDK already thinks it has a grab, we better let it see events; this
    * is the menu-navigation case and events need to get sent to the appropriate
@@ -259,7 +259,7 @@ filter_func (GdkXEvent *xevent,
   g_return_val_if_fail (ef != NULL, GDK_FILTER_CONTINUE);
 
   if ((* ef->func) (xevent, ef->data) ||
-      maybe_redirect_mouse_event ((MetaDisplay*)ef->data, xevent))
+      maybe_redirect_mouse_event (xevent))
     return GDK_FILTER_REMOVE;
   else
     return GDK_FILTER_CONTINUE;
@@ -294,17 +294,17 @@ meta_ui_remove_event_func (Display       *xdisplay,
 }
 
 LOCAL_SYMBOL MetaUI*
-meta_ui_new (MetaDisplay *display,
-             Screen      *screen)
+meta_ui_new (Display *xdisplay,
+             Screen  *screen)
 {
   GdkDisplay *gdisplay;
   MetaUI *ui;
 
-  ui = display->ui = g_new0 (MetaUI, 1);
-  ui->xdisplay = display->xdisplay;
+  ui = g_new0 (MetaUI, 1);
+  ui->xdisplay = xdisplay;
   ui->xscreen = screen;
 
-  gdisplay = display->gdk_display;
+  gdisplay = gdk_x11_lookup_xdisplay (xdisplay);
   g_assert (gdisplay == gdk_display_get_default ());
 
   ui->frames = meta_frames_new (XScreenNumberOfScreen (screen));
