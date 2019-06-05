@@ -245,7 +245,6 @@ static void meta_window_actor_get_preferred_height (ClutterActor *self,
 static gboolean meta_window_actor_get_paint_volume (ClutterActor       *actor,
                                                     ClutterPaintVolume *volume);
 
-static void meta_window_actor_queue_relayout (ClutterActor *actor);
 
 static void     meta_window_actor_detach     (MetaWindowActor *self);
 static gboolean meta_window_actor_has_shadow (MetaWindowActor *self);
@@ -289,7 +288,6 @@ meta_window_actor_class_init (MetaWindowActorClass *klass)
   actor_class->pick = meta_window_actor_pick;
   actor_class->paint = meta_window_actor_paint;
   actor_class->get_paint_volume = meta_window_actor_get_paint_volume;
-  actor_class->queue_relayout = meta_window_actor_queue_relayout;
 
   pspec = g_param_spec_object ("meta-window",
                                "MetaWindow",
@@ -377,8 +375,6 @@ meta_window_actor_init (MetaWindowActor *self)
   priv->paint_tower = meta_texture_tower_new ();
   priv->texture = NULL;
   priv->mask_texture = NULL;
-  priv->tex_width = 0;
-  priv->tex_height = 0;
   priv->create_mipmaps = TRUE;
   priv->mask_needs_update = TRUE;
 
@@ -1318,17 +1314,6 @@ meta_window_actor_get_preferred_height (ClutterActor *self,
 
   if (natural_height_p)
     *natural_height_p = priv->tex_height;
-}
-
-static void
-meta_window_actor_queue_relayout (ClutterActor *actor)
-{
-  MetaWindowActorPrivate *priv = META_WINDOW_ACTOR (actor)->priv;
-
-  if (priv->size_changed || priv->position_changed)
-    CLUTTER_ACTOR_CLASS (meta_window_actor_parent_class)->queue_relayout (actor->priv->parent);
-  else
-    CLUTTER_ACTOR_CLASS (meta_window_actor_parent_class)->queue_relayout (actor);
 }
 
 static gboolean
@@ -2367,10 +2352,9 @@ meta_window_actor_sync_actor_geometry (MetaWindowActor *self,
       priv->last_height != window_rect.height)
     {
       priv->size_changed = TRUE;
+      priv->last_width = window_rect.width;
+      priv->last_height = window_rect.height;
     }
-
-  priv->last_width = window_rect.width;
-  priv->last_height = window_rect.height;
 
   if (priv->last_x != window_rect.x ||
       priv->last_y != window_rect.y)
@@ -2393,14 +2377,11 @@ meta_window_actor_sync_actor_geometry (MetaWindowActor *self,
   if (meta_window_actor_effect_in_progress (self))
     return;
 
-  if (priv->size_changed || !priv->first_frame_drawn)
+  if (priv->size_changed)
     {
-      if (!priv->window->has_shape)
-        meta_window_update_rects (priv->window);
-
+      meta_window_update_rects (priv->window);
       priv->needs_pixmap = TRUE;
       meta_window_actor_update_shape (self);
-
       clutter_actor_set_size (CLUTTER_ACTOR (self),
                               window_rect.width, window_rect.height);
     }
@@ -2608,10 +2589,10 @@ meta_window_actor_new (MetaWindow *window)
 
   priv = self->priv;
 
-  priv->last_width = 0;
-  priv->last_height = 0;
-  priv->last_x = 0;
-  priv->last_y = 0;
+  priv->last_width = -1;
+  priv->last_height = -1;
+  priv->last_x = -1;
+  priv->last_y = -1;
 
   priv->needs_pixmap = TRUE;
 
