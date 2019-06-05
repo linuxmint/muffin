@@ -111,6 +111,10 @@ gboolean meta_prop_get_window        (MetaDisplay   *display,
                                       Window         xwindow,
                                       Atom           xatom,
                                       Window        *window_p);
+gboolean meta_prop_get_cardinal      (MetaDisplay   *display,
+                                      Window         xwindow,
+                                      Atom           xatom,
+                                      gulong        *cardinal_p);
 gboolean meta_prop_get_cardinal_with_atom_type (MetaDisplay   *display,
                                                 Window         xwindow,
                                                 Atom           xatom,
