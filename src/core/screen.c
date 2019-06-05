@@ -3065,12 +3065,7 @@ meta_screen_resize (MetaScreen *screen,
       MetaWindow *window = tmp->data;
 
       if (window->screen == screen)
-        {
-          meta_window_update_for_monitors_changed (window);
-
-          if (!window->override_redirect)
-            meta_window_update_monitor (window);
-        }
+        meta_window_update_for_monitors_changed (window);
     }
 
   g_free (old_monitor_infos);
