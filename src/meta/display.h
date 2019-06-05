@@ -201,15 +201,4 @@ void meta_display_keybinding_action_invoke_by_code (MetaDisplay  *display,
 
 void meta_display_restart (MetaDisplay *display);
 
-void meta_display_get_pointer (MetaDisplay  *display,
-                               int          *x,
-                               int          *y,
-                               unsigned int *mask);
-
-void meta_display_get_window_pointer (MetaDisplay  *display,
-                                      Window        xwindow,
-                                      int          *x,
-                                      int          *y,
-                                      unsigned int *mask);
-
 #endif

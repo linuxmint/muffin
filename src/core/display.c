@@ -3770,9 +3770,8 @@ meta_display_end_grab_op (MetaDisplay *display,
 {
   meta_topic (META_DEBUG_WINDOW_OPS,
               "Ending grab op %u at time %u\n", display->grab_op, timestamp);
-
-  if (display->grab_op == META_GRAB_OP_NONE ||
-      display->grab_op == META_GRAB_OP_COMPOSITOR)
+  
+  if (display->grab_op == META_GRAB_OP_NONE)
     return;
 
   meta_compositor_grab_op_end (display->compositor);
@@ -5491,70 +5490,6 @@ timestamp_too_old (MetaDisplay *display,
     }
 
   return FALSE;
-}
-
-/**
- * meta_display_get_pointer:
- * @display: a #MetaDisplay
- * @x: (out) (allow-none): location to store root window X coordinate, or %NULL.
- * @y: (out) (allow-none): location to store root window Y coordinate, or %NULL.
- * @mask: (out) (allow-none): location to store mask, or %NULL.
- *
- * Gets the root coordinates of the pointer.
- **/
-void
-meta_display_get_pointer (MetaDisplay  *display,
-                          int          *x,
-                          int          *y,
-                          unsigned int *mask)
-{
-  Window root_return;
-  Window child_return;
-  int win_x;
-  int win_y;
-
-  XQueryPointer (display->xdisplay,
-                 display->active_screen->xroot,
-                 &root_return,
-                 &child_return,
-                 x,
-                 y,
-                 &win_x,
-                 &win_y,
-                 mask);
-}
-
-/**
- * meta_display_get_window_pointer:
- * @display: a #MetaDisplay
- * @xwindow: an X11 #Window
- * @x: (out) (allow-none): location to store root window X coordinate, or %NULL.
- * @y: (out) (allow-none): location to store root window Y coordinate, or %NULL.
- * @mask: (out) (allow-none): location to store mask, or %NULL.
- *
- * Gets the root coordinates of the pointer.
- **/
-void
-meta_display_get_window_pointer (MetaDisplay  *display,
-                                 Window        xwindow,
-                                 int          *x,
-                                 int          *y,
-                                 unsigned int *mask)
-{
-  Window root_return;
-  Window child_return;
-  int root_x;
-  int root_y;
-
-  XQueryPointer (display->xdisplay,
-                 xwindow,
-                 &root_return,
-                 &child_return,
-                 &root_x,
-                 &root_y,
-                 x,
-                 y,
-                 mask);
 }
 
 void

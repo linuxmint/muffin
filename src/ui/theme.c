@@ -1165,7 +1165,8 @@ meta_color_spec_free (MetaColorSpec *spec)
       break;
 
     case META_COLOR_SPEC_GTK_CUSTOM:
-      g_free (spec->data.gtkcustom.color_name);
+      if (spec->data.gtkcustom.color_name)
+        g_free (spec->data.gtkcustom.color_name);
       if (spec->data.gtkcustom.fallback)
         meta_color_spec_free (spec->data.gtkcustom.fallback);
       DEBUG_FILL_STRUCT (&spec->data.gtkcustom);
@@ -3009,7 +3010,9 @@ meta_draw_op_free (MetaDrawOp *op)
       break;
 
     case META_DRAW_RECTANGLE:
-      g_free (op->data.rectangle.color_spec);
+      if (op->data.rectangle.color_spec)
+        g_free (op->data.rectangle.color_spec);
+
       meta_draw_spec_free (op->data.rectangle.x);
       meta_draw_spec_free (op->data.rectangle.y);
       meta_draw_spec_free (op->data.rectangle.width);
@@ -3017,7 +3020,9 @@ meta_draw_op_free (MetaDrawOp *op)
       break;
 
     case META_DRAW_ARC:
-      g_free (op->data.arc.color_spec);
+      if (op->data.arc.color_spec)
+        g_free (op->data.arc.color_spec);
+
       meta_draw_spec_free (op->data.arc.x);
       meta_draw_spec_free (op->data.arc.y);
       meta_draw_spec_free (op->data.arc.width);

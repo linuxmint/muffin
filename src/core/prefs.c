@@ -646,7 +646,8 @@ handle_preference_init_string (void)
           if (!cursor->target)
             meta_bug ("%s must have handler or target\n", cursor->base.key);
 
-          g_free (*(cursor->target));
+          if (*(cursor->target))
+            g_free (*(cursor->target));
 
           value = g_settings_get_string (SETTINGS (cursor->base.schema),
                                          cursor->base.key);
@@ -766,7 +767,8 @@ handle_preference_update_string (GSettings *settings,
 
       inform_listeners = (g_strcmp0 (value, *(cursor->target)) != 0);
 
-      g_free(*(cursor->target));
+      if (*(cursor->target))
+        g_free(*(cursor->target));
 
       *(cursor->target) = value;
     }
@@ -1358,7 +1360,9 @@ theme_name_handler (GVariant *value,
 
   if (g_strcmp0 (current_theme, string_value) != 0)
     {
-      g_free (current_theme);
+      if (current_theme)
+        g_free (current_theme);
+
       current_theme = g_strdup (string_value);
       queue_changed (META_PREF_THEME);
     }
