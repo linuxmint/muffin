@@ -1153,7 +1153,11 @@ meta_window_actor_get_paint_volume (ClutterActor       *actor,
   MetaWindowActorPrivate *priv = self->priv;
   ClutterActorPrivate *actor_priv = actor->priv;
 
-  if (priv->obscured)
+  /* When the window is fully obscured, implicit painting is suspended along with
+     paint volume fetching. During an effect however, after a window is marked hidden,
+     the JS still manually overrides the properties to finish the effect, so we need
+     to continue fetching the paint volume. */
+  if (priv->obscured && !priv->effect_in_progress)
     return TRUE;
 
   if ((!priv->should_have_shadow ||
@@ -1602,8 +1606,16 @@ meta_window_actor_check_obscured (MetaWindowActor *self)
   if (!priv || !priv->window)
     return;
 
-  if (!priv->first_frame_drawn ||
-      priv->window->type == META_WINDOW_OVERRIDE_OTHER)
+  /* first_frame_drawn becomes true after 1 second after the window maps.
+     This gives the window time to initialize before any optimizations are
+     applied. obscured_lock being true means an internal muffin method is
+     overriding the obscured optimization. public_obscured_lock means a Cinnamon
+     component is requesting an override. We are honor both, but track them
+     separately in order to avoid race conditions. This method is called on stack
+     change in compositor.c, and will be called at regular intervals depending on
+     the client apps running. When an override is active this makes sure the obscured
+     optimization is disabled, and returns early.*/
+  if (!priv->first_frame_drawn || priv->obscured_lock || priv->public_obscured_lock)
     {
       if (priv->obscured)
         set_obscured (self, FALSE);
@@ -1985,9 +1997,6 @@ fullscreen_sync_toggle (MetaWindowActor *self,
   MetaWindowActorPrivate *priv = self->priv;
   MetaSyncMethod method = *priv->display->prefs->sync_method;
 
-  if (priv->window->type == META_WINDOW_OVERRIDE_OTHER)
-    return;
-
   if (*priv->display->prefs->unredirect_fullscreen_windows &&
       method != META_SYNC_NONE)
     {
@@ -2100,9 +2109,9 @@ meta_window_actor_sync_actor_geometry (MetaWindowActor *self,
   if (priv->last_x != window_rect->x ||
       priv->last_y != window_rect->y)
     {
-        priv->last_x = window_rect->x;
-        priv->last_y = window_rect->y;
-        priv->position_changed = priv->geometry_changed = TRUE;
+      priv->last_x = window_rect->x;
+      priv->last_y = window_rect->y;
+      priv->position_changed = priv->geometry_changed = TRUE;
     }
 
 
@@ -2120,12 +2129,18 @@ meta_window_actor_sync_actor_geometry (MetaWindowActor *self,
 
   if (priv->size_changed)
     {
+      /* This is only necessary if the window does not have a shape region.
+         Windows like Steam meet this criteria. */
       if (!priv->window->has_shape ||
           !priv->first_frame_handler_queued ||
           priv->window->fullscreen)
         meta_window_update_client_area_rect (window);
 
       priv->needs_pixmap = TRUE;
+
+      /* Mark the shape as dirty and queue a redraw. This will ensure process_shape gets called,
+         and we will compute a shape region, opaque region if present, and build a mask texture
+         if the window has a frame. */
       meta_window_actor_update_shape (self);
 
       clutter_actor_set_size (CLUTTER_ACTOR (self),
@@ -2151,6 +2166,8 @@ meta_window_actor_show (MetaWindowActor   *self,
   priv->visible = TRUE;
 
   event = 0;
+
+  /* This function is currently set up in a way to support effects on clones of this actor. */
 
   if (!priv->display->compositor->switch_workspace_in_progress &&
       priv->display->desktop_effects &&
@@ -2518,6 +2535,7 @@ process_pixmap (MetaWindowActor *self)
   MetaCompositor *compositor = display->compositor;
   Window xwindow = priv->xwindow;
 
+  /* TBD: Mutter removed this block, we should check if Muffin still needs it. */
   if (xwindow == screen->xroot ||
       xwindow == clutter_x11_get_stage_window (compositor->stage))
     return;
