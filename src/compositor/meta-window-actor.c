@@ -2142,6 +2142,9 @@ meta_window_actor_sync_actor_geometry (MetaWindowActor *self,
       priv->needs_pixmap = TRUE;
       meta_window_actor_update_shape (self);
 
+      if (priv->unredirected)
+        meta_display_set_all_obscured ();
+
       clutter_actor_set_size (CLUTTER_ACTOR (self),
                               window_rect->width, window_rect->height);
     }

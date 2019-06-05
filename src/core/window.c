@@ -4214,8 +4214,6 @@ meta_window_unmake_fullscreen (MetaWindow  *window)
     {
       MetaRectangle target_rect;
 
-      meta_display_set_all_obscured ();
-
       meta_topic (META_DEBUG_WINDOW_OPS,
                   "Unfullscreening %s\n", window->desc);
 
