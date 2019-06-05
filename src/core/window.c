@@ -3110,8 +3110,6 @@ meta_window_show (MetaWindow *window)
 
   if (!window->visible_to_compositor)
     {
-      meta_window_update_monitor (window);
-
       window->visible_to_compositor = TRUE;
 
       MetaCompEffect effect = META_COMP_EFFECT_NONE;
