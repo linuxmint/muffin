@@ -763,8 +763,8 @@ meta_window_place (MetaWindow        *window,
     case META_WINDOW_OVERRIDE_OTHER:
       goto done_no_constraints;
     }
-
-  if (*window->display->prefs->disable_workarounds ||
+  
+  if (meta_prefs_get_disable_workarounds () ||
       (parent != NULL && parent->type == META_WINDOW_DESKTOP))
     {
       switch (window->type)
@@ -929,7 +929,7 @@ meta_window_place (MetaWindow        *window,
 
   
   /* Placement based on pointer position */
-  placement_mode = *window->display->prefs->placement_mode;
+  placement_mode = meta_prefs_get_placement_mode();
 
   if (placement_mode == META_PLACEMENT_MODE_POINTER ||
       placement_mode == META_PLACEMENT_MODE_MANUAL)

@@ -208,8 +208,8 @@ lower_window_and_transients (MetaWindow *window,
 
   meta_window_foreach_transient (window, lower_window_and_transients, NULL);
 
-  if (*window->display->prefs->focus_mode == C_DESKTOP_FOCUS_MODE_CLICK &&
-      *window->display->prefs->raise_on_click)
+  if (meta_prefs_get_focus_mode () == C_DESKTOP_FOCUS_MODE_CLICK &&
+      meta_prefs_get_raise_on_click ())
     {
       /* Move window to the back of the focusing workspace's MRU list.
        * Do extra sanity checks to avoid possible race conditions.
@@ -352,7 +352,7 @@ meta_core_maximize (Display *xdisplay,
 
   meta_screen_hide_hud_and_preview (window->screen);
 
-  if (*window->display->prefs->raise_on_click)
+  if (meta_prefs_get_raise_on_click ())
     meta_window_raise (window);
 
   meta_window_maximize (window, 
@@ -367,7 +367,7 @@ meta_core_toggle_maximize_vertically (Display *xdisplay,
 
   meta_screen_hide_hud_and_preview (window->screen);
 
-  if (*window->display->prefs->raise_on_click)
+  if (meta_prefs_get_raise_on_click ())
     meta_window_raise (window);
 
   if (META_WINDOW_MAXIMIZED_VERTICALLY (window))
@@ -386,7 +386,7 @@ meta_core_toggle_maximize_horizontally (Display *xdisplay,
 
   meta_screen_hide_hud_and_preview (window->screen);
 
-  if (*window->display->prefs->raise_on_click)
+  if (meta_prefs_get_raise_on_click ())
     meta_window_raise (window);
 
   if (META_WINDOW_MAXIMIZED_HORIZONTALLY (window))
@@ -422,7 +422,7 @@ meta_core_unmaximize (Display *xdisplay,
 {
   MetaWindow *window = meta_core_get_window (xdisplay, frame_xwindow);
 
-  if (*window->display->prefs->raise_on_click)
+  if (meta_prefs_get_raise_on_click ())
     meta_window_raise (window);
 
   meta_window_unmaximize (window,
@@ -553,7 +553,7 @@ meta_core_show_window_menu (Display *xdisplay,
 
   meta_screen_hide_hud_and_preview (window->screen);
 
-  if (*window->display->prefs->raise_on_click)
+  if (meta_prefs_get_raise_on_click ())
     meta_window_raise (window);
   meta_window_focus (window, timestamp);
 

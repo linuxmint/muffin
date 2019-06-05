@@ -282,8 +282,6 @@ meta_window_actor_init (MetaWindowActor *self)
   priv->first_frame_drawn_id = 0;
   priv->first_frame_handler_queued = FALSE;
   priv->first_frame_drawn = FALSE;
-
-  priv->visible = FALSE;
 }
 
 static void
@@ -1989,7 +1987,7 @@ meta_window_actor_should_unredirect (MetaWindowActor *self)
   if (window->override_redirect)
     return TRUE;
 
-  if (priv->does_full_damage && *window->display->prefs->unredirect_fullscreen_windows)
+  if (priv->does_full_damage && meta_prefs_get_unredirect_fullscreen_windows ())
     return TRUE;
 
   return FALSE;
@@ -1999,14 +1997,13 @@ static void
 fullscreen_sync_toggle (MetaWindowActor *self,
                         gboolean         state)
 {
-  MetaWindowActorPrivate *priv = self->priv;
-  MetaSyncMethod method = *priv->window->display->prefs->sync_method;
+  MetaSyncMethod method = meta_prefs_get_sync_method ();
 
-  if (*priv->window->display->prefs->unredirect_fullscreen_windows &&
+  if (meta_prefs_get_unredirect_fullscreen_windows () &&
       method != META_SYNC_NONE)
     {
       clutter_stage_x11_update_sync_state (
-        priv->window->display->compositor->stage,
+        self->priv->window->display->compositor->stage,
         state ? method : META_SYNC_NONE
       );
     }

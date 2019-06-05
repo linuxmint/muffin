@@ -552,7 +552,7 @@ meta_frames_ensure_layout (MetaFrames  *frames,
       pango_layout_set_auto_dir (frame->layout, FALSE);
 
       font_desc = meta_gtk_widget_get_font_desc (widget, scale,
-                                                 frame->meta_window->display->prefs->titlebar_font);
+                                                 meta_prefs_get_titlebar_font ());
 
       size = pango_font_description_get_size (font_desc);
 
@@ -1222,7 +1222,7 @@ static gboolean
 meta_frame_double_click_event (MetaUIFrame    *frame,
                                GdkEventButton *event)
 {
-  int action = *frame->meta_window->display->prefs->action_double_click_titlebar;
+  int action = meta_prefs_get_action_double_click_titlebar ();
 
   return meta_frame_titlebar_event (frame, event, action);
 }
@@ -1231,7 +1231,7 @@ static gboolean
 meta_frame_middle_click_event (MetaUIFrame    *frame,
                                GdkEventButton *event)
 {
-  int action = *frame->meta_window->display->prefs->action_middle_click_titlebar;
+  int action = meta_prefs_get_action_middle_click_titlebar();
 
   return meta_frame_titlebar_event (frame, event, action);
 }
@@ -1240,7 +1240,7 @@ static gboolean
 meta_frame_right_click_event(MetaUIFrame     *frame,
                              GdkEventButton  *event)
 {
-  int action = *frame->meta_window->display->prefs->action_right_click_titlebar;
+  int action = meta_prefs_get_action_right_click_titlebar();
 
   return meta_frame_titlebar_event (frame, event, action);
 }
@@ -1249,7 +1249,7 @@ static gboolean
 meta_frame_scroll_wheel_event (MetaUIFrame     *frame,
                                GdkEventButton  *event)
 {
-  int action = *frame->meta_window->display->prefs->action_scroll_titlebar;
+  int action = meta_prefs_get_action_scroll_wheel_titlebar();
 
   return meta_frame_titlebar_event (frame, event, action);
 }

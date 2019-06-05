@@ -1240,7 +1240,7 @@ meta_set_normal_hints (MetaWindow *window,
   int minw, minh, maxw, maxh;   /* min/max width/height                      */
   int basew, baseh, winc, hinc; /* base width/height, width/height increment */
 
-  ui_scale = *window->display->prefs->ui_scale;
+  ui_scale = meta_prefs_get_ui_scale ();
 
   /* Save the last ConfigureRequest, which we put here.
    * Values here set in the hints are supposed to
@@ -1718,7 +1718,7 @@ reload_gtk_hide_titlebar_when_maximized (MetaWindow    *window,
   gboolean requested_value = FALSE;
   gboolean current_value = window->hide_titlebar_when_maximized;
 
-  if (*window->display->prefs->ignore_hide_titlebar_when_maximized)
+  if (meta_prefs_get_ignore_hide_titlebar_when_maximized ())
     {
       return;
     }
