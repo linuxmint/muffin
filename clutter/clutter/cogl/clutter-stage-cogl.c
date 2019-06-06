@@ -203,6 +203,19 @@ clutter_stage_cogl_schedule_update (ClutterStageWindow *stage_window,
 
   next_presentation_time = stage_cogl->last_presentation_time + refresh_interval;
 
+  /* Get next_presentation_time closer to its final value, to reduce
+   * the number of while iterations below.
+   */
+  if (next_presentation_time < now)
+    {
+      int64_t last_virtual_presentation_time = now - now % refresh_interval;
+      int64_t hardware_clock_phase =
+        stage_cogl->last_presentation_time % refresh_interval;
+
+      next_presentation_time =
+        last_virtual_presentation_time + hardware_clock_phase;
+    }
+
   while (next_presentation_time < now + min_render_time_allowed)
     next_presentation_time += refresh_interval;
 
