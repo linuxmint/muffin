@@ -32,7 +32,10 @@ CoglTexture * meta_create_color_texture_4ub (guint8           red,
                                              guint8           blue,
                                              guint8           alpha,
                                              CoglTextureFlags flags);
+
 CoglPipeline * meta_create_texture_pipeline (CoglTexture *texture);
+
+gboolean meta_cogl_hardware_supports_npot_sizes (void);
 
 CoglTexture * meta_cogl_texture_new_from_data_wrapper                (int  width,
                                                                       int  height,
@@ -42,12 +45,10 @@ CoglTexture * meta_cogl_texture_new_from_data_wrapper                (int  width
                                                                       int  rowstride,
                                                             const uint8_t *data);
 
-
 CoglTexture * meta_cogl_rectangle_new (int width,
                                        int height,
                                        CoglPixelFormat format,
                                        int stride,
                                        const uint8_t *data);
-
 
 #endif /* __META_COGL_UTILS_H__ */

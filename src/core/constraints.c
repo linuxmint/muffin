@@ -756,7 +756,7 @@ constrain_modal_dialog (MetaWindow         *window,
   MetaWindow *parent = meta_window_get_transient_for (window);
   gboolean constraint_already_satisfied;
 
-  if (!window->attached)
+  if (!meta_window_is_attached_dialog (window))
     return TRUE;
 
   x = parent->rect.x + (parent->rect.width / 2  - info->current.width / 2);
@@ -830,19 +830,20 @@ constrain_maximization (MetaWindow         *window,
         GList *tmp = window->screen->active_workspace->snapped_windows;
         GSList *snapped_windows_as_struts = NULL;
         while (tmp) {
-          MetaWindow *tmp_window = META_WINDOW (tmp->data);
-          if (tmp->data == window || tmp_window->minimized ||
-              meta_window_get_monitor (window) != meta_window_get_monitor (tmp_window)) {
-              tmp = tmp->next;
-              continue;
-          }
-          MetaStrut *strut = g_slice_new0 (MetaStrut);
-          MetaSide side;
-          side = meta_window_get_tile_side (tmp_window);
-          strut->rect = tmp_window->outer_rect;
-          strut->side = side;
-          snapped_windows_as_struts = g_slist_prepend (snapped_windows_as_struts, strut);
-          tmp = tmp->next;
+            if (tmp->data == window || META_WINDOW (tmp->data)->minimized ||
+                meta_window_get_monitor (window) != meta_window_get_monitor (META_WINDOW (tmp->data))) {
+                tmp = tmp->next;
+                continue;
+            }
+            MetaStrut *strut = g_slice_new0 (MetaStrut);
+            MetaSide side;
+            MetaRectangle rect;
+            meta_window_get_outer_rect (META_WINDOW (tmp->data), &rect);
+            side = meta_window_get_tile_side (META_WINDOW (tmp->data));
+            strut->rect = rect;
+            strut->side = side;
+            snapped_windows_as_struts = g_slist_prepend (snapped_windows_as_struts, strut);
+            tmp = tmp->next;
         }
 
         target_size = info->current;
@@ -862,7 +863,7 @@ constrain_maximization (MetaWindow         *window,
       }
    }
   /* Now make target_size = maximized size of client window */
-  if (!window->has_custom_frame_extents)
+  if (!meta_window_is_client_decorated(window))
     meta_window_unextend_by_frame (window, &target_size, info->borders);
 
   /* Check min size constraints; max size constraints are ignored for maximized
@@ -907,7 +908,7 @@ constrain_tiling (MetaWindow         *window,
 {
   MetaRectangle target_size;
   MetaRectangle min_size, max_size;
-  MetaRectangle actual_position = window->outer_rect;
+  MetaRectangle actual_position;
   gboolean hminbad, vminbad;
   gboolean horiz_equal, vert_equal;
   gboolean constraint_already_satisfied;
@@ -926,6 +927,8 @@ constrain_tiling (MetaWindow         *window,
     meta_window_get_current_tile_area (window, &target_size);
   else
     return TRUE;
+
+  meta_window_get_outer_rect (window, &actual_position);
 
   if (window->custom_snap_size) {
       switch (window->tile_mode) {
@@ -1488,7 +1491,7 @@ constrain_titlebar_visible (MetaWindow         *window,
   int bottom_amount;
   int horiz_amount_offscreen, vert_amount_offscreen;
   int horiz_amount_onscreen,  vert_amount_onscreen;
-  int scale = *window->display->prefs->ui_scale;
+  int scale = meta_prefs_get_ui_scale ();
 
   if (priority > PRIORITY_TITLEBAR_VISIBLE)
     return TRUE;
@@ -1576,7 +1579,7 @@ constrain_partially_onscreen (MetaWindow         *window,
   int top_amount, bottom_amount;
   int horiz_amount_offscreen, vert_amount_offscreen;
   int horiz_amount_onscreen,  vert_amount_onscreen;
-  int scale = *window->display->prefs->ui_scale;
+  int scale = meta_prefs_get_ui_scale ();
 
   if (priority > PRIORITY_PARTIALLY_VISIBLE_ON_WORKAREA)
     return TRUE;
@@ -1613,7 +1616,7 @@ constrain_partially_onscreen (MetaWindow         *window,
       bottom_amount = info->current.height + info->borders->visible.bottom;
       vert_amount_onscreen = info->borders->visible.top;
     }
-  else if (window->has_custom_frame_extents)
+  else if (meta_window_is_client_decorated (window))
     {
       top_amount = vert_amount_onscreen = CSD_TITLEBAR_HEIGHT * scale; /* Hardcoded for now, we don't get this from Gtk */
       bottom_amount = vert_amount_offscreen = MAX ((info->current.height - (vert_amount_onscreen * 2)), 0);

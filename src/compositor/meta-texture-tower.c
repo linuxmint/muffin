@@ -249,9 +249,7 @@ meta_texture_tower_update_area (MetaTextureTower *tower,
  * Meta.
  */
 static int
-get_paint_level (CoglFramebuffer *fb,
-                 int width,
-                 int height)
+get_paint_level (int width, int height)
 {
   CoglMatrix projection, modelview, pm;
   float v[4];
@@ -279,12 +277,12 @@ get_paint_level (CoglFramebuffer *fb,
    *  (w_c)                               (w_o)        (1)
    */
 
-  cogl_framebuffer_get_projection_matrix (fb, &projection);
-  cogl_framebuffer_get_modelview_matrix (fb, &modelview);
+  cogl_get_projection_matrix (&projection);
+  cogl_get_modelview_matrix (&modelview);
 
   cogl_matrix_multiply (&pm, &projection, &modelview);
 
-  cogl_framebuffer_get_viewport4fv (fb, v);
+  cogl_get_viewport (v);
   viewport_width = v[2];
   viewport_height = v[3];
 
@@ -451,8 +449,7 @@ texture_tower_revalidate (MetaTextureTower *tower,
  *  %NULL if no base texture has yet been set.
  */
 LOCAL_SYMBOL CoglTexture *
-meta_texture_tower_get_paint_texture (CoglFramebuffer *fb,
-                                      MetaTextureTower *tower)
+meta_texture_tower_get_paint_texture (MetaTextureTower *tower)
 {
   int texture_width, texture_height;
   int level;
@@ -465,7 +462,7 @@ meta_texture_tower_get_paint_texture (CoglFramebuffer *fb,
   texture_width = cogl_texture_get_width (tower->textures[0]);
   texture_height = cogl_texture_get_height (tower->textures[0]);
 
-  level = get_paint_level(fb, texture_width, texture_height);
+  level = get_paint_level(texture_width, texture_height);
   if (level < 0) /* singular paint matrix, scaled to nothing */
     return NULL;
   level = MIN (level, tower->n_levels - 1);

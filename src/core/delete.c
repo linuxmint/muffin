@@ -146,7 +146,6 @@ meta_window_delete (MetaWindow  *window,
                     guint32      timestamp)
 {
   meta_error_trap_push (window->display);
-
   if (window->delete_window)
     {
       meta_topic (META_DEBUG_WINDOW_OPS,
