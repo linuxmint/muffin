@@ -198,6 +198,17 @@ clutter_stage_cogl_schedule_update (ClutterStageWindow *stage_window,
   min_render_time_allowed = refresh_interval / 2;
   max_render_time_allowed = refresh_interval - 1000 * sync_delay;
 
+  /* Be robust in the case of incredibly bogus refresh rate */
+  if (max_render_time_allowed <= 0)
+    {
+      g_warning ("Unsupported monitor refresh rate detected. "
+                 "(Refresh rate: %.3f, refresh interval: %ld)",
+                 refresh_rate,
+                 refresh_interval);
+      stage_cogl->update_time = now;
+      return;
+    }
+
   if (min_render_time_allowed > max_render_time_allowed)
     min_render_time_allowed = max_render_time_allowed;
 
