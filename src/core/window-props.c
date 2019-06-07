@@ -265,7 +265,7 @@ reload_progress (MetaWindow    *window,
       if (window->progress != value->v.cardinal)
         {
           window->progress = value->v.cardinal;
-          g_object_notify (window, "progress");
+          g_object_notify ((GObject*) window, "progress");
 
           meta_topic (META_DEBUG_WINDOW_STATE,
                       "Read XAppGtkWindow progress prop %u for %s\n",
@@ -277,7 +277,7 @@ reload_progress (MetaWindow    *window,
       if (window->progress != 0)
         {
           window->progress = 0;
-          g_object_notify (window, "progress");
+          g_object_notify ((GObject*) window, "progress");
 
           meta_topic (META_DEBUG_WINDOW_STATE,
                       "Read XAppGtkWindow progress prop %u for %s\n",
@@ -298,7 +298,7 @@ reload_progress_pulse (MetaWindow    *window,
       if (window->progress_pulse != new_val)
         {
           window->progress_pulse = new_val;
-          g_object_notify (window, "progress-pulse");
+          g_object_notify ((GObject*) window, "progress-pulse");
 
           meta_topic (META_DEBUG_WINDOW_STATE,
                       "Read XAppGtkWindow progress-pulse prop %s for %s\n",
@@ -310,7 +310,7 @@ reload_progress_pulse (MetaWindow    *window,
       if (window->progress_pulse)
         {
           window->progress_pulse = FALSE;
-          g_object_notify (window, "progress-pulse");
+          g_object_notify ((GObject*) window,  "progress-pulse");
 
           meta_topic (META_DEBUG_WINDOW_STATE,
                       "Read XAppGtkWindow progress-pulse prop %s for %s\n",
