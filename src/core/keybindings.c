@@ -1,12 +1,12 @@
 /* -*- mode: C; c-file-style: "gnu"; indent-tabs-mode: nil; -*- */
 
 /* Muffin Keybindings */
-/*
+/* 
  * Copyright (C) 2001 Havoc Pennington
  * Copyright (C) 2002 Red Hat Inc.
  * Copyright (C) 2003 Rob Adams
  * Copyright (C) 2004-2006 Elijah Newren
- *
+ * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
  * published by the Free Software Foundation; either version 2 of the
@@ -16,7 +16,7 @@
  * WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street - Suite 500, Boston, MA
@@ -176,10 +176,10 @@ static GHashTable *key_handlers;
 static void
 key_handler_free (MetaKeyHandler *handler)
 {
-  free (handler->name);
+  g_free (handler->name);
   if (handler->user_data_free_func && handler->user_data)
     handler->user_data_free_func (handler->user_data);
-  free (handler);
+  g_free (handler);
 }
 
 static void
@@ -196,7 +196,7 @@ reload_keymap (MetaDisplay *display)
                                          display->min_keycode,
                                          display->max_keycode -
                                          display->min_keycode + 1,
-                                         &display->keysyms_per_keycode);
+                                         &display->keysyms_per_keycode);  
 }
 
 static void
@@ -205,7 +205,7 @@ reload_modmap (MetaDisplay *display)
   XModifierKeymap *modmap;
   int map_size;
   int i;
-
+  
   if (display->modmap)
     XFreeModifiermap (display->modmap);
 
@@ -220,7 +220,7 @@ reload_modmap (MetaDisplay *display)
   display->meta_mask = 0;
   display->hyper_mask = 0;
   display->super_mask = 0;
-
+  
   /* there are 8 modifiers, and the first 3 are shift, shift lock,
    * and control
    */
@@ -232,7 +232,7 @@ reload_modmap (MetaDisplay *display)
        * see if its keysym is one we're interested in
        */
       int keycode = modmap->modifiermap[i];
-
+      
       if (keycode >= display->min_keycode &&
           keycode <= display->max_keycode)
         {
@@ -245,21 +245,21 @@ reload_modmap (MetaDisplay *display)
               if (syms[j] != 0)
                 {
                   const char *str;
-
+                  
                   str = XKeysymToString (syms[j]);
                   meta_topic (META_DEBUG_KEYBINDINGS,
                               "Keysym %s bound to modifier 0x%x\n",
                               str ? str : "none",
                               (1 << ( i / modmap->max_keypermod)));
                 }
-
+              
               if (syms[j] == XK_Num_Lock)
                 {
                   /* Mod1Mask is 1 << 3 for example, i.e. the
                    * fourth modifier, i / keyspermod is the modifier
                    * index
                    */
-
+                  
                   display->num_lock_mask |= (1 << ( i / modmap->max_keypermod));
                 }
               else if (syms[j] == XK_Scroll_Lock)
@@ -275,17 +275,17 @@ reload_modmap (MetaDisplay *display)
                        syms[j] == XK_Hyper_R)
                 {
                   display->hyper_mask |= (1 << ( i / modmap->max_keypermod));
-                }
+                }              
               else if (syms[j] == XK_Meta_L ||
                        syms[j] == XK_Meta_R)
                 {
                   display->meta_mask |= (1 << ( i / modmap->max_keypermod));
                 }
-
+              
               ++j;
             }
         }
-
+      
       ++i;
     }
 
@@ -322,7 +322,7 @@ reload_keycodes (MetaDisplay *display)
   if (display->key_bindings)
     {
       int i;
-
+      
       i = 0;
       while (i < display->n_key_bindings)
         {
@@ -331,7 +331,7 @@ reload_keycodes (MetaDisplay *display)
               display->key_bindings[i].keycode =
                 keysym_to_keycode (display, display->key_bindings[i].keysym);
             }
-
+          
           ++i;
         }
     }
@@ -342,11 +342,11 @@ reload_modifiers (MetaDisplay *display)
 {
   meta_topic (META_DEBUG_KEYBINDINGS,
               "Reloading keycodes for binding tables\n");
-
+  
   if (display->key_bindings)
     {
       int i;
-
+      
       i = 0;
       while (i < display->n_key_bindings)
         {
@@ -358,8 +358,8 @@ reload_modifiers (MetaDisplay *display)
                       " Devirtualized mods 0x%x -> 0x%x (%s)\n",
                       display->key_bindings[i].modifiers,
                       display->key_bindings[i].mask,
-                      display->key_bindings[i].name);
-
+                      display->key_bindings[i].name);          
+          
           ++i;
         }
     }
@@ -410,9 +410,9 @@ rebuild_binding_table (MetaDisplay     *display,
   GList *p;
   int n_bindings;
   int i;
-
+  
   n_bindings = count_bindings (prefs);
-  free (*bindings_p);
+  g_free (*bindings_p);
   *bindings_p = g_new0 (MetaKeyBinding, n_bindings);
 
   i = 0;
@@ -436,7 +436,7 @@ rebuild_binding_table (MetaDisplay     *display,
               (*bindings_p)[i].keycode = combo->keycode;
               (*bindings_p)[i].modifiers = combo->modifiers;
               (*bindings_p)[i].mask = 0;
-
+          
               ++i;
 
               if (pref->add_shift &&
@@ -445,7 +445,7 @@ rebuild_binding_table (MetaDisplay     *display,
                   meta_topic (META_DEBUG_KEYBINDINGS,
                               "Binding %s also needs Shift grabbed\n",
                                pref->name);
-
+              
                   (*bindings_p)[i].name = pref->name;
                   (*bindings_p)[i].handler = handler;
                   (*bindings_p)[i].keysym = combo->keysym;
@@ -453,19 +453,19 @@ rebuild_binding_table (MetaDisplay     *display,
                   (*bindings_p)[i].modifiers = combo->modifiers |
                     META_VIRTUAL_SHIFT_MASK;
                   (*bindings_p)[i].mask = 0;
-
+              
                   ++i;
                 }
             }
-
+            
           tmp = tmp->next;
         }
-
+      
       p = p->next;
     }
 
   g_assert (i == n_bindings);
-
+  
   *n_bindings_p = i;
 
   meta_topic (META_DEBUG_KEYBINDINGS,
@@ -496,7 +496,7 @@ regrab_key_bindings (MetaDisplay *display)
   GSList *windows;
 
   meta_error_trap_push (display); /* for efficiency push outer trap */
-
+  
   tmp = display->screens;
   while (tmp != NULL)
     {
@@ -513,10 +513,10 @@ regrab_key_bindings (MetaDisplay *display)
   while (tmp != NULL)
     {
       MetaWindow *w = tmp->data;
-
+      
       meta_window_ungrab_keys (w);
       meta_window_grab_keys (w);
-
+      
       tmp = tmp->next;
     }
   meta_error_trap_pop (display);
@@ -541,7 +541,7 @@ display_get_keybinding (MetaDisplay  *display,
         {
           return &display->key_bindings[i];
         }
-
+      
       --i;
     }
 
@@ -799,7 +799,7 @@ meta_display_keybinding_action_invoke_by_code (MetaDisplay  *display,
 LOCAL_SYMBOL void
 meta_display_process_mapping_event (MetaDisplay *display,
                                     XEvent      *event)
-{
+{ 
   gboolean keymap_changed = FALSE;
   gboolean modmap_changed = FALSE;
 
@@ -884,7 +884,7 @@ bindings_changed_callback (MetaPreference pref,
   MetaDisplay *display;
 
   display = data;
-
+  
   switch (pref)
     {
     case META_PREF_KEYBINDINGS:
@@ -914,22 +914,22 @@ LOCAL_SYMBOL void
 meta_display_shutdown_keys (MetaDisplay *display)
 {
   /* Note that display->xdisplay is invalid in this function */
-
+  
   meta_prefs_remove_listener (bindings_changed_callback, display);
 
   if (display->keymap)
     meta_XFree (display->keymap);
-
+  
   if (display->modmap)
     XFreeModifiermap (display->modmap);
-  free (display->key_bindings);
+  g_free (display->key_bindings);
 }
 
 static const char*
 keysym_name (int keysym)
 {
   const char *name;
-
+  
   name = XKeysymToString (keysym);
   if (name == NULL)
     name = "(unknown)";
@@ -961,7 +961,7 @@ meta_change_keygrab (MetaDisplay *display,
 
   /* efficiency, avoid so many XSync() */
   meta_error_trap_push (display);
-
+  
   ignored_mask = 0;
   while (ignored_mask <= display->ignored_modifier_mask)
     {
@@ -990,11 +990,11 @@ meta_change_keygrab (MetaDisplay *display,
       if (meta_is_debugging ())
         {
           int result;
-
+          
           result = meta_error_trap_pop_with_return (display);
-
+          
           if (grab && result != Success)
-            {
+            {      
               if (result == BadAccess)
                 meta_warning (_("Some other program is already using the key %s with modifiers %x as a binding\n"), keysym_name (keysym), modmask | ignored_mask);
               else
@@ -1032,7 +1032,7 @@ grab_keys (MetaKeyBinding *bindings,
   g_assert (n_bindings == 0 || bindings != NULL);
 
   meta_error_trap_push (display);
-
+  
   i = 0;
   while (i < n_bindings)
     {
@@ -1045,7 +1045,7 @@ grab_keys (MetaKeyBinding *bindings,
                          bindings[i].keycode,
                          bindings[i].mask);
         }
-
+      
       ++i;
     }
 
@@ -1067,10 +1067,10 @@ ungrab_all_keys (MetaDisplay *display,
   if (meta_is_debugging ())
     {
       int result;
-
+      
       result = meta_error_trap_pop_with_return (display);
-
-      if (result != Success)
+      
+      if (result != Success)    
         meta_topic (META_DEBUG_KEYBINDINGS,
                     "Ungrabbing all keys on 0x%lx failed\n", xwindow);
     }
@@ -1119,7 +1119,7 @@ meta_window_grab_keys (MetaWindow  *window)
       window->keys_grabbed = FALSE;
       return;
     }
-
+  
   if (window->keys_grabbed)
     {
       if (window->frame && !window->grab_on_frame)
@@ -1130,7 +1130,7 @@ meta_window_grab_keys (MetaWindow  *window)
       else
         return; /* already all good */
     }
-
+  
   grab_keys (window->display->key_bindings,
              window->display->n_key_bindings,
              window->display,
@@ -1187,7 +1187,7 @@ grab_keyboard (MetaDisplay *display,
 {
   int result;
   int grab_status;
-
+  
   /* Grab the keyboard, so we get key releases and all key
    * presses
    */
@@ -1197,7 +1197,7 @@ grab_keyboard (MetaDisplay *display,
                                xwindow, True,
                                GrabModeAsync, GrabModeAsync,
                                timestamp);
-
+  
   if (grab_status != GrabSuccess)
     {
       meta_error_trap_pop_with_return (display);
@@ -1217,9 +1217,9 @@ grab_keyboard (MetaDisplay *display,
           return FALSE;
         }
     }
-
+       
   meta_topic (META_DEBUG_KEYBINDINGS, "Grabbed all keys\n");
-
+       
   return TRUE;
 }
 
@@ -1242,7 +1242,7 @@ meta_screen_grab_all_keys (MetaScreen *screen, guint32 timestamp)
 
   if (screen->all_keys_grabbed)
     return FALSE;
-
+  
   if (screen->keys_grabbed)
     meta_screen_ungrab_keys (screen);
 
@@ -1282,10 +1282,10 @@ meta_window_grab_all_keys (MetaWindow  *window,
 {
   Window grabwindow;
   gboolean retval;
-
+  
   if (window->all_keys_grabbed)
     return FALSE;
-
+  
   if (window->keys_grabbed)
     meta_window_ungrab_keys (window);
 
@@ -1296,7 +1296,7 @@ meta_window_grab_all_keys (MetaWindow  *window,
               "Focusing %s because we're grabbing all its keys\n",
               window->desc);
   meta_window_focus (window, timestamp);
-
+  
   grabwindow = window->frame ? window->frame->xwindow : window->xwindow;
 
   meta_topic (META_DEBUG_KEYBINDINGS,
@@ -1369,16 +1369,16 @@ meta_window_resize_or_move_allowed (MetaWindow *window,
 }
 
 
-static gboolean
+static gboolean 
 is_modifier (MetaDisplay *display,
              unsigned int keycode)
 {
   int i;
   int map_size;
-  gboolean retval = FALSE;
+  gboolean retval = FALSE;  
 
   g_assert (display->modmap);
-
+  
   map_size = 8 * display->modmap->max_keypermod;
   i = 0;
   while (i < map_size)
@@ -1390,7 +1390,7 @@ is_modifier (MetaDisplay *display,
         }
       ++i;
     }
-
+  
   return retval;
 }
 
@@ -1485,7 +1485,7 @@ strip_self_mod (KeySym keysym, unsigned long *mask)
         mod = 0;
         break;
     }
-
+  
   *mask = *mask & ~mod;
 }
 
@@ -1699,7 +1699,7 @@ meta_display_process_key_event (MetaDisplay *display,
 
   /* if key event was on root window, we have a shortcut */
   screen = meta_display_screen_for_root (display, event->xkey.window);
-
+  
   /* else round-trip to server */
   if (screen == NULL)
     screen = meta_display_screen_for_xwindow (display,
@@ -1707,17 +1707,17 @@ meta_display_process_key_event (MetaDisplay *display,
 
   if (screen == NULL)
     return FALSE; /* event window is destroyed */
-
+  
   /* ignore key events on popup menus and such. */
   if (meta_ui_window_is_widget (screen->ui, event->xany.window))
     return FALSE;
-
+  
   /* window may be NULL */
-
+  
   keysym = XkbKeycodeToKeysym (display->xdisplay, event->xkey.keycode, 0, 0);
 
   str = XKeysymToString (keysym);
-
+  
   /* was topic */
   meta_topic (META_DEBUG_KEYBINDINGS,
               "Processing key %s event, keysym: %s state: 0x%x window: %s\n",
@@ -1755,8 +1755,8 @@ meta_display_process_key_event (MetaDisplay *display,
               mouse_grab_move = TRUE;
               /* Fall through - this is just a flag for if we make it to process_event */
             case META_GRAB_OP_RESIZING_SE:
-            case META_GRAB_OP_RESIZING_S:
-            case META_GRAB_OP_RESIZING_SW:
+            case META_GRAB_OP_RESIZING_S:      
+            case META_GRAB_OP_RESIZING_SW:      
             case META_GRAB_OP_RESIZING_N:
             case META_GRAB_OP_RESIZING_NE:
             case META_GRAB_OP_RESIZING_NW:
@@ -1768,7 +1768,7 @@ meta_display_process_key_event (MetaDisplay *display,
               keep_grab = process_mouse_move_resize_grab (display, screen,
                                                           window, event, keysym);
               break;
-
+ 
             case META_GRAB_OP_KEYBOARD_MOVING:
               meta_topic (META_DEBUG_KEYBINDINGS,
                           "Processing event for keyboard move\n");
@@ -1776,7 +1776,7 @@ meta_display_process_key_event (MetaDisplay *display,
               keep_grab = process_keyboard_move_grab (display, screen,
                                                       window, event, keysym);
               break;
-
+              
             case META_GRAB_OP_KEYBOARD_RESIZING_UNKNOWN:
             case META_GRAB_OP_KEYBOARD_RESIZING_S:
             case META_GRAB_OP_KEYBOARD_RESIZING_N:
@@ -1785,14 +1785,14 @@ meta_display_process_key_event (MetaDisplay *display,
             case META_GRAB_OP_KEYBOARD_RESIZING_SE:
             case META_GRAB_OP_KEYBOARD_RESIZING_NE:
             case META_GRAB_OP_KEYBOARD_RESIZING_SW:
-            case META_GRAB_OP_KEYBOARD_RESIZING_NW:
+            case META_GRAB_OP_KEYBOARD_RESIZING_NW:          
               meta_topic (META_DEBUG_KEYBINDINGS,
                           "Processing event for keyboard resize\n");
               g_assert (window != NULL);
               keep_grab = process_keyboard_resize_grab (display, screen,
                                                         window, event, keysym);
               break;
-
+ 
             default:
               break;
             }
@@ -1814,7 +1814,7 @@ meta_display_process_key_event (MetaDisplay *display,
           return TRUE;
         }
     }
-
+  
   /* Do the normal keybindings */
   return process_event (display->key_bindings,
                         display->n_key_bindings,
@@ -1831,17 +1831,16 @@ handle_workspace_shift (MetaWindow *window,
   MetaWorkspace *target_workspace;
   guint motion = META_MOTION_LEFT;
   gboolean should_handle = FALSE;
-  gboolean invert_workspace_flip = *window->display->prefs->invert_workspace_flip;
 
   if (keysym == XK_Left || keysym == XK_KP_Left)
     {
-      motion = invert_workspace_flip ? META_MOTION_RIGHT : META_MOTION_LEFT;
+      motion = meta_prefs_get_invert_flip_direction () ? META_MOTION_RIGHT : META_MOTION_LEFT;
       should_handle = TRUE;
     }
   else
   if (keysym == XK_Right || keysym == XK_KP_Right)
     {
-      motion = invert_workspace_flip ? META_MOTION_LEFT : META_MOTION_RIGHT;
+      motion = meta_prefs_get_invert_flip_direction () ? META_MOTION_LEFT : META_MOTION_RIGHT;
       should_handle = TRUE;
     }
 
@@ -2035,7 +2034,7 @@ process_keyboard_move_grab (MetaDisplay *display,
   int x, y;
   int incr;
   gboolean smart_snap;
-
+  
   handled = FALSE;
 
   /* don't care about releases, but eat them, don't end grab */
@@ -2049,7 +2048,7 @@ process_keyboard_move_grab (MetaDisplay *display,
   meta_window_get_position (window, &x, &y);
 
   smart_snap = (event->xkey.state & ShiftMask) != 0;
-
+  
 #define SMALL_INCREMENT 1
 #define NORMAL_INCREMENT 10
 
@@ -2067,7 +2066,7 @@ process_keyboard_move_grab (MetaDisplay *display,
        * remaximize it.  In normal cases, we need to do a moveresize
        * now to get the position back to the original.
        */
-      if (window->shaken_loose)
+      if (window->shaken_loose) 
         {
           meta_window_maximize (window,
                                 META_MAXIMIZE_HORIZONTAL |
@@ -2088,7 +2087,7 @@ process_keyboard_move_grab (MetaDisplay *display,
                                    display->grab_initial_window_pos.height);
         }
     }
-
+  
   /* When moving by increments, we still snap to edges if the move
    * to the edge is smaller than the increment. This is because
    * Shift + arrow to snap is sort of a hidden feature. This way
@@ -2111,7 +2110,7 @@ process_keyboard_move_grab (MetaDisplay *display,
       handled = TRUE;
       break;
     }
-
+  
   switch (keysym)
     {
     case XK_KP_Home:
@@ -2141,7 +2140,7 @@ process_keyboard_move_grab (MetaDisplay *display,
 
       meta_window_get_client_root_coords (window, &old_rect);
 
-      meta_window_edge_resistance_for_move (window,
+      meta_window_edge_resistance_for_move (window, 
                                             old_rect.x,
                                             old_rect.y,
                                             &x,
@@ -2202,7 +2201,7 @@ process_keyboard_resize_grab_op_change (MetaDisplay *display,
           break;
         }
       break;
-
+      
     case META_GRAB_OP_KEYBOARD_RESIZING_S:
       switch (keysym)
         {
@@ -2242,7 +2241,7 @@ process_keyboard_resize_grab_op_change (MetaDisplay *display,
           break;
         }
       break;
-
+      
     case META_GRAB_OP_KEYBOARD_RESIZING_W:
       switch (keysym)
         {
@@ -2269,7 +2268,7 @@ process_keyboard_resize_grab_op_change (MetaDisplay *display,
         case XK_Up:
         case XK_KP_Up:
           if (meta_window_resize_or_move_allowed (window, META_DIRECTION_UP)) {
-            display->grab_op = META_GRAB_OP_KEYBOARD_RESIZING_N;
+            display->grab_op = META_GRAB_OP_KEYBOARD_RESIZING_N; 
           }
           handled = TRUE;
           break;
@@ -2282,7 +2281,7 @@ process_keyboard_resize_grab_op_change (MetaDisplay *display,
           break;
         }
       break;
-
+      
     case META_GRAB_OP_KEYBOARD_RESIZING_SE:
     case META_GRAB_OP_KEYBOARD_RESIZING_NE:
     case META_GRAB_OP_KEYBOARD_RESIZING_SW:
@@ -2297,7 +2296,7 @@ process_keyboard_resize_grab_op_change (MetaDisplay *display,
   if (handled)
     {
       meta_window_update_keyboard_resize (window, TRUE);
-      return TRUE;
+      return TRUE; 
     }
 
   return FALSE;
@@ -2316,7 +2315,7 @@ process_keyboard_resize_grab (MetaDisplay *display,
   int width, height;
   gboolean smart_snap;
   int gravity;
-
+  
   handled = FALSE;
 
   /* don't care about releases, but eat them, don't end grab */
@@ -2340,7 +2339,7 @@ process_keyboard_resize_grab (MetaDisplay *display,
       return FALSE;
     }
 
-  if (process_keyboard_resize_grab_op_change (display, screen, window,
+  if (process_keyboard_resize_grab_op_change (display, screen, window, 
                                               event, keysym))
     return TRUE;
 
@@ -2353,7 +2352,7 @@ process_keyboard_resize_grab (MetaDisplay *display,
     gravity = meta_resize_gravity_from_grab_op (display->grab_op);
 
   smart_snap = (event->xkey.state & ShiftMask) != 0;
-
+  
 #define SMALL_INCREMENT 1
 #define NORMAL_INCREMENT 10
 
@@ -2366,7 +2365,7 @@ process_keyboard_resize_grab (MetaDisplay *display,
     {
       width_inc = SMALL_INCREMENT;
       height_inc = SMALL_INCREMENT;
-    }
+    }  
   else
     {
       width_inc = NORMAL_INCREMENT;
@@ -2380,7 +2379,7 @@ process_keyboard_resize_grab (MetaDisplay *display,
     width_inc = window->size_hints.width_inc;
   if (window->size_hints.height_inc > 1)
     height_inc = window->size_hints.height_inc;
-
+  
   switch (keysym)
     {
     case XK_Up:
@@ -2407,7 +2406,7 @@ process_keyboard_resize_grab (MetaDisplay *display,
           g_assert_not_reached ();
           break;
         }
-
+      
       handled = TRUE;
       break;
 
@@ -2435,10 +2434,10 @@ process_keyboard_resize_grab (MetaDisplay *display,
           g_assert_not_reached ();
           break;
         }
-
+      
       handled = TRUE;
       break;
-
+      
     case XK_Left:
     case XK_KP_Left:
       switch (gravity)
@@ -2463,10 +2462,10 @@ process_keyboard_resize_grab (MetaDisplay *display,
           g_assert_not_reached ();
           break;
         }
-
+      
       handled = TRUE;
       break;
-
+      
     case XK_Right:
     case XK_KP_Right:
       switch (gravity)
@@ -2491,10 +2490,10 @@ process_keyboard_resize_grab (MetaDisplay *display,
           g_assert_not_reached ();
           break;
         }
-
+      
       handled = TRUE;
       break;
-
+          
     default:
       break;
     }
@@ -2504,7 +2503,7 @@ process_keyboard_resize_grab (MetaDisplay *display,
     height = 1;
   if (width < 1)
     width = 1;
-
+  
   if (handled)
     {
       MetaRectangle old_rect;
@@ -2512,7 +2511,7 @@ process_keyboard_resize_grab (MetaDisplay *display,
                   "Computed new window size due to keypress: "
                   "%dx%d, gravity %s\n",
                   width, height, meta_gravity_to_string (gravity));
-
+      
       old_rect = window->rect;  /* Don't actually care about x,y */
 
       /* Do any edge resistance/snapping */
@@ -2530,7 +2529,7 @@ process_keyboard_resize_grab (MetaDisplay *display,
        * are actually different from what we had before.
        */
       if (window->rect.width != width || window->rect.height != height)
-        meta_window_resize_with_gravity (window,
+        meta_window_resize_with_gravity (window, 
                                          TRUE,
                                          width,
                                          height,
@@ -2552,9 +2551,9 @@ handle_switch_to_workspace (MetaDisplay    *display,
 {
   gint which = binding->handler->data;
   MetaWorkspace *workspace;
-
+  
   workspace = meta_screen_get_workspace_by_index (screen, which);
-
+  
   if (workspace)
       meta_workspace_activate (workspace, event->xkey.time);
 }
@@ -2621,7 +2620,7 @@ handle_move_to (MetaDisplay    *display,
 
   monitor = meta_screen_get_current_monitor (window->screen);
   meta_window_get_work_area_for_monitor (window, monitor, &work_area);
-  outer = window->outer_rect;
+  meta_window_get_outer_rect (window, &outer);
 
   if (direction & META_MOVE_TO_XCHANGE_FLAG) {
     new_x = work_area.x + (direction & META_MOVE_TO_RIGHT_FLAG ?
@@ -2718,7 +2717,7 @@ handle_activate_window_menu (MetaDisplay    *display,
 
       meta_window_get_position (display->focus_window,
                                 &x, &y);
-
+      
       if (meta_ui_get_direction() == META_UI_DIRECTION_RTL)
 	  x += display->focus_window->rect.width;
 
@@ -3047,7 +3046,7 @@ handle_move_to_workspace  (MetaDisplay    *display,
   gboolean flip = (which < 0);
   gboolean new = (which == META_MOTION_NOT_EXIST_YET);
   MetaWorkspace *workspace;
-
+  
   /* If which is zero or positive, it's a workspace number, and the window
    * should move to the workspace with that number.
    *
@@ -3058,11 +3057,11 @@ handle_move_to_workspace  (MetaDisplay    *display,
 
   if (window->always_sticky)
     return;
-
+  
   workspace = NULL;
   if (!new) {
     if (flip)
-      {
+      {      
         workspace = meta_workspace_get_neighbor (screen->active_workspace,
                                                  which);
       }
@@ -3071,7 +3070,7 @@ handle_move_to_workspace  (MetaDisplay    *display,
         workspace = meta_screen_get_workspace_by_index (screen, which);
       }
   }
-
+  
   if (workspace)
     {
       /* Activate second, so the window is never unmapped */
@@ -3109,7 +3108,7 @@ handle_move_to_monitor (MetaDisplay    *display,
   gint which = binding->handler->data;
   const MetaMonitorInfo *current, *new;
 
-  current = meta_screen_get_monitor_for_rect (screen, &window->outer_rect);
+  current = meta_screen_get_monitor_for_window (screen, window);
   new = meta_screen_get_monitor_neighbor (screen, current->number, which);
 
   if (new == NULL)
@@ -3118,7 +3117,7 @@ handle_move_to_monitor (MetaDisplay    *display,
   meta_window_move_to_monitor (window, new->number);
 }
 
-static void
+static void 
 handle_raise_or_lower (MetaDisplay    *display,
                        MetaScreen     *screen,
 		       MetaWindow     *window,
@@ -3127,35 +3126,38 @@ handle_raise_or_lower (MetaDisplay    *display,
                        gpointer        dummy)
 {
   /* Get window at pointer */
-
+  
   MetaWindow *above = NULL;
-
+      
   /* Check if top */
   if (meta_stack_get_top (window->screen->stack) == window)
     {
       meta_window_lower (window);
       return;
     }
-
+      
   /* else check if windows in same layer are intersecting it */
-
-  above = meta_stack_get_above (window->screen->stack, window, TRUE);
+  
+  above = meta_stack_get_above (window->screen->stack, window, TRUE); 
 
   while (above)
     {
-      MetaRectangle tmp;
-
+      MetaRectangle tmp, win_rect, above_rect;
+      
       if (above->mapped && meta_window_should_be_showing(above))
         {
+          meta_window_get_outer_rect (window, &win_rect);
+          meta_window_get_outer_rect (above, &above_rect);
+          
           /* Check if obscured */
-          if (meta_rectangle_intersect (&window->outer_rect, &above->outer_rect, &tmp))
+          if (meta_rectangle_intersect (&win_rect, &above_rect, &tmp))
             {
               meta_window_raise (window);
               return;
             }
         }
-
-      above = meta_stack_get_above (window->screen->stack, above, TRUE);
+	  
+      above = meta_stack_get_above (window->screen->stack, above, TRUE); 
     }
 
   /* window is not obscured */
@@ -3852,7 +3854,7 @@ meta_display_init_keys (MetaDisplay *display)
   reload_keymap (display);
   reload_modmap (display);
 
-  key_handlers = g_hash_table_new_full (g_str_hash, g_str_equal, free,
+  key_handlers = g_hash_table_new_full (g_str_hash, g_str_equal, g_free,
                                         (GDestroyNotify) key_handler_free);
   init_builtin_key_bindings (display);
 

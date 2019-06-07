@@ -520,7 +520,7 @@ create_attribute_cb (CoglPipeline *pipeline,
                         COGL_ATTRIBUTE_TYPE_FLOAT);
 
   if (layer_number >= 8)
-    free (name);
+    g_free (name);
 
   state->current++;
 

@@ -613,24 +613,24 @@ frame_cb (CoglOnscreen  *onscreen,
 
 void
 clutter_stage_x11_update_sync_state (ClutterStage *stage,
-                                     SyncMethod    method)
+                                     gint          state)
 {
   ClutterStageWindow *stage_window;
   ClutterStageX11 *stage_x11;
-  gboolean state;
 
   g_return_if_fail (stage != NULL);
+
+  if (_clutter_get_sync_to_vblank () == state)
+    return;
 
   stage_window = CLUTTER_STAGE_WINDOW (_clutter_stage_get_window (CLUTTER_STAGE (stage)));
   stage_x11 = CLUTTER_STAGE_X11 (stage_window);
 
   g_return_if_fail (stage_x11->onscreen != NULL);
 
-  state = method != SYNC_NONE;
-
   _clutter_set_sync_to_vblank (state);
   cogl_onscreen_set_swap_throttled (stage_x11->onscreen, state);
-  clutter_master_clock_set_sync_method (method);
+  clutter_master_clock_set_sync_method (state);
 }
 
 static gboolean
@@ -642,7 +642,6 @@ clutter_stage_x11_realize (ClutterStageWindow *stage_window)
   ClutterBackendX11 *backend_x11 = CLUTTER_BACKEND_X11 (backend);
   ClutterDeviceManager *device_manager;
   gfloat width, height;
-  SyncMethod sync_method = _clutter_get_sync_method();
   GError *error = NULL;
 
   clutter_actor_get_size (CLUTTER_ACTOR (stage_cogl->wrapper), &width, &height);
@@ -655,7 +654,7 @@ clutter_stage_x11_realize (ClutterStageWindow *stage_window)
   stage_x11->onscreen = cogl_onscreen_new (backend->cogl_context, width, height);
 
   cogl_onscreen_set_swap_throttled (stage_x11->onscreen,
-                                    sync_method != SYNC_NONE);
+                                    _clutter_get_sync_to_vblank ());
 
   stage_x11->frame_closure =
     cogl_onscreen_add_frame_callback (stage_x11->onscreen,
@@ -774,7 +773,7 @@ clutter_stage_x11_set_title (ClutterStageWindow *stage_window,
 {
   ClutterStageX11 *stage_x11 = CLUTTER_STAGE_X11 (stage_window);
 
-  free (stage_x11->title);
+  g_free (stage_x11->title);
   stage_x11->title = g_strdup (title);
   set_wm_title (stage_x11);
 }
@@ -955,7 +954,7 @@ clutter_stage_x11_finalize (GObject *gobject)
 {
   ClutterStageX11 *stage_x11 = CLUTTER_STAGE_X11 (gobject);
 
-  free (stage_x11->title);
+  g_free (stage_x11->title);
 
   G_OBJECT_CLASS (clutter_stage_x11_parent_class)->finalize (gobject);
 }

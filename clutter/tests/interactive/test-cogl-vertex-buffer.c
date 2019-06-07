@@ -167,7 +167,7 @@ init_static_index_arrays (TestState *state)
    * - It takes one extra index for linking between rows (MESH_HEIGHT - 1)
    * - A 2 x 3 mesh == 20 indices... */
   n_indices = (2 + 2 * MESH_WIDTH) * MESH_HEIGHT + (MESH_HEIGHT - 1);
-  state->static_indices = malloc (sizeof (guint16) * n_indices);
+  state->static_indices = g_malloc (sizeof (guint16) * n_indices);
   state->n_static_indices = n_indices;
 
 #define MESH_INDEX(X, Y) (Y) * (MESH_WIDTH + 1) + (X)
@@ -268,10 +268,10 @@ init_quad_mesh (TestState *state)
    * are using degenerate triangles at the edges to link to the next row)
    */
   state->quad_mesh_verts =
-    calloc (1, sizeof (float) * 3 * (MESH_WIDTH + 1) * (MESH_HEIGHT + 1));
+    g_malloc0 (sizeof (float) * 3 * (MESH_WIDTH + 1) * (MESH_HEIGHT + 1));
 
   state->quad_mesh_colors =
-    calloc (1, sizeof (guint8) * 4 * (MESH_WIDTH + 1) * (MESH_HEIGHT + 1));
+    g_malloc0 (sizeof (guint8) * 4 * (MESH_WIDTH + 1) * (MESH_HEIGHT + 1));
 
   vert = state->quad_mesh_verts;
   color = state->quad_mesh_colors;

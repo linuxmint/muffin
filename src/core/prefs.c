@@ -2,7 +2,7 @@
 
 /* Muffin preferences */
 
-/*
+/* 
  * Copyright (C) 2001 Havoc Pennington, Copyright (C) 2002 Red Hat Inc.
  * Copyright (C) 2006 Elijah Newren
  * Copyright (C) 2008 Thomas Thurman
@@ -17,7 +17,7 @@
  * WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street - Suite 500, Boston, MA
@@ -98,7 +98,7 @@ static CDesktopTitlebarScrollAction action_scroll_titlebar = C_DESKTOP_TITLEBAR_
 static gboolean dynamic_workspaces = FALSE;
 static gboolean unredirect_fullscreen_windows = FALSE;
 static gboolean desktop_effects = TRUE;
-static MetaSyncMethod sync_method = META_SYNC_PRESENTATION_TIME;
+static gboolean sync_to_vblank = TRUE;
 static gboolean threaded_swap = TRUE;
 static gboolean send_frame_timings = TRUE;
 static gboolean application_based = FALSE;
@@ -295,13 +295,6 @@ static MetaEnumPreference preferences_enum[] =
       },
       &background_transition,
     },
-    {
-      { "sync-method",
-        SCHEMA_MUFFIN,
-        META_PREF_SYNC_METHOD,
-      },
-      &sync_method,
-    },
     { { NULL, 0, 0 }, NULL },
   };
 
@@ -362,6 +355,13 @@ static MetaBoolPreference preferences_bool[] =
         META_PREF_DESKTOP_EFFECTS,
       },
       &desktop_effects,
+    },
+    {
+      { "sync-to-vblank",
+        SCHEMA_MUFFIN,
+        META_PREF_SYNC_TO_VBLANK,
+      },
+      &sync_to_vblank,
     },
     {
       { "threaded-swap",
@@ -646,7 +646,8 @@ handle_preference_init_string (void)
           if (!cursor->target)
             meta_bug ("%s must have handler or target\n", cursor->base.key);
 
-          free (*(cursor->target));
+          if (*(cursor->target))
+            g_free (*(cursor->target));
 
           value = g_settings_get_string (SETTINGS (cursor->base.schema),
                                          cursor->base.key);
@@ -663,7 +664,7 @@ handle_preference_init_int (void)
 {
   MetaIntPreference *cursor = preferences_int;
 
-
+  
   while (cursor->base.key != NULL)
     {
       if (cursor->target)
@@ -719,7 +720,7 @@ handle_preference_update_bool (GSettings *settings,
    * store the current value away.
    */
   old_value = *((gboolean *) cursor->target);
-
+  
   /* Now look it up... */
   *((gboolean *) cursor->target) =
     g_settings_get_boolean (SETTINGS (cursor->base.schema), key);
@@ -766,7 +767,8 @@ handle_preference_update_string (GSettings *settings,
 
       inform_listeners = (g_strcmp0 (value, *(cursor->target)) != 0);
 
-      free(*(cursor->target));
+      if (*(cursor->target))
+        g_free(*(cursor->target));
 
       *(cursor->target) = value;
     }
@@ -839,12 +841,12 @@ meta_prefs_remove_listener (MetaPrefsChangedFunc func,
       if (l->func == func &&
           l->data == data)
         {
-          free (l);
+          g_free (l);
           listeners = g_list_delete_link (listeners, tmp);
 
           return;
         }
-
+      
       tmp = tmp->next;
     }
 
@@ -859,9 +861,9 @@ emit_changed (MetaPreference pref)
 
   meta_topic (META_DEBUG_PREFS, "Notifying listeners that pref %s changed\n",
               meta_preference_to_string (pref));
-
+  
   copy = g_list_copy (listeners);
-
+  
   tmp = copy;
 
   while (tmp != NULL)
@@ -883,24 +885,24 @@ changed_idle_handler (gpointer data)
   GList *copy;
 
   changed_idle = 0;
-
+  
   copy = g_list_copy (changes); /* reentrancy paranoia */
 
   g_list_free (changes);
   changes = NULL;
-
+  
   tmp = copy;
   while (tmp != NULL)
     {
       MetaPreference pref = GPOINTER_TO_INT (tmp->data);
 
       emit_changed (pref);
-
+      
       tmp = tmp->next;
     }
 
   g_list_free (copy);
-
+  
   return FALSE;
 }
 
@@ -908,7 +910,7 @@ static void
 queue_changed (MetaPreference pref)
 {
   meta_topic (META_DEBUG_PREFS, "Queueing change of pref %s\n",
-              meta_preference_to_string (pref));
+              meta_preference_to_string (pref));  
 
   if (g_list_find (changes, GINT_TO_POINTER (pref)) == NULL)
     changes = g_list_prepend (changes, GINT_TO_POINTER (pref));
@@ -932,66 +934,6 @@ update_ui_scale (GdkScreen *screen, gpointer data)
   ui_scale = MAX (g_value_get_int (&value), 1); // Never let it be 0;
 }
 
-/**
- * meta_prefs_get_default_state: (skip)
- *
- */
-MetaPrefsState*
-meta_prefs_get_default_state (void)
-{
-  MetaPrefsState *prefs_state = g_new0 (MetaPrefsState, 1);
-
-  prefs_state->use_system_font = &use_system_font;
-  prefs_state->titlebar_font = titlebar_font;
-  prefs_state->mouse_button_mods = &mouse_button_mods;
-  prefs_state->mouse_button_zoom_mods = &mouse_button_zoom_mods;
-  prefs_state->mouse_zoom_enabled = &mouse_zoom_enabled;
-  prefs_state->focus_mode = &focus_mode;
-  prefs_state->focus_new_windows = &focus_new_windows;
-  prefs_state->raise_on_click = &raise_on_click;
-  prefs_state->attach_modal_dialogs = &attach_modal_dialogs;
-  prefs_state->ignore_hide_titlebar_when_maximized = &ignore_hide_titlebar_when_maximized;
-  prefs_state->current_theme = current_theme;
-  prefs_state->workspace_names = workspace_names;
-  prefs_state->num_workspaces = &num_workspaces;
-  prefs_state->workspace_cycle = &workspace_cycle;
-  prefs_state->action_double_click_titlebar = &action_double_click_titlebar;
-  prefs_state->action_middle_click_titlebar = &action_middle_click_titlebar;
-  prefs_state->action_right_click_titlebar = &action_right_click_titlebar;
-  prefs_state->action_scroll_titlebar = &action_scroll_titlebar;
-  prefs_state->dynamic_workspaces = &dynamic_workspaces;
-  prefs_state->unredirect_fullscreen_windows = &unredirect_fullscreen_windows;
-  prefs_state->desktop_effects = &desktop_effects;
-  prefs_state->sync_method = &sync_method;
-  prefs_state->threaded_swap = &threaded_swap;
-  prefs_state->send_frame_timings = &send_frame_timings;
-  prefs_state->application_based = &application_based;
-  prefs_state->disable_workarounds = &disable_workarounds;
-  prefs_state->auto_raise = &auto_raise;
-  prefs_state->auto_raise_delay = &auto_raise_delay;
-  prefs_state->gnome_animations = &gnome_animations;
-  prefs_state->cursor_theme = cursor_theme;
-  prefs_state->cursor_size = &cursor_size;
-  prefs_state->draggable_border_width = &draggable_border_width;
-  prefs_state->tile_hud_threshold = &tile_hud_threshold;
-  prefs_state->resize_threshold = &resize_threshold;
-  prefs_state->ui_scale = &ui_scale;
-  prefs_state->min_window_opacity = &min_window_opacity;
-  prefs_state->resize_with_right_button = &resize_with_right_button;
-  prefs_state->edge_tiling = &edge_tiling;
-  prefs_state->edge_resistance_window = &edge_resistance_window;
-  prefs_state->force_fullscreen = &force_fullscreen;
-  prefs_state->button_layout = &button_layout;
-  prefs_state->workspaces_only_on_primary = &workspaces_only_on_primary;
-  prefs_state->legacy_snap = &legacy_snap;
-  prefs_state->invert_workspace_flip = &invert_workspace_flip;
-  prefs_state->tile_maximize = &tile_maximize;
-  prefs_state->placement_mode = &placement_mode;
-  prefs_state->background_transition = &background_transition;
-
-  return prefs_state;
-}
-
 
 /****************************************************************************/
 /* Initialisation.                                                          */
@@ -1004,7 +946,7 @@ meta_prefs_init (void)
   GSList *tmp;
 
   settings_schemas = g_hash_table_new_full (g_str_hash, g_str_equal,
-                                            free, g_object_unref);
+                                            g_free, g_object_unref);
 
   settings = g_settings_new (SCHEMA_GENERAL);
   g_signal_connect (settings, "changed", G_CALLBACK (settings_changed), NULL);
@@ -1123,7 +1065,7 @@ do_override (char *key,
   detailed_signal = g_strdup_printf ("changed::%s", key);
   handler_id = g_signal_connect (settings, detailed_signal,
                                  G_CALLBACK (settings_changed), NULL);
-  free (detailed_signal);
+  g_free (detailed_signal);
 
   g_object_set_data (G_OBJECT (settings), key, GUINT_TO_POINTER (handler_id));
 
@@ -1169,7 +1111,7 @@ meta_prefs_override_preference_schema (const char *key, const char *schema)
 
   if (overridden)
     {
-      free (overridden->new_schema);
+      g_free (overridden->new_schema);
       overridden->new_schema = g_strdup (schema);
     }
   else
@@ -1201,7 +1143,7 @@ settings_changed (GSettings *settings,
   MetaEnumPreference *cursor;
   gboolean found_enum;
   gchar *schema;
-
+  
   g_object_get(settings, "schema", &schema, NULL);
 
   /* String array, handled separately */
@@ -1211,7 +1153,7 @@ settings_changed (GSettings *settings,
         queue_changed (META_PREF_WORKSPACE_NAMES);
       return;
     }
-
+  
   if (strcmp (key, KEY_MIN_WINDOW_OPACITY) == 0)
     {
       update_min_win_opacity ();
@@ -1280,7 +1222,7 @@ static void
 maybe_give_disable_workarounds_warning (void)
 {
   static gboolean first_disable = TRUE;
-
+    
   if (first_disable && disable_workarounds)
     {
       first_disable = FALSE;
@@ -1418,7 +1360,9 @@ theme_name_handler (GVariant *value,
 
   if (g_strcmp0 (current_theme, string_value) != 0)
     {
-      free (current_theme);
+      if (current_theme)
+        g_free (current_theme);
+
       current_theme = g_strdup (string_value);
       queue_changed (META_PREF_THEME);
     }
@@ -1441,7 +1385,7 @@ mouse_button_mods_handler (GVariant *value,
     {
       meta_topic (META_DEBUG_KEYBINDINGS,
                   "Failed to parse new GSettings value\n");
-
+          
       meta_warning (_("\"%s\" found in configuration database is "
                       "not a valid value for mouse button modifier\n"),
                     string_value);
@@ -1539,7 +1483,7 @@ snap_modifier_handler (GVariant *value,
 static gboolean
 button_layout_equal (const MetaButtonLayout *a,
                      const MetaButtonLayout *b)
-{
+{  
   int i;
 
   i = 0;
@@ -1580,7 +1524,7 @@ button_function_from_string (const char *str)
     return META_BUTTON_FUNCTION_ABOVE;
   else if (strcmp (str, "stick") == 0)
     return META_BUTTON_FUNCTION_STICK;
-  else
+  else 
     /* don't know; give up */
     return META_BUTTON_FUNCTION_LAST;
 }
@@ -1705,7 +1649,7 @@ button_layout_handler (GVariant *value,
           new_layout.right_buttons_has_spacer[i] = FALSE;
           ++i;
         }
-
+      
       buttons = g_strsplit (sides[1], ",", -1);
       i = 0;
       b = 0;
@@ -1741,7 +1685,7 @@ button_layout_handler (GVariant *value,
                               buttons[b]);
                 }
             }
-
+          
           ++b;
         }
 
@@ -1755,13 +1699,13 @@ button_layout_handler (GVariant *value,
     }
 
   g_strfreev (sides);
-
+  
   /* Invert the button layout for RTL languages */
   if (meta_ui_get_direction() == META_UI_DIRECTION_RTL)
   {
     MetaButtonLayout rtl_layout;
     int j;
-
+    
     for (i = 0; new_layout.left_buttons[i] != META_BUTTON_FUNCTION_LAST; i++);
     for (j = 0; j < i; j++)
       {
@@ -1773,7 +1717,7 @@ button_layout_handler (GVariant *value,
       }
     rtl_layout.right_buttons[j] = META_BUTTON_FUNCTION_LAST;
     rtl_layout.right_buttons_has_spacer[j] = FALSE;
-
+      
     for (i = 0; new_layout.right_buttons[i] != META_BUTTON_FUNCTION_LAST; i++);
     for (j = 0; j < i; j++)
       {
@@ -1837,10 +1781,10 @@ meta_prefs_get_desktop_effects (void)
   return desktop_effects;
 }
 
-MetaSyncMethod
-meta_prefs_get_sync_method (void)
+gboolean
+meta_prefs_get_sync_to_vblank (void)
 {
-  return sync_method;
+  return sync_to_vblank;
 }
 
 gboolean
@@ -1859,7 +1803,7 @@ gboolean
 meta_prefs_get_application_based (void)
 {
   return FALSE; /* For now, we never want this to do anything */
-
+  
   return application_based;
 }
 
@@ -1896,7 +1840,7 @@ meta_preference_to_string (MetaPreference pref)
 
     case META_PREF_RAISE_ON_CLICK:
       return "RAISE_ON_CLICK";
-
+      
     case META_PREF_THEME:
       return "THEME";
 
@@ -1929,7 +1873,7 @@ meta_preference_to_string (MetaPreference pref)
 
     case META_PREF_AUTO_RAISE:
       return "AUTO_RAISE";
-
+      
     case META_PREF_AUTO_RAISE_DELAY:
       return "AUTO_RAISE_DELAY";
 
@@ -1990,8 +1934,8 @@ meta_preference_to_string (MetaPreference pref)
     case META_PREF_UNREDIRECT_FULLSCREEN_WINDOWS:
       return "UNREDIRECT_FULLSCREEN_WINDOWS";
 
-    case META_PREF_SYNC_METHOD:
-      return "SYNC_METHOD";
+    case META_PREF_SYNC_TO_VBLANK:
+      return "SYNC_TO_VBLANK";
 
     case META_PREF_THREADED_SWAP:
       return "THREADED_SWAP";
@@ -2045,16 +1989,16 @@ meta_key_pref_free (MetaKeyPref *pref)
 {
   update_binding (pref, NULL);
 
-  free (pref->name);
-  free (pref->schema);
+  g_free (pref->name);
+  g_free (pref->schema);
 
-  free (pref);
+  g_free (pref);
 }
 
 static void
 init_bindings (void)
 {
-  key_bindings = g_hash_table_new_full (g_str_hash, g_str_equal, free,
+  key_bindings = g_hash_table_new_full (g_str_hash, g_str_equal, g_free,
                                         (GDestroyNotify)meta_key_pref_free);
 }
 
@@ -2081,10 +2025,10 @@ update_binding (MetaKeyPref *binding,
   /* Okay, so, we're about to provide a new list of key combos for this
    * action. Delete any pre-existing list.
    */
-  g_slist_foreach (binding->bindings, (GFunc) free, NULL);
+  g_slist_foreach (binding->bindings, (GFunc) g_free, NULL);
   g_slist_free (binding->bindings);
   binding->bindings = NULL;
-
+  
   for (i = 0; strokes && strokes[i]; i++)
     {
       keysym = 0;
@@ -2120,7 +2064,7 @@ update_binding (MetaKeyPref *binding,
           continue;
         }
 
-      combo = calloc (1, sizeof (MetaKeyCombo));
+      combo = g_malloc0 (sizeof (MetaKeyCombo));
       combo->keysym = keysym;
       combo->keycode = keycode;
       combo->modifiers = mods;
@@ -2203,7 +2147,7 @@ meta_prefs_get_workspace_name (int i)
     {
       char *generated_name = g_strdup_printf (_("Workspace %d"), i + 1);
       name = g_intern_string (generated_name);
-      free (generated_name);
+      g_free (generated_name);
     }
   else
     name = workspace_names[i];
@@ -2220,7 +2164,7 @@ meta_prefs_change_workspace_name (int         num,
 {
   GVariantBuilder builder;
   int n_workspace_names, i;
-
+  
   g_return_if_fail (num >= 0);
 
   meta_topic (META_DEBUG_PREFS,
@@ -2321,7 +2265,7 @@ meta_prefs_add_keybinding (const char           *name,
       char *changed_signal = g_strdup_printf ("changed::%s", name);
       id = g_signal_connect (settings, changed_signal,
                              G_CALLBACK (bindings_changed), NULL);
-      free (changed_signal);
+      g_free (changed_signal);
 
       g_object_set_data (G_OBJECT (settings), name, GUINT_TO_POINTER (id));
 
@@ -2414,7 +2358,7 @@ meta_prefs_remove_custom_keybinding (const char *name)
 
 /**
  * meta_prefs_get_keybindings:
- *
+ * 
  * Returns: (element-type MetaKeyPref) (transfer container):
  */
 GList *

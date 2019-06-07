@@ -91,7 +91,7 @@ on_node_reached (ClutterPathConstraint *constraint,
 
   str = node_to_string (&node);
   g_print ("Node %d reached: %s\n", index_, str);
-  free (str);
+  g_free (str);
 }
 
 G_MODULE_EXPORT int

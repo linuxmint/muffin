@@ -182,7 +182,7 @@ _cogl_texture_free (CoglTexture *texture)
 {
   _cogl_texture_free_loader (texture);
 
-  free (texture);
+  g_free (texture);
 }
 
 CoglBool
@@ -633,7 +633,7 @@ get_texture_bits_via_copy (CoglTexture *texture,
   bpp = _cogl_pixel_format_get_bytes_per_pixel (dst_format);
 
   full_rowstride = bpp * full_tex_width;
-  full_bits = malloc (full_rowstride * full_tex_height);
+  full_bits = g_malloc (full_rowstride * full_tex_height);
 
   if (texture->vtable->get_data (texture,
                                  dst_format,
@@ -654,7 +654,7 @@ get_texture_bits_via_copy (CoglTexture *texture,
   else
     ret = FALSE;
 
-  free (full_bits);
+  g_free (full_bits);
 
   return ret;
 }

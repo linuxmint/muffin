@@ -73,7 +73,7 @@ struct _CoglBitmap
  * @error: A #CoglError for catching exceptional errors or %NULL
  *
  * This is equivalent to cogl_bitmap_new_with_size() except that it
- * allocated the buffer using malloc() instead of creating a
+ * allocated the buffer using g_malloc() instead of creating a
  * #CoglPixelBuffer. The buffer will be automatically destroyed when
  * the bitmap is freed.
  *

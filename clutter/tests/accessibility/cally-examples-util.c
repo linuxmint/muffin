@@ -139,8 +139,8 @@ cally_util_a11y_init (int *argc, char ***argv)
 
   result = _a11y_invoke_module (bridge_path, TRUE);
 
-  free (bridge_dir);
-  free (bridge_path);
+  g_free (bridge_dir);
+  g_free (bridge_path);
 
   return result;
 }

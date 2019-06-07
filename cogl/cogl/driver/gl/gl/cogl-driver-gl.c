@@ -421,7 +421,7 @@ _cogl_driver_update_features (CoglContext *ctx,
                  _cogl_context_get_gl_version (ctx),
                  all_extensions);
 
-      free (all_extensions);
+      g_free (all_extensions);
     }
 
   _cogl_get_gl_version (ctx, &gl_major, &gl_minor);

@@ -164,7 +164,7 @@ meta_accel_label_destroy (GtkWidget *object)
   MetaAccelLabel *accel_label = META_ACCEL_LABEL (object);
 
 
-  free (accel_label->accel_string);
+  g_free (accel_label->accel_string);
   accel_label->accel_string = NULL;
 
   accel_label->accel_mods = 0;
@@ -178,7 +178,7 @@ meta_accel_label_finalize (GObject *object)
 {
   MetaAccelLabel *accel_label = META_ACCEL_LABEL (object);
 
-  free (accel_label->accel_string);
+  g_free (accel_label->accel_string);
 
   G_OBJECT_CLASS (meta_accel_label_parent_class)->finalize (object);
 }
@@ -273,9 +273,9 @@ meta_accel_label_draw (GtkWidget *widget,
         cairo_translate (cr, ac_width, 0);
       if (gtk_label_get_ellipsize (label))
         pango_layout_set_width (label_layout,
-                                pango_layout_get_width (label_layout)
+                                pango_layout_get_width (label_layout) 
                                 - ac_width * PANGO_SCALE);
-
+      
       allocation.width -= ac_width;
       gtk_widget_set_allocation (widget, &allocation);
       if (GTK_WIDGET_CLASS (meta_accel_label_parent_class)->draw)
@@ -285,7 +285,7 @@ meta_accel_label_draw (GtkWidget *widget,
       gtk_widget_set_allocation (widget, &allocation);
       if (gtk_label_get_ellipsize (label))
         pango_layout_set_width (label_layout,
-                                pango_layout_get_width (label_layout)
+                                pango_layout_get_width (label_layout) 
                                 + ac_width * PANGO_SCALE);
 
       cairo_restore (cr);
@@ -320,7 +320,7 @@ meta_accel_label_draw (GtkWidget *widget,
       if (GTK_WIDGET_CLASS (meta_accel_label_parent_class)->draw)
         GTK_WIDGET_CLASS (meta_accel_label_parent_class)->draw (widget, cr);
     }
-
+  
   return FALSE;
 }
 
@@ -336,7 +336,7 @@ meta_accel_label_update (MetaAccelLabel *accel_label)
 
   class = META_ACCEL_LABEL_GET_CLASS (accel_label);
 
-  free (accel_label->accel_string);
+  g_free (accel_label->accel_string);
   accel_label->accel_string = NULL;
 
   gstring = g_string_new (accel_label->accel_string);
@@ -439,10 +439,10 @@ meta_accel_label_update (MetaAccelLabel *accel_label)
       if (tmp[0] != 0 && tmp[1] == 0)
         tmp[0] = g_ascii_toupper (tmp[0]);
       g_string_append (gstring, tmp);
-      free (tmp);
+      g_free (tmp);
     }
 
-  free (accel_label->accel_string);
+  g_free (accel_label->accel_string);
   accel_label->accel_string = gstring->str;
   g_string_free (gstring, FALSE);
 

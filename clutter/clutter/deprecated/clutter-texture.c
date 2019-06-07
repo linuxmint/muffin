@@ -716,7 +716,7 @@ clutter_texture_async_data_free (ClutterTextureAsyncData *data)
      once it is known that the load thread has completed or from the
      load thread/upload function itself if the abort flag is true (in
      which case the main thread has disowned the data) */
-  free (data->load_filename);
+  g_free (data->load_filename);
 
   if (data->load_bitmap != NULL)
     cogl_object_unref (data->load_bitmap);
@@ -797,7 +797,7 @@ clutter_texture_finalize (GObject *object)
 {
   ClutterTexturePrivate *priv = CLUTTER_TEXTURE (object)->priv;
 
-  free (priv->filename);
+  g_free (priv->filename);
 
   G_OBJECT_CLASS (clutter_texture_parent_class)->finalize (object);
 }
@@ -1244,7 +1244,7 @@ clutter_texture_set_custom_property (ClutterScriptable *scriptable,
           g_error_free (error);
         }
 
-      free (path);
+      g_free (path);
     }
   else
     {
@@ -1595,7 +1595,7 @@ clutter_texture_set_from_data (ClutterTexture     *texture,
       return FALSE;
     }
 
-  free (priv->filename);
+  g_free (priv->filename);
   priv->filename = NULL;
 
   clutter_texture_set_cogl_texture (texture, new_texture);
@@ -2088,7 +2088,7 @@ clutter_texture_set_from_file (ClutterTexture *texture,
       return FALSE;
     }
 
-  free (priv->filename);
+  g_free (priv->filename);
   priv->filename = g_strdup (filename);
 
   clutter_texture_set_cogl_texture (texture, new_texture);
@@ -2381,7 +2381,7 @@ clutter_texture_set_area_from_rgb_data (ClutterTexture     *texture,
       return FALSE;
     }
 
-  free (texture->priv->filename);
+  g_free (texture->priv->filename);
   texture->priv->filename = NULL;
 
   /* rename signal */

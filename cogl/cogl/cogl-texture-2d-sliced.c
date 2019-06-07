@@ -174,7 +174,7 @@ _cogl_texture_2d_sliced_allocate_waste_buffer (CoglTexture2DSliced *tex_2ds,
       unsigned int right_size = first_y_span->size * last_x_span->waste;
       unsigned int bottom_size = first_x_span->size * last_y_span->waste;
 
-      waste_buf = malloc (MAX (right_size, bottom_size) * bpp);
+      waste_buf = g_malloc (MAX (right_size, bottom_size) * bpp);
     }
 
   return waste_buf;
@@ -389,7 +389,7 @@ _cogl_texture_2d_sliced_upload_bitmap (CoglTexture2DSliced *tex_2ds,
                                                      error))
             {
               if (waste_buf)
-                free (waste_buf);
+                g_free (waste_buf);
               return FALSE;
             }
 
@@ -419,14 +419,14 @@ _cogl_texture_2d_sliced_upload_bitmap (CoglTexture2DSliced *tex_2ds,
                                                   error)) /* dst_y */
             {
               if (waste_buf)
-                free (waste_buf);
+                g_free (waste_buf);
               return FALSE;
             }
         }
     }
 
   if (waste_buf)
-    free (waste_buf);
+    g_free (waste_buf);
 
   return TRUE;
 }
@@ -523,7 +523,7 @@ _cogl_texture_2d_sliced_upload_subregion (CoglTexture2DSliced *tex_2ds,
                                                      error))
             {
               if (waste_buf)
-                free (waste_buf);
+                g_free (waste_buf);
               return FALSE;
             }
 
@@ -538,14 +538,14 @@ _cogl_texture_2d_sliced_upload_subregion (CoglTexture2DSliced *tex_2ds,
                                                   error))
             {
               if (waste_buf)
-                free (waste_buf);
+                g_free (waste_buf);
               return FALSE;
             }
         }
     }
 
   if (waste_buf)
-    free (waste_buf);
+    g_free (waste_buf);
 
   return TRUE;
 }

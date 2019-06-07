@@ -21,7 +21,7 @@ create_source_rect (void)
   GLint prev_unpack_skip_rows;
   GLint prev_unpack_skip_pixles;
   GLint prev_rectangle_binding;
-  uint8_t *data = malloc (256 * 256 * 4), *p = data;
+  uint8_t *data = g_malloc (256 * 256 * 4), *p = data;
   CoglHandle tex;
   GLuint gl_tex;
 
@@ -67,7 +67,7 @@ create_source_rect (void)
 
   g_assert (glGetError () == GL_NO_ERROR);
 
-  free (data);
+  g_free (data);
 
   tex = test_utils_texture_new_from_foreign (gl_tex,
                                        GL_TEXTURE_RECTANGLE_ARB,
@@ -87,7 +87,7 @@ static CoglHandle
 create_source_2d (void)
 {
   int x, y;
-  uint8_t *data = malloc (256 * 256 * 4), *p = data;
+  uint8_t *data = g_malloc (256 * 256 * 4), *p = data;
   CoglHandle tex;
 
   for (y = 0; y < 256; y++)
@@ -105,7 +105,7 @@ create_source_2d (void)
                                     256 * 4,
                                     data);
 
-  free (data);
+  g_free (data);
 
   return tex;
 }
@@ -163,7 +163,7 @@ validate_result (TestState *state)
   uint8_t *data, *p;
   int x, y;
 
-  p = data = malloc (512 * 384 * 4);
+  p = data = g_malloc (512 * 384 * 4);
 
   cogl_read_pixels (0, 0, 512, 384,
                     COGL_READ_PIXELS_COLOR_BUFFER,
@@ -188,7 +188,7 @@ validate_result (TestState *state)
         p += 4;
       }
 
-  free (data);
+  g_free (data);
 
   /* Comment this out to see what the test paints */
   clutter_main_quit ();

@@ -1,11 +1,4 @@
 <schemalist>
-  <enum id="sync_method">
-    <value value="0" nick="none"/>
-    <value value="1" nick="fallback"/>
-    <value value="2" nick="swap_throttling"/>
-    <value value="3" nick="presentation_time"/>
-  </enum>
-
   <enum id="placement_type">
     <value value="0" nick="automatic"/>
     <value value="1" nick="pointer"/>
@@ -79,12 +72,6 @@
       <_description>
         Determines whether or not VBLANK is enabled.
       </_description>
-    </key>
-
-    <key name="sync-method" enum="sync_method">
-      <default>'presentation_time'</default>
-      <_summary>Sync method</_summary>
-      <_description>The method used by Muffin to provide VSync.</_description>
     </key>
 
     <key name="threaded-swap" type="b">

@@ -73,7 +73,7 @@ main (int argc, char *argv[])
 
       clutter_test_add (path, behaviour_tests[i].func);
 
-      free (path);
+      g_free (path);
     }
 
   return clutter_test_run ();

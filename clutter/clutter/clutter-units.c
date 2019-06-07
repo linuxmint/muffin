@@ -600,7 +600,7 @@ clutter_unit_type_name (ClutterUnitType unit_type)
  * typographic points. Pixels are integers.
  *
  * Return value: a newly allocated string containing the encoded
- *   #ClutterUnits value. Use free() to free the string
+ *   #ClutterUnits value. Use g_free() to free the string
  *
  * Since: 1.0
  */
@@ -826,7 +826,7 @@ param_units_validate (GParamSpec *pspec,
                  str,
                  clutter_unit_type_name (uspec->default_type));
 
-      free (str);
+      g_free (str);
 
       return FALSE;
     }

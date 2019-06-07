@@ -122,7 +122,7 @@ meta_module_finalize (GObject *object)
 {
   MetaModulePrivate *priv = META_MODULE (object)->priv;
 
-  free (priv->path);
+  g_free (priv->path);
   priv->path = NULL;
 
   G_OBJECT_CLASS (meta_module_parent_class)->finalize (object);
@@ -139,7 +139,7 @@ meta_module_set_property (GObject      *object,
   switch (prop_id)
     {
     case PROP_PATH:
-      free (priv->path);
+      g_free (priv->path);
       priv->path = g_value_dup_string (value);
       break;
     default:

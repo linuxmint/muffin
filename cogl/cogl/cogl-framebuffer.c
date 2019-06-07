@@ -728,7 +728,7 @@ _cogl_offscreen_free (CoglOffscreen *offscreen)
   if (offscreen->depth_texture != NULL)
     cogl_object_unref (offscreen->depth_texture);
 
-  free (offscreen);
+  g_free (offscreen);
 }
 
 CoglBool
@@ -2013,7 +2013,7 @@ get_wire_line_indices (CoglContext *ctx,
   n_lines = get_line_count (mode, n_vertices_in);
 
   /* Note: we are using COGL_INDICES_TYPE_UNSIGNED_INT so 4 bytes per index. */
-  line_indices = malloc (4 * n_lines * 2);
+  line_indices = g_malloc (4 * n_lines * 2);
 
   pos = 0;
 
@@ -2082,7 +2082,7 @@ get_wire_line_indices (CoglContext *ctx,
                           line_indices,
                           *n_indices);
 
-  free (line_indices);
+  g_free (line_indices);
 
   return ret;
 }

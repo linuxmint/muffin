@@ -60,7 +60,7 @@ make_texture (void)
   CoglTexture *tex;
   int partx, party, width, height;
 
-  p = tex_data = malloc (TEXTURE_SIZE * TEXTURE_SIZE * 4);
+  p = tex_data = g_malloc (TEXTURE_SIZE * TEXTURE_SIZE * 4);
 
   /* Make a texture with a different color for each part */
   for (party = 0; party < PARTS; party++)
@@ -95,7 +95,7 @@ make_texture (void)
                                           TEXTURE_SIZE * 4,
                                           tex_data);
 
-  free (tex_data);
+  g_free (tex_data);
 
   if (cogl_test_verbose ())
     {

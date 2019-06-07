@@ -277,7 +277,7 @@ _cogl_blit_get_tex_data_begin (CoglBlitData *data)
   data->format = _cogl_texture_get_format (data->src_tex);
   data->bpp = _cogl_pixel_format_get_bytes_per_pixel (data->format);
 
-  data->image_data = malloc (data->bpp * data->src_width *
+  data->image_data = g_malloc (data->bpp * data->src_width *
                                data->src_height);
   cogl_texture_get_data (data->src_tex, data->format,
                          data->src_width * data->bpp, data->image_data);
@@ -312,7 +312,7 @@ _cogl_blit_get_tex_data_blit (CoglBlitData *data,
 static void
 _cogl_blit_get_tex_data_end (CoglBlitData *data)
 {
-  free (data->image_data);
+  g_free (data->image_data);
 }
 
 /* These should be specified in order of preference */

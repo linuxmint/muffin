@@ -1222,7 +1222,7 @@ clutter_container_child_set (ClutterContainer *container,
   GObjectClass *klass;
   const gchar *name;
   va_list var_args;
-
+  
   g_return_if_fail (CLUTTER_IS_CONTAINER (container));
   g_return_if_fail (CLUTTER_IS_ACTOR (actor));
 
@@ -1236,7 +1236,7 @@ clutter_container_child_set (ClutterContainer *container,
       GValue value = G_VALUE_INIT;
       gchar *error = NULL;
       GParamSpec *pspec;
-
+    
       pspec = clutter_container_class_find_child_property (klass, name);
       if (!pspec)
         {
@@ -1265,7 +1265,7 @@ clutter_container_child_set (ClutterContainer *container,
            * on it might crash
            */
           g_warning ("%s: %s", G_STRLOC, error);
-          free (error);
+          g_free (error);
           break;
         }
 
@@ -1357,7 +1357,7 @@ clutter_container_child_get_property (ClutterContainer *container,
  *
  * In general, a copy is made of the property contents and the caller is
  * responsible for freeing the memory in the appropriate manner for the type, for
- * instance by calling free() or g_object_unref().
+ * instance by calling g_free() or g_object_unref(). 
  *
  * Since: 0.8
  */
@@ -1370,7 +1370,7 @@ clutter_container_child_get (ClutterContainer *container,
   GObjectClass *klass;
   const gchar *name;
   va_list var_args;
-
+  
   g_return_if_fail (CLUTTER_IS_CONTAINER (container));
   g_return_if_fail (CLUTTER_IS_ACTOR (actor));
 
@@ -1384,7 +1384,7 @@ clutter_container_child_get (ClutterContainer *container,
       GValue value = G_VALUE_INIT;
       gchar *error = NULL;
       GParamSpec *pspec;
-
+    
       pspec = clutter_container_class_find_child_property (klass, name);
       if (!pspec)
         {
@@ -1408,7 +1408,7 @@ clutter_container_child_get (ClutterContainer *container,
       if (error)
         {
           g_warning ("%s: %s", G_STRLOC, error);
-          free (error);
+          g_free (error);
           g_value_unset (&value);
           break;
         }

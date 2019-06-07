@@ -2,12 +2,12 @@
 
 /* Muffin X display handler */
 
-/*
+/* 
  * Copyright (C) 2001 Havoc Pennington
  * Copyright (C) 2002, 2003, 2004 Red Hat, Inc.
  * Copyright (C) 2003, 2004 Rob Adams
  * Copyright (C) 2004-2006 Elijah Newren
- *
+ * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
  * published by the Free Software Foundation; either version 2 of the
@@ -17,7 +17,7 @@
  * WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street - Suite 500, Boston, MA
@@ -113,7 +113,7 @@
  *
  * \ingroup pings
  */
-typedef struct
+typedef struct 
 {
   MetaDisplay *display;
   Window       xwindow;
@@ -124,7 +124,7 @@ typedef struct
   guint        ping_timeout_id;
 } MetaPingData;
 
-typedef struct
+typedef struct 
 {
   MetaDisplay *display;
   Window xwindow;
@@ -164,8 +164,6 @@ static guint display_signals [LAST_SIGNAL] = { 0 };
  * to shadow the parameter in its object methods.
  */
 static MetaDisplay *the_display = NULL;
-
-static guint obscured_timeout = 0;
 
 #ifdef WITH_VERBOSE_MODE
 static void   meta_spew_event           (MetaDisplay    *display,
@@ -358,7 +356,7 @@ ping_data_free (MetaPingData *ping_data)
     ping_data->ping_timeout_id = 0;
   }
 
-  free (ping_data);
+  g_free (ping_data);
 }
 
 /*
@@ -378,7 +376,7 @@ remove_pending_pings_for_window (MetaDisplay *display, Window xwindow)
   GSList *dead;
 
   /* could obviously be more efficient, don't care */
-
+  
   /* build list to be removed */
   dead = NULL;
   for (tmp = display->pending_pings; tmp; tmp = tmp->next)
@@ -447,11 +445,11 @@ enable_compositor (MetaDisplay *display,
 
   if (!display->compositor)
     return;
-
+  
   for (list = display->screens; list != NULL; list = list->next)
     {
       MetaScreen *screen = list->data;
-
+      
       meta_compositor_manage_screen (screen->display->compositor,
 				     screen);
 
@@ -495,11 +493,11 @@ meta_display_open (void)
 #undef item
   };
   Atom atoms[G_N_ELEMENTS(atom_names)];
-
+  
   meta_verbose ("Opening display '%s'\n", XDisplayName (NULL));
 
   xdisplay = meta_ui_get_display ();
-
+  
   if (xdisplay == NULL)
     {
       meta_warning (_("Failed to open X Window System display '%s'\n"),
@@ -509,21 +507,18 @@ meta_display_open (void)
 
   if (meta_is_syncing ())
     XSynchronize (xdisplay, True);
-
+  
   g_assert (the_display == NULL);
   the_display = g_object_new (META_TYPE_DISPLAY, NULL);
 
   the_display->closing = 0;
-
+  
   /* here we use XDisplayName which is what the user
    * probably put in, vs. DisplayString(display) which is
    * canonicalized by XOpenDisplay()
    */
   the_display->name = g_strdup (XDisplayName (NULL));
   the_display->xdisplay = xdisplay;
-  the_display->gdk_display = gdk_display_get_default();
-  the_display->gdk_device = gdk_seat_get_pointer (gdk_display_get_default_seat (the_display->gdk_display));
-
   if (gethostname (buf, sizeof(buf)-1) == 0)
     {
       buf[sizeof(buf)-1] = '\0';
@@ -548,25 +543,18 @@ meta_display_open (void)
   the_display->allow_terminal_deactivation = TRUE; /* Only relevant for when a
                                                   terminal has the focus */
 
-  the_display->prefs = meta_prefs_get_default_state ();
-
-  the_display->desktop_effects = meta_prefs_get_desktop_effects ();
-
   the_display->rebuild_keybinding_idle_id = 0;
-
-  the_display->sync_method = meta_prefs_get_sync_method();
 
   /* FIXME copy the checks from GDK probably */
   the_display->static_gravity_works = g_getenv ("MUFFIN_USE_STATIC_GRAVITY") != NULL;
-
+  
   meta_bell_init (the_display);
 
   meta_display_init_keys (the_display);
 
   update_window_grab_modifiers (the_display);
   update_mouse_zoom_modifiers (the_display);
-
-  the_display->mouse_zoom_enabled = *the_display->prefs->mouse_zoom_enabled;
+  the_display->mouse_zoom_enabled = meta_prefs_get_mouse_zoom_enabled ();
 
   meta_prefs_add_listener (prefs_changed_callback, the_display);
 
@@ -574,7 +562,7 @@ meta_display_open (void)
   XInternAtoms (the_display->xdisplay, atom_names, G_N_ELEMENTS (atom_names),
                 False, atoms);
   {
-    int i = 0;
+    int i = 0;    
 #define item(x) the_display->atom_##x = atoms[i++];
 #include <meta/atomnames.h>
 #undef item
@@ -584,7 +572,7 @@ meta_display_open (void)
   meta_display_init_window_prop_hooks (the_display);
   the_display->group_prop_hooks = NULL;
   meta_display_init_group_prop_hooks (the_display);
-
+  
   /* Offscreen unmapped window used for _NET_SUPPORTING_WM_CHECK,
    * created in screen_new
    */
@@ -597,26 +585,26 @@ meta_display_open (void)
 
   the_display->window_with_menu = NULL;
   the_display->window_menu = NULL;
-
+  
   the_display->screens = NULL;
   the_display->active_screen = NULL;
-
+  
 #ifdef HAVE_STARTUP_NOTIFICATION
   the_display->sn_display = sn_display_new (the_display->xdisplay,
                                         sn_error_trap_push,
                                         sn_error_trap_pop);
 #endif
-
+  
   the_display->events = NULL;
 
   /* Get events */
   meta_ui_add_event_func (the_display->xdisplay,
                           event_callback,
                           the_display);
-
+  
   the_display->window_ids = g_hash_table_new (meta_unsigned_long_hash,
                                           meta_unsigned_long_equal);
-
+  
   i = 0;
   while (i < N_IGNORED_CROSSING_SERIALS)
     {
@@ -624,14 +612,14 @@ meta_display_open (void)
       ++i;
     }
   the_display->ungrab_should_not_cause_focus_window = None;
-
+  
   the_display->current_time = CurrentTime;
   the_display->sentinel_counter = 0;
 
   the_display->grab_resize_timeout_id = 0;
   the_display->grab_have_keyboard = FALSE;
-
-#ifdef HAVE_XKB
+  
+#ifdef HAVE_XKB  
   the_display->last_bell_time = 0;
 #endif
 
@@ -649,14 +637,14 @@ meta_display_open (void)
     int major, minor;
 
     the_display->have_xsync = FALSE;
-
+    
     the_display->xsync_error_base = 0;
     the_display->xsync_event_base = 0;
 
     /* I don't think we really have to fill these in */
     major = SYNC_MAJOR_VERSION;
     minor = SYNC_MINOR_VERSION;
-
+    
     if (!XSyncQueryExtension (the_display->xdisplay,
                               &the_display->xsync_event_base,
                               &the_display->xsync_error_base) ||
@@ -685,10 +673,10 @@ meta_display_open (void)
 #ifdef HAVE_SHAPE
   {
     the_display->have_shape = FALSE;
-
+    
     the_display->shape_error_base = 0;
     the_display->shape_event_base = 0;
-
+    
     if (!XShapeQueryExtension (the_display->xdisplay,
                                &the_display->shape_event_base,
                                &the_display->shape_error_base))
@@ -698,7 +686,7 @@ meta_display_open (void)
       }
     else
       the_display->have_shape = TRUE;
-
+    
     meta_verbose ("Attempted to init Shape, found error base %d event base %d\n",
                   the_display->shape_error_base,
                   the_display->shape_event_base);
@@ -709,10 +697,10 @@ meta_display_open (void)
 
   {
     the_display->have_render = FALSE;
-
+    
     the_display->render_error_base = 0;
     the_display->render_event_base = 0;
-
+    
     if (!XRenderQueryExtension (the_display->xdisplay,
                                 &the_display->render_event_base,
                                 &the_display->render_error_base))
@@ -722,7 +710,7 @@ meta_display_open (void)
       }
     else
       the_display->have_render = TRUE;
-
+    
     meta_verbose ("Attempted to init Render, found error base %d event base %d\n",
                   the_display->render_error_base,
                   the_display->render_event_base);
@@ -740,7 +728,7 @@ meta_display_open (void)
       {
         the_display->composite_error_base = 0;
         the_display->composite_event_base = 0;
-      }
+      } 
     else
       {
         the_display->composite_major_version = 0;
@@ -760,7 +748,7 @@ meta_display_open (void)
 
     meta_verbose ("Attempted to init Composite, found error base %d event base %d "
                   "extn ver %d %d\n",
-                  the_display->composite_error_base,
+                  the_display->composite_error_base, 
                   the_display->composite_event_base,
                   the_display->composite_major_version,
                   the_display->composite_minor_version);
@@ -776,12 +764,12 @@ meta_display_open (void)
       {
         the_display->damage_error_base = 0;
         the_display->damage_event_base = 0;
-      }
+      } 
     else
       the_display->have_damage = TRUE;
 
     meta_verbose ("Attempted to init Damage, found error base %d event base %d\n",
-                  the_display->damage_error_base,
+                  the_display->damage_error_base, 
                   the_display->damage_event_base);
 
     the_display->have_xfixes = FALSE;
@@ -795,19 +783,19 @@ meta_display_open (void)
       {
         the_display->xfixes_error_base = 0;
         the_display->xfixes_event_base = 0;
-      }
+      } 
     else
       the_display->have_xfixes = TRUE;
 
     meta_verbose ("Attempted to init XFixes, found error base %d event base %d\n",
-                  the_display->xfixes_error_base,
+                  the_display->xfixes_error_base, 
                   the_display->xfixes_event_base);
   }
-
+      
 #ifdef HAVE_XCURSOR
   {
-    XcursorSetTheme (the_display->xdisplay, the_display->prefs->cursor_theme);
-    XcursorSetDefaultSize (the_display->xdisplay, (*the_display->prefs->cursor_size) * (*the_display->prefs->ui_scale));
+    XcursorSetTheme (the_display->xdisplay, meta_prefs_get_cursor_theme ());
+    XcursorSetDefaultSize (the_display->xdisplay, meta_prefs_get_cursor_size ());
   }
 #else /* HAVE_XCURSOR */
   meta_verbose ("Not compiled with Xcursor support\n");
@@ -842,7 +830,7 @@ meta_display_open (void)
                                     the_display->leader_window,
                                     the_display->atom__GNOME_WM_KEYBINDINGS,
                                     "Muffin,Metacity");
-
+    
     meta_prop_set_utf8_string_hint (the_display,
                                     the_display->leader_window,
                                     the_display->atom__MUFFIN_VERSION,
@@ -885,7 +873,7 @@ meta_display_open (void)
   the_display->debug_button_grabs = g_getenv ("MUFFIN_DEBUG_BUTTON_GRABS") != NULL;
 
   screens = NULL;
-
+  
   i = 0;
   while (i < ScreenCount (xdisplay))
     {
@@ -897,9 +885,9 @@ meta_display_open (void)
         screens = g_slist_prepend (screens, screen);
       ++i;
     }
-
+  
   the_display->screens = screens;
-
+  
   if (screens == NULL)
     {
       /* This would typically happen because all the screens already
@@ -917,15 +905,15 @@ meta_display_open (void)
      faster with the call to meta_screen_manage_all_windows further down
      the code */
   enable_compositor (the_display, FALSE);
-
+   
   meta_display_grab (the_display);
-
+  
   /* Now manage all existing windows */
   tmp = the_display->screens;
   while (tmp != NULL)
     {
       MetaScreen *screen = tmp->data;
-
+	
       meta_screen_manage_all_windows (screen);
 
       tmp = tmp->next;
@@ -1012,7 +1000,7 @@ meta_display_list_windows (MetaDisplay          *display,
       GSList *next;
 
       next = tmp->next;
-
+      
       if (next &&
           next->data == tmp->data)
         {
@@ -1023,7 +1011,7 @@ meta_display_list_windows (MetaDisplay          *display,
 
           if (tmp == winlist)
             winlist = next;
-
+          
           g_slist_free_1 (tmp);
 
           /* leave prev unchanged */
@@ -1032,7 +1020,7 @@ meta_display_list_windows (MetaDisplay          *display,
         {
           prev = tmp;
         }
-
+      
       tmp = next;
     }
 
@@ -1059,17 +1047,17 @@ meta_display_close (MetaDisplay *display,
   display->closing += 1;
 
   meta_prefs_remove_listener (prefs_changed_callback, display);
-
+  
   meta_display_remove_autoraise_callback (display);
 
   if (display->grab_old_window_stacking)
     g_list_free (display->grab_old_window_stacking);
-
+  
   /* Stop caring about events */
   meta_ui_remove_event_func (display->xdisplay,
                              event_callback,
                              display);
-
+  
   /* Free all screens */
   tmp = display->screens;
   while (tmp != NULL)
@@ -1089,7 +1077,7 @@ meta_display_close (MetaDisplay *display,
       display->sn_display = NULL;
     }
 #endif
-
+  
   /* Must be after all calls to meta_window_unmanage() since they
    * unregister windows
    */
@@ -1102,15 +1090,15 @@ meta_display_close (MetaDisplay *display,
 
   meta_display_free_window_prop_hooks (display);
   meta_display_free_group_prop_hooks (display);
-
-  free (display->hostname);
-  free (display->name);
+  
+  g_free (display->hostname);
+  g_free (display->name);
 
   meta_display_shutdown_keys (display);
 
   if (display->compositor)
     meta_compositor_destroy (display->compositor);
-
+  
   g_object_unref (display);
   the_display = NULL;
 
@@ -1151,7 +1139,7 @@ meta_display_screen_for_xwindow (MetaDisplay *display,
 {
   XWindowAttributes attr;
   int result;
-
+  
   meta_error_trap_push (display);
   attr.screen = NULL;
   result = XGetWindowAttributes (display->xdisplay, xwindow, &attr);
@@ -1163,7 +1151,7 @@ meta_display_screen_for_xwindow (MetaDisplay *display,
    */
   if (result == 0 || attr.screen == NULL)
     return NULL;
-
+  
   return meta_display_screen_for_x_screen (display, attr.screen);
 }
 
@@ -1205,7 +1193,7 @@ meta_display_ungrab (MetaDisplay *display)
 {
   if (display->server_grab_count == 0)
     meta_bug ("Ungrabbed non-grabbed server\n");
-
+  
   display->server_grab_count -= 1;
   if (display->server_grab_count == 0)
     {
@@ -1239,7 +1227,7 @@ meta_display_for_x_display (Display *xdisplay)
 
   meta_warning ("Could not find display for X display %p, probably going to crash\n",
                 xdisplay);
-
+  
   return NULL;
 }
 
@@ -1266,8 +1254,8 @@ grab_op_is_mouse_only (MetaGrabOp op)
     {
     case META_GRAB_OP_MOVING:
     case META_GRAB_OP_RESIZING_SE:
-    case META_GRAB_OP_RESIZING_S:
-    case META_GRAB_OP_RESIZING_SW:
+    case META_GRAB_OP_RESIZING_S:      
+    case META_GRAB_OP_RESIZING_SW:      
     case META_GRAB_OP_RESIZING_N:
     case META_GRAB_OP_RESIZING_NE:
     case META_GRAB_OP_RESIZING_NW:
@@ -1287,8 +1275,8 @@ grab_op_is_mouse (MetaGrabOp op)
     {
     case META_GRAB_OP_MOVING:
     case META_GRAB_OP_RESIZING_SE:
-    case META_GRAB_OP_RESIZING_S:
-    case META_GRAB_OP_RESIZING_SW:
+    case META_GRAB_OP_RESIZING_S:      
+    case META_GRAB_OP_RESIZING_SW:      
     case META_GRAB_OP_RESIZING_N:
     case META_GRAB_OP_RESIZING_NE:
     case META_GRAB_OP_RESIZING_NW:
@@ -1348,8 +1336,8 @@ meta_grab_op_is_resizing (MetaGrabOp op)
   switch (op)
     {
     case META_GRAB_OP_RESIZING_SE:
-    case META_GRAB_OP_RESIZING_S:
-    case META_GRAB_OP_RESIZING_SW:
+    case META_GRAB_OP_RESIZING_S:      
+    case META_GRAB_OP_RESIZING_SW:      
     case META_GRAB_OP_RESIZING_N:
     case META_GRAB_OP_RESIZING_NE:
     case META_GRAB_OP_RESIZING_NW:
@@ -1379,7 +1367,7 @@ meta_grab_op_is_moving (MetaGrabOp op)
     case META_GRAB_OP_MOVING:
     case META_GRAB_OP_KEYBOARD_MOVING:
       return TRUE;
-
+      
     default:
       return FALSE;
     }
@@ -1434,7 +1422,7 @@ guint32
 meta_display_get_current_time_roundtrip (MetaDisplay *display)
 {
   guint32 timestamp;
-
+  
   timestamp = meta_display_get_current_time (display);
   if (timestamp == CurrentTime)
     {
@@ -1492,7 +1480,7 @@ meta_display_add_ignored_crossing_serial (MetaDisplay  *display,
   /* don't add the same serial more than once */
   if (display->ignored_crossing_serials[N_IGNORED_CROSSING_SERIALS-1] == serial)
     return;
-
+  
   /* shift serials to the left */
   i = 0;
   while (i < (N_IGNORED_CROSSING_SERIALS - 1))
@@ -1535,7 +1523,7 @@ reset_ignored_crossing_serials (MetaDisplay *display)
   display->ungrab_should_not_cause_focus_window = None;
 }
 
-static gboolean
+static gboolean 
 window_raise_with_delay_callback (void *data)
 {
   MetaWindow *window;
@@ -1543,23 +1531,23 @@ window_raise_with_delay_callback (void *data)
 
   auto_raise = data;
 
-  meta_topic (META_DEBUG_FOCUS,
-	      "In autoraise callback for window 0x%lx\n",
+  meta_topic (META_DEBUG_FOCUS, 
+	      "In autoraise callback for window 0x%lx\n", 
 	      auto_raise->xwindow);
 
   auto_raise->display->autoraise_timeout_id = 0;
   auto_raise->display->autoraise_window = NULL;
 
-  window  = meta_display_lookup_x_window (auto_raise->display,
+  window  = meta_display_lookup_x_window (auto_raise->display, 
 					  auto_raise->xwindow);
-
-  if (window == NULL)
+  
+  if (window == NULL) 
     return FALSE;
 
   /* If we aren't already on top, check whether the pointer is inside
    * the window and raise the window if so.
-   */
-  if (meta_stack_get_top (window->screen->stack) != window)
+   */      
+  if (meta_stack_get_top (window->screen->stack) != window) 
     {
       int x, y, root_x, root_y;
       Window root, child;
@@ -1574,14 +1562,14 @@ window_raise_with_delay_callback (void *data)
 				   &root_x, &root_y, &x, &y, &mask);
       meta_error_trap_pop (window->display);
 
-      point_in_window =
+      point_in_window = 
         (window->frame && POINT_IN_RECT (root_x, root_y, window->frame->rect)) ||
         (window->frame == NULL && POINT_IN_RECT (root_x, root_y, window->rect));
       if (same_screen && point_in_window)
 	meta_window_raise (window);
       else
-	meta_topic (META_DEBUG_FOCUS,
-		    "Pointer not inside window, not raising %s\n",
+	meta_topic (META_DEBUG_FOCUS, 
+		    "Pointer not inside window, not raising %s\n", 
 		    window->desc);
     }
 
@@ -1593,28 +1581,27 @@ meta_display_queue_autoraise_callback (MetaDisplay *display,
                                        MetaWindow  *window)
 {
   MetaAutoRaiseData *auto_raise_data;
-  gboolean auto_raise_delay = *display->prefs->auto_raise_delay;
 
-  meta_topic (META_DEBUG_FOCUS,
-              "Queuing an autoraise timeout for %s with delay %d\n",
-              window->desc,
-              auto_raise_delay);
-
+  meta_topic (META_DEBUG_FOCUS, 
+              "Queuing an autoraise timeout for %s with delay %d\n", 
+              window->desc, 
+              meta_prefs_get_auto_raise_delay ());
+  
   auto_raise_data = g_new (MetaAutoRaiseData, 1);
   auto_raise_data->display = window->display;
   auto_raise_data->xwindow = window->xwindow;
-
+  
   if (display->autoraise_timeout_id != 0) {
     g_source_remove (display->autoraise_timeout_id);
     display->autoraise_timeout_id = 0;
   }
 
-  display->autoraise_timeout_id =
+  display->autoraise_timeout_id = 
     g_timeout_add_full (G_PRIORITY_DEFAULT,
-                        auto_raise_delay,
+                        meta_prefs_get_auto_raise_delay (),
                         window_raise_with_delay_callback,
                         auto_raise_data,
-                        free);
+                        g_free);
   display->autoraise_window = window;
 }
 
@@ -1646,7 +1633,7 @@ event_callback (XEvent   *event,
   gboolean filter_out_event;
 
   display = data;
-
+  
 #ifdef WITH_VERBOSE_MODE
   if (dump_events)
     meta_spew_event (display, event);
@@ -1655,14 +1642,14 @@ event_callback (XEvent   *event,
 #ifdef HAVE_STARTUP_NOTIFICATION
   sn_display_process_event (display->sn_display, event);
 #endif
-
+  
   bypass_compositor = FALSE;
   filter_out_event = FALSE;
   display->current_time = event_get_time (display, event);
   display->monitor_cache_invalidated = TRUE;
-
+  
   modified = event_get_modified_window (display, event);
-
+  
   if (event->type == UnmapNotify)
     {
       if (meta_ui_window_should_not_cause_focus (display->xdisplay,
@@ -1699,7 +1686,7 @@ event_callback (XEvent   *event,
       property_for_window = window;
       window = NULL;
     }
-
+    
 
   frame_was_receiver = FALSE;
   if (window &&
@@ -1733,11 +1720,11 @@ event_callback (XEvent   *event,
 #endif /* HAVE_XSYNC */
 
 #ifdef HAVE_SHAPE
-  if (META_DISPLAY_HAS_SHAPE (display) &&
+  if (META_DISPLAY_HAS_SHAPE (display) && 
       event->type == (display->shape_event_base + ShapeNotify))
     {
       filter_out_event = TRUE; /* GTK doesn't want to see this really */
-
+      
       if (window && !frame_was_receiver)
         {
           XShapeEvent *sev = (XShapeEvent*) event;
@@ -1746,7 +1733,7 @@ event_callback (XEvent   *event,
             {
               if (sev->shaped && !window->has_shape)
                 {
-                  window->has_shape = TRUE;
+                  window->has_shape = TRUE;                  
                   meta_topic (META_DEBUG_SHAPES,
                               "Window %s now has a shape\n",
                               window->desc);
@@ -1765,8 +1752,8 @@ event_callback (XEvent   *event,
                               window->desc);
                 }
 
-              if (window->compositor_private)
-                meta_window_actor_update_shape (window->compositor_private);
+              meta_compositor_window_shape_changed (display->compositor,
+                                                    window);
             }
         }
       else
@@ -1798,7 +1785,7 @@ event_callback (XEvent   *event,
           sanity_check_timestamps (display, display->current_time);
         }
     }
-
+  
   switch (event->type)
     {
     case KeyPress:
@@ -1849,14 +1836,14 @@ event_callback (XEvent   *event,
                       "Ending grab op %u on window %s due to button press\n",
                       display->grab_op,
                       (display->grab_window ?
-                       display->grab_window->desc :
+                       display->grab_window->desc : 
                        "none"));
           if (GRAB_OP_IS_WINDOW_SWITCH (display->grab_op))
             {
               MetaScreen *screen;
-              meta_topic (META_DEBUG_WINDOW_OPS,
+              meta_topic (META_DEBUG_WINDOW_OPS, 
                           "Syncing to old stack positions.\n");
-              screen =
+              screen = 
                 meta_display_screen_for_root (display, event->xany.window);
 
               if (screen!=NULL)
@@ -1884,7 +1871,7 @@ event_callback (XEvent   *event,
            * button 1.  So for all such events we focus the window.
            */
           unmodified = (event->xbutton.state & grab_mask) == 0;
-
+          
           if (unmodified ||
               event->xbutton.button == 1)
             {
@@ -1894,7 +1881,7 @@ event_callback (XEvent   *event,
                */
               if (!frame_was_receiver)
                 {
-                  if (*display->prefs->raise_on_click &&
+                  if (meta_prefs_get_raise_on_click () &&
                       !meta_ui_window_is_widget (display->active_screen->ui, modified))
                     meta_window_raise (window);
                   else
@@ -1918,14 +1905,14 @@ event_callback (XEvent   *event,
                      */
                     display->allow_terminal_deactivation = TRUE;
                 }
-
+              
               /* you can move on alt-click but not on
                * the click-to-focus
                */
               if (!unmodified)
                 begin_move = TRUE;
             }
-          else if (!unmodified && event->xbutton.button == (*display->prefs->resize_with_right_button ? 3 : 2))
+          else if (!unmodified && event->xbutton.button == meta_prefs_get_mouse_button_resize())
             {
               if (window->has_resize_func)
                 {
@@ -1959,7 +1946,7 @@ event_callback (XEvent   *event,
                     op = META_GRAB_OP_RESIZING_S;
                   else /* Middle region is no-op to avoid user triggering wrong action */
                     op = META_GRAB_OP_NONE;
-
+                  
                   if (op != META_GRAB_OP_NONE)
                     meta_display_begin_grab_op (display,
                                                 window->screen,
@@ -1974,9 +1961,9 @@ event_callback (XEvent   *event,
                                                 event->xbutton.y_root);
                 }
             }
-          else if (event->xbutton.button == (*display->prefs->resize_with_right_button ? 2 : 3))
+          else if (event->xbutton.button == meta_prefs_get_mouse_button_menu())
             {
-              if (*display->prefs->raise_on_click)
+              if (meta_prefs_get_raise_on_click ())
                 meta_window_raise (window);
               meta_window_show_menu (window,
                                      event->xbutton.x_root,
@@ -1991,28 +1978,27 @@ event_callback (XEvent   *event,
                * it has no modifiers and was on the client window
                */
               int mode;
-
+              
               /* When clicking a different app in click-to-focus
                * in application-based mode, and the different
                * app is not a dock or desktop, eat the focus click.
                */
-              // FIXME? meta_prefs_get_application_based returns FALSE
-              // if (*display->prefs->focus_mode == C_DESKTOP_FOCUS_MODE_CLICK &&
-              //     meta_prefs_get_application_based () &&
-              //     !window->has_focus &&
-              //     window->type != META_WINDOW_DOCK &&
-              //     window->type != META_WINDOW_DESKTOP &&
-              //     (display->focus_window == NULL ||
-              //      !meta_window_same_application (window,
-              //                                     display->focus_window)))
-              //   mode = AsyncPointer; /* eat focus click */
-              // else
-              mode = ReplayPointer; /* give event back */
+              if (meta_prefs_get_focus_mode () == C_DESKTOP_FOCUS_MODE_CLICK &&
+                  meta_prefs_get_application_based () &&
+                  !window->has_focus &&
+                  window->type != META_WINDOW_DOCK &&
+                  window->type != META_WINDOW_DESKTOP &&
+                  (display->focus_window == NULL ||
+                   !meta_window_same_application (window,
+                                                  display->focus_window)))
+                mode = AsyncPointer; /* eat focus click */
+              else
+                mode = ReplayPointer; /* give event back */
 
               meta_verbose ("Allowing events mode %s time %u\n",
                             mode == AsyncPointer ? "AsyncPointer" : "ReplayPointer",
                             (unsigned int)event->xbutton.time);
-
+              
               XAllowEvents (display->xdisplay,
                             mode, event->xbutton.time);
             }
@@ -2065,11 +2051,11 @@ event_callback (XEvent   *event,
        * actually appear on the right screen.
        */
       {
-        MetaScreen *new_screen =
+        MetaScreen *new_screen = 
           meta_display_screen_for_root (display, event->xcrossing.root);
 
         if (new_screen != NULL && display->active_screen != new_screen)
-          meta_workspace_focus_default_window (new_screen->active_workspace,
+          meta_workspace_focus_default_window (new_screen->active_workspace, 
                                                NULL,
                                                event->xcrossing.time);
       }
@@ -2078,14 +2064,12 @@ event_callback (XEvent   *event,
        * avoid races.
        */
       if (window && !crossing_serial_is_ignored (display, event->xany.serial) &&
-               event->xcrossing.mode != NotifyGrab &&
+               event->xcrossing.mode != NotifyGrab && 
                event->xcrossing.mode != NotifyUngrab &&
                event->xcrossing.detail != NotifyInferior &&
                meta_display_focus_sentinel_clear (display))
         {
-          CDesktopFocusMode focus_mode = *display->prefs->focus_mode;
-
-          switch (focus_mode)
+          switch (meta_prefs_get_focus_mode ())
             {
             case C_DESKTOP_FOCUS_MODE_SLOPPY:
             case C_DESKTOP_FOCUS_MODE_MOUSE:
@@ -2097,7 +2081,7 @@ event_callback (XEvent   *event,
                               "Focusing %s due to enter notify with serial %lu "
                               "at time %lu, and setting display->mouse_mode to "
                               "TRUE.\n",
-                              window->desc,
+                              window->desc, 
                               event->xany.serial,
                               event->xcrossing.time);
 
@@ -2105,15 +2089,15 @@ event_callback (XEvent   *event,
 
                   /* stop ignoring stuff */
                   reset_ignored_crossing_serials (display);
-
-                  if (*display->prefs->auto_raise)
+                  
+                  if (meta_prefs_get_auto_raise ()) 
                     {
                       meta_display_queue_autoraise_callback (display, window);
                     }
                   else
                     {
                       meta_topic (META_DEBUG_FOCUS,
-                                  "Auto raise is disabled\n");
+                                  "Auto raise is disabled\n");		      
                     }
                 }
               /* In mouse focus mode, we defocus when the mouse *enters*
@@ -2126,14 +2110,14 @@ event_callback (XEvent   *event,
                * alternative mechanism works great.
                */
               if (window->type == META_WINDOW_DESKTOP &&
-                  focus_mode == C_DESKTOP_FOCUS_MODE_MOUSE &&
+                  meta_prefs_get_focus_mode() == C_DESKTOP_FOCUS_MODE_MOUSE &&
                   display->expected_focus_window != NULL)
                 {
                   meta_topic (META_DEBUG_FOCUS,
                               "Unsetting focus from %s due to mouse entering "
                               "the DESKTOP window\n",
                               display->expected_focus_window->desc);
-                  meta_display_focus_the_no_focus_window (display,
+                  meta_display_focus_the_no_focus_window (display, 
                                                           window->screen,
                                                           event->xcrossing.time);
                 }
@@ -2141,7 +2125,7 @@ event_callback (XEvent   *event,
             case C_DESKTOP_FOCUS_MODE_CLICK:
               break;
             }
-
+          
           if (window->type == META_WINDOW_DOCK)
             meta_window_raise (window);
         }
@@ -2198,11 +2182,11 @@ event_callback (XEvent   *event,
                       event->xany.window,
                       meta_event_mode_to_string (event->xfocus.mode),
                       meta_event_detail_to_string (event->xfocus.detail));
-
+          
           if (event->type == FocusIn &&
               event->xfocus.detail == NotifyDetailNone)
             {
-              meta_topic (META_DEBUG_FOCUS,
+              meta_topic (META_DEBUG_FOCUS, 
                           "Focus got set to None, probably due to "
                           "brain-damage in the X protocol (see bug "
                           "125492).  Setting the default focus window.\n");
@@ -2246,7 +2230,7 @@ event_callback (XEvent   *event,
                                            &event->xcreatewindow);
       }
       break;
-
+      
     case DestroyNotify:
       {
         MetaScreen *screen;
@@ -2269,7 +2253,7 @@ event_callback (XEvent   *event,
           if (display->grab_op != META_GRAB_OP_NONE &&
               display->grab_window == window)
             meta_display_end_grab_op (display, timestamp);
-
+          
           if (frame_was_receiver)
             {
               meta_warning ("Unexpected destruction of frame 0x%lx, not sure if this should silently fail or be considered a bug\n",
@@ -2300,7 +2284,7 @@ event_callback (XEvent   *event,
               display->grab_window == window &&
               window->frame == NULL)
             meta_display_end_grab_op (display, timestamp);
-
+      
           if (!frame_was_receiver)
             {
               if (window->unmaps_pending == 0)
@@ -2309,7 +2293,7 @@ event_callback (XEvent   *event,
                               "Window %s withdrawn\n",
                               window->desc);
 
-                  /* Unmanage withdrawn window */
+                  /* Unmanage withdrawn window */		  
                   window->withdrawn = TRUE;
                   meta_window_unmanage (window, timestamp);
                   window = NULL;
@@ -2348,7 +2332,7 @@ event_callback (XEvent   *event,
                                     FALSE);
         }
       /* if frame was receiver it's some malicious send event or something */
-      else if (!frame_was_receiver && window)
+      else if (!frame_was_receiver && window)        
         {
           meta_verbose ("MapRequest on %s mapped = %d minimized = %d\n",
                         window->desc, window->mapped, window->minimized);
@@ -2409,8 +2393,8 @@ event_callback (XEvent   *event,
 	      screen->xscreen->width   = event->xconfigure.width;
 	      screen->xscreen->height  = event->xconfigure.height;
 #endif
-
-	      meta_screen_resize (screen,
+	      
+	      meta_screen_resize (screen, 
 				  event->xconfigure.width,
 				  event->xconfigure.height);
 	    }
@@ -2428,7 +2412,7 @@ event_callback (XEvent   *event,
         {
           unsigned int xwcm;
           XWindowChanges xwc;
-
+          
           xwcm = event->xconfigurerequest.value_mask &
             (CWX | CWY | CWWidth | CWHeight | CWBorderWidth);
 
@@ -2463,7 +2447,7 @@ event_callback (XEvent   *event,
       {
         MetaGroup *group;
         MetaScreen *screen;
-
+        
         if (window && !frame_was_receiver)
           meta_window_property_notify (window, event);
         else if (property_for_window && !frame_was_receiver)
@@ -2473,13 +2457,13 @@ event_callback (XEvent   *event,
                                            event->xproperty.window);
         if (group != NULL)
           meta_group_property_notify (group, event);
-
+        
         screen = NULL;
         if (window == NULL &&
             group == NULL) /* window/group != NULL means it wasn't a root window */
           screen = meta_display_screen_for_root (display,
                                                  event->xproperty.window);
-
+            
         if (screen != NULL)
           {
             if (event->xproperty.atom ==
@@ -2542,7 +2526,7 @@ event_callback (XEvent   *event,
 
           screen = meta_display_screen_for_root (display,
                                                  event->xclient.window);
-
+          
           if (screen)
             {
               if (event->xclient.message_type ==
@@ -2551,10 +2535,10 @@ event_callback (XEvent   *event,
                   int space;
                   MetaWorkspace *workspace;
                   guint32 time;
-
+              
                   space = event->xclient.data.l[0];
                   time = event->xclient.data.l[1];
-
+              
                   meta_verbose ("Request to change current workspace to %d with "
                                 "specified timestamp of %u\n",
                                 space, time);
@@ -2581,9 +2565,9 @@ event_callback (XEvent   *event,
                        display->atom__NET_NUMBER_OF_DESKTOPS)
                 {
                   int num_spaces;
-
+              
                   num_spaces = event->xclient.data.l[0];
-
+              
                   meta_verbose ("Request to set number of workspaces to %d\n",
                                 num_spaces);
 
@@ -2594,13 +2578,13 @@ event_callback (XEvent   *event,
                 {
                   gboolean showing_desktop;
                   guint32  timestamp;
-
+                  
                   showing_desktop = event->xclient.data.l[0] != 0;
                   /* FIXME: Braindead protocol doesn't have a timestamp */
                   timestamp = meta_display_get_current_time_roundtrip (display);
                   meta_verbose ("Request to %s desktop\n",
                                 showing_desktop ? "show" : "hide");
-
+                  
                   if (showing_desktop)
                     meta_screen_show_desktop (screen, timestamp);
                   else
@@ -2631,10 +2615,10 @@ event_callback (XEvent   *event,
                   meta_set_verbose (!meta_is_verbose ());
                 }
 	      else if (event->xclient.message_type ==
-		       display->atom_WM_PROTOCOLS)
+		       display->atom_WM_PROTOCOLS) 
 		{
                   meta_verbose ("Received WM_PROTOCOLS message\n");
-
+                  
 		  if ((Atom)event->xclient.data.l[0] == display->atom__NET_WM_PING)
                     {
                       process_pong_message (display, event);
@@ -2661,7 +2645,7 @@ event_callback (XEvent   *event,
         gboolean ignore_current;
 
         ignore_current = FALSE;
-
+        
         /* Check whether the next event is an identical MappingNotify
          * event.  If it is, ignore the current event, we'll update
          * when we get the next one.
@@ -2669,9 +2653,9 @@ event_callback (XEvent   *event,
 	if (XPending (display->xdisplay))
           {
             XEvent next_event;
-
+            
             XPeekEvent (display->xdisplay, &next_event);
-
+            
             if (next_event.type == MappingNotify &&
                 next_event.xmapping.request == event->xmapping.request)
               ignore_current = TRUE;
@@ -2688,10 +2672,10 @@ event_callback (XEvent   *event,
       break;
     default:
 #ifdef HAVE_XKB
-      if (event->type == display->xkb_base_event_type)
+      if (event->type == display->xkb_base_event_type) 
 	{
 	  XkbAnyEvent *xkb_ev = (XkbAnyEvent *) event;
-
+	  
 	  switch (xkb_ev->xkb_type)
 	    {
 	    case XkbBellNotify:
@@ -2719,7 +2703,7 @@ event_callback (XEvent   *event,
                                          window))
         filter_out_event = TRUE;
     }
-
+  
   display->current_time = CurrentTime;
   return filter_out_event;
 }
@@ -2756,10 +2740,10 @@ event_get_modified_window (MetaDisplay *display,
     case EnterNotify:
     case LeaveNotify:
       return event->xany.window;
-
+      
     case CreateNotify:
       return event->xcreatewindow.window;
-
+      
     case DestroyNotify:
       return event->xdestroywindow.window;
 
@@ -2774,10 +2758,10 @@ event_get_modified_window (MetaDisplay *display,
 
     case ReparentNotify:
      return event->xreparent.window;
-
+      
     case ConfigureNotify:
       return event->xconfigure.window;
-
+      
     case ConfigureRequest:
       return event->xconfigurerequest.window;
 
@@ -2795,7 +2779,7 @@ event_get_modified_window (MetaDisplay *display,
 
     default:
 #ifdef HAVE_SHAPE
-      if (META_DISPLAY_HAS_SHAPE (display) &&
+      if (META_DISPLAY_HAS_SHAPE (display) && 
           event->type == (display->shape_event_base + ShapeNotify))
         {
           XShapeEvent *sev = (XShapeEvent*) event;
@@ -2816,11 +2800,11 @@ event_get_time (MetaDisplay *display,
     case KeyPress:
     case KeyRelease:
       return event->xkey.time;
-
+      
     case ButtonPress:
     case ButtonRelease:
       return event->xbutton.time;
-
+      
     case MotionNotify:
       return event->xmotion.time;
 
@@ -2838,7 +2822,7 @@ event_get_time (MetaDisplay *display,
 
     case FocusIn:
     case FocusOut:
-    case KeymapNotify:
+    case KeymapNotify:      
     case Expose:
     case GraphicsExpose:
     case NoExpose:
@@ -2947,7 +2931,7 @@ stack_mode_to_string (int mode)
     case BottomIf:
       return "BottomIf";
     case Opposite:
-      return "Opposite";
+      return "Opposite";      
     }
 
   return "Unknown";
@@ -2961,12 +2945,12 @@ key_event_description (Display *xdisplay,
 {
   KeySym keysym;
   const char *str;
-
-  keysym = XkbKeycodeToKeysym (xdisplay, event->xkey.keycode, 0, 0);
+  
+  keysym = XkbKeycodeToKeysym (xdisplay, event->xkey.keycode, 0, 0);  
 
   str = XKeysymToString (keysym);
-
-  return g_strdup_printf ("Key '%s' state 0x%x",
+  
+  return g_strdup_printf ("Key '%s' state 0x%x", 
                           str ? str : "none", event->xkey.state);
 }
 #endif /* WITH_VERBOSE_MODE */
@@ -2980,7 +2964,7 @@ sync_value_to_64 (const XSyncValue *value)
 
   v = XSyncValueLow32 (*value);
   v |= (((gint64)XSyncValueHigh32 (*value)) << 32);
-
+  
   return v;
 }
 #endif /* WITH_VERBOSE_MODE */
@@ -3017,12 +3001,12 @@ meta_spew_event (MetaDisplay *display,
 
   if (!meta_is_verbose())
     return;
-
+  
   /* filter overnumerous events */
   if (event->type == Expose || event->type == MotionNotify ||
       event->type == NoExpose)
     return;
-
+      
   switch (event->type)
     {
     case KeyPress:
@@ -3206,9 +3190,9 @@ meta_spew_event (MetaDisplay *display,
       {
         char *str;
         const char *state;
-
+            
         name = "PropertyNotify";
-
+            
         meta_error_trap_push (display);
         str = XGetAtomName (display->xdisplay,
                             event->xproperty.atom);
@@ -3220,7 +3204,7 @@ meta_spew_event (MetaDisplay *display,
           state = "PropertyDelete";
         else
           state = "???";
-
+            
         extra = g_strdup_printf ("atom: %s state: %s",
                                  str ? str : "(unknown atom)",
                                  state);
@@ -3258,11 +3242,11 @@ meta_spew_event (MetaDisplay *display,
       break;
     default:
 #ifdef HAVE_XSYNC
-      if (META_DISPLAY_HAS_XSYNC (display) &&
+      if (META_DISPLAY_HAS_XSYNC (display) && 
           event->type == (display->xsync_event_base + XSyncAlarmNotify))
         {
           XSyncAlarmNotifyEvent *aevent = (XSyncAlarmNotifyEvent*) event;
-
+          
           name = "XSyncAlarmNotify";
           extra =
             g_strdup_printf ("alarm: 0x%lx"
@@ -3278,7 +3262,7 @@ meta_spew_event (MetaDisplay *display,
       else
 #endif /* HAVE_XSYNC */
 #ifdef HAVE_SHAPE
-        if (META_DISPLAY_HAS_SHAPE (display) &&
+        if (META_DISPLAY_HAS_SHAPE (display) && 
             event->type == (display->shape_event_base + ShapeNotify))
           {
             XShapeEvent *sev = (XShapeEvent*) event;
@@ -3297,7 +3281,7 @@ meta_spew_event (MetaDisplay *display,
                                sev->shaped);
           }
         else
-#endif /* HAVE_SHAPE */
+#endif /* HAVE_SHAPE */      
         {
           name = "(Unknown event)";
           extra = g_strdup_printf ("type: %d", event->xany.type);
@@ -3306,22 +3290,22 @@ meta_spew_event (MetaDisplay *display,
     }
 
   screen = meta_display_screen_for_root (display, event->xany.window);
-
+      
   if (screen)
     winname = g_strdup_printf ("root %d", screen->number);
   else
     winname = g_strdup_printf ("0x%lx", event->xany.window);
-
+      
   meta_topic (META_DEBUG_EVENTS,
               "%s on %s%s %s %sserial %lu\n", name, winname,
               extra ? ":" : "", extra ? extra : "",
               event->xany.send_event ? "SEND " : "",
               event->xany.serial);
 
-  free (winname);
+  g_free (winname);
 
   if (extra)
-    free (extra);
+    g_free (extra);
 }
 #endif /* WITH_VERBOSE_MODE */
 
@@ -3338,7 +3322,7 @@ meta_display_register_x_window (MetaDisplay *display,
                                 MetaWindow  *window)
 {
   g_return_if_fail (g_hash_table_lookup (display->window_ids, xwindowp) == NULL);
-
+  
   g_hash_table_insert (display->window_ids, xwindowp, window);
 }
 
@@ -3430,13 +3414,13 @@ meta_display_create_x_cursor (MetaDisplay *display,
     case META_CURSOR_BUSY:
       glyph = XC_watch;
       break;
-
+      
     default:
       g_assert_not_reached ();
       glyph = 0; /* silence compiler */
       break;
     }
-
+  
   xcursor = XCreateFontCursor (display->xdisplay, glyph);
 
   return xcursor;
@@ -3447,7 +3431,7 @@ xcursor_for_op (MetaDisplay *display,
                 MetaGrabOp   op)
 {
   MetaCursor cursor = META_CURSOR_DEFAULT;
-
+  
   switch (op)
     {
     case META_GRAB_OP_RESIZING_SE:
@@ -3487,7 +3471,7 @@ xcursor_for_op (MetaDisplay *display,
     case META_GRAB_OP_KEYBOARD_RESIZING_UNKNOWN:
       cursor = META_CURSOR_MOVE_OR_RESIZE_WINDOW;
       break;
-
+      
     default:
       break;
     }
@@ -3561,7 +3545,7 @@ meta_display_set_grab_op_cursor (MetaDisplay *display,
     }
 
 #undef GRAB_MASK
-
+  
   if (cursor != None)
     XFreeCursor (display->xdisplay, cursor);
 }
@@ -3581,12 +3565,12 @@ meta_display_begin_grab_op (MetaDisplay *display,
 {
   MetaWindow *grab_window = NULL;
   Window grab_xwindow;
-
+  
   meta_topic (META_DEBUG_WINDOW_OPS,
               "Doing grab op %u on window %s button %d pointer already grabbed: %d pointer pos %d,%d\n",
               op, window ? window->desc : "none", button, pointer_already_grabbed,
               root_x, root_y);
-
+  
   if (display->grab_op != META_GRAB_OP_NONE)
     {
       if (window)
@@ -3599,7 +3583,7 @@ meta_display_begin_grab_op (MetaDisplay *display,
   if (window &&
       (meta_grab_op_is_moving (op) || meta_grab_op_is_resizing (op)))
     {
-      if (*display->prefs->raise_on_click)
+      if (meta_prefs_get_raise_on_click ())
         meta_window_raise (window);
       else
         {
@@ -3612,7 +3596,7 @@ meta_display_begin_grab_op (MetaDisplay *display,
   /* If window is a modal dialog attached to its parent,
    * grab the parent instead for moving.
    */
-  if (window && window->attached &&
+  if (window && meta_window_is_attached_dialog (window) &&
       meta_grab_op_is_moving (op))
     grab_window = meta_window_get_transient_for (window);
 
@@ -3631,10 +3615,10 @@ meta_display_begin_grab_op (MetaDisplay *display,
     grab_xwindow = screen->xroot;
 
   display->grab_have_pointer = FALSE;
-
+  
   if (pointer_already_grabbed)
     display->grab_have_pointer = TRUE;
-
+  
   meta_display_set_grab_op_cursor (display, screen, op, FALSE, grab_xwindow,
                                    timestamp);
 
@@ -3655,7 +3639,7 @@ meta_display_begin_grab_op (MetaDisplay *display,
       else
         display->grab_have_keyboard =
                      meta_screen_grab_all_keys (screen, timestamp);
-
+      
       if (!display->grab_have_keyboard)
         {
           meta_topic (META_DEBUG_WINDOW_OPS,
@@ -3665,7 +3649,7 @@ meta_display_begin_grab_op (MetaDisplay *display,
           return FALSE;
         }
     }
-
+  
   display->grab_op = op;
   display->grab_window = grab_window;
   display->grab_screen = screen;
@@ -3701,7 +3685,7 @@ meta_display_begin_grab_op (MetaDisplay *display,
       g_source_remove (display->grab_resize_timeout_id);
       display->grab_resize_timeout_id = 0;
     }
-
+	
   if (display->grab_window)
     {
       meta_window_get_client_root_coords (display->grab_window,
@@ -3716,7 +3700,7 @@ meta_display_begin_grab_op (MetaDisplay *display,
         }
 #endif
     }
-
+  
   meta_topic (META_DEBUG_WINDOW_OPS,
               "Grab op %u on window %s successful\n",
               display->grab_op, window ? window->desc : "(null)");
@@ -3730,7 +3714,7 @@ meta_display_begin_grab_op (MetaDisplay *display,
       meta_topic (META_DEBUG_WINDOW_OPS,
                   "Saving old stack positions; old pointer was %p.\n",
                   display->grab_old_window_stacking);
-      display->grab_old_window_stacking =
+      display->grab_old_window_stacking = 
         meta_stack_get_positions (screen->stack);
     }
 
@@ -3743,7 +3727,7 @@ meta_display_begin_grab_op (MetaDisplay *display,
 
   g_signal_emit (display, display_signals[GRAB_OP_BEGIN], 0,
                  screen, display->grab_window, display->grab_op);
-
+  
   return TRUE;
 }
 
@@ -3786,9 +3770,8 @@ meta_display_end_grab_op (MetaDisplay *display,
 {
   meta_topic (META_DEBUG_WINDOW_OPS,
               "Ending grab op %u at time %u\n", display->grab_op, timestamp);
-
-  if (display->grab_op == META_GRAB_OP_NONE ||
-      display->grab_op == META_GRAB_OP_COMPOSITOR)
+  
+  if (display->grab_op == META_GRAB_OP_NONE)
     return;
 
   meta_compositor_grab_op_end (display->compositor);
@@ -3798,9 +3781,9 @@ meta_display_end_grab_op (MetaDisplay *display,
 
   if (display->grab_window != NULL)
     display->grab_window->shaken_loose = FALSE;
-
+  
   if (display->grab_window != NULL &&
-      !(*display->prefs->raise_on_click) &&
+      !meta_prefs_get_raise_on_click () &&
       (meta_grab_op_is_moving (display->grab_op) ||
        meta_grab_op_is_resizing (display->grab_op)))
     {
@@ -3822,9 +3805,9 @@ meta_display_end_grab_op (MetaDisplay *display,
        */
       display->ungrab_should_not_cause_focus_window = display->grab_xwindow;
     }
-
+  
   /* If this was a move or resize clear out the edge cache */
-  if (meta_grab_op_is_resizing (display->grab_op) ||
+  if (meta_grab_op_is_resizing (display->grab_op) || 
       meta_grab_op_is_moving (display->grab_op))
     {
       meta_topic (META_DEBUG_WINDOW_OPS,
@@ -3909,7 +3892,7 @@ meta_display_check_threshold_reached (MetaDisplay *display,
                                       int          y)
 {
   /* Don't bother doing the check again if we've already reached the threshold */
-  if ((*display->prefs->raise_on_click) ||
+  if (meta_prefs_get_raise_on_click () ||
       display->grab_threshold_movement_reached)
     return;
 
@@ -3932,9 +3915,9 @@ meta_change_button_grab (MetaDisplay *display,
                 grab ? "Grabbing" : "Ungrabbing",
                 xwindow,
                 sync, button, modmask);
-
+  
   meta_error_trap_push (display);
-
+  
   ignored_mask = 0;
   while (ignored_mask <= display->ignored_modifier_mask)
     {
@@ -3951,11 +3934,11 @@ meta_change_button_grab (MetaDisplay *display,
         meta_error_trap_push_with_return (display);
 
       /* GrabModeSync means freeze until XAllowEvents */
-
+      
       if (grab)
         XGrabButton (display->xdisplay, button, modmask | ignored_mask,
                      xwindow, False,
-                     ButtonPressMask | ButtonReleaseMask |
+                     ButtonPressMask | ButtonReleaseMask |    
                      PointerMotionMask | PointerMotionHintMask,
                      sync ? GrabModeSync : GrabModeAsync,
                      GrabModeAsync,
@@ -3967,15 +3950,15 @@ meta_change_button_grab (MetaDisplay *display,
       if (meta_is_debugging ())
         {
           int result;
-
+          
           result = meta_error_trap_pop_with_return (display);
-
+          
           if (result != Success)
             meta_verbose ("Failed to %s button %d with mask 0x%x for window 0x%lx error code %d\n",
                           grab ? "grab" : "ungrab",
                           button, modmask | ignored_mask, xwindow, result);
         }
-
+      
       ++ignored_mask;
     }
 
@@ -3985,7 +3968,7 @@ meta_change_button_grab (MetaDisplay *display,
 LOCAL_SYMBOL void
 meta_display_grab_window_buttons (MetaDisplay *display,
                                   Window       xwindow)
-{
+{  
   /* Grab Alt + button1 for moving window.
    * Grab Alt + button2 for resizing window.
    * Grab Alt + button3 for popping up window menu.
@@ -3994,7 +3977,7 @@ meta_display_grab_window_buttons (MetaDisplay *display,
    * Grab Alt + button5 for scrolling out
    */
   meta_verbose ("Grabbing window buttons for 0x%lx\n", xwindow);
-
+  
   /* FIXME If we ignored errors here instead of spewing, we could
    * put one big error trap around the loop and avoid a bunch of
    * XSync()
@@ -4009,8 +3992,8 @@ meta_display_grab_window_buttons (MetaDisplay *display,
           meta_change_button_grab (display, xwindow,
                                    TRUE,
                                    FALSE,
-                                   i, display->window_grab_modifiers);
-
+                                   i, display->window_grab_modifiers);  
+          
           /* This is for debugging, since I end up moving the Xnest
            * otherwise ;-)
            */
@@ -4072,11 +4055,11 @@ meta_display_ungrab_window_buttons  (MetaDisplay *display,
       meta_change_button_grab (display, xwindow,
                                FALSE, FALSE, i,
                                display->window_grab_modifiers);
-
+      
       if (debug)
         meta_change_button_grab (display, xwindow,
                                  FALSE, FALSE, i, ControlMask);
-
+      
       ++i;
     }
 
@@ -4121,18 +4104,18 @@ meta_display_grab_focus_window_button (MetaDisplay *display,
       return;
     }
 #endif
-
+  
   if (window->have_focus_click_grab)
     {
       meta_verbose (" (well, not grabbing since we already have the grab)\n");
       return;
     }
-
+  
   /* FIXME If we ignored errors here instead of spewing, we could
    * put one big error trap around the loop and avoid a bunch of
    * XSync()
    */
-
+  
   {
     int i = 1;
     while (i < MAX_FOCUS_BUTTON)
@@ -4141,7 +4124,7 @@ meta_display_grab_focus_window_button (MetaDisplay *display,
                                  window->xwindow,
                                  TRUE, TRUE,
                                  i, 0);
-
+        
         ++i;
       }
 
@@ -4157,14 +4140,14 @@ meta_display_ungrab_focus_window_button (MetaDisplay *display,
 
   if (!window->have_focus_click_grab)
     return;
-
+  
   {
     int i = 1;
     while (i < MAX_FOCUS_BUTTON)
       {
         meta_change_button_grab (display, window->xwindow,
                                  FALSE, FALSE, i, 0);
-
+        
         ++i;
       }
 
@@ -4184,7 +4167,7 @@ LOCAL_SYMBOL void
 meta_display_update_active_window_hint (MetaDisplay *display)
 {
   GSList *tmp;
-
+  
   gulong data[1];
 
   if (display->closing)
@@ -4194,12 +4177,12 @@ meta_display_update_active_window_hint (MetaDisplay *display)
     data[0] = display->focus_window->xwindow;
   else
     data[0] = None;
-
+  
   tmp = display->screens;
   while (tmp != NULL)
     {
       MetaScreen *screen = tmp->data;
-
+      
       meta_error_trap_push (display);
       XChangeProperty (display->xdisplay, screen->xroot,
                        display->atom__NET_ACTIVE_WINDOW,
@@ -4223,14 +4206,14 @@ meta_display_queue_retheme_all_windows (MetaDisplay *display)
   while (tmp != NULL)
     {
       MetaWindow *window = tmp->data;
-
+      
       meta_window_queue (window, META_QUEUE_MOVE_RESIZE);
       meta_window_frame_size_changed (window);
       if (window->frame)
         {
           meta_frame_queue_draw (window->frame);
         }
-
+      
       tmp = tmp->next;
     }
 
@@ -4243,11 +4226,11 @@ meta_display_retheme_all (void)
   meta_display_queue_retheme_all_windows (meta_get_display ());
 }
 
-LOCAL_SYMBOL void
-meta_display_set_cursor_theme (const char *theme,
+LOCAL_SYMBOL void 
+meta_display_set_cursor_theme (const char *theme, 
 			       int         size)
 {
-#ifdef HAVE_XCURSOR
+#ifdef HAVE_XCURSOR     
   GSList *tmp;
 
   MetaDisplay *display = meta_get_display ();
@@ -4259,7 +4242,7 @@ meta_display_set_cursor_theme (const char *theme,
   while (tmp != NULL)
     {
       MetaScreen *screen = tmp->data;
-
+	  	  
       meta_screen_update_cursor (screen);
 
       tmp = tmp->next;
@@ -4340,7 +4323,7 @@ meta_display_ping_timeout (gpointer data)
   meta_topic (META_DEBUG_PING,
               "Ping %u on window %lx timed out\n",
               ping_data->timestamp, ping_data->xwindow);
-
+  
   (* ping_data->ping_timeout_func) (ping_data->display, ping_data->xwindow,
                                     ping_data->timestamp, ping_data->user_data);
 
@@ -4348,7 +4331,7 @@ meta_display_ping_timeout (gpointer data)
     g_slist_remove (ping_data->display->pending_pings,
                     ping_data);
   ping_data_free (ping_data);
-
+  
   return FALSE;
 }
 
@@ -4400,7 +4383,7 @@ meta_display_ping_window (MetaDisplay       *display,
 
       return;
     }
-
+  
   ping_data = g_new (MetaPingData, 1);
   ping_data->display = display;
   ping_data->xwindow = window->xwindow;
@@ -4411,7 +4394,7 @@ meta_display_ping_window (MetaDisplay       *display,
   ping_data->ping_timeout_id = g_timeout_add (PING_TIMEOUT_DELAY,
 					      meta_display_ping_timeout,
 					      ping_data);
-
+  
   display->pending_pings = g_slist_prepend (display->pending_pings, ping_data);
 
   meta_topic (META_DEBUG_PING,
@@ -4503,15 +4486,15 @@ process_pong_message (MetaDisplay    *display,
 
   meta_topic (META_DEBUG_PING, "Received a pong with timestamp %u\n",
               timestamp);
-
+  
   for (tmp = display->pending_pings; tmp; tmp = tmp->next)
     {
       MetaPingData *ping_data = tmp->data;
-
+			  
       if (timestamp == ping_data->timestamp)
         {
           meta_topic (META_DEBUG_PING,
-                      "Matching ping found for pong %u\n",
+                      "Matching ping found for pong %u\n", 
                       ping_data->timestamp);
 
           /* Remove the ping data from the list */
@@ -4524,13 +4507,13 @@ process_pong_message (MetaDisplay    *display,
               g_source_remove (ping_data->ping_timeout_id);
               ping_data->ping_timeout_id = 0;
             }
-
+          
           /* Call callback */
-          (* ping_data->ping_reply_func) (display,
+          (* ping_data->ping_reply_func) (display, 
                                           ping_data->xwindow,
-                                          ping_data->timestamp,
+                                          ping_data->timestamp, 
                                           ping_data->user_data);
-
+			      
           ping_data_free (ping_data);
 
           break;
@@ -4562,7 +4545,7 @@ meta_display_window_has_pending_pings (MetaDisplay *display,
     {
       MetaPingData *ping_data = tmp->data;
 
-      if (ping_data->xwindow == window->xwindow)
+      if (ping_data->xwindow == window->xwindow) 
         return TRUE;
     }
 
@@ -4586,7 +4569,7 @@ get_focussed_group (MetaDisplay *display)
 static MetaWindow*
 find_tab_forward (MetaDisplay   *display,
                   MetaTabList    type,
-                  MetaScreen    *screen,
+                  MetaScreen    *screen, 
                   MetaWorkspace *workspace,
                   GList         *start,
                   gboolean       skip_first)
@@ -4620,7 +4603,7 @@ find_tab_forward (MetaDisplay   *display,
         return window;
 
       tmp = tmp->next;
-    }
+    }  
 
   return NULL;
 }
@@ -4628,7 +4611,7 @@ find_tab_forward (MetaDisplay   *display,
 static MetaWindow*
 find_tab_backward (MetaDisplay   *display,
                    MetaTabList    type,
-                   MetaScreen    *screen,
+                   MetaScreen    *screen, 
                    MetaWorkspace *workspace,
                    GList         *start,
                    gboolean       skip_last)
@@ -4639,7 +4622,7 @@ find_tab_backward (MetaDisplay   *display,
   g_return_val_if_fail (workspace != NULL, NULL);
 
   tmp = start;
-  if (skip_last)
+  if (skip_last)  
     tmp = tmp->prev;
   while (tmp != NULL)
     {
@@ -4693,35 +4676,35 @@ meta_display_get_tab_list (MetaDisplay   *display,
    */
   {
     GList *tmp;
-
+    
     tab_list = NULL;
     tmp = workspace->mru_list;
     while (tmp != NULL)
       {
         MetaWindow *window = tmp->data;
-
+        
         if (!window->minimized &&
             window->screen == screen &&
             IN_TAB_CHAIN (window, type))
           tab_list = g_list_prepend (tab_list, window);
-
+        
         tmp = tmp->next;
       }
   }
 
   {
     GList *tmp;
-
+    
     tmp = workspace->mru_list;
     while (tmp != NULL)
       {
         MetaWindow *window = tmp->data;
-
+        
         if (window->minimized &&
             window->screen == screen &&
             IN_TAB_CHAIN (window, type))
           tab_list = g_list_prepend (tab_list, window);
-
+        
         tmp = tmp->next;
       }
   }
@@ -4741,9 +4724,9 @@ meta_display_get_tab_list (MetaDisplay   *display,
         l_window=tmp->data;
 
         /* Check to see if it demands attention */
-        if (l_window->wm_state_demands_attention &&
+        if (l_window->wm_state_demands_attention && 
             l_window->workspace!=workspace &&
-            IN_TAB_CHAIN (l_window, type))
+            IN_TAB_CHAIN (l_window, type)) 
           {
             /* if it does, add it to the popup */
             tab_list = g_list_prepend (tab_list, l_window);
@@ -4754,7 +4737,7 @@ meta_display_get_tab_list (MetaDisplay   *display,
 
     g_slist_free (windows);
   }
-
+  
   return tab_list;
 }
 
@@ -4764,8 +4747,8 @@ meta_display_get_tab_list (MetaDisplay   *display,
  * @type: type of tab list
  * @screen: a #MetaScreen
  * @workspace: origin workspace
- * @window: (allow-none): starting window
- * @backward: If %TRUE, look for the previous window.
+ * @window: (allow-none): starting window 
+ * @backward: If %TRUE, look for the previous window.  
  *
  * Determine the next window that should be displayed for Alt-TAB
  * functionality.
@@ -4791,11 +4774,11 @@ meta_display_get_tab_next (MetaDisplay   *display,
 
   if (tab_list == NULL)
     return NULL;
-
+  
   if (window != NULL)
     {
       g_assert (window->display == display);
-
+      
       if (backward)
         ret = find_tab_backward (display, type, screen, workspace,
                                  g_list_find (tab_list,
@@ -4809,7 +4792,7 @@ meta_display_get_tab_next (MetaDisplay   *display,
     }
   else
     {
-      skip = display->focus_window != NULL &&
+      skip = display->focus_window != NULL && 
              tab_list->data == display->focus_window;
       if (backward)
         ret = find_tab_backward (display, type, screen, workspace,
@@ -4844,7 +4827,7 @@ meta_display_get_tab_current (MetaDisplay   *display,
   MetaWindow *window;
 
   window = display->focus_window;
-
+  
   if (window != NULL &&
       window->screen == screen &&
       IN_TAB_CHAIN (window, type) &&
@@ -4859,7 +4842,7 @@ LOCAL_SYMBOL int
 meta_resize_gravity_from_grab_op (MetaGrabOp op)
 {
   int gravity;
-
+  
   gravity = -1;
   switch (op)
     {
@@ -4909,7 +4892,7 @@ LOCAL_SYMBOL int
 meta_resize_gravity_from_tile_mode (MetaTileMode mode)
 {
   int gravity;
-
+  
   gravity = -1;
   switch (mode)
     {
@@ -4951,18 +4934,18 @@ static MetaScreen*
 find_screen_for_selection (MetaDisplay *display,
                            Window       owner,
                            Atom         selection)
-{
-  GSList *tmp;
-
+{  
+  GSList *tmp;  
+  
   tmp = display->screens;
   while (tmp != NULL)
     {
       MetaScreen *screen = tmp->data;
-
+      
       if (screen->wm_sn_selection_window == owner &&
           screen->wm_sn_atom == selection)
         return screen;
-
+  
       tmp = tmp->next;
     }
 
@@ -5004,7 +4987,7 @@ convert_property (MetaDisplay *display,
       meta_error_trap_pop_with_return (display);
       return FALSE;
     }
-
+  
   if (meta_error_trap_pop_with_return (display) != Success)
     return FALSE;
 
@@ -5033,20 +5016,20 @@ process_selection_request (MetaDisplay   *display,
   if (screen == NULL)
     {
       char *str;
-
+      
       meta_error_trap_push (display);
       str = XGetAtomName (display->xdisplay,
                           event->xselectionrequest.selection);
       meta_error_trap_pop (display);
-
+      
       meta_verbose ("Selection request with selection %s window 0x%lx not a WM_Sn selection we recognize\n",
                     str ? str : "(bad atom)", event->xselectionrequest.owner);
-
+      
       meta_XFree (str);
 
       return;
     }
-
+  
   reply.type = SelectionNotify;
   reply.display = display->xdisplay;
   reply.requestor = event->xselectionrequest.requestor;
@@ -5074,9 +5057,9 @@ process_selection_request (MetaDisplay   *display,
               meta_error_trap_pop_with_return (display);
               return;
             }
-
+          
           if (meta_error_trap_pop_with_return (display) == Success)
-            {
+            {              
               /* FIXME: to be 100% correct, should deal with rest > 0,
                * but since we have 4 possible targets, we will hardly ever
                * meet multiple requests with a length > 8
@@ -5107,7 +5090,7 @@ process_selection_request (MetaDisplay   *display,
     {
       if (event->xselectionrequest.property == None)
         event->xselectionrequest.property = event->xselectionrequest.target;
-
+      
       if (convert_property (display, screen,
                             event->xselectionrequest.requestor,
                             event->xselectionrequest.target,
@@ -5132,25 +5115,25 @@ process_selection_clear (MetaDisplay   *display,
   screen = find_screen_for_selection (display,
                                       event->xselectionclear.window,
                                       event->xselectionclear.selection);
-
+  
 
   if (screen != NULL)
     {
       meta_verbose ("Got selection clear for screen %d on display %s\n",
                     screen->number, display->name);
-
-      meta_display_unmanage_screen (display,
+      
+      meta_display_unmanage_screen (display, 
                                     screen,
                                     event->xselectionclear.time);
 
       /* display and screen may both be invalid memory... */
-
+      
       return;
     }
 
   {
     char *str;
-
+            
     meta_error_trap_push (display);
     str = XGetAtomName (display->xdisplay,
                         event->xselectionclear.selection);
@@ -5170,9 +5153,9 @@ meta_display_unmanage_screen (MetaDisplay *display,
 {
   meta_verbose ("Unmanaging screen %d on display %s\n",
                 screen->number, display->name);
-
+  
   g_return_if_fail (g_slist_find (display->screens, screen) != NULL);
-
+  
   meta_screen_free (screen, timestamp);
   display->screens = g_slist_remove (display->screens, screen);
 
@@ -5206,7 +5189,7 @@ meta_display_unmanage_windows_for_screen (MetaDisplay *display,
       if (!window->unmanaging)
         meta_window_unmanage (window, timestamp);
       g_object_unref (window);
-
+      
       tmp = tmp->next;
     }
   g_slist_free (winlist);
@@ -5264,7 +5247,7 @@ meta_display_devirtualize_modifiers (MetaDisplay        *display,
                                      unsigned int       *mask)
 {
   *mask = 0;
-
+  
   if (modifiers & META_VIRTUAL_SHIFT_MASK)
     *mask |= ShiftMask;
   if (modifiers & META_VIRTUAL_CONTROL_MASK)
@@ -5284,20 +5267,20 @@ meta_display_devirtualize_modifiers (MetaDisplay        *display,
   if (modifiers & META_VIRTUAL_MOD4_MASK)
     *mask |= Mod4Mask;
   if (modifiers & META_VIRTUAL_MOD5_MASK)
-    *mask |= Mod5Mask;
+    *mask |= Mod5Mask;  
 }
 
 static void
 update_window_grab_modifiers (MetaDisplay *display)
-
+     
 {
   MetaVirtualModifier virtual_mods;
   unsigned int mods;
-
-  virtual_mods = *display->prefs->mouse_button_mods;
+    
+  virtual_mods = meta_prefs_get_mouse_button_mods ();
   meta_display_devirtualize_modifiers (display, virtual_mods,
                                        &mods);
-
+    
   display->window_grab_modifiers = mods;
 }
 
@@ -5307,7 +5290,7 @@ update_mouse_zoom_modifiers (MetaDisplay *display)
   MetaVirtualModifier virtual_mods;
   unsigned int mods;
 
-  virtual_mods = *display->prefs->mouse_button_zoom_mods;
+  virtual_mods = meta_prefs_get_mouse_button_zoom_mods ();
   meta_display_devirtualize_modifiers (display, virtual_mods,
                                        &mods);
 
@@ -5330,9 +5313,9 @@ prefs_changed_callback (MetaPreference pref,
       MetaDisplay *display = data;
       GSList *windows;
       GSList *tmp;
-
+      
       windows = meta_display_list_windows (display, META_LIST_DEFAULT);
-
+      
       /* Ungrab all */
       tmp = windows;
       while (tmp != NULL)
@@ -5356,7 +5339,7 @@ prefs_changed_callback (MetaPreference pref,
       if (pref == META_PREF_MOUSE_BUTTON_ZOOM_MODS)
         update_mouse_zoom_modifiers (display);
 
-      display->mouse_zoom_enabled = *display->prefs->mouse_zoom_enabled;
+      display->mouse_zoom_enabled = meta_prefs_get_mouse_zoom_enabled ();
 
       /* Grab all */
       tmp = windows;
@@ -5386,13 +5369,13 @@ meta_display_increment_focus_sentinel (MetaDisplay *display)
   unsigned long data[1];
 
   data[0] = meta_display_get_current_time (display);
-
+  
   XChangeProperty (display->xdisplay,
                    ((MetaScreen*) display->screens->data)->xroot,
                    display->atom__MUFFIN_SENTINEL,
                    XA_CARDINAL,
                    32, PropModeReplace, (guchar*) data, 1);
-
+  
   display->sentinel_counter += 1;
 }
 
@@ -5441,7 +5424,7 @@ sanity_check_timestamps (MetaDisplay *display,
       while (tmp != NULL)
         {
           MetaWindow *window = tmp->data;
-
+          
           if (XSERVER_TIME_IS_BEFORE (timestamp, window->net_wm_user_time))
             {
               meta_warning ("%s appears to be one of the offending windows "
@@ -5464,7 +5447,7 @@ timestamp_too_old (MetaDisplay *display,
 {
   /* FIXME: If Soeren's suggestion in bug 151984 is implemented, it will allow
    * us to sanity check the timestamp here and ensure it doesn't correspond to
-   * a future time (though we would want to rename to
+   * a future time (though we would want to rename to 
    * timestamp_too_old_or_in_future).
    */
 
@@ -5509,72 +5492,8 @@ timestamp_too_old (MetaDisplay *display,
   return FALSE;
 }
 
-/**
- * meta_display_get_pointer:
- * @display: a #MetaDisplay
- * @x: (out) (allow-none): location to store root window X coordinate, or %NULL.
- * @y: (out) (allow-none): location to store root window Y coordinate, or %NULL.
- * @mask: (out) (allow-none): location to store mask, or %NULL.
- *
- * Gets the root coordinates of the pointer.
- **/
 void
-meta_display_get_pointer (MetaDisplay  *display,
-                          int          *x,
-                          int          *y,
-                          unsigned int *mask)
-{
-  Window root_return;
-  Window child_return;
-  int win_x;
-  int win_y;
-
-  XQueryPointer (display->xdisplay,
-                 display->active_screen->xroot,
-                 &root_return,
-                 &child_return,
-                 x,
-                 y,
-                 &win_x,
-                 &win_y,
-                 mask);
-}
-
-/**
- * meta_display_get_window_pointer:
- * @display: a #MetaDisplay
- * @xwindow: an X11 #Window
- * @x: (out) (allow-none): location to store root window X coordinate, or %NULL.
- * @y: (out) (allow-none): location to store root window Y coordinate, or %NULL.
- * @mask: (out) (allow-none): location to store mask, or %NULL.
- *
- * Gets the root coordinates of the pointer.
- **/
-void
-meta_display_get_window_pointer (MetaDisplay  *display,
-                                 Window        xwindow,
-                                 int          *x,
-                                 int          *y,
-                                 unsigned int *mask)
-{
-  Window root_return;
-  Window child_return;
-  int root_x;
-  int root_y;
-
-  XQueryPointer (display->xdisplay,
-                 xwindow,
-                 &root_return,
-                 &child_return,
-                 &root_x,
-                 &root_y,
-                 x,
-                 y,
-                 mask);
-}
-
-void
-meta_display_set_input_focus_window (MetaDisplay *display,
+meta_display_set_input_focus_window (MetaDisplay *display, 
                                      MetaWindow  *window,
                                      gboolean     focus_frame,
                                      guint32      timestamp)
@@ -5598,7 +5517,7 @@ meta_display_set_input_focus_window (MetaDisplay *display,
 }
 
 void
-meta_display_focus_the_no_focus_window (MetaDisplay *display,
+meta_display_focus_the_no_focus_window (MetaDisplay *display, 
                                         MetaScreen  *screen,
                                         guint32      timestamp)
 {
@@ -5692,7 +5611,7 @@ meta_display_get_focus_window (MetaDisplay *display)
   return display->focus_window;
 }
 
-int
+int 
 meta_display_get_damage_event_base (MetaDisplay *display)
 {
   return display->damage_event_base;
@@ -5775,7 +5694,7 @@ meta_display_restart_internal (MetaDisplay *display)
   execvp (arr->pdata[0], (char**)arr->pdata);
   g_warning ("Failed to reexec: %s", g_strerror (errno));
   g_ptr_array_free (arr, TRUE);
-  free (buf);
+  g_free (buf);
   return FALSE;
 }
 
@@ -5800,50 +5719,7 @@ meta_display_restart (MetaDisplay *display)
 }
 
 void
-meta_display_update_sync_state (MetaSyncMethod method)
+meta_display_update_sync_state (gboolean state)
 {
-  meta_compositor_update_sync_state (the_display->compositor, method);
-}
-
-static gboolean
-reset_all_obscured (MetaDisplay *display)
-{
-  if (!obscured_timeout)
-    {
-      obscured_timeout = TRUE;
-      return G_SOURCE_CONTINUE;
-    }
-
-  meta_compositor_set_all_obscured (display->compositor, TRUE);
-
-  obscured_timeout = FALSE;
-
-  return G_SOURCE_REMOVE;
-}
-
-void
-meta_display_set_all_obscured (void)
-{
-  meta_compositor_set_all_obscured (the_display->compositor, FALSE);
-
-  if (obscured_timeout)
-    {
-      obscured_timeout = FALSE;
-      return;
-    }
-
-
-  /* At the lowest priority that ensures everything important has had a chance to run first,
-     check if all windows are obscured after 500ms while they are overriden as not obscured.
-     The longer this is delayed, the longer all windows are forced to paint.
-     TODO: Consider removing the timeout in meta_window_actor_override_obscured_internal that
-     is eventually called through MetaCompositor. Less timeouts, less CPU interruption. */
-  g_timeout_add_full (1000, 500, (GSourceFunc) reset_all_obscured, the_display, NULL);
-  obscured_timeout = TRUE;
-}
-
-gboolean
-meta_display_popup_window_visible (MetaDisplay *display)
-{
-  return display->compositor->popup_window_visible;
+  meta_compositor_update_sync_state (the_display->compositor, state);
 }

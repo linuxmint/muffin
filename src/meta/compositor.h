@@ -45,7 +45,7 @@
  *   shown or hidden immediately.
  *
  * Indicates the appropriate effect to show the user for
- * meta_window_actor_show() and meta_window_actor_hide()
+ * meta_compositor_show_window() and meta_compositor_hide_window()
  */
 typedef enum
 {
@@ -63,6 +63,9 @@ void meta_compositor_manage_screen   (MetaCompositor *compositor,
                                       MetaScreen     *screen);
 void meta_compositor_unmanage_screen (MetaCompositor *compositor,
                                       MetaScreen     *screen);
+
+void meta_compositor_window_shape_changed (MetaCompositor *compositor,
+                                           MetaWindow     *window);
 
 gboolean meta_compositor_process_event (MetaCompositor *compositor,
                                         XEvent         *event,
@@ -110,11 +113,36 @@ void meta_compositor_add_window    (MetaCompositor *compositor,
 void meta_compositor_remove_window (MetaCompositor *compositor,
                                     MetaWindow     *window);
 
+void meta_compositor_show_window       (MetaCompositor      *compositor,
+                                        MetaWindow          *window,
+                                        MetaCompEffect       effect);
+void meta_compositor_hide_window       (MetaCompositor      *compositor,
+                                        MetaWindow          *window,
+                                        MetaCompEffect       effect);
 void meta_compositor_switch_workspace  (MetaCompositor      *compositor,
                                         MetaScreen          *screen,
                                         MetaWorkspace       *from,
                                         MetaWorkspace       *to,
                                         MetaMotionDirection  direction);
+
+void meta_compositor_maximize_window   (MetaCompositor      *compositor,
+                                        MetaWindow          *window,
+                                        MetaRectangle       *old_rect,
+                                        MetaRectangle       *new_rect);
+void meta_compositor_unmaximize_window (MetaCompositor      *compositor,
+                                        MetaWindow          *window,
+                                        MetaRectangle       *old_rect,
+                                        MetaRectangle       *new_rect);
+
+void meta_compositor_sync_window_geometry (MetaCompositor *compositor,
+                                           MetaWindow     *window,
+                                           gboolean        did_placement);
+void meta_compositor_set_updates_frozen   (MetaCompositor *compositor,
+                                           MetaWindow     *window,
+                                           gboolean        updates_frozen);
+void meta_compositor_queue_frame_drawn    (MetaCompositor *compositor,
+                                           MetaWindow     *window,
+                                           gboolean        no_delay_frame);
 
 void meta_compositor_sync_stack                (MetaCompositor *compositor,
                                                 MetaScreen     *screen,
@@ -126,6 +154,11 @@ void meta_compositor_sync_screen_size          (MetaCompositor *compositor,
 
 void meta_compositor_flash_screen              (MetaCompositor *compositor,
                                                 MetaScreen     *screen);
+
+void meta_compositor_tile_window       (MetaCompositor      *compositor,
+                                        MetaWindow          *window,
+                                        MetaRectangle       *old_rect,
+                                        MetaRectangle       *new_rect);
 
 void meta_compositor_show_tile_preview (MetaCompositor  *compositor,
                                         MetaScreen      *screen,

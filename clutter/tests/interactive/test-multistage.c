@@ -56,7 +56,7 @@ on_button_press (ClutterActor *actor,
     g_error ("pixbuf load failed");
 
   clutter_actor_set_reactive (tex, TRUE);
-  g_signal_connect (tex, "button-press-event",
+  g_signal_connect (tex, "button-press-event", 
                     G_CALLBACK (tex_button_cb), NULL);
 
   clutter_container_add_actor (CLUTTER_CONTAINER (new_stage), tex);
@@ -66,14 +66,14 @@ on_button_press (ClutterActor *actor,
 
   clutter_text_set_color (CLUTTER_TEXT (label), CLUTTER_COLOR_White);
   clutter_text_set_use_markup (CLUTTER_TEXT (label), TRUE);
-  width = (clutter_actor_get_width (new_stage)
+  width = (clutter_actor_get_width (new_stage) 
            - clutter_actor_get_width (label)) / 2;
-  height = (clutter_actor_get_height (new_stage)
+  height = (clutter_actor_get_height (new_stage) 
             - clutter_actor_get_height (label)) / 2;
   clutter_actor_set_position (label, width, height);
   clutter_container_add_actor (CLUTTER_CONTAINER (new_stage), label);
   clutter_actor_show (label);
-  free (stage_label);
+  g_free (stage_label);
 
   /*
   g_signal_connect (new_stage, "button-press-event",
@@ -88,13 +88,13 @@ on_button_press (ClutterActor *actor,
   r_behave = clutter_behaviour_rotate_new (alpha,
 					   CLUTTER_Y_AXIS,
 					   CLUTTER_ROTATE_CW,
-					   0.0, 360.0);
+					   0.0, 360.0); 
 
   clutter_behaviour_rotate_set_center (CLUTTER_BEHAVIOUR_ROTATE (r_behave),
-                                       clutter_actor_get_width (label)/2,
-                                       0,
+                                       clutter_actor_get_width (label)/2, 
+                                       0, 
                                        0);
-
+  
   clutter_behaviour_apply (r_behave, label);
   clutter_timeline_start (timeline);
 
@@ -102,7 +102,7 @@ on_button_press (ClutterActor *actor,
 
   stages = g_list_prepend (stages, new_stage);
 
-  free (stage_name);
+  g_free (stage_name);
 
   return TRUE;
 }
@@ -116,7 +116,7 @@ test_multistage_main (int argc, char *argv[])
 
   if (clutter_init (&argc, &argv) != CLUTTER_INIT_SUCCESS)
     return 1;
-
+  
   stage_default = clutter_stage_new ();
   clutter_stage_set_title (CLUTTER_STAGE (stage_default), "Default Stage");
   clutter_actor_set_name (stage_default, "Default Stage");
@@ -128,10 +128,10 @@ test_multistage_main (int argc, char *argv[])
                     NULL);
 
   label = clutter_text_new_with_text ("Mono 16", "Default stage");
-  width = (clutter_actor_get_width (stage_default)
+  width = (clutter_actor_get_width (stage_default) 
            - clutter_actor_get_width (label))
              / 2;
-  height = (clutter_actor_get_height (stage_default)
+  height = (clutter_actor_get_height (stage_default) 
             - clutter_actor_get_height (label))
             / 2;
   clutter_actor_set_position (label, width, height);

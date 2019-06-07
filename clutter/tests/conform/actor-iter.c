@@ -24,7 +24,7 @@ actor_iter_traverse_children (void)
 
       clutter_actor_add_child (actor, child);
 
-      free (name);
+      g_free (name);
     }
 
   g_assert_cmpint (clutter_actor_get_n_children (actor), ==, n_actors);
@@ -99,7 +99,7 @@ actor_iter_traverse_remove (void)
 
       clutter_actor_add_child (actor, child);
 
-      free (name);
+      g_free (name);
     }
 
   g_assert_cmpint (clutter_actor_get_n_children (actor), ==, n_actors);
@@ -155,7 +155,7 @@ actor_iter_assignment (void)
 
       clutter_actor_add_child (actor, child);
 
-      free (name);
+      g_free (name);
     }
 
   g_assert_cmpint (clutter_actor_get_n_children (actor), ==, n_actors);

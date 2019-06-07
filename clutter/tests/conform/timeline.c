@@ -38,7 +38,7 @@ timeline_data_init (TimelineData *data, int timeline_num)
 static void
 timeline_data_destroy (TimelineData *data)
 {
-  g_slist_foreach (data->markers_hit, (GFunc) free, NULL);
+  g_slist_foreach (data->markers_hit, (GFunc) g_free, NULL);
   g_slist_free (data->markers_hit);
 }
 
@@ -159,7 +159,7 @@ check_timeline (ClutterTimeline *timeline,
     }
 
   g_strfreev (markers);
-  free (marker_reached_count);
+  g_free (marker_reached_count);
 
   return succeeded;
 }
@@ -358,5 +358,5 @@ timeline_markers_from_script (TestConformSimpleFixture *fixture,
 
   g_object_unref (script);
 
-  free (test_file);
+  g_free (test_file);
 }

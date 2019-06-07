@@ -1135,7 +1135,7 @@ clutter_path_set_description (ClutterPath *path,
  * Returns a newly allocated string describing the path in the same
  * format as used by clutter_path_add_string().
  *
- * Return value: a string description of the path. Free with free().
+ * Return value: a string description of the path. Free with g_free().
  *
  * Since: 1.0
  */

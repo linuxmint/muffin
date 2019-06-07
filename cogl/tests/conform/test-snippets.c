@@ -158,9 +158,9 @@ lots_snippets (TestState *state)
       cogl_pipeline_add_snippet (pipeline, snippet);
       cogl_object_unref (snippet);
 
-      free (code);
-      free (uniform_name);
-      free (declarations);
+      g_free (code);
+      g_free (uniform_name);
+      g_free (declarations);
     }
 
   cogl_framebuffer_draw_rectangle (test_fb, pipeline, 30, 0, 40, 10);

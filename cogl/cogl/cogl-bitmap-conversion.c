@@ -439,7 +439,7 @@ _cogl_bitmap_convert_into_bitmap (CoglBitmap *src_bmp,
   use_16 = _cogl_bitmap_needs_short_temp_buffer (dst_format);
 
   /* Allocate a buffer to hold a temporary RGBA row */
-  tmp_row = malloc (width *
+  tmp_row = g_malloc (width *
                       (use_16 ? sizeof (uint16_t) : sizeof (uint8_t)) * 4);
 
   /* FIXME: Optimize */
@@ -481,7 +481,7 @@ _cogl_bitmap_convert_into_bitmap (CoglBitmap *src_bmp,
   _cogl_bitmap_unmap (src_bmp);
   _cogl_bitmap_unmap (dst_bmp);
 
-  free (tmp_row);
+  g_free (tmp_row);
 
   return TRUE;
 }
@@ -644,7 +644,7 @@ _cogl_bitmap_unpremult (CoglBitmap *bmp,
   if (_cogl_bitmap_can_fast_premult (format))
     tmp_row = NULL;
   else
-    tmp_row = malloc (sizeof (uint16_t) * 4 * width);
+    tmp_row = g_malloc (sizeof (uint16_t) * 4 * width);
 
   for (y = 0; y < height; y++)
     {
@@ -674,7 +674,7 @@ _cogl_bitmap_unpremult (CoglBitmap *bmp,
         }
     }
 
-  free (tmp_row);
+  g_free (tmp_row);
 
   _cogl_bitmap_unmap (bmp);
 
@@ -711,7 +711,7 @@ _cogl_bitmap_premult (CoglBitmap *bmp,
   if (_cogl_bitmap_can_fast_premult (format))
     tmp_row = NULL;
   else
-    tmp_row = malloc (sizeof (uint16_t) * 4 * width);
+    tmp_row = g_malloc (sizeof (uint16_t) * 4 * width);
 
   for (y = 0; y < height; y++)
     {
@@ -738,7 +738,7 @@ _cogl_bitmap_premult (CoglBitmap *bmp,
         }
     }
 
-  free (tmp_row);
+  g_free (tmp_row);
 
   _cogl_bitmap_unmap (bmp);
 

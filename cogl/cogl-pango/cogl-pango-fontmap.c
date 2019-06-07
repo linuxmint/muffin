@@ -69,7 +69,7 @@ free_priv (gpointer data)
   cogl_object_unref (priv->ctx);
   cogl_object_unref (priv->renderer);
 
-  free (priv);
+  g_free (priv);
 }
 
 PangoFontMap *

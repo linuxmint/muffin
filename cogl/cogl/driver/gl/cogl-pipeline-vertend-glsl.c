@@ -390,9 +390,9 @@ _cogl_pipeline_vertend_glsl_add_layer (CoglPipeline *pipeline,
 
   _cogl_pipeline_snippet_generate_code (&snippet_data);
 
-  free ((char *) snippet_data.chain_function);
-  free ((char *) snippet_data.final_name);
-  free ((char *) snippet_data.function_prefix);
+  g_free ((char *) snippet_data.chain_function);
+  g_free ((char *) snippet_data.final_name);
+  g_free ((char *) snippet_data.function_prefix);
 
   g_string_append_printf (shader_state->source,
                           "  cogl_tex_coord%i_out = "

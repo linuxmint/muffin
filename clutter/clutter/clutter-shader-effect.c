@@ -364,7 +364,7 @@ clutter_shader_effect_try_static_source (ClutterShaderEffect *self)
 
           cogl_shader_source (class_priv->shader, source);
 
-          free (source);
+          g_free (source);
 
           CLUTTER_NOTE (SHADER, "Compiling shader effect");
 
@@ -384,7 +384,7 @@ clutter_shader_effect_try_static_source (ClutterShaderEffect *self)
               gchar *log_buf = cogl_shader_get_info_log (class_priv->shader);
 
               g_warning (G_STRLOC ": Unable to compile the GLSL shader: %s", log_buf);
-              free (log_buf);
+              g_free (log_buf);
             }
         }
 
@@ -575,7 +575,7 @@ shader_uniform_free (gpointer data)
       ShaderUniform *uniform = data;
 
       g_value_unset (&uniform->value);
-      free (uniform->name);
+      g_free (uniform->name);
 
       g_slice_free (ShaderUniform, uniform);
     }
@@ -732,7 +732,7 @@ clutter_shader_effect_set_uniform_valist (ClutterShaderEffect *effect,
           g_value_init (&value, CLUTTER_TYPE_SHADER_INT);
           clutter_value_set_shader_int (&value, n_values, int_values);
 
-          free (int_values);
+          g_free (int_values);
         }
 
       goto add_uniform;
@@ -764,7 +764,7 @@ clutter_shader_effect_set_uniform_valist (ClutterShaderEffect *effect,
           g_value_init (&value, CLUTTER_TYPE_SHADER_FLOAT);
           clutter_value_set_shader_float (&value, n_values, float_values);
 
-          free (float_values);
+          g_free (float_values);
         }
 
       goto add_uniform;
@@ -916,7 +916,7 @@ clutter_shader_effect_set_shader_source (ClutterShaderEffect *effect,
       gchar *log_buf = cogl_shader_get_info_log (priv->shader);
 
       g_warning (G_STRLOC ": Unable to compile the GLSL shader: %s", log_buf);
-      free (log_buf);
+      g_free (log_buf);
     }
 
   return TRUE;

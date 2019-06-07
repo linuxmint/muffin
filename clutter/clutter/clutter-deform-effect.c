@@ -215,7 +215,7 @@ clutter_deform_effect_paint_target (ClutterOffscreenEffect *effect)
       if (verts == NULL)
         {
           mapped_buffer = FALSE;
-          verts = malloc (sizeof (*verts) * priv->n_vertices);
+          verts = g_malloc (sizeof (*verts) * priv->n_vertices);
         }
       else
         mapped_buffer = TRUE;
@@ -272,7 +272,7 @@ clutter_deform_effect_paint_target (ClutterOffscreenEffect *effect)
                                 0, /* offset */
                                 verts,
                                 sizeof (*verts) * priv->n_vertices);
-          free (verts);
+          g_free (verts);
         }
 
       priv->is_dirty = FALSE;
@@ -425,7 +425,7 @@ clutter_deform_effect_init_arrays (ClutterDeformEffect *self)
                               static_indices,
                               n_indices);
 
-  free (static_indices);
+  g_free (static_indices);
 
   priv->n_vertices = (priv->x_tiles + 1) * (priv->y_tiles + 1);
 

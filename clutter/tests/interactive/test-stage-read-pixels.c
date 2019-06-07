@@ -31,7 +31,7 @@ make_label (void)
 		    NULL, NULL, &text, NULL, NULL, NULL))
     {
       clutter_text_set_text (CLUTTER_TEXT (label), text);
-      free (text);
+      g_free (text);
     }
 
   return label;
@@ -110,7 +110,7 @@ on_motion_idle (gpointer user_data)
 				     pixels, TRUE,
 				     TEX_SIZE, TEX_SIZE,
 				     TEX_SIZE * 4, 4, 0, NULL);
-  free (pixels);
+  g_free (pixels);
 
   return FALSE;
 }

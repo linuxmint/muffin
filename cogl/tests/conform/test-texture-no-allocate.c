@@ -18,7 +18,7 @@ test_texture_no_allocate (void)
   CoglTexture2D *texture_2d;
   GError *error = NULL;
 
-  tex_data = malloc (BIG_TEX_WIDTH * BIG_TEX_HEIGHT * 4);
+  tex_data = g_malloc (BIG_TEX_WIDTH * BIG_TEX_HEIGHT * 4);
 
   /* NB: if we make the atlas and sliced texture APIs public then this
    * could changed to explicitly use that instead of the magic texture
@@ -37,7 +37,7 @@ test_texture_no_allocate (void)
                                       tex_data,
                                       &error);
 
-  free (tex_data);
+  g_free (tex_data);
 
   /* It's ok if this causes an error, we just don't want it to
    * crash */

@@ -43,14 +43,14 @@ on_paint (ClutterActor *actor, void *state)
    * verify is reading back grid of colors from a CoglOffscreen framebuffer
    */
 
-  data = malloc (FRAMEBUFFER_WIDTH * 4 * FRAMEBUFFER_HEIGHT);
+  data = g_malloc (FRAMEBUFFER_WIDTH * 4 * FRAMEBUFFER_HEIGHT);
   tex = test_utils_texture_new_from_data (FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT,
                                     TEST_UTILS_TEXTURE_NO_SLICING,
                                     COGL_PIXEL_FORMAT_RGBA_8888, /* data fmt */
                                     COGL_PIXEL_FORMAT_ANY, /* internal fmt */
                                     FRAMEBUFFER_WIDTH * 4, /* rowstride */
                                     data);
-  free (data);
+  g_free (data);
   offscreen = cogl_offscreen_new_with_texture (tex);
 
   cogl_push_framebuffer (offscreen);
@@ -68,7 +68,7 @@ on_paint (ClutterActor *actor, void *state)
   cogl_set_source_color4ub (0xff, 0xff, 0xff, 0xff);
   cogl_rectangle (0, 0, 1, -1);
 
-  pixels = calloc (1, FRAMEBUFFER_WIDTH * 4 * FRAMEBUFFER_HEIGHT);
+  pixels = g_malloc0 (FRAMEBUFFER_WIDTH * 4 * FRAMEBUFFER_HEIGHT);
   cogl_read_pixels (0, 0, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT,
                     COGL_READ_PIXELS_COLOR_BUFFER,
                     COGL_PIXEL_FORMAT_RGBA_8888_PRE,
@@ -78,7 +78,7 @@ on_paint (ClutterActor *actor, void *state)
   g_assert_cmpint (pixels[FRAMEBUFFER_WIDTH - 1], ==, 0xff00ff00);
   g_assert_cmpint (pixels[(FRAMEBUFFER_HEIGHT - 1) * FRAMEBUFFER_WIDTH], ==, 0xffff0000);
   g_assert_cmpint (pixels[(FRAMEBUFFER_HEIGHT - 1) * FRAMEBUFFER_WIDTH + FRAMEBUFFER_WIDTH - 1], ==, 0xffffffff);
-  free (pixels);
+  g_free (pixels);
 
   cogl_pop_framebuffer ();
   cogl_handle_unref (offscreen);
@@ -89,7 +89,7 @@ on_paint (ClutterActor *actor, void *state)
   cogl_set_source_texture (tex);
   cogl_rectangle (-1, 1, 1, -1);
 
-  pixels = calloc (1, FRAMEBUFFER_WIDTH * 4 * FRAMEBUFFER_HEIGHT);
+  pixels = g_malloc0 (FRAMEBUFFER_WIDTH * 4 * FRAMEBUFFER_HEIGHT);
   cogl_read_pixels (0, 0, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT,
                     COGL_READ_PIXELS_COLOR_BUFFER,
                     COGL_PIXEL_FORMAT_RGBA_8888_PRE,
@@ -99,14 +99,14 @@ on_paint (ClutterActor *actor, void *state)
   g_assert_cmpint (pixels[FRAMEBUFFER_WIDTH - 1], ==, 0xff00ff00);
   g_assert_cmpint (pixels[(FRAMEBUFFER_HEIGHT - 1) * FRAMEBUFFER_WIDTH], ==, 0xffff0000);
   g_assert_cmpint (pixels[(FRAMEBUFFER_HEIGHT - 1) * FRAMEBUFFER_WIDTH + FRAMEBUFFER_WIDTH - 1], ==, 0xffffffff);
-  free (pixels);
+  g_free (pixels);
 
   /* Verify using BGR format */
 
   cogl_set_source_texture (tex);
   cogl_rectangle (-1, 1, 1, -1);
 
-  pixelsc = calloc (1, FRAMEBUFFER_WIDTH * 3 * FRAMEBUFFER_HEIGHT);
+  pixelsc = g_malloc0 (FRAMEBUFFER_WIDTH * 3 * FRAMEBUFFER_HEIGHT);
   cogl_read_pixels (0, 0, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT,
                     COGL_READ_PIXELS_COLOR_BUFFER,
                     COGL_PIXEL_FORMAT_BGR_888,
@@ -120,7 +120,7 @@ on_paint (ClutterActor *actor, void *state)
   g_assert_cmpint (pixelsc[(FRAMEBUFFER_WIDTH - 1) * 3 + 1], ==, 0xff);
   g_assert_cmpint (pixelsc[(FRAMEBUFFER_WIDTH - 1) * 3 + 2], ==, 0x00);
 
-  free (pixelsc);
+  g_free (pixelsc);
 
   cogl_handle_unref (tex);
 

@@ -24,7 +24,7 @@
 
 /**
  * SECTION:clutter-actor
- * @short_description: The basic element of the scene graph
+ * @short_description: The basic element of the scene graph 
  *
  * The ClutterActor class is the basic element of the scene graph in Clutter,
  * and it encapsulates the position, size, and transformations of a node in
@@ -616,7 +616,40 @@
 #define CLUTTER_DISABLE_DEPRECATION_WARNINGS
 #define CLUTTER_ENABLE_EXPERIMENTAL_API
 
-#include "clutter-muffin.h"
+#include "clutter-actor-private.h"
+
+#include "clutter-action.h"
+#include "clutter-actor-meta-private.h"
+#include "clutter-animatable.h"
+#include "clutter-color-static.h"
+#include "clutter-color.h"
+#include "clutter-constraint-private.h"
+#include "clutter-container.h"
+#include "clutter-content-private.h"
+#include "clutter-debug.h"
+#include "clutter-easing.h"
+#include "clutter-effect-private.h"
+#include "clutter-enum-types.h"
+#include "clutter-fixed-layout.h"
+#include "clutter-flatten-effect.h"
+#include "clutter-interval.h"
+#include "clutter-main.h"
+#include "clutter-marshal.h"
+#include "clutter-paint-nodes.h"
+#include "clutter-paint-node-private.h"
+#include "clutter-paint-volume-private.h"
+#include "clutter-private.h"
+#include "clutter-property-transition.h"
+#include "clutter-scriptable.h"
+#include "clutter-script-private.h"
+#include "clutter-stage-private.h"
+#include "clutter-timeline.h"
+#include "clutter-transition.h"
+#include "clutter-units.h"
+
+#include "deprecated/clutter-actor.h"
+#include "deprecated/clutter-behaviour.h"
+#include "deprecated/clutter-container.h"
 
 /* Internal enum used to control mapped state update.  This is a hint
  * which indicates when to do something other than just enforce
@@ -634,6 +667,181 @@ typedef enum {
                               * used just before unmapping parent.
                               */
 } MapStateChange;
+
+/* 3 entries should be a good compromise, few layout managers
+ * will ask for 3 different preferred size in each allocation cycle */
+#define N_CACHED_SIZE_REQUESTS 3
+
+struct _ClutterActorPrivate
+{
+  /* request mode */
+  ClutterRequestMode request_mode;
+
+  /* our cached size requests for different width / height */
+  SizeRequest width_requests[N_CACHED_SIZE_REQUESTS];
+  SizeRequest height_requests[N_CACHED_SIZE_REQUESTS];
+
+  /* An age of 0 means the entry is not set */
+  guint cached_height_age;
+  guint cached_width_age;
+
+  /* the bounding box of the actor, relative to the parent's
+   * allocation
+   */
+  ClutterActorBox allocation;
+  ClutterAllocationFlags allocation_flags;
+
+  /* clip, in actor coordinates */
+  ClutterRect clip;
+
+  /* the cached transformation matrix; see apply_transform() */
+  CoglMatrix transform;
+
+  guint8 opacity;
+  gint opacity_override;
+
+  ClutterOffscreenRedirect offscreen_redirect;
+
+  /* This is an internal effect used to implement the
+     offscreen-redirect property */
+  ClutterEffect *flatten_effect;
+
+  /* scene graph */
+  ClutterActor *parent;
+  ClutterActor *prev_sibling;
+  ClutterActor *next_sibling;
+  ClutterActor *first_child;
+  ClutterActor *last_child;
+
+  gint n_children;
+
+  /* tracks whenever the children of an actor are changed; the
+   * age is incremented by 1 whenever an actor is added or
+   * removed. the age is not incremented when the first or the
+   * last child pointers are changed, or when grandchildren of
+   * an actor are changed.
+   */
+  gint age;
+
+  gchar *name; /* a non-unique name, used for debugging */
+
+  gint32 pick_id; /* per-stage unique id, used for picking */
+
+  /* a back-pointer to the Pango context that we can use
+   * to create pre-configured PangoLayout
+   */
+  PangoContext *pango_context;
+
+  /* the text direction configured for this child - either by
+   * application code, or by the actor's parent
+   */
+  ClutterTextDirection text_direction;
+
+  /* a counter used to toggle the CLUTTER_INTERNAL_CHILD flag */
+  gint internal_child;
+
+  /* meta classes */
+  ClutterMetaGroup *actions;
+  ClutterMetaGroup *constraints;
+  ClutterMetaGroup *effects;
+
+  /* delegate object used to allocate the children of this actor */
+  ClutterLayoutManager *layout_manager;
+
+  /* delegate object used to paint the contents of this actor */
+  ClutterContent *content;
+
+  ClutterActorBox content_box;
+  ClutterContentGravity content_gravity;
+  ClutterScalingFilter min_filter;
+  ClutterScalingFilter mag_filter;
+  ClutterContentRepeat content_repeat;
+
+  /* used when painting, to update the paint volume */
+  ClutterEffect *current_effect;
+
+  /* This is used to store an effect which needs to be redrawn. A
+     redraw can be queued to start from a particular effect. This is
+     used by parametrised effects that can cache an image of the
+     actor. If a parameter of the effect changes then it only needs to
+     redraw the cached image, not the actual actor. The pointer is
+     only valid if is_dirty == TRUE. If the pointer is NULL then the
+     whole actor is dirty. */
+  ClutterEffect *effect_to_redraw;
+
+  /* This is used when painting effects to implement the
+     clutter_actor_continue_paint() function. It points to the node in
+     the list of effects that is next in the chain */
+  const GList *next_effect_to_paint;
+
+  ClutterPaintVolume paint_volume;
+
+  /* NB: This volume isn't relative to this actor, it is in eye
+   * coordinates so that it can remain valid after the actor changes.
+   */
+  ClutterPaintVolume last_paint_volume;
+
+  ClutterStageQueueRedrawEntry *queue_redraw_entry;
+
+  ClutterColor bg_color;
+
+#ifdef CLUTTER_ENABLE_DEBUG
+  /* a string used for debugging messages */
+  gchar *debug_name;
+#endif
+
+  /* a set of clones of the actor */
+  GHashTable *clones;
+
+  /* whether the actor is inside a cloned branch; this
+   * value is propagated to all the actor's children
+   */
+  gulong in_cloned_branch;
+
+  GListModel *child_model;
+  ClutterActorCreateChildFunc create_child_func;
+  gpointer create_child_data;
+  GDestroyNotify create_child_notify;
+
+  /* bitfields: KEEP AT THE END */
+
+  /* fixed position and sizes */
+  guint position_set                : 1;
+  guint min_width_set               : 1;
+  guint min_height_set              : 1;
+  guint natural_width_set           : 1;
+  guint natural_height_set          : 1;
+  /* cached request is invalid (implies allocation is too) */
+  guint needs_width_request         : 1;
+  /* cached request is invalid (implies allocation is too) */
+  guint needs_height_request        : 1;
+  /* cached allocation is invalid (request has changed, probably) */
+  guint needs_allocation            : 1;
+  guint show_on_set_parent          : 1;
+  guint has_clip                    : 1;
+  guint clip_to_allocation          : 1;
+  guint enable_model_view_transform : 1;
+  guint enable_paint_unmapped       : 1;
+  guint has_pointer                 : 1;
+  guint propagated_one_redraw       : 1;
+  guint paint_volume_valid          : 1;
+  guint last_paint_volume_valid     : 1;
+  guint in_clone_paint              : 1;
+  guint transform_valid             : 1;
+  /* This is TRUE if anything has queued a redraw since we were last
+     painted. In this case effect_to_redraw will point to an effect
+     the redraw was queued from or it will be NULL if the redraw was
+     queued without an effect. */
+  guint is_dirty                    : 1;
+  guint bg_color_set                : 1;
+  guint content_box_valid           : 1;
+  guint x_expand_set                : 1;
+  guint y_expand_set                : 1;
+  guint needs_compute_expand        : 1;
+  guint needs_x_expand              : 1;
+  guint needs_y_expand              : 1;
+  guint needs_paint_volume_update   : 1;
+};
 
 enum
 {
@@ -3206,7 +3414,7 @@ _clutter_actor_paint_cull_result (ClutterActor *self,
                                 0,
                                 &color,
                                 0);
-      free (label);
+      g_free (label);
       g_object_unref (layout);
     }
 }
@@ -4525,7 +4733,7 @@ clutter_actor_set_rotation_center_internal (ClutterActor        *self,
                                             ClutterRotateAxis    axis,
                                             const ClutterVertex *center)
 {
-  ClutterVertex v = CLUTTER_VERTEX_INIT_ZERO;
+  ClutterVertex v = CLUTTER_VERTEX_INIT_ZERO; 
   GObject *obj = G_OBJECT (self);
   ClutterTransformInfo *info;
 
@@ -5790,10 +5998,10 @@ clutter_actor_finalize (GObject *object)
                 _clutter_actor_get_debug_name ((ClutterActor *) object),
                 g_type_name (G_OBJECT_TYPE (object)));
 
-  free (priv->name);
+  g_free (priv->name);
 
 #ifdef CLUTTER_ENABLE_DEBUG
-  free (priv->debug_name);
+  g_free (priv->debug_name);
 #endif
 
   G_OBJECT_CLASS (clutter_actor_parent_class)->finalize (object);
@@ -11711,7 +11919,7 @@ clutter_actor_set_name (ClutterActor *self,
 {
   g_return_if_fail (CLUTTER_IS_ACTOR (self));
 
-  free (self->priv->name);
+  g_free (self->priv->name);
   self->priv->name = g_strdup (name);
 
   g_object_notify_by_pspec (G_OBJECT (self), obj_props[PROP_NAME]);
@@ -13930,7 +14138,7 @@ clutter_actor_get_anchor_point_gravity (ClutterActor *self)
  *
  * Since: 0.6
  *
- * Deprecated: 1.12: Use #ClutterActor:pivot-point and
+ * Deprecated: 1.12: Use #ClutterActor:pivot-point and 
  * clutter_actor_set_translation() instead.
  */
 void
@@ -13978,7 +14186,7 @@ clutter_actor_move_anchor_point (ClutterActor *self,
  *
  * Since: 0.6
  *
- * Deprecated: 1.12: Use #ClutterActor:pivot-point and
+ * Deprecated: 1.12: Use #ClutterActor:pivot-point and 
  * clutter_actor_set_translation() instead.
  */
 void
@@ -14030,7 +14238,7 @@ clutter_actor_move_anchor_point_from_gravity (ClutterActor   *self,
  *
  * Since: 0.6
  *
- * Deprecated: 1.12: Use #ClutterActor:pivot-point and
+ * Deprecated: 1.12: Use #ClutterActor:pivot-point and 
  * clutter_actor_set_translation() instead. E.g. For %CLUTTER_GRAVITY_CENTER set
  * pivot_point to (0.5,0.5) and the translation to (width/2,height/2).
  */
@@ -14555,7 +14763,7 @@ clutter_actor_set_custom_property (ClutterScriptable *scriptable,
                     name,
                     tmp);
 
-      free (tmp);
+      g_free (tmp);
     }
 #endif /* CLUTTER_ENABLE_DEBUG */
 
@@ -14725,7 +14933,7 @@ clutter_actor_find_property (ClutterAnimatable *animatable,
       pspec = g_object_class_find_property (klass, property_name);
     }
 
-  free (p_name);
+  g_free (p_name);
 
   return pspec;
 }
@@ -14747,7 +14955,7 @@ clutter_actor_get_initial_state (ClutterAnimatable *animatable,
   else
     g_object_get_property (G_OBJECT (animatable), property_name, initial);
 
-  free (p_name);
+  g_free (p_name);
 }
 
 /*
@@ -14921,7 +15129,7 @@ clutter_actor_set_final_state (ClutterAnimatable *animatable,
         }
     }
 
-  free (p_name);
+  g_free (p_name);
 }
 
 static void
@@ -15587,7 +15795,7 @@ update_pango_context (ClutterBackend *backend,
   pango_cairo_context_set_resolution (context, resolution);
 
   pango_font_description_free (font_desc);
-  free (font_name);
+  g_free (font_name);
 }
 
 /**
@@ -18538,6 +18746,18 @@ clutter_actor_get_last_child (ClutterActor *self)
   return self->priv->last_child;
 }
 
+/* easy way to have properly named fields instead of the dummy ones
+ * we use in the public structure
+ */
+typedef struct _RealActorIter
+{
+  ClutterActor *root;           /* dummy1 */
+  ClutterActor *current;        /* dummy2 */
+  gpointer padding_1;           /* dummy3 */
+  gint age;                     /* dummy4 */
+  gpointer padding_2;           /* dummy5 */
+} RealActorIter;
+
 /**
  * clutter_actor_iter_init:
  * @iter: a #ClutterActorIter
@@ -18860,7 +19080,7 @@ transition_closure_free (gpointer data)
       /* remove the reference added in add_transition_internal() */
       g_object_unref (clos->transition);
 
-      free (clos->name);
+      g_free (clos->name);
 
       g_slice_free (TransitionClosure, clos);
     }
@@ -18916,7 +19136,7 @@ on_transition_stopped (ClutterTransition *transition,
                  t_name,
                  is_finished);
 
-  free (t_name);
+  g_free (t_name);
 
   /* if it's the last transition then we clean up */
   if (g_hash_table_size (info->transitions) == 0)
@@ -19081,7 +19301,7 @@ _clutter_actor_create_transition (ClutterActor *actor,
   if (error != NULL)
     {
       g_critical ("%s: %s", G_STRLOC, error);
-      free (error);
+      g_free (error);
       goto out;
     }
 
@@ -19092,7 +19312,7 @@ _clutter_actor_create_transition (ClutterActor *actor,
     {
       g_critical ("%s: %s", G_STRLOC, error);
       g_value_unset (&initial);
-      free (error);
+      g_free (error);
       goto out;
     }
 
@@ -19151,8 +19371,8 @@ _clutter_actor_create_transition (ClutterActor *actor,
                         info->cur_state->easing_delay,
                         initial_v, final_v);
 
-          free (initial_v);
-          free (final_v);
+          g_free (initial_v);
+          g_free (final_v);
         }
 #endif /* CLUTTER_ENABLE_DEBUG */
 
@@ -19298,7 +19518,7 @@ clutter_actor_remove_transition (ClutterActor *self,
                      FALSE);
     }
 
-  free (t_name);
+  g_free (t_name);
 }
 
 /**

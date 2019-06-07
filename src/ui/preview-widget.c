@@ -2,9 +2,9 @@
 
 /* Metacity theme preview widget */
 
-/*
+/* 
  * Copyright (C) 2002 Havoc Pennington
- *
+ * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
  * published by the Free Software Foundation; either version 2 of the
@@ -14,7 +14,7 @@
  * WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street - Suite 500, Boston, MA
@@ -77,13 +77,13 @@ meta_preview_init (MetaPreview *preview)
       preview->button_layout.right_buttons[i] = META_BUTTON_FUNCTION_LAST;
       ++i;
     }
-
+  
   preview->button_layout.left_buttons[0] = META_BUTTON_FUNCTION_MENU;
 
   preview->button_layout.right_buttons[0] = META_BUTTON_FUNCTION_MINIMIZE;
   preview->button_layout.right_buttons[1] = META_BUTTON_FUNCTION_MAXIMIZE;
   preview->button_layout.right_buttons[2] = META_BUTTON_FUNCTION_CLOSE;
-
+  
   preview->type = META_FRAME_TYPE_NORMAL;
   preview->flags =
     META_FRAME_ALLOWS_DELETE |
@@ -103,9 +103,9 @@ GtkWidget*
 meta_preview_new (void)
 {
   MetaPreview *preview;
-
+  
   preview = g_object_new (META_TYPE_PREVIEW, NULL);
-
+  
   return GTK_WIDGET (preview);
 }
 
@@ -116,9 +116,9 @@ meta_preview_finalize (GObject *object)
 
   preview = META_PREVIEW (object);
 
-  free (preview->title);
+  g_free (preview->title);
   preview->title = NULL;
-
+  
   G_OBJECT_CLASS (meta_preview_parent_class)->finalize (object);
 }
 
@@ -128,7 +128,7 @@ ensure_info (MetaPreview *preview)
   GtkWidget *widget;
 
   widget = GTK_WIDGET (preview);
-
+  
   if (preview->layout == NULL)
     {
       PangoFontDescription *font_desc;
@@ -136,34 +136,34 @@ ensure_info (MetaPreview *preview)
       PangoAttrList *attrs;
       PangoAttribute *attr;
 
-      if (preview->theme)
+      if (preview->theme)        
         scale = meta_theme_get_title_scale (preview->theme,
                                             preview->type,
                                             preview->flags);
       else
         scale = 1.0;
-
+      
       preview->layout = gtk_widget_create_pango_layout (widget,
                                                         preview->title);
-
+      
       font_desc = meta_gtk_widget_get_font_desc (widget, scale, NULL);
-
+      
       preview->text_height =
         meta_pango_font_desc_get_text_height (font_desc,
                                               gtk_widget_get_pango_context (widget));
-
+          
       attrs = pango_attr_list_new ();
-
+      
       attr = pango_attr_size_new (pango_font_description_get_size (font_desc));
       attr->start_index = 0;
       attr->end_index = G_MAXINT;
-
+      
       pango_attr_list_insert (attrs, attr);
-
+      
       pango_layout_set_attributes (preview->layout, attrs);
-
-      pango_attr_list_unref (attrs);
-
+      
+      pango_attr_list_unref (attrs);      
+  
       pango_font_description_free (font_desc);
     }
 
@@ -201,7 +201,7 @@ meta_preview_draw (GtkWidget *widget,
         META_BUTTON_STATE_NORMAL,
         META_BUTTON_STATE_NORMAL
       };
-
+  
       ensure_info (preview);
       cairo_save (cr);
 
@@ -211,8 +211,8 @@ meta_preview_draw (GtkWidget *widget,
       if (client_width < 0)
         client_width = 1;
       if (client_height < 0)
-        client_height = 1;
-
+        client_height = 1;  
+      
       meta_theme_draw_frame (preview->theme,
                              widget,
                              cr,
@@ -343,7 +343,7 @@ meta_preview_set_theme (MetaPreview    *preview,
   g_return_if_fail (META_IS_PREVIEW (preview));
 
   preview->theme = theme;
-
+  
   clear_cache (preview);
 
   gtk_widget_queue_resize (GTK_WIDGET (preview));
@@ -355,9 +355,9 @@ meta_preview_set_title (MetaPreview    *preview,
 {
   g_return_if_fail (META_IS_PREVIEW (preview));
 
-  free (preview->title);
+  g_free (preview->title);
   preview->title = g_strdup (title);
-
+  
   clear_cache (preview);
 
   gtk_widget_queue_resize (GTK_WIDGET (preview));
@@ -394,9 +394,9 @@ meta_preview_set_button_layout (MetaPreview            *preview,
                                 const MetaButtonLayout *button_layout)
 {
   g_return_if_fail (META_IS_PREVIEW (preview));
-
-  preview->button_layout = *button_layout;
-
+  
+  preview->button_layout = *button_layout;  
+  
   gtk_widget_queue_draw (GTK_WIDGET (preview));
 }
 

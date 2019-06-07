@@ -126,7 +126,7 @@ G_STMT_START { \
     char *__msg = g_strdup_printf ("assertion failed (actor %s at %.2f,%.2f): found actor %s", \
                                    __str1, __p->x, __p->y, __str2); \
     g_assertion_message (G_LOG_DOMAIN, __FILE__, __LINE__, G_STRFUNC, __msg); \
-    free (__msg); \
+    g_free (__msg); \
   } \
 } G_STMT_END
 
@@ -142,9 +142,9 @@ G_STMT_START { \
     char *__msg = g_strdup_printf ("assertion failed (color %s at %.2f,%.2f): found color %s", \
                                    __str1, __p->x, __p->y, __str2); \
     g_assertion_message (G_LOG_DOMAIN, __FILE__, __LINE__, G_STRFUNC, __msg); \
-    free (__msg); \
-    free (__str1); \
-    free (__str2); \
+    g_free (__msg); \
+    g_free (__str1); \
+    g_free (__str2); \
   } \
 } G_STMT_END
 

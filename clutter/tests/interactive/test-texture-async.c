@@ -135,7 +135,7 @@ test_texture_async_main (int argc, char *argv[])
   path = (argc > 1)
        ? g_strdup (argv[1])
        : g_build_filename (TESTS_DATADIR, "redhand.png", NULL);
-
+ 
   clutter_threads_add_timeout_full (G_PRIORITY_DEFAULT, 500,
                                     task, path,
                                     cleanup_task);
@@ -144,7 +144,7 @@ test_texture_async_main (int argc, char *argv[])
   clutter_main ();
   clutter_threads_leave ();
 
-  free (path);
+  g_free (path);
 
   return EXIT_SUCCESS;
 }

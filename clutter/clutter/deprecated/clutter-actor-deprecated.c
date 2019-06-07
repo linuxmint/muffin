@@ -131,7 +131,7 @@ clutter_actor_set_shader (ClutterActor  *self,
       shader_data->shader = NULL;
       shader_data->value_hash =
         g_hash_table_new_full (g_str_hash, g_str_equal,
-                               free,
+                               g_free,
                                shader_value_free);
 
       g_object_set_data_full (G_OBJECT (self), "-clutter-actor-shader-data",

@@ -500,7 +500,7 @@ clutter_box_set_property_valist (ClutterBox   *box,
       if (error)
         {
           g_warning ("%s: %s", G_STRLOC, error);
-          free (error);
+          g_free (error);
           break;
         }
 

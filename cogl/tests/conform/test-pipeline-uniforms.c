@@ -156,7 +156,7 @@ init_long_pipeline_state (TestState *state)
       state->long_uniform_locations[i] =
         cogl_pipeline_get_uniform_location (state->long_pipeline,
                                             uniform_name);
-      free (uniform_name);
+      g_free (uniform_name);
     }
 }
 

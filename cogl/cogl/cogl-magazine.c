@@ -80,5 +80,5 @@ void
 _cogl_magazine_free (CoglMagazine *magazine)
 {
   _cogl_memory_stack_free (magazine->stack);
-  free (magazine);
+  g_free (magazine);
 }

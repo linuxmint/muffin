@@ -24,7 +24,7 @@ assert_region_color (int x,
                      uint8_t blue,
                      uint8_t alpha)
 {
-  uint8_t *data = calloc (1, width * height * 4);
+  uint8_t *data = g_malloc0 (width * height * 4);
   cogl_read_pixels (x, y, width, height,
                     COGL_READ_PIXELS_COLOR_BUFFER,
                     COGL_PIXEL_FORMAT_RGBA_8888_PRE,
@@ -40,7 +40,7 @@ assert_region_color (int x,
                   pixel[ALPHA] == alpha);
 #endif
       }
-  free (data);
+  g_free (data);
 }
 
 static void
@@ -209,14 +209,14 @@ on_paint (ClutterActor *actor, void *state)
   /*
    * Next test offscreen drawing...
    */
-  data = malloc (FRAMEBUFFER_WIDTH * 4 * FRAMEBUFFER_HEIGHT);
+  data = g_malloc (FRAMEBUFFER_WIDTH * 4 * FRAMEBUFFER_HEIGHT);
   tex = test_utils_texture_new_from_data (FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT,
                                     TEST_UTILS_TEXTURE_NO_SLICING,
                                     COGL_PIXEL_FORMAT_RGBA_8888, /* data fmt */
                                     COGL_PIXEL_FORMAT_ANY, /* internal fmt */
                                     FRAMEBUFFER_WIDTH * 4, /* rowstride */
                                     data);
-  free (data);
+  g_free (data);
   offscreen = cogl_offscreen_new_with_texture (tex);
 
   cogl_push_framebuffer (offscreen);

@@ -750,7 +750,7 @@ pango_layout_get_line_after (PangoLayout     *layout,
  * atk_text_get_text_after_offset().
  *
  * Returns: a newly allocated string containing a slice of text
- *     from layout. Free with free().
+ *     from layout. Free with g_free().
  */
 static gchar *
 _gtk_pango_get_text_at (PangoLayout     *layout,
@@ -849,7 +849,7 @@ _gtk_pango_get_text_at (PangoLayout     *layout,
  * atk_text_get_text_before_offset().
  *
  * Returns: a newly allocated string containing a slice of text
- *     from layout. Free with free().
+ *     from layout. Free with g_free().
  */
 static gchar *
 _gtk_pango_get_text_before (PangoLayout     *layout,
@@ -950,7 +950,7 @@ _gtk_pango_get_text_before (PangoLayout     *layout,
  * atk_text_get_text_after_offset().
  *
  * Returns: a newly allocated string containing a slice of text
- *     from layout. Free with free().
+ *     from layout. Free with g_free().
  */
 static gchar *
 _gtk_pango_get_text_after (PangoLayout     *layout,
@@ -1860,7 +1860,7 @@ _cally_misc_add_attribute (AtkAttributeSet *attrib_set,
                            gchar           *value)
 {
   AtkAttributeSet *return_set;
-  AtkAttribute *at = malloc (sizeof (AtkAttribute));
+  AtkAttribute *at = g_malloc (sizeof (AtkAttribute));
   at->name = g_strdup (atk_text_attribute_get_name (attr));
   at->value = value;
   return_set = g_slist_prepend(attrib_set, at);

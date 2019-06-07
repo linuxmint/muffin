@@ -244,7 +244,7 @@ timeline_marker_free (gpointer data)
     {
       TimelineMarker *marker = data;
 
-      free (marker->name);
+      g_free (marker->name);
       g_slice_free (TimelineMarker, marker);
     }
 }
