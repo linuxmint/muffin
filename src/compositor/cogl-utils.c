@@ -57,7 +57,7 @@ meta_create_color_texture_4ub (guint8           red,
   CoglColor color;
   guint8 pixel[4];
 
-  cogl_color_set_from_4ub (&color, red, green, blue, alpha);
+  cogl_color_init_from_4ub (&color, red, green, blue, alpha);
   cogl_color_premultiply (&color);
 
   pixel[0] = cogl_color_get_red_byte (&color);
