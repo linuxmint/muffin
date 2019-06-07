@@ -165,8 +165,6 @@ static guint display_signals [LAST_SIGNAL] = { 0 };
  */
 static MetaDisplay *the_display = NULL;
 
-static guint obscured_timeout = 0;
-
 #ifdef WITH_VERBOSE_MODE
 static void   meta_spew_event           (MetaDisplay    *display,
                                          XEvent         *event);
@@ -548,10 +546,6 @@ meta_display_open (void)
   the_display->allow_terminal_deactivation = TRUE; /* Only relevant for when a
                                                   terminal has the focus */
 
-  the_display->prefs = meta_prefs_get_default_state ();
-
-  the_display->desktop_effects = meta_prefs_get_desktop_effects ();
-
   the_display->rebuild_keybinding_idle_id = 0;
 
   the_display->sync_method = meta_prefs_get_sync_method();
@@ -565,8 +559,7 @@ meta_display_open (void)
 
   update_window_grab_modifiers (the_display);
   update_mouse_zoom_modifiers (the_display);
-
-  the_display->mouse_zoom_enabled = *the_display->prefs->mouse_zoom_enabled;
+  the_display->mouse_zoom_enabled = meta_prefs_get_mouse_zoom_enabled ();
 
   meta_prefs_add_listener (prefs_changed_callback, the_display);
 
@@ -806,8 +799,8 @@ meta_display_open (void)
 
 #ifdef HAVE_XCURSOR
   {
-    XcursorSetTheme (the_display->xdisplay, the_display->prefs->cursor_theme);
-    XcursorSetDefaultSize (the_display->xdisplay, (*the_display->prefs->cursor_size) * (*the_display->prefs->ui_scale));
+    XcursorSetTheme (the_display->xdisplay, meta_prefs_get_cursor_theme ());
+    XcursorSetDefaultSize (the_display->xdisplay, meta_prefs_get_cursor_size ());
   }
 #else /* HAVE_XCURSOR */
   meta_verbose ("Not compiled with Xcursor support\n");
@@ -1593,12 +1586,11 @@ meta_display_queue_autoraise_callback (MetaDisplay *display,
                                        MetaWindow  *window)
 {
   MetaAutoRaiseData *auto_raise_data;
-  gboolean auto_raise_delay = *display->prefs->auto_raise_delay;
 
   meta_topic (META_DEBUG_FOCUS,
               "Queuing an autoraise timeout for %s with delay %d\n",
               window->desc,
-              auto_raise_delay);
+              meta_prefs_get_auto_raise_delay ());
 
   auto_raise_data = g_new (MetaAutoRaiseData, 1);
   auto_raise_data->display = window->display;
@@ -1611,7 +1603,7 @@ meta_display_queue_autoraise_callback (MetaDisplay *display,
 
   display->autoraise_timeout_id =
     g_timeout_add_full (G_PRIORITY_DEFAULT,
-                        auto_raise_delay,
+                        meta_prefs_get_auto_raise_delay (),
                         window_raise_with_delay_callback,
                         auto_raise_data,
                         free);
@@ -1765,8 +1757,8 @@ event_callback (XEvent   *event,
                               window->desc);
                 }
 
-              if (window->compositor_private)
-                meta_window_actor_update_shape (window->compositor_private);
+              meta_compositor_window_shape_changed (display->compositor,
+                                                    window);
             }
         }
       else
@@ -1894,7 +1886,7 @@ event_callback (XEvent   *event,
                */
               if (!frame_was_receiver)
                 {
-                  if (*display->prefs->raise_on_click &&
+                  if (meta_prefs_get_raise_on_click () &&
                       !meta_ui_window_is_widget (display->active_screen->ui, modified))
                     meta_window_raise (window);
                   else
@@ -1925,7 +1917,7 @@ event_callback (XEvent   *event,
               if (!unmodified)
                 begin_move = TRUE;
             }
-          else if (!unmodified && event->xbutton.button == (*display->prefs->resize_with_right_button ? 3 : 2))
+          else if (!unmodified && event->xbutton.button == meta_prefs_get_mouse_button_resize())
             {
               if (window->has_resize_func)
                 {
@@ -1974,9 +1966,9 @@ event_callback (XEvent   *event,
                                                 event->xbutton.y_root);
                 }
             }
-          else if (event->xbutton.button == (*display->prefs->resize_with_right_button ? 2 : 3))
+          else if (event->xbutton.button == meta_prefs_get_mouse_button_menu())
             {
-              if (*display->prefs->raise_on_click)
+              if (meta_prefs_get_raise_on_click ())
                 meta_window_raise (window);
               meta_window_show_menu (window,
                                      event->xbutton.x_root,
@@ -1996,18 +1988,17 @@ event_callback (XEvent   *event,
                * in application-based mode, and the different
                * app is not a dock or desktop, eat the focus click.
                */
-              // FIXME? meta_prefs_get_application_based returns FALSE
-              // if (*display->prefs->focus_mode == C_DESKTOP_FOCUS_MODE_CLICK &&
-              //     meta_prefs_get_application_based () &&
-              //     !window->has_focus &&
-              //     window->type != META_WINDOW_DOCK &&
-              //     window->type != META_WINDOW_DESKTOP &&
-              //     (display->focus_window == NULL ||
-              //      !meta_window_same_application (window,
-              //                                     display->focus_window)))
-              //   mode = AsyncPointer; /* eat focus click */
-              // else
-              mode = ReplayPointer; /* give event back */
+              if (meta_prefs_get_focus_mode () == C_DESKTOP_FOCUS_MODE_CLICK &&
+                  meta_prefs_get_application_based () &&
+                  !window->has_focus &&
+                  window->type != META_WINDOW_DOCK &&
+                  window->type != META_WINDOW_DESKTOP &&
+                  (display->focus_window == NULL ||
+                   !meta_window_same_application (window,
+                                                  display->focus_window)))
+                mode = AsyncPointer; /* eat focus click */
+              else
+                mode = ReplayPointer; /* give event back */
 
               meta_verbose ("Allowing events mode %s time %u\n",
                             mode == AsyncPointer ? "AsyncPointer" : "ReplayPointer",
@@ -2083,9 +2074,7 @@ event_callback (XEvent   *event,
                event->xcrossing.detail != NotifyInferior &&
                meta_display_focus_sentinel_clear (display))
         {
-          CDesktopFocusMode focus_mode = *display->prefs->focus_mode;
-
-          switch (focus_mode)
+          switch (meta_prefs_get_focus_mode ())
             {
             case C_DESKTOP_FOCUS_MODE_SLOPPY:
             case C_DESKTOP_FOCUS_MODE_MOUSE:
@@ -2106,7 +2095,7 @@ event_callback (XEvent   *event,
                   /* stop ignoring stuff */
                   reset_ignored_crossing_serials (display);
 
-                  if (*display->prefs->auto_raise)
+                  if (meta_prefs_get_auto_raise ())
                     {
                       meta_display_queue_autoraise_callback (display, window);
                     }
@@ -2126,7 +2115,7 @@ event_callback (XEvent   *event,
                * alternative mechanism works great.
                */
               if (window->type == META_WINDOW_DESKTOP &&
-                  focus_mode == C_DESKTOP_FOCUS_MODE_MOUSE &&
+                  meta_prefs_get_focus_mode() == C_DESKTOP_FOCUS_MODE_MOUSE &&
                   display->expected_focus_window != NULL)
                 {
                   meta_topic (META_DEBUG_FOCUS,
@@ -3599,7 +3588,7 @@ meta_display_begin_grab_op (MetaDisplay *display,
   if (window &&
       (meta_grab_op_is_moving (op) || meta_grab_op_is_resizing (op)))
     {
-      if (*display->prefs->raise_on_click)
+      if (meta_prefs_get_raise_on_click ())
         meta_window_raise (window);
       else
         {
@@ -3612,7 +3601,7 @@ meta_display_begin_grab_op (MetaDisplay *display,
   /* If window is a modal dialog attached to its parent,
    * grab the parent instead for moving.
    */
-  if (window && window->attached &&
+  if (window && meta_window_is_attached_dialog (window) &&
       meta_grab_op_is_moving (op))
     grab_window = meta_window_get_transient_for (window);
 
@@ -3786,9 +3775,8 @@ meta_display_end_grab_op (MetaDisplay *display,
 {
   meta_topic (META_DEBUG_WINDOW_OPS,
               "Ending grab op %u at time %u\n", display->grab_op, timestamp);
-
-  if (display->grab_op == META_GRAB_OP_NONE ||
-      display->grab_op == META_GRAB_OP_COMPOSITOR)
+  
+  if (display->grab_op == META_GRAB_OP_NONE)
     return;
 
   meta_compositor_grab_op_end (display->compositor);
@@ -3800,7 +3788,7 @@ meta_display_end_grab_op (MetaDisplay *display,
     display->grab_window->shaken_loose = FALSE;
 
   if (display->grab_window != NULL &&
-      !(*display->prefs->raise_on_click) &&
+      !meta_prefs_get_raise_on_click () &&
       (meta_grab_op_is_moving (display->grab_op) ||
        meta_grab_op_is_resizing (display->grab_op)))
     {
@@ -3909,7 +3897,7 @@ meta_display_check_threshold_reached (MetaDisplay *display,
                                       int          y)
 {
   /* Don't bother doing the check again if we've already reached the threshold */
-  if ((*display->prefs->raise_on_click) ||
+  if (meta_prefs_get_raise_on_click () ||
       display->grab_threshold_movement_reached)
     return;
 
@@ -5294,7 +5282,7 @@ update_window_grab_modifiers (MetaDisplay *display)
   MetaVirtualModifier virtual_mods;
   unsigned int mods;
 
-  virtual_mods = *display->prefs->mouse_button_mods;
+  virtual_mods = meta_prefs_get_mouse_button_mods ();
   meta_display_devirtualize_modifiers (display, virtual_mods,
                                        &mods);
 
@@ -5307,7 +5295,7 @@ update_mouse_zoom_modifiers (MetaDisplay *display)
   MetaVirtualModifier virtual_mods;
   unsigned int mods;
 
-  virtual_mods = *display->prefs->mouse_button_zoom_mods;
+  virtual_mods = meta_prefs_get_mouse_button_zoom_mods ();
   meta_display_devirtualize_modifiers (display, virtual_mods,
                                        &mods);
 
@@ -5356,7 +5344,7 @@ prefs_changed_callback (MetaPreference pref,
       if (pref == META_PREF_MOUSE_BUTTON_ZOOM_MODS)
         update_mouse_zoom_modifiers (display);
 
-      display->mouse_zoom_enabled = *display->prefs->mouse_zoom_enabled;
+      display->mouse_zoom_enabled = meta_prefs_get_mouse_zoom_enabled ();
 
       /* Grab all */
       tmp = windows;
@@ -5803,43 +5791,6 @@ void
 meta_display_update_sync_state (MetaSyncMethod method)
 {
   meta_compositor_update_sync_state (the_display->compositor, method);
-}
-
-static gboolean
-reset_all_obscured (MetaDisplay *display)
-{
-  if (!obscured_timeout)
-    {
-      obscured_timeout = TRUE;
-      return G_SOURCE_CONTINUE;
-    }
-
-  meta_compositor_set_all_obscured (display->compositor, TRUE);
-
-  obscured_timeout = FALSE;
-
-  return G_SOURCE_REMOVE;
-}
-
-void
-meta_display_set_all_obscured (void)
-{
-  meta_compositor_set_all_obscured (the_display->compositor, FALSE);
-
-  if (obscured_timeout)
-    {
-      obscured_timeout = FALSE;
-      return;
-    }
-
-
-  /* At the lowest priority that ensures everything important has had a chance to run first,
-     check if all windows are obscured after 500ms while they are overriden as not obscured.
-     The longer this is delayed, the longer all windows are forced to paint.
-     TODO: Consider removing the timeout in meta_window_actor_override_obscured_internal that
-     is eventually called through MetaCompositor. Less timeouts, less CPU interruption. */
-  g_timeout_add_full (1000, 500, (GSourceFunc) reset_all_obscured, the_display, NULL);
-  obscured_timeout = TRUE;
 }
 
 gboolean

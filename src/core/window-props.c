@@ -265,7 +265,7 @@ reload_progress (MetaWindow    *window,
       if (window->progress != value->v.cardinal)
         {
           window->progress = value->v.cardinal;
-          g_object_notify (window, "progress");
+          g_object_notify ((GObject*) window, "progress");
 
           meta_topic (META_DEBUG_WINDOW_STATE,
                       "Read XAppGtkWindow progress prop %u for %s\n",
@@ -277,7 +277,7 @@ reload_progress (MetaWindow    *window,
       if (window->progress != 0)
         {
           window->progress = 0;
-          g_object_notify (window, "progress");
+          g_object_notify ((GObject*) window, "progress");
 
           meta_topic (META_DEBUG_WINDOW_STATE,
                       "Read XAppGtkWindow progress prop %u for %s\n",
@@ -298,7 +298,7 @@ reload_progress_pulse (MetaWindow    *window,
       if (window->progress_pulse != new_val)
         {
           window->progress_pulse = new_val;
-          g_object_notify (window, "progress-pulse");
+          g_object_notify ((GObject*) window, "progress-pulse");
 
           meta_topic (META_DEBUG_WINDOW_STATE,
                       "Read XAppGtkWindow progress-pulse prop %s for %s\n",
@@ -310,7 +310,7 @@ reload_progress_pulse (MetaWindow    *window,
       if (window->progress_pulse)
         {
           window->progress_pulse = FALSE;
-          g_object_notify (window, "progress-pulse");
+          g_object_notify ((GObject*) window,  "progress-pulse");
 
           meta_topic (META_DEBUG_WINDOW_STATE,
                       "Read XAppGtkWindow progress-pulse prop %s for %s\n",
@@ -675,13 +675,15 @@ static void
 meta_window_set_opaque_region (MetaWindow     *window,
                                cairo_region_t *region)
 {
+  if (cairo_region_equal (window->opaque_region, region))
+    return;
+
   g_clear_pointer (&window->opaque_region, cairo_region_destroy);
 
   if (region != NULL)
     window->opaque_region = cairo_region_reference (region);
 
-  if (window->compositor_private)
-    meta_window_actor_update_shape (window->compositor_private);
+  meta_compositor_window_shape_changed (window->display->compositor, window);
 }
 
 static void
@@ -733,8 +735,7 @@ reload_opaque_region (MetaWindow    *window,
     }
 
  out:
-  if (!cairo_region_equal (window->opaque_region, opaque_region))
-    meta_window_set_opaque_region (window, opaque_region);
+  meta_window_set_opaque_region (window, opaque_region);
   cairo_region_destroy (opaque_region);
 }
 
@@ -1240,7 +1241,7 @@ meta_set_normal_hints (MetaWindow *window,
   int minw, minh, maxw, maxh;   /* min/max width/height                      */
   int basew, baseh, winc, hinc; /* base width/height, width/height increment */
 
-  ui_scale = *window->display->prefs->ui_scale;
+  ui_scale = meta_prefs_get_ui_scale ();
 
   /* Save the last ConfigureRequest, which we put here.
    * Values here set in the hints are supposed to
@@ -1718,7 +1719,7 @@ reload_gtk_hide_titlebar_when_maximized (MetaWindow    *window,
   gboolean requested_value = FALSE;
   gboolean current_value = window->hide_titlebar_when_maximized;
 
-  if (*window->display->prefs->ignore_hide_titlebar_when_maximized)
+  if (meta_prefs_get_ignore_hide_titlebar_when_maximized ())
     {
       return;
     }

@@ -2,9 +2,9 @@
 
 /* Metacity window frame manager widget */
 
-/*
+/* 
  * Copyright (C) 2001 Havoc Pennington
- *
+ * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
  * published by the Free Software Foundation; either version 2 of the
@@ -14,7 +14,7 @@
  * WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street - Suite 500, Boston, MA
@@ -27,7 +27,6 @@
 #include <gtk/gtk.h>
 #include <gdk/gdkx.h>
 #include <meta/common.h>
-#include <meta/types.h>
 #include "theme-private.h"
 
 typedef enum
@@ -74,7 +73,6 @@ typedef struct _MetaUIFrame         MetaUIFrame;
 
 struct _MetaUIFrame
 {
-  MetaWindow *meta_window;
   Window xwindow;
   GdkWindow *window;
   GtkStyleContext *style;
@@ -83,22 +81,20 @@ struct _MetaUIFrame
   int text_height;
   char *title; /* NULL once we have a layout */
   guint shape_applied : 1;
-
+  
   /* FIXME get rid of this, it can just be in the MetaFrames struct */
   MetaFrameControl prelit_control;
-  MetaButtonState button_state;
-  int grab_button;
-
-  MetaFrameGeometry fgeom;
 };
 
 struct _MetaFrames
 {
   GtkWindow parent_instance;
-
+  
   GHashTable *text_heights;
 
   GHashTable *frames;
+
+  MetaUIFrame *last_motion_frame;
 
   GtkStyleContext *normal_style;
   GHashTable *style_variants;
@@ -106,22 +102,6 @@ struct _MetaFrames
   int invalidate_cache_timeout_id;
   GList *invalidate_frames;
   GHashTable *cache;
-
-  MetaGrabOp current_grab_op;
-  MetaUIFrame *grab_frame;
-  guint grab_button;
-  gdouble grab_x;
-  gdouble grab_y;
-
-  MetaDisplay *display;
-  Display *xdisplay;
-  Window grab_xwindow;
-
-  MetaFrameControl last_control;
-
-  guint entered : 1;
-  int last_cursor_x;
-  int last_cursor_y;
 };
 
 struct _MetaFramesClass
@@ -135,7 +115,6 @@ GType        meta_frames_get_type               (void) G_GNUC_CONST;
 MetaFrames *meta_frames_new (int screen_number);
 
 void meta_frames_manage_window (MetaFrames *frames,
-                                MetaWindow *meta_window,
                                 Window      xwindow,
 				GdkWindow  *window);
 void meta_frames_unmanage_window (MetaFrames *frames,
@@ -175,9 +154,8 @@ void meta_frames_move_resize_frame (MetaFrames *frames,
 void meta_frames_queue_draw (MetaFrames *frames,
                              Window      xwindow);
 
-Window meta_frames_get_moving_frame (MetaFrames *frames);
+void meta_frames_notify_menu_hide (MetaFrames *frames);
 
-void meta_frames_calc_geometry (MetaFrames *frames,
-                                Window      xwindow);
+Window meta_frames_get_moving_frame (MetaFrames *frames);
 
 #endif

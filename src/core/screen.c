@@ -996,12 +996,10 @@ meta_screen_new (MetaDisplay *display,
 
   /* Get current workspace */
   current_workspace = 0;
-
-  if (meta_prop_get_cardinal_with_atom_type (screen->display,
-                                             screen->xroot,
-                                             screen->display->atom__NET_CURRENT_DESKTOP,
-                                             XA_CARDINAL,
-                                             &current_workspace))
+  if (meta_prop_get_cardinal (screen->display,
+                              screen->xroot,
+                              screen->display->atom__NET_CURRENT_DESKTOP,
+                              &current_workspace))
     meta_verbose ("Read existing _NET_CURRENT_DESKTOP = %d\n",
                   (int) current_workspace);
   else
@@ -1015,7 +1013,6 @@ meta_screen_new (MetaDisplay *display,
 
   set_workspace_names (screen);
 
-  screen->startup_workspace_index = current_workspace;
   screen->all_keys_grabbed = FALSE;
   screen->keys_grabbed = FALSE;
   meta_screen_grab_keys (screen);
@@ -1046,6 +1043,17 @@ meta_screen_new (MetaDisplay *display,
   screen->startup_sequences = NULL;
   screen->startup_sequence_timeout = 0;
 #endif
+
+  /* Switch to the _NET_CURRENT_DESKTOP workspace */
+  {
+    MetaWorkspace *space;
+    
+    space = meta_screen_get_workspace_by_index (screen,
+                                                current_workspace);
+    
+    if (space != NULL)
+      meta_workspace_activate (space, timestamp);
+  }
 
   meta_verbose ("Added screen %d ('%s') root 0x%lx\n",
                 screen->number, screen->screen_name, screen->xroot);
@@ -1237,8 +1245,9 @@ meta_screen_composite_all_windows (MetaScreen *screen)
       MetaWindow *window = tmp->data;
 
       meta_compositor_add_window (display->compositor, window);
-      if (window->visible_to_compositor && window->compositor_private)
-        meta_window_actor_show (window->compositor_private, META_COMP_EFFECT_NONE);
+      if (window->visible_to_compositor)
+        meta_compositor_show_window (display->compositor, window,
+                                     META_COMP_EFFECT_NONE);
     }
 
   g_slist_free (windows);
@@ -1277,7 +1286,7 @@ prefs_changed_callback (MetaPreference pref,
 
   if ((pref == META_PREF_NUM_WORKSPACES ||
        pref == META_PREF_DYNAMIC_WORKSPACES) &&
-      !(*screen->display->prefs->dynamic_workspaces))
+      !meta_prefs_get_dynamic_workspaces ())
     {
       /* GSettings doesn't provide timestamps, but luckily update_num_workspaces
        * often doesn't need it...
@@ -1620,7 +1629,7 @@ meta_screen_remove_workspace (MetaScreen *screen, MetaWorkspace *workspace,
 
   set_number_of_spaces_hint (screen, new_num);
 
-  if (!(*screen->display->prefs->dynamic_workspaces))
+  if (!meta_prefs_get_dynamic_workspaces ())
     meta_prefs_set_num_workspaces (new_num);
 
   update_net_desktop_layout (screen, new_num);
@@ -1681,7 +1690,7 @@ meta_screen_append_new_workspace (MetaScreen *screen, gboolean activate,
 
   set_number_of_spaces_hint (screen, new_num);
 
-  if (!(*screen->display->prefs->dynamic_workspaces))
+  if (!meta_prefs_get_dynamic_workspaces ())
     meta_prefs_set_num_workspaces (new_num);
 
   update_net_desktop_layout (screen, new_num);
@@ -1709,7 +1718,7 @@ update_num_workspaces (MetaScreen *screen,
   MetaWorkspace *last_remaining;
   gboolean need_change_space;
 
-  new_num = *screen->display->prefs->num_workspaces;
+  new_num = meta_prefs_get_num_workspaces ();
 
   g_assert (new_num > 0);
 
@@ -2157,7 +2166,7 @@ meta_screen_get_monitor_for_rect (MetaScreen    *screen,
   best_monitor = 0;
   monitor_score = -1;
 
-  rect_area = rect->width * rect->height;
+  rect_area = meta_rectangle_area (rect);
   for (i = 0; i < screen->n_monitor_infos; i++)
     {
       gboolean result;
@@ -2169,17 +2178,12 @@ meta_screen_get_monitor_for_rect (MetaScreen    *screen,
           result = meta_rectangle_intersect (&screen->monitor_infos[i].rect,
                                              rect,
                                              &dest);
-          cur = dest.width * dest.height;
+          cur = meta_rectangle_area (&dest);
         }
       else
         {
-          MetaRectangle *outer_rect = &screen->monitor_infos[i].rect;
-
-          result = (rect->x >= outer_rect->x &&
-                    rect->y >= outer_rect->y &&
-                    rect->x + rect->width  <= outer_rect->x + outer_rect->width &&
-                    rect->y + rect->height <= outer_rect->y + outer_rect->height);
-
+          result = meta_rectangle_contains_rect (&screen->monitor_infos[i].rect,
+                                                 rect);
           cur = rect_area;
         }
 
@@ -2191,6 +2195,17 @@ meta_screen_get_monitor_for_rect (MetaScreen    *screen,
     }
 
   return &screen->monitor_infos[best_monitor];
+}
+
+LOCAL_SYMBOL const MetaMonitorInfo*
+meta_screen_get_monitor_for_window (MetaScreen *screen,
+                                    MetaWindow *window)
+{
+  MetaRectangle window_rect;
+  
+  meta_window_get_outer_rect (window, &window_rect);
+
+  return meta_screen_get_monitor_for_rect (screen, &window_rect);
 }
 
 int
@@ -3085,13 +3100,7 @@ meta_screen_resize (MetaScreen *screen,
       MetaWindow *window = tmp->data;
 
       if (window->screen == screen)
-        {
-          meta_window_update_outer_rect (window);
-          meta_window_update_for_monitors_changed (window);
-
-          if (!window->override_redirect)
-            meta_window_update_monitor (window);
-        }
+        meta_window_update_for_monitors_changed (window);
     }
 
   free (old_monitor_infos);

@@ -55,7 +55,6 @@ struct _MetaCompositor
   guint           show_redraw : 1;
   guint           debug       : 1;
   guint           no_mipmaps  : 1;
-  guint           override_window_on_top : 1;
 
   gboolean frame_has_updated_xsurfaces;
   gboolean have_x11_sync_object;
@@ -68,8 +67,6 @@ struct _MetaCompositor
 CoglContext * meta_compositor_get_cogl_context (void);
 
 void meta_switch_workspace_completed (MetaScreen    *screen);
-
-MetaWindow * meta_compositor_get_window_for_xwindow (Window xwindow);
 
 gboolean meta_begin_modal_for_plugin (MetaScreen       *screen,
                                       MetaPlugin       *plugin,
@@ -91,8 +88,5 @@ void meta_check_end_modal (MetaScreen *screen);
 
 void meta_compositor_update_sync_state (MetaCompositor *compositor,
                                         MetaSyncMethod  method);
-
-void meta_compositor_set_all_obscured (MetaCompositor *compositor,
-                                       gboolean        obscured);
 
 #endif /* META_COMPOSITOR_PRIVATE_H */
