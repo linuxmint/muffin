@@ -35,7 +35,7 @@
 #define META_WINDOW_PRIVATE_H
 
 #include <config.h>
-#include <meta/compositor.h>
+#include <compositor/compositor-private.h>
 #include <meta/window.h>
 #include "screen-private.h"
 #include <meta/util.h>
