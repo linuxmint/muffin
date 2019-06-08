@@ -1835,17 +1835,16 @@ handle_workspace_shift (MetaWindow *window,
   MetaWorkspace *target_workspace;
   guint motion = META_MOTION_LEFT;
   gboolean should_handle = FALSE;
-  gboolean invert_workspace_flip = *window->display->prefs->invert_workspace_flip;
 
   if (keysym == XK_Left || keysym == XK_KP_Left)
     {
-      motion = invert_workspace_flip ? META_MOTION_RIGHT : META_MOTION_LEFT;
+      motion = meta_prefs_get_invert_flip_direction () ? META_MOTION_RIGHT : META_MOTION_LEFT;
       should_handle = TRUE;
     }
   else
   if (keysym == XK_Right || keysym == XK_KP_Right)
     {
-      motion = invert_workspace_flip ? META_MOTION_LEFT : META_MOTION_RIGHT;
+      motion = meta_prefs_get_invert_flip_direction () ? META_MOTION_LEFT : META_MOTION_RIGHT;
       should_handle = TRUE;
     }
 
@@ -2625,7 +2624,7 @@ handle_move_to (MetaDisplay    *display,
 
   monitor = meta_screen_get_current_monitor (window->screen);
   meta_window_get_work_area_for_monitor (window, monitor, &work_area);
-  outer = window->outer_rect;
+  meta_window_get_outer_rect (window, &outer);
 
   if (direction & META_MOVE_TO_XCHANGE_FLAG) {
     new_x = work_area.x + (direction & META_MOVE_TO_RIGHT_FLAG ?
@@ -3113,7 +3112,7 @@ handle_move_to_monitor (MetaDisplay    *display,
   gint which = binding->handler->data;
   const MetaMonitorInfo *current, *new;
 
-  current = meta_screen_get_monitor_for_rect (screen, &window->outer_rect);
+  current = meta_screen_get_monitor_for_window (screen, window);
   new = meta_screen_get_monitor_neighbor (screen, current->number, which);
 
   if (new == NULL)
@@ -3147,12 +3146,15 @@ handle_raise_or_lower (MetaDisplay    *display,
 
   while (above)
     {
-      MetaRectangle tmp;
-
+      MetaRectangle tmp, win_rect, above_rect;
+      
       if (above->mapped && meta_window_should_be_showing(above))
         {
+          meta_window_get_outer_rect (window, &win_rect);
+          meta_window_get_outer_rect (above, &above_rect);
+          
           /* Check if obscured */
-          if (meta_rectangle_intersect (&window->outer_rect, &above->outer_rect, &tmp))
+          if (meta_rectangle_intersect (&win_rect, &above_rect, &tmp))
             {
               meta_window_raise (window);
               return;

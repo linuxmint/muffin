@@ -933,66 +933,6 @@ update_ui_scale (GdkScreen *screen, gpointer data)
   ui_scale = MAX (g_value_get_int (&value), 1); // Never let it be 0;
 }
 
-/**
- * meta_prefs_get_default_state: (skip)
- *
- */
-MetaPrefsState*
-meta_prefs_get_default_state (void)
-{
-  MetaPrefsState *prefs_state = g_new0 (MetaPrefsState, 1);
-
-  prefs_state->use_system_font = &use_system_font;
-  prefs_state->titlebar_font = titlebar_font;
-  prefs_state->mouse_button_mods = &mouse_button_mods;
-  prefs_state->mouse_button_zoom_mods = &mouse_button_zoom_mods;
-  prefs_state->mouse_zoom_enabled = &mouse_zoom_enabled;
-  prefs_state->focus_mode = &focus_mode;
-  prefs_state->focus_new_windows = &focus_new_windows;
-  prefs_state->raise_on_click = &raise_on_click;
-  prefs_state->attach_modal_dialogs = &attach_modal_dialogs;
-  prefs_state->ignore_hide_titlebar_when_maximized = &ignore_hide_titlebar_when_maximized;
-  prefs_state->current_theme = current_theme;
-  prefs_state->workspace_names = workspace_names;
-  prefs_state->num_workspaces = &num_workspaces;
-  prefs_state->workspace_cycle = &workspace_cycle;
-  prefs_state->action_double_click_titlebar = &action_double_click_titlebar;
-  prefs_state->action_middle_click_titlebar = &action_middle_click_titlebar;
-  prefs_state->action_right_click_titlebar = &action_right_click_titlebar;
-  prefs_state->action_scroll_titlebar = &action_scroll_titlebar;
-  prefs_state->dynamic_workspaces = &dynamic_workspaces;
-  prefs_state->unredirect_fullscreen_windows = &unredirect_fullscreen_windows;
-  prefs_state->desktop_effects = &desktop_effects;
-  prefs_state->sync_method = &sync_method;
-  prefs_state->threaded_swap = &threaded_swap;
-  prefs_state->send_frame_timings = &send_frame_timings;
-  prefs_state->application_based = &application_based;
-  prefs_state->disable_workarounds = &disable_workarounds;
-  prefs_state->auto_raise = &auto_raise;
-  prefs_state->auto_raise_delay = &auto_raise_delay;
-  prefs_state->gnome_animations = &gnome_animations;
-  prefs_state->cursor_theme = cursor_theme;
-  prefs_state->cursor_size = &cursor_size;
-  prefs_state->draggable_border_width = &draggable_border_width;
-  prefs_state->tile_hud_threshold = &tile_hud_threshold;
-  prefs_state->resize_threshold = &resize_threshold;
-  prefs_state->ui_scale = &ui_scale;
-  prefs_state->min_window_opacity = &min_window_opacity;
-  prefs_state->resize_with_right_button = &resize_with_right_button;
-  prefs_state->edge_tiling = &edge_tiling;
-  prefs_state->edge_resistance_window = &edge_resistance_window;
-  prefs_state->force_fullscreen = &force_fullscreen;
-  prefs_state->button_layout = &button_layout;
-  prefs_state->workspaces_only_on_primary = &workspaces_only_on_primary;
-  prefs_state->legacy_snap = &legacy_snap;
-  prefs_state->invert_workspace_flip = &invert_workspace_flip;
-  prefs_state->tile_maximize = &tile_maximize;
-  prefs_state->placement_mode = &placement_mode;
-  prefs_state->background_transition = &background_transition;
-
-  return prefs_state;
-}
-
 
 /****************************************************************************/
 /* Initialisation.                                                          */

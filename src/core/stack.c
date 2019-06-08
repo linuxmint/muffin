@@ -1415,6 +1415,18 @@ meta_stack_get_below (MetaStack      *stack,
     return below;
 }
 
+static gboolean
+window_contains_point (MetaWindow *window,
+                       int         root_x,
+                       int         root_y)
+{
+  MetaRectangle rect;
+
+  meta_window_get_outer_rect (window, &rect);
+
+  return POINT_IN_RECT (root_x, root_y, rect);
+}
+
 static MetaWindow*
 get_default_focus_window (MetaStack     *stack,
                           MetaWorkspace *workspace,
@@ -1462,8 +1474,6 @@ get_default_focus_window (MetaStack     *stack,
           (workspace == NULL ||
            meta_window_located_on_workspace (window, workspace)))
         {
-          gboolean has_point = POINT_IN_RECT (root_x, root_y, window->outer_rect);
-
           if (topmost_dock == NULL &&
               window->type == META_WINDOW_DOCK)
             topmost_dock = window;
@@ -1473,13 +1483,15 @@ get_default_focus_window (MetaStack     *stack,
               if (transient_parent == NULL &&
                   not_this_one->xtransient_for != None &&
                   not_this_one->xtransient_for == window->xwindow &&
-                  (!must_be_at_point || has_point))
+                  (!must_be_at_point ||
+                   window_contains_point (window, root_x, root_y)))
                 transient_parent = window;
 
               if (topmost_in_group == NULL &&
                   not_this_one_group != NULL &&
                   not_this_one_group == meta_window_get_group (window) &&
-                  (!must_be_at_point || has_point))
+                  (!must_be_at_point ||
+                   window_contains_point (window, root_x, root_y)))
                 topmost_in_group = window;
             }
 
@@ -1489,7 +1501,8 @@ get_default_focus_window (MetaStack     *stack,
            */
           if (topmost_overall == NULL &&
               window->type != META_WINDOW_DOCK &&
-              (!must_be_at_point || has_point))
+              (!must_be_at_point ||
+               window_contains_point (window, root_x, root_y)))
             topmost_overall = window;
 
           /* We could try to bail out early here for efficiency in

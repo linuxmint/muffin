@@ -68,14 +68,6 @@ typedef struct _MetaWindowClass   MetaWindowClass;
 
 GType meta_window_get_type (void);
 
-/**
- * MetaWindowCallback:
- * @window: (closure): a #MetaWindow
- *
- * Callback type for MetaWindow
- */
-typedef void (* MetaWindowCallback) (MetaWindow *window);
-
 MetaFrame *meta_window_get_frame (MetaWindow *window);
 gboolean meta_window_has_focus (MetaWindow *window);
 gboolean meta_window_appears_focused (MetaWindow *window);
@@ -130,6 +122,7 @@ void meta_window_change_workspace (MetaWindow    *window,
 void meta_window_stick (MetaWindow  *window);
 void meta_window_unstick (MetaWindow  *window);
 GObject *meta_window_get_compositor_private (MetaWindow *window);
+void meta_window_set_compositor_private (MetaWindow *window, GObject *priv);
 void meta_window_configure_notify (MetaWindow *window, XConfigureEvent *event);
 const char *meta_window_get_role (MetaWindow *window);
 MetaStackLayer meta_window_get_layer (MetaWindow *window);

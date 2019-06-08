@@ -308,8 +308,6 @@ struct _MetaDisplay
 
   guint shadows_enabled : 1;
   guint debug_button_grabs : 1;
-  guint desktop_effects : 1;
-  MetaPrefsState *prefs;
 };
 
 struct _MetaDisplayClass
@@ -451,7 +449,5 @@ guint meta_display_get_above_tab_keycode (MetaDisplay *display);
 void meta_display_notify_restart (MetaDisplay *display);
 
 void meta_display_update_sync_state (MetaSyncMethod method);
-
-void meta_display_set_all_obscured (void);
 
 #endif

@@ -198,18 +198,16 @@ meta_rectangle_area (const MetaRectangle *rect)
  */
 gboolean
 meta_rectangle_intersect (const MetaRectangle *src1,
-                          const MetaRectangle *src2,
-                          MetaRectangle *dest)
+			  const MetaRectangle *src2,
+			  MetaRectangle *dest)
 {
   int dest_x, dest_y;
   int dest_w, dest_h;
   int return_val;
 
-  if (!src1 || !src2 || !dest)
-    {
-      g_warn_if_reached ();
-      return FALSE;
-    }
+  g_return_val_if_fail (src1 != NULL, FALSE);
+  g_return_val_if_fail (src2 != NULL, FALSE);
+  g_return_val_if_fail (dest != NULL, FALSE);
 
   return_val = FALSE;
 
@@ -788,6 +786,7 @@ meta_rectangle_expand_to_snapped_borders (MetaRectangle       *rect,
 {
   const GSList *strut_iter;
   gint x_c, y_c, max_x, max_y, min_x, min_y, fallback_x, fallback_y, fallback_width, fallback_height;
+  gboolean ulc = FALSE, llc = FALSE, urc = FALSE, lrc = FALSE;
 
   x_c = BOX_CENTER_X (*user_rect);
   y_c = BOX_TOP (*user_rect);
@@ -817,8 +816,6 @@ meta_rectangle_expand_to_snapped_borders (MetaRectangle       *rect,
         if (BOX_TOP (strut->rect) < max_y)
             max_y = BOX_TOP (strut->rect);
     } /* end loop over struts */
-
-  gboolean ulc = FALSE, llc = FALSE, urc = FALSE, lrc = FALSE;
 
 /* store safe fallback values if we end up with an impossible situation at the end */
   fallback_x = min_x;
