@@ -143,8 +143,7 @@ meta_actor_is_untransformed (ClutterActor *actor,
  * transform.
  */
 gboolean
-meta_actor_painting_untransformed (CoglFramebuffer *fb,
-                                   int              paint_width,
+meta_actor_painting_untransformed (int              paint_width,
                                    int              paint_height,
                                    int             *x_origin,
                                    int             *y_origin)
@@ -154,8 +153,8 @@ meta_actor_painting_untransformed (CoglFramebuffer *fb,
   float viewport[4];
   int i;
 
-  cogl_framebuffer_get_modelview_matrix (fb, &modelview);
-  cogl_framebuffer_get_projection_matrix (fb, &projection);
+  cogl_get_modelview_matrix (&modelview);
+  cogl_get_projection_matrix (&projection);
 
   cogl_matrix_multiply (&modelview_projection,
                         &projection,
@@ -174,7 +173,7 @@ meta_actor_painting_untransformed (CoglFramebuffer *fb,
   vertices[3].y = paint_height;
   vertices[3].z = 0;
 
-  cogl_framebuffer_get_viewport4fv (fb, viewport);
+  cogl_get_viewport (viewport);
 
   for (i = 0; i < 4; i++)
     {

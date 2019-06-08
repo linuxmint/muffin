@@ -531,10 +531,10 @@ static MetaMotionDirection
 get_wrapped_horizontal_direction (gint                from,
                                   gint                to,
                                   MetaMotionDirection suggested_dir,
-                                  gint                num_workspaces,
-                                  gboolean            wrap)
+                                  gint                num_workspaces)
 {
   MetaMotionDirection ret = 0;
+  gboolean wrap = meta_prefs_get_workspace_cycle();
 
   if (suggested_dir != 0 && wrap)
     {
@@ -661,24 +661,20 @@ meta_workspace_activate_internal (MetaWorkspace       *workspace,
     * Notify the compositor that the active workspace is changing.
     */
    screen = workspace->screen;
-   display = screen->display;
-   comp = display->compositor;
+   display = meta_screen_get_display (screen);
+   comp = meta_display_get_compositor (display);
    direction = 0;
 
    current_space = meta_workspace_index (old);
    new_space     = meta_workspace_index (workspace);
-   num_workspaces = g_list_length (screen->workspaces);
+   num_workspaces = meta_screen_get_n_workspaces (workspace->screen);
    meta_screen_calc_workspace_layout (workspace->screen, num_workspaces,
                                       current_space, &layout1);
 
    meta_screen_calc_workspace_layout (workspace->screen, num_workspaces,
                                       new_space, &layout2);
 
-   direction = get_wrapped_horizontal_direction (layout1.current_col,
-                                                 layout2.current_col,
-                                                 suggested_dir,
-                                                 num_workspaces,
-                                                 *display->prefs->workspace_cycle);
+   direction = get_wrapped_horizontal_direction (layout1.current_col, layout2.current_col, suggested_dir, num_workspaces);
 
    if (layout1.current_row < layout2.current_row)
      {
@@ -1309,10 +1305,10 @@ meta_workspace_get_neighbor (MetaWorkspace      *workspace,
   gboolean ltr, cycle;
 
   current_space = meta_workspace_index (workspace);
-  num_workspaces = g_list_length (workspace->screen->workspaces);
+  num_workspaces = meta_screen_get_n_workspaces (workspace->screen);
   meta_screen_calc_workspace_layout (workspace->screen, num_workspaces,
                                      current_space, &layout);
-  cycle = *workspace->screen->display->prefs->workspace_cycle;
+  cycle = meta_prefs_get_workspace_cycle();
 
   meta_verbose ("Getting neighbor of %d in direction %s\n",
                 current_space, meta_motion_direction_to_string (direction));
@@ -1373,8 +1369,6 @@ meta_workspace_focus_default_window (MetaWorkspace *workspace,
                                      MetaWindow    *not_this_one,
                                      guint32        timestamp)
 {
-  CDesktopFocusMode focus_mode = *workspace->screen->display->prefs->focus_mode;
-
   if (timestamp == CurrentTime)
     {
       meta_warning ("CurrentTime used to choose focus window; "
@@ -1382,7 +1376,7 @@ meta_workspace_focus_default_window (MetaWorkspace *workspace,
     }
 
 
-  if (focus_mode == C_DESKTOP_FOCUS_MODE_CLICK ||
+  if (meta_prefs_get_focus_mode () == C_DESKTOP_FOCUS_MODE_CLICK ||
       !workspace->screen->display->mouse_mode)
     focus_ancestor_or_top_window (workspace, not_this_one, timestamp);
   else
@@ -1414,15 +1408,15 @@ meta_workspace_focus_default_window (MetaWorkspace *workspace,
             }
 
           if (workspace->screen->display->autoraise_window != window &&
-              *workspace->screen->display->prefs->auto_raise)
+              meta_prefs_get_auto_raise ())
             {
               meta_display_queue_autoraise_callback (workspace->screen->display,
                                                      window);
             }
         }
-      else if (focus_mode == C_DESKTOP_FOCUS_MODE_SLOPPY)
+      else if (meta_prefs_get_focus_mode () == C_DESKTOP_FOCUS_MODE_SLOPPY)
         focus_ancestor_or_top_window (workspace, not_this_one, timestamp);
-      else if (focus_mode == C_DESKTOP_FOCUS_MODE_MOUSE)
+      else if (meta_prefs_get_focus_mode () == C_DESKTOP_FOCUS_MODE_MOUSE)
         {
           meta_topic (META_DEBUG_FOCUS,
                       "Setting focus to no_focus_window, since no valid "
@@ -1451,7 +1445,6 @@ focus_ancestor_or_top_window (MetaWorkspace *workspace,
                               guint32        timestamp)
 {
   MetaWindow *window = NULL;
-  CDesktopFocusMode focus_mode = *workspace->screen->display->prefs->focus_mode;
 
   if (not_this_one)
     meta_topic (META_DEBUG_FOCUS,
@@ -1478,7 +1471,7 @@ focus_ancestor_or_top_window (MetaWorkspace *workspace,
           meta_window_focus (ancestor, timestamp);
 
           /* Also raise the window if in click-to-focus */
-          if (focus_mode == C_DESKTOP_FOCUS_MODE_CLICK)
+          if (meta_prefs_get_focus_mode () == C_DESKTOP_FOCUS_MODE_CLICK)
             meta_window_raise (ancestor);
 
           return;
@@ -1497,7 +1490,7 @@ focus_ancestor_or_top_window (MetaWorkspace *workspace,
       meta_window_focus (window, timestamp);
 
       /* Also raise the window if in click-to-focus */
-      if (focus_mode == C_DESKTOP_FOCUS_MODE_CLICK)
+      if (meta_prefs_get_focus_mode () == C_DESKTOP_FOCUS_MODE_CLICK)
         meta_window_raise (window);
     }
   else

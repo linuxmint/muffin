@@ -2,9 +2,9 @@
 
 /* Muffin interface for talking to GTK+ UI module */
 
-/*
+/* 
  * Copyright (C) 2001 Havoc Pennington
- *
+ * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
  * published by the Free Software Foundation; either version 2 of the
@@ -14,7 +14,7 @@
  * WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street - Suite 500, Boston, MA
@@ -26,7 +26,6 @@
 
 /* Don't include gtk.h or gdk.h here */
 #include <meta/common.h>
-#include <meta/types.h>
 #include <meta/display.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
@@ -68,7 +67,6 @@ void meta_ui_get_frame_borders (MetaUI *ui,
                                 MetaFrameBorders *borders);
 Window meta_ui_create_frame_window (MetaUI *ui,
                                     Display *xdisplay,
-                                    MetaWindow *meta_window,
                                     Visual *xvisual,
 				    gint x,
 				    gint y,
@@ -87,6 +85,8 @@ void meta_ui_move_resize_frame (MetaUI *ui,
 
 /* GDK insists on tracking map/unmap */
 void meta_ui_map_frame   (MetaUI *ui,
+                          Window  xwindow);
+void meta_ui_unmap_frame (MetaUI *ui,
                           Window  xwindow);
 
 cairo_region_t *meta_ui_get_frame_bounds (MetaUI  *ui,

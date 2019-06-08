@@ -348,7 +348,7 @@ apply_edge_resistance (MetaWindow                *window,
   const int TIMEOUT_RESISTANCE_LENGTH_MS_SCREEN   =   0;
 
   /* Edge resistance can be disabled in gettings. */
-  if (!(*window->display->prefs->edge_resistance_window))
+  if (!meta_prefs_get_edge_resistance_window ())
     return new_pos;
 
   /* Quit if no movement was specified */
@@ -990,12 +990,9 @@ compute_resistance_and_snapping_edges (MetaDisplay *display)
         {
           MetaRectangle *new_rect;
           new_rect = g_new (MetaRectangle, 1);
-          new_rect->x = cur_window->outer_rect.x;
-          new_rect->y = cur_window->outer_rect.y;
-          new_rect->width = cur_window->outer_rect.width;
-          new_rect->height = cur_window->outer_rect.height;
+          meta_window_get_outer_rect (cur_window, new_rect);
           obscuring_windows = g_slist_prepend (obscuring_windows, new_rect);
-          window_stacking =
+          window_stacking = 
             g_slist_prepend (window_stacking, GINT_TO_POINTER (stack_position));
         }
 
@@ -1016,7 +1013,9 @@ compute_resistance_and_snapping_edges (MetaDisplay *display)
   cur_window_iter = stacked_windows;
   while (cur_window_iter != NULL)
     {
+      MetaRectangle  cur_rect;
       MetaWindow    *cur_window = cur_window_iter->data;
+      meta_window_get_outer_rect (cur_window, &cur_rect);
 
       /* Check if we want to use this window's edges for edge
        * resistance (note that dock edges are considered screen edges
@@ -1033,7 +1032,7 @@ compute_resistance_and_snapping_edges (MetaDisplay *display)
            * is offscreen (we also don't care about parts of edges covered
            * by other windows or DOCKS, but that's handled below).
            */
-          meta_rectangle_intersect (&cur_window->outer_rect,
+          meta_rectangle_intersect (&cur_rect, 
                                     &display->grab_screen->rect,
                                     &reduced);
 
@@ -1059,7 +1058,7 @@ compute_resistance_and_snapping_edges (MetaDisplay *display)
           new_edge->side_type = META_SIDE_LEFT;
           new_edge->edge_type = META_EDGE_WINDOW;
           new_edges = g_list_prepend (new_edges, new_edge);
-
+          
           /* Top side of this window is resistance for the bottom edge of
            * the window being moved.
            */
@@ -1157,7 +1156,7 @@ meta_window_edge_resistance_for_move (MetaWindow  *window,
   MetaRectangle old_outer, proposed_outer, new_outer;
   gboolean is_resize;
 
-  old_outer = window->outer_rect;
+  meta_window_get_outer_rect (window, &old_outer);
 
   proposed_outer = old_outer;
   proposed_outer.x += (*new_x - old_x);
@@ -1243,7 +1242,7 @@ meta_window_edge_resistance_for_resize (MetaWindow  *window,
   int proposed_outer_width, proposed_outer_height;
   gboolean is_resize;
 
-  old_outer = window->outer_rect;
+  meta_window_get_outer_rect (window, &old_outer);
   proposed_outer_width  = old_outer.width  + (*new_width  - old_width);
   proposed_outer_height = old_outer.height + (*new_height - old_height);
   meta_rectangle_resize_with_gravity (&old_outer,

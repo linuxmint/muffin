@@ -210,7 +210,7 @@ void meta_display_get_window_pointer (MetaDisplay  *display,
                                       Window        xwindow,
                                       int          *x,
                                       int          *y,
-                                      unsigned int *mask);
+unsigned int *mask);
 
 gboolean meta_display_popup_window_visible (MetaDisplay *display);
 
