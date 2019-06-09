@@ -118,6 +118,8 @@ meta_gradient_create_simple (int              width,
                                             from, to);
     case META_GRADIENT_LAST:
       break;
+    default:
+      break;
     }
   g_assert_not_reached ();
   return NULL;
@@ -153,6 +155,8 @@ meta_gradient_create_multi (int              width,
           return meta_gradient_create_multi_diagonal (width, height, colors, n_colors);
         case META_GRADIENT_LAST:
           g_assert_not_reached ();
+          break;
+        default:
           break;
         }
     }
@@ -860,6 +864,8 @@ meta_gradient_add_alpha (GdkPixbuf       *pixbuf,
 
     case META_GRADIENT_LAST:
       g_assert_not_reached ();
+      break;
+    default:
       break;
     }
 }

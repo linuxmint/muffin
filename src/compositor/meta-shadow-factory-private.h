@@ -47,7 +47,7 @@ void        meta_shadow_paint       (MetaShadow            *shadow,
                                      int                    window_y,
                                      int                    window_width,
                                      int                    window_height,
-                                     int                    opacity,
+                                     guint8                 opacity,
                                      cairo_region_t        *clip,
                                      gboolean               clip_strictly);
 void        meta_shadow_get_bounds  (MetaShadow            *shadow,

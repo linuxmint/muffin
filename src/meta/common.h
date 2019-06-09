@@ -101,31 +101,6 @@ typedef void (* MetaWindowMenuFunc) (MetaWindowMenu *menu,
                                      int             workspace,
                                      gpointer        data);
 
-/**
- * MetaGrabOp:
- * @META_GRAB_OP_NONE: None
- * @META_GRAB_OP_MOVING: Moving with pointer
- * @META_GRAB_OP_RESIZING_SE: Resizing SE with pointer
- * @META_GRAB_OP_RESIZING_S: Resizing S with pointer
- * @META_GRAB_OP_RESIZING_SW: Resizing SW with pointer
- * @META_GRAB_OP_RESIZING_N: Resizing N with pointer
- * @META_GRAB_OP_RESIZING_NE: Resizing NE with pointer
- * @META_GRAB_OP_RESIZING_NW: Resizing NW with pointer
- * @META_GRAB_OP_RESIZING_W: Resizing W with pointer
- * @META_GRAB_OP_RESIZING_E: Resizing E with pointer
- * @META_GRAB_OP_KEYBOARD_MOVING: Moving with keyboard
- * @META_GRAB_OP_KEYBOARD_RESIZING_UNKNOWN: Resizing with keyboard
- * @META_GRAB_OP_KEYBOARD_RESIZING_S: Resizing S with keyboard
- * @META_GRAB_OP_KEYBOARD_RESIZING_N: Resizing N with keyboard
- * @META_GRAB_OP_KEYBOARD_RESIZING_W: Resizing W with keyboard
- * @META_GRAB_OP_KEYBOARD_RESIZING_E: Resizing E with keyboard
- * @META_GRAB_OP_KEYBOARD_RESIZING_SE: Resizing SE with keyboard
- * @META_GRAB_OP_KEYBOARD_RESIZING_NE: Resizing NE with keyboard
- * @META_GRAB_OP_KEYBOARD_RESIZING_SW: Resizing SW with keyboard
- * @META_GRAB_OP_KEYBOARD_RESIZING_NW: Resizing NS with keyboard
- * @META_GRAB_OP_COMPOSITOR: Compositor asked for grab
- */
-
 /* when changing this enum, there are various switch statements
  * you have to update
  */
@@ -171,6 +146,19 @@ typedef enum
   
   META_GRAB_OP_KEYBOARD_WORKSPACE_SWITCHING,
   
+  /* Frame button ops */
+  META_GRAB_OP_CLICKING_MINIMIZE,
+  META_GRAB_OP_CLICKING_MAXIMIZE,
+  META_GRAB_OP_CLICKING_UNMAXIMIZE,
+  META_GRAB_OP_CLICKING_DELETE,
+  META_GRAB_OP_CLICKING_MENU,
+  META_GRAB_OP_CLICKING_SHADE,
+  META_GRAB_OP_CLICKING_UNSHADE,
+  META_GRAB_OP_CLICKING_ABOVE,
+  META_GRAB_OP_CLICKING_UNABOVE,
+  META_GRAB_OP_CLICKING_STICK,
+  META_GRAB_OP_CLICKING_UNSTICK,
+
   /* Special grab op when the compositor asked for a grab */
   META_GRAB_OP_COMPOSITOR
 } MetaGrabOp;
@@ -415,12 +403,6 @@ void meta_frame_borders_clear (MetaFrameBorders *self);
   (xcoord) <  ((rect).x + (rect).width) &&  \
   (ycoord) >= (rect).y &&                   \
   (ycoord) <  ((rect).y + (rect).height))
-
-#define POINT_IN_RECT_POINTER(xcoord, ycoord, rect) \
- ((xcoord) >= (rect)->x &&                   \
-  (xcoord) <  ((rect)->x + (rect)->width) &&  \
-  (ycoord) >= (rect)->y &&                   \
-  (ycoord) <  ((rect)->y + (rect)->height))
 
 /*
  * Layers a window can be in.
