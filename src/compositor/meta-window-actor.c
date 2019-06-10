@@ -137,6 +137,7 @@ struct _MetaWindowActorPrivate
   guint             no_shadow              : 1;
 
   guint             unredirected           : 1;
+  guint unredirection_blocked;
 
   /* This is used to detect fullscreen windows that need to be unredirected */
   guint             full_damage_frames_count;

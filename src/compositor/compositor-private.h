@@ -55,6 +55,8 @@ struct _MetaCompositor
   guint           show_redraw : 1;
   guint           debug       : 1;
   guint           no_mipmaps  : 1;
+  // Screensaver case
+  guint           override_window_on_top;
 
   gboolean frame_has_updated_xsurfaces;
   gboolean have_x11_sync_object;

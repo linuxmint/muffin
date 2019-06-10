@@ -1122,7 +1122,22 @@ get_top_visible_window_actor (MetaCompositor *compositor)
       meta_window_get_input_rect (meta_window_actor_get_meta_window (actor), &rect);
 
       if (meta_rectangle_overlap (&compositor->display->active_screen->rect, &rect))
-        return actor;
+        {
+          if (actor->priv->window->type == META_WINDOW_OVERRIDE_OTHER &&
+              /* Exclude popup windows. Only special windows are included in the top window group, and the only
+                 fullscreen one should be the screensaver. With this filtration override_window_on_top should reliably
+                 mean the screensaver is running and active. */
+              meta_window_is_monitor_sized (actor->priv->window))
+            {
+              compositor->override_window_on_top = TRUE;
+            }
+          else if (compositor->override_window_on_top)
+            {
+              compositor->override_window_on_top = FALSE;
+            }
+
+          return actor;
+        }
     }
 
   return NULL;
@@ -1324,6 +1339,12 @@ meta_pre_paint_func (gpointer data)
         {
           meta_window_actor_set_redirected (compositor->unredirected_window, TRUE);
           meta_shape_cow_for_window (compositor->display->active_screen, NULL);
+        }
+
+      if (top_window_actor != NULL && (compositor->override_window_on_top || top_window_actor->priv->unredirection_blocked))
+        {
+          top_window_actor->priv->unredirection_blocked = TRUE;
+          expected_unredirected_window = NULL;
         }
 
       if (expected_unredirected_window != NULL)
