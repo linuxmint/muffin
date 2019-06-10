@@ -1547,9 +1547,6 @@ meta_window_actor_should_unredirect (MetaWindowActor *self)
   MetaWindowActorPrivate *priv = self->priv;
   MetaWindow *window = priv->window;
 
-  if (!window)
-    return FALSE;
-
   if (meta_window_actor_is_destroyed (self))
     return FALSE;
 
