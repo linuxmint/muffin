@@ -77,9 +77,6 @@ void     meta_end_modal_for_plugin   (MetaScreen       *screen,
 gint64 meta_compositor_monotonic_time_to_server_time (MetaDisplay *display,
                                                       gint64       monotonic_time);
 
-void meta_compositor_grab_op_begin (MetaCompositor *compositor);
-void meta_compositor_grab_op_end (MetaCompositor *compositor);
-
 void meta_check_end_modal (MetaScreen *screen);
 
 #endif /* META_COMPOSITOR_PRIVATE_H */
