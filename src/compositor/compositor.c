@@ -220,9 +220,11 @@ get_output_window (MetaScreen *screen)
 {
   MetaDisplay *display = meta_screen_get_display (screen);
   Display     *xdisplay = meta_display_get_xdisplay (display);
-  Window       output;
+  Window       output, xroot;
   XWindowAttributes attr;
   long         event_mask;
+
+  xroot = meta_screen_get_xroot (screen);
 
   event_mask = FocusChangeMask |
                ExposureMask |
@@ -828,9 +830,9 @@ is_grabbed_event (XEvent *event)
     case KeyPress:
     case KeyRelease:
       return TRUE;
-    default:
-      return FALSE;
     }
+
+  return FALSE;
 }
 
 void
@@ -1020,8 +1022,6 @@ sync_actor_stacking (MetaCompositor *compositor)
   GList *tmp;
   GList *old;
   gboolean reordered;
-  ClutterActor *parent;
-  gboolean popup_window_visible;
 
   /* NB: The first entries in the lists are stacked the lowest */
 
@@ -1075,7 +1075,8 @@ sync_actor_stacking (MetaCompositor *compositor)
   if (!reordered)
     return;
 
-  popup_window_visible = FALSE;
+  ClutterActor *parent;
+  gboolean popup_window_visible = FALSE;
 
   for (tmp = g_list_last (compositor->windows); tmp != NULL; tmp = tmp->prev)
     {
@@ -1305,6 +1306,7 @@ meta_pre_paint_func (gpointer data)
 {
   GList *l;
   MetaCompositor *compositor = data;
+  GSList *screens = compositor->display->screens;
   MetaWindowActor *top_window_actor = NULL;
   MetaWindowActor *expected_unredirected_window = NULL;
 
