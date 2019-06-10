@@ -601,7 +601,6 @@ meta_compositor_manage_screen (MetaCompositor *compositor,
   compositor->screen = screen;
   compositor->output = None;
   compositor->windows = NULL;
-  compositor->popup_window_visible = FALSE;
 
   meta_screen_set_cm_selection (screen);
 
@@ -1076,30 +1075,14 @@ sync_actor_stacking (MetaCompositor *compositor)
     return;
 
   ClutterActor *parent;
-  gboolean popup_window_visible = FALSE;
 
   for (tmp = g_list_last (compositor->windows); tmp != NULL; tmp = tmp->prev)
     {
       ClutterActor *actor = tmp->data;
 
       parent = clutter_actor_get_parent (actor);
-
-      if (!popup_window_visible && parent == compositor->top_window_group)
-        {
-          switch (meta_window_actor_get_meta_window (META_WINDOW_ACTOR (actor))->type)
-            {
-              case META_WINDOW_DROPDOWN_MENU:
-              case META_WINDOW_POPUP_MENU:
-              case META_WINDOW_COMBO:
-                popup_window_visible = TRUE;
-                break;
-            }
-        }
-
       clutter_actor_set_child_below_sibling (parent, actor, NULL);
     }
-
-  compositor->popup_window_visible = popup_window_visible;
 
   parent = clutter_actor_get_parent (compositor->background_actor);
   clutter_actor_set_child_below_sibling (parent, compositor->background_actor, NULL);
