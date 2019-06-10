@@ -3701,6 +3701,8 @@ meta_window_is_monitor_sized (MetaWindow *window)
           window_rect.width == screen_width && window_rect.height == screen_height)
         return TRUE;
 
+      meta_screen_get_monitor_geometry (window->screen, window->monitor->number, &monitor_rect);
+
       if (meta_rectangle_equal (&window_rect, &monitor_rect))
         return TRUE;
     }
