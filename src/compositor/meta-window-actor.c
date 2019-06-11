@@ -1544,34 +1544,31 @@ meta_window_actor_detach (MetaWindowActor *self)
 LOCAL_SYMBOL gboolean
 meta_window_actor_should_unredirect (MetaWindowActor *self)
 {
+  MetaWindow *metaWindow = meta_window_actor_get_meta_window (self);
   MetaWindowActorPrivate *priv = self->priv;
-  MetaWindow *window = priv->window;
-
-  if (!window)
-    return FALSE;
 
   if (meta_window_actor_is_destroyed (self))
     return FALSE;
 
-  if (window->bypass_compositor == _NET_WM_BYPASS_COMPOSITOR_HINT_OFF)
+  if (meta_window_requested_dont_bypass_compositor (metaWindow))
     return FALSE;
 
   if (priv->opacity != 0xff)
     return FALSE;
 
-  if (window->has_shape)
+  if (metaWindow->has_shape)
     return FALSE;
 
-  if (!meta_window_is_monitor_sized (window))
+  if (priv->argb32 && !meta_window_requested_bypass_compositor (metaWindow))
     return FALSE;
 
-  if (window->bypass_compositor == _NET_WM_BYPASS_COMPOSITOR_HINT_ON)
+  if (!meta_window_is_monitor_sized (metaWindow))
+    return FALSE;
+
+  if (meta_window_requested_bypass_compositor (metaWindow))
     return TRUE;
 
-  if (priv->argb32)
-    return FALSE;
-
-  if (window->override_redirect)
+  if (meta_window_is_override_redirect (metaWindow))
     return TRUE;
 
   if (priv->does_full_damage && meta_prefs_get_unredirect_fullscreen_windows ())
@@ -1634,20 +1631,10 @@ meta_window_actor_destroy (MetaWindowActor *self)
 {
   MetaWindow *window;
   MetaWindowActorPrivate *priv = self->priv;
-  MetaCompositor *compositor = priv->screen->display->compositor;
   MetaWindowType window_type;
 
   window = priv->window;
   window_type = meta_window_get_window_type (window);
-
-  if (self == compositor->top_window_actor)
-    {
-      compositor->top_window_actor = NULL;
-      compositor->windows = g_list_remove (compositor->windows, self);
-
-      meta_stack_tracker_queue_sync_stack (priv->screen->stack_tracker);
-    }
-
   meta_window_set_compositor_private (window, NULL);
 
   if (priv->send_frame_messages_timer != 0)
