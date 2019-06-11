@@ -1604,21 +1604,6 @@ meta_compositor_monotonic_time_to_server_time (MetaDisplay *display,
     return monotonic_time + compositor->server_time_offset;
 }
 
-void
-meta_compositor_grab_op_begin (MetaCompositor *compositor)
-{
-  // CLUTTER_ACTOR_NO_LAYOUT set on the window group improves responsiveness of windows,
-  // but causes windows to flicker in and out of view sporadically on some configurations
-  // while dragging windows. Make sure it is disabled during the grab.
-  clutter_actor_unset_flags (compositor->window_group, CLUTTER_ACTOR_NO_LAYOUT);
-}
-
-void
-meta_compositor_grab_op_end (MetaCompositor *compositor)
-{
-  clutter_actor_set_flags (compositor->window_group, CLUTTER_ACTOR_NO_LAYOUT);
-}
-
 CoglContext *
 meta_compositor_get_cogl_context (void)
 {
