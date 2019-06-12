@@ -978,12 +978,13 @@ save_state (void)
 
           fputs ("  </window>\n", outfile);
         }
+#ifdef WITH_VERBOSE_MODE
       else
         {
           meta_topic (META_DEBUG_SM, "Not saving window '%s', not session managed\n",
                       window->desc);
         }
-
+#endif
       tmp = tmp->next;
       ++stack_position;
     }
@@ -1381,13 +1382,14 @@ start_element_handler  (GMarkupParseContext *context,
 
           ++i;
         }
-
+#ifdef WITH_VERBOSE_MODE
       if (pd->info->saved_rect_set)
         meta_topic (META_DEBUG_SM, "Saved unmaximized size %d,%d %dx%d \n",
                     pd->info->saved_rect.x,
                     pd->info->saved_rect.y,
                     pd->info->saved_rect.width,
                     pd->info->saved_rect.height);
+#endif
     }
   else if (strcmp (element_name, "geometry") == 0)
     {

@@ -912,10 +912,11 @@ queue_changed (MetaPreference pref)
 
   if (g_list_find (changes, GINT_TO_POINTER (pref)) == NULL)
     changes = g_list_prepend (changes, GINT_TO_POINTER (pref));
+#ifdef WITH_VERBOSE_MODE
   else
     meta_topic (META_DEBUG_PREFS, "Change of pref %s was already pending\n",
                 meta_preference_to_string (pref));
-
+#endif
   if (changed_idle == 0)
     changed_idle = g_idle_add_full (META_PRIORITY_PREFS_NOTIFY,
                                     changed_idle_handler, NULL, NULL);
@@ -1613,11 +1614,13 @@ button_layout_handler (GVariant *value,
                   if (f != META_BUTTON_FUNCTION_LAST)
                       new_layout.left_buttons[i++] = f;
                 }
+#ifdef WITH_VERBOSE_MODE
               else
                 {
                   meta_topic (META_DEBUG_PREFS, "Ignoring unknown or already-used button name \"%s\"\n",
                               buttons[b]);
                 }
+#endif
             }
 
           ++b;
@@ -1675,11 +1678,13 @@ button_layout_handler (GVariant *value,
                       new_layout.right_buttons[i++] = f;
 
                 }
+#ifdef WITH_VERBOSE_MODE
               else
                 {
                   meta_topic (META_DEBUG_PREFS, "Ignoring unknown or already-used button name \"%s\"\n",
                               buttons[b]);
                 }
+#endif
             }
 
           ++b;
@@ -2172,12 +2177,14 @@ meta_prefs_change_workspace_name (int         num,
    * to avoid saving it literally. */
   if (g_strcmp0 (name, meta_prefs_get_workspace_name (num)) == 0)
     {
+#ifdef WITH_VERBOSE_MODE
       if (!name || !*name)
         meta_topic (META_DEBUG_PREFS,
                     "Workspace %d already uses default name\n", num);
       else
         meta_topic (META_DEBUG_PREFS,
                     "Workspace %d already has name %s\n", num, name);
+#endif
       return;
     }
 

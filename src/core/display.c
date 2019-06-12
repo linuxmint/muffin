@@ -1572,10 +1572,12 @@ window_raise_with_delay_callback (void *data)
         (window->frame == NULL && POINT_IN_RECT (root_x, root_y, window->rect));
       if (same_screen && point_in_window)
 	meta_window_raise (window);
+#ifdef WITH_VERBOSE_MODE
       else
 	meta_topic (META_DEBUG_FOCUS,
 		    "Pointer not inside window, not raising %s\n",
 		    window->desc);
+#endif
     }
 
   return FALSE;
@@ -1750,17 +1752,19 @@ event_callback (XEvent   *event,
                               "Window %s no longer has a shape\n",
                               window->desc);
                 }
+#ifdef WITH_VERBOSE_MODE
               else
                 {
                   meta_topic (META_DEBUG_SHAPES,
                               "Window %s shape changed\n",
                               window->desc);
                 }
-
+#endif
               meta_compositor_window_shape_changed (display->compositor,
                                                     window);
             }
         }
+#ifdef WITH_VERBOSE_MODE
       else
         {
           meta_topic (META_DEBUG_SHAPES,
@@ -1768,6 +1772,7 @@ event_callback (XEvent   *event,
                       window ? window->desc : "(none)",
                       frame_was_receiver);
         }
+#endif
     }
 #endif /* HAVE_SHAPE */
 
@@ -1889,10 +1894,11 @@ event_callback (XEvent   *event,
                   if (meta_prefs_get_raise_on_click () &&
                       !meta_ui_window_is_widget (display->active_screen->ui, modified))
                     meta_window_raise (window);
+#ifdef WITH_VERBOSE_MODE
                   else
                     meta_topic (META_DEBUG_FOCUS,
                                 "Not raising window on click due to don't-raise-on-click option\n");
-
+#endif
                   /* Don't focus panels--they must explicitly request focus.
                    * See bug 160470
                    */
@@ -2099,11 +2105,13 @@ event_callback (XEvent   *event,
                     {
                       meta_display_queue_autoraise_callback (display, window);
                     }
+#ifdef WITH_VERBOSE_MODE
                   else
                     {
                       meta_topic (META_DEBUG_FOCUS,
                                   "Auto raise is disabled\n");
                     }
+#endif
                 }
               /* In mouse focus mode, we defocus when the mouse *enters*
                * the DESKTOP window, instead of defocusing on LeaveNotify.
@@ -3540,12 +3548,14 @@ meta_display_set_grab_op_cursor (MetaDisplay *display,
                       "XGrabPointer() returned GrabSuccess time %u\n",
                       timestamp);
         }
+#ifdef WITH_VERBOSE_MODE
       else
         {
           meta_topic (META_DEBUG_WINDOW_OPS,
                       "XGrabPointer() failed time %u\n",
                       timestamp);
         }
+#endif
       meta_error_trap_pop (display);
     }
 

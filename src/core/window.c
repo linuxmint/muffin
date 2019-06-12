@@ -1202,10 +1202,12 @@ meta_window_new_with_attrs (MetaDisplay       *display,
   /* if already mapped we don't want to do the placement thing;
    * override-redirect windows are placed by the app */
   window->placed = ((window->mapped && !window->hidden) || window->override_redirect);
+#ifdef WITH_VERBOSE_MODE
   if (window->placed)
     meta_topic (META_DEBUG_PLACEMENT,
                 "Not placing window 0x%lx since it's already mapped\n",
                 xwindow);
+#endif
   window->force_save_user_rect = TRUE;
   window->denied_focus_and_not_transient = FALSE;
   window->unmanaging = FALSE;
@@ -2713,6 +2715,7 @@ intervening_user_event_occurred (MetaWindow *window)
               window->net_wm_user_time,
               window->initial_timestamp_set,
               window->initial_timestamp);
+#ifdef WITH_VERBOSE_MODE
   if (focus_window != NULL)
     {
       meta_topic (META_DEBUG_STARTUP,
@@ -2724,7 +2727,7 @@ intervening_user_event_occurred (MetaWindow *window)
                   focus_window->net_wm_user_time_set,
                   focus_window->net_wm_user_time);
     }
-
+#endif
   /* We expect the most common case for not focusing a new window
    * to be when a hint to not focus it has been set.  Since we can
    * deal with that case rapidly, we use special case it--this is
@@ -3326,7 +3329,7 @@ meta_window_minimize (MetaWindow  *window)
       meta_window_foreach_transient (window,
                                      queue_calc_showing_func,
                                      NULL);
-
+#ifdef WITH_VERBOSE_MODE
       if (window->has_focus)
         {
           meta_topic (META_DEBUG_FOCUS,
@@ -3339,6 +3342,7 @@ meta_window_minimize (MetaWindow  *window)
                       "Minimizing window %s which doesn't have the focus\n",
                       window->desc);
         }
+#endif
       g_object_notify (G_OBJECT (window), "minimized");
     }
 
@@ -10066,12 +10070,12 @@ check_use_this_motion_notify (MetaWindow *window,
                  &useless,
                  find_last_time_predicate,
                  (XPointer) &esd);
-
+#ifdef WITH_VERBOSE_MODE
   if (esd.count > 0)
     meta_topic (META_DEBUG_RESIZING,
                 "Will skip %d motion events and use the event with time %u\n",
                 esd.count, (unsigned int) esd.last_time);
-
+#endif
   if (esd.last_time == 0)
     return TRUE;
   else
@@ -11272,6 +11276,7 @@ meta_window_set_demands_attention (MetaWindow *window)
       g_signal_emit_by_name (window->display, "window-demands-attention",
                              window);
     }
+#ifdef WITH_VERBOSE_MODE
   else
     {
       /* If the window's in full view, there's no point setting the flag. */
@@ -11281,6 +11286,7 @@ meta_window_set_demands_attention (MetaWindow *window)
                  "it's in full view\n",
                  window->desc);
     }
+#endif
 }
 
 /**

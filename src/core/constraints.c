@@ -664,12 +664,13 @@ update_onscreen_requirements (MetaWindow     *window,
   window->require_fully_onscreen =
     meta_rectangle_contained_in_region (info->usable_screen_region,
                                         &info->current);
+#ifdef WITH_VERBOSE_MODE
   if (old ^ window->require_fully_onscreen)
     meta_topic (META_DEBUG_GEOMETRY,
                 "require_fully_onscreen for %s toggled to %s\n",
                 window->desc,
                 window->require_fully_onscreen ? "TRUE" : "FALSE");
-
+#endif
   /* Update whether we want future constraint runs to require the
    * window to be on a single monitor.
    */
@@ -677,12 +678,13 @@ update_onscreen_requirements (MetaWindow     *window,
   window->require_on_single_monitor =
     meta_rectangle_contained_in_region (info->usable_monitor_region,
                                         &info->current);
+#ifdef WITH_VERBOSE_MODE
   if (old ^ window->require_on_single_monitor)
     meta_topic (META_DEBUG_GEOMETRY,
                 "require_on_single_monitor for %s toggled to %s\n",
                 window->desc,
                 window->require_on_single_monitor ? "TRUE" : "FALSE");
-
+#endif
   /* Update whether we want future constraint runs to require the
    * titlebar to be visible.
    */
@@ -698,13 +700,13 @@ update_onscreen_requirements (MetaWindow     *window,
   window->require_titlebar_visible =
     meta_rectangle_overlaps_with_region (info->usable_screen_region,
                                          &titlebar_rect);
-
+#ifdef WITH_VERBOSE_MODE
   if (old ^ window->require_titlebar_visible)
     meta_topic (META_DEBUG_GEOMETRY,
                 "require_titlebar_visible for %s toggled to %s\n",
                 window->desc,
                 window->require_titlebar_visible ? "TRUE" : "FALSE");
-
+#endif
 
   /* Don't forget to restore the position of the window */
   meta_window_unextend_by_frame (window, &info->current, info->borders);

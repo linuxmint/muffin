@@ -4265,12 +4265,13 @@ load_theme (const char *theme_dir,
   info.theme = NULL;
 
  out:
+#ifdef WITH_VERBOSE_MODE
   if (*error && !theme_error_is_fatal (*error))
     {
       meta_topic (META_DEBUG_THEMES, "Failed to read theme from file %s: %s\n",
                   theme_file, (*error)->message);
     }
-
+#endif
   free (theme_filename);
   free (theme_file);
   free (text);

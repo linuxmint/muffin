@@ -2111,11 +2111,11 @@ meta_screen_get_mouse_window (MetaScreen  *screen,
   unsigned int mask_return;
 
   window = NULL;
-
+#ifdef WITH_VERBOSE_MODE
   if (not_this_one)
     meta_topic (META_DEBUG_FOCUS,
                 "Focusing mouse window excluding %s\n", not_this_one->desc);
-
+#endif
   meta_error_trap_push (screen->display);
   XQueryPointer (screen->display->xdisplay,
                  screen->xroot,
@@ -3582,13 +3582,14 @@ meta_screen_apply_startup_properties (MetaScreen *screen,
 
       return changed_something;
     }
+#ifdef WITH_VERBOSE_MODE
   else
     {
       meta_topic (META_DEBUG_STARTUP,
                   "Did not find startup sequence for window %s ID \"%s\"\n",
                   window->desc, startup_id);
     }
-
+#endif
 #endif /* HAVE_STARTUP_NOTIFICATION */
 
   return FALSE;

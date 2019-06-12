@@ -997,10 +997,12 @@ meta_change_keygrab (MetaDisplay *display,
             {
               if (result == BadAccess)
                 meta_warning (_("Some other program is already using the key %s with modifiers %x as a binding\n"), keysym_name (keysym), modmask | ignored_mask);
+#ifdef WITH_VERBOSE_MODE
               else
                 meta_topic (META_DEBUG_KEYBINDINGS,
                             "Failed to grab key %s with modifiers %x\n",
                             keysym_name (keysym), modmask | ignored_mask);
+#endif
             }
         }
 
@@ -1069,10 +1071,11 @@ ungrab_all_keys (MetaDisplay *display,
       int result;
 
       result = meta_error_trap_pop_with_return (display);
-
+#ifdef WITH_VERBOSE_MODE
       if (result != Success)
         meta_topic (META_DEBUG_KEYBINDINGS,
                     "Ungrabbing all keys on 0x%lx failed\n", xwindow);
+#endif
     }
   else
     meta_error_trap_pop (display);
@@ -1564,11 +1567,12 @@ process_event (MetaKeyBinding       *bindings,
 
       if (handler == NULL)
         meta_bug ("Binding %s has no handler\n", bindings[i].name);
+#ifdef WITH_VERBOSE_MODE
       else
         meta_topic (META_DEBUG_KEYBINDINGS,
                     "Running handler for %s\n",
                     bindings[i].name);
-
+#endif
       /* Global keybindings count as a let-the-terminal-lose-focus
        * due to new window mapping until the user starts
        * interacting with the terminal again.
