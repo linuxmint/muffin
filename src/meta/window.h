@@ -173,6 +173,7 @@ void        meta_window_delete             (MetaWindow  *window,
 guint       meta_window_get_stable_sequence (MetaWindow *window);
 guint32     meta_window_get_user_time (MetaWindow *window);
 int         meta_window_get_pid (MetaWindow *window);
+int meta_window_get_client_pid (MetaWindow *window);
 const char *meta_window_get_client_machine (MetaWindow *window);
 gboolean    meta_window_is_remote (MetaWindow *window);
 gboolean    meta_window_is_modal (MetaWindow *window);

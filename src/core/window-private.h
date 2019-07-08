@@ -163,6 +163,7 @@ struct _MetaWindow
   
   int hide_titlebar_when_maximized;
   int net_wm_pid;
+  int client_pid;
   
   Window xtransient_for;
   Window xgroup_leader;
