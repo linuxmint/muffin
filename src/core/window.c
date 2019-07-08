@@ -52,6 +52,8 @@
 
 #include <X11/Xatom.h>
 #include <X11/Xlibint.h> /* For display->resource_mask */
+#include <X11/Xlib-xcb.h>
+#include <xcb/res.h>
 #include <string.h>
 #include <math.h>
 
@@ -741,6 +743,45 @@ sync_client_window_mapped (MetaWindow *window)
   meta_error_trap_pop (window->display);
 }
 
+static void
+update_client_pid (MetaWindow *window)
+{
+  MetaDisplay *display = window->display;
+  xcb_connection_t *xcb = XGetXCBConnection (display->xdisplay);
+  xcb_res_client_id_spec_t spec = { 0 };
+  xcb_res_query_client_ids_cookie_t cookie;
+  xcb_res_query_client_ids_reply_t *reply = NULL;
+
+  spec.client = window->xwindow;
+  spec.mask = XCB_RES_CLIENT_ID_MASK_LOCAL_CLIENT_PID;
+
+  cookie = xcb_res_query_client_ids (xcb, 1, &spec);
+  reply = xcb_res_query_client_ids_reply (xcb, cookie, NULL);
+
+  if (reply == NULL)
+    {
+      window->client_pid = -1;
+      return;
+    }
+
+  int pid = -1, *value;
+  xcb_res_client_id_value_iterator_t it;
+  for (it = xcb_res_query_client_ids_ids_iterator (reply);
+       it.rem;
+       xcb_res_client_id_value_next (&it))
+    {
+      spec = it.data->spec;
+      if (spec.mask & XCB_RES_CLIENT_ID_MASK_LOCAL_CLIENT_PID)
+        {
+          value = xcb_res_client_id_value_value (it.data);
+          window->client_pid = *value;
+          break;
+        }
+    }
+
+  free (reply);
+}
+
 LOCAL_SYMBOL MetaWindow*
 meta_window_new (MetaDisplay *display,
                  Window       xwindow,
@@ -1105,6 +1146,8 @@ meta_window_new_with_attrs (MetaDisplay       *display,
   window->screen = screen;
 
   window->desc = g_strdup_printf ("0x%lx", window->xwindow);
+
+  update_client_pid (window);
 
   window->override_redirect = attrs->override_redirect;
 
@@ -11774,6 +11817,22 @@ meta_window_get_pid (MetaWindow *window)
   g_return_val_if_fail (META_IS_WINDOW (window), -1);
 
   return window->net_wm_pid;
+}
+
+/**
+ * meta_window_get_client_pid:
+ * @window: a #MetaWindow
+ *
+ * Returns the client pid of the process that created this window, if known (obtained from XCB).
+ *
+ * Return value: the pid, or -1 if not known.
+ */
+int
+meta_window_get_client_pid (MetaWindow *window)
+{
+  g_return_val_if_fail (META_IS_WINDOW (window), -1);
+
+  return window->client_pid;
 }
 
 /**
