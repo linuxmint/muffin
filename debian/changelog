@@ -1,3 +1,13 @@
+muffin (4.2.1) tina; urgency=medium
+
+  [ Michael Webster ]
+  * clutter/clutter-text.c: Remove toggle_input_panel call during a key press.  The user for this isn't implemented in Cinnamon at this time, and this just causes critical warnings when clicking in an StEntry, such as in the menu applet or run dialog.
+
+  [ Cobinja ]
+  * Fix standalone muffin executable (#525)
+
+ -- Clement Lefebvre <root@linuxmint.com>  Wed, 10 Jul 2019 11:54:46 +0200
+
 muffin (4.2.0) tina; urgency=medium
 
   [ Jason Hicks ]
