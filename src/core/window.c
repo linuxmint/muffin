@@ -9334,9 +9334,6 @@ update_move (MetaWindow  *window,
   if (dx == 0 && dy == 0)
     return;
 
-    gboolean last_tile_mode_state = window->tile_mode;
-    gboolean last_mouse_on_edge_state = window->mouse_on_edge;
-
   /* Originally for detaching maximized windows, but we use this
    * for the zones at the sides of the monitor where trigger tiling
    * because it's about the right size
@@ -9539,8 +9536,6 @@ update_move (MetaWindow  *window,
   gboolean hminbad = FALSE;
   gboolean vminbad = FALSE;
 
-  if (window->tile_mode != last_tile_mode_state ||
-      window->mouse_on_edge != last_mouse_on_edge_state)
     {
       if (meta_prefs_get_edge_tiling ())
         {
