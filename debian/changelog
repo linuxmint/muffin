@@ -1,3 +1,11 @@
+muffin (4.2.2) tina; urgency=medium
+
+  [ Michael Webster ]
+  * src/core/workspace.c: Check for a compositor before attempting to use it when switching to a new workspace.
+  * src/core/window.c: remove extra conditions for showing the tiling hud.
+
+ -- Clement Lefebvre <root@linuxmint.com>  Thu, 25 Jul 2019 10:26:34 +0200
+
 muffin (4.2.1) tina; urgency=medium
 
   [ Michael Webster ]
