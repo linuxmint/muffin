@@ -1657,6 +1657,11 @@ check_expression (PosToken            *tokens,
   env.title_width = 0;
   env.title_height = 0;
 
+  env.icon_width = 0;
+  env.icon_height = 0;
+  env.mini_icon_width = 0;
+  env.mini_icon_height = 0;
+
   env.theme = theme;
 
   if (!meta_parse_position_expression (tokens, n_tokens,
