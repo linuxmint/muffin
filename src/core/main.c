@@ -322,6 +322,12 @@ meta_clutter_init (void)
   Display *xdisplay = GDK_DISPLAY_XDISPLAY (gdk_display_get_default ());
   clutter_x11_set_display (xdisplay);
 
+  /* XInitThreads() is needed to use the "threaded swap wait" functionality
+   * in Cogl. We call it here to hopefully call it before any other use of XLib.
+   */
+  if (threaded_swap)
+    XInitThreads();
+
   clutter_x11_disable_event_retrieval ();
 
   if (CLUTTER_INIT_SUCCESS == clutter_init (NULL, NULL))
@@ -416,13 +422,6 @@ meta_init (void)
   struct sigaction act;
   sigset_t empty_mask;
   GIOChannel *channel;
-  gboolean threaded_swap = meta_prefs_get_threaded_swap ();
-
-  /* XInitThreads() is needed to use the "threaded swap wait" functionality
-   * in Cogl. We call it here to hopefully call it before any other use of XLib.
-   */
-  if (threaded_swap)
-    XInitThreads();
 
   sigemptyset (&empty_mask);
   act.sa_handler = SIG_IGN;
