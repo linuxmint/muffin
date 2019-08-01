@@ -386,14 +386,12 @@ clutter_stage_allocate (ClutterActor           *self,
    */
   if (!clutter_feature_available (CLUTTER_FEATURE_STAGE_STATIC))
     {
-#ifdef CLUTTER_ENABLE_DEBUG
       CLUTTER_NOTE (LAYOUT,
                     "Following allocation to %.2fx%.2f (absolute origin %s)",
                     width, height,
                     (flags & CLUTTER_ABSOLUTE_ORIGIN_CHANGED)
                       ? "changed"
                       : "not changed");
-#endif
 
       clutter_actor_set_allocation (self, box,
                                     flags | CLUTTER_DELEGATE_LAYOUT);
@@ -445,7 +443,6 @@ clutter_stage_allocate (ClutterActor           *self,
       override.x2 = window_size.width;
       override.y2 = window_size.height;
 
-#ifdef CLUTTER_ENABLE_DEBUG
       CLUTTER_NOTE (LAYOUT,
                     "Overriding original allocation of %.2fx%.2f "
                     "with %.2fx%.2f (absolute origin %s)",
@@ -454,7 +451,6 @@ clutter_stage_allocate (ClutterActor           *self,
                     (flags & CLUTTER_ABSOLUTE_ORIGIN_CHANGED)
                       ? "changed"
                       : "not changed");
-#endif
 
       /* and store the overridden allocation */
       clutter_actor_set_allocation (self, &override,
@@ -1075,9 +1071,7 @@ _clutter_stage_maybe_relayout (ClutterActor *actor)
       priv->relayout_pending = FALSE;
       priv->stage_was_relayout = TRUE;
 
-#ifdef CLUTTER_ENABLE_DEBUG
       CLUTTER_NOTE (ACTOR, "Recomputing layout");
-#endif
 
       CLUTTER_SET_PRIVATE_FLAGS (stage, CLUTTER_IN_RELAYOUT);
 
@@ -1091,11 +1085,9 @@ _clutter_stage_maybe_relayout (ClutterActor *actor)
       box.x2 = natural_width;
       box.y2 = natural_height;
 
-#ifdef CLUTTER_ENABLE_DEBUG
       CLUTTER_NOTE (ACTOR, "Allocating (0, 0 - %d, %d) for the stage",
                     (int) natural_width,
                     (int) natural_height);
-#endif
 
       clutter_actor_allocate (CLUTTER_ACTOR (stage),
                               &box, CLUTTER_ALLOCATION_NONE);
@@ -1109,7 +1101,6 @@ clutter_stage_do_redraw (ClutterStage *stage)
 {
   ClutterActor *actor = CLUTTER_ACTOR (stage);
   ClutterStagePrivate *priv = stage->priv;
-  static gboolean show_fps;
 
   if (CLUTTER_ACTOR_IN_DESTRUCTION (stage))
     return;
@@ -1117,21 +1108,20 @@ clutter_stage_do_redraw (ClutterStage *stage)
   if (priv->impl == NULL)
     return;
 
-  show_fps = _clutter_context_get_show_fps ();
-
-#ifdef CLUTTER_ENABLE_DEBUG
   CLUTTER_NOTE (PAINT, "Redraw started for stage '%s'[%p]",
                 _clutter_actor_get_debug_name (actor),
                 stage);
-#endif
 
-  if (show_fps)
+  if (_clutter_context_get_show_fps ())
     {
       if (priv->fps_timer == NULL)
         priv->fps_timer = g_timer_new ();
+    }
 
-      _clutter_stage_window_redraw (priv->impl);
+  _clutter_stage_window_redraw (priv->impl);
 
+  if (_clutter_context_get_show_fps ())
+    {
       priv->timer_n_frames += 1;
 
       if (g_timer_elapsed (priv->fps_timer, NULL) >= 1.0)
@@ -1143,16 +1133,11 @@ clutter_stage_do_redraw (ClutterStage *stage)
           priv->timer_n_frames = 0;
           g_timer_start (priv->fps_timer);
         }
-      return;
     }
 
-  _clutter_stage_window_redraw (priv->impl);
-
-#ifdef CLUTTER_ENABLE_DEBUG
   CLUTTER_NOTE (PAINT, "Redraw finished for stage '%s'[%p]",
                 _clutter_actor_get_debug_name (actor),
                 stage);
-#endif
 }
 
 static GSList *
@@ -4167,9 +4152,7 @@ _clutter_stage_queue_actor_redraw (ClutterStage *stage,
     {
       ClutterMasterClock *master_clock;
 
-#ifdef CLUTTER_ENABLE_DEBUG
       CLUTTER_NOTE (PAINT, "First redraw request");
-#endif
 
       _clutter_stage_schedule_update (stage);
       priv->redraw_pending = TRUE;
