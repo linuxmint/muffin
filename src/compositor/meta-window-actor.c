@@ -1580,32 +1580,27 @@ meta_window_actor_should_unredirect (MetaWindowActor *self)
 LOCAL_SYMBOL void
 meta_window_actor_set_redirected (MetaWindowActor *self, gboolean state)
 {
-  MetaWindowActorPrivate *priv = self->priv;
-  MetaWindow *metaWindow = priv->window;
-  MetaDisplay *display = metaWindow->display;
+  MetaWindow *metaWindow = meta_window_actor_get_meta_window (self);
+  MetaDisplay *display = meta_window_get_display (metaWindow);
 
   Display *xdisplay = meta_display_get_xdisplay (display);
   Window  xwin = meta_window_actor_get_x_window (self);
 
-  meta_error_trap_push (display);
-
   if (state)
     {
+      meta_error_trap_push (display);
       XCompositeRedirectWindow (xdisplay, xwin, CompositeRedirectManual);
-      priv->unredirected = FALSE;
+      meta_error_trap_pop (display);
+      meta_window_actor_detach (self);
+      self->priv->unredirected = FALSE;
     }
   else
     {
-      meta_window_actor_detach (self);
+      meta_error_trap_push (display);
       XCompositeUnredirectWindow (xdisplay, xwin, CompositeRedirectManual);
-      priv->repaint_scheduled = TRUE;
-      priv->unredirected = TRUE;
+      meta_error_trap_pop (display);
+      self->priv->unredirected = TRUE;
     }
-
-  if (meta_prefs_get_unredirect_fullscreen_windows () && meta_prefs_get_sync_to_vblank ())
-    clutter_stage_x11_update_sync_state (display->compositor->stage, state);
-
-  meta_error_trap_pop (display);
 }
 
 LOCAL_SYMBOL void
@@ -2244,11 +2239,7 @@ meta_window_actor_process_damage (MetaWindowActor    *self,
 
   priv->received_damage = TRUE;
 
-  /* Drop damage event for unredirected windows */
-  if (priv->unredirected)
-    return;
-
-  if (meta_window_is_fullscreen (priv->window) && g_list_last (compositor->windows)->data == self)
+  if (meta_window_is_fullscreen (priv->window) && g_list_last (compositor->windows)->data == self && !priv->unredirected)
     {
       MetaRectangle window_rect;
       meta_window_get_outer_rect (priv->window, &window_rect);
@@ -2265,7 +2256,11 @@ meta_window_actor_process_damage (MetaWindowActor    *self,
         priv->does_full_damage = TRUE;
     }
 
-  if (priv->freeze_count)
+  /* Drop damage event for unredirected windows */
+  if (priv->unredirected)
+    return;
+
+  if (is_frozen (self))
     {
       /* The window is frozen due to an effect in progress: we ignore damage
        * here on the off chance that this will stop the corresponding

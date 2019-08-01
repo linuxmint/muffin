@@ -41,13 +41,6 @@ CLUTTER_AVAILABLE_IN_MUFFIN
 void            _clutter_set_sync_to_vblank     (gboolean      sync_to_vblank);
 
 CLUTTER_AVAILABLE_IN_MUFFIN
-void clutter_master_clock_set_sync_method (gint state);
-
-CLUTTER_AVAILABLE_IN_MUFFIN
-void clutter_stage_x11_update_sync_state (ClutterStage *stage,
-                                          gint          state);
-
-CLUTTER_AVAILABLE_IN_MUFFIN
 int64_t clutter_stage_get_frame_counter (ClutterStage *stage);
 
 CLUTTER_AVAILABLE_IN_MUFFIN

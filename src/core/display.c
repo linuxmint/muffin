@@ -5730,9 +5730,3 @@ meta_display_restart (MetaDisplay *display)
                    (GSourceFunc) meta_display_restart_internal,
                    display, NULL);
 }
-
-void
-meta_display_update_sync_state (gboolean state)
-{
-  meta_compositor_update_sync_state (the_display->compositor, state);
-}

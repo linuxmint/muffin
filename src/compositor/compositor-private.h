@@ -84,7 +84,4 @@ void meta_compositor_grab_op_end (MetaCompositor *compositor);
 
 void meta_check_end_modal (MetaScreen *screen);
 
-void meta_compositor_update_sync_state (MetaCompositor *compositor,
-                                        gboolean state);
-
 #endif /* META_COMPOSITOR_PRIVATE_H */

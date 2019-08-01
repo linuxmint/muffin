@@ -1618,16 +1618,9 @@ meta_compositor_grab_op_end (MetaCompositor *compositor)
 {
   clutter_actor_set_flags (compositor->window_group, CLUTTER_ACTOR_NO_LAYOUT);
 }
-
 CoglContext *
 meta_compositor_get_cogl_context (void)
 {
   return compositor_global->context;
 }
 
-void
-meta_compositor_update_sync_state (MetaCompositor *compositor,
-                                   gboolean state)
-{
-  clutter_stage_x11_update_sync_state (compositor->stage, state);
-}

@@ -135,8 +135,6 @@ G_DEFINE_TYPE_WITH_CODE (ClutterMasterClockDefault,
                          G_IMPLEMENT_INTERFACE (CLUTTER_TYPE_MASTER_CLOCK,
                                                 clutter_master_clock_iface_init));
 
-static ClutterMasterClockDefault *master_clock_global = NULL;
-
 /*
  * master_clock_is_running:
  * @master_clock: a #ClutterMasterClock
@@ -587,38 +585,6 @@ clutter_master_clock_default_class_init (ClutterMasterClockDefaultClass *klass)
   gobject_class->finalize = clutter_master_clock_default_finalize;
 }
 
-void
-clutter_master_clock_set_sync_method (gint state)
-{
-  SyncMethod method;
-
-  switch (state)
-    {
-      case 0:
-        method = SYNC_NONE;
-        g_message ("Sync method: NONE");
-        break;
-      case 1:
-        method = SYNC_PRESENTATION_TIME;
-        g_message ("Sync method: PRESENTATION TIME");
-        break;
-      case 2:
-        method = SYNC_FALLBACK;
-        g_message ("Sync method: FALLBACK");
-        break;
-      case 3:
-        method = SYNC_SWAP_THROTTLING;
-        g_message ("Sync method: SWAP THROTTLING");
-        break;
-      default:
-        method = SYNC_PRESENTATION_TIME;
-        g_warning ("Invalid sync state passed to clutter_master_clock_set_sync_method: %i", state);
-    }
-
-  master_clock_global->preferred_sync_method = method;
-  master_clock_global->active_sync_method = method;
-}
-
 static void
 clutter_master_clock_default_init (ClutterMasterClockDefault *self)
 {
@@ -626,9 +592,11 @@ clutter_master_clock_default_init (ClutterMasterClockDefault *self)
 
   source = clutter_clock_source_new (self);
   self->source = source;
-  master_clock_global = self;
 
-  clutter_master_clock_set_sync_method (_clutter_get_sync_to_vblank ());
+  self->preferred_sync_method = _clutter_get_sync_to_vblank () ?
+                                SYNC_PRESENTATION_TIME :
+                                SYNC_NONE;
+  self->active_sync_method = self->preferred_sync_method;
 
   self->ensure_next_iteration = FALSE;
   self->paused = FALSE;
