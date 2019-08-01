@@ -1627,7 +1627,7 @@ meta_compositor_get_cogl_context (void)
 
 void
 meta_compositor_update_sync_state (MetaCompositor *compositor,
-                                   MetaSyncMethod  method)
+                                   gboolean state)
 {
-  clutter_stage_x11_update_sync_state (compositor->stage, method);
+  clutter_stage_x11_update_sync_state (compositor->stage, state);
 }

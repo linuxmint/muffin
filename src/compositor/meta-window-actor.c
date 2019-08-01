@@ -1587,9 +1587,6 @@ meta_window_actor_set_redirected (MetaWindowActor *self, gboolean state)
   Display *xdisplay = meta_display_get_xdisplay (display);
   Window  xwin = meta_window_actor_get_x_window (self);
 
-  if (priv->unredirected != state)
-    return;
-
   meta_error_trap_push (display);
 
   if (state)
@@ -1604,6 +1601,9 @@ meta_window_actor_set_redirected (MetaWindowActor *self, gboolean state)
       priv->repaint_scheduled = TRUE;
       priv->unredirected = TRUE;
     }
+
+  if (meta_prefs_get_unredirect_fullscreen_windows () && meta_prefs_get_sync_to_vblank ())
+    clutter_stage_x11_update_sync_state (display->compositor->stage, state);
 
   meta_error_trap_pop (display);
 }
@@ -1688,7 +1688,6 @@ meta_window_actor_sync_actor_geometry (MetaWindowActor *self,
     {
       priv->needs_pixmap = TRUE;
       meta_window_actor_update_shape (self);
-
       clutter_actor_set_size (CLUTTER_ACTOR (self),
                               window_rect.width, window_rect.height);
     }
