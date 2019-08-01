@@ -151,88 +151,53 @@ clutter_stage_cogl_schedule_update (ClutterStageWindow *stage_window,
 {
   ClutterStageCogl *stage_cogl = CLUTTER_STAGE_COGL (stage_window);
   gint64 now;
-  gint64 target_presentation_time;
+  float refresh_rate;
   gint64 refresh_interval;
-  /*
-   * want_prerender_frames must be at least 1 (double buffered).
-   * Feel free to try triple buffering: want_prerender_frames = 2
-   * but it's not a good idea to default to that yet because filling all the
-   * buffers will cause the backend to block and throttle buffer releases even
-   * to unthrottled clients (swap interval 0).
-   */
-  gint want_prerender_frames = 1;
-  gint can_prerender_frames;
-  gint will_prerender_frames;
-  gint64 prerender_time;
 
   if (stage_cogl->update_time != -1)
     return;
 
   now = g_get_monotonic_time ();
 
-  if (sync_delay < 0 ||
-      stage_cogl->last_presentation_time <= 0 ||
-      stage_cogl->refresh_rate <= 0.0)
+  if (sync_delay < 0)
     {
-      /* -1 now means that hardware presentation times are unsupported and
-       * that the caller needs to find a different way to achieve frame
-       * scheduling.
-       */
-      stage_cogl->update_time = -1;
+      stage_cogl->update_time = now;
       return;
     }
 
-  /* FIXME (?) - On X11 this is performing worse than swap throttling. */
-
-  if (cogl_clutter_winsys_has_feature (COGL_WINSYS_FEATURE_SWAP_REGION))
-    refresh_interval = (gint64) (0.5 + 1000000 / stage_cogl->refresh_rate);
-  else
-    refresh_interval = 0;
-
-  target_presentation_time = stage_cogl->last_presentation_time
-                           + stage_cogl->pending_swaps * refresh_interval
-                           + refresh_interval;
-
-  if (target_presentation_time < now)
+  /* We only extrapolate presentation times for 150ms  - this is somewhat
+   * arbitrary. The reasons it might not be accurate for larger times are
+   * that the refresh interval might be wrong or the vertical refresh
+   * might be downclocked if nothing is going on onscreen.
+   */
+  if (stage_cogl->last_presentation_time == 0||
+      stage_cogl->last_presentation_time < now - 150000)
     {
-      /* If we missed some frames then find a more current target time that's
-       * in phase with the display hardware. This is logically equivalent to:
-       *
-       *   while (target_presentation_time < now)
-       *     target_presentation_time += refresh_interval;
-       *
-       * but with a better worst-case execution time...
-       */
-      target_presentation_time = now
-                               - now % refresh_interval
-                               + stage_cogl->last_presentation_time %
-                                 refresh_interval;
-
-      if (target_presentation_time < now)
-        target_presentation_time += refresh_interval;
+      stage_cogl->update_time = now;
+      return;
     }
 
-  can_prerender_frames = MAX (1, stage_cogl->max_buffer_age - 1);
-  will_prerender_frames = MIN (want_prerender_frames, can_prerender_frames);
+  refresh_rate = stage_cogl->refresh_rate;
+  if (refresh_rate == 0.0)
+    refresh_rate = 60.0;
 
-  prerender_time = will_prerender_frames * refresh_interval
-                 - 1000 * sync_delay;
+  refresh_interval = (gint64) (0.5 + 1000000 / refresh_rate);
+  if (refresh_interval == 0)
+    refresh_interval = 16667; /* 1/60th second */
 
-  stage_cogl->update_time = target_presentation_time - prerender_time;
+  stage_cogl->update_time = stage_cogl->last_presentation_time + 1000 * sync_delay;
 
-  /* Are we repeating ourselves? If a clear and reschedule occur too close
-   * together while a swap is pending then we will often land on the same
-   * result as last time. That's not useful because it only suggests to the
-   * caller to try and render the same frame twice.
-   */
-  if (stage_cogl->update_time <= stage_cogl->last_update_time)
-    stage_cogl->update_time = stage_cogl->last_update_time + refresh_interval;
+  while (stage_cogl->update_time < now)
+    stage_cogl->update_time += refresh_interval;
 }
 
 static gint64
 clutter_stage_cogl_get_update_time (ClutterStageWindow *stage_window)
 {
   ClutterStageCogl *stage_cogl = CLUTTER_STAGE_COGL (stage_window);
+
+  if (stage_cogl->pending_swaps)
+    return -1; /* in the future, indefinite */
 
   return stage_cogl->update_time;
 }
@@ -242,7 +207,6 @@ clutter_stage_cogl_clear_update_time (ClutterStageWindow *stage_window)
 {
   ClutterStageCogl *stage_cogl = CLUTTER_STAGE_COGL (stage_window);
 
-  stage_cogl->last_update_time = stage_cogl->update_time;
   stage_cogl->update_time = -1;
 }
 
@@ -668,9 +632,6 @@ clutter_stage_cogl_redraw_view (ClutterStageWindow *stage_window,
           if (valid_buffer_age (view_cogl, age))
             {
               cairo_rectangle_int_t damage_region;
-
-              if (age > stage_cogl->max_buffer_age)
-                stage_cogl->max_buffer_age = age;
 
               *current_fb_damage = fb_clip_region;
 
