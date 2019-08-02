@@ -53,7 +53,6 @@ typedef enum
   META_PREF_DYNAMIC_WORKSPACES,
   META_PREF_UNREDIRECT_FULLSCREEN_WINDOWS,
   META_PREF_DESKTOP_EFFECTS,
-  META_PREF_THREADED_SWAP,
   META_PREF_SEND_FRAME_TIMINGS,
   META_PREF_APPLICATION_BASED,
   META_PREF_KEYBINDINGS,
@@ -118,7 +117,6 @@ int                         meta_prefs_get_num_workspaces     (void);
 gboolean                    meta_prefs_get_workspace_cycle    (void);
 gboolean                    meta_prefs_get_dynamic_workspaces (void);
 gboolean                    meta_prefs_get_unredirect_fullscreen_windows (void);
-gboolean                    meta_prefs_get_threaded_swap (void);
 gboolean                    meta_prefs_get_send_frame_timings (void);
 gboolean                    meta_prefs_get_application_based  (void);
 gboolean                    meta_prefs_get_disable_workarounds (void);

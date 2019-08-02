@@ -98,7 +98,6 @@ static CDesktopTitlebarScrollAction action_scroll_titlebar = C_DESKTOP_TITLEBAR_
 static gboolean dynamic_workspaces = FALSE;
 static gboolean unredirect_fullscreen_windows = FALSE;
 static gboolean desktop_effects = TRUE;
-static gboolean threaded_swap = TRUE;
 static gboolean send_frame_timings = TRUE;
 static gboolean application_based = FALSE;
 static gboolean disable_workarounds = FALSE;
@@ -354,13 +353,6 @@ static MetaBoolPreference preferences_bool[] =
         META_PREF_DESKTOP_EFFECTS,
       },
       &desktop_effects,
-    },
-    {
-      { "threaded-swap",
-        SCHEMA_MUFFIN,
-        META_PREF_THREADED_SWAP,
-      },
-      &threaded_swap,
     },
     {
       { "send-frame-timings",
@@ -1775,12 +1767,6 @@ meta_prefs_get_desktop_effects (void)
 }
 
 gboolean
-meta_prefs_get_threaded_swap (void)
-{
-  return threaded_swap;
-}
-
-gboolean
 meta_prefs_get_send_frame_timings (void)
 {
   return send_frame_timings;
@@ -1920,9 +1906,6 @@ meta_preference_to_string (MetaPreference pref)
 
     case META_PREF_UNREDIRECT_FULLSCREEN_WINDOWS:
       return "UNREDIRECT_FULLSCREEN_WINDOWS";
-
-    case META_PREF_THREADED_SWAP:
-      return "THREADED_SWAP";
 
     case META_PREF_SEND_FRAME_TIMINGS:
       return "SEND_FRAME_TIMINGS";
