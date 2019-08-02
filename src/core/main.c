@@ -484,15 +484,9 @@ meta_init (void)
   /*
    * Disable some variables that cause rendering issues with private Clutter,
    * except when software rendering is explicitly set by Cinnamon.
-   */
-  g_unsetenv ("CLUTTER_VBLANK");
-
+  /* Load prefs */
   if (g_getenv ("CINNAMON_SOFTWARE_RENDERING") == NULL)
     g_unsetenv ("CLUTTER_PAINT");
-
-  /* Load prefs */
-  meta_prefs_init ();
-  _clutter_set_sync_to_vblank(meta_prefs_get_sync_to_vblank());
 
   /*
    * Clutter can only be initialized after the UI.
@@ -527,6 +521,8 @@ meta_run (void)
   };
   guint i;
 
+  /* Load prefs */
+  meta_prefs_init ();
   meta_prefs_add_listener (prefs_changed_callback, NULL);
 
   for (i=0; i<G_N_ELEMENTS(log_domains); i++)
