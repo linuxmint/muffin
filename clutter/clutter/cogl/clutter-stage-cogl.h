@@ -49,7 +49,6 @@ struct _ClutterStageCogl
   ClutterBackend *backend;
 
   float refresh_rate;
-  int pending_swaps;
 
   gint64 last_presentation_time;
   gint64 update_time;
