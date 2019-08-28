@@ -896,16 +896,6 @@ meta_window_should_attach_to_parent (MetaWindow *window)
     }
 }
 
-static gboolean
-emit_window_added (MetaWindow *window)
-{
-  if (window == NULL || window->screen == NULL || window->monitor == NULL)
-    return FALSE;
-
-  g_signal_emit_by_name (window->screen, "window-added", window, window->monitor->number);
-  return FALSE;
-}
-
 LOCAL_SYMBOL LOCAL_SYMBOL MetaWindow*
 meta_window_new_with_attrs (MetaDisplay       *display,
                             Window             xwindow,
@@ -1501,7 +1491,7 @@ meta_window_new_with_attrs (MetaDisplay       *display,
     }
 
   g_signal_emit_by_name (window->screen, "window-entered-monitor", window->monitor->number, window);
-  clutter_threads_add_timeout (20, (GSourceFunc) emit_window_added, window);
+  g_signal_emit_by_name (window->screen, "window-added", window, window->monitor->number);
 
   /* Must add window to stack before doing move/resize, since the
    * window might have fullscreen size (i.e. should have been
