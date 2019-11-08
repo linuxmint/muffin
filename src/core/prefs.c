@@ -37,6 +37,7 @@
 #include "meta-plugin-manager.h"
 #include <glib.h>
 #include <gio/gio.h>
+#include <gtk/gtk.h>
 #include <string.h>
 #include <stdlib.h>
 #include "keybindings-private.h"
@@ -923,14 +924,30 @@ queue_changed (MetaPreference pref)
 }
 
 static void
-update_ui_scale (GdkScreen *screen, gpointer data)
+store_initial_ui_scale (void)
 {
   GValue value = G_VALUE_INIT;
 
   g_value_init (&value, G_TYPE_INT);
 
-  gdk_screen_get_setting (screen, "gdk-window-scaling-factor", &value);
+  gdk_screen_get_setting (gdk_screen_get_default (), "gdk-window-scaling-factor", &value);
   ui_scale = MAX (g_value_get_int (&value), 1); // Never let it be 0;
+}
+
+static void
+set_ui_scale (int new_scale)
+{
+  if (new_scale == ui_scale)
+    {
+      return;
+    }
+
+  ui_scale = new_scale;
+
+  meta_topic (META_DEBUG_PREFS, "UI Scale changed (to %dx), triggering frames and cursor size updates.\n",
+              ui_scale);
+
+  queue_changed (META_PREF_UI_SCALE);
 }
 
 
@@ -983,14 +1000,7 @@ meta_prefs_init (void)
   handle_preference_init_string ();
   handle_preference_init_int ();
 
-  GdkDisplay *display = gdk_display_get_default();
-
-  g_signal_connect (gdk_display_get_default_screen (display), "monitors-changed",
-                    G_CALLBACK (update_ui_scale), NULL);
-  g_signal_connect (gdk_display_get_default_screen (display), "size-changed",
-                    G_CALLBACK (update_ui_scale), NULL);
-
-  update_ui_scale (gdk_display_get_default_screen (display), NULL);
+  store_initial_ui_scale ();
 
   init_bindings ();
   init_workspace_names ();
@@ -2564,4 +2574,10 @@ gint
 meta_prefs_get_ui_scale (void)
 {
   return ui_scale;
+}
+
+void
+meta_prefs_set_ui_scale (int new_scale)
+{
+  set_ui_scale (new_scale);
 }

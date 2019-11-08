@@ -84,7 +84,8 @@ typedef enum
   META_PREF_BACKGROUND_TRANSITION,
   META_PREF_MIN_WIN_OPACITY,
   META_PREF_MOUSE_ZOOM_ENABLED,
-  META_PREF_MOUSE_BUTTON_ZOOM_MODS
+  META_PREF_MOUSE_BUTTON_ZOOM_MODS,
+  META_PREF_UI_SCALE
 } MetaPreference;
 
 typedef void (* MetaPrefsChangedFunc) (MetaPreference pref,
@@ -183,6 +184,8 @@ gboolean meta_prefs_get_tile_maximize (void);
 gint meta_prefs_get_min_win_opacity (void);
 
 gint meta_prefs_get_ui_scale (void);
+
+void meta_prefs_set_ui_scale (int ui_scale);
 
 /* XXX FIXME This should be x-macroed, but isn't yet because it would be
  * difficult (or perhaps impossible) to add the suffixes using the current
