@@ -37,6 +37,7 @@
 #include "meta-plugin-manager.h"
 #include <glib.h>
 #include <gio/gio.h>
+#include <gtk/gtk.h>
 #include <string.h>
 #include <stdlib.h>
 #include "keybindings-private.h"
@@ -912,24 +913,41 @@ queue_changed (MetaPreference pref)
 
   if (g_list_find (changes, GINT_TO_POINTER (pref)) == NULL)
     changes = g_list_prepend (changes, GINT_TO_POINTER (pref));
+#ifdef WITH_VERBOSE_MODE
   else
     meta_topic (META_DEBUG_PREFS, "Change of pref %s was already pending\n",
                 meta_preference_to_string (pref));
-
+#endif
   if (changed_idle == 0)
     changed_idle = g_idle_add_full (META_PRIORITY_PREFS_NOTIFY,
                                     changed_idle_handler, NULL, NULL);
 }
 
 static void
-update_ui_scale (GdkScreen *screen, gpointer data)
+store_initial_ui_scale (void)
 {
   GValue value = G_VALUE_INIT;
 
   g_value_init (&value, G_TYPE_INT);
 
-  gdk_screen_get_setting (screen, "gdk-window-scaling-factor", &value);
+  gdk_screen_get_setting (gdk_screen_get_default (), "gdk-window-scaling-factor", &value);
   ui_scale = MAX (g_value_get_int (&value), 1); // Never let it be 0;
+}
+
+static void
+set_ui_scale (int new_scale)
+{
+  if (new_scale == ui_scale)
+    {
+      return;
+    }
+
+  ui_scale = new_scale;
+
+  meta_topic (META_DEBUG_PREFS, "UI Scale changed (to %dx), triggering frames and cursor size updates.\n",
+              ui_scale);
+
+  queue_changed (META_PREF_UI_SCALE);
 }
 
 
@@ -982,14 +1000,7 @@ meta_prefs_init (void)
   handle_preference_init_string ();
   handle_preference_init_int ();
 
-  GdkDisplay *display = gdk_display_get_default();
-
-  g_signal_connect (gdk_display_get_default_screen (display), "monitors-changed",
-                    G_CALLBACK (update_ui_scale), NULL);
-  g_signal_connect (gdk_display_get_default_screen (display), "size-changed",
-                    G_CALLBACK (update_ui_scale), NULL);
-
-  update_ui_scale (gdk_display_get_default_screen (display), NULL);
+  store_initial_ui_scale ();
 
   init_bindings ();
   init_workspace_names ();
@@ -1613,11 +1624,13 @@ button_layout_handler (GVariant *value,
                   if (f != META_BUTTON_FUNCTION_LAST)
                       new_layout.left_buttons[i++] = f;
                 }
+#ifdef WITH_VERBOSE_MODE
               else
                 {
                   meta_topic (META_DEBUG_PREFS, "Ignoring unknown or already-used button name \"%s\"\n",
                               buttons[b]);
                 }
+#endif
             }
 
           ++b;
@@ -1675,11 +1688,13 @@ button_layout_handler (GVariant *value,
                       new_layout.right_buttons[i++] = f;
 
                 }
+#ifdef WITH_VERBOSE_MODE
               else
                 {
                   meta_topic (META_DEBUG_PREFS, "Ignoring unknown or already-used button name \"%s\"\n",
                               buttons[b]);
                 }
+#endif
             }
 
           ++b;
@@ -2172,12 +2187,14 @@ meta_prefs_change_workspace_name (int         num,
    * to avoid saving it literally. */
   if (g_strcmp0 (name, meta_prefs_get_workspace_name (num)) == 0)
     {
+#ifdef WITH_VERBOSE_MODE
       if (!name || !*name)
         meta_topic (META_DEBUG_PREFS,
                     "Workspace %d already uses default name\n", num);
       else
         meta_topic (META_DEBUG_PREFS,
                     "Workspace %d already has name %s\n", num, name);
+#endif
       return;
     }
 
@@ -2557,4 +2574,10 @@ gint
 meta_prefs_get_ui_scale (void)
 {
   return ui_scale;
+}
+
+void
+meta_prefs_set_ui_scale (int new_scale)
+{
+  set_ui_scale (new_scale);
 }

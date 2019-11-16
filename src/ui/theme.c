@@ -2406,6 +2406,14 @@ pos_eval_get_variable (PosToken                  *t,
         *result = env->top_height;
       else if (t->d.v.name_quark == env->theme->quark_bottom_height)
         *result = env->bottom_height;
+      else if (t->d.v.name_quark == env->theme->quark_mini_icon_width)
+        *result = env->mini_icon_width;
+      else if (t->d.v.name_quark == env->theme->quark_mini_icon_height)
+        *result = env->mini_icon_height;
+      else if (t->d.v.name_quark == env->theme->quark_icon_width)
+        *result = env->icon_width;
+      else if (t->d.v.name_quark == env->theme->quark_icon_height)
+        *result = env->icon_height;
       else if (t->d.v.name_quark == env->theme->quark_title_width)
         *result = env->title_width;
       else if (t->d.v.name_quark == env->theme->quark_title_height)
@@ -2443,6 +2451,14 @@ pos_eval_get_variable (PosToken                  *t,
         *result = env->top_height;
       else if (strcmp (t->d.v.name, "bottom_height") == 0)
         *result = env->bottom_height;
+      else if (strcmp (t->d.v.name, "mini_icon_width") == 0)
+        *result = env->mini_icon_width;
+      else if (strcmp (t->d.v.name, "mini_icon_height") == 0)
+        *result = env->mini_icon_height;
+      else if (strcmp (t->d.v.name, "icon_width") == 0)
+        *result = env->icon_width;
+      else if (strcmp (t->d.v.name, "icon_height") == 0)
+        *result = env->icon_height;
       else if (strcmp (t->d.v.name, "title_width") == 0)
         *result = env->title_width;
       else if (strcmp (t->d.v.name, "title_height") == 0)
@@ -3575,7 +3591,8 @@ draw_op_as_pixbuf (const MetaDrawOp    *op,
     case META_DRAW_GTK_BOX:
     case META_DRAW_GTK_VLINE:
       break;
-
+    case META_DRAW_ICON:
+      break;
     case META_DRAW_TITLE:
       break;
 
@@ -3617,6 +3634,16 @@ fill_env (MetaPositionExprEnv *env,
       env->frame_x_center = 0;
       env->frame_y_center = 0;
     }
+
+#define META_ICON_WIDTH 32
+#define META_ICON_HEIGHT 32
+#define META_MINI_ICON_WIDTH 16
+#define META_MINI_ICON_HEIGHT 16
+
+  env->mini_icon_width = META_MINI_ICON_WIDTH;
+  env->mini_icon_height = META_MINI_ICON_HEIGHT;
+  env->icon_width = META_ICON_WIDTH;
+  env->icon_height = META_ICON_HEIGHT;
 
   env->title_width = info->title_layout_width;
   env->title_height = info->title_layout_height;
@@ -5200,6 +5227,10 @@ meta_theme_new (void)
   theme->quark_right_width = g_quark_from_static_string ("right_width");
   theme->quark_top_height = g_quark_from_static_string ("top_height");
   theme->quark_bottom_height = g_quark_from_static_string ("bottom_height");
+  theme->quark_mini_icon_width = g_quark_from_static_string ("mini_icon_width");
+  theme->quark_mini_icon_height = g_quark_from_static_string ("mini_icon_height");
+  theme->quark_icon_width = g_quark_from_static_string ("icon_width");
+  theme->quark_icon_height = g_quark_from_static_string ("icon_height");
   theme->quark_title_width = g_quark_from_static_string ("title_width");
   theme->quark_title_height = g_quark_from_static_string ("title_height");
   theme->quark_frame_x_center = g_quark_from_static_string ("frame_x_center");

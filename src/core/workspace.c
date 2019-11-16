@@ -310,16 +310,6 @@ meta_workspace_remove (MetaWorkspace *workspace)
    */
 }
 
-static gboolean
-emit_window_added (MetaWindow *window)
-{
-  if (window == NULL || window->workspace == NULL)
-    return FALSE;
-
-  g_signal_emit (window->workspace, signals[WINDOW_ADDED], 0, window);
-  return FALSE;
-}
-
 LOCAL_SYMBOL void
 meta_workspace_add_window (MetaWorkspace *workspace,
                            MetaWindow    *window)
@@ -369,7 +359,7 @@ meta_workspace_add_window (MetaWorkspace *workspace,
    */
   meta_window_queue (window, META_QUEUE_CALC_SHOWING|META_QUEUE_MOVE_RESIZE);
 
-  clutter_threads_add_timeout (20, (GSourceFunc) emit_window_added, window);
+  g_signal_emit (workspace, signals[WINDOW_ADDED], 0, window);
   g_object_notify (G_OBJECT (workspace), "n-windows");
 }
 
@@ -699,7 +689,10 @@ meta_workspace_activate_internal (MetaWorkspace       *workspace,
    meta_screen_free_workspace_layout (&layout1);
    meta_screen_free_workspace_layout (&layout2);
 
-   meta_compositor_switch_workspace (comp, screen, old, workspace, direction);
+   if (comp != NULL)
+     {
+       meta_compositor_switch_workspace (comp, screen, old, workspace, direction);
+     }
 
   /* This needs to be done after telling the compositor we are switching
    * workspaces since focusing a window will cause it to be immediately
@@ -1446,13 +1439,14 @@ focus_ancestor_or_top_window (MetaWorkspace *workspace,
 {
   MetaWindow *window = NULL;
 
+#ifdef WITH_VERBOSE_MODE
   if (not_this_one)
     meta_topic (META_DEBUG_FOCUS,
                 "Focusing MRU window excluding %s\n", not_this_one->desc);
   else
     meta_topic (META_DEBUG_FOCUS,
                 "Focusing MRU window\n");
-
+#endif
   /* First, check to see if we need to focus an ancestor of a window */
   if (not_this_one)
     {

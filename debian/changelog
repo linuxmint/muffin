@@ -1,3 +1,137 @@
+muffin (4.2.2) tina; urgency=medium
+
+  [ Michael Webster ]
+  * src/core/workspace.c: Check for a compositor before attempting to use it when switching to a new workspace.
+  * src/core/window.c: remove extra conditions for showing the tiling hud.
+
+ -- Clement Lefebvre <root@linuxmint.com>  Thu, 25 Jul 2019 10:26:34 +0200
+
+muffin (4.2.1) tina; urgency=medium
+
+  [ Michael Webster ]
+  * clutter/clutter-text.c: Remove toggle_input_panel call during a key press.  The user for this isn't implemented in Cinnamon at this time, and this just causes critical warnings when clicking in an StEntry, such as in the menu applet or run dialog.
+
+  [ Cobinja ]
+  * Fix standalone muffin executable (#525)
+
+ -- Clement Lefebvre <root@linuxmint.com>  Wed, 10 Jul 2019 11:54:46 +0200
+
+muffin (4.2.0) tina; urgency=medium
+
+  [ Jason Hicks ]
+  * cogl-util: Use original meta_rectangle_new for older GPUs (#401)
+  * window: Pass the input rect to meta_compositor_tile_window (#411)
+  * Improvements for Cinnamon's app system (#418)
+  * Clutter master clock improvements (#392)
+  * window: Remove some window icon properties and related processing (#399)
+  * Avoid usage of g_getenv in frequently called functions (#423)
+  * Phase out MetaCompScreen (#424)
+  * clutter-stage: Don't emit "after-paint" when picking (#412)
+  * window-actor: Fix partially visible frameless windows, some window flickering cases (#405)
+  * Stop caching the shape region in MetaShapedTexture (#406)
+  * window-actor: Only apply desaturation effect if window has a shadow (#408)
+  * shadow-factory: Replace the changed signal with a function call (#426)
+  * window: Cache icons if the size is <= icon_size, return a GdkPixbuf (#422)
+  * Support toggling vsync at runtime for better unredirection control (#425)
+  * window: Fix the position-changed signal not firing for CSD windows (#416)
+  * Move the desktop effects setting to Muffin (#428)
+  * Avoid getting context from Clutter in frequently called functions (#429)
+  * window: Cache the outer, client rects (#427)
+  * Various compositor improvements (#410)
+  * Improve sync between the cursor and frames (#397)
+  * ui: Don't apply CSD window filtering for button events (#435)
+  * screen: Ensure monitors update on monitor change (#439)
+  * screen: Update the rect cache on monitor change (#441)
+  * window: Update monitor state before showing the window (#444)
+  * compositor: Fix tiling placement (#447)
+  * Revert two commits from #410 (#448)
+  * clutter: Fix check for keyboard a11y features (#458)
+  * window-actor: Fix squished window textures (#453)
+  * window-actor: override Clutter opacity property and method (#449)
+  * Make compositor_private a MetaWindowActor type (#454)
+  * Fix unredirection for wine games, mpv
+  * clutter-actor: Keep is_dirty unchanged for culled actors (#456)
+  * boxes: Actually check for rectangle containment (#457)
+  * compositor: Avoid changing pipeline/source if shadow is not being painted (#459)
+  * Clean up the pre-paint functions (#460)
+  * clutter-stage: Remove unused variable, double assignment (#461)
+  * Add meta_display_popup_window_visible (#445)
+  * window-actor: Make actor non-reactive (#440)
+  * window-actor: Use int for opacity
+  * window: Remove obsolete cast in meta_window_adjust_opacity
+  * window: Fix the snap OSD getting stuck (#450)
+  *  Expose the sync method to preferences (#452)
+  * compositor: Fix workspace switching, improve window dragging smoothness (#465)
+  * Replace some deprecated GDK methods (#443)
+  * window: Remove unnecessary function call in send_sync_request (#467)
+
+  [ Simon Brown ]
+  * core util.c: remove a couple of cases generating compile warnings (#470)
+  * compositor-private: remove a couple of duplicated lines (#472)
+
+  [ Jason Hicks ]
+  * Replace some GLib wrappers (#421)
+  * Fix unredirected windows not being clipped out of the stage (#474)
+  * Make sure windows paint before un-fullscreening (#475)
+  * Add MetaPrefsState struct for retrieving the prefs state without function invocation (#466)
+  * boxes: Return if the rect pointers are null (#478)
+  * window-actor: Add reference to MetaDisplay (#476)
+  *  window-actor: Support applying effects on clones (#464)
+  *  Fix cinnamon-screensaver freezing up when activated (#477)
+  * compositor: Check if priv is NULL before calling meta_window_actor_should_unredirect (#479)
+
+  [ Michael Webster ]
+  * hidpi: Restore scaling to initial cursor size, tile HUD threshold and some tile/maximize break-away distances.
+
+  [ Jason Hicks ]
+  * window: Fix edge resistance
+  * Unconditionalize meta_window_update_outer_rect (#484)
+  * window-actor: Update clip_shadow before the redraw
+  * window: Call update_outer_rect in update_resize
+  * window: Fix tile HUD color not changing when holding the snap modifier during a drag (#488)
+  * Fix screensaver regressions (#489)
+  * gitignore auto-generated files (#506)
+  * window-actor: Use source actor for the close, minimize effects (#508)
+  * Fix segfault when using cinnamon --replace (#512)
+  * Fix the current workspace not being selected during startup (#511)
+
+  [ Clement Lefebvre ]
+  * Revert rect caching and obstructed windows optimizations (#515)
+
+  [ Jason Hicks ]
+  * Replace some GLib wrappers (#421)
+  * Replace some deprecated GDK methods (#443)
+  * Fix segfault when using cinnamon --replace (#512)
+  * Expose the sync method to preferences (#452)
+  * Fix unredirection for wine games, mpv
+
+  [ Clement Lefebvre ]
+  * Display: Add meta_display_get_pointer() and meta_display_get_window_pointer()
+
+  [ Jason Hicks ]
+  * window-actor: Fix segfault in meta_window_actor_should_unredirect (#514)
+  * Add meta_display_popup_window_visible (#445)
+  * window-private: Include compositor-private.h (#518)
+
+  [ Simon Brown ]
+  * window-props: remove some warnings with casts (#504)
+  * menu.c: remove some compile warnings (#503)
+  * core.c: remove a compile warning (#499)
+  * meta-sync-ring: get rid of some compiler warnings (#496)
+  * gradient: resolve a few compile warnings (#495)
+  * cogl-utils: remove a deprecation (#494)
+  * boxes: remove an ISO C90 warning (#493)
+  * compositor: fix a few compiler warnings (#492)
+
+  [ Clement Lefebvre ]
+  * Revert unredirection backports (#520)
+  * meta-window-actor: don't toggle sync during runtime (#523)
+
+  [ Simon Brown ]
+  * exclude code only needed in verbose mode (#502)
+
+ -- Clement Lefebvre <root@linuxmint.com>  Fri, 14 Jun 2019 12:55:23 +0100
+
 muffin (4.0.7) unstable; urgency=medium
 
   [ Jason Hicks ]

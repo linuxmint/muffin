@@ -220,9 +220,11 @@ get_output_window (MetaScreen *screen)
 {
   MetaDisplay *display = meta_screen_get_display (screen);
   Display     *xdisplay = meta_display_get_xdisplay (display);
-  Window       output;
+  Window       output, xroot;
   XWindowAttributes attr;
   long         event_mask;
+
+  xroot = meta_screen_get_xroot (screen);
 
   event_mask = FocusChangeMask |
                ExposureMask |
@@ -599,7 +601,6 @@ meta_compositor_manage_screen (MetaCompositor *compositor,
   compositor->screen = screen;
   compositor->output = None;
   compositor->windows = NULL;
-  compositor->popup_window_visible = FALSE;
 
   meta_screen_set_cm_selection (screen);
 
@@ -828,9 +829,9 @@ is_grabbed_event (XEvent *event)
     case KeyPress:
     case KeyRelease:
       return TRUE;
-    default:
-      return FALSE;
     }
+
+  return FALSE;
 }
 
 void
@@ -1020,8 +1021,6 @@ sync_actor_stacking (MetaCompositor *compositor)
   GList *tmp;
   GList *old;
   gboolean reordered;
-  ClutterActor *parent;
-  gboolean popup_window_visible;
 
   /* NB: The first entries in the lists are stacked the lowest */
 
@@ -1075,57 +1074,18 @@ sync_actor_stacking (MetaCompositor *compositor)
   if (!reordered)
     return;
 
-  popup_window_visible = FALSE;
+  ClutterActor *parent;
 
   for (tmp = g_list_last (compositor->windows); tmp != NULL; tmp = tmp->prev)
     {
       ClutterActor *actor = tmp->data;
 
       parent = clutter_actor_get_parent (actor);
-
-      if (!popup_window_visible && parent == compositor->top_window_group)
-        {
-          switch (meta_window_actor_get_meta_window (META_WINDOW_ACTOR (actor))->type)
-            {
-              case META_WINDOW_DROPDOWN_MENU:
-              case META_WINDOW_POPUP_MENU:
-              case META_WINDOW_COMBO:
-                popup_window_visible = TRUE;
-                break;
-            }
-        }
-
       clutter_actor_set_child_below_sibling (parent, actor, NULL);
     }
 
-  compositor->popup_window_visible = popup_window_visible;
-
   parent = clutter_actor_get_parent (compositor->background_actor);
   clutter_actor_set_child_below_sibling (parent, compositor->background_actor, NULL);
-}
-
-/*
- * Find the top most window that is visible on the screen. The intention of
- * this is to avoid offscreen windows that isn't actually part of the visible
- * desktop (such as the UI frames override redirect window).
- */
-static MetaWindowActor *
-get_top_visible_window_actor (MetaCompositor *compositor)
-{
-  GList *l;
-
-  for (l = g_list_last (compositor->windows); l; l = l->prev)
-    {
-      MetaWindowActor *actor = l->data;
-      MetaRectangle rect;
-
-      meta_window_get_input_rect (meta_window_actor_get_meta_window (actor), &rect);
-
-      if (meta_rectangle_overlap (&compositor->display->active_screen->rect, &rect))
-        return actor;
-    }
-
-  return NULL;
 }
 
 void
@@ -1217,8 +1177,6 @@ meta_compositor_sync_stack (MetaCompositor  *compositor,
     }
 
   sync_actor_stacking (compositor);
-
-  compositor->top_window_actor = get_top_visible_window_actor (compositor);
 }
 
 void
@@ -1305,18 +1263,18 @@ meta_pre_paint_func (gpointer data)
 {
   GList *l;
   MetaCompositor *compositor = data;
-  MetaWindowActor *top_window_actor = NULL;
+  GSList *screens = compositor->display->screens;
+  MetaWindowActor *top_window;
   MetaWindowActor *expected_unredirected_window = NULL;
 
   if (compositor->windows == NULL)
     return TRUE;
 
-  top_window_actor = compositor->top_window_actor;
+  top_window = g_list_last (compositor->windows)->data;
 
-  if (top_window_actor &&
-      meta_window_actor_should_unredirect (top_window_actor) &&
+  if (meta_window_actor_should_unredirect (top_window) &&
       compositor->disable_unredirect_count == 0)
-    expected_unredirected_window = top_window_actor;
+    expected_unredirected_window = top_window;
 
   if (compositor->unredirected_window != expected_unredirected_window)
     {
@@ -1329,8 +1287,8 @@ meta_pre_paint_func (gpointer data)
       if (expected_unredirected_window != NULL)
         {
           meta_shape_cow_for_window (compositor->display->active_screen,
-                                     meta_window_actor_get_meta_window (top_window_actor));
-          meta_window_actor_set_redirected (top_window_actor, FALSE);
+                                     meta_window_actor_get_meta_window (top_window));
+          meta_window_actor_set_redirected (top_window, FALSE);
         }
 
       compositor->unredirected_window = expected_unredirected_window;

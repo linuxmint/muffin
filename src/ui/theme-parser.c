@@ -1657,6 +1657,11 @@ check_expression (PosToken            *tokens,
   env.title_width = 0;
   env.title_height = 0;
 
+  env.icon_width = 0;
+  env.icon_height = 0;
+  env.mini_icon_width = 0;
+  env.mini_icon_height = 0;
+
   env.theme = theme;
 
   if (!meta_parse_position_expression (tokens, n_tokens,
@@ -4265,12 +4270,13 @@ load_theme (const char *theme_dir,
   info.theme = NULL;
 
  out:
+#ifdef WITH_VERBOSE_MODE
   if (*error && !theme_error_is_fatal (*error))
     {
       meta_topic (META_DEBUG_THEMES, "Failed to read theme from file %s: %s\n",
                   theme_file, (*error)->message);
     }
-
+#endif
   free (theme_filename);
   free (theme_file);
   free (text);
