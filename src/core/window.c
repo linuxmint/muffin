@@ -1146,7 +1146,8 @@ meta_window_new_with_attrs (MetaDisplay       *display,
 
   window->desc = g_strdup_printf ("0x%lx", window->xwindow);
 
-  update_client_pid (window);
+  // -1 is used as a result in get_client_pid() if it's called with a non-window-argument
+  window->client_pid = -2;
 
   window->override_redirect = attrs->override_redirect;
 
@@ -11813,6 +11814,10 @@ int
 meta_window_get_client_pid (MetaWindow *window)
 {
   g_return_val_if_fail (META_IS_WINDOW (window), -1);
+
+  if (window->client_pid == -2) {
+    update_client_pid (window);
+  }
 
   return window->client_pid;
 }
