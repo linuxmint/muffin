@@ -718,10 +718,11 @@ client_window_should_be_mapped (MetaWindow *window)
 static void
 sync_client_window_mapped (MetaWindow *window)
 {
-  gboolean should_be_mapped = client_window_should_be_mapped (window);
+  gboolean should_be_mapped;
 
   g_return_if_fail (!window->override_redirect);
 
+  should_be_mapped = client_window_should_be_mapped (window);
   if (window->mapped == should_be_mapped)
     return;
 
@@ -1740,11 +1741,11 @@ static gboolean
 detach_foreach_func (MetaWindow *window,
                      void       *data)
 {
-  GList **children = data;
-  MetaWindow *parent;
-
   if (window->attached)
     {
+      GList **children = data;
+      MetaWindow *parent;
+
       /* Only return the immediate children of the window being unmanaged */
       parent = meta_window_get_transient_for (window);
       if (parent->unmanaging)
@@ -2619,12 +2620,11 @@ meta_window_flush_calc_showing (MetaWindow *window)
 LOCAL_SYMBOL void
 meta_window_queue (MetaWindow *window, guint queuebits)
 {
-  guint queuenum;
 
   /* Easier to debug by checking here rather than in the idle */
   g_return_if_fail (!window->override_redirect || (queuebits & META_QUEUE_MOVE_RESIZE) == 0);
 
-  for (queuenum=0; queuenum<NUMBER_OF_QUEUES; queuenum++)
+  for (guint queuenum=0; queuenum<NUMBER_OF_QUEUES; queuenum++)
     {
       if (queuebits & 1<<queuenum)
         {
@@ -9301,9 +9301,6 @@ update_move (MetaWindow  *window,
   dx = x - display->grab_anchor_root_x;
   dy = y - display->grab_anchor_root_y;
 
-  new_x = display->grab_anchor_window_pos.x + dx;
-  new_y = display->grab_anchor_window_pos.y + dy;
-
   meta_verbose ("x,y = %d,%d anchor ptr %d,%d anchor pos %d,%d dx,dy %d,%d\n",
                 x, y,
                 display->grab_anchor_root_x,
@@ -9721,6 +9718,13 @@ update_resize (MetaWindow *window,
   dx = x - window->display->grab_anchor_root_x;
   dy = y - window->display->grab_anchor_root_y;
 
+  /* Don't bother doing anything if no move has been specified.  (This
+   * happens often, even in keyboard resizing, due to the warping of the
+   * pointer.
+   */
+  if (dx == 0 && dy == 0)
+    return;
+
   /* Attached modal dialogs are special in that size
    * changes apply to both sides, so that the dialog
    * remains centered to the parent.
@@ -9733,13 +9737,6 @@ update_resize (MetaWindow *window,
 
   new_w = window->display->grab_anchor_window_pos.width;
   new_h = window->display->grab_anchor_window_pos.height;
-
-  /* Don't bother doing anything if no move has been specified.  (This
-   * happens often, even in keyboard resizing, due to the warping of the
-   * pointer.
-   */
-  if (dx == 0 && dy == 0)
-    return;
 
   if (window->display->grab_op == META_GRAB_OP_KEYBOARD_RESIZING_UNKNOWN)
     {
@@ -11045,7 +11042,6 @@ ensure_mru_position_after (MetaWindow *window,
   GList* after_this_one_position;
 
   active_mru_list         = window->screen->active_workspace->mru_list;
-  window_position         = g_list_find (active_mru_list, window);
   after_this_one_position = g_list_find (active_mru_list, after_this_one);
 
   /* after_this_one_position is NULL when we switch workspaces, but in
@@ -11055,6 +11051,7 @@ ensure_mru_position_after (MetaWindow *window,
   if (after_this_one_position == NULL)
     return;
 
+  window_position         = g_list_find (active_mru_list, window);
   if (g_list_length (window_position) > g_list_length (after_this_one_position))
     {
       window->screen->active_workspace->mru_list =
@@ -11204,15 +11201,19 @@ meta_window_get_stable_sequence (MetaWindow *window)
 void
 meta_window_set_demands_attention (MetaWindow *window)
 {
-  MetaRectangle candidate_rect, other_rect;
-  GList *stack = window->screen->stack->sorted;
-  MetaWindow *other_window;
-  gboolean obscured = FALSE;
 
-  MetaWorkspace *workspace = window->screen->active_workspace;
+  GList *stack;
+  MetaRectangle candidate_rect, other_rect;
+  MetaWindow *other_window;
+  gboolean obscured;
+  MetaWorkspace *workspace;
 
   if (window->wm_state_demands_attention)
     return;
+
+  obscured = FALSE;
+  stack = window->screen->stack->sorted;
+  workspace = window->screen->active_workspace;
 
   if (workspace!=window->workspace)
     {
@@ -11971,13 +11972,14 @@ meta_window_compute_tile_match (MetaWindow *window)
 {
   MetaWindow *match;
   MetaStack *stack;
-  MetaTileMode match_tile_mode = META_TILE_NONE;
+  MetaTileMode match_tile_mode;
 
   window->tile_match = NULL;
 
   if (window->shaded || window->minimized)
     return;
 
+  match_tile_mode = META_TILE_NONE;
   if (META_WINDOW_TILED_LEFT (window))
     match_tile_mode = META_TILE_RIGHT;
   else if (META_WINDOW_TILED_RIGHT (window))
