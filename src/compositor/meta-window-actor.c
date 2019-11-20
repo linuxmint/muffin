@@ -848,8 +848,10 @@ meta_window_actor_paint (ClutterActor *actor)
 {
   MetaWindowActor *self = META_WINDOW_ACTOR (actor);
   MetaWindowActorPrivate *priv = self->priv;
+  CoglFramebuffer *framebuffer = NULL;
   gboolean appears_focused = meta_window_appears_focused (priv->window);
   MetaShadow *shadow = appears_focused ? priv->focused_shadow : priv->unfocused_shadow;
+
   if (!priv->window->display->shadows_enabled) {
       shadow = NULL;
   }
@@ -888,7 +890,10 @@ meta_window_actor_paint (ClutterActor *actor)
           cairo_region_subtract (clip, meta_window_get_frame_bounds (priv->window));
         }
 
+      framebuffer = cogl_get_draw_framebuffer ();
+
       meta_shadow_paint (shadow,
+                         framebuffer,
                          params.x_offset + shape_bounds.x,
                          params.y_offset + shape_bounds.y,
                          shape_bounds.width,
