@@ -1,3 +1,16 @@
+muffin (4.4.0) tricia; urgency=medium
+
+  [ Michael Webster ]
+  * metacity themes: Fix layout of themes that used mini-icons and were affected by e252272477.
+  * window.c, workspace.c: Remove delayed emission of the 'window-added' signals.
+  * prefs: Add a method for cinnamon to set the ui_scale when it changes, and trigger the proper updates to ensure everything scales properly.
+
+  [ Simon Brown ]
+  * window.c: various minor tweaks, small speedup (#491)
+  * meta-shadow-factory: remove some deprecated cogl_set_source calls (#497)
+
+ -- Clement Lefebvre <root@linuxmint.com>  Wed, 20 Nov 2019 16:50:26 +0000
+
 muffin (4.2.2) tina; urgency=medium
 
   [ Michael Webster ]
