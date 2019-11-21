@@ -353,16 +353,15 @@ meta_shadow_paint (MetaShadow      *shadow,
                   src_y2 = (src_y[j] * (dest_rect.y + dest_rect.height - (rect.y + rect.height)) +
                             src_y[j + 1] * (rect.y + rect.height - dest_rect.y)) / dest_rect.height;
 
-                  pos = k*4;
-                  rects[pos++] = rect.x;
-                  rects[pos++] = rect.y;
-                  rects[pos++] = rect.x + rect.width;
-                  rects[pos++] = rect.y + rect.height;
-
-                  rects[pos++] = src_x1;
-                  rects[pos++] = src_y1;
-                  rects[pos++] = src_x2;
-                  rects[pos] = src_y2;
+                  pos = k*8;
+                  rects[pos] = rect.x;
+                  rects[pos+1] = rect.y;
+                  rects[pos+2] = rect.x + rect.width;
+                  rects[pos+3] = rect.y + rect.height;
+                  rects[pos+4] = src_x1;
+                  rects[pos+5] = src_y1;
+                  rects[pos+6] = src_x2;
+                  rects[pos+7] = src_y2;
                 }
 
               cogl_framebuffer_draw_textured_rectangles (framebuffer,
