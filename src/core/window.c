@@ -9301,6 +9301,9 @@ update_move (MetaWindow  *window,
   dx = x - display->grab_anchor_root_x;
   dy = y - display->grab_anchor_root_y;
 
+  new_x = display->grab_anchor_window_pos.x + dx;
+  new_y = display->grab_anchor_window_pos.y + dy;
+
   meta_verbose ("x,y = %d,%d anchor ptr %d,%d anchor pos %d,%d dx,dy %d,%d\n",
                 x, y,
                 display->grab_anchor_root_x,
