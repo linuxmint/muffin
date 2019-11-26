@@ -487,7 +487,8 @@ AS_IF([test "x$enable_gles1" = "xyes"],
 
             AC_CHECK_HEADERS([EGL/eglext.h],
                              [COGL_EGL_INCLUDES="$COGL_EGL_INCLUDE
-#include <EGL/eglext.h>"],
+#include <EGL/eglext.h>
+#include <EGL/eglmesaext.h>"],
                              [],
                              [$COGL_EGL_INCLUDES])
 
@@ -759,7 +760,8 @@ AS_IF([test "x$NEED_EGL" = "xyes" && test "x$EGL_CHECKED" != "xyes"],
           )
 
         COGL_EGL_INCLUDES="#include <EGL/egl.h>
-#include <EGL/eglext.h>"
+#include <EGL/eglext.h>
+#include <EGL/eglmesaext.h>"
         AC_SUBST([COGL_EGL_INCLUDES])
       ])
 
