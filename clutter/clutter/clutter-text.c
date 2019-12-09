@@ -1193,9 +1193,7 @@ clutter_text_ensure_cursor_position (ClutterText *self)
 
       g_signal_emit (self, text_signals[CURSOR_CHANGED], 0);
 
-#ifdef __CLUTTER_WAYLAND_COMPOSITOR_H__
       update_cursor_location (self);
-#endif
     }
 }
 
@@ -2830,10 +2828,7 @@ clutter_text_key_focus_in (ClutterActor *actor)
 					       priv->input_purpose);
       clutter_input_focus_set_content_hints (priv->input_focus,
 					     priv->input_hints);
-
-#ifdef __CLUTTER_WAYLAND_COMPOSITOR_H__
       update_cursor_location (CLUTTER_TEXT (actor));
-#endif
     }
 
   priv->has_focus = TRUE;
