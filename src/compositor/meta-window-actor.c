@@ -1600,11 +1600,11 @@ meta_window_actor_set_redirected (MetaWindowActor *self, gboolean state)
   if (state)
     {
       XCompositeRedirectWindow (xdisplay, xwin, CompositeRedirectManual);
+      meta_window_actor_detach (self);
       priv->unredirected = FALSE;
     }
   else
     {
-      meta_window_actor_detach (self);
       XCompositeUnredirectWindow (xdisplay, xwin, CompositeRedirectManual);
       priv->repaint_scheduled = TRUE;
       priv->unredirected = TRUE;
