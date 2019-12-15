@@ -328,7 +328,7 @@ maybe_desaturate_window (ClutterActor *actor)
   MetaWindowActor *window = META_WINDOW_ACTOR (actor);
   MetaWindowActorPrivate *priv = window->priv;
 
-  if (!priv->should_have_shadow)
+  if (!priv->should_have_shadow && !priv->has_desat_effect)
     return;
 
   guint8 opacity = clutter_actor_get_opacity (actor);
