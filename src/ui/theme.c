@@ -5376,28 +5376,28 @@ meta_theme_load_image (MetaTheme  *theme,
       else
         {
           char *full_path;
+          gint width, height;
+
           full_path = g_build_filename (theme->dirname, filename, NULL);
 
-          GdkPixbuf *test_pixbuf = NULL;
-          gint test_height, test_width;
-
-          test_pixbuf = gdk_pixbuf_new_from_file (full_path, error);
-          test_height = gdk_pixbuf_get_height (test_pixbuf);
-          test_width = gdk_pixbuf_get_width (test_pixbuf);
-
-          g_object_unref (test_pixbuf);
-
-          test_height *= scale;
-          test_width *= scale;
-
-          pixbuf = gdk_pixbuf_new_from_file_at_size (full_path, test_width, test_height, error);
-          if (pixbuf == NULL)
+          if (gdk_pixbuf_get_file_info (full_path, &width, &height) == NULL)
             {
-              free (full_path);
+              g_free (full_path);
               return NULL;
             }
 
-          free (full_path);
+          width *= scale;
+          height *= scale;
+
+          pixbuf = gdk_pixbuf_new_from_file_at_size (full_path, width, height, error);
+
+          if (pixbuf == NULL)
+            {
+              g_free (full_path);
+              return NULL;
+            }
+
+          g_free (full_path);
         }
       g_hash_table_replace (theme->images_by_filename,
                             g_strdup (filename),
