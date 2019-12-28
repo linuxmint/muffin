@@ -1,3 +1,13 @@
+muffin (4.4.2) tricia; urgency=medium
+
+  [ Michael Webster ]
+  * meta-window-actor.c: Make sure to remove any existing desaturate effect when the window no longer has a shadow.
+  * src/ui/theme.c: Use a simpler method for getting an image file's dimensions before scaling it for hidpi.
+  * meta-window-actor.c: Detach after redirecting, not before unredirecting.
+  * MetaWindow: clear the cached window icon when _NET_WM_ICON changes, to force a regen the next time the icon is requested for the window.
+
+ -- Clement Lefebvre <root@linuxmint.com>  Sat, 28 Dec 2019 11:54:02 +0000
+
 muffin (4.4.1) tricia; urgency=medium
 
   * meta-shadow-factory: Fix terminal shadows (#540)
