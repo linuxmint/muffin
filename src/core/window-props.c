@@ -340,7 +340,7 @@ static void
 reload_icon (MetaWindow    *window,
              Atom           atom)
 {
-  g_signal_emit_by_name (window, "icon-changed", window);
+  meta_window_icon_changed (window);
 }
 
 static void

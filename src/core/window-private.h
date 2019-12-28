@@ -842,4 +842,5 @@ void meta_window_unextend_by_frame (MetaWindow              *window,
 void meta_window_get_client_area_rect (const MetaWindow      *window,
                                        cairo_rectangle_int_t *rect);
 
+void meta_window_icon_changed (MetaWindow *window);
 #endif

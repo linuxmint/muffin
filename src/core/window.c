@@ -7991,6 +7991,13 @@ meta_window_update_net_wm_type (MetaWindow *window)
   meta_window_recalc_window_type (window);
 }
 
+void
+meta_window_icon_changed (MetaWindow *window)
+{
+  g_clear_object (&window->icon);
+  g_signal_emit (window, window_signals[ICON_CHANGED], 0, window);
+}
+
 /**
  * meta_window_create_icon:
  * @window: a #MetaWindow
@@ -8010,7 +8017,7 @@ meta_window_create_icon (MetaWindow *window,
   if (window->override_redirect)
     return NULL;
 
-  if (window->icon && size <= window->icon_size)
+  if (window->icon)
     return window->icon;
 
   icon = NULL;
