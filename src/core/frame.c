@@ -208,8 +208,9 @@ meta_window_destroy_frame (MetaWindow *window)
                     * coordinates here means we'll need to ensure a configure
                     * notify event is sent; see bug 399552.
                     */
-                   window->frame->rect.x + borders.invisible.left,
-                   window->frame->rect.y + borders.invisible.top);
+                   window->frame->rect.x + borders.total.left,
+                   window->frame->rect.y + borders.total.top);
+
   meta_error_trap_pop (window->display);
 
   meta_ui_destroy_frame_window (window->screen->ui, frame->xwindow);
