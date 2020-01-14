@@ -2495,16 +2495,16 @@ get_control (MetaFrames *frames,
   meta_frames_calc_geometry (frames, frame, &fgeom);
   get_client_rect (&fgeom, fgeom.width, fgeom.height, &client);
 
-  if (POINT_IN_RECT (x, y, client))
+  if (META_POINT_IN_RECT (x, y, client))
     return META_FRAME_CONTROL_CLIENT_AREA;
   
-  if (POINT_IN_RECT (x, y, fgeom.close_rect.clickable))
+  if (META_POINT_IN_RECT (x, y, fgeom.close_rect.clickable))
     return META_FRAME_CONTROL_DELETE;
 
-  if (POINT_IN_RECT (x, y, fgeom.min_rect.clickable))
+  if (META_POINT_IN_RECT (x, y, fgeom.min_rect.clickable))
     return META_FRAME_CONTROL_MINIMIZE;
 
-  if (POINT_IN_RECT (x, y, fgeom.menu_rect.clickable))
+  if (META_POINT_IN_RECT (x, y, fgeom.menu_rect.clickable))
     return META_FRAME_CONTROL_MENU;
 
   meta_core_get (GDK_DISPLAY_XDISPLAY (gdk_display_get_default ()),
@@ -2521,7 +2521,7 @@ get_control (MetaFrames *frames,
   has_right = (flags & META_FRAME_ALLOWS_RIGHT_RESIZE) != 0;
   has_bottom = (flags & META_FRAME_ALLOWS_BOTTOM_RESIZE) != 0;
 
-  if (POINT_IN_RECT (x, y, fgeom.title_rect))
+  if (META_POINT_IN_RECT (x, y, fgeom.title_rect))
     {
       if (has_vert && y <= TOP_RESIZE_HEIGHT && has_north_resize)
         return META_FRAME_CONTROL_RESIZE_N;
@@ -2529,7 +2529,7 @@ get_control (MetaFrames *frames,
         return META_FRAME_CONTROL_TITLE;
     }
 
-  if (POINT_IN_RECT (x, y, fgeom.max_rect.clickable))
+  if (META_POINT_IN_RECT (x, y, fgeom.max_rect.clickable))
     {
       if (flags & META_FRAME_MAXIMIZED &&
           (META_WINDOW_TILED_TOP (window) ||
@@ -2542,32 +2542,32 @@ get_control (MetaFrames *frames,
         return META_FRAME_CONTROL_MAXIMIZE;
     }
       
-  if (POINT_IN_RECT (x, y, fgeom.shade_rect.clickable))
+  if (META_POINT_IN_RECT (x, y, fgeom.shade_rect.clickable))
     {
       return META_FRAME_CONTROL_SHADE;
     }
 
-  if (POINT_IN_RECT (x, y, fgeom.unshade_rect.clickable))
+  if (META_POINT_IN_RECT (x, y, fgeom.unshade_rect.clickable))
     {
       return META_FRAME_CONTROL_UNSHADE;
     }
 
-  if (POINT_IN_RECT (x, y, fgeom.above_rect.clickable))
+  if (META_POINT_IN_RECT (x, y, fgeom.above_rect.clickable))
     {
       return META_FRAME_CONTROL_ABOVE;
     }
 
-  if (POINT_IN_RECT (x, y, fgeom.unabove_rect.clickable))
+  if (META_POINT_IN_RECT (x, y, fgeom.unabove_rect.clickable))
     {
       return META_FRAME_CONTROL_UNABOVE;
     }
 
-  if (POINT_IN_RECT (x, y, fgeom.stick_rect.clickable))
+  if (META_POINT_IN_RECT (x, y, fgeom.stick_rect.clickable))
     {
       return META_FRAME_CONTROL_STICK;
     }
 
-  if (POINT_IN_RECT (x, y, fgeom.unstick_rect.clickable))
+  if (META_POINT_IN_RECT (x, y, fgeom.unstick_rect.clickable))
     {
       return META_FRAME_CONTROL_UNSTICK;
     }

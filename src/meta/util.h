@@ -31,12 +31,8 @@
 #include <meta/common.h>
 
 gboolean meta_is_verbose  (void);
-void     meta_set_verbose (gboolean setting);
 gboolean meta_is_debugging (void);
-void     meta_set_debugging (gboolean setting);
 gboolean meta_is_syncing (void);
-void     meta_set_syncing (gboolean setting);
-void     meta_set_replace_current_wm (gboolean setting);
 
 void meta_debug_spew_real (const char *format,
                            ...) G_GNUC_PRINTF (1, 2);
@@ -97,7 +93,6 @@ const char* meta_gravity_to_string (int gravity);
 
 #include <libintl.h>
 #define _(x) dgettext (GETTEXT_PACKAGE, x)
-#define N_(x) x
 
 char* meta_g_utf8_strndup (const gchar *src, gsize n);
 

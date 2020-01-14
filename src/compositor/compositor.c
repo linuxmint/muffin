@@ -74,6 +74,7 @@
 #include "meta-background-actor-private.h"
 #include "window-private.h" /* to check window->hidden */
 #include "display-private.h" /* for meta_display_lookup_x_window() */
+#include "util-private.h"
 #include <X11/extensions/shape.h>
 #include <X11/extensions/Xcomposite.h>
 #include "meta-sync-ring.h"

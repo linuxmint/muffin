@@ -20,14 +20,12 @@
  * Foundation, Inc., 51 Franklin Street - Suite 500, Boston, MA
  * 02110-1335, USA.
  */
-
+#include <config.h>
 #include <meta/meta-plugin.h>
 #include <meta/window.h>
 
-#include <libintl.h>
-#define _(x) dgettext (GETTEXT_PACKAGE, x)
-#define N_(x) x
-
+#include <meta/util.h>
+#include <glib/gi18n-lib.h>
 #include <clutter/clutter.h>
 #include <gmodule.h>
 #include <string.h>

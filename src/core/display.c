@@ -1568,8 +1568,8 @@ window_raise_with_delay_callback (void *data)
       meta_error_trap_pop (window->display);
 
       point_in_window =
-        (window->frame && POINT_IN_RECT (root_x, root_y, window->frame->rect)) ||
-        (window->frame == NULL && POINT_IN_RECT (root_x, root_y, window->rect));
+        (window->frame && META_POINT_IN_RECT (root_x, root_y, window->frame->rect)) ||
+        (window->frame == NULL && META_POINT_IN_RECT (root_x, root_y, window->rect));
       if (same_screen && point_in_window)
 	meta_window_raise (window);
 #ifdef WITH_VERBOSE_MODE

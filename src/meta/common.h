@@ -398,7 +398,7 @@ void meta_frame_borders_clear (MetaFrameBorders *self);
 
 /************************************************************/
 
-#define POINT_IN_RECT(xcoord, ycoord, rect) \
+#define META_POINT_IN_RECT(xcoord, ycoord, rect) \
  ((xcoord) >= (rect).x &&                   \
   (xcoord) <  ((rect).x + (rect).width) &&  \
   (ycoord) >= (rect).y &&                   \

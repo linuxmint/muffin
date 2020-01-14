@@ -28,6 +28,7 @@
 #include <clutter/clutter.h>
 #include "cogl-utils.h"
 #include <meta/errors.h>
+// #include "util-private.h"
 #include "meta-background-actor-private.h"
 
 struct _MetaBackgroundPrivate
