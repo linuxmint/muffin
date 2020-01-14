@@ -34,6 +34,8 @@ Build-Depends:
  libxrender-dev,
  libxcb-res0-dev,
  libxt-dev,
+ libx11-xcb-dev,
+ libxcb-randr0-dev,
  zenity,
 Standards-Version: 3.9.4
 
