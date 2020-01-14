@@ -996,7 +996,7 @@ meta_change_keygrab (MetaDisplay *display,
           if (grab && result != Success)
             {
               if (result == BadAccess)
-                meta_warning (_("Some other program is already using the key %s with modifiers %x as a binding\n"), keysym_name (keysym), modmask | ignored_mask);
+                meta_warning ("Some other program is already using the key %s with modifiers %x as a binding\n", keysym_name (keysym), modmask | ignored_mask);
 #ifdef WITH_VERBOSE_MODE
               else
                 meta_topic (META_DEBUG_KEYBINDINGS,

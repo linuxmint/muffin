@@ -1236,8 +1236,8 @@ maybe_give_disable_workarounds_warning (void)
     {
       first_disable = FALSE;
 
-      meta_warning (_("Workarounds for broken applications disabled. "
-                      "Some applications may not behave properly.\n"));
+      meta_warning ("Workarounds for broken applications disabled. "
+                      "Some applications may not behave properly.\n");
     }
 }
 
@@ -1329,8 +1329,8 @@ titlebar_handler (GVariant *value,
 
   if (desc == NULL)
     {
-      meta_warning (_("Could not parse font description "
-                      "\"%s\" from GSettings key %s\n"),
+      meta_warning ("Could not parse font description "
+                      "\"%s\" from GSettings key %s\n",
                     string_value ? string_value : "(null)",
                     KEY_TITLEBAR_FONT);
       return FALSE;
@@ -1393,8 +1393,8 @@ mouse_button_mods_handler (GVariant *value,
       meta_topic (META_DEBUG_KEYBINDINGS,
                   "Failed to parse new GSettings value\n");
 
-      meta_warning (_("\"%s\" found in configuration database is "
-                      "not a valid value for mouse button modifier\n"),
+      meta_warning ("\"%s\" found in configuration database is "
+                      "not a valid value for mouse button modifier\n",
                     string_value);
 
       return FALSE;
@@ -1429,8 +1429,8 @@ mouse_button_zoom_mods_handler (GVariant *value,
       meta_topic (META_DEBUG_KEYBINDINGS,
                   "Failed to parse new GSettings value\n");
 
-      meta_warning (_("\"%s\" found in configuration database is "
-                      "not a valid value for mouse button zoom modifier\n"),
+      meta_warning ("\"%s\" found in configuration database is "
+                      "not a valid value for mouse button zoom modifier\n",
                     string_value);
 
       return FALSE;
@@ -2050,7 +2050,7 @@ update_binding (MetaKeyPref *binding,
         {
           meta_topic (META_DEBUG_KEYBINDINGS,
                       "Failed to parse new GSettings value\n");
-          meta_warning (_("\"%s\" found in configuration database is not a valid value for keybinding \"%s\"\n"),
+          meta_warning ("\"%s\" found in configuration database is not a valid value for keybinding \"%s\"\n",
                         strokes[i], binding->name);
 
           /* Value is kept and will thus be removed next time we save the key.
@@ -2156,7 +2156,7 @@ meta_prefs_get_workspace_name (int i)
       g_strv_length (workspace_names) < (guint)i + 1 ||
       !*workspace_names[i])
     {
-      char *generated_name = g_strdup_printf (_("Workspace %d"), i + 1);
+      char *generated_name = g_strdup_printf ("Workspace %d", i + 1);
       name = g_intern_string (generated_name);
       free (generated_name);
     }

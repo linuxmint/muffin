@@ -91,9 +91,6 @@ void meta_print_backtrace (void);
 const char* meta_frame_type_to_string (MetaFrameType type);
 const char* meta_gravity_to_string (int gravity);
 
-#include <libintl.h>
-#define _(x) dgettext (GETTEXT_PACKAGE, x)
-
 char* meta_g_utf8_strndup (const gchar *src, gsize n);
 
 void  meta_free_gslist_and_elements (GSList *list_to_deep_free);

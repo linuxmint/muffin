@@ -433,7 +433,7 @@ enable_compositor (MetaDisplay *display,
       !META_DISPLAY_HAS_XFIXES (display) ||
       !META_DISPLAY_HAS_RENDER (display))
     {
-      meta_warning (_("Missing %s extension required for compositing"),
+      meta_warning ("Missing %s extension required for compositing",
                     !META_DISPLAY_HAS_COMPOSITE (display) ? "composite" :
                     !META_DISPLAY_HAS_DAMAGE (display) ? "damage" :
                     !META_DISPLAY_HAS_XFIXES (display) ? "xfixes" : "render");
@@ -500,7 +500,7 @@ meta_display_open (void)
 
   if (xdisplay == NULL)
     {
-      meta_warning (_("Failed to open X Window System display '%s'\n"),
+      meta_warning ("Failed to open X Window System display '%s'\n",
 		    XDisplayName (NULL));
       return FALSE;
     }

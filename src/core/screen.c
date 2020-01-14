@@ -826,7 +826,7 @@ meta_screen_new (MetaDisplay *display,
    */
   if (xroot == None)
     {
-      meta_warning (_("Screen %d on display '%s' is invalid\n"),
+      meta_warning ("Screen %d on display '%s' is invalid\n",
                     number, display->name);
       return NULL;
     }
@@ -842,7 +842,7 @@ meta_screen_new (MetaDisplay *display,
 
       if (!replace_current_wm)
         {
-          meta_warning (_("Screen %d on display \"%s\" already has a window manager; try using the --replace option to replace the current window manager.\n"),
+          meta_warning ("Screen %d on display \"%s\" already has a window manager; try using the --replace option to replace the current window manager.\n",
                         number, display->name);
 
           return NULL;
@@ -869,7 +869,7 @@ meta_screen_new (MetaDisplay *display,
 
   if (XGetSelectionOwner (xdisplay, wm_sn_atom) != new_wm_sn_owner)
     {
-      meta_warning (_("Could not acquire window manager selection on screen %d display \"%s\"\n"),
+      meta_warning ("Could not acquire window manager selection on screen %d display \"%s\"\n",
                     number, display->name);
 
       XDestroyWindow (xdisplay, new_wm_sn_owner);
@@ -924,7 +924,7 @@ meta_screen_new (MetaDisplay *display,
                 ExposureMask | attr.your_event_mask);
   if (meta_error_trap_pop_with_return (display) != Success)
     {
-      meta_warning (_("Screen %d on display \"%s\" already has a window manager\n"),
+      meta_warning ("Screen %d on display \"%s\" already has a window manager\n",
                     number, display->name);
 
       XDestroyWindow (xdisplay, new_wm_sn_owner);
@@ -1108,7 +1108,7 @@ meta_screen_free (MetaScreen *screen,
   meta_error_trap_push_with_return (screen->display);
   XSelectInput (screen->display->xdisplay, screen->xroot, 0);
   if (meta_error_trap_pop_with_return (screen->display) != Success)
-    meta_warning (_("Could not release screen %d on display \"%s\"\n"),
+    meta_warning ("Could not release screen %d on display \"%s\"\n",
                   screen->number, screen->display->name);
 
   unset_wm_check_hint (screen);

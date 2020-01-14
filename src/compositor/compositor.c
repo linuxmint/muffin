@@ -553,7 +553,7 @@ redirect_windows (MetaCompositor *compositor,
         {
           /* This probably means that a non-WM compositor like xcompmgr is running;
            * we have no way to get it to exit */
-          meta_fatal (_("Another compositing manager is already running on screen %i on display \"%s\"."),
+          meta_fatal ("Another compositing manager is already running on screen %i on display \"%s\".",
                       screen_number, display->name);
         }
 

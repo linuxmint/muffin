@@ -122,7 +122,7 @@ ensure_logfile (void)
 
       if (err != NULL)
         {
-          meta_warning (_("Failed to open debug log: %s\n"),
+          meta_warning ("Failed to open debug log: %s\n",
                         err->message);
           g_error_free (err);
           return;
@@ -132,13 +132,13 @@ ensure_logfile (void)
 
       if (logfile == NULL)
         {
-          meta_warning (_("Failed to fdopen() log file %s: %s\n"),
+          meta_warning ("Failed to fdopen() log file %s: %s\n",
                         filename, strerror (errno));
           close (fd);
         }
       else
         {
-          g_printerr (_("Opened log file %s\n"), filename);
+          g_printerr ("Opened log file %s\n"), filename;
         }
 
       free (filename);
@@ -157,7 +157,7 @@ meta_set_verbose (gboolean setting)
 {
 #ifndef WITH_VERBOSE_MODE
   if (setting)
-    meta_fatal (_("Muffin was compiled without support for verbose mode\n"));
+    meta_fatal ("Muffin was compiled without support for verbose mode\n");
 #else
   if (setting)
     ensure_logfile ();

@@ -445,7 +445,7 @@ reload_net_wm_pid (MetaWindow    *window,
       gulong cardinal = (int) value->v.cardinal;
 
       if (cardinal <= 0)
-        meta_warning (_("Application set a bogus _NET_WM_PID %lu\n"),
+        meta_warning ("Application set a bogus _NET_WM_PID %lu\n",
                       cardinal);
       else
         {
@@ -1832,8 +1832,8 @@ reload_transient_for (MetaWindow    *window,
             }
           else
             {
-              meta_warning (_("Invalid WM_TRANSIENT_FOR window 0x%lx specified "
-                              "for %s.\n"),
+              meta_warning ("Invalid WM_TRANSIENT_FOR window 0x%lx specified "
+                              "for %s.\n",
                             transient_for, window->desc);
               transient_for = None;
             }
@@ -1844,8 +1844,8 @@ reload_transient_for (MetaWindow    *window,
         {
           if (parent == window)
             {
-              meta_warning (_("WM_TRANSIENT_FOR window 0x%lx for %s "
-                              "would create loop.\n"),
+              meta_warning ("WM_TRANSIENT_FOR window 0x%lx for %s "
+                              "would create loop.\n",
                             transient_for, window->desc);
               transient_for = None;
               break;

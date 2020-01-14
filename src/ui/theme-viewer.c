@@ -30,10 +30,7 @@
 #include <time.h>
 #include <stdlib.h>
 #include <string.h>
-
-#include <libintl.h>
-#define _(x) dgettext (GETTEXT_PACKAGE, x)
-#define N_(x) x
+#include <glib/gi18n.h>
 
 /* We need to compute all different button arrangements
  * in terms of button location. We don't care about
