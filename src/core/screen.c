@@ -1227,6 +1227,8 @@ meta_screen_manage_all_windows (MetaScreen *screen)
            * either within the screen extents, or within a single monitor when constraints
            * are run initially. */
           mw->require_fully_onscreen = FALSE;
+          mw->require_on_single_monitor = FALSE;
+          mw->require_titlebar_visible = FALSE;
         }
     }
   meta_stack_thaw (screen->stack);
