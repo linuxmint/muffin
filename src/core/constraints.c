@@ -608,6 +608,8 @@ place_window_if_needed(MetaWindow     *window,
                   else
                     window->snap_queued = FALSE;
                   meta_window_real_tile (window, TRUE);
+                  window->saved_rect = info->current;
+
                   meta_XFree (tile_info);
                 }
             }
