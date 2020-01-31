@@ -31,7 +31,5 @@ DISTCHECK_CONFIGURE_FLAGS = \
 	--enable-gles2 \
 	--enable-gl \
 	--enable-xlib-egl-platform \
-	--enable-wayland-egl-platform \
 	--enable-glx \
-	--enable-wayland-egl-server  \
 	--enable-cogl-gst

@@ -667,7 +667,7 @@ AC_ARG_ENABLE(
   [kms-egl-platform],
   [AC_HELP_STRING([--enable-kms-egl-platform=@<:@no/yes@:>@], [Enable support for the KMS egl platform @<:@default=no@:>@])],
   [],
-  enable_kms_egl_platform=yes
+  enable_kms_egl_platform=no
 )
 AS_IF([test "x$enable_kms_egl_platform" = "xyes"],
       [
@@ -700,7 +700,7 @@ AC_ARG_ENABLE(
   [wayland-egl-server],
   [AC_HELP_STRING([--enable-wayland-egl-server=@<:@no/yes@:>@], [Enable server side wayland support @<:@default=no@:>@])],
   [],
-  enable_wayland_egl_server=yes
+  enable_wayland_egl_server=no
 )
 AS_IF([test "x$enable_wayland_egl_server" = "xyes"],
       [
