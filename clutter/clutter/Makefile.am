@@ -605,6 +605,7 @@ libmuffin_clutter_@MUFFIN_PLUGIN_API_VERSION@_la_LDFLAGS = \
 	$(CLUTTER_LINK_FLAGS) \
 	$(CLUTTER_LT_LDFLAGS) \
 	-export-dynamic \
+	-release \
 	-rpath $(muffinlibdir) \
 	$(NULL)
 
