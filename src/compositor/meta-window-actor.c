@@ -1031,7 +1031,7 @@ meta_window_actor_has_shadow (MetaWindowActor *self)
     return TRUE;
 #endif
 
-  return TRUE;
+  return FALSE;
 }
 
 /**
