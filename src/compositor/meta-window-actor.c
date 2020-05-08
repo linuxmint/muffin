@@ -1927,7 +1927,7 @@ ensure_tooltip_visible (MetaWindow *window)
     }
   else if (win_rect.x + win_rect.width > work_area.x + work_area.width)
     {
-      new_y = (work_area.x + work_area.width - win_rect.width);
+      new_x = (work_area.x + work_area.width - win_rect.width);
     }
 
   if (new_x != win_rect.x || new_y != win_rect.y)
