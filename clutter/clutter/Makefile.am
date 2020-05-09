@@ -649,6 +649,7 @@ install-exec-local:
 	  ) ; \
 	done
 
+if HAVE_INTROSPECTION
 # gobject-introspection rules
 -include $(INTROSPECTION_MAKEFILE)
 
@@ -720,8 +721,9 @@ gir_DATA = $(INTROSPECTION_GIRS)
 typelibdir = $(muffinlibdir)
 typelib_DATA = $(INTROSPECTION_GIRS:.gir=.typelib)
 
+CLEANFILES += $(gir_DATA) $(typelib_DATA)
+endif
+
 EXTRA_DIST += \
 	Makefile.am.marshal	\
 	Makefile.am.enums
-
-CLEANFILES += $(gir_DATA) $(typelib_DATA)
