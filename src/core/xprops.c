@@ -1262,9 +1262,11 @@ free_value (MetaPropValue *value)
       break;
     case META_PROP_VALUE_SYNC_COUNTER:
       break;
+#ifdef HAVE_XSYNC
     case META_PROP_VALUE_SYNC_COUNTER_LIST:
       meta_XFree (value->v.xcounter_list.counters);
       break;
+#endif
     }
 }
 
