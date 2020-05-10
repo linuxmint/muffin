@@ -1906,11 +1906,13 @@ meta_window_unmanage (MetaWindow  *window,
       invalidate_work_areas (window);
     }
 
+#ifdef HAVE_XSYNC
   if (window->sync_request_timeout_id)
     {
       g_source_remove (window->sync_request_timeout_id);
       window->sync_request_timeout_id = 0;
     }
+#endif
 
   if (window->display->grab_window == window)
     meta_display_end_grab_op (window->display, timestamp);
