@@ -1,3 +1,46 @@
+muffin (4.6.0) ulyana; urgency=medium
+
+  [ Michael Webster ]
+  * frame.c: When reparenting the window during frame destruction (usually when unmanaging the window), account for the entire frame to avoid the window shifting by the visible top and left frame widths.
+  * muffin: Use glib for gettext
+  * display.c: Remove meta_display_get_atom() - it is unused, and breaks the build when g-ir-scanner (with gobject-introspection ~1.62)
+  * all: Don't translate log warnings, remove a couple of remaining gettext defines.
+  * control: add libx11-xcb-dev and libxcb-randr0-dev to the build dependencies.
+  * screen.c: Don't constrain pre-existing windows fully on-screen or in-monitor at startup.
+  * screen.c: Fix single-monitor case for previous commit, and include require_titlebar_visible.
+  * constraints.c: Restore a tiled window's saved rectangle after restoring its tiled state on initial placement.
+  * Disable wayland related build options by default, remove debian rules to explicitly disable them.
+
+  [ Clement Lefebvre ]
+  * Docs: Remove obsolete link
+
+  [ Đoàn Trần Công Danh ]
+  * pkg-config: support cross-build cinnamon
+
+  [ Michael Webster ]
+  * meta-window-actor.c: Reposition tooltips if they would fall outside their monitor's workarea.
+
+  [ Javier Jardón ]
+  * configure.in: Remove gnome-doc-utils unneded dependency
+
+  [ Michael Webster ]
+  * Remove debian gnome-doc-utils dependency.
+
+  [ Lars Mueller ]
+  * Add function to fetch a window's pid from XCB
+  * window.c: change get_client_pid behavior
+
+  [ Michael Webster ]
+  * meta-window-actor.c: Don't give windows a shadow by default.
+  * Move muffin-restart-helper to the libmuffin package and install it to /usr/libexec.
+  * meta-window-actor.c: Fix copy/paste error from d80c0dc898b665fa.
+
+  [ Garry Filakhtov ]
+  * Fix clutter build with --disable-introspection
+  * Fix the build without XSync extension enabled
+
+ -- Clement Lefebvre <root@linuxmint.com>  Wed, 13 May 2020 14:01:43 +0100
+
 muffin (4.4.2) tricia; urgency=medium
 
   [ Michael Webster ]
