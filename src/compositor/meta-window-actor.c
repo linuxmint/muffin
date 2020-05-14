@@ -1289,9 +1289,10 @@ meta_window_actor_queue_frame_drawn (MetaWindowActor *self,
 
   priv->needs_frame_drawn = TRUE;
 
-  frame->sync_request_serial = 0;
 #ifdef HAVE_XSYNC
   frame->sync_request_serial = priv->window->sync_request_serial;
+#else
+  frame->sync_request_serial = 0;
 #endif
 
   priv->frames = g_list_prepend (priv->frames, frame);
