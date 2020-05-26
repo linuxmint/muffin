@@ -150,6 +150,10 @@ update_wrap_mode_of_actor (MetaBackgroundActor *self)
 
   meta_background_set_layer_wrap_mode (META_BACKGROUND (priv->top_actor), priv->background->wrap_mode);
   meta_background_set_layer_wrap_mode (META_BACKGROUND (priv->bottom_actor), priv->background->wrap_mode);
+
+  /* this ensures the actors also get resized if the stage size changed */
+  clutter_actor_queue_relayout (CLUTTER_ACTOR (priv->top_actor));
+  clutter_actor_queue_relayout (CLUTTER_ACTOR (priv->bottom_actor));
 }
 
 static void
@@ -628,10 +632,6 @@ LOCAL_SYMBOL void
 meta_background_actor_screen_size_changed (MetaScreen *screen)
 {
   MetaScreenBackground *background = meta_screen_background_get (screen);
-  GSList *l;
 
   update_wrap_mode (background);
-
-  for (l = background->actors; l; l = l->next)
-    clutter_actor_queue_relayout (l->data);
 }
