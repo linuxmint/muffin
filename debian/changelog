@@ -1,3 +1,16 @@
+muffin (4.6.1) ulyana; urgency=medium
+
+  [ Michael Webster ]
+  * Revert "pkg-config: support cross-build cinnamon"
+
+  [ Eli Schwartz ]
+  * fixup defines for HAVE_XSYNC by running fallback code only in else block
+
+  [ James Ross ]
+  * backgrounds: relayout the transition actors on size change
+
+ -- Clement Lefebvre <root@linuxmint.com>  Wed, 27 May 2020 12:17:20 +0100
+
 muffin (4.6.0) ulyana; urgency=medium
 
   [ Michael Webster ]
