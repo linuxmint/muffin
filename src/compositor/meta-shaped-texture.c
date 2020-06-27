@@ -221,13 +221,12 @@ get_unblended_pipeline (CoglContext *ctx)
   static CoglPipeline *template = NULL;
   if (G_UNLIKELY (template == NULL))
     {
-      CoglColor color;
       template = cogl_pipeline_copy (get_base_pipeline (ctx));
-      cogl_color_init_from_4ub (&color, 255, 255, 255, 255);
-      cogl_pipeline_set_blend (template,
-                               "RGBA = ADD (SRC_COLOR, 0)",
-                               NULL);
-      cogl_pipeline_set_color (template, &color);
+      cogl_pipeline_set_layer_combine (template,
+                                       0,
+                                       "RGBA = REPLACE (TEXTURE)",
+                                       NULL);
+
     }
 
   return template;
