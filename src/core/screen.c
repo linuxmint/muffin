@@ -635,18 +635,22 @@ reload_monitor_infos (MetaScreen *screen)
 
                 crtc = XRRGetCrtcInfo (display->xdisplay, resources, resources->crtcs[i]);
                 info = find_monitor_with_rect (screen, crtc->x, crtc->y, (int)crtc->width, (int)crtc->height);
-                for (j = 0; j < resources->nmode; j++)
-                  {
-                    if (resources->modes[j].id == crtc->mode)
-                      info->refresh_rate = (resources->modes[j].dotClock /
-                                            ((float)resources->modes[j].hTotal *
-                                            resources->modes[j].vTotal));
-                  }
+
                 if (info)
-                  info->output = find_main_output_for_crtc (screen, resources, crtc);
+                  {
+                    for (j = 0; j < resources->nmode; j++)
+                      {
+                        if (resources->modes[j].id == crtc->mode)
+                          info->refresh_rate = (resources->modes[j].dotClock /
+                                                ((float)resources->modes[j].hTotal *
+                                                resources->modes[j].vTotal));
+                      }
+                    info->output = find_main_output_for_crtc (screen, resources, crtc);
+                  }
 
                 XRRFreeCrtcInfo (crtc);
               }
+
             XRRFreeScreenResources (resources);
           }
       }
