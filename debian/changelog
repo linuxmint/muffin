@@ -1,3 +1,10 @@
+muffin (4.6.3) ulyana; urgency=medium
+
+  [ Michael Webster ]
+  * screen.c: Check for MetaMonitorInfo being non-null before attempting to access it.
+
+ -- Clement Lefebvre <root@linuxmint.com>  Tue, 11 Aug 2020 12:36:00 +0100
+
 muffin (4.6.2) ulyana; urgency=medium
 
   [ steve ]
