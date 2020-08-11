@@ -1,3 +1,17 @@
+muffin (4.4.4) tricia; urgency=medium
+
+  [ Michael Webster ]
+  * meta-window-actor.c: Don't give windows a shadow by default.
+
+  [ James Ross ]
+  * backgrounds: relayout the transition actors on size change
+
+  [ Michael Webster ]
+  * meta-window-actor.c: Fix copy/paste error from d80c0dc898b665fa.
+  * screen.c: Check for MetaMonitorInfo being non-null before attempting to access it.
+
+ -- Clement Lefebvre <root@linuxmint.com>  Tue, 11 Aug 2020 13:47:48 +0100
+
 muffin (4.4.3) debbie; urgency=medium
 
   [ Michael Webster ]
