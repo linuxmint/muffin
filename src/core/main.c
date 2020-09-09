@@ -118,6 +118,33 @@ log_handler (const gchar   *log_domain,
   meta_print_backtrace ();
 }
 
+static void
+glib_debug_log_handler (const gchar   *log_domain,
+             GLogLevelFlags log_level,
+             const gchar   *message,
+             gpointer       user_data)
+{
+  guint i;
+  const gchar *forbidden[] = {
+    "posix_spawn",
+    "setenv()/putenv()",
+    "unsetenv()"
+  };
+
+  for (i = 0; i < G_N_ELEMENTS (forbidden); i++)
+    {
+      if (g_str_has_prefix (message, forbidden[i]))
+        {
+          return;
+        }
+    }
+
+  log_handler (log_domain,
+               log_level,
+               message,
+               user_data);
+}
+
 /*
  * Prints a list of which configure script options were used to
  * build this copy of Muffin. This is actually always called
@@ -523,12 +550,22 @@ int
 meta_run (void)
 {
   const gchar *log_domains[] = {
-    NULL, G_LOG_DOMAIN, "Gtk", "Gdk", "GLib",
+    NULL, G_LOG_DOMAIN, "Gtk", "Gdk",
     "Pango", "GLib-GObject", "GThread"
   };
   guint i;
 
   meta_prefs_add_listener (prefs_changed_callback, NULL);
+
+  // Intercept GLib debug level
+  g_log_set_handler ("GLib",
+                     G_LOG_LEVEL_DEBUG,
+                     glib_debug_log_handler, NULL);
+
+  // Direct all but debug to the normal handler
+  g_log_set_handler ("GLib",
+                     (G_LOG_LEVEL_MASK | G_LOG_FLAG_FATAL | G_LOG_FLAG_RECURSION) & ~G_LOG_LEVEL_DEBUG,
+                     log_handler, NULL);
 
   for (i=0; i<G_N_ELEMENTS(log_domains); i++)
     g_log_set_handler (log_domains[i],
