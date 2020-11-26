@@ -1,3 +1,13 @@
+muffin (4.8.0) ulyssa; urgency=medium
+
+  [ Michael Webster ]
+  * core/main.c: Squelch certain glib debug messages to reduce log spam.
+
+  [ brownsr ]
+  * shaped-texture: Use the REPLACE combine function on opaque areas from upstream https://gitlab.gnome.org/vanvugt/mutter/-/commit/d1411c5f84b90f4191baa9706ff30892e6e07f52 said to give 5% render improvement at 4K and lower power use
+
+ -- Clement Lefebvre <root@linuxmint.com>  Thu, 26 Nov 2020 13:51:07 +0000
+
 muffin (4.6.3) ulyana; urgency=medium
 
   [ Michael Webster ]
