@@ -134,7 +134,7 @@ meta_screen_background_get (MetaScreen *screen)
                               background, (GDestroyNotify) free_screen_background);
 
       stage = meta_get_stage_for_screen (screen);
-      g_signal_connect (stage, "notify::color",
+      g_signal_connect (stage, "notify::background-color",
                         G_CALLBACK (on_notify_stage_color), background);
 
       meta_background_actor_update (screen);
