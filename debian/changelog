@@ -1,3 +1,10 @@
+muffin (4.8.1) ulyssa; urgency=medium
+
+  [ Michael Webster ]
+  * meta-background-actor.c: Listen to the stage's background-color instead of the color property.
+
+ -- Clement Lefebvre <root@linuxmint.com>  Thu, 14 Jan 2021 09:47:32 +0000
+
 muffin (4.8.0) ulyssa; urgency=medium
 
   [ Michael Webster ]
