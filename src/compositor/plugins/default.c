@@ -277,7 +277,8 @@ on_switch_workspace_effect_complete (ClutterTimeline *timeline, gpointer data)
 
       if (apriv->orig_parent)
         {
-          clutter_actor_reparent (a, apriv->orig_parent);
+          clutter_actor_remove_child (a, apriv->orig_parent);
+          clutter_actor_add_child (a, apriv->orig_parent);
           apriv->orig_parent = NULL;
         }
 
@@ -303,8 +304,8 @@ switch_workspace (MetaPlugin *plugin,
   MetaScreen *screen;
   MetaDefaultPluginPrivate *priv = META_DEFAULT_PLUGIN (plugin)->priv;
   GList        *l;
-  ClutterActor *workspace0  = clutter_group_new ();
-  ClutterActor *workspace1  = clutter_group_new ();
+  ClutterActor *workspace0  = clutter_actor_new ();
+  ClutterActor *workspace1  = clutter_actor_new ();
   ClutterActor *stage;
   int           screen_width, screen_height;
   ClutterAnimation *animation;
@@ -356,8 +357,11 @@ switch_workspace (MetaPlugin *plugin,
         {
           apriv->orig_parent = clutter_actor_get_parent (actor);
 
-          clutter_actor_reparent (actor,
+          clutter_actor_remove_child (actor,
 				  win_workspace == to ? workspace1 : workspace0);
+          clutter_actor_add_child (actor,
+				  win_workspace == to ? workspace1 : workspace0);
+
           clutter_actor_show_all (actor);
           clutter_actor_raise_top (actor);
         }
