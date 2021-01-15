@@ -589,6 +589,10 @@ make_dock (int type)
       break;
     case DOCK_ALL:
       break;
+    default:
+      // Most people prefer docks on the bottom, use as default
+      box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
+      break;
     }
 
   window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
@@ -636,6 +640,12 @@ make_dock (int type)
       break;
     case DOCK_ALL:
       break;
+    default:
+      // Most people prefer docks on the bottom, use as default
+      gtk_widget_set_size_request (window, 600, DOCK_SIZE);
+      gtk_window_move (GTK_WINDOW (window), 200, gdk_screen_height () - DOCK_SIZE);
+      set_gtk_window_struts (window, 0, 0, 0, DOCK_SIZE);
+      gtk_window_set_title (GTK_WINDOW (window), "BottomDock");
     }
 
   gtk_widget_show_all (window);
@@ -1045,5 +1055,3 @@ do_appwindow (void)
 
   return window;
 }
-
-
