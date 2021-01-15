@@ -280,7 +280,7 @@ menu_item_new (MenuItem *menuitem, int workspace_id)
     {
       GtkWidget *image;
 
-      image = gtk_image_new_from_stock (menuitem->stock_id, GTK_ICON_SIZE_MENU);
+      image = gtk_image_new_from_icon_name (menuitem->stock_id, GTK_ICON_SIZE_MENU);
       mi = gtk_image_menu_item_new ();
 
       gtk_image_menu_item_set_image (GTK_IMAGE_MENU_ITEM (mi), image);

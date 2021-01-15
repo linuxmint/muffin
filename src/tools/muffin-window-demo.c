@@ -547,7 +547,7 @@ splashscreen_cb (GtkAction           *action,
 
   vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
 
-  image = gtk_image_new_from_stock (GTK_STOCK_DIALOG_INFO, GTK_ICON_SIZE_DIALOG);
+  image = gtk_image_new_from_icon_name (GTK_STOCK_DIALOG_INFO, GTK_ICON_SIZE_DIALOG);
   gtk_box_pack_start (GTK_BOX (vbox), image, FALSE, FALSE, 0);
 
   gtk_box_pack_start (GTK_BOX (vbox), focus_label (window), FALSE, FALSE, 0);
@@ -594,7 +594,7 @@ make_dock (int type)
   window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
   set_gtk_window_type (GTK_WINDOW (window), "_NET_WM_WINDOW_TYPE_DOCK");
 
-  image = gtk_image_new_from_stock (GTK_STOCK_DIALOG_INFO, GTK_ICON_SIZE_DIALOG);
+  image = gtk_image_new_from_icon_name (GTK_STOCK_DIALOG_INFO, GTK_ICON_SIZE_DIALOG);
   gtk_box_pack_start (GTK_BOX (box), image, FALSE, FALSE, 0);
 
   gtk_box_pack_start (GTK_BOX (box), focus_label (window), FALSE, FALSE, 0);
