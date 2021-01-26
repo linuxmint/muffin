@@ -1,5 +1,5 @@
 
-SUBDIRS=cogl clutter src po doc data
+SUBDIRS=cogl clutter src src/compositor/plugins po doc data
 
 EXTRA_DIST = HACKING MAINTAINERS rationales.txt
 

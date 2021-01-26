@@ -2,9 +2,9 @@
 pkglibdir=@MUFFIN_PLUGIN_DIR@
 
 AM_CPPFLAGS= \
-  $(WARN_CFLAGS) \
+	$(WARN_CFLAGS) \
 	$(MUFFIN_CFLAGS) \
-  -I$(top_builddir)/src						\
+	-I$(top_builddir)/src						\
 	-I$(top_srcdir)/src						\
 	-I$(top_srcdir)/cogl						\
 	-I$(top_builddir)/cogl						\
@@ -27,7 +27,10 @@ AM_CPPFLAGS= \
 default_la_CFLAGS   = $(WARN_CFLAGS) -fPIC
 default_la_SOURCES  = default.c
 default_la_LDFLAGS  = $(WARN_LDFLAGS) -module -avoid-version -no-undefined
-default_la_LIBADD   = $(CLUTTER_LIBS)
+default_la_LIBADD   = \
+	$(CLUTTER_LIBS) \
+	$(top_builddir)/src/libmuffin.la \
+	$(top_builddir)/clutter/clutter/libmuffin-clutter-@MUFFIN_PLUGIN_API_VERSION@.la
 
 pkglib_LTLIBRARIES = default.la
 
