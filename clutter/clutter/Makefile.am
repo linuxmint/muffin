@@ -666,7 +666,11 @@ Clutter-@MUFFIN_PLUGIN_API_VERSION@.gir: libmuffin-clutter-@MUFFIN_PLUGIN_API_VE
 
 Clutter_@MUFFIN_PLUGIN_API_VERSION@_gir_NAMESPACE = Clutter
 Clutter_@MUFFIN_PLUGIN_API_VERSION@_gir_VERSION = @MUFFIN_PLUGIN_API_VERSION@
-Clutter_@MUFFIN_PLUGIN_API_VERSION@_gir_LIBS = libmuffin-clutter-@MUFFIN_PLUGIN_API_VERSION@.la
+Clutter_@MUFFIN_PLUGIN_API_VERSION@_gir_LIBS = \
+	libmuffin-clutter-@MUFFIN_PLUGIN_API_VERSION@.la \
+	$(top_builddir)/../cogl/cogl/libmuffin-cogl-@MUFFIN_PLUGIN_API_VERSION@.la \
+	$(top_builddir)/../cogl/cogl-pango/libmuffin-cogl-pango-@MUFFIN_PLUGIN_API_VERSION@.la \
+	$(top_builddir)/../cogl/cogl-path/libmuffin-cogl-path-@MUFFIN_PLUGIN_API_VERSION@.la
 Clutter_@MUFFIN_PLUGIN_API_VERSION@_gir_FILES = \
 	$(clutter_include_HEADERS) \
 	$(clutter_deprecated_HEADERS) \
@@ -687,7 +691,11 @@ Cally-@MUFFIN_PLUGIN_API_VERSION@.gir: Makefile Clutter-@MUFFIN_PLUGIN_API_VERSI
 
 Cally_@MUFFIN_PLUGIN_API_VERSION@_gir_NAMESPACE = Cally
 Cally_@MUFFIN_PLUGIN_API_VERSION@_gir_VERSION = @MUFFIN_PLUGIN_API_VERSION@
-Cally_@MUFFIN_PLUGIN_API_VERSION@_gir_LIBS = libmuffin-clutter-@MUFFIN_PLUGIN_API_VERSION@.la
+Cally_@MUFFIN_PLUGIN_API_VERSION@_gir_LIBS = \
+	libmuffin-clutter-@MUFFIN_PLUGIN_API_VERSION@.la \
+	$(top_builddir)/../cogl/cogl/libmuffin-cogl-@MUFFIN_PLUGIN_API_VERSION@.la \
+	$(top_builddir)/../cogl/cogl-pango/libmuffin-cogl-pango-@MUFFIN_PLUGIN_API_VERSION@.la \
+	$(top_builddir)/../cogl/cogl-path/libmuffin-cogl-path-@MUFFIN_PLUGIN_API_VERSION@.la
 Cally_@MUFFIN_PLUGIN_API_VERSION@_gir_FILES = $(cally_sources_h) $(cally_sources_c)
 Cally_@MUFFIN_PLUGIN_API_VERSION@_gir_CFLAGS = $(AM_CPPFLAGS) $(CLUTTER_CFLAGS)
 Cally_@MUFFIN_PLUGIN_API_VERSION@_gir_SCANNERFLAGS = \
@@ -702,7 +710,11 @@ ClutterX11-@MUFFIN_PLUGIN_API_VERSION@.gir: Makefile Clutter-@MUFFIN_PLUGIN_API_
 
 ClutterX11_@MUFFIN_PLUGIN_API_VERSION@_gir_NAMESPACE = ClutterX11
 ClutterX11_@MUFFIN_PLUGIN_API_VERSION@_gir_INCLUDES = xlib-2.0
-ClutterX11_@MUFFIN_PLUGIN_API_VERSION@_gir_LIBS = libmuffin-clutter-@MUFFIN_PLUGIN_API_VERSION@.la
+ClutterX11_@MUFFIN_PLUGIN_API_VERSION@_gir_LIBS = \
+	libmuffin-clutter-@MUFFIN_PLUGIN_API_VERSION@.la \
+	$(top_builddir)/../cogl/cogl/libmuffin-cogl-@MUFFIN_PLUGIN_API_VERSION@.la \
+	$(top_builddir)/../cogl/cogl-pango/libmuffin-cogl-pango-@MUFFIN_PLUGIN_API_VERSION@.la \
+	$(top_builddir)/../cogl/cogl-path/libmuffin-cogl-path-@MUFFIN_PLUGIN_API_VERSION@.la
 ClutterX11_@MUFFIN_PLUGIN_API_VERSION@_gir_FILES = $(x11_introspection)
 ClutterX11_@MUFFIN_PLUGIN_API_VERSION@_gir_CFLAGS = $(AM_CPPFLAGS) $(CLUTTER_CFLAGS)
 ClutterX11_@MUFFIN_PLUGIN_API_VERSION@_gir_SCANNERFLAGS = \

@@ -277,7 +277,12 @@ Meta-$(api_version).gir: libmuffin.la
 @META_GIR@_INCLUDES = GObject-2.0 CDesktopEnums-3.0 Gdk-3.0 Gtk-3.0 Cogl-$(MUFFIN_PLUGIN_API_VERSION) Clutter-$(MUFFIN_PLUGIN_API_VERSION) xlib-2.0 xfixes-4.0
 @META_GIR@_PACKAGES = gtk+-3.0
 @META_GIR@_CFLAGS = $(AM_CPPFLAGS)
-@META_GIR@_LIBS = libmuffin.la
+@META_GIR@_LIBS = \
+	libmuffin.la \
+	$(top_builddir)/clutter/clutter/libmuffin-clutter-@MUFFIN_PLUGIN_API_VERSION@.la \
+	$(top_builddir)/cogl/cogl/libmuffin-cogl-@MUFFIN_PLUGIN_API_VERSION@.la \
+	$(top_builddir)/cogl/cogl-pango/libmuffin-cogl-pango-@MUFFIN_PLUGIN_API_VERSION@.la \
+	$(top_builddir)/cogl/cogl-path/libmuffin-cogl-path-@MUFFIN_PLUGIN_API_VERSION@.la
 @META_GIR@_FILES =				\
 	muffin-enum-types.h			\
 	$(libmuffininclude_base_headers)	\
