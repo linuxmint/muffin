@@ -3,7 +3,7 @@
 
 lib_LTLIBRARIES = libmuffin.la
 
-SUBDIRS=wm-tester tools compositor/plugins
+SUBDIRS=wm-tester tools
 
 NULL =
 
