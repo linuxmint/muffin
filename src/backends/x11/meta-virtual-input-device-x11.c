@@ -28,9 +28,14 @@
 #include "meta-keymap-x11.h"
 #include "meta-virtual-input-device-x11.h"
 
+#define DISCRETE_SCROLL_STEP 10.0
+
 struct _MetaVirtualInputDeviceX11
 {
   ClutterVirtualInputDevice parent;
+
+  double accum_scroll_dx;
+  double accum_scroll_dy;
 };
 
 G_DEFINE_TYPE (MetaVirtualInputDeviceX11,
@@ -112,6 +117,39 @@ meta_virtual_input_device_x11_notify_scroll_continuous (ClutterVirtualInputDevic
                                                         ClutterScrollSource        scroll_source,
                                                         ClutterScrollFinishFlags   finish_flags)
 {
+  MetaVirtualInputDeviceX11 *virtual_device_x11;
+  ClutterScrollDirection direction;
+  int i, n_xscrolls, n_yscrolls;
+
+  virtual_device_x11 = META_VIRTUAL_INPUT_DEVICE_X11 (virtual_device);
+
+  virtual_device_x11->accum_scroll_dx += dx;
+  virtual_device_x11->accum_scroll_dy += dy;
+  n_xscrolls = floor ((fabs (virtual_device_x11->accum_scroll_dx) + DBL_EPSILON) /
+                      DISCRETE_SCROLL_STEP);
+  n_yscrolls = floor ((fabs (virtual_device_x11->accum_scroll_dy) + DBL_EPSILON) /
+                      DISCRETE_SCROLL_STEP);
+
+  direction = virtual_device_x11->accum_scroll_dx > 0 ? CLUTTER_SCROLL_RIGHT
+                                                      : CLUTTER_SCROLL_LEFT;
+  for (i = 0; i < n_xscrolls; ++i)
+    {
+      meta_virtual_input_device_x11_notify_discrete_scroll (
+        virtual_device, time_us, direction, CLUTTER_SCROLL_SOURCE_WHEEL);
+    }
+
+  direction = virtual_device_x11->accum_scroll_dy > 0 ? CLUTTER_SCROLL_DOWN
+                                                      : CLUTTER_SCROLL_UP;
+  for (i = 0; i < n_yscrolls; ++i)
+    {
+      meta_virtual_input_device_x11_notify_discrete_scroll (
+        virtual_device, time_us, direction, CLUTTER_SCROLL_SOURCE_WHEEL);
+    }
+
+  virtual_device_x11->accum_scroll_dx =
+    fmod (virtual_device_x11->accum_scroll_dx, DISCRETE_SCROLL_STEP);
+  virtual_device_x11->accum_scroll_dy =
+    fmod (virtual_device_x11->accum_scroll_dy, DISCRETE_SCROLL_STEP);
 }
 
 static void
