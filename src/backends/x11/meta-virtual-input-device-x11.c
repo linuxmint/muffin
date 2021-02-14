@@ -121,7 +121,7 @@ meta_virtual_input_device_x11_notify_key (ClutterVirtualInputDevice *virtual_dev
                                           ClutterKeyState            key_state)
 {
   XTestFakeKeyEvent (clutter_x11_get_default_display (),
-                     key, key_state == CLUTTER_KEY_STATE_PRESSED, 0);
+                     key + 8, key_state == CLUTTER_KEY_STATE_PRESSED, 0);
 }
 
 static void
