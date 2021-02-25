@@ -4433,7 +4433,8 @@ window_activate (MetaWindow     *window,
    * honor 0 timestamps for pagers.
    */
   can_ignore_outdated_timestamps =
-    (timestamp != 0 || (FALSE && source_indication != META_CLIENT_TYPE_PAGER));
+    (timestamp != 0 || (source_indication != META_CLIENT_TYPE_PAGER));
+
   if (XSERVER_TIME_IS_BEFORE (timestamp, window->display->last_user_time) &&
       can_ignore_outdated_timestamps)
     {
@@ -4465,12 +4466,19 @@ window_activate (MetaWindow     *window,
   /* For non-transient windows, we just set up a pulsing indicator,
      rather than move windows or workspaces.
      See http://bugzilla.gnome.org/show_bug.cgi?id=482354 */
-  if (window->xtransient_for == None &&
-      !meta_window_located_on_workspace (window, window->screen->active_workspace))
+  if (window->xtransient_for == None)
     {
-      meta_window_set_demands_attention (window);
-      /* We've marked it as demanding, don't need to do anything else. */
-      return;
+      if (!meta_window_located_on_workspace (window, workspace))
+        {
+          if (meta_prefs_get_bring_windows_to_current_workspace ())
+            {
+              meta_window_change_workspace (window, workspace);
+            }
+          else
+            {
+              meta_workspace_activate (window->workspace, timestamp);
+            }
+        }
     }
   else if (window->xtransient_for != None)
     {
@@ -4508,7 +4516,7 @@ meta_window_activate (MetaWindow     *window,
    * we were such.  If we change the pager behavior later, we could revisit
    * this and just add extra flags to window_activate.
    */
-  window_activate (window, timestamp, META_CLIENT_TYPE_PAGER, NULL);
+  window_activate (window, timestamp, META_CLIENT_TYPE_APPLICATION, NULL);
 }
 
 void

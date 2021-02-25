@@ -65,12 +65,15 @@
 
 #define KEY_MOUSEWHEEL_ZOOM_ENABLED "screen-magnifier-enabled"
 
+#define KEY_BRING_ACTIVATED_WINDOWS_TO_CURRENT_WORKSPACE "bring-windows-to-current-workspace"
+
 /* These are the different schemas we are keeping
  * a GSettings instance for */
 #define SCHEMA_GENERAL         "org.cinnamon.desktop.wm.preferences"
 #define SCHEMA_MUFFIN          "org.cinnamon.muffin"
 #define SCHEMA_INTERFACE       "org.cinnamon.desktop.interface"
 #define SCHEMA_A11Y_APPLICATIONS "org.cinnamon.desktop.a11y.applications"
+#define SCHEMA_CINNAMON        "org.cinnamon"
 
 #define SETTINGS(s) g_hash_table_lookup (settings_schemas, (s))
 
@@ -86,6 +89,7 @@ static MetaVirtualModifier mouse_button_zoom_mods = Mod1Mask;
 static gboolean mouse_zoom_enabled = FALSE;
 static CDesktopFocusMode focus_mode = C_DESKTOP_FOCUS_MODE_CLICK;
 static CDesktopFocusNewWindows focus_new_windows = C_DESKTOP_FOCUS_NEW_WINDOWS_SMART;
+static gboolean bring_user_activated_windows_to_current_workspace = FALSE;
 static gboolean raise_on_click = TRUE;
 static gboolean attach_modal_dialogs = FALSE;
 static gboolean ignore_hide_titlebar_when_maximized = FALSE;
@@ -328,6 +332,13 @@ static MetaBoolPreference preferences_bool[] =
         META_PREF_RAISE_ON_CLICK,
       },
       &raise_on_click,
+    },
+    {
+      { "bring-windows-to-current-workspace",
+        SCHEMA_CINNAMON,
+        META_PREF_BRING_WINDOWS_TO_CURRENT_WORKSPACE,
+      },
+      &bring_user_activated_windows_to_current_workspace,
     },
     {
       { "titlebar-uses-system-font",
@@ -987,6 +998,11 @@ meta_prefs_init (void)
                     G_CALLBACK (settings_changed), NULL);
   g_hash_table_insert (settings_schemas, g_strdup (SCHEMA_A11Y_APPLICATIONS), settings);
 
+  settings = g_settings_new (SCHEMA_CINNAMON);
+  g_signal_connect (settings, "changed::" KEY_BRING_ACTIVATED_WINDOWS_TO_CURRENT_WORKSPACE,
+                    G_CALLBACK (settings_changed), NULL);
+  g_hash_table_insert (settings_schemas, g_strdup (SCHEMA_CINNAMON), settings);
+
   for (tmp = overridden_keys; tmp; tmp = tmp->next)
     {
       MetaPrefsOverriddenKey *override = tmp->data;
@@ -1290,6 +1306,15 @@ meta_prefs_get_raise_on_click (void)
    * in #326156.
    */
   return raise_on_click || focus_mode == C_DESKTOP_FOCUS_MODE_CLICK;
+}
+
+gboolean
+meta_prefs_get_bring_windows_to_current_workspace (void)
+{
+  /* Windows that the user activates (with a current timestamp) will
+   * be brought to the currently active workspace if necessary. Normally
+   * the user is brought to the window's workspace instead. */
+  return bring_user_activated_windows_to_current_workspace;
 }
 
 const char*
@@ -1974,7 +1999,10 @@ meta_preference_to_string (MetaPreference pref)
 
     case META_PREF_MIN_WIN_OPACITY:
       return "MIN_WIN_OPACITY";
-    }
+
+    case META_PREF_BRING_WINDOWS_TO_CURRENT_WORKSPACE:
+      return "BRING_WINDOWS_TO_CURRENT_WORKSPACE";
+  }
 
   return "(unknown)";
 }

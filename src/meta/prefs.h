@@ -85,7 +85,8 @@ typedef enum
   META_PREF_MIN_WIN_OPACITY,
   META_PREF_MOUSE_ZOOM_ENABLED,
   META_PREF_MOUSE_BUTTON_ZOOM_MODS,
-  META_PREF_UI_SCALE
+  META_PREF_UI_SCALE,
+  META_PREF_BRING_WINDOWS_TO_CURRENT_WORKSPACE,
 } MetaPreference;
 
 typedef void (* MetaPrefsChangedFunc) (MetaPreference pref,
@@ -113,6 +114,7 @@ CDesktopFocusNewWindows     meta_prefs_get_focus_new_windows  (void);
 gboolean                    meta_prefs_get_attach_modal_dialogs (void);
 gboolean                    meta_prefs_get_ignore_hide_titlebar_when_maximized (void);
 gboolean                    meta_prefs_get_raise_on_click     (void);
+gboolean                    meta_prefs_get_bring_windows_to_current_workspace (void);
 const char*                 meta_prefs_get_theme              (void);
 /* returns NULL if GTK default should be used */
 const PangoFontDescription* meta_prefs_get_titlebar_font      (void);
