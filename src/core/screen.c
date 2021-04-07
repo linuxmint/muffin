@@ -3324,7 +3324,7 @@ remove_sequence (MetaScreen        *screen,
 typedef struct
 {
   GSList *list;
-  GTimeVal now;
+  gint64 now;
 } CollectTimedOutData;
 
 /* This should be fairly long, as it should never be required unless
@@ -3343,11 +3343,9 @@ collect_timed_out_foreach (void *element,
   long tv_sec, tv_usec;
   double elapsed;
 
-  sn_startup_sequence_get_last_active_time (sequence, &tv_sec, &tv_usec);
-
   elapsed =
-    ((((double)ctod->now.tv_sec - tv_sec) * G_USEC_PER_SEC +
-      (ctod->now.tv_usec - tv_usec))) / 1000.0;
+    ((((double)ctod->now - tv_sec) * G_USEC_PER_SEC +
+      (ctod->now - tv_usec))) / G_TIME_SPAN_MILLISECOND;
 
   meta_topic (META_DEBUG_STARTUP,
               "Sequence used %g seconds vs. %g max: %s\n",
