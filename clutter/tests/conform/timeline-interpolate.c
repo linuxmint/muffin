@@ -18,7 +18,7 @@
 typedef struct _TestState
 {
   ClutterTimeline *timeline;
-  GTimeVal start_time;
+  int64_t start_time;
   guint new_frame_counter;
   gint expected_frame;
   gint completion_count;
@@ -31,18 +31,17 @@ new_frame_cb (ClutterTimeline *timeline,
 	      gint frame_num,
 	      TestState *state)
 {
-  GTimeVal current_time;
+  int64_t current_time;
   gint current_frame;
   glong msec_diff;
   gint loop_overflow = 0;
   static gint step = 1;
 
-  g_get_current_time (&current_time);
+  current_time = g_get_real_time ();
 
   current_frame = clutter_timeline_get_elapsed_time (state->timeline);
 
-  msec_diff = (current_time.tv_sec - state->start_time.tv_sec) * 1000;
-  msec_diff += (current_time.tv_usec - state->start_time.tv_usec)/1000;
+  msec_diff = (current_time - state->start_time) / G_TIME_SPAN_MILLISECOND;
 
   /* If we expect to have interpolated past the end of the timeline
    * we keep track of the overflow so we can determine when
@@ -136,7 +135,7 @@ timeline_interpolation (void)
 {
   TestState state;
 
-  state.timeline = 
+  state.timeline =
     clutter_timeline_new (TEST_TIMELINE_DURATION);
   clutter_timeline_set_loop (state.timeline, TRUE);
   g_signal_connect (G_OBJECT(state.timeline),
@@ -153,9 +152,9 @@ timeline_interpolation (void)
   state.passed = TRUE;
   state.expected_frame = 0;
 
-  g_get_current_time (&state.start_time);
+  state.start_time = g_get_real_time ();
   clutter_timeline_start (state.timeline);
-  
+
   clutter_main();
 
   g_object_unref (state.timeline);
