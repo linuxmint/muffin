@@ -3988,13 +3988,13 @@ meta_window_unmaximize_internal (MetaWindow        *window,
   if (unmaximize_horizontally && unmaximize_vertically)
     window->saved_maximize = FALSE;
 
-  /* Only do something if the window isn't already maximized in the
+  /* Only do something if the window is tiled, or maximized in the
    * given direction(s).
    */
   if ((unmaximize_horizontally && window->maximized_horizontally) ||
       (unmaximize_vertically   && window->maximized_vertically) ||
-      window->tile_type == META_WINDOW_TILE_TYPE_NONE ||
-      window->tile_mode == META_TILE_NONE)
+      window->tile_type != META_WINDOW_TILE_TYPE_NONE ||
+      window->tile_mode != META_TILE_NONE)
     {
       MetaRectangle target_rect;
       MetaRectangle work_area;
