@@ -3826,7 +3826,7 @@ meta_display_end_grab_op (MetaDisplay *display,
       meta_grab_op_is_moving (display->grab_op))
     {
       meta_topic (META_DEBUG_WINDOW_OPS,
-                  "Clearing out the edges for resistance/snapping");
+                  "Clearing out the edges for resistance/snapping\n");
       meta_display_cleanup_edges (display);
     }
 
