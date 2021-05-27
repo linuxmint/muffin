@@ -1,3 +1,19 @@
+muffin (5.0.0) uma; urgency=medium
+
+  [ orbea ]
+  * build: Add missing libtool depedencies.
+  * build: Fix undefined references with slibtool.
+
+  [ Michael Webster ]
+  * Revert "Remove useless, annoying window activation warning."
+  * windows: Fix focus-stealing prevention. Cinnamon no longer attempts to deal with this.
+
+  [ Albert Pool ]
+  * Do not unmaximize windows that are not maximized or tiled - fixes Wine bug
+  * Add newline to debug message
+
+ -- Clement Lefebvre <root@linuxmint.com>  Thu, 27 May 2021 15:45:16 +0100
+
 muffin (4.8.1) ulyssa; urgency=medium
 
   [ Michael Webster ]
