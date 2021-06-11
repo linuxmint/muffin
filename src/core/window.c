@@ -4433,8 +4433,7 @@ window_activate (MetaWindow     *window,
    * honor 0 timestamps for pagers.
    */
   can_ignore_outdated_timestamps =
-    (timestamp != 0 || (source_indication != META_CLIENT_TYPE_PAGER));
-
+    (timestamp != 0 || (FALSE && source_indication != META_CLIENT_TYPE_PAGER));
   if (XSERVER_TIME_IS_BEFORE (timestamp, window->display->last_user_time) &&
       can_ignore_outdated_timestamps)
     {
@@ -4516,7 +4515,7 @@ meta_window_activate (MetaWindow     *window,
    * we were such.  If we change the pager behavior later, we could revisit
    * this and just add extra flags to window_activate.
    */
-  window_activate (window, timestamp, META_CLIENT_TYPE_APPLICATION, NULL);
+  window_activate (window, timestamp, META_CLIENT_TYPE_PAGER, NULL);
 }
 
 void
