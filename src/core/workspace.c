@@ -741,6 +741,8 @@ meta_workspace_activate_with_focus (MetaWorkspace *workspace,
                                     MetaWindow    *focus_this,
                                     guint32        timestamp)
 {
+  g_return_if_fail (META_IS_WORKSPACE (workspace));
+
   meta_workspace_activate_internal (workspace, focus_this, 0, timestamp);
 }
 
@@ -748,6 +750,8 @@ void
 meta_workspace_activate (MetaWorkspace *workspace,
                          guint32        timestamp)
 {
+  g_return_if_fail (META_IS_WORKSPACE (workspace));
+
   meta_workspace_activate_internal (workspace, NULL, 0, timestamp);
 }
 
@@ -765,12 +769,16 @@ meta_workspace_activate_with_direction_hint (MetaWorkspace       *workspace,
                                              MetaMotionDirection  direction,
                                              guint32              timestamp)
 {
+  g_return_if_fail (META_IS_WORKSPACE (workspace));
+
   meta_workspace_activate_internal (workspace, NULL, direction, timestamp);
 }
 
 int
 meta_workspace_index (MetaWorkspace *workspace)
 {
+  g_return_val_if_fail (META_IS_WORKSPACE (workspace), 0);
+
   int ret = g_list_index (workspace->screen->workspaces, workspace);
   /* return value is negative if the workspace is invalid */
   return ret;
@@ -779,6 +787,8 @@ meta_workspace_index (MetaWorkspace *workspace)
 void
 meta_workspace_update_window_hints (MetaWorkspace *workspace)
 {
+  g_return_if_fail (META_IS_WORKSPACE (workspace));
+
   GList *l = workspace->windows;
   while (l)
     {
@@ -802,6 +812,8 @@ meta_workspace_update_window_hints (MetaWorkspace *workspace)
 GList*
 meta_workspace_list_windows (MetaWorkspace *workspace)
 {
+  g_return_val_if_fail (META_IS_WORKSPACE (workspace), NULL);
+
   GSList *display_windows;
   GSList *tmp;
   GList *workspace_windows;
