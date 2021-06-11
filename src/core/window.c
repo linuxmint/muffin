@@ -4448,8 +4448,9 @@ window_activate (MetaWindow     *window,
   /* For those stupid pagers, get a valid timestamp and show a warning */
   if (timestamp == 0)
     {
-      meta_warning ("meta_window_activate called by a pager with a 0 timestamp; "
-                    "the pager needs to be fixed.\n");
+      meta_topic (META_DEBUG_FOCUS,
+                  "meta_window_activate called by a pager with a 0 timestamp; "
+                  "the pager needs to be fixed.\n");
       timestamp = meta_display_get_current_time_roundtrip (window->display);
     }
 
@@ -7422,9 +7423,10 @@ meta_window_client_message (MetaWindow *window,
       if (timestamp == 0)
         {
           /* Client using older EWMH _NET_ACTIVE_WINDOW without a timestamp */
-          meta_warning ("Buggy client sent a _NET_ACTIVE_WINDOW message with a "
-                        "timestamp of 0 for %s\n",
-                        window->desc);
+          meta_topic (META_DEBUG_FOCUS,
+                      "Buggy client sent a _NET_ACTIVE_WINDOW message with a "
+                      "timestamp of 0 for %s\n",
+                      window->desc);
           timestamp = meta_display_get_current_time (display);
         }
 
