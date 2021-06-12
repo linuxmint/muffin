@@ -1,3 +1,12 @@
+muffin (5.0.1) uma; urgency=medium
+
+  [ Michael Webster ]
+  * window.c: go back to ewmh < 1.2 support for window activation.
+  * workspace.c: Add some safety checks on some public methods.
+  * window.c: Turn some warnings into focus debug messages.
+
+ -- Clement Lefebvre <root@linuxmint.com>  Sat, 12 Jun 2021 14:04:56 +0100
+
 muffin (5.0.0) uma; urgency=medium
 
   [ orbea ]
