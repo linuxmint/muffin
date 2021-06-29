@@ -1211,7 +1211,6 @@ meta_window_new_with_attrs (MetaDisplay       *display,
   window->tile_after_placement = FALSE;
   window->move_after_placement = FALSE;
   window->fullscreen = FALSE;
-  window->fullscreen_after_placement = FALSE;
   window->fullscreen_monitors[0] = -1;
   window->require_fully_onscreen = TRUE;
   window->require_on_single_monitor = TRUE;
@@ -8440,7 +8439,6 @@ recalc_window_type (MetaWindow *window)
 
   if (old_type != window->type)
     {
-      gboolean old_decorated = window->decorated;
       GObject  *object = G_OBJECT (window);
 
       recalc_window_features (window);
@@ -8448,21 +8446,12 @@ recalc_window_type (MetaWindow *window)
       if (!window->override_redirect)
 	set_net_wm_state (window);
 
-      /* Update frame */
-      if (window->decorated)
-        meta_window_ensure_frame (window);
-      else
-        meta_window_destroy_frame (window);
-
       /* update stacking constraints */
       meta_window_update_layer (window);
 
       meta_window_grab_keys (window);
 
       g_object_freeze_notify (object);
-
-      if (old_decorated != window->decorated)
-        g_object_notify (object, "decorated");
 
       g_object_notify (object, "window-type");
 
@@ -8564,6 +8553,7 @@ recalc_window_features (MetaWindow *window)
   gboolean old_has_shade_func;
   gboolean old_always_sticky;
   gboolean old_skip_taskbar;
+  gboolean old_decorated;
 
   old_has_close_func = window->has_close_func;
   old_has_minimize_func = window->has_minimize_func;
@@ -8572,6 +8562,7 @@ recalc_window_features (MetaWindow *window)
   old_has_shade_func = window->has_shade_func;
   old_always_sticky = window->always_sticky;
   old_skip_taskbar = window->skip_taskbar;
+  old_decorated = window->decorated;
 
   /* Use MWM hints initially */
   window->decorated = window->mwm_decorated;
@@ -8673,6 +8664,7 @@ recalc_window_features (MetaWindow *window)
    */
   if (window->fullscreen)
     {
+      window->decorated = FALSE;
       window->has_shade_func = FALSE;
       window->has_move_func = FALSE;
       window->has_resize_func = FALSE;
@@ -8778,6 +8770,23 @@ recalc_window_features (MetaWindow *window)
       old_has_shade_func != window->has_shade_func       ||
       old_always_sticky != window->always_sticky)
     set_allowed_actions_hint (window);
+
+  if (!window->constructing &&
+      old_decorated != window->decorated)
+    {
+      /* Update frame */
+      if (window->decorated)
+        meta_window_ensure_frame (window);
+      else
+        meta_window_destroy_frame (window);
+
+      meta_window_queue (window,
+                         META_QUEUE_MOVE_RESIZE |
+                         /* because ensure/destroy frame may unmap: */
+                         META_QUEUE_CALC_SHOWING);
+
+      g_object_notify (G_OBJECT (window), "decorated");
+    }
 
   if (window->has_resize_func != old_has_resize_func)
     g_object_notify (G_OBJECT (window), "resizeable");
