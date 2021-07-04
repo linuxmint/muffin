@@ -34,7 +34,7 @@
 #include "cogl-object-private.h"
 #include "cogl-matrix-stack-private.h"
 #include "cogl-journal-private.h"
-#include "cogl-winsys-private.h"
+#include "winsys/cogl-winsys-private.h"
 #include "cogl-attribute-private.h"
 #include "cogl-offscreen.h"
 #include "cogl-gl-header.h"

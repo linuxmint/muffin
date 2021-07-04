@@ -179,25 +179,25 @@ struct _ClutterPoint
  */
 #define CLUTTER_POINT_INIT_ZERO         CLUTTER_POINT_INIT (0.f, 0.f)
 
-CLUTTER_AVAILABLE_IN_1_12
+CLUTTER_EXPORT
 GType clutter_point_get_type (void) G_GNUC_CONST;
 
-CLUTTER_AVAILABLE_IN_1_12
+CLUTTER_EXPORT
 const ClutterPoint *    clutter_point_zero      (void);
-CLUTTER_AVAILABLE_IN_1_12
+CLUTTER_EXPORT
 ClutterPoint *          clutter_point_alloc     (void);
-CLUTTER_AVAILABLE_IN_1_12
+CLUTTER_EXPORT
 ClutterPoint *          clutter_point_init      (ClutterPoint       *point,
                                                  float               x,
                                                  float               y);
-CLUTTER_AVAILABLE_IN_1_12
+CLUTTER_EXPORT
 ClutterPoint *          clutter_point_copy      (const ClutterPoint *point);
-CLUTTER_AVAILABLE_IN_1_12
+CLUTTER_EXPORT
 void                    clutter_point_free      (ClutterPoint       *point);
-CLUTTER_AVAILABLE_IN_1_12
+CLUTTER_EXPORT
 gboolean                clutter_point_equals    (const ClutterPoint *a,
                                                  const ClutterPoint *b);
-CLUTTER_AVAILABLE_IN_1_12
+CLUTTER_EXPORT
 float                   clutter_point_distance  (const ClutterPoint *a,
                                                  const ClutterPoint *b,
                                                  float              *x_distance,
@@ -243,20 +243,20 @@ struct _ClutterSize
  */
 #define CLUTTER_SIZE_INIT_ZERO          CLUTTER_SIZE_INIT (0.f, 0.f)
 
-CLUTTER_AVAILABLE_IN_1_12
+CLUTTER_EXPORT
 GType clutter_size_get_type (void) G_GNUC_CONST;
 
-CLUTTER_AVAILABLE_IN_1_12
+CLUTTER_EXPORT
 ClutterSize *   clutter_size_alloc      (void);
-CLUTTER_AVAILABLE_IN_1_12
+CLUTTER_EXPORT
 ClutterSize *   clutter_size_init       (ClutterSize       *size,
                                          float              width,
                                          float              height);
-CLUTTER_AVAILABLE_IN_1_12
+CLUTTER_EXPORT
 ClutterSize *   clutter_size_copy       (const ClutterSize *size);
-CLUTTER_AVAILABLE_IN_1_12
+CLUTTER_EXPORT
 void            clutter_size_free       (ClutterSize       *size);
-CLUTTER_AVAILABLE_IN_1_12
+CLUTTER_EXPORT
 gboolean        clutter_size_equals     (const ClutterSize *a,
                                          const ClutterSize *b);
 
@@ -314,63 +314,63 @@ struct _ClutterRect
  */
 #define CLUTTER_RECT_INIT_ZERO                  CLUTTER_RECT_INIT (0.f, 0.f, 0.f, 0.f)
 
-CLUTTER_AVAILABLE_IN_1_12
+CLUTTER_EXPORT
 GType clutter_rect_get_type (void) G_GNUC_CONST;
 
-CLUTTER_AVAILABLE_IN_1_12
+CLUTTER_EXPORT
 const ClutterRect *     clutter_rect_zero               (void);
-CLUTTER_AVAILABLE_IN_1_12
+CLUTTER_EXPORT
 ClutterRect *           clutter_rect_alloc              (void);
-CLUTTER_AVAILABLE_IN_1_12
+CLUTTER_EXPORT
 ClutterRect *           clutter_rect_init               (ClutterRect       *rect,
                                                          float              x,
                                                          float              y,
                                                          float              width,
                                                          float              height);
-CLUTTER_AVAILABLE_IN_1_12
+CLUTTER_EXPORT
 ClutterRect *           clutter_rect_copy               (const ClutterRect *rect);
-CLUTTER_AVAILABLE_IN_1_12
+CLUTTER_EXPORT
 void                    clutter_rect_free               (ClutterRect       *rect);
-CLUTTER_AVAILABLE_IN_1_12
+CLUTTER_EXPORT
 gboolean                clutter_rect_equals             (ClutterRect       *a,
                                                          ClutterRect       *b);
 
-CLUTTER_AVAILABLE_IN_1_12
+CLUTTER_EXPORT
 ClutterRect *           clutter_rect_normalize          (ClutterRect       *rect);
-CLUTTER_AVAILABLE_IN_1_12
+CLUTTER_EXPORT
 void                    clutter_rect_get_center         (ClutterRect       *rect,
                                                          ClutterPoint      *center);
-CLUTTER_AVAILABLE_IN_1_12
+CLUTTER_EXPORT
 gboolean                clutter_rect_contains_point     (ClutterRect       *rect,
                                                          ClutterPoint      *point);
-CLUTTER_AVAILABLE_IN_1_12
+CLUTTER_EXPORT
 gboolean                clutter_rect_contains_rect      (ClutterRect       *a,
                                                          ClutterRect       *b);
-CLUTTER_AVAILABLE_IN_1_12
+CLUTTER_EXPORT
 void                    clutter_rect_union              (ClutterRect       *a,
                                                          ClutterRect       *b,
                                                          ClutterRect       *res);
-CLUTTER_AVAILABLE_IN_1_12
+CLUTTER_EXPORT
 gboolean                clutter_rect_intersection       (ClutterRect       *a,
                                                          ClutterRect       *b,
                                                          ClutterRect       *res);
-CLUTTER_AVAILABLE_IN_1_12
+CLUTTER_EXPORT
 void                    clutter_rect_offset             (ClutterRect       *rect,
                                                          float              d_x,
                                                          float              d_y);
-CLUTTER_AVAILABLE_IN_1_12
+CLUTTER_EXPORT
 void                    clutter_rect_inset              (ClutterRect       *rect,
                                                          float              d_x,
                                                          float              d_y);
-CLUTTER_AVAILABLE_IN_1_12
+CLUTTER_EXPORT
 void                    clutter_rect_clamp_to_pixel     (ClutterRect       *rect);
-CLUTTER_AVAILABLE_IN_1_12
+CLUTTER_EXPORT
 float                   clutter_rect_get_x              (ClutterRect       *rect);
-CLUTTER_AVAILABLE_IN_1_12
+CLUTTER_EXPORT
 float                   clutter_rect_get_y              (ClutterRect       *rect);
-CLUTTER_AVAILABLE_IN_1_12
+CLUTTER_EXPORT
 float                   clutter_rect_get_width          (ClutterRect       *rect);
-CLUTTER_AVAILABLE_IN_1_12
+CLUTTER_EXPORT
 float                   clutter_rect_get_height         (ClutterRect       *rect);
 
 /**
@@ -415,24 +415,24 @@ struct _ClutterVertex
  */
 #define CLUTTER_VERTEX_INIT_ZERO        CLUTTER_VERTEX_INIT (0.f, 0.f, 0.f)
 
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 GType          clutter_vertex_get_type (void) G_GNUC_CONST;
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 ClutterVertex *clutter_vertex_new      (gfloat               x,
                                         gfloat               y,
                                         gfloat               z);
-CLUTTER_AVAILABLE_IN_1_12
+CLUTTER_EXPORT
 ClutterVertex *clutter_vertex_alloc    (void);
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 ClutterVertex *clutter_vertex_init     (ClutterVertex       *vertex,
                                         gfloat               x,
                                         gfloat               y,
                                         gfloat               z);
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 ClutterVertex *clutter_vertex_copy     (const ClutterVertex *vertex);
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 void           clutter_vertex_free     (ClutterVertex       *vertex);
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 gboolean       clutter_vertex_equal    (const ClutterVertex *vertex_a,
                                         const ClutterVertex *vertex_b);
 
@@ -488,76 +488,76 @@ struct _ClutterActorBox
  */
 #define CLUTTER_ACTOR_BOX_INIT_ZERO                     CLUTTER_ACTOR_BOX_INIT (0.f, 0.f, 0.f, 0.f)
 
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 GType            clutter_actor_box_get_type      (void) G_GNUC_CONST;
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 ClutterActorBox *clutter_actor_box_new           (gfloat                 x_1,
                                                   gfloat                 y_1,
                                                   gfloat                 x_2,
                                                   gfloat                 y_2);
-CLUTTER_AVAILABLE_IN_1_12
+CLUTTER_EXPORT
 ClutterActorBox *clutter_actor_box_alloc         (void);
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 ClutterActorBox *clutter_actor_box_init          (ClutterActorBox       *box,
                                                   gfloat                 x_1,
                                                   gfloat                 y_1,
                                                   gfloat                 x_2,
                                                   gfloat                 y_2);
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 void             clutter_actor_box_init_rect     (ClutterActorBox       *box,
                                                   gfloat                 x,
                                                   gfloat                 y,
                                                   gfloat                 width,
                                                   gfloat                 height);
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 ClutterActorBox *clutter_actor_box_copy          (const ClutterActorBox *box);
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 void             clutter_actor_box_free          (ClutterActorBox       *box);
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 gboolean         clutter_actor_box_equal         (const ClutterActorBox *box_a,
                                                   const ClutterActorBox *box_b);
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 gfloat           clutter_actor_box_get_x         (const ClutterActorBox *box);
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 gfloat           clutter_actor_box_get_y         (const ClutterActorBox *box);
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 gfloat           clutter_actor_box_get_width     (const ClutterActorBox *box);
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 gfloat           clutter_actor_box_get_height    (const ClutterActorBox *box);
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 void             clutter_actor_box_get_origin    (const ClutterActorBox *box,
                                                   gfloat                *x,
                                                   gfloat                *y);
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 void             clutter_actor_box_get_size      (const ClutterActorBox *box,
                                                   gfloat                *width,
                                                   gfloat                *height);
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 gfloat           clutter_actor_box_get_area      (const ClutterActorBox *box);
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 gboolean         clutter_actor_box_contains      (const ClutterActorBox *box,
                                                   gfloat                 x,
                                                   gfloat                 y);
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 void             clutter_actor_box_from_vertices (ClutterActorBox       *box,
                                                   const ClutterVertex    verts[]);
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 void             clutter_actor_box_interpolate   (const ClutterActorBox *initial,
                                                   const ClutterActorBox *final,
                                                   gdouble                progress,
                                                   ClutterActorBox       *result);
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 void             clutter_actor_box_clamp_to_pixel (ClutterActorBox       *box);
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 void             clutter_actor_box_union          (const ClutterActorBox *a,
                                                    const ClutterActorBox *b,
                                                    ClutterActorBox       *result);
 
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 void             clutter_actor_box_set_origin     (ClutterActorBox       *box,
                                                    gfloat                 x,
                                                    gfloat                 y);
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 void             clutter_actor_box_set_size       (ClutterActorBox       *box,
                                                    gfloat                 width,
                                                    gfloat                 height);
@@ -586,14 +586,14 @@ struct _ClutterGeometry
   guint  height;
 };
 
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 GType clutter_geometry_get_type (void) G_GNUC_CONST;
 
-CLUTTER_DEPRECATED_IN_1_16
+CLUTTER_DEPRECATED
 void      clutter_geometry_union      (const ClutterGeometry *geometry_a,
                                        const ClutterGeometry *geometry_b,
                                        ClutterGeometry       *result);
-CLUTTER_DEPRECATED_IN_1_16
+CLUTTER_DEPRECATED
 gboolean  clutter_geometry_intersects (const ClutterGeometry *geometry0,
                                        const ClutterGeometry *geometry1);
 
@@ -612,13 +612,13 @@ struct _ClutterKnot
   gint y;
 };
 
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 GType        clutter_knot_get_type (void) G_GNUC_CONST;
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 ClutterKnot *clutter_knot_copy     (const ClutterKnot *knot);
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 void         clutter_knot_free     (ClutterKnot       *knot);
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 gboolean     clutter_knot_equal    (const ClutterKnot *knot_a,
                                     const ClutterKnot *knot_b);
 
@@ -643,14 +643,14 @@ struct _ClutterPathNode
   ClutterKnot points[3];
 };
 
-CLUTTER_AVAILABLE_IN_1_0
+CLUTTER_EXPORT
 GType clutter_path_node_get_type (void) G_GNUC_CONST;
 
-CLUTTER_AVAILABLE_IN_1_0
+CLUTTER_EXPORT
 ClutterPathNode *clutter_path_node_copy  (const ClutterPathNode *node);
-CLUTTER_AVAILABLE_IN_1_0
+CLUTTER_EXPORT
 void             clutter_path_node_free  (ClutterPathNode       *node);
-CLUTTER_AVAILABLE_IN_1_0
+CLUTTER_EXPORT
 gboolean         clutter_path_node_equal (const ClutterPathNode *node_a,
                                           const ClutterPathNode *node_b);
 
@@ -658,43 +658,43 @@ gboolean         clutter_path_node_equal (const ClutterPathNode *node_a,
  * ClutterPaintVolume
  */
 
-CLUTTER_AVAILABLE_IN_1_2
+CLUTTER_EXPORT
 GType clutter_paint_volume_get_type (void) G_GNUC_CONST;
 
-CLUTTER_AVAILABLE_IN_1_2
+CLUTTER_EXPORT
 ClutterPaintVolume *clutter_paint_volume_copy                (const ClutterPaintVolume *pv);
-CLUTTER_AVAILABLE_IN_1_2
+CLUTTER_EXPORT
 void                clutter_paint_volume_free                (ClutterPaintVolume       *pv);
 
-CLUTTER_AVAILABLE_IN_1_2
+CLUTTER_EXPORT
 void                clutter_paint_volume_set_origin          (ClutterPaintVolume       *pv,
                                                               const ClutterVertex      *origin);
-CLUTTER_AVAILABLE_IN_1_2
+CLUTTER_EXPORT
 void                clutter_paint_volume_get_origin          (const ClutterPaintVolume *pv,
                                                               ClutterVertex            *vertex);
-CLUTTER_AVAILABLE_IN_1_2
+CLUTTER_EXPORT
 void                clutter_paint_volume_set_width           (ClutterPaintVolume       *pv,
                                                               gfloat                    width);
-CLUTTER_AVAILABLE_IN_1_2
+CLUTTER_EXPORT
 gfloat              clutter_paint_volume_get_width           (const ClutterPaintVolume *pv);
-CLUTTER_AVAILABLE_IN_1_2
+CLUTTER_EXPORT
 void                clutter_paint_volume_set_height          (ClutterPaintVolume       *pv,
                                                               gfloat                    height);
-CLUTTER_AVAILABLE_IN_1_2
+CLUTTER_EXPORT
 gfloat              clutter_paint_volume_get_height          (const ClutterPaintVolume *pv);
-CLUTTER_AVAILABLE_IN_1_2
+CLUTTER_EXPORT
 void                clutter_paint_volume_set_depth           (ClutterPaintVolume       *pv,
                                                               gfloat                    depth);
-CLUTTER_AVAILABLE_IN_1_2
+CLUTTER_EXPORT
 gfloat              clutter_paint_volume_get_depth           (const ClutterPaintVolume *pv);
-CLUTTER_AVAILABLE_IN_1_2
+CLUTTER_EXPORT
 void                clutter_paint_volume_union               (ClutterPaintVolume       *pv,
                                                               const ClutterPaintVolume *another_pv);
-CLUTTER_AVAILABLE_IN_1_10
+CLUTTER_EXPORT
 void                clutter_paint_volume_union_box           (ClutterPaintVolume       *pv,
                                                               const ClutterActorBox    *box);
 
-CLUTTER_AVAILABLE_IN_1_2
+CLUTTER_EXPORT
 gboolean            clutter_paint_volume_set_from_allocation (ClutterPaintVolume       *pv,
                                                               ClutterActor             *actor);
 
@@ -717,14 +717,14 @@ struct _ClutterMargin
   float bottom;
 };
 
-CLUTTER_AVAILABLE_IN_1_10
+CLUTTER_EXPORT
 GType clutter_margin_get_type (void) G_GNUC_CONST;
 
-CLUTTER_AVAILABLE_IN_1_10
+CLUTTER_EXPORT
 ClutterMargin * clutter_margin_new      (void) G_GNUC_MALLOC;
-CLUTTER_AVAILABLE_IN_1_10
+CLUTTER_EXPORT
 ClutterMargin * clutter_margin_copy     (const ClutterMargin *margin_);
-CLUTTER_AVAILABLE_IN_1_10
+CLUTTER_EXPORT
 void            clutter_margin_free     (ClutterMargin       *margin_);
 
 /**
@@ -755,24 +755,24 @@ typedef gboolean (* ClutterProgressFunc) (const GValue *a,
                                           gdouble       progress,
                                           GValue       *retval);
 
-CLUTTER_AVAILABLE_IN_1_0
+CLUTTER_EXPORT
 void clutter_interval_register_progress_func (GType               value_type,
                                               ClutterProgressFunc func);
 
-CLUTTER_AVAILABLE_IN_1_12
+CLUTTER_EXPORT
 GType clutter_matrix_get_type (void) G_GNUC_CONST;
 
-CLUTTER_AVAILABLE_IN_1_12
+CLUTTER_EXPORT
 ClutterMatrix * clutter_matrix_alloc            (void);
-CLUTTER_AVAILABLE_IN_1_12
+CLUTTER_EXPORT
 ClutterMatrix * clutter_matrix_init_identity    (ClutterMatrix       *matrix);
-CLUTTER_AVAILABLE_IN_1_12
+CLUTTER_EXPORT
 ClutterMatrix * clutter_matrix_init_from_array  (ClutterMatrix       *matrix,
                                                  const float          values[16]);
-CLUTTER_AVAILABLE_IN_1_12
+CLUTTER_EXPORT
 ClutterMatrix * clutter_matrix_init_from_matrix (ClutterMatrix       *a,
                                                  const ClutterMatrix *b);
-CLUTTER_AVAILABLE_IN_1_12
+CLUTTER_EXPORT
 void            clutter_matrix_free             (ClutterMatrix       *matrix);
 
 G_END_DECLS

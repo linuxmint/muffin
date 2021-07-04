@@ -79,23 +79,23 @@ struct _ClutterBehaviourScaleClass
   ClutterBehaviourClass parent_class;
 };
 
-CLUTTER_DEPRECATED_IN_1_6
+CLUTTER_DEPRECATED
 GType clutter_behaviour_scale_get_type (void) G_GNUC_CONST;
 
-CLUTTER_DEPRECATED_IN_1_6_FOR(clutter_actor_animate with ClutterActor:scale-x and ClutterActor:scale-y)
+CLUTTER_DEPRECATED_FOR(clutter_actor_animate with ClutterActor:scale-x and ClutterActor:scale-y)
 ClutterBehaviour *clutter_behaviour_scale_new        (ClutterAlpha          *alpha,
                                                       gdouble                x_scale_start,
                                                       gdouble                y_scale_start,
                                                       gdouble                x_scale_end,
                                                       gdouble                y_scale_end);
 
-CLUTTER_DEPRECATED_IN_1_6
+CLUTTER_DEPRECATED
 void              clutter_behaviour_scale_set_bounds (ClutterBehaviourScale *scale,
                                                       gdouble                x_scale_start,
                                                       gdouble                y_scale_start,
                                                       gdouble                x_scale_end,
                                                       gdouble                y_scale_end);
-CLUTTER_DEPRECATED_IN_1_6
+CLUTTER_DEPRECATED
 void              clutter_behaviour_scale_get_bounds (ClutterBehaviourScale *scale,
                                                       gdouble               *x_scale_start,
                                                       gdouble               *y_scale_start,

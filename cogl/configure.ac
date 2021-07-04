@@ -1,81 +1,6 @@
 AC_PREREQ(2.59)
 
-dnl ================================================================
-dnl XXX: If you are making a release then you need to check these
-dnl sections:
-dnl » API versions (Only the 1.x version needs to change)
-dnl   (the pretty numbers that the users see)
-dnl
-dnl » Interface version details for libtool
-dnl   (the shared library versioning information)
-dnl
-dnl » Source code release status
-dnl   (mark the source code as being part of a "release" or from "git")
-dnl ================================================================
-
-dnl ================================================================
-dnl API versions (i.e. the pretty numbers that users see)
-dnl ================================================================
-m4_define([cogl_major_version], [2])
-m4_define([cogl_minor_version], [0])
-m4_define([cogl_micro_version], [0])
-m4_define([cogl_version],
-          [cogl_major_version.cogl_minor_version.cogl_micro_version])
-
-dnl Since the core Cogl library has to also maintain support for the
-dnl Cogl 1.x API for Clutter then we track the 1.x version separately.
-m4_define([cogl_1_minor_version], [22])
-m4_define([cogl_1_micro_version], [1])
-m4_define([cogl_1_version], [1.cogl_1_minor_version.cogl_1_micro_version])
-
-dnl ================================================================
-dnl Interface version details for libtool
-dnl ================================================================
-# Note: we don't automatically deduce the libtool version info from
-# the pretty version number that users sees. This is because we want
-# to update the pretty version number before making a release since it
-# can affect the name of our pkg-config file and the naming or
-# location of other installed files which we want to be able to verify
-# as correct well before making a release.
-#
-# For reference on how the various numbers should be updated at
-# release time these rules are adapted from the libtool info pages:
-#
-#  1. Update the version information only immediately before a public
-#     release.
-#
-#  2. If the library source code has changed at all since the last
-#     update, then increment REVISION (`C:R:A' becomes `C:r+1:A').
-#
-#  3. If any interfaces have been added, removed, or changed since the
-#     last update, increment CURRENT, and set REVISION to 0.
-#
-#  4. If any interfaces have been added since the last public release,
-#     then increment AGE.
-#
-#  5. If any interfaces have been removed since the last public release,
-#     then set AGE to 0.
-m4_define([cogl_lt_current], 24)
-m4_define([cogl_lt_revision], 1)
-m4_define([cogl_lt_age], 4)
-# We do also tell libtool the pretty version:
-m4_define([cogl_lt_release], [cogl_version])
-
-
-dnl ================================================================
-dnl Source code release status
-dnl ================================================================
-# Finally we explicitly track when we are building development source
-# from Git vs building source corresponding to a release. As with the
-# libtool version info we don't automatically derive this from the
-# pretty version number because we want to test the results of
-# updating the version number in advance of a release.
-#
-# Possible status values are: git, snapshot or release
-#
-m4_define([cogl_release_status], [git])
-
-AC_INIT(cogl, [cogl_1_version])
+AC_INIT(cogl, [0.1])
 AC_CONFIG_SRCDIR(cogl/cogl.h)
 AC_CONFIG_AUX_DIR([build])
 AC_CONFIG_MACRO_DIR([build/autotools])
@@ -129,35 +54,6 @@ AM_SILENT_RULES([yes])
 AH_BOTTOM([#include "config-custom.h"])
 
 dnl ================================================================
-dnl Export the API versioning
-dnl ================================================================
-AC_SUBST([COGL_MAJOR_VERSION],[cogl_major_version])
-AC_SUBST([COGL_MINOR_VERSION],[cogl_minor_version])
-AC_SUBST([COGL_MICRO_VERSION],[cogl_micro_version])
-AC_SUBST([COGL_VERSION],[cogl_version])
-AC_SUBST([COGL_API_VERSION],[cogl_major_version.0])
-AC_SUBST([COGL_API_VERSION_AM],[$COGL_MAJOR_VERSION\_0])
-
-AC_SUBST([COGL_1_MINOR_VERSION],[cogl_1_minor_version])
-AC_SUBST([COGL_1_MICRO_VERSION],[cogl_1_micro_version])
-AC_SUBST([COGL_1_VERSION],[cogl_1_version])
-
-
-dnl ================================================================
-dnl Export the libtool versioning
-dnl ================================================================
-AC_SUBST([COGL_LT_CURRENT], [cogl_lt_current])
-AC_SUBST([COGL_LT_REVISION], [cogl_lt_revision])
-AC_SUBST([COGL_LT_AGE], [cogl_lt_age])
-AC_SUBST([COGL_LT_RELEASE], [cogl_lt_release])
-
-
-dnl ================================================================
-dnl Export the source code release status
-dnl ================================================================
-AC_SUBST([COGL_RELEASE_STATUS], [cogl_release_status])
-
-dnl ================================================================
 dnl Compiler stuff.
 dnl ================================================================
 AC_PROG_CC
@@ -173,10 +69,8 @@ dnl     ============================================================
 AC_MSG_CHECKING([for _Static_assert])
 AC_COMPILE_IFELSE([AC_LANG_PROGRAM([_Static_assert (1, "");],
                                    [(void) 0])],
-                  [AC_DEFINE([HAVE_STATIC_ASSERT], [1],
-                             [Whether _Static_assert can be used or not])
-                   AC_MSG_RESULT([yes])],
-                  [AC_MSG_RESULT([no])])
+                  [AC_MSG_RESULT([yes])],
+                  [AC_MSG_ERROR([Missing _Static_assert])])
 
 dnl ================================================================
 dnl Libtool stuff.
@@ -254,25 +148,7 @@ dnl     Enable cairo usage for debugging
 dnl       (debugging code can use cairo to dump the atlas)
 dnl     ============================================================
 
-PKG_CHECK_EXISTS([CAIRO], [cairo >= cairo_req_version], [have_cairo=yes])
-AC_ARG_ENABLE(
-  [cairo],
-  [AC_HELP_STRING([--enable-cairo=@<:@no/yes@:>@], [Control Cairo usage in Cogl debugging code @<:@default=auto@:>@])],
-  [],
-  [
-    AS_IF([test "x$enable_debug" = "xyes"],
-          [enable_cairo=$have_cairo],
-          [enable_cairo=no])
-  ]
-)
-AS_IF([test "x$enable_cairo" = "xyes" && test "x$enable_debug" = "xyes"],
-      [
-        AS_IF([test "x$have_cairo" != "xyes"],
-              [AC_MSG_ERROR([Could not find Cairo])])
-
-        COGL_PKG_REQUIRES="$COGL_PKG_REQUIRES cairo >= cairo_req_version"
-        AC_DEFINE([HAVE_CAIRO], [1], [Whether we have cairo or not])
-      ])
+COGL_PKG_REQUIRES="$COGL_PKG_REQUIRES cairo >= cairo_req_version"
 
 
 dnl     ============================================================
@@ -387,37 +263,8 @@ AM_PATH_GLIB_2_0([glib_req_version],
 
 COGL_PKG_REQUIRES="$COGL_PKG_REQUIRES gobject-2.0 gmodule-no-export-2.0"
 
-dnl     ============================================================
-dnl     Should cogl-pango be built?
-dnl     ============================================================
+COGL_PANGO_PKG_REQUIRES="$COGL_PANGO_PKG_REQUIRES pangocairo >= pangocairo_req_version"
 
-AC_ARG_ENABLE(
-  [cogl-pango],
-  [AC_HELP_STRING([--enable-cogl-pango=@<:@no/yes@:>@], [Enable pango support @<:@default=yes@:>@])],
-  [],
-  enable_cogl_pango=yes
-)
-AS_IF([test "x$enable_cogl_pango" = "xyes"],
-      [
-	COGL_PANGO_PKG_REQUIRES="$COGL_PANGO_PKG_REQUIRES pangocairo >= pangocairo_req_version"
-      ]
-)
-
-dnl     ============================================================
-dnl     Should cogl-path be built?
-dnl     ============================================================
-
-AC_ARG_ENABLE(
-  [cogl-path],
-  [AC_HELP_STRING([--enable-cogl-path=@<:@no/yes@:>@], [Enable 2D path support @<:@default=yes@:>@])],
-  [],
-  enable_cogl_path=yes
-)
-AS_IF([test "x$enable_cogl_path" = "xyes"],
-      [
-        COGL_DEFINES_SYMBOLS="$COGL_DEFINES_SYMBOLS COGL_HAS_COGL_PATH_SUPPORT"
-      ]
-)
 
 dnl     ============================================================
 dnl     Choose image loading backend
@@ -435,83 +282,6 @@ dnl         ========================================================
 EGL_CHECKED=no
 
 enabled_drivers=""
-
-HAVE_GLES1=0
-AC_ARG_ENABLE(
-  [gles1],
-  [AC_HELP_STRING([--enable-gles1=@<:@no/yes@:>@], [Enable support for OpenGL-ES 1.1 @<:@default=no@:>@])],
-  [],
-  enable_gles1=no
-)
-AS_IF([test "x$enable_gles1" = "xyes"],
-      [
-        enabled_drivers="$enabled_drivers gles1"
-
-        cogl_gl_headers="GLES/gl.h GLES/glext.h"
-
-        AC_DEFINE([HAVE_COGL_GLES], 1, [Have GLES 1.1 for rendering])
-        COGL_DEFINES_SYMBOLS="$COGL_DEFINES_SYMBOLS COGL_HAS_GLES CLUTTER_COGL_HAS_GLES"
-        COGL_DEFINES_SYMBOLS="$COGL_DEFINES_SYMBOLS COGL_HAS_GLES1"
-        HAVE_GLES1=1
-
-        PKG_CHECK_EXISTS([glesv1_cm],
-          [COGL_PKG_REQUIRES_GL="$COGL_PKG_REQUIRES_GL glesv1_cm"
-           COGL_GLES1_LIBNAME="libGLESv1_CM.so"
-          ],
-          [
-            # We have to check the two headers independently as GLES/glext.h
-            # needs to include GLES/gl.h to have the GL types defined (eg.
-            # GLenum).
-            AC_CHECK_HEADER([GLES/gl.h],
-                            [],
-                            [AC_MSG_ERROR([Unable to locate GLES/gl.h])])
-            AC_CHECK_HEADER([GLES/glext.h],
-                            [],
-                            [AC_MSG_ERROR([Unable to locate GLES/glext.h])],
-                            [#include <GLES/gl.h>])
-
-            # Early implementations provided only a GLES/egl.h while Khronos's
-            # implementer guide now states EGL/egl.h is the One. Some
-            # implementations keep a GLES/egl.h wrapper around EGL/egl.h for
-            # backward compatibility while others provide EGL/egl.h only.
-            AC_CHECK_HEADERS([GLES/egl.h EGL/egl.h])
-
-            AS_IF([test "x$ac_cv_header_GLES_egl_h" = "xyes"],
-                  [COGL_EGL_INCLUDES="#include <GLES/egl.h>"],
-                  [test "x$ac_cv_header_EGL_egl_h" = "xyes"],
-                  [
-                    COGL_EGL_INCLUDES="#include <EGL/egl.h>"
-                  ],
-                  [AC_MSG_ERROR([Unable to locate EGL header])])
-            AC_SUBST([COGL_EGL_INCLUDES])
-
-            AC_CHECK_HEADERS([EGL/eglext.h],
-                             [COGL_EGL_INCLUDES="$COGL_EGL_INCLUDE
-#include <EGL/eglext.h>"],
-                             [],
-                             [$COGL_EGL_INCLUDES])
-
-            # Check for a GLES 1.x Common Profile library with/without EGL.
-            #
-            # Note: historically GLES 1 libraries shipped with the
-            # EGL and GLES symbols all bundled in one library. Now
-            # the Khronos Implementers Guide defines two naming
-            # schemes: -lGLES_CM should be used for a library that
-            # bundles the GLES and EGL API together and -lGLESv1_CM
-            # would be used for a standalone GLES API.
-            AC_CHECK_LIB(GLES_CM, [eglInitialize],
-              [COGL_GLES1_LIBNAME="libGLES_CM.so"],
-              [
-                AC_CHECK_LIB(GLESv1_CM, [glFlush],
-                  [COGL_GLES1_LIBNAME="libGLESv1_CM.so"
-                   NEED_SEPARATE_EGL=yes
-                  ],
-                  [AC_MSG_ERROR([Unable to locate required GLES 1.x Common Profile library])])
-              ])
-
-            EGL_CHECKED=yes
-          ])
-      ])
 
 HAVE_GLES2=0
 AC_ARG_ENABLE(
@@ -591,10 +361,6 @@ AC_ARG_WITH([gl-libname],
             [AS_HELP_STRING([--with-gl-libname],
                             override the name of the GL library to dlopen)],
             [COGL_GL_LIBNAME="$withval"])
-AC_ARG_WITH([gles1-libname],
-            [AS_HELP_STRING([--with-gles1-libname],
-                            override the name of the GLESv1 library to dlopen)],
-            [COGL_GLES1_LIBNAME="$withval"])
 AC_ARG_WITH([gles2-libname],
             [AS_HELP_STRING([--with-gles2-libname],
                             override the name of the GLESv2 library to dlopen)],
@@ -611,8 +377,6 @@ AM_CONDITIONAL(HAVE_COGL_DEFAULT_DRIVER,
 
 AC_SUBST([COGL_GL_LIBNAME])
 AC_SUBST([HAVE_GL])
-AC_SUBST([COGL_GLES1_LIBNAME])
-AC_SUBST([HAVE_GLES1])
 AC_SUBST([COGL_GLES2_LIBNAME])
 AC_SUBST([HAVE_GLES2])
 AC_SUBST([COGL_DEFAULT_DRIVER])
@@ -662,39 +426,6 @@ AS_IF([test "x$enable_glx" = "xyes"],
 AM_CONDITIONAL(SUPPORT_GLX, [test "x$SUPPORT_GLX" = "xyes"])
 
 EGL_PLATFORM_COUNT=0
-
-AC_ARG_ENABLE(
-  [kms-egl-platform],
-  [AC_HELP_STRING([--enable-kms-egl-platform=@<:@no/yes@:>@], [Enable support for the KMS egl platform @<:@default=no@:>@])],
-  [],
-  enable_kms_egl_platform=no
-)
-AS_IF([test "x$enable_kms_egl_platform" = "xyes"],
-      [
-        EGL_PLATFORM_COUNT=$((EGL_PLATFORM_COUNT+1))
-        NEED_EGL=yes
-        EGL_PLATFORMS="$EGL_PLATFORMS kms"
-
-        PKG_CHECK_EXISTS([gbm],
-                         [
-                           COGL_PKG_REQUIRES="$COGL_PKG_REQUIRES gbm"
-                           COGL_PKG_REQUIRES="$COGL_PKG_REQUIRES libdrm"
-                         ],
-                         [AC_MSG_ERROR([Unable to locate required libgbm library for the KMS egl platform])])
-
-        GBM_VERSION=`$PKG_CONFIG --modversion gbm`
-        GBM_MAJOR=`echo $GBM_VERSION | cut -d'.' -f1`
-        GBM_MINOR=`echo $GBM_VERSION | cut -d'.' -f2`
-        GBM_MICRO=`echo $GBM_VERSION | cut -d'.' -f3 | sed 's/-.*//'`
-
-        AC_DEFINE_UNQUOTED([COGL_GBM_MAJOR], [$GBM_MAJOR], [The major version for libgbm])
-        AC_DEFINE_UNQUOTED([COGL_GBM_MINOR], [$GBM_MINOR], [The minor version for libgbm])
-        AC_DEFINE_UNQUOTED([COGL_GBM_MICRO], [$GBM_MICRO], [The micro version for libgbm])
-
-        COGL_DEFINES_SYMBOLS="$COGL_DEFINES_SYMBOLS COGL_HAS_EGL_PLATFORM_KMS_SUPPORT"
-      ])
-AM_CONDITIONAL(SUPPORT_EGL_PLATFORM_KMS,
-               [test "x$enable_kms_egl_platform" = "xyes"])
 
 AC_ARG_ENABLE(
   [wayland-egl-server],
@@ -825,12 +556,7 @@ if test -n "$COGL_PKG_REQUIRES"; then
 fi
 AC_SUBST(COGL_PANGO_PKG_REQUIRES)
 
-AS_IF([test "x$enable_cogl_pango" = "xyes"],
-  [PKG_CHECK_MODULES(COGL_PANGO_DEP, [$COGL_PANGO_PKG_REQUIRES])]
-)
-AM_CONDITIONAL([BUILD_COGL_PANGO], [test "x$enable_cogl_pango" = "xyes"])
-
-AM_CONDITIONAL([BUILD_COGL_PATH], [test "x$enable_cogl_path" = "xyes"])
+PKG_CHECK_MODULES(COGL_PANGO_DEP, [$COGL_PANGO_PKG_REQUIRES])
 
 dnl ================================================================
 dnl Misc program dependencies.
@@ -848,10 +574,6 @@ dnl ================================================================
 AC_PATH_X
 AC_HEADER_STDC
 AC_CHECK_HEADERS(fcntl.h limits.h unistd.h)
-AC_CHECK_HEADER([endian.h],
-                [AC_CHECK_DECL([__FLOAT_WORD_ORDER],
-                               AC_DEFINE([HAVE_FLOAT_WORD_ORDER], [1],
-                                         [Has the __FLOAT_WORD_ORDER macro]))])
 
 dnl ================================================================
 dnl Checks for library functions.
@@ -951,6 +673,8 @@ AC_SUBST(COGL_EXTRA_LDFLAGS)
 MAINTAINER_CFLAGS=
 AC_SUBST(MAINTAINER_CFLAGS)
 
+AC_DEFINE([COGL_CONFIG_H_INCLUDED], 1, [cogl-config.h was included])
+
 AC_OUTPUT(
 Makefile
 test-fixtures/Makefile
@@ -1003,8 +727,6 @@ echo "        Wayland compositor support: ${enable_wayland_egl_server}"
 fi
 echo "        Build libcogl-gles2 GLES 2.0 frontend api: ${enable_cogl_gles2}"
 echo "        Image backend: ${COGL_IMAGE_BACKEND}"
-echo "        Cogl Pango: ${enable_cogl_pango}"
-echo "        Cogl Path: ${enable_cogl_path}"
 
 # Compiler/Debug related flags
 echo ""

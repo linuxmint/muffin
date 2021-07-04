@@ -327,7 +327,7 @@ clutter_egl_get_egl_display (void)
       return 0;
     }
 
-#if COGL_HAS_EGL_SUPPORT
+#ifdef COGL_HAS_EGL_SUPPORT
   return cogl_egl_context_get_egl_display (backend->cogl_context);
 #else
   return 0;

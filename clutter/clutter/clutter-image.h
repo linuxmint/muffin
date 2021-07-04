@@ -100,14 +100,14 @@ struct _ClutterImageClass
   gpointer _padding[16];
 };
 
-CLUTTER_AVAILABLE_IN_1_10
+CLUTTER_EXPORT
 GQuark clutter_image_error_quark (void);
-CLUTTER_AVAILABLE_IN_1_10
+CLUTTER_EXPORT
 GType clutter_image_get_type (void) G_GNUC_CONST;
 
-CLUTTER_AVAILABLE_IN_1_10
+CLUTTER_EXPORT
 ClutterContent *        clutter_image_new               (void);
-CLUTTER_AVAILABLE_IN_1_10
+CLUTTER_EXPORT
 gboolean                clutter_image_set_data          (ClutterImage                 *image,
                                                          const guint8                 *data,
                                                          CoglPixelFormat               pixel_format,
@@ -115,14 +115,14 @@ gboolean                clutter_image_set_data          (ClutterImage           
                                                          guint                         height,
                                                          guint                         row_stride,
                                                          GError                      **error);
-CLUTTER_AVAILABLE_IN_1_10
+CLUTTER_EXPORT
 gboolean                clutter_image_set_area          (ClutterImage                 *image,
                                                          const guint8                 *data,
                                                          CoglPixelFormat               pixel_format,
                                                          const cairo_rectangle_int_t  *rect,
                                                          guint                         row_stride,
                                                          GError                      **error);
-CLUTTER_AVAILABLE_IN_1_12
+CLUTTER_EXPORT
 gboolean                clutter_image_set_bytes         (ClutterImage                 *image,
                                                          GBytes                       *data,
                                                          CoglPixelFormat               pixel_format,
@@ -131,7 +131,7 @@ gboolean                clutter_image_set_bytes         (ClutterImage           
                                                          guint                         row_stride,
                                                          GError                      **error);
 
-CLUTTER_AVAILABLE_IN_1_10
+CLUTTER_EXPORT
 CoglTexture *           clutter_image_get_texture       (ClutterImage                 *image);
 
 G_END_DECLS

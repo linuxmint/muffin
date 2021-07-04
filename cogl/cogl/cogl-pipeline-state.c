@@ -31,9 +31,7 @@
  *   Robert Bragg <robert@linux.intel.com>
  */
 
-#ifdef HAVE_CONFIG_H
 #include "cogl-config.h"
-#endif
 
 #include "cogl-context-private.h"
 #include "cogl-color-private.h"
@@ -1176,17 +1174,6 @@ cogl_pipeline_set_depth_state (CoglPipeline *pipeline,
       orig_state->range_near == depth_state->range_near &&
       orig_state->range_far == depth_state->range_far)
     return TRUE;
-
-  if (ctx->driver == COGL_DRIVER_GLES1 &&
-      (depth_state->range_near != 0 ||
-       depth_state->range_far != 1))
-    {
-      _cogl_set_error (error,
-                       COGL_SYSTEM_ERROR,
-                       COGL_SYSTEM_ERROR_UNSUPPORTED,
-                       "glDepthRange not available on GLES 1");
-      return FALSE;
-    }
 
   /* - Flush journal primitives referencing the current state.
    * - Make sure the pipeline has no dependants so it may be modified.

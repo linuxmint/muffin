@@ -29,7 +29,7 @@ struct _ClutterEventTranslatorIface
                                               ClutterEvent           *translated);
 };
 
-CLUTTER_AVAILABLE_IN_MUFFIN
+CLUTTER_EXPORT
 GType _clutter_event_translator_get_type (void) G_GNUC_CONST;
 
 ClutterTranslateReturn _clutter_event_translator_translate_event (ClutterEventTranslator *translator,

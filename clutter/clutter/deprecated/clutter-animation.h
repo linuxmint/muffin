@@ -94,115 +94,115 @@ struct _ClutterAnimationClass
   void (*_clutter_reserved8) (void);
 };
 
-CLUTTER_DEPRECATED_IN_1_12
+CLUTTER_DEPRECATED
 GType clutter_animation_get_type (void) G_GNUC_CONST;
 
-CLUTTER_DEPRECATED_IN_1_12_FOR(clutter_property_transition_new)
+CLUTTER_DEPRECATED_FOR(clutter_property_transition_new)
 ClutterAnimation *      clutter_animation_new                   (void);
 
-CLUTTER_DEPRECATED_IN_1_12_FOR(clutter_transition_set_animatable)
+CLUTTER_DEPRECATED_FOR(clutter_transition_set_animatable)
 void                    clutter_animation_set_object            (ClutterAnimation     *animation,
                                                                  GObject              *object);
-CLUTTER_DEPRECATED_IN_1_12_FOR(clutter_transition_get_animatable)
+CLUTTER_DEPRECATED_FOR(clutter_transition_get_animatable)
 GObject *               clutter_animation_get_object            (ClutterAnimation     *animation);
-CLUTTER_DEPRECATED_IN_1_12_FOR(clutter_timeline_set_progress_mode)
+CLUTTER_DEPRECATED_FOR(clutter_timeline_set_progress_mode)
 void                    clutter_animation_set_mode              (ClutterAnimation     *animation,
                                                                  gulong                mode);
-CLUTTER_DEPRECATED_IN_1_12_FOR(clutter_timeline_get_progress_mode)
+CLUTTER_DEPRECATED_FOR(clutter_timeline_get_progress_mode)
 gulong                  clutter_animation_get_mode              (ClutterAnimation     *animation);
-CLUTTER_DEPRECATED_IN_1_12_FOR(clutter_timeline_set_duration)
+CLUTTER_DEPRECATED_FOR(clutter_timeline_set_duration)
 void                    clutter_animation_set_duration          (ClutterAnimation     *animation,
                                                                  guint                 msecs);
-CLUTTER_DEPRECATED_IN_1_12_FOR(clutter_timeline_get_duration)
+CLUTTER_DEPRECATED_FOR(clutter_timeline_get_duration)
 guint                   clutter_animation_get_duration          (ClutterAnimation     *animation);
-CLUTTER_DEPRECATED_IN_1_12_FOR(clutter_timeline_set_repeat_count)
+CLUTTER_DEPRECATED_FOR(clutter_timeline_set_repeat_count)
 void                    clutter_animation_set_loop              (ClutterAnimation     *animation,
                                                                  gboolean              loop);
-CLUTTER_DEPRECATED_IN_1_12_FOR(clutter_timeline_get_repeat_count)
+CLUTTER_DEPRECATED_FOR(clutter_timeline_get_repeat_count)
 gboolean                clutter_animation_get_loop              (ClutterAnimation     *animation);
-CLUTTER_DEPRECATED_IN_1_12
+CLUTTER_DEPRECATED
 void                    clutter_animation_set_timeline          (ClutterAnimation     *animation,
                                                                  ClutterTimeline      *timeline);
-CLUTTER_DEPRECATED_IN_1_12
+CLUTTER_DEPRECATED
 ClutterTimeline *       clutter_animation_get_timeline          (ClutterAnimation     *animation);
-CLUTTER_DEPRECATED_IN_1_10_FOR(clutter_animation_set_timeline)
+CLUTTER_DEPRECATED_FOR(clutter_animation_set_timeline)
 void                    clutter_animation_set_alpha             (ClutterAnimation     *animation,
                                                                  ClutterAlpha         *alpha);
-CLUTTER_DEPRECATED_IN_1_10_FOR(clutter_animation_get_timeline)
+CLUTTER_DEPRECATED_FOR(clutter_animation_get_timeline)
 ClutterAlpha *          clutter_animation_get_alpha             (ClutterAnimation     *animation);
-CLUTTER_DEPRECATED_IN_1_12
+CLUTTER_DEPRECATED
 ClutterAnimation *      clutter_animation_bind                  (ClutterAnimation     *animation,
                                                                  const gchar          *property_name,
                                                                  const GValue         *final);
-CLUTTER_DEPRECATED_IN_1_12_FOR(clutter_transition_set_interval)
+CLUTTER_DEPRECATED_FOR(clutter_transition_set_interval)
 ClutterAnimation *      clutter_animation_bind_interval         (ClutterAnimation     *animation,
                                                                  const gchar          *property_name,
                                                                  ClutterInterval      *interval);
-CLUTTER_DEPRECATED_IN_1_12
+CLUTTER_DEPRECATED
 gboolean                clutter_animation_has_property          (ClutterAnimation     *animation,
                                                                  const gchar          *property_name);
-CLUTTER_DEPRECATED_IN_1_12
+CLUTTER_DEPRECATED
 ClutterAnimation *      clutter_animation_update                (ClutterAnimation     *animation,
                                                                  const gchar          *property_name,
                                                                  const GValue         *final);
-CLUTTER_DEPRECATED_IN_1_12
+CLUTTER_DEPRECATED
 void                    clutter_animation_update_interval       (ClutterAnimation     *animation,
                                                                  const gchar          *property_name,
                                                                  ClutterInterval      *interval);
-CLUTTER_DEPRECATED_IN_1_12
+CLUTTER_DEPRECATED
 void                    clutter_animation_unbind_property       (ClutterAnimation     *animation,
                                                                  const gchar          *property_name);
-CLUTTER_DEPRECATED_IN_1_12
+CLUTTER_DEPRECATED
 ClutterInterval     *   clutter_animation_get_interval          (ClutterAnimation     *animation,
                                                                  const gchar          *property_name);
-CLUTTER_DEPRECATED_IN_1_12
+CLUTTER_DEPRECATED
 void                    clutter_animation_completed             (ClutterAnimation     *animation);
 
 /*
  * ClutterActor API
  */
 
-CLUTTER_DEPRECATED_IN_1_12
+CLUTTER_DEPRECATED
 ClutterAnimation *      clutter_actor_animate                   (ClutterActor         *actor,
                                                                  gulong                mode,
                                                                  guint                 duration,
                                                                  const gchar          *first_property_name,
                                                                  ...) G_GNUC_NULL_TERMINATED;
-CLUTTER_DEPRECATED_IN_1_12
+CLUTTER_DEPRECATED
 ClutterAnimation *      clutter_actor_animate_with_timeline     (ClutterActor         *actor,
                                                                  gulong                mode,
                                                                  ClutterTimeline      *timeline,
                                                                  const gchar          *first_property_name,
                                                                  ...) G_GNUC_NULL_TERMINATED;
-CLUTTER_DEPRECATED_IN_1_12
+CLUTTER_DEPRECATED
 ClutterAnimation *      clutter_actor_animatev                  (ClutterActor         *actor,
                                                                  gulong                mode,
                                                                  guint                 duration,
                                                                  gint                  n_properties,
                                                                  const gchar * const   properties[],
                                                                  const GValue         *values);
-CLUTTER_DEPRECATED_IN_1_12
+CLUTTER_DEPRECATED
 ClutterAnimation *      clutter_actor_animate_with_timelinev    (ClutterActor         *actor,
                                                                  gulong                mode,
                                                                  ClutterTimeline      *timeline,
                                                                  gint                  n_properties,
                                                                  const gchar * const   properties[],
                                                                  const GValue         *values);
-CLUTTER_DEPRECATED_IN_1_10_FOR(clutter_actor_animate_with_timeline)
+CLUTTER_DEPRECATED_FOR(clutter_actor_animate_with_timeline)
 ClutterAnimation *      clutter_actor_animate_with_alpha        (ClutterActor         *actor,
                                                                  ClutterAlpha         *alpha,
                                                                  const gchar          *first_property_name,
                                                                  ...) G_GNUC_NULL_TERMINATED;
-CLUTTER_DEPRECATED_IN_1_10_FOR(clutter_actor_animate_with_timelinev)
+CLUTTER_DEPRECATED_FOR(clutter_actor_animate_with_timelinev)
 ClutterAnimation *      clutter_actor_animate_with_alphav       (ClutterActor         *actor,
                                                                  ClutterAlpha         *alpha,
                                                                  gint                  n_properties,
                                                                  const gchar * const   properties[],
                                                                  const GValue         *values);
 
-CLUTTER_DEPRECATED_IN_1_12
+CLUTTER_DEPRECATED
 ClutterAnimation *      clutter_actor_get_animation             (ClutterActor         *actor);
-CLUTTER_DEPRECATED_IN_1_12
+CLUTTER_DEPRECATED
 void                    clutter_actor_detach_animation          (ClutterActor         *actor);
 
 G_END_DECLS

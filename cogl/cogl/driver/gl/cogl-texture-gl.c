@@ -27,20 +27,16 @@
  *
  */
 
-#ifdef HAVE_CONFIG_H
 #include "cogl-config.h"
-#endif
 
-#ifdef HAVE_STRINGS_H
 #include <strings.h>
-#endif
 
 #include "cogl-context-private.h"
-#include "cogl-util-gl-private.h"
-#include "cogl-texture-gl-private.h"
 #include "cogl-texture-3d-private.h"
 #include "cogl-util.h"
-#include "cogl-pipeline-opengl-private.h"
+#include "driver/gl/cogl-util-gl-private.h"
+#include "driver/gl/cogl-texture-gl-private.h"
+#include "driver/gl/cogl-pipeline-opengl-private.h"
 
 static inline int
 calculate_alignment (int rowstride)

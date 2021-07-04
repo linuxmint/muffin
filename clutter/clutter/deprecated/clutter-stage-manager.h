@@ -32,7 +32,7 @@
 
 G_BEGIN_DECLS
 
-CLUTTER_DEPRECATED_IN_1_2
+CLUTTER_DEPRECATED
 void    clutter_stage_manager_set_default_stage (ClutterStageManager *stage_manager,
                                                  ClutterStage        *stage);
 

@@ -23,9 +23,7 @@
  * Author: Jonas Ådahl <jadahl@gmail.com>
  */
 
-#ifdef HAVE_CONFIG_H
 #include "clutter-build-config.h"
-#endif
 
 #include <math.h>
 
@@ -313,8 +311,7 @@ start_slow_keys (ClutterEvent               *event,
   SlowKeysEventPending *slow_keys_event;
   ClutterKeyEvent *key_event = (ClutterKeyEvent *) event;
 
-  /* Synthetic key events are for autorepeat, ignore those... */
-  if (key_event->flags & CLUTTER_EVENT_FLAG_SYNTHETIC)
+  if (key_event->flags & CLUTTER_EVENT_FLAG_REPEATED)
     return;
 
   slow_keys_event = g_new0 (SlowKeysEventPending, 1);

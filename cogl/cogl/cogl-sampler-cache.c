@@ -30,13 +30,11 @@
  *   Neil Roberts <neil@linux.intel.com>
  */
 
-#ifdef HAVE_CONFIG_H
 #include "cogl-config.h"
-#endif
 
 #include "cogl-sampler-cache-private.h"
 #include "cogl-context-private.h"
-#include "cogl-util-gl-private.h"
+#include "driver/gl/cogl-util-gl-private.h"
 
 #ifndef GL_TEXTURE_WRAP_R
 #define GL_TEXTURE_WRAP_R 0x8072

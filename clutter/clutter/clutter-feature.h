@@ -32,9 +32,9 @@
 
 G_BEGIN_DECLS
 
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 gboolean            clutter_feature_available       (ClutterFeatureFlags feature);
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 ClutterFeatureFlags clutter_feature_get_all         (void);
 
 G_END_DECLS

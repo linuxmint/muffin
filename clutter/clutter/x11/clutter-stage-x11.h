@@ -82,7 +82,7 @@ struct _ClutterStageX11Class
   ClutterStageCoglClass parent_class;
 };
 
-CLUTTER_AVAILABLE_IN_MUFFIN
+CLUTTER_EXPORT
 GType _clutter_stage_x11_get_type (void) G_GNUC_CONST;
 
 void  _clutter_stage_x11_events_device_changed (ClutterStageX11 *stage_x11,

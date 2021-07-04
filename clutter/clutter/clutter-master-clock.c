@@ -31,9 +31,7 @@
  * painting it.
  */
 
-#ifdef HAVE_CONFIG_H
 #include "clutter-build-config.h"
-#endif
 
 #include "clutter-master-clock.h"
 #include "clutter-master-clock-default.h"

@@ -48,16 +48,16 @@ G_BEGIN_DECLS
 typedef struct _ClutterDesaturateEffect         ClutterDesaturateEffect;
 typedef struct _ClutterDesaturateEffectClass    ClutterDesaturateEffectClass;
 
-CLUTTER_AVAILABLE_IN_1_4
+CLUTTER_EXPORT
 GType clutter_desaturate_effect_get_type (void) G_GNUC_CONST;
 
-CLUTTER_AVAILABLE_IN_1_4
+CLUTTER_EXPORT
 ClutterEffect *clutter_desaturate_effect_new        (gdouble                  factor);
 
-CLUTTER_AVAILABLE_IN_1_4
+CLUTTER_EXPORT
 void           clutter_desaturate_effect_set_factor (ClutterDesaturateEffect *effect,
                                                      gdouble                  factor);
-CLUTTER_AVAILABLE_IN_1_4
+CLUTTER_EXPORT
 gdouble        clutter_desaturate_effect_get_factor (ClutterDesaturateEffect *effect);
 
 G_END_DECLS

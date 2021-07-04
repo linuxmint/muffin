@@ -78,15 +78,15 @@ struct _ClutterCloneClass
   void (*_clutter_actor_clone4) (void);
 };
 
-CLUTTER_AVAILABLE_IN_1_0
+CLUTTER_EXPORT
 GType clutter_clone_get_type (void) G_GNUC_CONST;
 
-CLUTTER_AVAILABLE_IN_1_0
+CLUTTER_EXPORT
 ClutterActor *  clutter_clone_new               (ClutterActor *source);
-CLUTTER_AVAILABLE_IN_1_0
+CLUTTER_EXPORT
 void            clutter_clone_set_source        (ClutterClone *self,
                                                  ClutterActor *source);
-CLUTTER_AVAILABLE_IN_1_0
+CLUTTER_EXPORT
 ClutterActor *  clutter_clone_get_source        (ClutterClone *self);
 
 G_END_DECLS

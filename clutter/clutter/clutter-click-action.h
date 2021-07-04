@@ -97,22 +97,22 @@ struct _ClutterClickActionClass
   void (* _clutter_click_action7) (void);
 };
 
-CLUTTER_AVAILABLE_IN_1_4
+CLUTTER_EXPORT
 GType clutter_click_action_get_type (void) G_GNUC_CONST;
 
-CLUTTER_AVAILABLE_IN_1_4
+CLUTTER_EXPORT
 ClutterAction *        clutter_click_action_new        (void);
 
-CLUTTER_AVAILABLE_IN_1_4
+CLUTTER_EXPORT
 guint                  clutter_click_action_get_button (ClutterClickAction *action);
-CLUTTER_AVAILABLE_IN_1_4
+CLUTTER_EXPORT
 ClutterModifierType    clutter_click_action_get_state  (ClutterClickAction *action);
-CLUTTER_AVAILABLE_IN_1_8
+CLUTTER_EXPORT
 void                   clutter_click_action_get_coords (ClutterClickAction *action,
                                                         gfloat             *press_x,
                                                         gfloat             *press_y);
 
-CLUTTER_AVAILABLE_IN_1_4
+CLUTTER_EXPORT
 void                   clutter_click_action_release    (ClutterClickAction *action);
 
 G_END_DECLS

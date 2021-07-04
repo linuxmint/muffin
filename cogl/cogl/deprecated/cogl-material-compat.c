@@ -29,16 +29,14 @@
  *  Robert Bragg <robert@linux.intel.com>
  */
 
-#ifdef HAVE_CONFIG_H
 #include "cogl-config.h"
-#endif
 
-#include <cogl-material-compat.h>
 #include <cogl-pipeline.h>
 #include <cogl-pipeline-private.h>
 #include <cogl-types.h>
 #include <cogl-matrix.h>
 #include <cogl-context-private.h>
+#include <deprecated/cogl-material-compat.h>
 
 G_DEFINE_BOXED_TYPE (CoglMaterial, cogl_material,
                      cogl_object_ref, cogl_object_unref)

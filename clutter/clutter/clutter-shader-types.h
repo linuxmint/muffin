@@ -70,32 +70,32 @@ typedef struct _ClutterShaderMatrix   ClutterShaderMatrix;
  */
 #define CLUTTER_VALUE_HOLDS_SHADER_MATRIX(x) (G_VALUE_HOLDS ((x), CLUTTER_TYPE_SHADER_MATRIX))
 
-CLUTTER_AVAILABLE_IN_1_0
+CLUTTER_EXPORT
 GType clutter_shader_float_get_type  (void) G_GNUC_CONST;
-CLUTTER_AVAILABLE_IN_1_0
+CLUTTER_EXPORT
 GType clutter_shader_int_get_type    (void) G_GNUC_CONST;
-CLUTTER_AVAILABLE_IN_1_0
+CLUTTER_EXPORT
 GType clutter_shader_matrix_get_type (void) G_GNUC_CONST;
 
-CLUTTER_AVAILABLE_IN_1_0
+CLUTTER_EXPORT
 void            clutter_value_set_shader_float  (GValue       *value,
                                                  gint          size,
                                                  const gfloat *floats);
-CLUTTER_AVAILABLE_IN_1_0
+CLUTTER_EXPORT
 void            clutter_value_set_shader_int    (GValue       *value,
                                                  gint          size,
                                                  const gint   *ints);
-CLUTTER_AVAILABLE_IN_1_0
+CLUTTER_EXPORT
 void            clutter_value_set_shader_matrix (GValue       *value,
                                                  gint          size,
                                                  const gfloat *matrix);
-CLUTTER_AVAILABLE_IN_1_0
+CLUTTER_EXPORT
 const gfloat *  clutter_value_get_shader_float  (const GValue *value,
                                                  gsize        *length);
-CLUTTER_AVAILABLE_IN_1_0
+CLUTTER_EXPORT
 const gint   *  clutter_value_get_shader_int    (const GValue *value,
                                                  gsize        *length);
-CLUTTER_AVAILABLE_IN_1_0
+CLUTTER_EXPORT
 const gfloat *  clutter_value_get_shader_matrix (const GValue *value,
                                                  gsize        *length);
 

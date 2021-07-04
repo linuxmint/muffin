@@ -32,29 +32,27 @@
  *   Neil Roberts <neil@linux.intel.com>
  */
 
-#ifdef HAVE_CONFIG_H
 #include "cogl-config.h"
-#endif
 
 #include <string.h>
 
 #include "cogl-context-private.h"
-#include "cogl-util-gl-private.h"
 #include "cogl-pipeline-private.h"
 #include "cogl-pipeline-layer-private.h"
 #include "cogl-blend-string.h"
 #include "cogl-snippet-private.h"
 #include "cogl-list.h"
+#include "driver/gl/cogl-util-gl-private.h"
 
 #ifdef COGL_PIPELINE_FRAGEND_GLSL
 
 #include "cogl-context-private.h"
 #include "cogl-object-private.h"
-#include "cogl-shader-private.h"
-#include "cogl-program-private.h"
 #include "cogl-pipeline-cache.h"
-#include "cogl-pipeline-fragend-glsl-private.h"
 #include "cogl-glsl-shader-private.h"
+#include "driver/gl/cogl-pipeline-fragend-glsl-private.h"
+#include "deprecated/cogl-shader-private.h"
+#include "deprecated/cogl-program-private.h"
 
 #include <glib.h>
 

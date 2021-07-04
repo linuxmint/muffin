@@ -94,44 +94,44 @@ struct _ClutterCairoTextureClass
   void (*_clutter_cairo_4) (void);
 };
 
-CLUTTER_DEPRECATED_IN_1_12_FOR(clutter_canvas_get_type)
+CLUTTER_DEPRECATED_FOR(clutter_canvas_get_type)
 GType clutter_cairo_texture_get_type (void) G_GNUC_CONST;
 
-CLUTTER_DEPRECATED_IN_1_12_FOR(clutter_canvas_new)
+CLUTTER_DEPRECATED_FOR(clutter_canvas_new)
 ClutterActor *  clutter_cairo_texture_new                       (guint                  width,
                                                                  guint                  height);
 
-CLUTTER_DEPRECATED_IN_1_12_FOR(clutter_canvas_set_size)
+CLUTTER_DEPRECATED_FOR(clutter_canvas_set_size)
 void            clutter_cairo_texture_set_surface_size          (ClutterCairoTexture   *self,
                                                                  guint                  width,
                                                                  guint                  height);
-CLUTTER_DEPRECATED_IN_1_12_FOR(clutter_canvas_get_size)
+CLUTTER_DEPRECATED_FOR(clutter_canvas_get_size)
 void            clutter_cairo_texture_get_surface_size          (ClutterCairoTexture   *self,
                                                                  guint                 *width,
                                                                  guint                 *height);
-CLUTTER_DEPRECATED_IN_1_12
+CLUTTER_DEPRECATED
 void            clutter_cairo_texture_set_auto_resize           (ClutterCairoTexture   *self,
                                                                  gboolean               value);
-CLUTTER_DEPRECATED_IN_1_12
+CLUTTER_DEPRECATED
 gboolean        clutter_cairo_texture_get_auto_resize           (ClutterCairoTexture   *self);
 
-CLUTTER_DEPRECATED_IN_1_12
+CLUTTER_DEPRECATED
 void            clutter_cairo_texture_clear                     (ClutterCairoTexture   *self);
 
-CLUTTER_DEPRECATED_IN_1_12
+CLUTTER_DEPRECATED
 void            clutter_cairo_texture_invalidate_rectangle      (ClutterCairoTexture   *self,
                                                                  cairo_rectangle_int_t *rect);
-CLUTTER_DEPRECATED_IN_1_12
+CLUTTER_DEPRECATED
 void            clutter_cairo_texture_invalidate                (ClutterCairoTexture   *self);
 
-CLUTTER_DEPRECATED_IN_1_8_FOR(clutter_cairo_texture_invalidate_rectangle)
+CLUTTER_DEPRECATED_FOR(clutter_cairo_texture_invalidate_rectangle)
 cairo_t *       clutter_cairo_texture_create_region             (ClutterCairoTexture   *self,
                                                                  gint                   x_offset,
                                                                  gint                   y_offset,
                                                                  gint                   width,
                                                                  gint                   height);
 
-CLUTTER_DEPRECATED_IN_1_8_FOR(clutter_cairo_texture_invalidate)
+CLUTTER_DEPRECATED_FOR(clutter_cairo_texture_invalidate)
 cairo_t *       clutter_cairo_texture_create                    (ClutterCairoTexture   *self);
 
 G_END_DECLS

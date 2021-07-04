@@ -14,6 +14,9 @@ shift
 TEST_BINARY=$1
 shift
 
+UNIT_TESTS_FILE=$1
+shift
+
 . $ENVIRONMENT_CONFIG
 
 set +m
@@ -88,7 +91,7 @@ printf $TITLE_FORMAT "Test"
 
 if test $HAVE_GL -eq 1; then
   GL_FORMAT=" %6s %8s %7s %6s %6s"
-  printf "$GL_FORMAT" "GL+FF" "GL+ARBFP" "GL+GLSL" "GL-NPT" "GL3"
+  printf "$GL_FORMAT" "GL+GLSL" "GL-NPT" "GL3"
 fi
 if test $HAVE_GLES2 -eq 1; then
   GLES2_FORMAT=" %6s %7s"
@@ -98,15 +101,16 @@ fi
 echo ""
 echo ""
 
-for test in `cat unit-tests`
+if [ ! -f $UNIT_TESTS_FILE ]; then
+  echo Missing unit-tests file
+  exit 1
+fi
+
+for test in `cat $UNIT_TESTS_FILE`
 do
   export COGL_DEBUG=
 
   if test $HAVE_GL -eq 1; then
-    export COGL_DRIVER=gl
-    export COGL_DEBUG=disable-glsl,disable-arbfp
-    run_test $test gl_ff
-
     export COGL_DRIVER=gl
     # NB: we can't explicitly disable fixed + glsl in this case since
     # the arbfp code only supports fragment processing so we need either
@@ -140,8 +144,6 @@ do
   printf $TITLE_FORMAT "$test:"
   if test $HAVE_GL -eq 1; then
     printf "$GL_FORMAT" \
-      "`get_status $gl_ff_result`" \
-      "`get_status $gl_arbfp_result`" \
       "`get_status $gl_glsl_result`" \
       "`get_status $gl_npot_result`" \
       "`get_status $gl3_result`"

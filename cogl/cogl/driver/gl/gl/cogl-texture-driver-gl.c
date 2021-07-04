@@ -33,9 +33,7 @@
  *  Robert Bragg   <robert@linux.intel.com>
  */
 
-#ifdef HAVE_CONFIG_H
 #include "cogl-config.h"
-#endif
 
 #include "cogl-private.h"
 #include "cogl-util.h"
@@ -46,10 +44,10 @@
 #include "cogl-context-private.h"
 #include "cogl-object-private.h"
 #include "cogl-primitives.h"
-#include "cogl-pipeline-opengl-private.h"
-#include "cogl-util-gl-private.h"
 #include "cogl-error-private.h"
-#include "cogl-texture-gl-private.h"
+#include "driver/gl/cogl-pipeline-opengl-private.h"
+#include "driver/gl/cogl-util-gl-private.h"
+#include "driver/gl/cogl-texture-gl-private.h"
 
 #include <string.h>
 #include <stdlib.h>
@@ -480,7 +478,7 @@ _cogl_texture_driver_size_supported (CoglContext *ctx,
 
   if (gl_target == GL_TEXTURE_2D)
     proxy_target = GL_PROXY_TEXTURE_2D;
-#if HAVE_COGL_GL
+#ifdef HAVE_COGL_GL
   else if (gl_target == GL_TEXTURE_RECTANGLE_ARB)
     proxy_target = GL_PROXY_TEXTURE_RECTANGLE_ARB;
 #endif

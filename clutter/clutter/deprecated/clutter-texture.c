@@ -43,9 +43,7 @@
  * recommended to use #ClutterImage instead.
  */
 
-#ifdef HAVE_CONFIG_H
 #include "clutter-build-config.h"
-#endif
 
 /* sadly, we are still using ClutterShader internally */
 #define CLUTTER_DISABLE_DEPRECATION_WARNINGS

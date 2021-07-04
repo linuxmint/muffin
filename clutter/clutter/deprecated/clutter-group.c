@@ -47,9 +47,7 @@
  * manage child actors.
  */
 
-#ifdef HAVE_CONFIG_H
 #include "clutter-build-config.h"
-#endif
 
 #include <stdarg.h>
 

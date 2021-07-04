@@ -32,16 +32,14 @@
  *  Robert Bragg   <robert@linux.intel.com>
  */
 
-#ifdef HAVE_CONFIG_H
 #include "cogl-config.h"
-#endif
 
 #include "cogl-context-private.h"
-#include "cogl-util-gl-private.h"
 #include "cogl-primitives-private.h"
-#include "cogl-pipeline-opengl-private.h"
-#include "cogl-clip-stack-gl-private.h"
 #include "cogl-primitive-private.h"
+#include "driver/gl/cogl-util-gl-private.h"
+#include "driver/gl/cogl-pipeline-opengl-private.h"
+#include "driver/gl/cogl-clip-stack-gl-private.h"
 
 #ifndef GL_CLIP_PLANE0
 #define GL_CLIP_PLANE0 0x3000
@@ -123,10 +121,6 @@ set_clip_plane (CoglFramebuffer *framebuffer,
     {
     default:
       g_assert_not_reached ();
-      break;
-
-    case COGL_DRIVER_GLES1:
-      GE( ctx, glClipPlanef (plane_num, planef) );
       break;
 
     case COGL_DRIVER_GL:

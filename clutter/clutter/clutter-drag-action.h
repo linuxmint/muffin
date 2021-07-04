@@ -105,45 +105,45 @@ struct _ClutterDragActionClass
   void (* _clutter_drag_action4) (void);
 };
 
-CLUTTER_AVAILABLE_IN_1_4
+CLUTTER_EXPORT
 GType clutter_drag_action_get_type (void) G_GNUC_CONST;
 
-CLUTTER_AVAILABLE_IN_1_4
+CLUTTER_EXPORT
 ClutterAction * clutter_drag_action_new                   (void);
 
-CLUTTER_AVAILABLE_IN_1_4
+CLUTTER_EXPORT
 void            clutter_drag_action_set_drag_threshold (ClutterDragAction *action,
                                                         gint               x_threshold,
                                                         gint               y_threshold);
-CLUTTER_AVAILABLE_IN_1_4
+CLUTTER_EXPORT
 void            clutter_drag_action_get_drag_threshold (ClutterDragAction *action,
                                                         guint             *x_threshold,
                                                         guint             *y_threshold);
-CLUTTER_AVAILABLE_IN_1_4
+CLUTTER_EXPORT
 void            clutter_drag_action_set_drag_handle    (ClutterDragAction *action,
                                                         ClutterActor      *handle);
-CLUTTER_AVAILABLE_IN_1_4
+CLUTTER_EXPORT
 ClutterActor *  clutter_drag_action_get_drag_handle    (ClutterDragAction *action);
-CLUTTER_AVAILABLE_IN_1_4
+CLUTTER_EXPORT
 void            clutter_drag_action_set_drag_axis      (ClutterDragAction *action,
                                                         ClutterDragAxis    axis);
-CLUTTER_AVAILABLE_IN_1_4
+CLUTTER_EXPORT
 ClutterDragAxis clutter_drag_action_get_drag_axis      (ClutterDragAction *action);
 
-CLUTTER_AVAILABLE_IN_1_4
+CLUTTER_EXPORT
 void            clutter_drag_action_get_press_coords   (ClutterDragAction *action,
                                                         gfloat            *press_x,
                                                         gfloat            *press_y);
-CLUTTER_AVAILABLE_IN_1_4
+CLUTTER_EXPORT
 void            clutter_drag_action_get_motion_coords  (ClutterDragAction *action,
                                                         gfloat            *motion_x,
                                                         gfloat            *motion_y);
 
-CLUTTER_AVAILABLE_IN_1_12
+CLUTTER_EXPORT
 gboolean        clutter_drag_action_get_drag_area      (ClutterDragAction *action,
                                                         ClutterRect       *drag_area);
 
-CLUTTER_AVAILABLE_IN_1_12
+CLUTTER_EXPORT
 void            clutter_drag_action_set_drag_area      (ClutterDragAction *action,
                                                         const ClutterRect *drag_area);
 

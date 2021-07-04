@@ -31,9 +31,7 @@
  * that cover all the state changes available.
  */
 
-#ifdef HAVE_CONFIG_H
 #include "clutter-build-config.h"
-#endif
 
 #define CLUTTER_ENABLE_EXPERIMENTAL_API
 
@@ -820,8 +818,8 @@ clutter_text_node_draw (ClutterPaintNode *node)
             }
 
           cogl_pango_render_layout (tnode->layout,
-                                    op->op.texrect[0],
-                                    op->op.texrect[1],
+                                    op->op.texrect[4],
+                                    op->op.texrect[5],
                                     &tnode->color,
                                     0);
 

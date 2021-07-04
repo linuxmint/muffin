@@ -28,9 +28,7 @@
  *
  */
 
-#ifdef HAVE_CONFIG_H
 #include "cogl-config.h"
-#endif
 
 #include "cogl-clip-stack.h"
 #include "cogl-clip-stack-nop-private.h"

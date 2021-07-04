@@ -51,6 +51,14 @@ gboolean _clutter_keymap_x11_get_is_modifier     (ClutterKeymapX11    *keymap,
 
 PangoDirection _clutter_keymap_x11_get_direction (ClutterKeymapX11    *keymap);
 
+gboolean clutter_keymap_x11_keycode_for_keyval (ClutterKeymapX11 *keymap_x11,
+                                                guint             keyval,
+                                                guint            *keycode_out,
+                                                guint            *level_out);
+void     clutter_keymap_x11_latch_modifiers (ClutterKeymapX11 *keymap_x11,
+                                             uint32_t          level,
+                                             gboolean          enable);
+
 G_END_DECLS
 
 #endif /* __CLUTTER_KEYMAP_X11_H__ */

@@ -10,17 +10,13 @@ EXTRA_DIST =
 BUILT_SOURCES =
 
 AM_CPPFLAGS = \
-	-DCLUTTER_PREFIX=\""$(prefix)"\"	\
-	-DCLUTTER_LIBDIR=\""$(libdir)"\"	\
-	-DCLUTTER_DATADIR=\""$(datadir)"\"	\
-	-DCLUTTER_LOCALEDIR=\""$(localedir)"\"	\
 	-DCLUTTER_SYSCONFDIR=\""$(sysconfdir)"\" \
 	-DCLUTTER_COMPILATION=1			\
 	-DCOGL_DISABLE_DEPRECATION_WARNINGS	\
 	-DG_LOG_DOMAIN=\"Clutter\" 		\
+	-fvisibility=hidden			\
 	-I$(top_srcdir) 			\
 	-I$(top_srcdir)/clutter			\
-	-I$(top_srcdir)/clutter/cally		\
 	-I$(top_builddir)			\
 	-I$(top_builddir)/clutter		\
 	-I$(top_srcdir)/../cogl			\
@@ -28,7 +24,6 @@ AM_CPPFLAGS = \
 	-I$(top_builddir)/../cogl/cogl		\
 	$(CLUTTER_DEPRECATED_CFLAGS)		\
 	$(CLUTTER_DEBUG_CFLAGS)			\
-	$(CLUTTER_HIDDEN_VISIBILITY_CFLAGS)	\
 	$(NULL)
 
 AM_CFLAGS = $(CLUTTER_CFLAGS) $(MAINTAINER_CFLAGS)
@@ -355,10 +350,6 @@ built_source_h = \
 DISTCLEANFILES += clutter-config.h
 EXTRA_DIST += clutter-config.h.in
 
-# version header
-DISTCLEANFILES += clutter-version.h
-EXTRA_DIST += clutter-version.h.in clutter-version.h
-
 # key symbol update script
 EXTRA_DIST += clutter-keysyms-update.pl
 
@@ -447,9 +438,6 @@ backend_source_c_priv += $(x11_source_c_priv)
 # the list of files we want to introspect on X11
 x11_introspection = $(x11_source_c) $(x11_source_h)
 
-clutterx11_includedir = $(clutter_includedir)/x11
-clutterx11_include_HEADERS = $(x11_source_h)
-
 muffin-clutter-x11-@MUFFIN_PLUGIN_API_VERSION@.pc: muffin-clutter-$(MUFFIN_PLUGIN_API_VERSION).pc
 	$(QUIET_GEN)cp -f $< $(@F)
 
@@ -498,9 +486,6 @@ backend_source_c_priv += $(evdev_c_priv)
 backend_source_h_priv += $(evdev_h_priv)
 backend_source_h += $(evdev_h)
 
-clutterevdev_includedir = $(clutter_includedir)/evdev
-clutterevdev_include_HEADERS = $(evdev_h)
-
 backend_source_c += evdev/clutter-xkb-utils.c
 backend_source_h_priv += evdev/clutter-xkb-utils.h
 
@@ -520,15 +505,10 @@ backend_source_h += $(wayland_compositor_source_h)
 backend_source_c += \
 	wayland/clutter-wayland-surface.c
 
-wayland_compositor_includedir = $(clutter_includedir)/wayland
-wayland_compositor_include_HEADERS = $(wayland_compositor_source_h)
-
 backend_source_h += $(egl_source_h)
 backend_source_c += $(egl_source_c)
 backend_source_h_priv += $(egl_source_h_priv)
 
-clutteregl_includedir = $(clutter_includedir)/egl
-clutteregl_include_HEADERS = $(egl_source_h)
 endif # SUPPORT_WAYLAND
 
 # cally
@@ -564,9 +544,6 @@ cally_sources_private = \
 	cally/cally-actor-private.h	\
 	$(NULL)
 
-cally_includedir = $(clutter_base_includedir)/cally
-cally_include_HEADERS = $(cally_sources_h)
-
 # general build rules:
 # you should not need to modify anything below this point
 
@@ -585,7 +562,7 @@ pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = $(pc_files)
 DISTCLEANFILES += $(pc_files)
 
-clutter_include_HEADERS = $(source_h) clutter.h clutter-version.h clutter-autocleanups.h clutter-muffin.h
+clutter_include_HEADERS = $(source_h) clutter.h clutter-autocleanups.h clutter-muffin.h
 nodist_clutter_include_HEADERS = clutter-config.h $(built_source_h)
 
 clutter_deprecated_HEADERS = $(deprecated_h)
@@ -628,6 +605,7 @@ libmuffin_clutter_@MUFFIN_PLUGIN_API_VERSION@_la_LDFLAGS = \
 	$(CLUTTER_LINK_FLAGS) \
 	$(CLUTTER_LT_LDFLAGS) \
 	-export-dynamic \
+	-release \
 	-rpath $(muffinlibdir) \
 	$(NULL)
 

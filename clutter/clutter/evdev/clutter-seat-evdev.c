@@ -141,7 +141,7 @@ clutter_seat_evdev_release_touch_state (ClutterSeatEvdev  *seat,
                                         ClutterTouchState *touch_state)
 {
   g_clear_pointer (&seat->touch_states[touch_state->seat_slot],
-                   (GDestroyNotify) clutter_touch_state_free);
+                   clutter_touch_state_free);
 }
 
 ClutterSeatEvdev *
@@ -309,7 +309,7 @@ clutter_seat_evdev_notify_key (ClutterSeatEvdev   *seat,
   else
     {
       changed_state = 0;
-      clutter_event_set_flags (event, CLUTTER_EVENT_FLAG_SYNTHETIC);
+      clutter_event_set_flags (event, CLUTTER_EVENT_FLAG_REPEATED);
     }
 
   queue_event (event);

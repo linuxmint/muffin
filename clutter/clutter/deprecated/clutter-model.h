@@ -198,102 +198,102 @@ struct _ClutterModelClass
   void (*_clutter_model_8) (void);
 };
 
-CLUTTER_DEPRECATED_IN_1_24_FOR(g_list_model_get_type)
+CLUTTER_DEPRECATED_FOR(g_list_model_get_type)
 GType                 clutter_model_get_type           (void) G_GNUC_CONST;
 
-CLUTTER_DEPRECATED_IN_1_24_FOR(GListModel)
+CLUTTER_DEPRECATED_FOR(GListModel)
 void                  clutter_model_set_types          (ClutterModel     *model,
                                                         guint             n_columns,
                                                         GType            *types);
-CLUTTER_DEPRECATED_IN_1_24_FOR(GListModel)
+CLUTTER_DEPRECATED_FOR(GListModel)
 void                  clutter_model_set_names          (ClutterModel     *model,
                                                         guint             n_columns,
                                                         const gchar * const names[]);
 
-CLUTTER_DEPRECATED_IN_1_24_FOR(GListModel)
+CLUTTER_DEPRECATED_FOR(GListModel)
 void                  clutter_model_append             (ClutterModel     *model,
                                                         ...);
-CLUTTER_DEPRECATED_IN_1_24_FOR(GListModel)
+CLUTTER_DEPRECATED_FOR(GListModel)
 void                  clutter_model_appendv            (ClutterModel     *model,
                                                         guint             n_columns,
                                                         guint            *columns,
                                                         GValue           *values);
-CLUTTER_DEPRECATED_IN_1_24_FOR(GListModel)
+CLUTTER_DEPRECATED_FOR(GListModel)
 void                  clutter_model_prepend            (ClutterModel     *model,
                                                         ...);
-CLUTTER_DEPRECATED_IN_1_24_FOR(GListModel)
+CLUTTER_DEPRECATED_FOR(GListModel)
 void                  clutter_model_prependv           (ClutterModel     *model,
                                                         guint             n_columns,
                                                         guint            *columns,
                                                         GValue           *values);
-CLUTTER_DEPRECATED_IN_1_24_FOR(GListModel)
+CLUTTER_DEPRECATED_FOR(GListModel)
 void                  clutter_model_insert             (ClutterModel     *model,
                                                         guint             row,
                                                         ...);
-CLUTTER_DEPRECATED_IN_1_24_FOR(GListModel)
+CLUTTER_DEPRECATED_FOR(GListModel)
 void                  clutter_model_insertv            (ClutterModel     *model,
                                                         guint             row,
                                                         guint             n_columns,
                                                         guint            *columns,
                                                         GValue           *values);
-CLUTTER_DEPRECATED_IN_1_24_FOR(GListModel)
+CLUTTER_DEPRECATED_FOR(GListModel)
 void                  clutter_model_insert_value       (ClutterModel     *model,
                                                         guint             row,
                                                         guint             column,
                                                         const GValue     *value);
-CLUTTER_DEPRECATED_IN_1_24_FOR(GListModel)
+CLUTTER_DEPRECATED_FOR(GListModel)
 void                  clutter_model_remove             (ClutterModel     *model,
                                                         guint             row);
 
-CLUTTER_DEPRECATED_IN_1_24_FOR(GListModel)
+CLUTTER_DEPRECATED_FOR(GListModel)
 guint                 clutter_model_get_n_rows         (ClutterModel     *model);
-CLUTTER_DEPRECATED_IN_1_24_FOR(GListModel)
+CLUTTER_DEPRECATED_FOR(GListModel)
 guint                 clutter_model_get_n_columns      (ClutterModel     *model);
-CLUTTER_DEPRECATED_IN_1_24_FOR(GListModel)
+CLUTTER_DEPRECATED_FOR(GListModel)
 const gchar *         clutter_model_get_column_name    (ClutterModel     *model,
                                                         guint             column);
-CLUTTER_DEPRECATED_IN_1_24_FOR(GListModel)
+CLUTTER_DEPRECATED_FOR(GListModel)
 GType                 clutter_model_get_column_type    (ClutterModel     *model,
                                                         guint             column);
 
-CLUTTER_DEPRECATED_IN_1_24_FOR(GListModel)
+CLUTTER_DEPRECATED_FOR(GListModel)
 ClutterModelIter *    clutter_model_get_first_iter     (ClutterModel     *model);
-CLUTTER_DEPRECATED_IN_1_24_FOR(GListModel)
+CLUTTER_DEPRECATED_FOR(GListModel)
 ClutterModelIter *    clutter_model_get_last_iter      (ClutterModel     *model);
-CLUTTER_DEPRECATED_IN_1_24_FOR(GListModel)
+CLUTTER_DEPRECATED_FOR(GListModel)
 ClutterModelIter *    clutter_model_get_iter_at_row    (ClutterModel     *model,
                                                         guint             row);
 
-CLUTTER_DEPRECATED_IN_1_24_FOR(GListModel)
+CLUTTER_DEPRECATED_FOR(GListModel)
 void                  clutter_model_set_sorting_column (ClutterModel     *model,
                                                         gint              column);
-CLUTTER_DEPRECATED_IN_1_24_FOR(GListModel)
+CLUTTER_DEPRECATED_FOR(GListModel)
 gint                  clutter_model_get_sorting_column (ClutterModel     *model);
 
-CLUTTER_DEPRECATED_IN_1_24_FOR(GListModel)
+CLUTTER_DEPRECATED_FOR(GListModel)
 void                  clutter_model_foreach            (ClutterModel     *model,
                                                         ClutterModelForeachFunc func, 
                                                         gpointer          user_data);
-CLUTTER_DEPRECATED_IN_1_24_FOR(GListModel)
+CLUTTER_DEPRECATED_FOR(GListModel)
 void                  clutter_model_set_sort           (ClutterModel     *model, 
                                                         gint              column,
                                                         ClutterModelSortFunc func, 
                                                         gpointer          user_data,
                                                         GDestroyNotify    notify);
-CLUTTER_DEPRECATED_IN_1_24_FOR(GListModel)
+CLUTTER_DEPRECATED_FOR(GListModel)
 void                  clutter_model_set_filter         (ClutterModel     *model, 
                                                         ClutterModelFilterFunc func, 
                                                         gpointer          user_data,
                                                         GDestroyNotify    notify);
-CLUTTER_DEPRECATED_IN_1_24_FOR(GListModel)
+CLUTTER_DEPRECATED_FOR(GListModel)
 gboolean              clutter_model_get_filter_set     (ClutterModel     *model);
 
-CLUTTER_DEPRECATED_IN_1_24_FOR(GListModel)
+CLUTTER_DEPRECATED_FOR(GListModel)
 void                  clutter_model_resort             (ClutterModel     *model);
-CLUTTER_DEPRECATED_IN_1_24_FOR(GListModel)
+CLUTTER_DEPRECATED_FOR(GListModel)
 gboolean              clutter_model_filter_row         (ClutterModel     *model,
                                                         guint             row);
-CLUTTER_DEPRECATED_IN_1_24_FOR(GListModel)
+CLUTTER_DEPRECATED_FOR(GListModel)
 gboolean              clutter_model_filter_iter        (ClutterModel     *model,
                                                         ClutterModelIter *iter);
 
@@ -390,45 +390,45 @@ struct _ClutterModelIterClass
   void (*_clutter_model_iter_8) (void);
 };
 
-CLUTTER_DEPRECATED_IN_1_24
+CLUTTER_DEPRECATED
 GType             clutter_model_iter_get_type   (void) G_GNUC_CONST;
 
-CLUTTER_DEPRECATED_IN_1_24
+CLUTTER_DEPRECATED
 void              clutter_model_iter_get        (ClutterModelIter *iter,
                                                  ...);
-CLUTTER_DEPRECATED_IN_1_24
+CLUTTER_DEPRECATED
 void              clutter_model_iter_get_valist (ClutterModelIter *iter,
                                                  va_list          args);
-CLUTTER_DEPRECATED_IN_1_24
+CLUTTER_DEPRECATED
 void              clutter_model_iter_get_value  (ClutterModelIter *iter,
                                                  guint             column,
                                                  GValue           *value);
-CLUTTER_DEPRECATED_IN_1_24
+CLUTTER_DEPRECATED
 void              clutter_model_iter_set        (ClutterModelIter *iter,
                                                  ...);
-CLUTTER_DEPRECATED_IN_1_24
+CLUTTER_DEPRECATED
 void              clutter_model_iter_set_valist (ClutterModelIter *iter,
                                                  va_list          args);
-CLUTTER_DEPRECATED_IN_1_24
+CLUTTER_DEPRECATED
 void              clutter_model_iter_set_value  (ClutterModelIter *iter,
                                                  guint             column,
                                                  const GValue     *value);
 
-CLUTTER_DEPRECATED_IN_1_24
+CLUTTER_DEPRECATED
 gboolean          clutter_model_iter_is_first   (ClutterModelIter *iter);
-CLUTTER_DEPRECATED_IN_1_24
+CLUTTER_DEPRECATED
 gboolean          clutter_model_iter_is_last    (ClutterModelIter *iter);
-CLUTTER_DEPRECATED_IN_1_24
+CLUTTER_DEPRECATED
 ClutterModelIter *clutter_model_iter_next       (ClutterModelIter *iter);
-CLUTTER_DEPRECATED_IN_1_24
+CLUTTER_DEPRECATED
 ClutterModelIter *clutter_model_iter_prev       (ClutterModelIter *iter);
 
-CLUTTER_DEPRECATED_IN_1_24
+CLUTTER_DEPRECATED
 ClutterModel *    clutter_model_iter_get_model  (ClutterModelIter *iter);
-CLUTTER_DEPRECATED_IN_1_24
+CLUTTER_DEPRECATED
 guint             clutter_model_iter_get_row    (ClutterModelIter *iter);
 
-CLUTTER_DEPRECATED_IN_1_24
+CLUTTER_DEPRECATED
 ClutterModelIter *clutter_model_iter_copy       (ClutterModelIter *iter);
 
 G_END_DECLS

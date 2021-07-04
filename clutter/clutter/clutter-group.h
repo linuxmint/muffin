@@ -88,7 +88,7 @@ struct _ClutterGroupClass
   void (*_clutter_reserved6) (void);
 };
 
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 GType clutter_group_get_type (void) G_GNUC_CONST;
 
 G_END_DECLS

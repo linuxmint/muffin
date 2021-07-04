@@ -32,7 +32,6 @@
 #define __COGL_CONTEXT_PRIVATE_H
 
 #include "cogl-context.h"
-#include "cogl-winsys-private.h"
 #include "cogl-flags.h"
 
 #ifdef COGL_HAS_XLIB_SUPPORT
@@ -62,6 +61,7 @@
 #include "cogl-poll-private.h"
 #include "cogl-path/cogl-path-types.h"
 #include "cogl-private.h"
+#include "winsys/cogl-winsys-private.h"
 
 typedef struct
 {

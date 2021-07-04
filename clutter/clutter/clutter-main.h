@@ -61,7 +61,7 @@ typedef enum {
   CLUTTER_INIT_ERROR_INTERNAL = -3
 } ClutterInitError;
 
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 GQuark clutter_init_error_quark (void);
 
 /**
@@ -78,12 +78,12 @@ GQuark clutter_init_error_quark (void);
 #define CLUTTER_PRIORITY_REDRAW         (G_PRIORITY_HIGH_IDLE + 50)
 
 /* Initialisation */
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 void                    clutter_base_init                       (void);
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 ClutterInitError        clutter_init                            (int          *argc,
                                                                  char       ***argv) G_GNUC_WARN_UNUSED_RESULT;
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 ClutterInitError        clutter_init_with_args                  (int          *argc,
                                                                  char       ***argv,
                                                                  const char   *parameter_string,
@@ -91,91 +91,86 @@ ClutterInitError        clutter_init_with_args                  (int          *a
                                                                  const char   *translation_domain,
                                                                  GError      **error) G_GNUC_WARN_UNUSED_RESULT;
 
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 GOptionGroup *          clutter_get_option_group                (void);
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 GOptionGroup *          clutter_get_option_group_without_init   (void);
 
 /* Mainloop */
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 void                    clutter_main                            (void);
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 void                    clutter_main_quit                       (void);
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 gint                    clutter_main_level                      (void);
 
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 void                    clutter_do_event                        (ClutterEvent *event);
 
 /* Debug utility functions */
-CLUTTER_AVAILABLE_IN_1_4
+CLUTTER_EXPORT
 gboolean                clutter_get_accessibility_enabled       (void);
 
-CLUTTER_AVAILABLE_IN_1_14
+CLUTTER_EXPORT
 void                    clutter_disable_accessibility           (void);
 
 /* Threading functions */
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 void                    clutter_threads_set_lock_functions      (GCallback enter_fn,
                                                                  GCallback leave_fn);
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 guint                   clutter_threads_add_idle                (GSourceFunc    func,
                                                                  gpointer       data);
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 guint                   clutter_threads_add_idle_full           (gint           priority,
                                                                  GSourceFunc    func,
                                                                  gpointer       data,
                                                                  GDestroyNotify notify);
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 guint                   clutter_threads_add_timeout             (guint          interval,
                                                                  GSourceFunc    func,
                                                                  gpointer       data);
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 guint                   clutter_threads_add_timeout_full        (gint           priority,
                                                                  guint          interval,
                                                                  GSourceFunc    func,
                                                                  gpointer       data,
                                                                  GDestroyNotify notify);
-CLUTTER_AVAILABLE_IN_1_0
+CLUTTER_EXPORT
 guint                   clutter_threads_add_repaint_func        (GSourceFunc    func,
                                                                  gpointer       data,
                                                                  GDestroyNotify notify);
-CLUTTER_AVAILABLE_IN_1_10
+CLUTTER_EXPORT
 guint                   clutter_threads_add_repaint_func_full   (ClutterRepaintFlags flags,
                                                                  GSourceFunc    func,
                                                                  gpointer       data,
                                                                  GDestroyNotify notify);
-CLUTTER_AVAILABLE_IN_1_0
+CLUTTER_EXPORT
 void                    clutter_threads_remove_repaint_func     (guint          handle_id);
 
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 void                    clutter_grab_pointer                    (ClutterActor  *actor);
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 void                    clutter_ungrab_pointer                  (void);
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 ClutterActor *          clutter_get_pointer_grab                (void);
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 void                    clutter_grab_keyboard                   (ClutterActor  *actor);
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 void                    clutter_ungrab_keyboard                 (void);
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 ClutterActor *          clutter_get_keyboard_grab               (void);
 
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 PangoFontMap *          clutter_get_font_map                    (void);
 
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 ClutterTextDirection    clutter_get_default_text_direction      (void);
 
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 guint                   clutter_get_default_frame_rate          (void);
 
-CLUTTER_AVAILABLE_IN_1_2
-gboolean                clutter_check_version                   (guint major,
-                                                                 guint minor,
-                                                                 guint micro);
-
-CLUTTER_AVAILABLE_IN_1_10
+CLUTTER_EXPORT
 gboolean                clutter_check_windowing_backend         (const char *backend_type);
 
 

@@ -29,25 +29,23 @@
  *  Neil Roberts   <neil@linux.intel.com>
  */
 
-#ifdef HAVE_CONFIG_H
 #include "cogl-config.h"
-#endif
 
 #include "cogl-private.h"
 #include "cogl-util.h"
 #include "cogl-texture-private.h"
 #include "cogl-texture-3d-private.h"
 #include "cogl-texture-3d.h"
-#include "cogl-texture-gl-private.h"
 #include "cogl-texture-driver.h"
 #include "cogl-context-private.h"
 #include "cogl-object-private.h"
 #include "cogl-journal-private.h"
 #include "cogl-pipeline-private.h"
-#include "cogl-pipeline-opengl-private.h"
 #include "cogl-error-private.h"
-#include "cogl-util-gl-private.h"
 #include "cogl-gtype-private.h"
+#include "driver/gl/cogl-texture-gl-private.h"
+#include "driver/gl/cogl-pipeline-opengl-private.h"
+#include "driver/gl/cogl-util-gl-private.h"
 
 #include <string.h>
 #include <math.h>
@@ -641,7 +639,7 @@ _cogl_texture_3d_pre_paint (CoglTexture *tex, CoglTexturePrePaintFlags flags)
          GL_GENERATE_MIPMAP and reuploading the first pixel */
       if (cogl_has_feature (ctx, COGL_FEATURE_ID_OFFSCREEN))
         _cogl_texture_gl_generate_mipmaps (tex);
-#if defined (HAVE_COGL_GL) || defined (HAVE_COGL_GLES)
+#ifdef HAVE_COGL_GL
       else if (_cogl_has_private_feature (ctx, COGL_PRIVATE_FEATURE_GL_FIXED))
         {
           _cogl_bind_gl_texture_transient (GL_TEXTURE_3D,

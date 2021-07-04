@@ -79,13 +79,13 @@ struct _ClutterListModelClass
   ClutterModelClass parent_class;
 };
 
-CLUTTER_DEPRECATED_IN_1_24_FOR(g_list_store_get_type)
+CLUTTER_DEPRECATED_FOR(g_list_store_get_type)
 GType         clutter_list_model_get_type (void) G_GNUC_CONST;
 
-CLUTTER_DEPRECATED_IN_1_24_FOR(g_list_store_new)
+CLUTTER_DEPRECATED_FOR(g_list_store_new)
 ClutterModel *clutter_list_model_new      (guint                n_columns,
                                               ...);
-CLUTTER_DEPRECATED_IN_1_24_FOR(g_list_store_new)
+CLUTTER_DEPRECATED_FOR(g_list_store_new)
 ClutterModel *clutter_list_model_newv     (guint                n_columns,
                                            GType               *types,
                                            const gchar * const  names[]);

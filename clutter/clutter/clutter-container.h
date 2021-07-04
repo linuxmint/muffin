@@ -141,52 +141,52 @@ struct _ClutterContainerIface
                           GParamSpec       *pspec);
 };
 
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 GType clutter_container_get_type (void) G_GNUC_CONST;
 
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 ClutterActor *          clutter_container_find_child_by_name            (ClutterContainer *container,
                                                                          const gchar      *child_name);
 
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 GParamSpec *            clutter_container_class_find_child_property     (GObjectClass     *klass,
                                                                          const gchar      *property_name);
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 GParamSpec **           clutter_container_class_list_child_properties   (GObjectClass     *klass,
                                                                          guint            *n_properties);
 
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 void                    clutter_container_create_child_meta             (ClutterContainer *container,
                                                                          ClutterActor     *actor);
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 void                    clutter_container_destroy_child_meta            (ClutterContainer *container,
                                                                          ClutterActor     *actor);
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 ClutterChildMeta *      clutter_container_get_child_meta                (ClutterContainer *container,
                                                                          ClutterActor     *actor);
 
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 void                    clutter_container_child_set_property            (ClutterContainer *container,
                                                                          ClutterActor     *child,
                                                                          const gchar      * property,
                                                                          const GValue     *value);
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 void                    clutter_container_child_get_property            (ClutterContainer *container,
                                                                          ClutterActor     *child,
                                                                          const gchar      *property,
                                                                          GValue           *value);
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 void                    clutter_container_child_set                     (ClutterContainer *container,
                                                                          ClutterActor     *actor,
                                                                          const gchar      *first_prop,
                                                                          ...) G_GNUC_NULL_TERMINATED;
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 void                    clutter_container_child_get                     (ClutterContainer *container,
                                                                          ClutterActor     *actor,
                                                                          const gchar      *first_prop,
                                                                          ...) G_GNUC_NULL_TERMINATED;
 
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 void                    clutter_container_child_notify                  (ClutterContainer *container,
                                                                          ClutterActor     *child,
                                                                          GParamSpec       *pspec);

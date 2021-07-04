@@ -29,9 +29,7 @@
  *   Robert Bragg <robert@linux.intel.com>
  */
 
-#ifdef HAVE_CONFIG_H
 #include "cogl-config.h"
-#endif
 
 #include <stdlib.h>
 #include <string.h>
@@ -40,23 +38,24 @@
 #include "cogl-private.h"
 #include "cogl-object.h"
 #include "cogl-context-private.h"
-#include "cogl-util-gl-private.h"
 #include "cogl-muffin.h"
 
 #include "cogl-renderer.h"
 #include "cogl-renderer-private.h"
 #include "cogl-display-private.h"
-#include "cogl-winsys-private.h"
-#include "cogl-winsys-stub-private.h"
 #include "cogl-config-private.h"
 #include "cogl-error-private.h"
 #include "cogl-gtype-private.h"
 
+#include "driver/gl/cogl-util-gl-private.h"
+#include "winsys/cogl-winsys-private.h"
+#include "winsys/cogl-winsys-stub-private.h"
+
 #ifdef COGL_HAS_EGL_PLATFORM_XLIB_SUPPORT
-#include "cogl-winsys-egl-x11-private.h"
+#include "winsys/cogl-winsys-egl-x11-private.h"
 #endif
 #ifdef COGL_HAS_GLX_SUPPORT
-#include "cogl-winsys-glx-private.h"
+#include "winsys/cogl-winsys-glx-private.h"
 #endif
 
 #ifdef COGL_HAS_XLIB_SUPPORT
@@ -67,7 +66,7 @@
 extern const CoglTextureDriver _cogl_texture_driver_gl;
 extern const CoglDriverVtable _cogl_driver_gl;
 #endif
-#if defined (HAVE_COGL_GLES) || defined (HAVE_COGL_GLES2)
+#if defined (HAVE_COGL_GLES2)
 extern const CoglTextureDriver _cogl_texture_driver_gles;
 extern const CoglDriverVtable _cogl_driver_gles;
 #endif
@@ -129,20 +128,6 @@ static CoglDriverDescription _cogl_drivers[] =
     &_cogl_driver_gles,
     &_cogl_texture_driver_gles,
     COGL_GLES2_LIBNAME,
-  },
-#endif
-#ifdef HAVE_COGL_GLES
-  {
-    COGL_DRIVER_GLES1,
-    "gles1",
-    0,
-    { COGL_PRIVATE_FEATURE_ANY_GL,
-      COGL_PRIVATE_FEATURE_GL_EMBEDDED,
-      COGL_PRIVATE_FEATURE_GL_FIXED,
-      -1 },
-    &_cogl_driver_gles,
-    &_cogl_texture_driver_gles,
-    COGL_GLES1_LIBNAME,
   },
 #endif
   {
@@ -401,12 +386,8 @@ driver_id_to_name (CoglDriver id)
         return "gl";
       case COGL_DRIVER_GL3:
         return "gl3";
-      case COGL_DRIVER_GLES1:
-        return "gles1";
       case COGL_DRIVER_GLES2:
         return "gles2";
-      case COGL_DRIVER_WEBGL:
-        return "webgl";
       case COGL_DRIVER_NOP:
         return "nop";
       case COGL_DRIVER_ANY:
@@ -803,8 +784,7 @@ cogl_renderer_get_n_fragment_texture_units (CoglRenderer *renderer)
   _COGL_GET_CONTEXT (ctx, 0);
 
 #if defined (HAVE_COGL_GL) || defined (HAVE_COGL_GLES2)
-  if (cogl_has_feature (ctx, COGL_FEATURE_ID_GLSL) ||
-      cogl_has_feature (ctx, COGL_FEATURE_ID_ARBFP))
+  if (cogl_has_feature (ctx, COGL_FEATURE_ID_GLSL))
     GE (ctx, glGetIntegerv (GL_MAX_TEXTURE_IMAGE_UNITS, &n));
 #endif
 

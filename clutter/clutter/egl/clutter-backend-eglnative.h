@@ -71,7 +71,7 @@ struct _ClutterBackendEglNativeClass
   ClutterBackendClass parent_class;
 };
 
-CLUTTER_AVAILABLE_IN_MUFFIN
+CLUTTER_EXPORT
 GType clutter_backend_egl_native_get_type (void) G_GNUC_CONST;
 
 ClutterBackend *clutter_backend_egl_native_new (void);

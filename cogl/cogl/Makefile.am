@@ -13,11 +13,6 @@ DISTCLEANFILES =
 AM_CPPFLAGS = \
 	-I$(top_srcdir)				\
 	-I$(top_builddir)			\
-	-I$(srcdir)/deprecated			\
-	-I$(srcdir)/winsys 			\
-	-I$(srcdir)/driver/gl 			\
-	-I$(srcdir)/driver/gl/gl 		\
-	-I$(srcdir)/driver/gl/gles 		\
 	$(NULL)
 
 AM_CPPFLAGS += \
@@ -171,18 +166,8 @@ cogl_driver_sources += \
 	driver/gl/cogl-pipeline-opengl-private.h \
 	driver/gl/cogl-pipeline-fragend-glsl.c \
 	driver/gl/cogl-pipeline-fragend-glsl-private.h \
-	driver/gl/gl/cogl-pipeline-fragend-arbfp.c \
-	driver/gl/gl/cogl-pipeline-fragend-arbfp-private.h \
-	driver/gl/gl/cogl-pipeline-progend-fixed-arbfp.c \
-	driver/gl/gl/cogl-pipeline-progend-fixed-arbfp-private.h \
-	driver/gl/cogl-pipeline-fragend-fixed.c \
-	driver/gl/cogl-pipeline-fragend-fixed-private.h \
 	driver/gl/cogl-pipeline-vertend-glsl.c \
 	driver/gl/cogl-pipeline-vertend-glsl-private.h \
-	driver/gl/cogl-pipeline-vertend-fixed.c \
-	driver/gl/cogl-pipeline-vertend-fixed-private.h \
-	driver/gl/cogl-pipeline-progend-fixed.c \
-	driver/gl/cogl-pipeline-progend-fixed-private.h \
 	driver/gl/cogl-pipeline-progend-glsl.c \
 	driver/gl/cogl-pipeline-progend-glsl-private.h \
 	$(NULL)
@@ -358,11 +343,9 @@ cogl_sources_c = \
 	cogl-poll-private.h			\
 	cogl-poll.c				\
 	gl-prototypes/cogl-all-functions.h	\
-	gl-prototypes/cogl-gles1-functions.h	\
 	gl-prototypes/cogl-gles2-functions.h	\
 	gl-prototypes/cogl-core-functions.h	\
 	gl-prototypes/cogl-in-gles-core-functions.h	\
-	gl-prototypes/cogl-in-gles1-core-functions.h	\
 	gl-prototypes/cogl-in-gles2-core-functions.h	\
 	gl-prototypes/cogl-fixed-functions.h	\
 	gl-prototypes/cogl-glsl-functions.h	\

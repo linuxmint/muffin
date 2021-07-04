@@ -95,9 +95,7 @@
  *   "MVert", "MFace" and "MEdge" primitives.
  */
 
-#ifdef HAVE_CONFIG_H
 #include "cogl-config.h"
-#endif
 
 #include <stdio.h>
 #include <string.h>
@@ -106,7 +104,6 @@
 #include "cogl-util.h"
 #include "cogl-context-private.h"
 #include "cogl-object-private.h"
-#include "cogl-vertex-buffer-private.h"
 #include "cogl-texture-private.h"
 #include "cogl-pipeline.h"
 #include "cogl-pipeline-private.h"
@@ -116,6 +113,7 @@
 #include "cogl-journal-private.h"
 #include "cogl1-context.h"
 #include "cogl-vertex-buffer.h"
+#include "deprecated/cogl-vertex-buffer-private.h"
 
 #define PAD_FOR_ALIGNMENT(VAR, TYPE_SIZE) \
   (VAR = TYPE_SIZE + ((VAR - 1) & ~(TYPE_SIZE - 1)))

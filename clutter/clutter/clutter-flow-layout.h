@@ -74,54 +74,54 @@ struct _ClutterFlowLayoutClass
   ClutterLayoutManagerClass parent_class;
 };
 
-CLUTTER_AVAILABLE_IN_1_2
+CLUTTER_EXPORT
 GType clutter_flow_layout_get_type (void) G_GNUC_CONST;
 
-CLUTTER_AVAILABLE_IN_1_2
+CLUTTER_EXPORT
 ClutterLayoutManager * clutter_flow_layout_new                (ClutterFlowOrientation  orientation);
 
-CLUTTER_AVAILABLE_IN_1_2
+CLUTTER_EXPORT
 void                   clutter_flow_layout_set_orientation    (ClutterFlowLayout      *layout,
                                                                ClutterFlowOrientation  orientation);
-CLUTTER_AVAILABLE_IN_1_2
+CLUTTER_EXPORT
 ClutterFlowOrientation clutter_flow_layout_get_orientation    (ClutterFlowLayout      *layout);
-CLUTTER_AVAILABLE_IN_1_2
+CLUTTER_EXPORT
 void                   clutter_flow_layout_set_homogeneous    (ClutterFlowLayout      *layout,
                                                                gboolean                homogeneous);
-CLUTTER_AVAILABLE_IN_1_2
+CLUTTER_EXPORT
 gboolean               clutter_flow_layout_get_homogeneous    (ClutterFlowLayout      *layout);
 
-CLUTTER_AVAILABLE_IN_1_2
+CLUTTER_EXPORT
 void                   clutter_flow_layout_set_column_spacing (ClutterFlowLayout      *layout,
                                                                gfloat                  spacing);
-CLUTTER_AVAILABLE_IN_1_2
+CLUTTER_EXPORT
 gfloat                 clutter_flow_layout_get_column_spacing (ClutterFlowLayout      *layout);
-CLUTTER_AVAILABLE_IN_1_2
+CLUTTER_EXPORT
 void                   clutter_flow_layout_set_row_spacing    (ClutterFlowLayout      *layout,
                                                                gfloat                  spacing);
-CLUTTER_AVAILABLE_IN_1_2
+CLUTTER_EXPORT
 gfloat                 clutter_flow_layout_get_row_spacing    (ClutterFlowLayout      *layout);
 
-CLUTTER_AVAILABLE_IN_1_2
+CLUTTER_EXPORT
 void                   clutter_flow_layout_set_column_width   (ClutterFlowLayout      *layout,
                                                                gfloat                  min_width,
                                                                gfloat                  max_width);
-CLUTTER_AVAILABLE_IN_1_2
+CLUTTER_EXPORT
 void                   clutter_flow_layout_get_column_width   (ClutterFlowLayout      *layout,
                                                                gfloat                 *min_width,
                                                                gfloat                 *max_width);
-CLUTTER_AVAILABLE_IN_1_2
+CLUTTER_EXPORT
 void                   clutter_flow_layout_set_row_height     (ClutterFlowLayout      *layout,
                                                                gfloat                  min_height,
                                                                gfloat                  max_height);
-CLUTTER_AVAILABLE_IN_1_2
+CLUTTER_EXPORT
 void                   clutter_flow_layout_get_row_height     (ClutterFlowLayout      *layout,
                                                                gfloat                 *min_height,
                                                                gfloat                 *max_height);
-CLUTTER_AVAILABLE_IN_1_16
+CLUTTER_EXPORT
 void                   clutter_flow_layout_set_snap_to_grid   (ClutterFlowLayout      *layout,
                                                                gboolean                snap_to_grid);
-CLUTTER_AVAILABLE_IN_1_16
+CLUTTER_EXPORT
 gboolean               clutter_flow_layout_get_snap_to_grid   (ClutterFlowLayout      *layout);
 
 G_END_DECLS

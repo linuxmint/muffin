@@ -30,14 +30,12 @@
  *  Neil Roberts <neil@linux.intel.com>
  */
 
-#ifdef HAVE_CONFIG_H
 #include "cogl-config.h"
-#endif
 
 #include "cogl-poll.h"
 #include "cogl-poll-private.h"
-#include "cogl-winsys-private.h"
 #include "cogl-renderer-private.h"
+#include "winsys/cogl-winsys-private.h"
 
 struct _CoglPollSource
 {

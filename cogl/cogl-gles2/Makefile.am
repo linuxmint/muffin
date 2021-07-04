@@ -9,7 +9,9 @@ muffinlib_LTLIBRARIES = libmuffin-cogl-gles2-@MUFFIN_PLUGIN_API_VERSION@.la
 
 AM_CPPFLAGS = \
 	-I$(top_srcdir) \
-	-I$(top_builddir)
+	-I$(top_builddir) \
+	-I$(top_builddir)/cogl \
+	$(NULL)
 
 AM_CFLAGS = $(COGL_DEP_CFLAGS) $(COGL_EXTRA_CFLAGS) $(MAINTAINER_CFLAGS)
 

@@ -30,14 +30,10 @@
  *   Robert Bragg <robert@linux.intel.com>
  */
 
-#ifdef HAVE_CONFIG_H
 #include "cogl-config.h"
-#endif
 
 #include "cogl-i18n-private.h"
 #include "cogl-util.h"
-#include "cogl-winsys-egl-private.h"
-#include "cogl-winsys-private.h"
 #include "cogl-feature-private.h"
 #include "cogl-context-private.h"
 #include "cogl-framebuffer.h"
@@ -48,8 +44,9 @@
 #include "cogl-gles2-context-private.h"
 #include "cogl-error-private.h"
 #include "cogl-egl.h"
-
 #include "cogl-private.h"
+#include "winsys/cogl-winsys-egl-private.h"
+#include "winsys/cogl-winsys-private.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -88,7 +85,7 @@
 #define COGL_WINSYS_FEATURE_END()               \
   { NULL, 0 },                                  \
     };
-#include "cogl-winsys-egl-feature-functions.h"
+#include "winsys/cogl-winsys-egl-feature-functions.h"
 
 /* Define an array of features */
 #undef COGL_WINSYS_FEATURE_BEGIN
@@ -105,7 +102,7 @@
 
 static const CoglFeatureData winsys_feature_data[] =
   {
-#include "cogl-winsys-egl-feature-functions.h"
+#include "winsys/cogl-winsys-egl-feature-functions.h"
   };
 
 static const char *
@@ -265,8 +262,6 @@ egl_attributes_from_framebuffer_config (CoglDisplay *display,
   attributes[i++] = ((renderer->driver == COGL_DRIVER_GL ||
                       renderer->driver == COGL_DRIVER_GL3) ?
                      EGL_OPENGL_BIT :
-                     renderer->driver == COGL_DRIVER_GLES1 ?
-                     EGL_OPENGL_ES_BIT :
                      EGL_OPENGL_ES2_BIT);
 
   if (config->samples_per_pixel)

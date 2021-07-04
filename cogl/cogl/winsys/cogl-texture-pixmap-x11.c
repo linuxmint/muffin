@@ -33,9 +33,7 @@
  *  Robert Bragg   <robert@linux.intel.com>
  */
 
-#ifdef HAVE_CONFIG_H
 #include "cogl-config.h"
-#endif
 
 #include "cogl-debug.h"
 #include "cogl-util.h"
@@ -51,13 +49,13 @@
 #include "cogl-display-private.h"
 #include "cogl-renderer-private.h"
 #include "cogl-object-private.h"
-#include "cogl-winsys-private.h"
-#include "cogl-pipeline-opengl-private.h"
 #include "cogl-xlib.h"
 #include "cogl-error-private.h"
-#include "cogl-texture-gl-private.h"
 #include "cogl-private.h"
 #include "cogl-gtype-private.h"
+#include "driver/gl/cogl-pipeline-opengl-private.h"
+#include "driver/gl/cogl-texture-gl-private.h"
+#include "winsys/cogl-winsys-private.h"
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>

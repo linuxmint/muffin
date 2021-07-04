@@ -31,7 +31,7 @@
 
 G_BEGIN_DECLS
 
-CLUTTER_DEPRECATED_IN_1_12_FOR(clutter_input_device_get_coords)
+CLUTTER_DEPRECATED_FOR(clutter_input_device_get_coords)
 void clutter_input_device_get_device_coords  (ClutterInputDevice  *device,
                                               gint                *x,
                                               gint                *y);

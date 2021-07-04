@@ -108,7 +108,6 @@
 #include "clutter-transition-group.h"
 #include "clutter-transition.h"
 #include "clutter-units.h"
-#include "clutter-version.h"
 #include "clutter-virtual-input-device.h"
 #include "clutter-zoom-action.h"
 

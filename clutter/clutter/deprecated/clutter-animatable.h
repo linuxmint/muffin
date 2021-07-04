@@ -33,7 +33,7 @@
 
 G_BEGIN_DECLS
 
-CLUTTER_DEPRECATED_IN_1_8_FOR(clutter_animatable_interpolate_value)
+CLUTTER_DEPRECATED_FOR(clutter_animatable_interpolate_value)
 gboolean        clutter_animatable_animate_property     (ClutterAnimatable *animatable,
                                                          ClutterAnimation  *animation,
                                                          const gchar       *property_name,

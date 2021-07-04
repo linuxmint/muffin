@@ -415,12 +415,6 @@ cogl_is_texture_rectangle
 cogl_is_texture_2d
 cogl_is_texture_3d
 
-#ifdef COGL_HAS_EGL_PLATFORM_KMS_SUPPORT
-cogl_kms_display_queue_modes_reset
-cogl_kms_display_set_layout
-cogl_kms_renderer_get_kms_fd
-#endif
-
 cogl_material_alpha_func_get_type
 cogl_material_copy
 cogl_material_filter_get_type

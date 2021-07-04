@@ -96,7 +96,7 @@ typedef struct _CoglGLXRenderer
 
 #define COGL_WINSYS_FEATURE_END()
 
-#include "cogl-winsys-glx-feature-functions.h"
+#include "winsys/cogl-winsys-glx-feature-functions.h"
 
 #undef COGL_WINSYS_FEATURE_BEGIN
 #undef COGL_WINSYS_FEATURE_FUNCTION

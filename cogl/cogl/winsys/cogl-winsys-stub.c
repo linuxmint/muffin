@@ -31,16 +31,14 @@
  *
  */
 
-#ifdef HAVE_CONFIG_H
 #include "cogl-config.h"
-#endif
 
 #include "cogl-renderer-private.h"
 #include "cogl-display-private.h"
 #include "cogl-context-private.h"
 #include "cogl-framebuffer-private.h"
 #include "cogl-private.h"
-#include "cogl-winsys-stub-private.h"
+#include "winsys/cogl-winsys-stub-private.h"
 
 #include <string.h>
 

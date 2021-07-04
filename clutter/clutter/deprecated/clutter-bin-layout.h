@@ -33,19 +33,19 @@
 
 G_BEGIN_DECLS
 
-CLUTTER_DEPRECATED_IN_1_12
+CLUTTER_DEPRECATED
 void            clutter_bin_layout_set_alignment        (ClutterBinLayout    *self,
                                                          ClutterActor        *child,
                                                          ClutterBinAlignment  x_align,
                                                          ClutterBinAlignment  y_align);
 
-CLUTTER_DEPRECATED_IN_1_12
+CLUTTER_DEPRECATED
 void            clutter_bin_layout_get_alignment        (ClutterBinLayout    *self,
                                                          ClutterActor        *child,
                                                          ClutterBinAlignment *x_align,
                                                          ClutterBinAlignment *y_align);
 
-CLUTTER_DEPRECATED_IN_1_12
+CLUTTER_DEPRECATED
 void            clutter_bin_layout_add                  (ClutterBinLayout    *self,
                                                          ClutterActor        *child,
                                                          ClutterBinAlignment  x_align,

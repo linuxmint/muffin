@@ -31,26 +31,24 @@
  *  Neil Roberts   <neil@linux.intel.com>
  */
 
-#ifdef HAVE_CONFIG_H
 #include "cogl-config.h"
-#endif
 
 #include "cogl-private.h"
 #include "cogl-util.h"
 #include "cogl-texture-private.h"
 #include "cogl-texture-2d-private.h"
-#include "cogl-texture-2d-gl-private.h"
 #include "cogl-texture-driver.h"
 #include "cogl-context-private.h"
 #include "cogl-object-private.h"
 #include "cogl-journal-private.h"
-#include "cogl-pipeline-opengl-private.h"
 #include "cogl-framebuffer-private.h"
 #include "cogl-error-private.h"
-#ifdef COGL_HAS_EGL_SUPPORT
-#include "cogl-winsys-egl-private.h"
-#endif
 #include "cogl-gtype-private.h"
+#include "driver/gl/cogl-texture-2d-gl-private.h"
+#include "driver/gl/cogl-pipeline-opengl-private.h"
+#ifdef COGL_HAS_EGL_SUPPORT
+#include "winsys/cogl-winsys-egl-private.h"
+#endif
 
 #include <string.h>
 #include <math.h>
@@ -387,6 +385,7 @@ cogl_wayland_texture_2d_new_from_buffer (CoglContext *ctx,
       else
         return tex;
     }
+#ifdef COGL_HAS_EGL_SUPPORT
   else
     {
       int format, width, height;
@@ -441,6 +440,7 @@ cogl_wayland_texture_2d_new_from_buffer (CoglContext *ctx,
           return tex;
         }
     }
+#endif /* COGL_HAS_EGL_SUPPORT */
 
   _cogl_set_error (error,
                    COGL_SYSTEM_ERROR,

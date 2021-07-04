@@ -125,34 +125,34 @@ struct _ClutterDeviceManagerClass
   gpointer _padding[6];
 };
 
-CLUTTER_AVAILABLE_IN_1_2
+CLUTTER_EXPORT
 GType clutter_device_manager_get_type (void) G_GNUC_CONST;
 
-CLUTTER_AVAILABLE_IN_1_2
+CLUTTER_EXPORT
 ClutterDeviceManager *clutter_device_manager_get_default     (void);
-CLUTTER_AVAILABLE_IN_1_2
+CLUTTER_EXPORT
 GSList *              clutter_device_manager_list_devices    (ClutterDeviceManager   *device_manager);
-CLUTTER_AVAILABLE_IN_1_2
+CLUTTER_EXPORT
 const GSList *        clutter_device_manager_peek_devices    (ClutterDeviceManager   *device_manager);
 
-CLUTTER_AVAILABLE_IN_1_2
+CLUTTER_EXPORT
 ClutterInputDevice *  clutter_device_manager_get_device      (ClutterDeviceManager   *device_manager,
                                                               gint                    device_id);
-CLUTTER_AVAILABLE_IN_1_2
+CLUTTER_EXPORT
 ClutterInputDevice *  clutter_device_manager_get_core_device (ClutterDeviceManager   *device_manager,
                                                               ClutterInputDeviceType  device_type);
 
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 ClutterVirtualInputDevice *clutter_device_manager_create_virtual_device (ClutterDeviceManager  *device_manager,
                                                                          ClutterInputDeviceType device_type);
 
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 ClutterVirtualDeviceType clutter_device_manager_get_supported_virtual_device_types (ClutterDeviceManager *device_manager);
 
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 void clutter_device_manager_set_kbd_a11y_settings (ClutterDeviceManager   *device_manager,
                                                    ClutterKbdA11ySettings *settings);
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 void clutter_device_manager_get_kbd_a11y_settings (ClutterDeviceManager   *device_manager,
                                                    ClutterKbdA11ySettings *settings);
 

@@ -42,9 +42,7 @@
  * the parent class corresponding function.
  */
 
-#ifdef HAVE_CONFIG_H
 #include "clutter-build-config.h"
-#endif
 
 #include <math.h>
 #include <cairo.h>
@@ -74,7 +72,6 @@
 #include "clutter-private.h"
 #include "clutter-stage-manager-private.h"
 #include "clutter-stage-private.h"
-#include "clutter-version.h" 	/* For flavour */
 #include "clutter-private.h"
 
 #include "cogl/cogl.h"

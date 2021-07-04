@@ -90,10 +90,10 @@ struct _ClutterBehaviourEllipseClass
   ClutterBehaviourClass   parent_class;
 };
 
-CLUTTER_DEPRECATED_IN_1_8
+CLUTTER_DEPRECATED
 GType clutter_behaviour_ellipse_get_type (void) G_GNUC_CONST;
 
-CLUTTER_DEPRECATED_IN_1_8_FOR(clutter_actor_animate)
+CLUTTER_DEPRECATED_FOR(clutter_actor_animate)
 ClutterBehaviour *     clutter_behaviour_ellipse_new             (ClutterAlpha            *alpha,
 								  gint                     x,
 								  gint                     y,
@@ -103,54 +103,54 @@ ClutterBehaviour *     clutter_behaviour_ellipse_new             (ClutterAlpha  
 								  gdouble                  start,
 								  gdouble                  end);
 
-CLUTTER_DEPRECATED_IN_1_8
+CLUTTER_DEPRECATED
 void                   clutter_behaviour_ellipse_set_center      (ClutterBehaviourEllipse *self,
 								  gint                     x,
 								  gint                     y);
-CLUTTER_DEPRECATED_IN_1_8
+CLUTTER_DEPRECATED
 void                   clutter_behaviour_ellipse_get_center      (ClutterBehaviourEllipse *self,
 								  gint                    *x,
 								  gint                    *y);
-CLUTTER_DEPRECATED_IN_1_6
+CLUTTER_DEPRECATED
 void                   clutter_behaviour_ellipse_set_width       (ClutterBehaviourEllipse *self,
 								  gint                     width);
-CLUTTER_DEPRECATED_IN_1_6
+CLUTTER_DEPRECATED
 gint                   clutter_behaviour_ellipse_get_width       (ClutterBehaviourEllipse *self);
-CLUTTER_DEPRECATED_IN_1_6
+CLUTTER_DEPRECATED
 void                   clutter_behaviour_ellipse_set_height      (ClutterBehaviourEllipse *self,
 								  gint                     height);
-CLUTTER_DEPRECATED_IN_1_6
+CLUTTER_DEPRECATED
 gint                   clutter_behaviour_ellipse_get_height      (ClutterBehaviourEllipse *self);
-CLUTTER_DEPRECATED_IN_1_6
+CLUTTER_DEPRECATED
 void                   clutter_behaviour_ellipse_set_angle_start (ClutterBehaviourEllipse *self,
 								  gdouble                  angle_start);
-CLUTTER_DEPRECATED_IN_1_6
+CLUTTER_DEPRECATED
 gdouble                clutter_behaviour_ellipse_get_angle_start (ClutterBehaviourEllipse *self);
-CLUTTER_DEPRECATED_IN_1_6
+CLUTTER_DEPRECATED
 void                   clutter_behaviour_ellipse_set_angle_end   (ClutterBehaviourEllipse *self,
 								  gdouble                  angle_end);
-CLUTTER_DEPRECATED_IN_1_6
+CLUTTER_DEPRECATED
 gdouble                clutter_behaviour_ellipse_get_angle_end   (ClutterBehaviourEllipse *self);
-CLUTTER_DEPRECATED_IN_1_6
+CLUTTER_DEPRECATED
 void                   clutter_behaviour_ellipse_set_angle_tilt  (ClutterBehaviourEllipse *self,
 								  ClutterRotateAxis        axis,
 								  gdouble                  angle_tilt);
-CLUTTER_DEPRECATED_IN_1_6
+CLUTTER_DEPRECATED
 gdouble                clutter_behaviour_ellipse_get_angle_tilt  (ClutterBehaviourEllipse *self,
 								  ClutterRotateAxis        axis);
-CLUTTER_DEPRECATED_IN_1_6
+CLUTTER_DEPRECATED
 void                   clutter_behaviour_ellipse_set_tilt        (ClutterBehaviourEllipse *self,
 								  gdouble                  angle_tilt_x,
 								  gdouble                  angle_tilt_y,
 								  gdouble                  angle_tilt_z);
-CLUTTER_DEPRECATED_IN_1_6
+CLUTTER_DEPRECATED
 void                   clutter_behaviour_ellipse_get_tilt        (ClutterBehaviourEllipse *self,
 								  gdouble                 *angle_tilt_x,
 								  gdouble                 *angle_tilt_y,
 								  gdouble                 *angle_tilt_z);
-CLUTTER_DEPRECATED_IN_1_6
+CLUTTER_DEPRECATED
 ClutterRotateDirection clutter_behaviour_ellipse_get_direction   (ClutterBehaviourEllipse *self);
-CLUTTER_DEPRECATED_IN_1_6
+CLUTTER_DEPRECATED
 void                   clutter_behaviour_ellipse_set_direction   (ClutterBehaviourEllipse *self,
 								  ClutterRotateDirection   direction);
 

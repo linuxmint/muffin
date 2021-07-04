@@ -74,9 +74,9 @@ struct _CallyRectangleClass
   gpointer _padding_dummy[8];
 };
 
-CLUTTER_AVAILABLE_IN_1_4
+CLUTTER_EXPORT
 GType      cally_rectangle_get_type (void) G_GNUC_CONST;
-CLUTTER_AVAILABLE_IN_1_4
+CLUTTER_EXPORT
 AtkObject* cally_rectangle_new      (ClutterActor *actor);
 
 G_END_DECLS

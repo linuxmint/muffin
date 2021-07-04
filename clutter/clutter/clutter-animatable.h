@@ -95,21 +95,21 @@ struct _ClutterAnimatableIface
                                      GValue            *value);
 };
 
-CLUTTER_AVAILABLE_IN_1_0
+CLUTTER_EXPORT
 GType clutter_animatable_get_type (void) G_GNUC_CONST;
 
-CLUTTER_AVAILABLE_IN_1_0
+CLUTTER_EXPORT
 GParamSpec *clutter_animatable_find_property     (ClutterAnimatable *animatable,
                                                   const gchar       *property_name);
-CLUTTER_AVAILABLE_IN_1_0
+CLUTTER_EXPORT
 void        clutter_animatable_get_initial_state (ClutterAnimatable *animatable,
                                                   const gchar       *property_name,
                                                   GValue            *value);
-CLUTTER_AVAILABLE_IN_1_0
+CLUTTER_EXPORT
 void        clutter_animatable_set_final_state   (ClutterAnimatable *animatable,
                                                   const gchar       *property_name,
                                                   const GValue      *value);
-CLUTTER_AVAILABLE_IN_1_8
+CLUTTER_EXPORT
 gboolean    clutter_animatable_interpolate_value (ClutterAnimatable *animatable,
                                                   const gchar       *property_name,
                                                   ClutterInterval   *interval,

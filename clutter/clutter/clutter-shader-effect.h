@@ -90,30 +90,30 @@ struct _ClutterShaderEffectClass
   void (*_clutter_shader5) (void);
 };
 
-CLUTTER_AVAILABLE_IN_1_4
+CLUTTER_EXPORT
 GType clutter_shader_effect_get_type (void) G_GNUC_CONST;
 
-CLUTTER_AVAILABLE_IN_1_4
+CLUTTER_EXPORT
 ClutterEffect * clutter_shader_effect_new               (ClutterShaderType    shader_type);
 
-CLUTTER_AVAILABLE_IN_1_4
+CLUTTER_EXPORT
 gboolean        clutter_shader_effect_set_shader_source (ClutterShaderEffect *effect,
                                                          const gchar         *source);
 
-CLUTTER_AVAILABLE_IN_1_4
+CLUTTER_EXPORT
 void            clutter_shader_effect_set_uniform       (ClutterShaderEffect *effect,
                                                          const gchar         *name,
                                                          GType                gtype,
                                                          gsize                n_values,
                                                          ...);
-CLUTTER_AVAILABLE_IN_1_4
+CLUTTER_EXPORT
 void            clutter_shader_effect_set_uniform_value (ClutterShaderEffect *effect,
                                                          const gchar         *name,
                                                          const GValue        *value);
 
-CLUTTER_AVAILABLE_IN_1_4
+CLUTTER_EXPORT
 CoglHandle      clutter_shader_effect_get_shader        (ClutterShaderEffect *effect);
-CLUTTER_AVAILABLE_IN_1_4
+CLUTTER_EXPORT
 CoglHandle      clutter_shader_effect_get_program       (ClutterShaderEffect *effect);
 
 G_END_DECLS

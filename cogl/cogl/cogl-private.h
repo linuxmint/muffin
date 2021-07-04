@@ -62,7 +62,6 @@ typedef enum
   COGL_PRIVATE_FEATURE_ALPHA_TEXTURES,
   COGL_PRIVATE_FEATURE_TEXTURE_SWIZZLE,
   COGL_PRIVATE_FEATURE_TEXTURE_MAX_LEVEL,
-  COGL_PRIVATE_FEATURE_ARBFP,
   COGL_PRIVATE_FEATURE_OES_EGL_SYNC,
   /* If this is set then the winsys is responsible for queueing dirty
    * events. Otherwise a dirty event will be queued when the onscreen

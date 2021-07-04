@@ -1173,7 +1173,7 @@ cogl_framebuffer_clear4f (CoglFramebuffer *framebuffer,
  * Deprecated: 1.16: Use #CoglPrimitive<!-- -->s and
  *                   cogl_primitive_draw() instead
  */
-COGL_DEPRECATED_IN_1_16_FOR (cogl_primitive_draw)
+COGL_DEPRECATED_FOR (cogl_primitive_draw)
 void
 cogl_framebuffer_draw_primitive (CoglFramebuffer *framebuffer,
                                  CoglPipeline *pipeline,
@@ -1211,7 +1211,7 @@ cogl_framebuffer_draw_primitive (CoglFramebuffer *framebuffer,
  * Deprecated: 1.16: Use #CoglPrimitive<!-- -->s and
  *                   cogl_primitive_draw() instead
  */
-COGL_DEPRECATED_IN_1_16_FOR (cogl_primitive_draw)
+COGL_DEPRECATED_FOR (cogl_primitive_draw)
 void
 cogl_framebuffer_vdraw_attributes (CoglFramebuffer *framebuffer,
                                    CoglPipeline *pipeline,
@@ -1258,7 +1258,7 @@ cogl_framebuffer_vdraw_attributes (CoglFramebuffer *framebuffer,
  * Deprecated: 1.16: Use #CoglPrimitive<!-- -->s and
  *                   cogl_primitive_draw() instead
  */
-COGL_DEPRECATED_IN_1_16_FOR (cogl_primitive_draw)
+COGL_DEPRECATED_FOR (cogl_primitive_draw)
 void
 cogl_framebuffer_draw_attributes (CoglFramebuffer *framebuffer,
                                   CoglPipeline *pipeline,
@@ -1324,7 +1324,7 @@ cogl_framebuffer_draw_attributes (CoglFramebuffer *framebuffer,
  * Deprecated: 1.16: Use #CoglPrimitive<!-- -->s and
  *                   cogl_primitive_draw() instead
  */
-COGL_DEPRECATED_IN_1_16_FOR (cogl_primitive_draw)
+COGL_DEPRECATED_FOR (cogl_primitive_draw)
 void
 cogl_framebuffer_vdraw_indexed_attributes (CoglFramebuffer *framebuffer,
                                            CoglPipeline *pipeline,
@@ -1392,7 +1392,7 @@ cogl_framebuffer_vdraw_indexed_attributes (CoglFramebuffer *framebuffer,
  * Deprecated: 1.16: Use #CoglPrimitive<!-- -->s and
  *                   cogl_primitive_draw() instead
  */
-COGL_DEPRECATED_IN_1_16_FOR (cogl_primitive_draw)
+COGL_DEPRECATED_FOR (cogl_primitive_draw)
 void
 cogl_framebuffer_draw_indexed_attributes (CoglFramebuffer *framebuffer,
                                           CoglPipeline *pipeline,

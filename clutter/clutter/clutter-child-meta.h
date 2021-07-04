@@ -109,12 +109,12 @@ struct _ClutterChildMetaClass
   GObjectClass parent_class;
 }; 
 
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 GType clutter_child_meta_get_type (void) G_GNUC_CONST;
 
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 ClutterContainer *      clutter_child_meta_get_container        (ClutterChildMeta *data);
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 ClutterActor     *      clutter_child_meta_get_actor            (ClutterChildMeta *data);
 
 G_END_DECLS

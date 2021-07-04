@@ -36,9 +36,7 @@
  * Cairo 2D API instead.
  */
 
-#ifdef HAVE_CONFIG_H
 #include "clutter-build-config.h"
-#endif
 
 #define CLUTTER_DISABLE_DEPRECATION_WARNINGS
 #include "deprecated/clutter-rectangle.h"

@@ -28,23 +28,21 @@
  *
  */
 
-#ifdef HAVE_CONFIG_H
 #include "cogl-config.h"
-#endif
 
 #include <string.h>
 
 #include "cogl-private.h"
 #include "cogl-context-private.h"
-#include "cogl-util-gl-private.h"
 #include "cogl-feature-private.h"
 #include "cogl-renderer-private.h"
 #include "cogl-error-private.h"
-#include "cogl-framebuffer-gl-private.h"
-#include "cogl-texture-2d-gl-private.h"
-#include "cogl-attribute-gl-private.h"
-#include "cogl-clip-stack-gl-private.h"
-#include "cogl-buffer-gl-private.h"
+#include "driver/gl/cogl-util-gl-private.h"
+#include "driver/gl/cogl-framebuffer-gl-private.h"
+#include "driver/gl/cogl-texture-2d-gl-private.h"
+#include "driver/gl/cogl-attribute-gl-private.h"
+#include "driver/gl/cogl-clip-stack-gl-private.h"
+#include "driver/gl/cogl-buffer-gl-private.h"
 
 static CoglBool
 _cogl_driver_pixel_format_from_gl_internal (CoglContext *context,
@@ -517,12 +515,6 @@ _cogl_driver_update_features (CoglContext *ctx,
       _cogl_check_extension ("GL_EXT_blend_color", gl_extensions))
     COGL_FLAGS_SET (private_features,
                     COGL_PRIVATE_FEATURE_BLEND_CONSTANT, TRUE);
-
-  if (ctx->glGenPrograms)
-    {
-      flags |= COGL_FEATURE_SHADERS_ARBFP;
-      COGL_FLAGS_SET (ctx->features, COGL_FEATURE_ID_ARBFP, TRUE);
-    }
 
   if (ctx->glCreateProgram)
     {

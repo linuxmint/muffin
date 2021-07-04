@@ -19,9 +19,7 @@
  * Author: Stef Walter <stefw@collabora.co.uk>
  */
 
-#ifdef HAVE_CONFIG_H
 #include "clutter-build-config.h"
-#endif
 
 #include "clutter-text-buffer.h"
 #include "clutter-marshal.h"

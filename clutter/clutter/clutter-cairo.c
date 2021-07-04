@@ -27,9 +27,7 @@
  * Clutter provides some utility functions for using Cairo.
  */
 
-#ifdef HAVE_CONFIG_H
 #include "clutter-build-config.h"
-#endif
 
 #include "clutter-cairo.h"
 #include "clutter-color.h"

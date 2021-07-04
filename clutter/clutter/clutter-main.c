@@ -47,9 +47,7 @@
  * [threads.c](https://git.gnome.org/browse/clutter/tree/examples/threads.c?h=clutter-1.18)
  */
 
-#ifdef HAVE_CONFIG_H
 #include "clutter-build-config.h"
-#endif
 
 #include <stdlib.h>
 
@@ -67,7 +65,6 @@
 #include "clutter-settings-private.h"
 #include "clutter-stage-manager.h"
 #include "clutter-stage-private.h"
-#include "clutter-version.h" 	/* For flavour define */
 
 #ifdef CLUTTER_WINDOWING_X11
 #include "x11/clutter-backend-x11.h"
@@ -79,7 +76,7 @@
 #include <cogl/cogl.h>
 #include <cogl-pango/cogl-pango.h>
 
-#include "cally.h" /* For accessibility support */
+#include "cally/cally.h" /* For accessibility support */
 
 /* main context */
 static ClutterMainContext *ClutterCntx       = NULL;
@@ -111,10 +108,6 @@ static GSList *main_loops                    = NULL;
 guint clutter_debug_flags       = 0;
 guint clutter_paint_debug_flags = 0;
 guint clutter_pick_debug_flags  = 0;
-
-const guint clutter_major_version = CLUTTER_MAJOR_VERSION;
-const guint clutter_minor_version = CLUTTER_MINOR_VERSION;
-const guint clutter_micro_version = CLUTTER_MICRO_VERSION;
 
 #ifdef CLUTTER_ENABLE_DEBUG
 static const GDebugKey clutter_debug_keys[] = {
@@ -2758,6 +2751,7 @@ clutter_input_device_grab (ClutterInputDevice *device,
   switch (device->device_type)
     {
     case CLUTTER_POINTER_DEVICE:
+    case CLUTTER_TABLET_DEVICE:
       grab_actor = &(device->pointer_grab_actor);
       break;
 
@@ -2803,6 +2797,7 @@ clutter_input_device_ungrab (ClutterInputDevice *device)
   switch (device->device_type)
     {
     case CLUTTER_POINTER_DEVICE:
+    case CLUTTER_TABLET_DEVICE:
       grab_actor = &(device->pointer_grab_actor);
       break;
 
@@ -3468,36 +3463,6 @@ _clutter_run_repaint_functions (ClutterRepaintFlags flags)
     }
   else
     context->repaint_funcs = g_list_reverse (reinvoke_list);
-}
-
-/**
- * clutter_check_version:
- * @major: major version, like 1 in 1.2.3
- * @minor: minor version, like 2 in 1.2.3
- * @micro: micro version, like 3 in 1.2.3
- *
- * Run-time version check, to check the version the Clutter library
- * that an application is currently linked against
- *
- * This is the run-time equivalent of the compile-time %CLUTTER_CHECK_VERSION
- * pre-processor macro
- *
- * Return value: %TRUE if the version of the Clutter library is
- *   greater than (@major, @minor, @micro), and %FALSE otherwise
- *
- * Since: 1.2
- */
-gboolean
-clutter_check_version (guint major,
-                       guint minor,
-                       guint micro)
-{
-  return (clutter_major_version > major ||
-          (clutter_major_version == major &&
-           clutter_minor_version > minor) ||
-          (clutter_major_version == major &&
-           clutter_minor_version == minor &&
-           clutter_micro_version >= micro));
 }
 
 /**

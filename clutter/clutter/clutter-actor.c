@@ -841,6 +841,7 @@ struct _ClutterActorPrivate
   guint needs_x_expand              : 1;
   guint needs_y_expand              : 1;
   guint needs_paint_volume_update   : 1;
+  guint had_effects_on_last_paint_volume_update : 1;
 };
 
 enum
@@ -1092,6 +1093,11 @@ static void clutter_actor_set_child_transform_internal (ClutterActor        *sel
 
 static void     clutter_actor_realize_internal          (ClutterActor *self);
 static void     clutter_actor_unrealize_internal        (ClutterActor *self);
+
+static void clutter_actor_push_in_cloned_branch (ClutterActor *self,
+                                                 gulong        count);
+static void clutter_actor_pop_in_cloned_branch (ClutterActor *self,
+                                                gulong        count);
 
 /* Helper macro which translates by the anchor coord, applies the
    given transformation and then translates back */
@@ -4288,6 +4294,9 @@ clutter_actor_remove_child_internal (ClutterActor                 *self,
   self->priv->n_children -= 1;
 
   self->priv->age += 1;
+
+  if (self->priv->in_cloned_branch)
+    clutter_actor_pop_in_cloned_branch (child, self->priv->in_cloned_branch);
 
   /* if the child that got removed was visible and set to
    * expand then we want to reset the parent's state in
@@ -9016,7 +9025,7 @@ _clutter_actor_queue_only_relayout (ClutterActor *self)
       priv->needs_allocation)
     return; /* save some cpu cycles */
 
-#if CLUTTER_ENABLE_DEBUG
+#ifdef CLUTTER_ENABLE_DEBUG
   if (!CLUTTER_ACTOR_IS_TOPLEVEL (self) && CLUTTER_ACTOR_IN_RELAYOUT (self))
     {
       g_warning ("The actor '%s' is currently inside an allocation "
@@ -12929,6 +12938,9 @@ clutter_actor_add_child_internal (ClutterActor              *self,
   self->priv->n_children += 1;
 
   self->priv->age += 1;
+
+  if (self->priv->in_cloned_branch)
+    clutter_actor_push_in_cloned_branch (child, self->priv->in_cloned_branch);
 
   /* if push_internal() has been called then we automatically set
    * the flag on the actor
@@ -17494,7 +17506,7 @@ _clutter_actor_get_paint_volume_real (ClutterActor *self,
            */
           effects = _clutter_meta_group_peek_metas (priv->effects);
           for (l = effects;
-               l != NULL || (l != NULL && l->data != priv->current_effect);
+               l != NULL && l->data != priv->current_effect;
                l = l->next)
             {
               if (!_clutter_effect_get_paint_volume (l->data, pv))
@@ -17530,6 +17542,32 @@ _clutter_actor_get_paint_volume_real (ClutterActor *self,
   return TRUE;
 }
 
+static gboolean
+_clutter_actor_has_active_paint_volume_override_effects (ClutterActor *self)
+{
+  const GList *l;
+
+  if (self->priv->effects == NULL)
+    return FALSE;
+
+  /* We just need to all effects current effect to see
+   * if anyone wants to override the paint volume. If so, then
+   * we need to recompute, since the paint volume returned can
+   * change from call to call. */
+  for (l = _clutter_meta_group_peek_metas (self->priv->effects);
+       l != NULL;
+       l = l->next)
+    {
+      ClutterEffect *effect = l->data;
+
+      if (clutter_actor_meta_get_enabled (CLUTTER_ACTOR_META (effect)) &&
+          _clutter_effect_has_custom_paint_volume (effect))
+        return TRUE;
+    }
+
+  return FALSE;
+}
+
 /* The public clutter_actor_get_paint_volume API returns a const
  * pointer since we return a pointer directly to the cached
  * PaintVolume associated with the actor and don't want the user to
@@ -17540,16 +17578,32 @@ _clutter_actor_get_paint_volume_real (ClutterActor *self,
 static ClutterPaintVolume *
 _clutter_actor_get_paint_volume_mutable (ClutterActor *self)
 {
+  gboolean has_paint_volume_override_effects;
   ClutterActorPrivate *priv;
 
   priv = self->priv;
 
+  has_paint_volume_override_effects = _clutter_actor_has_active_paint_volume_override_effects (self);
+
   if (priv->paint_volume_valid)
     {
-      if (!priv->needs_paint_volume_update)
+      /* If effects are applied, the actor paint volume
+       * needs to be recomputed on each paint, since those
+       * paint volumes could change over the duration of the
+       * effect.
+       *
+       * We also need to update the paint volume if we went
+       * from having effects to not having effects on the last
+       * paint volume update. */
+      if (!priv->needs_paint_volume_update &&
+          priv->current_effect == NULL &&
+          !has_paint_volume_override_effects &&
+          !priv->had_effects_on_last_paint_volume_update)
         return &priv->paint_volume;
       clutter_paint_volume_free (&priv->paint_volume);
     }
+
+  priv->had_effects_on_last_paint_volume_update = has_paint_volume_override_effects;
 
   if (_clutter_actor_get_paint_volume_real (self, &priv->paint_volume))
     {
@@ -20740,29 +20794,31 @@ clutter_actor_get_child_transform (ClutterActor  *self,
 }
 
 static void
-clutter_actor_push_in_cloned_branch (ClutterActor *self)
+clutter_actor_push_in_cloned_branch (ClutterActor *self,
+                                     gulong        count)
 {
   ClutterActor *iter;
 
   for (iter = self->priv->first_child;
        iter != NULL;
        iter = iter->priv->next_sibling)
-    clutter_actor_push_in_cloned_branch (iter);
+    clutter_actor_push_in_cloned_branch (iter, count);
 
-  self->priv->in_cloned_branch += 1;
+  self->priv->in_cloned_branch += count;
 }
 
 static void
-clutter_actor_pop_in_cloned_branch (ClutterActor *self)
+clutter_actor_pop_in_cloned_branch (ClutterActor *self,
+                                    gulong        count)
 {
   ClutterActor *iter;
 
-  self->priv->in_cloned_branch -= 1;
+  self->priv->in_cloned_branch -= count;
 
   for (iter = self->priv->first_child;
        iter != NULL;
        iter = iter->priv->next_sibling)
-    clutter_actor_pop_in_cloned_branch (iter);
+    clutter_actor_pop_in_cloned_branch (iter, count);
 }
 
 void
@@ -20778,7 +20834,7 @@ _clutter_actor_attach_clone (ClutterActor *actor,
 
   g_hash_table_add (priv->clones, clone);
 
-  clutter_actor_push_in_cloned_branch (actor);
+  clutter_actor_push_in_cloned_branch (actor, 1);
 }
 
 void
@@ -20793,7 +20849,7 @@ _clutter_actor_detach_clone (ClutterActor *actor,
       g_hash_table_lookup (priv->clones, clone) == NULL)
     return;
 
-  clutter_actor_pop_in_cloned_branch (actor);
+  clutter_actor_pop_in_cloned_branch (actor, 1);
 
   g_hash_table_remove (priv->clones, clone);
 

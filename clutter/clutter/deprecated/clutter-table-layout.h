@@ -81,90 +81,90 @@ struct _ClutterTableLayoutClass
   ClutterLayoutManagerClass parent_class;
 };
 
-CLUTTER_DEPRECATED_IN_1_18_FOR (clutter_grid_layout_get_type)
+CLUTTER_DEPRECATED_FOR (clutter_grid_layout_get_type)
 GType clutter_table_layout_get_type (void) G_GNUC_CONST;
 
-CLUTTER_DEPRECATED_IN_1_18_FOR (clutter_grid_layout_new)
+CLUTTER_DEPRECATED_FOR (clutter_grid_layout_new)
 ClutterLayoutManager *clutter_table_layout_new                 (void);
 
-CLUTTER_DEPRECATED_IN_1_18_FOR (clutter_grid_layout_attach)
+CLUTTER_DEPRECATED_FOR (clutter_grid_layout_attach)
 void                  clutter_table_layout_pack                (ClutterTableLayout    *layout,
                                                                 ClutterActor          *actor,
                                                                 gint                   column,
                                                                 gint                   row);
 
-CLUTTER_DEPRECATED_IN_1_18_FOR (clutter_grid_layout_set_column_spacing)
+CLUTTER_DEPRECATED_FOR (clutter_grid_layout_set_column_spacing)
 void                  clutter_table_layout_set_column_spacing  (ClutterTableLayout    *layout,
                                                                 guint                  spacing);
-CLUTTER_DEPRECATED_IN_1_18_FOR (clutter_grid_layout_set_row_spacing)
+CLUTTER_DEPRECATED_FOR (clutter_grid_layout_set_row_spacing)
 void                  clutter_table_layout_set_row_spacing     (ClutterTableLayout    *layout,
                                                                 guint                  spacing);
-CLUTTER_DEPRECATED_IN_1_18_FOR (clutter_grid_layout_get_column_spacing)
+CLUTTER_DEPRECATED_FOR (clutter_grid_layout_get_column_spacing)
 guint                 clutter_table_layout_get_column_spacing  (ClutterTableLayout    *layout);
-CLUTTER_DEPRECATED_IN_1_18_FOR (clutter_grid_layout_get_row_spacing)
+CLUTTER_DEPRECATED_FOR (clutter_grid_layout_get_row_spacing)
 guint                 clutter_table_layout_get_row_spacing     (ClutterTableLayout    *layout);
 
-CLUTTER_DEPRECATED_IN_1_18
+CLUTTER_DEPRECATED
 void                  clutter_table_layout_set_span            (ClutterTableLayout    *layout,
                                                                 ClutterActor          *actor,
                                                                 gint                   column_span,
                                                                 gint                   row_span);
-CLUTTER_DEPRECATED_IN_1_18
+CLUTTER_DEPRECATED
 void                  clutter_table_layout_get_span            (ClutterTableLayout    *layout,
                                                                 ClutterActor          *actor,
                                                                 gint                  *column_span,
                                                                 gint                  *row_span);
 
-CLUTTER_DEPRECATED_IN_1_12
+CLUTTER_DEPRECATED
 void                  clutter_table_layout_set_alignment       (ClutterTableLayout    *layout,
                                                                 ClutterActor          *actor,
                                                                 ClutterTableAlignment  x_align,
                                                                 ClutterTableAlignment  y_align);
-CLUTTER_DEPRECATED_IN_1_12
+CLUTTER_DEPRECATED
 void                  clutter_table_layout_get_alignment       (ClutterTableLayout    *layout,
                                                                 ClutterActor          *actor,
                                                                 ClutterTableAlignment *x_align,
                                                                 ClutterTableAlignment *y_align);
-CLUTTER_DEPRECATED_IN_1_12
+CLUTTER_DEPRECATED
 void                  clutter_table_layout_set_fill            (ClutterTableLayout    *layout,
                                                                 ClutterActor          *actor,
                                                                 gboolean               x_fill,
                                                                 gboolean               y_fill);
-CLUTTER_DEPRECATED_IN_1_12
+CLUTTER_DEPRECATED
 void                  clutter_table_layout_get_fill            (ClutterTableLayout    *layout,
                                                                 ClutterActor          *actor,
                                                                 gboolean              *x_fill,
                                                                 gboolean              *y_fill);
-CLUTTER_DEPRECATED_IN_1_12
+CLUTTER_DEPRECATED
 void                  clutter_table_layout_set_expand          (ClutterTableLayout    *layout,
                                                                 ClutterActor          *actor,
                                                                 gboolean               x_expand,
                                                                 gboolean               y_expand);
-CLUTTER_DEPRECATED_IN_1_12
+CLUTTER_DEPRECATED
 void                  clutter_table_layout_get_expand          (ClutterTableLayout    *layout,
                                                                 ClutterActor          *actor,
                                                                 gboolean              *x_expand,
                                                                 gboolean              *y_expand);
 
-CLUTTER_DEPRECATED_IN_1_18
+CLUTTER_DEPRECATED
 gint                  clutter_table_layout_get_row_count       (ClutterTableLayout    *layout);
-CLUTTER_DEPRECATED_IN_1_18
+CLUTTER_DEPRECATED
 gint                  clutter_table_layout_get_column_count    (ClutterTableLayout    *layout);
 
-CLUTTER_DEPRECATED_IN_1_12
+CLUTTER_DEPRECATED
 void                  clutter_table_layout_set_use_animations  (ClutterTableLayout    *layout,
                                                                 gboolean               animate);
-CLUTTER_DEPRECATED_IN_1_12
+CLUTTER_DEPRECATED
 gboolean              clutter_table_layout_get_use_animations  (ClutterTableLayout    *layout);
-CLUTTER_DEPRECATED_IN_1_12
+CLUTTER_DEPRECATED
 void                  clutter_table_layout_set_easing_mode     (ClutterTableLayout    *layout,
                                                                 gulong                 mode);
-CLUTTER_DEPRECATED_IN_1_12
+CLUTTER_DEPRECATED
 gulong                clutter_table_layout_get_easing_mode     (ClutterTableLayout    *layout);
-CLUTTER_DEPRECATED_IN_1_12
+CLUTTER_DEPRECATED
 void                  clutter_table_layout_set_easing_duration (ClutterTableLayout    *layout,
                                                                 guint                  msecs);
-CLUTTER_DEPRECATED_IN_1_12
+CLUTTER_DEPRECATED
 guint                 clutter_table_layout_get_easing_duration (ClutterTableLayout    *layout);
 
 G_END_DECLS

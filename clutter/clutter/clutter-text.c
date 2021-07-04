@@ -38,9 +38,7 @@
  * #ClutterText is available since Clutter 1.0
  */
 
-#ifdef HAVE_CONFIG_H
 #include "clutter-build-config.h"
-#endif
 
 #include <string.h>
 #include <math.h>
@@ -1193,9 +1191,7 @@ clutter_text_ensure_cursor_position (ClutterText *self)
 
       g_signal_emit (self, text_signals[CURSOR_CHANGED], 0);
 
-#ifdef __CLUTTER_WAYLAND_COMPOSITOR_H__
       update_cursor_location (self);
-#endif
     }
 }
 
@@ -1748,7 +1744,8 @@ add_selection_rectangle_to_path (ClutterText           *text,
 
 /* Draws the selected text, its background, and the cursor */
 static void
-selection_paint (ClutterText *self)
+paint_selection (ClutterText      *self,
+                 ClutterPaintNode *node)
 {
   ClutterTextPrivate *priv = self->priv;
   ClutterActor *actor = CLUTTER_ACTOR (self);
@@ -1760,33 +1757,59 @@ selection_paint (ClutterText *self)
 
   if (priv->position == priv->selection_bound)
     {
+      g_autoptr(ClutterPaintNode) cursor_node = NULL;
+
       /* No selection, just draw the cursor */
       if (priv->cursor_color_set)
         color = &priv->cursor_color;
       else
         color = &priv->text_color;
 
-      cogl_set_source_color4ub (color->red,
-                                color->green,
-                                color->blue,
-                                paint_opacity * color->alpha / 255);
+      cursor_node = clutter_color_node_new (&(ClutterColor) {
+                                              color->red,
+                                              color->green,
+                                              color->blue,
+                                              paint_opacity * color->alpha / 255,
+                                            });
+      clutter_paint_node_set_name (cursor_node, "ClutterText.selection-background");
+      clutter_paint_node_add_child (node, cursor_node);
 
-      cogl_rectangle (priv->cursor_rect.origin.x,
-                      priv->cursor_rect.origin.y,
-                      priv->cursor_rect.origin.x + priv->cursor_rect.size.width,
-                      priv->cursor_rect.origin.y + priv->cursor_rect.size.height);
+      clutter_paint_node_add_rectangle (cursor_node,
+                                        &(ClutterActorBox) {
+                                          priv->cursor_rect.origin.x,
+                                          priv->cursor_rect.origin.y,
+                                          priv->cursor_rect.origin.x + priv->cursor_rect.size.width,
+                                          priv->cursor_rect.origin.y + priv->cursor_rect.size.height
+                                        });
     }
   else
     {
       /* Paint selection background first */
+      g_autoptr(ClutterPaintNode) selection_background_node = NULL;
+      g_autoptr(ClutterPaintNode) selection_text_node = NULL;
+      g_autoptr(ClutterPaintNode) selection_clip_node = NULL;
       PangoLayout *layout = clutter_text_get_layout (self);
+      ClutterActorBox alloc = { 0, };
       CoglPath *selection_path = cogl_path_new ();
-      CoglColor cogl_color = { 0, };
-      CoglFramebuffer *fb;
 
-      fb = _clutter_actor_get_active_framebuffer (actor);
-      if (G_UNLIKELY (fb == NULL))
-        return;
+      clutter_text_foreach_selection_rectangle (self,
+                                                add_selection_rectangle_to_path,
+                                                selection_path);
+
+      /* Clip against both the actor allocation - we don't want to draw
+       * the selection rectangle outside the actor - and the selection
+       * path - we don't want to render the text over the unselected
+       * text either.
+       */
+      selection_clip_node = clutter_clip_node_new ();
+      clutter_paint_node_set_name (selection_clip_node, "ClutterText.clip-selection");
+      clutter_paint_node_add_child (node, selection_clip_node);
+
+      clutter_actor_get_allocation_box (CLUTTER_ACTOR (self), &alloc);
+      clutter_actor_box_set_origin (&alloc, 0, 0);
+
+      clutter_paint_node_add_rectangle (selection_clip_node, &alloc);
+      clutter_paint_node_add_path (selection_clip_node, selection_path);
 
       /* Paint selection background */
       if (priv->selection_color_set)
@@ -1796,35 +1819,40 @@ selection_paint (ClutterText *self)
       else
         color = &priv->text_color;
 
-      cogl_set_source_color4ub (color->red,
-                                color->green,
-                                color->blue,
-                                paint_opacity * color->alpha / 255);
+      selection_background_node = clutter_color_node_new (&(ClutterColor) {
+                                                            color->red,
+                                                            color->green,
+                                                            color->blue,
+                                                            paint_opacity * color->alpha / 255,
+                                                          });
+      clutter_paint_node_set_name (selection_background_node, "ClutterText.selection-background");
+      clutter_paint_node_add_child (selection_clip_node, selection_background_node);
 
-      clutter_text_foreach_selection_rectangle (self,
-                                                add_selection_rectangle_to_path,
-                                                selection_path);
-
-      cogl_path_fill (selection_path);
+      clutter_paint_node_add_path (selection_background_node, selection_path);
 
       /* Paint selected text */
-      cogl_framebuffer_push_path_clip (fb, selection_path);
-      cogl_object_unref (selection_path);
-
       if (priv->selected_text_color_set)
         color = &priv->selected_text_color;
       else
         color = &priv->text_color;
 
-      cogl_color_init_from_4ub (&cogl_color,
-                                color->red,
-                                color->green,
-                                color->blue,
-                                paint_opacity * color->alpha / 255);
+      selection_text_node = clutter_text_node_new (layout,
+                                                   &(ClutterColor) {
+                                                     color->red,
+                                                     color->green,
+                                                     color->blue,
+                                                     paint_opacity * color->alpha / 255,
+                                                   });
 
-      cogl_pango_render_layout (layout, priv->text_x, 0, &cogl_color, 0);
+      clutter_paint_node_set_name (selection_text_node, "ClutterText.selection-text");
+      clutter_paint_node_add_child (selection_clip_node, selection_text_node);
 
-      cogl_framebuffer_pop_clip (fb);
+      clutter_paint_node_add_texture_rectangle (selection_text_node,
+                                                &alloc,
+                                                priv->text_x, priv->text_y,
+                                                1, 1);
+
+      cogl_object_unref (selection_path);
     }
 }
 
@@ -2375,31 +2403,42 @@ clutter_text_compute_layout_offsets (ClutterText           *self,
 
 #define TEXT_PADDING    2
 
-static void
-clutter_text_paint (ClutterActor *self)
+static inline ClutterPaintNode *
+create_clip_node (ClutterPaintNode *node,
+                  float             width,
+                  float             height)
 {
+  g_autoptr(ClutterPaintNode) clip_node = NULL;
+
+  clip_node = clutter_clip_node_new ();
+  clutter_paint_node_set_name (clip_node, "ClutterText.clip");
+  clutter_paint_node_add_child (node, clip_node);
+
+  clutter_paint_node_add_rectangle (clip_node,
+                                    &(ClutterActorBox) {
+                                      0, 0,
+                                      width, height,
+                                    });
+
+  return g_steal_pointer (&clip_node);
+}
+
+static void
+clutter_text_paint_node (ClutterActor     *self,
+                         ClutterPaintNode *node)
+{
+  g_autoptr(ClutterPaintNode) text_node = NULL;
   ClutterText *text = CLUTTER_TEXT (self);
   ClutterTextPrivate *priv = text->priv;
-  CoglFramebuffer *fb;
   PangoLayout *layout;
   ClutterActorBox alloc = { 0, };
-  CoglColor color = { 0, };
   guint8 real_opacity;
   gint text_x = priv->text_x;
   gint text_y = priv->text_y;
-  gboolean clip_set = FALSE;
   gboolean bg_color_set = FALSE;
   guint n_chars;
   float alloc_width;
   float alloc_height;
-
-  /* FIXME: this should not be needed, but apparently the text-cache
-   * test unit manages to get in a situation where the active frame
-   * buffer is NULL
-   */
-  fb = _clutter_actor_get_active_framebuffer (self);
-  if (fb == NULL)
-    fb = cogl_get_draw_framebuffer ();
 
   /* Note that if anything in this paint method changes it needs to be
      reflected in the get_paint_volume implementation which is tightly
@@ -2413,6 +2452,7 @@ clutter_text_paint (ClutterActor *self)
   g_object_get (self, "background-color-set", &bg_color_set, NULL);
   if (bg_color_set)
     {
+      g_autoptr(ClutterPaintNode) background_color_node = NULL;
       ClutterColor bg_color;
 
       clutter_actor_get_background_color (self, &bg_color);
@@ -2420,11 +2460,11 @@ clutter_text_paint (ClutterActor *self)
                      * bg_color.alpha
                      / 255;
 
-      cogl_set_source_color4ub (bg_color.red,
-                                bg_color.green,
-                                bg_color.blue,
-                                bg_color.alpha);
-      cogl_rectangle (0, 0, alloc_width, alloc_height);
+      background_color_node = clutter_color_node_new (&bg_color);
+      clutter_paint_node_set_name (background_color_node, "ClutterText.background-color");
+      clutter_paint_node_add_child (node, background_color_node);
+
+      clutter_paint_node_add_rectangle (background_color_node, &alloc);
     }
 
   /* don't bother painting an empty text actor, unless it's
@@ -2477,8 +2517,7 @@ clutter_text_paint (ClutterActor *self)
 
       pango_layout_get_extents (layout, NULL, &logical_rect);
 
-      cogl_framebuffer_push_rectangle_clip (fb, 0, 0, alloc_width, alloc_height);
-      clip_set = TRUE;
+      node = create_clip_node (node, alloc_width, alloc_height);
 
       actor_width = alloc_width - 2 * TEXT_PADDING;
       text_width  = logical_rect.width / PANGO_SCALE;
@@ -2521,12 +2560,8 @@ clutter_text_paint (ClutterActor *self)
       pango_layout_get_pixel_extents (layout, NULL, &logical_rect);
 
       /* don't clip if the layout managed to fit inside our allocation */
-      if (logical_rect.width > alloc_width ||
-          logical_rect.height > alloc_height)
-        {
-          cogl_framebuffer_push_rectangle_clip (fb, 0, 0, alloc_width, alloc_height);
-          clip_set = TRUE;
-        }
+      if (logical_rect.width > alloc_width || logical_rect.height > alloc_height)
+        node = create_clip_node (node, alloc_width, alloc_height);
 
       clutter_text_compute_layout_offsets (text, layout, &alloc, &text_x, &text_y);
     }
@@ -2549,17 +2584,25 @@ clutter_text_paint (ClutterActor *self)
   CLUTTER_NOTE (PAINT, "painting text (text: '%s')",
                 clutter_text_buffer_get_text (get_buffer (text)));
 
-  cogl_color_init_from_4ub (&color,
-                            priv->text_color.red,
-                            priv->text_color.green,
-                            priv->text_color.blue,
-                            real_opacity);
-  cogl_pango_render_layout (layout, priv->text_x, priv->text_y, &color, 0);
+  text_node = clutter_text_node_new (layout,
+                                     &(ClutterColor) {
+                                        priv->text_color.red,
+                                        priv->text_color.green,
+                                        priv->text_color.blue,
+                                        real_opacity
+                                      });
 
-  selection_paint (text);
+  clutter_paint_node_set_name (text_node, "ClutterText.text");
+  clutter_paint_node_add_child (node, text_node);
 
-  if (clip_set)
-    cogl_framebuffer_pop_clip (fb);
+  clutter_actor_box_set_origin (&alloc, 0, 0);
+  clutter_paint_node_add_texture_rectangle (text_node,
+                                            &alloc,
+                                            priv->text_x,
+                                            priv->text_y,
+                                            1, 1);
+
+  paint_selection (text, node);
 }
 
 static void
@@ -2823,24 +2866,31 @@ clutter_text_has_overlaps (ClutterActor *self)
 }
 
 static void
-clutter_text_key_focus_in (ClutterActor *actor)
+clutter_text_im_focus (ClutterText *text)
 {
-  ClutterTextPrivate *priv = CLUTTER_TEXT (actor)->priv;
+  ClutterTextPrivate *priv = text->priv;
   ClutterBackend *backend = clutter_get_default_backend ();
   ClutterInputMethod *method = clutter_backend_get_input_method (backend);
 
-  if (method && priv->editable)
-    {
-      clutter_input_method_focus_in (method, priv->input_focus);
-      clutter_input_focus_set_content_purpose (priv->input_focus,
-					       priv->input_purpose);
-      clutter_input_focus_set_content_hints (priv->input_focus,
-					     priv->input_hints);
+  if (!method)
+    return;
 
-#ifdef __CLUTTER_WAYLAND_COMPOSITOR_H__
-      update_cursor_location (CLUTTER_TEXT (actor));
-#endif
-    }
+  clutter_input_method_focus_in (method, priv->input_focus);
+  clutter_input_focus_set_content_purpose (priv->input_focus,
+                                           priv->input_purpose);
+  clutter_input_focus_set_content_hints (priv->input_focus,
+                                         priv->input_hints);
+  clutter_input_focus_set_can_show_preedit (priv->input_focus, TRUE);
+  update_cursor_location (text);
+}
+
+static void
+clutter_text_key_focus_in (ClutterActor *actor)
+{
+  ClutterTextPrivate *priv = CLUTTER_TEXT (actor)->priv;
+
+  if (priv->editable)
+    clutter_text_im_focus (CLUTTER_TEXT (actor));
 
   priv->has_focus = TRUE;
 
@@ -3549,7 +3599,7 @@ clutter_text_class_init (ClutterTextClass *klass)
   gobject_class->dispose = clutter_text_dispose;
   gobject_class->finalize = clutter_text_finalize;
 
-  actor_class->paint = clutter_text_paint;
+  actor_class->paint_node = clutter_text_paint_node;
   actor_class->get_paint_volume = clutter_text_get_paint_volume;
   actor_class->get_preferred_width = clutter_text_get_preferred_width;
   actor_class->get_preferred_height = clutter_text_get_preferred_height;
@@ -4700,7 +4750,7 @@ clutter_text_set_editable (ClutterText *self,
           if (!priv->editable && clutter_input_focus_is_focused (priv->input_focus))
             clutter_input_method_focus_out (method);
           else if (priv->has_focus)
-            clutter_input_method_focus_in (method, priv->input_focus);
+            clutter_text_im_focus (self);
         }
 
       clutter_text_queue_redraw (CLUTTER_ACTOR (self));

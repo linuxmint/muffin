@@ -52,16 +52,16 @@ struct _ClutterInputDeviceToolClass
   GObjectClass parent_class;
 };
 
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 GType                      clutter_input_device_tool_get_type (void) G_GNUC_CONST;
 
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 guint64                    clutter_input_device_tool_get_serial    (ClutterInputDeviceTool *tool);
 
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 ClutterInputDeviceToolType clutter_input_device_tool_get_tool_type (ClutterInputDeviceTool *tool);
 
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 guint64                    clutter_input_device_tool_get_id        (ClutterInputDeviceTool *tool);
 
 G_END_DECLS

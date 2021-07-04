@@ -31,12 +31,9 @@
  *   Neil Roberts <neil@linux.intel.com>
  */
 
-#ifdef HAVE_CONFIG_H
 #include "cogl-config.h"
-#endif
 
 #include "cogl-context-private.h"
-#include "cogl-util-gl-private.h"
 #include "cogl-matrix-stack.h"
 #include "cogl-framebuffer-private.h"
 #include "cogl-object-private.h"
@@ -44,6 +41,7 @@
 #include "cogl-matrix-private.h"
 #include "cogl-magazine-private.h"
 #include "cogl-gtype-private.h"
+#include "driver/gl/cogl-util-gl-private.h"
 
 static void _cogl_matrix_stack_free (CoglMatrixStack *stack);
 
@@ -829,7 +827,7 @@ _cogl_matrix_flush_to_gl_builtin (CoglContext *ctx,
 {
   g_assert (_cogl_has_private_feature (ctx, COGL_PRIVATE_FEATURE_GL_FIXED));
 
-#if defined (HAVE_COGL_GL) || defined (HAVE_COGL_GLES)
+#ifdef HAVE_COGL_GL
   if (ctx->flushed_matrix_mode != mode)
     {
       GLenum gl_mode = 0;
@@ -869,7 +867,7 @@ _cogl_matrix_entry_flush_to_gl_builtins (CoglContext *ctx,
 {
   g_assert (_cogl_has_private_feature (ctx, COGL_PRIVATE_FEATURE_GL_FIXED));
 
-#if defined (HAVE_COGL_GL) || defined (HAVE_COGL_GLES)
+#ifdef HAVE_COGL_GL
   {
     CoglBool needs_flip;
     CoglMatrixEntryCache *cache;

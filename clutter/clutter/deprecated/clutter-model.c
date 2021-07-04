@@ -153,9 +153,7 @@
  *   own storage data type instead.
  */
 
-#ifdef HAVE_CONFIG_H
 #include "clutter-build-config.h"
-#endif
 
 #include <string.h>
 #include <glib-object.h>

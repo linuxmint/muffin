@@ -462,7 +462,7 @@ cogl_path_fill (CoglPath *path);
  * Stability: unstable
  * Deprecated: 1.16: Use cogl_path_fill() instead
  */
-COGL_DEPRECATED_IN_1_16_FOR (cogl_path_fill)
+COGL_DEPRECATED_FOR (cogl_path_fill)
 void
 cogl_framebuffer_fill_path (CoglFramebuffer *framebuffer,
                             CoglPipeline *pipeline,
@@ -494,7 +494,7 @@ cogl_path_stroke (CoglPath *path);
  * Stability: unstable
  * Deprecated: 1.16: Use cogl_path_stroke() instead
  */
-COGL_DEPRECATED_IN_1_16_FOR (cogl_path_stroke)
+COGL_DEPRECATED_FOR (cogl_path_stroke)
 void
 cogl_framebuffer_stroke_path (CoglFramebuffer *framebuffer,
                               CoglPipeline *pipeline,
@@ -531,7 +531,7 @@ cogl_framebuffer_push_path_clip (CoglFramebuffer *framebuffer,
  * Stability: Unstable
  * Deprecated: 1.16: Use cogl_framebuffer_push_path_clip() instead
  */
-COGL_DEPRECATED_IN_1_16_FOR (cogl_framebuffer_push_path_clip)
+COGL_DEPRECATED_FOR (cogl_framebuffer_push_path_clip)
 void
 cogl_clip_push_from_path (CoglPath *path);
 

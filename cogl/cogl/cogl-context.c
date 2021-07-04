@@ -28,18 +28,13 @@
  *
  */
 
-#ifdef HAVE_CONFIG_H
 #include "cogl-config.h"
-#endif
 
 #include "cogl-object.h"
 #include "cogl-private.h"
-#include "cogl-winsys-private.h"
-#include "winsys/cogl-winsys-stub-private.h"
 #include "cogl-profile.h"
 #include "cogl-util.h"
 #include "cogl-context-private.h"
-#include "cogl-util-gl-private.h"
 #include "cogl-display-private.h"
 #include "cogl-renderer-private.h"
 #include "cogl-journal-private.h"
@@ -48,7 +43,6 @@
 #include "cogl-texture-3d-private.h"
 #include "cogl-texture-rectangle-private.h"
 #include "cogl-pipeline-private.h"
-#include "cogl-pipeline-opengl-private.h"
 #include "cogl-framebuffer-private.h"
 #include "cogl-onscreen-private.h"
 #include "cogl-attribute-private.h"
@@ -57,15 +51,15 @@
 #include "cogl-config-private.h"
 #include "cogl-error-private.h"
 #include "cogl-gtype-private.h"
+#include "driver/gl/cogl-pipeline-opengl-private.h"
+#include "driver/gl/cogl-util-gl-private.h"
+#include "winsys/cogl-winsys-private.h"
+#include "winsys/cogl-winsys-stub-private.h"
 
-#include "cogl/deprecated/cogl-framebuffer-deprecated.h"
+#include "deprecated/cogl-framebuffer-deprecated.h"
 
 #include <string.h>
 #include <stdlib.h>
-
-#ifdef HAVE_COGL_GL
-#include "cogl-pipeline-fragend-arbfp-private.h"
-#endif
 
 /* These aren't defined in the GLES headers */
 #ifndef GL_POINT_SPRITE
@@ -112,12 +106,6 @@ _cogl_init_feature_overrides (CoglContext *ctx)
 
   if (G_UNLIKELY (COGL_DEBUG_ENABLED (COGL_DEBUG_DISABLE_PBOS)))
     COGL_FLAGS_SET (ctx->private_features, COGL_PRIVATE_FEATURE_PBOS, FALSE);
-
-  if (G_UNLIKELY (COGL_DEBUG_ENABLED (COGL_DEBUG_DISABLE_ARBFP)))
-    {
-      ctx->feature_flags &= ~COGL_FEATURE_SHADERS_ARBFP;
-      COGL_FLAGS_SET (ctx->features, COGL_FEATURE_ID_ARBFP, FALSE);
-    }
 
   if (G_UNLIKELY (COGL_DEBUG_ENABLED (COGL_DEBUG_DISABLE_GLSL)))
     {
@@ -373,8 +361,8 @@ cogl_context_new (CoglDisplay *display,
   context->max_texture_units = -1;
   context->max_activateable_texture_units = -1;
 
-  context->current_fragment_program_type = COGL_PIPELINE_PROGRAM_TYPE_FIXED;
-  context->current_vertex_program_type = COGL_PIPELINE_PROGRAM_TYPE_FIXED;
+  context->current_fragment_program_type = COGL_PIPELINE_PROGRAM_TYPE_GLSL;
+  context->current_vertex_program_type = COGL_PIPELINE_PROGRAM_TYPE_GLSL;
   context->current_gl_program = 0;
 
   context->current_gl_dither_enabled = TRUE;
@@ -425,7 +413,7 @@ cogl_context_new (CoglDisplay *display,
   context->texture_download_pipeline = NULL;
   context->blit_texture_pipeline = NULL;
 
-#if defined (HAVE_COGL_GL) || defined (HAVE_COGL_GLES)
+#ifdef HAVE_COGL_GL
   if (_cogl_has_private_feature (context, COGL_PRIVATE_FEATURE_ALPHA_TEST))
     /* The default for GL_ALPHA_TEST is to always pass which is equivalent to
      * the test being disabled therefore we assume that for all drivers there
@@ -434,9 +422,7 @@ cogl_context_new (CoglDisplay *display,
      * implemented in the fragment shader so there is no enable for it
      */
     GE (context, glEnable (GL_ALPHA_TEST));
-#endif
 
-#if defined (HAVE_COGL_GL)
   if ((context->driver == COGL_DRIVER_GL3))
     {
       GLuint vertex_array;

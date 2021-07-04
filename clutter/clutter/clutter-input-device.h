@@ -47,128 +47,128 @@ G_BEGIN_DECLS
  */
 typedef struct _ClutterInputDeviceClass ClutterInputDeviceClass;
 
-CLUTTER_AVAILABLE_IN_1_0
+CLUTTER_EXPORT
 GType clutter_input_device_get_type (void) G_GNUC_CONST;
 
-CLUTTER_AVAILABLE_IN_1_0
+CLUTTER_EXPORT
 ClutterInputDeviceType  clutter_input_device_get_device_type    (ClutterInputDevice  *device);
-CLUTTER_AVAILABLE_IN_1_0
+CLUTTER_EXPORT
 gint                    clutter_input_device_get_device_id      (ClutterInputDevice  *device);
 
-CLUTTER_AVAILABLE_IN_1_12
+CLUTTER_EXPORT
 gboolean                clutter_input_device_get_coords        (ClutterInputDevice   *device,
                                                                 ClutterEventSequence *sequence,
                                                                 ClutterPoint         *point);
-CLUTTER_AVAILABLE_IN_1_16
+CLUTTER_EXPORT
 ClutterModifierType     clutter_input_device_get_modifier_state (ClutterInputDevice  *device);
-CLUTTER_AVAILABLE_IN_1_2
+CLUTTER_EXPORT
 ClutterActor *          clutter_input_device_get_pointer_actor  (ClutterInputDevice  *device);
-CLUTTER_AVAILABLE_IN_1_2
+CLUTTER_EXPORT
 ClutterStage *          clutter_input_device_get_pointer_stage  (ClutterInputDevice  *device);
-CLUTTER_AVAILABLE_IN_1_2
+CLUTTER_EXPORT
 const gchar *           clutter_input_device_get_device_name    (ClutterInputDevice  *device);
-CLUTTER_AVAILABLE_IN_1_2
+CLUTTER_EXPORT
 ClutterInputMode        clutter_input_device_get_device_mode    (ClutterInputDevice  *device);
-CLUTTER_AVAILABLE_IN_1_2
+CLUTTER_EXPORT
 gboolean                clutter_input_device_get_has_cursor     (ClutterInputDevice  *device);
-CLUTTER_AVAILABLE_IN_1_2
+CLUTTER_EXPORT
 void                    clutter_input_device_set_enabled        (ClutterInputDevice  *device,
                                                                  gboolean             enabled);
-CLUTTER_AVAILABLE_IN_1_2
+CLUTTER_EXPORT
 gboolean                clutter_input_device_get_enabled        (ClutterInputDevice  *device);
 
-CLUTTER_AVAILABLE_IN_1_2
+CLUTTER_EXPORT
 guint                   clutter_input_device_get_n_axes         (ClutterInputDevice  *device);
-CLUTTER_AVAILABLE_IN_1_2
+CLUTTER_EXPORT
 ClutterInputAxis        clutter_input_device_get_axis           (ClutterInputDevice  *device,
                                                                  guint                index_);
-CLUTTER_AVAILABLE_IN_1_2
+CLUTTER_EXPORT
 gboolean                clutter_input_device_get_axis_value     (ClutterInputDevice  *device,
                                                                  gdouble             *axes,
                                                                  ClutterInputAxis     axis,
                                                                  gdouble             *value);
 
-CLUTTER_AVAILABLE_IN_1_2
+CLUTTER_EXPORT
 guint                   clutter_input_device_get_n_keys         (ClutterInputDevice  *device);
-CLUTTER_AVAILABLE_IN_1_2
+CLUTTER_EXPORT
 void                    clutter_input_device_set_key            (ClutterInputDevice  *device,
                                                                  guint                index_,
                                                                  guint                keyval,
                                                                  ClutterModifierType  modifiers);
-CLUTTER_AVAILABLE_IN_1_2
+CLUTTER_EXPORT
 gboolean                clutter_input_device_get_key            (ClutterInputDevice  *device,
                                                                  guint                index_,
                                                                  guint               *keyval,
                                                                  ClutterModifierType *modifiers);
 
-CLUTTER_AVAILABLE_IN_1_2
+CLUTTER_EXPORT
 ClutterInputDevice *    clutter_input_device_get_associated_device (ClutterInputDevice *device);
-CLUTTER_AVAILABLE_IN_1_2
+CLUTTER_EXPORT
 GList *                 clutter_input_device_get_slave_devices  (ClutterInputDevice  *device);
 
-CLUTTER_AVAILABLE_IN_1_2
+CLUTTER_EXPORT
 void                    clutter_input_device_update_from_event  (ClutterInputDevice  *device,
                                                                  ClutterEvent        *event,
                                                                  gboolean             update_stage);
 
-CLUTTER_AVAILABLE_IN_1_10
+CLUTTER_EXPORT
 void                    clutter_input_device_grab               (ClutterInputDevice  *device,
                                                                  ClutterActor        *actor);
-CLUTTER_AVAILABLE_IN_1_10
+CLUTTER_EXPORT
 void                    clutter_input_device_ungrab             (ClutterInputDevice  *device);
-CLUTTER_AVAILABLE_IN_1_10
+CLUTTER_EXPORT
 ClutterActor *          clutter_input_device_get_grabbed_actor  (ClutterInputDevice  *device);
 
-CLUTTER_AVAILABLE_IN_1_12
+CLUTTER_EXPORT
 void                    clutter_input_device_sequence_grab      (ClutterInputDevice   *device,
                                                                  ClutterEventSequence *sequence,
                                                                  ClutterActor         *actor);
-CLUTTER_AVAILABLE_IN_1_12
+CLUTTER_EXPORT
 void                    clutter_input_device_sequence_ungrab    (ClutterInputDevice   *device,
                                                                  ClutterEventSequence *sequence);
-CLUTTER_AVAILABLE_IN_1_12
+CLUTTER_EXPORT
 ClutterActor *          clutter_input_device_sequence_get_grabbed_actor (ClutterInputDevice   *device,
                                                                          ClutterEventSequence *sequence);
 
-CLUTTER_AVAILABLE_IN_1_10
+CLUTTER_EXPORT
 gboolean                clutter_input_device_keycode_to_evdev   (ClutterInputDevice *device,
                                                                  guint               hardware_keycode,
                                                                  guint              *evdev_keycode);
 
-CLUTTER_AVAILABLE_IN_1_22
+CLUTTER_EXPORT
 const gchar *           clutter_input_device_get_vendor_id      (ClutterInputDevice *device);
-CLUTTER_AVAILABLE_IN_1_22
+CLUTTER_EXPORT
 const gchar *           clutter_input_device_get_product_id     (ClutterInputDevice *device);
 
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 gint                    clutter_input_device_get_n_rings        (ClutterInputDevice *device);
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 gint                    clutter_input_device_get_n_strips       (ClutterInputDevice *device);
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 gint                    clutter_input_device_get_n_mode_groups  (ClutterInputDevice *device);
 
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 gint                    clutter_input_device_get_group_n_modes  (ClutterInputDevice *device,
                                                                  gint                group);
 
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 gboolean                clutter_input_device_is_mode_switch_button (ClutterInputDevice *device,
                                                                     guint               group,
 								    guint               button);
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 gint                    clutter_input_device_get_mode_switch_button_group (ClutterInputDevice *device,
                                                                            guint               button);
 
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 const gchar *           clutter_input_device_get_device_node    (ClutterInputDevice *device);
 
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 ClutterInputDeviceMapping clutter_input_device_get_mapping_mode (ClutterInputDevice *device);
 
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 void                      clutter_input_device_set_mapping_mode (ClutterInputDevice        *device,
                                                                  ClutterInputDeviceMapping  mapping);
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 gboolean                  clutter_input_device_is_grouped       (ClutterInputDevice *device,
                                                                  ClutterInputDevice *other_device);
 

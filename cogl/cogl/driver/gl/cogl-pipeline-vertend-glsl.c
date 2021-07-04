@@ -31,27 +31,25 @@
  *   Neil Roberts <neil@linux.intel.com>
  */
 
-#ifdef HAVE_CONFIG_H
 #include "cogl-config.h"
-#endif
 
 #include <string.h>
 
 #include <test-fixtures/test-unit.h>
 
 #include "cogl-context-private.h"
-#include "cogl-util-gl-private.h"
 #include "cogl-pipeline-private.h"
-#include "cogl-pipeline-opengl-private.h"
+#include "driver/gl/cogl-util-gl-private.h"
+#include "driver/gl/cogl-pipeline-opengl-private.h"
 
 #ifdef COGL_PIPELINE_VERTEND_GLSL
 
 #include "cogl-context-private.h"
 #include "cogl-object-private.h"
-#include "cogl-program-private.h"
-#include "cogl-pipeline-vertend-glsl-private.h"
 #include "cogl-pipeline-state-private.h"
 #include "cogl-glsl-shader-private.h"
+#include "driver/gl/cogl-pipeline-vertend-glsl-private.h"
+#include "deprecated/cogl-program-private.h"
 
 const CoglPipelineVertend _cogl_pipeline_glsl_vertend;
 

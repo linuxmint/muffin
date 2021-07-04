@@ -80,35 +80,35 @@ struct _ClutterRectangleClass
   void (*_clutter_rectangle4) (void);
 };
 
-CLUTTER_DEPRECATED_IN_1_10
+CLUTTER_DEPRECATED
 GType clutter_rectangle_get_type (void) G_GNUC_CONST;
 
-CLUTTER_DEPRECATED_IN_1_10_FOR(clutter_actor_new)
+CLUTTER_DEPRECATED_FOR(clutter_actor_new)
 ClutterActor *clutter_rectangle_new              (void);
 
-CLUTTER_DEPRECATED_IN_1_10_FOR(clutter_actor_new)
+CLUTTER_DEPRECATED_FOR(clutter_actor_new)
 ClutterActor *clutter_rectangle_new_with_color   (const ClutterColor *color);
 
-CLUTTER_DEPRECATED_IN_1_10_FOR(clutter_actor_get_background_color)
+CLUTTER_DEPRECATED_FOR(clutter_actor_get_background_color)
 void          clutter_rectangle_get_color        (ClutterRectangle   *rectangle,
                                                   ClutterColor       *color);
 
-CLUTTER_DEPRECATED_IN_1_10_FOR(clutter_actor_set_background_color)
+CLUTTER_DEPRECATED_FOR(clutter_actor_set_background_color)
 void          clutter_rectangle_set_color        (ClutterRectangle   *rectangle,
 						  const ClutterColor *color);
 
-CLUTTER_DEPRECATED_IN_1_10
+CLUTTER_DEPRECATED
 guint         clutter_rectangle_get_border_width (ClutterRectangle   *rectangle);
 
-CLUTTER_DEPRECATED_IN_1_10
+CLUTTER_DEPRECATED
 void          clutter_rectangle_set_border_width (ClutterRectangle   *rectangle,
                                                   guint               width);
 
-CLUTTER_DEPRECATED_IN_1_10
+CLUTTER_DEPRECATED
 void          clutter_rectangle_get_border_color (ClutterRectangle   *rectangle,
                                                   ClutterColor       *color);
 
-CLUTTER_DEPRECATED_IN_1_10
+CLUTTER_DEPRECATED
 void          clutter_rectangle_set_border_color (ClutterRectangle   *rectangle,
                                                   const ClutterColor *color);
 

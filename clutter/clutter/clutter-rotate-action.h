@@ -89,10 +89,10 @@ struct _ClutterRotateActionClass
   void (* _clutter_rotate_action7) (void);
 };
 
-CLUTTER_AVAILABLE_IN_1_12
+CLUTTER_EXPORT
 GType clutter_rotate_action_get_type (void) G_GNUC_CONST;
 
-CLUTTER_AVAILABLE_IN_1_12
+CLUTTER_EXPORT
 ClutterAction *clutter_rotate_action_new        (void);
 
 G_END_DECLS

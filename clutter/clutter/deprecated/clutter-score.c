@@ -79,9 +79,7 @@
  *   complex animations involving multiple timelines.
  */
 
-#ifdef HAVE_CONFIG_H
 #include "clutter-build-config.h"
-#endif
 
 #define CLUTTER_DISABLE_DEPRECATION_WARNINGS
 

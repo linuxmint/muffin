@@ -104,45 +104,45 @@ struct _ClutterAlphaClass
   void (*_clutter_alpha_5) (void);
 }; 
 
-CLUTTER_DEPRECATED_IN_1_12
+CLUTTER_DEPRECATED
 GType clutter_alpha_get_type (void) G_GNUC_CONST;
 
-CLUTTER_DEPRECATED_IN_1_12
+CLUTTER_DEPRECATED
 ClutterAlpha *   clutter_alpha_new              (void);
-CLUTTER_DEPRECATED_IN_1_12
+CLUTTER_DEPRECATED
 ClutterAlpha *   clutter_alpha_new_full         (ClutterTimeline  *timeline,
                                                  gulong            mode);
-CLUTTER_DEPRECATED_IN_1_12
+CLUTTER_DEPRECATED
 ClutterAlpha *   clutter_alpha_new_with_func    (ClutterTimeline  *timeline,
                                                  ClutterAlphaFunc  func,
                                                  gpointer          data,
                                                  GDestroyNotify    destroy);
 
-CLUTTER_DEPRECATED_IN_1_12
+CLUTTER_DEPRECATED
 gdouble          clutter_alpha_get_alpha        (ClutterAlpha     *alpha);
-CLUTTER_DEPRECATED_IN_1_12
+CLUTTER_DEPRECATED
 void             clutter_alpha_set_func         (ClutterAlpha     *alpha,
                                                  ClutterAlphaFunc  func,
                                                  gpointer          data,
                                                  GDestroyNotify    destroy);
-CLUTTER_DEPRECATED_IN_1_12
+CLUTTER_DEPRECATED
 void             clutter_alpha_set_closure      (ClutterAlpha     *alpha,
                                                  GClosure         *closure);
-CLUTTER_DEPRECATED_IN_1_12
+CLUTTER_DEPRECATED
 void             clutter_alpha_set_timeline     (ClutterAlpha     *alpha,
                                                  ClutterTimeline  *timeline);
-CLUTTER_DEPRECATED_IN_1_12
+CLUTTER_DEPRECATED
 ClutterTimeline *clutter_alpha_get_timeline     (ClutterAlpha     *alpha);
-CLUTTER_DEPRECATED_IN_1_12
+CLUTTER_DEPRECATED
 void             clutter_alpha_set_mode         (ClutterAlpha     *alpha,
                                                  gulong            mode);
-CLUTTER_DEPRECATED_IN_1_12
+CLUTTER_DEPRECATED
 gulong           clutter_alpha_get_mode         (ClutterAlpha     *alpha);
 
-CLUTTER_DEPRECATED_IN_1_12
+CLUTTER_DEPRECATED
 gulong           clutter_alpha_register_func    (ClutterAlphaFunc  func,
                                                  gpointer          data);
-CLUTTER_DEPRECATED_IN_1_12
+CLUTTER_DEPRECATED
 gulong           clutter_alpha_register_closure (GClosure         *closure);
 
 G_END_DECLS

@@ -53,9 +53,7 @@
  * Since: 1.12
  */
 
-#ifdef HAVE_CONFIG_H
 #include "clutter-build-config.h"
-#endif
 
 #include "clutter-pan-action.h"
 

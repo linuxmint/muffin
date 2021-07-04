@@ -28,9 +28,7 @@
  *
  */
 
-#ifdef HAVE_CONFIG_H
 #include "cogl-config.h"
-#endif
 
 #include "cogl-util.h"
 #include "cogl-debug.h"
@@ -39,9 +37,9 @@
 #include "cogl-buffer-private.h"
 #include "cogl-pixel-buffer.h"
 #include "cogl-context-private.h"
-#include "cogl-buffer-gl-private.h"
 #include "cogl-error-private.h"
 #include "cogl-gtype-private.h"
+#include "driver/gl/cogl-buffer-gl-private.h"
 
 #include <string.h>
 

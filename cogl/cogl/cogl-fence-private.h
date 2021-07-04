@@ -33,7 +33,7 @@
 
 #include "cogl-fence.h"
 #include "cogl-list.h"
-#include "cogl-winsys-private.h"
+#include "winsys/cogl-winsys-private.h"
 
 typedef enum
 {

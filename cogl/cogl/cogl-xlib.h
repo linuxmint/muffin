@@ -71,7 +71,7 @@ COGL_BEGIN_DECLS
  * Stability: Unstable
  * Deprecated: 1.16: Use cogl_xlib_renderer_get_display() instead
  */
-COGL_DEPRECATED_IN_1_16_FOR (cogl_xlib_renderer_get_display)
+COGL_DEPRECATED_FOR (cogl_xlib_renderer_get_display)
 Display *
 cogl_xlib_get_display (void);
 
@@ -86,7 +86,7 @@ cogl_xlib_get_display (void);
  * Deprecated: 1.16: Use cogl_xlib_renderer_set_foreign_display()
  *                   instead
  */
-COGL_DEPRECATED_IN_1_16_FOR (cogl_xlib_renderer_set_foreign_display)
+COGL_DEPRECATED_FOR (cogl_xlib_renderer_set_foreign_display)
 void
 cogl_xlib_set_display (Display *display);
 
@@ -108,7 +108,7 @@ cogl_xlib_set_display (Display *display);
  * Stability: Unstable
  * Deprecated: 1.16: Use cogl_xlib_renderer_handle_event() instead
  */
-COGL_DEPRECATED_IN_1_16_FOR (cogl_xlib_renderer_handle_event)
+COGL_DEPRECATED_FOR (cogl_xlib_renderer_handle_event)
 CoglFilterReturn
 cogl_xlib_handle_event (XEvent *xevent);
 

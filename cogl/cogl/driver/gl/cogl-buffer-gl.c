@@ -32,14 +32,12 @@
  *   Robert Bragg <robert@linux.intel.com>
  */
 
-#ifdef HAVE_CONFIG_H
 #include "cogl-config.h"
-#endif
 
 #include "cogl-context-private.h"
-#include "cogl-buffer-gl-private.h"
+#include "driver/gl/cogl-buffer-gl-private.h"
 #include "cogl-error-private.h"
-#include "cogl-util-gl-private.h"
+#include "driver/gl/cogl-util-gl-private.h"
 
 /*
  * GL/GLES compatibility defines for the buffer API:
@@ -107,8 +105,7 @@ update_hints_to_gl_enum (CoglBuffer *buffer)
     case COGL_BUFFER_UPDATE_HINT_STREAM:
       /* OpenGL ES 1.1 only knows about STATIC_DRAW and DYNAMIC_DRAW */
 #if defined(HAVE_COGL_GL) || defined(HAVE_COGL_GLES2)
-      if (buffer->context->driver != COGL_DRIVER_GLES1)
-        return GL_STREAM_DRAW;
+      return GL_STREAM_DRAW;
 #else
       return GL_DYNAMIC_DRAW;
 #endif

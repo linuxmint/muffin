@@ -33,9 +33,7 @@
  * The alpha channel is fully opaque at 255 and fully transparent at 0.
  */
 
-#ifdef HAVE_CONFIG_H
 #include "clutter-build-config.h"
-#endif
 
 #include <math.h>
 

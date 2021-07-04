@@ -26,7 +26,7 @@
 
 #define CLUTTER_TYPE_INPUT_FOCUS (clutter_input_focus_get_type ())
 
-CLUTTER_AVAILABLE_IN_MUFFIN
+CLUTTER_EXPORT
 G_DECLARE_DERIVABLE_TYPE (ClutterInputFocus, clutter_input_focus,
                           CLUTTER, INPUT_FOCUS, GObject)
 
@@ -51,33 +51,33 @@ struct _ClutterInputFocusClass
                              guint              cursor);
 };
 
-CLUTTER_AVAILABLE_IN_MUFFIN
+CLUTTER_EXPORT
 gboolean clutter_input_focus_is_focused (ClutterInputFocus *focus);
 
-CLUTTER_AVAILABLE_IN_MUFFIN
+CLUTTER_EXPORT
 void clutter_input_focus_reset (ClutterInputFocus *focus);
-CLUTTER_AVAILABLE_IN_MUFFIN
+CLUTTER_EXPORT
 void clutter_input_focus_set_cursor_location (ClutterInputFocus *focus,
                                               const ClutterRect *rect);
 
-CLUTTER_AVAILABLE_IN_MUFFIN
+CLUTTER_EXPORT
 void clutter_input_focus_set_surrounding (ClutterInputFocus *focus,
                                           const gchar       *text,
                                           guint              cursor,
                                           guint              anchor);
-CLUTTER_AVAILABLE_IN_MUFFIN
+CLUTTER_EXPORT
 void clutter_input_focus_set_content_hints (ClutterInputFocus            *focus,
                                             ClutterInputContentHintFlags  hint);
-CLUTTER_AVAILABLE_IN_MUFFIN
+CLUTTER_EXPORT
 void clutter_input_focus_set_content_purpose (ClutterInputFocus          *focus,
                                               ClutterInputContentPurpose  purpose);
-CLUTTER_AVAILABLE_IN_MUFFIN
+CLUTTER_EXPORT
 gboolean clutter_input_focus_filter_key_event (ClutterInputFocus     *focus,
                                                const ClutterKeyEvent *key);
-CLUTTER_AVAILABLE_IN_MUFFIN
+CLUTTER_EXPORT
 void clutter_input_focus_set_can_show_preedit (ClutterInputFocus *focus,
                                                gboolean           can_show_preedit);
-CLUTTER_AVAILABLE_IN_MUFFIN
+CLUTTER_EXPORT
 void clutter_input_focus_request_toggle_input_panel (ClutterInputFocus *focus);
 
 #endif /* __CLUTTER_INPUT_FOCUS_H__ */

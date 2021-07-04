@@ -36,16 +36,13 @@
  * #ClutterStageManager is available since Clutter 0.8
  */
 
-#ifdef HAVE_CONFIG_H
 #include "clutter-build-config.h"
-#endif
 
 #include "clutter-stage-manager-private.h"
 
 #include "clutter-marshal.h"
 #include "clutter-debug.h"
 #include "clutter-private.h"
-#include "clutter-version.h"  
 
 #include "deprecated/clutter-stage-manager.h"
 
