@@ -1,0 +1,7 @@
+option('gtk-doc',             type: 'boolean', value: true, description: 'use gtk-doc to build documentation')
+option('libcanberra',         type: 'boolean', value: true, description: 'libcanberra for playing sounds')
+option('shape',               type: 'boolean', value: true, description: 'use the shaped window extension')
+option('sm',                  type: 'boolean', value: true, description: 'session management support')
+option('startup-notification',type: 'boolean', value: true, description: 'startup notification support, for embedded/size-sensitive custom non-GNOME builds')
+option('xsync',               type: 'boolean', value: true, description: 'use the XSync extension')
+option('xinerama',            type: 'boolean', value: true, description: 'disable muffin\'s use of the Xinerama extension')

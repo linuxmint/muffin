@@ -1,16 +1,11 @@
 #!/usr/bin/make -f
 # -*- makefile -*-
 
-# Uncomment this to turn on verbose mode.
-#export DH_VERBOSE=1
-
-export DEB_LDFLAGS_MAINT_APPEND=-Wl,--as-needed
-DEB_HOST_MULTIARCH ?= $(shell dpkg-architecture -qDEB_HOST_MULTIARCH)
-DEB_BUILD_ARCH     ?= $(shell dpkg-architecture -qDEB_BUILD_ARCH)
+export LDFLAGS+=-Wl,-z,defs -Wl,-O1 -Wl,--as-needed
 
 ifneq (,$(filter parallel=%,$(DEB_BUILD_OPTIONS)))
   NUMJOBS = $(patsubst parallel=%,%,$(filter parallel=%,$(DEB_BUILD_OPTIONS)))
-  MAKEFLAGS += -j$(NUMJOBS)
+  NINJAFLAGS += -j$(NUMJOBS)
 endif
 
 ifeq (ppc64el,$(filter $(DEB_BUILD_ARCH),ppc64el))
@@ -18,19 +13,21 @@ ifeq (ppc64el,$(filter $(DEB_BUILD_ARCH),ppc64el))
 endif
 
 %:
-	dh  $@ --with gir
-
-override_dh_autoreconf:
-	NOCONFIGURE=1 dh_autoreconf --as-needed ./autogen.sh
+	dh $@ --with gir
 
 override_dh_auto_configure:
-	dh_auto_configure -- \
-	  --libexecdir="\$${prefix}/libexec" \
-	  --disable-static \
-	  --enable-startup-notification=yes \
-	  --disable-silent-rules \
-		--enable-gtk-doc \
-		--disable-clutter-doc \
+	meson debian/build \
+		--prefix=/usr \
+		--libdir=lib/$(DEB_HOST_MULTIARCH) \
+		--libexecdir=libexec/muffin \
+		-D gtk-doc=true \
+		-D startup-notification=true
+
+override_dh_auto_build:
+	ninja $(NINJAFLAGS) -C debian/build
+
+override_dh_auto_test:
+	ninja $(NINJAFLAGS) -C debian/build test
 
 override_dh_girepository:
 	dh_girepository /usr/lib/$(DEB_HOST_MULTIARCH)/muffin
@@ -38,5 +35,6 @@ override_dh_girepository:
 override_dh_strip:
 	dh_strip --dbg-package=muffin-dbg
 
-override_dh_install:
-	dh_install -X.la --fail-missing
+override_dh_auto_install:
+	DESTDIR=${CURDIR}/debian/tmp \
+	ninja -C debian/build install
