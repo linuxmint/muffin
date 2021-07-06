@@ -1265,15 +1265,24 @@ meta_pre_paint_func (gpointer data)
   GList *l;
   MetaCompositor *compositor = data;
   GSList *screens = compositor->display->screens;
-  MetaWindowActor *top_window;
+  MetaWindowActor *top_window = NULL;
   MetaWindowActor *expected_unredirected_window = NULL;
 
   if (compositor->windows == NULL)
     return TRUE;
 
-  top_window = g_list_last (compositor->windows)->data;
+  for (l = g_list_last (compositor->windows); l; l = l->prev)
+    {
+      MetaRectangle *rect = &meta_window_actor_get_meta_window (l->data)->rect;
+      if (rect->x + rect->width > 0 && rect->y + rect->height > 0)
+        {
+          top_window = l->data;
+          break;
+        }
+    }
 
-  if (meta_window_actor_should_unredirect (top_window) &&
+  if (top_window != NULL &&
+      meta_window_actor_should_unredirect (top_window) &&
       compositor->disable_unredirect_count == 0)
     expected_unredirected_window = top_window;
 
