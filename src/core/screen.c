@@ -810,7 +810,7 @@ meta_screen_new (MetaDisplay *display,
   char buf[128];
   guint32 manager_timestamp;
   gulong current_workspace;
-  
+
   replace_current_wm = meta_get_replace_current_wm ();
 
   /* Only display->name, display->xdisplay, and display->error_traps
@@ -1008,7 +1008,7 @@ meta_screen_new (MetaDisplay *display,
                   (int) current_workspace);
   else
     meta_verbose ("No _NET_CURRENT_DESKTOP present\n");
-  
+
   /* Screens must have at least one workspace at all times,
    * so create that required workspace.
    */
@@ -1051,10 +1051,10 @@ meta_screen_new (MetaDisplay *display,
   /* Switch to the _NET_CURRENT_DESKTOP workspace */
   {
     MetaWorkspace *space;
-    
+
     space = meta_screen_get_workspace_by_index (screen,
                                                 current_workspace);
-    
+
     if (space != NULL)
       meta_workspace_activate (space, timestamp);
   }
@@ -2217,7 +2217,7 @@ meta_screen_get_monitor_for_window (MetaScreen *screen,
                                     MetaWindow *window)
 {
   MetaRectangle window_rect;
-  
+
   meta_window_get_outer_rect (window, &window_rect);
 
   return meta_screen_get_monitor_for_rect (screen, &window_rect);
@@ -3324,7 +3324,7 @@ remove_sequence (MetaScreen        *screen,
 typedef struct
 {
   GSList *list;
-  GTimeVal now;
+  GDateTime *now;
 } CollectTimedOutData;
 
 /* This should be fairly long, as it should never be required unless
@@ -3340,14 +3340,14 @@ collect_timed_out_foreach (void *element,
 {
   CollectTimedOutData *ctod = data;
   SnStartupSequence *sequence = element;
-  long tv_sec, tv_usec;
+  long sec, usec;
   double elapsed;
 
-  sn_startup_sequence_get_last_active_time (sequence, &tv_sec, &tv_usec);
+  sn_startup_sequence_get_last_active_time (sequence, &sec, &usec);
 
   elapsed =
-    ((((double)ctod->now.tv_sec - tv_sec) * G_USEC_PER_SEC +
-      (ctod->now.tv_usec - tv_usec))) / 1000.0;
+    ((((double)g_date_time_get_second (ctod->now) - sec) * G_USEC_PER_SEC +
+      (g_date_time_get_microsecond(ctod->now) - usec))) / G_TIME_SPAN_MILLISECOND;
 
   meta_topic (META_DEBUG_STARTUP,
               "Sequence used %g seconds vs. %g max: %s\n",
@@ -3366,7 +3366,7 @@ startup_sequence_timeout (void *data)
   GSList *tmp;
 
   ctod.list = NULL;
-  g_get_current_time (&ctod.now);
+  ctod.now = g_get_real_time ();
   g_slist_foreach (screen->startup_sequences,
                    collect_timed_out_foreach,
                    &ctod);

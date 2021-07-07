@@ -2,12 +2,12 @@
 
 /* Muffin X display handler */
 
-/* 
+/*
  * Copyright (C) 2001 Havoc Pennington
  * Copyright (C) 2002 Red Hat, Inc.
  * Copyright (C) 2003 Rob Adams
  * Copyright (C) 2004-2006 Elijah Newren
- * 
+ *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
  * published by the Free Software Foundation; either version 2 of the
@@ -17,7 +17,7 @@
  * WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street - Suite 500, Boston, MA
@@ -78,7 +78,7 @@ typedef void (* MetaWindowPingFunc) (MetaDisplay *display,
 struct _MetaDisplay
 {
   GObject parent_instance;
-  
+
   char *name;
   Display *xdisplay;
   GdkDisplay *gdk_display;
@@ -132,7 +132,7 @@ struct _MetaDisplay
   guint allow_terminal_deactivation : 1;
 
   guint static_gravity_works : 1;
-  
+
   /*< private-ish >*/
   guint error_trap_synced_at_last_pop : 1;
   MetaEventQueue *events;
@@ -141,7 +141,7 @@ struct _MetaDisplay
   GHashTable *window_ids;
   int error_traps;
   int (* error_trap_handler) (Display     *display,
-                              XErrorEvent *error);  
+                              XErrorEvent *error);
   int server_grab_count;
 
   /* serials of leave/unmap events that may
@@ -150,7 +150,7 @@ struct _MetaDisplay
    */
   unsigned long ignored_crossing_serials[N_IGNORED_CROSSING_SERIALS];
   Window ungrab_should_not_cause_focus_window;
-  
+
   guint32 current_time;
 
   /* We maintain a sequence counter, incremented for each #MetaWindow
@@ -172,7 +172,7 @@ struct _MetaDisplay
   /* Alt+click button grabs */
   unsigned int window_grab_modifiers;
   unsigned int mouse_zoom_modifiers;
-  
+
   /* current window operation */
   MetaGrabOp  grab_op;
   MetaScreen *grab_screen;
@@ -197,7 +197,7 @@ struct _MetaDisplay
   int         grab_initial_x, grab_initial_y;  /* These are only relevant for */
   gboolean    grab_threshold_movement_reached; /* raise_on_click == FALSE.    */
   MetaResizePopup *grab_resize_popup;
-  GTimeVal    grab_last_moveresize_time;
+  int64_t    grab_last_moveresize_time;
   guint32     grab_motion_notify_time;
   GList*      grab_old_window_stacking;
   MetaEdgeResistanceData *grab_edge_resistance_data;
@@ -231,7 +231,7 @@ struct _MetaDisplay
   unsigned int meta_mask;
 
   guint        rebuild_keybinding_idle_id;
-  
+
   /* Monitor cache */
   unsigned int monitor_cache_invalidated : 1;
 
@@ -272,7 +272,7 @@ struct _MetaDisplay
   int damage_error_base;
   int xfixes_event_base;
   int xfixes_error_base;
-  
+
 #ifdef HAVE_STARTUP_NOTIFICATION
   SnDisplay *sn_display;
 #endif
@@ -413,7 +413,7 @@ const char* meta_event_detail_to_string (int d);
 void meta_display_queue_retheme_all_windows (MetaDisplay *display);
 void meta_display_retheme_all (void);
 
-void meta_display_set_cursor_theme (const char *theme, 
+void meta_display_set_cursor_theme (const char *theme,
 				    int         size);
 
 void meta_display_ping_window      (MetaDisplay        *display,

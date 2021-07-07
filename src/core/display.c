@@ -3685,8 +3685,7 @@ meta_display_begin_grab_op (MetaDisplay *display,
   display->grab_anchor_root_y = root_y;
   display->grab_latest_motion_x = root_x;
   display->grab_latest_motion_y = root_y;
-  display->grab_last_moveresize_time.tv_sec = 0;
-  display->grab_last_moveresize_time.tv_usec = 0;
+  display->grab_last_moveresize_time = 0;
   display->grab_motion_notify_time = 0;
   display->grab_old_window_stacking = NULL;
 #ifdef HAVE_XSYNC
@@ -3785,7 +3784,7 @@ meta_display_end_grab_op (MetaDisplay *display,
 {
   meta_topic (META_DEBUG_WINDOW_OPS,
               "Ending grab op %u at time %u\n", display->grab_op, timestamp);
-  
+
   if (display->grab_op == META_GRAB_OP_NONE)
     return;
 
