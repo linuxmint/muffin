@@ -547,7 +547,7 @@ splashscreen_cb (GtkAction           *action,
 
   vbox = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
 
-  image = gtk_image_new_from_stock (GTK_STOCK_DIALOG_INFO, GTK_ICON_SIZE_DIALOG);
+  image = gtk_image_new_from_icon_name (GTK_STOCK_DIALOG_INFO, GTK_ICON_SIZE_DIALOG);
   gtk_box_pack_start (GTK_BOX (vbox), image, FALSE, FALSE, 0);
 
   gtk_box_pack_start (GTK_BOX (vbox), focus_label (window), FALSE, FALSE, 0);
@@ -589,12 +589,16 @@ make_dock (int type)
       break;
     case DOCK_ALL:
       break;
+    default:
+      // Most people prefer docks on the bottom, use as default
+      box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
+      break;
     }
 
   window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
   set_gtk_window_type (GTK_WINDOW (window), "_NET_WM_WINDOW_TYPE_DOCK");
 
-  image = gtk_image_new_from_stock (GTK_STOCK_DIALOG_INFO, GTK_ICON_SIZE_DIALOG);
+  image = gtk_image_new_from_icon_name (GTK_STOCK_DIALOG_INFO, GTK_ICON_SIZE_DIALOG);
   gtk_box_pack_start (GTK_BOX (box), image, FALSE, FALSE, 0);
 
   gtk_box_pack_start (GTK_BOX (box), focus_label (window), FALSE, FALSE, 0);
@@ -636,6 +640,12 @@ make_dock (int type)
       break;
     case DOCK_ALL:
       break;
+    default:
+      // Most people prefer docks on the bottom, use as default
+      gtk_widget_set_size_request (window, 600, DOCK_SIZE);
+      gtk_window_move (GTK_WINDOW (window), 200, gdk_screen_height () - DOCK_SIZE);
+      set_gtk_window_struts (window, 0, 0, 0, DOCK_SIZE);
+      gtk_window_set_title (GTK_WINDOW (window), "BottomDock");
     }
 
   gtk_widget_show_all (window);
@@ -1045,5 +1055,3 @@ do_appwindow (void)
 
   return window;
 }
-
-

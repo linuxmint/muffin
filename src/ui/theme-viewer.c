@@ -243,7 +243,7 @@ dialog_contents (void)
   update_spacings (vbox, action_area);
 
   label = gtk_label_new (_("This is a sample message in a sample dialog"));
-  image = gtk_image_new_from_stock (GTK_STOCK_DIALOG_INFO,
+  image = gtk_image_new_from_icon_name (GTK_STOCK_DIALOG_INFO,
                                     GTK_ICON_SIZE_DIALOG);
   gtk_misc_set_alignment (GTK_MISC (image), 0.5, 0.0);
 
