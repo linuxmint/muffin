@@ -4121,15 +4121,6 @@ void
 meta_window_unmaximize (MetaWindow        *window,
                         MetaMaximizeFlags  directions)
 {
-  /* Restore tiling if necessary */
-  if (window->tile_mode == META_TILE_LEFT ||
-      window->tile_mode == META_TILE_RIGHT)
-    {
-      window->maximized_horizontally = FALSE;
-      meta_window_real_tile (window, FALSE);
-      return;
-    }
-
   meta_window_unmaximize_internal (window, directions, &window->saved_rect,
                                    NorthWestGravity);
 }
@@ -12474,9 +12465,7 @@ meta_window_tile (MetaWindow *window,
       meta_window_real_tile (window, TRUE);
   } else {
       window->last_tile_mode = window->tile_mode;
-      window->tile_mode = mode;
       window->custom_snap_size = FALSE;
-      meta_window_set_tile_type (window, META_WINDOW_TILE_TYPE_NONE);
       window->tile_monitor_number = window->saved_maximize ? window->monitor->number
                                                            : -1;
       if (window->saved_maximize)
