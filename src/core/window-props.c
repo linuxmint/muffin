@@ -902,10 +902,7 @@ reload_net_wm_state (MetaWindow    *window,
       else if (value->v.atom_list.atoms[i] == window->display->atom__NET_WM_STATE_SKIP_PAGER)
         window->wm_state_skip_pager = TRUE;
       else if (value->v.atom_list.atoms[i] == window->display->atom__NET_WM_STATE_FULLSCREEN)
-        {
-          window->fullscreen = TRUE;
-          g_object_notify (G_OBJECT (window), "fullscreen");
-        }
+        window->fullscreen = TRUE;
       else if (value->v.atom_list.atoms[i] == window->display->atom__NET_WM_STATE_ABOVE)
         window->wm_state_above = TRUE;
       else if (value->v.atom_list.atoms[i] == window->display->atom__NET_WM_STATE_BELOW)
@@ -930,6 +927,7 @@ reload_mwm_hints (MetaWindow    *window,
                   gboolean       initial)
 {
   MotifWmHints *hints;
+  gboolean old_decorated = window->decorated;
 
   window->mwm_decorated = TRUE;
   window->mwm_border_only = FALSE;
@@ -1033,6 +1031,23 @@ reload_mwm_hints (MetaWindow    *window,
     meta_verbose ("Functions flag unset\n");
 
   meta_window_recalc_features (window);
+
+  /* We do all this anyhow at the end of meta_window_new() */
+  if (!window->constructing)
+    {
+      if (window->decorated)
+        meta_window_ensure_frame (window);
+      else
+        meta_window_destroy_frame (window);
+
+      meta_window_queue (window,
+                         META_QUEUE_MOVE_RESIZE |
+                         /* because ensure/destroy frame may unmap: */
+                         META_QUEUE_CALC_SHOWING);
+
+      if (old_decorated != window->decorated)
+        g_object_notify (G_OBJECT (window), "decorated");
+    }
 }
 
 static void
