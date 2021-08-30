@@ -233,6 +233,8 @@ meta_frame_layout_new  (void)
   layout->button_width = -1;
   layout->button_height = -1;
 
+  /* Spacing as hardcoded in GTK+ */
+  layout->titlebar_spacing = 6;
   layout->has_title = TRUE;
   layout->title_scale = 1.0;
 
@@ -776,13 +778,11 @@ meta_frame_layout_calc_geometry (const MetaFrameLayout  *layout,
 
       space_used_by_buttons += button_width * n_left;
       space_used_by_buttons += (button_width * 0.75) * n_left_spacers;
-      space_used_by_buttons += layout->button_border.left * n_left;
-      space_used_by_buttons += layout->button_border.right * n_left;
+      space_used_by_buttons += layout->titlebar_spacing * MAX (n_left - 1, 0);
 
       space_used_by_buttons += button_width * n_right;
       space_used_by_buttons += (button_width * 0.75) * n_right_spacers;
-      space_used_by_buttons += layout->button_border.left * n_right;
-      space_used_by_buttons += layout->button_border.right * n_right;
+      space_used_by_buttons += layout->titlebar_spacing * MAX (n_right - 1, 0);
 
       if (space_used_by_buttons <= space_available)
         break; /* Everything fits, bail out */
@@ -873,7 +873,7 @@ meta_frame_layout_calc_geometry (const MetaFrameLayout  *layout,
         break;
 
       rect = right_func_rects[i];
-      rect->visible.x = x - layout->button_border.right - button_width;
+      rect->visible.x = x - button_width;
       if (right_buttons_has_spacer[i])
         rect->visible.x -= (button_width * 0.75);
 
@@ -891,7 +891,7 @@ meta_frame_layout_calc_geometry (const MetaFrameLayout  *layout,
           rect->clickable.height = button_height + button_y;
 
           if (i == n_right - 1)
-            rect->clickable.width += layout->right_titlebar_edge + layout->right_width + layout->button_border.right;
+            rect->clickable.width += layout->right_titlebar_edge + layout->right_width;
 
         }
       else
@@ -899,7 +899,10 @@ meta_frame_layout_calc_geometry (const MetaFrameLayout  *layout,
 
       *(right_bg_rects[i]) = rect->visible;
 
-      x = rect->visible.x - layout->button_border.left;
+      x = rect->visible.x;
+
+      if (i > 0)
+        x -= layout->titlebar_spacing;
 
       --i;
     }
@@ -917,7 +920,7 @@ meta_frame_layout_calc_geometry (const MetaFrameLayout  *layout,
 
       rect = left_func_rects[i];
 
-      rect->visible.x = x + layout->button_border.left;
+      rect->visible.x = x;
       rect->visible.y = button_y;
       rect->visible.width = button_width;
       rect->visible.height = button_height;
@@ -942,7 +945,9 @@ meta_frame_layout_calc_geometry (const MetaFrameLayout  *layout,
           g_memmove (&(rect->clickable), &(rect->visible), sizeof(rect->clickable));
 
 
-      x = rect->visible.x + rect->visible.width + layout->button_border.right;
+      x = rect->visible.x + rect->visible.width;
+      if (i < n_left - 1)
+        x += layout->titlebar_spacing;
       if (left_buttons_has_spacer[i])
         x += (button_width * 0.75);
 
