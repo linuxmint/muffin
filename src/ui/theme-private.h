@@ -31,6 +31,12 @@
 #include <gtk/gtk.h>
 
 /**
+ * MetaStyleInfo: (skip)
+ *
+ */
+typedef struct _MetaStyleInfo MetaStyleInfo;
+
+/**
  * MetaFrameStyle: (skip)
  *
  */
@@ -681,6 +687,19 @@ typedef enum
 
 typedef enum
 {
+  META_STYLE_ELEMENT_FRAME,
+  META_STYLE_ELEMENT_LAST
+} MetaStyleElement;
+
+struct _MetaStyleInfo
+{
+  int refcount;
+
+  GtkStyleContext *styles[META_STYLE_ELEMENT_LAST];
+};
+
+typedef enum
+{
   /* Listed in the order in which the textures are drawn.
    * (though this only matters for overlaps of course.)
    * Buttons are drawn after the frame textures.
@@ -986,7 +1005,6 @@ void           meta_draw_op_draw (const MetaDrawOp    *op,
 
 void           meta_draw_op_draw_with_style (const MetaDrawOp    *op,
                                              GtkStyleContext     *style_gtk,
-                                             GtkWidget           *widget,
                                              cairo_t             *cr,
                                              const MetaDrawInfo  *info,
                                              /* logical region being drawn */
@@ -1002,7 +1020,6 @@ void            meta_draw_op_list_draw  (const MetaDrawOpList *op_list,
                                          MetaRectangle         rect);
 void            meta_draw_op_list_draw_with_style  (const MetaDrawOpList *op_list,
                                                     GtkStyleContext      *style_gtk,
-                                                    GtkWidget            *widget,
                                                     cairo_t              *cr,
                                                     const MetaDrawInfo   *info,
                                                     MetaRectangle         rect);
@@ -1031,29 +1048,6 @@ MetaFrameStyle* meta_frame_style_new   (MetaFrameStyle *parent);
 void            meta_frame_style_ref   (MetaFrameStyle *style);
 void            meta_frame_style_unref (MetaFrameStyle *style);
 
-void meta_frame_style_draw (MetaFrameStyle          *style,
-                            GtkWidget               *widget,
-                            cairo_t                 *cr,
-                            const MetaFrameGeometry *fgeom,
-                            int                      client_width,
-                            int                      client_height,
-                            PangoLayout             *title_layout,
-                            int                      text_height,
-                            MetaButtonState          button_states[META_BUTTON_TYPE_LAST]);
-
-
-void meta_frame_style_draw_with_style (MetaFrameStyle          *style,
-                                       GtkStyleContext         *style_gtk,
-                                       GtkWidget               *widget,
-                                       cairo_t                 *cr,
-                                       const MetaFrameGeometry *fgeom,
-                                       int                      client_width,
-                                       int                      client_height,
-                                       PangoLayout             *title_layout,
-                                       int                      text_height,
-                                       MetaButtonState          button_states[META_BUTTON_TYPE_LAST]);
-
-
 gboolean       meta_frame_style_validate (MetaFrameStyle    *style,
                                           guint              current_theme_version,
                                           GError           **error);
@@ -1078,8 +1072,13 @@ double meta_theme_get_title_scale (MetaTheme     *theme,
                                    MetaFrameType  type,
                                    MetaFrameFlags flags);
 
+MetaStyleInfo * meta_theme_create_style_info (GdkScreen   *screen,
+                                              const gchar *variant);
+MetaStyleInfo * meta_style_info_ref          (MetaStyleInfo *style);
+void            meta_style_info_unref        (MetaStyleInfo  *style_info);
+
 void meta_theme_draw_frame (MetaTheme              *theme,
-                            GtkWidget              *widget,
+                            MetaStyleInfo          *style_info,
                             cairo_t                *cr,
                             MetaFrameType           type,
                             MetaFrameFlags          flags,
@@ -1089,19 +1088,6 @@ void meta_theme_draw_frame (MetaTheme              *theme,
                             int                     text_height,
                             const MetaButtonLayout *button_layout,
                             MetaButtonState         button_states[META_BUTTON_TYPE_LAST]);
-
-void meta_theme_draw_frame_with_style (MetaTheme              *theme,
-                                       GtkStyleContext        *style_gtk,
-                                       GtkWidget              *widget,
-                                       cairo_t                *cr,
-                                       MetaFrameType           type,
-                                       MetaFrameFlags          flags,
-                                       int                     client_width,
-                                       int                     client_height,
-                                       PangoLayout            *title_layout,
-                                       int                     text_height,
-                                       const MetaButtonLayout *button_layout,
-                                       MetaButtonState         button_states[META_BUTTON_TYPE_LAST]);
 
 void meta_theme_get_frame_borders (MetaTheme         *theme,
                                    MetaFrameType      type,

@@ -179,70 +179,41 @@ prefs_changed_callback (MetaPreference pref,
     }
 }
 
-static GtkStyleContext *
-create_style_context (MetaFrames  *frames,
-                      const gchar *variant)
-{
-  GtkStyleContext *style;
-  GdkScreen *screen;
-  char *theme_name;
-
-  screen = gtk_widget_get_screen (GTK_WIDGET (frames));
-  g_object_get (gtk_settings_get_for_screen (screen),
-                "gtk-theme-name", &theme_name,
-                NULL);
-
-  style = gtk_style_context_new ();
-  gtk_style_context_set_path (style,
-                              gtk_widget_get_path (GTK_WIDGET (frames)));
-
-  if (theme_name && *theme_name)
-    {
-      GtkCssProvider *provider;
-
-      provider = gtk_css_provider_get_named (theme_name, variant);
-      gtk_style_context_add_provider (style,
-                                      GTK_STYLE_PROVIDER (provider),
-                                      GTK_STYLE_PROVIDER_PRIORITY_SETTINGS);
-    }
-
-  free (theme_name);
-
-  return style;
-}
-
-static GtkStyleContext *
+static MetaStyleInfo *
 meta_frames_get_theme_variant (MetaFrames  *frames,
                                const gchar *variant)
 {
-  GtkStyleContext *style;
+  MetaStyleInfo *style_info;
 
-  style = g_hash_table_lookup (frames->style_variants, variant);
-  if (style == NULL)
+  style_info = g_hash_table_lookup (frames->style_variants, variant);
+  if (style_info == NULL)
     {
-      style = create_style_context (frames, variant);
-      g_hash_table_insert (frames->style_variants, g_strdup (variant), style);
+      style_info = meta_theme_create_style_info (gtk_widget_get_screen (GTK_WIDGET (frames)), variant);
+      g_hash_table_insert (frames->style_variants, g_strdup (variant), style_info);
     }
 
-  return style;
+  return style_info;
 }
 
 static void
 update_style_contexts (MetaFrames *frames)
 {
-  GtkStyleContext *style;
+  MetaStyleInfo *style_info;
   GList *variant_list, *variant;
+  GdkScreen *screen;
+
+  screen = gtk_widget_get_screen (GTK_WIDGET (frames));
 
   if (frames->normal_style)
-    g_object_unref (frames->normal_style);
-  frames->normal_style = create_style_context (frames, NULL);
+    meta_style_info_unref (frames->normal_style);
+  frames->normal_style = meta_theme_create_style_info (screen, NULL);
 
   variant_list = g_hash_table_get_keys (frames->style_variants);
   for (variant = variant_list; variant; variant = variant->next)
     {
-      style = create_style_context (frames, (char *)variant->data);
+      style_info = meta_theme_create_style_info (screen, (char *)variant->data);
       g_hash_table_insert (frames->style_variants,
-                           g_strdup (variant->data), style);
+                           g_strdup (variant->data), style_info);
     }
   g_list_free (variant_list);
 }
@@ -260,7 +231,7 @@ meta_frames_init (MetaFrames *frames)
 
   frames->style_variants = g_hash_table_new_full (g_str_hash, g_str_equal,
 
-                                                  free, g_object_unref);
+                                                  free, (GDestroyNotify)meta_style_info_unref);
   update_style_contexts (frames);
 
   gtk_widget_set_double_buffered (GTK_WIDGET (frames), FALSE);
@@ -302,7 +273,7 @@ meta_frames_destroy (GtkWidget *object)
 
   if (frames->normal_style)
     {
-      g_object_unref (frames->normal_style);
+      meta_style_info_unref (frames->normal_style);
       frames->normal_style = NULL;
     }
 
@@ -653,8 +624,8 @@ meta_frames_attach_style (MetaFrames  *frames,
   gboolean has_frame;
   char *variant = NULL;
 
-  if (frame->style != NULL)
-    g_object_unref (frame->style);
+  if (frame->style_info != NULL)
+    meta_style_info_unref (frame->style_info);
 
   meta_core_get (GDK_DISPLAY_XDISPLAY (gdk_display_get_default ()),
                  frame->xwindow,
@@ -663,10 +634,10 @@ meta_frames_attach_style (MetaFrames  *frames,
                  META_CORE_GET_END);
 
   if (variant == NULL || strcmp(variant, "normal") == 0)
-    frame->style = g_object_ref (frames->normal_style);
+    frame->style_info = meta_style_info_ref (frames->normal_style);
   else
-    frame->style = g_object_ref (meta_frames_get_theme_variant (frames,
-                                                                variant));
+    frame->style_info = meta_style_info_ref (meta_frames_get_theme_variant (frames,
+                                                                            variant));
 }
 
 LOCAL_SYMBOL void
@@ -684,7 +655,7 @@ meta_frames_manage_window (MetaFrames *frames,
 
   gdk_window_set_user_data (frame->window, frames);
 
-  frame->style = NULL;
+  frame->style_info = NULL;
 
   /* Don't set event mask here, it's in frame.c */
 
@@ -728,7 +699,7 @@ meta_frames_unmanage_window (MetaFrames *frames,
       
       g_hash_table_remove (frames->frames, &frame->xwindow);
 
-      g_object_unref (frame->style);
+      meta_style_info_unref (frame->style_info);
 
       gdk_window_destroy (frame->window);
 
@@ -2248,7 +2219,6 @@ meta_frames_paint (MetaFrames   *frames,
                    MetaUIFrame  *frame,
                    cairo_t      *cr)
 {
-  GtkWidget *widget;
   MetaFrameFlags flags;
   MetaFrameType type;
   int w, h;
@@ -2259,7 +2229,6 @@ meta_frames_paint (MetaFrames   *frames,
   MetaGrabOp grab_op;
   Display *display;
 
-  widget = GTK_WIDGET (frames);
   display = GDK_DISPLAY_XDISPLAY (gdk_display_get_default ());
 
   for (i = 0; i < META_BUTTON_TYPE_LAST; i++)
@@ -2354,17 +2323,16 @@ meta_frames_paint (MetaFrames   *frames,
 
   meta_prefs_get_button_layout (&button_layout);
 
-  meta_theme_draw_frame_with_style (meta_theme_get_current (),
-                                    frame->style,
-                                    widget,
-                                    cr,
-                                    type,
-                                    flags,
-                                    w, h,
-                                    frame->layout,
-                                    frame->text_height,
-                                    &button_layout,
-                                    button_states);
+  meta_theme_draw_frame (meta_theme_get_current (),
+                         frame->style_info,
+                         cr,
+                         type,
+                         flags,
+                         w, h,
+                         frame->layout,
+                         frame->text_height,
+                         &button_layout,
+                         button_states);
 }
 
 static gboolean
