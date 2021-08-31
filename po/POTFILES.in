@@ -18,12 +18,10 @@ src/core/window-props.c
 src/core/xprops.c
 src/muffin.desktop.in
 src/org.cinnamon.muffin.gschema.xml.in
-src/tools/muffin-message.c
 src/ui/frames.c
 src/ui/menu.c
 src/ui/metaaccellabel.c
 src/ui/resizepopup.c
 src/ui/theme.c
 src/ui/theme-parser.c
-src/ui/theme-viewer.c
 

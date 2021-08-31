@@ -3,8 +3,6 @@
 
 lib_LTLIBRARIES = libmuffin.la
 
-SUBDIRS=wm-tester tools
-
 NULL =
 
 AM_CPPFLAGS=								\
@@ -169,8 +167,6 @@ libmuffin_la_SOURCES =				\
 	meta/theme.h				\
 	ui/theme-private.h			\
 	ui/ui.c					\
-	meta/preview-widget.h			\
-	ui/preview-widget.c			\
 	$(muffin_built_sources) \
 	$(NULL)
 
@@ -214,7 +210,6 @@ libmuffininclude_base_headers =		\
 # Excluded from scanning for introspection but installed
 # atomnames.h: macros cause problems for scanning process
 libmuffininclude_extra_headers =		\
-	meta/preview-widget.h			\
 	meta/atomnames.h
 
 libmuffinincludedir = $(includedir)/muffin/meta
@@ -222,11 +217,6 @@ libmuffinincludedir = $(includedir)/muffin/meta
 libmuffininclude_HEADERS =			\
 	$(libmuffininclude_base_headers)	\
 	$(libmuffininclude_extra_headers)
-
-muffin_theme_viewer_SOURCES=  \
-	ui/theme-viewer.c
-
-bin_PROGRAMS=muffin muffin-theme-viewer
 
 muffin_SOURCES = core/muffin.c
 muffin_LDADD = $(MUFFIN_LIBS) libmuffin.la
@@ -290,8 +280,6 @@ Meta-$(api_version).gir: libmuffin.la
 @META_GIR@_SCANNERFLAGS = $(WARN_SCANNERFLAGS) --warn-all --warn-error --identifier-prefix=Meta
 
 endif
-
-muffin_theme_viewer_LDADD= $(MUFFIN_LIBS) libmuffin.la
 
 testboxes_SOURCES = core/testboxes.c core/boxes.c core/util.c
 testgradient_SOURCES = ui/testgradient.c
