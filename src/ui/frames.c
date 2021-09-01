@@ -572,6 +572,7 @@ meta_frames_calc_geometry (MetaFrames        *frames,
   meta_prefs_get_button_layout (&button_layout);
 
   meta_theme_calc_geometry (meta_theme_get_current (),
+                            frame->style_info,
                             type,
                             frame->text_height,
                             flags,
@@ -749,6 +750,7 @@ meta_frames_get_borders (MetaFrames *frames,
    * window size
    */
   meta_theme_get_frame_borders (meta_theme_get_current (),
+                                frame->style_info,
                                 type,
                                 frame->text_height,
                                 flags,
@@ -1994,6 +1996,7 @@ populate_cache (MetaFrames *frames,
     }
 
   meta_theme_get_frame_borders (meta_theme_get_current (),
+                                frame->style_info,
                                 frame_type,
                                 frame->text_height,
                                 frame_flags,
@@ -2111,7 +2114,7 @@ subtract_client_area (cairo_region_t *region,
                  META_CORE_GET_CLIENT_WIDTH, &area.width,
                  META_CORE_GET_CLIENT_HEIGHT, &area.height,
                  META_CORE_GET_END);
-  meta_theme_get_frame_borders (meta_theme_get_current (),
+  meta_theme_get_frame_borders (meta_theme_get_current (), frame->style_info,
                                 type, frame->text_height, flags,
                                 &borders);
 
