@@ -65,6 +65,9 @@
 #include <stdarg.h>
 #include <math.h>
 
+/* This is temporary because of code removed by https://github.com/linuxmint/muffin/commit/e252272477c68cd8584eb590a2c608012fe17621 */
+#define MINI_ICON_WIDTH 16
+
 #define GDK_COLOR_RGBA(color)                                           \
                          ((guint32) (0xff                         |     \
                                      ((int)((color).red * 255) << 24)   |    \
@@ -239,6 +242,7 @@ meta_frame_layout_new  (void)
   layout->titlebar_spacing = 6;
   layout->has_title = TRUE;
   layout->title_scale = 1.0;
+  layout->icon_size = MINI_ICON_WIDTH;
 
   init_border (&layout->button_border);
 
@@ -618,6 +622,88 @@ strip_button (MetaButtonSpace *func_rects[MAX_BUTTONS_PER_CORNER],
     }
 
   return FALSE; /* did not strip anything */
+}
+
+static void
+get_padding_and_border (GtkStyleContext *style,
+                        GtkBorder       *border)
+{
+  GtkBorder tmp;
+  GtkStateFlags state = gtk_style_context_get_state (style);
+
+  gtk_style_context_get_border (style, state, border);
+  gtk_style_context_get_padding (style, state, &tmp);
+
+  border->left += tmp.left;
+  border->top += tmp.top;
+  border->right += tmp.right;
+  border->bottom += tmp.bottom;
+}
+
+static void
+meta_frame_layout_sync_with_style (MetaFrameLayout *layout,
+                                   MetaStyleInfo   *style_info,
+                                   MetaFrameFlags   flags)
+{
+  GtkStyleContext *style;
+  GtkBorder border;
+  int border_radius, max_radius;
+
+  meta_style_info_set_flags (style_info, flags);
+
+  layout->button_sizing = META_BUTTON_SIZING_FIXED;
+
+  style = style_info->styles[META_STYLE_ELEMENT_FRAME];
+  get_padding_and_border (style, &border);
+
+  layout->left_width = border.left;
+  layout->right_width = border.right;
+  layout->bottom_height = border.bottom;
+
+  if (layout->hide_buttons)
+    layout->icon_size = 0;
+
+  if (!layout->has_title && layout->hide_buttons)
+    return; /* border-only - be done */
+
+  style = style_info->styles[META_STYLE_ELEMENT_TITLEBAR];
+  gtk_style_context_get (style, gtk_style_context_get_state (style),
+                         "border-radius", &border_radius,
+                         NULL);
+  /* GTK+ currently does not allow us to look up radii of individual
+   * corners; however we don't clip the client area, so with the
+   * current trend of using small/no visible frame borders, most
+   * themes should work fine with this.
+   */
+  layout->top_left_corner_rounded_radius = border_radius;
+  layout->top_right_corner_rounded_radius = border_radius;
+  max_radius = MIN (layout->bottom_height, layout->left_width);
+  layout->bottom_left_corner_rounded_radius = MAX (border_radius, max_radius);
+  max_radius = MIN (layout->bottom_height, layout->right_width);
+  layout->bottom_right_corner_rounded_radius = MAX (border_radius, max_radius);
+
+  get_padding_and_border (style, &border);
+  layout->left_titlebar_edge = border.left;
+  layout->right_titlebar_edge = border.right;
+  layout->title_vertical_pad = border.top;
+
+  layout->button_border.top = border.top;
+  layout->button_border.bottom = border.bottom;
+  layout->button_border.left = 0;
+  layout->button_border.right = 0;
+
+  layout->button_width = layout->icon_size;
+  layout->button_height = layout->icon_size;
+
+  style = style_info->styles[META_STYLE_ELEMENT_BUTTON];
+  get_padding_and_border (style, &border);
+  layout->button_width += border.left + border.right;
+  layout->button_height += border.top + border.bottom;
+
+  style = style_info->styles[META_STYLE_ELEMENT_IMAGE];
+  get_padding_and_border (style, &border);
+  layout->button_width += border.left + border.right;
+  layout->button_height += border.top + border.bottom;
 }
 
 LOCAL_SYMBOL void
