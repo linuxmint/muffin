@@ -811,3 +811,10 @@ meta_core_increment_event_serial (Display *xdisplay)
   meta_display_increment_event_serial (display);
 }
 
+void
+meta_retheme_all (void)
+{
+  if (meta_get_display ())
+    meta_display_retheme_all ();
+}
+
