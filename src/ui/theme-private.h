@@ -258,19 +258,17 @@ struct _MetaFrameStyle
 };
 
 /* Kinds of frame...
- * 
- *  normal ->   noresize / vert only / horz only / both
- *              focused / unfocused
+ *
+ *  normal ->   focused / unfocused
  *  max    ->   focused / unfocused
  *  shaded ->   focused / unfocused
  *  max/shaded -> focused / unfocused
  *
- *  so 4 states with 8 sub-states in one, 2 sub-states in the other 3,
- *  meaning 14 total
+ *  so 4 states with 2 sub-states each, meaning 8 total
  *
- * 14 window states times 7 or 8 window types. Except some
+ * 8 window states times 7 or 8 window types. Except some
  * window types never get a frame so that narrows it down a bit.
- * 
+ *
  */
 typedef enum
 {
@@ -287,15 +285,6 @@ typedef enum
 
 typedef enum
 {
-  META_FRAME_RESIZE_NONE,
-  META_FRAME_RESIZE_VERTICAL,
-  META_FRAME_RESIZE_HORIZONTAL,
-  META_FRAME_RESIZE_BOTH,
-  META_FRAME_RESIZE_LAST
-} MetaFrameResize;
-
-typedef enum
-{
   META_FRAME_FOCUS_NO,
   META_FRAME_FOCUS_YES,
   META_FRAME_FOCUS_LAST
@@ -303,8 +292,7 @@ typedef enum
 
 /**
  * How to draw frames at different times: when it's maximised or not, shaded
- * or not, when it's focussed or not, and (for non-maximised windows), when
- * it can be horizontally or vertically resized, both, or neither.
+ * or not, tiled or not, and when it's focussed or not.
  * Not all window types actually get a frame.
  *
  * A theme contains one of these objects for each type of window (each
@@ -316,7 +304,7 @@ struct _MetaFrameStyleSet
 {
   int refcount;
   MetaFrameStyleSet *parent;
-  MetaFrameStyle *normal_styles[META_FRAME_RESIZE_LAST][META_FRAME_FOCUS_LAST];
+  MetaFrameStyle *normal_styles[META_FRAME_FOCUS_LAST];
   MetaFrameStyle *maximized_styles[META_FRAME_FOCUS_LAST];
   MetaFrameStyle *tiled_left_styles[META_FRAME_FOCUS_LAST];
   MetaFrameStyle *tiled_right_styles[META_FRAME_FOCUS_LAST];
@@ -324,7 +312,7 @@ struct _MetaFrameStyleSet
   MetaFrameStyle *tiled_llc_styles[META_FRAME_FOCUS_LAST];
   MetaFrameStyle *tiled_urc_styles[META_FRAME_FOCUS_LAST];
   MetaFrameStyle *tiled_lrc_styles[META_FRAME_FOCUS_LAST];
-  MetaFrameStyle *shaded_styles[META_FRAME_RESIZE_LAST][META_FRAME_FOCUS_LAST];
+  MetaFrameStyle *shaded_styles[META_FRAME_FOCUS_LAST];
   MetaFrameStyle *maximized_and_shaded_styles[META_FRAME_FOCUS_LAST];
   MetaFrameStyle *tiled_left_and_shaded_styles[META_FRAME_FOCUS_LAST];
   MetaFrameStyle *tiled_right_and_shaded_styles[META_FRAME_FOCUS_LAST];
