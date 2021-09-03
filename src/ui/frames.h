@@ -76,12 +76,12 @@ struct _MetaUIFrame
   Window xwindow;
   GdkWindow *window;
   MetaStyleInfo *style_info;
-  MetaFrameStyle *cache_style;
+  MetaFrameLayout *cache_layout;
   PangoLayout *text_layout;
   int text_height;
   char *title; /* NULL once we have a layout */
   guint shape_applied : 1;
-  
+
   /* FIXME get rid of this, it can just be in the MetaFrames struct */
   MetaFrameControl prelit_control;
 };
