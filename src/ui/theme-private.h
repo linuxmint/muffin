@@ -296,6 +296,7 @@ void meta_theme_calc_geometry (MetaTheme              *theme,
 
 int                   meta_pango_font_desc_get_text_height (const PangoFontDescription *font_desc,
                                                             PangoContext         *context);
+int                   meta_theme_get_window_scaling_factor (void);
 
 #define META_THEME_ALLOWS(theme, feature) (theme->format_version >= feature)
 
