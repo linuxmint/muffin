@@ -282,7 +282,6 @@ Meta-$(api_version).gir: libmuffin.la
 endif
 
 testboxes_SOURCES = core/testboxes.c core/boxes.c core/util.c
-testgradient_SOURCES = ui/testgradient.c
 testasyncgetprop_SOURCES = core/testasyncgetprop.c core/async-getprop.c
 
 # NO-OP: work around the fact that source code tested by the programs are
@@ -290,10 +289,9 @@ testasyncgetprop_SOURCES = core/testasyncgetprop.c core/async-getprop.c
 testasyncgetprop_CFLAGS = $(WARN_CFLAGS) $(AM_CFLAGS)
 testboxes_CFLAGS = $(WARN_CFLAGS) $(AM_CFLAGS)
 
-noinst_PROGRAMS=testboxes testgradient testasyncgetprop
+noinst_PROGRAMS=testboxes testasyncgetprop
 
 testboxes_LDADD = $(MUFFIN_LIBS) $(top_builddir)/clutter/clutter/libmuffin-clutter-$(MUFFIN_PLUGIN_API_VERSION).la
-testgradient_LDADD = $(MUFFIN_LIBS) libmuffin.la
 testasyncgetprop_LDADD = $(MUFFIN_LIBS)
 
 

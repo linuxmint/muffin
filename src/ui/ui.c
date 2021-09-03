@@ -672,7 +672,7 @@ meta_ui_theme_get_frame_borders (MetaUI *ui,
 
       text_height = meta_pango_font_desc_get_text_height (font_desc, context);
 
-      meta_theme_get_frame_borders (meta_theme_get_current (),
+      meta_theme_get_frame_borders (meta_theme_get_default (),
                                     style_info, type, text_height, flags,
                                     borders);
 
@@ -688,17 +688,10 @@ meta_ui_theme_get_frame_borders (MetaUI *ui,
     meta_style_info_unref (style_info);
 }
 
-LOCAL_SYMBOL void
-meta_ui_set_current_theme (const char *name,
-                           gboolean    force_reload)
-{
-  meta_theme_set_current (name, force_reload);
-}
-
 LOCAL_SYMBOL gboolean
 meta_ui_have_a_theme (void)
 {
-  return meta_theme_get_current () != NULL;
+  return meta_theme_get_default () != NULL;
 }
 
 static void
