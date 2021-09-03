@@ -36,10 +36,5 @@ MetaTheme* meta_theme_get_default (void);
 
 MetaTheme* meta_theme_new      (void);
 void       meta_theme_free     (MetaTheme *theme);
-gboolean   meta_theme_validate (MetaTheme *theme,
-                                GError   **error);
-
-MetaTheme* meta_theme_load (const char *theme_name,
-                            GError    **err);
 
 #endif
