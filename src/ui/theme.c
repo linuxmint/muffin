@@ -1224,8 +1224,8 @@ meta_style_info_create_font_desc (MetaStyleInfo *style_info)
   PangoFontDescription *font_desc;
   const PangoFontDescription *override = meta_prefs_get_titlebar_font ();
 
-  gtk_style_context_get (style_info->styles[META_STYLE_ELEMENT_TITLE],
-                         GTK_STATE_FLAG_NORMAL,
+  gtk_style_context_get (context,
+                         gtk_style_context_get_state (context),
                          "font", &font_desc, NULL);
 
   if (override)
