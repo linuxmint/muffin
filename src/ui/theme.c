@@ -1019,13 +1019,13 @@ meta_frame_layout_draw_with_style (MetaFrameLayout         *layout,
 
               width = gdk_pixbuf_get_width (pixbuf) / scale;
               height = gdk_pixbuf_get_height (pixbuf) / scale;
-              x = button_rect.x + (button_rect.width - width) / 2;
-              y = button_rect.y + (button_rect.height - height) / 2;
+              x = button_rect.x + (button_rect.width - layout->icon_size) / 2;
+              y = button_rect.y + (button_rect.height - layout->icon_size) / 2;
 
               cairo_translate (cr, x, y);
               cairo_scale (cr,
-                           width / layout->icon_size,
-                           height / layout->icon_size);
+                           layout->icon_size / width,
+                           layout->icon_size / height);
 
               gdk_cairo_set_source_pixbuf (cr, pixbuf, 0, 0);
               cairo_paint (cr);
