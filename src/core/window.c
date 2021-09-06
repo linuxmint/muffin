@@ -12370,8 +12370,8 @@ update_edge_constraints (MetaWindow *window)
     case META_TILE_TOP:
       window->edge_constraints[0] = META_EDGE_CONSTRAINT_MONITOR;
       window->edge_constraints[1] = META_EDGE_CONSTRAINT_MONITOR;
-      window->edge_constraints[2] = META_EDGE_CONSTRAINT_MONITOR;
-      window->edge_constraints[3] = META_EDGE_CONSTRAINT_NONE;
+      window->edge_constraints[2] = META_EDGE_CONSTRAINT_NONE;
+      window->edge_constraints[3] = META_EDGE_CONSTRAINT_MONITOR;
       break;
 
     case META_TILE_BOTTOM:
