@@ -9486,6 +9486,8 @@ update_move (MetaWindow  *window,
         window->tile_monitor_number = monitor->number;
     }
 
+  update_edge_constraints (window);
+
   /* shake loose (unmaximize) maximized or tiled window if dragged beyond
    * the threshold in the Y direction. Tiled windows can also be pulled
    * loose via X motion.
