@@ -13,7 +13,7 @@ Build-Depends:
  libcanberra-gtk3-dev,
  libcinnamon-desktop-dev (>= 3.6),
  libgirepository1.0-dev (>= 0.9.12),
- libgl1-mesa-dev,
+ libglvnd-dev,
  libglib2.0-dev (>= 2.37.3),
  libgtk-3-dev (>= 3.9.12),
  libice-dev,
