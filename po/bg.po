@@ -1,423 +1,295 @@
-# Bulgarian translation of muffin po-file.
+# Bulgarian translation of mutter po-file.
 # Copyright (C) 2002, 2004, 2006, 2007, 2008 Free Software Foundation, Inc.
-# Copyright (C) 2009, 2010, 2011, 2012 Free Software Foundation, Inc.
-# Alexander Shopov <ash@kambanaria.org>, 2002, 2006, 2007, 2009, 2010, 2011, 2012.
+# Copyright (C) 2009, 2010, 2011, 2012, 2013 Free Software Foundation, Inc.
+# Copyright (C) 2014, 2015, 2016, 2017 Free Software Foundation, Inc.
+# Alexander Shopov <ash@kambanaria.org>, 2002, 2006, 2007, 2009, 2010.
+# Alexander Shopov <ash@kambanaria.org>, 2011, 2012, 2013, 2014, 2015.
+# Alexander Shopov <ash@kambanaria.org>, 2016, 2017.
 # Vladimir Petkov <kaladan@gmail.com>, 2004. 
 # Rostislav Raykov <zbrox@i-space.org>, 2004.
 # Yavor Doganov <yavor@gnu.org>, 2008.
 #
-#
 msgid ""
 msgstr ""
-"Project-Id-Version: muffin master\n"
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-03-12 06:45+0200\n"
-"PO-Revision-Date: 2012-03-12 06:45+0200\n"
+"Project-Id-Version: mutter master\n"
+"Report-Msgid-Bugs-To: https://bugzilla.gnome.org/enter_bug.cgi?"
+"product=mutter&keywords=I18N+L10N&component=general\n"
+"POT-Creation-Date: 2017-09-10 11:09+0000\n"
+"PO-Revision-Date: 2017-09-10 17:41+0300\n"
 "Last-Translator: Alexander Shopov <ash@kambanaria.org>\n"
 "Language-Team: Bulgarian <dict@fsa-bg.org>\n"
 "Language: bg\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: ../src/50-muffin-windows.xml.in.h:1
+#: data/50-mutter-navigation.xml:6
+msgid "Navigation"
+msgstr "Навигация"
+
+#: data/50-mutter-navigation.xml:9
+msgid "Move window to workspace 1"
+msgstr "Преместване на прозореца на работен плот 1"
+
+#: data/50-mutter-navigation.xml:12
+msgid "Move window to workspace 2"
+msgstr "Преместване на прозореца на работен плот 2"
+
+#: data/50-mutter-navigation.xml:15
+msgid "Move window to workspace 3"
+msgstr "Преместване на прозореца на работен плот 3"
+
+#: data/50-mutter-navigation.xml:18
+msgid "Move window to workspace 4"
+msgstr "Преместване на прозореца на работен плот 4"
+
+#: data/50-mutter-navigation.xml:21
+msgid "Move window to last workspace"
+msgstr "Преместване на прозореца на последния работен плот"
+
+#: data/50-mutter-navigation.xml:24
+msgid "Move window one workspace to the left"
+msgstr "Преместване на прозореца един работен плот наляво"
+
+#: data/50-mutter-navigation.xml:27
+msgid "Move window one workspace to the right"
+msgstr "Преместване на прозореца един работен плот надясно"
+
+#: data/50-mutter-navigation.xml:30
+msgid "Move window one workspace up"
+msgstr "Преместване на прозореца един работен плот нагоре"
+
+#: data/50-mutter-navigation.xml:33
+msgid "Move window one workspace down"
+msgstr "Преместване на прозореца един работен плот надолу"
+
+#: data/50-mutter-navigation.xml:36
+msgid "Move window one monitor to the left"
+msgstr "Преместване на прозореца един екран наляво"
+
+#: data/50-mutter-navigation.xml:39
+msgid "Move window one monitor to the right"
+msgstr "Преместване на прозореца един екран надясно"
+
+#: data/50-mutter-navigation.xml:42
+msgid "Move window one monitor up"
+msgstr "Преместване на прозореца един екран нагоре"
+
+#: data/50-mutter-navigation.xml:45
+msgid "Move window one monitor down"
+msgstr "Преместване на прозореца един екран надолу"
+
+#: data/50-mutter-navigation.xml:49
+msgid "Switch applications"
+msgstr "Преместване на фокуса между програмите"
+
+#: data/50-mutter-navigation.xml:54
+msgid "Switch to previous application"
+msgstr "Преместване на фокуса към предишната програма"
+
+#: data/50-mutter-navigation.xml:58
+msgid "Switch windows"
+msgstr "Преместване на фокуса между прозорците"
+
+#: data/50-mutter-navigation.xml:63
+msgid "Switch to previous window"
+msgstr "Преместване на фокуса към предишния прозорец"
+
+#: data/50-mutter-navigation.xml:67
+msgid "Switch windows of an application"
+msgstr "Преместване на фокуса между прозорците на една програма"
+
+#: data/50-mutter-navigation.xml:72
+msgid "Switch to previous window of an application"
+msgstr "Преместване на фокуса към предишния прозорец на програма"
+
+#: data/50-mutter-navigation.xml:76
+msgid "Switch system controls"
+msgstr "Към следващия служебен обект"
+
+#: data/50-mutter-navigation.xml:81
+msgid "Switch to previous system control"
+msgstr "Към предишния служебен обект"
+
+#: data/50-mutter-navigation.xml:85
+msgid "Switch windows directly"
+msgstr "Незабавно преместване на фокуса между прозорците"
+
+#: data/50-mutter-navigation.xml:90
+msgid "Switch directly to previous window"
+msgstr "Незабавно преместване на фокуса към предишния прозорец"
+
+#: data/50-mutter-navigation.xml:94
+msgid "Switch windows of an app directly"
+msgstr "Незабавно преместване на фокуса между прозорците на една програма"
+
+#: data/50-mutter-navigation.xml:99
+msgid "Switch directly to previous window of an app"
+msgstr ""
+"Незабавно преместване на фокуса към предишния прозорец на една програма"
+
+#: data/50-mutter-navigation.xml:103
+msgid "Switch system controls directly"
+msgstr "Незабавно преместване на фокуса между служебните обекти"
+
+#: data/50-mutter-navigation.xml:108
+msgid "Switch directly to previous system control"
+msgstr "Незабавно преместване на фокуса към предишния служебен обект"
+
+#: data/50-mutter-navigation.xml:111
+msgid "Hide all normal windows"
+msgstr "Скриване на всички обикновени прозорци"
+
+#: data/50-mutter-navigation.xml:114
+msgid "Switch to workspace 1"
+msgstr "Превключване към работен плот 1"
+
+#: data/50-mutter-navigation.xml:117
+msgid "Switch to workspace 2"
+msgstr "Превключване към работен плот 2"
+
+#: data/50-mutter-navigation.xml:120
+msgid "Switch to workspace 3"
+msgstr "Превключване към работен плот 3"
+
+#: data/50-mutter-navigation.xml:123
+msgid "Switch to workspace 4"
+msgstr "Превключване към работен плот 4"
+
+#: data/50-mutter-navigation.xml:126
+msgid "Switch to last workspace"
+msgstr "Превключване към последния работен плот"
+
+#: data/50-mutter-navigation.xml:129
+msgid "Move to workspace left"
+msgstr "Преместване на левия работен плот"
+
+#: data/50-mutter-navigation.xml:132
+msgid "Move to workspace right"
+msgstr "Преместване на десния работен плот"
+
+#: data/50-mutter-navigation.xml:135
+msgid "Move to workspace above"
+msgstr "Преместване на горния работен плот"
+
+#: data/50-mutter-navigation.xml:138
+msgid "Move to workspace below"
+msgstr "Преместване на долния работен плот"
+
+#: data/50-mutter-system.xml:6
+msgid "System"
+msgstr "Система"
+
+#: data/50-mutter-system.xml:8
+msgid "Show the run command prompt"
+msgstr "Показване на прозореца за стартиране на команда"
+
+#: data/50-mutter-system.xml:10
+msgid "Show the activities overview"
+msgstr "Преглед на дейностите"
+
+#: data/50-mutter-windows.xml:6
 msgid "Windows"
 msgstr "Прозорци"
 
-#: ../src/50-muffin-windows.xml.in.h:2
+#: data/50-mutter-windows.xml:8
+msgid "Activate the window menu"
+msgstr "Задействане на менюто за прозорците"
+
+#: data/50-mutter-windows.xml:10
+msgid "Toggle fullscreen mode"
+msgstr "Превключване на режима за цял екран"
+
+#: data/50-mutter-windows.xml:12
+msgid "Toggle maximization state"
+msgstr "Превключване на състоянието на максимизиране"
+
+#: data/50-mutter-windows.xml:14
+msgid "Maximize window"
+msgstr "Максимизиране на прозорец"
+
+#: data/50-mutter-windows.xml:16
+msgid "Restore window"
+msgstr "Възстановяване на прозорец"
+
+#: data/50-mutter-windows.xml:18
+msgid "Toggle shaded state"
+msgstr "Превключване на състоянието на навиване"
+
+#: data/50-mutter-windows.xml:20
+msgid "Close window"
+msgstr "Затваряне на прозореца"
+
+#: data/50-mutter-windows.xml:22
+msgid "Hide window"
+msgstr "Скриване на прозорец"
+
+#: data/50-mutter-windows.xml:24
+msgid "Move window"
+msgstr "Преместване на прозорец"
+
+#: data/50-mutter-windows.xml:26
+msgid "Resize window"
+msgstr "Оразмеряване на прозорец"
+
+#: data/50-mutter-windows.xml:29
+msgid "Toggle window on all workspaces or one"
+msgstr "Превключване на появата на прозореца на всички работни места"
+
+#: data/50-mutter-windows.xml:31
+msgid "Raise window if covered, otherwise lower it"
+msgstr "Ако прозорецът е под друг, го издига, иначе го понижава"
+
+#: data/50-mutter-windows.xml:33
+msgid "Raise window above other windows"
+msgstr "Издигане на прозореца над другите"
+
+#: data/50-mutter-windows.xml:35
+msgid "Lower window below other windows"
+msgstr "Понижаване на прозореца под другите прозорци"
+
+#: data/50-mutter-windows.xml:37
+msgid "Maximize window vertically"
+msgstr "Максимизиране на прозореца вертикално"
+
+#: data/50-mutter-windows.xml:39
+msgid "Maximize window horizontally"
+msgstr "Максимизиране на прозореца хоризонтално"
+
+#: data/50-mutter-windows.xml:43
 msgid "View split on left"
 msgstr "Изглед разделен отляво"
 
-#: ../src/50-muffin-windows.xml.in.h:3
+#: data/50-mutter-windows.xml:47
 msgid "View split on right"
 msgstr "Изглед разделен отдясно"
 
-#. This probably means that a non-WM compositor like xcompmgr is running;
-#. * we have no way to get it to exit
-#: ../src/compositor/compositor.c:492
-#, c-format
-msgid ""
-"Another compositing manager is already running on screen %i on display \"%s"
-"\"."
-msgstr "На екран %i от дисплея „%s“ вече има мениджър за наслагване."
+#: data/mutter.desktop.in:4
+msgid "Mutter"
+msgstr "Mutter"
 
-#: ../src/core/bell.c:307
-msgid "Bell event"
-msgstr "Събитие за звънец"
-
-#: ../src/core/core.c:157
-#, c-format
-msgid "Unknown window information request: %d"
-msgstr "Неизвестна заявка за информация за прозорец: %d"
-
-#: ../src/core/delete.c:111
-#, c-format
-msgid "<tt>%s</tt> is not responding."
-msgstr "<tt>%s</tt> не отговаря на съобщенията."
-
-#: ../src/core/delete.c:114
-msgid "Application is not responding."
-msgstr "Програмата не отговаря на съобщенията."
-
-#: ../src/core/delete.c:119
-msgid ""
-"You may choose to wait a short while for it to continue or force the "
-"application to quit entirely."
-msgstr ""
-"Можете да изчакате малко преди изрично да накарате приложението да спре "
-"работата си."
-
-#: ../src/core/delete.c:126
-msgid "_Wait"
-msgstr "Из_чакване"
-
-#: ../src/core/delete.c:126
-msgid "_Force Quit"
-msgstr "_Принудително спиране"
-
-#: ../src/core/display.c:361
-#, c-format
-msgid "Missing %s extension required for compositing"
-msgstr "Липсва разширението „%s“, необходимо за наслагване"
-
-#: ../src/core/display.c:427
-#, c-format
-msgid "Failed to open X Window System display '%s'\n"
-msgstr "Неуспех при отварянето на дисплея на X Window „%s“\n"
-
-#: ../src/core/keybindings.c:852
-#, c-format
-msgid ""
-"Some other program is already using the key %s with modifiers %x as a "
-"binding\n"
-msgstr "Някоя друга програма използва бързия клавиш %s с модификатори %x\n"
-
-#: ../src/core/main.c:206
-msgid "Disable connection to session manager"
-msgstr "Прекъсване на връзката към мениджъра на сесиите"
-
-#: ../src/core/main.c:212
-msgid "Replace the running window manager"
-msgstr "Замяна на текущия мениджър на прозорци"
-
-#: ../src/core/main.c:218
-msgid "Specify session management ID"
-msgstr "Определяне на идентификатор за управлението на сесии"
-
-#: ../src/core/main.c:223
-msgid "X Display to use"
-msgstr "X дисплеят, който да се използва"
-
-# Ако „запазено“ не се членува, низът се събира на един ред без
-# пренасяне.
-#: ../src/core/main.c:229
-msgid "Initialize session from savefile"
-msgstr "Инициализиране на сесия от файл със запазено състояние"
-
-#: ../src/core/main.c:235
-msgid "Make X calls synchronous"
-msgstr "Извикванията на X да са синхронни"
-
-#: ../src/core/main.c:504
-#, c-format
-msgid "Failed to scan themes directory: %s\n"
-msgstr "Неуспех при сканирането на папката с темите: %s\n"
-
-#: ../src/core/main.c:520
-#, c-format
-msgid ""
-"Could not find a theme! Be sure %s exists and contains the usual themes.\n"
-msgstr ""
-"Неуспех при намирането на тема! Проверете дали %s съществува и съдържа "
-"обичайните теми.\n"
-
-#: ../src/core/muffin.c:40
-#, c-format
-msgid ""
-"muffin %s\n"
-"Copyright (C) 2001-%d Havoc Pennington, Red Hat, Inc., and others\n"
-"This is free software; see the source for copying conditions.\n"
-"There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A "
-"PARTICULAR PURPOSE.\n"
-msgstr ""
-"muffin %s\n"
-"Авторски права (C) 2001-%d Havoc Pennington, Red Hat, Inc., и други\n"
-"Тази програма (muffin) е свободен софтуер, прегледайте изходния код относно "
-"условията за разпространение.\n"
-"Тази програма се разпространява БЕЗ НИКАКВИ ГАРАНЦИИ, дори и за ПРОДАЖБА или "
-"СЪОТВЕТСТВИЕ С КАКВАТО И ДА Е УПОТРЕБА.\n"
-
-#: ../src/core/muffin.c:54
-msgid "Print version"
-msgstr "Отпечатване на версията на програмата"
-
-#: ../src/core/muffin.c:60
-msgid "Comma-separated list of compositor plugins"
-msgstr "Списък с приставки за мениджъра за наслагването разделени с „,“"
-
-#: ../src/core/prefs.c:1077
-msgid ""
-"Workarounds for broken applications disabled. Some applications may not "
-"behave properly.\n"
-msgstr ""
-"Триковете за развалените програми са изключени. Някои програми могат да са с "
-"неправилно поведение.\n"
-
-#: ../src/core/prefs.c:1152
-#, c-format
-msgid "Could not parse font description \"%s\" from GSettings key %s\n"
-msgstr ""
-"Описанието на шрифт „%s“ от ключа на GSettings — %s, не може да бъде "
-"анализирано\n"
-
-#: ../src/core/prefs.c:1218
-#, c-format
-msgid ""
-"\"%s\" found in configuration database is not a valid value for mouse button "
-"modifier\n"
-msgstr ""
-"„%s“, който е открит в базата от данни с настройките, не е валиден "
-"модификатор на бутон на мишката\n"
-
-#: ../src/core/prefs.c:1739
-#, c-format
-msgid ""
-"\"%s\" found in configuration database is not a valid value for keybinding "
-"\"%s\"\n"
-msgstr ""
-"Низът „%s“ открит в базата от данни с настройки е невалиден за стойност на "
-"клавишната комбинация „%s“\n"
-
-#: ../src/core/prefs.c:1836
-#, c-format
-msgid "Workspace %d"
-msgstr "Работен плот %d"
-
-#: ../src/core/screen.c:730
-#, c-format
-msgid "Screen %d on display '%s' is invalid\n"
-msgstr "Екранът %d на дисплей „%s“ е невалиден\n"
-
-#: ../src/core/screen.c:746
-#, c-format
-msgid ""
-"Screen %d on display \"%s\" already has a window manager; try using the --"
-"replace option to replace the current window manager.\n"
-msgstr ""
-"Екранът %d на дисплей „%s“ вече има мениджър на прозорци; пробвайте да го "
-"замените с опцията --replace.\n"
-
-#: ../src/core/screen.c:773
-#, c-format
-msgid ""
-"Could not acquire window manager selection on screen %d display \"%s\"\n"
-msgstr ""
-"Неуспех при получаването на избрания мениджър за прозорци на екран %d, "
-"дисплей „%s“\n"
-
-#: ../src/core/screen.c:828
-#, c-format
-msgid "Screen %d on display \"%s\" already has a window manager\n"
-msgstr "Екран %d на дисплей „%s“ вече има мениджър за прозорци\n"
-
-#: ../src/core/screen.c:1013
-#, c-format
-msgid "Could not release screen %d on display \"%s\"\n"
-msgstr "Неуспех при отстъпването на екран %d на дисплей „%s“\n"
-
-#: ../src/core/session.c:843 ../src/core/session.c:850
-#, c-format
-msgid "Could not create directory '%s': %s\n"
-msgstr "Неуспех при създаването на папката „%s“: %s\n"
-
-#: ../src/core/session.c:860
-#, c-format
-msgid "Could not open session file '%s' for writing: %s\n"
-msgstr "Неуспех при отварянето на сесийния файл „%s“ за запис: %s\n"
-
-#: ../src/core/session.c:1001
-#, c-format
-msgid "Error writing session file '%s': %s\n"
-msgstr "Грешка при записване на сесийния файл „%s“: %s\n"
-
-#: ../src/core/session.c:1006
-#, c-format
-msgid "Error closing session file '%s': %s\n"
-msgstr "Грешка при затваряне на сесийния файл „%s“: %s\n"
-
-#: ../src/core/session.c:1136
-#, c-format
-msgid "Failed to parse saved session file: %s\n"
-msgstr "Неуспех при анализирането на записания сесиен файл: %s\n"
-
-#: ../src/core/session.c:1185
-#, c-format
-msgid "<muffin_session> attribute seen but we already have the session ID"
-msgstr ""
-"Атрибутът <muffin_session> е видян, но вече имаме сесийния идентификатор"
-
-#: ../src/core/session.c:1198 ../src/core/session.c:1273
-#: ../src/core/session.c:1305 ../src/core/session.c:1377
-#: ../src/core/session.c:1437
-#, c-format
-msgid "Unknown attribute %s on <%s> element"
-msgstr "Непознат атрибут %s на елемента <%s>"
-
-#: ../src/core/session.c:1215
-#, c-format
-msgid "nested <window> tag"
-msgstr "вложен етикет <window>"
-
-#: ../src/core/session.c:1457
-#, c-format
-msgid "Unknown element %s"
-msgstr "Непознат елемент %s"
-
-#: ../src/core/session.c:1809
-msgid ""
-"These windows do not support &quot;save current setup&quot; and will have to "
-"be restarted manually next time you log in."
-msgstr ""
-"Тези прозорци не поддържат операцията по записване на текущото състояние и "
-"ще трябва да се стартират ръчно при следващото ви влизане."
-
-#: ../src/core/util.c:111
-#, c-format
-msgid "Failed to open debug log: %s\n"
-msgstr "Неуспех при отварянето на дневника за изчистване на грешки: %s\n"
-
-#: ../src/core/util.c:121
-#, c-format
-msgid "Failed to fdopen() log file %s: %s\n"
-msgstr "Неуспех при изпълнението на fdopen() върху журналния файл %s: %s\n"
-
-#: ../src/core/util.c:127
-#, c-format
-msgid "Opened log file %s\n"
-msgstr "Отворен е дневника %s\n"
-
-#: ../src/core/util.c:146 ../src/tools/muffin-message.c:149
-#, c-format
-msgid "Muffin was compiled without support for verbose mode\n"
-msgstr "Muffin е компилиран без поддръжка на подробен режим\n"
-
-#: ../src/core/util.c:290
-msgid "Window manager: "
-msgstr "Мениджър на прозорци: "
-
-#: ../src/core/util.c:438
-msgid "Bug in window manager: "
-msgstr "Грешка в мениджъра на прозорци: "
-
-#: ../src/core/util.c:471
-msgid "Window manager warning: "
-msgstr "Предупреждение от мениджъра на прозорци: "
-
-#: ../src/core/util.c:499
-msgid "Window manager error: "
-msgstr "Грешка от мениджъра на прозорци: "
-
-#. first time through
-#: ../src/core/window.c:7224
-#, c-format
-msgid ""
-"Window %s sets SM_CLIENT_ID on itself, instead of on the WM_CLIENT_LEADER "
-"window as specified in the ICCCM.\n"
-msgstr ""
-"Прозорецът %s зададе SM_CLIENT_ID за себе, а не за прозореца "
-"WM_CLIENT_LEADER, както е указано в ICCCM.\n"
-
-#. We ignore mwm_has_resize_func because WM_NORMAL_HINTS is the
-#. * authoritative source for that info. Some apps such as mplayer or
-#. * xine disable resize via MWM but not WM_NORMAL_HINTS, but that
-#. * leads to e.g. us not fullscreening their windows.  Apps that set
-#. * MWM but not WM_NORMAL_HINTS are basically broken. We complain
-#. * about these apps but make them work.
-#.
-#: ../src/core/window.c:7887
-#, c-format
-msgid ""
-"Window %s sets an MWM hint indicating it isn't resizable, but sets min size "
-"%d x %d and max size %d x %d; this doesn't make much sense.\n"
-msgstr ""
-"Прозорецът %s задава подсказка MWM за това, че размерът му не може да се "
-"променя, но едновременно с това указва минимален размер %d x %d и максимален "
-"размер %d x %d. Това не е смислено.\n"
-
-#: ../src/core/window-props.c:309
-#, c-format
-msgid "Application set a bogus _NET_WM_PID %lu\n"
-msgstr "Приложението зададе неверен _NET_WM_PID %lu\n"
-
-#: ../src/core/window-props.c:426
-#, c-format
-msgid "%s (on %s)"
-msgstr "%s (от %s)"
-
-#: ../src/core/window-props.c:1481
-#, c-format
-msgid "Invalid WM_TRANSIENT_FOR window 0x%lx specified for %s.\n"
-msgstr "За %2$s е указан неправилен WM_TRANSIENT_FOR, прозорец 0x%1$lx.\n"
-
-#: ../src/core/window-props.c:1492
-#, c-format
-msgid "WM_TRANSIENT_FOR window 0x%lx for %s would create loop.\n"
-msgstr "WM_TRANSIENT_FOR за прозорец 0x%lx за %s ще зацикли.\n"
-
-#: ../src/core/xprops.c:155
-#, c-format
-msgid ""
-"Window 0x%lx has property %s\n"
-"that was expected to have type %s format %d\n"
-"and actually has type %s format %d n_items %d.\n"
-"This is most likely an application bug, not a window manager bug.\n"
-"The window has title=\"%s\" class=\"%s\" name=\"%s\"\n"
-msgstr ""
-"Прозорецът 0x%lx има свойството %s\n"
-"което трябва да е от вида: %s, формат: %d\n"
-"а всъщност има вида: %s, формат: %d, брой: %d.\n"
-"Това най-вероятно е грешка в приложението, а не в мениджъра на прозорци.\n"
-"Прозорецът е със заглавие=„%s“, клас=„%s“, име=„%s“\n"
-
-#: ../src/core/xprops.c:411
-#, c-format
-msgid "Property %s on window 0x%lx contained invalid UTF-8\n"
-msgstr "Свойството %s на прозореца 0x%lx съдържа невалиден UTF-8\n"
-
-#: ../src/core/xprops.c:494
-#, c-format
-msgid ""
-"Property %s on window 0x%lx contained invalid UTF-8 for item %d in the list\n"
-msgstr ""
-"Свойството %s на прозореца 0x%lx съдържа невалиден UTF-8 за елемента %d в "
-"списъка\n"
-
-#: ../src/muffin.desktop.in.h:1 ../src/muffin-wm.desktop.in.h:1
-msgid "Muffin"
-msgstr "Muffin"
-
-#: ../src/org.cinnamon.muffin.gschema.xml.in.h:1
+#: data/org.gnome.mutter.gschema.xml.in:7
 msgid "Modifier to use for extended window management operations"
 msgstr ""
 "Модификатор, който да се ползва за допълнителните действия по прозорците"
 
-#: ../src/org.cinnamon.muffin.gschema.xml.in.h:2
+#: data/org.gnome.mutter.gschema.xml.in:8
 msgid ""
-"This key will initiate the \"overlay\", which is a combination window "
-"overview and application launching system. The default is intended to be the "
-"\"Windows key\" on PC hardware. It's expected that this binding either the "
-"default or set to the empty string."
+"This key will initiate the “overlay”, which is a combination window overview "
+"and application launching system. The default is intended to be the “Windows "
+"key” on PC hardware. It’s expected that this binding either the default or "
+"set to the empty string."
 msgstr ""
 "Този клавиш стартира наслагването, което е комбинация от прозорец и система "
 "за стартиране на програми. Стандартно клавишът е „Windows“ при системите "
 "съвместими с PC. Очаква се да е или стандартната стойност или празен низ."
 
-#: ../src/org.cinnamon.muffin.gschema.xml.in.h:3
+#: data/org.gnome.mutter.gschema.xml.in:20
 msgid "Attach modal dialogs"
 msgstr "Прилепени модални диалогови прозорци"
 
-#: ../src/org.cinnamon.muffin.gschema.xml.in.h:4
+#: data/org.gnome.mutter.gschema.xml.in:21
 msgid ""
 "When true, instead of having independent titlebars, modal dialogs appear "
 "attached to the titlebar of the parent window and are moved together with "
@@ -427,25 +299,13 @@ msgstr ""
 "заглавната лента на родителския си прозорец и се местят с него, вместо да са "
 "отделни и да имат собствена заглавна лента."
 
-#: ../src/org.cinnamon.muffin.gschema.xml.in.h:5
-msgid "Live Hidden Windows"
-msgstr "Обновяване на скритите прозорци"
-
-#: ../src/org.cinnamon.muffin.gschema.xml.in.h:6
-msgid ""
-"Determines whether hidden windows (i.e., minimized windows and windows on "
-"other workspaces than the current one) should be kept alive."
-msgstr ""
-"Дали скритите прозорци (т.е. минимизираните или на другите плотове) да се "
-"обновяват."
-
-#: ../src/org.cinnamon.muffin.gschema.xml.in.h:7
+#: data/org.gnome.mutter.gschema.xml.in:30
 msgid "Enable edge tiling when dropping windows on screen edges"
 msgstr ""
 "Включване на прилепването и максимизирането на прозорците по границите на "
 "екрана"
 
-#: ../src/org.cinnamon.muffin.gschema.xml.in.h:8
+#: data/org.gnome.mutter.gschema.xml.in:31
 msgid ""
 "If enabled, dropping windows on vertical screen edges maximizes them "
 "vertically and resizes them horizontally to cover half of the available "
@@ -454,39 +314,39 @@ msgstr ""
 "Ако е включено, прозорците ще се максимизират по вертикала и ще заемат "
 "половината площ по хоризонтала при поставянето им край вертикалните граници "
 "на екрана. При поставянето им край горната граница прозорците ще се "
-"максимзират изцяло."
+"максимизират изцяло."
 
-#: ../src/org.cinnamon.muffin.gschema.xml.in.h:9
+#: data/org.gnome.mutter.gschema.xml.in:40
 msgid "Workspaces are managed dynamically"
 msgstr "Динамично управление на работните места"
 
-#: ../src/org.cinnamon.muffin.gschema.xml.in.h:10
+#: data/org.gnome.mutter.gschema.xml.in:41
 msgid ""
-"Determines whether workspaces are managed dynamically or whether there's a "
+"Determines whether workspaces are managed dynamically or whether there’s a "
 "static number of workspaces (determined by the num-workspaces key in org."
 "gnome.desktop.wm.preferences)."
 msgstr ""
 "Определя дали се ползва динамично управление на работните места или броят им "
-"е установено число (зададено чрез ключа „num-workspaces“ в org.cinnamon.desktop."
-"wm.preferences)."
+"е установено число (зададено чрез ключа „num-workspaces“ в „org.gnome."
+"desktop.wm.preferences“)."
 
-#: ../src/org.cinnamon.muffin.gschema.xml.in.h:11
+#: data/org.gnome.mutter.gschema.xml.in:50
 msgid "Workspaces only on primary"
-msgstr "Работни плотове само на основния монитор"
+msgstr "Работни плотове само на основния екран"
 
-#: ../src/org.cinnamon.muffin.gschema.xml.in.h:12
+#: data/org.gnome.mutter.gschema.xml.in:51
 msgid ""
 "Determines whether workspace switching should happen for windows on all "
 "monitors or only for windows on the primary monitor."
 msgstr ""
-"Дали смяната на работни плотове да се извършва на всички монитори или само "
-"на основния."
+"Дали смяната на работни плотове да се извършва на всички екрани или само на "
+"основния."
 
-#: ../src/org.cinnamon.muffin.gschema.xml.in.h:13
+#: data/org.gnome.mutter.gschema.xml.in:59
 msgid "No tab popup"
 msgstr "Без изскачащ прозорец при обхождане"
 
-#: ../src/org.cinnamon.muffin.gschema.xml.in.h:14
+#: data/org.gnome.mutter.gschema.xml.in:60
 msgid ""
 "Determines whether the use of popup and highlight frame should be disabled "
 "for window cycling."
@@ -494,1146 +354,334 @@ msgstr ""
 "Дали отбелязването на рамка и изскачащият прозорец при обхождане на "
 "прозорците да се изключат."
 
-#: ../src/org.cinnamon.muffin.gschema.xml.in.h:15
+#: data/org.gnome.mutter.gschema.xml.in:68
+msgid "Delay focus changes until the pointer stops moving"
+msgstr "Смяната на фокуса да изчака спирането на показалеца"
+
+#: data/org.gnome.mutter.gschema.xml.in:69
+msgid ""
+"If set to true, and the focus mode is either “sloppy” or “mouse” then the "
+"focus will not be changed immediately when entering a window, but only after "
+"the pointer stops moving."
+msgstr ""
+"Ако е включено и начинът за фокусиране е „sloppy“ (мързеливо) или "
+"„mouse“ (под мишката), тогава фокусът няма да се предава веднага при "
+"навлизането в прозорец, а едва след като показалецът спре да се движи."
+
+#: data/org.gnome.mutter.gschema.xml.in:79
 msgid "Draggable border width"
 msgstr "Широчина на границата за влачене"
 
-#: ../src/org.cinnamon.muffin.gschema.xml.in.h:16
+#: data/org.gnome.mutter.gschema.xml.in:80
 msgid ""
-"The amount of total draggable borders. If the theme's visible borders are "
+"The amount of total draggable borders. If the theme’s visible borders are "
 "not enough, invisible borders will be added to meet this value."
 msgstr ""
 "Общ размер на границите за влачене. Ако видимите граници на темата са по-"
 "малки, се добавят невидими граници, за да се достигне тази величина."
 
-#: ../src/org.cinnamon.muffin.gschema.xml.in.h:17
+#: data/org.gnome.mutter.gschema.xml.in:89
+msgid "Auto maximize nearly monitor sized windows"
+msgstr ""
+"Автоматично максимизиране на прозорци с размер близък до този на екрана"
+
+#: data/org.gnome.mutter.gschema.xml.in:90
+msgid ""
+"If enabled, new windows that are initially the size of the monitor "
+"automatically get maximized."
+msgstr ""
+"Ако е включено, новите прозорци, чийто размер е близък на този на екрана, "
+"автоматично ще се максимизират."
+
+#: data/org.gnome.mutter.gschema.xml.in:98
+msgid "Place new windows in the center"
+msgstr "Поставяне на новите прозорци в центъра на екрана"
+
+#: data/org.gnome.mutter.gschema.xml.in:99
+msgid ""
+"When true, the new windows will always be put in the center of the active "
+"screen of the monitor."
+msgstr "Ако е включено, новите прозорци ще се поставят в центъра на екрана."
+
+#: data/org.gnome.mutter.gschema.xml.in:107
+msgid "Enable experimental features"
+msgstr "Включване на експерименталните възможности"
+
+#: data/org.gnome.mutter.gschema.xml.in:108
+msgid ""
+"To enable experimental features, add the feature keyword to the list. "
+"Whether the feature requires restarting the compositor depends on the given "
+"feature. Any experimental feature is not required to still be available, or "
+"configurable. Don’t expect adding anything in this setting to be future "
+"proof. Currently possible keywords: • “scale-monitor-framebuffer” — makes "
+"mutter default to layout logical monitors in a logical pixel coordinate "
+"space, while scaling monitor framebuffers instead of window content, to "
+"manage HiDPI monitors. Does not require a restart. • “remote-desktop” — "
+"enables remote desktop support. To support remote desktop with screen "
+"sharing, “screen-cast” must also be enabled. • “screen-cast” — enables "
+"screen cast support."
+msgstr ""
+"За да включите експерименталните възможности, добавете ги към списъка. В "
+"някои случаи това изисква рестартиране на мениджъра за наслагване. "
+"Експерименталните възможности може да не са инсталирани или може да не се "
+"настройват. Тази секция не гарантира никаква бъдеща съвместимост. Възможните "
+"стойности са: • „scale-monitor-framebuffer“ — обединяване на всички монитори "
+"в съвместно графично пространство с логически координати на пикселите, при "
+"което се мащабират буферите за кадри, а не съдържанието на прозорците — за "
+"управление на мониторите с висока разделителна способност, не изисква "
+"рестартиране. • „remote-desktop“ — поддръжка на отдалечено работно място. "
+"Отдалеченото работно място изиска и предаването на екрана със „screen-cast“. "
+"• „screen-cast“ — предаване на екрана."
+
+#: data/org.gnome.mutter.gschema.xml.in:145
 msgid "Select window from tab popup"
 msgstr "Избиране при обхождане чрез изскачащ прозорец"
 
-#: ../src/org.cinnamon.muffin.gschema.xml.in.h:18
+#: data/org.gnome.mutter.gschema.xml.in:150
 msgid "Cancel tab popup"
 msgstr "Без изскачащ прозорец при обхождане"
 
-#: ../src/tools/muffin-message.c:123
-#, c-format
-msgid "Usage: %s\n"
-msgstr "Употреба: %s\n"
+#: data/org.gnome.mutter.gschema.xml.in:155
+msgid "Switch monitor configurations"
+msgstr "Смяна на настройките на екрана"
 
-#: ../src/ui/frames.c:1158
-msgid "Close Window"
-msgstr "Затваряне на прозореца"
+#: data/org.gnome.mutter.gschema.xml.in:160
+msgid "Rotates the built-in monitor configuration"
+msgstr "Завъртане на вградения екран"
 
-#: ../src/ui/frames.c:1161
-msgid "Window Menu"
-msgstr "Меню за прозорците"
+#: data/org.gnome.mutter.wayland.gschema.xml.in:6
+msgid "Switch to VT 1"
+msgstr "Превключване към виртуална графична конзола 1"
 
-#: ../src/ui/frames.c:1164
-msgid "Minimize Window"
-msgstr "Минимизиране на прозореца"
+#: data/org.gnome.mutter.wayland.gschema.xml.in:10
+msgid "Switch to VT 2"
+msgstr "Превключване към виртуална графична конзола 2"
 
-#: ../src/ui/frames.c:1167
-msgid "Maximize Window"
-msgstr "Максимизиране на прозореца"
+#: data/org.gnome.mutter.wayland.gschema.xml.in:14
+msgid "Switch to VT 3"
+msgstr "Превключване към виртуална графична конзола 3"
 
-#: ../src/ui/frames.c:1170
-msgid "Restore Window"
-msgstr "Възстановяване на прозорец"
+#: data/org.gnome.mutter.wayland.gschema.xml.in:18
+msgid "Switch to VT 4"
+msgstr "Превключване към виртуална графична конзола 4"
 
-#: ../src/ui/frames.c:1173
-msgid "Roll Up Window"
-msgstr "Навиване на прозореца"
+#: data/org.gnome.mutter.wayland.gschema.xml.in:22
+msgid "Switch to VT 5"
+msgstr "Превключване към виртуална графична конзола 5"
 
-#: ../src/ui/frames.c:1176
-msgid "Unroll Window"
-msgstr "Развиване на прозореца"
+#: data/org.gnome.mutter.wayland.gschema.xml.in:26
+msgid "Switch to VT 6"
+msgstr "Превключване към виртуална графична конзола 6"
 
-#: ../src/ui/frames.c:1179
-msgid "Keep Window On Top"
-msgstr "Прозорецът да е отгоре"
+#: data/org.gnome.mutter.wayland.gschema.xml.in:30
+msgid "Switch to VT 7"
+msgstr "Превключване към виртуална графична конзола 7"
 
-#: ../src/ui/frames.c:1182
-msgid "Remove Window From Top"
-msgstr "Прозорецът да не е само отгоре"
+#: data/org.gnome.mutter.wayland.gschema.xml.in:34
+msgid "Switch to VT 8"
+msgstr "Превключване към виртуална графична конзола 8"
 
-#: ../src/ui/frames.c:1185
-msgid "Always On Visible Workspace"
-msgstr "Винаги на видимия работен плот"
+#: data/org.gnome.mutter.wayland.gschema.xml.in:38
+msgid "Switch to VT 9"
+msgstr "Превключване към виртуална графична конзола 9"
 
-#: ../src/ui/frames.c:1188
-msgid "Put Window On Only One Workspace"
-msgstr "Прозорецът да се появява само на едно работен плот"
+#: data/org.gnome.mutter.wayland.gschema.xml.in:42
+msgid "Switch to VT 10"
+msgstr "Превключване към виртуална графична конзола 10"
 
-#. Translators: Translate this string the same way as you do in libwnck!
-#: ../src/ui/menu.c:69
-msgid "Mi_nimize"
-msgstr "Ми_нимизиране"
+#: data/org.gnome.mutter.wayland.gschema.xml.in:46
+msgid "Switch to VT 11"
+msgstr "Превключване към виртуална графична конзола 11"
 
-#. Translators: Translate this string the same way as you do in libwnck!
-#: ../src/ui/menu.c:71
-msgid "Ma_ximize"
-msgstr "_Максимизиране"
+#: data/org.gnome.mutter.wayland.gschema.xml.in:50
+msgid "Switch to VT 12"
+msgstr "Превключване към виртуална графична конзола 12"
 
-#. Translators: Translate this string the same way as you do in libwnck!
-#: ../src/ui/menu.c:73
-msgid "Unma_ximize"
-msgstr "Де_максимизиране"
+#: data/org.gnome.mutter.wayland.gschema.xml.in:54
+msgid "Re-enable shortcuts"
+msgstr "Включване на клавишните комбинации"
 
-#. Translators: Translate this string the same way as you do in libwnck!
-#: ../src/ui/menu.c:75
-msgid "Roll _Up"
-msgstr "На_виване"
-
-#. Translators: Translate this string the same way as you do in libwnck!
-#: ../src/ui/menu.c:77
-msgid "_Unroll"
-msgstr "_Развиване"
-
-#. Translators: Translate this string the same way as you do in libwnck!
-#: ../src/ui/menu.c:79
-msgid "_Move"
-msgstr "_Преместване"
-
-#. Translators: Translate this string the same way as you do in libwnck!
-#: ../src/ui/menu.c:81
-msgid "_Resize"
-msgstr "О_размеряване"
-
-#. Translators: Translate this string the same way as you do in libwnck!
-#: ../src/ui/menu.c:83
-msgid "Move Titlebar On_screen"
-msgstr "Преместване на лентата за заглавието по _екрана"
-
-#. separator
-#. Translators: Translate this string the same way as you do in libwnck!
-#: ../src/ui/menu.c:86 ../src/ui/menu.c:88
-msgid "Always on _Top"
-msgstr "Винаги _отгоре"
-
-#. Translators: Translate this string the same way as you do in libwnck!
-#: ../src/ui/menu.c:90
-msgid "_Always on Visible Workspace"
-msgstr "_Винаги на видимия работен плот"
-
-#. Translators: Translate this string the same way as you do in libwnck!
-#: ../src/ui/menu.c:92
-msgid "_Only on This Workspace"
-msgstr "_Само на този работен плот"
-
-#. Translators: Translate this string the same way as you do in libwnck!
-#: ../src/ui/menu.c:94
-msgid "Move to Workspace _Left"
-msgstr "Преместване на _левия работен плот"
-
-#. Translators: Translate this string the same way as you do in libwnck!
-#: ../src/ui/menu.c:96
-msgid "Move to Workspace R_ight"
-msgstr "Преместване на десни_я работен плот"
-
-#. Translators: Translate this string the same way as you do in libwnck!
-#: ../src/ui/menu.c:98
-msgid "Move to Workspace _Up"
-msgstr "Преместване на _горния работен плот"
-
-#. Translators: Translate this string the same way as you do in libwnck!
-#: ../src/ui/menu.c:100
-msgid "Move to Workspace _Down"
-msgstr "Преместване в _долния работен плот"
-
-#. separator
-#. Translators: Translate this string the same way as you do in libwnck!
-#: ../src/ui/menu.c:104
-msgid "_Close"
-msgstr "_Затваряне"
-
-#: ../src/ui/menu.c:204
-#, c-format
-msgid "Workspace %d%n"
-msgstr "Работен плот %d%n"
-
-#: ../src/ui/menu.c:214
-#, c-format
-msgid "Workspace 1_0"
-msgstr "Работен плот 1_0"
-
-#: ../src/ui/menu.c:216
-#, c-format
-msgid "Workspace %s%d"
-msgstr "Работен плот %s%d"
-
-#: ../src/ui/menu.c:397
-msgid "Move to Another _Workspace"
-msgstr "Преместване на др_уг работен плот"
-
-#. This is the text that should appear next to menu accelerators
-#. * that use the shift key. If the text on this key isn't typically
-#. * translated on keyboards used for your language, don't translate
-#. * this.
+#. TRANSLATORS: This string refers to a button that switches between
+#. * different modes.
 #.
-#: ../src/ui/metaaccellabel.c:77
-msgid "Shift"
-msgstr "Shift"
+#: src/backends/meta-input-settings.c:2151
+#, c-format
+msgid "Mode Switch (Group %d)"
+msgstr "Смяна на режима (режим %d)"
 
-#. This is the text that should appear next to menu accelerators
-#. * that use the control key. If the text on this key isn't typically
-#. * translated on keyboards used for your language, don't translate
-#. * this.
+#. TRANSLATORS: This string refers to an action, cycles drawing tablets'
+#. * mapping through the available outputs.
 #.
-#: ../src/ui/metaaccellabel.c:83
-msgid "Ctrl"
-msgstr "Ctrl"
+#: src/backends/meta-input-settings.c:2174
+msgid "Switch monitor"
+msgstr "Смяна на екрана"
 
-#. This is the text that should appear next to menu accelerators
-#. * that use the alt key. If the text on this key isn't typically
-#. * translated on keyboards used for your language, don't translate
-#. * this.
+#: src/backends/meta-input-settings.c:2176
+msgid "Show on-screen help"
+msgstr "Показване на помощта на екрана"
+
+#: src/backends/meta-monitor-manager.c:903
+msgid "Built-in display"
+msgstr "Вграден екран"
+
+#: src/backends/meta-monitor-manager.c:926
+msgid "Unknown"
+msgstr "Непознат"
+
+#: src/backends/meta-monitor-manager.c:928
+msgid "Unknown Display"
+msgstr "Непознат екран"
+
+#. TRANSLATORS: this is a monitor vendor name, followed by a
+#. * size in inches, like 'Dell 15"'
 #.
-#: ../src/ui/metaaccellabel.c:89
-msgid "Alt"
-msgstr "Alt"
-
-#. This is the text that should appear next to menu accelerators
-#. * that use the meta key. If the text on this key isn't typically
-#. * translated on keyboards used for your language, don't translate
-#. * this.
-#.
-#: ../src/ui/metaaccellabel.c:95
-msgid "Meta"
-msgstr "Meta"
-
-#. This is the text that should appear next to menu accelerators
-#. * that use the super key. If the text on this key isn't typically
-#. * translated on keyboards used for your language, don't translate
-#. * this.
-#.
-#: ../src/ui/metaaccellabel.c:101
-msgid "Super"
-msgstr "Super"
-
-#. This is the text that should appear next to menu accelerators
-#. * that use the hyper key. If the text on this key isn't typically
-#. * translated on keyboards used for your language, don't translate
-#. * this.
-#.
-#: ../src/ui/metaaccellabel.c:107
-msgid "Hyper"
-msgstr "Hyper"
-
-#. This is the text that should appear next to menu accelerators
-#. * that use the mod2 key. If the text on this key isn't typically
-#. * translated on keyboards used for your language, don't translate
-#. * this.
-#.
-#: ../src/ui/metaaccellabel.c:113
-msgid "Mod2"
-msgstr "Mod2"
-
-#. This is the text that should appear next to menu accelerators
-#. * that use the mod3 key. If the text on this key isn't typically
-#. * translated on keyboards used for your language, don't translate
-#. * this.
-#.
-#: ../src/ui/metaaccellabel.c:119
-msgid "Mod3"
-msgstr "Mod3"
-
-#. This is the text that should appear next to menu accelerators
-#. * that use the mod4 key. If the text on this key isn't typically
-#. * translated on keyboards used for your language, don't translate
-#. * this.
-#.
-#: ../src/ui/metaaccellabel.c:125
-msgid "Mod4"
-msgstr "Mod4"
-
-#. This is the text that should appear next to menu accelerators
-#. * that use the mod5 key. If the text on this key isn't typically
-#. * translated on keyboards used for your language, don't translate
-#. * this.
-#.
-#: ../src/ui/metaaccellabel.c:131
-msgid "Mod5"
-msgstr "Mod5"
-
-#. Translators: This represents the size of a window.  The first number is
-#. * the width of the window and the second is the height.
-#.
-#: ../src/ui/resizepopup.c:113
+#: src/backends/meta-monitor-manager.c:936
 #, c-format
-msgid "%d x %d"
-msgstr "%d×%d"
+msgid "%s %s"
+msgstr "%s %s"
 
-#: ../src/ui/theme.c:253
-msgid "top"
-msgstr "горния"
-
-#: ../src/ui/theme.c:255
-msgid "bottom"
-msgstr "долния"
-
-#: ../src/ui/theme.c:257
-msgid "left"
-msgstr "левия"
-
-#: ../src/ui/theme.c:259
-msgid "right"
-msgstr "десния"
-
-#: ../src/ui/theme.c:286
-#, c-format
-msgid "frame geometry does not specify \"%s\" dimension"
-msgstr "геометрията на рамката не указва „%s“ размер"
-
-#: ../src/ui/theme.c:305
-#, c-format
-msgid "frame geometry does not specify dimension \"%s\" for border \"%s\""
-msgstr "геометрията на рамката не указва „%s“ размер на „%s“ ръб"
-
-#: ../src/ui/theme.c:342
-#, c-format
-msgid "Button aspect ratio %g is not reasonable"
-msgstr "Отношението на размерите на бутона %g е неподходящо"
-
-#: ../src/ui/theme.c:354
-#, c-format
-msgid "Frame geometry does not specify size of buttons"
-msgstr "Геометрията на рамката не указва размера на бутоните"
-
-#: ../src/ui/theme.c:1067
-#, c-format
-msgid "Gradients should have at least two colors"
-msgstr "Преливките трябва да имат поне два цвята"
-
-#: ../src/ui/theme.c:1219
+#. This probably means that a non-WM compositor like xcompmgr is running;
+#. * we have no way to get it to exit
+#: src/compositor/compositor.c:476
 #, c-format
 msgid ""
-"GTK custom color specification must have color name and fallback in "
-"parentheses, e.g. gtk:custom(foo,bar); could not parse \"%s\""
-msgstr ""
-"Цветовата спецификация на GTK трябва да съдържа в скоби име на основен и "
-"резервен цвят: напр. gtk:custom(foo,bar). Неуспех при анализа на „%s“"
+"Another compositing manager is already running on screen %i on display “%s”."
+msgstr "На екран %i от дисплея „%s“ вече има мениджър за наслагване."
 
-#: ../src/ui/theme.c:1235
+#: src/core/bell.c:194
+msgid "Bell event"
+msgstr "Събитие за звънец"
+
+#: src/core/display.c:608
+#, c-format
+msgid "Failed to open X Window System display “%s”\n"
+msgstr "Неуспешно отваряне на дисплея на X Window „%s“\n"
+
+#: src/core/main.c:189
+msgid "Disable connection to session manager"
+msgstr "Прекъсване на връзката към мениджъра на сесиите"
+
+#: src/core/main.c:195
+msgid "Replace the running window manager"
+msgstr "Замяна на текущия мениджър на прозорци"
+
+#: src/core/main.c:201
+msgid "Specify session management ID"
+msgstr "Определяне на идентификатор за управлението на сесии"
+
+#: src/core/main.c:206
+msgid "X Display to use"
+msgstr "X дисплеят, който да се използва"
+
+# Ако „запазено“ не се членува, низът се събира на един ред без
+# пренасяне.
+#: src/core/main.c:212
+msgid "Initialize session from savefile"
+msgstr "Инициализиране на сесия от файл със запазено състояние"
+
+#: src/core/main.c:218
+msgid "Make X calls synchronous"
+msgstr "Извикванията на X да са синхронни"
+
+#: src/core/main.c:225
+msgid "Run as a wayland compositor"
+msgstr "Wayland да е мениджър за наслагване"
+
+#: src/core/main.c:231
+msgid "Run as a nested compositor"
+msgstr "Изпълнение като вложен сървър за изобразяване"
+
+#: src/core/main.c:239
+msgid "Run as a full display server, rather than nested"
+msgstr "Изпълнение като самостоятелен, а не вложен сървър за изобразяване"
+
+#. Translators: %s is a window title
+#: src/core/meta-close-dialog-default.c:147
+#, c-format
+msgid "“%s” is not responding."
+msgstr "„%s“ не отговаря на съобщенията."
+
+#: src/core/meta-close-dialog-default.c:149
+msgid "Application is not responding."
+msgstr "Програмата не отговаря на съобщенията."
+
+#: src/core/meta-close-dialog-default.c:154
+msgid ""
+"You may choose to wait a short while for it to continue or force the "
+"application to quit entirely."
+msgstr ""
+"Можете да изчакате малко, преди изрично да накарате програмата да спре "
+"работата си."
+
+#: src/core/meta-close-dialog-default.c:161
+msgid "_Force Quit"
+msgstr "_Принудително спиране"
+
+#: src/core/meta-close-dialog-default.c:161
+msgid "_Wait"
+msgstr "Из_чакване"
+
+#: src/core/mutter.c:39
 #, c-format
 msgid ""
-"Invalid character '%c' in color_name parameter of gtk:custom, only A-Za-z0-9-"
-"_ are valid"
+"mutter %s\n"
+"Copyright © 2001-%d Havoc Pennington, Red Hat, Inc., and others\n"
+"This is free software; see the source for copying conditions.\n"
+"There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A "
+"PARTICULAR PURPOSE.\n"
 msgstr ""
-"Неправилен знак „%c“ в параметъра за име на цвят (color_name) на gtk:custom. "
-"Позволени са само A-Za-z0-9-_."
+"mutter %s\n"
+"Авторски права (C) 2001-%d Havoc Pennington, Red Hat, Inc., и други\n"
+"Тази програма (mutter) е свободен софтуер, прегледайте изходния код относно "
+"условията за разпространение.\n"
+"Тази програма се разпространява БЕЗ НИКАКВИ ГАРАНЦИИ, дори и за ПРОДАЖБА или "
+"СЪОТВЕТСТВИЕ С КАКВАТО И ДА Е УПОТРЕБА.\n"
 
-#: ../src/ui/theme.c:1249
+#: src/core/mutter.c:53
+msgid "Print version"
+msgstr "Отпечатване на версията на програмата"
+
+#: src/core/mutter.c:59
+msgid "Mutter plugin to use"
+msgstr "Приставка, която да се ползва"
+
+#: src/core/prefs.c:1997
+#, c-format
+msgid "Workspace %d"
+msgstr "Работен плот %d"
+
+#: src/core/screen.c:580
 #, c-format
 msgid ""
-"Gtk:custom format is \"gtk:custom(color_name,fallback)\", \"%s\" does not "
-"fit the format"
+"Display “%s” already has a window manager; try using the --replace option to "
+"replace the current window manager."
 msgstr ""
-"Форматът на Gtk:custom е „gtk:custom(основен_цвят,резервен_цвят)“, „%s“ не "
-"съответства на формата"
+"Вече има мениджър на прозорци на дисплей „%s“. Пробвайте да го замените с "
+"опцията „--replace“."
 
-#: ../src/ui/theme.c:1294
+#: src/core/screen.c:665
 #, c-format
+msgid "Screen %d on display “%s” is invalid\n"
+msgstr "Екранът %d на дисплей „%s“ е невалиден\n"
+
+#: src/core/util.c:120
+msgid "Mutter was compiled without support for verbose mode\n"
+msgstr "Mutter е компилиран без поддръжка на подробен режим\n"
+
+#: src/wayland/meta-wayland-tablet-pad.c:563
+#, c-format
+msgid "Mode Switch: Mode %d"
+msgstr "Смяна на режима: режим %d"
+
+#: src/x11/session.c:1815
 msgid ""
-"GTK color specification must have the state in brackets, e.g. gtk:fg[NORMAL] "
-"where NORMAL is the state; could not parse \"%s\""
+"These windows do not support “save current setup” and will have to be "
+"restarted manually next time you log in."
 msgstr ""
-"Цветовата спецификация на GTK трябва да указва състоянието в квадратни "
-"скоби, напр. gtk:fg[NORMAL], където NORMAL е състоянието. Неуспех при "
-"анализира „%s“"
+"Тези прозорци не поддържат операцията по записване на текущото състояние и "
+"ще трябва да се стартират ръчно при следващото ви влизане."
 
-#: ../src/ui/theme.c:1308
+#: src/x11/window-props.c:559
 #, c-format
-msgid ""
-"GTK color specification must have a close bracket after the state, e.g. gtk:"
-"fg[NORMAL] where NORMAL is the state; could not parse \"%s\""
-msgstr ""
-"Цветовата спецификация на GTK трябва да съдържа квадратна скоба след "
-"състоянието, напр. gtk:fg[NORMAL], където NORMAL е състоянието. Неуспех при "
-"анализа на „%s“"
-
-#: ../src/ui/theme.c:1319
-#, c-format
-msgid "Did not understand state \"%s\" in color specification"
-msgstr "Неуспех при анализа на състоянието „%s“ в цветовата спецификация"
-
-#: ../src/ui/theme.c:1332
-#, c-format
-msgid "Did not understand color component \"%s\" in color specification"
-msgstr "Неуспех при анализа на цветови компонент „%s“ в цветовата спецификация"
-
-#: ../src/ui/theme.c:1361
-#, c-format
-msgid ""
-"Blend format is \"blend/bg_color/fg_color/alpha\", \"%s\" does not fit the "
-"format"
-msgstr ""
-"Форматът на смесването е „blend/bg_color/fg_color/alpha“, „%s“ не се "
-"подчинява на формата"
-
-#: ../src/ui/theme.c:1372
-#, c-format
-msgid "Could not parse alpha value \"%s\" in blended color"
-msgstr "Неуспех при анализира на алфа стойността „%s“ в смесения цвят"
-
-#: ../src/ui/theme.c:1382
-#, c-format
-msgid "Alpha value \"%s\" in blended color is not between 0.0 and 1.0"
-msgstr "Алфа стойността „%s“ в смесения цвят не е между 0.0 и 1.0"
-
-#: ../src/ui/theme.c:1429
-#, c-format
-msgid ""
-"Shade format is \"shade/base_color/factor\", \"%s\" does not fit the format"
-msgstr ""
-"Форматът на навиването е „shade/base_color/factor“, „%s“ не съответства на "
-"формата"
-
-#: ../src/ui/theme.c:1440
-#, c-format
-msgid "Could not parse shade factor \"%s\" in shaded color"
-msgstr "Неуспех при анализа на фактора на навиването „%s“ в цвета за навиване"
-
-#: ../src/ui/theme.c:1450
-#, c-format
-msgid "Shade factor \"%s\" in shaded color is negative"
-msgstr "Факторът на навиване „%s“ в цвета за сянката е отрицателен"
-
-#: ../src/ui/theme.c:1479
-#, c-format
-msgid "Could not parse color \"%s\""
-msgstr "Неуспех при анализа на цвета „%s“"
-
-#: ../src/ui/theme.c:1790
-#, c-format
-msgid "Coordinate expression contains character '%s' which is not allowed"
-msgstr "Изразът за координати съдържа символа „%s“, който не е позволен"
-
-#: ../src/ui/theme.c:1817
-#, c-format
-msgid ""
-"Coordinate expression contains floating point number '%s' which could not be "
-"parsed"
-msgstr ""
-"Изразът за координати съдържа числото с плаваща запетая „%s“, което не може "
-"да бъде анализирано"
-
-#: ../src/ui/theme.c:1831
-#, c-format
-msgid "Coordinate expression contains integer '%s' which could not be parsed"
-msgstr ""
-"Изразът за координати съдържа цялото число „%s“, което не може да бъде "
-"анализирано"
-
-#: ../src/ui/theme.c:1953
-#, c-format
-msgid ""
-"Coordinate expression contained unknown operator at the start of this text: "
-"\"%s\""
-msgstr ""
-"Изразът за координати съдържа непознат оператор в началото на този текст: "
-"„%s“"
-
-#: ../src/ui/theme.c:2010
-#, c-format
-msgid "Coordinate expression was empty or not understood"
-msgstr "Изразът за координати бе празен или не бе разбран"
-
-#: ../src/ui/theme.c:2121 ../src/ui/theme.c:2131 ../src/ui/theme.c:2165
-#, c-format
-msgid "Coordinate expression results in division by zero"
-msgstr "Изразът за координати дава деление на нула"
-
-#: ../src/ui/theme.c:2173
-#, c-format
-msgid ""
-"Coordinate expression tries to use mod operator on a floating-point number"
-msgstr ""
-"Изразът за координати използва оператора mod върху число с плаваща запетая"
-
-#: ../src/ui/theme.c:2229
-#, c-format
-msgid ""
-"Coordinate expression has an operator \"%s\" where an operand was expected"
-msgstr ""
-"Изразът за координати използва оператора „%s“ на място, където се очаква "
-"операнд"
-
-#: ../src/ui/theme.c:2238
-#, c-format
-msgid "Coordinate expression had an operand where an operator was expected"
-msgstr ""
-"Изразът за координати използва оператор на място, където се очаква операнд"
-
-#: ../src/ui/theme.c:2246
-#, c-format
-msgid "Coordinate expression ended with an operator instead of an operand"
-msgstr "Изразът за координати завършва с оператор вместо с операнд"
-
-#: ../src/ui/theme.c:2256
-#, c-format
-msgid ""
-"Coordinate expression has operator \"%c\" following operator \"%c\" with no "
-"operand in between"
-msgstr ""
-"Изразът за координати използва оператора „%c“ след „%c“ без да има операнд "
-"между тях"
-
-#: ../src/ui/theme.c:2407 ../src/ui/theme.c:2452
-#, c-format
-msgid "Coordinate expression had unknown variable or constant \"%s\""
-msgstr ""
-"Изразът за координати използва непознатата променлива или константа „%s“"
-
-#: ../src/ui/theme.c:2506
-#, c-format
-msgid "Coordinate expression parser overflowed its buffer."
-msgstr "Анализаторът на изрази за координати препълни буфера си."
-
-#: ../src/ui/theme.c:2535
-#, c-format
-msgid "Coordinate expression had a close parenthesis with no open parenthesis"
-msgstr "В израза за координати има затваряща скоба без съответна отваряща"
-
-#: ../src/ui/theme.c:2599
-#, c-format
-msgid "Coordinate expression had an open parenthesis with no close parenthesis"
-msgstr "В изразът за координати има отваряща скоба без съответна затваряща"
-
-#: ../src/ui/theme.c:2610
-#, c-format
-msgid "Coordinate expression doesn't seem to have any operators or operands"
-msgstr "Изразът за координати не съдържа нито оператори, нито операнди"
-
-#: ../src/ui/theme.c:2822 ../src/ui/theme.c:2842 ../src/ui/theme.c:2862
-#, c-format
-msgid "Theme contained an expression that resulted in an error: %s\n"
-msgstr "Темата съдържа израз, който даде грешка: %s\n"
-
-#: ../src/ui/theme.c:4533
-#, c-format
-msgid ""
-"<button function=\"%s\" state=\"%s\" draw_ops=\"whatever\"/> must be "
-"specified for this frame style"
-msgstr ""
-"За този стил на рамката трябва да се укаже <button function=\"%s\" state=\"%s"
-"\" draw_ops=\"нещо си\"/>"
-
-#: ../src/ui/theme.c:5066 ../src/ui/theme.c:5091
-#, c-format
-msgid ""
-"Missing <frame state=\"%s\" resize=\"%s\" focus=\"%s\" style=\"whatever\"/>"
-msgstr ""
-"Липсва <frame state=\"%s\" resize=\"%s\" focus=\"%s\" style=\"нещо си\"/>"
-
-#: ../src/ui/theme.c:5139
-#, c-format
-msgid "Failed to load theme \"%s\": %s\n"
-msgstr "Неуспех при зареждането на темата „%s“: %s\n"
-
-#: ../src/ui/theme.c:5275 ../src/ui/theme.c:5282 ../src/ui/theme.c:5289
-#: ../src/ui/theme.c:5296 ../src/ui/theme.c:5303
-#, c-format
-msgid "No <%s> set for theme \"%s\""
-msgstr "Не е даден елементът <%s> за темата „%s“"
-
-#: ../src/ui/theme.c:5311
-#, c-format
-msgid ""
-"No frame style set for window type \"%s\" in theme \"%s\", add a <window "
-"type=\"%s\" style_set=\"whatever\"/> element"
-msgstr ""
-"Няма указан стил на рамката за „%s“ прозорците в тема „%s“. Добавете елемент "
-"<window type=\"%s\" style_set=\"нещо си\"/>"
-
-#: ../src/ui/theme.c:5709 ../src/ui/theme.c:5771 ../src/ui/theme.c:5834
-#, c-format
-msgid ""
-"User-defined constants must begin with a capital letter; \"%s\" does not"
-msgstr ""
-"Константите определени от потребителя трябва да започват с главна буква, а "
-"„%s“ не започва така"
-
-#: ../src/ui/theme.c:5717 ../src/ui/theme.c:5779 ../src/ui/theme.c:5842
-#, c-format
-msgid "Constant \"%s\" has already been defined"
-msgstr "Константата „%s“ вече е дефинирана"
-
-#. Translators: This means that an attribute which should have been found
-#. * on an XML element was not in fact found.
-#.
-#: ../src/ui/theme-parser.c:236
-#, c-format
-msgid "No \"%s\" attribute on element <%s>"
-msgstr "Елементът <%s> няма атрибут „%s“"
-
-#: ../src/ui/theme-parser.c:265 ../src/ui/theme-parser.c:283
-#, c-format
-msgid "Line %d character %d: %s"
-msgstr "Ред %d, знак %d: %s"
-
-#: ../src/ui/theme-parser.c:479
-#, c-format
-msgid "Attribute \"%s\" repeated twice on the same <%s> element"
-msgstr "Атрибутът „%s“ се повтаря два пъти в един елемент <%s>"
-
-#: ../src/ui/theme-parser.c:503 ../src/ui/theme-parser.c:552
-#, c-format
-msgid "Attribute \"%s\" is invalid on <%s> element in this context"
-msgstr "Атрибутът „%s“ е невалиден за елемента <%s> в този контекст"
-
-#: ../src/ui/theme-parser.c:594
-#, c-format
-msgid "Could not parse \"%s\" as an integer"
-msgstr "„%s“ не може да се анализира като цяло число"
-
-#: ../src/ui/theme-parser.c:603 ../src/ui/theme-parser.c:658
-#, c-format
-msgid "Did not understand trailing characters \"%s\" in string \"%s\""
-msgstr "Крайните символи „%s“ в низа „%s“ са неразбираеми"
-
-#: ../src/ui/theme-parser.c:613
-#, c-format
-msgid "Integer %ld must be positive"
-msgstr "Цялото число %ld трябва да е положително"
-
-#: ../src/ui/theme-parser.c:621
-#, c-format
-msgid "Integer %ld is too large, current max is %d"
-msgstr "Цялото число %ld е прекалено голямо, максимумът е %d"
-
-#: ../src/ui/theme-parser.c:649 ../src/ui/theme-parser.c:765
-#, c-format
-msgid "Could not parse \"%s\" as a floating point number"
-msgstr "„%s“ не може да се интерпретира като число с плаваща запетая"
-
-#: ../src/ui/theme-parser.c:680 ../src/ui/theme-parser.c:708
-#, c-format
-msgid "Boolean values must be \"true\" or \"false\" not \"%s\""
-msgstr "Булевите стойности са или „истина“, или „лъжа“. Не са „%s“"
-
-#: ../src/ui/theme-parser.c:735
-#, c-format
-msgid "Angle must be between 0.0 and 360.0, was %g\n"
-msgstr "Ъгълът трябва да е между 0.0 и 360.0, а е %g\n"
-
-#: ../src/ui/theme-parser.c:798
-#, c-format
-msgid "Alpha must be between 0.0 (invisible) and 1.0 (fully opaque), was %g\n"
-msgstr ""
-"Алфа трябва да е между 0.0 (пълна прозрачност) и 1.0 (пълна непрозрачност), "
-"а е %g\n"
-
-#: ../src/ui/theme-parser.c:863
-#, c-format
-msgid ""
-"Invalid title scale \"%s\" (must be one of xx-small,x-small,small,medium,"
-"large,x-large,xx-large)\n"
-msgstr ""
-"Невалидно увеличение на заглавието „%s“ (трябва да е едно от „xx-small“, „x-"
-"small“, „small“,„medium“, „large“, „x-large“, „xx-large“)\n"
-
-#: ../src/ui/theme-parser.c:1019 ../src/ui/theme-parser.c:1082
-#: ../src/ui/theme-parser.c:1116 ../src/ui/theme-parser.c:1219
-#, c-format
-msgid "<%s> name \"%s\" used a second time"
-msgstr "Името „%2$s“ на <%1$s> е използвано втори път"
-
-#: ../src/ui/theme-parser.c:1031 ../src/ui/theme-parser.c:1128
-#: ../src/ui/theme-parser.c:1231
-#, c-format
-msgid "<%s> parent \"%s\" has not been defined"
-msgstr "Родителят „%2$s“ на <%1$s> не е дефиниран"
-
-#: ../src/ui/theme-parser.c:1141
-#, c-format
-msgid "<%s> geometry \"%s\" has not been defined"
-msgstr "Геометрията „%2$s“ на <%1$s> не е дефинирана"
-
-#: ../src/ui/theme-parser.c:1154
-#, c-format
-msgid "<%s> must specify either a geometry or a parent that has a geometry"
-msgstr "<%s> трябва да указва или геометрия, или родител с геометрия"
-
-#: ../src/ui/theme-parser.c:1196
-msgid "You must specify a background for an alpha value to be meaningful"
-msgstr "За да бъде алфа стойността валидна, трябва да е указан фон"
-
-#: ../src/ui/theme-parser.c:1264
-#, c-format
-msgid "Unknown type \"%s\" on <%s> element"
-msgstr "Непознат вид „%s“ на елемента <%s>"
-
-#: ../src/ui/theme-parser.c:1275
-#, c-format
-msgid "Unknown style_set \"%s\" on <%s> element"
-msgstr "Непознат style_set „%s“ на елемента <%s>"
-
-#: ../src/ui/theme-parser.c:1283
-#, c-format
-msgid "Window type \"%s\" has already been assigned a style set"
-msgstr "Видът прозорци „%s“ вече има установен вид на стила"
-
-#: ../src/ui/theme-parser.c:1313 ../src/ui/theme-parser.c:1377
-#: ../src/ui/theme-parser.c:1603 ../src/ui/theme-parser.c:2838
-#: ../src/ui/theme-parser.c:2884 ../src/ui/theme-parser.c:3034
-#: ../src/ui/theme-parser.c:3273 ../src/ui/theme-parser.c:3311
-#: ../src/ui/theme-parser.c:3349 ../src/ui/theme-parser.c:3387
-#, c-format
-msgid "Element <%s> is not allowed below <%s>"
-msgstr "Елементът <%s> не е позволен под <%s>"
-
-#: ../src/ui/theme-parser.c:1427 ../src/ui/theme-parser.c:1441
-#: ../src/ui/theme-parser.c:1486
-msgid ""
-"Cannot specify both \"button_width\"/\"button_height\" and \"aspect_ratio\" "
-"for buttons"
-msgstr ""
-"Не може да се указват едновременно и двата размера („button_width“, "
-"„button_height“ — височина и широчина на бутоните), и отношението на "
-"размерите им — „aspect_ratio“"
-
-#: ../src/ui/theme-parser.c:1450
-#, c-format
-msgid "Distance \"%s\" is unknown"
-msgstr "Разстоянието „%s“ е неизвестно"
-
-#: ../src/ui/theme-parser.c:1495
-#, c-format
-msgid "Aspect ratio \"%s\" is unknown"
-msgstr "Пропорцията „%s“ е неизвестна"
-
-#: ../src/ui/theme-parser.c:1557
-#, c-format
-msgid "Border \"%s\" is unknown"
-msgstr "Границата „%s“ е непозната"
-
-#: ../src/ui/theme-parser.c:1868
-#, c-format
-msgid "No \"start_angle\" or \"from\" attribute on element <%s>"
-msgstr "Елементът <%s> няма атрибут „start_angle“ или „from“"
-
-#: ../src/ui/theme-parser.c:1875
-#, c-format
-msgid "No \"extent_angle\" or \"to\" attribute on element <%s>"
-msgstr "Елементът <%s> няма атрибут „extent_angle“ или „to“"
-
-#: ../src/ui/theme-parser.c:2115
-#, c-format
-msgid "Did not understand value \"%s\" for type of gradient"
-msgstr "Стойността „%s“ не може да се анализира като вид градиент"
-
-#: ../src/ui/theme-parser.c:2193 ../src/ui/theme-parser.c:2568
-#, c-format
-msgid "Did not understand fill type \"%s\" for <%s> element"
-msgstr "Непознато запълване „%s“ за елемента <%s>"
-
-#: ../src/ui/theme-parser.c:2360 ../src/ui/theme-parser.c:2443
-#: ../src/ui/theme-parser.c:2506
-#, c-format
-msgid "Did not understand state \"%s\" for <%s> element"
-msgstr "Неуспех при анализа на състоянието „%s“ на елемента <%s>"
-
-#: ../src/ui/theme-parser.c:2370 ../src/ui/theme-parser.c:2453
-#, c-format
-msgid "Did not understand shadow \"%s\" for <%s> element"
-msgstr "Неуспех при анализа на сянката „%s“ на елемента <%s>"
-
-#: ../src/ui/theme-parser.c:2380
-#, c-format
-msgid "Did not understand arrow \"%s\" for <%s> element"
-msgstr "Неуспех при анализа на стрелката „%s“ на елемента <%s>"
-
-#: ../src/ui/theme-parser.c:2694 ../src/ui/theme-parser.c:2790
-#, c-format
-msgid "No <draw_ops> called \"%s\" has been defined"
-msgstr "Няма дефинирани <draw_ops> с име „%s“"
-
-#: ../src/ui/theme-parser.c:2706 ../src/ui/theme-parser.c:2802
-#, c-format
-msgid "Including draw_ops \"%s\" here would create a circular reference"
-msgstr "Включването на draw_ops „%s“ тук би предизвикало циклична зависимост"
-
-#: ../src/ui/theme-parser.c:2917
-#, c-format
-msgid "Unknown position \"%s\" for frame piece"
-msgstr "Непозната позиция „%s“ за елемент на рамката"
-
-#: ../src/ui/theme-parser.c:2925
-#, c-format
-msgid "Frame style already has a piece at position %s"
-msgstr "Стилът на рамката вече има елемент на позицията %s"
-
-#: ../src/ui/theme-parser.c:2942 ../src/ui/theme-parser.c:3019
-#, c-format
-msgid "No <draw_ops> with the name \"%s\" has been defined"
-msgstr "Няма дефиниран <draw_ops> с името „%s“"
-
-#: ../src/ui/theme-parser.c:2972
-#, c-format
-msgid "Unknown function \"%s\" for button"
-msgstr "Непозната функция „%s“ за бутона"
-
-#: ../src/ui/theme-parser.c:2982
-#, c-format
-msgid "Button function \"%s\" does not exist in this version (%d, need %d)"
-msgstr ""
-"Функцията на бутона „%s“ не съществува в тази версия (%d, а трябва да е %d)"
-
-#: ../src/ui/theme-parser.c:2994
-#, c-format
-msgid "Unknown state \"%s\" for button"
-msgstr "Непознато състояние „%s“ за бутона"
-
-#: ../src/ui/theme-parser.c:3002
-#, c-format
-msgid "Frame style already has a button for function %s state %s"
-msgstr "Стилът на рамката има бутон за функция %s, състояние %s"
-
-#: ../src/ui/theme-parser.c:3073
-#, c-format
-msgid "\"%s\" is not a valid value for focus attribute"
-msgstr "„%s“ не е валидна стойност за атрибута фокус"
-
-#: ../src/ui/theme-parser.c:3082
-#, c-format
-msgid "\"%s\" is not a valid value for state attribute"
-msgstr "„%s“ не е валидна стойност за атрибута състояние"
-
-#: ../src/ui/theme-parser.c:3092
-#, c-format
-msgid "A style called \"%s\" has not been defined"
-msgstr "Не е дефиниран стил на име  „%s“"
-
-#: ../src/ui/theme-parser.c:3113 ../src/ui/theme-parser.c:3136
-#, c-format
-msgid "\"%s\" is not a valid value for resize attribute"
-msgstr "„%s“ не е валидна стойност за атрибута оразмеряване"
-
-#: ../src/ui/theme-parser.c:3147
-#, c-format
-msgid ""
-"Should not have \"resize\" attribute on <%s> element for maximized/shaded "
-"states"
-msgstr ""
-"Елементът <%s> не трябва да има атрибут „resize“ за състоянията максимизиран/"
-"засенчен"
-
-#: ../src/ui/theme-parser.c:3161
-#, c-format
-msgid ""
-"Should not have \"resize\" attribute on <%s> element for maximized states"
-msgstr ""
-"Елементът <%s> не трябва да има атрибут „resize“ за състоянието максимизиран"
-
-#: ../src/ui/theme-parser.c:3175 ../src/ui/theme-parser.c:3222
-#, c-format
-msgid "Style has already been specified for state %s resize %s focus %s"
-msgstr "Вече е указан стил за състояние %s, оразмеряване %s, фокус %s"
-
-#: ../src/ui/theme-parser.c:3186 ../src/ui/theme-parser.c:3197
-#: ../src/ui/theme-parser.c:3208 ../src/ui/theme-parser.c:3233
-#: ../src/ui/theme-parser.c:3244 ../src/ui/theme-parser.c:3255
-#, c-format
-msgid "Style has already been specified for state %s focus %s"
-msgstr "Вече е указан стил за състояние %s, фокус %s"
-
-#: ../src/ui/theme-parser.c:3294
-msgid ""
-"Can't have a two draw_ops for a <piece> element (theme specified a draw_ops "
-"attribute and also a <draw_ops> element, or specified two elements)"
-msgstr ""
-"Не може да има два draw_ops за елемент <piece> (темата е указала атрибут "
-"draw_ops и елемент <draw_ops> или два елемента)"
-
-#: ../src/ui/theme-parser.c:3332
-msgid ""
-"Can't have a two draw_ops for a <button> element (theme specified a draw_ops "
-"attribute and also a <draw_ops> element, or specified two elements)"
-msgstr ""
-"Не може да има два draw_ops за елемент <button> (темата е указала атрибут "
-"draw_ops и елемент <draw_ops> или два елемента)"
-
-#: ../src/ui/theme-parser.c:3370
-msgid ""
-"Can't have a two draw_ops for a <menu_icon> element (theme specified a "
-"draw_ops attribute and also a <draw_ops> element, or specified two elements)"
-msgstr ""
-"Не може да има два draw_ops за елемент <menu_icon> (темата е указала атрибут "
-"draw_ops и елемент <draw_ops> или два елемента)"
-
-#: ../src/ui/theme-parser.c:3434
-#, c-format
-msgid "Bad version specification '%s'"
-msgstr "Неправилна версия „%s“"
-
-#: ../src/ui/theme-parser.c:3507
-msgid ""
-"\"version\" attribute cannot be used in metacity-theme-1.xml or metacity-"
-"theme-2.xml"
-msgstr ""
-"Атрибутът „version“ (версия) не може да се използва в in metacity-theme-1."
-"xml или metacity-theme-2.xml"
-
-#: ../src/ui/theme-parser.c:3530
-#, c-format
-msgid "Theme requires version %s but latest supported theme version is %d.%d"
-msgstr "Темата изисква версия %s, но най-високата поддържана версия е %d.%d"
-
-#: ../src/ui/theme-parser.c:3562
-#, c-format
-msgid "Outermost element in theme must be <metacity_theme> not <%s>"
-msgstr "Най-външният елемент в темата трябва да е <metacity_theme>, а не <%s>"
-
-#: ../src/ui/theme-parser.c:3582
-#, c-format
-msgid ""
-"Element <%s> is not allowed inside a name/author/date/description element"
-msgstr "Елементът <%s> не е разрешен в елементите name/author/date/description"
-
-#: ../src/ui/theme-parser.c:3587
-#, c-format
-msgid "Element <%s> is not allowed inside a <constant> element"
-msgstr "Елементът <%s> не е позволен в <constant> елемент"
-
-#: ../src/ui/theme-parser.c:3599
-#, c-format
-msgid ""
-"Element <%s> is not allowed inside a distance/border/aspect_ratio element"
-msgstr "Елементът <%s> не е позволен в елемент distance/border/aspect_ratio"
-
-#: ../src/ui/theme-parser.c:3621
-#, c-format
-msgid "Element <%s> is not allowed inside a draw operation element"
-msgstr "Елементът <%s> не е позволен в елемент с операция за чертане"
-
-#: ../src/ui/theme-parser.c:3631 ../src/ui/theme-parser.c:3661
-#: ../src/ui/theme-parser.c:3666 ../src/ui/theme-parser.c:3671
-#, c-format
-msgid "Element <%s> is not allowed inside a <%s> element"
-msgstr "Елементът <%s> не е позволен в елемент <%s>"
-
-#: ../src/ui/theme-parser.c:3899
-msgid "No draw_ops provided for frame piece"
-msgstr "Няма draw_ops за детайл от рамката"
-
-#: ../src/ui/theme-parser.c:3914
-msgid "No draw_ops provided for button"
-msgstr "Няма draw_ops за бутон"
-
-#: ../src/ui/theme-parser.c:3968
-#, c-format
-msgid "No text is allowed inside element <%s>"
-msgstr "Не е позволен текст в елемента <%s>"
-
-#: ../src/ui/theme-parser.c:4026 ../src/ui/theme-parser.c:4038
-#: ../src/ui/theme-parser.c:4050 ../src/ui/theme-parser.c:4062
-#: ../src/ui/theme-parser.c:4074
-#, c-format
-msgid "<%s> specified twice for this theme"
-msgstr "<%s> е указан два пъти за тази тема"
-
-#: ../src/ui/theme-parser.c:4348
-#, c-format
-msgid "Failed to find a valid file for theme %s\n"
-msgstr "Неуспех при намирането на валиден файл за темата %s\n"
-
-#: ../src/ui/theme-viewer.c:99
-msgid "_Windows"
-msgstr "_Прозорци"
-
-#: ../src/ui/theme-viewer.c:100
-msgid "_Dialog"
-msgstr "_Диалогов прозорец"
-
-#: ../src/ui/theme-viewer.c:101
-msgid "_Modal dialog"
-msgstr "_Модален диалогов прозорец"
-
-#: ../src/ui/theme-viewer.c:102
-msgid "_Utility"
-msgstr "_Инструмент"
-
-#: ../src/ui/theme-viewer.c:103
-msgid "_Splashscreen"
-msgstr "_Стартиращ екран"
-
-#: ../src/ui/theme-viewer.c:104
-msgid "_Top dock"
-msgstr "_Горен док"
-
-#: ../src/ui/theme-viewer.c:105
-msgid "_Bottom dock"
-msgstr "_Долен док"
-
-#: ../src/ui/theme-viewer.c:106
-msgid "_Left dock"
-msgstr "_Ляв док"
-
-#: ../src/ui/theme-viewer.c:107
-msgid "_Right dock"
-msgstr "_Десен док"
-
-#: ../src/ui/theme-viewer.c:108
-msgid "_All docks"
-msgstr "_Всички докове"
-
-#: ../src/ui/theme-viewer.c:109
-msgid "Des_ktop"
-msgstr "Работен _плот"
-
-#: ../src/ui/theme-viewer.c:115
-msgid "Open another one of these windows"
-msgstr "Отваряне на друг от следните прозорци"
-
-#: ../src/ui/theme-viewer.c:117
-msgid "This is a demo button with an 'open' icon"
-msgstr "Демонстрационен бутон с икона за отваряне"
-
-#: ../src/ui/theme-viewer.c:119
-msgid "This is a demo button with a 'quit' icon"
-msgstr "Демонстрационен бутон с икона за спиране на програмата"
-
-#: ../src/ui/theme-viewer.c:248
-msgid "This is a sample message in a sample dialog"
-msgstr "Това е примерно съобщение в примерен диалогов прозорец"
-
-#: ../src/ui/theme-viewer.c:328
-#, c-format
-msgid "Fake menu item %d\n"
-msgstr "Фалшив обект на менюто %d\n"
-
-#: ../src/ui/theme-viewer.c:363
-msgid "Border-only window"
-msgstr "Прозорец само с граници"
-
-#: ../src/ui/theme-viewer.c:365
-msgid "Bar"
-msgstr "Лента"
-
-#: ../src/ui/theme-viewer.c:382
-msgid "Normal Application Window"
-msgstr "Нормален прозорец на програма"
-
-#: ../src/ui/theme-viewer.c:386
-msgid "Dialog Box"
-msgstr "Диалогов прозорец"
-
-#: ../src/ui/theme-viewer.c:390
-msgid "Modal Dialog Box"
-msgstr "Модален диалогов прозорец"
-
-#: ../src/ui/theme-viewer.c:394
-msgid "Utility Palette"
-msgstr "Палитра на инструментите"
-
-#: ../src/ui/theme-viewer.c:398
-msgid "Torn-off Menu"
-msgstr "Откъсване на менюто"
-
-#: ../src/ui/theme-viewer.c:402
-msgid "Border"
-msgstr "Граница"
-
-#: ../src/ui/theme-viewer.c:406
-msgid "Attached Modal Dialog"
-msgstr "Прилепени модални диалогови прозорци"
-
-#: ../src/ui/theme-viewer.c:739
-#, c-format
-msgid "Button layout test %d"
-msgstr "Тест за подредбата на бутоните %d"
-
-#: ../src/ui/theme-viewer.c:768
-#, c-format
-msgid "%g milliseconds to draw one window frame"
-msgstr "%g милисекунди за да изрисува една прозоречна рамка"
-
-#: ../src/ui/theme-viewer.c:813
-#, c-format
-msgid "Usage: metacity-theme-viewer [THEMENAME]\n"
-msgstr "Употреба: metacity-theme-viewer [ИМЕНАТЕМАТА]\n"
-
-#: ../src/ui/theme-viewer.c:820
-#, c-format
-msgid "Error loading theme: %s\n"
-msgstr "Грешка при зареждането на темата: %s\n"
-
-#: ../src/ui/theme-viewer.c:826
-#, c-format
-msgid "Loaded theme \"%s\" in %g seconds\n"
-msgstr "Темата „%s“ е заредена за %g секунди\n"
-
-#: ../src/ui/theme-viewer.c:870
-msgid "Normal Title Font"
-msgstr "Нормален шрифт на заглавието"
-
-#: ../src/ui/theme-viewer.c:876
-msgid "Small Title Font"
-msgstr "Малък шрифт на заглавието"
-
-#: ../src/ui/theme-viewer.c:882
-msgid "Large Title Font"
-msgstr "Голям шрифт на заглавието"
-
-#: ../src/ui/theme-viewer.c:887
-msgid "Button Layouts"
-msgstr "Изглед на бутоните"
-
-#: ../src/ui/theme-viewer.c:892
-msgid "Benchmark"
-msgstr "Статистика"
-
-#: ../src/ui/theme-viewer.c:944
-msgid "Window Title Goes Here"
-msgstr "Тук се поставя заглавието на прозорците"
-
-#: ../src/ui/theme-viewer.c:1047
-#, c-format
-msgid ""
-"Drew %d frames in %g client-side seconds (%g milliseconds per frame) and %g "
-"seconds wall clock time including X server resources (%g milliseconds per "
-"frame)\n"
-msgstr ""
-"Изчертаха се %d кадъра за %g секунди от страна на клиента (по %g милисекунди "
-"на кадър) и %g секунди нормално време, което включва ресурси от страна на "
-"сървъра X (по %g милисекунди на кадър)\n"
-
-#: ../src/ui/theme-viewer.c:1266
-msgid "position expression test returned TRUE but set error"
-msgstr ""
-"изразът за проверка на разположението върна TRUE, но зададе състояние за "
-"грешка"
-
-#: ../src/ui/theme-viewer.c:1268
-msgid "position expression test returned FALSE but didn't set error"
-msgstr ""
-"изразът за проверка на разположението върна FALSE, но не зададе състояние за "
-"грешка"
-
-#: ../src/ui/theme-viewer.c:1272
-msgid "Error was expected but none given"
-msgstr "Очакваше се грешка, но не беше дадена никаква"
-
-#: ../src/ui/theme-viewer.c:1274
-#, c-format
-msgid "Error %d was expected but %d given"
-msgstr "Очакваше се грешка %d, но беше дадена %d"
-
-#: ../src/ui/theme-viewer.c:1280
-#, c-format
-msgid "Error not expected but one was returned: %s"
-msgstr "Не се очакваше грешка, но беше върната една: %s"
-
-#: ../src/ui/theme-viewer.c:1284
-#, c-format
-msgid "x value was %d, %d was expected"
-msgstr "стойността на x бе %d, а се очакваше %d"
-
-#: ../src/ui/theme-viewer.c:1287
-#, c-format
-msgid "y value was %d, %d was expected"
-msgstr "стойността y бе %d, а се очакваше %d"
-
-#: ../src/ui/theme-viewer.c:1352
-#, c-format
-msgid "%d coordinate expressions parsed in %g seconds (%g seconds average)\n"
-msgstr "%d координатен израз обработен за %g секунди (%g секунди средно)\n"
+msgid "%s (on %s)"
+msgstr "%s (от %s)"

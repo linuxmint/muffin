@@ -1,0 +1,72 @@
+/* The prefix for our gettext translation domains. */
+#mesondefine GETTEXT_PACKAGE
+
+/* Version number of package */
+#mesondefine VERSION
+
+/* Version number of package */
+#mesondefine PACKAGE_VERSION
+
+/* Search path for plugins */
+#mesondefine MUTTER_PLUGIN_DIR
+
+/* */
+#mesondefine MUTTER_LOCALEDIR
+
+/* */
+#mesondefine MUTTER_LIBEXECDIR
+
+/* */
+#mesondefine MUTTER_PKGDATADIR
+
+/* Defined if EGL support is enabled */
+#mesondefine HAVE_EGL
+
+/* Defined if EGLDevice support is enabled */
+#mesondefine HAVE_EGL_DEVICE
+
+/* Defined if EGLStream support is enabled */
+#mesondefine HAVE_WAYLAND_EGLSTREAM
+
+/* Building with gudev for device type detection */
+#mesondefine HAVE_LIBGUDEV
+
+/* Building with libwacom for advanced tablet management */
+#mesondefine HAVE_LIBWACOM
+
+/* Define if you want to enable the native (KMS) backend based on systemd */
+#mesondefine HAVE_NATIVE_BACKEND
+
+/* Define if you want to enable Wayland support */
+#mesondefine HAVE_WAYLAND
+
+/* Defined if screen cast and remote desktop support is enabled */
+#mesondefine HAVE_REMOTE_DESKTOP
+
+/* Building with SM support */
+#mesondefine HAVE_SM
+
+/* Building with startup notification support */
+#mesondefine HAVE_STARTUP_NOTIFICATION
+
+/* Building with Sysprof profiling suport */
+#mesondefine HAVE_PROFILER
+
+/* Path to Xwayland executable */
+#mesondefine XWAYLAND_PATH
+
+/* Xwayland applications allowed to issue keyboard grabs */
+#mesondefine XWAYLAND_GRAB_DEFAULT_ACCESS_RULES
+
+/* XKB base prefix */
+#mesondefine XKB_BASE
+
+/* Whether <sys/prctl.h> exists and it defines prctl() */
+#mesondefine HAVE_SYS_PRCTL
+
+/* Either <sys/random.h> or <linux/random.h> */
+#mesondefine HAVE_SYS_RANDOM
+#mesondefine HAVE_LINUX_RANDOM
+
+/* Whether Xwayland has -initfd option */
+#mesondefine HAVE_XWAYLAND_INITFD

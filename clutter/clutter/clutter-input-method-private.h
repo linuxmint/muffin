@@ -26,8 +26,8 @@ ClutterInputFocus * clutter_input_method_get_focus (ClutterInputMethod *method);
 
 void clutter_input_method_reset               (ClutterInputMethod *method);
 
-void clutter_input_method_set_cursor_location (ClutterInputMethod *method,
-                                               const ClutterRect  *rect);
+void clutter_input_method_set_cursor_location (ClutterInputMethod    *method,
+                                               const graphene_rect_t *rect);
 void clutter_input_method_set_surrounding     (ClutterInputMethod *method,
                                                const gchar        *text,
                                                guint               cursor,

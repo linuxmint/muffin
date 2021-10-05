@@ -97,7 +97,7 @@ typedef struct _CoglFenceClosure CoglFenceClosure;
  * Since: 2.0
  * Stability: Unstable
  */
-void *
+COGL_EXPORT void *
 cogl_fence_closure_get_user_data (CoglFenceClosure *closure);
 
 /**
@@ -118,7 +118,7 @@ cogl_fence_closure_get_user_data (CoglFenceClosure *closure);
  * Since: 2.0
  * Stability: Unstable
  */
-CoglFenceClosure *
+COGL_EXPORT CoglFenceClosure *
 cogl_framebuffer_add_fence_callback (CoglFramebuffer *framebuffer,
                                      CoglFenceCallback callback,
                                      void *user_data);
@@ -136,7 +136,7 @@ cogl_framebuffer_add_fence_callback (CoglFramebuffer *framebuffer,
  * Since: 2.0
  * Stability: Unstable
  */
-void
+COGL_EXPORT void
 cogl_framebuffer_cancel_fence_callback (CoglFramebuffer *framebuffer,
                                         CoglFenceClosure *closure);
 

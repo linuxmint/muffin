@@ -1,16 +1,17 @@
-# Low German translation for muffin.
-# Copyright (C) 2009 muffin's COPYRIGHT HOLDER
-# This file is distributed under the same license as the muffin package.
+# Low German translation for mutter.
+# Copyright (C) 2009 mutter's COPYRIGHT HOLDER
+# This file is distributed under the same license as the mutter package.
 # Nils-Christoph Fiedler <ncfiedler@gnome.org>, 2009.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: muffin master\n"
-"Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?product=muffin&component=general\n"
+"Project-Id-Version: mutter master\n"
+"Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?product=mutter&component=general\n"
 "POT-Creation-Date: 2009-11-24 21:04+0000\n"
 "PO-Revision-Date: 2010-08-08 15:45+0100\n"
 "Last-Translator: Nils-Christoph Fiedler <ncfiedler@gnome.org>\n"
 "Language-Team: Low German <nds-lowgerman@lists.sourceforge.net>\n"
+"Language: nds\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -96,7 +97,7 @@ msgstr ""
 #: ../src/core/main.c:127
 #, c-format
 msgid ""
-"muffin %s\n"
+"mutter %s\n"
 "Copyright (C) 2001-2008 Havoc Pennington, Red Hat, Inc., and others\n"
 "This is free software; see the source for copying conditions.\n"
 "There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n"
@@ -107,7 +108,7 @@ msgid "Disable connection to session manager"
 msgstr ""
 
 #: ../src/core/main.c:263
-msgid "Replace the running window manager with Muffin"
+msgid "Replace the running window manager with Mutter"
 msgstr ""
 
 #: ../src/core/main.c:269
@@ -315,7 +316,7 @@ msgstr ""
 
 #: ../src/core/session.c:1196
 #, c-format
-msgid "<muffin_session> attribute seen but we already have the session ID"
+msgid "<mutter_session> attribute seen but we already have the session ID"
 msgstr ""
 
 #: ../src/core/session.c:1209
@@ -357,9 +358,9 @@ msgid "Opened log file %s\n"
 msgstr ""
 
 #: ../src/core/util.c:139
-#: ../src/tools/muffin-message.c:176
+#: ../src/tools/mutter-message.c:176
 #, c-format
-msgid "Muffin was compiled without support for verbose mode\n"
+msgid "Mutter was compiled without support for verbose mode\n"
 msgstr ""
 
 #: ../src/core/util.c:239
@@ -381,10 +382,10 @@ msgstr "Finsteroppasserfehler:"
 #. Translators: This is the title used on dialog boxes
 #. eof all-keybindings.h
 #: ../src/core/util.c:573
-#: ../src/muffin.desktop.in.h:1
-#: ../src/muffin-wm.desktop.in.h:1
-msgid "Muffin"
-msgstr "Muffin"
+#: ../src/mutter.desktop.in.h:1
+#: ../src/mutter-wm.desktop.in.h:1
+msgid "Mutter"
+msgstr "Mutter"
 
 #. first time through
 #: ../src/core/window.c:6161
@@ -747,31 +748,31 @@ msgstr ""
 msgid "Move window to center of screen"
 msgstr "Finster to de Midde vu'm Billschirm verschuven"
 
-#: ../src/muffin.schemas.in.h:1
+#: ../src/mutter.schemas.in.h:1
 msgid "Clutter Plugins"
 msgstr "Clutter Plugins"
 
-#: ../src/muffin.schemas.in.h:2
+#: ../src/mutter.schemas.in.h:2
 msgid "Determines whether hidden windows (i.e., minimized windows and windows on other workspaces than the current one) should be kept alive."
 msgstr ""
 
-#: ../src/muffin.schemas.in.h:3
+#: ../src/mutter.schemas.in.h:3
 msgid "Live Hidden Windows"
 msgstr ""
 
-#: ../src/muffin.schemas.in.h:4
+#: ../src/mutter.schemas.in.h:4
 msgid "Modifier to use for extended window management operations"
 msgstr ""
 
-#: ../src/muffin.schemas.in.h:5
+#: ../src/mutter.schemas.in.h:5
 msgid "Plugins to load for the Clutter-based compositing manager."
 msgstr ""
 
-#: ../src/muffin.schemas.in.h:6
+#: ../src/mutter.schemas.in.h:6
 msgid "This key will initiate the \"overlay\", which is a combination window overview and application launching system. The default is intended to be the \"Windows key\" on PC hardware. It's expected that this binding either the default or set to the empty string."
 msgstr ""
 
-#: ../src/tools/muffin-message.c:150
+#: ../src/tools/mutter-message.c:150
 #, c-format
 msgid "Usage: %s\n"
 msgstr "Gebruk: %s\n"

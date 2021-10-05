@@ -28,9 +28,7 @@
  *
  */
 
-#ifdef HAVE_CONFIG_H
 #include "cogl-config.h"
-#endif
 
 #include <string.h>
 #include <math.h>
@@ -38,7 +36,6 @@
 #include <glib.h>
 
 #include "cogl-clip-stack.h"
-#include "cogl-primitives.h"
 #include "cogl-context-private.h"
 #include "cogl-framebuffer-private.h"
 #include "cogl-journal-private.h"
@@ -46,14 +43,11 @@
 #include "cogl-matrix-private.h"
 #include "cogl-primitives-private.h"
 #include "cogl-private.h"
-#include "cogl-pipeline-opengl-private.h"
 #include "cogl-attribute-private.h"
 #include "cogl-primitive-private.h"
 #include "cogl1-context.h"
 #include "cogl-offscreen.h"
 #include "cogl-matrix-stack.h"
-
-
 
 static void *
 _cogl_clip_stack_push_entry (CoglClipStack *clip_stack,
@@ -301,6 +295,30 @@ _cogl_clip_stack_push_primitive (CoglClipStack *stack,
 }
 
 CoglClipStack *
+cogl_clip_stack_push_region (CoglClipStack   *stack,
+                             cairo_region_t  *region)
+{
+  CoglClipStack *entry;
+  CoglClipStackRegion *entry_region;
+  cairo_rectangle_int_t bounds;
+
+  entry_region = _cogl_clip_stack_push_entry (stack,
+                                              sizeof (CoglClipStackRegion),
+                                              COGL_CLIP_STACK_REGION);
+  entry = (CoglClipStack *) entry_region;
+
+  cairo_region_get_extents (region, &bounds);
+  entry->bounds_x0 = bounds.x;
+  entry->bounds_x1 = bounds.x + bounds.width;
+  entry->bounds_y0 = bounds.y;
+  entry->bounds_y1 = bounds.y + bounds.height;
+
+  entry_region->region = cairo_region_reference (region);
+
+  return entry;
+}
+
+CoglClipStack *
 _cogl_clip_stack_ref (CoglClipStack *entry)
 {
   /* A NULL pointer is considered a valid stack so we should accept
@@ -341,6 +359,13 @@ _cogl_clip_stack_unref (CoglClipStack *entry)
             g_slice_free1 (sizeof (CoglClipStackPrimitive), entry);
             break;
           }
+        case COGL_CLIP_STACK_REGION:
+          {
+            CoglClipStackRegion *region = (CoglClipStackRegion *) entry;
+            cairo_region_destroy (region->region);
+            g_slice_free1 (sizeof (CoglClipStackRegion), entry);
+            break;
+          }
         default:
           g_assert_not_reached ();
         }
@@ -354,7 +379,7 @@ _cogl_clip_stack_pop (CoglClipStack *stack)
 {
   CoglClipStack *new_top;
 
-  _COGL_RETURN_VAL_IF_FAIL (stack != NULL, NULL);
+  g_return_val_if_fail (stack != NULL, NULL);
 
   /* To pop we are moving the top of the stack to the old top's parent
      node. The stack always needs to have a reference to the top entry

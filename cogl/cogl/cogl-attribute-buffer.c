@@ -31,9 +31,7 @@
  *   Robert Bragg <robert@linux.intel.com>
  */
 
-#ifdef HAVE_CONFIG_H
 #include "cogl-config.h"
-#endif
 
 #include "cogl-object-private.h"
 #include "cogl-attribute-buffer.h"
@@ -73,7 +71,7 @@ cogl_attribute_buffer_new (CoglContext *context,
   buffer = cogl_attribute_buffer_new_with_size (context, bytes);
 
   /* Note: to keep the common cases simple this API doesn't throw
-   * CoglErrors, so developers can assume this function never returns
+   * GErrors, so developers can assume this function never returns
    * NULL and we will simply abort on error.
    *
    * Developers wanting to catch errors can use

@@ -14,21 +14,23 @@
  * General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street - Suite 500, Boston, MA
- * 02110-1335, USA.
+ * along with this program; if not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef META_COMPOSITOR_H
 #define META_COMPOSITOR_H
 
 #include <glib.h>
-#include <X11/Xlib.h>
 
 #include <meta/types.h>
 #include <meta/boxes.h>
 #include <meta/window.h>
 #include <meta/workspace.h>
+
+#define META_TYPE_COMPOSITOR (meta_compositor_get_type ())
+META_EXPORT
+G_DECLARE_DERIVABLE_TYPE (MetaCompositor, meta_compositor,
+                          META, COMPOSITOR, GObject)
 
 /**
  * MetaCompEffect:
@@ -56,129 +58,108 @@ typedef enum
   META_COMP_EFFECT_NONE
 } MetaCompEffect;
 
-MetaCompositor *meta_compositor_new     (MetaDisplay    *display);
+typedef enum
+{
+  META_SIZE_CHANGE_MAXIMIZE,
+  META_SIZE_CHANGE_UNMAXIMIZE,
+  META_SIZE_CHANGE_FULLSCREEN,
+  META_SIZE_CHANGE_UNFULLSCREEN,
+} MetaSizeChange;
+
+META_EXPORT
 void            meta_compositor_destroy (MetaCompositor *compositor);
 
-void meta_compositor_manage_screen   (MetaCompositor *compositor,
-                                      MetaScreen     *screen);
-void meta_compositor_unmanage_screen (MetaCompositor *compositor,
-                                      MetaScreen     *screen);
+META_EXPORT
+void meta_compositor_manage   (MetaCompositor *compositor);
 
+META_EXPORT
+void meta_compositor_unmanage (MetaCompositor *compositor);
+
+META_EXPORT
 void meta_compositor_window_shape_changed (MetaCompositor *compositor,
                                            MetaWindow     *window);
 
-gboolean meta_compositor_process_event (MetaCompositor *compositor,
-                                        XEvent         *event,
-                                        MetaWindow     *window);
+META_EXPORT
+void meta_compositor_window_opacity_changed (MetaCompositor *compositor,
+                                             MetaWindow     *window);
 
-/* At a high-level, a window is not-visible or visible. When a
- * window is added (with add_window()) it is not visible.
- * show_window() indicates a transition from not-visible to
- * visible. Some of the reasons for this:
- *
- *  - Window newly created
- *  - Window is unminimized
- *  - Window is moved to the current desktop
- *  - Window was made sticky
- *
- * hide_window() indicates that the window has transitioned from
- * visible to not-visible. Some reasons include:
- *
- *  - Window was destroyed
- *  - Window is minimized
- *  - Window is moved to a different desktop
- *  - Window no longer sticky.
- *
- * Note that combinations are possible - a window might have first
- * been minimized and then moved to a different desktop. The
- * 'effect' parameter to show_window() and hide_window() is a hint
- * as to the appropriate effect to show the user and should not
- * be considered to be indicative of a state change.
- *
- * When the active workspace is changed, switch_workspace() is called
- * first, then show_window() and hide_window() are called individually
- * for each window affected, with an effect of META_COMP_EFFECT_NONE.
- * If hiding windows will affect the switch workspace animation, the
- * compositor needs to delay hiding the windows until the switch
- * workspace animation completes.
- *
- * maximize_window() and unmaximize_window() are transitions within
- * the visible state. The window is resized *before* the call, so
- * it may be necessary to readjust the display based on the old_rect
- * to start the animation.
- */
+META_EXPORT
+gboolean meta_compositor_filter_keybinding (MetaCompositor *compositor,
+                                            MetaKeyBinding *binding);
 
-void meta_compositor_add_window    (MetaCompositor *compositor,
-                                    MetaWindow     *window);
-void meta_compositor_remove_window (MetaCompositor *compositor,
-                                    MetaWindow     *window);
+META_EXPORT
+void meta_compositor_add_window        (MetaCompositor      *compositor,
+                                        MetaWindow          *window);
 
+META_EXPORT
+void meta_compositor_remove_window     (MetaCompositor      *compositor,
+                                        MetaWindow          *window);
+
+META_EXPORT
 void meta_compositor_show_window       (MetaCompositor      *compositor,
                                         MetaWindow          *window,
                                         MetaCompEffect       effect);
+
+META_EXPORT
 void meta_compositor_hide_window       (MetaCompositor      *compositor,
                                         MetaWindow          *window,
                                         MetaCompEffect       effect);
+
+META_EXPORT
 void meta_compositor_switch_workspace  (MetaCompositor      *compositor,
-                                        MetaScreen          *screen,
                                         MetaWorkspace       *from,
                                         MetaWorkspace       *to,
                                         MetaMotionDirection  direction);
 
-void meta_compositor_maximize_window   (MetaCompositor      *compositor,
-                                        MetaWindow          *window,
-                                        MetaRectangle       *old_rect,
-                                        MetaRectangle       *new_rect);
-void meta_compositor_unmaximize_window (MetaCompositor      *compositor,
-                                        MetaWindow          *window,
-                                        MetaRectangle       *old_rect,
-                                        MetaRectangle       *new_rect);
+META_EXPORT
+void meta_compositor_size_change_window (MetaCompositor      *compositor,
+                                         MetaWindow          *window,
+                                         MetaSizeChange       which_change,
+                                         MetaRectangle       *old_frame_rect,
+                                         MetaRectangle       *old_buffer_rect);
 
+META_EXPORT
 void meta_compositor_sync_window_geometry (MetaCompositor *compositor,
                                            MetaWindow     *window,
                                            gboolean        did_placement);
-void meta_compositor_set_updates_frozen   (MetaCompositor *compositor,
-                                           MetaWindow     *window,
-                                           gboolean        updates_frozen);
+
+META_EXPORT
+void meta_compositor_sync_updates_frozen  (MetaCompositor *compositor,
+                                           MetaWindow     *window);
+
+META_EXPORT
 void meta_compositor_queue_frame_drawn    (MetaCompositor *compositor,
                                            MetaWindow     *window,
                                            gboolean        no_delay_frame);
 
+META_EXPORT
 void meta_compositor_sync_stack                (MetaCompositor *compositor,
-                                                MetaScreen     *screen,
                                                 GList          *stack);
-void meta_compositor_sync_screen_size          (MetaCompositor *compositor,
-                                                MetaScreen     *screen,
-                                                guint           width,
-                                                guint           height);
 
-void meta_compositor_flash_screen              (MetaCompositor *compositor,
-                                                MetaScreen     *screen);
+META_EXPORT
+void meta_compositor_flash_display             (MetaCompositor *compositor,
+                                                MetaDisplay    *display);
 
-void meta_compositor_tile_window       (MetaCompositor      *compositor,
-                                        MetaWindow          *window,
-                                        MetaRectangle       *old_rect,
-                                        MetaRectangle       *new_rect);
+META_EXPORT
+void meta_compositor_show_tile_preview (MetaCompositor *compositor,
+                                        MetaWindow     *window,
+                                        MetaRectangle  *tile_rect,
+                                        int             tile_monitor_number);
 
-void meta_compositor_show_tile_preview (MetaCompositor  *compositor,
-                                        MetaScreen      *screen,
-                                        MetaWindow      *window,
-                                        MetaRectangle   *tile_rect,
-                                        int             tile_monitor_number,
-                                        guint           snap_queued);
+META_EXPORT
+void meta_compositor_hide_tile_preview (MetaCompositor *compositor);
 
-void meta_compositor_hide_tile_preview (MetaCompositor  *compositor,
-                                        MetaScreen      *screen);
+META_EXPORT
+void meta_compositor_show_window_menu (MetaCompositor     *compositor,
+                                       MetaWindow         *window,
+				       MetaWindowMenuType  menu,
+                                       int                 x,
+                                       int                 y);
 
-void meta_compositor_show_hud_preview (MetaCompositor   *compositor,
-                                       MetaScreen       *screen,
-                                       guint            current_proximity_zone,
-                                       MetaRectangle    *work_area,
-                                       guint            snap_queued);
-
-void meta_compositor_hide_hud_preview (MetaCompositor   *compositor,
-                                       MetaScreen       *screen);
-
-void meta_compositor_toggle_send_frame_timings (MetaScreen *screen);
+META_EXPORT
+void meta_compositor_show_window_menu_for_rect (MetaCompositor     *compositor,
+                                                MetaWindow         *window,
+				                MetaWindowMenuType  menu,
+                                                MetaRectangle      *rect);
 
 #endif /* META_COMPOSITOR_H */

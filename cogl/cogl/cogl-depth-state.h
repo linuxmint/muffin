@@ -37,7 +37,7 @@
 #ifndef __COGL_DEPTH_STATE_H__
 #define __COGL_DEPTH_STATE_H__
 
-COGL_BEGIN_DECLS
+G_BEGIN_DECLS
 
 /**
  * SECTION:cogl-depth-state
@@ -54,9 +54,9 @@ typedef struct {
   /*< private >*/
   uint32_t COGL_PRIVATE (magic);
 
-  CoglBool COGL_PRIVATE (test_enabled);
+  gboolean COGL_PRIVATE (test_enabled);
   CoglDepthTestFunction COGL_PRIVATE (test_function);
-  CoglBool COGL_PRIVATE (write_enabled);
+  gboolean COGL_PRIVATE (write_enabled);
   float COGL_PRIVATE (range_near);
   float COGL_PRIVATE (range_far);
 
@@ -84,7 +84,7 @@ typedef struct {
  * Since: 2.0
  * Stability: Unstable
  */
-void
+COGL_EXPORT void
 cogl_depth_state_init (CoglDepthState *state);
 
 /**
@@ -112,9 +112,9 @@ cogl_depth_state_init (CoglDepthState *state);
  * Since: 2.0
  * Stability: Unstable
  */
-void
+COGL_EXPORT void
 cogl_depth_state_set_test_enabled (CoglDepthState *state,
-                                   CoglBool enable);
+                                   gboolean enable);
 
 /**
  * cogl_depth_state_get_test_enabled:
@@ -127,7 +127,7 @@ cogl_depth_state_set_test_enabled (CoglDepthState *state,
  * Since: 2.0
  * Stability: Unstable
  */
-CoglBool
+COGL_EXPORT gboolean
 cogl_depth_state_get_test_enabled (CoglDepthState *state);
 
 /**
@@ -150,9 +150,9 @@ cogl_depth_state_get_test_enabled (CoglDepthState *state);
  * Since: 2.0
  * Stability: Unstable
  */
-void
+COGL_EXPORT void
 cogl_depth_state_set_write_enabled (CoglDepthState *state,
-                                    CoglBool enable);
+                                    gboolean enable);
 
 /**
  * cogl_depth_state_get_write_enabled:
@@ -165,7 +165,7 @@ cogl_depth_state_set_write_enabled (CoglDepthState *state,
  * Since: 2.0
  * Stability: Unstable
  */
-CoglBool
+COGL_EXPORT gboolean
 cogl_depth_state_get_write_enabled (CoglDepthState *state);
 
 /**
@@ -186,7 +186,7 @@ cogl_depth_state_get_write_enabled (CoglDepthState *state);
  * Since: 2.0
  * Stability: Unstable
  */
-void
+COGL_EXPORT void
 cogl_depth_state_set_test_function (CoglDepthState *state,
                                     CoglDepthTestFunction function);
 
@@ -201,7 +201,7 @@ cogl_depth_state_set_test_function (CoglDepthState *state,
  * Since: 2.0
  * Stability: Unstable
  */
-CoglDepthTestFunction
+COGL_EXPORT CoglDepthTestFunction
 cogl_depth_state_get_test_function (CoglDepthState *state);
 
 /**
@@ -225,13 +225,6 @@ cogl_depth_state_get_test_function (CoglDepthState *state);
  * mapped too although the range must still lye within the range [0,
  * 1].
  *
- * If your driver does not support this feature (for example you are
- * using GLES 1 drivers) then if you don't use the default range
- * values you will get an error reported when calling
- * cogl_pipeline_set_depth_state (). You can check ahead of time for
- * the %COGL_FEATURE_ID_DEPTH_RANGE feature with
- * cogl_has_feature() to know if this function will succeed.
- *
  * By default normalized device coordinate depth values are mapped to
  * the full range of depth buffer values, [0, 1].
  *
@@ -242,7 +235,7 @@ cogl_depth_state_get_test_function (CoglDepthState *state);
  * Since: 2.0
  * Stability: Unstable
  */
-void
+COGL_EXPORT void
 cogl_depth_state_set_range (CoglDepthState *state,
                             float near_val,
                             float far_val);
@@ -260,11 +253,11 @@ cogl_depth_state_set_range (CoglDepthState *state,
  * Since: 2.0
  * Stability: Unstable
  */
-void
+COGL_EXPORT void
 cogl_depth_state_get_range (CoglDepthState *state,
                             float *near_val,
                             float *far_val);
 
-COGL_END_DECLS
+G_END_DECLS
 
 #endif /* __COGL_DEPTH_STATE_H__ */

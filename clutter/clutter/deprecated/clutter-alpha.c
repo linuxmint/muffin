@@ -39,15 +39,12 @@
  * be available any more in the next major version of Clutter.
  *
  * A #ClutterAlpha binds a #ClutterTimeline to a progress function which
- * translates the time T into an adimensional factor alpha. The factor can
- * then be used to drive a #ClutterBehaviour, which will translate the
- * alpha value into something meaningful for a #ClutterActor.
+ * translates the time T into an adimensional factor alpha.
  *
  * You should provide a #ClutterTimeline and bind it to the #ClutterAlpha
  * instance using clutter_alpha_set_timeline(). You should also set an
- * "animation mode", either by using the #ClutterAnimationMode values that
- * Clutter itself provides or by registering custom functions using
- * clutter_alpha_register_func().
+ * "animation mode", by using the #ClutterAnimationMode values that
+ * Clutter provides.
  *
  * Instead of a #ClutterAnimationMode you may provide a function returning
  * the alpha value depending on the progress of the timeline, using
@@ -58,9 +55,6 @@
  * Since the alpha function is controlled by the timeline instance, you can
  * pause, stop or resume the #ClutterAlpha from calling the alpha function by
  * using the appropriate functions of the #ClutterTimeline object.
- *
- * #ClutterAlpha is used to "drive" a #ClutterBehaviour instance, and it
- * is internally used by the #ClutterAnimation API.
  *
  * #ClutterAlpha is available since Clutter 0.2.
  *
@@ -78,9 +72,7 @@
  *
  * The following JSON fragment defines a #ClutterAlpha
  * using a #ClutterTimeline with id "sine-timeline" and an alpha
- * function called `my_sine_alpha`. The defined #ClutterAlpha
- * instance can be reused in multiple #ClutterBehaviour
- * definitions or for #ClutterAnimation definitions.
+ * function called `my_sine_alpha`.
  *
  * |[
  * {
@@ -95,9 +87,7 @@
  * ]|
  */
 
-#ifdef HAVE_CONFIG_H
 #include "clutter-build-config.h"
-#endif
 
 #include <math.h>
 
@@ -371,9 +361,8 @@ clutter_alpha_class_init (ClutterAlphaClass *klass)
   /**
    * ClutterAlpha:mode:
    *
-   * The progress function logical id - either a value from the
-   * #ClutterAnimationMode enumeration or a value returned by
-   * clutter_alpha_register_func().
+   * The progress function logical id - a value from the
+   * #ClutterAnimationMode enumeration.
    *
    * If %CLUTTER_CUSTOM_MODE is used then the function set using
    * clutter_alpha_set_closure() or clutter_alpha_set_func()
@@ -647,9 +636,6 @@ clutter_alpha_get_timeline (ClutterAlpha *alpha)
  * bind a #ClutterTimeline object to the #ClutterAlpha instance
  * using clutter_alpha_set_timeline().
  *
- * You should use the newly created #ClutterAlpha instance inside
- * a #ClutterBehaviour object.
- *
  * Return value: the newly created empty #ClutterAlpha instance.
  *
  * Since: 0.2
@@ -689,44 +675,6 @@ clutter_alpha_new_full (ClutterTimeline *timeline,
                        "timeline", timeline,
                        "mode", mode,
                        NULL);
-}
-
-/**
- * clutter_alpha_new_with_func:
- * @timeline: a #ClutterTimeline
- * @func: a #ClutterAlphaFunc
- * @data: data to pass to the function, or %NULL
- * @destroy: function to call when removing the alpha function, or %NULL
- *
- * Creates a new #ClutterAlpha instances and sets the timeline
- * and the alpha function.
- *
- * This function will not register @func as a global alpha function.
- *
- * See also clutter_alpha_set_timeline() and clutter_alpha_set_func().
- *
- * Return value: the newly created #ClutterAlpha
- *
- * Since: 1.0
- *
- * Deprecated: 1.12: Use #ClutterTimeline instead
- */
-ClutterAlpha *
-clutter_alpha_new_with_func (ClutterTimeline  *timeline,
-                             ClutterAlphaFunc  func,
-                             gpointer          data,
-                             GDestroyNotify    destroy)
-{
-  ClutterAlpha *retval;
-
-  g_return_val_if_fail (CLUTTER_IS_TIMELINE (timeline), NULL);
-  g_return_val_if_fail (func != NULL, NULL);
-
-  retval = clutter_alpha_new ();
-  clutter_alpha_set_timeline (retval, timeline);
-  clutter_alpha_set_func (retval, func, data, destroy);
-
-  return retval;
 }
 
 /**
@@ -783,8 +731,7 @@ clutter_alpha_easing_func (ClutterAlpha *alpha,
  * @mode: a #ClutterAnimationMode
  *
  * Sets the progress function of @alpha using the symbolic value
- * of @mode, as taken by the #ClutterAnimationMode enumeration or
- * using the value returned by clutter_alpha_register_func().
+ * of @mode, as taken by the #ClutterAnimationMode enumeration.
  *
  * Since: 1.0
  *
@@ -838,9 +785,7 @@ clutter_alpha_set_mode (ClutterAlpha *alpha,
 
       if (G_UNLIKELY (clutter_alphas == NULL))
         {
-          g_warning ("No alpha functions defined for ClutterAlpha to use. "
-                     "Use clutter_alpha_register_func() to register an "
-                     "alpha function.");
+          g_warning ("No alpha functions defined for ClutterAlpha to use. ");
           return;
         }
 
@@ -871,82 +816,4 @@ clutter_alpha_set_mode (ClutterAlpha *alpha,
     g_assert_not_reached ();
 
   g_object_notify_by_pspec (G_OBJECT (alpha), obj_props[PROP_MODE]);
-}
-
-static gulong
-register_alpha_internal (AlphaData *alpha_data)
-{
-  if (G_UNLIKELY (clutter_alphas == NULL))
-    clutter_alphas = g_ptr_array_new ();
-
-  g_ptr_array_add (clutter_alphas, alpha_data);
-
-  return clutter_alphas->len + CLUTTER_ANIMATION_LAST;
-}
-
-/**
- * clutter_alpha_register_func: (skip)
- * @func: a #ClutterAlphaFunc
- * @data: user data to pass to @func, or %NULL
- *
- * Registers a global alpha function and returns its logical id
- * to be used by clutter_alpha_set_mode() or by #ClutterAnimation.
- *
- * The logical id is always greater than %CLUTTER_ANIMATION_LAST.
- *
- * Return value: the logical id of the alpha function
- *
- * Since: 1.0
- *
- * Deprecated: 1.12: There is no direct replacement for this
- *   function. Use clutter_timeline_set_progress_func() on each
- *   specific #ClutterTimeline instance
- */
-gulong
-clutter_alpha_register_func (ClutterAlphaFunc func,
-                             gpointer         data)
-{
-  AlphaData *alpha_data;
-
-  g_return_val_if_fail (func != NULL, 0);
-
-  alpha_data = g_slice_new (AlphaData);
-  alpha_data->closure_set = FALSE;
-  alpha_data->func = func;
-  alpha_data->data = data;
-
-  return register_alpha_internal (alpha_data);
-}
-
-/**
- * clutter_alpha_register_closure: (rename-to clutter_alpha_register_func)
- * @closure: a #GClosure
- *
- * #GClosure variant of clutter_alpha_register_func().
- *
- * Registers a global alpha function and returns its logical id
- * to be used by clutter_alpha_set_mode() or by #ClutterAnimation.
- *
- * The logical id is always greater than %CLUTTER_ANIMATION_LAST.
- *
- * Return value: the logical id of the alpha function
- *
- * Since: 1.0
- *
- * Deprecated: 1.12: There is no direct replacement for this
- *   function. Use clutter_timeline_set_progress_func() on each
- *   specific #ClutterTimeline instance
- */
-gulong
-clutter_alpha_register_closure (GClosure *closure)
-{
-  AlphaData *alpha_data;
-
-  g_return_val_if_fail (closure != NULL, 0);
-
-  alpha_data = g_slice_new (AlphaData);
-  alpha_data->closure_set = TRUE;
-  alpha_data->closure = closure;
-
-  return register_alpha_internal (alpha_data);
 }

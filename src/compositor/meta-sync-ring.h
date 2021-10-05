@@ -2,7 +2,6 @@
 #define _META_SYNC_RING_H_
 
 #include <glib.h>
-
 #include <X11/Xlib.h>
 
 gboolean meta_sync_ring_init (Display *dpy);

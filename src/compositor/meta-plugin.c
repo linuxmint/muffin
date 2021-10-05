@@ -16,145 +16,49 @@
  * General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street - Suite 500, Boston, MA
- * 02110-1335, USA.
+ * along with this program; if not, see <http://www.gnu.org/licenses/>.
  */
 
 /**
  * SECTION:meta-plugin
  * @title: MetaPlugin
  * @short_description: Entry point for plugins
+ *
  */
 
-#include <meta/meta-plugin.h>
-#include "meta-plugin-manager.h"
-#include <meta/screen.h>
-#include <meta/display.h>
+#include "config.h"
+
+#include "meta/meta-plugin.h"
 
 #include <string.h>
 #include <X11/Xlib.h>
 #include <X11/extensions/Xfixes.h>
 #include <X11/extensions/shape.h>
-#include <clutter/x11/clutter-x11.h>
 
-#include "compositor-private.h"
-#include "meta-window-actor-private.h"
+#include "backends/meta-monitor-manager-private.h"
+#include "clutter/x11/clutter-x11.h"
+#include "compositor/compositor-private.h"
+#include "compositor/meta-window-actor-private.h"
+#include "compositor/meta-plugin-manager.h"
+#include "meta/display.h"
+#include "meta/util.h"
 
-G_DEFINE_ABSTRACT_TYPE (MetaPlugin, meta_plugin, G_TYPE_OBJECT);
 
-#define META_PLUGIN_GET_PRIVATE(obj) \
-(G_TYPE_INSTANCE_GET_PRIVATE ((obj), META_TYPE_PLUGIN, MetaPluginPrivate))
-
-enum
+typedef struct _MetaPluginPrivate
 {
-  PROP_0,
-  PROP_SCREEN,
-  PROP_DEBUG_MODE,
-};
+  MetaCompositor *compositor;
+} MetaPluginPrivate;
 
-struct _MetaPluginPrivate
-{
-  MetaScreen   *screen;
-
-  gint          running;
-  gboolean      debug    : 1;
-};
-
-static void
-meta_plugin_set_property (GObject      *object,
-                          guint         prop_id,
-                          const GValue *value,
-                          GParamSpec   *pspec)
-{
-  MetaPluginPrivate *priv = META_PLUGIN (object)->priv;
-
-  switch (prop_id)
-    {
-    case PROP_SCREEN:
-      priv->screen = g_value_get_object (value);
-      break;
-    case PROP_DEBUG_MODE:
-      priv->debug = g_value_get_boolean (value);
-      break;
-    default:
-      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
-      break;
-    }
-}
-
-static void
-meta_plugin_get_property (GObject    *object,
-                          guint       prop_id,
-                          GValue     *value,
-                          GParamSpec *pspec)
-{
-  MetaPluginPrivate *priv = META_PLUGIN (object)->priv;
-
-  switch (prop_id)
-    {
-    case PROP_SCREEN:
-      g_value_set_object (value, priv->screen);
-      break;
-    case PROP_DEBUG_MODE:
-      g_value_set_boolean (value, priv->debug);
-      break;
-    default:
-      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
-      break;
-    }
-}
-
+G_DEFINE_ABSTRACT_TYPE_WITH_PRIVATE (MetaPlugin, meta_plugin, G_TYPE_OBJECT);
 
 static void
 meta_plugin_class_init (MetaPluginClass *klass)
 {
-  GObjectClass      *gobject_class = G_OBJECT_CLASS (klass);
-
-  gobject_class->set_property    = meta_plugin_set_property;
-  gobject_class->get_property    = meta_plugin_get_property;
-
-  g_object_class_install_property (gobject_class,
-                                   PROP_SCREEN,
-                                   g_param_spec_object ("screen",
-                                                        "MetaScreen",
-                                                        "MetaScreen",
-                                                        META_TYPE_SCREEN,
-                                                        G_PARAM_READWRITE));
-
-  g_object_class_install_property (gobject_class,
-				   PROP_DEBUG_MODE,
-				   g_param_spec_boolean ("debug-mode",
-                                                      "Debug Mode",
-                                                      "Debug Mode",
-                                                      FALSE,
-                                                      G_PARAM_READABLE));
-
-  g_type_class_add_private (gobject_class, sizeof (MetaPluginPrivate));
 }
 
 static void
 meta_plugin_init (MetaPlugin *self)
 {
-  MetaPluginPrivate *priv;
-
-  self->priv = priv = META_PLUGIN_GET_PRIVATE (self);
-}
-
-gboolean
-meta_plugin_running  (MetaPlugin *plugin)
-{
-  MetaPluginPrivate *priv = META_PLUGIN (plugin)->priv;
-
-  return (priv->running > 0);
-}
-
-gboolean
-meta_plugin_debug_mode (MetaPlugin *plugin)
-{
-  MetaPluginPrivate *priv = META_PLUGIN (plugin)->priv;
-
-  return priv->debug;
 }
 
 const MetaPluginInfo *
@@ -168,35 +72,24 @@ meta_plugin_get_info (MetaPlugin *plugin)
   return NULL;
 }
 
-/**
- * _meta_plugin_effect_started:
- * @plugin: the plugin
- *
- * Mark that an effect has started for the plugin. This is called
- * internally by MetaPluginManager.
- */
-void
-_meta_plugin_effect_started (MetaPlugin *plugin)
+gboolean
+_meta_plugin_xevent_filter (MetaPlugin *plugin,
+                            XEvent     *xev)
 {
-  MetaPluginPrivate *priv = META_PLUGIN (plugin)->priv;
+  MetaPluginClass *klass = META_PLUGIN_GET_CLASS (plugin);
 
-  priv->running++;
+  if (klass->xevent_filter)
+    return klass->xevent_filter (plugin, xev);
+  else
+    return FALSE;
 }
 
 void
 meta_plugin_switch_workspace_completed (MetaPlugin *plugin)
 {
-  MetaPluginPrivate *priv = META_PLUGIN (plugin)->priv;
+  MetaPluginPrivate *priv = meta_plugin_get_instance_private (plugin);
 
-  MetaScreen *screen = priv->screen;
-
-  if (priv->running-- < 0)
-    {
-      g_warning ("Error in running effect accounting, adjusting.");
-      priv->running = 0;
-    }
-
-  meta_switch_workspace_completed (screen);
+  meta_switch_workspace_completed (priv->compositor);
 }
 
 static void
@@ -204,26 +97,6 @@ meta_plugin_window_effect_completed (MetaPlugin      *plugin,
                                      MetaWindowActor *actor,
                                      unsigned long    event)
 {
-  MetaPluginPrivate *priv = META_PLUGIN (plugin)->priv;
-
-  if (priv->running-- < 0)
-    {
-      g_warning ("Error in running effect accounting, adjusting.");
-      priv->running = 0;
-    }
-
-  if (!actor)
-    {
-      const MetaPluginInfo *info;
-      const gchar            *name = NULL;
-
-      if (plugin && (info = meta_plugin_get_info (plugin)))
-        name = info->name;
-
-      g_warning ("Plugin [%s] passed NULL for actor!",
-                 name ? name : "unknown");
-    }
-
   meta_window_actor_effect_completed (actor, event);
 }
 
@@ -235,24 +108,17 @@ meta_plugin_minimize_completed (MetaPlugin      *plugin,
 }
 
 void
-meta_plugin_maximize_completed (MetaPlugin      *plugin,
-                                MetaWindowActor *actor)
-{
-  meta_plugin_window_effect_completed (plugin, actor, META_PLUGIN_MAXIMIZE);
-}
-
-void
-meta_plugin_unmaximize_completed (MetaPlugin      *plugin,
+meta_plugin_unminimize_completed (MetaPlugin      *plugin,
                                   MetaWindowActor *actor)
 {
-  meta_plugin_window_effect_completed (plugin, actor, META_PLUGIN_UNMAXIMIZE);
+  meta_plugin_window_effect_completed (plugin, actor, META_PLUGIN_UNMINIMIZE);
 }
 
 void
-meta_plugin_tile_completed     (MetaPlugin      *plugin,
-                                MetaWindowActor *actor)
+meta_plugin_size_change_completed (MetaPlugin      *plugin,
+                                   MetaWindowActor *actor)
 {
-  meta_plugin_window_effect_completed (plugin, actor, META_PLUGIN_TILE);
+  meta_plugin_window_effect_completed (plugin, actor, META_PLUGIN_SIZE_CHANGE);
 }
 
 void
@@ -272,10 +138,6 @@ meta_plugin_destroy_completed (MetaPlugin      *plugin,
 /**
  * meta_plugin_begin_modal:
  * @plugin: a #MetaPlugin
- * @grab_window: the X window to grab the keyboard and mouse on
- * @cursor: the cursor to use for the pointer grab, or None,
- *          to use the normal cursor for the grab window and
- *          its descendants.
  * @options: flags that modify the behavior of the modal grab
  * @timestamp: the timestamp used for establishing grabs
  *
@@ -296,15 +158,13 @@ meta_plugin_destroy_completed (MetaPlugin      *plugin,
  */
 gboolean
 meta_plugin_begin_modal (MetaPlugin       *plugin,
-                         Window            grab_window,
-                         Cursor            cursor,
                          MetaModalOptions  options,
                          guint32           timestamp)
 {
-  MetaPluginPrivate *priv = META_PLUGIN (plugin)->priv;
+  MetaPluginPrivate *priv = meta_plugin_get_instance_private (plugin);
 
-  return meta_begin_modal_for_plugin (priv->screen, plugin,
-                                      grab_window, cursor, options, timestamp);
+  return meta_begin_modal_for_plugin (priv->compositor, plugin,
+                                      options, timestamp);
 }
 
 /**
@@ -322,25 +182,42 @@ void
 meta_plugin_end_modal (MetaPlugin *plugin,
                        guint32     timestamp)
 {
-  MetaPluginPrivate *priv = META_PLUGIN (plugin)->priv;
+  MetaPluginPrivate *priv = meta_plugin_get_instance_private (plugin);
 
-  meta_end_modal_for_plugin (priv->screen, plugin, timestamp);
+  meta_end_modal_for_plugin (priv->compositor, plugin, timestamp);
 }
 
 /**
- * meta_plugin_get_screen:
+ * meta_plugin_get_display:
  * @plugin: a #MetaPlugin
  *
- * Gets the #MetaScreen corresponding to a plugin. Each plugin instance
- * is associated with exactly one screen; if Metacity is managing
- * multiple screens, multiple plugin instances will be created.
+ * Gets the #MetaDisplay corresponding to a plugin.
  *
- * Return value: (transfer none): the #MetaScreen for the plugin
+ * Return value: (transfer none): the #MetaDisplay for the plugin
  */
-MetaScreen *
-meta_plugin_get_screen (MetaPlugin *plugin)
+MetaDisplay *
+meta_plugin_get_display (MetaPlugin *plugin)
 {
-  MetaPluginPrivate *priv = META_PLUGIN (plugin)->priv;
+  MetaPluginPrivate *priv = meta_plugin_get_instance_private (plugin);
+  MetaDisplay *display = meta_compositor_get_display (priv->compositor);
 
-  return priv->screen;
+  return display;
+}
+
+void
+_meta_plugin_set_compositor (MetaPlugin *plugin, MetaCompositor *compositor)
+{
+  MetaPluginPrivate *priv = meta_plugin_get_instance_private (plugin);
+
+  priv->compositor = compositor;
+}
+
+void
+meta_plugin_complete_display_change (MetaPlugin *plugin,
+                                     gboolean    ok)
+{
+  MetaMonitorManager *manager;
+
+  manager = meta_monitor_manager_get ();
+  meta_monitor_manager_confirm_configuration (manager, ok);
 }

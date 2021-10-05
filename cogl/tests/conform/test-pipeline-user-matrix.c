@@ -2,6 +2,7 @@
 
 #include <string.h>
 
+#include "test-declarations.h"
 #include "test-utils.h"
 
 typedef struct _TestState
@@ -20,7 +21,7 @@ validate_result (TestState *state)
   /* The textures are setup so that when added together with the
      correct matrices then all of the pixels should be white. We can
      verify this by reading back the entire stage */
-  pixels = malloc (state->width * state->height * 4);
+  pixels = g_malloc (state->width * state->height * 4);
 
   cogl_framebuffer_read_pixels (test_fb, 0, 0, state->width, state->height,
                                 COGL_PIXEL_FORMAT_RGBA_8888_PRE,
@@ -30,7 +31,7 @@ validate_result (TestState *state)
     {
       screen_pixel = g_strdup_printf ("#%06x", GUINT32_FROM_BE (*p) >> 8);
       g_assert_cmpstr (screen_pixel, ==, intended_pixel);
-      free (screen_pixel);
+      g_free (screen_pixel);
     }
 }
 
@@ -54,7 +55,7 @@ paint (TestState *state)
   CoglTexture *tex0, *tex1;
   CoglPipeline *pipeline;
   CoglMatrix matrix;
-  CoglError *error = NULL;
+  GError *error = NULL;
 
   cogl_framebuffer_orthographic (test_fb,
                                  0, 0,

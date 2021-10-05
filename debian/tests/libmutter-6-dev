@@ -1,0 +1,41 @@
+#!/bin/sh
+# autopkgtest check: Build and run a program against libmutter, to verify
+# that the headers and pkg-config file are installed correctly
+# (C) 2012 Canonical Ltd.
+# (C) 2018-2019 Simon McVittie
+# Authors: Martin Pitt, Simon McVittie
+
+set -eux
+
+WORKDIR=$(mktemp -d)
+export HOME="$WORKDIR"
+export XDG_RUNTIME_DIR="$WORKDIR"
+cleanup () {
+    rm -fr "$WORKDIR"
+}
+trap cleanup 0 INT QUIT ABRT PIPE TERM
+cd "$WORKDIR"
+
+if [ -n "${DEB_HOST_GNU_TYPE:-}" ]; then
+    CROSS_COMPILE="$DEB_HOST_GNU_TYPE-"
+else
+    CROSS_COMPILE=
+fi
+
+cat <<'EOF' > trivial.c
+#include <meta/util.h>
+
+int main(void)
+{
+    g_assert_false(meta_is_wayland_compositor());
+    return 0;
+}
+EOF
+
+# Deliberately word-splitting pkg-config's output:
+# shellcheck disable=SC2046
+"${CROSS_COMPILE}gcc" -o trivial trivial.c $("${CROSS_COMPILE}pkg-config" --cflags --libs libmutter-6)
+echo "build: OK"
+[ -x trivial ]
+xvfb-run -a dbus-run-session -- ./trivial
+echo "run: OK"

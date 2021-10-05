@@ -68,7 +68,6 @@ typedef struct _CoglSamplerCacheEntry
 
   CoglSamplerCacheWrapMode wrap_mode_s;
   CoglSamplerCacheWrapMode wrap_mode_t;
-  CoglSamplerCacheWrapMode wrap_mode_p;
 } CoglSamplerCacheEntry;
 
 CoglSamplerCache *
@@ -81,8 +80,7 @@ const CoglSamplerCacheEntry *
 _cogl_sampler_cache_update_wrap_modes (CoglSamplerCache *cache,
                                        const CoglSamplerCacheEntry *old_entry,
                                        CoglSamplerCacheWrapMode wrap_mode_s,
-                                       CoglSamplerCacheWrapMode wrap_mode_t,
-                                       CoglSamplerCacheWrapMode wrap_mode_p);
+                                       CoglSamplerCacheWrapMode wrap_mode_t);
 
 const CoglSamplerCacheEntry *
 _cogl_sampler_cache_update_filters (CoglSamplerCache *cache,

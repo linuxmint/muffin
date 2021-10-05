@@ -30,14 +30,12 @@
  *  Neil Roberts <neil@linux.intel.com>
  */
 
-#ifdef HAVE_CONFIG_H
 #include "cogl-config.h"
-#endif
 
 #include "cogl-poll.h"
 #include "cogl-poll-private.h"
-#include "cogl-winsys-private.h"
 #include "cogl-renderer-private.h"
+#include "winsys/cogl-winsys-private.h"
 
 struct _CoglPollSource
 {
@@ -55,10 +53,10 @@ cogl_poll_renderer_get_info (CoglRenderer *renderer,
 {
   GList *l, *next;
 
-  _COGL_RETURN_VAL_IF_FAIL (cogl_is_renderer (renderer), 0);
-  _COGL_RETURN_VAL_IF_FAIL (poll_fds != NULL, 0);
-  _COGL_RETURN_VAL_IF_FAIL (n_poll_fds != NULL, 0);
-  _COGL_RETURN_VAL_IF_FAIL (timeout != NULL, 0);
+  g_return_val_if_fail (cogl_is_renderer (renderer), 0);
+  g_return_val_if_fail (poll_fds != NULL, 0);
+  g_return_val_if_fail (n_poll_fds != NULL, 0);
+  g_return_val_if_fail (timeout != NULL, 0);
 
   *timeout = -1;
 
@@ -97,7 +95,7 @@ cogl_poll_renderer_dispatch (CoglRenderer *renderer,
 {
   GList *l, *next;
 
-  _COGL_RETURN_IF_FAIL (cogl_is_renderer (renderer));
+  g_return_if_fail (cogl_is_renderer (renderer));
 
   _cogl_closure_list_invoke_no_args (&renderer->idle_closures);
 

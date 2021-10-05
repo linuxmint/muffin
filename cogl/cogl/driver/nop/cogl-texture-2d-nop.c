@@ -32,23 +32,20 @@
  *  Robert Bragg   <robert@linux.intel.com>
  */
 
-#ifdef HAVE_CONFIG_H
 #include "cogl-config.h"
-#endif
 
 #include <string.h>
 
 #include "cogl-private.h"
 #include "cogl-texture-2d-nop-private.h"
 #include "cogl-texture-2d-private.h"
-#include "cogl-error-private.h"
 
 void
 _cogl_texture_2d_nop_free (CoglTexture2D *tex_2d)
 {
 }
 
-CoglBool
+gboolean
 _cogl_texture_2d_nop_can_create (CoglContext *ctx,
                                  int width,
                                  int height,
@@ -62,9 +59,9 @@ _cogl_texture_2d_nop_init (CoglTexture2D *tex_2d)
 {
 }
 
-CoglBool
+gboolean
 _cogl_texture_2d_nop_allocate (CoglTexture *tex,
-                               CoglError **error)
+                               GError **error)
 {
   return TRUE;
 }
@@ -79,8 +76,7 @@ _cogl_texture_2d_nop_flush_legacy_texobj_filters (CoglTexture *tex,
 void
 _cogl_texture_2d_nop_flush_legacy_texobj_wrap_modes (CoglTexture *tex,
                                                      GLenum wrap_mode_s,
-                                                     GLenum wrap_mode_t,
-                                                     GLenum wrap_mode_p)
+                                                     GLenum wrap_mode_t)
 {
 }
 
@@ -108,7 +104,7 @@ _cogl_texture_2d_nop_generate_mipmap (CoglTexture2D *tex_2d)
 {
 }
 
-CoglBool
+gboolean
 _cogl_texture_2d_nop_copy_from_bitmap (CoglTexture2D *tex_2d,
                                        int src_x,
                                        int src_y,
@@ -118,7 +114,7 @@ _cogl_texture_2d_nop_copy_from_bitmap (CoglTexture2D *tex_2d,
                                        int dst_x,
                                        int dst_y,
                                        int level,
-                                       CoglError **error)
+                                       GError **error)
 {
   return TRUE;
 }

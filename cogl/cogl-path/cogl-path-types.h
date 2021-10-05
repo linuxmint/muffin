@@ -37,7 +37,7 @@
 
 #include <cogl/cogl-types.h>
 
-COGL_BEGIN_DECLS
+G_BEGIN_DECLS
 
 typedef struct _CoglPath CoglPath;
 
@@ -75,11 +75,12 @@ typedef struct _CoglPath CoglPath;
  *
  * Since: 1.4
  */
-typedef enum {
+typedef enum
+{
   COGL_PATH_FILL_RULE_NON_ZERO,
   COGL_PATH_FILL_RULE_EVEN_ODD
 } CoglPathFillRule;
 
-COGL_END_DECLS
+G_END_DECLS
 
 #endif /* __COGL_PATH_TYPES_H__ */

@@ -1,0 +1,772 @@
+# Friulian translation for mutter.
+# Copyright (C) 2016 mutter's COPYRIGHT HOLDER
+# This file is distributed under the same license as the mutter package.
+# Fabio Tomat <f.t.public@gmail.com>, 2016.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: mutter master\n"
+"Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/mutter/issues\n"
+"POT-Creation-Date: 2019-08-06 00:49+0000\n"
+"PO-Revision-Date: 2019-09-03 09:53+0200\n"
+"Last-Translator: Fabio Tomat <f.t.public@gmail.com>\n"
+"Language-Team: Friulian <fur@li.org>\n"
+"Language: fur\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 2.2.3\n"
+
+#: data/50-mutter-navigation.xml:6
+msgid "Navigation"
+msgstr "Navigazion"
+
+#: data/50-mutter-navigation.xml:9
+msgid "Move window to workspace 1"
+msgstr "Sposte barcon tal spazi di lavôr 1"
+
+#: data/50-mutter-navigation.xml:12
+msgid "Move window to workspace 2"
+msgstr "Sposte barcon tal spazi di lavôr 2"
+
+#: data/50-mutter-navigation.xml:15
+msgid "Move window to workspace 3"
+msgstr "Sposte barcon tal spazi di lavôr 3"
+
+#: data/50-mutter-navigation.xml:18
+msgid "Move window to workspace 4"
+msgstr "Sposte barcon tal spazi di lavôr 4"
+
+#: data/50-mutter-navigation.xml:21
+msgid "Move window to last workspace"
+msgstr "Sposte barcon tal ultin spazi di lavôr"
+
+#: data/50-mutter-navigation.xml:24
+msgid "Move window one workspace up"
+msgstr "Sposte barcon tal spazi di lavôr parsore"
+
+#: data/50-mutter-navigation.xml:27
+msgid "Move window one workspace down"
+msgstr "Sposte barcon tal spazi di lavôr sot"
+
+#: data/50-mutter-navigation.xml:30
+msgid "Move window one monitor to the left"
+msgstr "Sposte barcon tal visôr a çampe"
+
+#: data/50-mutter-navigation.xml:33
+msgid "Move window one monitor to the right"
+msgstr "Sposte barcon tal visôr a drete"
+
+#: data/50-mutter-navigation.xml:36
+msgid "Move window one monitor up"
+msgstr "Sposte barcon tal visôr parsore"
+
+#: data/50-mutter-navigation.xml:39
+msgid "Move window one monitor down"
+msgstr "Sposte barcon tal visôr sot"
+
+#: data/50-mutter-navigation.xml:43
+msgid "Switch applications"
+msgstr "Passâ di une aplicazion in chê altre"
+
+#: data/50-mutter-navigation.xml:48
+msgid "Switch to previous application"
+msgstr "Passe ae aplicazion prime"
+
+#: data/50-mutter-navigation.xml:52
+msgid "Switch windows"
+msgstr "Passâ di un barcon in chel altri"
+
+#: data/50-mutter-navigation.xml:57
+msgid "Switch to previous window"
+msgstr "Passe al barcon prime"
+
+#: data/50-mutter-navigation.xml:61
+msgid "Switch windows of an application"
+msgstr "Passâ di un barcon in chel altri di une aplicazion"
+
+#: data/50-mutter-navigation.xml:66
+msgid "Switch to previous window of an application"
+msgstr "Passe al barcon prime di une aplicazion"
+
+#: data/50-mutter-navigation.xml:70
+msgid "Switch system controls"
+msgstr "Passâ di un control di sisteme in chel altri"
+
+#: data/50-mutter-navigation.xml:75
+msgid "Switch to previous system control"
+msgstr "Passe al control di sisteme precedent"
+
+#: data/50-mutter-navigation.xml:79
+msgid "Switch windows directly"
+msgstr "Passe dret ai barcons"
+
+#: data/50-mutter-navigation.xml:84
+msgid "Switch directly to previous window"
+msgstr "Passe dret al barcon precedent"
+
+#: data/50-mutter-navigation.xml:88
+msgid "Switch windows of an app directly"
+msgstr "Passe dret a un barcon di une aplicazion"
+
+#: data/50-mutter-navigation.xml:93
+msgid "Switch directly to previous window of an app"
+msgstr "Passe dret al barcon precedent di une aplicazion"
+
+#: data/50-mutter-navigation.xml:97
+msgid "Switch system controls directly"
+msgstr "Passe dret ai controi dal sisteme"
+
+#: data/50-mutter-navigation.xml:102
+msgid "Switch directly to previous system control"
+msgstr "Passe dret al control precedent dal sisteme"
+
+#: data/50-mutter-navigation.xml:105
+msgid "Hide all normal windows"
+msgstr "Plate ducj i barcons normâi"
+
+#: data/50-mutter-navigation.xml:108
+msgid "Switch to workspace 1"
+msgstr "Passe al spazi di lavôr 1"
+
+#: data/50-mutter-navigation.xml:111
+msgid "Switch to workspace 2"
+msgstr "Passe al spazi di lavôr 2"
+
+#: data/50-mutter-navigation.xml:114
+msgid "Switch to workspace 3"
+msgstr "Passe al spazi di lavôr 3"
+
+#: data/50-mutter-navigation.xml:117
+msgid "Switch to workspace 4"
+msgstr "Passe al spazi di lavôr 4"
+
+#: data/50-mutter-navigation.xml:120
+msgid "Switch to last workspace"
+msgstr "Passe al ultin spazi di lavôr"
+
+#: data/50-mutter-navigation.xml:123
+msgid "Move to workspace above"
+msgstr "Sposte il spazi di lavôr parsore"
+
+#: data/50-mutter-navigation.xml:126
+msgid "Move to workspace below"
+msgstr "Sposte il spazi di lavôr sot"
+
+#: data/50-mutter-system.xml:6 data/50-mutter-wayland.xml:6
+msgid "System"
+msgstr "Sisteme"
+
+#: data/50-mutter-system.xml:8
+msgid "Show the run command prompt"
+msgstr "Mostre la richieste “eseguìs comant”"
+
+#: data/50-mutter-system.xml:10
+msgid "Show the activities overview"
+msgstr "Mostre la panoramiche ativitâts"
+
+#: data/50-mutter-wayland.xml:8
+msgid "Restore the keyboard shortcuts"
+msgstr "Ripristine lis scurtis di tastiere"
+
+#: data/50-mutter-windows.xml:6
+msgid "Windows"
+msgstr "Barcons"
+
+#: data/50-mutter-windows.xml:8
+msgid "Activate the window menu"
+msgstr "Ative il menù dal barcon"
+
+#: data/50-mutter-windows.xml:10
+msgid "Toggle fullscreen mode"
+msgstr "Ative/Disative modalitât plen visôr"
+
+#: data/50-mutter-windows.xml:12
+msgid "Toggle maximization state"
+msgstr "Ative/Disative il stât slargjât"
+
+#: data/50-mutter-windows.xml:14
+msgid "Maximize window"
+msgstr "Slargje il barcon"
+
+#: data/50-mutter-windows.xml:16
+msgid "Restore window"
+msgstr "Ripristine barcon"
+
+#: data/50-mutter-windows.xml:18
+msgid "Close window"
+msgstr "Siere il barcon"
+
+#: data/50-mutter-windows.xml:20
+msgid "Hide window"
+msgstr "Plate il barcon"
+
+#: data/50-mutter-windows.xml:22
+msgid "Move window"
+msgstr "Sposte il barcon"
+
+#: data/50-mutter-windows.xml:24
+msgid "Resize window"
+msgstr "Ridimensione barcon"
+
+#: data/50-mutter-windows.xml:27
+msgid "Toggle window on all workspaces or one"
+msgstr "Ative/Disative barcon su ducj i spazis di lavôr o nome un"
+
+#: data/50-mutter-windows.xml:29
+msgid "Raise window if covered, otherwise lower it"
+msgstr "Tire sù il barcon se al è cuviert, se no sbassilu"
+
+#: data/50-mutter-windows.xml:31
+msgid "Raise window above other windows"
+msgstr "Met il barcon parsore di chei altris"
+
+#: data/50-mutter-windows.xml:33
+msgid "Lower window below other windows"
+msgstr "Bute il barcon sot di chei altris"
+
+#: data/50-mutter-windows.xml:35
+msgid "Maximize window vertically"
+msgstr "Slargje il barcon par verticâl"
+
+#: data/50-mutter-windows.xml:37
+msgid "Maximize window horizontally"
+msgstr "Slargje il barcon par orizontâl"
+
+#: data/50-mutter-windows.xml:41
+msgid "View split on left"
+msgstr "Slargje dividint ae çampe"
+
+#: data/50-mutter-windows.xml:45
+msgid "View split on right"
+msgstr "Slargje dividint ae drete"
+
+#: data/mutter.desktop.in:4
+msgid "Mutter"
+msgstr "Mutter"
+
+#: data/org.gnome.mutter.gschema.xml.in:7
+msgid "Modifier to use for extended window management operations"
+msgstr "Modificadôr di doprâ pes operazions estesis di gjestion barcons"
+
+#: data/org.gnome.mutter.gschema.xml.in:8
+msgid ""
+"This key will initiate the “overlay”, which is a combination window overview "
+"and application launching system. The default is intended to be the “Windows "
+"key” on PC hardware. It’s expected that this binding either the default or "
+"set to the empty string."
+msgstr ""
+"Cheste clâf e tache il “overlay”, che e je une cumbinazion tra la "
+"panoramiche dai barcons e il sisteme par inviâ lis aplicazions. Il valôr "
+"predefinît al è pensât par jessi il “tast Windows” su hardware PC. Si spiete "
+"che cheste scurte e sedi il valôr predefinît o une stringhe vueide."
+
+#: data/org.gnome.mutter.gschema.xml.in:20
+msgid "Attach modal dialogs"
+msgstr "Dialics modâi tacâts"
+
+#: data/org.gnome.mutter.gschema.xml.in:21
+msgid ""
+"When true, instead of having independent titlebars, modal dialogs appear "
+"attached to the titlebar of the parent window and are moved together with "
+"the parent window."
+msgstr ""
+"Se metût a VÊR, invezit di vê sbaris di titul indipendentis, i dialics modâi "
+"a semein tacâts ae sbare dal titul dal barcon gjenitôr e si spostin cun lui."
+
+#: data/org.gnome.mutter.gschema.xml.in:30
+msgid "Enable edge tiling when dropping windows on screen edges"
+msgstr ""
+"Abilite il piastrelâ tal ôr cuant che si strissine i barcons tal ôr dal visôr"
+
+#: data/org.gnome.mutter.gschema.xml.in:31
+msgid ""
+"If enabled, dropping windows on vertical screen edges maximizes them "
+"vertically and resizes them horizontally to cover half of the available "
+"area. Dropping windows on the top screen edge maximizes them completely."
+msgstr ""
+"Se abilitade, strissinant i barcons sui ôrs verticâi dal schermi, i barcons "
+"a vegnin slargjâts in verticâl e ridimensionâts in orizontâl, in mût di "
+"cuvierzi metât dal spazi disponibil. Strissinant sul ôr superiôr dal schermi "
+"al slargje i barcons dal dut."
+
+#: data/org.gnome.mutter.gschema.xml.in:40
+msgid "Workspaces are managed dynamically"
+msgstr "I spazis di vore a son ministrât in maniere dinamiche"
+
+#: data/org.gnome.mutter.gschema.xml.in:41
+msgid ""
+"Determines whether workspaces are managed dynamically or whether there’s a "
+"static number of workspaces (determined by the num-workspaces key in org."
+"gnome.desktop.wm.preferences)."
+msgstr ""
+"Al determine se i spazis di lavôr a son gjestîts in maniere dinamiche o se "
+"il lôr numar al è fis (determinât de clâf num-workspaces in org.gnome."
+"desktop.wm.preferences)."
+
+#: data/org.gnome.mutter.gschema.xml.in:50
+msgid "Workspaces only on primary"
+msgstr "Spazis di vore nome tal visôr primari"
+
+#: data/org.gnome.mutter.gschema.xml.in:51
+msgid ""
+"Determines whether workspace switching should happen for windows on all "
+"monitors or only for windows on the primary monitor."
+msgstr ""
+"Determine se il cambi di spazi di lavôr al à di vignî pai barcons su ducj i "
+"visôrs o nome pai barcons sul visôr primari."
+
+#: data/org.gnome.mutter.gschema.xml.in:59
+msgid "No tab popup"
+msgstr "Nissun tab popup"
+
+#: data/org.gnome.mutter.gschema.xml.in:60
+msgid ""
+"Determines whether the use of popup and highlight frame should be disabled "
+"for window cycling."
+msgstr ""
+"Determine se disabilitâ l'ûs di popup e di curnîs di evidenziadure tal passâ "
+"di un barcon a chel altri."
+
+#: data/org.gnome.mutter.gschema.xml.in:68
+msgid "Delay focus changes until the pointer stops moving"
+msgstr "Tarde il cambiament dal focus fintremai che il puntadôr si ferme"
+
+#: data/org.gnome.mutter.gschema.xml.in:69
+msgid ""
+"If set to true, and the focus mode is either “sloppy” or “mouse” then the "
+"focus will not be changed immediately when entering a window, but only after "
+"the pointer stops moving."
+msgstr ""
+"Se metût a VÊR e la modalitât di focus e je metude a “sloppy” o “mouse” "
+"alore il focus nol ven spostât subite cuant che si passe suntun barcon, ma "
+"nome cuant che il puntadôr si ferme."
+
+#: data/org.gnome.mutter.gschema.xml.in:79
+msgid "Draggable border width"
+msgstr "Largjece dal ôr che si pues strissinâ"
+
+#: data/org.gnome.mutter.gschema.xml.in:80
+msgid ""
+"The amount of total draggable borders. If the theme’s visible borders are "
+"not enough, invisible borders will be added to meet this value."
+msgstr ""
+"Il spessôr totâl pai ôrs che si puedin strissinâ. Se i ôrs visibii dal teme "
+"no bastin, a vegnin zontâts dai ôrs invisibii par rivâ a chest valôr."
+
+#: data/org.gnome.mutter.gschema.xml.in:89
+msgid "Auto maximize nearly monitor sized windows"
+msgstr "Slargje in automatic i barcons grancj su par ju come il visôr"
+
+#: data/org.gnome.mutter.gschema.xml.in:90
+msgid ""
+"If enabled, new windows that are initially the size of the monitor "
+"automatically get maximized."
+msgstr ""
+"Se abilitât, i gnûfs barcons che a an al inizi la stesse dimension dal visôr "
+"a vegnin slargjâts in automatic."
+
+#: data/org.gnome.mutter.gschema.xml.in:98
+msgid "Place new windows in the center"
+msgstr "Place i gnûfs barcons tal mieç"
+
+#: data/org.gnome.mutter.gschema.xml.in:99
+msgid ""
+"When true, the new windows will always be put in the center of the active "
+"screen of the monitor."
+msgstr ""
+"Se metût a VÊR, i gnûfs barcons a vegnaran plaçâts simpri tal mieç dal "
+"schermi atîf dal visôr."
+
+#: data/org.gnome.mutter.gschema.xml.in:107
+msgid "Enable experimental features"
+msgstr "Abilite funzionalitâts sperimentâls"
+
+#: data/org.gnome.mutter.gschema.xml.in:108
+msgid ""
+"To enable experimental features, add the feature keyword to the list. "
+"Whether the feature requires restarting the compositor depends on the given "
+"feature. Any experimental feature is not required to still be available, or "
+"configurable. Don’t expect adding anything in this setting to be future "
+"proof. Currently possible keywords: • “scale-monitor-framebuffer” — makes "
+"mutter default to layout logical monitors in a logical pixel coordinate "
+"space, while scaling monitor framebuffers instead of window content, to "
+"manage HiDPI monitors. Does not require a restart. • “rt-scheduler” — makes "
+"mutter request a low priority real-time scheduling. The executable or user "
+"must have CAP_SYS_NICE. Requires a restart. • “autostart-xwayland” — "
+"initializes Xwayland lazily if there are X11 clients. Requires restart."
+msgstr ""
+"Par abilitâ lis funzionalitâts sperimentâls, zonte la peraule clâf de "
+"funzionalitât ae liste. Il fat che la funzionalitât e vedi bisugne di tornâ "
+"a inviâ il compositôr al dipent de funzionalitât dade. Cualsisei "
+"funzionalitât sperimentâl no je necessarie che e sedi disponibile o "
+"configurabile. No sta spietâti di zontâ alc in cheste impostazion e pensâ "
+"che e duredi tal timp. Atualmentri lis peraulis clâf pussibilis a son: • "
+"“scale-monitor-framebuffer” — al rint come predefinît par mutter, la "
+"disposizion logjiche dai visôrs intun spazi logjic di coordenadis di pixel, "
+"in plui si fâs il scjalâ dai framebuffer dai visôrs invezit che il contignût "
+"dal barcon; dut chest par gjestî i visôrs HiDPI. Nol covente tornâ a inviâ. "
+"• “rt-scheduler” — al fâs in mût che mutter al domandi une programazion in "
+"timp reâl a prioritât basse. L'eseguibil o l'utent a scugnin vê "
+"CAP_SYS_NICE. Al covente tornâ a inviâ. • “autostart-xwayland” — al "
+"inizialize Xwayland in maniere sflacjose se a son presints clients X11. Al "
+"covente tornâ a inviâ."
+
+#: data/org.gnome.mutter.gschema.xml.in:134
+msgid "Modifier to use to locate the pointer"
+msgstr "Modificadôr di doprâ par localizâ il pontadôr"
+
+#: data/org.gnome.mutter.gschema.xml.in:135
+msgid "This key will initiate the “locate pointer” action."
+msgstr "Cheste clâf e inizializerâ la azion “localize pontadôr”."
+
+#: data/org.gnome.mutter.gschema.xml.in:155
+msgid "Select window from tab popup"
+msgstr "Selezione barcon dal tab popup"
+
+#: data/org.gnome.mutter.gschema.xml.in:160
+msgid "Cancel tab popup"
+msgstr "Anule tab popup"
+
+#: data/org.gnome.mutter.gschema.xml.in:165
+msgid "Switch monitor configurations"
+msgstr "Cambie configurazions visôr"
+
+#: data/org.gnome.mutter.gschema.xml.in:170
+msgid "Rotates the built-in monitor configuration"
+msgstr "Al volte la configurazion dal visôr integrât"
+
+#: data/org.gnome.mutter.wayland.gschema.xml.in:6
+msgid "Switch to VT 1"
+msgstr "Passe al VT 1"
+
+#: data/org.gnome.mutter.wayland.gschema.xml.in:10
+msgid "Switch to VT 2"
+msgstr "Passe al VT 2"
+
+#: data/org.gnome.mutter.wayland.gschema.xml.in:14
+msgid "Switch to VT 3"
+msgstr "Passe al VT 3"
+
+#: data/org.gnome.mutter.wayland.gschema.xml.in:18
+msgid "Switch to VT 4"
+msgstr "Passe al VT 4"
+
+#: data/org.gnome.mutter.wayland.gschema.xml.in:22
+msgid "Switch to VT 5"
+msgstr "Passe al VT 5"
+
+#: data/org.gnome.mutter.wayland.gschema.xml.in:26
+msgid "Switch to VT 6"
+msgstr "Passe al VT 6"
+
+#: data/org.gnome.mutter.wayland.gschema.xml.in:30
+msgid "Switch to VT 7"
+msgstr "Passe al VT 7"
+
+#: data/org.gnome.mutter.wayland.gschema.xml.in:34
+msgid "Switch to VT 8"
+msgstr "Passe al VT 8"
+
+#: data/org.gnome.mutter.wayland.gschema.xml.in:38
+msgid "Switch to VT 9"
+msgstr "Passe al VT 9"
+
+#: data/org.gnome.mutter.wayland.gschema.xml.in:42
+msgid "Switch to VT 10"
+msgstr "Passe al VT 10"
+
+#: data/org.gnome.mutter.wayland.gschema.xml.in:46
+msgid "Switch to VT 11"
+msgstr "Passe al VT 11"
+
+#: data/org.gnome.mutter.wayland.gschema.xml.in:50
+msgid "Switch to VT 12"
+msgstr "Passe al VT 12"
+
+#: data/org.gnome.mutter.wayland.gschema.xml.in:54
+msgid "Re-enable shortcuts"
+msgstr "Torne abilite lis scurtis"
+
+#: data/org.gnome.mutter.wayland.gschema.xml.in:64
+msgid "Allow X11 grabs to lock keyboard focus with Xwayland"
+msgstr ""
+"Permet aes cjapadis di control cun X11 di blocâ la focalizazion de tastiere "
+"cun Xwayland"
+
+#: data/org.gnome.mutter.wayland.gschema.xml.in:65
+msgid ""
+"Allow all keyboard events to be routed to X11 “override redirect” windows "
+"with a grab when running in Xwayland. This option is to support X11 clients "
+"which map an “override redirect” window (which do not receive keyboard "
+"focus) and issue a keyboard grab to force all keyboard events to that "
+"window. This option is seldom used and has no effect on regular X11 windows "
+"which can receive keyboard focus under normal circumstances. For a X11 grab "
+"to be taken into account under Wayland, the client must also either send a "
+"specific X11 ClientMessage to the root window or be among the applications "
+"white-listed in key “xwayland-grab-access-rules”."
+msgstr ""
+"Cuant che a zire sot Xwayland, permet a ducj i events di tastiere di jessi "
+"indreçâts sui barcons X11 “override redirect” cjapant il control de "
+"tastiere. Cheste opzion e ven doprade di râr e no à efiets sui barcons "
+"normâi di X11 che a puedin ricevi la concentrazion dai segnai de tastiere "
+"sot circostancis normâls. Par une cjapade di control di X11, par che e sedi "
+"tignude in considerazion sot Wayland, il client al scugne ancje o inviâ un "
+"specific messaç (X11 ClientMessage) al barcon lidrîs o jessi tra lis "
+"aplicazions metudis te liste blancje inte clâf “xwayland-grab-access-rules”."
+
+#: data/org.gnome.mutter.wayland.gschema.xml.in:84
+msgid "Xwayland applications allowed to issue keyboard grabs"
+msgstr "Aplicazions Xwayland che a puedin cjapâ la tastiere"
+
+#: data/org.gnome.mutter.wayland.gschema.xml.in:85
+msgid ""
+"List the resource names or resource class of X11 windows either allowed or "
+"not allowed to issue X11 keyboard grabs under Xwayland. The resource name or "
+"resource class of a given X11 window can be obtained using the command "
+"“xprop WM_CLASS”. Wildcards “*” and jokers “?” in the values are supported. "
+"Values starting with “!” are blacklisted, which has precedence over the "
+"whitelist, to revoke applications from the default system list. The default "
+"system list includes the following applications: "
+"“@XWAYLAND_GRAB_DEFAULT_ACCESS_RULES@” Users can break an existing grab by "
+"using the specific keyboard shortcut defined by the keybinding key “restore-"
+"shortcuts”."
+msgstr ""
+"Liste di nons di risorsis o classis di risorsis di barcons X11 che a puedin "
+"o no puedin cjapâ i segnâi di tastiere X11 sot di Xwayland. Il non de "
+"risorse o la classe de risorse di un dât barcon X11 al pues jessi otignût "
+"doprant il comant “xprop WM_CLASS”. I caratars “*” e “?” tai valôrs a son "
+"supuartâts. I valôrs che a tachin cun “!” a son metûts te liste nere, che e "
+"à precedence su la liste blancje, par revocâ lis aplicazions de liste di "
+"sisteme predefinide. La liste di sisteme predefinide e inclût lis "
+"aplicazions chi daurman: “@XWAYLAND_GRAB_DEFAULT_ACCESS_RULES@” I utents a "
+"puedin interompi il control cjapât doprant la specifiche scurte di tastiere "
+"definide de clâf di associazion tast “restore-shortcuts”."
+
+#. TRANSLATORS: This string refers to a button that switches between
+#. * different modes.
+#.
+#: src/backends/meta-input-settings.c:2531
+#, c-format
+msgid "Mode Switch (Group %d)"
+msgstr "Cambie mût (Grup %d)"
+
+#. TRANSLATORS: This string refers to an action, cycles drawing tablets'
+#. * mapping through the available outputs.
+#.
+#: src/backends/meta-input-settings.c:2554
+msgid "Switch monitor"
+msgstr "Cambie visôr"
+
+#: src/backends/meta-input-settings.c:2556
+msgid "Show on-screen help"
+msgstr "Mostre jutori a schermi"
+
+#: src/backends/meta-monitor.c:223
+msgid "Built-in display"
+msgstr "Display integrât"
+
+#: src/backends/meta-monitor.c:252
+msgid "Unknown"
+msgstr "No cognossût"
+
+#: src/backends/meta-monitor.c:254
+msgid "Unknown Display"
+msgstr "Display no cognossût"
+
+#: src/backends/meta-monitor.c:262
+#, c-format
+msgctxt ""
+"This is a monitor vendor name, followed by a size in inches, like 'Dell 15\"'"
+msgid "%s %s"
+msgstr "%s %s"
+
+#: src/backends/meta-monitor.c:270
+#, c-format
+msgctxt ""
+"This is a monitor vendor name followed by product/model name where size in "
+"inches could not be calculated, e.g. Dell U2414H"
+msgid "%s %s"
+msgstr "%s %s"
+
+#. Translators: this string will appear in Sysprof
+#: src/backends/meta-profiler.c:82
+msgid "Compositor"
+msgstr "Composidôr"
+
+#. This probably means that a non-WM compositor like xcompmgr is running;
+#. * we have no way to get it to exit
+#: src/compositor/compositor.c:510
+#, c-format
+msgid ""
+"Another compositing manager is already running on screen %i on display “%s”."
+msgstr ""
+"Un altri compositing manager al è za in esecuzion sul schermi %i sul display "
+"“%s”."
+
+#: src/core/bell.c:192
+msgid "Bell event"
+msgstr "Event cjampane"
+
+#: src/core/main.c:185
+msgid "Disable connection to session manager"
+msgstr "Disabilite la conession al gjestôr de session"
+
+#: src/core/main.c:191
+msgid "Replace the running window manager"
+msgstr "Rimplace il window manager in vore"
+
+#: src/core/main.c:197
+msgid "Specify session management ID"
+msgstr "Specifiche il ID di gjestion session"
+
+#: src/core/main.c:202
+msgid "X Display to use"
+msgstr "Display X di doprâ"
+
+#: src/core/main.c:208
+msgid "Initialize session from savefile"
+msgstr "Inizialize session da file salvât"
+
+#: src/core/main.c:214
+msgid "Make X calls synchronous"
+msgstr "Fâs lis clamadis X sincronis"
+
+#: src/core/main.c:221
+msgid "Run as a wayland compositor"
+msgstr "Eseguìs come compositor wayland"
+
+#: src/core/main.c:227
+msgid "Run as a nested compositor"
+msgstr "Eseguìs come compositor nidiât"
+
+#: src/core/main.c:233
+msgid "Run wayland compositor without starting Xwayland"
+msgstr "Eseguìs il compositôr di wayland cence inviâ Xwayland"
+
+#: src/core/main.c:241
+msgid "Run as a full display server, rather than nested"
+msgstr "Eseguìs come servidôr display complet, invezit che nidiât"
+
+#: src/core/main.c:247
+msgid "Run with X11 backend"
+msgstr "Eseguìs cul backend X11"
+
+#. Translators: %s is a window title
+#: src/core/meta-close-dialog-default.c:151
+#, c-format
+msgid "“%s” is not responding."
+msgstr "“%s” nol rispuint."
+
+#: src/core/meta-close-dialog-default.c:153
+msgid "Application is not responding."
+msgstr "La aplicazion no rispuint."
+
+#: src/core/meta-close-dialog-default.c:158
+msgid ""
+"You may choose to wait a short while for it to continue or force the "
+"application to quit entirely."
+msgstr ""
+"Al è pussibil sielzi di spietâ un pôc lassant che la aplicazion e continui o "
+"sfuarçâ la aplicazion par sierâle dal dut."
+
+#: src/core/meta-close-dialog-default.c:165
+msgid "_Force Quit"
+msgstr "Sfuarce _Jessude"
+
+#: src/core/meta-close-dialog-default.c:165
+msgid "_Wait"
+msgstr "_Spiete"
+
+#: src/core/mutter.c:38
+#, c-format
+msgid ""
+"mutter %s\n"
+"Copyright © 2001-%d Havoc Pennington, Red Hat, Inc., and others\n"
+"This is free software; see the source for copying conditions.\n"
+"There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A "
+"PARTICULAR PURPOSE.\n"
+msgstr ""
+"mutter %s\n"
+"Copyright © 2001-%d Havoc Pennington, Red Hat, Inc., e altris\n"
+"Chest al è software libar; viodi i sorzints pes condizions di copie.\n"
+"No je NISSUNE garanzie; nancje di CUMIERÇABILITÂT o IDONEITÂT A UNE "
+"FINALITÂT PARTICOLÂR.\n"
+
+#: src/core/mutter.c:52
+msgid "Print version"
+msgstr "Stampe version"
+
+#: src/core/mutter.c:58
+msgid "Mutter plugin to use"
+msgstr "Plugin Mutter di doprâ"
+
+#: src/core/prefs.c:1849
+#, c-format
+msgid "Workspace %d"
+msgstr "Spazi di lavôr %d"
+
+#: src/core/util.c:121
+msgid "Mutter was compiled without support for verbose mode\n"
+msgstr "Mutter al è stât compilât cence supuart pe modalitât fetose\n"
+
+#: src/wayland/meta-wayland-tablet-pad.c:567
+#, c-format
+msgid "Mode Switch: Mode %d"
+msgstr "Cambie mût: mût %d"
+
+#: src/x11/meta-x11-display.c:671
+#, c-format
+msgid ""
+"Display “%s” already has a window manager; try using the --replace option to "
+"replace the current window manager."
+msgstr ""
+"Il display “%s” al à za un window manager; prove dopre la opzion --replace "
+"par rimplaçâ chel atuâl."
+
+#: src/x11/meta-x11-display.c:1032
+msgid "Failed to initialize GDK\n"
+msgstr "No si è rivâts a inizializâ GDK\n"
+
+#: src/x11/meta-x11-display.c:1056
+#, c-format
+msgid "Failed to open X Window System display “%s”\n"
+msgstr "Impussibil vierzi il display “%s” di X Window System\n"
+
+#: src/x11/meta-x11-display.c:1140
+#, c-format
+msgid "Screen %d on display “%s” is invalid\n"
+msgstr "Schermi %d su display “%s” no valit\n"
+
+#: src/x11/meta-x11-selection-input-stream.c:445
+#, c-format
+msgid "Format %s not supported"
+msgstr "Il formât %s nol è supuartât"
+
+#: src/x11/session.c:1821
+msgid ""
+"These windows do not support “save current setup” and will have to be "
+"restarted manually next time you log in."
+msgstr ""
+"Chescj barcons no supuartin la funzion “salve impostazions atuâls” e si "
+"scugnarà tornâ a inviâlis a man tal prossim acès."
+
+#: src/x11/window-props.c:569
+#, c-format
+msgid "%s (on %s)"
+msgstr "%s (su %s)"
+
+#~ msgid "Move window one workspace to the left"
+#~ msgstr "Sposte barcon tal spazi di lavôr a çampe"
+
+#~ msgid "Move window one workspace to the right"
+#~ msgstr "Sposte barcon tal spazi di lavôr a drete"
+
+#~ msgid "Move to workspace left"
+#~ msgstr "Sposte il spazi di lavôr a çampe"
+
+#~ msgid "Move to workspace right"
+#~ msgstr "Sposte il spazi di lavôr a drete"
+
+#~ msgid "Toggle shaded state"
+#~ msgstr "Ative/Disative stât inrodolât"

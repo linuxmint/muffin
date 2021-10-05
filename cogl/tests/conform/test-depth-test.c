@@ -4,6 +4,7 @@
 
 #include <string.h>
 
+#include "test-declarations.h"
 #include "test-utils.h"
 
 #define QUAD_WIDTH 20
@@ -27,20 +28,20 @@ typedef struct
 {
   uint32_t               color;
   float                 depth;
-  CoglBool              test_enable;
+  gboolean              test_enable;
   CoglDepthTestFunction test_function;
-  CoglBool              write_enable;
-  CoglBool              fb_write_enable;
+  gboolean              write_enable;
+  gboolean              fb_write_enable;
   float                 range_near;
   float                 range_far;
 } TestDepthState;
 
-static CoglBool
+static gboolean
 draw_rectangle (TestState *state,
                 int x,
                 int y,
                 TestDepthState *rect_state,
-                CoglBool legacy_mode)
+                gboolean legacy_mode)
 {
   uint8_t Cr = MASK_RED (rect_state->color);
   uint8_t Cg = MASK_GREEN (rect_state->color);
@@ -82,16 +83,22 @@ draw_rectangle (TestState *state,
     }
   else
     {
-      cogl_push_framebuffer (test_fb);
-      cogl_push_matrix ();
-      cogl_set_source_color4ub (Cr, Cg, Cb, Ca);
-      cogl_translate (0, 0, rect_state->depth);
-      cogl_rectangle (x * QUAD_WIDTH,
-                      y * QUAD_WIDTH,
-                      x * QUAD_WIDTH + QUAD_WIDTH,
-                      y * QUAD_WIDTH + QUAD_WIDTH);
-      cogl_pop_matrix ();
-      cogl_pop_framebuffer ();
+      CoglPipeline *legacy_pipeline;
+
+      legacy_pipeline = cogl_pipeline_new (test_ctx);
+
+      cogl_framebuffer_push_matrix (test_fb);
+      cogl_pipeline_set_color4ub (pipeline, Cr, Cg, Cb, Ca);
+      cogl_framebuffer_translate (test_fb, 0, 0, rect_state->depth);
+      cogl_framebuffer_draw_rectangle (test_fb,
+                                       pipeline,
+                                       x * QUAD_WIDTH,
+                                       y * QUAD_WIDTH,
+                                       x * QUAD_WIDTH + QUAD_WIDTH,
+                                       y * QUAD_WIDTH + QUAD_WIDTH);
+      cogl_framebuffer_pop_matrix (test_fb);
+
+      cogl_object_unref (legacy_pipeline);
     }
 
   cogl_object_unref (pipeline);
@@ -106,10 +113,10 @@ test_depth (TestState *state,
             TestDepthState *rect0_state,
             TestDepthState *rect1_state,
             TestDepthState *rect2_state,
-            CoglBool legacy_mode,
+            gboolean legacy_mode,
             uint32_t expected_result)
 {
-  CoglBool missing_feature = FALSE;
+  gboolean missing_feature = FALSE;
 
   if (rect0_state)
     missing_feature |= !draw_rectangle (state, x, y, rect0_state, legacy_mode);
@@ -242,43 +249,6 @@ paint (TestState *state)
                 &rect0_state, &rect1_state, NULL,
                 FALSE, /* legacy mode */
                 0xff0000ff); /* expected */
-  }
-
-  /* Test that the legacy cogl_set_depth_test_enabled() API still
-   * works... */
-
-  {
-    /* Nearest */
-    TestDepthState rect0_state = {
-      0xff0000ff, /* rgba color */
-      -10, /* depth */
-      FALSE, /* depth test enable */
-      COGL_DEPTH_TEST_FUNCTION_LESS,
-      TRUE, /* depth write enable */
-      TRUE, /* FB depth write enable */
-      0, 1 /* depth range */
-    };
-    /* Furthest */
-    TestDepthState rect1_state = {
-      0x00ff00ff, /* rgba color */
-      -70, /* depth */
-      FALSE, /* depth test enable */
-      COGL_DEPTH_TEST_FUNCTION_LESS,
-      TRUE, /* depth write enable */
-      TRUE, /* FB depth write enable */
-      0, 1 /* depth range */
-    };
-
-    cogl_set_depth_test_enabled (TRUE);
-    test_depth (state, 0, 2, /* position */
-                &rect0_state, &rect1_state, NULL,
-                TRUE, /* legacy mode */
-                0xff0000ff); /* expected */
-    cogl_set_depth_test_enabled (FALSE);
-    test_depth (state, 1, 2, /* position */
-                &rect0_state, &rect1_state, NULL,
-                TRUE, /* legacy mode */
-                0x00ff00ff); /* expected */
   }
 }
 

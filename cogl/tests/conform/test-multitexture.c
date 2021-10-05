@@ -28,7 +28,7 @@ assert_region_color (int x,
                      uint8_t blue,
                      uint8_t alpha)
 {
-  uint8_t *data = calloc (1, width * height * 4);
+  uint8_t *data = g_malloc0 (width * height * 4);
   cogl_read_pixels (x, y, width, height,
                     COGL_READ_PIXELS_COLOR_BUFFER,
                     COGL_PIXEL_FORMAT_RGBA_8888_PRE,
@@ -43,7 +43,7 @@ assert_region_color (int x,
                   pixel[BLUE] == blue);
 #endif
       }
-  free (data);
+  g_free (data);
 }
 
 /* Creates a texture divided into 4 quads with colors arranged as follows:
@@ -68,7 +68,7 @@ make_texture (guchar ref)
   CoglHandle tex;
   guchar val;
 
-  tex_data = malloc (QUAD_WIDTH * QUAD_WIDTH * 16);
+  tex_data = g_malloc (QUAD_WIDTH * QUAD_WIDTH * 16);
 
   for (y = 0; y < QUAD_WIDTH * 2; y++)
     for (x = 0; x < QUAD_WIDTH * 2; x++)
@@ -93,18 +93,20 @@ make_texture (guchar ref)
                                     QUAD_WIDTH * 8,
                                     tex_data);
 
-  free (tex_data);
+  g_free (tex_data);
 
   return tex;
 }
 
 static void
-on_paint (ClutterActor *actor, TestState *state)
+on_paint (ClutterActor        *actor,
+          ClutterPaintContext *paint_context,
+          TestState           *state)
 {
   CoglHandle tex0, tex1;
   CoglHandle material;
-  CoglBool status;
-  CoglError *error = NULL;
+  gboolean status;
+  GError *error = NULL;
   float tex_coords[] = {
     0, 0, 0.5, 0.5, /* tex0 */
     0.5, 0.5, 1, 1 /* tex1 */
@@ -149,9 +151,9 @@ on_paint (ClutterActor *actor, TestState *state)
   cogl_rectangle_with_multitexture_coords (0, 0, QUAD_WIDTH, QUAD_WIDTH,
                                            tex_coords, 8);
 
-  cogl_handle_unref (material);
-  cogl_handle_unref (tex0);
-  cogl_handle_unref (tex1);
+  cogl_object_unref (material);
+  cogl_object_unref (tex0);
+  cogl_object_unref (tex1);
 
   /* See what we got... */
 
@@ -164,7 +166,7 @@ on_paint (ClutterActor *actor, TestState *state)
 #endif
 }
 
-static CoglBool
+static gboolean
 queue_redraw (void *stage)
 {
   clutter_actor_queue_redraw (CLUTTER_ACTOR (stage));
@@ -199,7 +201,7 @@ test_multitexture (TestUtilsGTestFixture *fixture,
 
   clutter_main ();
 
-  g_source_remove (idle_source);
+  g_clear_handle_id (&idle_source, g_source_remove);
 
   if (cogl_test_verbose ())
     g_print ("OK\n");

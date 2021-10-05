@@ -30,7 +30,6 @@
 #include "clutter-x11.h"
 
 #include "clutter-backend-private.h"
-#include "clutter-keymap-x11.h"
 
 #include "xsettings/xsettings-client.h"
 
@@ -45,7 +44,6 @@ G_BEGIN_DECLS
 
 typedef struct _ClutterBackendX11       ClutterBackendX11;
 typedef struct _ClutterBackendX11Class  ClutterBackendX11Class;
-typedef struct _ClutterEventX11         ClutterEventX11;
 typedef struct _ClutterX11EventFilter   ClutterX11EventFilter;
 
 G_DEFINE_AUTOPTR_CLEANUP_FUNC (ClutterBackendX11, g_object_unref)
@@ -55,16 +53,6 @@ struct _ClutterX11EventFilter
   ClutterX11FilterFunc func;
   gpointer             data;
 
-};
-
-struct _ClutterEventX11
-{
-  /* additional fields for Key events */
-  gint key_group;
-
-  guint key_is_modifier : 1;
-  guint num_lock_set    : 1;
-  guint caps_lock_set   : 1;
 };
 
 struct _ClutterBackendX11
@@ -82,14 +70,12 @@ struct _ClutterBackendX11
   Window   xwin_root;
 
   /* event source */
-  GSource *event_source;
   GSList  *event_filters;
 
   /* props */
   Atom atom_NET_WM_PID;
   Atom atom_NET_WM_PING;
   Atom atom_NET_WM_STATE;
-  Atom atom_NET_WM_STATE_FULLSCREEN;
   Atom atom_NET_WM_USER_TIME;
   Atom atom_WM_PROTOCOLS;
   Atom atom_WM_DELETE_WINDOW;
@@ -100,17 +86,8 @@ struct _ClutterBackendX11
 
   Time last_event_time;
 
-  ClutterDeviceManager *device_manager;
-  gboolean has_xinput;
-  int xi_minor;
-
   XSettingsClient *xsettings;
   Window xsettings_xwin;
-
-  ClutterKeymapX11 *keymap;
-  gboolean use_xkb;
-  gboolean have_xkb_autorepeat;
-  guint keymap_serial;
 };
 
 struct _ClutterBackendX11Class
@@ -118,30 +95,13 @@ struct _ClutterBackendX11Class
   ClutterBackendClass parent_class;
 };
 
-CLUTTER_AVAILABLE_IN_MUFFIN
+CLUTTER_EXPORT
 GType clutter_backend_x11_get_type (void) G_GNUC_CONST;
 
 ClutterBackend *clutter_backend_x11_new (void);
 
-void            _clutter_backend_x11_events_init        (ClutterBackend *backend);
-
-GSource *       _clutter_x11_event_source_new   (ClutterBackendX11 *backend_x11);
-
 /* Private to glx/eglx backends */
-XVisualInfo *   _clutter_backend_x11_get_visual_info (ClutterBackendX11 *backend_x11);
-
 void            _clutter_x11_select_events (Window xwin);
-
-ClutterEventX11 *       _clutter_event_x11_new          (void);
-ClutterEventX11 *       _clutter_event_x11_copy         (ClutterEventX11 *event_x11);
-void                    _clutter_event_x11_free         (ClutterEventX11 *event_x11);
-
-gboolean        _clutter_x11_input_device_translate_screen_coord (ClutterInputDevice *device,
-                                                                  gint                stage_root_x,
-                                                                  gint                stage_root_y,
-                                                                  guint               index_,
-                                                                  gdouble             value,
-                                                                  gdouble            *axis_value);
 
 G_END_DECLS
 

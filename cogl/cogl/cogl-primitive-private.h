@@ -63,7 +63,7 @@ _cogl_primitive_immutable_ref (CoglPrimitive *primitive);
 void
 _cogl_primitive_immutable_unref (CoglPrimitive *primitive);
 
-void
+COGL_EXPORT void
 _cogl_primitive_draw (CoglPrimitive *primitive,
                       CoglFramebuffer *framebuffer,
                       CoglPipeline *pipeline,

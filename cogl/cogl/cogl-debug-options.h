@@ -94,11 +94,6 @@ OPT (DISABLE_BATCHING,
      "disable-batching",
      N_("Disable Journal batching"),
      N_("Disable batching of geometry in the Cogl Journal."))
-OPT (DISABLE_VBOS,
-     N_("Root Cause"),
-     "disable-vbos",
-     N_("Disable GL Vertex Buffers"),
-     N_("Disable use of OpenGL vertex buffer objects"))
 OPT (DISABLE_PBOS,
      N_("Root Cause"),
      "disable-pbos",
@@ -130,32 +125,11 @@ OPT (DISABLE_TEXTURING,
      "disable-texturing",
      N_("Disable texturing"),
      N_("Disable texturing any primitives"))
-OPT (DISABLE_ARBFP,
-     N_("Root Cause"),
-     "disable-arbfp",
-     N_("Disable arbfp"),
-     N_("Disable use of ARB fragment programs"))
-OPT (DISABLE_FIXED,
-     N_("Root Cause"),
-     "disable-fixed",
-     N_("Disable fixed"),
-     N_("Disable use of the fixed function pipeline backend"))
-OPT (DISABLE_GLSL,
-     N_("Root Cause"),
-     "disable-glsl",
-     N_("Disable GLSL"),
-     N_("Disable use of GLSL"))
 OPT (DISABLE_BLENDING,
      N_("Root Cause"),
      "disable-blending",
      N_("Disable blending"),
      N_("Disable use of blending"))
-OPT (DISABLE_NPOT_TEXTURES,
-     N_("Root Cause"),
-     "disable-npot-textures",
-     N_("Disable non-power-of-two textures"),
-     N_("Makes Cogl think that the GL driver doesn't support NPOT textures "
-        "so that it will create sliced textures or textures with waste instead."))
 OPT (DISABLE_SOFTWARE_CLIP,
      N_("Root Cause"),
      "disable-software-clip",
@@ -165,7 +139,7 @@ OPT (SHOW_SOURCE,
      N_("Cogl Tracing"),
      "show-source",
      N_("Show source"),
-     N_("Show generated ARBfp/GLSL source code"))
+     N_("Show generated GLSL source code"))
 OPT (OPENGL,
      N_("Cogl Tracing"),
      "opengl",
@@ -180,7 +154,7 @@ OPT (DISABLE_BLENDING,
      N_("Root Cause"),
      "disable-program-caches",
      N_("Disable program caches"),
-     N_("Disable fallback caches for arbfp and glsl programs"))
+     N_("Disable fallback caches for glsl programs"))
 OPT (DISABLE_FAST_READ_PIXEL,
      N_("Root Cause"),
      "disable-fast-read-pixel",

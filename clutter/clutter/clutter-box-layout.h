@@ -77,41 +77,41 @@ struct _ClutterBoxLayoutClass
   ClutterLayoutManagerClass parent_class;
 };
 
-CLUTTER_AVAILABLE_IN_1_2
+CLUTTER_EXPORT
 GType clutter_box_layout_get_type (void) G_GNUC_CONST;
 
-CLUTTER_AVAILABLE_IN_1_2
+CLUTTER_EXPORT
 ClutterLayoutManager *  clutter_box_layout_new                 (void);
 
-CLUTTER_AVAILABLE_IN_1_12
+CLUTTER_EXPORT
 void                    clutter_box_layout_set_orientation      (ClutterBoxLayout    *layout,
                                                                  ClutterOrientation   orientation);
-CLUTTER_AVAILABLE_IN_1_12
+CLUTTER_EXPORT
 ClutterOrientation      clutter_box_layout_get_orientation      (ClutterBoxLayout    *layout);
 
-CLUTTER_AVAILABLE_IN_1_2
+CLUTTER_EXPORT
 void                    clutter_box_layout_set_spacing          (ClutterBoxLayout    *layout,
                                                                  guint                spacing);
-CLUTTER_AVAILABLE_IN_1_2
+CLUTTER_EXPORT
 guint                   clutter_box_layout_get_spacing          (ClutterBoxLayout    *layout);
-CLUTTER_AVAILABLE_IN_1_2
+CLUTTER_EXPORT
 void                    clutter_box_layout_set_homogeneous      (ClutterBoxLayout    *layout,
                                                                  gboolean             homogeneous);
-CLUTTER_AVAILABLE_IN_1_2
+CLUTTER_EXPORT
 gboolean                clutter_box_layout_get_homogeneous      (ClutterBoxLayout    *layout);
-CLUTTER_AVAILABLE_IN_1_2
+CLUTTER_EXPORT
 void                    clutter_box_layout_set_pack_start       (ClutterBoxLayout    *layout,
                                                                  gboolean             pack_start);
-CLUTTER_AVAILABLE_IN_1_2
+CLUTTER_EXPORT
 gboolean                clutter_box_layout_get_pack_start       (ClutterBoxLayout    *layout);
 
-CLUTTER_DEPRECATED_IN_1_12_FOR(clutter_box_layout_set_orientation)
+CLUTTER_DEPRECATED_FOR(clutter_box_layout_set_orientation)
 void                    clutter_box_layout_set_vertical         (ClutterBoxLayout    *layout,
                                                                  gboolean             vertical);
-CLUTTER_DEPRECATED_IN_1_12_FOR(clutter_box_layout_get_orientation)
+CLUTTER_DEPRECATED_FOR(clutter_box_layout_get_orientation)
 gboolean                clutter_box_layout_get_vertical         (ClutterBoxLayout    *layout);
 
-CLUTTER_AVAILABLE_IN_1_2
+CLUTTER_EXPORT
 void                    clutter_box_layout_pack                 (ClutterBoxLayout    *layout,
                                                                  ClutterActor        *actor,
                                                                  gboolean             expand,
@@ -119,48 +119,48 @@ void                    clutter_box_layout_pack                 (ClutterBoxLayou
                                                                  gboolean             y_fill,
                                                                  ClutterBoxAlignment  x_align,
                                                                  ClutterBoxAlignment  y_align);
-CLUTTER_DEPRECATED_IN_1_12
+CLUTTER_DEPRECATED
 void                    clutter_box_layout_set_alignment        (ClutterBoxLayout    *layout,
                                                                  ClutterActor        *actor,
                                                                  ClutterBoxAlignment  x_align,
                                                                  ClutterBoxAlignment  y_align);
-CLUTTER_DEPRECATED_IN_1_12
+CLUTTER_DEPRECATED
 void                    clutter_box_layout_get_alignment        (ClutterBoxLayout    *layout,
                                                                  ClutterActor        *actor,
                                                                  ClutterBoxAlignment *x_align,
                                                                  ClutterBoxAlignment *y_align);
-CLUTTER_DEPRECATED_IN_1_12
+CLUTTER_DEPRECATED
 void                    clutter_box_layout_set_fill             (ClutterBoxLayout    *layout,
                                                                  ClutterActor        *actor,
                                                                  gboolean             x_fill,
                                                                  gboolean             y_fill);
-CLUTTER_DEPRECATED_IN_1_12
+CLUTTER_DEPRECATED
 void                    clutter_box_layout_get_fill             (ClutterBoxLayout    *layout,
                                                                  ClutterActor        *actor,
                                                                  gboolean            *x_fill,
                                                                  gboolean            *y_fill);
-CLUTTER_DEPRECATED_IN_1_12
+CLUTTER_DEPRECATED
 void                    clutter_box_layout_set_expand           (ClutterBoxLayout    *layout,
                                                                  ClutterActor        *actor,
                                                                  gboolean             expand);
-CLUTTER_DEPRECATED_IN_1_12
+CLUTTER_DEPRECATED
 gboolean                clutter_box_layout_get_expand           (ClutterBoxLayout    *layout,
                                                                  ClutterActor        *actor);
 
-CLUTTER_DEPRECATED_IN_1_12
+CLUTTER_DEPRECATED
 void                    clutter_box_layout_set_use_animations   (ClutterBoxLayout    *layout,
                                                                  gboolean             animate);
-CLUTTER_DEPRECATED_IN_1_12
+CLUTTER_DEPRECATED
 gboolean                clutter_box_layout_get_use_animations   (ClutterBoxLayout    *layout);
-CLUTTER_DEPRECATED_IN_1_12
+CLUTTER_DEPRECATED
 void                    clutter_box_layout_set_easing_mode      (ClutterBoxLayout    *layout,
                                                                  gulong               mode);
-CLUTTER_DEPRECATED_IN_1_12
+CLUTTER_DEPRECATED
 gulong                  clutter_box_layout_get_easing_mode      (ClutterBoxLayout    *layout);
-CLUTTER_DEPRECATED_IN_1_12
+CLUTTER_DEPRECATED
 void                    clutter_box_layout_set_easing_duration  (ClutterBoxLayout    *layout,
                                                                  guint                msecs);
-CLUTTER_DEPRECATED_IN_1_12
+CLUTTER_DEPRECATED
 guint                   clutter_box_layout_get_easing_duration  (ClutterBoxLayout    *layout);
 
 G_END_DECLS

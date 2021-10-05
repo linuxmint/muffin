@@ -52,10 +52,10 @@ typedef enum
 
 typedef struct _CoglAttributeNameState
 {
-  char *name;
+  const char *name;
   CoglAttributeNameID name_id;
   int name_index;
-  CoglBool normalized_default;
+  gboolean normalized_default;
   int layer_number;
 } CoglAttributeNameState;
 
@@ -64,9 +64,9 @@ struct _CoglAttribute
   CoglObject _parent;
 
   const CoglAttributeNameState *name_state;
-  CoglBool normalized;
+  gboolean normalized;
 
-  CoglBool is_buffered;
+  gboolean is_buffered;
 
   union {
     struct {
@@ -90,17 +90,16 @@ typedef enum
   COGL_DRAW_SKIP_JOURNAL_FLUSH = 1 << 0,
   COGL_DRAW_SKIP_PIPELINE_VALIDATION = 1 << 1,
   COGL_DRAW_SKIP_FRAMEBUFFER_FLUSH = 1 << 2,
-  COGL_DRAW_SKIP_LEGACY_STATE = 1 << 3,
   /* By default the vertex attribute drawing code will assume that if
      there is a color attribute array enabled then we can't determine
      if the colors will be opaque so we need to enabling
      blending. However when drawing from the journal we know what the
      contents of the color array is so we can override this by passing
      this flag. */
-  COGL_DRAW_COLOR_ATTRIBUTE_IS_OPAQUE = 1 << 4,
+  COGL_DRAW_COLOR_ATTRIBUTE_IS_OPAQUE = 1 << 3,
   /* This forcibly disables the debug option to divert all drawing to
    * wireframes */
-  COGL_DRAW_SKIP_DEBUG_WIREFRAME = 1 << 5
+  COGL_DRAW_SKIP_DEBUG_WIREFRAME = 1 << 4
 } CoglDrawFlags;
 
 /* During CoglContext initialization we register the "cogl_color_in"

@@ -1,9 +1,5 @@
 /* -*- mode: C; c-file-style: "gnu"; indent-tabs-mode: nil; -*- */
 /*
- * MetaShadowFactory:
- *
- * Create and cache shadow textures for abritrary window shapes
- *
  * Copyright 2010 Red Hat, Inc.
  *
  * This program is free software; you can redistribute it and/or
@@ -17,24 +13,24 @@
  * General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street - Suite 500, Boston, MA
- * 02110-1335, USA.
+ * along with this program; if not, see <http://www.gnu.org/licenses/>.
  */
 
 /**
  * SECTION:meta-shadow-factory
  * @title: MetaShadowFactory
- * @short_description: Create and cache shadow textures for arbitrary window shapes
+ * @short_description: Create and cache shadow textures for abritrary window shapes
  */
 
-#include <config.h>
+#include "config.h"
+
 #include <math.h>
 #include <string.h>
 
-#include "cogl-utils.h"
-#include "meta-shadow-factory-private.h"
-#include "region-utils.h"
+#include "compositor/cogl-utils.h"
+#include "compositor/region-utils.h"
+#include "meta/meta-shadow-factory.h"
+#include "meta/util.h"
 
 /* This file implements blurring the shape of a window to produce a
  * shadow texture. The details are discussed below; a quick summary
@@ -110,14 +106,18 @@ struct _MetaShadowFactory
   GHashTable *shadow_classes;
 };
 
-struct _MetaShadowFactoryClass
+enum
 {
-  GObjectClass parent_class;
+  CHANGED,
+
+  LAST_SIGNAL
 };
+
+static guint signals[LAST_SIGNAL] = { 0 };
 
 /* The first element in this array also defines the default parameters
  * for newly created classes */
-static MetaShadowClassInfo default_shadow_classes[] = {
+MetaShadowClassInfo default_shadow_classes[] = {
   { "normal",       { 10, -1, 0, 3, 128 }, { 8, -1, 0, 2, 64 } },
   { "dialog",       { 10, -1, 0, 3, 128 }, { 8, -1, 0, 2, 64 } },
   { "modal_dialog", { 10, -1, 0, 3, 128 }, { 8, -1, 0, 2, 64 } },
@@ -126,8 +126,8 @@ static MetaShadowClassInfo default_shadow_classes[] = {
   { "menu",         { 10, -1, 0, 3, 128 }, { 8, -1, 0, 2, 64 } },
 
   { "popup-menu",    { 1, -1, 0, 0, 128 }, { 1, -1, 0, 0, 128 } },
-
   { "dropdown-menu", { 1, -1, 0, 0, 128 }, { 1, -1, 0, 0, 128 } },
+
   { "attached",      { 10, -1, 0, 3, 128 }, { 8, -1, 0, 2, 64 } }
 };
 
@@ -152,7 +152,7 @@ meta_shadow_cache_key_equal (gconstpointer a,
           meta_window_shape_equal (key_a->shape, key_b->shape));
 }
 
-LOCAL_SYMBOL MetaShadow *
+MetaShadow *
 meta_shadow_ref (MetaShadow *shadow)
 {
   shadow->ref_count++;
@@ -160,7 +160,7 @@ meta_shadow_ref (MetaShadow *shadow)
   return shadow;
 }
 
-LOCAL_SYMBOL void
+void
 meta_shadow_unref (MetaShadow *shadow)
 {
   shadow->ref_count--;
@@ -186,7 +186,7 @@ meta_shadow_unref (MetaShadow *shadow)
  * @window_y: y position of the region to paint a shadow for
  * @window_width: actual width of the region to paint a shadow for
  * @window_height: actual height of the region to paint a shadow for
- * @clip: (allow-none): if non-%NULL specifies the visible portion
+ * @clip: (nullable): if non-%NULL specifies the visible portion
  *   of the shadow.
  * @clip_strictly: if %TRUE, drawing will be clipped strictly
  *   to @clip, otherwise, it will be only used to optimize
@@ -197,7 +197,7 @@ meta_shadow_unref (MetaShadow *shadow)
  * different sizes with the same extracted #MetaWindowShape the
  * size needs to be passed in here.)
  */
-LOCAL_SYMBOL void
+void
 meta_shadow_paint (MetaShadow      *shadow,
                    CoglFramebuffer *framebuffer,
                    int              window_x,
@@ -207,7 +207,6 @@ meta_shadow_paint (MetaShadow      *shadow,
                    guint8           opacity,
                    cairo_region_t  *clip,
                    gboolean         clip_strictly)
-
 {
   float texture_width = cogl_texture_get_width (shadow->texture);
   float texture_height = cogl_texture_get_height (shadow->texture);
@@ -217,7 +216,12 @@ meta_shadow_paint (MetaShadow      *shadow,
   int dest_x[4];
   int dest_y[4];
   int n_x, n_y;
-  gboolean source_updated = FALSE;
+
+  if (clip && cairo_region_is_empty (clip))
+    return;
+
+  cogl_pipeline_set_color4ub (shadow->pipeline,
+                              opacity, opacity, opacity, opacity);
 
   if (shadow->scale_width)
     {
@@ -296,14 +300,6 @@ meta_shadow_paint (MetaShadow      *shadow,
           if (overlap == CAIRO_REGION_OVERLAP_OUT)
             continue;
 
-          if (!source_updated)
-            {
-              cogl_pipeline_set_color4ub (shadow->pipeline,
-                                          opacity, opacity, opacity, opacity);
-//              cogl_set_source (shadow->pipeline); do not believe needed, but still there in mutter
-              source_updated = TRUE;
-            }
-
           /* There's quite a bit of overhead from allocating a new
            * region in order to find an exact intersection and
            * generating more geometry - we make the assumption that
@@ -324,19 +320,15 @@ meta_shadow_paint (MetaShadow      *shadow,
             {
               cairo_region_t *intersection;
               int n_rectangles, k;
-              float *rects;
 
               intersection = cairo_region_create_rectangle (&dest_rect);
               cairo_region_intersect (intersection, clip);
 
               n_rectangles = cairo_region_num_rectangles (intersection);
-              rects = g_alloca (sizeof (float) * 8 * n_rectangles);
-
               for (k = 0; k < n_rectangles; k++)
                 {
                   cairo_rectangle_int_t rect;
                   float src_x1, src_x2, src_y1, src_y2;
-                  int pos;
 
                   cairo_region_get_rectangle (intersection, k, &rect);
 
@@ -353,21 +345,12 @@ meta_shadow_paint (MetaShadow      *shadow,
                   src_y2 = (src_y[j] * (dest_rect.y + dest_rect.height - (rect.y + rect.height)) +
                             src_y[j + 1] * (rect.y + rect.height - dest_rect.y)) / dest_rect.height;
 
-                  pos = k*8;
-                  rects[pos] = rect.x;
-                  rects[pos+1] = rect.y;
-                  rects[pos+2] = rect.x + rect.width;
-                  rects[pos+3] = rect.y + rect.height;
-                  rects[pos+4] = src_x1;
-                  rects[pos+5] = src_y1;
-                  rects[pos+6] = src_x2;
-                  rects[pos+7] = src_y2;
+                  cogl_framebuffer_draw_textured_rectangle (framebuffer,
+                                                            shadow->pipeline,
+                                                            rect.x, rect.y,
+                                                            rect.x + rect.width, rect.y + rect.height,
+                                                            src_x1, src_y1, src_x2, src_y2);
                 }
-
-              cogl_framebuffer_draw_textured_rectangles (framebuffer,
-                                                         shadow->pipeline,
-                                                         rects,
-                                                         n_rectangles);
 
               cairo_region_destroy (intersection);
             }
@@ -386,7 +369,7 @@ meta_shadow_paint (MetaShadow      *shadow,
  * Computes the bounds of the pixels that will be affected by
  * meta_shadow_paint()
  */
-LOCAL_SYMBOL void
+void
 meta_shadow_get_bounds  (MetaShadow            *shadow,
                          int                    window_x,
                          int                    window_y,
@@ -403,7 +386,7 @@ meta_shadow_get_bounds  (MetaShadow            *shadow,
 static void
 meta_shadow_class_info_free (MetaShadowClassInfo *class_info)
 {
-  free ((char *)class_info->name);
+  g_free ((char *)class_info->name);
   g_slice_free (MetaShadowClassInfo, class_info);
 }
 
@@ -460,9 +443,17 @@ meta_shadow_factory_class_init (MetaShadowFactoryClass *klass)
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
   object_class->finalize = meta_shadow_factory_finalize;
+
+  signals[CHANGED] =
+    g_signal_new ("changed",
+                  G_TYPE_FROM_CLASS (object_class),
+                  G_SIGNAL_RUN_LAST,
+                  0,
+                  NULL, NULL, NULL,
+                  G_TYPE_NONE, 0);
 }
 
-LOCAL_SYMBOL MetaShadowFactory *
+MetaShadowFactory *
 meta_shadow_factory_new (void)
 {
   return g_object_new (META_TYPE_SHADOW_FACTORY, NULL);
@@ -511,7 +502,12 @@ get_box_filter_size (int radius)
 static int
 get_shadow_spread (int radius)
 {
-  int d = get_box_filter_size (radius);
+  int d;
+
+  if (radius == 0)
+    return 0;
+
+  d = get_box_filter_size (radius);
 
   if (d % 2 == 1)
     return 3 * (d / 2);
@@ -551,7 +547,7 @@ blur_xspan (guchar *row,
    * be well predicted and there are enough different possibilities
    * that trying to write this as a series of unconditional loops
    * is hard and not an obvious win. The main slow down here seems
-   * to be the integer division for pixel; one possible optimization
+   * to be the integer division per pixel; one possible optimization
    * would be to accumulate into two 16-bit integer buffers and
    * only divide down after all three passes. (SSE parallel implementation
    * of the divide step is possible.)
@@ -559,34 +555,34 @@ blur_xspan (guchar *row,
   for (i = x0 - d + offset; i < x1 + offset; i++)
     {
       if (i >= 0 && i < row_width)
-	sum += row[i];
+        sum += row[i];
 
       if (i >= x0 + offset)
-	{
-	  if (i >= d)
-	    sum -= row[i - d];
+        {
+          if (i >= d)
+            sum -= row[i - d];
 
-	  tmp_buffer[i - offset] = (sum + d / 2) / d;
-	}
+          tmp_buffer[i - offset] = (sum + d / 2) / d;
+        }
     }
 
-  memcpy(row + x0, tmp_buffer + x0, x1 - x0);
+  memcpy (row + x0, tmp_buffer + x0, x1 - x0);
 }
 
 static void
 blur_rows (cairo_region_t   *convolve_region,
            int               x_offset,
            int               y_offset,
-	   guchar           *buffer,
-	   int               buffer_width,
-	   int               buffer_height,
+           guchar           *buffer,
+           int               buffer_width,
+           int               buffer_height,
            int               d)
 {
   int i, j;
   int n_rectangles;
   guchar *tmp_buffer;
 
-  tmp_buffer = malloc (buffer_width);
+  tmp_buffer = g_malloc (buffer_width);
 
   n_rectangles = cairo_region_num_rectangles (convolve_region);
   for (i = 0; i < n_rectangles; i++)
@@ -596,33 +592,33 @@ blur_rows (cairo_region_t   *convolve_region,
       cairo_region_get_rectangle (convolve_region, i, &rect);
 
       for (j = y_offset + rect.y; j < y_offset + rect.y + rect.height; j++)
-	{
-	  guchar *row = buffer + j * buffer_width;
-	  int x0 = x_offset + rect.x;
-	  int x1 = x0 + rect.width;
+        {
+          guchar *row = buffer + j * buffer_width;
+          int x0 = x_offset + rect.x;
+          int x1 = x0 + rect.width;
 
           /* We want to produce a symmetric blur that spreads a pixel
            * equally far to the left and right. If d is odd that happens
            * naturally, but for d even, we approximate by using a blur
            * on either side and then a centered blur of size d + 1.
-           * (techique also from the SVG specification)
+           * (technique also from the SVG specification)
            */
-	  if (d % 2 == 1)
-	    {
-	      blur_xspan (row, tmp_buffer, buffer_width, x0, x1, d, 0);
-	      blur_xspan (row, tmp_buffer, buffer_width, x0, x1, d, 0);
-	      blur_xspan (row, tmp_buffer, buffer_width, x0, x1, d, 0);
-	    }
-	  else
-	    {
-	      blur_xspan (row, tmp_buffer, buffer_width, x0, x1, d, 1);
-	      blur_xspan (row, tmp_buffer, buffer_width, x0, x1, d, -1);
-	      blur_xspan (row, tmp_buffer, buffer_width, x0, x1, d + 1, 0);
-	    }
-	}
+          if (d % 2 == 1)
+            {
+              blur_xspan (row, tmp_buffer, buffer_width, x0, x1, d, 0);
+              blur_xspan (row, tmp_buffer, buffer_width, x0, x1, d, 0);
+              blur_xspan (row, tmp_buffer, buffer_width, x0, x1, d, 0);
+            }
+          else
+            {
+              blur_xspan (row, tmp_buffer, buffer_width, x0, x1, d, 1);
+              blur_xspan (row, tmp_buffer, buffer_width, x0, x1, d, -1);
+              blur_xspan (row, tmp_buffer, buffer_width, x0, x1, d + 1, 0);
+            }
+        }
     }
 
-  free (tmp_buffer);
+  g_free (tmp_buffer);
 }
 
 static void
@@ -644,7 +640,7 @@ fade_bytes (guchar *bytes,
  */
 static guchar *
 flip_buffer (guchar *buffer,
-	     int     width,
+             int     width,
              int     height)
 {
   /* Working in blocks increases cache efficiency, compared to reading
@@ -656,54 +652,54 @@ flip_buffer (guchar *buffer,
       int i0, j0;
 
       for (j0 = 0; j0 < height; j0 += BLOCK_SIZE)
-	for (i0 = 0; i0 <= j0; i0 += BLOCK_SIZE)
-	  {
-	    int max_j = MIN(j0 + BLOCK_SIZE, height);
-	    int max_i = MIN(i0 + BLOCK_SIZE, width);
-	    int i, j;
+        for (i0 = 0; i0 <= j0; i0 += BLOCK_SIZE)
+          {
+            int max_j = MIN(j0 + BLOCK_SIZE, height);
+            int max_i = MIN(i0 + BLOCK_SIZE, width);
+            int i, j;
 
-	    if (i0 == j0)
-	      {
-		for (j = j0; j < max_j; j++)
-		  for (i = i0; i < j; i++)
-		    {
-		      guchar tmp = buffer[j * width + i];
-		      buffer[j * width + i] = buffer[i * width + j];
-		      buffer[i * width + j] = tmp;
-		    }
-	      }
-	    else
-	      {
-		for (j = j0; j < max_j; j++)
-		  for (i = i0; i < max_i; i++)
-		    {
-		      guchar tmp = buffer[j * width + i];
-		      buffer[j * width + i] = buffer[i * width + j];
-		      buffer[i * width + j] = tmp;
-		    }
-	      }
-	  }
+            if (i0 == j0)
+              {
+                for (j = j0; j < max_j; j++)
+                  for (i = i0; i < j; i++)
+                    {
+                      guchar tmp = buffer[j * width + i];
+                      buffer[j * width + i] = buffer[i * width + j];
+                      buffer[i * width + j] = tmp;
+                    }
+              }
+            else
+              {
+                for (j = j0; j < max_j; j++)
+                  for (i = i0; i < max_i; i++)
+                    {
+                      guchar tmp = buffer[j * width + i];
+                      buffer[j * width + i] = buffer[i * width + j];
+                      buffer[i * width + j] = tmp;
+                    }
+              }
+          }
 
       return buffer;
     }
   else
     {
-      guchar *new_buffer = malloc (height * width);
+      guchar *new_buffer = g_malloc (height * width);
       int i0, j0;
 
       for (i0 = 0; i0 < width; i0 += BLOCK_SIZE)
         for (j0 = 0; j0 < height; j0 += BLOCK_SIZE)
-	  {
-	    int max_j = MIN(j0 + BLOCK_SIZE, height);
-	    int max_i = MIN(i0 + BLOCK_SIZE, width);
-	    int i, j;
+          {
+            int max_j = MIN(j0 + BLOCK_SIZE, height);
+            int max_i = MIN(i0 + BLOCK_SIZE, width);
+            int i, j;
 
             for (i = i0; i < max_i; i++)
               for (j = j0; j < max_j; j++)
-		new_buffer[i * height + j] = buffer[j * width + i];
-	  }
+                new_buffer[i * height + j] = buffer[j * width + i];
+          }
 
-      free (buffer);
+      g_free (buffer);
 
       return new_buffer;
     }
@@ -714,6 +710,9 @@ static void
 make_shadow (MetaShadow     *shadow,
              cairo_region_t *region)
 {
+  ClutterBackend *backend = clutter_get_default_backend ();
+  CoglContext *ctx = clutter_backend_get_cogl_context (backend);
+  GError *error = NULL;
   int d = get_box_filter_size (shadow->key.radius);
   int spread = get_shadow_spread (shadow->key.radius);
   cairo_rectangle_int_t extents;
@@ -752,7 +751,7 @@ make_shadow (MetaShadow     *shadow,
   if (buffer_width < buffer_height && buffer_width > (3 * buffer_height) / 4)
     buffer_width = buffer_height;
 
-  buffer = calloc (1, buffer_width * buffer_height);
+  buffer = g_malloc0 (buffer_width * buffer_height);
 
   /* Blurring with multiple box-blur passes is fast, but (especially for
    * large shadow sizes) we can improve efficiency by restricting the blur
@@ -773,7 +772,7 @@ make_shadow (MetaShadow     *shadow,
 
       cairo_region_get_rectangle (region, k, &rect);
       for (j = y_offset + rect.y; j < y_offset + rect.y + rect.height; j++)
-	memset (buffer + buffer_width * j + x_offset + rect.x, 255, rect.width);
+        memset (buffer + buffer_width * j + x_offset + rect.x, 255, rect.width);
     }
 
   /* Step 2: swap rows and columns */
@@ -803,19 +802,25 @@ make_shadow (MetaShadow     *shadow,
    * in the case of top_fade >= 0. We also account for padding at the left for symmetry
    * though that doesn't currently occur.
    */
-  shadow->texture = meta_cogl_texture_new_from_data_wrapper (shadow->outer_border_left + extents.width + shadow->outer_border_right,
-                                                             shadow->outer_border_top + extents.height + shadow->outer_border_bottom,
-                                                             COGL_TEXTURE_NONE,
-                                                             COGL_PIXEL_FORMAT_A_8,
-                                                             COGL_PIXEL_FORMAT_ANY,
-                                                             buffer_width,
-                                                             (buffer +
-                                                              (y_offset - shadow->outer_border_top) * buffer_width +
-                                                              (x_offset - shadow->outer_border_left)));
+  shadow->texture = COGL_TEXTURE (cogl_texture_2d_new_from_data (ctx,
+                                                                 shadow->outer_border_left + extents.width + shadow->outer_border_right,
+                                                                 shadow->outer_border_top + extents.height + shadow->outer_border_bottom,
+                                                                 COGL_PIXEL_FORMAT_A_8,
+                                                                 buffer_width,
+                                                                 (buffer +
+                                                                  (y_offset - shadow->outer_border_top) * buffer_width +
+                                                                  (x_offset - shadow->outer_border_left)),
+                                                                 &error));
+
+  if (error)
+    {
+      meta_warning ("Failed to allocate shadow texture: %s\n", error->message);
+      g_error_free (error);
+    }
 
   cairo_region_destroy (row_convolve_region);
   cairo_region_destroy (column_convolve_region);
-  free (buffer);
+  g_free (buffer);
 
   shadow->pipeline = meta_create_texture_pipeline (shadow->texture);
 }
@@ -869,7 +874,7 @@ get_shadow_params (MetaShadowFactory *factory,
  * Return value: (transfer full): a newly referenced #MetaShadow; unref with
  *  meta_shadow_unref()
  */
-LOCAL_SYMBOL MetaShadow *
+MetaShadow *
 meta_shadow_factory_get_shadow (MetaShadowFactory *factory,
                                 MetaWindowShape   *shape,
                                 int                width,
@@ -1025,7 +1030,7 @@ meta_shadow_factory_set_params (MetaShadowFactory *factory,
 
   *stored_params = *params;
 
-  meta_compositor_on_shadow_factory_changed ();
+  g_signal_emit (factory, signals[CHANGED], 0);
 }
 
 /**
@@ -1056,3 +1061,6 @@ meta_shadow_factory_get_params (MetaShadowFactory *factory,
   if (params)
     *params = *stored_params;
 }
+
+G_DEFINE_BOXED_TYPE (MetaShadow, meta_shadow,
+                     meta_shadow_ref, meta_shadow_unref)

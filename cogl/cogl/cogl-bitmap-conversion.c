@@ -28,9 +28,7 @@
  *
  */
 
-#ifdef HAVE_CONFIG_H
 #include "cogl-config.h"
-#endif
 
 #include "cogl-private.h"
 #include "cogl-bitmap-private.h"
@@ -291,7 +289,7 @@ _cogl_bitmap_premult_unpacked_span_16 (uint16_t *data,
     }
 }
 
-static CoglBool
+static gboolean
 _cogl_bitmap_can_fast_premult (CoglPixelFormat format)
 {
   switch (format & ~COGL_PREMULT_BIT)
@@ -307,7 +305,7 @@ _cogl_bitmap_can_fast_premult (CoglPixelFormat format)
     }
 }
 
-static CoglBool
+static gboolean
 _cogl_bitmap_needs_short_temp_buffer (CoglPixelFormat format)
 {
   /* If the format is using more than 8 bits per component then we'll
@@ -357,12 +355,13 @@ _cogl_bitmap_needs_short_temp_buffer (CoglPixelFormat format)
     }
 
   g_assert_not_reached ();
+  return FALSE;
 }
 
-CoglBool
+gboolean
 _cogl_bitmap_convert_into_bitmap (CoglBitmap *src_bmp,
                                   CoglBitmap *dst_bmp,
-                                  CoglError **error)
+                                  GError **error)
 {
   uint8_t *src_data;
   uint8_t *dst_data;
@@ -375,8 +374,8 @@ _cogl_bitmap_convert_into_bitmap (CoglBitmap *src_bmp,
   int width, height;
   CoglPixelFormat src_format;
   CoglPixelFormat dst_format;
-  CoglBool use_16;
-  CoglBool need_premult;
+  gboolean use_16;
+  gboolean need_premult;
 
   src_format = cogl_bitmap_get_format (src_bmp);
   src_rowstride = cogl_bitmap_get_rowstride (src_bmp);
@@ -385,8 +384,8 @@ _cogl_bitmap_convert_into_bitmap (CoglBitmap *src_bmp,
   width = cogl_bitmap_get_width (src_bmp);
   height = cogl_bitmap_get_height (src_bmp);
 
-  _COGL_RETURN_VAL_IF_FAIL (width == cogl_bitmap_get_width (dst_bmp), FALSE);
-  _COGL_RETURN_VAL_IF_FAIL (height == cogl_bitmap_get_height (dst_bmp), FALSE);
+  g_return_val_if_fail (width == cogl_bitmap_get_width (dst_bmp), FALSE);
+  g_return_val_if_fail (height == cogl_bitmap_get_height (dst_bmp), FALSE);
 
   need_premult
     = ((src_format & COGL_PREMULT_BIT) != (dst_format & COGL_PREMULT_BIT) &&
@@ -439,7 +438,7 @@ _cogl_bitmap_convert_into_bitmap (CoglBitmap *src_bmp,
   use_16 = _cogl_bitmap_needs_short_temp_buffer (dst_format);
 
   /* Allocate a buffer to hold a temporary RGBA row */
-  tmp_row = malloc (width *
+  tmp_row = g_malloc (width *
                       (use_16 ? sizeof (uint16_t) : sizeof (uint8_t)) * 4);
 
   /* FIXME: Optimize */
@@ -481,7 +480,7 @@ _cogl_bitmap_convert_into_bitmap (CoglBitmap *src_bmp,
   _cogl_bitmap_unmap (src_bmp);
   _cogl_bitmap_unmap (dst_bmp);
 
-  free (tmp_row);
+  g_free (tmp_row);
 
   return TRUE;
 }
@@ -489,7 +488,7 @@ _cogl_bitmap_convert_into_bitmap (CoglBitmap *src_bmp,
 CoglBitmap *
 _cogl_bitmap_convert (CoglBitmap *src_bmp,
                       CoglPixelFormat dst_format,
-                      CoglError **error)
+                      GError **error)
 {
   CoglBitmap *dst_bmp;
   int width, height;
@@ -515,7 +514,7 @@ _cogl_bitmap_convert (CoglBitmap *src_bmp,
   return dst_bmp;
 }
 
-static CoglBool
+static gboolean
 driver_can_convert (CoglContext *ctx,
                     CoglPixelFormat src_format,
                     CoglPixelFormat internal_format)
@@ -547,14 +546,14 @@ driver_can_convert (CoglContext *ctx,
 CoglBitmap *
 _cogl_bitmap_convert_for_upload (CoglBitmap *src_bmp,
                                  CoglPixelFormat internal_format,
-                                 CoglBool can_convert_in_place,
-                                 CoglError **error)
+                                 gboolean can_convert_in_place,
+                                 GError **error)
 {
   CoglContext *ctx = _cogl_bitmap_get_context (src_bmp);
   CoglPixelFormat src_format = cogl_bitmap_get_format (src_bmp);
   CoglBitmap *dst_bmp;
 
-  _COGL_RETURN_VAL_IF_FAIL (internal_format != COGL_PIXEL_FORMAT_ANY, NULL);
+  g_return_val_if_fail (internal_format != COGL_PIXEL_FORMAT_ANY, NULL);
 
   /* OpenGL supports specifying a different format for the internal
      format when uploading texture data. We should use this to convert
@@ -615,9 +614,9 @@ _cogl_bitmap_convert_for_upload (CoglBitmap *src_bmp,
   return dst_bmp;
 }
 
-CoglBool
+gboolean
 _cogl_bitmap_unpremult (CoglBitmap *bmp,
-                        CoglError **error)
+                        GError **error)
 {
   uint8_t *p, *data;
   uint16_t *tmp_row;
@@ -644,7 +643,7 @@ _cogl_bitmap_unpremult (CoglBitmap *bmp,
   if (_cogl_bitmap_can_fast_premult (format))
     tmp_row = NULL;
   else
-    tmp_row = malloc (sizeof (uint16_t) * 4 * width);
+    tmp_row = g_malloc (sizeof (uint16_t) * 4 * width);
 
   for (y = 0; y < height; y++)
     {
@@ -674,7 +673,7 @@ _cogl_bitmap_unpremult (CoglBitmap *bmp,
         }
     }
 
-  free (tmp_row);
+  g_free (tmp_row);
 
   _cogl_bitmap_unmap (bmp);
 
@@ -683,9 +682,9 @@ _cogl_bitmap_unpremult (CoglBitmap *bmp,
   return TRUE;
 }
 
-CoglBool
+gboolean
 _cogl_bitmap_premult (CoglBitmap *bmp,
-                      CoglError **error)
+                      GError **error)
 {
   uint8_t *p, *data;
   uint16_t *tmp_row;
@@ -711,7 +710,7 @@ _cogl_bitmap_premult (CoglBitmap *bmp,
   if (_cogl_bitmap_can_fast_premult (format))
     tmp_row = NULL;
   else
-    tmp_row = malloc (sizeof (uint16_t) * 4 * width);
+    tmp_row = g_malloc (sizeof (uint16_t) * 4 * width);
 
   for (y = 0; y < height; y++)
     {
@@ -738,7 +737,7 @@ _cogl_bitmap_premult (CoglBitmap *bmp,
         }
     }
 
-  free (tmp_row);
+  g_free (tmp_row);
 
   _cogl_bitmap_unmap (bmp);
 

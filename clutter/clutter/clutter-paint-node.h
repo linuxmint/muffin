@@ -41,25 +41,35 @@ G_BEGIN_DECLS
 typedef struct _ClutterPaintNodePrivate ClutterPaintNodePrivate;
 typedef struct _ClutterPaintNodeClass   ClutterPaintNodeClass;
 
-CLUTTER_AVAILABLE_IN_1_10
+CLUTTER_EXPORT
 GType clutter_paint_node_get_type (void) G_GNUC_CONST;
 
-CLUTTER_AVAILABLE_IN_1_10
+CLUTTER_EXPORT
 ClutterPaintNode *      clutter_paint_node_ref                          (ClutterPaintNode      *node);
-CLUTTER_AVAILABLE_IN_1_10
+CLUTTER_EXPORT
 void                    clutter_paint_node_unref                        (ClutterPaintNode      *node);
 
-CLUTTER_AVAILABLE_IN_1_10
+CLUTTER_EXPORT
+void                    clutter_paint_node_paint                        (ClutterPaintNode      *node,
+                                                                         ClutterPaintContext   *paint_context);
+
+CLUTTER_EXPORT
 void                    clutter_paint_node_set_name                     (ClutterPaintNode      *node,
                                                                          const char            *name);
+CLUTTER_EXPORT
+void                    clutter_paint_node_set_static_name              (ClutterPaintNode      *node,
+                                                                         const char            *name);
 
-CLUTTER_AVAILABLE_IN_1_10
+CLUTTER_EXPORT
+CoglFramebuffer *       clutter_paint_node_get_framebuffer              (ClutterPaintNode      *node);
+
+CLUTTER_EXPORT
 void                    clutter_paint_node_add_child                    (ClutterPaintNode      *node,
                                                                          ClutterPaintNode      *child);
-CLUTTER_AVAILABLE_IN_1_10
+CLUTTER_EXPORT
 void                    clutter_paint_node_add_rectangle                (ClutterPaintNode      *node,
                                                                          const ClutterActorBox *rect);
-CLUTTER_AVAILABLE_IN_1_10
+CLUTTER_EXPORT
 void                    clutter_paint_node_add_texture_rectangle        (ClutterPaintNode      *node,
                                                                          const ClutterActorBox *rect,
                                                                          float                  x_1,
@@ -67,10 +77,16 @@ void                    clutter_paint_node_add_texture_rectangle        (Clutter
                                                                          float                  x_2,
                                                                          float                  y_2);
 
-CLUTTER_AVAILABLE_IN_1_10
+CLUTTER_EXPORT
+void                   clutter_paint_node_add_multitexture_rectangle   (ClutterPaintNode       *node,
+                                                                        const ClutterActorBox  *rect,
+                                                                        const float            *text_coords,
+                                                                        unsigned int            text_coords_len);
+
+CLUTTER_EXPORT
 void                    clutter_paint_node_add_path                     (ClutterPaintNode      *node,
                                                                          CoglPath              *path);
-CLUTTER_AVAILABLE_IN_1_10
+CLUTTER_EXPORT
 void                    clutter_paint_node_add_primitive                (ClutterPaintNode      *node,
                                                                          CoglPrimitive         *primitive);
 
@@ -85,15 +101,15 @@ void                    clutter_paint_node_add_primitive                (Clutter
  */
 #define CLUTTER_VALUE_HOLDS_PAINT_NODE(value)   (G_VALUE_HOLDS (value, CLUTTER_TYPE_PAINT_NODE))
 
-CLUTTER_AVAILABLE_IN_1_10
+CLUTTER_EXPORT
 void                    clutter_value_set_paint_node                    (GValue                *value,
                                                                          gpointer               node);
-CLUTTER_AVAILABLE_IN_1_10
+CLUTTER_EXPORT
 void                    clutter_value_take_paint_node                   (GValue                *value,
                                                                          gpointer               node);
-CLUTTER_AVAILABLE_IN_1_10
+CLUTTER_EXPORT
 gpointer                clutter_value_get_paint_node                    (const GValue          *value);
-CLUTTER_AVAILABLE_IN_1_10
+CLUTTER_EXPORT
 gpointer                clutter_value_dup_paint_node                    (const GValue          *value);
 
 G_END_DECLS

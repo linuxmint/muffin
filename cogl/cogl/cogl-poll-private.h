@@ -41,7 +41,7 @@ _cogl_poll_renderer_remove_fd (CoglRenderer *renderer, int fd);
 typedef int64_t (*CoglPollPrepareCallback) (void *user_data);
 typedef void (*CoglPollDispatchCallback) (void *user_data, int revents);
 
-void
+COGL_EXPORT void
 _cogl_poll_renderer_add_fd (CoglRenderer *renderer,
                             int fd,
                             CoglPollFDEvent events,
@@ -68,7 +68,7 @@ _cogl_poll_renderer_remove_source (CoglRenderer *renderer,
 
 typedef void (*CoglIdleCallback) (void *user_data);
 
-CoglClosure *
+COGL_EXPORT CoglClosure *
 _cogl_poll_renderer_add_idle (CoglRenderer *renderer,
                               CoglIdleCallback idle_cb,
                               void *user_data,

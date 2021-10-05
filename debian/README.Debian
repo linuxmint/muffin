@@ -1,13 +1,13 @@
-Muffin Compositor
+Mutter Compositor
 ===================
 
-Muffin includes a compositor based on Clutter. Muffin by default adds
+Mutter includes a compositor based on Clutter. Mutter by default adds
 very simple effects using the compositor, such as a drop-shadow. The
 compositor may be used by plugins to add more effects. GNOME Shell is
 an example of one such plugin.
 
 The compositor can be enabled on the fly by setting the gconf key
-/apps/muffin/general/compositing_manager to true by using
+/apps/mutter/general/compositing_manager to true by using
 gconf-editor or gconftool-2.
 
 Before enabling the compositor, you need to make sure your X server

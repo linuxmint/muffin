@@ -58,91 +58,9 @@
 
 COGL_EXT_BEGIN (only_in_both_gles,
                 4, 1,
-                COGL_EXT_IN_GLES |
                 COGL_EXT_IN_GLES2,
                 "ARB\0",
                 "ES2_compatibility\0")
 COGL_EXT_FUNCTION (void, glDepthRangef,
                    (GLfloat near_val, GLfloat far_val))
-COGL_EXT_FUNCTION (void, glClearDepthf,
-                   (GLclampf depth))
 COGL_EXT_END ()
-
-COGL_EXT_BEGIN (only_in_both_gles_and_gl_1_3,
-                1, 3,
-                COGL_EXT_IN_GLES |
-                COGL_EXT_IN_GLES2,
-                "\0",
-                "\0")
-COGL_EXT_FUNCTION (void, glCompressedTexImage2D,
-                   (GLenum target,
-                    GLint level,
-                    GLenum internalformat,
-                    GLsizei width,
-                    GLsizei height,
-                    GLint border,
-                    GLsizei imageSize,
-                    const GLvoid* data))
-COGL_EXT_FUNCTION (void, glCompressedTexSubImage2D,
-                   (GLenum target,
-                    GLint level,
-                    GLint xoffset,
-                    GLint yoffset,
-                    GLsizei width,
-                    GLsizei height,
-                    GLenum format,
-                    GLsizei imageSize,
-                    const GLvoid* data))
-COGL_EXT_FUNCTION (void, glSampleCoverage,
-                   (GLclampf value, GLboolean invert))
-COGL_EXT_END ()
-
-COGL_EXT_BEGIN (only_in_both_gles_and_gl_1_5,
-                1, 5,
-                COGL_EXT_IN_GLES |
-                COGL_EXT_IN_GLES2,
-                "\0",
-                "\0")
-COGL_EXT_FUNCTION (void, glGetBufferParameteriv,
-                   (GLenum target, GLenum pname, GLint* params))
-COGL_EXT_END ()
-
-COGL_EXT_BEGIN (vbos, 1, 5,
-                COGL_EXT_IN_GLES |
-                COGL_EXT_IN_GLES2,
-                "ARB\0",
-                "vertex_buffer_object\0")
-COGL_EXT_FUNCTION (void, glGenBuffers,
-                   (GLsizei		 n,
-                    GLuint		*buffers))
-COGL_EXT_FUNCTION (void, glBindBuffer,
-                   (GLenum		 target,
-                    GLuint		 buffer))
-COGL_EXT_FUNCTION (void, glBufferData,
-                   (GLenum		 target,
-                    GLsizeiptr		 size,
-                    const GLvoid		*data,
-                    GLenum		 usage))
-COGL_EXT_FUNCTION (void, glBufferSubData,
-                   (GLenum		 target,
-                    GLintptr		 offset,
-                    GLsizeiptr		 size,
-                    const GLvoid		*data))
-COGL_EXT_FUNCTION (void, glDeleteBuffers,
-                   (GLsizei		 n,
-                    const GLuint		*buffers))
-COGL_EXT_FUNCTION (GLboolean, glIsBuffer,
-                   (GLuint               buffer))
-COGL_EXT_END ()
-
-/* Available in GL 1.3, the multitexture extension or GLES. These are
-   required */
-COGL_EXT_BEGIN (multitexture_part0, 1, 3,
-                COGL_EXT_IN_GLES |
-                COGL_EXT_IN_GLES2,
-                "ARB\0",
-                "multitexture\0")
-COGL_EXT_FUNCTION (void, glActiveTexture,
-                   (GLenum                texture))
-COGL_EXT_END ()
-

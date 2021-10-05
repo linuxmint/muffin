@@ -5,86 +5,102 @@
 
 #include <X11/extensions/Xfixes.h>
 
-#include <meta/compositor.h>
-#include <meta/display.h>
-#include "meta-plugin-manager.h"
-#include "meta-window-actor-private.h"
-#include <clutter/clutter.h>
-
-struct _MetaCompositor
-{
-  MetaDisplay    *display;
-  MetaScreen     *screen;
-
-  Atom            atom_x_root_pixmap;
-  Atom            atom_x_set_root;
-  Atom            atom_net_wm_window_opacity;
-  guint           pre_paint_func_id;
-  guint           post_paint_func_id;
-
-  ClutterActor   *stage, *shadow_src;
-  ClutterActor   *bottom_window_group, *window_group, *overlay_group, *top_window_group;
-  ClutterActor   *background_actor;
-  ClutterActor   *hidden_group;
-
-  GList          *windows;
-
-  MetaWindowActor *unredirected_window;
-
-  CoglContext    *context;
-
-  Window          output;
-
-  /* Used for unredirecting fullscreen windows */
-  guint           disable_unredirect_count;
-
-  /* Before we create the output window */
-  XserverRegion   pending_input_region;
-
-  gint            switch_workspace_in_progress;
-
-  MetaPluginManager *plugin_mgr;
-
-  MetaPlugin     *modal_plugin;
-
-  gint64          server_time_query_time;
-  gint64          server_time_offset;
-
-  guint           server_time_is_monotonic_time : 1;
-  guint           show_redraw : 1;
-  guint           debug       : 1;
-  guint           no_mipmaps  : 1;
-
-  gboolean frame_has_updated_xsurfaces;
-  gboolean have_x11_sync_object;
-};
+#include "clutter/clutter.h"
+#include "compositor/meta-plugin-manager.h"
+#include "compositor/meta-window-actor-private.h"
+#include "meta/compositor.h"
+#include "meta/display.h"
 
 /* Wait 2ms after vblank before starting to draw next frame */
-#define META_SYNC_DELAY 0
+#define META_SYNC_DELAY 2
 
-CoglContext * meta_compositor_get_cogl_context (void);
+struct _MetaCompositorClass
+{
+  GObjectClass parent_class;
 
-void meta_switch_workspace_completed (MetaScreen    *screen);
+  void (* manage) (MetaCompositor *compositor);
+  void (* unmanage) (MetaCompositor *compositor);
+  void (* pre_paint) (MetaCompositor *compositor);
+  void (* post_paint) (MetaCompositor *compositor);
+  void (* remove_window) (MetaCompositor *compositor,
+                          MetaWindow     *window);
+  int64_t (* monotonic_to_high_res_xserver_time) (MetaCompositor *compositor,
+                                                  int64_t         time_us);
+};
 
-gboolean meta_begin_modal_for_plugin (MetaScreen       *screen,
+void meta_compositor_remove_window_actor (MetaCompositor  *compositor,
+                                          MetaWindowActor *window_actor);
+
+void meta_switch_workspace_completed (MetaCompositor *compositor);
+
+gboolean meta_begin_modal_for_plugin (MetaCompositor   *compositor,
                                       MetaPlugin       *plugin,
-                                      Window            grab_window,
-                                      Cursor            cursor,
                                       MetaModalOptions  options,
                                       guint32           timestamp);
-void     meta_end_modal_for_plugin   (MetaScreen       *screen,
+void     meta_end_modal_for_plugin   (MetaCompositor   *compositor,
                                       MetaPlugin       *plugin,
                                       guint32           timestamp);
 
-gint64 meta_compositor_monotonic_time_to_server_time (MetaDisplay *display,
-                                                      gint64       monotonic_time);
+MetaPluginManager * meta_compositor_get_plugin_manager (MetaCompositor *compositor);
 
-void meta_compositor_grab_op_begin (MetaCompositor *compositor);
-void meta_compositor_grab_op_end (MetaCompositor *compositor);
+int64_t meta_compositor_monotonic_to_high_res_xserver_time (MetaCompositor *compositor,
+                                                            int64_t         monotonic_time_us);
 
-void meta_check_end_modal (MetaScreen *screen);
+void meta_compositor_flash_window (MetaCompositor *compositor,
+                                   MetaWindow     *window);
 
-void meta_compositor_update_sync_state (MetaCompositor *compositor,
-                                        MetaSyncMethod  method);
+MetaCloseDialog * meta_compositor_create_close_dialog (MetaCompositor *compositor,
+                                                       MetaWindow     *window);
+
+MetaInhibitShortcutsDialog * meta_compositor_create_inhibit_shortcuts_dialog (MetaCompositor *compositor,
+                                                                              MetaWindow     *window);
+
+void meta_compositor_locate_pointer (MetaCompositor *compositor);
+
+void meta_compositor_redirect_x11_windows (MetaCompositor *compositor);
+
+gboolean meta_compositor_is_unredirect_inhibited (MetaCompositor *compositor);
+
+MetaDisplay * meta_compositor_get_display (MetaCompositor *compositor);
+
+MetaWindowActor * meta_compositor_get_top_window_actor (MetaCompositor *compositor);
+
+ClutterStage * meta_compositor_get_stage (MetaCompositor *compositor);
+
+gboolean meta_compositor_is_switching_workspace (MetaCompositor *compositor);
+
+static inline int64_t
+us (int64_t us)
+{
+  return us;
+}
+
+static inline int64_t
+ms2us (int64_t ms)
+{
+  return us (ms * 1000);
+}
+
+static inline int64_t
+s2us (int64_t s)
+{
+  return ms2us(s * 1000);
+}
+
+/*
+ * This function takes a 64 bit time stamp from the monotonic clock, and clamps
+ * it to the scope of the X server clock, without losing the granularity.
+ */
+static inline int64_t
+meta_translate_to_high_res_xserver_time (int64_t time_us)
+{
+  int64_t us;
+  int64_t ms;
+
+  us = time_us % 1000;
+  ms = time_us / 1000;
+
+  return ms2us (ms & 0xffffffff) + us;
+}
 
 #endif /* META_COMPOSITOR_PRIVATE_H */

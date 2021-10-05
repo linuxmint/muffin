@@ -1,5 +1,6 @@
 #include <cogl/cogl.h>
 
+#include "test-declarations.h"
 #include "test-utils.h"
 #include "cogl-config.h"
 
@@ -8,7 +9,7 @@
 
 static GMainLoop *loop;
 
-gboolean
+static gboolean
 timeout (void *user_data)
 {
   g_assert (!"timeout not reached");
@@ -16,7 +17,7 @@ timeout (void *user_data)
   return FALSE;
 }
 
-void
+static void
 callback (CoglFence *fence,
           void *user_data)
 {

@@ -16,23 +16,23 @@
  * General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street - Suite 500, Boston, MA
- * 02110-1335, USA.
+ * along with this program; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <config.h>
-#include "edge-resistance.h"
-#include "boxes-private.h"
-#include "display-private.h"
-#include "workspace-private.h"
+#include "config.h"
+
+#include "core/edge-resistance.h"
+
+#include "core/boxes-private.h"
+#include "core/display-private.h"
+#include "core/meta-workspace-manager-private.h"
+#include "core/workspace-private.h"
 
 /* A simple macro for whether a given window's edges are potentially
  * relevant for resistance/snapping during a move/resize operation
  */
 #define WINDOW_EDGES_RELEVANT(window, display) \
   meta_window_should_be_showing (window) &&    \
-  window->screen == display->grab_screen &&    \
   window         != display->grab_window &&    \
   window->type   != META_WINDOW_DESKTOP &&     \
   window->type   != META_WINDOW_MENU    &&     \
@@ -196,10 +196,12 @@ find_nearest_position (const GArray        *edges,
   int best, best_dist, i;
   gboolean edges_align;
 
-  /* Initialize mid in the off chance that the array only
+  /* Initialize mid, edge, & compare in the off change that the array only
    * has one element.
    */
   mid  = 0;
+  edge = g_array_index (edges, MetaEdge*, mid);
+  compare = horizontal ? edge->rect.x : edge->rect.y;
 
   /* Begin the search... */
   low  = 0;
@@ -283,6 +285,7 @@ find_nearest_position (const GArray        *edges,
           if (dist < best_dist)
             {
               best = compare;
+              best_dist = dist;
             }
           break;
         }
@@ -305,6 +308,7 @@ movement_towards_edge (MetaSide side, int increment)
       return increment > 0;
     default:
       g_assert_not_reached ();
+      return FALSE;
     }
 }
 
@@ -347,10 +351,6 @@ apply_edge_resistance (MetaWindow                *window,
   const int TIMEOUT_RESISTANCE_LENGTH_MS_MONITOR =   0;
   const int TIMEOUT_RESISTANCE_LENGTH_MS_SCREEN   =   0;
 
-  /* Edge resistance can be disabled in gettings. */
-  if (!meta_prefs_get_edge_resistance_window ())
-    return new_pos;
-
   /* Quit if no movement was specified */
   if (old_pos == new_pos)
     return new_pos;
@@ -363,11 +363,7 @@ apply_edge_resistance (MetaWindow                *window,
         resistance_data->timeout_edge_pos < new_pos)))
     {
       resistance_data->timeout_setup = FALSE;
-      if (resistance_data->timeout_id != 0)
-        {
-          g_source_remove (resistance_data->timeout_id);
-          resistance_data->timeout_id = 0;
-        }
+      g_clear_handle_id (&resistance_data->timeout_id, g_source_remove);
     }
 
   /* Get the range of indices in the edge array that we move past/to. */
@@ -441,6 +437,8 @@ apply_edge_resistance (MetaWindow                *window,
                     g_timeout_add (timeout_length_ms,
                                    edge_resistance_timeout,
                                    resistance_data);
+                  g_source_set_name_by_id (resistance_data->timeout_id,
+                                           "[mutter] edge_resistance_timeout");
                   resistance_data->timeout_setup = TRUE;
                   resistance_data->timeout_edge_pos = compare;
                   resistance_data->timeout_over = FALSE;
@@ -558,7 +556,7 @@ apply_edge_resistance_to_each_side (MetaDisplay         *display,
 
   edge_data = display->grab_edge_resistance_data;
 
-  if (auto_snap)
+  if (auto_snap && !META_WINDOW_TILED_SIDE_BY_SIDE (window))
     {
       /* Do the auto snapping instead of normal edge resistance; in all
        * cases, we allow snapping to opposite kinds of edges (e.g. left
@@ -592,6 +590,50 @@ apply_edge_resistance_to_each_side (MetaDisplay         *display,
                                         edge_data->bottom_edges,
                                         FALSE,
                                         keyboard_op);
+    }
+  else if (auto_snap && META_WINDOW_TILED_SIDE_BY_SIDE (window))
+    {
+      MetaRectangle workarea;
+      guint i;
+
+      const gfloat tile_edges[] =
+        {
+          1./4.,
+          1./3.,
+          1./2.,
+          2./3.,
+          3./4.,
+        };
+
+      meta_window_get_work_area_current_monitor (window, &workarea);
+
+      new_left = new_outer->x;
+      new_top = new_outer->y;
+      new_right = new_outer->x + new_outer->width;
+      new_bottom = new_outer->y + new_outer->height;
+
+      /* When snapping tiled windows, we don't really care about the
+       * x and y position, only about the width and height. Also, it
+       * is special-cased (instead of relying on edge_data) because
+       * we don't really care for other windows when calculating the
+       * snapping points of tiled windows - we only care about the
+       * work area and the target position.
+       */
+      for (i = 0; i < G_N_ELEMENTS (tile_edges); i++)
+        {
+          guint horizontal_point = workarea.x + floor (workarea.width * tile_edges[i]);
+
+          if (ABS (horizontal_point - new_left) < 16)
+            {
+              new_left = horizontal_point;
+              new_right = workarea.x + workarea.width;
+            }
+          else if (ABS (horizontal_point - new_right) < 16)
+            {
+              new_left = workarea.x;
+              new_right = horizontal_point;
+            }
+        }
     }
   else
     {
@@ -669,7 +711,7 @@ apply_edge_resistance_to_each_side (MetaDisplay         *display,
   return modified;
 }
 
-LOCAL_SYMBOL void
+void
 meta_display_cleanup_edges (MetaDisplay *display)
 {
   guint i,j;
@@ -681,7 +723,7 @@ meta_display_cleanup_edges (MetaDisplay *display)
 
   /* We first need to clean out any window edges */
   edges_to_be_freed = g_hash_table_new_full (g_direct_hash, g_direct_equal,
-                                             free, NULL);
+                                             g_free, NULL);
   for (i = 0; i < 4; i++)
     {
       GArray *tmp = NULL;
@@ -724,7 +766,7 @@ meta_display_cleanup_edges (MetaDisplay *display)
         }
     }
 
-  /* Now free all the window edges (the key destroy function is free) */
+  /* Now free all the window edges (the key destroy function is g_free) */
   g_hash_table_destroy (edges_to_be_freed);
 
   /* Now free the arrays and data */
@@ -738,24 +780,16 @@ meta_display_cleanup_edges (MetaDisplay *display)
   edge_data->bottom_edges = NULL;
 
   /* Cleanup the timeouts */
-  if (edge_data->left_data.timeout_setup && edge_data->left_data.timeout_id != 0) {
-    g_source_remove (edge_data->left_data.timeout_id);
-    edge_data->left_data.timeout_id = 0;
-  }
-  if (edge_data->right_data.timeout_setup && edge_data->right_data.timeout_id != 0) {
-    g_source_remove (edge_data->right_data.timeout_id);
-    edge_data->right_data.timeout_id = 0;
-  }
-  if (edge_data->top_data.timeout_setup && edge_data->top_data.timeout_id != 0) {
-    g_source_remove (edge_data->top_data.timeout_id);
-    edge_data->top_data.timeout_id = 0;
-  }
-  if (edge_data->bottom_data.timeout_setup && edge_data->bottom_data.timeout_id != 0) {
-    g_source_remove (edge_data->bottom_data.timeout_id);
-    edge_data->bottom_data.timeout_id = 0;
-  }
+  if (edge_data->left_data.timeout_setup)
+    g_clear_handle_id (&edge_data->left_data.timeout_id, g_source_remove);
+  if (edge_data->right_data.timeout_setup)
+    g_clear_handle_id (&edge_data->right_data.timeout_id, g_source_remove);
+  if (edge_data->top_data.timeout_setup)
+    g_clear_handle_id (&edge_data->top_data.timeout_id, g_source_remove);
+  if (edge_data->bottom_data.timeout_setup)
+    g_clear_handle_id (&edge_data->bottom_data.timeout_id, g_source_remove);
 
-  free (display->grab_edge_resistance_data);
+  g_free (display->grab_edge_resistance_data);
   display->grab_edge_resistance_data = NULL;
 }
 
@@ -961,6 +995,7 @@ compute_resistance_and_snapping_edges (MetaDisplay *display)
    * in the layer that we are working on
    */
   GSList *rem_windows, *rem_win_stacking;
+  MetaWorkspaceManager *workspace_manager = display->workspace_manager;
 
   g_assert (display->grab_window != NULL);
   meta_topic (META_DEBUG_WINDOW_OPS,
@@ -971,8 +1006,8 @@ compute_resistance_and_snapping_edges (MetaDisplay *display)
    * 1st: Get the list of relevant windows, from bottom to top
    */
   stacked_windows =
-    meta_stack_list_windows (display->grab_screen->stack,
-                             display->grab_screen->active_workspace);
+    meta_stack_list_windows (display->stack,
+                             workspace_manager->active_workspace);
 
   /*
    * 2nd: we need to separate that stacked list into a list of windows that
@@ -990,9 +1025,9 @@ compute_resistance_and_snapping_edges (MetaDisplay *display)
         {
           MetaRectangle *new_rect;
           new_rect = g_new (MetaRectangle, 1);
-          meta_window_get_outer_rect (cur_window, new_rect);
+          meta_window_get_frame_rect (cur_window, new_rect);
           obscuring_windows = g_slist_prepend (obscuring_windows, new_rect);
-          window_stacking = 
+          window_stacking =
             g_slist_prepend (window_stacking, GINT_TO_POINTER (stack_position));
         }
 
@@ -1015,7 +1050,7 @@ compute_resistance_and_snapping_edges (MetaDisplay *display)
     {
       MetaRectangle  cur_rect;
       MetaWindow    *cur_window = cur_window_iter->data;
-      meta_window_get_outer_rect (cur_window, &cur_rect);
+      meta_window_get_frame_rect (cur_window, &cur_rect);
 
       /* Check if we want to use this window's edges for edge
        * resistance (note that dock edges are considered screen edges
@@ -1026,14 +1061,18 @@ compute_resistance_and_snapping_edges (MetaDisplay *display)
         {
           GList *new_edges;
           MetaEdge *new_edge;
+          MetaRectangle display_rect = { 0 };
           MetaRectangle reduced;
+
+          meta_display_get_size (display,
+                                 &display_rect.width, &display_rect.height);
 
           /* We don't care about snapping to any portion of the window that
            * is offscreen (we also don't care about parts of edges covered
            * by other windows or DOCKS, but that's handled below).
            */
-          meta_rectangle_intersect (&cur_rect, 
-                                    &display->grab_screen->rect,
+          meta_rectangle_intersect (&cur_rect,
+                                    &display_rect,
                                     &reduced);
 
           new_edges = NULL;
@@ -1058,7 +1097,7 @@ compute_resistance_and_snapping_edges (MetaDisplay *display)
           new_edge->side_type = META_SIDE_LEFT;
           new_edge->edge_type = META_EDGE_WINDOW;
           new_edges = g_list_prepend (new_edges, new_edge);
-          
+
           /* Top side of this window is resistance for the bottom edge of
            * the window being moved.
            */
@@ -1110,13 +1149,7 @@ compute_resistance_and_snapping_edges (MetaDisplay *display)
   g_list_free (stacked_windows);
   /* Free the memory used by the obscuring windows/docks lists */
   g_slist_free (window_stacking);
-  /* FIXME: Shouldn't there be a helper function to make this one line of code
-   * to free a list instead of four ugly ones?
-   */
-  g_slist_foreach (obscuring_windows,
-                   (void (*)(gpointer,gpointer))&free, /* ew, for ugly */
-                   NULL);
-  g_slist_free (obscuring_windows);
+  g_slist_free_full (obscuring_windows, g_free);
 
   /* Sort the list.  FIXME: Should I bother with this sorting?  I just
    * sort again later in cache_edges() anyway...
@@ -1130,8 +1163,8 @@ compute_resistance_and_snapping_edges (MetaDisplay *display)
    */
   cache_edges (display,
                edges,
-               display->grab_screen->active_workspace->monitor_edges,
-               display->grab_screen->active_workspace->screen_edges);
+               workspace_manager->active_workspace->monitor_edges,
+               workspace_manager->active_workspace->screen_edges);
   g_list_free (edges);
 
   /*
@@ -1140,13 +1173,8 @@ compute_resistance_and_snapping_edges (MetaDisplay *display)
   initialize_grab_edge_resistance_data (display);
 }
 
-/* Note that old_[xy] and new_[xy] are with respect to inner positions of
- * the window.
- */
-LOCAL_SYMBOL void
+void
 meta_window_edge_resistance_for_move (MetaWindow  *window,
-                                      int          old_x,
-                                      int          old_y,
                                       int         *new_x,
                                       int         *new_y,
                                       GSourceFunc  timeout_func,
@@ -1156,11 +1184,11 @@ meta_window_edge_resistance_for_move (MetaWindow  *window,
   MetaRectangle old_outer, proposed_outer, new_outer;
   gboolean is_resize;
 
-  meta_window_get_outer_rect (window, &old_outer);
+  meta_window_get_frame_rect (window, &old_outer);
 
   proposed_outer = old_outer;
-  proposed_outer.x += (*new_x - old_x);
-  proposed_outer.y += (*new_y - old_y);
+  proposed_outer.x = *new_x;
+  proposed_outer.y = *new_y;
   new_outer = proposed_outer;
 
   window->display->grab_last_user_action_was_snap = snap;
@@ -1211,40 +1239,33 @@ meta_window_edge_resistance_for_move (MetaWindow  *window,
       else
         smaller_y_change = bottom_change;
 
-      *new_x = old_x + smaller_x_change +
+      *new_x = old_outer.x + smaller_x_change +
               (BOX_LEFT (*reference) - BOX_LEFT (old_outer));
-      *new_y = old_y + smaller_y_change +
+      *new_y = old_outer.y + smaller_y_change +
               (BOX_TOP (*reference) - BOX_TOP (old_outer));
 
       meta_topic (META_DEBUG_EDGE_RESISTANCE,
                   "outer x & y move-to coordinate changed from %d,%d to %d,%d\n",
                   proposed_outer.x, proposed_outer.y,
-                  old_outer.x + (*new_x - old_x),
-                  old_outer.y + (*new_y - old_y));
+                  *new_x, *new_y);
     }
 }
 
-/* Note that old_(width|height) and new_(width|height) are with respect to
- * sizes of the inner window.
- */
-LOCAL_SYMBOL void
+void
 meta_window_edge_resistance_for_resize (MetaWindow  *window,
-                                        int          old_width,
-                                        int          old_height,
                                         int         *new_width,
                                         int         *new_height,
-                                        int          gravity,
+                                        MetaGravity  gravity,
                                         GSourceFunc  timeout_func,
                                         gboolean     snap,
                                         gboolean     is_keyboard_op)
 {
   MetaRectangle old_outer, new_outer;
   int proposed_outer_width, proposed_outer_height;
-  gboolean is_resize;
 
-  meta_window_get_outer_rect (window, &old_outer);
-  proposed_outer_width  = old_outer.width  + (*new_width  - old_width);
-  proposed_outer_height = old_outer.height + (*new_height - old_height);
+  meta_window_get_frame_rect (window, &old_outer);
+  proposed_outer_width  = *new_width;
+  proposed_outer_height = *new_height;
   meta_rectangle_resize_with_gravity (&old_outer,
                                       &new_outer,
                                       gravity,
@@ -1252,7 +1273,6 @@ meta_window_edge_resistance_for_resize (MetaWindow  *window,
                                       proposed_outer_height);
 
   window->display->grab_last_user_action_was_snap = snap;
-  is_resize = TRUE;
   if (apply_edge_resistance_to_each_side (window->display,
                                           window,
                                           &old_outer,
@@ -1260,10 +1280,10 @@ meta_window_edge_resistance_for_resize (MetaWindow  *window,
                                           timeout_func,
                                           snap,
                                           is_keyboard_op,
-                                          is_resize))
+                                          TRUE))
     {
-      *new_width  = old_width  + (new_outer.width  - old_outer.width);
-      *new_height = old_height + (new_outer.height - old_outer.height);
+      *new_width = new_outer.width;
+      *new_height = new_outer.height;
 
       meta_topic (META_DEBUG_EDGE_RESISTANCE,
                   "outer width & height got changed from %d,%d to %d,%d\n",

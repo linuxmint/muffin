@@ -28,15 +28,12 @@
 
 G_BEGIN_DECLS
 
-#define CLUTTER_TYPE_MASTER_CLOCK               (_clutter_master_clock_get_type ())
-#define CLUTTER_MASTER_CLOCK(obj)               (G_TYPE_CHECK_INSTANCE_CAST ((obj), CLUTTER_TYPE_MASTER_CLOCK, ClutterMasterClock))
-#define CLUTTER_IS_MASTER_CLOCK(obj)            (G_TYPE_CHECK_INSTANCE_TYPE ((obj), CLUTTER_TYPE_MASTER_CLOCK))
-#define CLUTTER_MASTER_CLOCK_GET_IFACE(obj)     (G_TYPE_INSTANCE_GET_INTERFACE ((obj), CLUTTER_TYPE_MASTER_CLOCK, ClutterMasterClockIface))
+#define CLUTTER_TYPE_MASTER_CLOCK (clutter_master_clock_get_type ())
+G_DECLARE_INTERFACE (ClutterMasterClock, clutter_master_clock,
+                     CLUTTER, MASTER_CLOCK,
+                     GObject)
 
-typedef struct _ClutterMasterClock      ClutterMasterClock; /* dummy */
-typedef struct _ClutterMasterClockIface ClutterMasterClockIface;
-
-struct _ClutterMasterClockIface
+struct _ClutterMasterClockInterface
 {
   /*< private >*/
   GTypeInterface parent_iface;
@@ -50,8 +47,6 @@ struct _ClutterMasterClockIface
   void (* set_paused)             (ClutterMasterClock *master_clock,
                                    gboolean            paused);
 };
-
-GType _clutter_master_clock_get_type (void) G_GNUC_CONST;
 
 ClutterMasterClock *    _clutter_master_clock_get_default               (void);
 void                    _clutter_master_clock_add_timeline              (ClutterMasterClock *master_clock,

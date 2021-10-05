@@ -65,7 +65,7 @@ typedef struct _CoglClosure
  * Removes the given closure from the callback list it is connected to
  * and destroys it. If the closure was created with a destroy function
  * then it will be invoked. */
-void
+COGL_EXPORT void
 _cogl_closure_disconnect (CoglClosure *closure);
 
 void

@@ -39,7 +39,7 @@
 #include <cogl/cogl-defines.h>
 #include <cogl/cogl-macros.h>
 
-COGL_BEGIN_DECLS
+G_BEGIN_DECLS
 
 /**
  * SECTION:cogl-shaders
@@ -47,11 +47,6 @@ COGL_BEGIN_DECLS
  *
  * Cogl allows accessing the GL programmable pipeline in order to create
  * vertex and fragment shaders.
- *
- * The shader source code can either be GLSL or ARBfp. If the source
- * code is ARBfp, it must begin with the string “!!ARBfp1.0”. The
- * application should check for the %COGL_FEATURE_SHADERS_GLSL or
- * %COGL_FEATURE_SHADERS_ARBFP features before using shaders.
  *
  * When using GLSL Cogl provides replacement names for most of the
  * builtin varyings and uniforms. It is recommended to use these names
@@ -234,7 +229,8 @@ COGL_BEGIN_DECLS
  *
  * Since: 1.0
  */
-typedef enum {
+typedef enum
+{
   COGL_SHADER_TYPE_VERTEX,
   COGL_SHADER_TYPE_FRAGMENT
 } CoglShaderType;
@@ -249,35 +245,9 @@ typedef enum {
  * Returns: a new shader handle.
  * Deprecated: 1.16: Use #CoglSnippet api
  */
-COGL_DEPRECATED_IN_1_16_FOR (cogl_snippet_)
-CoglHandle
+COGL_DEPRECATED_FOR (cogl_snippet_)
+COGL_EXPORT CoglHandle
 cogl_create_shader (CoglShaderType shader_type);
-
-/**
- * cogl_shader_ref:
- * @handle: A #CoglHandle to a shader.
- *
- * Add an extra reference to a shader.
- *
- * Returns: @handle
- * Deprecated: 1.16: Use #CoglSnippet api
- */
-COGL_DEPRECATED_IN_1_16_FOR (cogl_snippet_)
-CoglHandle
-cogl_shader_ref (CoglHandle handle);
-
-/**
- * cogl_shader_unref:
- * @handle: A #CoglHandle to a shader.
- *
- * Removes a reference to a shader. If it was the last reference the
- * shader object will be destroyed.
- *
- * Deprecated: 1.16: Use #CoglSnippet api
- */
-COGL_DEPRECATED_IN_1_16_FOR (cogl_snippet_)
-void
-cogl_shader_unref (CoglHandle handle);
 
 /**
  * cogl_is_shader:
@@ -289,8 +259,8 @@ cogl_shader_unref (CoglHandle handle);
  *   %FALSE otherwise
  * Deprecated: 1.16: Use #CoglSnippet api
  */
-COGL_DEPRECATED_IN_1_16_FOR (cogl_snippet_)
-CoglBool
+COGL_DEPRECATED_FOR (cogl_snippet_)
+COGL_EXPORT gboolean
 cogl_is_shader (CoglHandle handle);
 
 /**
@@ -306,41 +276,10 @@ cogl_is_shader (CoglHandle handle);
  * for a description of the recommended format for the shader code.
  * Deprecated: 1.16: Use #CoglSnippet api
  */
-COGL_DEPRECATED_IN_1_16_FOR (cogl_snippet_)
-void
+COGL_DEPRECATED_FOR (cogl_snippet_)
+COGL_EXPORT void
 cogl_shader_source (CoglHandle  shader,
                     const char *source);
-
-/**
- * cogl_shader_compile:
- * @handle: #CoglHandle for a shader.
- *
- * Compiles the shader, no return value, but the shader is now ready
- * for linking into a program. Note that calling this function is
- * optional. If it is not called then the shader will be automatically
- * compiled when it is linked.
- * Deprecated: 1.16: Use #CoglSnippet api
- */
-COGL_DEPRECATED_IN_1_16_FOR (cogl_snippet_)
-void
-cogl_shader_compile (CoglHandle handle);
-
-/**
- * cogl_shader_get_info_log:
- * @handle: #CoglHandle for a shader.
- *
- * Retrieves the information log for a coglobject, can be used in conjunction
- * with cogl_shader_get_parameteriv() to retrieve the compiler warnings/error
- * messages that caused a shader to not compile correctly, mainly useful for
- * debugging purposes.
- *
- * Return value: a newly allocated string containing the info log. Use
- *   free() to free it
- * Deprecated: 1.16: Use #CoglSnippet api
- */
-COGL_DEPRECATED_IN_1_16_FOR (cogl_snippet_)
-char *
-cogl_shader_get_info_log (CoglHandle handle);
 
 /**
  * cogl_shader_get_type:
@@ -352,22 +291,9 @@ cogl_shader_get_info_log (CoglHandle handle);
  *          or %COGL_SHADER_TYPE_FRAGMENT if the shader is a frament processor
  * Deprecated: 1.16: Use #CoglSnippet api
  */
-COGL_DEPRECATED_IN_1_16_FOR (cogl_snippet_)
-CoglShaderType
+COGL_DEPRECATED_FOR (cogl_snippet_)
+COGL_EXPORT CoglShaderType
 cogl_shader_get_type (CoglHandle handle);
-
-/**
- * cogl_shader_is_compiled:
- * @handle: #CoglHandle for a shader.
- *
- * Retrieves whether a shader #CoglHandle has been compiled
- *
- * Return value: %TRUE if the shader object has sucessfully be compiled
- * Deprecated: 1.16: Use #CoglSnippet api
- */
-COGL_DEPRECATED_IN_1_16_FOR (cogl_snippet_)
-CoglBool
-cogl_shader_is_compiled (CoglHandle handle);
 
 /**
  * cogl_create_program:
@@ -378,36 +304,9 @@ cogl_shader_is_compiled (CoglHandle handle);
  * Returns: a new cogl program.
  * Deprecated: 1.16: Use #CoglSnippet api
  */
-COGL_DEPRECATED_IN_1_16_FOR (cogl_snippet_)
-CoglHandle
+COGL_DEPRECATED_FOR (cogl_snippet_)
+COGL_EXPORT CoglHandle
 cogl_create_program (void);
-
-/**
- * cogl_program_ref:
- * @handle: A #CoglHandle to a program.
- *
- * Add an extra reference to a program.
- *
- * Deprecated: 1.0: Please use cogl_object_ref() instead.
- *
- * Returns: @handle
- */
-COGL_DEPRECATED_IN_1_16_FOR (cogl_snippet_)
-CoglHandle
-cogl_program_ref (CoglHandle handle);
-
-/**
- * cogl_program_unref:
- * @handle: A #CoglHandle to a program.
- *
- * Removes a reference to a program. If it was the last reference the
- * program object will be destroyed.
- *
- * Deprecated: 1.0: Please use cogl_object_unref() instead.
- */
-COGL_DEPRECATED_IN_1_16_FOR (cogl_snippet_)
-void
-cogl_program_unref (CoglHandle handle);
 
 /**
  * cogl_is_program:
@@ -420,8 +319,8 @@ cogl_program_unref (CoglHandle handle);
  *
  * Deprecated: 1.16: Use #CoglSnippet api
  */
-COGL_DEPRECATED_IN_1_16_FOR (cogl_snippet_)
-CoglBool
+COGL_DEPRECATED_FOR (cogl_snippet_)
+COGL_EXPORT gboolean
 cogl_is_program (CoglHandle handle);
 
 /**
@@ -436,8 +335,8 @@ cogl_is_program (CoglHandle handle);
  *
  * Deprecated: 1.16: Use #CoglSnippet api
  */
-COGL_DEPRECATED_IN_1_16_FOR (cogl_snippet_)
-void
+COGL_DEPRECATED_FOR (cogl_snippet_)
+COGL_EXPORT void
 cogl_program_attach_shader (CoglHandle program_handle,
                             CoglHandle shader_handle);
 
@@ -451,28 +350,9 @@ cogl_program_attach_shader (CoglHandle program_handle,
  *
  * Deprecated: 1.16: Use #CoglSnippet api
  */
-COGL_DEPRECATED_IN_1_16_FOR (cogl_snippet_)
-void
+COGL_DEPRECATED_FOR (cogl_snippet_)
+COGL_EXPORT void
 cogl_program_link (CoglHandle handle);
-
-/**
- * cogl_program_use:
- * @handle: a #CoglHandle for a shader program or %COGL_INVALID_HANDLE.
- *
- * Activate a specific shader program replacing that part of the GL
- * rendering pipeline, if passed in %COGL_INVALID_HANDLE the default
- * behavior of GL is reinstated.
- *
- * This function affects the global state of the current Cogl
- * context. It is much more efficient to attach the shader to a
- * specific material used for rendering instead by calling
- * cogl_material_set_user_program().
- *
- * Deprecated: 1.16: Use #CoglSnippet api
- */
-COGL_DEPRECATED_IN_1_16_FOR (cogl_snippet_)
-void
-cogl_program_use (CoglHandle handle);
 
 /**
  * cogl_program_get_uniform_location:
@@ -484,12 +364,10 @@ cogl_program_use (CoglHandle handle);
  * shader object and is possible to modify as an external parameter.
  *
  * Return value: the offset of a uniform in a specified program.
- *   This uniform can be set using cogl_program_uniform_1f() when the
- *   program is in use.
  * Deprecated: 1.16: Use #CoglSnippet api instead
  */
-COGL_DEPRECATED_IN_1_16_FOR (cogl_snippet_)
-int
+COGL_DEPRECATED_FOR (cogl_snippet_)
+COGL_EXPORT int
 cogl_program_get_uniform_location (CoglHandle  handle,
                                    const char *uniform_name);
 
@@ -506,8 +384,8 @@ cogl_program_get_uniform_location (CoglHandle  handle,
  * Since: 1.4
  * Deprecated: 1.16: Use #CoglSnippet api instead
  */
-COGL_DEPRECATED_IN_1_16_FOR (cogl_snippet_)
-void
+COGL_DEPRECATED_FOR (cogl_snippet_)
+COGL_EXPORT void
 cogl_program_set_uniform_1f (CoglHandle program,
                              int uniform_location,
                              float value);
@@ -525,8 +403,8 @@ cogl_program_set_uniform_1f (CoglHandle program,
  * Since: 1.4
  * Deprecated: 1.16: Use #CoglSnippet api instead
  */
-COGL_DEPRECATED_IN_1_16_FOR (cogl_snippet_)
-void
+COGL_DEPRECATED_FOR (cogl_snippet_)
+COGL_EXPORT void
 cogl_program_set_uniform_1i (CoglHandle program,
                              int uniform_location,
                              int value);
@@ -548,8 +426,8 @@ cogl_program_set_uniform_1i (CoglHandle program,
  * Since: 1.4
  * Deprecated: 1.16: Use #CoglSnippet api instead
  */
-COGL_DEPRECATED_IN_1_16_FOR (cogl_snippet_)
-void
+COGL_DEPRECATED_FOR (cogl_snippet_)
+COGL_EXPORT void
 cogl_program_set_uniform_float (CoglHandle program,
                                 int uniform_location,
                                 int n_components,
@@ -573,8 +451,8 @@ cogl_program_set_uniform_float (CoglHandle program,
  * Since: 1.4
  * Deprecated: 1.16: Use #CoglSnippet api instead
  */
-COGL_DEPRECATED_IN_1_16_FOR (cogl_snippet_)
-void
+COGL_DEPRECATED_FOR (cogl_snippet_)
+COGL_EXPORT void
 cogl_program_set_uniform_int (CoglHandle program,
                               int uniform_location,
                               int n_components,
@@ -599,105 +477,15 @@ cogl_program_set_uniform_int (CoglHandle program,
  * Since: 1.4
  * Deprecated: 1.16: Use #CoglSnippet api instead
  */
-COGL_DEPRECATED_IN_1_16_FOR (cogl_snippet_)
-void
+COGL_DEPRECATED_FOR (cogl_snippet_)
+COGL_EXPORT void
 cogl_program_set_uniform_matrix (CoglHandle program,
                                  int uniform_location,
                                  int dimensions,
                                  int count,
-                                 CoglBool transpose,
+                                 gboolean transpose,
                                  const float *value);
 
-/**
- * cogl_program_uniform_1f:
- * @uniform_no: the uniform to set.
- * @value: the new value of the uniform.
- *
- * Changes the value of a floating point uniform in the currently
- * used (see cogl_program_use()) shader program.
- *
- * Deprecated: 1.16: Use #CoglSnippet api
- */
-COGL_DEPRECATED_IN_1_16_FOR (cogl_snippet_)
-void
-cogl_program_uniform_1f (int   uniform_no,
-                         float value);
-
-/**
- * cogl_program_uniform_1i:
- * @uniform_no: the uniform to set.
- * @value: the new value of the uniform.
- *
- * Changes the value of an integer uniform in the currently
- * used (see cogl_program_use()) shader program.
- *
- * Deprecated: 1.16: Use #CoglSnippet api
- */
-COGL_DEPRECATED_IN_1_16_FOR (cogl_snippet_)
-void
-cogl_program_uniform_1i (int uniform_no,
-                         int value);
-
-/**
- * cogl_program_uniform_float:
- * @uniform_no: the uniform to set.
- * @size: Size of float vector.
- * @count: Size of array of uniforms.
- * @value: (array length=count): the new value of the uniform.
- *
- * Changes the value of a float vector uniform, or uniform array in the
- * currently used (see cogl_program_use()) shader program.
- *
- * Deprecated: 1.16: Use #CoglSnippet api
- */
-COGL_DEPRECATED_IN_1_16_FOR (cogl_snippet_)
-void
-cogl_program_uniform_float (int            uniform_no,
-                            int            size,
-                            int            count,
-                            const float   *value);
-
-/**
- * cogl_program_uniform_int:
- * @uniform_no: the uniform to set.
- * @size: Size of int vector.
- * @count: Size of array of uniforms.
- * @value: (array length=count): the new value of the uniform.
- *
- * Changes the value of a int vector uniform, or uniform array in the
- * currently used (see cogl_program_use()) shader program.
- *
- * Deprecated: 1.16: Use #CoglSnippet api
- */
-COGL_DEPRECATED_IN_1_16_FOR (cogl_snippet_)
-void
-cogl_program_uniform_int (int        uniform_no,
-                          int        size,
-                          int        count,
-                          const int *value);
-
-/**
- * cogl_program_uniform_matrix:
- * @uniform_no: the uniform to set.
- * @size: Size of matrix.
- * @count: Size of array of uniforms.
- * @transpose: Whether to transpose the matrix when setting the uniform.
- * @value: (array length=count): the new value of the uniform.
- *
- * Changes the value of a matrix uniform, or uniform array in the
- * currently used (see cogl_program_use()) shader program. The @size
- * parameter is used to determine the square size of the matrix.
- *
- * Deprecated: 1.16: Use #CoglSnippet api
- */
-COGL_DEPRECATED_IN_1_16_FOR (cogl_snippet_)
-void
-cogl_program_uniform_matrix (int          uniform_no,
-                             int          size,
-                             int          count,
-                             CoglBool     transpose,
-                             const float *value);
-
-COGL_END_DECLS
+G_END_DECLS
 
 #endif /* __COGL_SHADER_H__ */

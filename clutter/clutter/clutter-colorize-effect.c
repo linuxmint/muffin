@@ -37,9 +37,7 @@
 #define CLUTTER_IS_COLORIZE_EFFECT_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), CLUTTER_TYPE_COLORIZE_EFFECT))
 #define CLUTTER_COLORIZE_EFFECT_GET_CLASS(obj)  (G_TYPE_INSTANCE_GET_CLASS ((obj), CLUTTER_TYPE_COLORIZE_EFFECT, ClutterColorizeEffectClass))
 
-#ifdef HAVE_CONFIG_H
 #include "clutter-build-config.h"
-#endif
 
 #define CLUTTER_ENABLE_EXPERIMENTAL_API
 
@@ -107,7 +105,8 @@ G_DEFINE_TYPE (ClutterColorizeEffect,
                CLUTTER_TYPE_OFFSCREEN_EFFECT);
 
 static gboolean
-clutter_colorize_effect_pre_paint (ClutterEffect *effect)
+clutter_colorize_effect_pre_paint (ClutterEffect       *effect,
+                                   ClutterPaintContext *paint_context)
 {
   ClutterColorizeEffect *self = CLUTTER_COLORIZE_EFFECT (effect);
   ClutterEffectClass *parent_class;
@@ -128,7 +127,7 @@ clutter_colorize_effect_pre_paint (ClutterEffect *effect)
     }
 
   parent_class = CLUTTER_EFFECT_CLASS (clutter_colorize_effect_parent_class);
-  if (parent_class->pre_paint (effect))
+  if (parent_class->pre_paint (effect, paint_context))
     {
       ClutterOffscreenEffect *offscreen_effect =
         CLUTTER_OFFSCREEN_EFFECT (effect);
@@ -147,9 +146,12 @@ clutter_colorize_effect_pre_paint (ClutterEffect *effect)
 }
 
 static void
-clutter_colorize_effect_paint_target (ClutterOffscreenEffect *effect)
+clutter_colorize_effect_paint_target (ClutterOffscreenEffect *effect,
+                                      ClutterPaintContext    *paint_context)
 {
   ClutterColorizeEffect *self = CLUTTER_COLORIZE_EFFECT (effect);
+  CoglFramebuffer *framebuffer =
+    clutter_paint_context_get_framebuffer (paint_context);
   ClutterActor *actor;
   guint8 paint_opacity;
 
@@ -161,11 +163,11 @@ clutter_colorize_effect_paint_target (ClutterOffscreenEffect *effect)
                               paint_opacity,
                               paint_opacity,
                               paint_opacity);
-  cogl_push_source (self->pipeline);
 
-  cogl_rectangle (0, 0, self->tex_width, self->tex_height);
-
-  cogl_pop_source ();
+  cogl_framebuffer_draw_rectangle (framebuffer,
+                                   self->pipeline,
+                                   0, 0,
+                                   self->tex_width, self->tex_height);
 }
 
 static void
@@ -294,9 +296,7 @@ clutter_colorize_effect_init (ClutterColorizeEffect *self)
       cogl_pipeline_add_snippet (klass->base_pipeline, snippet);
       cogl_object_unref (snippet);
 
-      cogl_pipeline_set_layer_null_texture (klass->base_pipeline,
-                                            0, /* layer number */
-                                            COGL_TEXTURE_TYPE_2D);
+      cogl_pipeline_set_layer_null_texture (klass->base_pipeline, 0);
     }
 
   self->pipeline = cogl_pipeline_copy (klass->base_pipeline);

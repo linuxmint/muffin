@@ -75,8 +75,8 @@ struct _CallyRootPrivate
   GSList *stage_list;
 
   /* signals id */
-  guint stage_added_id;
-  guint stage_removed_id;
+  gulong stage_added_id;
+  gulong stage_removed_id;
 };
 
 G_DEFINE_TYPE_WITH_PRIVATE (CallyRoot, cally_root,  ATK_TYPE_GOBJECT_ACCESSIBLE)
@@ -149,11 +149,9 @@ cally_root_finalize (GObject *object)
 
   stage_manager = atk_gobject_accessible_get_object (ATK_GOBJECT_ACCESSIBLE (root));
 
-  g_signal_handler_disconnect (stage_manager,
-                               root->priv->stage_added_id);
+  g_clear_signal_handler (&root->priv->stage_added_id, stage_manager);
 
-  g_signal_handler_disconnect (stage_manager,
-                               root->priv->stage_added_id);
+  g_clear_signal_handler (&root->priv->stage_removed_id, stage_manager);
 
   G_OBJECT_CLASS (cally_root_parent_class)->finalize (object);
 }

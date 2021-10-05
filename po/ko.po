@@ -1,425 +1,283 @@
-# muffin korean translation
-# This file is distributed under the same license as the muffin package.
+# mutter korean translation
+# This file is distributed under the same license as the mutter package.
 #
 # Based on metacity translation:
 # Young-Ho, Cha <ganadist@chollian.net>, 2002, 2006.
 # Changwoo Ryu <cwryu@debian.org>, 2003, 2004, 2005, 2006, 2007, 2008, 2009.
 #
-# Updated in muffin:
-# Changwoo Ryu <cwryu@debian.org>, 2011-2012.
+# Updated in mutter:
+# Changwoo Ryu <cwryu@debian.org>, 2011-2017.
+# Gwan-gyeong Mun <elongbug@gmail.com>, 2018-2019.
 #
 #
 # 주의:
-# - 이 프로그램의 이름인 Muffin는 "머터"로 음역.
+# - 이 프로그램의 이름인 Mutter는 "머터"로 음역.
 # - Clutter는 "클러터"로 음역.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: muffin\n"
-"Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
-"product=muffin&keywords=I18N+L10N&component=general\n"
-"POT-Creation-Date: 2012-03-15 21:29+0000\n"
-"PO-Revision-Date: 2012-03-27 01:25+0900\n"
-"Last-Translator: Changwoo Ryu <cwryu@debian.org>\n"
+"Project-Id-Version: mutter\n"
+"Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/mutter/issues\n"
+"POT-Creation-Date: 2020-02-23 17:41+0000\n"
+"PO-Revision-Date: 2020-02-24 14:09+0200\n"
+"Last-Translator: Gwan-gyeong Mun <elongbug@gmail.com>\n"
 "Language-Team: GNOME Korea <gnome-kr@googlegroups.com>\n"
+"Language: ko\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: Korean\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Poedit 2.2.4\n"
 
-#: ../src/50-muffin-windows.xml.in.h:1
+#: data/50-mutter-navigation.xml:6
+msgid "Navigation"
+msgstr "조종"
+
+#: data/50-mutter-navigation.xml:9
+msgid "Move window to workspace 1"
+msgstr "창을 작업 공간 1로 옮기기"
+
+#: data/50-mutter-navigation.xml:12
+msgid "Move window to workspace 2"
+msgstr "창을 작업 공간 2로 옮기기"
+
+#: data/50-mutter-navigation.xml:15
+msgid "Move window to workspace 3"
+msgstr "창을 작업 공간 3으로 옮기기"
+
+#: data/50-mutter-navigation.xml:18
+msgid "Move window to workspace 4"
+msgstr "창을 작업 공간 4로 옮기기"
+
+#: data/50-mutter-navigation.xml:21
+msgid "Move window to last workspace"
+msgstr "창을 최근 작업 공간으로 옮기기"
+
+#: data/50-mutter-navigation.xml:24
+msgid "Move window one workspace up"
+msgstr "창을 한칸 위 작업 공간으로 옮기기"
+
+#: data/50-mutter-navigation.xml:27
+msgid "Move window one workspace down"
+msgstr "창을 한칸 아래 작업 공간으로 옮기기"
+
+#: data/50-mutter-navigation.xml:30
+msgid "Move window one monitor to the left"
+msgstr "창을 한칸 왼쪽 모니터로 옮기기"
+
+#: data/50-mutter-navigation.xml:33
+msgid "Move window one monitor to the right"
+msgstr "창을 한칸 오른쪽 모니터로 옮기기"
+
+#: data/50-mutter-navigation.xml:36
+msgid "Move window one monitor up"
+msgstr "창을 한칸 위 모니터로 옮기기"
+
+#: data/50-mutter-navigation.xml:39
+msgid "Move window one monitor down"
+msgstr "창을 한칸 아래 모니터로 옮기기"
+
+#: data/50-mutter-navigation.xml:43
+msgid "Switch applications"
+msgstr "프로그램 전환"
+
+#: data/50-mutter-navigation.xml:48
+msgid "Switch to previous application"
+msgstr "이전 프로그램으로 전환"
+
+#: data/50-mutter-navigation.xml:52
+msgid "Switch windows"
+msgstr "창 전환"
+
+#: data/50-mutter-navigation.xml:57
+msgid "Switch to previous window"
+msgstr "이전 창으로 전환"
+
+#: data/50-mutter-navigation.xml:61
+msgid "Switch windows of an application"
+msgstr "한 프로그램의 창 전환"
+
+#: data/50-mutter-navigation.xml:66
+msgid "Switch to previous window of an application"
+msgstr "한 프로그램의 이전 창으로 전환"
+
+#: data/50-mutter-navigation.xml:70
+msgid "Switch system controls"
+msgstr "시스템 조작 전환"
+
+#: data/50-mutter-navigation.xml:75
+msgid "Switch to previous system control"
+msgstr "이전 시스템 조작으로 전환"
+
+#: data/50-mutter-navigation.xml:79
+msgid "Switch windows directly"
+msgstr "직접 창 전환"
+
+#: data/50-mutter-navigation.xml:84
+msgid "Switch directly to previous window"
+msgstr "직접 이전 창으로 전환"
+
+#: data/50-mutter-navigation.xml:88
+msgid "Switch windows of an app directly"
+msgstr "직접 한 앱의 창 전환"
+
+#: data/50-mutter-navigation.xml:93
+msgid "Switch directly to previous window of an app"
+msgstr "직접 한 앱의 이전 창으로 전환"
+
+#: data/50-mutter-navigation.xml:97
+msgid "Switch system controls directly"
+msgstr "직접 시스템 조작 전환"
+
+#: data/50-mutter-navigation.xml:102
+msgid "Switch directly to previous system control"
+msgstr "직접 이전 시스템 조작으로 전환"
+
+#: data/50-mutter-navigation.xml:105
+msgid "Hide all normal windows"
+msgstr "모든 일반 창 감추기"
+
+#: data/50-mutter-navigation.xml:108
+msgid "Switch to workspace 1"
+msgstr "작업 공간 1로 이동"
+
+#: data/50-mutter-navigation.xml:111
+msgid "Switch to workspace 2"
+msgstr "작업 공간 2로 이동"
+
+#: data/50-mutter-navigation.xml:114
+msgid "Switch to workspace 3"
+msgstr "작업 공간 3으로 이동"
+
+#: data/50-mutter-navigation.xml:117
+msgid "Switch to workspace 4"
+msgstr "작업 공간 4로 이동"
+
+#: data/50-mutter-navigation.xml:120
+msgid "Switch to last workspace"
+msgstr "최근 작업 공간으로 이동"
+
+#: data/50-mutter-navigation.xml:123
+msgid "Move to workspace above"
+msgstr "위 작업 공간으로 옮기기"
+
+#: data/50-mutter-navigation.xml:126
+msgid "Move to workspace below"
+msgstr "아래 작업 공간으로 옮기기"
+
+#: data/50-mutter-system.xml:6 data/50-mutter-wayland.xml:6
+msgid "System"
+msgstr "시스템"
+
+#: data/50-mutter-system.xml:8
+msgid "Show the run command prompt"
+msgstr "실행 명령 프롬프트 보이기"
+
+#: data/50-mutter-system.xml:10
+msgid "Show the activities overview"
+msgstr "현재 활동 보이기"
+
+#: data/50-mutter-wayland.xml:8
+msgid "Restore the keyboard shortcuts"
+msgstr "키보드 바로 가기 복구"
+
+#: data/50-mutter-windows.xml:6
 msgid "Windows"
 msgstr "창"
 
-#: ../src/50-muffin-windows.xml.in.h:2
+#: data/50-mutter-windows.xml:8
+msgid "Activate the window menu"
+msgstr "창 메뉴 활성화"
+
+#: data/50-mutter-windows.xml:10
+msgid "Toggle fullscreen mode"
+msgstr "전체 화면 모드 토글"
+
+#: data/50-mutter-windows.xml:12
+msgid "Toggle maximization state"
+msgstr "최대화 상태 토글"
+
+#: data/50-mutter-windows.xml:14
+msgid "Maximize window"
+msgstr "창 최대화"
+
+#: data/50-mutter-windows.xml:16
+msgid "Restore window"
+msgstr "창 복구"
+
+#: data/50-mutter-windows.xml:18
+msgid "Close window"
+msgstr "창 닫기"
+
+#: data/50-mutter-windows.xml:20
+msgid "Hide window"
+msgstr "창 감추기"
+
+#: data/50-mutter-windows.xml:22
+msgid "Move window"
+msgstr "창 옮기기"
+
+#: data/50-mutter-windows.xml:24
+msgid "Resize window"
+msgstr "창 크기 조정"
+
+#: data/50-mutter-windows.xml:27
+msgid "Toggle window on all workspaces or one"
+msgstr "창을 모든/하나의 작업 공간에 두기 토글"
+
+#: data/50-mutter-windows.xml:29
+msgid "Raise window if covered, otherwise lower it"
+msgstr "창이 가려 있으면 올리고 아니면 내리기"
+
+#: data/50-mutter-windows.xml:31
+msgid "Raise window above other windows"
+msgstr "창을 다른 창 위로 올리기"
+
+#: data/50-mutter-windows.xml:33
+msgid "Lower window below other windows"
+msgstr "창을 다른 창 아래로 내리기"
+
+#: data/50-mutter-windows.xml:35
+msgid "Maximize window vertically"
+msgstr "창을 세로 방향으로 최대화"
+
+#: data/50-mutter-windows.xml:37
+msgid "Maximize window horizontally"
+msgstr "창을 가로 방향으로 최대화"
+
+#: data/50-mutter-windows.xml:41
 msgid "View split on left"
-msgstr "왼쪽 절반 뷰"
+msgstr "왼쪽 나눔창 보기"
 
-#: ../src/50-muffin-windows.xml.in.h:3
+#: data/50-mutter-windows.xml:45
 msgid "View split on right"
-msgstr "오른쪽 절반 뷰"
+msgstr "오른쪽 나눔창 보기"
 
-#. This probably means that a non-WM compositor like xcompmgr is running;
-#. * we have no way to get it to exit
-#: ../src/compositor/compositor.c:492
-#, c-format
-msgid ""
-"Another compositing manager is already running on screen %i on display \"%s"
-"\"."
-msgstr ""
-"다른 창 구성 관리 프로그램이 이미 디스플레이 \"%2$s\" 화면 %1$i번에서 실행 중"
-"입니다."
-
-#: ../src/core/bell.c:307
-msgid "Bell event"
-msgstr "삑소리 이벤트"
-
-#: ../src/core/core.c:157
-#, c-format
-msgid "Unknown window information request: %d"
-msgstr "알 수 없는 창 정보 요청: %d"
-
-#: ../src/core/delete.c:111
-#, c-format
-msgid "<tt>%s</tt> is not responding."
-msgstr "<tt>%s</tt> 창이 반응하지 않습니다."
-
-#: ../src/core/delete.c:114
-msgid "Application is not responding."
-msgstr "프로그램이 반응하지 않습니다."
-
-#: ../src/core/delete.c:119
-msgid ""
-"You may choose to wait a short while for it to continue or force the "
-"application to quit entirely."
-msgstr "좀 더 기다리거나 해당 프로그램을 강제로 끝낼 수 있습니다."
-
-#: ../src/core/delete.c:126
-msgid "_Wait"
-msgstr "기다리기(_W)"
-
-#: ../src/core/delete.c:126
-msgid "_Force Quit"
-msgstr "강제로 끝내기(_F)"
-
-#: ../src/core/display.c:387
-#, c-format
-msgid "Missing %s extension required for compositing"
-msgstr "콤포짓에 필요한 %s 확장 기능이 없습니다"
-
-#: ../src/core/display.c:453
-#, c-format
-msgid "Failed to open X Window System display '%s'\n"
-msgstr "X 윈도 시스템 디스플레이 '%s'을(를) 여는데 실패하였습니다\n"
-
-#: ../src/core/keybindings.c:852
-#, c-format
-msgid ""
-"Some other program is already using the key %s with modifiers %x as a "
-"binding\n"
-msgstr ""
-"다른 프로그램에서 이미 단축키로 변경 키 %2$x와(과) 키 %1$s을(를) 사용하고 있"
-"습니다\n"
-
-#: ../src/core/main.c:206
-msgid "Disable connection to session manager"
-msgstr "세션 관리자와 연결 하지 않습니다"
-
-#: ../src/core/main.c:212
-msgid "Replace the running window manager"
-msgstr "실행 중인 창 관리자를 바꿉니다"
-
-#: ../src/core/main.c:218
-msgid "Specify session management ID"
-msgstr "세션 관리 ID를 지정합니다"
-
-#: ../src/core/main.c:223
-msgid "X Display to use"
-msgstr "사용할 X 디스플레이"
-
-#: ../src/core/main.c:229
-msgid "Initialize session from savefile"
-msgstr "저장 파일에서 세션을 초기화 합니다"
-
-#: ../src/core/main.c:235
-msgid "Make X calls synchronous"
-msgstr "동기 X 호출을 합니다"
-
-#: ../src/core/main.c:504
-#, c-format
-msgid "Failed to scan themes directory: %s\n"
-msgstr "테마 디렉터리를 읽는 데 실패했습니다: %s\n"
-
-#: ../src/core/main.c:520
-#, c-format
-msgid ""
-"Could not find a theme! Be sure %s exists and contains the usual themes.\n"
-msgstr ""
-"테마를 찾을 수 없습니다! %s이(가) 있고 올바른 테마가 들어 있는지 확인하십시"
-"오.\n"
-
-#: ../src/core/muffin.c:40
-#, c-format
-msgid ""
-"muffin %s\n"
-"Copyright (C) 2001-%d Havoc Pennington, Red Hat, Inc., and others\n"
-"This is free software; see the source for copying conditions.\n"
-"There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A "
-"PARTICULAR PURPOSE.\n"
-msgstr ""
-"muffin %s\n"
-"Copyright (C) 2001-%d Havoc Pennington, Red Hat, Inc., and others\n"
-"This is free software; see the source for copying conditions.\n"
-"There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A "
-"PARTICULAR PURPOSE.\n"
-
-#: ../src/core/muffin.c:54
-msgid "Print version"
-msgstr "버전을 출력합니다"
-
-#: ../src/core/muffin.c:60
-msgid "Comma-separated list of compositor plugins"
-msgstr "컴포짓 플러그인의 목록, 쉼표로 구분"
-
-#: ../src/core/prefs.c:1077
-msgid ""
-"Workarounds for broken applications disabled. Some applications may not "
-"behave properly.\n"
-msgstr ""
-"응용 프로그램에 대한 임시 방편을 막았습니다. 몇몇 응용프로그램들이 제대로 동"
-"작하지 않을것입니다.\n"
-
-#: ../src/core/prefs.c:1152
-#, c-format
-msgid "Could not parse font description \"%s\" from GSettings key %s\n"
-msgstr "GSettings 키 %2$s에서 글꼴 지정 \"%1$s\"을(를) 분석할 수 없습니다\n"
-
-#: ../src/core/prefs.c:1218
-#, c-format
-msgid ""
-"\"%s\" found in configuration database is not a valid value for mouse button "
-"modifier\n"
-msgstr ""
-"설정 데이터베이스에서 찾은 \"%s\"이(가) 마우스 단추 변경 키의 올바른 값이 아"
-"닙니다\n"
-
-#: ../src/core/prefs.c:1739
-#, c-format
-msgid ""
-"\"%s\" found in configuration database is not a valid value for keybinding "
-"\"%s\"\n"
-msgstr ""
-"설정 데이터베이스에서 찾은 \"%s\"이(가) 단축키 \"%s\"에 대한 올바른 값이 아닙"
-"니다\n"
-
-#: ../src/core/prefs.c:1836
-#, c-format
-msgid "Workspace %d"
-msgstr "작업 공간 %d"
-
-#: ../src/core/screen.c:730
-#, c-format
-msgid "Screen %d on display '%s' is invalid\n"
-msgstr "디스플레이 '%2$s'의 화면 %1$d은(는) 잘못되었습니다\n"
-
-#: ../src/core/screen.c:746
-#, c-format
-msgid ""
-"Screen %d on display \"%s\" already has a window manager; try using the --"
-"replace option to replace the current window manager.\n"
-msgstr ""
-"디스플레이 \"%2$s\"의 화면 %1$d에 이미 창 관리자가 실행되고 있습니다. 현재 "
-"창 관리자를 무시하는 --replace 옵션을 써보십시오.\n"
-
-#: ../src/core/screen.c:773
-#, c-format
-msgid ""
-"Could not acquire window manager selection on screen %d display \"%s\"\n"
-msgstr "디스플레이 \"%2$s\"의 화면 %1$d에 창 관리 선택을 가질 수 없습니다\n"
-
-#: ../src/core/screen.c:828
-#, c-format
-msgid "Screen %d on display \"%s\" already has a window manager\n"
-msgstr ""
-"디스플레이 \"%2$s\"의 화면 %1$d은(는) 이미 창 관리자가 실행되고 있습니다\n"
-
-#: ../src/core/screen.c:1013
-#, c-format
-msgid "Could not release screen %d on display \"%s\"\n"
-msgstr "디스플레이 \"%2$s\"의 화면 %1$d을(를) 떼어 놓을수 없습니다\n"
-
-#: ../src/core/session.c:843 ../src/core/session.c:850
-#, c-format
-msgid "Could not create directory '%s': %s\n"
-msgstr "디렉터리 '%s'을(를) 만들 수 없습니다: %s\n"
-
-#: ../src/core/session.c:860
-#, c-format
-msgid "Could not open session file '%s' for writing: %s\n"
-msgstr "세션 파일 '%s'을(를) 쓰기위해 열 수 없습니다: %s\n"
-
-#: ../src/core/session.c:1001
-#, c-format
-msgid "Error writing session file '%s': %s\n"
-msgstr "세션 파일 '%s'을(를) 쓰는 중 오류: %s\n"
-
-#: ../src/core/session.c:1006
-#, c-format
-msgid "Error closing session file '%s': %s\n"
-msgstr "세션 파일 '%s'을(를) 닫는 중 오류: %s\n"
-
-#: ../src/core/session.c:1136
-#, c-format
-msgid "Failed to parse saved session file: %s\n"
-msgstr "저장된 세션파일을 분석하기 실패: %s\n"
-
-#: ../src/core/session.c:1185
-#, c-format
-msgid "<muffin_session> attribute seen but we already have the session ID"
-msgstr "이미 세션 ID를 가지고 있는데 <muffin_session> 속성이 나왔습니다."
-
-#: ../src/core/session.c:1198 ../src/core/session.c:1273
-#: ../src/core/session.c:1305 ../src/core/session.c:1377
-#: ../src/core/session.c:1437
-#, c-format
-msgid "Unknown attribute %s on <%s> element"
-msgstr "<%2$s> 엘리먼트에 알 수 없는 속성 %1$s"
-
-#: ../src/core/session.c:1215
-#, c-format
-msgid "nested <window> tag"
-msgstr "포함된 <window> 태그"
-
-#: ../src/core/session.c:1457
-#, c-format
-msgid "Unknown element %s"
-msgstr "알 수 없는 속성 %s"
-
-#: ../src/core/session.c:1809
-msgid ""
-"These windows do not support &quot;save current setup&quot; and will have to "
-"be restarted manually next time you log in."
-msgstr ""
-"이 창은 &quot;현재 설정 저장&quot;을 지원하지 않기 때문에 다음 번에 로그인 "
-"할 때 수동으로 다시 시작해야 합니다."
-
-#: ../src/core/util.c:111
-#, c-format
-msgid "Failed to open debug log: %s\n"
-msgstr "디버그 로그 열기 실패: %s\n"
-
-#: ../src/core/util.c:121
-#, c-format
-msgid "Failed to fdopen() log file %s: %s\n"
-msgstr "로그 파일 %s을(를) fdopen()하기 실패: %s\n"
-
-#: ../src/core/util.c:127
-#, c-format
-msgid "Opened log file %s\n"
-msgstr "로그 파일 %s을(를) 엽니다\n"
-
-#: ../src/core/util.c:146 ../src/tools/muffin-message.c:149
-#, c-format
-msgid "Muffin was compiled without support for verbose mode\n"
-msgstr "머터가 자세한 모드 지원 없이 컴파일 되었습니다\n"
-
-#: ../src/core/util.c:290
-msgid "Window manager: "
-msgstr "창 관리자: "
-
-#: ../src/core/util.c:438
-msgid "Bug in window manager: "
-msgstr "창 관리자의 벌레: "
-
-#: ../src/core/util.c:471
-msgid "Window manager warning: "
-msgstr "창 관리자 주의: "
-
-#: ../src/core/util.c:499
-msgid "Window manager error: "
-msgstr "장 관리자 오류: "
-
-#. first time through
-#: ../src/core/window.c:7269
-#, c-format
-msgid ""
-"Window %s sets SM_CLIENT_ID on itself, instead of on the WM_CLIENT_LEADER "
-"window as specified in the ICCCM.\n"
-msgstr ""
-"창 %s(이)가 자신에게 ICCCM에 저정한대로 WM_CLIENT_LEADER창 대신에 자신에게 "
-"SM_CLIENT_ID를 지정했습니다.\n"
-
-#. We ignore mwm_has_resize_func because WM_NORMAL_HINTS is the
-#. * authoritative source for that info. Some apps such as mplayer or
-#. * xine disable resize via MWM but not WM_NORMAL_HINTS, but that
-#. * leads to e.g. us not fullscreening their windows.  Apps that set
-#. * MWM but not WM_NORMAL_HINTS are basically broken. We complain
-#. * about these apps but make them work.
-#.
-#: ../src/core/window.c:7932
-#, c-format
-msgid ""
-"Window %s sets an MWM hint indicating it isn't resizable, but sets min size %"
-"d x %d and max size %d x %d; this doesn't make much sense.\n"
-msgstr ""
-"%s 창에서 크기 변경이 불가능하다는 MWM 힌트를 설정했지만, 최소 크기 %d x %d "
-"및 최대 크기 %d x %d(으)로 설정했습니다. 앞뒤가 맞지 않습니다.\n"
-
-#: ../src/core/window-props.c:309
-#, c-format
-msgid "Application set a bogus _NET_WM_PID %lu\n"
-msgstr "응용 프로그램이 가짜 _NET_WM_PID %lu을(를) 설정하였습니다\n"
-
-# <창제목> (on <기계>)
-#: ../src/core/window-props.c:426
-#, c-format
-msgid "%s (on %s)"
-msgstr "%s (%s에서)"
-
-#: ../src/core/window-props.c:1481
-#, c-format
-msgid "Invalid WM_TRANSIENT_FOR window 0x%lx specified for %s.\n"
-msgstr "%2$s에 대해 WM_TRANSIENT_FOR 0x%1$lx 창이 잘못되었습니다.\n"
-
-#: ../src/core/window-props.c:1492
-#, c-format
-msgid "WM_TRANSIENT_FOR window 0x%lx for %s would create loop.\n"
-msgstr "%2$s에 대해 WM_TRANSIENT_FOR 0x%1$lx 창은 무한 반복입니다.\n"
-
-#: ../src/core/xprops.c:155
-#, c-format
-msgid ""
-"Window 0x%lx has property %s\n"
-"that was expected to have type %s format %d\n"
-"and actually has type %s format %d n_items %d.\n"
-"This is most likely an application bug, not a window manager bug.\n"
-"The window has title=\"%s\" class=\"%s\" name=\"%s\"\n"
-msgstr ""
-"창 0x%lx의 등록 정보 %s\n"
-"형식 %s %d이(가) 들어있어야 하는데\n"
-"실제로는 형식 %s %d n_items %d이(가) 들어있습니다\n"
-"대부분은 창 관리자 버그가 아니라 응용 프로그램 버그입니다.\n"
-"창의 정보: title=\"%s\" class=\"%s\" name=\"%s\"\n"
-
-#: ../src/core/xprops.c:411
-#, c-format
-msgid "Property %s on window 0x%lx contained invalid UTF-8\n"
-msgstr "창 0x%2$lx의 등록 정보 %1$s은(는) 잘못된 UTF-8이 들어 있습니다\n"
-
-#: ../src/core/xprops.c:494
-#, c-format
-msgid ""
-"Property %s on window 0x%lx contained invalid UTF-8 for item %d in the list\n"
-msgstr ""
-"창 0x%2$lx의 등록 정보 %1$s은(는) 목록안의 항목 %3$d에 잘못된 UTF-8을 포함하"
-"고 있습니다\n"
-
-#: ../src/muffin.desktop.in.h:1 ../src/muffin-wm.desktop.in.h:1
-msgid "Muffin"
+#: data/mutter.desktop.in:4
+msgid "Mutter"
 msgstr "머터"
 
-#: ../src/org.cinnamon.muffin.gschema.xml.in.h:1
+#: data/org.gnome.mutter.gschema.xml.in:7
 msgid "Modifier to use for extended window management operations"
 msgstr "창 관리 작업을 할 때 사용할 변경 키"
 
-#: ../src/org.cinnamon.muffin.gschema.xml.in.h:2
+#: data/org.gnome.mutter.gschema.xml.in:8
 msgid ""
-"This key will initiate the \"overlay\", which is a combination window "
-"overview and application launching system. The default is intended to be the "
-"\"Windows key\" on PC hardware. It's expected that this binding either the "
-"default or set to the empty string."
+"This key will initiate the “overlay”, which is a combination window overview "
+"and application launching system. The default is intended to be the “Windows "
+"key” on PC hardware. It’s expected that this binding either the default or "
+"set to the empty string."
 msgstr ""
-"다음 창으로 이동할 때 창 팝업 및 프레임을 표시할지 여부. 이 키는 \"오버레이"
-"\"를 시작합니다. 오버레이는 창 상태 보기 및 프로그램 실행 환경입니다. PC에서 "
-"기본값은 \"윈도우 키\"입니다. 보통 이 키 바인딩은 기본값이거나 빈 문자열입니"
+"다음 창으로 이동할 때 창 팝업 및 프레임을 표시할지 여부. 이 키는 “오버레"
+"이”를 시작합니다. 오버레이는 창 상태 보기 및 프로그램 실행 환경입니다. PC에"
+"서 기본값은 “윈도우 키”입니다. 보통 이 키 바인딩은 기본값이거나 빈 문자열입니"
 "다."
 
-#: ../src/org.cinnamon.muffin.gschema.xml.in.h:3
+#: data/org.gnome.mutter.gschema.xml.in:20
 msgid "Attach modal dialogs"
 msgstr "모달 대화 상자 부착"
 
-#: ../src/org.cinnamon.muffin.gschema.xml.in.h:4
+#: data/org.gnome.mutter.gschema.xml.in:21
 msgid ""
 "When true, instead of having independent titlebars, modal dialogs appear "
 "attached to the titlebar of the parent window and are moved together with "
@@ -428,23 +286,11 @@ msgstr ""
 "참이면 모달 대화 상자에서 별도의 제목 표시줄을 표시하지 않고 상위 창의 제목 "
 "표시줄에 붙어서 상위 창과 함께 움직입니다."
 
-#: ../src/org.cinnamon.muffin.gschema.xml.in.h:5
-msgid "Live Hidden Windows"
-msgstr "실행 중인 숨긴 창"
-
-#: ../src/org.cinnamon.muffin.gschema.xml.in.h:6
-msgid ""
-"Determines whether hidden windows (i.e., minimized windows and windows on "
-"other workspaces than the current one) should be kept alive."
-msgstr ""
-"숨긴 창을 (예를 들어 최소화한 창과 현재가 아닌 다른 작업 공간의 창) 실행 상태"
-"로 두어야 할지 지정합니다."
-
-#: ../src/org.cinnamon.muffin.gschema.xml.in.h:7
+#: data/org.gnome.mutter.gschema.xml.in:30
 msgid "Enable edge tiling when dropping windows on screen edges"
 msgstr "창을 화면 가장자리에 끌어 놓을 때 가장자리에 맞춰 격자로 만들기"
 
-#: ../src/org.cinnamon.muffin.gschema.xml.in.h:8
+#: data/org.gnome.mutter.gschema.xml.in:31
 msgid ""
 "If enabled, dropping windows on vertical screen edges maximizes them "
 "vertically and resizes them horizontally to cover half of the available "
@@ -454,22 +300,25 @@ msgstr ""
 "로 방향으로 화면을 절반을 차지하도록 크기를 바꿉니다. 화면 위 가장자리에 창"
 "을 놓으면 전체 화면으로 만듭니다."
 
-#: ../src/org.cinnamon.muffin.gschema.xml.in.h:9
+#: data/org.gnome.mutter.gschema.xml.in:40
 msgid "Workspaces are managed dynamically"
 msgstr "작업 공간을 동적으로 관리"
 
-#: ../src/org.cinnamon.muffin.gschema.xml.in.h:10
+#: data/org.gnome.mutter.gschema.xml.in:41
 msgid ""
-"Determines whether workspaces are managed dynamically or whether there's a "
+"Determines whether workspaces are managed dynamically or whether there’s a "
 "static number of workspaces (determined by the num-workspaces key in org."
 "gnome.desktop.wm.preferences)."
-msgstr "작업 공간을 동적으로 관리할지 아니면 작업 공간이 고정된 개수인지 지정합니다. (고정된 개수는 org.cinnamon.desktop.wm.preferences의 num-workspaces 키로 지정합니다.)"
+msgstr ""
+"작업 공간을 동적으로 관리할지 아니면 작업 공간이 고정된 개수인지 지정합니다. "
+"(고정된 개수는 org.gnome.desktop.wm.preferences의 num-workspaces 키로 지정합"
+"니다.)"
 
-#: ../src/org.cinnamon.muffin.gschema.xml.in.h:11
+#: data/org.gnome.mutter.gschema.xml.in:50
 msgid "Workspaces only on primary"
 msgstr "주 모니터에서만 작업 공간"
 
-#: ../src/org.cinnamon.muffin.gschema.xml.in.h:12
+#: data/org.gnome.mutter.gschema.xml.in:51
 msgid ""
 "Determines whether workspace switching should happen for windows on all "
 "monitors or only for windows on the primary monitor."
@@ -477,1133 +326,452 @@ msgstr ""
 "작업 공간을 전환할 때 모든 모니터의 창에 대해 할지 주 모니터의 창에서만 할지 "
 "결정합니다."
 
-#: ../src/org.cinnamon.muffin.gschema.xml.in.h:13
+#: data/org.gnome.mutter.gschema.xml.in:59
 msgid "No tab popup"
 msgstr "탭 팝업 없음"
 
-#: ../src/org.cinnamon.muffin.gschema.xml.in.h:14
+#: data/org.gnome.mutter.gschema.xml.in:60
 msgid ""
 "Determines whether the use of popup and highlight frame should be disabled "
 "for window cycling."
 msgstr ""
 "팝업 및 강조 프레임을 창 전환 목록에 사용하지 않게 만들지 여부를 결정합니다."
 
-#: ../src/org.cinnamon.muffin.gschema.xml.in.h:15
+#: data/org.gnome.mutter.gschema.xml.in:68
+msgid "Delay focus changes until the pointer stops moving"
+msgstr "포인터가 움직임을 멈출 때까지 포커스 전환 미루기"
+
+#: data/org.gnome.mutter.gschema.xml.in:69
+msgid ""
+"If set to true, and the focus mode is either “sloppy” or “mouse” then the "
+"focus will not be changed immediately when entering a window, but only after "
+"the pointer stops moving."
+msgstr ""
+"참이고 포커스 모드가 “sloppy”나 “mouse”인 경우, 창 안에 포인터를 옮겼을 때 즉"
+"시 포커스를 전환하지 않고, 포인터가 움직임을 멈추었을 때 전환합니다."
+
+#: data/org.gnome.mutter.gschema.xml.in:79
 msgid "Draggable border width"
 msgstr "마우스로 끌 수 있는 가장자리의 너비"
 
-#: ../src/org.cinnamon.muffin.gschema.xml.in.h:16
+#: data/org.gnome.mutter.gschema.xml.in:80
 msgid ""
-"The amount of total draggable borders. If the theme's visible borders are "
+"The amount of total draggable borders. If the theme’s visible borders are "
 "not enough, invisible borders will be added to meet this value."
 msgstr ""
 "마우스로 끌 수 있는 가장자리의 너비. 테마의 가장자리가 이보다 작은 경우, 투명"
 "한 가장자리가 부족한 양만큼 추가됩니다."
 
-#: ../src/org.cinnamon.muffin.gschema.xml.in.h:17
+#: data/org.gnome.mutter.gschema.xml.in:89
+msgid "Auto maximize nearly monitor sized windows"
+msgstr "모니터 크기와 가까운 창 자동 최대화"
+
+#: data/org.gnome.mutter.gschema.xml.in:90
+msgid ""
+"If enabled, new windows that are initially the size of the monitor "
+"automatically get maximized."
+msgstr "참이면 처음에 크기가 모니터 크기인 새 창은 최대화됩니다."
+
+#: data/org.gnome.mutter.gschema.xml.in:98
+msgid "Place new windows in the center"
+msgstr "새 창을 중앙에 놓기"
+
+#: data/org.gnome.mutter.gschema.xml.in:99
+msgid ""
+"When true, the new windows will always be put in the center of the active "
+"screen of the monitor."
+msgstr "참이면, 새로운 창은 항상 사용 중인 모니터 화면의 중앙에 놓습니다."
+
+#: data/org.gnome.mutter.gschema.xml.in:107
+msgid "Enable experimental features"
+msgstr "실험적인 기능 사용"
+
+#: data/org.gnome.mutter.gschema.xml.in:108
+msgid ""
+"To enable experimental features, add the feature keyword to the list. "
+"Whether the feature requires restarting the compositor depends on the given "
+"feature. Any experimental feature is not required to still be available, or "
+"configurable. Don’t expect adding anything in this setting to be future "
+"proof. Currently possible keywords: • “scale-monitor-framebuffer” — makes "
+"mutter default to layout logical monitors in a logical pixel coordinate "
+"space, while scaling monitor framebuffers instead of window content, to "
+"manage HiDPI monitors. Does not require a restart. • “rt-scheduler” — makes "
+"mutter request a low priority real-time scheduling. The executable or user "
+"must have CAP_SYS_NICE. Requires a restart. • “autostart-xwayland” — "
+"initializes Xwayland lazily if there are X11 clients. Requires restart."
+msgstr ""
+"실험적인 기능을 사용하려면, 해당 기능 키워드를 목록에 추가하십시오. 기능에 따"
+"라 컴포지터를 다시 시작해야 할 수도 있습니다. 실험적인 기능은 사용할 수 없을 "
+"수도 있고, 설정할 수 없을 수도 있습니다. 이 설정에 추가한 사항이 앞으로 버전"
+"에서도 동작할 거라고 기대하지 마십시오. 현재 가능한 값은: • “scale-monitor-"
+"framebuffer” — 머터는 기본적으로 논리 픽셀 좌표 공간에서 논리 모니터를 배치하"
+"고, HiDPI 모니터를 관리하기 위해 창 내용 대신 모니터 프레임 버퍼를 스케일링합"
+"니다. 재시작은 필요하지 않습니다. • “rt-scheduler” — 머터 요청을 우선순위가 "
+"낮은 실시간 스케줄링으로 만듭니다. 실행 파일 또는 사용자는 CAP_SYS_NICE가 있"
+"어야 합니다. 재시작이 필요합니다. • “autostart-xwayland” — X11 클라이언트가 "
+"있는 경우 X웨일랜드 초기화를 늦게 합니다. 재시작이 필요합니다."
+
+#: data/org.gnome.mutter.gschema.xml.in:134
+msgid "Modifier to use to locate the pointer"
+msgstr "포인터 위치 찾기에 사용할 키"
+
+#: data/org.gnome.mutter.gschema.xml.in:135
+msgid "This key will initiate the “locate pointer” action."
+msgstr "이 키는 “포인터 위치 찾기” 동작을 합니다."
+
+#: data/org.gnome.mutter.gschema.xml.in:142
+msgid "Timeout for check-alive ping"
+msgstr "활성 확인 핑 시간 초과"
+
+#: data/org.gnome.mutter.gschema.xml.in:143
+msgid ""
+"Number of milliseconds a client has to respond to a ping request in order to "
+"not be detected as frozen. Using 0 will disable the alive check completely."
+msgstr ""
+"중지된 것으로 감지되지 않도록 클라이언트가 핑 요청에 응답해야 하는 시간 (밀리"
+"초). 0을 사용하면 활성 확인이 완전히 비활성화됩니다."
+
+#: data/org.gnome.mutter.gschema.xml.in:165
 msgid "Select window from tab popup"
 msgstr "탭 팝업에서 창 선택"
 
-#: ../src/org.cinnamon.muffin.gschema.xml.in.h:18
+#: data/org.gnome.mutter.gschema.xml.in:170
 msgid "Cancel tab popup"
 msgstr "탭 팝업 취소"
 
-#: ../src/tools/muffin-message.c:123
-#, c-format
-msgid "Usage: %s\n"
-msgstr "사용법: %s\n"
+#: data/org.gnome.mutter.gschema.xml.in:175
+msgid "Switch monitor configurations"
+msgstr "모니터 설정 전환"
 
-#. Translators: Translate this string the same way as you do in libwnck!
-#: ../src/ui/menu.c:69
-msgid "Mi_nimize"
-msgstr "최소화(_N)"
+#: data/org.gnome.mutter.gschema.xml.in:180
+msgid "Rotates the built-in monitor configuration"
+msgstr "내장된 모니터 설정을 돌아가면서 전환합니다"
 
-#. Translators: Translate this string the same way as you do in libwnck!
-#: ../src/ui/menu.c:71
-msgid "Ma_ximize"
-msgstr "최대화(_X)"
+#: data/org.gnome.mutter.wayland.gschema.xml.in:6
+msgid "Switch to VT 1"
+msgstr "가상 터미널 1로 이동"
 
-#. Translators: Translate this string the same way as you do in libwnck!
-#: ../src/ui/menu.c:73
-msgid "Unma_ximize"
-msgstr "최대화 취소(_X)"
+#: data/org.gnome.mutter.wayland.gschema.xml.in:10
+msgid "Switch to VT 2"
+msgstr "가상 터미널 2로 이동"
 
-#. Translators: Translate this string the same way as you do in libwnck!
-#: ../src/ui/menu.c:75
-msgid "Roll _Up"
-msgstr "말아올리기(_U)"
+#: data/org.gnome.mutter.wayland.gschema.xml.in:14
+msgid "Switch to VT 3"
+msgstr "가상 터미널 3으로 이동"
 
-#. Translators: Translate this string the same way as you do in libwnck!
-#: ../src/ui/menu.c:77
-msgid "_Unroll"
-msgstr "펼치기(_U)"
+#: data/org.gnome.mutter.wayland.gschema.xml.in:18
+msgid "Switch to VT 4"
+msgstr "가상 터미널 4로 이동"
 
-#. Translators: Translate this string the same way as you do in libwnck!
-#: ../src/ui/menu.c:79
-msgid "_Move"
-msgstr "옮기기(_M)"
+#: data/org.gnome.mutter.wayland.gschema.xml.in:22
+msgid "Switch to VT 5"
+msgstr "가상 터미널 5로 이동"
 
-#. Translators: Translate this string the same way as you do in libwnck!
-#: ../src/ui/menu.c:81
-msgid "_Resize"
-msgstr "크기 조정(_R)"
+#: data/org.gnome.mutter.wayland.gschema.xml.in:26
+msgid "Switch to VT 6"
+msgstr "가상 터미널 6으로 이동"
 
-#. Translators: Translate this string the same way as you do in libwnck!
-#: ../src/ui/menu.c:83
-msgid "Move Titlebar On_screen"
-msgstr "창 제목막대 화면에 표시(_S)"
+#: data/org.gnome.mutter.wayland.gschema.xml.in:30
+msgid "Switch to VT 7"
+msgstr "가상 터미널 7로 이동"
 
-#. separator
-#. Translators: Translate this string the same way as you do in libwnck!
-#: ../src/ui/menu.c:86 ../src/ui/menu.c:88
-msgid "Always on _Top"
-msgstr "항상 위(_T)"
+#: data/org.gnome.mutter.wayland.gschema.xml.in:34
+msgid "Switch to VT 8"
+msgstr "가상 터미널 8로 이동"
 
-#. Translators: Translate this string the same way as you do in libwnck!
-#: ../src/ui/menu.c:90
-msgid "_Always on Visible Workspace"
-msgstr "항상 현재 작업 공간에 놓기(_A)"
+#: data/org.gnome.mutter.wayland.gschema.xml.in:38
+msgid "Switch to VT 9"
+msgstr "가상 터미널 9로 이동"
 
-#. Translators: Translate this string the same way as you do in libwnck!
-#: ../src/ui/menu.c:92
-msgid "_Only on This Workspace"
-msgstr "이 작업 공간에만 놓기(_O)"
+#: data/org.gnome.mutter.wayland.gschema.xml.in:42
+msgid "Switch to VT 10"
+msgstr "가상 터미널 10으로 이동"
 
-#. Translators: Translate this string the same way as you do in libwnck!
-#: ../src/ui/menu.c:94
-msgid "Move to Workspace _Left"
-msgstr "왼쪽 작업 공간으로 옮기기(_L)"
+#: data/org.gnome.mutter.wayland.gschema.xml.in:46
+msgid "Switch to VT 11"
+msgstr "가상 터미널 11로 이동"
 
-#. Translators: Translate this string the same way as you do in libwnck!
-#: ../src/ui/menu.c:96
-msgid "Move to Workspace R_ight"
-msgstr "오른쪽 작업 공간으로 옮기기(_I)"
+#: data/org.gnome.mutter.wayland.gschema.xml.in:50
+msgid "Switch to VT 12"
+msgstr "가상 터미널 12로 이동"
 
-#. Translators: Translate this string the same way as you do in libwnck!
-#: ../src/ui/menu.c:98
-msgid "Move to Workspace _Up"
-msgstr "위쪽 작업 공간으로 옮기기(_U)"
+#: data/org.gnome.mutter.wayland.gschema.xml.in:54
+msgid "Re-enable shortcuts"
+msgstr "바로 가기 다시 사용하기"
 
-#. Translators: Translate this string the same way as you do in libwnck!
-#: ../src/ui/menu.c:100
-msgid "Move to Workspace _Down"
-msgstr "아래쪽 작업 공간으로 옮기기(_D)"
+#: data/org.gnome.mutter.wayland.gschema.xml.in:64
+msgid "Allow X11 grabs to lock keyboard focus with Xwayland"
+msgstr "키보드 포커스를 고정하는 X11 잡기를 X웨일랜드에서 허용"
 
-#. separator
-#. Translators: Translate this string the same way as you do in libwnck!
-#: ../src/ui/menu.c:104
-msgid "_Close"
-msgstr "닫기(_C)"
+#: data/org.gnome.mutter.wayland.gschema.xml.in:65
+msgid ""
+"Allow all keyboard events to be routed to X11 “override redirect” windows "
+"with a grab when running in Xwayland. This option is to support X11 clients "
+"which map an “override redirect” window (which do not receive keyboard "
+"focus) and issue a keyboard grab to force all keyboard events to that "
+"window. This option is seldom used and has no effect on regular X11 windows "
+"which can receive keyboard focus under normal circumstances. For a X11 grab "
+"to be taken into account under Wayland, the client must also either send a "
+"specific X11 ClientMessage to the root window or be among the applications "
+"white-listed in key “xwayland-grab-access-rules”."
+msgstr ""
+"X웨일랜드 환경에서 X11 “override redirect” 창이 잡기를 할 때 모든 키보드 이벤"
+"트가 전달되도록 허용합니다. 이 옵션은 X11 클라이언트의 “override redirect”(키"
+"보드 포커스를 받지 않는) 창에 모든 키보드 이벤트를 강제로 적용하는 키보드 잡"
+"기를 지원합니다. 이 옵션은 거의 사용되지 않으며 일반적인 상황에서 키보드 포커"
+"스를 받을 수 있는 일반 X11 창에는 영향을 미치지 않습니다. 웨일랜드에서 X11 잡"
+"기를 고려하려면, 클라이언트는 특정 X11 클라이언트메시지를 루트 창에 보내거나 "
+"“xwayland-grab-access-rules”의 허용 목록에 있는 프로그램 중 하나여야 합니다."
 
-#: ../src/ui/menu.c:204
-#, c-format
-msgid "Workspace %d%n"
-msgstr "작업 공간 %d%n"
+#: data/org.gnome.mutter.wayland.gschema.xml.in:84
+msgid "Xwayland applications allowed to issue keyboard grabs"
+msgstr "X웨일랜드 프로그램에서 키보드 잡기 허용"
 
-#: ../src/ui/menu.c:214
-#, c-format
-msgid "Workspace 1_0"
-msgstr "작업 공간 1_0"
+#: data/org.gnome.mutter.wayland.gschema.xml.in:85
+msgid ""
+"List the resource names or resource class of X11 windows either allowed or "
+"not allowed to issue X11 keyboard grabs under Xwayland. The resource name or "
+"resource class of a given X11 window can be obtained using the command "
+"“xprop WM_CLASS”. Wildcards “*” and jokers “?” in the values are supported. "
+"Values starting with “!” are blacklisted, which has precedence over the "
+"whitelist, to revoke applications from the default system list. The default "
+"system list includes the following applications: "
+"“@XWAYLAND_GRAB_DEFAULT_ACCESS_RULES@” Users can break an existing grab by "
+"using the specific keyboard shortcut defined by the keybinding key “restore-"
+"shortcuts”."
+msgstr ""
+"X웨일랜드에서 X11 키보드 잡기를 허용하거나 허용하지 않는 X11 창의 리소스 이"
+"름 또는 리소스 클래스를 나열하세요. X11 창의 리소스 이름 또는 리소스 클래스"
+"는 “xprop WM_CLASS\" 명령을 사용하여 얻을 수 있습니다. 와일드카드 \"*\"와 \"?"
+"\"를 값에서 사용할 수 있습니다. \"!\"로 시작하는 값은 허용 목록보다 높은 우선"
+"순위로 블랙리스트 처리되어, 프로그램이 기본 시스템 목록에서 빠지게 됩니다. 기"
+"본 시스템 목록에 포함된 프로그램: “@XWAYLAND_GRAB_DEFAULT_ACCESS_RULES@” 사용"
+"자는 “restore-shortcuts” 키 바인딩에 정의된 특정 키보드 바로 가기를 사용하여 "
+"기존 잡기를 중단할 수 있습니다."
 
-#: ../src/ui/menu.c:216
-#, c-format
-msgid "Workspace %s%d"
-msgstr "작업 공간 %s%d"
-
-#: ../src/ui/menu.c:397
-msgid "Move to Another _Workspace"
-msgstr "다른 작업 공간으로 옮기기(_W)"
-
-#. This is the text that should appear next to menu accelerators
-#. * that use the shift key. If the text on this key isn't typically
-#. * translated on keyboards used for your language, don't translate
-#. * this.
+#. TRANSLATORS: This string refers to a button that switches between
+#. * different modes.
 #.
-#: ../src/ui/metaaccellabel.c:77
-msgid "Shift"
-msgstr "Shift"
+#: src/backends/meta-input-settings.c:2567
+#, c-format
+msgid "Mode Switch (Group %d)"
+msgstr "모드 전환 (그룹 %d)"
 
-#. This is the text that should appear next to menu accelerators
-#. * that use the control key. If the text on this key isn't typically
-#. * translated on keyboards used for your language, don't translate
-#. * this.
+#. TRANSLATORS: This string refers to an action, cycles drawing tablets'
+#. * mapping through the available outputs.
 #.
-#: ../src/ui/metaaccellabel.c:83
-msgid "Ctrl"
-msgstr "Ctrl"
+#: src/backends/meta-input-settings.c:2590
+msgid "Switch monitor"
+msgstr "모니터 전환"
 
-#. This is the text that should appear next to menu accelerators
-#. * that use the alt key. If the text on this key isn't typically
-#. * translated on keyboards used for your language, don't translate
-#. * this.
-#.
-#: ../src/ui/metaaccellabel.c:89
-msgid "Alt"
-msgstr "Alt"
+#: src/backends/meta-input-settings.c:2592
+msgid "Show on-screen help"
+msgstr "화면 도움말 표시"
 
-#. This is the text that should appear next to menu accelerators
-#. * that use the meta key. If the text on this key isn't typically
-#. * translated on keyboards used for your language, don't translate
-#. * this.
-#.
-#: ../src/ui/metaaccellabel.c:95
-msgid "Meta"
-msgstr "Meta"
+#: src/backends/meta-monitor.c:223
+msgid "Built-in display"
+msgstr "내장 디스플레이"
 
-#. This is the text that should appear next to menu accelerators
-#. * that use the super key. If the text on this key isn't typically
-#. * translated on keyboards used for your language, don't translate
-#. * this.
-#.
-#: ../src/ui/metaaccellabel.c:101
-msgid "Super"
-msgstr "Super"
+#: src/backends/meta-monitor.c:252
+msgid "Unknown"
+msgstr "알 수 없음"
 
-#. This is the text that should appear next to menu accelerators
-#. * that use the hyper key. If the text on this key isn't typically
-#. * translated on keyboards used for your language, don't translate
-#. * this.
-#.
-#: ../src/ui/metaaccellabel.c:107
-msgid "Hyper"
-msgstr "Hyper"
+#: src/backends/meta-monitor.c:254
+msgid "Unknown Display"
+msgstr "알 수 없는 디스플레이"
 
-#. This is the text that should appear next to menu accelerators
-#. * that use the mod2 key. If the text on this key isn't typically
-#. * translated on keyboards used for your language, don't translate
-#. * this.
-#.
-#: ../src/ui/metaaccellabel.c:113
-msgid "Mod2"
-msgstr "Mod2"
-
-#. This is the text that should appear next to menu accelerators
-#. * that use the mod3 key. If the text on this key isn't typically
-#. * translated on keyboards used for your language, don't translate
-#. * this.
-#.
-#: ../src/ui/metaaccellabel.c:119
-msgid "Mod3"
-msgstr "Mod3"
-
-#. This is the text that should appear next to menu accelerators
-#. * that use the mod4 key. If the text on this key isn't typically
-#. * translated on keyboards used for your language, don't translate
-#. * this.
-#.
-#: ../src/ui/metaaccellabel.c:125
-msgid "Mod4"
-msgstr "Mod4"
-
-#. This is the text that should appear next to menu accelerators
-#. * that use the mod5 key. If the text on this key isn't typically
-#. * translated on keyboards used for your language, don't translate
-#. * this.
-#.
-#: ../src/ui/metaaccellabel.c:131
-msgid "Mod5"
-msgstr "Mod5"
-
-#. Translators: This represents the size of a window.  The first number is
-#. * the width of the window and the second is the height.
-#.
-#: ../src/ui/resizepopup.c:113
+#: src/backends/meta-monitor.c:262
 #, c-format
-msgid "%d x %d"
-msgstr "%d x %d"
+msgctxt ""
+"This is a monitor vendor name, followed by a size in inches, like 'Dell 15\"'"
+msgid "%s %s"
+msgstr "%s %s"
 
-#: ../src/ui/theme.c:253
-msgid "top"
-msgstr "맨 위"
-
-#: ../src/ui/theme.c:255
-msgid "bottom"
-msgstr "맨 아래"
-
-#: ../src/ui/theme.c:257
-msgid "left"
-msgstr "왼쪽"
-
-#: ../src/ui/theme.c:259
-msgid "right"
-msgstr "오른쪽"
-
-#: ../src/ui/theme.c:286
+#: src/backends/meta-monitor.c:270
 #, c-format
-msgid "frame geometry does not specify \"%s\" dimension"
-msgstr "프레임 위치가 \"%s\"차원으로 지정되지 않았습니다"
+msgctxt ""
+"This is a monitor vendor name followed by product/model name where size in "
+"inches could not be calculated, e.g. Dell U2414H"
+msgid "%s %s"
+msgstr "%s %s"
 
-#: ../src/ui/theme.c:305
+#. Translators: this string will appear in Sysprof
+#: src/backends/meta-profiler.c:79
+msgid "Compositor"
+msgstr "컴포지터"
+
+#. This probably means that a non-WM compositor like xcompmgr is running;
+#. * we have no way to get it to exit
+#: src/compositor/compositor.c:533
 #, c-format
-msgid "frame geometry does not specify dimension \"%s\" for border \"%s\""
+msgid ""
+"Another compositing manager is already running on screen %i on display “%s”."
 msgstr ""
-"프레임 위치가 가장자리 \"%2$s\" 가장자리의 \"%1$s\"차원으로 지정되지 않았습니"
-"다."
+"다른 창 구성 관리 프로그램이 이미 디스플레이 “%2$s” 화면 %1$i번에서 실행 중입"
+"니다."
 
-#: ../src/ui/theme.c:342
+#: src/core/bell.c:192
+msgid "Bell event"
+msgstr "삑소리 이벤트"
+
+#: src/core/main.c:190
+msgid "Disable connection to session manager"
+msgstr "세션 관리자와 연결 하지 않습니다"
+
+#: src/core/main.c:196
+msgid "Replace the running window manager"
+msgstr "실행 중인 창 관리자를 바꿉니다"
+
+#: src/core/main.c:202
+msgid "Specify session management ID"
+msgstr "세션 관리 ID를 지정합니다"
+
+#: src/core/main.c:207
+msgid "X Display to use"
+msgstr "사용할 X 디스플레이"
+
+#: src/core/main.c:213
+msgid "Initialize session from savefile"
+msgstr "저장 파일에서 세션을 초기화 합니다"
+
+#: src/core/main.c:219
+msgid "Make X calls synchronous"
+msgstr "동기 X 호출을 합니다"
+
+#: src/core/main.c:226
+msgid "Run as a wayland compositor"
+msgstr "웨일랜드 컴포지터로 실행합니다"
+
+#: src/core/main.c:232
+msgid "Run as a nested compositor"
+msgstr "중첩 컴포지터로 실행합니다"
+
+#: src/core/main.c:238
+msgid "Run wayland compositor without starting Xwayland"
+msgstr "웨일랜드 컴포지터를 X웨일랜드 시작없이 실행합니다"
+
+#: src/core/main.c:246
+msgid "Run as a full display server, rather than nested"
+msgstr "전체 디스플레이 서버로 실행, 중첩 컴포지터가 아님"
+
+#: src/core/main.c:252
+msgid "Run with X11 backend"
+msgstr "X11 백 엔드로 실행 합니다"
+
+#. Translators: %s is a window title
+#: src/core/meta-close-dialog-default.c:151
 #, c-format
-msgid "Button aspect ratio %g is not reasonable"
-msgstr "단추의 가로세로 비 %g이(가) 적당하지 않습니다"
+msgid "“%s” is not responding."
+msgstr "“%s” 창이 반응하지 않습니다."
 
-#: ../src/ui/theme.c:354
-#, c-format
-msgid "Frame geometry does not specify size of buttons"
-msgstr "프레임 위치가 단추의 크기로 지정되지 않았습니다"
+#: src/core/meta-close-dialog-default.c:153
+msgid "Application is not responding."
+msgstr "프로그램이 반응하지 않습니다."
 
-#: ../src/ui/theme.c:1067
-#, c-format
-msgid "Gradients should have at least two colors"
-msgstr "서서히 변하는 색으로 지정하려면 최소 2색이 필요합니다"
+#: src/core/meta-close-dialog-default.c:158
+msgid ""
+"You may choose to wait a short while for it to continue or force the "
+"application to quit entirely."
+msgstr "좀 더 기다리거나 해당 프로그램을 강제로 끝낼 수 있습니다."
 
-#: ../src/ui/theme.c:1219
+#: src/core/meta-close-dialog-default.c:165
+msgid "_Force Quit"
+msgstr "강제로 끝내기(_F)"
+
+#: src/core/meta-close-dialog-default.c:165
+msgid "_Wait"
+msgstr "기다리기(_W)"
+
+#: src/core/mutter.c:38
 #, c-format
 msgid ""
-"GTK custom color specification must have color name and fallback in "
-"parentheses, e.g. gtk:custom(foo,bar); could not parse \"%s\""
+"mutter %s\n"
+"Copyright © 2001-%d Havoc Pennington, Red Hat, Inc., and others\n"
+"This is free software; see the source for copying conditions.\n"
+"There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A "
+"PARTICULAR PURPOSE.\n"
 msgstr ""
-"GTK 사용자 지정 색상 지정은 색 이름과 대체할 색을 괄호 안에 써야 합니다. 예"
-"를 들어: gtk:custom(foo,bar). \"%s\"을(를) 분석할 수 없습니다"
+"mutter %s\n"
+"Copyright © 2001-%d Havoc Pennington, Red Hat, Inc., and others\n"
+"This is free software; see the source for copying conditions.\n"
+"There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A "
+"PARTICULAR PURPOSE.\n"
 
-#: ../src/ui/theme.c:1235
+#: src/core/mutter.c:52
+msgid "Print version"
+msgstr "버전을 출력합니다"
+
+#: src/core/mutter.c:58
+msgid "Mutter plugin to use"
+msgstr "사용할 머터 플러그인"
+
+#: src/core/prefs.c:1911
+#, c-format
+msgid "Workspace %d"
+msgstr "작업 공간 %d"
+
+#: src/core/util.c:122
+msgid "Mutter was compiled without support for verbose mode\n"
+msgstr "머터가 자세한 모드 지원 없이 컴파일 되었습니다\n"
+
+#: src/wayland/meta-wayland-tablet-pad.c:568
+#, c-format
+msgid "Mode Switch: Mode %d"
+msgstr "모드 전환: 모드 %d"
+
+#: src/x11/meta-x11-display.c:676
 #, c-format
 msgid ""
-"Invalid character '%c' in color_name parameter of gtk:custom, only A-Za-z0-9-"
-"_ are valid"
+"Display “%s” already has a window manager; try using the --replace option to "
+"replace the current window manager."
 msgstr ""
-"gtk:custom의 color_name 파라미터 안에 잘못된 문자 '%c'. A-Za-z0-9-_ 문자만 허"
-"용합니다."
+"디스플레이  “%s”에 이미 창 관리자가 있습니다. 현재 창 관리자를 바꾸려면 --"
+"replace 옵션을 써보십시오."
 
-#: ../src/ui/theme.c:1249
+#: src/x11/meta-x11-display.c:1089
+msgid "Failed to initialize GDK\n"
+msgstr "GDK 초기화에 실패했습니다\n"
+
+#: src/x11/meta-x11-display.c:1113
 #, c-format
+msgid "Failed to open X Window System display “%s”\n"
+msgstr "X 윈도 시스템 디스플레이 “%s”을(를) 여는데 실패하였습니다\n"
+
+#: src/x11/meta-x11-display.c:1196
+#, c-format
+msgid "Screen %d on display “%s” is invalid\n"
+msgstr "디스플레이 “%2$s”의 화면 %1$d은(는) 잘못되었습니다\n"
+
+#: src/x11/meta-x11-selection-input-stream.c:460
+#, c-format
+msgid "Format %s not supported"
+msgstr "%s 형식은 지원하지 않습니다"
+
+#: src/x11/session.c:1821
 msgid ""
-"Gtk:custom format is \"gtk:custom(color_name,fallback)\", \"%s\" does not "
-"fit the format"
+"These windows do not support “save current setup” and will have to be "
+"restarted manually next time you log in."
 msgstr ""
-"gtk:custom 형식은 \"gtk:custom(색이름,대체색)\"입니다, \"%s\"(은)는 형식에 맞"
-"지 않습니다"
+"이 창은 “현재 설정 저장”을 지원하지 않기 때문에 다음 번에 로그인 할 때 수동으"
+"로 다시 시작해야 합니다."
 
-#: ../src/ui/theme.c:1294
+# <창제목> (on <기계>)
+#: src/x11/window-props.c:569
 #, c-format
-msgid ""
-"GTK color specification must have the state in brackets, e.g. gtk:fg[NORMAL] "
-"where NORMAL is the state; could not parse \"%s\""
-msgstr ""
-"GTK 색상 지정은 중괄호안에 있어야 합니다. 예를 들어: gtk:fg[NORMAL], 여기서 "
-"NORMAL이 값입니다. \"%s\"을(를) 분석할 수 없습니다."
+msgid "%s (on %s)"
+msgstr "%s (%s에서)"
 
-#: ../src/ui/theme.c:1308
-#, c-format
-msgid ""
-"GTK color specification must have a close bracket after the state, e.g. gtk:"
-"fg[NORMAL] where NORMAL is the state; could not parse \"%s\""
-msgstr ""
-"GTK 색상 지정은 값 뒤에 중괄호로 닫혀 있어야 합니다. 예를 들어: gtk:fg"
-"[NORMAL], 여기서 NORMAL은 값입니다. \"%s\"을(를) 분석할 수 없습니다."
-
-#: ../src/ui/theme.c:1319
-#, c-format
-msgid "Did not understand state \"%s\" in color specification"
-msgstr "색상 지정의 \"%s\" 값을 이해할 수 없습니다"
-
-#: ../src/ui/theme.c:1332
-#, c-format
-msgid "Did not understand color component \"%s\" in color specification"
-msgstr "색상 지정의 색상 구성요소 \"%s\"을(를) 이해할 수 없습니다"
-
-#: ../src/ui/theme.c:1361
-#, c-format
-msgid ""
-"Blend format is \"blend/bg_color/fg_color/alpha\", \"%s\" does not fit the "
-"format"
-msgstr ""
-"섞기 형식은 \"blend/bg_color/fg_color/alpha\"입니다, \"%s\"은(는) 형식에 맞"
-"지 않습니다"
-
-#: ../src/ui/theme.c:1372
-#, c-format
-msgid "Could not parse alpha value \"%s\" in blended color"
-msgstr "색상 섞기에서 알파 값 \"%s\"을(를) 분석할 수 없습니다"
-
-#: ../src/ui/theme.c:1382
-#, c-format
-msgid "Alpha value \"%s\" in blended color is not between 0.0 and 1.0"
-msgstr "색상 섞기에서 알파 값 \"%s\"은(는) 0.0 과 1.0사이의 값이 아닙니다"
-
-#: ../src/ui/theme.c:1429
-#, c-format
-msgid ""
-"Shade format is \"shade/base_color/factor\", \"%s\" does not fit the format"
-msgstr ""
-"그림자 형식은 \"shade/base_color/format\"입니다, \"%s\"(은)는 형식에 맞지 않"
-"습니다"
-
-#: ../src/ui/theme.c:1440
-#, c-format
-msgid "Could not parse shade factor \"%s\" in shaded color"
-msgstr "그림자색에서 그림자 인자 \"%s\"(을)를 해석할 수 없습니다"
-
-#: ../src/ui/theme.c:1450
-#, c-format
-msgid "Shade factor \"%s\" in shaded color is negative"
-msgstr "그림자색에서 그림자 인자 \"%s\"(은)는 음수입니다"
-
-#: ../src/ui/theme.c:1479
-#, c-format
-msgid "Could not parse color \"%s\""
-msgstr "색상 \"%s\"을(를) 해석할 수 없습니다"
-
-#: ../src/ui/theme.c:1790
-#, c-format
-msgid "Coordinate expression contains character '%s' which is not allowed"
-msgstr "좌표식에 허용되지 않는 문자 '%s'(이)가 포함되어 있습니다"
-
-#: ../src/ui/theme.c:1817
-#, c-format
-msgid ""
-"Coordinate expression contains floating point number '%s' which could not be "
-"parsed"
-msgstr "좌표식에 분석할 수 없는 부동소수점 숫자 '%s'이(가) 포함되어 있습니다"
-
-#: ../src/ui/theme.c:1831
-#, c-format
-msgid "Coordinate expression contains integer '%s' which could not be parsed"
-msgstr "좌표식에 분석할 수 없는 정수 '%s'이(가) 포함되어 있습니다"
-
-#: ../src/ui/theme.c:1953
-#, c-format
-msgid ""
-"Coordinate expression contained unknown operator at the start of this text: "
-"\"%s\""
-msgstr ""
-"좌표식에 이 글자 시작부분에 알 수 없는 연산자가 포함되어 있습니다: \"%s\""
-
-#: ../src/ui/theme.c:2010
-#, c-format
-msgid "Coordinate expression was empty or not understood"
-msgstr "좌표식이 비어있거나 이해할 수 없습니다"
-
-#: ../src/ui/theme.c:2121 ../src/ui/theme.c:2131 ../src/ui/theme.c:2165
-#, c-format
-msgid "Coordinate expression results in division by zero"
-msgstr "좌표식의 결과 값이 0로 나누었습니다"
-
-#: ../src/ui/theme.c:2173
-#, c-format
-msgid ""
-"Coordinate expression tries to use mod operator on a floating-point number"
-msgstr "좌표식에서 부동소수점 수에 나머지 연산을 하려 합니다"
-
-#: ../src/ui/theme.c:2229
-#, c-format
-msgid ""
-"Coordinate expression has an operator \"%s\" where an operand was expected"
-msgstr "좌표식에서 피연산자가 들어갈 곳에 연산자 \"%s\"이(가) 있습니다"
-
-#: ../src/ui/theme.c:2238
-#, c-format
-msgid "Coordinate expression had an operand where an operator was expected"
-msgstr "좌표식에서 연산자가 들어갈 곳에 피연산자가 있습니다"
-
-#: ../src/ui/theme.c:2246
-#, c-format
-msgid "Coordinate expression ended with an operator instead of an operand"
-msgstr "좌표식에서 피연산자 대신에 연산자로 끝나있습니다"
-
-#: ../src/ui/theme.c:2256
-#, c-format
-msgid ""
-"Coordinate expression has operator \"%c\" following operator \"%c\" with no "
-"operand in between"
-msgstr ""
-"좌표식에서 피연산자가 없는 연산자 \"%2$c\"다음에 연산자 \"%1$c\"이(가) 있습니"
-"다"
-
-#: ../src/ui/theme.c:2407 ../src/ui/theme.c:2452
-#, c-format
-msgid "Coordinate expression had unknown variable or constant \"%s\""
-msgstr "좌표식에 알 수 없는 변수나 상수 \"%s\"이(가) 있습니다"
-
-#: ../src/ui/theme.c:2506
-#, c-format
-msgid "Coordinate expression parser overflowed its buffer."
-msgstr "좌표 계산 파서의 버퍼가 크기를 넘어갔습니다."
-
-#: ../src/ui/theme.c:2535
-#, c-format
-msgid "Coordinate expression had a close parenthesis with no open parenthesis"
-msgstr "좌표식에 닫는 괄호는 있지만 여는 괄호가 없습니다"
-
-#: ../src/ui/theme.c:2599
-#, c-format
-msgid "Coordinate expression had an open parenthesis with no close parenthesis"
-msgstr "좌표식에 여는 괄호는 있지만 닫는 괄호가 없습니다"
-
-#: ../src/ui/theme.c:2610
-#, c-format
-msgid "Coordinate expression doesn't seem to have any operators or operands"
-msgstr "좌표식에 어떠한 연산자나 피연산자가 없습니다"
-
-#: ../src/ui/theme.c:2822 ../src/ui/theme.c:2842 ../src/ui/theme.c:2862
-#, c-format
-msgid "Theme contained an expression that resulted in an error: %s\n"
-msgstr "테마가 오류 값을 내는 표현식이 들어 있습니다: %s\n"
-
-#: ../src/ui/theme.c:4533
-#, c-format
-msgid ""
-"<button function=\"%s\" state=\"%s\" draw_ops=\"whatever\"/> must be "
-"specified for this frame style"
-msgstr ""
-"이 프레임 스타일에는 <button function=\"%s\" style=\"%s\" draw_ops=\"whatever"
-"\"/>가 지정되어야 합니다"
-
-#: ../src/ui/theme.c:5066 ../src/ui/theme.c:5091
-#, c-format
-msgid ""
-"Missing <frame state=\"%s\" resize=\"%s\" focus=\"%s\" style=\"whatever\"/>"
-msgstr ""
-"<frame state=\"%s\" resize=\"%s\" focus=\"%s\" state=\"whatever\"/> 가 없습니"
-"다"
-
-#: ../src/ui/theme.c:5139
-#, c-format
-msgid "Failed to load theme \"%s\": %s\n"
-msgstr "테마 \"%s\"을(를) 읽을 수 없습니다: %s\n"
-
-#: ../src/ui/theme.c:5275 ../src/ui/theme.c:5282 ../src/ui/theme.c:5289
-#: ../src/ui/theme.c:5296 ../src/ui/theme.c:5303
-#, c-format
-msgid "No <%s> set for theme \"%s\""
-msgstr "테마 \"%2$s\"의 <%1$s>(이)가 설정되지 않았습니다"
-
-#: ../src/ui/theme.c:5311
-#, c-format
-msgid ""
-"No frame style set for window type \"%s\" in theme \"%s\", add a <window "
-"type=\"%s\" style_set=\"whatever\"/> element"
-msgstr ""
-"테마 \"%2$s\"의 창 형식 \"%1$s\"에 대한 프레임 스타일이 없습니다,<window "
-"type=\"%3$s\" style_set=\"whatever\"/> 엘리먼트를 추가하십시오"
-
-#: ../src/ui/theme.c:5709 ../src/ui/theme.c:5771 ../src/ui/theme.c:5834
-#, c-format
-msgid ""
-"User-defined constants must begin with a capital letter; \"%s\" does not"
-msgstr ""
-"사용자 정의 상수는 대문자로 시작되어야 합니다. \"%s\"은(는) 그렇지 않습니다."
-
-#: ../src/ui/theme.c:5717 ../src/ui/theme.c:5779 ../src/ui/theme.c:5842
-#, c-format
-msgid "Constant \"%s\" has already been defined"
-msgstr "상수 \"%s\"은(는) 이미 지정되어 있습니다"
-
-#. Translators: This means that an attribute which should have been found
-#. * on an XML element was not in fact found.
-#.
-#: ../src/ui/theme-parser.c:236
-#, c-format
-msgid "No \"%s\" attribute on element <%s>"
-msgstr "\"%s\" 속성이 <%s> 엘리먼트에 없습니다"
-
-#: ../src/ui/theme-parser.c:265 ../src/ui/theme-parser.c:283
-#, c-format
-msgid "Line %d character %d: %s"
-msgstr "%d 줄 %d 문자: %s"
-
-#: ../src/ui/theme-parser.c:479
-#, c-format
-msgid "Attribute \"%s\" repeated twice on the same <%s> element"
-msgstr "같은 <%2$s> 엘리먼트에 \"%1$s\"속성이 두번 겹쳐져 있습니다"
-
-#: ../src/ui/theme-parser.c:503 ../src/ui/theme-parser.c:552
-#, c-format
-msgid "Attribute \"%s\" is invalid on <%s> element in this context"
-msgstr "이 문맥의 <%2$s> 엘리먼트에 속성 \"%1$s\"은(는) 올바르지 않습니다"
-
-#: ../src/ui/theme-parser.c:594
-#, c-format
-msgid "Could not parse \"%s\" as an integer"
-msgstr "정수값 \"%s\"을(를) 분석할 수 없습니다"
-
-#: ../src/ui/theme-parser.c:603 ../src/ui/theme-parser.c:658
-#, c-format
-msgid "Did not understand trailing characters \"%s\" in string \"%s\""
-msgstr "문자열 \"%2$s\"에서 이어진 문자 \"%1$s\"을(를) 이해할 수 없습니다"
-
-#: ../src/ui/theme-parser.c:613
-#, c-format
-msgid "Integer %ld must be positive"
-msgstr "정수 %ld은(는) 양수여야 합니다"
-
-#: ../src/ui/theme-parser.c:621
-#, c-format
-msgid "Integer %ld is too large, current max is %d"
-msgstr "정수 %ld이(가) 너무 큽니다, 현재 최대값은 %d 입니다"
-
-#: ../src/ui/theme-parser.c:649 ../src/ui/theme-parser.c:765
-#, c-format
-msgid "Could not parse \"%s\" as a floating point number"
-msgstr "부동소수점 수 \"%s\"(으)로 분석할 수 없습니다"
-
-#: ../src/ui/theme-parser.c:680 ../src/ui/theme-parser.c:708
-#, c-format
-msgid "Boolean values must be \"true\" or \"false\" not \"%s\""
-msgstr "Boolean 값은 \"true\"이거나 \"false\"만 됩니다 \"%s\"은(는) 안됩니다"
-
-#: ../src/ui/theme-parser.c:735
-#, c-format
-msgid "Angle must be between 0.0 and 360.0, was %g\n"
-msgstr "각도 값은 0.0과 360.0 사이여야 합니다, %g(으)로 되어 있습니다\n"
-
-#: ../src/ui/theme-parser.c:798
-#, c-format
-msgid "Alpha must be between 0.0 (invisible) and 1.0 (fully opaque), was %g\n"
-msgstr ""
-"알파 값은 0.0(보이지 않음)과 1.0(완전 불투명)사이여야 합니다, %g(으)로 되어있"
-"습니다\n"
-
-#: ../src/ui/theme-parser.c:863
-#, c-format
-msgid ""
-"Invalid title scale \"%s\" (must be one of xx-small,x-small,small,medium,"
-"large,x-large,xx-large)\n"
-msgstr ""
-"잘못된 제목 확대 \"%s\" (xx-small, x-small, small, medium, large, x-large, "
-"xx-large중에 하나여야 합니다)\n"
-
-#: ../src/ui/theme-parser.c:1019 ../src/ui/theme-parser.c:1082
-#: ../src/ui/theme-parser.c:1116 ../src/ui/theme-parser.c:1219
-#, c-format
-msgid "<%s> name \"%s\" used a second time"
-msgstr "<%s> 이름 \"%s\"이(가) 두번 쓰였습니다"
-
-#: ../src/ui/theme-parser.c:1031 ../src/ui/theme-parser.c:1128
-#: ../src/ui/theme-parser.c:1231
-#, c-format
-msgid "<%s> parent \"%s\" has not been defined"
-msgstr "<%s> 부모 \"%s\"이(가) 아직 지정되지 않았습니다"
-
-#: ../src/ui/theme-parser.c:1141
-#, c-format
-msgid "<%s> geometry \"%s\" has not been defined"
-msgstr "<%s> 위치 \"%s\"이(가) 아직 지정되지 않았습니다"
-
-#: ../src/ui/theme-parser.c:1154
-#, c-format
-msgid "<%s> must specify either a geometry or a parent that has a geometry"
-msgstr "<%s> 는 위치나 위치를 가지는 부모를 지정하여야 합니다"
-
-#: ../src/ui/theme-parser.c:1196
-msgid "You must specify a background for an alpha value to be meaningful"
-msgstr "배경의 알파값을 의미있는 값으로 지정해야 합니다"
-
-#: ../src/ui/theme-parser.c:1264
-#, c-format
-msgid "Unknown type \"%s\" on <%s> element"
-msgstr "<%2$s> 엘리먼트에 알 수 없는 형식 \"%1$s\""
-
-# 접근키 아님
-#: ../src/ui/theme-parser.c:1275
-#, c-format
-msgid "Unknown style_set \"%s\" on <%s> element"
-msgstr "<%2$s> 엘리먼트에 알 수 없는 스타일 셋 \"%1$s\""
-
-#: ../src/ui/theme-parser.c:1283
-#, c-format
-msgid "Window type \"%s\" has already been assigned a style set"
-msgstr "창 형식 \"%s\"은(는) 이미 스타일 셋으로 지정되어 있습니다"
-
-#: ../src/ui/theme-parser.c:1313 ../src/ui/theme-parser.c:1377
-#: ../src/ui/theme-parser.c:1603 ../src/ui/theme-parser.c:2838
-#: ../src/ui/theme-parser.c:2884 ../src/ui/theme-parser.c:3034
-#: ../src/ui/theme-parser.c:3273 ../src/ui/theme-parser.c:3311
-#: ../src/ui/theme-parser.c:3349 ../src/ui/theme-parser.c:3387
-#, c-format
-msgid "Element <%s> is not allowed below <%s>"
-msgstr "<%s> 엘리먼트는 <%s> 아래에 허용되지 않습니다"
-
-#: ../src/ui/theme-parser.c:1427 ../src/ui/theme-parser.c:1441
-#: ../src/ui/theme-parser.c:1486
-msgid ""
-"Cannot specify both \"button_width\"/\"button_height\" and \"aspect_ratio\" "
-"for buttons"
-msgstr ""
-"단추의 button_width/button_height 와 \"aspect_ratio\"를 한꺼번에 지정할 수 없"
-"습니다"
-
-#: ../src/ui/theme-parser.c:1450
-#, c-format
-msgid "Distance \"%s\" is unknown"
-msgstr "거리 \"%s\"을(를) 알 수 없습니다"
-
-#: ../src/ui/theme-parser.c:1495
-#, c-format
-msgid "Aspect ratio \"%s\" is unknown"
-msgstr "가로세로비 \"%s\"을(를) 알 수 없습니다"
-
-#: ../src/ui/theme-parser.c:1557
-#, c-format
-msgid "Border \"%s\" is unknown"
-msgstr "가장자리 \"%s\"을(를) 알 수 없습니다"
-
-#: ../src/ui/theme-parser.c:1868
-#, c-format
-msgid "No \"start_angle\" or \"from\" attribute on element <%s>"
-msgstr "<%s> 엘리먼트에 \"start_angle\"이나 \"from\" 속성이 없습니다"
-
-#: ../src/ui/theme-parser.c:1875
-#, c-format
-msgid "No \"extent_angle\" or \"to\" attribute on element <%s>"
-msgstr "<%s> 엘리먼트에 \"extent_angle\"이나 \"to\" 속성이 없습니다"
-
-#: ../src/ui/theme-parser.c:2115
-#, c-format
-msgid "Did not understand value \"%s\" for type of gradient"
-msgstr "서서히 변하는 색 형식 값 \"%s\"을(를) 이해할 수 없습니다"
-
-#: ../src/ui/theme-parser.c:2193 ../src/ui/theme-parser.c:2568
-#, c-format
-msgid "Did not understand fill type \"%s\" for <%s> element"
-msgstr "<%2$s> 엘리먼트의 채우기 형식 \"%1$s\"을(를) 이해할 수 없습니다"
-
-#: ../src/ui/theme-parser.c:2360 ../src/ui/theme-parser.c:2443
-#: ../src/ui/theme-parser.c:2506
-#, c-format
-msgid "Did not understand state \"%s\" for <%s> element"
-msgstr "<%2$s> 엘리먼트의 state \"%1$s\"을(를) 이해할 수 없습니다"
-
-#: ../src/ui/theme-parser.c:2370 ../src/ui/theme-parser.c:2453
-#, c-format
-msgid "Did not understand shadow \"%s\" for <%s> element"
-msgstr "<%2$s> 엘리먼트의 shadow \"%1$s\"을(를) 이해할 수 없습니다"
-
-#: ../src/ui/theme-parser.c:2380
-#, c-format
-msgid "Did not understand arrow \"%s\" for <%s> element"
-msgstr "<%2$s> 엘리먼트의 arrow \"%1$s\"을(를) 이해할 수 없습니다"
-
-#: ../src/ui/theme-parser.c:2694 ../src/ui/theme-parser.c:2790
-#, c-format
-msgid "No <draw_ops> called \"%s\" has been defined"
-msgstr "\"%s\"라 불리는 <draw_ops>는 정의되지 않았습니다"
-
-#: ../src/ui/theme-parser.c:2706 ../src/ui/theme-parser.c:2802
-#, c-format
-msgid "Including draw_ops \"%s\" here would create a circular reference"
-msgstr "draw_ops를 포함하는 \"%s\"이(가) 자기 자신을 참조하고 있습니다"
-
-#: ../src/ui/theme-parser.c:2917
-#, c-format
-msgid "Unknown position \"%s\" for frame piece"
-msgstr "프레임 조각에 대한 알 수 없는 위치 \"%s\""
-
-#: ../src/ui/theme-parser.c:2925
-#, c-format
-msgid "Frame style already has a piece at position %s"
-msgstr "프레임 스타일은 이미 %s 위치에 조각이 있습니다"
-
-#: ../src/ui/theme-parser.c:2942 ../src/ui/theme-parser.c:3019
-#, c-format
-msgid "No <draw_ops> with the name \"%s\" has been defined"
-msgstr "이름 \"%s\"을(를) 가지는 <draw_ops>가 지정되지 않았습니다"
-
-#: ../src/ui/theme-parser.c:2972
-#, c-format
-msgid "Unknown function \"%s\" for button"
-msgstr "단추에 알 수 없는 기능 \"%s\""
-
-#: ../src/ui/theme-parser.c:2982
-#, c-format
-msgid "Button function \"%s\" does not exist in this version (%d, need %d)"
-msgstr "이 버전에는 \"%s\" 단추 함수가 없습니다 (버전은 %d, 버전 %d 필요)"
-
-#: ../src/ui/theme-parser.c:2994
-#, c-format
-msgid "Unknown state \"%s\" for button"
-msgstr "단추에 알 수 없는 상태 \"%s\""
-
-#: ../src/ui/theme-parser.c:3002
-#, c-format
-msgid "Frame style already has a button for function %s state %s"
-msgstr "프레임 스타일에 단추의 기능 %s 상태 %s이(가) 이미 있습니다"
-
-#: ../src/ui/theme-parser.c:3073
-#, c-format
-msgid "\"%s\" is not a valid value for focus attribute"
-msgstr "\"%s\"은(는) focus 속성에 대한 올바른 값이 아닙니다"
-
-#: ../src/ui/theme-parser.c:3082
-#, c-format
-msgid "\"%s\" is not a valid value for state attribute"
-msgstr "\"%s\"은(는) state 속성에 대한 올바른 값이 아닙니다"
-
-#: ../src/ui/theme-parser.c:3092
-#, c-format
-msgid "A style called \"%s\" has not been defined"
-msgstr "\"%s\"(이)라는 스타일은 정의되지 않았습니다"
-
-#: ../src/ui/theme-parser.c:3113 ../src/ui/theme-parser.c:3136
-#, c-format
-msgid "\"%s\" is not a valid value for resize attribute"
-msgstr "resize 속성에 \"%s\"은(는) 올바른 값이 아닙니다"
-
-#: ../src/ui/theme-parser.c:3147
-#, c-format
-msgid ""
-"Should not have \"resize\" attribute on <%s> element for maximized/shaded "
-"states"
-msgstr ""
-"최대화/그림자 상태에서 <%s> 엘리먼트는 \"resize\" 속성을 가지지 않습니다"
-
-#: ../src/ui/theme-parser.c:3161
-#, c-format
-msgid ""
-"Should not have \"resize\" attribute on <%s> element for maximized states"
-msgstr "최대화한 상태에서 <%s> 엘리먼트는 \"resize\" 속성을 가지지 않습니다"
-
-#: ../src/ui/theme-parser.c:3175 ../src/ui/theme-parser.c:3222
-#, c-format
-msgid "Style has already been specified for state %s resize %s focus %s"
-msgstr "스타일에 상태 %s 크기 조절 %s 포커스 %s에 대해 이미 지정되어 있습니다"
-
-#: ../src/ui/theme-parser.c:3186 ../src/ui/theme-parser.c:3197
-#: ../src/ui/theme-parser.c:3208 ../src/ui/theme-parser.c:3233
-#: ../src/ui/theme-parser.c:3244 ../src/ui/theme-parser.c:3255
-#, c-format
-msgid "Style has already been specified for state %s focus %s"
-msgstr "스타일에 상태 %s 포커스 %s에 대해 이미 지정되어 있습니다"
-
-#: ../src/ui/theme-parser.c:3294
-msgid ""
-"Can't have a two draw_ops for a <piece> element (theme specified a draw_ops "
-"attribute and also a <draw_ops> element, or specified two elements)"
-msgstr ""
-"<piece> 엘리먼트에 두개의 draw_ops를 가질수 없습니다 (테마에 draw_ops 속성과 "
-"<draw_ops> 엘리먼트를 지정했거나 두 엘리먼트를 지정했습니다"
-
-#: ../src/ui/theme-parser.c:3332
-msgid ""
-"Can't have a two draw_ops for a <button> element (theme specified a draw_ops "
-"attribute and also a <draw_ops> element, or specified two elements)"
-msgstr ""
-"<button> 엘리먼트에 두개의 draw_ops를 가질수 없습니다 (테마에 draw_ops 속성"
-"과 <draw_ops> 엘리먼트를 지정했거나 두 엘리먼트를 지정했습니다"
-
-#: ../src/ui/theme-parser.c:3370
-msgid ""
-"Can't have a two draw_ops for a <menu_icon> element (theme specified a "
-"draw_ops attribute and also a <draw_ops> element, or specified two elements)"
-msgstr ""
-"<menu_icon> 엘리먼트에 두개의 draw_ops를 가질수 없습니다 (테마에 draw_ops 속"
-"성과 <draw_ops> 엘리먼트를 지정했거나 두 엘리먼트를 지정했습니다"
-
-#: ../src/ui/theme-parser.c:3434
-#, c-format
-msgid "Bad version specification '%s'"
-msgstr "잘못된 형식의 버전 '%s'"
-
-#: ../src/ui/theme-parser.c:3507
-msgid ""
-"\"version\" attribute cannot be used in metacity-theme-1.xml or metacity-"
-"theme-2.xml"
-msgstr ""
-"metacity-theme-1.xml 혹은 metacity-theme-2.xml 파일에서는 \"version\" 속성을 "
-"사용할 수 없습니다"
-
-#: ../src/ui/theme-parser.c:3530
-#, c-format
-msgid "Theme requires version %s but latest supported theme version is %d.%d"
-msgstr "테마에 %s 버전이 필요하지만 지원하는 테마의 최신 버전은 %d.%d입니다."
-
-#: ../src/ui/theme-parser.c:3562
-#, c-format
-msgid "Outermost element in theme must be <metacity_theme> not <%s>"
-msgstr "테마의 최상위는 <%s> 엘리먼트가 아니라 <metacity_theme>여야 합니다"
-
-#: ../src/ui/theme-parser.c:3582
-#, c-format
-msgid ""
-"Element <%s> is not allowed inside a name/author/date/description element"
-msgstr ""
-"name/author/date/description 엘리먼트 안에서 <%s> 엘리먼트가 허용되지 않습니"
-"다"
-
-#: ../src/ui/theme-parser.c:3587
-#, c-format
-msgid "Element <%s> is not allowed inside a <constant> element"
-msgstr "<constant> 엘리먼트 안에서 <%s> 엘리먼트는 허용되지 않습니다"
-
-#: ../src/ui/theme-parser.c:3599
-#, c-format
-msgid ""
-"Element <%s> is not allowed inside a distance/border/aspect_ratio element"
-msgstr ""
-"distance/border/aspect_ratio 엘리먼트 안에서 <%s> 엘리먼트가 허용되지 않습니"
-"다"
-
-#: ../src/ui/theme-parser.c:3621
-#, c-format
-msgid "Element <%s> is not allowed inside a draw operation element"
-msgstr "draw operation 엘리먼트 안에서 <%s> 엘리먼트가 허용되지 않습니다"
-
-#: ../src/ui/theme-parser.c:3631 ../src/ui/theme-parser.c:3661
-#: ../src/ui/theme-parser.c:3666 ../src/ui/theme-parser.c:3671
-#, c-format
-msgid "Element <%s> is not allowed inside a <%s> element"
-msgstr "<%2$s> 엘리먼트 안에서 <%1$s> 엘리먼트가 허용되지 않습니다"
-
-#: ../src/ui/theme-parser.c:3899
-msgid "No draw_ops provided for frame piece"
-msgstr "프레임 조각에 draw_ops가 제공하지 않습니다"
-
-#: ../src/ui/theme-parser.c:3914
-msgid "No draw_ops provided for button"
-msgstr "단추에 draw_ops가 제공되지 않습니다"
-
-#: ../src/ui/theme-parser.c:3968
-#, c-format
-msgid "No text is allowed inside element <%s>"
-msgstr "<%s> 엘리먼트 안에 텍스트가 허용되지 않습니다"
-
-#: ../src/ui/theme-parser.c:4026 ../src/ui/theme-parser.c:4038
-#: ../src/ui/theme-parser.c:4050 ../src/ui/theme-parser.c:4062
-#: ../src/ui/theme-parser.c:4074
-#, c-format
-msgid "<%s> specified twice for this theme"
-msgstr "이 테마에서 <%s> 태그가 두 번 지정되었습니다"
-
-#: ../src/ui/theme-parser.c:4348
-#, c-format
-msgid "Failed to find a valid file for theme %s\n"
-msgstr "%s 테마의 올바른 파일을 찾는 데 실패했습니다\n"
-
-#: ../src/ui/theme-viewer.c:99
-msgid "_Windows"
-msgstr "창(_W)"
-
-#: ../src/ui/theme-viewer.c:100
-msgid "_Dialog"
-msgstr "대화 상자(_D)"
-
-#: ../src/ui/theme-viewer.c:101
-msgid "_Modal dialog"
-msgstr "모달 대화 상자(_M)"
-
-#: ../src/ui/theme-viewer.c:102
-msgid "_Utility"
-msgstr "도구(_U)"
-
-#: ../src/ui/theme-viewer.c:103
-msgid "_Splashscreen"
-msgstr "스플래시 화면(_S)"
-
-#: ../src/ui/theme-viewer.c:104
-msgid "_Top dock"
-msgstr "위 도크(_T)"
-
-#: ../src/ui/theme-viewer.c:105
-msgid "_Bottom dock"
-msgstr "아래 도크(_B)"
-
-#: ../src/ui/theme-viewer.c:106
-msgid "_Left dock"
-msgstr "왼쪽 도크(_L)"
-
-#: ../src/ui/theme-viewer.c:107
-msgid "_Right dock"
-msgstr "오른쪽 도크(_R)"
-
-#: ../src/ui/theme-viewer.c:108
-msgid "_All docks"
-msgstr "모든 도크(_A)"
-
-#: ../src/ui/theme-viewer.c:109
-msgid "Des_ktop"
-msgstr "데스크톱(_K)"
-
-#: ../src/ui/theme-viewer.c:115
-msgid "Open another one of these windows"
-msgstr "이 창을 하나 더 엽니다"
-
-#: ../src/ui/theme-viewer.c:117
-msgid "This is a demo button with an 'open' icon"
-msgstr "'열기' 아이콘이 들어 있는 데모 단추입니다"
-
-#: ../src/ui/theme-viewer.c:119
-msgid "This is a demo button with a 'quit' icon"
-msgstr "'끝내기' 아이콘이 들어 있는 데모 단추입니다"
-
-#: ../src/ui/theme-viewer.c:248
-msgid "This is a sample message in a sample dialog"
-msgstr "예제 대화 상자의 예제 메시지입니다"
-
-#: ../src/ui/theme-viewer.c:328
-#, c-format
-msgid "Fake menu item %d\n"
-msgstr "가짜 메뉴 항목 %d\n"
-
-#: ../src/ui/theme-viewer.c:363
-msgid "Border-only window"
-msgstr "테두리만 있는 창"
-
-#: ../src/ui/theme-viewer.c:365
-msgid "Bar"
-msgstr "모음"
-
-#: ../src/ui/theme-viewer.c:382
-msgid "Normal Application Window"
-msgstr "보통 프로그램 창"
-
-#: ../src/ui/theme-viewer.c:386
-msgid "Dialog Box"
-msgstr "대화 상자"
-
-#: ../src/ui/theme-viewer.c:390
-msgid "Modal Dialog Box"
-msgstr "모달 대화 상자"
-
-#: ../src/ui/theme-viewer.c:394
-msgid "Utility Palette"
-msgstr "도구 팔레트"
-
-#: ../src/ui/theme-viewer.c:398
-msgid "Torn-off Menu"
-msgstr "떼어내기 메뉴"
-
-#: ../src/ui/theme-viewer.c:402
-msgid "Border"
-msgstr "테두리"
-
-#: ../src/ui/theme-viewer.c:406
-msgid "Attached Modal Dialog"
-msgstr "부착한 모달 대화 상자"
-
-#: ../src/ui/theme-viewer.c:739
-#, c-format
-msgid "Button layout test %d"
-msgstr "단추 배치 테스트 %d"
-
-#: ../src/ui/theme-viewer.c:768
-#, c-format
-msgid "%g milliseconds to draw one window frame"
-msgstr "창 프레임 하나를 그리는 데 %g ms"
-
-#: ../src/ui/theme-viewer.c:813
-#, c-format
-msgid "Usage: metacity-theme-viewer [THEMENAME]\n"
-msgstr "사용법: metacity-theme-viewer [테마이름]\n"
-
-#: ../src/ui/theme-viewer.c:820
-#, c-format
-msgid "Error loading theme: %s\n"
-msgstr "테마를 읽어들이는 데 오류가 발생했습니다: %s\n"
-
-#: ../src/ui/theme-viewer.c:826
-#, c-format
-msgid "Loaded theme \"%s\" in %g seconds\n"
-msgstr "\"%s\" 테마를 읽어들이는 데 %g초\n"
-
-#: ../src/ui/theme-viewer.c:870
-msgid "Normal Title Font"
-msgstr "보통 제목 글꼴"
-
-#: ../src/ui/theme-viewer.c:876
-msgid "Small Title Font"
-msgstr "작은 제목 글꼴"
-
-#: ../src/ui/theme-viewer.c:882
-msgid "Large Title Font"
-msgstr "큰 제목 글꼴"
-
-#: ../src/ui/theme-viewer.c:887
-msgid "Button Layouts"
-msgstr "단추 배치"
-
-#: ../src/ui/theme-viewer.c:892
-msgid "Benchmark"
-msgstr "벤치마크"
-
-#: ../src/ui/theme-viewer.c:944
-msgid "Window Title Goes Here"
-msgstr "창 제목이 여기에 들어갑니다"
-
-#: ../src/ui/theme-viewer.c:1047
-#, c-format
-msgid ""
-"Drew %d frames in %g client-side seconds (%g milliseconds per frame) and %g "
-"seconds wall clock time including X server resources (%g milliseconds per "
-"frame)\n"
-msgstr ""
-"%d개 프레임을 그리는 데 클라이언트 입장에서 %g초가 걸렸습니다 (한 프레임에 %"
-"g ms). 그리고 X 서버 리소스까지 포함해 실제 시간으로 %g 초가 걸렸습니다 (한 "
-"프레임에 %g ms).\n"
-
-#: ../src/ui/theme-viewer.c:1266
-msgid "position expression test returned TRUE but set error"
-msgstr "위치 표현식 테스트가 참을 리턴했지만 오류가 발생했습니다"
-
-#: ../src/ui/theme-viewer.c:1268
-msgid "position expression test returned FALSE but didn't set error"
-msgstr "위치 표현식 테스트가 거짓을 리턴했지만 오류가 발생하지 않았습니다"
-
-#: ../src/ui/theme-viewer.c:1272
-msgid "Error was expected but none given"
-msgstr "오류가 발생해야 하지만 발생하지 않았습니다"
-
-#: ../src/ui/theme-viewer.c:1274
-#, c-format
-msgid "Error %d was expected but %d given"
-msgstr "오류 %d번이 발생해야 하지만 오류 %d번이 발생했습니다"
-
-#: ../src/ui/theme-viewer.c:1280
-#, c-format
-msgid "Error not expected but one was returned: %s"
-msgstr "오류가 발생하면 안 되지만 오류 한 개가 발생했습니다: %s"
-
-#: ../src/ui/theme-viewer.c:1284
-#, c-format
-msgid "x value was %d, %d was expected"
-msgstr "가로값이 %d입니다. 와야 하는 값은 %d입니다"
-
-#: ../src/ui/theme-viewer.c:1287
-#, c-format
-msgid "y value was %d, %d was expected"
-msgstr "세로값이 %d입니다. 와야 하는 값은 %d입니다"
-
-#: ../src/ui/theme-viewer.c:1352
-#, c-format
-msgid "%d coordinate expressions parsed in %g seconds (%g seconds average)\n"
-msgstr "%d개의 좌표 표현식을 %g초에 파싱했습니다 (평균 %g초)\n"
-
-#~ msgid "Close Window"
-#~ msgstr "창 닫기"
-
-#~ msgid "Window Menu"
-#~ msgstr "창 메뉴"
-
-#~ msgid "Minimize Window"
-#~ msgstr "창 최소화"
-
-#~ msgid "Maximize Window"
-#~ msgstr "창 최대화"
-
-#~ msgid "Restore Window"
-#~ msgstr "창 복귀"
-
-#~ msgid "Roll Up Window"
-#~ msgstr "창 말아올리기"
-
-#~ msgid "Unroll Window"
-#~ msgstr "창 펼치기"
+#~ msgid "Move window one workspace to the left"
+#~ msgstr "창을 한칸 왼쪽 작업 공간으로 옮기기"
 
-#~ msgid "Keep Window On Top"
-#~ msgstr "창을 맨 위에 두기"
+#~ msgid "Move window one workspace to the right"
+#~ msgstr "창을 한칸 오른쪽 작업 공간으로 옮기기"
 
-#~ msgid "Remove Window From Top"
-#~ msgstr "창을 맨 위에서 빼기"
+#~ msgid "Move to workspace left"
+#~ msgstr "왼쪽 작업 공간으로 옮기기"
 
-#~ msgid "Always On Visible Workspace"
-#~ msgstr "항상 현재 작업 공간에 놓기"
+#~ msgid "Move to workspace right"
+#~ msgstr "오른쪽 작업 공간으로 옮기기"
 
-#~ msgid "Put Window On Only One Workspace"
-#~ msgstr "창을 한 개 작업 공간에만 두기"
+#~ msgid "Toggle shaded state"
+#~ msgstr "그림자 상태 토글"

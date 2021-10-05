@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include "test-declarations.h"
 #include "test-utils.h"
 
 typedef struct _TestState
@@ -205,7 +206,7 @@ test_paint (TestState *state)
   cogl_object_unref (pipeline);
 }
 
-static CoglBool
+static gboolean
 get_attributes_cb (CoglPrimitive *prim,
                    CoglAttribute *attrib,
                    void *user_data)
@@ -251,7 +252,7 @@ test_copy (TestState *state)
                                           16, /* offset */
                                           2, /* components */
                                           COGL_ATTRIBUTE_TYPE_FLOAT);
-      free (name);
+      g_free (name);
     }
 
   prim_a = cogl_primitive_new_with_attributes (COGL_VERTICES_MODE_TRIANGLES,

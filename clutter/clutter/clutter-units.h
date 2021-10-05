@@ -70,45 +70,45 @@ struct _ClutterUnits
   gint64 __padding_2;
 };
 
-CLUTTER_AVAILABLE_IN_1_0
+CLUTTER_EXPORT
 GType           clutter_units_get_type         (void) G_GNUC_CONST;
-CLUTTER_AVAILABLE_IN_1_0
+CLUTTER_EXPORT
 ClutterUnitType clutter_units_get_unit_type    (const ClutterUnits *units);
-CLUTTER_AVAILABLE_IN_1_0
+CLUTTER_EXPORT
 gfloat          clutter_units_get_unit_value   (const ClutterUnits *units);
 
-CLUTTER_AVAILABLE_IN_1_0
+CLUTTER_EXPORT
 ClutterUnits *  clutter_units_copy             (const ClutterUnits *units);
-CLUTTER_AVAILABLE_IN_1_0
+CLUTTER_EXPORT
 void            clutter_units_free             (ClutterUnits       *units);
 
-CLUTTER_AVAILABLE_IN_1_0
+CLUTTER_EXPORT
 void            clutter_units_from_pixels      (ClutterUnits       *units,
                                                 gint                px);
-CLUTTER_AVAILABLE_IN_1_0
+CLUTTER_EXPORT
 void            clutter_units_from_em          (ClutterUnits       *units,
                                                 gfloat              em);
-CLUTTER_AVAILABLE_IN_1_0
+CLUTTER_EXPORT
 void            clutter_units_from_em_for_font (ClutterUnits       *units,
                                                 const gchar        *font_name,
                                                 gfloat              em);
-CLUTTER_AVAILABLE_IN_1_0
+CLUTTER_EXPORT
 void            clutter_units_from_mm          (ClutterUnits       *units,
                                                 gfloat              mm);
-CLUTTER_AVAILABLE_IN_1_0
+CLUTTER_EXPORT
 void            clutter_units_from_cm          (ClutterUnits       *units,
                                                 gfloat              cm);
-CLUTTER_AVAILABLE_IN_1_0
+CLUTTER_EXPORT
 void            clutter_units_from_pt          (ClutterUnits       *units,
                                                 gfloat              pt);
 
-CLUTTER_AVAILABLE_IN_1_0
+CLUTTER_EXPORT
 gfloat          clutter_units_to_pixels        (ClutterUnits       *units);
 
-CLUTTER_AVAILABLE_IN_1_0
+CLUTTER_EXPORT
 gboolean        clutter_units_from_string      (ClutterUnits       *units,
                                                 const gchar        *str);
-CLUTTER_AVAILABLE_IN_1_0
+CLUTTER_EXPORT
 gchar *         clutter_units_to_string        (const ClutterUnits *units);
 
 /* shorthands for the constructors */
@@ -160,10 +160,10 @@ struct _ClutterParamSpecUnits
   gfloat maximum;
 };
 
-CLUTTER_AVAILABLE_IN_1_0
+CLUTTER_EXPORT
 GType clutter_param_units_get_type (void) G_GNUC_CONST;
 
-CLUTTER_AVAILABLE_IN_1_0
+CLUTTER_EXPORT
 GParamSpec *            clutter_param_spec_units (const gchar        *name,
                                                   const gchar        *nick,
                                                   const gchar        *blurb,
@@ -173,10 +173,10 @@ GParamSpec *            clutter_param_spec_units (const gchar        *name,
                                                   gfloat              default_value,
                                                   GParamFlags         flags);
 
-CLUTTER_AVAILABLE_IN_1_0
+CLUTTER_EXPORT
 void                    clutter_value_set_units  (GValue             *value,
                                                   const ClutterUnits *units);
-CLUTTER_AVAILABLE_IN_1_0
+CLUTTER_EXPORT
 const ClutterUnits *    clutter_value_get_units  (const GValue       *value);
 
 G_END_DECLS
