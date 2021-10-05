@@ -9,20 +9,20 @@ shift
 UNIT_TEST=$1
 shift
 
-test -z ${UNIT_TEST} && {
+test -z "${UNIT_TEST}" && {
         echo "Usage: $0 UNIT_TEST"
         exit 1
 }
 
-BINARY_NAME=`basename $TEST_BINARY`
-UNIT_TEST=`echo $UNIT_TEST|sed 's/-/_/g'`
+BINARY_NAME=$(basename "$TEST_BINARY")
+UNIT_TEST=$(echo "$UNIT_TEST"|sed 's/-/_/g')
 
-echo "Running: ./$BINARY_NAME ${UNIT_TEST} $@"
+echo "Running: ./$BINARY_NAME ${UNIT_TEST} $*"
 echo ""
-COGL_TEST_VERBOSE=1 $TEST_BINARY ${UNIT_TEST} "$@"
+COGL_TEST_VERBOSE=1 "$TEST_BINARY" "${UNIT_TEST}" "$@"
 exit_val=$?
 
-if test $exit_val -eq 0; then
+if test "$exit_val" -eq 0; then
   echo "OK"
 fi
 
@@ -36,4 +36,4 @@ echo "$ env G_SLICE=always-malloc \\"
 echo "  libtool --mode=execute \\"
 echo "          valgrind ./$BINARY_NAME ${UNIT_TEST}"
 
-exit $exit_val
+exit "$exit_val"

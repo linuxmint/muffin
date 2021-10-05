@@ -41,7 +41,7 @@
 void
 _cogl_texture_2d_gl_free (CoglTexture2D *tex_2d);
 
-CoglBool
+gboolean
 _cogl_texture_2d_gl_can_create (CoglContext *ctx,
                                 int width,
                                 int height,
@@ -50,15 +50,15 @@ _cogl_texture_2d_gl_can_create (CoglContext *ctx,
 void
 _cogl_texture_2d_gl_init (CoglTexture2D *tex_2d);
 
-CoglBool
+gboolean
 _cogl_texture_2d_gl_allocate (CoglTexture *tex,
-                              CoglError **error);
+                              GError **error);
 
 CoglTexture2D *
 _cogl_texture_2d_gl_new_from_bitmap (CoglBitmap *bmp,
                                      CoglPixelFormat internal_format,
-                                     CoglBool can_convert_in_place,
-                                     CoglError **error);
+                                     gboolean can_convert_in_place,
+                                     GError **error);
 
 #if defined (COGL_HAS_EGL_SUPPORT) && defined (EGL_KHR_image_base)
 CoglTexture2D *
@@ -67,7 +67,7 @@ _cogl_egl_texture_2d_gl_new_from_image (CoglContext *ctx,
                                         int height,
                                         CoglPixelFormat format,
                                         EGLImageKHR image,
-                                        CoglError **error);
+                                        GError **error);
 #endif
 
 void
@@ -78,8 +78,7 @@ _cogl_texture_2d_gl_flush_legacy_texobj_filters (CoglTexture *tex,
 void
 _cogl_texture_2d_gl_flush_legacy_texobj_wrap_modes (CoglTexture *tex,
                                                     GLenum wrap_mode_s,
-                                                    GLenum wrap_mode_t,
-                                                    GLenum wrap_mode_p);
+                                                    GLenum wrap_mode_t);
 
 void
 _cogl_texture_2d_gl_copy_from_framebuffer (CoglTexture2D *tex_2d,
@@ -98,7 +97,7 @@ _cogl_texture_2d_gl_get_gl_handle (CoglTexture2D *tex_2d);
 void
 _cogl_texture_2d_gl_generate_mipmap (CoglTexture2D *tex_2d);
 
-CoglBool
+gboolean
 _cogl_texture_2d_gl_copy_from_bitmap (CoglTexture2D *tex_2d,
                                       int src_x,
                                       int src_y,
@@ -108,7 +107,10 @@ _cogl_texture_2d_gl_copy_from_bitmap (CoglTexture2D *tex_2d,
                                       int dst_x,
                                       int dst_y,
                                       int level,
-                                      CoglError **error);
+                                      GError **error);
+
+gboolean
+_cogl_texture_2d_gl_is_get_data_supported (CoglTexture2D *tex_2d);
 
 void
 _cogl_texture_2d_gl_get_data (CoglTexture2D *tex_2d,

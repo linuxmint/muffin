@@ -47,10 +47,7 @@
 #include "cogl-object.h"
 #include "cogl-bitmap-private.h"
 #include "cogl-atlas-texture-private.h"
-#include "cogl-error-private.h"
-#include "cogl-texture-rectangle.h"
 #include "cogl-sub-texture.h"
-#include "cogl-texture-2d-gl.h"
 
 #include "deprecated/cogl-auto-texture.h"
 
@@ -58,8 +55,8 @@ static CoglTexture *
 _cogl_texture_new_from_bitmap (CoglBitmap *bitmap,
                                CoglTextureFlags flags,
                                CoglPixelFormat internal_format,
-                               CoglBool can_convert_in_place,
-                               CoglError **error);
+                               gboolean can_convert_in_place,
+                               GError **error);
 
 static void
 set_auto_mipmap_cb (CoglTexture *sub_texture,
@@ -78,29 +75,22 @@ cogl_texture_new_with_size (unsigned int width,
 			    CoglPixelFormat internal_format)
 {
   CoglTexture *tex;
-  CoglError *skip_error = NULL;
+  GError *skip_error = NULL;
 
   _COGL_GET_CONTEXT (ctx, NULL);
 
-  if ((_cogl_util_is_pot (width) && _cogl_util_is_pot (height)) ||
-      (cogl_has_feature (ctx, COGL_FEATURE_ID_TEXTURE_NPOT_BASIC) &&
-       cogl_has_feature (ctx, COGL_FEATURE_ID_TEXTURE_NPOT_MIPMAP)))
+  /* First try creating a fast-path non-sliced texture */
+  tex = COGL_TEXTURE (cogl_texture_2d_new_with_size (ctx, width, height));
+
+  _cogl_texture_set_internal_format (tex, internal_format);
+
+  if (!cogl_texture_allocate (tex, &skip_error))
     {
-      /* First try creating a fast-path non-sliced texture */
-      tex = COGL_TEXTURE (cogl_texture_2d_new_with_size (ctx, width, height));
-
-      _cogl_texture_set_internal_format (tex, internal_format);
-
-      if (!cogl_texture_allocate (tex, &skip_error))
-        {
-          cogl_error_free (skip_error);
-          skip_error = NULL;
-          cogl_object_unref (tex);
-          tex = NULL;
-        }
+      g_error_free (skip_error);
+      skip_error = NULL;
+      cogl_object_unref (tex);
+      tex = NULL;
     }
-  else
-    tex = NULL;
 
   if (!tex)
     {
@@ -119,7 +109,7 @@ cogl_texture_new_with_size (unsigned int width,
    * semantics and return NULL if allocation fails... */
   if (!cogl_texture_allocate (tex, &skip_error))
     {
-      cogl_error_free (skip_error);
+      g_error_free (skip_error);
       cogl_object_unref (tex);
       return NULL;
     }
@@ -147,17 +137,18 @@ _cogl_texture_new_from_data (CoglContext *ctx,
                              CoglPixelFormat internal_format,
                              int rowstride,
                              const uint8_t *data,
-                             CoglError **error)
+                             GError **error)
 {
   CoglBitmap *bmp;
   CoglTexture *tex;
 
-  _COGL_RETURN_VAL_IF_FAIL (format != COGL_PIXEL_FORMAT_ANY, NULL);
-  _COGL_RETURN_VAL_IF_FAIL (data != NULL, NULL);
+  g_return_val_if_fail (format != COGL_PIXEL_FORMAT_ANY, NULL);
+  g_return_val_if_fail (cogl_pixel_format_get_n_planes (format) == 1, NULL);
+  g_return_val_if_fail (data != NULL, NULL);
 
   /* Rowstride from width if not given */
   if (rowstride == 0)
-    rowstride = width * _cogl_pixel_format_get_bytes_per_pixel (format);
+    rowstride = width * cogl_pixel_format_get_bytes_per_pixel (format, 0);
 
   /* Wrap the data into a bitmap */
   bmp = cogl_bitmap_new_for_data (ctx,
@@ -186,7 +177,7 @@ cogl_texture_new_from_data (int width,
                             int rowstride,
                             const uint8_t *data)
 {
-  CoglError *ignore_error = NULL;
+  GError *ignore_error = NULL;
   CoglTexture *tex;
 
   _COGL_GET_CONTEXT (ctx, NULL);
@@ -199,7 +190,7 @@ cogl_texture_new_from_data (int width,
                                      data,
                                      &ignore_error);
   if (!tex)
-    cogl_error_free (ignore_error);
+    g_error_free (ignore_error);
   return tex;
 }
 
@@ -207,12 +198,11 @@ static CoglTexture *
 _cogl_texture_new_from_bitmap (CoglBitmap *bitmap,
                                CoglTextureFlags flags,
                                CoglPixelFormat internal_format,
-                               CoglBool can_convert_in_place,
-                               CoglError **error)
+                               gboolean can_convert_in_place,
+                               GError **error)
 {
-  CoglContext *ctx = _cogl_bitmap_get_context (bitmap);
   CoglTexture *tex;
-  CoglError *internal_error = NULL;
+  GError *internal_error = NULL;
 
   if (!flags &&
       !COGL_DEBUG_ENABLED (COGL_DEBUG_DISABLE_ATLAS))
@@ -228,32 +218,24 @@ _cogl_texture_new_from_bitmap (CoglBitmap *bitmap,
       if (cogl_texture_allocate (COGL_TEXTURE (atlas_tex), &internal_error))
         return COGL_TEXTURE (atlas_tex);
 
-      cogl_error_free (internal_error);
+      g_error_free (internal_error);
       internal_error = NULL;
       cogl_object_unref (atlas_tex);
     }
 
   /* If that doesn't work try a fast path 2D texture */
-  if ((_cogl_util_is_pot (bitmap->width) &&
-       _cogl_util_is_pot (bitmap->height)) ||
-      (cogl_has_feature (ctx, COGL_FEATURE_ID_TEXTURE_NPOT_BASIC) &&
-       cogl_has_feature (ctx, COGL_FEATURE_ID_TEXTURE_NPOT_MIPMAP)))
+  tex = COGL_TEXTURE (_cogl_texture_2d_new_from_bitmap (bitmap,
+                                                        can_convert_in_place));
+
+  _cogl_texture_set_internal_format (tex, internal_format);
+
+  if (!cogl_texture_allocate (tex, &internal_error))
     {
-      tex = COGL_TEXTURE (_cogl_texture_2d_new_from_bitmap (bitmap,
-                                                            can_convert_in_place));
-
-      _cogl_texture_set_internal_format (tex, internal_format);
-
-      if (!cogl_texture_allocate (tex, &internal_error))
-        {
-          cogl_error_free (internal_error);
-          internal_error = NULL;
-          cogl_object_unref (tex);
-          tex = NULL;
-        }
+      g_error_free (internal_error);
+      internal_error = NULL;
+      cogl_object_unref (tex);
+      tex = NULL;
     }
-  else
-    tex = NULL;
 
   if (!tex)
     {
@@ -291,7 +273,7 @@ cogl_texture_new_from_bitmap (CoglBitmap *bitmap,
                               CoglTextureFlags flags,
                               CoglPixelFormat internal_format)
 {
-  CoglError *ignore_error = NULL;
+  GError *ignore_error = NULL;
   CoglTexture *tex =
     _cogl_texture_new_from_bitmap (bitmap,
                                    flags,
@@ -299,7 +281,7 @@ cogl_texture_new_from_bitmap (CoglBitmap *bitmap,
                                    FALSE, /* can't convert in-place */
                                    &ignore_error);
   if (!tex)
-    cogl_error_free (ignore_error);
+    g_error_free (ignore_error);
   return tex;
 }
 
@@ -307,14 +289,14 @@ CoglTexture *
 cogl_texture_new_from_file (const char        *filename,
                             CoglTextureFlags   flags,
                             CoglPixelFormat    internal_format,
-                            CoglError           **error)
+                            GError           **error)
 {
   CoglBitmap *bmp;
   CoglTexture *texture = NULL;
 
   _COGL_GET_CONTEXT (ctx, NULL);
 
-  _COGL_RETURN_VAL_IF_FAIL (error == NULL || *error == NULL, NULL);
+  g_return_val_if_fail (error == NULL || *error == NULL, NULL);
 
   bmp = cogl_bitmap_new_from_file (filename, error);
   if (bmp == NULL)
@@ -328,82 +310,6 @@ cogl_texture_new_from_file (const char        *filename,
   cogl_object_unref (bmp);
 
   return texture;
-}
-
-CoglTexture *
-cogl_texture_new_from_foreign (GLuint           gl_handle,
-			       GLenum           gl_target,
-			       GLuint           width,
-			       GLuint           height,
-			       GLuint           x_pot_waste,
-			       GLuint           y_pot_waste,
-			       CoglPixelFormat  format)
-{
-  _COGL_GET_CONTEXT (ctx, NULL);
-
-#ifdef HAVE_COGL_GL
-  if (gl_target == GL_TEXTURE_RECTANGLE_ARB)
-    {
-      CoglTextureRectangle *texture_rectangle;
-      CoglSubTexture *sub_texture;
-
-      if (x_pot_waste != 0 || y_pot_waste != 0)
-        {
-          /* It shouldn't be necessary to have waste in this case since
-           * the texture isn't limited to power of two sizes. */
-          g_warning ("You can't create a foreign GL_TEXTURE_RECTANGLE cogl "
-                     "texture with waste\n");
-          return NULL;
-        }
-
-      texture_rectangle = cogl_texture_rectangle_new_from_foreign (ctx,
-                                                                   gl_handle,
-                                                                   width,
-                                                                   height,
-                                                                   format);
-      _cogl_texture_set_internal_format (COGL_TEXTURE (texture_rectangle),
-                                         format);
-
-      /* CoglTextureRectangle textures work with non-normalized
-       * coordinates, but the semantics for this function that people
-       * depend on are that all returned texture works with normalized
-       * coordinates so we wrap with a CoglSubTexture... */
-      sub_texture = cogl_sub_texture_new (ctx,
-                                          COGL_TEXTURE (texture_rectangle),
-                                          0, 0, width, height);
-      return COGL_TEXTURE (sub_texture);
-    }
-#endif
-
-  if (x_pot_waste != 0 || y_pot_waste != 0)
-    {
-      CoglTexture *tex =
-        COGL_TEXTURE (_cogl_texture_2d_sliced_new_from_foreign (ctx,
-                                                                gl_handle,
-                                                                gl_target,
-                                                                width,
-                                                                height,
-                                                                x_pot_waste,
-                                                                y_pot_waste,
-                                                                format));
-      _cogl_texture_set_internal_format (tex, format);
-
-      cogl_texture_allocate (tex, NULL);
-      return tex;
-    }
-  else
-    {
-      CoglTexture *tex =
-        COGL_TEXTURE (cogl_texture_2d_gl_new_from_foreign (ctx,
-                                                           gl_handle,
-                                                           width,
-                                                           height,
-                                                           format));
-      _cogl_texture_set_internal_format (tex, format);
-
-      cogl_texture_allocate (tex, NULL);
-      return tex;
-    }
 }
 
 CoglTexture *

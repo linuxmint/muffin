@@ -3,15 +3,8 @@
 #ifndef META_BACKGROUND_ACTOR_PRIVATE_H
 #define META_BACKGROUND_ACTOR_PRIVATE_H
 
-#include <meta/screen.h>
-#include <meta/meta-background-actor.h>
-#include "meta-background.h"
+#include "meta/meta-background-actor.h"
 
-void meta_background_actor_set_visible_region  (MetaBackgroundActor *self,
-                                                cairo_region_t      *visible_region);
-
-void meta_background_actor_update              (MetaScreen *screen);
-void meta_background_actor_screen_size_changed (MetaScreen *screen);
-
+cairo_region_t *meta_background_actor_get_clip_region (MetaBackgroundActor *self);
 
 #endif /* META_BACKGROUND_ACTOR_PRIVATE_H */

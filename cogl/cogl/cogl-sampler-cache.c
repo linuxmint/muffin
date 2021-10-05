@@ -30,13 +30,11 @@
  *   Neil Roberts <neil@linux.intel.com>
  */
 
-#ifdef HAVE_CONFIG_H
 #include "cogl-config.h"
-#endif
 
 #include "cogl-sampler-cache-private.h"
 #include "cogl-context-private.h"
-#include "cogl-util-gl-private.h"
+#include "driver/gl/cogl-util-gl-private.h"
 
 #ifndef GL_TEXTURE_WRAP_R
 #define GL_TEXTURE_WRAP_R 0x8072
@@ -79,10 +77,9 @@ canonicalize_key (CoglSamplerCacheEntry *key)
      sampler object for the state */
   key->wrap_mode_s = get_real_wrap_mode (key->wrap_mode_s);
   key->wrap_mode_t = get_real_wrap_mode (key->wrap_mode_t);
-  key->wrap_mode_p = get_real_wrap_mode (key->wrap_mode_p);
 }
 
-static CoglBool
+static gboolean
 wrap_mode_equal_gl (CoglSamplerCacheWrapMode wrap_mode0,
                     CoglSamplerCacheWrapMode wrap_mode1)
 {
@@ -92,7 +89,7 @@ wrap_mode_equal_gl (CoglSamplerCacheWrapMode wrap_mode0,
   return get_real_wrap_mode (wrap_mode0) == get_real_wrap_mode (wrap_mode1);
 }
 
-static CoglBool
+static gboolean
 sampler_state_equal_gl (const void *value0,
                         const void *value1)
 {
@@ -102,8 +99,7 @@ sampler_state_equal_gl (const void *value0,
   return (state0->mag_filter == state1->mag_filter &&
           state0->min_filter == state1->min_filter &&
           wrap_mode_equal_gl (state0->wrap_mode_s, state1->wrap_mode_s) &&
-          wrap_mode_equal_gl (state0->wrap_mode_t, state1->wrap_mode_t) &&
-          wrap_mode_equal_gl (state0->wrap_mode_p, state1->wrap_mode_p));
+          wrap_mode_equal_gl (state0->wrap_mode_t, state1->wrap_mode_t));
 }
 
 static unsigned int
@@ -132,12 +128,11 @@ hash_sampler_state_gl (const void *key)
                                         sizeof (entry->min_filter));
   hash = hash_wrap_mode_gl (hash, entry->wrap_mode_s);
   hash = hash_wrap_mode_gl (hash, entry->wrap_mode_t);
-  hash = hash_wrap_mode_gl (hash, entry->wrap_mode_p);
 
   return _cogl_util_one_at_a_time_mix (hash);
 }
 
-static CoglBool
+static gboolean
 sampler_state_equal_cogl (const void *value0,
                           const void *value1)
 {
@@ -147,8 +142,7 @@ sampler_state_equal_cogl (const void *value0,
   return (state0->mag_filter == state1->mag_filter &&
           state0->min_filter == state1->min_filter &&
           state0->wrap_mode_s == state1->wrap_mode_s &&
-          state0->wrap_mode_t == state1->wrap_mode_t &&
-          state0->wrap_mode_p == state1->wrap_mode_p);
+          state0->wrap_mode_t == state1->wrap_mode_t);
 }
 
 static unsigned int
@@ -165,8 +159,6 @@ hash_sampler_state_cogl (const void *key)
                                         sizeof (entry->wrap_mode_s));
   hash = _cogl_util_one_at_a_time_hash (hash, &entry->wrap_mode_t,
                                         sizeof (entry->wrap_mode_t));
-  hash = _cogl_util_one_at_a_time_hash (hash, &entry->wrap_mode_p,
-                                        sizeof (entry->wrap_mode_p));
 
   return _cogl_util_one_at_a_time_mix (hash);
 }
@@ -234,10 +226,6 @@ _cogl_sampler_cache_get_entry_gl (CoglSamplerCache *cache,
                          entry->sampler_object,
                          GL_TEXTURE_WRAP_T,
                          entry->wrap_mode_t);
-          set_wrap_mode (context,
-                         entry->sampler_object,
-                         GL_TEXTURE_WRAP_R,
-                         entry->wrap_mode_p);
         }
       else
         {
@@ -289,7 +277,6 @@ _cogl_sampler_cache_get_default_entry (CoglSamplerCache *cache)
 
   key.wrap_mode_s = COGL_SAMPLER_CACHE_WRAP_MODE_AUTOMATIC;
   key.wrap_mode_t = COGL_SAMPLER_CACHE_WRAP_MODE_AUTOMATIC;
-  key.wrap_mode_p = COGL_SAMPLER_CACHE_WRAP_MODE_AUTOMATIC;
 
   key.min_filter = GL_LINEAR;
   key.mag_filter = GL_LINEAR;
@@ -301,14 +288,12 @@ const CoglSamplerCacheEntry *
 _cogl_sampler_cache_update_wrap_modes (CoglSamplerCache *cache,
                                        const CoglSamplerCacheEntry *old_entry,
                                        CoglSamplerCacheWrapMode wrap_mode_s,
-                                       CoglSamplerCacheWrapMode wrap_mode_t,
-                                       CoglSamplerCacheWrapMode wrap_mode_p)
+                                       CoglSamplerCacheWrapMode wrap_mode_t)
 {
   CoglSamplerCacheEntry key = *old_entry;
 
   key.wrap_mode_s = wrap_mode_s;
   key.wrap_mode_t = wrap_mode_t;
-  key.wrap_mode_p = wrap_mode_p;
 
   return _cogl_sampler_cache_get_entry_cogl (cache, &key);
 }
@@ -367,5 +352,5 @@ _cogl_sampler_cache_free (CoglSamplerCache *cache)
 
   g_hash_table_destroy (cache->hash_table_cogl);
 
-  free (cache);
+  g_free (cache);
 }

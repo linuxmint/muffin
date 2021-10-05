@@ -31,9 +31,7 @@
  *  Neil Roberts   <neil@linux.intel.com>
  */
 
-#ifdef HAVE_CONFIG_H
 #include "cogl-config.h"
-#endif
 
 #include <glib.h>
 
@@ -48,7 +46,7 @@
    http://www.blackpawn.com/texts/lightmaps/default.html
 */
 
-#if defined (COGL_ENABLE_DEBUG) && defined (HAVE_CAIRO)
+#ifdef COGL_ENABLE_DEBUG
 
 /* The cairo header is only used for debugging to generate an image of
    the atlas */
@@ -56,7 +54,7 @@
 
 static void _cogl_rectangle_map_dump_image (CoglRectangleMap *map);
 
-#endif /* COGL_ENABLE_DEBUG && HAVE_CAIRO */
+#endif /* COGL_ENABLE_DEBUG */
 
 typedef struct _CoglRectangleMapNode       CoglRectangleMapNode;
 typedef struct _CoglRectangleMapStackEntry CoglRectangleMapStackEntry;
@@ -117,7 +115,7 @@ struct _CoglRectangleMapStackEntry
   CoglRectangleMapNode *node;
   /* Index of next branch of this node to explore. Basically either 0
      to go left or 1 to go right */
-  CoglBool next_index;
+  gboolean next_index;
 };
 
 static CoglRectangleMapNode *
@@ -161,7 +159,7 @@ _cogl_rectangle_map_new (unsigned int width,
 static void
 _cogl_rectangle_map_stack_push (GArray *stack,
                                 CoglRectangleMapNode *node,
-                                CoglBool next_index)
+                                gboolean next_index)
 {
   CoglRectangleMapStackEntry *new_entry;
 
@@ -348,7 +346,7 @@ _cogl_rectangle_map_verify (CoglRectangleMap *map)
 
 #endif /* COGL_ENABLE_DEBUG */
 
-CoglBool
+gboolean
 _cogl_rectangle_map_add (CoglRectangleMap *map,
                          unsigned int width,
                          unsigned int height,
@@ -362,7 +360,7 @@ _cogl_rectangle_map_add (CoglRectangleMap *map,
 
   /* Zero-sized rectangles break the algorithm for removing rectangles
      so we'll disallow them */
-  _COGL_RETURN_VAL_IF_FAIL (width > 0 && height > 0, FALSE);
+  g_return_val_if_fail (width > 0 && height > 0, FALSE);
 
   /* Start with the root node */
   g_array_set_size (stack, 0);
@@ -464,9 +462,7 @@ _cogl_rectangle_map_add (CoglRectangleMap *map,
 #ifdef COGL_ENABLE_DEBUG
       if (G_UNLIKELY (COGL_DEBUG_ENABLED (COGL_DEBUG_DUMP_ATLAS_IMAGE)))
         {
-#ifdef HAVE_CAIRO
           _cogl_rectangle_map_dump_image (map);
-#endif
           /* Dumping the rectangle map is really slow so we might as well
              verify the space remaining here as it is also quite slow */
           _cogl_rectangle_map_verify (map);
@@ -557,9 +553,7 @@ _cogl_rectangle_map_remove (CoglRectangleMap *map,
 #ifdef COGL_ENABLE_DEBUG
   if (G_UNLIKELY (COGL_DEBUG_ENABLED (COGL_DEBUG_DUMP_ATLAS_IMAGE)))
     {
-#ifdef HAVE_CAIRO
       _cogl_rectangle_map_dump_image (map);
-#endif
       /* Dumping the rectangle map is really slow so we might as well
          verify the space remaining here as it is also quite slow */
       _cogl_rectangle_map_verify (map);
@@ -703,10 +697,10 @@ _cogl_rectangle_map_free (CoglRectangleMap *map)
 
   g_array_free (map->stack, TRUE);
 
-  free (map);
+  g_free (map);
 }
 
-#if defined (COGL_ENABLE_DEBUG) && defined (HAVE_CAIRO)
+#ifdef COGL_ENABLE_DEBUG
 
 static void
 _cogl_rectangle_map_dump_image_cb (CoglRectangleMapNode *node, void *data)
@@ -761,4 +755,4 @@ _cogl_rectangle_map_dump_image (CoglRectangleMap *map)
   cairo_surface_destroy (surface);
 }
 
-#endif /* COGL_ENABLE_DEBUG && HAVE_CAIRO */
+#endif /* COGL_ENABLE_DEBUG */

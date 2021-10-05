@@ -7,12 +7,12 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "test-declarations.h"
 #include "test-utils.h"
 
 /* A bit of sugar for adding new conformance tests */
 #define ADD_TEST(FUNC, REQUIREMENTS, KNOWN_FAIL_REQUIREMENTS)           \
   G_STMT_START {                                                        \
-    extern void FUNC (void);                                            \
     if (strcmp (#FUNC, argv[1]) == 0)                                   \
       {                                                                 \
         test_utils_init (REQUIREMENTS, KNOWN_FAIL_REQUIREMENTS);        \
@@ -57,12 +57,9 @@ main (int argc, char **argv)
   ADD_TEST (test_blend, 0, 0);
   ADD_TEST (test_premult, 0, TEST_KNOWN_FAILURE);
   UNPORTED_TEST (test_readpixels);
-#ifdef COGL_HAS_COGL_PATH_SUPPORT
   ADD_TEST (test_path, 0, 0);
   ADD_TEST (test_path_clip, 0, 0);
-#endif
   ADD_TEST (test_depth_test, 0, 0);
-  ADD_TEST (test_color_mask, 0, 0);
   ADD_TEST (test_backface_culling, 0, TEST_REQUIREMENT_NPOT);
   ADD_TEST (test_layer_remove, 0, 0);
 
@@ -76,7 +73,6 @@ main (int argc, char **argv)
   ADD_TEST (test_pixel_buffer_set_data, 0, 0);
   ADD_TEST (test_pixel_buffer_sub_region, 0, 0);
   UNPORTED_TEST (test_texture_rectangle);
-  ADD_TEST (test_texture_3d, TEST_REQUIREMENT_TEXTURE_3D, 0);
   ADD_TEST (test_wrap_modes, 0, 0);
   UNPORTED_TEST (test_texture_pixmap_x11);
   ADD_TEST (test_texture_get_set_data, 0, 0);
@@ -84,9 +80,6 @@ main (int argc, char **argv)
   ADD_TEST (test_read_texture_formats, 0, TEST_KNOWN_FAILURE);
   ADD_TEST (test_write_texture_formats, 0, 0);
   ADD_TEST (test_alpha_textures, 0, 0);
-  ADD_TEST (test_wrap_rectangle_textures,
-            TEST_REQUIREMENT_TEXTURE_RECTANGLE,
-            TEST_KNOWN_FAILURE);
 
   UNPORTED_TEST (test_vertex_buffer_contiguous);
   UNPORTED_TEST (test_vertex_buffer_interleved);
@@ -121,8 +114,6 @@ main (int argc, char **argv)
             TEST_REQUIREMENT_GLSL,
             0);
 
-  ADD_TEST (test_version, 0, 0);
-
   ADD_TEST (test_alpha_test, 0, 0);
 
   ADD_TEST (test_map_buffer_range, TEST_REQUIREMENT_MAP_WRITE, 0);
@@ -136,13 +127,7 @@ main (int argc, char **argv)
 
   UNPORTED_TEST (test_viewport);
 
-  ADD_TEST (test_gles2_context, TEST_REQUIREMENT_GLES2_CONTEXT, 0);
-  ADD_TEST (test_gles2_context_fbo, TEST_REQUIREMENT_GLES2_CONTEXT, 0);
-  ADD_TEST (test_gles2_context_copy_tex_image,
-            TEST_REQUIREMENT_GLES2_CONTEXT,
-            0);
-
-  ADD_TEST (test_euler_quaternion, 0, 0);
+  ADD_TEST (test_euler, 0, 0);
   ADD_TEST (test_color_hsl, 0, 0);
 
   ADD_TEST (test_fence, TEST_REQUIREMENT_FENCE, 0);

@@ -33,24 +33,13 @@
 
 G_BEGIN_DECLS
 
-#define CLUTTER_TYPE_CONTENT            (clutter_content_get_type ())
-#define CLUTTER_CONTENT(obj)            (G_TYPE_CHECK_INSTANCE_CAST ((obj), CLUTTER_TYPE_CONTENT, ClutterContent))
-#define CLUTTER_IS_CONTENT(obj)         (G_TYPE_CHECK_INSTANCE_TYPE ((obj), CLUTTER_TYPE_CONTENT))
-#define CLUTTER_CONTENT_GET_IFACE(obj)  (G_TYPE_INSTANCE_GET_INTERFACE ((obj), CLUTTER_TYPE_CONTENT, ClutterContentIface))
+#define CLUTTER_TYPE_CONTENT (clutter_content_get_type ())
 
-typedef struct _ClutterContentIface     ClutterContentIface;
+CLUTTER_EXPORT
+G_DECLARE_INTERFACE (ClutterContent, clutter_content, CLUTTER, CONTENT, GObject)
 
 /**
- * ClutterContent:
- *
- * The #ClutterContent structure is an opaque type
- * whose members cannot be acccessed directly.
- *
- * Since: 1.10
- */
-
-/**
- * ClutterContentIface:
+ * ClutterContentInterface:
  * @get_preferred_size: virtual function; should be overridden by subclasses
  *   of #ClutterContent that have a natural size
  * @paint_content: virtual function; called each time the content needs to
@@ -62,12 +51,12 @@ typedef struct _ClutterContentIface     ClutterContentIface;
  * @invalidate: virtual function; called each time a #ClutterContent state
  *   is changed.
  *
- * The #ClutterContentIface structure contains only
+ * The #ClutterContentInterface structure contains only
  * private data.
  *
  * Since: 1.10
  */
-struct _ClutterContentIface
+struct _ClutterContentInterface
 {
   /*< private >*/
   GTypeInterface g_iface;
@@ -76,9 +65,10 @@ struct _ClutterContentIface
   gboolean      (* get_preferred_size)  (ClutterContent   *content,
                                          gfloat           *width,
                                          gfloat           *height);
-  void          (* paint_content)       (ClutterContent   *content,
-                                         ClutterActor     *actor,
-                                         ClutterPaintNode *node);
+  void          (* paint_content)       (ClutterContent      *content,
+                                         ClutterActor        *actor,
+                                         ClutterPaintNode    *node,
+                                         ClutterPaintContext *paint_context);
 
   void          (* attached)            (ClutterContent   *content,
                                          ClutterActor     *actor);
@@ -86,17 +76,19 @@ struct _ClutterContentIface
                                          ClutterActor     *actor);
 
   void          (* invalidate)          (ClutterContent   *content);
+
+  void          (* invalidate_size)     (ClutterContent   *content);
 };
 
-CLUTTER_AVAILABLE_IN_1_10
-GType clutter_content_get_type (void) G_GNUC_CONST;
-
-CLUTTER_AVAILABLE_IN_1_10
+CLUTTER_EXPORT
 gboolean        clutter_content_get_preferred_size      (ClutterContent *content,
                                                          gfloat         *width,
                                                          gfloat         *height);
-CLUTTER_AVAILABLE_IN_1_10
+CLUTTER_EXPORT
 void            clutter_content_invalidate              (ClutterContent *content);
+
+CLUTTER_EXPORT
+void            clutter_content_invalidate_size         (ClutterContent *content);
 
 G_END_DECLS
 

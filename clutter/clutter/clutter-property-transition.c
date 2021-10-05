@@ -30,9 +30,7 @@
  * #ClutterPropertyTransition is available since Clutter 1.10
  */
 
-#ifdef HAVE_CONFIG_H
 #include "clutter-build-config.h"
-#endif
 
 #include "clutter-property-transition.h"
 
@@ -125,7 +123,7 @@ clutter_property_transition_detached (ClutterTransition *transition,
   ClutterPropertyTransition *self = CLUTTER_PROPERTY_TRANSITION (transition);
   ClutterPropertyTransitionPrivate *priv = self->priv;
 
-  priv->pspec = NULL;
+  priv->pspec = NULL; 
 }
 
 static void
@@ -238,7 +236,7 @@ clutter_property_transition_finalize (GObject *gobject)
 
   priv = CLUTTER_PROPERTY_TRANSITION (gobject)->priv;
 
-  free (priv->property_name);
+  g_free (priv->property_name);
 
   G_OBJECT_CLASS (clutter_property_transition_parent_class)->finalize (gobject);
 }
@@ -322,7 +320,7 @@ clutter_property_transition_set_property_name (ClutterPropertyTransition *transi
   if (g_strcmp0 (priv->property_name, property_name) == 0)
     return;
 
-  free (priv->property_name);
+  g_free (priv->property_name);
   priv->property_name = g_strdup (property_name);
   priv->pspec = NULL;
 

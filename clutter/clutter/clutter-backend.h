@@ -34,7 +34,9 @@
 #include <cogl/cogl.h>
 
 #include <clutter/clutter-config.h>
+#include <clutter/clutter-keymap.h>
 #include <clutter/clutter-types.h>
+#include <clutter/clutter-seat.h>
 
 G_BEGIN_DECLS
 
@@ -53,36 +55,33 @@ G_BEGIN_DECLS
 typedef struct _ClutterBackend          ClutterBackend;
 typedef struct _ClutterBackendClass     ClutterBackendClass;
 
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 GType clutter_backend_get_type (void) G_GNUC_CONST;
 
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 ClutterBackend *                clutter_get_default_backend             (void);
 
-CLUTTER_AVAILABLE_IN_1_16
-void                            clutter_set_windowing_backend           (const char *backend_type);
-
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 gdouble                         clutter_backend_get_resolution          (ClutterBackend             *backend);
 
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 void                            clutter_backend_set_font_options        (ClutterBackend             *backend,
                                                                          const cairo_font_options_t *options);
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 const cairo_font_options_t *    clutter_backend_get_font_options        (ClutterBackend             *backend);
 
-CLUTTER_AVAILABLE_IN_1_8
+CLUTTER_EXPORT
 CoglContext *                   clutter_backend_get_cogl_context        (ClutterBackend             *backend);
 
-CLUTTER_AVAILABLE_IN_ALL
-void                            clutter_backend_bell_notify             (ClutterBackend             *backend);
-
-CLUTTER_AVAILABLE_IN_MUFFIN
+CLUTTER_EXPORT
 ClutterInputMethod *            clutter_backend_get_input_method        (ClutterBackend             *backend);
 
-CLUTTER_AVAILABLE_IN_MUFFIN
+CLUTTER_EXPORT
 void                            clutter_backend_set_input_method        (ClutterBackend             *backend,
                                                                          ClutterInputMethod         *method);
+CLUTTER_EXPORT
+ClutterSeat *                   clutter_backend_get_default_seat        (ClutterBackend             *backend);
+
 G_END_DECLS
 
 #endif /* __CLUTTER_BACKEND_H__ */

@@ -37,9 +37,7 @@
  * Pixel Buffers API.
  */
 
-#ifdef HAVE_CONFIG_H
 #include "cogl-config.h"
-#endif
 
 #include <stdio.h>
 #include <string.h>
@@ -79,7 +77,7 @@ static CoglPixelBuffer *
 _cogl_pixel_buffer_new (CoglContext *context,
                         size_t size,
                         const void *data,
-                        CoglError **error)
+                        GError **error)
 {
   CoglPixelBuffer *pixel_buffer = g_slice_new0 (CoglPixelBuffer);
   CoglBuffer *buffer = COGL_BUFFER (pixel_buffer);
@@ -115,11 +113,11 @@ cogl_pixel_buffer_new (CoglContext *context,
                        size_t size,
                        const void *data)
 {
-  CoglError *ignore_error = NULL;
+  GError *ignore_error = NULL;
   CoglPixelBuffer *buffer =
     _cogl_pixel_buffer_new (context, size, data, &ignore_error);
-  if (!buffer)
-    cogl_error_free (ignore_error);
+
+  g_clear_error (&ignore_error);
   return buffer;
 }
 

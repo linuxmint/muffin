@@ -32,15 +32,9 @@
 #define __COGL_CONTEXT_PRIVATE_H
 
 #include "cogl-context.h"
-#include "cogl-winsys-private.h"
 #include "cogl-flags.h"
 
-#ifdef COGL_HAS_XLIB_SUPPORT
-#include "cogl-xlib-private.h"
-#endif
-
 #include "cogl-display-private.h"
-#include "cogl-primitives.h"
 #include "cogl-clip-stack.h"
 #include "cogl-matrix-stack.h"
 #include "cogl-pipeline-private.h"
@@ -51,8 +45,6 @@
 #include "cogl-texture-driver.h"
 #include "cogl-pipeline-cache.h"
 #include "cogl-texture-2d.h"
-#include "cogl-texture-3d.h"
-#include "cogl-texture-rectangle.h"
 #include "cogl-sampler-cache-private.h"
 #include "cogl-gpu-info-private.h"
 #include "cogl-gl-header.h"
@@ -62,6 +54,7 @@
 #include "cogl-poll-private.h"
 #include "cogl-path/cogl-path-types.h"
 #include "cogl-private.h"
+#include "winsys/cogl-winsys-private.h"
 
 typedef struct
 {
@@ -99,12 +92,8 @@ struct _CoglContext
 
   /* Features cache */
   unsigned long features[COGL_FLAGS_N_LONGS_FOR_SIZE (_COGL_N_FEATURE_IDS)];
-  CoglFeatureFlags feature_flags; /* legacy/deprecated feature flags */
   unsigned long private_features
     [COGL_FLAGS_N_LONGS_FOR_SIZE (COGL_N_PRIVATE_FEATURES)];
-
-  CoglBool needs_viewport_scissor_workaround;
-  CoglFramebuffer *viewport_scissor_workaround_framebuffer;
 
   CoglPipeline *default_pipeline;
   CoglPipelineLayer *default_layer_0;
@@ -115,27 +104,19 @@ struct _CoglContext
   GArray *attribute_name_index_map;
   int n_attribute_names;
 
-  CoglBitmask       enabled_builtin_attributes;
-  CoglBitmask       enabled_texcoord_attributes;
   CoglBitmask       enabled_custom_attributes;
 
   /* These are temporary bitmasks that are used when disabling
-   * builtin,texcoord and custom attribute arrays. They are here just
+   * builtin and custom attribute arrays. They are here just
    * to avoid allocating new ones each time */
-  CoglBitmask       enable_builtin_attributes_tmp;
-  CoglBitmask       enable_texcoord_attributes_tmp;
   CoglBitmask       enable_custom_attributes_tmp;
   CoglBitmask       changed_bits_tmp;
 
-  CoglBool          legacy_backface_culling_enabled;
+  gboolean          legacy_backface_culling_enabled;
 
   /* A few handy matrix constants */
   CoglMatrix        identity_matrix;
   CoglMatrix        y_flip_matrix;
-
-  /* Value that was last used when calling glMatrixMode to avoid
-     calling it multiple times */
-  CoglMatrixMode    flushed_matrix_mode;
 
   /* The matrix stack entries that should be flushed during the next
    * pipeline state flush */
@@ -152,25 +133,17 @@ struct _CoglContext
   GArray           *texture_units;
   int               active_texture_unit;
 
-  CoglPipelineFogState legacy_fog_state;
+  /* Only used for comparing other pipelines when reading pixels. */
+  CoglPipeline     *opaque_color_pipeline;
 
-  /* Pipelines */
-  CoglPipeline     *opaque_color_pipeline; /* used for set_source_color */
-  CoglPipeline     *blended_color_pipeline; /* used for set_source_color */
-  CoglPipeline     *texture_pipeline; /* used for set_source_texture */
   GString          *codegen_header_buffer;
   GString          *codegen_source_buffer;
   GString          *codegen_boilerplate_buffer;
-  GList            *source_stack;
-
-  int               legacy_state_set;
 
   CoglPipelineCache *pipeline_cache;
 
   /* Textures */
   CoglTexture2D *default_gl_texture_2d_tex;
-  CoglTexture3D *default_gl_texture_3d_tex;
-  CoglTextureRectangle *default_gl_texture_rect_tex;
 
   /* Central list of all framebuffers so all journals can be flushed
    * at any time. */
@@ -185,25 +158,23 @@ struct _CoglContext
   /* Some simple caching, to minimize state changes... */
   CoglPipeline     *current_pipeline;
   unsigned long     current_pipeline_changes_since_flush;
-  CoglBool          current_pipeline_with_color_attrib;
-  CoglBool          current_pipeline_unknown_color_alpha;
+  gboolean          current_pipeline_with_color_attrib;
+  gboolean          current_pipeline_unknown_color_alpha;
   unsigned long     current_pipeline_age;
 
-  CoglBool          gl_blend_enable_cache;
+  gboolean          gl_blend_enable_cache;
 
-  CoglBool              depth_test_enabled_cache;
+  gboolean              depth_test_enabled_cache;
   CoglDepthTestFunction depth_test_function_cache;
-  CoglBool              depth_writing_enabled_cache;
+  gboolean              depth_writing_enabled_cache;
   float                 depth_range_near_cache;
   float                 depth_range_far_cache;
 
-  CoglBool              legacy_depth_test_enabled;
+  gboolean              legacy_depth_test_enabled;
 
   CoglBuffer       *current_buffer[COGL_BUFFER_BIND_TARGET_COUNT];
 
   /* Framebuffers */
-  GSList           *framebuffer_stack;
-  CoglFramebuffer  *window_buffer;
   unsigned long     current_draw_buffer_state_flushed;
   unsigned long     current_draw_buffer_changes;
   CoglFramebuffer  *current_draw_buffer;
@@ -219,13 +190,10 @@ struct _CoglContext
   CoglList onscreen_dirty_queue;
   CoglClosure *onscreen_dispatch_idle;
 
-  CoglGLES2Context *current_gles2_context;
-  GQueue gles2_context_stack;
-
   /* This becomes TRUE the first time the context is bound to an
    * onscreen buffer. This is used by cogl-framebuffer-gl to determine
    * when to initialise the glDrawBuffer state */
-  CoglBool was_bound_to_onscreen;
+  gboolean was_bound_to_onscreen;
 
   /* Primitives */
   CoglPath         *current_path;
@@ -240,8 +208,6 @@ struct _CoglContext
   CoglIndices      *rectangle_byte_indices;
   CoglIndices      *rectangle_short_indices;
   int               rectangle_short_indices_len;
-
-  CoglBool          in_begin_gl_block;
 
   CoglPipeline     *texture_download_pipeline;
   CoglPipeline     *blit_texture_pipeline;
@@ -262,14 +228,9 @@ struct _CoglContext
   GLint             max_activateable_texture_units;
 
   /* Fragment processing programs */
-  CoglHandle              current_program;
-
-  CoglPipelineProgramType current_fragment_program_type;
-  CoglPipelineProgramType current_vertex_program_type;
   GLuint                  current_gl_program;
 
-  CoglBool current_gl_dither_enabled;
-  CoglColorMask current_gl_color_mask;
+  gboolean current_gl_dither_enabled;
   GLenum current_gl_draw_buffer;
 
   /* Clipping */
@@ -280,7 +241,7 @@ struct _CoglContext
      doesn't need to be a valid pointer. We can't just use NULL in
      current_clip_stack to mark a dirty state because NULL is a valid
      stack (meaning no clipping) */
-  CoglBool          current_clip_stack_valid;
+  gboolean          current_clip_stack_valid;
   /* The clip state that was flushed. This isn't intended to be used
      as a stack to push and pop new entries. Instead the current stack
      that the user wants is part of the framebuffer state. This is
@@ -288,35 +249,15 @@ struct _CoglContext
      same state multiple times. When the clip state is flushed this
      will hold a reference */
   CoglClipStack    *current_clip_stack;
-  /* Whether the stencil buffer was used as part of the current clip
-     state. If TRUE then any further use of the stencil buffer (such
-     as for drawing paths) would need to be merged with the existing
-     stencil buffer */
-  CoglBool          current_clip_stack_uses_stencil;
 
   /* This is used as a temporary buffer to fill a CoglBuffer when
      cogl_buffer_map fails and we only want to map to fill it with new
      data */
   GByteArray       *buffer_map_fallback_array;
-  CoglBool          buffer_map_fallback_in_use;
+  gboolean          buffer_map_fallback_in_use;
   size_t            buffer_map_fallback_offset;
 
-  CoglWinsysRectangleState rectangle_state;
-
   CoglSamplerCache *sampler_cache;
-
-  /* FIXME: remove these when we remove the last xlib based clutter
-   * backend. they should be tracked as part of the renderer but e.g.
-   * the eglx backend doesn't yet have a corresponding Cogl winsys
-   * and so we wont have a renderer in that case. */
-#ifdef COGL_HAS_XLIB_SUPPORT
-  int damage_base;
-  /* List of callback functions that will be given every Xlib event */
-  GSList *event_filters;
-  /* Current top of the XError trap state stack. The actual memory for
-     these is expected to be allocated on the stack by the caller */
-  CoglXlibTrapState *trap_state;
-#endif
 
   unsigned long winsys_features
     [COGL_FLAGS_N_LONGS_FOR_SIZE (COGL_WINSYS_FEATURE_N_FEATURES)];
@@ -359,8 +300,8 @@ struct _CoglContext
 #undef COGL_EXT_END
 };
 
-CoglContext *
-_cogl_context_get_default ();
+COGL_EXPORT CoglContext *
+_cogl_context_get_default (void);
 
 const CoglWinsysVtable *
 _cogl_context_get_winsys (CoglContext *context);
@@ -371,9 +312,9 @@ _cogl_context_get_winsys (CoglContext *context);
  * to know when to re-query the GL extensions. The backend should also
  * check whether the GL context is supported by Cogl. If not it should
  * return FALSE and set @error */
-CoglBool
+gboolean
 _cogl_context_update_features (CoglContext *context,
-                               CoglError **error);
+                               GError **error);
 
 /* Obtains the context and returns retval if NULL */
 #define _COGL_GET_CONTEXT(ctxvar, retval) \

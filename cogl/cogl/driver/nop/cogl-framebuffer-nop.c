@@ -28,9 +28,7 @@
  *
  */
 
-#ifdef HAVE_CONFIG_H
 #include "cogl-config.h"
-#endif
 
 #include "cogl-framebuffer-nop-private.h"
 
@@ -44,9 +42,9 @@ _cogl_framebuffer_nop_flush_state (CoglFramebuffer *draw_buffer,
 {
 }
 
-CoglBool
+gboolean
 _cogl_offscreen_nop_allocate (CoglOffscreen *offscreen,
-                              CoglError **error)
+                              GError **error)
 {
   return TRUE;
 }
@@ -75,6 +73,11 @@ _cogl_framebuffer_nop_query_bits (CoglFramebuffer *framebuffer,
 
 void
 _cogl_framebuffer_nop_finish (CoglFramebuffer *framebuffer)
+{
+}
+
+void
+_cogl_framebuffer_nop_flush (CoglFramebuffer *framebuffer)
 {
 }
 
@@ -109,13 +112,13 @@ _cogl_framebuffer_nop_draw_indexed_attributes (CoglFramebuffer *framebuffer,
 {
 }
 
-CoglBool
+gboolean
 _cogl_framebuffer_nop_read_pixels_into_bitmap (CoglFramebuffer *framebuffer,
                                                int x,
                                                int y,
                                                CoglReadPixelsFlags source,
                                                CoglBitmap *bitmap,
-                                               CoglError **error)
+                                               GError **error)
 {
   return TRUE;
 }

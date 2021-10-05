@@ -37,9 +37,7 @@
  * Since: 1.8
  */
 
-#ifdef HAVE_CONFIG_H
 #include "clutter-build-config.h"
-#endif
 
 #include "clutter-swipe-action.h"
 

@@ -28,17 +28,15 @@
  *
  */
 
-#ifdef HAVE_CONFIG_H
 #include "cogl-config.h"
-#endif
 
 #include <string.h>
 
 #include "cogl-boxed-value.h"
 #include "cogl-context-private.h"
-#include "cogl-util-gl-private.h"
+#include "driver/gl/cogl-util-gl-private.h"
 
-CoglBool
+gboolean
 _cogl_boxed_value_equal (const CoglBoxedValue *bva,
                          const CoglBoxedValue *bvb)
 {
@@ -136,12 +134,12 @@ _cogl_boxed_value_set_x (CoglBoxedValue *bv,
                          CoglBoxedType type,
                          size_t value_size,
                          const void *value,
-                         CoglBool transpose)
+                         gboolean transpose)
 {
   if (count == 1)
     {
       if (bv->count > 1)
-        free (bv->v.array);
+        g_free (bv->v.array);
 
       if (transpose)
         _cogl_boxed_value_tranpose (bv->v.float_value,
@@ -158,12 +156,12 @@ _cogl_boxed_value_set_x (CoglBoxedValue *bv,
               bv->size != size ||
               bv->type != type)
             {
-              free (bv->v.array);
-              bv->v.array = malloc (count * value_size);
+              g_free (bv->v.array);
+              bv->v.array = g_malloc (count * value_size);
             }
         }
       else
-        bv->v.array = malloc (count * value_size);
+        bv->v.array = g_malloc (count * value_size);
 
       if (transpose)
         {
@@ -231,7 +229,7 @@ void
 _cogl_boxed_value_set_matrix (CoglBoxedValue *bv,
                               int dimensions,
                               int count,
-                              CoglBool transpose,
+                              gboolean transpose,
                               const float *value)
 {
   _cogl_boxed_value_set_x (bv,
@@ -280,7 +278,7 @@ void
 _cogl_boxed_value_destroy (CoglBoxedValue *bv)
 {
   if (bv->count > 1)
-    free (bv->v.array);
+    g_free (bv->v.array);
 }
 
 void

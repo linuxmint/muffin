@@ -78,6 +78,8 @@ typedef struct _CoglJournalEntry
   CoglPipeline            *pipeline;
   CoglMatrixEntry         *modelview_entry;
   CoglClipStack           *clip_stack;
+  float                    viewport[4];
+  gboolean                 dither_enabled;
   /* Offset into ctx->logged_vertices */
   size_t                   array_offset;
   int                      n_layers;
@@ -101,21 +103,21 @@ _cogl_journal_flush (CoglJournal *journal);
 void
 _cogl_journal_discard (CoglJournal *journal);
 
-CoglBool
+gboolean
 _cogl_journal_all_entries_within_bounds (CoglJournal *journal,
                                          float clip_x0,
                                          float clip_y0,
                                          float clip_x1,
                                          float clip_y1);
 
-CoglBool
+gboolean
 _cogl_journal_try_read_pixel (CoglJournal *journal,
                               int x,
                               int y,
                               CoglBitmap *bitmap,
-                              CoglBool *found_intersection);
+                              gboolean *found_intersection);
 
-CoglBool
+gboolean
 _cogl_is_journal (void *object);
 
 #endif /* __COGL_JOURNAL_PRIVATE_H */

@@ -4,10 +4,10 @@
  * SECTION:restart-helper
  * @short_description: helper program during a restart
  *
- * To smoothly restart Muffin, we want to keep the composite
+ * To smoothly restart Mutter, we want to keep the composite
  * overlay window enabled during the restart. This is done by
  * spawning this program, which keeps a reference to the the composite
- * overlay window until Muffin picks it back up.
+ * overlay window until Mutter picks it back up.
  */
 
 /*
@@ -26,6 +26,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, see <http://www.gnu.org/licenses/>.
  */
+
+#include "config.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -60,9 +62,9 @@ main (int    argc,
 		      selection_window,
 		      CurrentTime);
 
-  /* Muffin looks for an (arbitrary) line printed to stdout to know that
+  /* Mutter looks for an (arbitrary) line printed to stdout to know that
    * we have started and have a reference to the COW. XSync() so that
-   * everything is set on the X server before Muffin starts restarting.
+   * everything is set on the X server before Mutter starts restarting.
    */
   XSync (display, False);
 
@@ -74,7 +76,7 @@ main (int    argc,
       XEvent xev;
 
       XNextEvent (display, &xev);
-      /* Muffin restarted and unset the selection to indicate that
+      /* Mutter restarted and unset the selection to indicate that
        * it has a reference on the COW again */
       if (xev.xany.type == SelectionClear)
 	return 0;

@@ -42,6 +42,7 @@
 #include "cogl-matrix.h"
 #include "cogl-context.h"
 
+#include <graphene.h>
 
 /**
  * SECTION:cogl-matrix-stack
@@ -139,6 +140,7 @@ typedef struct _CoglMatrixStack CoglMatrixStack;
  *
  * Returns: a #GType that can be used with the GLib type system.
  */
+COGL_EXPORT
 GType cogl_matrix_stack_get_gtype (void);
 
 /**
@@ -182,6 +184,7 @@ typedef struct _CoglMatrixEntry CoglMatrixEntry;
  *
  * Returns: a #GType that can be used with the GLib type system.
  */
+COGL_EXPORT
 GType cogl_matrix_entry_get_gtype (void);
 
 
@@ -213,7 +216,7 @@ GType cogl_matrix_entry_get_gtype (void);
  *
  * Return value: (transfer full): A newly allocated #CoglMatrixStack
  */
-CoglMatrixStack *
+COGL_EXPORT CoglMatrixStack *
 cogl_matrix_stack_new (CoglContext *ctx);
 
 /**
@@ -228,7 +231,7 @@ cogl_matrix_stack_new (CoglContext *ctx);
  * called when going back up one layer to restore the previous
  * transform of an ancestor.
  */
-void
+COGL_EXPORT void
 cogl_matrix_stack_push (CoglMatrixStack *stack);
 
 /**
@@ -241,7 +244,7 @@ cogl_matrix_stack_push (CoglMatrixStack *stack);
  * This is usually called while traversing a scenegraph whenever you
  * return up one level in the graph towards the root node.
  */
-void
+COGL_EXPORT void
 cogl_matrix_stack_pop (CoglMatrixStack *stack);
 
 /**
@@ -250,7 +253,7 @@ cogl_matrix_stack_pop (CoglMatrixStack *stack);
  *
  * Resets the current matrix to the identity matrix.
  */
-void
+COGL_EXPORT void
 cogl_matrix_stack_load_identity (CoglMatrixStack *stack);
 
 /**
@@ -263,7 +266,7 @@ cogl_matrix_stack_load_identity (CoglMatrixStack *stack);
  * Multiplies the current matrix by one that scales the x, y and z
  * axes by the given values.
  */
-void
+COGL_EXPORT void
 cogl_matrix_stack_scale (CoglMatrixStack *stack,
                          float x,
                          float y,
@@ -279,7 +282,7 @@ cogl_matrix_stack_scale (CoglMatrixStack *stack,
  * Multiplies the current matrix by one that translates along all
  * three axes according to the given values.
  */
-void
+COGL_EXPORT void
 cogl_matrix_stack_translate (CoglMatrixStack *stack,
                              float x,
                              float y,
@@ -299,7 +302,7 @@ cogl_matrix_stack_translate (CoglMatrixStack *stack,
  * the axis-vector (0, 0, 1) causes a small counter-clockwise
  * rotation.
  */
-void
+COGL_EXPORT void
 cogl_matrix_stack_rotate (CoglMatrixStack *stack,
                           float angle,
                           float x,
@@ -307,28 +310,16 @@ cogl_matrix_stack_rotate (CoglMatrixStack *stack,
                           float z);
 
 /**
- * cogl_matrix_stack_rotate_quaternion:
- * @stack: A #CoglMatrixStack
- * @quaternion: A #CoglQuaternion
- *
- * Multiplies the current matrix by one that rotates according to the
- * rotation described by @quaternion.
- */
-void
-cogl_matrix_stack_rotate_quaternion (CoglMatrixStack *stack,
-                                     const CoglQuaternion *quaternion);
-
-/**
  * cogl_matrix_stack_rotate_euler:
  * @stack: A #CoglMatrixStack
- * @euler: A #CoglEuler
+ * @euler: A #graphene_euler_t
  *
  * Multiplies the current matrix by one that rotates according to the
  * rotation described by @euler.
  */
-void
+COGL_EXPORT void
 cogl_matrix_stack_rotate_euler (CoglMatrixStack *stack,
-                                const CoglEuler *euler);
+                                const graphene_euler_t *euler);
 
 /**
  * cogl_matrix_stack_multiply:
@@ -337,7 +328,7 @@ cogl_matrix_stack_rotate_euler (CoglMatrixStack *stack,
  *
  * Multiplies the current matrix by the given matrix.
  */
-void
+COGL_EXPORT void
 cogl_matrix_stack_multiply (CoglMatrixStack *stack,
                             const CoglMatrix *matrix);
 
@@ -359,7 +350,7 @@ cogl_matrix_stack_multiply (CoglMatrixStack *stack,
  * viewing frustum defined by 4 side clip planes that all cross
  * through the origin and 2 near and far clip planes.
  */
-void
+COGL_EXPORT void
 cogl_matrix_stack_frustum (CoglMatrixStack *stack,
                            float left,
                            float right,
@@ -385,7 +376,7 @@ cogl_matrix_stack_frustum (CoglMatrixStack *stack,
  * since there wont be enough precision to identify the depth of
  * objects near to each other.</note>
  */
-void
+COGL_EXPORT void
 cogl_matrix_stack_perspective (CoglMatrixStack *stack,
                                float fov_y,
                                float aspect,
@@ -408,7 +399,7 @@ cogl_matrix_stack_perspective (CoglMatrixStack *stack,
  *
  * Replaces the current matrix with an orthographic projection matrix.
  */
-void
+COGL_EXPORT void
 cogl_matrix_stack_orthographic (CoglMatrixStack *stack,
                                 float x_1,
                                 float y_1,
@@ -429,7 +420,7 @@ cogl_matrix_stack_orthographic (CoglMatrixStack *stack,
  *   for degenerate transformations that can't be inverted (in this case the
  *   @inverse matrix will simply be initialized with the identity matrix)
  */
-CoglBool
+COGL_EXPORT gboolean
 cogl_matrix_stack_get_inverse (CoglMatrixStack *stack,
                                CoglMatrix *inverse);
 
@@ -451,7 +442,7 @@ cogl_matrix_stack_get_inverse (CoglMatrixStack *stack,
  * Return value: (transfer none): A pointer to the #CoglMatrixEntry
  *               representing the current matrix stack transform.
  */
-CoglMatrixEntry *
+COGL_EXPORT CoglMatrixEntry *
 cogl_matrix_stack_get_entry (CoglMatrixStack *stack);
 
 /**
@@ -480,7 +471,7 @@ cogl_matrix_stack_get_entry (CoglMatrixStack *stack);
  *               and in that case @matrix will be initialized with
  *               the value of the current transform.
  */
-CoglMatrix *
+COGL_EXPORT CoglMatrix *
 cogl_matrix_stack_get (CoglMatrixStack *stack,
                        CoglMatrix *matrix);
 
@@ -511,7 +502,7 @@ cogl_matrix_stack_get (CoglMatrixStack *stack,
  *               and in that case @matrix will be initialized with
  *               the effective transform represented by @entry.
  */
-CoglMatrix *
+COGL_EXPORT CoglMatrix *
 cogl_matrix_entry_get (CoglMatrixEntry *entry,
                        CoglMatrix *matrix);
 
@@ -525,7 +516,7 @@ cogl_matrix_entry_get (CoglMatrixEntry *entry,
  * since the last time cogl_matrix_stack_push() was called or since
  * the stack was initialized.
  */
-void
+COGL_EXPORT void
 cogl_matrix_stack_set (CoglMatrixStack *stack,
                        const CoglMatrix *matrix);
 
@@ -538,7 +529,7 @@ cogl_matrix_stack_set (CoglMatrixStack *stack,
  * Return value: %TRUE if @object is a #CoglMatrixStack, otherwise
  *               %FALSE.
  */
-CoglBool
+COGL_EXPORT gboolean
 cogl_is_matrix_stack (void *object);
 
 /**
@@ -560,7 +551,7 @@ cogl_is_matrix_stack (void *object);
  *                @entry0 and the transform of @entry1 is a translation,
  *                otherwise %FALSE.
  */
-CoglBool
+COGL_EXPORT gboolean
 cogl_matrix_entry_calculate_translation (CoglMatrixEntry *entry0,
                                          CoglMatrixEntry *entry1,
                                          float *x,
@@ -581,7 +572,7 @@ cogl_matrix_entry_calculate_translation (CoglMatrixEntry *entry0,
  * Return value: %TRUE if @entry is definitely an identity transform,
  *               otherwise %FALSE.
  */
-CoglBool
+COGL_EXPORT gboolean
 cogl_matrix_entry_is_identity (CoglMatrixEntry *entry);
 
 /**
@@ -599,7 +590,7 @@ cogl_matrix_entry_is_identity (CoglMatrixEntry *entry);
  * Return value: %TRUE if @entry0 represents the same transform as
  *               @entry1, otherwise %FALSE.
  */
-CoglBool
+COGL_EXPORT gboolean
 cogl_matrix_entry_equal (CoglMatrixEntry *entry0,
                          CoglMatrixEntry *entry1);
 
@@ -610,7 +601,7 @@ cogl_matrix_entry_equal (CoglMatrixEntry *entry0,
  * Allows visualizing the operations that build up the given @entry
  * for debugging purposes by printing to stdout.
  */
-void
+COGL_EXPORT void
 cogl_debug_matrix_entry_print (CoglMatrixEntry *entry);
 
 /**
@@ -624,7 +615,7 @@ cogl_debug_matrix_entry_print (CoglMatrixEntry *entry);
  * It is an error to pass an @entry pointer to cogl_object_ref() and
  * cogl_object_unref()
  */
-CoglMatrixEntry *
+COGL_EXPORT CoglMatrixEntry *
 cogl_matrix_entry_ref (CoglMatrixEntry *entry);
 
 /**
@@ -635,7 +626,7 @@ cogl_matrix_entry_ref (CoglMatrixEntry *entry);
  * cogl_matrix_entry_unref() or to release the reference given when
  * calling cogl_matrix_stack_get_entry().
  */
-void
+COGL_EXPORT void
 cogl_matrix_entry_unref (CoglMatrixEntry *entry);
 
 #endif /* _COGL_MATRIX_STACK_H_ */

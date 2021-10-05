@@ -10,10 +10,10 @@
  * are unmapped.
  */
 
-/* 
+/*
  * Copyright (C) 2001 Havoc Pennington
  * Copyright (C) 2004, 2005 Elijah Newren
- * 
+ *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
  * published by the Free Software Foundation; either version 2 of the
@@ -23,24 +23,23 @@
  * WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street - Suite 500, Boston, MA
- * 02110-1335, USA.
+ * along with this program; if not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef META_WORKSPACE_PRIVATE_H
 #define META_WORKSPACE_PRIVATE_H
 
-#include <meta/workspace.h>
-#include "window-private.h"
+#include "core/window-private.h"
+#include "meta/workspace.h"
 
 struct _MetaWorkspace
 {
   GObject parent_instance;
-  MetaScreen *screen;
-  
+  MetaDisplay *display;
+  MetaWorkspaceManager *manager;
+
   GList *windows;
 
   /* The "MRU list", or "most recently used" list, is a list of
@@ -56,16 +55,14 @@ struct _MetaWorkspace
 
   GList  *list_containing_self;
 
+  GHashTable *logical_monitor_data;
+
   MetaRectangle work_area_screen;
-  MetaRectangle *work_area_monitor;
   GList  *screen_region;
-  GList  **monitor_region;
-  gint n_monitor_regions;
   GList  *screen_edges;
   GList  *monitor_edges;
   GSList *builtin_struts;
   GSList *all_struts;
-  GList *snapped_windows;
   guint work_areas_invalid : 1;
 
   guint showing_desktop : 1;
@@ -76,24 +73,31 @@ struct _MetaWorkspaceClass
   GObjectClass parent_class;
 };
 
-MetaWorkspace* meta_workspace_new           (MetaScreen    *screen);
+MetaWorkspace* meta_workspace_new           (MetaWorkspaceManager *workspace_manager);
 void           meta_workspace_remove        (MetaWorkspace *workspace);
 void           meta_workspace_add_window    (MetaWorkspace *workspace,
                                              MetaWindow    *window);
 void           meta_workspace_remove_window (MetaWorkspace *workspace,
                                              MetaWindow    *window);
-void      meta_workspace_update_snapped_windows (MetaWorkspace *workspace);
-gboolean meta_workspace_has_snapped_windows (MetaWorkspace *workspace);
-void     meta_workspace_recalc_for_snapped_windows (MetaWorkspace *workspace);
 void           meta_workspace_relocate_windows (MetaWorkspace *workspace,
                                                 MetaWorkspace *new_home);
+
+void meta_workspace_get_work_area_for_logical_monitor (MetaWorkspace      *workspace,
+                                                       MetaLogicalMonitor *logical_monitor,
+                                                       MetaRectangle      *area);
 
 void meta_workspace_invalidate_work_area (MetaWorkspace *workspace);
 
 GList* meta_workspace_get_onscreen_region       (MetaWorkspace *workspace);
-GList* meta_workspace_get_onmonitor_region      (MetaWorkspace *workspace,
-                                                 int            which_monitor);
+GList * meta_workspace_get_onmonitor_region (MetaWorkspace      *workspace,
+                                             MetaLogicalMonitor *logical_monitor);
+
+void meta_workspace_focus_default_window (MetaWorkspace *workspace,
+                                          MetaWindow    *not_this_one,
+                                          guint32        timestamp);
 
 const char* meta_workspace_get_name (MetaWorkspace *workspace);
+
+void meta_workspace_index_changed (MetaWorkspace *workspace);
 
 #endif

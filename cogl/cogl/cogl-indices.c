@@ -32,9 +32,7 @@
  *   Neil Roberts <neil@linux.intel.com>
  */
 
-#ifdef HAVE_CONFIG_H
 #include "cogl-config.h"
-#endif
 
 #include "cogl-util.h"
 #include "cogl-object-private.h"
@@ -93,7 +91,7 @@ cogl_indices_new (CoglContext *context,
   CoglIndexBuffer *index_buffer = cogl_index_buffer_new (context, buffer_bytes);
   CoglBuffer *buffer = COGL_BUFFER (index_buffer);
   CoglIndices *indices;
-  CoglError *ignore_error = NULL;
+  GError *ignore_error = NULL;
 
   _cogl_buffer_set_data (buffer,
                          0,
@@ -102,7 +100,7 @@ cogl_indices_new (CoglContext *context,
                          &ignore_error);
   if (ignore_error)
     {
-      cogl_error_free (ignore_error);
+      g_error_free (ignore_error);
       cogl_object_unref (index_buffer);
       return NULL;
     }
@@ -122,15 +120,15 @@ cogl_indices_get_buffer (CoglIndices *indices)
 CoglIndicesType
 cogl_indices_get_type (CoglIndices *indices)
 {
-  _COGL_RETURN_VAL_IF_FAIL (cogl_is_indices (indices),
-                            COGL_INDICES_TYPE_UNSIGNED_BYTE);
+  g_return_val_if_fail (cogl_is_indices (indices),
+                        COGL_INDICES_TYPE_UNSIGNED_BYTE);
   return indices->type;
 }
 
 size_t
 cogl_indices_get_offset (CoglIndices *indices)
 {
-  _COGL_RETURN_VAL_IF_FAIL (cogl_is_indices (indices), 0);
+  g_return_val_if_fail (cogl_is_indices (indices), 0);
 
   return indices->offset;
 }
@@ -138,7 +136,7 @@ cogl_indices_get_offset (CoglIndices *indices)
 static void
 warn_about_midscene_changes (void)
 {
-  static CoglBool seen = FALSE;
+  static gboolean seen = FALSE;
   if (!seen)
     {
       g_warning ("Mid-scene modification of indices has "
@@ -151,7 +149,7 @@ void
 cogl_indices_set_offset (CoglIndices *indices,
                          size_t offset)
 {
-  _COGL_RETURN_IF_FAIL (cogl_is_indices (indices));
+  g_return_if_fail (cogl_is_indices (indices));
 
   if (G_UNLIKELY (indices->immutable_ref))
     warn_about_midscene_changes ();
@@ -169,7 +167,7 @@ _cogl_indices_free (CoglIndices *indices)
 CoglIndices *
 _cogl_indices_immutable_ref (CoglIndices *indices)
 {
-  _COGL_RETURN_VAL_IF_FAIL (cogl_is_indices (indices), NULL);
+  g_return_val_if_fail (cogl_is_indices (indices), NULL);
 
   indices->immutable_ref++;
   _cogl_buffer_immutable_ref (COGL_BUFFER (indices->buffer));
@@ -179,8 +177,8 @@ _cogl_indices_immutable_ref (CoglIndices *indices)
 void
 _cogl_indices_immutable_unref (CoglIndices *indices)
 {
-  _COGL_RETURN_IF_FAIL (cogl_is_indices (indices));
-  _COGL_RETURN_IF_FAIL (indices->immutable_ref > 0);
+  g_return_if_fail (cogl_is_indices (indices));
+  g_return_if_fail (indices->immutable_ref > 0);
 
   indices->immutable_ref--;
   _cogl_buffer_immutable_unref (COGL_BUFFER (indices->buffer));
@@ -197,7 +195,7 @@ cogl_get_rectangle_indices (CoglContext *ctx, int n_rectangles)
       /* Generate the byte array if we haven't already */
       if (ctx->rectangle_byte_indices == NULL)
         {
-          uint8_t *byte_array = malloc (256 / 4 * 6 * sizeof (uint8_t));
+          uint8_t *byte_array = g_malloc (256 / 4 * 6 * sizeof (uint8_t));
           uint8_t *p = byte_array;
           int i, vert_num = 0;
 
@@ -218,7 +216,7 @@ cogl_get_rectangle_indices (CoglContext *ctx, int n_rectangles)
                                 byte_array,
                                 256 / 4 * 6);
 
-          free (byte_array);
+          g_free (byte_array);
         }
 
       return ctx->rectangle_byte_indices;
@@ -240,7 +238,7 @@ cogl_get_rectangle_indices (CoglContext *ctx, int n_rectangles)
             ctx->rectangle_short_indices_len *= 2;
 
           /* Over-allocate to generate a whole number of quads */
-          p = short_array = malloc ((ctx->rectangle_short_indices_len
+          p = short_array = g_malloc ((ctx->rectangle_short_indices_len
                                        + 5) / 6 * 6
                                       * sizeof (uint16_t));
 
@@ -262,7 +260,7 @@ cogl_get_rectangle_indices (CoglContext *ctx, int n_rectangles)
                                 short_array,
                                 ctx->rectangle_short_indices_len);
 
-          free (short_array);
+          g_free (short_array);
         }
 
       return ctx->rectangle_short_indices;

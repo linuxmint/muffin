@@ -1,0 +1,7 @@
+/* Have GL for rendering */
+#undef HAVE_COGL_GL
+
+/* Have GLES 2.0 for rendering */
+#undef HAVE_COGL_GLES2
+
+#define COGL_CONFIG_H_INCLUDED 1

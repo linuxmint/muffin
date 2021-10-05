@@ -51,7 +51,7 @@ struct _CoglOutput
 };
 
 CoglOutput *_cogl_output_new (const char *name);
-CoglBool _cogl_output_values_equal (CoglOutput *output,
+gboolean _cogl_output_values_equal (CoglOutput *output,
                                     CoglOutput *other);
 
 #endif /* __COGL_OUTPUT_PRIVATE_H */

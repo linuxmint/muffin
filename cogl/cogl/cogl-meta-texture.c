@@ -30,15 +30,13 @@
  *  Robert Bragg   <robert@linux.intel.com>
  */
 
-#ifdef HAVE_CONFIG_H
 #include "cogl-config.h"
-#endif
 
 #include "cogl-texture.h"
 #include "cogl-matrix.h"
 #include "cogl-spans.h"
 #include "cogl-meta-texture.h"
-#include "cogl-texture-rectangle-private.h"
+#include "cogl-texture-private.h"
 
 #include <string.h>
 #include <math.h>
@@ -229,8 +227,8 @@ typedef struct _ClampData
 {
   float start;
   float end;
-  CoglBool s_flipped;
-  CoglBool t_flipped;
+  gboolean s_flipped;
+  gboolean t_flipped;
   CoglMetaTextureCallback callback;
   void *user_data;
 } ClampData;
@@ -279,7 +277,7 @@ clamp_t_cb (CoglTexture *sub_texture,
                         clamp_data->user_data);
 }
 
-static CoglBool
+static gboolean
 foreach_clamped_region (CoglMetaTexture *meta_texture,
                         float *tx_1,
                         float *ty_1,
@@ -318,15 +316,8 @@ foreach_clamped_region (CoglMetaTexture *meta_texture,
 
   if (wrap_s == COGL_PIPELINE_WRAP_MODE_CLAMP_TO_EDGE)
     {
-      float max_s_coord;
+      float max_s_coord = 1.0;
       float half_texel_width;
-
-      /* Consider that rectangle textures have non-normalized
-       * coordinates... */
-      if (cogl_is_texture_rectangle (meta_texture))
-        max_s_coord = width;
-      else
-        max_s_coord = 1.0;
 
       half_texel_width = max_s_coord / (width * 2);
 
@@ -377,15 +368,8 @@ foreach_clamped_region (CoglMetaTexture *meta_texture,
   if (wrap_t == COGL_PIPELINE_WRAP_MODE_CLAMP_TO_EDGE)
     {
       float height = cogl_texture_get_height (COGL_TEXTURE (meta_texture));
-      float max_t_coord;
+      float max_t_coord = 1.0;
       float half_texel_height;
-
-      /* Consider that rectangle textures have non-normalized
-       * coordinates... */
-      if (cogl_is_texture_rectangle (meta_texture))
-        max_t_coord = height;
-      else
-        max_t_coord = 1.0;
 
       half_texel_height = max_t_coord / (height * 2);
 
@@ -468,33 +452,6 @@ normalize_meta_coords_cb (CoglTexture *slice_texture,
                   data->user_data);
 }
 
-typedef struct _UnNormalizeData
-{
-  CoglMetaTextureCallback callback;
-  void *user_data;
-  float width;
-  float height;
-} UnNormalizeData;
-
-static void
-un_normalize_slice_coords_cb (CoglTexture *slice_texture,
-                              const float *slice_coords,
-                              const float *meta_coords,
-                              void *user_data)
-{
-  UnNormalizeData *data = user_data;
-  float un_normalized_slice_coords[4] = {
-    slice_coords[0] * data->width,
-    slice_coords[1] * data->height,
-    slice_coords[2] * data->width,
-    slice_coords[3] * data->height
-  };
-
-  data->callback (slice_texture,
-                  un_normalized_slice_coords, meta_coords,
-                  data->user_data);
-}
-
 void
 cogl_meta_texture_foreach_in_region (CoglMetaTexture *meta_texture,
                                      float tx_1,
@@ -519,7 +476,7 @@ cogl_meta_texture_foreach_in_region (CoglMetaTexture *meta_texture,
   if (wrap_s == COGL_PIPELINE_WRAP_MODE_CLAMP_TO_EDGE ||
       wrap_t == COGL_PIPELINE_WRAP_MODE_CLAMP_TO_EDGE)
     {
-      CoglBool finished = foreach_clamped_region (meta_texture,
+      gboolean finished = foreach_clamped_region (meta_texture,
                                                   &tx_1, &ty_1, &tx_2, &ty_2,
                                                   wrap_s, wrap_t,
                                                   callback,
@@ -541,19 +498,16 @@ cogl_meta_texture_foreach_in_region (CoglMetaTexture *meta_texture,
    * coordinates beyond this point and only re-normalize just before
    * calling the user's callback... */
 
-  if (!cogl_is_texture_rectangle (COGL_TEXTURE (meta_texture)))
-    {
-      normalize_data.callback = callback;
-      normalize_data.user_data = user_data;
-      normalize_data.s_normalize_factor = 1.0f / width;
-      normalize_data.t_normalize_factor = 1.0f / height;
-      callback = normalize_meta_coords_cb;
-      user_data = &normalize_data;
-      tx_1 *= width;
-      ty_1 *= height;
-      tx_2 *= width;
-      ty_2 *= height;
-    }
+  normalize_data.callback = callback;
+  normalize_data.user_data = user_data;
+  normalize_data.s_normalize_factor = 1.0f / width;
+  normalize_data.t_normalize_factor = 1.0f / height;
+  callback = normalize_meta_coords_cb;
+  user_data = &normalize_data;
+  tx_1 *= width;
+  ty_1 *= height;
+  tx_2 *= width;
+  ty_2 *= height;
 
   /* XXX: at some point this wont be routed through the CoglTexture
    * vtable, instead there will be a separate CoglMetaTexture
@@ -611,21 +565,6 @@ cogl_meta_texture_foreach_in_region (CoglMetaTexture *meta_texture,
       CoglSpan x_span = { 0, width, 0 };
       CoglSpan y_span = { 0, height, 0 };
       float meta_region_coords[4] = { tx_1, ty_1, tx_2, ty_2 };
-      UnNormalizeData un_normalize_data;
-
-      /* If we are dealing with a CoglTextureRectangle then we need a shim
-       * callback that un_normalizes the slice coordinates we get from
-       * _cogl_texture_spans_foreach_in_region before passing them to
-       * the user's callback. */
-      if (cogl_is_texture_rectangle (meta_texture))
-        {
-          un_normalize_data.callback = callback;
-          un_normalize_data.user_data = user_data;
-          un_normalize_data.width = width;
-          un_normalize_data.height = height;
-          callback = un_normalize_slice_coords_cb;
-          user_data = &un_normalize_data;
-        }
 
       _cogl_texture_spans_foreach_in_region (&x_span, 1,
                                              &y_span, 1,

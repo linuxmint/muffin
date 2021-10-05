@@ -4,6 +4,7 @@
  * A Low Level GPU Graphics and Utilities API
  *
  * Copyright (C) 2009, 2011 Intel Corporation.
+ * Copyright (C) 2019 DisplayLink (UK) Ltd.
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -59,10 +60,6 @@
 /* The functions in this file are part of the core GL,GLES1 and GLES2 apis */
 #include "cogl-core-functions.h"
 
-/* The functions in this file are core to GLES1 only but may also be
- * extensions available for GLES2 and GL */
-#include "cogl-in-gles1-core-functions.h"
-
 /* The functions in this file are core to GLES2 only but
  * may be extensions for GLES1 and GL */
 #include "cogl-in-gles2-core-functions.h"
@@ -70,9 +67,6 @@
 /* The functions in this file are core to GLES1 and GLES2 but not core
  * to GL but they may be extensions available for GL */
 #include "cogl-in-gles-core-functions.h"
-
-/* These are fixed-function APIs core to GL and GLES1 */
-#include "cogl-fixed-functions.h"
 
 /* These are GLSL shader APIs core to GL 2.0 and GLES2 */
 #include "cogl-glsl-functions.h"
@@ -91,8 +85,6 @@ COGL_EXT_FUNCTION (void, glGetTexImage,
                    (GLenum target, GLint level,
                     GLenum format, GLenum type,
                     GLvoid *pixels))
-COGL_EXT_FUNCTION (void, glClipPlane,
-                   (GLenum plane, const double *equation))
 COGL_EXT_FUNCTION (void, glDepthRange,
                    (double near_val, double far_val))
 COGL_EXT_FUNCTION (void, glDrawBuffer,
@@ -113,31 +105,10 @@ COGL_EXT_FUNCTION (GLboolean, glUnmapBuffer,
                    (GLenum		 target))
 COGL_EXT_END ()
 
-COGL_EXT_BEGIN (texture_3d, 1, 2,
-                0, /* not in either GLES */
-                "OES\0",
-                "texture_3D\0")
-COGL_EXT_FUNCTION (void, glTexImage3D,
-                   (GLenum target, GLint level,
-                    GLint internalFormat,
-                    GLsizei width, GLsizei height,
-                    GLsizei depth, GLint border,
-                    GLenum format, GLenum type,
-                    const GLvoid *pixels))
-COGL_EXT_FUNCTION (void, glTexSubImage3D,
-                   (GLenum target, GLint level,
-                    GLint xoffset, GLint yoffset,
-                    GLint zoffset, GLsizei width,
-                    GLsizei height, GLsizei depth,
-                    GLenum format,
-                    GLenum type, const GLvoid *pixels))
-COGL_EXT_END ()
-
-
 
 COGL_EXT_BEGIN (offscreen_blit, 3, 0,
-                0, /* not in either GLES */
-                "EXT\0ANGLE\0",
+                COGL_EXT_IN_GLES3,
+                "EXT\0NV\0",
                 "framebuffer_blit\0")
 COGL_EXT_FUNCTION (void, glBlitFramebuffer,
                    (GLint                 srcX0,
@@ -152,39 +123,11 @@ COGL_EXT_FUNCTION (void, glBlitFramebuffer,
                     GLenum                filter))
 COGL_EXT_END ()
 
-/* ARB_fragment_program */
-COGL_EXT_BEGIN (arbfp, 255, 255,
-                0, /* not in either GLES */
-                "ARB\0",
-                "fragment_program\0")
-COGL_EXT_FUNCTION (void, glGenPrograms,
-                   (GLsizei               n,
-                    GLuint               *programs))
-COGL_EXT_FUNCTION (void, glDeletePrograms,
-                   (GLsizei               n,
-                    GLuint               *programs))
-COGL_EXT_FUNCTION (void, glBindProgram,
-                   (GLenum                target,
-                    GLuint                program))
-COGL_EXT_FUNCTION (void, glProgramString,
-                   (GLenum                target,
-                    GLenum                format,
-                    GLsizei               len,
-                    const void           *program))
-COGL_EXT_FUNCTION (void, glProgramLocalParameter4fv,
-                   (GLenum                target,
-                    GLuint                index,
-                    GLfloat              *params))
-COGL_EXT_END ()
-
 COGL_EXT_BEGIN (EGL_image, 255, 255,
                 0, /* not in either GLES */
                 "OES\0",
                 "EGL_image\0")
 COGL_EXT_FUNCTION (void, glEGLImageTargetTexture2D,
-                   (GLenum           target,
-                    GLeglImageOES    image))
-COGL_EXT_FUNCTION (void, glEGLImageTargetRenderbufferStorage,
                    (GLenum           target,
                     GLeglImageOES    image))
 COGL_EXT_END ()
@@ -219,7 +162,7 @@ COGL_EXT_FUNCTION (void, glFramebufferTexture2DMultisampleIMG,
 COGL_EXT_END ()
 
 COGL_EXT_BEGIN (ARB_sampler_objects, 3, 3,
-                0, /* not in either GLES */
+                COGL_EXT_IN_GLES3,
                 "ARB:\0",
                 "sampler_objects\0")
 COGL_EXT_FUNCTION (void, glGenSamplers,
@@ -237,43 +180,8 @@ COGL_EXT_FUNCTION (void, glSamplerParameteri,
                     GLint param))
 COGL_EXT_END ()
 
-/* These only list functions that come from the old GLSL extensions.
- * Functions that are common to the extensions and GLSL 2.0 should
- * instead be listed in cogl-glsl-functions.h */
-COGL_EXT_BEGIN (shader_objects, 255, 255,
-                0, /* not in either GLES */
-                "ARB\0",
-                "shader_objects\0")
-COGL_EXT_FUNCTION (GLuint, glCreateProgramObject,
-                   (void))
-COGL_EXT_FUNCTION (GLuint, glCreateShaderObject,
-                   (GLenum shaderType))
-COGL_EXT_FUNCTION (void, glDeleteObject,
-                   (GLuint obj))
-COGL_EXT_FUNCTION (void, glAttachObject,
-                   (GLuint container, GLuint obj))
-COGL_EXT_FUNCTION (void, glUseProgramObject,
-                   (GLuint programObj))
-COGL_EXT_FUNCTION (void, glGetInfoLog,
-                   (GLuint                obj,
-                    GLsizei               maxLength,
-                    GLsizei              *length,
-                    char                 *infoLog))
-COGL_EXT_FUNCTION (void, glGetObjectParameteriv,
-                   (GLuint                obj,
-                    GLenum                pname,
-                    GLint                *params))
-COGL_EXT_FUNCTION (void, glDetachObject,
-                   (GLuint container, GLuint obj))
-COGL_EXT_FUNCTION (void, glGetAttachedObjects,
-                   (GLuint program,
-                    GLsizei maxcount,
-                    GLsizei* count,
-                    GLuint* shaders))
-COGL_EXT_END ()
-
 COGL_EXT_BEGIN (only_gl3, 3, 0,
-                0, /* not in either GLES */
+                COGL_EXT_IN_GLES3,
                 "\0",
                 "\0")
 COGL_EXT_FUNCTION (const GLubyte *, glGetStringi,
@@ -281,14 +189,11 @@ COGL_EXT_FUNCTION (const GLubyte *, glGetStringi,
 COGL_EXT_END ()
 
 COGL_EXT_BEGIN (vertex_array_object, 3, 0,
-                0, /* not in either GLES */
+                COGL_EXT_IN_GLES3,
                 "ARB\0OES\0",
                 "vertex_array_object\0")
 COGL_EXT_FUNCTION (void, glBindVertexArray,
                    (GLuint array))
-COGL_EXT_FUNCTION (void, glDeleteVertexArrays,
-                   (GLsizei n,
-                    const GLuint *arrays))
 COGL_EXT_FUNCTION (void, glGenVertexArrays,
                    (GLsizei n,
                     GLuint *arrays))
@@ -307,7 +212,7 @@ COGL_EXT_END ()
 
 #ifdef GL_ARB_sync
 COGL_EXT_BEGIN (sync, 3, 2,
-                0, /* not in either GLES */
+                COGL_EXT_IN_GLES3,
                 "ARB:\0",
                 "sync\0")
 COGL_EXT_FUNCTION (GLsync, glFenceSync,
@@ -333,4 +238,12 @@ COGL_EXT_BEGIN (robustness, 255, 255,
                 "robustness\0")
 COGL_EXT_FUNCTION (GLenum, glGetGraphicsResetStatus,
                    (void))
+COGL_EXT_END ()
+
+COGL_EXT_BEGIN (multitexture_part1, 1, 3,
+                0,
+                "ARB\0",
+                "multitexture\0")
+COGL_EXT_FUNCTION (void, glClientActiveTexture,
+                   (GLenum                texture))
 COGL_EXT_END ()

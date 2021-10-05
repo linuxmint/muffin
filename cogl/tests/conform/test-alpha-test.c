@@ -1,6 +1,7 @@
 #include <cogl/cogl.h>
 #include <string.h>
 
+#include "test-declarations.h"
 #include "test-utils.h"
 
 static CoglTexture2D *

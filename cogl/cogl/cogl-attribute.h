@@ -48,7 +48,7 @@ typedef struct _CoglAttribute CoglAttribute;
 
 #include <glib-object.h>
 
-COGL_BEGIN_DECLS
+G_BEGIN_DECLS
 
 /**
  * SECTION:cogl-attribute
@@ -63,6 +63,7 @@ COGL_BEGIN_DECLS
  *
  * Returns: a #GType that can be used with the GLib type system.
  */
+COGL_EXPORT
 GType cogl_attribute_get_gtype (void);
 
 /**
@@ -155,7 +156,7 @@ GType cogl_attribute_get_gtype (void);
  */
 /* XXX: look for a precedent to see if the stride/offset args should
  * have a different order. */
-CoglAttribute *
+COGL_EXPORT CoglAttribute *
 cogl_attribute_new (CoglAttributeBuffer *attribute_buffer,
                     const char *name,
                     size_t stride,
@@ -183,7 +184,7 @@ cogl_attribute_new (CoglAttributeBuffer *attribute_buffer,
  * Return value: (transfer full): A newly allocated #CoglAttribute
  *          representing the given constant @value.
  */
-CoglAttribute *
+COGL_EXPORT CoglAttribute *
 cogl_attribute_new_const_1f (CoglContext *context,
                              const char *name,
                              float value);
@@ -210,7 +211,7 @@ cogl_attribute_new_const_1f (CoglContext *context,
  * Return value: (transfer full): A newly allocated #CoglAttribute
  *          representing the given constant vector.
  */
-CoglAttribute *
+COGL_EXPORT CoglAttribute *
 cogl_attribute_new_const_2f (CoglContext *context,
                              const char *name,
                              float component0,
@@ -242,7 +243,7 @@ cogl_attribute_new_const_2f (CoglContext *context,
  * Return value: (transfer full): A newly allocated #CoglAttribute
  *          representing the given constant vector.
  */
-CoglAttribute *
+COGL_EXPORT CoglAttribute *
 cogl_attribute_new_const_3f (CoglContext *context,
                              const char *name,
                              float component0,
@@ -277,7 +278,7 @@ cogl_attribute_new_const_3f (CoglContext *context,
  * Return value: (transfer full): A newly allocated #CoglAttribute
  *          representing the given constant vector.
  */
-CoglAttribute *
+COGL_EXPORT CoglAttribute *
 cogl_attribute_new_const_4f (CoglContext *context,
                              const char *name,
                              float component0,
@@ -306,7 +307,7 @@ cogl_attribute_new_const_4f (CoglContext *context,
  * Return value: (transfer full): A newly allocated #CoglAttribute
  *          representing the given constant vector.
  */
-CoglAttribute *
+COGL_EXPORT CoglAttribute *
 cogl_attribute_new_const_2fv (CoglContext *context,
                               const char *name,
                               const float *value);
@@ -335,7 +336,7 @@ cogl_attribute_new_const_2fv (CoglContext *context,
  * Return value: (transfer full): A newly allocated #CoglAttribute
  *          representing the given constant vector.
  */
-CoglAttribute *
+COGL_EXPORT CoglAttribute *
 cogl_attribute_new_const_3fv (CoglContext *context,
                               const char *name,
                               const float *value);
@@ -365,7 +366,7 @@ cogl_attribute_new_const_3fv (CoglContext *context,
  * Return value: (transfer full): A newly allocated #CoglAttribute
  *          representing the given constant vector.
  */
-CoglAttribute *
+COGL_EXPORT CoglAttribute *
 cogl_attribute_new_const_4fv (CoglContext *context,
                               const char *name,
                               const float *value);
@@ -398,11 +399,11 @@ cogl_attribute_new_const_4fv (CoglContext *context,
  * Return value: (transfer full): A newly allocated #CoglAttribute
  *          representing the given constant matrix.
  */
-CoglAttribute *
+COGL_EXPORT CoglAttribute *
 cogl_attribute_new_const_2x2fv (CoglContext *context,
                                 const char *name,
                                 const float *matrix2x2,
-                                CoglBool transpose);
+                                gboolean transpose);
 
 /**
  * cogl_attribute_new_const_3x3fv:
@@ -433,11 +434,11 @@ cogl_attribute_new_const_2x2fv (CoglContext *context,
  * Return value: (transfer full): A newly allocated #CoglAttribute
  *          representing the given constant matrix.
  */
-CoglAttribute *
+COGL_EXPORT CoglAttribute *
 cogl_attribute_new_const_3x3fv (CoglContext *context,
                                 const char *name,
                                 const float *matrix3x3,
-                                CoglBool transpose);
+                                gboolean transpose);
 
 /**
  * cogl_attribute_new_const_4x4fv:
@@ -468,11 +469,11 @@ cogl_attribute_new_const_3x3fv (CoglContext *context,
  * Return value: (transfer full): A newly allocated #CoglAttribute
  *          representing the given constant matrix.
  */
-CoglAttribute *
+COGL_EXPORT CoglAttribute *
 cogl_attribute_new_const_4x4fv (CoglContext *context,
                                 const char *name,
                                 const float *matrix4x4,
-                                CoglBool transpose);
+                                gboolean transpose);
 
 /**
  * cogl_attribute_set_normalized:
@@ -492,9 +493,9 @@ cogl_attribute_new_const_4x4fv (CoglContext *context,
  * Stability: unstable
  * Since: 1.10
  */
-void
+COGL_EXPORT void
 cogl_attribute_set_normalized (CoglAttribute *attribute,
-                               CoglBool normalized);
+                               gboolean normalized);
 
 /**
  * cogl_attribute_get_normalized:
@@ -506,7 +507,7 @@ cogl_attribute_set_normalized (CoglAttribute *attribute,
  * Stability: unstable
  * Since: 1.10
  */
-CoglBool
+COGL_EXPORT gboolean
 cogl_attribute_get_normalized (CoglAttribute *attribute);
 
 /**
@@ -519,7 +520,7 @@ cogl_attribute_get_normalized (CoglAttribute *attribute);
  * Stability: unstable
  * Since: 1.10
  */
-CoglAttributeBuffer *
+COGL_EXPORT CoglAttributeBuffer *
 cogl_attribute_get_buffer (CoglAttribute *attribute);
 
 /**
@@ -532,7 +533,7 @@ cogl_attribute_get_buffer (CoglAttribute *attribute);
  * Stability: unstable
  * Since: 1.10
  */
-void
+COGL_EXPORT void
 cogl_attribute_set_buffer (CoglAttribute *attribute,
                            CoglAttributeBuffer *attribute_buffer);
 
@@ -545,10 +546,10 @@ cogl_attribute_set_buffer (CoglAttribute *attribute,
  * Return value: %TRUE if the @object references a #CoglAttribute,
  *   %FALSE otherwise
  */
-CoglBool
+COGL_EXPORT gboolean
 cogl_is_attribute (void *object);
 
-COGL_END_DECLS
+G_END_DECLS
 
 #endif /* __COGL_ATTRIBUTE_H__ */
 

@@ -1,6 +1,6 @@
 /* -*- mode: C; c-file-style: "gnu"; indent-tabs-mode: nil; -*- */
 
-/* Muffin X window decorations */
+/* Mutter X window decorations */
 
 /*
  * Copyright (C) 2001 Havoc Pennington
@@ -18,40 +18,35 @@
  * General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street - Suite 500, Boston, MA
- * 02110-1335, USA.
+ * along with this program; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <config.h>
-#include "frame.h"
-#include <meta/errors.h>
-#include "keybindings-private.h"
+#include "config.h"
 
-#include <X11/extensions/Xrender.h>
+#include "core/frame.h"
+
+#include "backends/x11/meta-backend-x11.h"
+#include "core/bell.h"
+#include "core/keybindings-private.h"
+#include "meta/meta-x11-errors.h"
+#include "x11/meta-x11-display-private.h"
 
 #define EVENT_MASK (SubstructureRedirectMask |                     \
                     StructureNotifyMask | SubstructureNotifyMask | \
-                    ExposureMask |                                 \
-                    ButtonPressMask | ButtonReleaseMask |          \
-                    PointerMotionMask | PointerMotionHintMask |    \
-                    EnterWindowMask | LeaveWindowMask |            \
-                    FocusChangeMask |                              \
-                    ColormapChangeMask)
+                    ExposureMask | FocusChangeMask)
 
-LOCAL_SYMBOL void
+void
 meta_window_ensure_frame (MetaWindow *window)
 {
   MetaFrame *frame;
   XSetWindowAttributes attrs;
-  Visual *visual;
   gulong create_serial;
+  MetaX11Display *x11_display;
 
   if (window->frame)
     return;
 
-  /* See comment below for why this is required. */
-  meta_display_grab (window->display);
+  x11_display = window->display->x11_display;
 
   frame = g_new (MetaFrame, 1);
 
@@ -65,65 +60,35 @@ meta_window_ensure_frame (MetaWindow *window)
   frame->right_width = 0;
   frame->current_cursor = 0;
 
-  frame->is_flashing = FALSE;
   frame->borders_cached = FALSE;
 
-  meta_verbose ("Framing window %s: visual %s default, depth %d default depth %d\n",
-                window->desc,
-                XVisualIDFromVisual (window->xvisual) ==
-                XVisualIDFromVisual (window->screen->default_xvisual) ?
-                "is" : "is not",
-                window->depth, window->screen->default_depth);
   meta_verbose ("Frame geometry %d,%d  %dx%d\n",
                 frame->rect.x, frame->rect.y,
                 frame->rect.width, frame->rect.height);
 
-  /* Default depth/visual handles clients with weird visuals; they can
-   * always be children of the root depth/visual obviously, but
-   * e.g. DRI games can't be children of a parent that has the same
-   * visual as the client. NULL means default visual.
-   *
-   * We look for an ARGB visual if we can find one, otherwise use
-   * the default of NULL.
-   */
+  frame->ui_frame = meta_ui_create_frame (x11_display->ui,
+                                          x11_display->xdisplay,
+                                          frame->window,
+                                          window->xvisual,
+                                          frame->rect.x,
+                                          frame->rect.y,
+                                          frame->rect.width,
+                                          frame->rect.height,
+                                          &create_serial);
+  frame->xwindow = frame->ui_frame->xwindow;
 
-  /* Special case for depth 32 windows (assumed to be ARGB),
-   * we use the window's visual. Otherwise we just use the system visual.
-   */
-  if (window->depth == 32)
-    visual = window->xvisual;
-  else
-    visual = NULL;
-
-  frame->xwindow = meta_ui_create_frame_window (window->screen->ui,
-                                                window->display->xdisplay,
-                                                visual,
-                                                frame->rect.x,
-                                                frame->rect.y,
-						frame->rect.width,
-						frame->rect.height,
-						frame->window->screen->number,
-                                                &create_serial);
-  meta_stack_tracker_record_add (window->screen->stack_tracker,
+  meta_stack_tracker_record_add (window->display->stack_tracker,
                                  frame->xwindow,
                                  create_serial);
 
   meta_verbose ("Frame for %s is 0x%lx\n", frame->window->desc, frame->xwindow);
   attrs.event_mask = EVENT_MASK;
-  XChangeWindowAttributes (window->display->xdisplay,
+  XChangeWindowAttributes (x11_display->xdisplay,
 			   frame->xwindow, CWEventMask, &attrs);
 
-  meta_display_register_x_window (window->display, &frame->xwindow, window);
+  meta_x11_display_register_x_window (x11_display, &frame->xwindow, window);
 
-  /* Reparent the client window; it may be destroyed,
-   * thus the error trap. We'll get a destroy notify later
-   * and free everything. Comment in FVWM source code says
-   * we need a server grab or the child can get its MapNotify
-   * before we've finished reparenting and getting the decoration
-   * window onscreen, so ensure_frame must be called with
-   * a grab.
-   */
-  meta_error_trap_push (window->display);
+  meta_x11_error_trap_push (x11_display);
   if (window->mapped)
     {
       window->mapped = FALSE; /* the reparent will unmap the window,
@@ -133,20 +98,24 @@ meta_window_ensure_frame (MetaWindow *window)
                   "Incrementing unmaps_pending on %s for reparent\n", window->desc);
       window->unmaps_pending += 1;
     }
-  /* window was reparented to this position */
-  window->rect.x = 0;
-  window->rect.y = 0;
 
-  meta_stack_tracker_record_remove (window->screen->stack_tracker,
+  meta_stack_tracker_record_remove (window->display->stack_tracker,
                                     window->xwindow,
-                                    XNextRequest (window->display->xdisplay));
-  XReparentWindow (window->display->xdisplay,
+                                    XNextRequest (x11_display->xdisplay));
+  XReparentWindow (x11_display->xdisplay,
                    window->xwindow,
                    frame->xwindow,
-                   window->rect.x,
-                   window->rect.y);
+                   frame->child_x,
+                   frame->child_y);
+  window->reparents_pending += 1;
   /* FIXME handle this error */
-  meta_error_trap_pop (window->display);
+  meta_x11_error_trap_pop (x11_display);
+
+  /* Ensure focus is restored after the unmap/map events triggered
+   * by XReparentWindow().
+   */
+  if (meta_window_has_focus (window))
+    window->restore_focus_on_map = TRUE;
 
   /* stick frame to the window */
   window->frame = frame;
@@ -154,29 +123,53 @@ meta_window_ensure_frame (MetaWindow *window)
   /* Now that frame->xwindow is registered with window, we can set its
    * style and background.
    */
-  meta_ui_update_frame_style (window->screen->ui, frame->xwindow);
+  meta_frame_update_style (frame);
+  meta_frame_update_title (frame);
 
-  if (window->title)
-    meta_ui_set_frame_title (window->screen->ui,
-                             window->frame->xwindow,
-                             window->title);
+  meta_ui_map_frame (x11_display->ui, frame->xwindow);
+
+  {
+    MetaBackend *backend = meta_get_backend ();
+    if (META_IS_BACKEND_X11 (backend))
+      {
+        Display *xdisplay = meta_backend_x11_get_xdisplay (META_BACKEND_X11 (backend));
+
+        /* Since the backend selects for events on another connection,
+         * make sure to sync the GTK+ connection to ensure that the
+         * frame window has been created on the server at this point. */
+        XSync (x11_display->xdisplay, False);
+
+        unsigned char mask_bits[XIMaskLen (XI_LASTEVENT)] = { 0 };
+        XIEventMask mask = { XIAllMasterDevices, sizeof (mask_bits), mask_bits };
+
+        XISelectEvents (GDK_DISPLAY_XDISPLAY (gdk_display_get_default ()),
+                        frame->xwindow, &mask, 1);
+
+        XISetMask (mask.mask, XI_ButtonPress);
+        XISetMask (mask.mask, XI_ButtonRelease);
+        XISetMask (mask.mask, XI_Motion);
+        XISetMask (mask.mask, XI_Enter);
+        XISetMask (mask.mask, XI_Leave);
+
+        XISelectEvents (xdisplay, frame->xwindow, &mask, 1);
+      }
+  }
 
   /* Move keybindings to frame instead of window */
   meta_window_grab_keys (window);
-
-  meta_ui_map_frame (frame->window->screen->ui, frame->xwindow);
-
-  meta_display_ungrab (window->display);
 }
 
-LOCAL_SYMBOL void
+void
 meta_window_destroy_frame (MetaWindow *window)
 {
   MetaFrame *frame;
   MetaFrameBorders borders;
+  MetaX11Display *x11_display;
 
   if (window->frame == NULL)
     return;
+
+  x11_display = window->display->x11_display;
 
   meta_verbose ("Unframing window %s\n", window->desc);
 
@@ -187,7 +180,7 @@ meta_window_destroy_frame (MetaWindow *window)
   /* Unparent the client window; it may be destroyed,
    * thus the error trap.
    */
-  meta_error_trap_push (window->display);
+  meta_x11_error_trap_push (x11_display);
   if (window->mapped)
     {
       window->mapped = FALSE; /* Keep track of unmapping it, so we
@@ -198,25 +191,36 @@ meta_window_destroy_frame (MetaWindow *window)
                   "Incrementing unmaps_pending on %s for reparent back to root\n", window->desc);
       window->unmaps_pending += 1;
     }
-  meta_stack_tracker_record_add (window->screen->stack_tracker,
-                                 window->xwindow,
-                                 XNextRequest (window->display->xdisplay));
-  XReparentWindow (window->display->xdisplay,
-                   window->xwindow,
-                   window->screen->xroot,
-                   /* Using anything other than meta_window_get_position()
-                    * coordinates here means we'll need to ensure a configure
-                    * notify event is sent; see bug 399552.
-                    */
-                   window->frame->rect.x + borders.total.left,
-                   window->frame->rect.y + borders.total.top);
 
-  meta_error_trap_pop (window->display);
+  if (!x11_display->closing)
+    {
+      meta_stack_tracker_record_add (window->display->stack_tracker,
+                                     window->xwindow,
+                                     XNextRequest (x11_display->xdisplay));
 
-  meta_ui_destroy_frame_window (window->screen->ui, frame->xwindow);
+      XReparentWindow (x11_display->xdisplay,
+                       window->xwindow,
+                       x11_display->xroot,
+                       /* Using anything other than client root window coordinates
+                        * coordinates here means we'll need to ensure a configure
+                        * notify event is sent; see bug 399552.
+                        */
+                       window->frame->rect.x + borders.invisible.left,
+                       window->frame->rect.y + borders.invisible.top);
+      window->reparents_pending += 1;
+    }
 
-  meta_display_unregister_x_window (window->display,
-                                    frame->xwindow);
+  meta_x11_error_trap_pop (x11_display);
+
+  meta_ui_frame_unmanage (frame->ui_frame);
+
+  /* Ensure focus is restored after the unmap/map events triggered
+   * by XReparentWindow().
+   */
+  if (meta_window_has_focus (window))
+    window->restore_focus_on_map = TRUE;
+
+  meta_x11_display_unregister_x_window (x11_display, frame->xwindow);
 
   window->frame = NULL;
   if (window->frame_bounds)
@@ -228,7 +232,7 @@ meta_window_destroy_frame (MetaWindow *window)
   /* Move keybindings to window instead of frame */
   meta_window_grab_keys (window);
 
-  free (frame);
+  g_free (frame);
 
   /* Put our state back where it should be */
   meta_window_queue (window, META_QUEUE_CALC_SHOWING);
@@ -236,7 +240,7 @@ meta_window_destroy_frame (MetaWindow *window)
 }
 
 
-LOCAL_SYMBOL MetaFrameFlags
+MetaFrameFlags
 meta_frame_get_flags (MetaFrame *frame)
 {
   MetaFrameFlags flags;
@@ -275,18 +279,6 @@ meta_frame_get_flags (MetaFrame *frame)
   if (META_WINDOW_ALLOWS_VERTICAL_RESIZE (frame->window))
     flags |= META_FRAME_ALLOWS_VERTICAL_RESIZE;
 
-  if (META_WINDOW_ALLOWS_TOP_RESIZE (frame->window))
-    flags |= META_FRAME_ALLOWS_TOP_RESIZE;
-
-  if (META_WINDOW_ALLOWS_BOTTOM_RESIZE (frame->window))
-    flags |= META_FRAME_ALLOWS_BOTTOM_RESIZE;
-
-  if (META_WINDOW_ALLOWS_LEFT_RESIZE (frame->window))
-    flags |= META_FRAME_ALLOWS_LEFT_RESIZE;
-
-  if (META_WINDOW_ALLOWS_RIGHT_RESIZE (frame->window))
-    flags |= META_FRAME_ALLOWS_RIGHT_RESIZE;
-
   if (meta_window_appears_focused (frame->window))
     flags |= META_FRAME_HAS_FOCUS;
 
@@ -302,26 +294,14 @@ meta_frame_get_flags (MetaFrame *frame)
   if (META_WINDOW_MAXIMIZED (frame->window))
     flags |= META_FRAME_MAXIMIZED;
 
-  if (META_WINDOW_TILED_LEFT (frame->window) ||
-      META_WINDOW_TILED_ULC (frame->window) ||
-      META_WINDOW_TILED_LLC (frame->window))
+  if (META_WINDOW_TILED_LEFT (frame->window))
     flags |= META_FRAME_TILED_LEFT;
 
-  if (META_WINDOW_TILED_RIGHT (frame->window) ||
-      META_WINDOW_TILED_URC (frame->window) ||
-      META_WINDOW_TILED_LRC (frame->window))
+  if (META_WINDOW_TILED_RIGHT (frame->window))
     flags |= META_FRAME_TILED_RIGHT;
-
-  if (META_WINDOW_TILED_TOP (frame->window) ||
-      META_WINDOW_TILED_BOTTOM (frame->window)) {
-    flags |= META_FRAME_MAXIMIZED;
-  }
 
   if (frame->window->fullscreen)
     flags |= META_FRAME_FULLSCREEN;
-
-  if (frame->is_flashing)
-    flags |= META_FRAME_IS_FLASHING;
 
   if (frame->window->wm_state_above)
     flags |= META_FRAME_ABOVE;
@@ -338,7 +318,7 @@ meta_frame_borders_clear (MetaFrameBorders *self)
   self->visible.right  = self->invisible.right  = self->total.right  = 0;
 }
 
-LOCAL_SYMBOL void
+void
 meta_frame_calc_borders (MetaFrame        *frame,
                          MetaFrameBorders *borders)
 {
@@ -350,9 +330,7 @@ meta_frame_calc_borders (MetaFrame        *frame,
     {
       if (!frame->borders_cached)
         {
-          meta_ui_get_frame_borders (frame->window->screen->ui,
-                                     frame->xwindow,
-                                     &frame->cached_borders);
+          meta_ui_frame_get_borders (frame->ui_frame, &frame->cached_borders);
           frame->borders_cached = TRUE;
         }
 
@@ -366,23 +344,8 @@ meta_frame_clear_cached_borders (MetaFrame *frame)
   frame->borders_cached = FALSE;
 }
 
-LOCAL_SYMBOL void
-meta_frame_get_corner_radiuses (MetaFrame *frame,
-                                float     *top_left,
-                                float     *top_right,
-                                float     *bottom_left,
-                                float     *bottom_right)
-{
-  meta_ui_get_corner_radiuses (frame->window->screen->ui,
-                               frame->xwindow,
-                               top_left, top_right,
-                               bottom_left, bottom_right);
-}
-
-LOCAL_SYMBOL gboolean
+gboolean
 meta_frame_sync_to_window (MetaFrame *frame,
-                           int        resize_gravity,
-                           gboolean   need_move,
                            gboolean   need_resize)
 {
   meta_topic (META_DEBUG_GEOMETRY,
@@ -392,64 +355,73 @@ meta_frame_sync_to_window (MetaFrame *frame,
               frame->rect.x + frame->rect.width,
               frame->rect.y + frame->rect.height);
 
-  meta_ui_move_resize_frame (frame->window->screen->ui,
-			     frame->xwindow,
+  meta_ui_frame_move_resize (frame->ui_frame,
 			     frame->rect.x,
 			     frame->rect.y,
 			     frame->rect.width,
 			     frame->rect.height);
 
-  if (need_resize)
-    {
-      /* If we're interactively resizing the frame, repaint
-       * it immediately so we don't start to lag.
-       */
-      if (frame->window->display->grab_window ==
-          frame->window)
-        meta_ui_repaint_frame (frame->window->screen->ui,
-                               frame->xwindow);
-    }
-
   return need_resize;
 }
 
-LOCAL_SYMBOL cairo_region_t *
+cairo_region_t *
 meta_frame_get_frame_bounds (MetaFrame *frame)
 {
-  return meta_ui_get_frame_bounds (frame->window->screen->ui,
-                                   frame->xwindow,
-                                   frame->rect.width,
-                                   frame->rect.height);
+  return meta_ui_frame_get_bounds (frame->ui_frame);
 }
 
-LOCAL_SYMBOL void
+void
+meta_frame_get_mask (MetaFrame             *frame,
+                     cairo_rectangle_int_t *frame_rect,
+                     cairo_t               *cr)
+{
+  meta_ui_frame_get_mask (frame->ui_frame, frame_rect, cr);
+}
+
+void
 meta_frame_queue_draw (MetaFrame *frame)
 {
-  meta_ui_queue_frame_draw (frame->window->screen->ui,
-                            frame->xwindow);
+  meta_ui_frame_queue_draw (frame->ui_frame);
 }
 
-LOCAL_SYMBOL void
+void
 meta_frame_set_screen_cursor (MetaFrame	*frame,
 			      MetaCursor cursor)
 {
+  MetaX11Display *x11_display;
   Cursor xcursor;
   if (cursor == frame->current_cursor)
     return;
+
   frame->current_cursor = cursor;
+  x11_display = frame->window->display->x11_display;
+
   if (cursor == META_CURSOR_DEFAULT)
-    XUndefineCursor (frame->window->display->xdisplay, frame->xwindow);
+    XUndefineCursor (x11_display->xdisplay, frame->xwindow);
   else
     {
-      xcursor = meta_display_create_x_cursor (frame->window->display, cursor);
-      XDefineCursor (frame->window->display->xdisplay, frame->xwindow, xcursor);
-      XFlush (frame->window->display->xdisplay);
-      XFreeCursor (frame->window->display->xdisplay, xcursor);
+      xcursor = meta_x11_display_create_x_cursor (x11_display, cursor);
+      XDefineCursor (x11_display->xdisplay, frame->xwindow, xcursor);
+      XFlush (x11_display->xdisplay);
+      XFreeCursor (x11_display->xdisplay, xcursor);
     }
 }
 
-LOCAL_SYMBOL Window
+Window
 meta_frame_get_xwindow (MetaFrame *frame)
 {
   return frame->xwindow;
+}
+
+void
+meta_frame_update_style (MetaFrame *frame)
+{
+  meta_ui_frame_update_style (frame->ui_frame);
+}
+
+void
+meta_frame_update_title (MetaFrame *frame)
+{
+  if (frame->window->title)
+    meta_ui_frame_set_title (frame->ui_frame, frame->window->title);
 }

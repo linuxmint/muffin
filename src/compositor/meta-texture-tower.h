@@ -17,15 +17,13 @@
  * General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street - Suite 500, Boston, MA
- * 02110-1335, USA.
+ * along with this program; if not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef __META_TEXTURE_TOWER_H__
 #define __META_TEXTURE_TOWER_H__
 
-#include <clutter/clutter.h>
+#include "clutter/clutter.h"
 
 G_BEGIN_DECLS
 
@@ -62,8 +60,9 @@ void              meta_texture_tower_update_area       (MetaTextureTower *tower,
                                                         int               y,
                                                         int               width,
                                                         int               height);
-CoglTexture     *meta_texture_tower_get_paint_texture (MetaTextureTower *tower);
+CoglTexture      *meta_texture_tower_get_paint_texture (MetaTextureTower    *tower,
+                                                        ClutterPaintContext *paint_context);
 
-G_BEGIN_DECLS
+G_END_DECLS
 
 #endif /* __META_TEXTURE_TOWER_H__ */

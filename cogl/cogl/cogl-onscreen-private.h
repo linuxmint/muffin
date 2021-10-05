@@ -59,17 +59,9 @@ struct _CoglOnscreen
 {
   CoglFramebuffer  _parent;
 
-#ifdef COGL_HAS_X11_SUPPORT
-  uint32_t foreign_xid;
-  CoglOnscreenX11MaskCallback foreign_update_mask_callback;
-  void *foreign_update_mask_data;
-#endif
-
-  CoglBool swap_throttled;
-
   CoglList frame_closures;
 
-  CoglBool resizable;
+  gboolean resizable;
   CoglList resize_closures;
 
   CoglList dirty_closures;
@@ -86,7 +78,7 @@ struct _CoglOnscreen
 CoglOnscreen *
 _cogl_onscreen_new (void);
 
-void
+COGL_EXPORT void
 _cogl_framebuffer_winsys_update_size (CoglFramebuffer *framebuffer,
                                       int width, int height);
 
@@ -95,10 +87,10 @@ _cogl_onscreen_queue_event (CoglOnscreen *onscreen,
                             CoglFrameEvent type,
                             CoglFrameInfo *info);
 
-void
+COGL_EXPORT void
 _cogl_onscreen_notify_frame_sync (CoglOnscreen *onscreen, CoglFrameInfo *info);
 
-void
+COGL_EXPORT void
 _cogl_onscreen_notify_complete (CoglOnscreen *onscreen, CoglFrameInfo *info);
 
 void

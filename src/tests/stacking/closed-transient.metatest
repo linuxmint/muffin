@@ -1,0 +1,19 @@
+new_client 1 wayland
+create 1/1
+show 1/1
+
+new_client 2 wayland
+create 2/1
+show 2/1
+
+create 1/2
+show 1/2
+set_parent 1/2 1
+
+wait
+assert_stacking 1/1 2/1 1/2
+
+destroy 1/2
+
+wait
+assert_stacking 2/1 1/1

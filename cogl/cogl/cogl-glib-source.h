@@ -67,7 +67,7 @@ G_BEGIN_DECLS
  * Stability: unstable
  * Since: 1.10
  */
-GSource *
+COGL_EXPORT GSource *
 cogl_glib_source_new (CoglContext *context,
                       int priority);
 
@@ -88,7 +88,7 @@ cogl_glib_source_new (CoglContext *context,
  * Stability: unstable
  * Since: 1.16
  */
-GSource *
+COGL_EXPORT GSource *
 cogl_glib_renderer_source_new (CoglRenderer *renderer,
                                int priority);
 

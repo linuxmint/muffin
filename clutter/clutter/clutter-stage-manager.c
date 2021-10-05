@@ -36,18 +36,13 @@
  * #ClutterStageManager is available since Clutter 0.8
  */
 
-#ifdef HAVE_CONFIG_H
 #include "clutter-build-config.h"
-#endif
 
 #include "clutter-stage-manager-private.h"
 
 #include "clutter-marshal.h"
 #include "clutter-debug.h"
 #include "clutter-private.h"
-#include "clutter-version.h"  
-
-#include "deprecated/clutter-stage-manager.h"
 
 enum
 {
@@ -92,8 +87,8 @@ clutter_stage_manager_dispose (GObject *gobject)
 
   stage_manager = CLUTTER_STAGE_MANAGER (gobject);
 
-  g_slist_foreach (stage_manager->stages, (GFunc) clutter_actor_destroy, NULL);
-  g_slist_free (stage_manager->stages);
+  g_slist_free_full (stage_manager->stages,
+                     (GDestroyNotify) clutter_actor_destroy);
   stage_manager->stages = NULL;
 
   G_OBJECT_CLASS (clutter_stage_manager_parent_class)->dispose (gobject);
@@ -137,8 +132,7 @@ clutter_stage_manager_class_init (ClutterStageManagerClass *klass)
                   G_OBJECT_CLASS_TYPE (gobject_class),
                   G_SIGNAL_RUN_LAST,
                   G_STRUCT_OFFSET (ClutterStageManagerClass, stage_added),
-                  NULL, NULL,
-                  _clutter_marshal_VOID__OBJECT,
+                  NULL, NULL, NULL,
                   G_TYPE_NONE, 1,
                   CLUTTER_TYPE_STAGE);
   /**
@@ -156,8 +150,7 @@ clutter_stage_manager_class_init (ClutterStageManagerClass *klass)
                   G_OBJECT_CLASS_TYPE (gobject_class),
                   G_SIGNAL_RUN_LAST,
                   G_STRUCT_OFFSET (ClutterStageManagerClass, stage_removed),
-                  NULL, NULL,
-                  _clutter_marshal_VOID__OBJECT,
+                  NULL, NULL, NULL,
                   G_TYPE_NONE, 1,
                   CLUTTER_TYPE_STAGE);
 }
@@ -186,23 +179,6 @@ clutter_stage_manager_get_default (void)
     context->stage_manager = g_object_new (CLUTTER_TYPE_STAGE_MANAGER, NULL);
 
   return context->stage_manager;
-}
-
-/**
- * clutter_stage_manager_set_default_stage:
- * @stage_manager: a #ClutterStageManager
- * @stage: a #ClutterStage
- *
- * Sets @stage as the default stage.
- *
- * Since: 0.8
- *
- * Deprecated: 1.2: Calling this function has no effect
- */
-void
-clutter_stage_manager_set_default_stage (ClutterStageManager *stage_manager,
-                                         ClutterStage        *stage)
-{
 }
 
 /*< private >

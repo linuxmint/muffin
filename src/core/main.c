@@ -1,6 +1,6 @@
 /* -*- mode: C; c-file-style: "gnu"; indent-tabs-mode: nil; -*- */
 
-/* Muffin main() */
+/* Mutter main() */
 
 /*
  * Copyright (C) 2001 Havoc Pennington
@@ -17,9 +17,7 @@
  * General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street - Suite 500, Boston, MA
- * 02110-1335, USA.
+ * along with this program; if not, see <http://www.gnu.org/licenses/>.
  */
 
 /**
@@ -28,60 +26,76 @@
  * @short_description: Program startup.
  *
  * Functions which parse the command-line arguments, create the display,
- * kick everything off and then close down Muffin when it's time to go.
+ * kick everything off and then close down Mutter when it's time to go.
  *
  *
  *
- * Muffin - a boring window manager for the adult in you
+ * Mutter - a boring window manager for the adult in you
  *
- * Many window managers are like Marshmallow Froot Loops; Muffin
- * is like Cheerios.
+ * Many window managers are like Marshmallow Froot Loops; Mutter
+ * is like Frosted Flakes: it's still plain old corn, but dusted
+ * with some sugar.
  *
  * The best way to get a handle on how the whole system fits together
  * is discussed in doc/code-overview.txt; if you're looking for functions
  * to investigate, read main(), meta_display_open(), and event_callback().
  */
 
-#ifndef _GNU_SOURCE
-#define _GNU_SOURCE
-#endif
-#define _SVID_SOURCE /* for putenv() and some signal-related functions */
+#define _XOPEN_SOURCE /* for putenv() and some signal-related functions */
 
-#include <config.h>
-#include <meta/main.h>
-#include "util-private.h"
-#include "display-private.h"
-#include <meta/errors.h>
-#include "ui.h"
-#include "session.h"
-#include <meta/prefs.h>
-#include <meta/compositor.h>
+#include "config.h"
 
-#include <glib-object.h>
-#include <gdk/gdkx.h>
+#include "meta/main.h"
 
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/wait.h>
-#include <stdio.h>
-#include <string.h>
-#include <signal.h>
-#include <unistd.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <glib-object.h>
+#include <glib-unix.h>
 #include <locale.h>
+#include <signal.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 #include <time.h>
 #include <unistd.h>
-
-#include <clutter/clutter.h>
-#include "clutter/x11/clutter-x11.h"
-#include "cogl/cogl.h"
-#include "cogl/cogl-xlib.h"
-#include "cogl/winsys/cogl-winsys-glx-private.h"
-#include <GL/gl.h>
+#include <unistd.h>
 
 #ifdef HAVE_INTROSPECTION
 #include <girepository.h>
+#endif
+
+#if defined(HAVE_NATIVE_BACKEND) && defined(HAVE_WAYLAND)
+#include <systemd/sd-login.h>
+#endif /* HAVE_WAYLAND && HAVE_NATIVE_BACKEND */
+
+#ifdef HAVE_SYS_PRCTL
+#include <sys/prctl.h>
+#endif
+
+#include "backends/meta-backend-private.h"
+#include "backends/x11/cm/meta-backend-x11-cm.h"
+#include "backends/x11/meta-backend-x11.h"
+#include "clutter/clutter.h"
+#include "core/display-private.h"
+#include "core/main-private.h"
+#include "core/util-private.h"
+#include "meta/compositor.h"
+#include "meta/meta-backend.h"
+#include "meta/meta-x11-errors.h"
+#include "meta/prefs.h"
+#include "ui/ui.h"
+#include "x11/session.h"
+
+#ifdef HAVE_WAYLAND
+#include "backends/x11/nested/meta-backend-x11-nested.h"
+#include "wayland/meta-wayland.h"
+#include "wayland/meta-xwayland.h"
+#endif
+
+#ifdef HAVE_NATIVE_BACKEND
+#include "backends/native/meta-backend-native.h"
 #endif
 
 /*
@@ -90,7 +104,7 @@
 static MetaExitCode meta_exit_code = META_EXIT_SUCCESS;
 
 /*
- * Handle on the main loop, so that we have an easy way of shutting Muffin
+ * Handle on the main loop, so that we have an easy way of shutting Mutter
  * down.
  */
 static GMainLoop *meta_main_loop = NULL;
@@ -98,92 +112,17 @@ static GMainLoop *meta_main_loop = NULL;
 static void prefs_changed_callback (MetaPreference pref,
                                     gpointer       data);
 
-/*
- * Prints log messages. If Muffin was compiled with backtrace support,
- * also prints a backtrace (see meta_print_backtrace()).
+/**
+ * meta_print_compilation_info:
  *
- * \param log_domain  the domain the error occurred in (we ignore this)
- * \param log_level   the log level so that we can filter out less
- *                    important messages
- * \param message     the message to log
- * \param user_data   arbitrary data (we ignore this)
- */
-static void
-log_handler (const gchar   *log_domain,
-             GLogLevelFlags log_level,
-             const gchar   *message,
-             gpointer       user_data)
-{
-  meta_warning ("Log level %d: %s\n", log_level, message);
-  meta_print_backtrace ();
-}
-
-static void
-glib_debug_log_handler (const gchar   *log_domain,
-             GLogLevelFlags log_level,
-             const gchar   *message,
-             gpointer       user_data)
-{
-  guint i;
-  const gchar *forbidden[] = {
-    "posix_spawn",
-    "setenv()/putenv()",
-    "unsetenv()"
-  };
-
-  for (i = 0; i < G_N_ELEMENTS (forbidden); i++)
-    {
-      if (g_str_has_prefix (message, forbidden[i]))
-        {
-          return;
-        }
-    }
-
-  log_handler (log_domain,
-               log_level,
-               message,
-               user_data);
-}
-
-/*
  * Prints a list of which configure script options were used to
- * build this copy of Muffin. This is actually always called
+ * build this copy of Mutter. This is actually always called
  * on startup, but it's all no-op unless we're in verbose mode
- * (see meta_set_verbose).
+ * (see meta_set_verbose()).
  */
 static void
 meta_print_compilation_info (void)
 {
-#ifdef HAVE_SHAPE
-  meta_verbose ("Compiled with shape extension\n");
-#else
-  meta_verbose ("Compiled without shape extension\n");
-#endif
-#ifdef HAVE_XINERAMA
-  meta_topic (META_DEBUG_XINERAMA, "Compiled with Xinerama extension\n");
-#else
-  meta_topic (META_DEBUG_XINERAMA, "Compiled without Xinerama extension\n");
-#endif
-#ifdef HAVE_XFREE_XINERAMA
-  meta_topic (META_DEBUG_XINERAMA, " (using XFree86 Xinerama)\n");
-#else
-  meta_topic (META_DEBUG_XINERAMA, " (not using XFree86 Xinerama)\n");
-#endif
-#ifdef HAVE_SOLARIS_XINERAMA
-  meta_topic (META_DEBUG_XINERAMA, " (using Solaris Xinerama)\n");
-#else
-  meta_topic (META_DEBUG_XINERAMA, " (not using Solaris Xinerama)\n");
-#endif
-#ifdef HAVE_XSYNC
-  meta_verbose ("Compiled with sync extension\n");
-#else
-  meta_verbose ("Compiled without sync extension\n");
-#endif
-#ifdef HAVE_RANDR
-  meta_verbose ("Compiled with randr extension\n");
-#else
-  meta_verbose ("Compiled without randr extension\n");
-#endif
 #ifdef HAVE_STARTUP_NOTIFICATION
   meta_verbose ("Compiled with startup notification\n");
 #else
@@ -191,13 +130,15 @@ meta_print_compilation_info (void)
 #endif
 }
 
-/*
+/**
+ * meta_print_self_identity:
+ *
  * Prints the version number, the current timestamp (not the
  * build date), the locale, the character encoding, and a list
  * of configure script options that were used to build this
- * copy of Muffin. This is actually always called
+ * copy of Mutter. This is actually always called
  * on startup, but it's all no-op unless we're in verbose mode
- * (see meta_set_verbose).
+ * (see meta_set_verbose()).
  */
 static void
 meta_print_self_identity (void)
@@ -210,7 +151,7 @@ meta_print_self_identity (void)
   g_date_clear (&d, 1);
   g_date_set_time_t (&d, time (NULL));
   g_date_strftime (buf, sizeof (buf), "%x", &d);
-  meta_verbose ("Muffin version %s running on %s\n",
+  meta_verbose ("Mutter version %s running on %s\n",
     VERSION, buf);
 
   /* Locale and encoding. */
@@ -223,7 +164,7 @@ meta_print_self_identity (void)
 }
 
 /*
- * The set of possible options that can be set on Muffin's
+ * The set of possible options that can be set on Mutter's
  * command line.
  */
 static gchar    *opt_save_file;
@@ -232,6 +173,15 @@ static gchar    *opt_client_id;
 static gboolean  opt_replace_wm;
 static gboolean  opt_disable_sm;
 static gboolean  opt_sync;
+#ifdef HAVE_WAYLAND
+static gboolean  opt_wayland;
+static gboolean  opt_nested;
+static gboolean  opt_no_x11;
+#endif
+#ifdef HAVE_NATIVE_BACKEND
+static gboolean  opt_display_server;
+#endif
+static gboolean  opt_x11;
 
 static GOptionEntry meta_options[] = {
   {
@@ -241,7 +191,7 @@ static GOptionEntry meta_options[] = {
     NULL
   },
   {
-    "replace", 0, 0, G_OPTION_ARG_NONE,
+    "replace", 'r', 0, G_OPTION_ARG_NONE,
     &opt_replace_wm,
     N_("Replace the running window manager"),
     NULL
@@ -269,13 +219,45 @@ static GOptionEntry meta_options[] = {
     N_("Make X calls synchronous"),
     NULL
   },
+#ifdef HAVE_WAYLAND
+  {
+    "wayland", 0, 0, G_OPTION_ARG_NONE,
+    &opt_wayland,
+    N_("Run as a wayland compositor"),
+    NULL
+  },
+  {
+    "nested", 0, 0, G_OPTION_ARG_NONE,
+    &opt_nested,
+    N_("Run as a nested compositor"),
+    NULL
+  },
+  {
+    "no-x11", 0, 0, G_OPTION_ARG_NONE,
+    &opt_no_x11,
+    N_("Run wayland compositor without starting Xwayland"),
+    NULL
+  },
+#endif
+#ifdef HAVE_NATIVE_BACKEND
+  {
+    "display-server", 0, 0, G_OPTION_ARG_NONE,
+    &opt_display_server,
+    N_("Run as a full display server, rather than nested")
+  },
+#endif
+  {
+    "x11", 0, 0, G_OPTION_ARG_NONE,
+    &opt_x11,
+    N_("Run with X11 backend")
+  },
   {NULL}
 };
 
 /**
  * meta_get_option_context: (skip)
  *
- * Returns a #GOptionContext initialized with muffin-related options.
+ * Returns a #GOptionContext initialized with mutter-related options.
  * Parse the command-line args with this before calling meta_init().
  *
  * Return value: the #GOptionContext
@@ -287,116 +269,34 @@ meta_get_option_context (void)
 
   if (setlocale (LC_ALL, "") == NULL)
     meta_warning ("Locale not understood by C library, internationalization will not work\n");
-  bindtextdomain (GETTEXT_PACKAGE, MUFFIN_LOCALEDIR);
+  bindtextdomain (GETTEXT_PACKAGE, MUTTER_LOCALEDIR);
   bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
 
   ctx = g_option_context_new (NULL);
   g_option_context_add_main_entries (ctx, meta_options, GETTEXT_PACKAGE);
-  g_option_context_add_group (ctx, clutter_get_option_group_without_init ());
-  g_option_context_add_group (ctx, cogl_get_option_group ());
-
   return ctx;
 }
 
-/* Muffin is responsible for pulling events off the X queue, so Clutter
- * doesn't need (and shouldn't) run its normal event source which polls
- * the X fd, but we do have to deal with dispatching events that accumulate
- * in the clutter queue. This happens, for example, when clutter generate
- * enter/leave events on mouse motion - several events are queued in the
- * clutter queue but only one dispatched. It could also happen because of
- * explicit calls to clutter_event_put(). We add a very simple custom
- * event loop source which is simply responsible for pulling events off
- * of the queue and dispatching them before we block for new events.
+/**
+ * meta_select_display:
+ *
+ * Selects which display Mutter should use. It first tries to use
+ * @display_name as the display. If @display_name is %NULL then
+ * try to use the environment variable MUTTER_DISPLAY. If that
+ * also is %NULL, use the default - :0.0
  */
-
-static gboolean
-event_prepare (GSource    *source,
-               gint       *timeout_)
-{
-  *timeout_ = -1;
-
-  return clutter_events_pending ();
-}
-
-static gboolean
-event_check (GSource *source)
-{
-  return clutter_events_pending ();
-}
-
-static gboolean
-event_dispatch (GSource    *source,
-                GSourceFunc callback,
-                gpointer    user_data)
-{
-  ClutterEvent *event = clutter_event_get ();
-  if (event)
-    clutter_do_event (event);
-
-  return TRUE;
-}
-
-static GSourceFuncs event_funcs = {
-  event_prepare,
-  event_check,
-  event_dispatch
-};
-
 static void
-meta_clutter_init (void)
+meta_select_display (char *display_arg)
 {
-  gboolean threaded_swap = meta_prefs_get_threaded_swap ();
-  Display *xdisplay = GDK_DISPLAY_XDISPLAY (gdk_display_get_default ());
-  clutter_x11_set_display (xdisplay);
+  const char *display_name;
 
-  clutter_x11_disable_event_retrieval ();
-
-  if (CLUTTER_INIT_SUCCESS == clutter_init (NULL, NULL))
-    {
-      GSource *source = g_source_new (&event_funcs, sizeof (GSource));
-      g_source_attach (source, NULL);
-      g_source_unref (source);
-
-      if (threaded_swap)
-        {
-          CoglRenderer *renderer = cogl_renderer_new ();
-          cogl_renderer_set_custom_winsys (renderer, _cogl_winsys_glx_get_vtable (), NULL);
-          cogl_xlib_renderer_set_foreign_display (renderer, xdisplay);
-
-          cogl_xlib_renderer_request_reset_on_video_memory_purge (renderer, TRUE);
-
-          /* Set up things so that if the INTEL_swap_event extension is not present,
-            * but the driver is known to have good thread support, we use an extra
-            * thread and call glXWaitVideoSync() in the thread. This allows idles
-            * to work properly, even when Muffin is constantly redrawing new frames;
-            * otherwise, without INTEL_swap_event, we'll just block in glXSwapBuffers().
-            */
-          cogl_xlib_renderer_set_threaded_swap_wait_enabled (renderer, TRUE);
-        }
-    }
+  if (display_arg)
+    display_name = (const char *) display_arg;
   else
-    {
-	  meta_fatal ("Unable to initialize Clutter.\n");
-    }
-}
+    display_name = g_getenv ("MUTTER_DISPLAY");
 
-/*
- * Selects which display Muffin should use. It first tries to use
- * display_name as the display. If display_name is NULL then
- * try to use the environment variable MUFFIN_DISPLAY. If that
- * also is NULL, use the default - :0.0
- */
-static void
-meta_select_display (gchar *display_name)
-{
-  gchar *envVar = "";
   if (display_name)
-    envVar = g_strconcat ("DISPLAY=", display_name, NULL);
-  else if (g_getenv ("MUFFIN_DISPLAY"))
-    envVar = g_strconcat ("DISPLAY=",
-      g_getenv ("MUFFIN_DISPLAY"), NULL);
-  /* DO NOT FREE envVar, putenv() sucks */
-  putenv (envVar);
+    g_setenv ("DISPLAY", display_name, TRUE);
 }
 
 static void
@@ -406,35 +306,226 @@ meta_finalize (void)
 
   if (display)
     meta_display_close (display,
-                        CurrentTime); /* I doubt correct timestamps matter here */
-}
+                        META_CURRENT_TIME); /* I doubt correct timestamps matter here */
 
-static int sigterm_pipe_fds[2] = { -1, -1 };
-
-static void
-sigterm_handler (int signum)
-{
-  if (sigterm_pipe_fds[1] >= 0)
-    {
-      int G_GNUC_UNUSED dummy;
-
-      dummy = write (sigterm_pipe_fds[1], "", 1);
-      close (sigterm_pipe_fds[1]);
-      sigterm_pipe_fds[1] = -1;
-    }
+#ifdef HAVE_WAYLAND
+  if (meta_is_wayland_compositor ())
+    meta_wayland_finalize ();
+#endif
 }
 
 static gboolean
-on_sigterm (void)
+on_sigterm (gpointer user_data)
 {
-  meta_quit (META_EXIT_SUCCESS);
-  return FALSE;
+  meta_quit (EXIT_SUCCESS);
+
+  return G_SOURCE_REMOVE;
+}
+
+#if defined(HAVE_WAYLAND) && defined(HAVE_NATIVE_BACKEND)
+static gboolean
+session_type_is_supported (const char *session_type)
+{
+   return (g_strcmp0 (session_type, "x11") == 0) ||
+          (g_strcmp0 (session_type, "wayland") == 0);
+}
+
+static char *
+find_session_type (void)
+{
+  char **sessions = NULL;
+  char *session_id;
+  char *session_type;
+  const char *session_type_env;
+  gboolean is_tty = FALSE;
+  int ret, i;
+
+  ret = sd_pid_get_session (0, &session_id);
+  if (ret == 0 && session_id != NULL)
+    {
+      ret = sd_session_get_type (session_id, &session_type);
+      free (session_id);
+
+      if (ret == 0)
+        {
+          if (session_type_is_supported (session_type))
+            goto out;
+          else
+            is_tty = g_strcmp0 (session_type, "tty") == 0;
+          free (session_type);
+        }
+    }
+  else if (sd_uid_get_sessions (getuid (), 1, &sessions) > 0)
+    {
+      for (i = 0; sessions[i] != NULL; i++)
+        {
+          ret = sd_session_get_type (sessions[i], &session_type);
+
+          if (ret < 0)
+            continue;
+
+          if (session_type_is_supported (session_type))
+            {
+              g_strfreev (sessions);
+              goto out;
+            }
+
+          free (session_type);
+        }
+    }
+  g_strfreev (sessions);
+
+  session_type_env = g_getenv ("XDG_SESSION_TYPE");
+  if (session_type_is_supported (session_type_env))
+    {
+      /* The string should be freeable */
+      session_type = strdup (session_type_env);
+      goto out;
+    }
+
+  /* Legacy support for starting through xinit */
+  if (is_tty && (g_getenv ("MUTTER_DISPLAY") || g_getenv ("DISPLAY")))
+    {
+      session_type = strdup ("x11");
+      goto out;
+    }
+
+  meta_warning ("Unsupported session type\n");
+  meta_exit (META_EXIT_ERROR);
+
+out:
+  return session_type;
+}
+
+static gboolean
+check_for_wayland_session_type (void)
+{
+  char *session_type;
+  gboolean is_wayland;
+
+  session_type = find_session_type ();
+  is_wayland = g_strcmp0 (session_type, "wayland") == 0;
+  free (session_type);
+
+  return is_wayland;
+}
+#endif
+
+/*
+ * Determine the compositor configuration, i.e. whether to run as a Wayland
+ * compositor, as well as what backend to use.
+ *
+ * There are various different flags affecting this:
+ *
+ *    --nested always forces the use of the nested X11 backend
+ *    --display-server always forces the use of the native backend
+ *    --wayland always forces the compositor type to be a Wayland compositor
+ *
+ * If no flag is passed that forces the compositor type, the compositor type
+ * is determined first from the logind session type, or if that fails, from the
+ * XDG_SESSION_TYPE environment variable.
+ *
+ * If no flag is passed that forces the backend type, the backend type is
+ * determined given the compositor type. If the compositor is a Wayland
+ * compositor, then the native backend is used, or the nested backend, would
+ * the native backend not be enabled at build time. If the compositor is not a
+ * Wayland compositor, then the X11 Compositing Manager backend is used.
+ */
+static void
+calculate_compositor_configuration (MetaCompositorType *compositor_type,
+                                    GType              *backend_gtype)
+{
+#ifdef HAVE_WAYLAND
+  gboolean run_as_wayland_compositor = opt_wayland && !opt_x11;
+
+#ifdef HAVE_NATIVE_BACKEND
+  if ((opt_wayland || opt_nested || opt_display_server) && opt_x11)
+#else
+  if ((opt_wayland || opt_nested) && opt_x11)
+#endif
+    {
+      meta_warning ("Can't run both as Wayland compositor and X11 compositing manager\n");
+      meta_exit (META_EXIT_ERROR);
+    }
+
+#ifdef HAVE_NATIVE_BACKEND
+  if (opt_nested && opt_display_server)
+    {
+      meta_warning ("Can't run both as nested and as a display server\n");
+      meta_exit (META_EXIT_ERROR);
+    }
+
+  if (!run_as_wayland_compositor && !opt_x11)
+    run_as_wayland_compositor = check_for_wayland_session_type ();
+#endif /* HAVE_NATIVE_BACKEND */
+
+  if (!run_as_wayland_compositor && opt_no_x11)
+    {
+      meta_warning ("Can't disable X11 support on X11 compositor\n");
+      meta_exit (META_EXIT_ERROR);
+    }
+
+  if (run_as_wayland_compositor)
+    *compositor_type = META_COMPOSITOR_TYPE_WAYLAND;
+  else
+#endif /* HAVE_WAYLAND */
+    *compositor_type = META_COMPOSITOR_TYPE_X11;
+
+#ifdef HAVE_WAYLAND
+  if (opt_nested)
+    {
+      *backend_gtype = META_TYPE_BACKEND_X11_NESTED;
+      return;
+    }
+#endif /* HAVE_WAYLAND */
+
+#ifdef HAVE_NATIVE_BACKEND
+  if (opt_display_server)
+    {
+      *backend_gtype = META_TYPE_BACKEND_NATIVE;
+      return;
+    }
+
+#ifdef HAVE_WAYLAND
+  if (run_as_wayland_compositor)
+    {
+      *backend_gtype = META_TYPE_BACKEND_NATIVE;
+      return;
+    }
+#endif /* HAVE_WAYLAND */
+#endif /* HAVE_NATIVE_BACKEND */
+
+#ifdef HAVE_WAYLAND
+  if (run_as_wayland_compositor)
+    {
+      *backend_gtype = META_TYPE_BACKEND_X11_NESTED;
+      return;
+    }
+  else
+#endif /* HAVE_WAYLAND */
+    {
+      *backend_gtype = META_TYPE_BACKEND_X11_CM;
+      return;
+    }
+}
+
+static gboolean _compositor_configuration_overridden = FALSE;
+static MetaCompositorType _compositor_type_override;
+static GType _backend_gtype_override;
+
+void
+meta_override_compositor_configuration (MetaCompositorType compositor_type,
+                                        GType              backend_gtype)
+{
+  _compositor_configuration_overridden = TRUE;
+  _compositor_type_override = compositor_type;
+  _backend_gtype_override = backend_gtype;
 }
 
 /**
  * meta_init: (skip)
  *
- * Initialize muffin. Call this after meta_get_option_context() and
+ * Initialize mutter. Call this after meta_get_option_context() and
  * meta_plugin_manager_set_plugin_type(), and before meta_run().
  */
 void
@@ -442,14 +533,12 @@ meta_init (void)
 {
   struct sigaction act;
   sigset_t empty_mask;
-  GIOChannel *channel;
-  gboolean threaded_swap = meta_prefs_get_threaded_swap ();
+  MetaCompositorType compositor_type;
+  GType backend_gtype;
 
-  /* XInitThreads() is needed to use the "threaded swap wait" functionality
-   * in Cogl. We call it here to hopefully call it before any other use of XLib.
-   */
-  if (threaded_swap)
-    XInitThreads();
+#ifdef HAVE_SYS_PRCTL
+  prctl (PR_SET_DUMPABLE, 1);
+#endif
 
   sigemptyset (&empty_mask);
   act.sa_handler = SIG_IGN;
@@ -464,25 +553,27 @@ meta_init (void)
                 g_strerror (errno));
 #endif
 
-  if (pipe (sigterm_pipe_fds) != 0)
-    g_printerr ("Failed to create SIGTERM pipe: %s\n",
-                g_strerror (errno));
+  g_unix_signal_add (SIGTERM, on_sigterm, NULL);
 
-  channel = g_io_channel_unix_new (sigterm_pipe_fds[0]);
-  g_io_channel_set_flags (channel, G_IO_FLAG_NONBLOCK, NULL);
-  g_io_add_watch (channel, G_IO_IN, (GIOFunc) on_sigterm, NULL);
-  g_io_channel_set_close_on_unref (channel, TRUE);
-  g_io_channel_unref (channel);
-
-  act.sa_handler = &sigterm_handler;
-  if (sigaction (SIGTERM, &act, NULL) < 0)
-    g_printerr ("Failed to register SIGTERM handler: %s\n",
-		g_strerror (errno));
-
-  if (g_getenv ("MUFFIN_VERBOSE"))
+  if (g_getenv ("MUTTER_VERBOSE"))
     meta_set_verbose (TRUE);
-  if (g_getenv ("MUFFIN_DEBUG"))
+  if (g_getenv ("MUTTER_DEBUG"))
     meta_set_debugging (TRUE);
+
+  if (_compositor_configuration_overridden)
+    {
+      compositor_type = _compositor_type_override;
+      backend_gtype = _backend_gtype_override;
+    }
+  else
+    {
+      calculate_compositor_configuration (&compositor_type, &backend_gtype);
+    }
+
+#ifdef HAVE_WAYLAND
+  if (compositor_type == META_COMPOSITOR_TYPE_WAYLAND)
+    meta_set_is_wayland_compositor (TRUE);
+#endif
 
   if (g_get_home_dir ())
     if (chdir (g_get_home_dir ()) < 0)
@@ -492,12 +583,17 @@ meta_init (void)
   meta_print_self_identity ();
 
 #ifdef HAVE_INTROSPECTION
-  g_irepository_prepend_search_path (MUFFIN_PKGLIBDIR);
+  g_irepository_prepend_search_path (MUTTER_PKGLIBDIR);
 #endif
 
-  meta_set_syncing (opt_sync || (g_getenv ("MUFFIN_SYNC") != NULL));
+  /* NB: When running as a hybrid wayland compositor we run our own headless X
+   * server so the user can't control the X display to connect too. */
+  if (!meta_is_wayland_compositor ())
+    meta_select_display (opt_display_name);
 
-  meta_select_display (opt_display_name);
+  meta_init_backend (backend_gtype);
+
+  meta_set_syncing (opt_sync || (g_getenv ("MUTTER_SYNC") != NULL));
 
   if (opt_replace_wm)
     meta_set_replace_current_wm (TRUE);
@@ -506,88 +602,20 @@ meta_init (void)
     meta_fatal ("Can't specify both SM save file and SM client id\n");
 
   meta_main_loop = g_main_loop_new (NULL, FALSE);
-
-  meta_ui_init ();
-
-  /*
-   * Disable some variables that cause rendering issues with private Clutter,
-   * except when software rendering is explicitly set by Cinnamon.
-   */
-  g_unsetenv ("CLUTTER_VBLANK");
-
-  if (g_getenv ("CINNAMON_SOFTWARE_RENDERING") == NULL)
-    g_unsetenv ("CLUTTER_PAINT");
-
-  /* Load prefs */
-  meta_prefs_init ();
-  _clutter_set_sync_method (meta_prefs_get_sync_method ());
-
-  /*
-   * Clutter can only be initialized after the UI.
-   */
-  meta_clutter_init ();
-
-  const char *renderer = (const char *) glGetString (GL_RENDERER);
-  if (strstr (renderer, "llvmpipe") ||
-      strstr (renderer, "Rasterizer") ||
-      strstr (renderer, "softpipe"))
-  {
-	/* Clutter envs not set, since they won't work after Clutter init */
-    g_setenv ("CINNAMON_SOFTWARE_RENDERING", "1", FALSE);
-    g_setenv ("CINNAMON_SLOWDOWN_FACTOR", "0.0001", FALSE);
-    meta_warning ("Software rendering detected: %s\n", renderer);
-  }
 }
 
 /**
- * meta_run: (skip)
+ * meta_register_with_session:
  *
- * Runs muffin. Call this after completing your own initialization.
+ * Registers mutter with the session manager.  Call this after completing your own
+ * initialization.
  *
- * Return value: muffin's exit status
+ * This should be called when the session manager can safely continue to the
+ * next phase of startup and potentially display windows.
  */
-int
-meta_run (void)
+void
+meta_register_with_session (void)
 {
-  const gchar *log_domains[] = {
-    NULL, G_LOG_DOMAIN, "Gtk", "Gdk",
-    "Pango", "GLib-GObject", "GThread"
-  };
-  guint i;
-
-  meta_prefs_add_listener (prefs_changed_callback, NULL);
-
-  // Intercept GLib debug level
-  g_log_set_handler ("GLib",
-                     G_LOG_LEVEL_DEBUG,
-                     glib_debug_log_handler, NULL);
-
-  // Direct all but debug to the normal handler
-  g_log_set_handler ("GLib",
-                     (G_LOG_LEVEL_MASK | G_LOG_FLAG_FATAL | G_LOG_FLAG_RECURSION) & ~G_LOG_LEVEL_DEBUG,
-                     log_handler, NULL);
-
-  for (i=0; i<G_N_ELEMENTS(log_domains); i++)
-    g_log_set_handler (log_domains[i],
-                       G_LOG_LEVEL_MASK | G_LOG_FLAG_FATAL | G_LOG_FLAG_RECURSION,
-                       log_handler, NULL);
-
-  if (g_getenv ("MUFFIN_G_FATAL_WARNINGS") != NULL)
-    g_log_set_always_fatal (G_LOG_LEVEL_MASK);
-
-  meta_ui_set_current_theme (meta_prefs_get_theme (), FALSE);
-
-  if (!meta_ui_have_a_theme ())
-    {
-      meta_ui_set_current_theme ("Default", FALSE);
-      meta_warning ("Could not find theme %s. Falling back to default theme.", meta_prefs_get_theme ());
-    }
-
-
-  /* Connect to SM as late as possible - but before managing display,
-   * or we might try to manage a window before we have the session
-   * info
-   */
   if (!opt_disable_sm)
     {
       if (opt_client_id == NULL)
@@ -609,9 +637,25 @@ meta_run (void)
   /* Free memory possibly allocated by the argument parsing which are
    * no longer needed.
    */
-  free (opt_save_file);
-  free (opt_display_name);
-  free (opt_client_id);
+  g_free (opt_save_file);
+  g_free (opt_display_name);
+  g_free (opt_client_id);
+}
+
+/**
+ * meta_run: (skip)
+ *
+ * Runs mutter. Call this after completing initialization that doesn't require
+ * an event loop.
+ *
+ * Return value: mutter's exit status
+ */
+int
+meta_run (void)
+{
+  /* Load prefs */
+  meta_prefs_init ();
+  meta_prefs_add_listener (prefs_changed_callback, NULL);
 
   if (!meta_display_open ())
     meta_exit (META_EXIT_ERROR);
@@ -623,14 +667,15 @@ meta_run (void)
   return meta_exit_code;
 }
 
-/*
- * Stops Muffin. This tells the event loop to stop processing; it is
+/**
+ * meta_quit:
+ * @code: The success or failure code to return to the calling process.
+ *
+ * Stops Mutter. This tells the event loop to stop processing; it is
  * rather dangerous to use this because this will leave the user with
  * no window manager. We generally do this only if, for example, the
  * session manager asks us to; we assume the session manager knows
  * what it's talking about.
- *
- * \param code The success or failure code to return to the calling process.
  */
 void
 meta_quit (MetaExitCode code)
@@ -642,14 +687,15 @@ meta_quit (MetaExitCode code)
     }
 }
 
-/*
+/**
+ * prefs_changed_callback:
+ * @pref:  Which preference has changed
+ * @data:  Arbitrary data (which we ignore)
+ *
  * Called on pref changes. (One of several functions of its kind and purpose.)
  *
- * \bug Why are these particular prefs handled in main.c and not others?
- * Should they be?
- *
- * \param pref  Which preference has changed
- * \param data  Arbitrary data (which we ignore)
+ * FIXME: Why are these particular prefs handled in main.c and not others?
+ *        Should they be?
  */
 static void
 prefs_changed_callback (MetaPreference pref,
@@ -657,28 +703,56 @@ prefs_changed_callback (MetaPreference pref,
 {
   switch (pref)
     {
-    case META_PREF_THEME:
     case META_PREF_DRAGGABLE_BORDER_WIDTH:
-      meta_ui_set_current_theme (meta_prefs_get_theme (), FALSE);
-      meta_display_retheme_all ();
+      meta_display_queue_retheme_all_windows (meta_get_display ());
       break;
 
-    case META_PREF_CURSOR_THEME:
-    case META_PREF_CURSOR_SIZE:
-      meta_display_set_cursor_theme (meta_prefs_get_cursor_theme (),
-				     meta_prefs_get_cursor_size ());
-      break;
-    case META_PREF_SYNC_METHOD:
-      meta_display_update_sync_state (meta_prefs_get_sync_method ());
-      break;
-    case META_PREF_UI_SCALE:
-      meta_ui_set_current_theme (meta_prefs_get_theme (), TRUE);
-      meta_display_retheme_all ();
-      meta_display_set_cursor_theme (meta_prefs_get_cursor_theme (),
-                                     meta_prefs_get_cursor_size ());
-      break;
     default:
       /* handled elsewhere or otherwise */
       break;
     }
+}
+
+MetaDisplayPolicy
+meta_get_x11_display_policy (void)
+{
+  MetaBackend *backend = meta_get_backend ();
+
+  if (META_IS_BACKEND_X11_CM (backend))
+    return META_DISPLAY_POLICY_MANDATORY;
+
+#ifdef HAVE_WAYLAND
+  if (meta_is_wayland_compositor ())
+    {
+      MetaSettings *settings = meta_backend_get_settings (backend);
+
+      if (opt_no_x11)
+        return META_DISPLAY_POLICY_DISABLED;
+
+      if (meta_settings_is_experimental_feature_enabled (settings,
+                                                         META_EXPERIMENTAL_FEATURE_AUTOSTART_XWAYLAND))
+        return META_DISPLAY_POLICY_ON_DEMAND;
+    }
+#endif
+
+  return META_DISPLAY_POLICY_MANDATORY;
+}
+
+void
+meta_test_init (void)
+{
+#if defined(HAVE_WAYLAND)
+  g_autofree char *display_name = g_strdup ("mutter-test-display-XXXXXX");
+  int fd = g_mkstemp (display_name);
+
+  meta_override_compositor_configuration (META_COMPOSITOR_TYPE_WAYLAND,
+                                          META_TYPE_BACKEND_X11_NESTED);
+  meta_wayland_override_display_name (display_name);
+  meta_xwayland_override_display_number (512 + rand() % 512);
+  meta_init ();
+
+  close (fd);
+#else
+  g_warning ("Tests require wayland support");
+#endif
 }

@@ -79,7 +79,8 @@ typedef void (* ClutterScriptConnectFunc) (ClutterScript *script,
  *
  * Since: 0.6
  */
-typedef enum {
+typedef enum
+{
   CLUTTER_SCRIPT_ERROR_INVALID_TYPE_FUNCTION,
   CLUTTER_SCRIPT_ERROR_INVALID_PROPERTY,
   CLUTTER_SCRIPT_ERROR_INVALID_VALUE
@@ -93,7 +94,7 @@ typedef enum {
  * Since: 0.6
  */
 #define CLUTTER_SCRIPT_ERROR    (clutter_script_error_quark ())
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 GQuark clutter_script_error_quark (void);
 
 /**
@@ -144,75 +145,75 @@ struct _ClutterScriptClass
   void (*_clutter_reserved8) (void);
 };
 
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 GType clutter_script_get_type (void) G_GNUC_CONST;
 
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 ClutterScript * clutter_script_new                      (void);
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 guint           clutter_script_load_from_file           (ClutterScript             *script,
                                                          const gchar               *filename,
                                                          GError                   **error);
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 guint           clutter_script_load_from_data           (ClutterScript             *script,
                                                          const gchar               *data,
                                                          gssize                     length,
                                                          GError                   **error);
-CLUTTER_AVAILABLE_IN_1_10
+CLUTTER_EXPORT
 guint           clutter_script_load_from_resource       (ClutterScript             *script,
                                                          const gchar               *resource_path,
                                                          GError                   **error);
 
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 GObject *       clutter_script_get_object               (ClutterScript             *script,
                                                          const gchar               *name);
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 gint            clutter_script_get_objects              (ClutterScript             *script,
                                                          const gchar               *first_name,
                                                          ...) G_GNUC_NULL_TERMINATED;
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 GList *         clutter_script_list_objects             (ClutterScript             *script);
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 void            clutter_script_unmerge_objects          (ClutterScript             *script,
                                                          guint                      merge_id);
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 void            clutter_script_ensure_objects           (ClutterScript             *script);
 
-CLUTTER_DEPRECATED_IN_1_12
+CLUTTER_DEPRECATED
 void            clutter_script_add_states               (ClutterScript             *script,
                                                          const gchar               *name,
                                                          ClutterState              *state);
 
-CLUTTER_DEPRECATED_IN_1_12
+CLUTTER_DEPRECATED
 ClutterState *  clutter_script_get_states               (ClutterScript             *script,
                                                          const gchar               *name);
 
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 void            clutter_script_connect_signals          (ClutterScript             *script,
                                                          gpointer                   user_data);
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 void            clutter_script_connect_signals_full     (ClutterScript             *script,
                                                          ClutterScriptConnectFunc   func,
                                                          gpointer                   user_data);
 
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 void            clutter_script_add_search_paths         (ClutterScript             *script,
                                                          const gchar * const        paths[],
                                                          gsize                      n_paths);
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 gchar *         clutter_script_lookup_filename          (ClutterScript             *script,
                                                          const gchar               *filename) G_GNUC_MALLOC;
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 GType           clutter_script_get_type_from_name       (ClutterScript             *script,
                                                          const gchar               *type_name);
 
-CLUTTER_AVAILABLE_IN_1_10
+CLUTTER_EXPORT
 void            clutter_script_set_translation_domain   (ClutterScript             *script,
                                                          const gchar               *domain);
-CLUTTER_AVAILABLE_IN_1_10
+CLUTTER_EXPORT
 const gchar *   clutter_script_get_translation_domain   (ClutterScript             *script);
 
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 const gchar *   clutter_get_script_id                   (GObject                   *gobject);
 
 G_END_DECLS

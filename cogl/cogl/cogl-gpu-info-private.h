@@ -74,12 +74,7 @@ typedef enum
 
 typedef enum
 {
-  /* If this bug is present then it is faster to read pixels into a
-   * PBO and then memcpy out of the PBO into system memory rather than
-   * directly read into system memory.
-   * https://bugs.freedesktop.org/show_bug.cgi?id=46631
-   */
-  COGL_GPU_INFO_DRIVER_BUG_MESA_46631_SLOW_READ_PIXELS = 1 << 0
+  COGL_GPU_INFO_DRIVER_STUB
 } CoglGpuInfoDriverBug;
 
 typedef struct _CoglGpuInfoVersion CoglGpuInfoVersion;

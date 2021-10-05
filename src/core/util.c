@@ -1,7 +1,5 @@
 /* -*- mode: C; c-file-style: "gnu"; indent-tabs-mode: nil; -*- */
 
-/* Muffin utilities */
-
 /*
  * Copyright (C) 2001 Havoc Pennington
  * Copyright (C) 2005 Elijah Newren
@@ -17,9 +15,7 @@
  * General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street - Suite 500, Boston, MA
- * 02110-1335, USA.
+ * along with this program; if not, see <http://www.gnu.org/licenses/>.
  */
 
 /**
@@ -28,74 +24,40 @@
  * @short_description: Miscellaneous utility functions
  */
 
-#ifndef _GNU_SOURCE
-#define _GNU_SOURCE
-#endif
 #define _POSIX_C_SOURCE 200112L /* for fdopen() */
 
-#include <config.h>
-#include <meta/common.h>
-#include "util-private.h"
-#include <meta/main.h>
+#include "config.h"
 
-#include <clutter/clutter.h> /* For clutter_threads_add_repaint_func() */
+#include "core/util-private.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <errno.h>
-#include <dirent.h>
 #include <string.h>
-#include <fcntl.h>
-#include <unistd.h>
-#ifdef HAVE_SYS_RESOURCE_H
-#include <sys/resource.h>
-#endif
 #include <X11/Xlib.h>   /* must explicitly be included for Solaris; #326746 */
 #include <X11/Xutil.h>  /* Just for the definition of the various gravities */
+
+#include "clutter/clutter.h"
+#include "cogl/cogl.h"
+#include "meta/common.h"
+#include "meta/main.h"
 
 #ifdef WITH_VERBOSE_MODE
 static void
 meta_topic_real_valist (MetaDebugTopic topic,
                         const char    *format,
-                        va_list        args);
+                        va_list        args) G_GNUC_PRINTF(2, 0);
 #endif
 
-#ifdef HAVE_BACKTRACE
-#include <execinfo.h>
-void
-meta_print_backtrace (void)
-{
-  void *bt[500];
-  int bt_size;
-  int i;
-  char **syms;
-
-  bt_size = backtrace (bt, 500);
-
-  syms = backtrace_symbols (bt, bt_size);
-
-  i = 0;
-  while (i < bt_size)
-    {
-      meta_verbose ("  %s\n", syms[i]);
-      ++i;
-    }
-
-  free (syms);
-}
-#else
-void
-meta_print_backtrace (void)
-{
-  meta_verbose ("Not compiled with backtrace support\n");
-}
-#endif
+static gboolean
+meta_later_remove_from_list (guint later_id, GSList **laters_list);
 
 static gint verbose_topics = 0;
 static gboolean is_debugging = FALSE;
 static gboolean replace_current = FALSE;
 static int no_prefix = 0;
+static gboolean is_wayland_compositor = FALSE;
 
 #ifdef WITH_VERBOSE_MODE
 static FILE* logfile = NULL;
@@ -103,14 +65,14 @@ static FILE* logfile = NULL;
 static void
 ensure_logfile (void)
 {
-  if (logfile == NULL && g_getenv ("MUFFIN_USE_LOGFILE"))
+  if (logfile == NULL && g_getenv ("MUTTER_USE_LOGFILE"))
     {
       char *filename = NULL;
       char *tmpl;
       int fd;
       GError *err;
 
-      tmpl = g_strdup_printf ("muffin-%d-debug-log-XXXXXX",
+      tmpl = g_strdup_printf ("mutter-%d-debug-log-XXXXXX",
                               (int) getpid ());
 
       err = NULL;
@@ -118,7 +80,7 @@ ensure_logfile (void)
                             &filename,
                             &err);
 
-      free (tmpl);
+      g_free (tmpl);
 
       if (err != NULL)
         {
@@ -138,10 +100,10 @@ ensure_logfile (void)
         }
       else
         {
-          g_printerr ("Opened log file %s\n"), filename;
+          g_printerr ("Opened log file %s\n", filename);
         }
 
-      free (filename);
+      g_free (filename);
     }
 }
 #endif
@@ -157,7 +119,7 @@ meta_set_verbose (gboolean setting)
 {
 #ifndef WITH_VERBOSE_MODE
   if (setting)
-    meta_fatal ("Muffin was compiled without support for verbose mode\n");
+    meta_fatal (_("Mutter was compiled without support for verbose mode\n"));
 #else
   if (setting)
     ensure_logfile ();
@@ -235,6 +197,18 @@ meta_set_replace_current_wm (gboolean setting)
   replace_current = setting;
 }
 
+gboolean
+meta_is_wayland_compositor (void)
+{
+  return is_wayland_compositor;
+}
+
+void
+meta_set_is_wayland_compositor (gboolean value)
+{
+  is_wayland_compositor = value;
+}
+
 char *
 meta_g_utf8_strndup (const gchar *src,
                      gsize        n)
@@ -263,22 +237,9 @@ utf8_fputs (const char *str,
   else
     retval = fputs (l, f);
 
-  free (l);
+  g_free (l);
 
   return retval;
-}
-
-/**
- * meta_free_gslist_and_elements: (skip)
- *
- */
-void
-meta_free_gslist_and_elements (GSList *list_to_deep_free)
-{
-  g_slist_foreach (list_to_deep_free,
-                   (void (*)(gpointer,gpointer))&free, /* ew, for ugly */
-                   NULL);
-  g_slist_free (list_to_deep_free);
 }
 
 #ifdef WITH_VERBOSE_MODE
@@ -301,12 +262,12 @@ meta_debug_spew_real (const char *format, ...)
   out = logfile ? logfile : stderr;
 
   if (no_prefix == 0)
-    utf8_fputs ("muffin: ", out);
+    utf8_fputs ("Window manager: ", out);
   utf8_fputs (str, out);
 
   fflush (out);
 
-  free (str);
+  g_free (str);
 }
 #endif /* WITH_VERBOSE_MODE */
 
@@ -372,10 +333,12 @@ topic_name (MetaDebugTopic topic)
       return "COMPOSITOR";
     case META_DEBUG_EDGE_RESISTANCE:
       return "EDGE_RESISTANCE";
+    case META_DEBUG_DBUS:
+      return "DBUS";
+    case META_DEBUG_INPUT:
+      return "INPUT";
     case META_DEBUG_VERBOSE:
       return "VERBOSE";
-    default:
-      break;
     }
 
   return "WM";
@@ -415,7 +378,7 @@ meta_topic_real_valist (MetaDebugTopic topic,
 
   fflush (out);
 
-  free (str);
+  g_free (str);
 }
 
 void
@@ -451,14 +414,12 @@ meta_bug (const char *format, ...)
 #endif
 
   if (no_prefix == 0)
-    utf8_fputs ("Bug in muffin: ", out);
+    utf8_fputs ("Bug in window manager: ", out);
   utf8_fputs (str, out);
 
   fflush (out);
 
-  free (str);
-
-  meta_print_backtrace ();
+  g_free (str);
 
   /* stop us in a debugger */
   abort ();
@@ -484,12 +445,12 @@ meta_warning (const char *format, ...)
 #endif
 
   if (no_prefix == 0)
-    utf8_fputs ("Cinnamon warning: ", out);
+    utf8_fputs ("Window manager warning: ", out);
   utf8_fputs (str, out);
 
   fflush (out);
 
-  free (str);
+  g_free (str);
 }
 
 void
@@ -499,7 +460,9 @@ meta_fatal (const char *format, ...)
   gchar *str;
   FILE *out;
 
-  g_return_if_fail (format != NULL);
+  g_warn_if_fail (format);
+  if (!format)
+    meta_exit (META_EXIT_ERROR);
 
   va_start (args, format);
   str = g_strdup_vprintf (format, args);
@@ -512,12 +475,12 @@ meta_fatal (const char *format, ...)
 #endif
 
   if (no_prefix == 0)
-    utf8_fputs ("Cinnamon error: ", out);
+    utf8_fputs ("Window manager error: ", out);
   utf8_fputs (str, out);
 
   fflush (out);
 
-  free (str);
+  g_free (str);
 
   meta_exit (META_EXIT_ERROR);
 }
@@ -564,44 +527,50 @@ meta_unsigned_long_hash  (gconstpointer v)
 }
 
 const char*
-meta_gravity_to_string (int gravity)
+meta_gravity_to_string (MetaGravity gravity)
 {
   switch (gravity)
     {
-    case NorthWestGravity:
-      return "NorthWestGravity";
+    case META_GRAVITY_NORTH_WEST:
+      return "META_GRAVITY_NORTH_WEST";
       break;
-    case NorthGravity:
-      return "NorthGravity";
+    case META_GRAVITY_NORTH:
+      return "META_GRAVITY_NORTH";
       break;
-    case NorthEastGravity:
-      return "NorthEastGravity";
+    case META_GRAVITY_NORTH_EAST:
+      return "META_GRAVITY_NORTH_EAST";
       break;
-    case WestGravity:
-      return "WestGravity";
+    case META_GRAVITY_WEST:
+      return "META_GRAVITY_WEST";
       break;
-    case CenterGravity:
-      return "CenterGravity";
+    case META_GRAVITY_CENTER:
+      return "META_GRAVITY_CENTER";
       break;
-    case EastGravity:
-      return "EastGravity";
+    case META_GRAVITY_EAST:
+      return "META_GRAVITY_EAST";
       break;
-    case SouthWestGravity:
-      return "SouthWestGravity";
+    case META_GRAVITY_SOUTH_WEST:
+      return "META_GRAVITY_SOUTH_WEST";
       break;
-    case SouthGravity:
-      return "SouthGravity";
+    case META_GRAVITY_SOUTH:
+      return "META_GRAVITY_SOUTH";
       break;
-    case SouthEastGravity:
-      return "SouthEastGravity";
+    case META_GRAVITY_SOUTH_EAST:
+      return "META_GRAVITY_SOUTH_EAST";
       break;
-    case StaticGravity:
-      return "StaticGravity";
+    case META_GRAVITY_STATIC:
+      return "META_GRAVITY_STATIC";
       break;
     default:
-      return "NorthWestGravity";
+      return "META_GRAVITY_NORTH_WEST";
       break;
     }
+}
+
+char*
+meta_external_binding_name_for_action (guint keybinding_action)
+{
+  return g_strdup_printf ("external-grab-%u", keybinding_action);
 }
 
 /* Command line arguments are passed in the locale encoding; in almost
@@ -625,6 +594,16 @@ append_argument (GPtrArray  *args,
 
 /**
  * meta_show_dialog: (skip)
+ * @type: type of dialog
+ * @message: message
+ * @timeout: timeout
+ * @display: display
+ * @ok_text: text for Ok button
+ * @cancel_text: text for Cancel button
+ * @icon_name: icon name
+ * @transient_for: window XID of parent
+ * @columns: columns
+ * @entries: entries
  *
  */
 GPid
@@ -634,6 +613,7 @@ meta_show_dialog (const char *type,
                   const char *display,
                   const char *ok_text,
                   const char *cancel_text,
+                  const char *icon_name,
                   const int transient_for,
                   GSList *columns,
                   GSList *entries)
@@ -647,16 +627,19 @@ meta_show_dialog (const char *type,
 
   append_argument (args, "zenity");
   append_argument (args, type);
-  append_argument (args, "--display");
-  append_argument (args, display);
+
+  if (display)
+    {
+      append_argument (args, "--display");
+      append_argument (args, display);
+    }
+
   append_argument (args, "--class");
-  append_argument (args, "muffin-dialog");
+  append_argument (args, "mutter-dialog");
   append_argument (args, "--title");
   append_argument (args, "");
   append_argument (args, "--text");
   append_argument (args, message);
-  append_argument (args, "--width");
-  append_argument (args, "400");
 
   if (timeout)
     {
@@ -676,6 +659,12 @@ meta_show_dialog (const char *type,
       append_argument (args, cancel_text);
     }
 
+  if (icon_name)
+    {
+      append_argument (args, "--icon-name");
+      append_argument (args, icon_name);
+    }
+
   tmp = columns;
   while (tmp)
     {
@@ -691,14 +680,16 @@ meta_show_dialog (const char *type,
       tmp = tmp->next;
     }
 
-  g_ptr_array_add (args, NULL); /* NULL-terminate */
-
   if (transient_for)
     {
       gchar *env = g_strdup_printf("%d", transient_for);
       setenv ("WINDOWID", env, 1);
-      free (env);
+      g_free (env);
+
+      append_argument (args, "--modal");
     }
+
+  g_ptr_array_add (args, NULL); /* NULL-terminate */
 
   g_spawn_async (
                  "/",
@@ -742,7 +733,14 @@ typedef struct
   gboolean run_once;
 } MetaLater;
 
-static GSList *laters = NULL;
+static GSList *laters[] = {
+  NULL, /* META_LATER_RESIZE */
+  NULL, /* META_LATER_CALC_SHOWING */
+  NULL, /* META_LATER_CHECK_FULLSCREEN */
+  NULL, /* META_LATER_SYNC_STACK */
+  NULL, /* META_LATER_BEFORE_REDRAW */
+  NULL, /* META_LATER_IDLE */
+};
 /* This is a dummy timeline used to get the Clutter master clock running */
 static ClutterTimeline *later_timeline;
 static guint later_repaint_func = 0;
@@ -766,34 +764,50 @@ unref_later (MetaLater *later)
 static void
 destroy_later (MetaLater *later)
 {
-  if (later->source)
-    {
-      g_source_remove (later->source);
-      later->source = 0;
-    }
+  g_clear_handle_id (&later->source, g_source_remove);
   later->func = NULL;
   unref_later (later);
 }
 
-/* Used to sort the list of laters with the highest priority
- * functions first.
- */
-static int
-compare_laters (gconstpointer a,
-                gconstpointer b)
+#ifdef COGL_HAS_TRACING
+static const char *
+later_type_to_string (MetaLaterType when)
 {
-  return ((const MetaLater *)a)->when - ((const MetaLater *)b)->when;
+  switch (when)
+    {
+    case META_LATER_RESIZE:
+      return "Later (resize)";
+    case META_LATER_CALC_SHOWING:
+      return "Later (calc-showing)";
+    case META_LATER_CHECK_FULLSCREEN:
+      return "Later (check-fullscreen)";
+    case META_LATER_SYNC_STACK:
+      return "Later (sync-stack)";
+    case META_LATER_BEFORE_REDRAW:
+      return "Later (before-redraw)";
+    case META_LATER_IDLE:
+      return "Later (idle)";
+    }
+
+  return "unknown";
 }
+#endif
 
 static gboolean
-run_repaint_laters (gpointer data)
+call_later_func (MetaLater *later)
+{
+  COGL_TRACE_BEGIN_SCOPED (later, later_type_to_string (later->when));
+  return later->func (later->data);
+}
+
+static void
+run_repaint_laters (GSList **laters_list)
 {
   GSList *laters_copy;
   GSList *l;
-  gboolean keep_timeline_running = FALSE;
 
   laters_copy = NULL;
-  for (l = laters; l; l = l->next)
+  for (l = *laters_list; l; l = l->next)
     {
       MetaLater *later = l->data;
       if (later->source == 0 ||
@@ -809,22 +823,41 @@ run_repaint_laters (gpointer data)
     {
       MetaLater *later = l->data;
 
-      if (later->func && later->func (later->data))
+      if (!later->func || !call_later_func (later))
+        meta_later_remove_from_list (later->id, laters_list);
+      unref_later (later);
+    }
+
+  g_slist_free (laters_copy);
+}
+
+static gboolean
+run_all_repaint_laters (gpointer data)
+{
+  guint i;
+  GSList *l;
+  gboolean keep_timeline_running = FALSE;
+
+  for (i = 0; i < G_N_ELEMENTS (laters); i++)
+    {
+      run_repaint_laters (&laters[i]);
+    }
+
+  for (i = 0; i < G_N_ELEMENTS (laters); i++)
+    {
+      for (l = laters[i]; l; l = l->next)
         {
+          MetaLater *later = l->data;
+
           if (later->source == 0)
             keep_timeline_running = TRUE;
         }
-      else
-        meta_later_remove (later->id);
-      unref_later (later);
     }
 
   if (!keep_timeline_running)
     clutter_timeline_stop (later_timeline);
 
-  g_slist_free (laters_copy);
-
-  /* Just keep the repaint func around - it's cheap if the list is empty */
+  /* Just keep the repaint func around - it's cheap if the lists are empty */
   return TRUE;
 }
 
@@ -835,7 +868,7 @@ ensure_later_repaint_func (void)
     later_timeline = clutter_timeline_new (G_MAXUINT);
 
   if (later_repaint_func == 0)
-    later_repaint_func = clutter_threads_add_repaint_func (run_repaint_laters,
+    later_repaint_func = clutter_threads_add_repaint_func (run_all_repaint_laters,
                                                            NULL, NULL);
 
   /* Make sure the repaint function gets run */
@@ -891,7 +924,7 @@ meta_later_add (MetaLaterType  when,
   later->data = data;
   later->notify = notify;
 
-  laters = g_slist_insert_sorted (laters, later, compare_laters);
+  laters[when] = g_slist_prepend (laters[when], later);
 
   switch (when)
     {
@@ -905,6 +938,7 @@ meta_later_add (MetaLaterType  when,
        * there so it will happen before GTK+ repaints.
        */
       later->source = g_idle_add_full (META_PRIORITY_RESIZE, call_idle_later, later, NULL);
+      g_source_set_name_by_id (later->source, "[mutter] call_idle_later");
       ensure_later_repaint_func ();
       break;
     case META_LATER_CALC_SHOWING:
@@ -915,13 +949,34 @@ meta_later_add (MetaLaterType  when,
       break;
     case META_LATER_IDLE:
       later->source = g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, call_idle_later, later, NULL);
-      break;
-    default:
-      g_warning ("Default reached in meta_later_add");
+      g_source_set_name_by_id (later->source, "[mutter] call_idle_later");
       break;
     }
 
   return later->id;
+}
+
+static gboolean
+meta_later_remove_from_list (guint later_id, GSList **laters_list)
+{
+  GSList *l;
+
+  for (l = *laters_list; l; l = l->next)
+    {
+      MetaLater *later = l->data;
+
+      if (later->id == later_id)
+        {
+          *laters_list = g_slist_delete_link (*laters_list, l);
+          /* If this was a "repaint func" later, we just let the
+           * repaint func run and get removed
+           */
+          destroy_later (later);
+          return TRUE;
+        }
+    }
+
+  return FALSE;
 }
 
 /**
@@ -933,110 +988,62 @@ meta_later_add (MetaLaterType  when,
 void
 meta_later_remove (guint later_id)
 {
-  GSList *l;
+  guint i;
 
-  for (l = laters; l; l = l->next)
+  for (i = 0; i < G_N_ELEMENTS (laters); i++)
     {
-      MetaLater *later = l->data;
-      if (later->id == later_id)
-        {
-          laters = g_slist_delete_link (laters, l);
-          /* If this was a "repaint func" later, we just let the
-           * repaint func run and get removed
-           */
-          destroy_later (later);
-          return;
-        }
+      if (meta_later_remove_from_list (later_id, &laters[i]))
+        return;
     }
+}
+
+MetaLocaleDirection
+meta_get_locale_direction (void)
+{
+  switch (gtk_get_locale_direction ())
+    {
+    case GTK_TEXT_DIR_LTR:
+      return META_LOCALE_DIRECTION_LTR;
+    case GTK_TEXT_DIR_RTL:
+      return META_LOCALE_DIRECTION_RTL;
+    default:
+      g_assert_not_reached ();
+      return 0;
+    }
+}
+
+char *
+meta_generate_random_id (GRand *rand,
+                         int    length)
+{
+  char *id;
+  int i;
+
+  /* Generate a random string of printable ASCII characters. */
+
+  id = g_new0 (char, length + 1);
+  for (i = 0; i < length; i++)
+    id[i] = (char) g_rand_int_range (rand, 32, 127);
+
+  return id;
+}
+
+
+void
+meta_add_clutter_debug_flags (ClutterDebugFlag     debug_flags,
+                              ClutterDrawDebugFlag draw_flags,
+                              ClutterPickDebugFlag pick_flags)
+{
+  clutter_add_debug_flags (debug_flags, draw_flags, pick_flags);
+}
+
+void
+meta_remove_clutter_debug_flags (ClutterDebugFlag     debug_flags,
+                                 ClutterDrawDebugFlag draw_flags,
+                                 ClutterPickDebugFlag pick_flags)
+{
+  clutter_remove_debug_flags (debug_flags, draw_flags, pick_flags);
 }
 
 /* eof util.c */
 
-/* Code to close all file descriptors before we exec; copied from gspawn.c in GLib.
- *
- * Authors: Padraig O'Briain, Matthias Clasen, Lennart Poettering
- *
- * http://bugzilla.gnome.org/show_bug.cgi?id=469231
- * http://bugzilla.gnome.org/show_bug.cgi?id=357585
- */
-
-static int
-set_cloexec (void *data, gint fd)
-{
-  if (fd >= GPOINTER_TO_INT (data))
-    fcntl (fd, F_SETFD, FD_CLOEXEC);
-
-  return 0;
-}
-
-#ifndef HAVE_FDWALK
-static int
-fdwalk (int (*cb)(void *data, int fd), void *data)
-{
-  gint open_max;
-  gint fd;
-  gint res = 0;
-
-#ifdef HAVE_SYS_RESOURCE_H
-  struct rlimit rl;
-#endif
-
-#ifdef __linux__
-  DIR *d;
-
-  if ((d = opendir("/proc/self/fd"))) {
-      struct dirent *de;
-
-      while ((de = readdir(d))) {
-          glong l;
-          gchar *e = NULL;
-
-          if (de->d_name[0] == '.')
-              continue;
-
-          errno = 0;
-          l = strtol(de->d_name, &e, 10);
-          if (errno != 0 || !e || *e)
-              continue;
-
-          fd = (gint) l;
-
-          if ((glong) fd != l)
-              continue;
-
-          if (fd == dirfd(d))
-              continue;
-
-          if ((res = cb (data, fd)) != 0)
-              break;
-        }
-
-      closedir(d);
-      return res;
-  }
-
-  /* If /proc is not mounted or not accessible we fall back to the old
-   * rlimit trick */
-
-#endif
-
-#ifdef HAVE_SYS_RESOURCE_H
-  if (getrlimit(RLIMIT_NOFILE, &rl) == 0 && rl.rlim_max != RLIM_INFINITY)
-      open_max = rl.rlim_max;
-  else
-#endif
-      open_max = sysconf (_SC_OPEN_MAX);
-
-  for (fd = 0; fd < open_max; fd++)
-      if ((res = cb (data, fd)) != 0)
-          break;
-
-  return res;
-}
-#endif
-
-void
-meta_pre_exec_close_fds(void)
-{
-  fdwalk (set_cloexec, GINT_TO_POINTER(3));
-}

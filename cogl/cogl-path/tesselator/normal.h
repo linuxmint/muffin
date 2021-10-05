@@ -36,6 +36,7 @@
 #define __normal_h_
 
 #include "tess.h"
+#include "tesselator.h"
 
 /* __gl_projectPolygon( tess ) determines the polygon normal
  * and project vertices onto the plane of the polygon.

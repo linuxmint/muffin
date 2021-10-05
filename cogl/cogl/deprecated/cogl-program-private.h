@@ -74,15 +74,12 @@ struct _CoglProgramUniform
 void
 _cogl_program_flush_uniforms (CoglProgram *program,
                               GLuint gl_program,
-                              CoglBool gl_program_changed);
+                              gboolean gl_program_changed);
 
-CoglShaderLanguage
-_cogl_program_get_language (CoglHandle handle);
-
-CoglBool
+gboolean
 _cogl_program_has_fragment_shader (CoglHandle handle);
 
-CoglBool
+gboolean
 _cogl_program_has_vertex_shader (CoglHandle handle);
 
 #endif /* __COGL_PROGRAM_H */

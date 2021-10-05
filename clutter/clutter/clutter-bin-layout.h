@@ -74,10 +74,10 @@ struct _ClutterBinLayoutClass
   ClutterLayoutManagerClass parent_class;
 };
 
-CLUTTER_AVAILABLE_IN_1_2
+CLUTTER_EXPORT
 GType clutter_bin_layout_get_type (void) G_GNUC_CONST;
 
-CLUTTER_AVAILABLE_IN_1_2
+CLUTTER_EXPORT
 ClutterLayoutManager *  clutter_bin_layout_new  (ClutterBinAlignment x_align,
                                                  ClutterBinAlignment y_align);
 

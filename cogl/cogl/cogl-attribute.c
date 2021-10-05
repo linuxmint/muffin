@@ -31,9 +31,7 @@
  *   Robert Bragg <robert@linux.intel.com>
  */
 
-#ifdef HAVE_CONFIG_H
 #include "cogl-config.h"
-#endif
 
 #include "cogl-util.h"
 #include "cogl-context-private.h"
@@ -43,13 +41,9 @@
 #include "cogl-attribute-private.h"
 #include "cogl-pipeline.h"
 #include "cogl-pipeline-private.h"
-#include "cogl-pipeline-opengl-private.h"
 #include "cogl-texture-private.h"
 #include "cogl-framebuffer-private.h"
 #include "cogl-indices-private.h"
-#ifdef COGL_PIPELINE_PROGEND_GLSL
-#include "cogl-pipeline-progend-glsl-private.h"
-#endif
 #include "cogl-private.h"
 #include "cogl-gtype-private.h"
 
@@ -67,11 +61,11 @@ static void _cogl_attribute_free (CoglAttribute *attribute);
 COGL_OBJECT_DEFINE (Attribute, attribute);
 COGL_GTYPE_DEFINE_CLASS (Attribute, attribute);
 
-static CoglBool
+static gboolean
 validate_cogl_attribute_name (const char *name,
-                              char **real_attribute_name,
+                              const char **real_attribute_name,
                               CoglAttributeNameID *name_id,
-                              CoglBool *normalized,
+                              gboolean *normalized,
                               int *layer_number)
 {
   name = name + 5; /* skip "cogl_" */
@@ -164,45 +158,16 @@ _cogl_attribute_register_attribute_name (CoglContext *context,
   return name_state;
 
 error:
-  free (name_state);
+  g_free (name_state);
   return NULL;
 }
 
-static CoglBool
+static gboolean
 validate_n_components (const CoglAttributeNameState *name_state,
                        int n_components)
 {
   switch (name_state->name_id)
     {
-    case COGL_ATTRIBUTE_NAME_ID_POSITION_ARRAY:
-      if (G_UNLIKELY (n_components == 1))
-        {
-          g_critical ("glVertexPointer doesn't allow 1 component vertex "
-                      "positions so we currently only support \"cogl_vertex\" "
-                      "attributes where n_components == 2, 3 or 4");
-          return FALSE;
-        }
-      break;
-    case COGL_ATTRIBUTE_NAME_ID_COLOR_ARRAY:
-      if (G_UNLIKELY (n_components != 3 && n_components != 4))
-        {
-          g_critical ("glColorPointer expects 3 or 4 component colors so we "
-                      "currently only support \"cogl_color\" attributes where "
-                      "n_components == 3 or 4");
-          return FALSE;
-        }
-      break;
-    case COGL_ATTRIBUTE_NAME_ID_TEXTURE_COORD_ARRAY:
-      break;
-    case COGL_ATTRIBUTE_NAME_ID_NORMAL_ARRAY:
-      if (G_UNLIKELY (n_components != 3))
-        {
-          g_critical ("glNormalPointer expects 3 component normals so we "
-                      "currently only support \"cogl_normal\" attributes "
-                      "where n_components == 3");
-          return FALSE;
-        }
-      break;
     case COGL_ATTRIBUTE_NAME_ID_POINT_SIZE_ARRAY:
       if (G_UNLIKELY (n_components != 1))
         {
@@ -211,6 +176,10 @@ validate_n_components (const CoglAttributeNameState *name_state,
           return FALSE;
         }
       break;
+    case COGL_ATTRIBUTE_NAME_ID_POSITION_ARRAY:
+    case COGL_ATTRIBUTE_NAME_ID_COLOR_ARRAY:
+    case COGL_ATTRIBUTE_NAME_ID_TEXTURE_COORD_ARRAY:
+    case COGL_ATTRIBUTE_NAME_ID_NORMAL_ARRAY:
     case COGL_ATTRIBUTE_NAME_ID_CUSTOM_ARRAY:
       return TRUE;
     }
@@ -273,7 +242,7 @@ _cogl_attribute_new_const (CoglContext *context,
                            const char *name,
                            int n_components,
                            int n_columns,
-                           CoglBool transpose,
+                           gboolean transpose,
                            const float *value)
 {
   CoglAttribute *attribute = g_slice_new (CoglAttribute);
@@ -311,7 +280,7 @@ _cogl_attribute_new_const (CoglContext *context,
       /* FIXME: Up until GL[ES] 3 only square matrices were supported
        * and we don't currently expose non-square matrices in Cogl.
        */
-      _COGL_RETURN_VAL_IF_FAIL (n_columns == n_components, NULL);
+      g_return_val_if_fail (n_columns == n_components, NULL);
       _cogl_boxed_value_set_matrix (&attribute->d.constant.boxed,
                                     n_columns,
                                     1,
@@ -430,7 +399,7 @@ CoglAttribute *
 cogl_attribute_new_const_2x2fv (CoglContext *context,
                                 const char *name,
                                 const float *matrix2x2,
-                                CoglBool transpose)
+                                gboolean transpose)
 {
   return _cogl_attribute_new_const (context,
                                     name,
@@ -444,7 +413,7 @@ CoglAttribute *
 cogl_attribute_new_const_3x3fv (CoglContext *context,
                                 const char *name,
                                 const float *matrix3x3,
-                                CoglBool transpose)
+                                gboolean transpose)
 {
   return _cogl_attribute_new_const (context,
                                     name,
@@ -458,7 +427,7 @@ CoglAttribute *
 cogl_attribute_new_const_4x4fv (CoglContext *context,
                                 const char *name,
                                 const float *matrix4x4,
-                                CoglBool transpose)
+                                gboolean transpose)
 {
   return _cogl_attribute_new_const (context,
                                     name,
@@ -468,10 +437,10 @@ cogl_attribute_new_const_4x4fv (CoglContext *context,
                                     matrix4x4);
 }
 
-CoglBool
+gboolean
 cogl_attribute_get_normalized (CoglAttribute *attribute)
 {
-  _COGL_RETURN_VAL_IF_FAIL (cogl_is_attribute (attribute), FALSE);
+  g_return_val_if_fail (cogl_is_attribute (attribute), FALSE);
 
   return attribute->normalized;
 }
@@ -479,7 +448,7 @@ cogl_attribute_get_normalized (CoglAttribute *attribute)
 static void
 warn_about_midscene_changes (void)
 {
-  static CoglBool seen = FALSE;
+  static gboolean seen = FALSE;
   if (!seen)
     {
       g_warning ("Mid-scene modification of attributes has "
@@ -490,9 +459,9 @@ warn_about_midscene_changes (void)
 
 void
 cogl_attribute_set_normalized (CoglAttribute *attribute,
-                                      CoglBool normalized)
+                                      gboolean normalized)
 {
-  _COGL_RETURN_IF_FAIL (cogl_is_attribute (attribute));
+  g_return_if_fail (cogl_is_attribute (attribute));
 
   if (G_UNLIKELY (attribute->immutable_ref))
     warn_about_midscene_changes ();
@@ -503,8 +472,8 @@ cogl_attribute_set_normalized (CoglAttribute *attribute,
 CoglAttributeBuffer *
 cogl_attribute_get_buffer (CoglAttribute *attribute)
 {
-  _COGL_RETURN_VAL_IF_FAIL (cogl_is_attribute (attribute), NULL);
-  _COGL_RETURN_VAL_IF_FAIL (attribute->is_buffered, NULL);
+  g_return_val_if_fail (cogl_is_attribute (attribute), NULL);
+  g_return_val_if_fail (attribute->is_buffered, NULL);
 
   return attribute->d.buffered.attribute_buffer;
 }
@@ -513,8 +482,8 @@ void
 cogl_attribute_set_buffer (CoglAttribute *attribute,
                            CoglAttributeBuffer *attribute_buffer)
 {
-  _COGL_RETURN_IF_FAIL (cogl_is_attribute (attribute));
-  _COGL_RETURN_IF_FAIL (attribute->is_buffered);
+  g_return_if_fail (cogl_is_attribute (attribute));
+  g_return_if_fail (attribute->is_buffered);
 
   if (G_UNLIKELY (attribute->immutable_ref))
     warn_about_midscene_changes ();
@@ -530,7 +499,7 @@ _cogl_attribute_immutable_ref (CoglAttribute *attribute)
 {
   CoglBuffer *buffer = COGL_BUFFER (attribute->d.buffered.attribute_buffer);
 
-  _COGL_RETURN_VAL_IF_FAIL (cogl_is_attribute (attribute), NULL);
+  g_return_val_if_fail (cogl_is_attribute (attribute), NULL);
 
   attribute->immutable_ref++;
   _cogl_buffer_immutable_ref (buffer);
@@ -542,8 +511,8 @@ _cogl_attribute_immutable_unref (CoglAttribute *attribute)
 {
   CoglBuffer *buffer = COGL_BUFFER (attribute->d.buffered.attribute_buffer);
 
-  _COGL_RETURN_IF_FAIL (cogl_is_attribute (attribute));
-  _COGL_RETURN_IF_FAIL (attribute->immutable_ref > 0);
+  g_return_if_fail (cogl_is_attribute (attribute));
+  g_return_if_fail (attribute->immutable_ref > 0);
 
   attribute->immutable_ref--;
   _cogl_buffer_immutable_unref (buffer);
@@ -560,7 +529,7 @@ _cogl_attribute_free (CoglAttribute *attribute)
   g_slice_free (CoglAttribute, attribute);
 }
 
-static CoglBool
+static gboolean
 validate_layer_cb (CoglPipeline *pipeline,
                    int layer_index,
                    void *user_data)
@@ -568,7 +537,7 @@ validate_layer_cb (CoglPipeline *pipeline,
   CoglTexture *texture =
     cogl_pipeline_get_layer_texture (pipeline, layer_index);
   CoglFlushLayerState *state = user_data;
-  CoglBool status = TRUE;
+  gboolean status = TRUE;
 
   /* invalid textures will be handled correctly in
    * _cogl_pipeline_flush_layers_gl_state */
@@ -654,17 +623,7 @@ _cogl_flush_attributes_state (CoglFramebuffer *framebuffer,
    * pixel and the scene is just comprised of simple rectangles still
    * in the journal. For this optimization to work we need to track
    * when the framebuffer really does get drawn to. */
-  _cogl_framebuffer_mark_mid_scene (framebuffer);
   _cogl_framebuffer_mark_clear_clip_dirty (framebuffer);
-
-  if (G_UNLIKELY (!(flags & COGL_DRAW_SKIP_LEGACY_STATE)) &&
-      G_UNLIKELY (ctx->legacy_state_set) &&
-      _cogl_get_enable_legacy_state ())
-    {
-      copy = cogl_pipeline_copy (pipeline);
-      pipeline = copy;
-      _cogl_pipeline_apply_legacy_state (pipeline);
-    }
 
   ctx->driver_vtable->flush_attributes_state (framebuffer,
                                               pipeline,

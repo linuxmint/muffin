@@ -1,0 +1,4 @@
+[Test]
+Type=session
+TestEnvironment=COGL_TEST_VERBOSE=1
+Exec=sh -c "cd @libexecdir@/installed-tests/mutter-@apiversion@/cogl/conform; ./run-tests.sh ./config.env ./test-conformance ./unit-tests"

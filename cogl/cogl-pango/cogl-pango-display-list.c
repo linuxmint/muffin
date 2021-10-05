@@ -26,9 +26,7 @@
  * SOFTWARE.
  */
 
-#ifdef HAVE_CONFIG_H
 #include "cogl-config.h"
-#endif
 
 #include <glib.h>
 #include <string.h>
@@ -49,7 +47,7 @@ typedef struct _CoglPangoDisplayListRectangle CoglPangoDisplayListRectangle;
 
 struct _CoglPangoDisplayList
 {
-  CoglBool                color_override;
+  gboolean                color_override;
   CoglColor               color;
   GSList                 *nodes;
   GSList                 *last_node;
@@ -67,7 +65,7 @@ struct _CoglPangoDisplayListNode
 {
   CoglPangoDisplayListNodeType type;
 
-  CoglBool color_override;
+  gboolean color_override;
   CoglColor color;
 
   CoglPipeline *pipeline;
@@ -83,6 +81,7 @@ struct _CoglPangoDisplayListNode
       GArray *rectangles;
       /* A primitive representing those vertices */
       CoglPrimitive *primitive;
+      guint has_color : 1;
     } texture;
 
     struct
@@ -275,9 +274,10 @@ emit_vertex_buffer_geometry (CoglFramebuffer *fb,
       CoglAttributeBuffer *buffer;
       CoglVertexP2T2 *verts, *v;
       int n_verts;
-      CoglBool allocated = FALSE;
+      gboolean allocated = FALSE;
       CoglAttribute *attributes[2];
       CoglPrimitive *prim;
+      CoglIndices *indices;
       int i;
 
       n_verts = node->d.texture.rectangles->len * 4;
@@ -333,7 +333,7 @@ emit_vertex_buffer_geometry (CoglFramebuffer *fb,
                                 0, /* offset */
                                 verts,
                                 sizeof (CoglVertexP2T2) * n_verts);
-          free (verts);
+          g_free (verts);
         }
       else
         cogl_buffer_unmap (COGL_BUFFER (buffer));
@@ -356,22 +356,11 @@ emit_vertex_buffer_geometry (CoglFramebuffer *fb,
                                                  attributes,
                                                  2 /* n_attributes */);
 
-#ifdef CLUTTER_COGL_HAS_GL
-      if (_cogl_has_private_feature (ctx, COGL_PRIVATE_FEATURE_QUADS))
-        cogl_primitive_set_mode (prim, GL_QUADS);
-      else
-#endif
-        {
-          /* GLES doesn't support GL_QUADS so instead we use a VBO
-             with indexed vertices to generate GL_TRIANGLES from the
-             quads */
+      indices =
+        cogl_get_rectangle_indices (ctx, node->d.texture.rectangles->len);
 
-          CoglIndices *indices =
-            cogl_get_rectangle_indices (ctx, node->d.texture.rectangles->len);
-
-          cogl_primitive_set_indices (prim, indices,
-                                      node->d.texture.rectangles->len * 6);
-        }
+      cogl_primitive_set_indices (prim, indices,
+                                  node->d.texture.rectangles->len * 6);
 
       node->d.texture.primitive = prim;
 
@@ -432,7 +421,9 @@ _cogl_pango_display_list_render (CoglFramebuffer *fb,
                                   cogl_color_get_red_byte (&node->color),
                                   cogl_color_get_green_byte (&node->color),
                                   cogl_color_get_blue_byte (&node->color),
-                                  cogl_color_get_alpha_byte (color));
+                                  (cogl_color_get_alpha_byte (&node->color) *
+                                   cogl_color_get_alpha_byte (color) /
+                                   255));
       else
         draw_color = *color;
       cogl_color_premultiply (&draw_color);
@@ -485,8 +476,8 @@ _cogl_pango_display_list_node_free (CoglPangoDisplayListNode *node)
 void
 _cogl_pango_display_list_clear (CoglPangoDisplayList *dl)
 {
-  g_slist_foreach (dl->nodes, (GFunc) _cogl_pango_display_list_node_free, NULL);
-  g_slist_free (dl->nodes);
+  g_slist_free_full (dl->nodes, (GDestroyNotify)
+                     _cogl_pango_display_list_node_free);
   dl->nodes = NULL;
   dl->last_node = NULL;
 }

@@ -80,9 +80,7 @@
  * #ClutterBindConstraint is available since Clutter 1.4
  */
 
-#ifdef HAVE_CONFIG_H
 #include "clutter-build-config.h"
-#endif
 
 #include <math.h>
 
@@ -147,6 +145,55 @@ source_destroyed (ClutterActor          *actor,
 }
 
 static void
+clutter_bind_constraint_update_preferred_size (ClutterConstraint  *constraint,
+                                               ClutterActor       *actor,
+                                               ClutterOrientation  direction,
+                                               float               for_size,
+                                               float              *minimum_size,
+                                               float              *natural_size)
+{
+  ClutterBindConstraint *bind = CLUTTER_BIND_CONSTRAINT (constraint);
+  float source_min, source_nat;
+
+  if (bind->source == NULL)
+    return;
+
+  /* only these bindings affect the preferred size */
+  if (!(bind->coordinate == CLUTTER_BIND_WIDTH ||
+        bind->coordinate == CLUTTER_BIND_HEIGHT ||
+        bind->coordinate == CLUTTER_BIND_SIZE ||
+        bind->coordinate == CLUTTER_BIND_ALL))
+    return;
+
+  switch (direction)
+    {
+    case CLUTTER_ORIENTATION_HORIZONTAL:
+      if (bind->coordinate != CLUTTER_BIND_HEIGHT)
+        {
+          clutter_actor_get_preferred_width (bind->source, for_size,
+                                             &source_min,
+                                             &source_nat);
+
+          *minimum_size = source_min;
+          *natural_size = source_nat;
+        }
+      break;
+
+    case CLUTTER_ORIENTATION_VERTICAL:
+      if (bind->coordinate != CLUTTER_BIND_WIDTH)
+        {
+          clutter_actor_get_preferred_height (bind->source, for_size,
+                                              &source_min,
+                                              &source_nat);
+
+          *minimum_size = source_min;
+          *natural_size = source_nat;
+        }
+      break;
+    }
+}
+
+static void
 clutter_bind_constraint_update_allocation (ClutterConstraint *constraint,
                                            ClutterActor      *actor,
                                            ClutterActorBox   *allocation)
@@ -154,7 +201,9 @@ clutter_bind_constraint_update_allocation (ClutterConstraint *constraint,
   ClutterBindConstraint *bind = CLUTTER_BIND_CONSTRAINT (constraint);
   gfloat source_width, source_height;
   gfloat actor_width, actor_height;
-  ClutterVertex source_position = { 0., };
+  graphene_point3d_t source_position;
+
+  source_position = GRAPHENE_POINT3D_INIT (0.f, 0.f, 0.f);
 
   if (bind->source == NULL)
     return;
@@ -328,6 +377,8 @@ clutter_bind_constraint_class_init (ClutterBindConstraintClass *klass)
   meta_class->set_actor = clutter_bind_constraint_set_actor;
 
   constraint_class->update_allocation = clutter_bind_constraint_update_allocation;
+  constraint_class->update_preferred_size = clutter_bind_constraint_update_preferred_size;
+
   /**
    * ClutterBindConstraint:source:
    *

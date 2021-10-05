@@ -1,6 +1,4 @@
-#ifdef HAVE_CONFIG_H
 #include "clutter-build-config.h"
-#endif
 
 #include <math.h>
 
@@ -342,7 +340,7 @@ clutter_actor_box_contains (const ClutterActorBox *box,
 /**
  * clutter_actor_box_from_vertices:
  * @box: a #ClutterActorBox
- * @verts: (array fixed-size=4): array of four #ClutterVertex
+ * @verts: (array fixed-size=4): array of four #graphene_point3d_t
  *
  * Calculates the bounding box represented by the four vertices; for details
  * of the vertex array see clutter_actor_get_abs_allocation_vertices().
@@ -350,8 +348,8 @@ clutter_actor_box_contains (const ClutterActorBox *box,
  * Since: 1.0
  */
 void
-clutter_actor_box_from_vertices (ClutterActorBox     *box,
-                                 const ClutterVertex  verts[])
+clutter_actor_box_from_vertices (ClutterActorBox          *box,
+                                 const graphene_point3d_t  verts[])
 {
   gfloat x_1, x_2, y_1, y_2;
 
@@ -594,6 +592,27 @@ _clutter_actor_box_enlarge_for_effects (ClutterActorBox *box)
    */
   box->x1 = box->x2 - width - 3;
   box->y1 = box->y2 - height - 3;
+}
+
+/**
+ * clutter_actor_box_scale:
+ * @box: a #ClutterActorBox
+ * @scale: scale factor for resizing this box
+ *
+ * Rescale the @box by provided @scale factor.
+ *
+ * Since: 1.6
+ */
+void
+clutter_actor_box_scale (ClutterActorBox *box,
+                         gfloat           scale)
+{
+  g_return_if_fail (box != NULL);
+
+  box->x1 *= scale;
+  box->x2 *= scale;
+  box->y1 *= scale;
+  box->y2 *= scale;
 }
 
 G_DEFINE_BOXED_TYPE_WITH_CODE (ClutterActorBox, clutter_actor_box,

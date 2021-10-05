@@ -44,7 +44,7 @@
  * so these macros are only kept for compatibility...
  */
 
-#if !defined(COGL_ENABLE_MUFFIN_API) && !defined(COGL_GIR_SCANNING)
+#if !defined(COGL_ENABLE_MUTTER_API) && !defined(COGL_GIR_SCANNING)
 #define COGL_FRAMEBUFFER(X) (X)
 #define COGL_BUFFER(X) (X)
 #define COGL_TEXTURE(X) (X)

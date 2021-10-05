@@ -147,3 +147,9 @@ COGL_WINSYS_FEATURE_BEGIN (surfaceless_context,
                            "surfaceless_context\0",
                            COGL_EGL_WINSYS_FEATURE_SURFACELESS_CONTEXT)
 COGL_WINSYS_FEATURE_END ()
+
+COGL_WINSYS_FEATURE_BEGIN (context_priority,
+                           "IMG\0",
+                           "context_priority\0",
+                           COGL_EGL_WINSYS_FEATURE_CONTEXT_PRIORITY)
+COGL_WINSYS_FEATURE_END ()

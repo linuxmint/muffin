@@ -96,32 +96,40 @@ struct _ClutterConstraintClass
   void (* _clutter_constraint7) (void);
 };
 
-CLUTTER_AVAILABLE_IN_1_4
+CLUTTER_EXPORT
 GType clutter_constraint_get_type (void) G_GNUC_CONST;
 
+CLUTTER_EXPORT
+void clutter_constraint_update_preferred_size (ClutterConstraint  *constraint,
+                                               ClutterActor       *actor,
+                                               ClutterOrientation  direction,
+                                               float               for_size,
+                                               float              *minimum_size,
+                                               float              *natural_size);
+
 /* ClutterActor API */
-CLUTTER_AVAILABLE_IN_1_4
+CLUTTER_EXPORT
 void               clutter_actor_add_constraint            (ClutterActor      *self,
                                                             ClutterConstraint *constraint);
-CLUTTER_AVAILABLE_IN_1_4
+CLUTTER_EXPORT
 void               clutter_actor_add_constraint_with_name  (ClutterActor      *self,
                                                             const gchar       *name,
                                                             ClutterConstraint *constraint);
-CLUTTER_AVAILABLE_IN_1_4
+CLUTTER_EXPORT
 void               clutter_actor_remove_constraint         (ClutterActor      *self,
                                                             ClutterConstraint *constraint);
-CLUTTER_AVAILABLE_IN_1_4
+CLUTTER_EXPORT
 void               clutter_actor_remove_constraint_by_name (ClutterActor      *self,
                                                             const gchar       *name);
-CLUTTER_AVAILABLE_IN_1_4
+CLUTTER_EXPORT
 GList *            clutter_actor_get_constraints           (ClutterActor      *self);
-CLUTTER_AVAILABLE_IN_1_4
+CLUTTER_EXPORT
 ClutterConstraint *clutter_actor_get_constraint            (ClutterActor      *self,
                                                             const gchar       *name);
-CLUTTER_AVAILABLE_IN_1_4
+CLUTTER_EXPORT
 void               clutter_actor_clear_constraints         (ClutterActor      *self);
 
-CLUTTER_AVAILABLE_IN_1_10
+CLUTTER_EXPORT
 gboolean           clutter_actor_has_constraints           (ClutterActor      *self);
 
 G_END_DECLS

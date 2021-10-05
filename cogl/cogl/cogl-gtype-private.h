@@ -269,8 +269,10 @@ void _cogl_gtype_object_class_base_finalize (CoglObjectClass *klass);
 void _cogl_gtype_object_class_init (CoglObjectClass *klass);
 void _cogl_gtype_object_init (CoglObject *object);
 
+COGL_EXPORT
 void cogl_object_value_set_object (GValue   *value,
                                    gpointer  object);
+COGL_EXPORT
 gpointer cogl_object_value_get_object (const GValue *value);
 
 void _cogl_gtype_dummy_iface_init (gpointer iface);
