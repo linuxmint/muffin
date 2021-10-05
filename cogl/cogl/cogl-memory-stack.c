@@ -54,9 +54,7 @@
  *   Robert Bragg <robert@linux.intel.com>
  */
 
-#ifdef HAVE_CONFIG_H
 #include "cogl-config.h"
-#endif
 
 #include "cogl-memory-stack-private.h"
 #include "cogl-list.h"
@@ -85,7 +83,7 @@ _cogl_memory_sub_stack_alloc (size_t bytes)
 {
   CoglMemorySubStack *sub_stack = g_slice_new (CoglMemorySubStack);
   sub_stack->bytes = bytes;
-  sub_stack->data = malloc (bytes);
+  sub_stack->data = g_malloc (bytes);
   return sub_stack;
 }
 
@@ -176,7 +174,7 @@ _cogl_memory_stack_rewind (CoglMemoryStack *stack)
 static void
 _cogl_memory_sub_stack_free (CoglMemorySubStack *sub_stack)
 {
-  free (sub_stack->data);
+  g_free (sub_stack->data);
   g_slice_free (CoglMemorySubStack, sub_stack);
 }
 

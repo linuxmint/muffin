@@ -1,4 +1,0 @@
-# libtool not installed
-usr/lib/*/libmuffin.la
-# manpages are compressed
-usr/share/man/man1/*.1

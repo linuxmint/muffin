@@ -40,7 +40,7 @@
 
 #include <glib-object.h>
 
-COGL_BEGIN_DECLS
+G_BEGIN_DECLS
 
 /**
  * SECTION:cogl-offscreen
@@ -59,6 +59,7 @@ typedef struct _CoglOffscreen CoglOffscreen;
  *
  * Returns: a #GType that can be used with the GLib type system.
  */
+COGL_EXPORT
 GType cogl_offscreen_get_gtype (void);
 
 /* Offscreen api */
@@ -75,8 +76,8 @@ GType cogl_offscreen_get_gtype (void);
  * destroy the offscreen buffer before you can use the @texture again.
  *
  * <note>This api only works with low-level #CoglTexture types such as
- * #CoglTexture2D, #CoglTexture3D and #CoglTextureRectangle, and not
- * with meta-texture types such as #CoglTexture2DSliced.</note>
+ * #CoglTexture2D and not with meta-texture types such as
+ * #CoglTexture2DSliced.</note>
  *
  * The storage for the framebuffer is actually allocated lazily
  * so this function will never return %NULL to indicate a runtime
@@ -90,12 +91,12 @@ GType cogl_offscreen_get_gtype (void);
  * message. If you need to be able to catch such exceptions at runtime
  * then you can explicitly allocate your framebuffer when you have
  * finished configuring it by calling cogl_framebuffer_allocate() and
- * passing in a #CoglError argument to catch any exceptions.
+ * passing in a #GError argument to catch any exceptions.
  *
  * Return value: (transfer full): a newly instantiated #CoglOffscreen
  *   framebuffer.
  */
-CoglOffscreen *
+COGL_EXPORT CoglOffscreen *
 cogl_offscreen_new_with_texture (CoglTexture *texture);
 
 /**
@@ -110,16 +111,16 @@ cogl_offscreen_new_with_texture (CoglTexture *texture);
  * you can use the @texture again.
  *
  * <note>This only works with low-level #CoglTexture types such as
- * #CoglTexture2D, #CoglTexture3D and #CoglTextureRectangle, and not
- * with meta-texture types such as #CoglTexture2DSliced.</note>
+ * #CoglTexture2D and not with meta-texture types such as
+ * #CoglTexture2DSliced.</note>
  *
  * Return value: (transfer full): a newly instantiated #CoglOffscreen
  *   framebuffer or %NULL if it wasn't possible to create the
  *   buffer.
  * Deprecated: 1.16: Use cogl_offscreen_new_with_texture instead.
  */
-COGL_DEPRECATED_IN_1_16_FOR (cogl_offscreen_new_with_texture)
-CoglOffscreen *
+COGL_DEPRECATED_FOR (cogl_offscreen_new_with_texture)
+COGL_EXPORT CoglOffscreen *
 cogl_offscreen_new_to_texture (CoglTexture *texture);
 
 /**
@@ -132,43 +133,15 @@ cogl_offscreen_new_to_texture (CoglTexture *texture);
  * Returns: %TRUE if @object is a #CoglOffscreen framebuffer,
  *          %FALSE otherwise
  */
-CoglBool
+COGL_EXPORT gboolean
 cogl_is_offscreen (void *object);
-
-/**
- * cogl_offscreen_ref:
- * @offscreen: A pointer to a #CoglOffscreen framebuffer
- *
- * Increments the reference count on the @offscreen framebuffer.
- *
- * Return value: (transfer none): For convenience it returns the
- *                                given @offscreen
- *
- * Deprecated: 1.2: cogl_object_ref() should be used in new code.
- */
-COGL_DEPRECATED_FOR (cogl_object_ref)
-void *
-cogl_offscreen_ref (void *offscreen);
-
-/**
- * cogl_offscreen_unref:
- * @offscreen: A pointer to a #CoglOffscreen framebuffer
- *
- * Decreases the reference count for the @offscreen buffer and frees it when
- * the count reaches 0.
- *
- * Deprecated: 1.2: cogl_object_unref() should be used in new code.
- */
-COGL_DEPRECATED_FOR (cogl_object_unref)
-void
-cogl_offscreen_unref (void *offscreen);
 
 /**
  * cogl_offscreen_get_texture: (skip)
  */
-CoglTexture *
+COGL_EXPORT CoglTexture *
 cogl_offscreen_get_texture (CoglOffscreen *offscreen);
 
-COGL_END_DECLS
+G_END_DECLS
 
 #endif /* __COGL_OFFSCREEN_H__ */

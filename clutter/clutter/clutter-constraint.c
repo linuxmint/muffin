@@ -48,7 +48,7 @@
  * Constraints provide a way to build user interfaces by using
  * relations between #ClutterActors, without explicit fixed
  * positioning and sizing, similarly to how fluid layout managers like
- * #ClutterBoxLayout and #ClutterTableLayout lay out their children.
+ * #ClutterBoxLayout lay out their children.
  *
  * Constraints are attached to a #ClutterActor, and are available
  * for inspection using clutter_actor_get_constraints().
@@ -128,9 +128,7 @@
  * can be recovered at any point using clutter_actor_meta_get_actor().
  */
 
-#ifdef HAVE_CONFIG_H
 #include "clutter-build-config.h"
-#endif
 
 #include <string.h>
 
@@ -224,6 +222,17 @@ clutter_constraint_update_allocation (ClutterConstraint *constraint,
   return !clutter_actor_box_equal (allocation, &old_alloc);
 }
 
+/**
+ * clutter_constraint_update_preferred_size:
+ * @constraint: a #ClutterConstraint
+ * @actor: a #ClutterActor
+ * @direction: a #ClutterOrientation
+ * @for_size: the size in the opposite direction
+ * @minimum_size: (inout): the minimum size to modify
+ * @natural_size: (inout): the natural size to modify
+ *
+ * Asks the @constraint to update the size request of a #ClutterActor.
+ */
 void
 clutter_constraint_update_preferred_size (ClutterConstraint  *constraint,
                                           ClutterActor       *actor,

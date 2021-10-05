@@ -42,9 +42,7 @@
  * #ClutterScrollActor is available since Clutter 1.12.
  */
 
-#ifdef HAVE_CONFIG_H
 #include "clutter-build-config.h"
-#endif
 
 #include "clutter-scroll-actor.h"
 
@@ -58,7 +56,7 @@
 
 struct _ClutterScrollActorPrivate
 {
-  ClutterPoint scroll_to;
+  graphene_point_t scroll_to;
 
   ClutterScrollMode scroll_mode;
 
@@ -86,9 +84,9 @@ enum
 static GParamSpec *obj_props[PROP_LAST] = { NULL, };
 static GParamSpec *animatable_props[ANIM_PROP_LAST] = { NULL, };
 
-static ClutterAnimatableIface *parent_animatable_iface = NULL;
+static ClutterAnimatableInterface *parent_animatable_iface = NULL;
 
-static void     clutter_animatable_iface_init   (ClutterAnimatableIface *iface);
+static void clutter_animatable_iface_init (ClutterAnimatableInterface *iface);
 
 G_DEFINE_TYPE_WITH_CODE (ClutterScrollActor, clutter_scroll_actor, CLUTTER_TYPE_ACTOR,
                          G_ADD_PRIVATE (ClutterScrollActor)
@@ -96,19 +94,19 @@ G_DEFINE_TYPE_WITH_CODE (ClutterScrollActor, clutter_scroll_actor, CLUTTER_TYPE_
                                                 clutter_animatable_iface_init))
 
 static void
-clutter_scroll_actor_set_scroll_to_internal (ClutterScrollActor *self,
-                                             const ClutterPoint *point)
+clutter_scroll_actor_set_scroll_to_internal (ClutterScrollActor     *self,
+                                             const graphene_point_t *point)
 {
   ClutterScrollActorPrivate *priv = self->priv;
   ClutterActor *actor = CLUTTER_ACTOR (self);
   ClutterMatrix m = CLUTTER_MATRIX_INIT_IDENTITY;
   float dx, dy;
 
-  if (clutter_point_equals (&priv->scroll_to, point))
+  if (graphene_point_equal (&priv->scroll_to, point))
     return;
 
   if (point == NULL)
-    clutter_point_init (&priv->scroll_to, 0.f, 0.f);
+    graphene_point_init (&priv->scroll_to, 0.f, 0.f);
   else
     priv->scroll_to = *point;
 
@@ -218,7 +216,7 @@ clutter_scroll_actor_set_final_state (ClutterAnimatable *animatable,
   if (strcmp (property_name, "scroll-to") == 0)
     {
       ClutterScrollActor *self = CLUTTER_SCROLL_ACTOR (animatable);
-      const ClutterPoint *point = g_value_get_boxed (value);
+      const graphene_point_t *point = g_value_get_boxed (value);
 
       clutter_scroll_actor_set_scroll_to_internal (self, point);
     }
@@ -242,7 +240,7 @@ clutter_scroll_actor_get_initial_state (ClutterAnimatable *animatable,
 }
 
 static void
-clutter_animatable_iface_init (ClutterAnimatableIface *iface)
+clutter_animatable_iface_init (ClutterAnimatableInterface *iface)
 {
   parent_animatable_iface = g_type_interface_peek_parent (iface);
 
@@ -250,7 +248,7 @@ clutter_animatable_iface_init (ClutterAnimatableIface *iface)
     g_param_spec_boxed ("scroll-to",
                         "Scroll To",
                         "The point to scroll the actor to",
-                        CLUTTER_TYPE_POINT,
+                        GRAPHENE_TYPE_POINT,
                         G_PARAM_READWRITE |
                         G_PARAM_STATIC_STRINGS |
                         CLUTTER_PARAM_ANIMATABLE);
@@ -324,7 +322,7 @@ clutter_scroll_actor_get_scroll_mode (ClutterScrollActor *actor)
 /**
  * clutter_scroll_actor_scroll_to_point:
  * @actor: a #ClutterScrollActor
- * @point: a #ClutterPoint
+ * @point: a #graphene_point_t
  *
  * Scrolls the contents of @actor so that @point is the new origin
  * of the visible area.
@@ -337,8 +335,8 @@ clutter_scroll_actor_get_scroll_mode (ClutterScrollActor *actor)
  * Since: 1.12
  */
 void
-clutter_scroll_actor_scroll_to_point (ClutterScrollActor *actor,
-                                      const ClutterPoint *point)
+clutter_scroll_actor_scroll_to_point (ClutterScrollActor     *actor,
+                                      const graphene_point_t *point)
 {
   ClutterScrollActorPrivate *priv;
   const ClutterAnimationInfo *info;
@@ -392,10 +390,10 @@ clutter_scroll_actor_scroll_to_point (ClutterScrollActor *actor,
 
   /* if a transition already exist, update its bounds */
   clutter_transition_set_from (priv->transition,
-                               CLUTTER_TYPE_POINT,
+                               GRAPHENE_TYPE_POINT,
                                &priv->scroll_to);
   clutter_transition_set_to (priv->transition,
-                             CLUTTER_TYPE_POINT,
+                             GRAPHENE_TYPE_POINT,
                              point);
 
   /* always use the current easing state */
@@ -419,10 +417,10 @@ clutter_scroll_actor_scroll_to_point (ClutterScrollActor *actor,
  * Since: 1.12
  */
 void
-clutter_scroll_actor_scroll_to_rect (ClutterScrollActor *actor,
-                                     const ClutterRect  *rect)
+clutter_scroll_actor_scroll_to_rect (ClutterScrollActor    *actor,
+                                     const graphene_rect_t *rect)
 {
-  ClutterRect n_rect;
+  graphene_rect_t n_rect;
 
   g_return_if_fail (CLUTTER_IS_SCROLL_ACTOR (actor));
   g_return_if_fail (rect != NULL);
@@ -430,7 +428,7 @@ clutter_scroll_actor_scroll_to_rect (ClutterScrollActor *actor,
   n_rect = *rect;
 
   /* normalize, so that we have a valid origin */
-  clutter_rect_normalize (&n_rect);
+  graphene_rect_normalize (&n_rect);
 
   clutter_scroll_actor_scroll_to_point (actor, &n_rect.origin);
 }

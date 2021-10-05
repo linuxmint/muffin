@@ -27,14 +27,12 @@
  *
  */
 
-#ifdef HAVE_CONFIG_H
 #include "cogl-config.h"
-#endif
 
 #include "cogl-fence.h"
 #include "cogl-fence-private.h"
 #include "cogl-context-private.h"
-#include "cogl-winsys-private.h"
+#include "winsys/cogl-winsys-private.h"
 
 #define FENCE_CHECK_TIMEOUT 5000 /* microseconds */
 
@@ -52,7 +50,7 @@ _cogl_fence_check (CoglFenceClosure *fence)
   if (fence->type == FENCE_TYPE_WINSYS)
     {
       const CoglWinsysVtable *winsys = _cogl_context_get_winsys (context);
-      CoglBool ret;
+      gboolean ret;
 
       ret = winsys->fence_is_complete (context, fence->fence_obj);
       if (!ret)

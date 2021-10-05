@@ -16,19 +16,17 @@
  * General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street - Suite 500, Boston, MA
- * 02110-1335, USA.
+ * along with this program; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#if HAVE_CONFIG_H
-#include <config.h>
-#endif
+#include "config.h"
 
-#include <meta/meta-plugin.h>
-#include "meta-module.h"
+#include "compositor/meta-module.h"
 
 #include <gmodule.h>
+
+#include "meta/meta-plugin.h"
+#include "meta/meta-version.h"
 
 enum
 {
@@ -43,10 +41,7 @@ struct _MetaModulePrivate
   GType         plugin_type;
 };
 
-#define META_MODULE_GET_PRIVATE(obj) \
-(G_TYPE_INSTANCE_GET_PRIVATE ((obj), META_TYPE_MODULE, MetaModulePrivate))
-
-G_DEFINE_TYPE (MetaModule, meta_module, G_TYPE_TYPE_MODULE);
+G_DEFINE_TYPE_WITH_PRIVATE (MetaModule, meta_module, G_TYPE_TYPE_MODULE);
 
 static gboolean
 meta_module_load (GTypeModule *gmodule)
@@ -74,7 +69,7 @@ meta_module_load (GTypeModule *gmodule)
 		       (gpointer *)(void *)&register_type) &&
       info && register_type)
     {
-      if (info->version_api != MUFFIN_PLUGIN_API_VERSION)
+      if (info->version_api != META_PLUGIN_API_VERSION)
 	g_warning ("Plugin API mismatch for [%s]", priv->path);
       else
         {
@@ -122,7 +117,7 @@ meta_module_finalize (GObject *object)
 {
   MetaModulePrivate *priv = META_MODULE (object)->priv;
 
-  free (priv->path);
+  g_free (priv->path);
   priv->path = NULL;
 
   G_OBJECT_CLASS (meta_module_parent_class)->finalize (object);
@@ -139,7 +134,7 @@ meta_module_set_property (GObject      *object,
   switch (prop_id)
     {
     case PROP_PATH:
-      free (priv->path);
+      g_free (priv->path);
       priv->path = g_value_dup_string (value);
       break;
     default:
@@ -189,20 +184,15 @@ meta_module_class_init (MetaModuleClass *klass)
 							NULL,
 							G_PARAM_READWRITE |
 						      G_PARAM_CONSTRUCT_ONLY));
-
-  g_type_class_add_private (gobject_class, sizeof (MetaModulePrivate));
 }
 
 static void
 meta_module_init (MetaModule *self)
 {
-  MetaModulePrivate *priv;
-
-  self->priv = priv = META_MODULE_GET_PRIVATE (self);
-
+  self->priv = meta_module_get_instance_private (self);
 }
 
-LOCAL_SYMBOL GType
+GType
 meta_module_get_plugin_type (MetaModule *module)
 {
   MetaModulePrivate *priv = META_MODULE (module)->priv;

@@ -1,4 +1,5 @@
 /* -*- mode: C; c-file-style: "gnu"; indent-tabs-mode: nil; -*- */
+
 /*
  * MetaWindowShape
  *
@@ -17,18 +18,16 @@
  * General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street - Suite 500, Boston, MA
- * 02110-1335, USA.
+ * along with this program; if not, see <http://www.gnu.org/licenses/>.
  */
-#if HAVE_CONFIG_H
-#include <config.h>
-#endif
+
+#include "config.h"
+
+#include "meta/meta-window-shape.h"
 
 #include <string.h>
 
-#include "meta-window-shape.h"
-#include "region-utils.h"
+#include "compositor/region-utils.h"
 
 struct _MetaWindowShape
 {
@@ -40,7 +39,7 @@ struct _MetaWindowShape
   guint hash;
 };
 
-LOCAL_SYMBOL MetaWindowShape *
+MetaWindowShape *
 meta_window_shape_new (cairo_region_t *region)
 {
   MetaWindowShape *shape;
@@ -162,7 +161,7 @@ meta_window_shape_new (cairo_region_t *region)
   return shape;
 }
 
-LOCAL_SYMBOL MetaWindowShape *
+MetaWindowShape *
 meta_window_shape_ref (MetaWindowShape *shape)
 {
   shape->ref_count++;
@@ -170,24 +169,24 @@ meta_window_shape_ref (MetaWindowShape *shape)
   return shape;
 }
 
-LOCAL_SYMBOL void
+void
 meta_window_shape_unref (MetaWindowShape *shape)
 {
   shape->ref_count--;
   if (shape->ref_count == 0)
     {
-      free (shape->rectangles);
+      g_free (shape->rectangles);
       g_slice_free (MetaWindowShape, shape);
     }
 }
 
-LOCAL_SYMBOL guint
+guint
 meta_window_shape_hash (MetaWindowShape *shape)
 {
   return shape->hash;
 }
 
-LOCAL_SYMBOL gboolean
+gboolean
 meta_window_shape_equal (MetaWindowShape *shape_a,
                          MetaWindowShape *shape_b)
 {
@@ -198,7 +197,7 @@ meta_window_shape_equal (MetaWindowShape *shape_a,
                  sizeof (cairo_rectangle_int_t) * shape_a->n_rectangles) == 0;
 }
 
-LOCAL_SYMBOL void
+void
 meta_window_shape_get_borders (MetaWindowShape *shape,
                                int             *border_top,
                                int             *border_right,
@@ -226,7 +225,7 @@ meta_window_shape_get_borders (MetaWindowShape *shape,
  *
  * Return value: a newly created region
  */
-LOCAL_SYMBOL cairo_region_t *
+cairo_region_t *
 meta_window_shape_to_region (MetaWindowShape *shape,
                              int              center_width,
                              int              center_height)
@@ -256,3 +255,5 @@ meta_window_shape_to_region (MetaWindowShape *shape,
   return region;
 }
 
+G_DEFINE_BOXED_TYPE (MetaWindowShape, meta_window_shape,
+                     meta_window_shape_ref, meta_window_shape_unref)

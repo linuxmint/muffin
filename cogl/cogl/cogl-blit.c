@@ -4,6 +4,7 @@
  * A Low Level GPU Graphics and Utilities API
  *
  * Copyright (C) 2011 Intel Corporation.
+ * Copyright (C) 2019 DisplayLink (UK) Ltd.
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -29,9 +30,7 @@
  *  Neil Roberts   <neil@linux.intel.com>
  */
 
-#ifdef HAVE_CONFIG_H
 #include "cogl-config.h"
-#endif
 
 #include <string.h>
 
@@ -46,7 +45,7 @@
 
 static const CoglBlitMode *_cogl_blit_default_mode = NULL;
 
-static CoglBool
+static gboolean
 _cogl_blit_texture_render_begin (CoglBlitData *data)
 {
   CoglContext *ctx = data->src_tex->context;
@@ -54,7 +53,7 @@ _cogl_blit_texture_render_begin (CoglBlitData *data)
   CoglFramebuffer *fb;
   CoglPipeline *pipeline;
   unsigned int dst_width, dst_height;
-  CoglError *ignore_error = NULL;
+  GError *ignore_error = NULL;
 
   offscreen = _cogl_offscreen_new_with_texture_full
     (data->dst_tex, COGL_OFFSCREEN_DISABLE_DEPTH_AND_STENCIL, 0 /* level */);
@@ -62,7 +61,7 @@ _cogl_blit_texture_render_begin (CoglBlitData *data)
   fb = COGL_FRAMEBUFFER (offscreen);
   if (!cogl_framebuffer_allocate (fb, &ignore_error))
     {
-      cogl_error_free (ignore_error);
+      g_error_free (ignore_error);
       cogl_object_unref (fb);
       return FALSE;
     }
@@ -146,19 +145,20 @@ _cogl_blit_texture_render_end (CoglBlitData *data)
   cogl_object_unref (data->dest_fb);
 }
 
-static CoglBool
+static gboolean
 _cogl_blit_framebuffer_begin (CoglBlitData *data)
 {
   CoglContext *ctx = data->src_tex->context;
   CoglOffscreen *dst_offscreen = NULL, *src_offscreen = NULL;
   CoglFramebuffer *dst_fb, *src_fb;
-  CoglError *ignore_error = NULL;
+  GError *ignore_error = NULL;
 
-  /* We can only blit between FBOs if both textures are the same
-     format and the blit framebuffer extension is supported */
-  if ((_cogl_texture_get_format (data->src_tex) & ~COGL_A_BIT) !=
-      (_cogl_texture_get_format (data->dst_tex) & ~COGL_A_BIT) ||
-      !_cogl_has_private_feature (ctx, COGL_PRIVATE_FEATURE_OFFSCREEN_BLIT))
+  /* We can only blit between FBOs if both textures have the same
+     premult convention and the blit framebuffer extension is
+     supported. */
+  if ((_cogl_texture_get_format (data->src_tex) & COGL_PREMULT_BIT) !=
+      (_cogl_texture_get_format (data->dst_tex) & COGL_PREMULT_BIT) ||
+      !_cogl_has_private_feature (ctx, COGL_PRIVATE_FEATURE_BLIT_FRAMEBUFFER))
     return FALSE;
 
   dst_offscreen = _cogl_offscreen_new_with_texture_full
@@ -167,7 +167,7 @@ _cogl_blit_framebuffer_begin (CoglBlitData *data)
   dst_fb = COGL_FRAMEBUFFER (dst_offscreen);
   if (!cogl_framebuffer_allocate (dst_fb, &ignore_error))
     {
-      cogl_error_free (ignore_error);
+      g_error_free (ignore_error);
       goto error;
     }
 
@@ -179,7 +179,7 @@ _cogl_blit_framebuffer_begin (CoglBlitData *data)
   src_fb = COGL_FRAMEBUFFER (src_offscreen);
   if (!cogl_framebuffer_allocate (src_fb, &ignore_error))
     {
-      cogl_error_free (ignore_error);
+      g_error_free (ignore_error);
       goto error;
     }
 
@@ -207,11 +207,12 @@ _cogl_blit_framebuffer_blit (CoglBlitData *data,
                              int width,
                              int height)
 {
-  _cogl_blit_framebuffer (data->src_fb,
-                          data->dest_fb,
-                          src_x, src_y,
-                          dst_x, dst_y,
-                          width, height);
+  cogl_blit_framebuffer (data->src_fb,
+                         data->dest_fb,
+                         src_x, src_y,
+                         dst_x, dst_y,
+                         width, height,
+                         NULL);
 }
 
 static void
@@ -221,12 +222,12 @@ _cogl_blit_framebuffer_end (CoglBlitData *data)
   cogl_object_unref (data->dest_fb);
 }
 
-static CoglBool
+static gboolean
 _cogl_blit_copy_tex_sub_image_begin (CoglBlitData *data)
 {
   CoglOffscreen *offscreen;
   CoglFramebuffer *fb;
-  CoglError *ignore_error = NULL;
+  GError *ignore_error = NULL;
 
   /* This will only work if the target texture is a CoglTexture2D */
   if (!cogl_is_texture_2d (data->dst_tex))
@@ -238,7 +239,7 @@ _cogl_blit_copy_tex_sub_image_begin (CoglBlitData *data)
   fb = COGL_FRAMEBUFFER (offscreen);
   if (!cogl_framebuffer_allocate (fb, &ignore_error))
     {
-      cogl_error_free (ignore_error);
+      g_error_free (ignore_error);
       cogl_object_unref (fb);
       return FALSE;
     }
@@ -271,13 +272,17 @@ _cogl_blit_copy_tex_sub_image_end (CoglBlitData *data)
   cogl_object_unref (data->src_fb);
 }
 
-static CoglBool
+static gboolean
 _cogl_blit_get_tex_data_begin (CoglBlitData *data)
 {
   data->format = _cogl_texture_get_format (data->src_tex);
-  data->bpp = _cogl_pixel_format_get_bytes_per_pixel (data->format);
 
-  data->image_data = malloc (data->bpp * data->src_width *
+  g_return_val_if_fail (cogl_pixel_format_get_n_planes (data->format) == 1,
+                        FALSE);
+
+  data->bpp = cogl_pixel_format_get_bytes_per_pixel (data->format, 0);
+
+  data->image_data = g_malloc (data->bpp * data->src_width *
                                data->src_height);
   cogl_texture_get_data (data->src_tex, data->format,
                          data->src_width * data->bpp, data->image_data);
@@ -294,7 +299,7 @@ _cogl_blit_get_tex_data_blit (CoglBlitData *data,
                               int width,
                               int height)
 {
-  CoglError *ignore = NULL;
+  GError *ignore = NULL;
   int rowstride = data->src_width * data->bpp;
   int offset = rowstride * src_y + src_x * data->bpp;
 
@@ -312,7 +317,7 @@ _cogl_blit_get_tex_data_blit (CoglBlitData *data,
 static void
 _cogl_blit_get_tex_data_end (CoglBlitData *data)
 {
-  free (data->image_data);
+  g_free (data->image_data);
 }
 
 /* These should be specified in order of preference */
@@ -411,7 +416,7 @@ _cogl_blit_begin (CoglBlitData *data,
                      _cogl_blit_modes[i].name);
 
       /* The last blit mode can't fail so this should never happen */
-      _COGL_RETURN_IF_FAIL (i < G_N_ELEMENTS (_cogl_blit_modes));
+      g_return_if_fail (i < G_N_ELEMENTS (_cogl_blit_modes));
     }
 
   data->blit_mode = _cogl_blit_default_mode;

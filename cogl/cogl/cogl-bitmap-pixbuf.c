@@ -28,26 +28,23 @@
  *
  */
 
-#ifdef HAVE_CONFIG_H
 #include "cogl-config.h"
-#endif
 
 #include "cogl-util.h"
 #include "cogl-bitmap-private.h"
 #include "cogl-context-private.h"
 #include "cogl-private.h"
-#include "cogl-error-private.h"
 
 #include <string.h>
 
 #include <gdk-pixbuf/gdk-pixbuf.h>
 
-CoglBool
+gboolean
 _cogl_bitmap_get_size_from_file (const char *filename,
                                  int        *width,
                                  int        *height)
 {
-  _COGL_RETURN_VAL_IF_FAIL (filename != NULL, FALSE);
+  g_return_val_if_fail (filename != NULL, FALSE);
 
   if (gdk_pixbuf_get_file_info (filename, width, height) != NULL)
     return TRUE;
@@ -58,11 +55,11 @@ _cogl_bitmap_get_size_from_file (const char *filename,
 CoglBitmap *
 _cogl_bitmap_from_file (CoglContext *ctx,
                         const char *filename,
-			CoglError **error)
+                        GError **error)
 {
   static CoglUserDataKey pixbuf_key;
   GdkPixbuf *pixbuf;
-  CoglBool has_alpha;
+  gboolean has_alpha;
   GdkColorspace color_space;
   CoglPixelFormat pixel_format;
   int width;
@@ -77,7 +74,7 @@ _cogl_bitmap_from_file (CoglContext *ctx,
   pixbuf = gdk_pixbuf_new_from_file (filename, &glib_error);
   if (pixbuf == NULL)
     {
-      _cogl_propagate_gerror (error, glib_error);
+      g_propagate_error (error, glib_error);
       return FALSE;
     }
 

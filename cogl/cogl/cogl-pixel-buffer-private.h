@@ -40,13 +40,13 @@
 
 #include <glib.h>
 
-COGL_BEGIN_DECLS
+G_BEGIN_DECLS
 
 struct _CoglPixelBuffer
 {
   CoglBuffer            _parent;
 };
 
-COGL_END_DECLS
+G_END_DECLS
 
 #endif /* __COGL_PIXEL_BUFFER_PRIVATE_H__ */

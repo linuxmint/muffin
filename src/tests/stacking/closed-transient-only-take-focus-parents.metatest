@@ -1,0 +1,34 @@
+new_client 0 x11
+create 0/1
+show 0/1
+
+new_client 1 x11
+create 1/1
+accept_focus 1/1 false
+can_take_focus 1/1 true
+accept_take_focus 1/1 true
+show 1/1
+
+create 1/2 csd
+set_parent 1/2 1
+accept_focus 1/2 false
+can_take_focus 1/2 true
+accept_take_focus 1/2 true
+show 1/2
+
+create 1/3
+set_parent 1/3 2
+show 1/3
+
+assert_focused 1/3
+assert_stacking 0/1 1/1 1/2 1/3
+
+destroy 1/3
+wait
+
+assert_focused 1/2
+assert_stacking 0/1 1/1 1/2
+
+sleep 150
+assert_focused 1/2
+assert_stacking 0/1 1/1 1/2

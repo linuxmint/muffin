@@ -98,11 +98,11 @@
  * |[
  * {
  *   "type" : "ClutterBox",
- *   "layout-manager" : { "type" : "ClutterTableLayout" },
+ *   "layout-manager" : { "type" : "ClutterGridLayout" },
  *   "children" : [
  *     {
- *       "type" : "ClutterTexture",
- *       "filename" : "image-00.png",
+ *       "type" : "ClutterText",
+ *       "text" : "Some text",
  *
  *       "layout::row" : 0,
  *       "layout::column" : 0,
@@ -112,8 +112,8 @@
  *       "layout::y-expand" : true
  *     },
  *     {
- *       "type" : "ClutterTexture",
- *       "filename" : "image-01.png",
+ *       "type" : "ClutterText",
+ *       "text" : "Some more text",
  *
  *       "layout::row" : 0,
  *       "layout::column" : 1,
@@ -129,9 +129,7 @@
  * #ClutterLayoutManager is available since Clutter 1.2
  */
 
-#ifdef HAVE_CONFIG_H
 #include "clutter-build-config.h"
-#endif
 
 #include <glib-object.h>
 #include <gobject/gvaluecollector.h>
@@ -331,9 +329,6 @@ layout_manager_real_begin_animation (ClutterLayoutManager *manager,
   /* let the alpha take ownership of the timeline */
   g_object_unref (timeline);
 
-  g_signal_connect_swapped (timeline, "completed",
-                            G_CALLBACK (clutter_layout_manager_end_animation),
-                            manager);
   g_signal_connect_swapped (timeline, "new-frame",
                             G_CALLBACK (clutter_layout_manager_layout_changed),
                             manager);
@@ -377,9 +372,6 @@ layout_manager_real_end_animation (ClutterLayoutManager *manager)
   if (clutter_timeline_is_playing (timeline))
     clutter_timeline_stop (timeline);
 
-  g_signal_handlers_disconnect_by_func (timeline,
-                                        G_CALLBACK (clutter_layout_manager_end_animation),
-                                        manager);
   g_signal_handlers_disconnect_by_func (timeline,
                                         G_CALLBACK (clutter_layout_manager_layout_changed),
                                         manager);
@@ -446,8 +438,7 @@ clutter_layout_manager_class_init (ClutterLayoutManagerClass *klass)
                   G_SIGNAL_RUN_LAST,
                   G_STRUCT_OFFSET (ClutterLayoutManagerClass,
                                    layout_changed),
-                  NULL, NULL,
-                  _clutter_marshal_VOID__VOID,
+                  NULL, NULL, NULL,
                   G_TYPE_NONE, 0);
 }
 
@@ -817,7 +808,7 @@ clutter_layout_manager_child_set (ClutterLayoutManager *manager,
       if (error)
         {
           g_warning ("%s: %s", G_STRLOC, error);
-          free (error);
+          g_free (error);
           break;
         }
 
@@ -965,7 +956,7 @@ clutter_layout_manager_child_get (ClutterLayoutManager *manager,
       if (error)
         {
           g_warning ("%s: %s", G_STRLOC, error);
-          free (error);
+          g_free (error);
           g_value_unset (&value);
           break;
         }
@@ -1083,7 +1074,7 @@ clutter_layout_manager_find_child_property (ClutterLayoutManager *manager,
  * stored inside the #ClutterLayoutMeta sub-class used by @manager
  *
  * Return value: (transfer full) (array length=n_pspecs): the newly-allocated,
- *   %NULL-terminated array of #GParamSpec<!-- -->s. Use free() to free the
+ *   %NULL-terminated array of #GParamSpec<!-- -->s. Use g_free() to free the
  *   resources allocated for the array
  *
  * Since: 1.2

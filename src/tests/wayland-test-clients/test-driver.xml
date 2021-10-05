@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<protocol name="test_driver">
+  <interface name="test_driver" version="1">
+    <request name="sync_actor_destroyed">
+      <arg name="callback" type="new_id" interface="wl_callback"/>
+      <arg name="surface" type="object" interface="wl_surface"/>
+    </request>
+  </interface>
+</protocol>

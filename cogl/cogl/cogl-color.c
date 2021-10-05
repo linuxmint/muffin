@@ -28,9 +28,7 @@
  *
  */
 
-#ifdef HAVE_CONFIG_H
 #include "cogl-config.h"
-#endif
 
 #include <string.h>
 
@@ -70,23 +68,12 @@ cogl_color_init_from_4ub (CoglColor *color,
                           uint8_t blue,
                           uint8_t alpha)
 {
-  _COGL_RETURN_IF_FAIL (color != NULL);
+  g_return_if_fail (color != NULL);
 
   color->red   = red;
   color->green = green;
   color->blue  = blue;
   color->alpha = alpha;
-}
-
-/* XXX: deprecated, use cogl_color_init_from_4ub */
-void
-cogl_color_set_from_4ub (CoglColor *dest,
-                         uint8_t red,
-                         uint8_t green,
-                         uint8_t blue,
-                         uint8_t alpha)
-{
-  cogl_color_init_from_4ub (dest, red, green, blue, alpha);
 }
 
 void
@@ -96,7 +83,7 @@ cogl_color_init_from_4f (CoglColor *color,
                          float blue,
                          float alpha)
 {
-  _COGL_RETURN_IF_FAIL (color != NULL);
+  g_return_if_fail (color != NULL);
 
   color->red   =  (red * 255);
   color->green =  (green * 255);
@@ -104,22 +91,11 @@ cogl_color_init_from_4f (CoglColor *color,
   color->alpha =  (alpha * 255);
 }
 
-/* XXX: deprecated, use cogl_color_init_from_4f */
-void
-cogl_color_set_from_4f (CoglColor *color,
-                        float red,
-                        float green,
-                        float blue,
-                        float alpha)
-{
-  cogl_color_init_from_4f (color, red, green, blue, alpha);
-}
-
 void
 cogl_color_init_from_4fv (CoglColor *color,
                           const float *color_array)
 {
-  _COGL_RETURN_IF_FAIL (color != NULL);
+  g_return_if_fail (color != NULL);
 
   color->red   =  (color_array[0] * 255);
   color->green =  (color_array[1] * 255);
@@ -302,13 +278,13 @@ cogl_color_unpremultiply (CoglColor *color)
     }
 }
 
-CoglBool
+gboolean
 cogl_color_equal (const void *v1, const void *v2)
 {
   const uint32_t *c1 = v1, *c2 = v2;
 
-  _COGL_RETURN_VAL_IF_FAIL (v1 != NULL, FALSE);
-  _COGL_RETURN_VAL_IF_FAIL (v2 != NULL, FALSE);
+  g_return_val_if_fail (v1 != NULL, FALSE);
+  g_return_val_if_fail (v2 != NULL, FALSE);
 
   /* XXX: We don't compare the padding */
   return *c1 == *c2 ? TRUE : FALSE;

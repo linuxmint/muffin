@@ -30,6 +30,7 @@
 
 #include <clutter/clutter-types.h>
 #include <clutter/clutter-group.h>
+#include <clutter/clutter-stage-view.h>
 
 G_BEGIN_DECLS
 
@@ -61,8 +62,6 @@ struct _ClutterStage
 };
 /**
  * ClutterStageClass:
- * @fullscreen: handler for the #ClutterStage::fullscreen signal
- * @unfullscreen: handler for the #ClutterStage::unfullscreen signal
  * @activate: handler for the #ClutterStage::activate signal
  * @deactivate: handler for the #ClutterStage::deactivate signal
  * @delete_event: handler for the #ClutterStage::delete-event signal
@@ -79,17 +78,19 @@ struct _ClutterStageClass
 
   /*< public >*/
   /* signals */
-  void (* fullscreen)   (ClutterStage *stage);
-  void (* unfullscreen) (ClutterStage *stage);
   void (* activate)     (ClutterStage *stage);
   void (* deactivate)   (ClutterStage *stage);
 
   gboolean (* delete_event) (ClutterStage *stage,
                              ClutterEvent *event);
 
+  void (* paint_view) (ClutterStage         *stage,
+                       ClutterStageView     *view,
+                       const cairo_region_t *redraw_clip);
+
   /*< private >*/
   /* padding for future expansion */
-  gpointer _padding_dummy[31];
+  gpointer _padding_dummy[30];
 };
 
 /**
@@ -116,26 +117,6 @@ struct _ClutterPerspective
 };
 
 /**
- * ClutterFog:
- * @z_near: starting distance from the viewer to the near clipping
- *   plane (always positive)
- * @z_far: final distance from the viewer to the far clipping
- *   plane (always positive)
- *
- * Fog settings used to create the depth cueing effect.
- *
- * Since: 0.6
- *
- * Deprecated: 1.10: The fog-related API in #ClutterStage has been
- *   deprecated as well.
- */
-struct _ClutterFog
-{
-  gfloat z_near;
-  gfloat z_far;
-};
-
-/**
  * ClutterFrameInfo: (skip)
  */
 struct _ClutterFrameInfo
@@ -151,119 +132,116 @@ typedef struct _ClutterCapture
   cairo_rectangle_int_t rect;
 } ClutterCapture;
 
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 GType clutter_perspective_get_type (void) G_GNUC_CONST;
-CLUTTER_DEPRECATED_IN_1_10
-GType clutter_fog_get_type (void) G_GNUC_CONST;
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 GType clutter_stage_get_type (void) G_GNUC_CONST;
 
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 ClutterActor *  clutter_stage_new                               (void);
 
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 void            clutter_stage_set_perspective                   (ClutterStage          *stage,
 			                                         ClutterPerspective    *perspective);
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 void            clutter_stage_get_perspective                   (ClutterStage          *stage,
 			                                         ClutterPerspective    *perspective);
-CLUTTER_AVAILABLE_IN_ALL
-void            clutter_stage_set_fullscreen                    (ClutterStage          *stage,
-                                                                 gboolean               fullscreen);
-CLUTTER_AVAILABLE_IN_ALL
-gboolean        clutter_stage_get_fullscreen                    (ClutterStage          *stage);
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 void            clutter_stage_show_cursor                       (ClutterStage          *stage);
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 void            clutter_stage_hide_cursor                       (ClutterStage          *stage);
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 void            clutter_stage_set_title                         (ClutterStage          *stage,
                                                                  const gchar           *title);
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 const gchar *   clutter_stage_get_title                         (ClutterStage          *stage);
-CLUTTER_AVAILABLE_IN_ALL
-void            clutter_stage_set_user_resizable                (ClutterStage          *stage,
-						                 gboolean               resizable);
-CLUTTER_AVAILABLE_IN_ALL
-gboolean        clutter_stage_get_user_resizable                (ClutterStage          *stage);
 
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 void            clutter_stage_set_minimum_size                  (ClutterStage          *stage,
                                                                  guint                  width,
                                                                  guint                  height);
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 void            clutter_stage_get_minimum_size                  (ClutterStage          *stage,
                                                                  guint                 *width,
                                                                  guint                 *height);
-CLUTTER_AVAILABLE_IN_ALL
-void            clutter_stage_set_no_clear_hint                 (ClutterStage          *stage,
-                                                                 gboolean               no_clear);
-CLUTTER_AVAILABLE_IN_ALL
-gboolean        clutter_stage_get_no_clear_hint                 (ClutterStage          *stage);
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 void            clutter_stage_set_use_alpha                     (ClutterStage          *stage,
                                                                  gboolean               use_alpha);
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 gboolean        clutter_stage_get_use_alpha                     (ClutterStage          *stage);
 
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 void            clutter_stage_set_key_focus                     (ClutterStage          *stage,
                                                                  ClutterActor          *actor);
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 ClutterActor *  clutter_stage_get_key_focus                     (ClutterStage          *stage);
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 void            clutter_stage_set_throttle_motion_events        (ClutterStage          *stage,
                                                                  gboolean               throttle);
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 gboolean        clutter_stage_get_throttle_motion_events        (ClutterStage          *stage);
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 void            clutter_stage_set_motion_events_enabled         (ClutterStage          *stage,
                                                                  gboolean               enabled);
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 gboolean        clutter_stage_get_motion_events_enabled         (ClutterStage          *stage);
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 void            clutter_stage_set_accept_focus                  (ClutterStage          *stage,
                                                                  gboolean               accept_focus);
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 gboolean        clutter_stage_get_accept_focus                  (ClutterStage          *stage);
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 gboolean        clutter_stage_event                             (ClutterStage          *stage,
                                                                  ClutterEvent          *event);
 
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 ClutterActor *  clutter_stage_get_actor_at_pos                  (ClutterStage          *stage,
                                                                  ClutterPickMode        pick_mode,
-                                                                 gint                   x,
-                                                                 gint                   y);
-CLUTTER_AVAILABLE_IN_ALL
+                                                                 float                  x,
+                                                                 float                  y);
+CLUTTER_EXPORT
 guchar *        clutter_stage_read_pixels                       (ClutterStage          *stage,
                                                                  gint                   x,
                                                                  gint                   y,
                                                                  gint                   width,
                                                                  gint                   height);
 
-CLUTTER_AVAILABLE_IN_ALL
-void            clutter_stage_get_redraw_clip_bounds            (ClutterStage          *stage,
-                                                                 cairo_rectangle_int_t *clip);
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 void            clutter_stage_ensure_viewport                   (ClutterStage          *stage);
-CLUTTER_AVAILABLE_IN_ALL
+CLUTTER_EXPORT
 void            clutter_stage_ensure_redraw                     (ClutterStage          *stage);
 
+CLUTTER_EXPORT
+gboolean        clutter_stage_is_redraw_queued                  (ClutterStage          *stage);
+
 #ifdef CLUTTER_ENABLE_EXPERIMENTAL_API
-CLUTTER_AVAILABLE_IN_1_14
+CLUTTER_EXPORT
 void            clutter_stage_set_sync_delay                    (ClutterStage          *stage,
                                                                  gint                   sync_delay);
-CLUTTER_AVAILABLE_IN_1_14
+CLUTTER_EXPORT
 void            clutter_stage_skip_sync_delay                   (ClutterStage          *stage);
 #endif
 
-CLUTTER_AVAILABLE_IN_MUFFIN
+CLUTTER_EXPORT
+void clutter_stage_schedule_update (ClutterStage *stage);
+
+CLUTTER_EXPORT
+gboolean clutter_stage_get_capture_final_size (ClutterStage          *stage,
+                                               cairo_rectangle_int_t *rect,
+                                               int                   *width,
+                                               int                   *height,
+                                               float                 *scale);
+
+CLUTTER_EXPORT
 gboolean clutter_stage_capture (ClutterStage          *stage,
                                 gboolean               paint,
                                 cairo_rectangle_int_t *rect,
-                                ClutterCapture       **captures,
-                                int                   *n_captures);
+                                ClutterCapture       **out_captures,
+                                int                   *out_n_captures);
+CLUTTER_EXPORT
+ClutterStageView * clutter_stage_get_view_at (ClutterStage *stage,
+                                              float         x,
+                                              float         y);
 
 G_END_DECLS
 

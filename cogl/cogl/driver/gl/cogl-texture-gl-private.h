@@ -45,8 +45,7 @@ _cogl_texture_gl_prep_alignment_for_pixels_download (CoglContext *ctx,
 void
 _cogl_texture_gl_flush_legacy_texobj_wrap_modes (CoglTexture *texture,
                                                  unsigned int wrap_mode_s,
-                                                 unsigned int wrap_mode_t,
-                                                 unsigned int wrap_mode_p);
+                                                 unsigned int wrap_mode_t);
 
 void
 _cogl_texture_gl_flush_legacy_texobj_filters (CoglTexture *texture,
@@ -54,8 +53,8 @@ _cogl_texture_gl_flush_legacy_texobj_filters (CoglTexture *texture,
                                               unsigned int mag_filter);
 
 void
-_cogl_texture_gl_maybe_update_max_level (CoglTexture *texture,
-                                         int max_level);
+cogl_texture_gl_set_max_level (CoglTexture *texture,
+                               int max_level);
 
 void
 _cogl_texture_gl_generate_mipmaps (CoglTexture *texture);

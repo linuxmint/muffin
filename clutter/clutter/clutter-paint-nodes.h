@@ -49,10 +49,10 @@ G_BEGIN_DECLS
 typedef struct _ClutterColorNode                ClutterColorNode;
 typedef struct _ClutterColorNodeClass           ClutterColorNodeClass;
 
-CLUTTER_AVAILABLE_IN_1_10
+CLUTTER_EXPORT
 GType clutter_color_node_get_type (void) G_GNUC_CONST;
 
-CLUTTER_AVAILABLE_IN_1_10
+CLUTTER_EXPORT
 ClutterPaintNode *      clutter_color_node_new          (const ClutterColor    *color);
 
 #define CLUTTER_TYPE_TEXTURE_NODE               (clutter_texture_node_get_type ())
@@ -70,10 +70,10 @@ ClutterPaintNode *      clutter_color_node_new          (const ClutterColor    *
 typedef struct _ClutterTextureNode              ClutterTextureNode;
 typedef struct _ClutterTextureNodeClass         ClutterTextureNodeClass;
 
-CLUTTER_AVAILABLE_IN_1_10
+CLUTTER_EXPORT
 GType clutter_texture_node_get_type (void) G_GNUC_CONST;
 
-CLUTTER_AVAILABLE_IN_1_10
+CLUTTER_EXPORT
 ClutterPaintNode *      clutter_texture_node_new        (CoglTexture           *texture,
                                                          const ClutterColor    *color,
                                                          ClutterScalingFilter   min_filter,
@@ -94,10 +94,10 @@ ClutterPaintNode *      clutter_texture_node_new        (CoglTexture           *
 typedef struct _ClutterClipNode                 ClutterClipNode;
 typedef struct _ClutterClipNodeClass            ClutterClipNodeClass;
 
-CLUTTER_AVAILABLE_IN_1_10
+CLUTTER_EXPORT
 GType clutter_clip_node_get_type (void) G_GNUC_CONST;
 
-CLUTTER_AVAILABLE_IN_1_10
+CLUTTER_EXPORT
 ClutterPaintNode *      clutter_clip_node_new           (void);
 
 #define CLUTTER_TYPE_PIPELINE_NODE              (clutter_pipeline_node_get_type ())
@@ -115,10 +115,10 @@ ClutterPaintNode *      clutter_clip_node_new           (void);
 typedef struct _ClutterPipelineNode             ClutterPipelineNode;
 typedef struct _ClutterPipelineNodeClass        ClutterPipelineNodeClass;
 
-CLUTTER_AVAILABLE_IN_1_10
+CLUTTER_EXPORT
 GType clutter_pipeline_node_get_type (void) G_GNUC_CONST;
 
-CLUTTER_AVAILABLE_IN_1_10
+CLUTTER_EXPORT
 ClutterPaintNode *      clutter_pipeline_node_new       (CoglPipeline          *pipeline);
 
 #define CLUTTER_TYPE_TEXT_NODE                  (clutter_text_node_get_type ())
@@ -136,12 +136,99 @@ ClutterPaintNode *      clutter_pipeline_node_new       (CoglPipeline          *
 typedef struct _ClutterTextNode                 ClutterTextNode;
 typedef struct _ClutterTextNodeClass            ClutterTextNodeClass;
 
-CLUTTER_AVAILABLE_IN_1_10
+CLUTTER_EXPORT
 GType clutter_text_node_get_type (void) G_GNUC_CONST;
 
-CLUTTER_AVAILABLE_IN_1_10
+CLUTTER_EXPORT
 ClutterPaintNode *      clutter_text_node_new           (PangoLayout           *layout,
                                                          const ClutterColor    *color);
+
+#define CLUTTER_TYPE_ACTOR_NODE                 (clutter_actor_node_get_type ())
+#define CLUTTER_ACTOR_NODE(obj)                 (G_TYPE_CHECK_INSTANCE_CAST ((obj), CLUTTER_TYPE_ACTOR_NODE, ClutterActorNode))
+#define CLUTTER_IS_ACTOR_NODE(obj)              (G_TYPE_CHECK_INSTANCE_TYPE ((obj), CLUTTER_TYPE_ACTOR_NODE))
+
+/**
+ * ClutterActorNode:
+ *
+ * The #ClutterActorNode structure is an opaque
+ * type whose members cannot be directly accessed.
+ */
+typedef struct _ClutterActorNode ClutterActorNode;
+typedef struct _ClutterActorNode ClutterActorNodeClass;
+
+CLUTTER_EXPORT
+GType clutter_actor_node_get_type (void) G_GNUC_CONST;
+
+CLUTTER_EXPORT
+ClutterPaintNode * clutter_actor_node_new (ClutterActor *actor);
+
+#define CLUTTER_TYPE_ROOT_NODE                  (clutter_root_node_get_type ())
+#define CLUTTER_ROOT_NODE(obj)                  (G_TYPE_CHECK_INSTANCE_CAST ((obj), CLUTTER_TYPE_ROOT_NODE, ClutterRootNode))
+#define CLUTTER_IS_ROOT_NODE(obj)               (G_TYPE_CHECK_INSTANCE_TYPE ((obj), CLUTTER_TYPE_ROOT_NODE))
+
+/**
+ * ClutterRootNode:
+ *
+ * The #ClutterRootNode structure is an opaque
+ * type whose members cannot be directly accessed.
+ */
+typedef struct _ClutterRootNode                 ClutterRootNode;
+typedef struct _ClutterPaintNodeClass           ClutterRootNodeClass;
+
+CLUTTER_EXPORT
+GType clutter_root_node_get_type (void) G_GNUC_CONST;
+
+CLUTTER_EXPORT
+ClutterPaintNode *      clutter_root_node_new           (CoglFramebuffer       *framebuffer,
+                                                         const ClutterColor    *clear_color,
+                                                         CoglBufferBit          clear_flags);
+
+#define CLUTTER_TYPE_LAYER_NODE                 (clutter_layer_node_get_type ())
+#define CLUTTER_LAYER_NODE(obj)                 (G_TYPE_CHECK_INSTANCE_CAST ((obj), CLUTTER_TYPE_LAYER_NODE, ClutterLayerNode))
+#define CLUTTER_IS_LAYER_NODE(obj)              (G_TYPE_CHECK_INSTANCE_TYPE ((obj), CLUTTER_TYPE_LAYER_NODE))
+
+/*
+ * ClutterLayerNode:
+ *
+ * The #ClutterLayerNode structure is an opaque
+ * type whose members cannot be directly accessed.
+ *
+ * Since: 1.10
+ */
+typedef struct _ClutterLayerNode                ClutterLayerNode;
+typedef struct _ClutterLayerNodeClass           ClutterLayerNodeClass;
+
+CLUTTER_EXPORT
+GType clutter_layer_node_get_type (void) G_GNUC_CONST;
+
+CLUTTER_EXPORT
+ClutterPaintNode *      clutter_layer_node_new          (const CoglMatrix        *projection,
+                                                         const cairo_rectangle_t *viewport,
+                                                         float                    width,
+                                                         float                    height,
+                                                         guint8                   opacity);
+
+
+#define CLUTTER_TYPE_TRANSFORM_NODE             (clutter_transform_node_get_type ())
+#define CLUTTER_TRANSFORM_NODE(obj)             (G_TYPE_CHECK_INSTANCE_CAST ((obj), CLUTTER_TYPE_TRANSFORM_NODE, ClutterTransformNode))
+#define CLUTTER_IS_TRANSFORM_NODE(obj)          (G_TYPE_CHECK_INSTANCE_TYPE ((obj), CLUTTER_TYPE_TRANSFORM_NODE))
+
+/*
+ * ClutterTransformNode:
+ *
+ * The #ClutterLayerNode structure is an opaque
+ * type whose members cannot be directly accessed.
+ *
+ * Since: 1.10
+ */
+typedef struct _ClutterTransformNode            ClutterTransformNode;
+typedef struct _ClutterPaintNodeClass           ClutterTransformNodeClass;
+
+CLUTTER_EXPORT
+GType clutter_transform_node_get_type (void) G_GNUC_CONST;
+
+CLUTTER_EXPORT
+ClutterPaintNode *      clutter_transform_node_new          (const CoglMatrix *projection);
 
 G_END_DECLS
 

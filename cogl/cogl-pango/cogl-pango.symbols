@@ -7,6 +7,3 @@ cogl_pango_font_map_new
 cogl_pango_font_map_set_resolution  
 cogl_pango_font_map_set_use_mipmapping
 cogl_pango_renderer_get_type
-cogl_pango_render_layout
-cogl_pango_render_layout_line
-cogl_pango_render_layout_subpixel

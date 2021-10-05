@@ -1,0 +1,14 @@
+/* Mutter version */
+#mesondefine MUTTER_VERSION
+
+/* List of Cogl drivers */
+#mesondefine CLUTTER_DRIVERS
+
+/* Have evdev support for input handling */
+#mesondefine HAVE_EVDEV
+
+/* Building with libwacom for advanced tablet management */
+#mesondefine HAVE_LIBWACOM
+
+/* Supports PangoFt2 */
+#mesondefine HAVE_PANGO_FT2

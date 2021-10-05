@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 if test -z "$G_DEBUG"; then
     G_DEBUG=fatal-warnings
@@ -14,9 +14,14 @@ shift
 TEST_BINARY=$1
 shift
 
-. $ENVIRONMENT_CONFIG
+UNIT_TESTS=$1
+shift
+
+. "$ENVIRONMENT_CONFIG"
 
 set +m
+
+LOG=$(mktemp)
 
 trap "" ERR
 trap "" SIGABRT
@@ -27,13 +32,15 @@ EXIT=0
 MISSING_FEATURE="WARNING: Missing required feature";
 KNOWN_FAILURE="WARNING: Test is known to fail";
 
-echo "Key:"
-echo "ok = Test passed"
-echo "n/a = Driver is missing a feature required for the test"
-echo "FAIL = Unexpected failure"
-echo "FIXME = Test failed, but it was an expected failure"
-echo "PASS! = Unexpected pass"
-echo ""
+if [ -z "$RUN_TESTS_QUIET" ]; then
+  echo "Key:"
+  echo "ok = Test passed"
+  echo "n/a = Driver is missing a feature required for the test"
+  echo "FAIL = Unexpected failure"
+  echo "FIXME = Test failed, but it was an expected failure"
+  echo "PASS! = Unexpected pass"
+  echo ""
+fi
 
 get_status()
 {
@@ -62,96 +69,94 @@ get_status()
 
 run_test()
 {
-  $($TEST_BINARY $1 &>.log)
+  $("$TEST_BINARY" "$1" &> "$LOG")
   TMP=$?
   var_name=$2_result
-  eval $var_name=$TMP
-  if grep -q "$MISSING_FEATURE" .log; then
-    if test $TMP -ne 0; then
-      eval $var_name=500
+  eval "$var_name=$TMP"
+  if grep -q "$MISSING_FEATURE" "$LOG"; then
+    if test "$TMP" -ne 0; then
+      eval "$var_name=500"
     else
-      eval $var_name=400
+      eval "$var_name=400"
     fi
-  elif grep -q "$KNOWN_FAILURE" .log; then
+  elif grep -q "$KNOWN_FAILURE" "$LOG"; then
     if test $TMP -ne 0; then
-      eval $var_name=300
+      eval "$var_name=300"
     else
-      eval $var_name=400
+      eval "$var_name=400"
     fi
   else
-    if test $TMP -ne 0; then EXIT=$TMP; fi
+    if test "$TMP" -ne 0; then EXIT=$TMP; fi
   fi
 }
 
+if [ -z "$UNIT_TESTS" ]; then
+  echo Missing unit-tests file or names
+  exit 1
+fi
+
 TITLE_FORMAT="%35s"
-printf $TITLE_FORMAT "Test"
+printf "$TITLE_FORMAT" "Test"
 
-if test $HAVE_GL -eq 1; then
-  GL_FORMAT=" %6s %8s %7s %6s %6s"
-  printf "$GL_FORMAT" "GL+FF" "GL+ARBFP" "GL+GLSL" "GL-NPT" "GL3"
+if test "$HAVE_GL" -eq 1; then
+  GL_FORMAT=" %6s %8s %7s %6s"
+  printf "$GL_FORMAT" "GL+GLSL" "GL3"
 fi
-if test $HAVE_GLES2 -eq 1; then
-  GLES2_FORMAT=" %6s %7s"
-  printf "$GLES2_FORMAT" "ES2" "ES2-NPT"
+if test "$HAVE_GLES2" -eq 1; then
+  GLES2_FORMAT=" %6s"
+  printf "$GLES2_FORMAT" "ES2"
 fi
 
 echo ""
-echo ""
 
-for test in `cat unit-tests`
+if [ -f "$UNIT_TESTS" ]; then
+  UNIT_TESTS="$(cat $UNIT_TESTS)"
+fi
+
+if [ -z "$RUN_TESTS_QUIET" ] || [ "$(echo "$UNIT_TESTS" | wc -w )" -gt 1 ]; then
+  echo ""
+fi
+
+for test in $UNIT_TESTS
 do
+  printf $TITLE_FORMAT "$test:"
   export COGL_DEBUG=
 
-  if test $HAVE_GL -eq 1; then
-    export COGL_DRIVER=gl
-    export COGL_DEBUG=disable-glsl,disable-arbfp
-    run_test $test gl_ff
-
+  if test "$HAVE_GL" -eq 1; then
     export COGL_DRIVER=gl
     # NB: we can't explicitly disable fixed + glsl in this case since
     # the arbfp code only supports fragment processing so we need either
     # the fixed or glsl vertends
     export COGL_DEBUG=
-    run_test $test gl_arbfp
+    run_test "$test" gl_arbfp
 
     export COGL_DRIVER=gl
     export COGL_DEBUG=disable-fixed,disable-arbfp
-    run_test $test gl_glsl
-
-    export COGL_DRIVER=gl
-    export COGL_DEBUG=disable-npot-textures
-    run_test $test gl_npot
+    run_test "$test" gl_glsl
 
     export COGL_DRIVER=gl3
     export COGL_DEBUG=
-    run_test $test gl3
+    run_test "$test" gl3
   fi
 
-  if test $HAVE_GLES2 -eq 1; then
+  if test "$HAVE_GLES2" -eq 1; then
     export COGL_DRIVER=gles2
     export COGL_DEBUG=
-    run_test $test gles2
-
-    export COGL_DRIVER=gles2
-    export COGL_DEBUG=disable-npot-textures
-    run_test $test gles2_npot
+    run_test "$test" gles2
   fi
 
-  printf $TITLE_FORMAT "$test:"
-  if test $HAVE_GL -eq 1; then
+  if test "$HAVE_GL" -eq 1; then
     printf "$GL_FORMAT" \
-      "`get_status $gl_ff_result`" \
-      "`get_status $gl_arbfp_result`" \
-      "`get_status $gl_glsl_result`" \
-      "`get_status $gl_npot_result`" \
-      "`get_status $gl3_result`"
+      "$(get_status "$gl_glsl_result")" \
+      "$(get_status "$gl3_result")"
   fi
-  if test $HAVE_GLES2 -eq 1; then
+  if test "$HAVE_GLES2" -eq 1; then
     printf "$GLES2_FORMAT" \
-      "`get_status $gles2_result`" \
-      "`get_status $gles2_npot_result`"
+      "$(get_status "$gles2_result")"
   fi
   echo ""
 done
 
-exit $EXIT
+rm "$LOG"
+
+exit "$EXIT"

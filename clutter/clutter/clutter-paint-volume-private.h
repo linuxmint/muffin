@@ -58,7 +58,7 @@ struct _ClutterPaintVolume
    * elements 4, 5, 6 and 7 most of the time for 2D actors when
    * calculating the projected paint box.
    */
-  ClutterVertex vertices[8];
+  graphene_point3d_t vertices[8];
 
   /* As an optimization for internally managed PaintVolumes we allow
    * initializing ClutterPaintVolume variables allocated on the stack

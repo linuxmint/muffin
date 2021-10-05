@@ -48,7 +48,7 @@ typedef struct _CoglContext CoglContext;
 
 #include <glib-object.h>
 
-COGL_BEGIN_DECLS
+G_BEGIN_DECLS
 
 /**
  * SECTION:cogl-context
@@ -99,12 +99,13 @@ COGL_BEGIN_DECLS
  *
  * Returns: a #GType that can be used with the GLib type system.
  */
+COGL_EXPORT
 GType cogl_context_get_gtype (void);
 
 /**
- * cogl_context_new: (constructor)
+ * cogl_context_new: (constructor) (skip)
  * @display: (allow-none): A #CoglDisplay pointer
- * @error: A CoglError return location.
+ * @error: A GError return location.
  *
  * Creates a new #CoglContext which acts as an application sandbox
  * for any state objects that are allocated.
@@ -113,12 +114,12 @@ GType cogl_context_get_gtype (void);
  * Since: 1.8
  * Stability: unstable
  */
-CoglContext *
+COGL_EXPORT CoglContext *
 cogl_context_new (CoglDisplay *display,
-                  CoglError **error);
+                  GError **error);
 
 /**
- * cogl_context_get_display:
+ * cogl_context_get_display: (skip)
  * @context: A #CoglContext pointer
  *
  * Retrieves the #CoglDisplay that is internally associated with the
@@ -132,11 +133,11 @@ cogl_context_new (CoglDisplay *display,
  * Since: 1.8
  * Stability: unstable
  */
-CoglDisplay *
+COGL_EXPORT CoglDisplay *
 cogl_context_get_display (CoglContext *context);
 
 /**
- * cogl_context_get_renderer:
+ * cogl_context_get_renderer: (skip)
  * @context: A #CoglContext pointer
  *
  * Retrieves the #CoglRenderer that is internally associated with the
@@ -151,7 +152,7 @@ cogl_context_get_display (CoglContext *context);
  * Since: 1.16
  * Stability: unstable
  */
-CoglRenderer *
+COGL_EXPORT CoglRenderer *
 cogl_context_get_renderer (CoglContext *context);
 
 /**
@@ -166,7 +167,7 @@ cogl_context_get_renderer (CoglContext *context);
  * Since: 1.10
  * Stability: Unstable
  */
-CoglBool
+COGL_EXPORT gboolean
 cogl_is_context (void *object);
 
 /* XXX: not guarded by the EXPERIMENTAL_API defines to avoid
@@ -174,58 +175,22 @@ cogl_is_context (void *object);
  * experimental since it's only useable with experimental API... */
 /**
  * CoglFeatureID:
- * @COGL_FEATURE_ID_TEXTURE_NPOT_BASIC: The hardware supports non power
- *     of two textures, but you also need to check the
- *     %COGL_FEATURE_ID_TEXTURE_NPOT_MIPMAP and %COGL_FEATURE_ID_TEXTURE_NPOT_REPEAT
- *     features to know if the hardware supports npot texture mipmaps
- *     or repeat modes other than
- *     %COGL_PIPELINE_WRAP_MODE_CLAMP_TO_EDGE respectively.
- * @COGL_FEATURE_ID_TEXTURE_NPOT_MIPMAP: Mipmapping is supported in
- *     conjuntion with non power of two textures.
- * @COGL_FEATURE_ID_TEXTURE_NPOT_REPEAT: Repeat modes other than
- *     %COGL_PIPELINE_WRAP_MODE_CLAMP_TO_EDGE are supported by the
- *     hardware.
- * @COGL_FEATURE_ID_TEXTURE_NPOT: Non power of two textures are supported
- *    by the hardware. This is a equivalent to the
- *    %COGL_FEATURE_ID_TEXTURE_NPOT_BASIC, %COGL_FEATURE_ID_TEXTURE_NPOT_MIPMAP
- *    and %COGL_FEATURE_ID_TEXTURE_NPOT_REPEAT features combined.
- * @COGL_FEATURE_ID_TEXTURE_RECTANGLE: Support for rectangular
- *    textures with non-normalized texture coordinates.
  * @COGL_FEATURE_ID_TEXTURE_RG: Support for
  *    %COGL_TEXTURE_COMPONENTS_RG as the internal components of a
  *    texture.
- * @COGL_FEATURE_ID_TEXTURE_3D: 3D texture support
- * @COGL_FEATURE_ID_OFFSCREEN: Offscreen rendering support
- * @COGL_FEATURE_ID_OFFSCREEN_MULTISAMPLE: Multisample support for
- *    offscreen framebuffers
- * @COGL_FEATURE_ID_ONSCREEN_MULTIPLE: Multiple onscreen framebuffers
- *    supported.
- * @COGL_FEATURE_ID_GLSL: GLSL support
- * @COGL_FEATURE_ID_ARBFP: ARBFP support
  * @COGL_FEATURE_ID_UNSIGNED_INT_INDICES: Set if
  *     %COGL_INDICES_TYPE_UNSIGNED_INT is supported in
  *     cogl_indices_new().
- * @COGL_FEATURE_ID_DEPTH_RANGE: cogl_pipeline_set_depth_range() support
- * @COGL_FEATURE_ID_POINT_SPRITE: Whether
- *     cogl_pipeline_set_layer_point_sprite_coords_enabled() is supported.
- * @COGL_FEATURE_ID_PER_VERTEX_POINT_SIZE: Whether cogl_point_size_in
- *     can be used as an attribute to set a per-vertex point size.
  * @COGL_FEATURE_ID_MAP_BUFFER_FOR_READ: Whether cogl_buffer_map() is
  *     supported with CoglBufferAccess including read support.
  * @COGL_FEATURE_ID_MAP_BUFFER_FOR_WRITE: Whether cogl_buffer_map() is
  *     supported with CoglBufferAccess including write support.
- * @COGL_FEATURE_ID_MIRRORED_REPEAT: Whether
- *    %COGL_PIPELINE_WRAP_MODE_MIRRORED_REPEAT is supported.
  * @COGL_FEATURE_ID_SWAP_BUFFERS_EVENT:
  *     Available if the window system supports reporting an event
  *     for swap buffer completions.
  * @COGL_FEATURE_ID_BUFFER_AGE: Available if the age of #CoglOnscreen back
  *    buffers are tracked and so cogl_onscreen_get_buffer_age() can be
  *    expected to return age values other than 0.
- * @COGL_FEATURE_ID_GLES2_CONTEXT: Whether creating new GLES2 contexts is
- *    suported.
- * @COGL_FEATURE_ID_DEPTH_TEXTURE: Whether #CoglFramebuffer support rendering
- *     the depth buffer to a texture.
  * @COGL_FEATURE_ID_PRESENTATION_TIME: Whether frame presentation
  *    time stamps will be recorded in #CoglFrameInfo objects.
  *
@@ -237,29 +202,12 @@ cogl_is_context (void *object);
  */
 typedef enum _CoglFeatureID
 {
-  COGL_FEATURE_ID_TEXTURE_NPOT_BASIC = 1,
-  COGL_FEATURE_ID_TEXTURE_NPOT_MIPMAP,
-  COGL_FEATURE_ID_TEXTURE_NPOT_REPEAT,
-  COGL_FEATURE_ID_TEXTURE_NPOT,
-  COGL_FEATURE_ID_TEXTURE_RECTANGLE,
-  COGL_FEATURE_ID_TEXTURE_3D,
-  COGL_FEATURE_ID_GLSL,
-  COGL_FEATURE_ID_ARBFP,
-  COGL_FEATURE_ID_OFFSCREEN,
-  COGL_FEATURE_ID_OFFSCREEN_MULTISAMPLE,
-  COGL_FEATURE_ID_ONSCREEN_MULTIPLE,
   COGL_FEATURE_ID_UNSIGNED_INT_INDICES,
-  COGL_FEATURE_ID_DEPTH_RANGE,
-  COGL_FEATURE_ID_POINT_SPRITE,
   COGL_FEATURE_ID_MAP_BUFFER_FOR_READ,
   COGL_FEATURE_ID_MAP_BUFFER_FOR_WRITE,
-  COGL_FEATURE_ID_MIRRORED_REPEAT,
   COGL_FEATURE_ID_SWAP_BUFFERS_EVENT,
-  COGL_FEATURE_ID_GLES2_CONTEXT,
-  COGL_FEATURE_ID_DEPTH_TEXTURE,
   COGL_FEATURE_ID_PRESENTATION_TIME,
   COGL_FEATURE_ID_FENCE,
-  COGL_FEATURE_ID_PER_VERTEX_POINT_SIZE,
   COGL_FEATURE_ID_TEXTURE_RG,
   COGL_FEATURE_ID_BUFFER_AGE,
   COGL_FEATURE_ID_TEXTURE_EGL_IMAGE_EXTERNAL,
@@ -287,7 +235,7 @@ typedef enum _CoglFeatureID
  * Since: 1.10
  * Stability: unstable
  */
-CoglBool
+COGL_EXPORT gboolean
 cogl_has_feature (CoglContext *context, CoglFeatureID feature);
 
 /**
@@ -307,7 +255,7 @@ cogl_has_feature (CoglContext *context, CoglFeatureID feature);
  * Since: 1.10
  * Stability: unstable
  */
-CoglBool
+COGL_EXPORT gboolean
 cogl_has_features (CoglContext *context, ...);
 
 /**
@@ -336,7 +284,7 @@ typedef void (*CoglFeatureCallback) (CoglFeatureID feature, void *user_data);
  * Since: 1.10
  * Stability: unstable
  */
-void
+COGL_EXPORT void
 cogl_foreach_feature (CoglContext *context,
                       CoglFeatureCallback callback,
                       void *user_data);
@@ -361,7 +309,7 @@ cogl_foreach_feature (CoglContext *context,
  * Since: 1.14
  * Stability: unstable
  */
-int64_t
+COGL_EXPORT int64_t
 cogl_get_clock_time (CoglContext *context);
 
 /**
@@ -403,10 +351,10 @@ typedef enum _CoglGraphicsResetStatus
  *
  * Return value: a #CoglGraphicsResetStatus
  */
-CoglGraphicsResetStatus
+COGL_EXPORT CoglGraphicsResetStatus
 cogl_get_graphics_reset_status (CoglContext *context);
 
-COGL_END_DECLS
+G_END_DECLS
 
 #endif /* __COGL_CONTEXT_H__ */
 

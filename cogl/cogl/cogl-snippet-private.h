@@ -62,7 +62,7 @@ struct _CoglSnippet
   /* This is set to TRUE the first time the snippet is attached to the
      pipeline. After that any attempts to modify the snippet will be
      ignored. */
-  CoglBool immutable;
+  gboolean immutable;
 
   char *declarations;
   char *pre;

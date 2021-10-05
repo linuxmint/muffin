@@ -34,9 +34,9 @@
 #ifndef __COGL_FRAMEBUFFER_GL_PRIVATE_H__
 #define __COGL_FRAMEBUFFER_GL_PRIVATE_H__
 
-CoglBool
+gboolean
 _cogl_offscreen_gl_allocate (CoglOffscreen *offscreen,
-                             CoglError **error);
+                             GError **error);
 
 void
 _cogl_offscreen_gl_free (CoglOffscreen *offscreen);
@@ -60,6 +60,9 @@ _cogl_framebuffer_gl_query_bits (CoglFramebuffer *framebuffer,
 
 void
 _cogl_framebuffer_gl_finish (CoglFramebuffer *framebuffer);
+
+void
+_cogl_framebuffer_gl_flush (CoglFramebuffer *framebuffer);
 
 void
 _cogl_framebuffer_gl_discard_buffers (CoglFramebuffer *framebuffer,
@@ -89,13 +92,13 @@ _cogl_framebuffer_gl_draw_indexed_attributes (CoglFramebuffer *framebuffer,
                                               int n_attributes,
                                               CoglDrawFlags flags);
 
-CoglBool
+gboolean
 _cogl_framebuffer_gl_read_pixels_into_bitmap (CoglFramebuffer *framebuffer,
                                               int x,
                                               int y,
                                               CoglReadPixelsFlags source,
                                               CoglBitmap *bitmap,
-                                              CoglError **error);
+                                              GError **error);
 
 #endif /* __COGL_FRAMEBUFFER_GL_PRIVATE_H__ */
 

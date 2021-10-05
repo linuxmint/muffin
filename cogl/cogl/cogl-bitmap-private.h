@@ -51,8 +51,8 @@ struct _CoglBitmap
 
   uint8_t *data;
 
-  CoglBool mapped;
-  CoglBool bound;
+  gboolean mapped;
+  gboolean bound;
 
   /* If this is non-null then 'data' is ignored and instead it is
      fetched from this shared bitmap. */
@@ -70,10 +70,10 @@ struct _CoglBitmap
  * @width: width of the bitmap in pixels
  * @height: height of the bitmap in pixels
  * @format: the format of the pixels the array will store
- * @error: A #CoglError for catching exceptional errors or %NULL
+ * @error: A #GError for catching exceptional errors or %NULL
  *
  * This is equivalent to cogl_bitmap_new_with_size() except that it
- * allocated the buffer using malloc() instead of creating a
+ * allocated the buffer using g_malloc() instead of creating a
  * #CoglPixelBuffer. The buffer will be automatically destroyed when
  * the bitmap is freed.
  *
@@ -87,7 +87,7 @@ _cogl_bitmap_new_with_malloc_buffer (CoglContext *context,
                                      unsigned int width,
                                      unsigned int height,
                                      CoglPixelFormat format,
-                                     CoglError **error);
+                                     GError **error);
 
 /* The idea of this function is that it will create a bitmap that
    shares the actual data with another bitmap. This is needed for the
@@ -103,55 +103,55 @@ _cogl_bitmap_new_shared (CoglBitmap      *shared_bmp,
 
 CoglBitmap *
 _cogl_bitmap_convert (CoglBitmap *bmp,
-		      CoglPixelFormat dst_format,
-                      CoglError **error);
+                      CoglPixelFormat dst_format,
+                      GError **error);
 
 CoglBitmap *
 _cogl_bitmap_convert_for_upload (CoglBitmap *src_bmp,
                                  CoglPixelFormat internal_format,
-                                 CoglBool can_convert_in_place,
-                                 CoglError **error);
+                                 gboolean can_convert_in_place,
+                                 GError **error);
 
-CoglBool
+gboolean
 _cogl_bitmap_convert_into_bitmap (CoglBitmap *src_bmp,
                                   CoglBitmap *dst_bmp,
-                                  CoglError **error);
+                                  GError **error);
 
 CoglBitmap *
 _cogl_bitmap_from_file (CoglContext *ctx,
                         const char *filename,
-			CoglError **error);
+                        GError **error);
 
-CoglBool
+gboolean
 _cogl_bitmap_unpremult (CoglBitmap *dst_bmp,
-                        CoglError **error);
+                        GError **error);
 
-CoglBool
+gboolean
 _cogl_bitmap_premult (CoglBitmap *dst_bmp,
-                      CoglError **error);
+                      GError **error);
 
-CoglBool
+gboolean
 _cogl_bitmap_convert_premult_status (CoglBitmap *bmp,
                                      CoglPixelFormat dst_format,
-                                     CoglError **error);
+                                     GError **error);
 
-CoglBool
+gboolean
 _cogl_bitmap_copy_subregion (CoglBitmap *src,
-			     CoglBitmap *dst,
-			     int src_x,
-			     int src_y,
-			     int dst_x,
-			     int dst_y,
-			     int width,
-			     int height,
-                             CoglError **error);
+                             CoglBitmap *dst,
+                             int src_x,
+                             int src_y,
+                             int dst_x,
+                             int dst_y,
+                             int width,
+                             int height,
+                             GError **error);
 
 /* Creates a deep copy of the source bitmap */
 CoglBitmap *
 _cogl_bitmap_copy (CoglBitmap *src_bmp,
-                   CoglError **error);
+                   GError **error);
 
-CoglBool
+gboolean
 _cogl_bitmap_get_size_from_file (const char *filename,
                                  int        *width,
                                  int        *height);
@@ -172,28 +172,10 @@ uint8_t *
 _cogl_bitmap_map (CoglBitmap *bitmap,
                   CoglBufferAccess access,
                   CoglBufferMapHint hints,
-                  CoglError **error);
+                  GError **error);
 
 void
 _cogl_bitmap_unmap (CoglBitmap *bitmap);
-
-/* These two are replacements for map and unmap that should used when
- * the pointer is going to be passed to GL for pixel packing or
- * unpacking. The address might not be valid for reading if the bitmap
- * was created with new_from_buffer but it will however be good to
- * pass to glTexImage2D for example. The access should be READ for
- * unpacking and WRITE for packing. It can not be both
- *
- * TODO: split this bind/unbind functions out into a GL specific file
- */
-uint8_t *
-_cogl_bitmap_gl_bind (CoglBitmap *bitmap,
-                      CoglBufferAccess access,
-                      CoglBufferMapHint hints,
-                      CoglError **error);
-
-void
-_cogl_bitmap_gl_unbind (CoglBitmap *bitmap);
 
 CoglContext *
 _cogl_bitmap_get_context (CoglBitmap *bitmap);

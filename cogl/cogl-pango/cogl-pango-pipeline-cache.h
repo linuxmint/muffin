@@ -38,7 +38,7 @@
 
 #include "cogl/cogl-context-private.h"
 
-COGL_BEGIN_DECLS
+G_BEGIN_DECLS
 
 typedef struct _CoglPangoPipelineCache
 {
@@ -49,13 +49,13 @@ typedef struct _CoglPangoPipelineCache
   CoglPipeline *base_texture_alpha_pipeline;
   CoglPipeline *base_texture_rgba_pipeline;
 
-  CoglBool use_mipmapping;
+  gboolean use_mipmapping;
 } CoglPangoPipelineCache;
 
 
 CoglPangoPipelineCache *
 _cogl_pango_pipeline_cache_new (CoglContext *ctx,
-                                CoglBool use_mipmapping);
+                                gboolean use_mipmapping);
 
 /* Returns a pipeline that can be used to render glyphs in the given
    texture. The pipeline has a new reference so it is up to the caller
@@ -67,6 +67,6 @@ _cogl_pango_pipeline_cache_get (CoglPangoPipelineCache *cache,
 void
 _cogl_pango_pipeline_cache_free (CoglPangoPipelineCache *cache);
 
-COGL_END_DECLS
+G_END_DECLS
 
 #endif /* __COGL_PANGO_PIPELINE_CACHE_H__ */

@@ -32,7 +32,6 @@
 #include "cally-root.h"
 #include "cally-stage.h"
 #include "cally-text.h"
-#include "cally-texture.h"
 #include "cally-util.h"
 
 #undef __CALLY_H_INSIDE__

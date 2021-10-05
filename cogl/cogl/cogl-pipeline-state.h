@@ -39,7 +39,7 @@
 #include <cogl/cogl-color.h>
 #include <cogl/cogl-depth-state.h>
 
-COGL_BEGIN_DECLS
+G_BEGIN_DECLS
 
 /**
  * cogl_pipeline_set_color:
@@ -58,7 +58,7 @@ COGL_BEGIN_DECLS
  * Since: 2.0
  * Stability: Unstable
  */
-void
+COGL_EXPORT void
 cogl_pipeline_set_color (CoglPipeline    *pipeline,
                          const CoglColor *color);
 
@@ -77,7 +77,7 @@ cogl_pipeline_set_color (CoglPipeline    *pipeline,
  * Since: 2.0
  * Stability: Unstable
  */
-void
+COGL_EXPORT void
 cogl_pipeline_set_color4ub (CoglPipeline *pipeline,
 			    uint8_t red,
                             uint8_t green,
@@ -99,7 +99,7 @@ cogl_pipeline_set_color4ub (CoglPipeline *pipeline,
  * Since: 2.0
  * Stability: Unstable
  */
-void
+COGL_EXPORT void
 cogl_pipeline_set_color4f (CoglPipeline *pipeline,
                            float         red,
                            float         green,
@@ -116,192 +116,9 @@ cogl_pipeline_set_color4f (CoglPipeline *pipeline,
  * Since: 2.0
  * Stability: Unstable
  */
-void
+COGL_EXPORT void
 cogl_pipeline_get_color (CoglPipeline *pipeline,
                          CoglColor    *color);
-
-/**
- * cogl_pipeline_set_ambient:
- * @pipeline: A #CoglPipeline object
- * @ambient: The components of the desired ambient color
- *
- * Sets the pipeline's ambient color, in the standard OpenGL lighting
- * model. The ambient color affects the overall color of the object.
- *
- * Since the diffuse color will be intense when the light hits the surface
- * directly, the ambient will be most apparent where the light hits at a
- * slant.
- *
- * The default value is (0.2, 0.2, 0.2, 1.0)
- *
- * Since: 2.0
- * Stability: Unstable
- */
-void
-cogl_pipeline_set_ambient (CoglPipeline    *pipeline,
-			   const CoglColor *ambient);
-
-/**
- * cogl_pipeline_get_ambient:
- * @pipeline: A #CoglPipeline object
- * @ambient: The location to store the ambient color
- *
- * Retrieves the current ambient color for @pipeline
- *
- * Since: 2.0
- * Stability: Unstable
- */
-void
-cogl_pipeline_get_ambient (CoglPipeline *pipeline,
-                           CoglColor    *ambient);
-
-/**
- * cogl_pipeline_set_diffuse:
- * @pipeline: A #CoglPipeline object
- * @diffuse: The components of the desired diffuse color
- *
- * Sets the pipeline's diffuse color, in the standard OpenGL lighting
- * model. The diffuse color is most intense where the light hits the
- * surface directly - perpendicular to the surface.
- *
- * The default value is (0.8, 0.8, 0.8, 1.0)
- *
- * Since: 2.0
- * Stability: Unstable
- */
-void
-cogl_pipeline_set_diffuse (CoglPipeline    *pipeline,
-			   const CoglColor *diffuse);
-
-/**
- * cogl_pipeline_get_diffuse:
- * @pipeline: A #CoglPipeline object
- * @diffuse: The location to store the diffuse color
- *
- * Retrieves the current diffuse color for @pipeline
- *
- * Since: 2.0
- * Stability: Unstable
- */
-void
-cogl_pipeline_get_diffuse (CoglPipeline *pipeline,
-                           CoglColor    *diffuse);
-
-/**
- * cogl_pipeline_set_ambient_and_diffuse:
- * @pipeline: A #CoglPipeline object
- * @color: The components of the desired ambient and diffuse colors
- *
- * Conveniently sets the diffuse and ambient color of @pipeline at the same
- * time. See cogl_pipeline_set_ambient() and cogl_pipeline_set_diffuse().
- *
- * The default ambient color is (0.2, 0.2, 0.2, 1.0)
- *
- * The default diffuse color is (0.8, 0.8, 0.8, 1.0)
- *
- * Since: 2.0
- * Stability: Unstable
- */
-void
-cogl_pipeline_set_ambient_and_diffuse (CoglPipeline    *pipeline,
-				       const CoglColor *color);
-
-/**
- * cogl_pipeline_set_specular:
- * @pipeline: A #CoglPipeline object
- * @specular: The components of the desired specular color
- *
- * Sets the pipeline's specular color, in the standard OpenGL lighting
- * model. The intensity of the specular color depends on the viewport
- * position, and is brightest along the lines of reflection.
- *
- * The default value is (0.0, 0.0, 0.0, 1.0)
- *
- * Since: 2.0
- * Stability: Unstable
- */
-void
-cogl_pipeline_set_specular (CoglPipeline    *pipeline,
-			    const CoglColor *specular);
-
-/**
- * cogl_pipeline_get_specular:
- * @pipeline: A #CoglPipeline object
- * @specular: The location to store the specular color
- *
- * Retrieves the pipelines current specular color.
- *
- * Since: 2.0
- * Stability: Unstable
- */
-void
-cogl_pipeline_get_specular (CoglPipeline *pipeline,
-                            CoglColor    *specular);
-
-/**
- * cogl_pipeline_set_shininess:
- * @pipeline: A #CoglPipeline object
- * @shininess: The desired shininess; must be >= 0.0
- *
- * Sets the shininess of the pipeline, in the standard OpenGL lighting
- * model, which determines the size of the specular highlights. A
- * higher @shininess will produce smaller highlights which makes the
- * object appear more shiny.
- *
- * The default value is 0.0
- *
- * Since: 2.0
- * Stability: Unstable
- */
-void
-cogl_pipeline_set_shininess (CoglPipeline *pipeline,
-			     float         shininess);
-
-/**
- * cogl_pipeline_get_shininess:
- * @pipeline: A #CoglPipeline object
- *
- * Retrieves the pipelines current emission color.
- *
- * Return value: The pipelines current shininess value
- *
- * Since: 2.0
- * Stability: Unstable
- */
-float
-cogl_pipeline_get_shininess (CoglPipeline *pipeline);
-
-/**
- * cogl_pipeline_set_emission:
- * @pipeline: A #CoglPipeline object
- * @emission: The components of the desired emissive color
- *
- * Sets the pipeline's emissive color, in the standard OpenGL lighting
- * model. It will look like the surface is a light source emitting this
- * color.
- *
- * The default value is (0.0, 0.0, 0.0, 1.0)
- *
- * Since: 2.0
- * Stability: Unstable
- */
-void
-cogl_pipeline_set_emission (CoglPipeline    *pipeline,
-			    const CoglColor *emission);
-
-/**
- * cogl_pipeline_get_emission:
- * @pipeline: A #CoglPipeline object
- * @emission: The location to store the emission color
- *
- * Retrieves the pipelines current emission color.
- *
- * Since: 2.0
- * Stability: Unstable
- */
-void
-cogl_pipeline_get_emission (CoglPipeline *pipeline,
-                            CoglColor    *emission);
 
 /**
  * CoglPipelineAlphaFunc:
@@ -325,7 +142,8 @@ cogl_pipeline_get_emission (CoglPipeline *pipeline,
  * incoming alpha value and a reference alpha value. The #CoglPipelineAlphaFunc
  * determines how the comparison is done.
  */
-typedef enum {
+typedef enum
+{
   COGL_PIPELINE_ALPHA_FUNC_NEVER    = 0x0200,
   COGL_PIPELINE_ALPHA_FUNC_LESS	    = 0x0201,
   COGL_PIPELINE_ALPHA_FUNC_EQUAL    = 0x0202,
@@ -355,7 +173,7 @@ typedef enum {
  * Since: 2.0
  * Stability: Unstable
  */
-void
+COGL_EXPORT void
 cogl_pipeline_set_alpha_test_function (CoglPipeline         *pipeline,
 				       CoglPipelineAlphaFunc alpha_func,
 				       float                 alpha_reference);
@@ -369,7 +187,7 @@ cogl_pipeline_set_alpha_test_function (CoglPipeline         *pipeline,
  * Since: 2.0
  * Stability: Unstable
  */
-CoglPipelineAlphaFunc
+COGL_EXPORT CoglPipelineAlphaFunc
 cogl_pipeline_get_alpha_test_function (CoglPipeline *pipeline);
 
 /**
@@ -381,7 +199,7 @@ cogl_pipeline_get_alpha_test_function (CoglPipeline *pipeline);
  * Since: 2.0
  * Stability: Unstable
  */
-float
+COGL_EXPORT float
 cogl_pipeline_get_alpha_test_reference (CoglPipeline *pipeline);
 
 /**
@@ -389,7 +207,7 @@ cogl_pipeline_get_alpha_test_reference (CoglPipeline *pipeline);
  * @pipeline: A #CoglPipeline object
  * @blend_string: A <link linkend="cogl-Blend-Strings">Cogl blend string</link>
  *   describing the desired blend function.
- * @error: return location for a #CoglError that may report lack of driver
+ * @error: return location for a #GError that may report lack of driver
  *   support if you give separate blend string statements for the alpha
  *   channel and RGB channels since some drivers, or backends such as
  *   GLES 1.1, don't support this feature. May be %NULL, in which case a
@@ -466,10 +284,10 @@ cogl_pipeline_get_alpha_test_reference (CoglPipeline *pipeline);
  * Since: 2.0
  * Stability: Unstable
  */
-CoglBool
+COGL_EXPORT gboolean
 cogl_pipeline_set_blend (CoglPipeline *pipeline,
                          const char   *blend_string,
-                         CoglError      **error);
+                         GError **error);
 
 /**
  * cogl_pipeline_set_blend_constant:
@@ -482,7 +300,7 @@ cogl_pipeline_set_blend (CoglPipeline *pipeline,
  * Since: 2.0
  * Stability: Unstable
  */
-void
+COGL_EXPORT void
 cogl_pipeline_set_blend_constant (CoglPipeline *pipeline,
                                   const CoglColor *constant_color);
 
@@ -507,7 +325,7 @@ cogl_pipeline_set_blend_constant (CoglPipeline *pipeline,
  * Since: 2.0
  * Stability: Unstable
  */
-void
+COGL_EXPORT void
 cogl_pipeline_set_point_size (CoglPipeline *pipeline,
                               float point_size);
 
@@ -523,14 +341,14 @@ cogl_pipeline_set_point_size (CoglPipeline *pipeline,
  * Since: 2.0
  * Stability: Unstable
  */
-float
+COGL_EXPORT float
 cogl_pipeline_get_point_size (CoglPipeline *pipeline);
 
 /**
  * cogl_pipeline_set_per_vertex_point_size:
  * @pipeline: a #CoglPipeline pointer
  * @enable: whether to enable per-vertex point size
- * @error: a location to store a #CoglError if the change failed
+ * @error: a location to store a #GError if the change failed
  *
  * Sets whether to use a per-vertex point size or to use the value set
  * by cogl_pipeline_set_point_size(). If per-vertex point size is
@@ -543,19 +361,14 @@ cogl_pipeline_get_point_size (CoglPipeline *pipeline);
  * and cogl_point_size_out is not written to then the results are
  * undefined.
  *
- * Note that enabling this will only work if the
- * %COGL_FEATURE_ID_PER_VERTEX_POINT_SIZE feature is available. If
- * this is not available then the function will return %FALSE and set
- * a #CoglError.
- *
  * Since: 2.0
  * Stability: Unstable
  * Return value: %TRUE if the change suceeded or %FALSE otherwise
  */
-CoglBool
+COGL_EXPORT gboolean
 cogl_pipeline_set_per_vertex_point_size (CoglPipeline *pipeline,
-                                         CoglBool enable,
-                                         CoglError **error);
+                                         gboolean enable,
+                                         GError **error);
 
 /**
  * cogl_pipeline_get_per_vertex_point_size:
@@ -567,40 +380,8 @@ cogl_pipeline_set_per_vertex_point_size (CoglPipeline *pipeline,
  *   enabled or %FALSE otherwise. The per-vertex point size can be
  *   enabled with cogl_pipeline_set_per_vertex_point_size().
  */
-CoglBool
+COGL_EXPORT gboolean
 cogl_pipeline_get_per_vertex_point_size (CoglPipeline *pipeline);
-
-/**
- * cogl_pipeline_get_color_mask:
- * @pipeline: a #CoglPipeline object.
- *
- * Gets the current #CoglColorMask of which channels would be written to the
- * current framebuffer. Each bit set in the mask means that the
- * corresponding color would be written.
- *
- * Returns: A #CoglColorMask
- * Since: 1.8
- * Stability: unstable
- */
-CoglColorMask
-cogl_pipeline_get_color_mask (CoglPipeline *pipeline);
-
-/**
- * cogl_pipeline_set_color_mask:
- * @pipeline: a #CoglPipeline object.
- * @color_mask: A #CoglColorMask of which color channels to write to
- *              the current framebuffer.
- *
- * Defines a bit mask of which color channels should be written to the
- * current framebuffer. If a bit is set in @color_mask that means that
- * color will be written.
- *
- * Since: 1.8
- * Stability: unstable
- */
-void
-cogl_pipeline_set_color_mask (CoglPipeline *pipeline,
-                              CoglColorMask color_mask);
 
 /**
  * cogl_pipeline_get_user_program:
@@ -609,12 +390,12 @@ cogl_pipeline_set_color_mask (CoglPipeline *pipeline,
  * Queries what user program has been associated with the given
  * @pipeline using cogl_pipeline_set_user_program().
  *
- * Return value: (transfer none): The current user program or %COGL_INVALID_HANDLE.
+ * Return value: (transfer none): The current user program or %NULL.
  *
  * Since: 2.0
  * Stability: Unstable
  */
-CoglHandle
+COGL_EXPORT CoglHandle
 cogl_pipeline_get_user_program (CoglPipeline *pipeline);
 
 /**
@@ -637,7 +418,6 @@ cogl_pipeline_get_user_program (CoglPipeline *pipeline);
  *                     "!!ARBfp1.0\n"
  *                     "MOV result.color,fragment.color;\n"
  *                     "END\n");
- * cogl_shader_compile (shader);
  *
  * program = cogl_create_program ();
  * cogl_program_attach_shader (program, shader);
@@ -657,22 +437,18 @@ cogl_pipeline_get_user_program (CoglPipeline *pipeline);
  * meantime we hope this will handle most practical GLSL and ARBfp
  * requirements.
  *
- * Also remember you need to check for either the
- * %COGL_FEATURE_SHADERS_GLSL or %COGL_FEATURE_SHADERS_ARBFP before
- * using the cogl_program or cogl_shader API.
- *
  * Since: 2.0
  * Stability: Unstable
  */
-void
+COGL_EXPORT void
 cogl_pipeline_set_user_program (CoglPipeline *pipeline,
                                 CoglHandle program);
 
 /**
- * cogl_pipeline_set_depth_state:
+ * cogl_pipeline_set_depth_state: (skip)
  * @pipeline: A #CoglPipeline object
  * @state: A #CoglDepthState struct
- * @error: A #CoglError to report failures to setup the given @state.
+ * @error: A #GError to report failures to setup the given @state.
  *
  * This commits all the depth state configured in @state struct to the
  * given @pipeline. The configuration values are copied into the
@@ -688,13 +464,13 @@ cogl_pipeline_set_user_program (CoglPipeline *pipeline,
  * Since: 2.0
  * Stability: Unstable
  */
-CoglBool
+COGL_EXPORT gboolean
 cogl_pipeline_set_depth_state (CoglPipeline *pipeline,
                                const CoglDepthState *state,
-                               CoglError **error);
+                               GError **error);
 
 /**
- * cogl_pipeline_get_depth_state:
+ * cogl_pipeline_get_depth_state: (skip)
  * @pipeline: A #CoglPipeline object
  * @state_out: (out): A destination #CoglDepthState struct
  *
@@ -704,7 +480,7 @@ cogl_pipeline_set_depth_state (CoglPipeline *pipeline,
  * Since: 2.0
  * Stability: Unstable
  */
-void
+COGL_EXPORT void
 cogl_pipeline_get_depth_state (CoglPipeline *pipeline,
                                CoglDepthState *state_out);
 
@@ -748,7 +524,7 @@ typedef enum
  * Status: Unstable
  * Since: 2.0
  */
-void
+COGL_EXPORT void
 cogl_pipeline_set_cull_face_mode (CoglPipeline *pipeline,
                                   CoglPipelineCullFaceMode cull_face_mode);
 
@@ -761,7 +537,7 @@ cogl_pipeline_set_cull_face_mode (CoglPipeline *pipeline,
  * Status: Unstable
  * Since: 2.0
  */
-CoglPipelineCullFaceMode
+COGL_EXPORT CoglPipelineCullFaceMode
 cogl_pipeline_get_cull_face_mode (CoglPipeline *pipeline);
 
 /**
@@ -780,7 +556,7 @@ cogl_pipeline_get_cull_face_mode (CoglPipeline *pipeline);
  * Status: Unstable
  * Since: 2.0
  */
-void
+COGL_EXPORT void
 cogl_pipeline_set_front_face_winding (CoglPipeline *pipeline,
                                       CoglWinding front_winding);
 
@@ -801,7 +577,7 @@ cogl_pipeline_set_front_face_winding (CoglPipeline *pipeline,
  * Status: Unstable
  * Since: 2.0
  */
-CoglWinding
+COGL_EXPORT CoglWinding
 cogl_pipeline_get_front_face_winding (CoglPipeline *pipeline);
 
 /**
@@ -824,7 +600,7 @@ cogl_pipeline_get_front_face_winding (CoglPipeline *pipeline);
  * Since: 2.0
  * Stability: Unstable
  */
-void
+COGL_EXPORT void
 cogl_pipeline_set_uniform_1f (CoglPipeline *pipeline,
                               int uniform_location,
                               float value);
@@ -849,7 +625,7 @@ cogl_pipeline_set_uniform_1f (CoglPipeline *pipeline,
  * Since: 2.0
  * Stability: Unstable
  */
-void
+COGL_EXPORT void
 cogl_pipeline_set_uniform_1i (CoglPipeline *pipeline,
                               int uniform_location,
                               int value);
@@ -878,7 +654,7 @@ cogl_pipeline_set_uniform_1i (CoglPipeline *pipeline,
  * Since: 2.0
  * Stability: Unstable
  */
-void
+COGL_EXPORT void
 cogl_pipeline_set_uniform_float (CoglPipeline *pipeline,
                                  int uniform_location,
                                  int n_components,
@@ -909,7 +685,7 @@ cogl_pipeline_set_uniform_float (CoglPipeline *pipeline,
  * Since: 2.0
  * Stability: Unstable
  */
-void
+COGL_EXPORT void
 cogl_pipeline_set_uniform_int (CoglPipeline *pipeline,
                                int uniform_location,
                                int n_components,
@@ -946,16 +722,16 @@ cogl_pipeline_set_uniform_int (CoglPipeline *pipeline,
  * Since: 2.0
  * Stability: Unstable
  */
-void
+COGL_EXPORT void
 cogl_pipeline_set_uniform_matrix (CoglPipeline *pipeline,
                                   int uniform_location,
                                   int dimensions,
                                   int count,
-                                  CoglBool transpose,
+                                  gboolean transpose,
                                   const float *value);
 
 /**
- * cogl_pipeline_add_snippet:
+ * cogl_pipeline_add_snippet: (skip)
  * @pipeline: A #CoglPipeline
  * @snippet: The #CoglSnippet to add to the vertex processing hook
  *
@@ -967,10 +743,10 @@ cogl_pipeline_set_uniform_matrix (CoglPipeline *pipeline,
  * Since: 1.10
  * Stability: Unstable
  */
-void
+COGL_EXPORT void
 cogl_pipeline_add_snippet (CoglPipeline *pipeline,
                            CoglSnippet *snippet);
 
-COGL_END_DECLS
+G_END_DECLS
 
 #endif /* __COGL_PIPELINE_STATE_H__ */

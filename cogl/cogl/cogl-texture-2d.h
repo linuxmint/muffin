@@ -44,7 +44,7 @@
 #include "cogl-egl-defines.h"
 #endif
 
-COGL_BEGIN_DECLS
+G_BEGIN_DECLS
 
 /**
  * SECTION:cogl-texture-2d
@@ -55,21 +55,23 @@ COGL_BEGIN_DECLS
  * made up of multiple 2D textures, or atlas textures where Cogl must
  * internally modify user texture coordinates before they can be used
  * by the GPU.
- *
- * You should be aware that many GPUs only support power of two sizes
- * for #CoglTexture2D textures. You can check support for non power of
- * two textures by checking for the %COGL_FEATURE_ID_TEXTURE_NPOT feature
- * via cogl_has_feature().
  */
 
 typedef struct _CoglTexture2D CoglTexture2D;
 #define COGL_TEXTURE_2D(X) ((CoglTexture2D *)X)
+
+typedef enum _CoglEglImageFlags
+{
+  COGL_EGL_IMAGE_FLAG_NONE = 0,
+  COGL_EGL_IMAGE_FLAG_NO_GET_DATA = 1 << 0,
+} CoglEglImageFlags;
 
 /**
  * cogl_texture_2d_get_gtype:
  *
  * Returns: a #GType that can be used with the GLib type system.
  */
+COGL_EXPORT
 GType cogl_texture_2d_get_gtype (void);
 
 /**
@@ -82,11 +84,11 @@ GType cogl_texture_2d_get_gtype (void);
  * Return value: %TRUE if the object references a #CoglTexture2D,
  *   %FALSE otherwise
  */
-CoglBool
+COGL_EXPORT gboolean
 cogl_is_texture_2d (void *object);
 
 /**
- * cogl_texture_2d_new_with_size:
+ * cogl_texture_2d_new_with_size: (skip)
  * @ctx: A #CoglContext
  * @width: Width of the texture to allocate
  * @height: Height of the texture to allocate
@@ -105,25 +107,20 @@ cogl_is_texture_2d (void *object);
  * using cogl_texture_set_components() and
  * cogl_texture_set_premultiplied().
  *
- * <note>Many GPUs only support power of two sizes for #CoglTexture2D
- * textures. You can check support for non power of two textures by
- * checking for the %COGL_FEATURE_ID_TEXTURE_NPOT feature via
- * cogl_has_feature().</note>
- *
  * Returns: (transfer full): A new #CoglTexture2D object with no storage yet allocated.
  *
  * Since: 2.0
  */
-CoglTexture2D *
+COGL_EXPORT CoglTexture2D *
 cogl_texture_2d_new_with_size (CoglContext *ctx,
                                int width,
                                int height);
 
 /**
- * cogl_texture_2d_new_from_file:
+ * cogl_texture_2d_new_from_file: (skip)
  * @ctx: A #CoglContext
  * @filename: the file to load
- * @error: A #CoglError to catch exceptional errors or %NULL
+ * @error: A #GError to catch exceptional errors or %NULL
  *
  * Creates a low-level #CoglTexture2D texture from an image file.
  *
@@ -138,23 +135,18 @@ cogl_texture_2d_new_with_size (CoglContext *ctx,
  * using cogl_texture_set_components() and
  * cogl_texture_set_premultiplied().
  *
- * <note>Many GPUs only support power of two sizes for #CoglTexture2D
- * textures. You can check support for non power of two textures by
- * checking for the %COGL_FEATURE_ID_TEXTURE_NPOT feature via
- * cogl_has_feature().</note>
- *
  * Return value: (transfer full): A newly created #CoglTexture2D or %NULL on failure
  *               and @error will be updated.
  *
  * Since: 1.16
  */
-CoglTexture2D *
+COGL_EXPORT CoglTexture2D *
 cogl_texture_2d_new_from_file (CoglContext *ctx,
                                const char *filename,
-                               CoglError **error);
+                               GError **error);
 
 /**
- * cogl_texture_2d_new_from_data:
+ * cogl_texture_2d_new_from_data: (skip)
  * @ctx: A #CoglContext
  * @width: width of texture in pixels
  * @height: height of texture in pixels
@@ -163,7 +155,7 @@ cogl_texture_2d_new_from_file (CoglContext *ctx,
  *    scanlines in @data. A value of 0 will make Cogl automatically
  *    calculate @rowstride from @width and @format.
  * @data: pointer the memory region where the source buffer resides
- * @error: A #CoglError for exceptions
+ * @error: A #GError for exceptions
  *
  * Creates a low-level #CoglTexture2D texture based on data residing
  * in memory.
@@ -179,11 +171,6 @@ cogl_texture_2d_new_from_file (CoglContext *ctx,
  * cogl_texture_2d_new_with_size() and then upload data using
  * cogl_texture_set_data()</note>
  *
- * <note>Many GPUs only support power of two sizes for #CoglTexture2D
- * textures. You can check support for non power of two textures by
- * checking for the %COGL_FEATURE_ID_TEXTURE_NPOT feature via
- * cogl_has_feature().</note>
- *
  * Returns: (transfer full): A newly allocated #CoglTexture2D, or if
  *          the size is not supported (because it is too large or a
  *          non-power-of-two size that the hardware doesn't support)
@@ -191,14 +178,14 @@ cogl_texture_2d_new_from_file (CoglContext *ctx,
  *
  * Since: 2.0
  */
-CoglTexture2D *
+COGL_EXPORT CoglTexture2D *
 cogl_texture_2d_new_from_data (CoglContext *ctx,
                                int width,
                                int height,
                                CoglPixelFormat format,
                                int rowstride,
                                const uint8_t *data,
-                               CoglError **error);
+                               GError **error);
 
 /**
  * cogl_texture_2d_new_from_bitmap:
@@ -218,53 +205,55 @@ cogl_texture_2d_new_from_data (CoglContext *ctx,
  * using cogl_texture_set_components() and
  * cogl_texture_set_premultiplied().
  *
- * <note>Many GPUs only support power of two sizes for #CoglTexture2D
- * textures. You can check support for non power of two textures by
- * checking for the %COGL_FEATURE_ID_TEXTURE_NPOT feature via
- * cogl_has_feature().</note>
- *
  * Returns: (transfer full): A newly allocated #CoglTexture2D
  *
  * Since: 2.0
  * Stability: unstable
  */
-CoglTexture2D *
+COGL_EXPORT CoglTexture2D *
 cogl_texture_2d_new_from_bitmap (CoglBitmap *bitmap);
 
+/**
+ * cogl_egl_texture_2d_new_from_image: (skip)
+ */
 #if defined (COGL_HAS_EGL_SUPPORT) && defined (EGL_KHR_image_base)
 /* NB: The reason we require the width, height and format to be passed
  * even though they may seem redundant is because GLES 1/2 don't
  * provide a way to query these properties. */
-CoglTexture2D *
+COGL_EXPORT CoglTexture2D *
 cogl_egl_texture_2d_new_from_image (CoglContext *ctx,
                                     int width,
                                     int height,
                                     CoglPixelFormat format,
                                     EGLImageKHR image,
-                                    CoglError **error);
+                                    CoglEglImageFlags flags,
+                                    GError **error);
 
 typedef gboolean (*CoglTexture2DEGLImageExternalAlloc) (CoglTexture2D *tex_2d,
                                                         gpointer user_data,
                                                         GError **error);
 
-CoglTexture2D *
+/**
+ * cogl_texture_2d_new_from_egl_image_external: (skip)
+ */
+COGL_EXPORT CoglTexture2D *
 cogl_texture_2d_new_from_egl_image_external (CoglContext *ctx,
                                              int width,
                                              int height,
                                              CoglTexture2DEGLImageExternalAlloc alloc,
                                              gpointer user_data,
                                              GDestroyNotify destroy,
-                                             CoglError **error);
+                                             GError **error);
 
-void
+COGL_EXPORT void
 cogl_texture_2d_egl_image_external_bind (CoglTexture2D *tex_2d);
 
-void
+COGL_EXPORT void
 cogl_texture_2d_egl_image_external_alloc_finish (CoglTexture2D *tex_2d,
 						 void *user_data,
 						 GDestroyNotify destroy);
 #endif
 
-COGL_END_DECLS
+G_END_DECLS
 
 #endif /* __COGL_TEXTURE_2D_H */

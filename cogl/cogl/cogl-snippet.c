@@ -31,9 +31,7 @@
  *   Neil Roberts <neil@linux.intel.com>
  */
 
-#ifdef HAVE_CONFIG_H
 #include "cogl-config.h"
-#endif
 
 #include "cogl-types.h"
 #include "cogl-snippet-private.h"
@@ -66,12 +64,12 @@ cogl_snippet_new (CoglSnippetHook hook,
 CoglSnippetHook
 cogl_snippet_get_hook (CoglSnippet *snippet)
 {
-  _COGL_RETURN_VAL_IF_FAIL (cogl_is_snippet (snippet), 0);
+  g_return_val_if_fail (cogl_is_snippet (snippet), 0);
 
   return snippet->hook;
 }
 
-static CoglBool
+static gboolean
 _cogl_snippet_modify (CoglSnippet *snippet)
 {
   if (snippet->immutable)
@@ -90,19 +88,19 @@ void
 cogl_snippet_set_declarations (CoglSnippet *snippet,
                                const char *declarations)
 {
-  _COGL_RETURN_IF_FAIL (cogl_is_snippet (snippet));
+  g_return_if_fail (cogl_is_snippet (snippet));
 
   if (!_cogl_snippet_modify (snippet))
     return;
 
-  free (snippet->declarations);
+  g_free (snippet->declarations);
   snippet->declarations = declarations ? g_strdup (declarations) : NULL;
 }
 
 const char *
 cogl_snippet_get_declarations (CoglSnippet *snippet)
 {
-  _COGL_RETURN_VAL_IF_FAIL (cogl_is_snippet (snippet), NULL);
+  g_return_val_if_fail (cogl_is_snippet (snippet), NULL);
 
   return snippet->declarations;
 }
@@ -111,19 +109,19 @@ void
 cogl_snippet_set_pre (CoglSnippet *snippet,
                       const char *pre)
 {
-  _COGL_RETURN_IF_FAIL (cogl_is_snippet (snippet));
+  g_return_if_fail (cogl_is_snippet (snippet));
 
   if (!_cogl_snippet_modify (snippet))
     return;
 
-  free (snippet->pre);
+  g_free (snippet->pre);
   snippet->pre = pre ? g_strdup (pre) : NULL;
 }
 
 const char *
 cogl_snippet_get_pre (CoglSnippet *snippet)
 {
-  _COGL_RETURN_VAL_IF_FAIL (cogl_is_snippet (snippet), NULL);
+  g_return_val_if_fail (cogl_is_snippet (snippet), NULL);
 
   return snippet->pre;
 }
@@ -132,19 +130,19 @@ void
 cogl_snippet_set_replace (CoglSnippet *snippet,
                           const char *replace)
 {
-  _COGL_RETURN_IF_FAIL (cogl_is_snippet (snippet));
+  g_return_if_fail (cogl_is_snippet (snippet));
 
   if (!_cogl_snippet_modify (snippet))
     return;
 
-  free (snippet->replace);
+  g_free (snippet->replace);
   snippet->replace = replace ? g_strdup (replace) : NULL;
 }
 
 const char *
 cogl_snippet_get_replace (CoglSnippet *snippet)
 {
-  _COGL_RETURN_VAL_IF_FAIL (cogl_is_snippet (snippet), NULL);
+  g_return_val_if_fail (cogl_is_snippet (snippet), NULL);
 
   return snippet->replace;
 }
@@ -153,19 +151,19 @@ void
 cogl_snippet_set_post (CoglSnippet *snippet,
                        const char *post)
 {
-  _COGL_RETURN_IF_FAIL (cogl_is_snippet (snippet));
+  g_return_if_fail (cogl_is_snippet (snippet));
 
   if (!_cogl_snippet_modify (snippet))
     return;
 
-  free (snippet->post);
+  g_free (snippet->post);
   snippet->post = post ? g_strdup (post) : NULL;
 }
 
 const char *
 cogl_snippet_get_post (CoglSnippet *snippet)
 {
-  _COGL_RETURN_VAL_IF_FAIL (cogl_is_snippet (snippet), NULL);
+  g_return_val_if_fail (cogl_is_snippet (snippet), NULL);
 
   return snippet->post;
 }
@@ -179,9 +177,9 @@ _cogl_snippet_make_immutable (CoglSnippet *snippet)
 static void
 _cogl_snippet_free (CoglSnippet *snippet)
 {
-  free (snippet->declarations);
-  free (snippet->pre);
-  free (snippet->replace);
-  free (snippet->post);
+  g_free (snippet->declarations);
+  g_free (snippet->pre);
+  g_free (snippet->replace);
+  g_free (snippet->post);
   g_slice_free (CoglSnippet, snippet);
 }

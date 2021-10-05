@@ -37,7 +37,7 @@
 
 G_BEGIN_DECLS
 
-CLUTTER_AVAILABLE_IN_1_10
+CLUTTER_EXPORT
 void    clutter_wayland_set_compositor_display  (void *display);
 
 G_END_DECLS

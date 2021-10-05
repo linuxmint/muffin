@@ -31,9 +31,7 @@
  *   Robert Bragg <robert@linux.intel.com>
  */
 
-#ifdef HAVE_CONFIG_H
 #include "cogl-config.h"
-#endif
 
 #include "cogl-context-private.h"
 #include "cogl-pipeline-private.h"
@@ -43,7 +41,6 @@
 #include "cogl-snippet-private.h"
 #include "cogl-texture-private.h"
 #include "cogl-pipeline-layer-state-private.h"
-#include "cogl-error-private.h"
 
 #include "string.h"
 #if 0
@@ -138,87 +135,6 @@ cogl_pipeline_get_layer_texture (CoglPipeline *pipeline,
   return _cogl_pipeline_layer_get_texture (layer);
 }
 
-CoglTextureType
-_cogl_pipeline_layer_get_texture_type (CoglPipelineLayer *layer)
-{
-  CoglPipelineLayer *authority =
-    _cogl_pipeline_layer_get_authority (layer,
-                                        COGL_PIPELINE_LAYER_STATE_TEXTURE_TYPE);
-
-  return authority->texture_type;
-}
-
-static void
-_cogl_pipeline_set_layer_texture_type (CoglPipeline *pipeline,
-                                       int layer_index,
-                                       CoglTextureType texture_type)
-{
-  CoglPipelineLayerState change = COGL_PIPELINE_LAYER_STATE_TEXTURE_TYPE;
-  CoglPipelineLayer *layer;
-  CoglPipelineLayer *authority;
-  CoglPipelineLayer *new;
-
-  /* Note: this will ensure that the layer exists, creating one if it
-   * doesn't already.
-   *
-   * Note: If the layer already existed it's possibly owned by another
-   * pipeline. If the layer is created then it will be owned by
-   * pipeline. */
-  layer = _cogl_pipeline_get_layer (pipeline, layer_index);
-
-  /* Now find the ancestor of the layer that is the authority for the
-   * state we want to change */
-  authority = _cogl_pipeline_layer_get_authority (layer, change);
-
-  if (texture_type == authority->texture_type)
-    return;
-
-  new = _cogl_pipeline_layer_pre_change_notify (pipeline, layer, change);
-  if (new != layer)
-    layer = new;
-  else
-    {
-      /* If the original layer we found is currently the authority on
-       * the state we are changing see if we can revert to one of our
-       * ancestors being the authority. */
-      if (layer == authority &&
-          _cogl_pipeline_layer_get_parent (authority) != NULL)
-        {
-          CoglPipelineLayer *parent =
-            _cogl_pipeline_layer_get_parent (authority);
-          CoglPipelineLayer *old_authority =
-            _cogl_pipeline_layer_get_authority (parent, change);
-
-          if (old_authority->texture_type == texture_type)
-            {
-              layer->differences &= ~change;
-
-              g_assert (layer->owner == pipeline);
-              if (layer->differences == 0)
-                _cogl_pipeline_prune_empty_layer_difference (pipeline,
-                                                             layer);
-              goto changed;
-            }
-        }
-    }
-
-  layer->texture_type = texture_type;
-
-  /* If we weren't previously the authority on this state then we need
-   * to extended our differences mask and so it's possible that some
-   * of our ancestry will now become redundant, so we aim to reparent
-   * ourselves if that's true... */
-  if (layer != authority)
-    {
-      layer->differences |= change;
-      _cogl_pipeline_layer_prune_redundant_ancestry (layer);
-    }
-
-changed:
-
-  pipeline->dirty_real_blend_enable = TRUE;
-}
-
 static void
 _cogl_pipeline_set_layer_texture_data (CoglPipeline *pipeline,
                                        int layer_index,
@@ -303,69 +219,13 @@ cogl_pipeline_set_layer_texture (CoglPipeline *pipeline,
                                  int layer_index,
                                  CoglTexture *texture)
 {
-  /* For the convenience of fragend code we separate texture state
-   * into the "type" and the "data", and setting a layer texture
-   * updates both of these properties.
-   *
-   * One example for why this is helpful is that the fragends may
-   * cache programs they generate and want to re-use those programs
-   * with all pipelines having equivalent fragment processing state.
-   * For the sake of determining if pipelines have equivalent fragment
-   * processing state we don't need to compare that the same
-   * underlying texture objects are referenced by the pipelines but we
-   * do need to see if they use the same texture types. Making this
-   * distinction is much simpler if they are in different state
-   * groups.
-   *
-   * Note: if a NULL texture is set then we leave the type unchanged
-   * so we can avoid needlessly invalidating any associated fragment
-   * program.
-   */
-  if (texture)
-    {
-      CoglTextureType texture_type =
-        _cogl_texture_get_type (texture);
-      _cogl_pipeline_set_layer_texture_type (pipeline,
-                                             layer_index,
-                                             texture_type);
-    }
   _cogl_pipeline_set_layer_texture_data (pipeline, layer_index, texture);
 }
 
 void
 cogl_pipeline_set_layer_null_texture (CoglPipeline *pipeline,
-                                      int layer_index,
-                                      CoglTextureType texture_type)
+                                      int layer_index)
 {
-  CoglContext *ctx = _cogl_context_get_default ();
-
-  /* Disallow setting texture types that aren't supported */
-  switch (texture_type)
-    {
-    case COGL_TEXTURE_TYPE_2D:
-      break;
-
-    case COGL_TEXTURE_TYPE_3D:
-      if (ctx->default_gl_texture_3d_tex == NULL)
-        {
-          g_warning ("The default 3D texture was set on a pipeline but "
-                     "3D textures are not supported");
-          texture_type = COGL_TEXTURE_TYPE_2D;
-          return;
-        }
-      break;
-
-    case COGL_TEXTURE_TYPE_RECTANGLE:
-      if (ctx->default_gl_texture_rect_tex == NULL)
-        {
-          g_warning ("The default rectangle texture was set on a pipeline but "
-                     "rectangle textures are not supported");
-          texture_type = COGL_TEXTURE_TYPE_2D;
-        }
-      break;
-    }
-
-  _cogl_pipeline_set_layer_texture_type (pipeline, layer_index, texture_type);
   _cogl_pipeline_set_layer_texture_data (pipeline, layer_index, NULL);
 }
 
@@ -432,7 +292,7 @@ public_to_internal_wrap_mode (CoglPipelineWrapMode mode)
 static CoglPipelineWrapMode
 internal_to_public_wrap_mode (CoglSamplerCacheWrapMode internal_mode)
 {
-  _COGL_RETURN_VAL_IF_FAIL (internal_mode !=
+  g_return_val_if_fail (internal_mode !=
                         COGL_SAMPLER_CACHE_WRAP_MODE_CLAMP_TO_BORDER,
                         COGL_PIPELINE_WRAP_MODE_AUTOMATIC);
   return (CoglPipelineWrapMode)internal_mode;
@@ -452,7 +312,7 @@ cogl_pipeline_set_layer_wrap_mode_s (CoglPipeline *pipeline,
 
   _COGL_GET_CONTEXT (ctx, NO_RETVAL);
 
-  _COGL_RETURN_IF_FAIL (cogl_is_pipeline (pipeline));
+  g_return_if_fail (cogl_is_pipeline (pipeline));
 
   /* Note: this will ensure that the layer exists, creating one if it
    * doesn't already.
@@ -471,9 +331,7 @@ cogl_pipeline_set_layer_wrap_mode_s (CoglPipeline *pipeline,
                                            authority->sampler_cache_entry,
                                            internal_mode,
                                            authority->sampler_cache_entry->
-                                           wrap_mode_t,
-                                           authority->sampler_cache_entry->
-                                           wrap_mode_p);
+                                           wrap_mode_t);
   _cogl_pipeline_set_layer_sampler_state (pipeline,
                                           layer,
                                           authority,
@@ -494,7 +352,7 @@ cogl_pipeline_set_layer_wrap_mode_t (CoglPipeline *pipeline,
 
   _COGL_GET_CONTEXT (ctx, NO_RETVAL);
 
-  _COGL_RETURN_IF_FAIL (cogl_is_pipeline (pipeline));
+  g_return_if_fail (cogl_is_pipeline (pipeline));
 
   /* Note: this will ensure that the layer exists, creating one if it
    * doesn't already.
@@ -513,62 +371,6 @@ cogl_pipeline_set_layer_wrap_mode_t (CoglPipeline *pipeline,
                                            authority->sampler_cache_entry,
                                            authority->sampler_cache_entry->
                                            wrap_mode_s,
-                                           internal_mode,
-                                           authority->sampler_cache_entry->
-                                           wrap_mode_p);
-  _cogl_pipeline_set_layer_sampler_state (pipeline,
-                                          layer,
-                                          authority,
-                                          sampler_state);
-}
-
-/* The rationale for naming the third texture coordinate 'p' instead
-   of OpenGL's usual 'r' is that 'r' conflicts with the usual naming
-   of the 'red' component when treating a vector as a color. Under
-   GLSL this is awkward because the texture swizzling for a vector
-   uses a single letter for each component and the names for colors,
-   textures and positions are synonymous. GLSL works around this by
-   naming the components of the texture s, t, p and q. Cogl already
-   effectively already exposes this naming because it exposes GLSL so
-   it makes sense to use that naming consistently. Another alternative
-   could be u, v and w. This is what Blender and Direct3D use. However
-   the w component conflicts with the w component of a position
-   vertex.  */
-void
-cogl_pipeline_set_layer_wrap_mode_p (CoglPipeline *pipeline,
-                                     int layer_index,
-                                     CoglPipelineWrapMode mode)
-{
-  CoglPipelineLayerState       change = COGL_PIPELINE_LAYER_STATE_SAMPLER;
-  CoglPipelineLayer           *layer;
-  CoglPipelineLayer           *authority;
-  CoglSamplerCacheWrapMode     internal_mode =
-    public_to_internal_wrap_mode (mode);
-  const CoglSamplerCacheEntry *sampler_state;
-
-  _COGL_GET_CONTEXT (ctx, NO_RETVAL);
-
-  _COGL_RETURN_IF_FAIL (cogl_is_pipeline (pipeline));
-
-  /* Note: this will ensure that the layer exists, creating one if it
-   * doesn't already.
-   *
-   * Note: If the layer already existed it's possibly owned by another
-   * pipeline. If the layer is created then it will be owned by
-   * pipeline. */
-  layer = _cogl_pipeline_get_layer (pipeline, layer_index);
-
-  /* Now find the ancestor of the layer that is the authority for the
-   * state we want to change */
-  authority = _cogl_pipeline_layer_get_authority (layer, change);
-
-  sampler_state =
-    _cogl_sampler_cache_update_wrap_modes (ctx->sampler_cache,
-                                           authority->sampler_cache_entry,
-                                           authority->sampler_cache_entry->
-                                           wrap_mode_s,
-                                           authority->sampler_cache_entry->
-                                           wrap_mode_t,
                                            internal_mode);
   _cogl_pipeline_set_layer_sampler_state (pipeline,
                                           layer,
@@ -590,7 +392,7 @@ cogl_pipeline_set_layer_wrap_mode (CoglPipeline *pipeline,
 
   _COGL_GET_CONTEXT (ctx, NO_RETVAL);
 
-  _COGL_RETURN_IF_FAIL (cogl_is_pipeline (pipeline));
+  g_return_if_fail (cogl_is_pipeline (pipeline));
 
   /* Note: this will ensure that the layer exists, creating one if it
    * doesn't already.
@@ -608,14 +410,11 @@ cogl_pipeline_set_layer_wrap_mode (CoglPipeline *pipeline,
     _cogl_sampler_cache_update_wrap_modes (ctx->sampler_cache,
                                            authority->sampler_cache_entry,
                                            internal_mode,
-                                           internal_mode,
                                            internal_mode);
   _cogl_pipeline_set_layer_sampler_state (pipeline,
                                           layer,
                                           authority,
                                           sampler_state);
-  /* XXX: I wonder if we should really be duplicating the mode into
-   * the 'p' wrap mode too? */
 }
 
 /* FIXME: deprecate this API */
@@ -626,7 +425,7 @@ _cogl_pipeline_layer_get_wrap_mode_s (CoglPipelineLayer *layer)
   CoglPipelineLayer     *authority;
   const CoglSamplerCacheEntry *sampler_state;
 
-  _COGL_RETURN_VAL_IF_FAIL (_cogl_is_pipeline_layer (layer), FALSE);
+  g_return_val_if_fail (_cogl_is_pipeline_layer (layer), FALSE);
 
   /* Now find the ancestor of the layer that is the authority for the
    * state we want to change */
@@ -641,7 +440,7 @@ cogl_pipeline_get_layer_wrap_mode_s (CoglPipeline *pipeline, int layer_index)
 {
   CoglPipelineLayer *layer;
 
-  _COGL_RETURN_VAL_IF_FAIL (cogl_is_pipeline (pipeline), FALSE);
+  g_return_val_if_fail (cogl_is_pipeline (pipeline), FALSE);
 
   /* Note: this will ensure that the layer exists, creating one if it
    * doesn't already.
@@ -663,7 +462,7 @@ _cogl_pipeline_layer_get_wrap_mode_t (CoglPipelineLayer *layer)
   CoglPipelineLayer     *authority;
   const CoglSamplerCacheEntry *sampler_state;
 
-  _COGL_RETURN_VAL_IF_FAIL (_cogl_is_pipeline_layer (layer), FALSE);
+  g_return_val_if_fail (_cogl_is_pipeline_layer (layer), FALSE);
 
   /* Now find the ancestor of the layer that is the authority for the
    * state we want to change */
@@ -678,7 +477,7 @@ cogl_pipeline_get_layer_wrap_mode_t (CoglPipeline *pipeline, int layer_index)
 {
   CoglPipelineLayer *layer;
 
-  _COGL_RETURN_VAL_IF_FAIL (cogl_is_pipeline (pipeline), FALSE);
+  g_return_val_if_fail (cogl_is_pipeline (pipeline), FALSE);
 
   /* Note: this will ensure that the layer exists, creating one if it
    * doesn't already.
@@ -692,41 +491,10 @@ cogl_pipeline_get_layer_wrap_mode_t (CoglPipeline *pipeline, int layer_index)
   return _cogl_pipeline_layer_get_wrap_mode_t (layer);
 }
 
-CoglPipelineWrapMode
-_cogl_pipeline_layer_get_wrap_mode_p (CoglPipelineLayer *layer)
-{
-  CoglPipelineLayerState change = COGL_PIPELINE_LAYER_STATE_SAMPLER;
-  CoglPipelineLayer     *authority =
-    _cogl_pipeline_layer_get_authority (layer, change);
-  const CoglSamplerCacheEntry *sampler_state;
-
-  sampler_state = authority->sampler_cache_entry;
-  return internal_to_public_wrap_mode (sampler_state->wrap_mode_p);
-}
-
-CoglPipelineWrapMode
-cogl_pipeline_get_layer_wrap_mode_p (CoglPipeline *pipeline, int layer_index)
-{
-  CoglPipelineLayer *layer;
-
-  _COGL_RETURN_VAL_IF_FAIL (cogl_is_pipeline (pipeline), FALSE);
-
-  /* Note: this will ensure that the layer exists, creating one if it
-   * doesn't already.
-   *
-   * Note: If the layer already existed it's possibly owned by another
-   * pipeline. If the layer is created then it will be owned by
-   * pipeline. */
-  layer = _cogl_pipeline_get_layer (pipeline, layer_index);
-
-  return _cogl_pipeline_layer_get_wrap_mode_p (layer);
-}
-
 void
 _cogl_pipeline_layer_get_wrap_modes (CoglPipelineLayer *layer,
                                      CoglSamplerCacheWrapMode *wrap_mode_s,
-                                     CoglSamplerCacheWrapMode *wrap_mode_t,
-                                     CoglSamplerCacheWrapMode *wrap_mode_p)
+                                     CoglSamplerCacheWrapMode *wrap_mode_t)
 {
   CoglPipelineLayer *authority =
     _cogl_pipeline_layer_get_authority (layer,
@@ -734,14 +502,13 @@ _cogl_pipeline_layer_get_wrap_modes (CoglPipelineLayer *layer,
 
   *wrap_mode_s = authority->sampler_cache_entry->wrap_mode_s;
   *wrap_mode_t = authority->sampler_cache_entry->wrap_mode_t;
-  *wrap_mode_p = authority->sampler_cache_entry->wrap_mode_p;
 }
 
-CoglBool
+gboolean
 cogl_pipeline_set_layer_point_sprite_coords_enabled (CoglPipeline *pipeline,
                                                      int layer_index,
-                                                     CoglBool enable,
-                                                     CoglError **error)
+                                                     gboolean enable,
+                                                     GError **error)
 {
   CoglPipelineLayerState       change =
     COGL_PIPELINE_LAYER_STATE_POINT_SPRITE_COORDS;
@@ -751,31 +518,7 @@ cogl_pipeline_set_layer_point_sprite_coords_enabled (CoglPipeline *pipeline,
 
   _COGL_GET_CONTEXT (ctx, FALSE);
 
-  _COGL_RETURN_VAL_IF_FAIL (cogl_is_pipeline (pipeline), FALSE);
-
-  /* Don't allow point sprite coordinates to be enabled if the driver
-     doesn't support it */
-  if (enable && !cogl_has_feature (ctx, COGL_FEATURE_ID_POINT_SPRITE))
-    {
-      if (error)
-        {
-          _cogl_set_error (error,
-                           COGL_SYSTEM_ERROR,
-                           COGL_SYSTEM_ERROR_UNSUPPORTED,
-                           "Point sprite texture coordinates are enabled for "
-                           "a layer but the GL driver does not support it.");
-        }
-      else
-        {
-          static CoglBool warning_seen = FALSE;
-          if (!warning_seen)
-            g_warning ("Point sprite texture coordinates are enabled "
-                       "for a layer but the GL driver does not support it.");
-          warning_seen = TRUE;
-        }
-
-      return FALSE;
-    }
+  g_return_val_if_fail (cogl_is_pipeline (pipeline), FALSE);
 
   /* Note: this will ensure that the layer exists, creating one if it
    * doesn't already.
@@ -836,7 +579,7 @@ cogl_pipeline_set_layer_point_sprite_coords_enabled (CoglPipeline *pipeline,
   return TRUE;
 }
 
-CoglBool
+gboolean
 cogl_pipeline_get_layer_point_sprite_coords_enabled (CoglPipeline *pipeline,
                                                      int layer_index)
 {
@@ -845,7 +588,7 @@ cogl_pipeline_get_layer_point_sprite_coords_enabled (CoglPipeline *pipeline,
   CoglPipelineLayer *layer;
   CoglPipelineLayer *authority;
 
-  _COGL_RETURN_VAL_IF_FAIL (cogl_is_pipeline (pipeline), FALSE);
+  g_return_val_if_fail (cogl_is_pipeline (pipeline), FALSE);
 
   /* Note: this will ensure that the layer exists, creating one if it
    * doesn't already.
@@ -938,9 +681,9 @@ cogl_pipeline_add_layer_snippet (CoglPipeline *pipeline,
                                  int layer_index,
                                  CoglSnippet *snippet)
 {
-  _COGL_RETURN_IF_FAIL (cogl_is_pipeline (pipeline));
-  _COGL_RETURN_IF_FAIL (cogl_is_snippet (snippet));
-  _COGL_RETURN_IF_FAIL (snippet->hook >= COGL_SNIPPET_FIRST_LAYER_HOOK);
+  g_return_if_fail (cogl_is_pipeline (pipeline));
+  g_return_if_fail (cogl_is_snippet (snippet));
+  g_return_if_fail (snippet->hook >= COGL_SNIPPET_FIRST_LAYER_HOOK);
 
   if (snippet->hook < COGL_SNIPPET_FIRST_LAYER_FRAGMENT_HOOK)
     _cogl_pipeline_layer_add_vertex_snippet (pipeline,
@@ -952,15 +695,7 @@ cogl_pipeline_add_layer_snippet (CoglPipeline *pipeline,
                                                snippet);
 }
 
-CoglBool
-_cogl_pipeline_layer_texture_type_equal (CoglPipelineLayer *authority0,
-                                         CoglPipelineLayer *authority1,
-                                         CoglPipelineEvalFlags flags)
-{
-  return authority0->texture_type == authority1->texture_type;
-}
-
-CoglBool
+gboolean
 _cogl_pipeline_layer_texture_data_equal (CoglPipelineLayer *authority0,
                                          CoglPipelineLayer *authority1,
                                          CoglPipelineEvalFlags flags)
@@ -968,8 +703,7 @@ _cogl_pipeline_layer_texture_data_equal (CoglPipelineLayer *authority0,
   if (authority0->texture == NULL)
     {
       if (authority1->texture == NULL)
-        return (_cogl_pipeline_layer_get_texture_type (authority0) ==
-                _cogl_pipeline_layer_get_texture_type (authority1));
+        return TRUE;
       else
         return FALSE;
     }
@@ -986,7 +720,7 @@ _cogl_pipeline_layer_texture_data_equal (CoglPipelineLayer *authority0,
     }
 }
 
-CoglBool
+gboolean
 _cogl_pipeline_layer_combine_state_equal (CoglPipelineLayer *authority0,
                                           CoglPipelineLayer *authority1)
 {
@@ -1028,7 +762,7 @@ _cogl_pipeline_layer_combine_state_equal (CoglPipelineLayer *authority0,
   return TRUE;
 }
 
-CoglBool
+gboolean
 _cogl_pipeline_layer_combine_constant_equal (CoglPipelineLayer *authority0,
                                              CoglPipelineLayer *authority1)
 {
@@ -1037,7 +771,7 @@ _cogl_pipeline_layer_combine_constant_equal (CoglPipelineLayer *authority0,
                  sizeof (float) * 4) == 0 ? TRUE : FALSE;
 }
 
-CoglBool
+gboolean
 _cogl_pipeline_layer_sampler_equal (CoglPipelineLayer *authority0,
                                     CoglPipelineLayer *authority1)
 {
@@ -1048,7 +782,7 @@ _cogl_pipeline_layer_sampler_equal (CoglPipelineLayer *authority0,
           authority1->sampler_cache_entry->sampler_object);
 }
 
-CoglBool
+gboolean
 _cogl_pipeline_layer_user_matrix_equal (CoglPipelineLayer *authority0,
                                         CoglPipelineLayer *authority1)
 {
@@ -1061,7 +795,7 @@ _cogl_pipeline_layer_user_matrix_equal (CoglPipelineLayer *authority0,
   return TRUE;
 }
 
-CoglBool
+gboolean
 _cogl_pipeline_layer_point_sprite_coords_equal (CoglPipelineLayer *authority0,
                                                 CoglPipelineLayer *authority1)
 {
@@ -1071,7 +805,7 @@ _cogl_pipeline_layer_point_sprite_coords_equal (CoglPipelineLayer *authority0,
   return big_state0->point_sprite_coords == big_state1->point_sprite_coords;
 }
 
-CoglBool
+gboolean
 _cogl_pipeline_layer_vertex_snippets_equal (CoglPipelineLayer *authority0,
                                             CoglPipelineLayer *authority1)
 {
@@ -1081,7 +815,7 @@ _cogl_pipeline_layer_vertex_snippets_equal (CoglPipelineLayer *authority0,
                                             vertex_snippets);
 }
 
-CoglBool
+gboolean
 _cogl_pipeline_layer_fragment_snippets_equal (CoglPipelineLayer *authority0,
                                               CoglPipelineLayer *authority1)
 {
@@ -1173,11 +907,11 @@ setup_texture_combine_state (CoglBlendStringStatement *statement,
     }
 }
 
-CoglBool
+gboolean
 cogl_pipeline_set_layer_combine (CoglPipeline *pipeline,
 				 int layer_index,
 				 const char *combine_description,
-                                 CoglError **error)
+                                 GError **error)
 {
   CoglPipelineLayerState state = COGL_PIPELINE_LAYER_STATE_COMBINE;
   CoglPipelineLayer *authority;
@@ -1188,7 +922,7 @@ cogl_pipeline_set_layer_combine (CoglPipeline *pipeline,
   CoglBlendStringStatement *a;
   int count;
 
-  _COGL_RETURN_VAL_IF_FAIL (cogl_is_pipeline (pipeline), FALSE);
+  g_return_val_if_fail (cogl_is_pipeline (pipeline), FALSE);
 
   /* Note: this will ensure that the layer exists, creating one if it
    * doesn't already.
@@ -1288,7 +1022,7 @@ cogl_pipeline_set_layer_combine_constant (CoglPipeline *pipeline,
   CoglPipelineLayer     *new;
   float                  color_as_floats[4];
 
-  _COGL_RETURN_IF_FAIL (cogl_is_pipeline (pipeline));
+  g_return_if_fail (cogl_is_pipeline (pipeline));
 
   /* Note: this will ensure that the layer exists, creating one if it
    * doesn't already.
@@ -1371,7 +1105,7 @@ _cogl_pipeline_get_layer_combine_constant (CoglPipeline *pipeline,
   CoglPipelineLayer *layer;
   CoglPipelineLayer *authority;
 
-  _COGL_RETURN_IF_FAIL (cogl_is_pipeline (pipeline));
+  g_return_if_fail (cogl_is_pipeline (pipeline));
 
   /* Note: this will ensure that the layer exists, creating one if it
    * doesn't already.
@@ -1398,7 +1132,7 @@ _cogl_pipeline_get_layer_matrix (CoglPipeline *pipeline, int layer_index)
   CoglPipelineLayer *layer;
   CoglPipelineLayer *authority;
 
-  _COGL_RETURN_VAL_IF_FAIL (cogl_is_pipeline (pipeline), NULL);
+  g_return_val_if_fail (cogl_is_pipeline (pipeline), NULL);
 
   layer = _cogl_pipeline_get_layer (pipeline, layer_index);
 
@@ -1416,7 +1150,7 @@ cogl_pipeline_set_layer_matrix (CoglPipeline *pipeline,
   CoglPipelineLayer     *authority;
   CoglPipelineLayer     *new;
 
-  _COGL_RETURN_IF_FAIL (cogl_is_pipeline (pipeline));
+  g_return_if_fail (cogl_is_pipeline (pipeline));
 
   /* Note: this will ensure that the layer exists, creating one if it
    * doesn't already.
@@ -1478,12 +1212,12 @@ cogl_pipeline_set_layer_matrix (CoglPipeline *pipeline,
 CoglTexture *
 _cogl_pipeline_layer_get_texture (CoglPipelineLayer *layer)
 {
-  _COGL_RETURN_VAL_IF_FAIL (_cogl_is_pipeline_layer (layer), NULL);
+  g_return_val_if_fail (_cogl_is_pipeline_layer (layer), NULL);
 
   return _cogl_pipeline_layer_get_texture_real (layer);
 }
 
-CoglBool
+gboolean
 _cogl_pipeline_layer_has_user_matrix (CoglPipeline *pipeline,
                                       int layer_index)
 {
@@ -1522,7 +1256,7 @@ _cogl_pipeline_get_layer_filters (CoglPipeline *pipeline,
   CoglPipelineLayer *layer;
   CoglPipelineLayer *authority;
 
-  _COGL_RETURN_IF_FAIL (cogl_is_pipeline (pipeline));
+  g_return_if_fail (cogl_is_pipeline (pipeline));
 
   layer = _cogl_pipeline_get_layer (pipeline, layer_index);
 
@@ -1563,7 +1297,7 @@ _cogl_pipeline_layer_get_min_filter (CoglPipelineLayer *layer)
 {
   CoglPipelineLayer *authority;
 
-  _COGL_RETURN_VAL_IF_FAIL (_cogl_is_pipeline_layer (layer), 0);
+  g_return_val_if_fail (_cogl_is_pipeline_layer (layer), 0);
 
   authority =
     _cogl_pipeline_layer_get_authority (layer,
@@ -1577,7 +1311,7 @@ _cogl_pipeline_layer_get_mag_filter (CoglPipelineLayer *layer)
 {
   CoglPipelineLayer *authority;
 
-  _COGL_RETURN_VAL_IF_FAIL (_cogl_is_pipeline_layer (layer), 0);
+  g_return_val_if_fail (_cogl_is_pipeline_layer (layer), 0);
 
   authority =
     _cogl_pipeline_layer_get_authority (layer,
@@ -1599,10 +1333,10 @@ cogl_pipeline_set_layer_filters (CoglPipeline      *pipeline,
 
   _COGL_GET_CONTEXT (ctx, NO_RETVAL);
 
-  _COGL_RETURN_IF_FAIL (cogl_is_pipeline (pipeline));
+  g_return_if_fail (cogl_is_pipeline (pipeline));
 
-  _COGL_RETURN_IF_FAIL (mag_filter == COGL_PIPELINE_FILTER_NEAREST ||
-                        mag_filter == COGL_PIPELINE_FILTER_LINEAR);
+  g_return_if_fail (mag_filter == COGL_PIPELINE_FILTER_NEAREST ||
+                    mag_filter == COGL_PIPELINE_FILTER_LINEAR);
 
   /* Note: this will ensure that the layer exists, creating one if it
    * doesn't already.
@@ -1627,6 +1361,17 @@ cogl_pipeline_set_layer_filters (CoglPipeline      *pipeline,
                                           sampler_state);
 }
 
+void
+cogl_pipeline_set_layer_max_mipmap_level (CoglPipeline *pipeline,
+                                          int           layer,
+                                          int           max_level)
+{
+  CoglTexture *texture = cogl_pipeline_get_layer_texture (pipeline, layer);
+
+  if (texture != NULL)
+    cogl_texture_set_max_level (texture, max_level);
+}
+
 const CoglSamplerCacheEntry *
 _cogl_pipeline_layer_get_sampler_state (CoglPipelineLayer *layer)
 {
@@ -1647,18 +1392,6 @@ _cogl_pipeline_layer_hash_unit_state (CoglPipelineLayer *authority,
   int unit = authority->unit_index;
   state->hash =
     _cogl_util_one_at_a_time_hash (state->hash, &unit, sizeof (unit));
-}
-
-void
-_cogl_pipeline_layer_hash_texture_type_state (CoglPipelineLayer *authority,
-                                              CoglPipelineLayer **authorities,
-                                              CoglPipelineHashState *state)
-{
-  CoglTextureType texture_type = authority->texture_type;
-
-  state->hash = _cogl_util_one_at_a_time_hash (state->hash,
-                                               &texture_type,
-                                               sizeof (texture_type));
 }
 
 void
@@ -1730,7 +1463,7 @@ _cogl_pipeline_layer_hash_combine_constant_state (CoglPipelineLayer *authority,
                                                   CoglPipelineHashState *state)
 {
   CoglPipelineLayerBigState *b = authority->big_state;
-  CoglBool need_hash = FALSE;
+  gboolean need_hash = FALSE;
   int n_args;
   int i;
 

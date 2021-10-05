@@ -48,10 +48,10 @@ G_BEGIN_DECLS
 typedef struct _ClutterBlurEffect       ClutterBlurEffect;
 typedef struct _ClutterBlurEffectClass  ClutterBlurEffectClass;
 
-CLUTTER_AVAILABLE_IN_1_4
+CLUTTER_EXPORT
 GType clutter_blur_effect_get_type (void) G_GNUC_CONST;
 
-CLUTTER_AVAILABLE_IN_1_4
+CLUTTER_EXPORT
 ClutterEffect *clutter_blur_effect_new (void);
 
 G_END_DECLS

@@ -31,7 +31,7 @@
 #ifndef __COGL_WINSYS_GLX_PRIVATE_H
 #define __COGL_WINSYS_GLX_PRIVATE_H
 
-const CoglWinsysVtable *
+COGL_EXPORT const CoglWinsysVtable *
 _cogl_winsys_glx_get_vtable (void);
 
 #endif /* __COGL_WINSYS_GLX_PRIVATE_H */

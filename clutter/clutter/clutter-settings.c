@@ -17,9 +17,7 @@
  * #ClutterSettings is available since Clutter 1.4
  */
 
-#ifdef HAVE_CONFIG_H
 #include "clutter-build-config.h"
-#endif
 
 #include "clutter-settings.h"
 
@@ -274,9 +272,9 @@ clutter_settings_finalize (GObject *gobject)
 {
   ClutterSettings *self = CLUTTER_SETTINGS (gobject);
 
-  free (self->font_name);
-  free (self->xft_hint_style);
-  free (self->xft_rgba);
+  g_free (self->font_name);
+  g_free (self->xft_hint_style);
+  g_free (self->xft_rgba);
 
   G_OBJECT_CLASS (clutter_settings_parent_class)->finalize (gobject);
 }
@@ -308,7 +306,7 @@ clutter_settings_set_property (GObject      *gobject,
       break;
 
     case PROP_FONT_NAME:
-      free (self->font_name);
+      g_free (self->font_name);
       self->font_name = g_value_dup_string (value);
       settings_update_font_name (self);
       break;
@@ -329,13 +327,13 @@ clutter_settings_set_property (GObject      *gobject,
       break;
 
     case PROP_FONT_HINT_STYLE:
-      free (self->xft_hint_style);
+      g_free (self->xft_hint_style);
       self->xft_hint_style = g_value_dup_string (value);
       settings_update_font_options (self);
       break;
 
     case PROP_FONT_RGBA:
-      free (self->xft_rgba);
+      g_free (self->xft_rgba);
       self->xft_rgba = g_value_dup_string (value);
       settings_update_font_options (self);
       break;
@@ -487,7 +485,7 @@ clutter_settings_class_init (ClutterSettingsClass *klass)
                       P_("Double Click Time"),
                       P_("The time between clicks necessary to detect a multiple click"),
                       0, G_MAXINT,
-                      250,
+                      400,
                       CLUTTER_PARAM_READWRITE);
 
   /**
@@ -697,7 +695,7 @@ clutter_settings_init (ClutterSettings *self)
   self->font_dpi = -1;
   self->unscaled_font_dpi = -1;
 
-  self->double_click_time = 250;
+  self->double_click_time = 400;
   self->double_click_distance = 5;
 
   self->dnd_drag_threshold = 8;
@@ -844,5 +842,5 @@ _clutter_settings_read_from_key_file (ClutterSettings *settings,
       g_value_unset (&value);
     }
 
-  free (pspecs);
+  g_free (pspecs);
 }

@@ -27,11 +27,11 @@
 #define __CLUTTER_BACKEND_EGL_NATIVE_H__
 
 #include <glib-object.h>
+#include <gio/gio.h>
 #include <cogl/cogl.h>
 #include <cogl/cogl-egl.h>
 #include <clutter/clutter-event.h>
 #include <clutter/clutter-backend.h>
-#include <clutter/clutter-device-manager.h>
 
 #include "clutter-backend-private.h"
 
@@ -53,9 +53,6 @@ struct _ClutterBackendEglNative
 {
   ClutterBackend parent_instance;
 
-  /* device manager (ie evdev) */
-  ClutterDeviceManager *device_manager;
-
   /* event source */
   GSource *event_source;
 
@@ -71,7 +68,7 @@ struct _ClutterBackendEglNativeClass
   ClutterBackendClass parent_class;
 };
 
-CLUTTER_AVAILABLE_IN_MUFFIN
+CLUTTER_EXPORT
 GType clutter_backend_egl_native_get_type (void) G_GNUC_CONST;
 
 ClutterBackend *clutter_backend_egl_native_new (void);

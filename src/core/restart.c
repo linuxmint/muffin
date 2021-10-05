@@ -21,7 +21,7 @@
  * SECTION:restart
  * @short_description: Smoothly restart the compositor
  *
- * There are some cases where we need to restart Muffin in order
+ * There are some cases where we need to restart Mutter in order
  * to deal with changes in state - the particular case inspiring
  * this is enabling or disabling stereo output. To make this
  * fairly smooth for the user, we need to do two things:
@@ -34,24 +34,32 @@
  * This handles both of these.
  */
 
-#include <config.h>
+#include "config.h"
 
-#include <clutter/clutter.h>
 #include <gio/gunixinputstream.h>
 
-#include <meta/main.h>
-#include "ui.h"
-#include <meta/util.h>
-#include "display-private.h"
+#include "clutter/clutter.h"
+#include "core/display-private.h"
+#include "core/util-private.h"
+#include "meta/main.h"
+#include "ui/ui.h"
+#include "x11/meta-x11-display-private.h"
 
 static gboolean restart_helper_started = FALSE;
-static gboolean restart_stage_shown = FALSE;
+static gboolean restart_message_shown = FALSE;
+static gboolean is_restart = FALSE;
+
+void
+meta_set_is_restart (gboolean whether)
+{
+  is_restart = whether;
+}
 
 static void
 restart_check_ready (void)
 {
-  if (restart_helper_started && restart_stage_shown)
-    meta_display_restart (meta_get_display ());
+  if (restart_helper_started && restart_message_shown)
+    meta_display_request_restart (meta_get_display ());
 }
 
 static void
@@ -71,7 +79,7 @@ restart_helper_read_line_callback (GObject      *source_object,
                     error ? error->message : NULL);
     }
   else
-    free (line); /* We don't actually care what the restart helper outputs */
+    g_free (line); /* We don't actually care what the restart helper outputs */
 
   g_object_unref (source_object);
 
@@ -80,9 +88,9 @@ restart_helper_read_line_callback (GObject      *source_object,
 }
 
 static gboolean
-restart_stage_painted (gpointer data)
+restart_message_painted (gpointer data)
 {
-  restart_stage_shown = TRUE;
+  restart_message_shown = TRUE;
   restart_check_ready ();
 
   return FALSE;
@@ -90,11 +98,18 @@ restart_stage_painted (gpointer data)
 
 /**
  * meta_restart:
+ * @message: (allow-none): message to display to the user, or %NULL
  *
- * Starts the process of restarting the compositor.
+ * Starts the process of restarting the compositor. Note that Mutter's
+ * involvement here is to make the restart visually smooth for the
+ * user - it cannot itself safely reexec a program that embeds libmuttter.
+ * So in order for this to work, the compositor must handle two
+ * signals -  MetaDisplay::show-restart-message, to display the
+ * message passed here on the Clutter stage, and ::restart to actually
+ * reexec the compositor.
  */
 void
-meta_restart (void)
+meta_restart (const char *message)
 {
   MetaDisplay *display = meta_get_display();
   GInputStream *unix_stream;
@@ -103,15 +118,23 @@ meta_restart (void)
   int helper_out_fd;
 
   static const char * const helper_argv[] = {
-    MUFFIN_LIBEXECDIR "/muffin-restart-helper", NULL
+    MUTTER_LIBEXECDIR "/muffin-restart-helper", NULL
   };
 
-  meta_display_notify_restart (display);
-
-  /* Wait until the stage was painted */
-  clutter_threads_add_repaint_func_full (CLUTTER_REPAINT_FLAGS_POST_PAINT,
-                                         restart_stage_painted,
-                                         NULL, NULL);
+  if (message && meta_display_show_restart_message (display, message))
+    {
+      /* Wait until the stage was painted */
+      clutter_threads_add_repaint_func_full (CLUTTER_REPAINT_FLAGS_POST_PAINT,
+                                             restart_message_painted,
+                                             NULL, NULL);
+    }
+  else
+    {
+      /* Can't show the message, show the message as soon as the
+       * restart helper starts
+       */
+      restart_message_painted (NULL);
+    }
 
   /* We also need to wait for the restart helper to get its
    * reference to the Composite Overlay Window.
@@ -156,4 +179,18 @@ meta_restart (void)
   restart_check_ready ();
 
   return;
+}
+
+/**
+ * meta_is_restart:
+ *
+ * Returns %TRUE if this instance of Mutter comes from Mutter
+ * restarting itself (for example to enable/disable stereo.)
+ * See meta_restart(). If this is the case, any startup visuals
+ * or animations should be suppressed.
+ */
+gboolean
+meta_is_restart (void)
+{
+  return is_restart;
 }

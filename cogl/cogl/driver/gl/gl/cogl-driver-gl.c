@@ -28,25 +28,60 @@
  *
  */
 
-#ifdef HAVE_CONFIG_H
 #include "cogl-config.h"
-#endif
 
 #include <string.h>
 
 #include "cogl-private.h"
 #include "cogl-context-private.h"
-#include "cogl-util-gl-private.h"
 #include "cogl-feature-private.h"
 #include "cogl-renderer-private.h"
-#include "cogl-error-private.h"
-#include "cogl-framebuffer-gl-private.h"
-#include "cogl-texture-2d-gl-private.h"
-#include "cogl-attribute-gl-private.h"
-#include "cogl-clip-stack-gl-private.h"
-#include "cogl-buffer-gl-private.h"
+#include "driver/gl/cogl-util-gl-private.h"
+#include "driver/gl/cogl-framebuffer-gl-private.h"
+#include "driver/gl/cogl-texture-2d-gl-private.h"
+#include "driver/gl/cogl-attribute-gl-private.h"
+#include "driver/gl/cogl-clip-stack-gl-private.h"
+#include "driver/gl/cogl-buffer-gl-private.h"
 
-static CoglBool
+static gboolean
+_cogl_driver_gl_real_context_init (CoglContext *context)
+{
+
+  _cogl_driver_gl_context_init (context);
+
+  if ((context->driver == COGL_DRIVER_GL3))
+    {
+      GLuint vertex_array;
+
+      /* In a forward compatible context, GL 3 doesn't support rendering
+       * using the default vertex array object. Cogl doesn't use vertex
+       * array objects yet so for now we just create a dummy array
+       * object that we will use as our own default object. Eventually
+       * it could be good to attach the vertex array objects to
+       * CoglPrimitives */
+      context->glGenVertexArrays (1, &vertex_array);
+      context->glBindVertexArray (vertex_array);
+    }
+
+  /* As far as I can tell, GL_POINT_SPRITE doesn't have any effect
+     unless GL_COORD_REPLACE is enabled for an individual layer.
+     Therefore it seems like it should be ok to just leave it enabled
+     all the time instead of having to have a set property on each
+     pipeline to track whether any layers have point sprite coords
+     enabled. We don't need to do this for GL3 or GLES2 because point
+     sprites are handled using a builtin varying in the shader. */
+  if (context->driver == COGL_DRIVER_GL)
+    GE (context, glEnable (GL_POINT_SPRITE));
+
+  /* There's no enable for this in GLES2, it's always on */
+  if (context->driver == COGL_DRIVER_GL ||
+      context->driver == COGL_DRIVER_GL3)
+    GE (context, glEnable (GL_PROGRAM_POINT_SIZE) );
+
+  return TRUE;
+}
+
+static gboolean
 _cogl_driver_pixel_format_from_gl_internal (CoglContext *context,
                                             GLenum gl_int_format,
                                             CoglPixelFormat *out_format)
@@ -96,12 +131,11 @@ _cogl_driver_pixel_format_from_gl_internal (CoglContext *context,
 }
 
 static CoglPixelFormat
-_cogl_driver_pixel_format_to_gl_with_target (CoglContext *context,
-                                             CoglPixelFormat format,
-                                             CoglPixelFormat target_format,
-                                             GLenum *out_glintformat,
-                                             GLenum *out_glformat,
-                                             GLenum *out_gltype)
+_cogl_driver_pixel_format_to_gl (CoglContext     *context,
+                                 CoglPixelFormat  format,
+                                 GLenum          *out_glintformat,
+                                 GLenum          *out_glformat,
+                                 GLenum          *out_gltype)
 {
   CoglPixelFormat required_format;
   GLenum glintformat = 0;
@@ -175,16 +209,7 @@ _cogl_driver_pixel_format_to_gl_with_target (CoglContext *context,
     case COGL_PIXEL_FORMAT_BGRA_8888:
     case COGL_PIXEL_FORMAT_BGRA_8888_PRE:
       glintformat = GL_RGBA;
-      /* If the driver has texture_swizzle, pretend internal
-       * and buffer format are the same here, the pixels
-       * will be flipped through this extension.
-       */
-      if (target_format == format &&
-          _cogl_has_private_feature
-          (context, COGL_PRIVATE_FEATURE_TEXTURE_SWIZZLE))
-        glformat = GL_RGBA;
-      else
-        glformat = GL_BGRA;
+      glformat = GL_BGRA;
       gltype = GL_UNSIGNED_BYTE;
       break;
 
@@ -299,21 +324,7 @@ _cogl_driver_pixel_format_to_gl_with_target (CoglContext *context,
   return required_format;
 }
 
-static CoglPixelFormat
-_cogl_driver_pixel_format_to_gl (CoglContext *context,
-                                 CoglPixelFormat  format,
-                                 GLenum *out_glintformat,
-                                 GLenum *out_glformat,
-                                 GLenum *out_gltype)
-{
-  return _cogl_driver_pixel_format_to_gl_with_target (context,
-                                                      format, format,
-                                                      out_glintformat,
-                                                      out_glformat,
-                                                      out_gltype);
-}
-
-static CoglBool
+static gboolean
 _cogl_get_gl_version (CoglContext *ctx,
                       int *major_out,
                       int *minor_out)
@@ -327,61 +338,43 @@ _cogl_get_gl_version (CoglContext *ctx,
   return _cogl_gl_util_parse_gl_version (version_string, major_out, minor_out);
 }
 
-static CoglBool
+static gboolean
 check_gl_version (CoglContext *ctx,
                   char **gl_extensions,
-                  CoglError **error)
+                  GError **error)
 {
   int major, minor;
 
   if (!_cogl_get_gl_version (ctx, &major, &minor))
     {
-      _cogl_set_error (error,
+      g_set_error (error,
                    COGL_DRIVER_ERROR,
                    COGL_DRIVER_ERROR_UNKNOWN_VERSION,
                    "The OpenGL version could not be determined");
       return FALSE;
     }
 
-  /* GL 1.3 supports all of the required functionality in core */
-  if (COGL_CHECK_GL_VERSION (major, minor, 1, 3))
-    return TRUE;
-
-  /* OpenGL 1.2 is only supported if we have the multitexturing
-     extension */
-  if (!_cogl_check_extension ("GL_ARB_multitexture", gl_extensions))
+  /* We require GLSL 1.20, which is implied by OpenGL 2.1. */
+  if (!COGL_CHECK_GL_VERSION (major, minor, 2, 1))
     {
-      _cogl_set_error (error,
+      g_set_error (error,
                    COGL_DRIVER_ERROR,
                    COGL_DRIVER_ERROR_INVALID_VERSION,
-                   "The OpenGL driver is missing "
-                   "the GL_ARB_multitexture extension");
-      return FALSE;
-    }
-
-  /* OpenGL 1.2 is required */
-  if (!COGL_CHECK_GL_VERSION (major, minor, 1, 2))
-    {
-      _cogl_set_error (error,
-                   COGL_DRIVER_ERROR,
-                   COGL_DRIVER_ERROR_INVALID_VERSION,
-                   "The OpenGL version of your driver (%i.%i) "
-                   "is not compatible with Cogl",
-                   major, minor);
+                   "OpenGL 2.1 or better is required");
       return FALSE;
     }
 
   return TRUE;
 }
 
-static CoglBool
+static gboolean
 _cogl_driver_update_features (CoglContext *ctx,
-                              CoglError **error)
+                              GError **error)
 {
-  CoglFeatureFlags flags = 0;
   unsigned long private_features
     [COGL_FLAGS_N_LONGS_FOR_SIZE (COGL_N_PRIVATE_FEATURES)] = { 0 };
   char **gl_extensions;
+  const char *glsl_version;
   int gl_major = 0, gl_minor = 0;
   int i;
 
@@ -421,7 +414,7 @@ _cogl_driver_update_features (CoglContext *ctx,
                  _cogl_context_get_gl_version (ctx),
                  all_extensions);
 
-      free (all_extensions);
+      g_free (all_extensions);
     }
 
   _cogl_get_gl_version (ctx, &gl_major, &gl_minor);
@@ -429,174 +422,46 @@ _cogl_driver_update_features (CoglContext *ctx,
   _cogl_gpu_info_init (ctx, &ctx->gpu);
 
   ctx->glsl_major = 1;
-  ctx->glsl_minor = 1;
+  ctx->glsl_minor = 2;
+  ctx->glsl_version_to_use = 120;
 
-  if (COGL_CHECK_GL_VERSION (gl_major, gl_minor, 2, 0))
-    {
-      const char *glsl_version =
-        (char *)ctx->glGetString (GL_SHADING_LANGUAGE_VERSION);
-      _cogl_gl_util_parse_gl_version (glsl_version,
-                                      &ctx->glsl_major,
-                                      &ctx->glsl_minor);
-    }
+  glsl_version = (char *)ctx->glGetString (GL_SHADING_LANGUAGE_VERSION);
+  _cogl_gl_util_parse_gl_version (glsl_version,
+                                  &ctx->glsl_major,
+                                  &ctx->glsl_minor);
 
-  if (COGL_CHECK_GL_VERSION (ctx->glsl_major, ctx->glsl_minor, 1, 2))
-    /* We want to use version 120 if it is available so that the
-     * gl_PointCoord can be used. */
-    ctx->glsl_version_to_use = 120;
-  else
-    ctx->glsl_version_to_use = 110;
-
-  flags = (COGL_FEATURE_TEXTURE_READ_PIXELS
-           | COGL_FEATURE_UNSIGNED_INT_INDICES
-           | COGL_FEATURE_DEPTH_RANGE);
   COGL_FLAGS_SET (ctx->features,
                   COGL_FEATURE_ID_UNSIGNED_INT_INDICES, TRUE);
-  COGL_FLAGS_SET (ctx->features, COGL_FEATURE_ID_DEPTH_RANGE, TRUE);
-
-  if (COGL_CHECK_GL_VERSION (gl_major, gl_minor, 1, 4))
-    COGL_FLAGS_SET (ctx->features, COGL_FEATURE_ID_MIRRORED_REPEAT, TRUE);
 
   _cogl_feature_check_ext_functions (ctx,
                                      gl_major,
                                      gl_minor,
                                      gl_extensions);
 
-  if (COGL_CHECK_GL_VERSION (gl_major, gl_minor, 2, 0) ||
-      _cogl_check_extension ("GL_ARB_texture_non_power_of_two", gl_extensions))
-    {
-      flags |= COGL_FEATURE_TEXTURE_NPOT
-        | COGL_FEATURE_TEXTURE_NPOT_BASIC
-        | COGL_FEATURE_TEXTURE_NPOT_MIPMAP
-        | COGL_FEATURE_TEXTURE_NPOT_REPEAT;
-      COGL_FLAGS_SET (ctx->features, COGL_FEATURE_ID_TEXTURE_NPOT, TRUE);
-      COGL_FLAGS_SET (ctx->features,
-                      COGL_FEATURE_ID_TEXTURE_NPOT_BASIC, TRUE);
-      COGL_FLAGS_SET (ctx->features,
-                      COGL_FEATURE_ID_TEXTURE_NPOT_MIPMAP, TRUE);
-      COGL_FLAGS_SET (ctx->features,
-                      COGL_FEATURE_ID_TEXTURE_NPOT_REPEAT, TRUE);
-    }
-
   if (_cogl_check_extension ("GL_MESA_pack_invert", gl_extensions))
     COGL_FLAGS_SET (private_features,
                     COGL_PRIVATE_FEATURE_MESA_PACK_INVERT, TRUE);
 
-  if (ctx->glGenRenderbuffers)
+  if (!ctx->glGenRenderbuffers)
     {
-      flags |= COGL_FEATURE_OFFSCREEN;
-      COGL_FLAGS_SET (ctx->features, COGL_FEATURE_ID_OFFSCREEN, TRUE);
-      COGL_FLAGS_SET (private_features,
-                      COGL_PRIVATE_FEATURE_QUERY_FRAMEBUFFER_BITS,
-                      TRUE);
+      g_set_error (error,
+                   COGL_DRIVER_ERROR,
+                   COGL_DRIVER_ERROR_NO_SUITABLE_DRIVER_FOUND,
+                   "Framebuffer objects are required to use the GL driver");
+      return FALSE;
     }
+  COGL_FLAGS_SET (private_features,
+                  COGL_PRIVATE_FEATURE_QUERY_FRAMEBUFFER_BITS,
+                  TRUE);
 
   if (ctx->glBlitFramebuffer)
     COGL_FLAGS_SET (private_features,
-                    COGL_PRIVATE_FEATURE_OFFSCREEN_BLIT, TRUE);
+                    COGL_PRIVATE_FEATURE_BLIT_FRAMEBUFFER, TRUE);
 
-  if (ctx->glRenderbufferStorageMultisampleIMG)
-    {
-      flags |= COGL_FEATURE_OFFSCREEN_MULTISAMPLE;
-      COGL_FLAGS_SET (ctx->features,
-                      COGL_FEATURE_ID_OFFSCREEN_MULTISAMPLE, TRUE);
-    }
+  COGL_FLAGS_SET (private_features, COGL_PRIVATE_FEATURE_PBOS, TRUE);
 
-  if (COGL_CHECK_GL_VERSION (gl_major, gl_minor, 3, 0) ||
-      _cogl_check_extension ("GL_ARB_depth_texture", gl_extensions))
-    {
-      flags |= COGL_FEATURE_DEPTH_TEXTURE;
-      COGL_FLAGS_SET (ctx->features, COGL_FEATURE_ID_DEPTH_TEXTURE, TRUE);
-    }
-
-  if (COGL_CHECK_GL_VERSION (gl_major, gl_minor, 2, 1) ||
-      _cogl_check_extension ("GL_EXT_pixel_buffer_object", gl_extensions))
-    COGL_FLAGS_SET (private_features, COGL_PRIVATE_FEATURE_PBOS, TRUE);
-
-  if (COGL_CHECK_GL_VERSION (gl_major, gl_minor, 1, 4) ||
-      _cogl_check_extension ("GL_EXT_blend_color", gl_extensions))
-    COGL_FLAGS_SET (private_features,
-                    COGL_PRIVATE_FEATURE_BLEND_CONSTANT, TRUE);
-
-  if (ctx->glGenPrograms)
-    {
-      flags |= COGL_FEATURE_SHADERS_ARBFP;
-      COGL_FLAGS_SET (ctx->features, COGL_FEATURE_ID_ARBFP, TRUE);
-    }
-
-  if (ctx->glCreateProgram)
-    {
-      flags |= COGL_FEATURE_SHADERS_GLSL;
-      COGL_FLAGS_SET (ctx->features, COGL_FEATURE_ID_GLSL, TRUE);
-    }
-  else
-    {
-      /* If all of the old GLSL extensions are available then we can fake
-       * the GL 2.0 GLSL support by diverting to the old function names */
-      if (ctx->glCreateProgramObject && /* GL_ARB_shader_objects */
-           ctx->glVertexAttribPointer && /* GL_ARB_vertex_shader */
-           _cogl_check_extension ("GL_ARB_fragment_shader", gl_extensions))
-        {
-          ctx->glCreateShader = ctx->glCreateShaderObject;
-          ctx->glCreateProgram = ctx->glCreateProgramObject;
-          ctx->glDeleteShader = ctx->glDeleteObject;
-          ctx->glDeleteProgram = ctx->glDeleteObject;
-          ctx->glAttachShader = ctx->glAttachObject;
-          ctx->glUseProgram = ctx->glUseProgramObject;
-          ctx->glGetProgramInfoLog = ctx->glGetInfoLog;
-          ctx->glGetShaderInfoLog = ctx->glGetInfoLog;
-          ctx->glGetShaderiv = ctx->glGetObjectParameteriv;
-          ctx->glGetProgramiv = ctx->glGetObjectParameteriv;
-          ctx->glDetachShader = ctx->glDetachObject;
-          ctx->glGetAttachedShaders = ctx->glGetAttachedObjects;
-          /* FIXME: there doesn't seem to be an equivalent for glIsShader
-           * and glIsProgram. This doesn't matter for now because Cogl
-           * doesn't use these but if we add support for simulating a
-           * GLES2 context on top of regular GL then we'll need to do
-           * something here */
-
-          flags |= COGL_FEATURE_SHADERS_GLSL;
-          COGL_FLAGS_SET (ctx->features, COGL_FEATURE_ID_GLSL, TRUE);
-        }
-    }
-
-  if ((COGL_CHECK_GL_VERSION (gl_major, gl_minor, 2, 0) ||
-       _cogl_check_extension ("GL_ARB_point_sprite", gl_extensions)) &&
-
-      /* If GLSL is supported then we only enable point sprite support
-       * too if we have glsl >= 1.2 otherwise we don't have the
-       * gl_PointCoord builtin which we depend on in the glsl backend.
-       */
-      (!COGL_FLAGS_GET (ctx->features, COGL_FEATURE_ID_GLSL) ||
-       COGL_CHECK_GL_VERSION (ctx->glsl_major, ctx->glsl_minor, 1, 2)))
-    {
-      flags |= COGL_FEATURE_POINT_SPRITE;
-      COGL_FLAGS_SET (ctx->features, COGL_FEATURE_ID_POINT_SPRITE, TRUE);
-    }
-
-  if (ctx->glGenBuffers)
-    {
-      COGL_FLAGS_SET (private_features, COGL_PRIVATE_FEATURE_VBOS, TRUE);
-      flags |= (COGL_FEATURE_MAP_BUFFER_FOR_READ |
-                COGL_FEATURE_MAP_BUFFER_FOR_WRITE);
-      COGL_FLAGS_SET (ctx->features,
-                         COGL_FEATURE_ID_MAP_BUFFER_FOR_READ, TRUE);
-      COGL_FLAGS_SET (ctx->features,
-                      COGL_FEATURE_ID_MAP_BUFFER_FOR_WRITE, TRUE);
-    }
-
-  if (_cogl_check_extension ("GL_ARB_texture_rectangle", gl_extensions))
-    {
-      flags |= COGL_FEATURE_TEXTURE_RECTANGLE;
-      COGL_FLAGS_SET (ctx->features,
-                      COGL_FEATURE_ID_TEXTURE_RECTANGLE, TRUE);
-    }
-
-  if (ctx->glTexImage3D)
-    {
-      flags |= COGL_FEATURE_TEXTURE_3D;
-      COGL_FLAGS_SET (ctx->features, COGL_FEATURE_ID_TEXTURE_3D, TRUE);
-    }
+  COGL_FLAGS_SET (ctx->features, COGL_FEATURE_ID_MAP_BUFFER_FOR_READ, TRUE);
+  COGL_FLAGS_SET (ctx->features, COGL_FEATURE_ID_MAP_BUFFER_FOR_WRITE, TRUE);
 
   if (ctx->glEGLImageTargetTexture2D)
     COGL_FLAGS_SET (private_features,
@@ -616,33 +481,11 @@ _cogl_driver_update_features (CoglContext *ctx,
     COGL_FLAGS_SET (private_features,
                     COGL_PRIVATE_FEATURE_TEXTURE_SWIZZLE, TRUE);
 
-  /* The per-vertex point size is only available via GLSL with the
-   * gl_PointSize builtin. This is only available in GL 2.0 (not the
-   * GLSL extensions) */
-  if (COGL_CHECK_GL_VERSION (gl_major, gl_minor, 2, 0))
-    {
-      COGL_FLAGS_SET (ctx->features,
-                      COGL_FEATURE_ID_PER_VERTEX_POINT_SIZE,
-                      TRUE);
-      COGL_FLAGS_SET (private_features,
-                      COGL_PRIVATE_FEATURE_ENABLE_PROGRAM_POINT_SIZE, TRUE);
-    }
-
   if (ctx->driver == COGL_DRIVER_GL)
     {
-      int max_clip_planes = 0;
-
       /* Features which are not available in GL 3 */
-      COGL_FLAGS_SET (private_features, COGL_PRIVATE_FEATURE_GL_FIXED, TRUE);
-      COGL_FLAGS_SET (private_features, COGL_PRIVATE_FEATURE_ALPHA_TEST, TRUE);
-      COGL_FLAGS_SET (private_features, COGL_PRIVATE_FEATURE_QUADS, TRUE);
       COGL_FLAGS_SET (private_features,
                       COGL_PRIVATE_FEATURE_ALPHA_TEXTURES, TRUE);
-
-      GE( ctx, glGetIntegerv (GL_MAX_CLIP_PLANES, &max_clip_planes) );
-      if (max_clip_planes >= 4)
-        COGL_FLAGS_SET (private_features,
-                        COGL_PRIVATE_FEATURE_FOUR_CLIP_PLANES, TRUE);
     }
 
   COGL_FLAGS_SET (private_features,
@@ -650,9 +493,6 @@ _cogl_driver_update_features (CoglContext *ctx,
   COGL_FLAGS_SET (private_features, COGL_PRIVATE_FEATURE_ANY_GL, TRUE);
   COGL_FLAGS_SET (private_features,
                   COGL_PRIVATE_FEATURE_FORMAT_CONVERSION, TRUE);
-  COGL_FLAGS_SET (private_features, COGL_PRIVATE_FEATURE_BLEND_CONSTANT, TRUE);
-  COGL_FLAGS_SET (private_features,
-                  COGL_PRIVATE_FEATURE_BUILTIN_POINT_SIZE_UNIFORM, TRUE);
   COGL_FLAGS_SET (private_features,
                   COGL_PRIVATE_FEATURE_QUERY_TEXTURE_PARAMETERS, TRUE);
   COGL_FLAGS_SET (private_features,
@@ -670,18 +510,17 @@ _cogl_driver_update_features (CoglContext *ctx,
   /* Cache features */
   for (i = 0; i < G_N_ELEMENTS (private_features); i++)
     ctx->private_features[i] |= private_features[i];
-  ctx->feature_flags |= flags;
 
   g_strfreev (gl_extensions);
 
   if (!COGL_FLAGS_GET (private_features, COGL_PRIVATE_FEATURE_ALPHA_TEXTURES) &&
       !COGL_FLAGS_GET (private_features, COGL_PRIVATE_FEATURE_TEXTURE_SWIZZLE))
     {
-      _cogl_set_error (error,
-                       COGL_DRIVER_ERROR,
-                       COGL_DRIVER_ERROR_NO_SUITABLE_DRIVER_FOUND,
-                       "The GL_ARB_texture_swizzle extension is required "
-                       "to use the GL3 driver");
+      g_set_error (error,
+                   COGL_DRIVER_ERROR,
+                   COGL_DRIVER_ERROR_NO_SUITABLE_DRIVER_FOUND,
+                   "The GL_ARB_texture_swizzle extension is required "
+                   "to use the GL3 driver");
       return FALSE;
     }
 
@@ -691,9 +530,10 @@ _cogl_driver_update_features (CoglContext *ctx,
 const CoglDriverVtable
 _cogl_driver_gl =
   {
+    _cogl_driver_gl_real_context_init,
+    _cogl_driver_gl_context_deinit,
     _cogl_driver_pixel_format_from_gl_internal,
     _cogl_driver_pixel_format_to_gl,
-    _cogl_driver_pixel_format_to_gl_with_target,
     _cogl_driver_update_features,
     _cogl_offscreen_gl_allocate,
     _cogl_offscreen_gl_free,
@@ -701,6 +541,7 @@ _cogl_driver_gl =
     _cogl_framebuffer_gl_clear,
     _cogl_framebuffer_gl_query_bits,
     _cogl_framebuffer_gl_finish,
+    _cogl_framebuffer_gl_flush,
     _cogl_framebuffer_gl_discard_buffers,
     _cogl_framebuffer_gl_draw_attributes,
     _cogl_framebuffer_gl_draw_indexed_attributes,
@@ -713,6 +554,7 @@ _cogl_driver_gl =
     _cogl_texture_2d_gl_get_gl_handle,
     _cogl_texture_2d_gl_generate_mipmap,
     _cogl_texture_2d_gl_copy_from_bitmap,
+    _cogl_texture_2d_gl_is_get_data_supported,
     _cogl_texture_2d_gl_get_data,
     _cogl_gl_flush_attributes_state,
     _cogl_clip_stack_gl_flush,

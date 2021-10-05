@@ -55,7 +55,7 @@
 
 #include <cogl/cogl-renderer.h>
 
-COGL_BEGIN_DECLS
+G_BEGIN_DECLS
 
 /**
  * cogl_xlib_renderer_handle_event: (skip)
@@ -72,7 +72,7 @@ COGL_BEGIN_DECLS
  * either not interested in the event, or has used the event to update
  * internal state without taking any exclusive action.
  */
-CoglFilterReturn
+COGL_EXPORT CoglFilterReturn
 cogl_xlib_renderer_handle_event (CoglRenderer *renderer,
                                  XEvent *event);
 
@@ -99,7 +99,7 @@ typedef CoglFilterReturn (* CoglXlibFilterFunc) (XEvent *event,
  * function can stop further processing of the event by return
  * %COGL_FILTER_REMOVE.
  */
-void
+COGL_EXPORT void
 cogl_xlib_renderer_add_filter (CoglRenderer *renderer,
                                CoglXlibFilterFunc func,
                                void *data);
@@ -113,7 +113,7 @@ cogl_xlib_renderer_add_filter (CoglRenderer *renderer,
  * Removes a callback that was previously added with
  * cogl_xlib_renderer_add_filter().
  */
-void
+COGL_EXPORT void
 cogl_xlib_renderer_remove_filter (CoglRenderer *renderer,
                                   CoglXlibFilterFunc func,
                                   void *data);
@@ -126,7 +126,7 @@ cogl_xlib_renderer_remove_filter (CoglRenderer *renderer,
  * winsys backend. The display needs to be set with
  * cogl_xlib_renderer_set_foreign_display() before this function is called.
  */
-Display *
+COGL_EXPORT Display *
 cogl_xlib_renderer_get_foreign_display (CoglRenderer *renderer);
 
 /**
@@ -136,78 +136,20 @@ cogl_xlib_renderer_get_foreign_display (CoglRenderer *renderer);
  * Sets a foreign Xlib display that Cogl will use for and Xlib based winsys
  * backend.
  *
- * Note that calling this function will automatically call
- * cogl_xlib_renderer_set_event_retrieval_enabled() to disable Cogl's
+ * Note that calling this function will automatically disable Cogl's
  * event retrieval. Cogl still needs to see all of the X events so the
  * application should also use cogl_xlib_renderer_handle_event() if it
  * uses this function.
  */
-void
+COGL_EXPORT void
 cogl_xlib_renderer_set_foreign_display (CoglRenderer *renderer,
                                         Display *display);
 
 /**
- * cogl_xlib_renderer_set_event_retrieval_enabled: (skip)
- * @renderer: a #CoglRenderer
- * @enable: The new value
- *
- * Sets whether Cogl should automatically retrieve events from the X
- * display. This defaults to %TRUE unless
- * cogl_xlib_renderer_set_foreign_display() is called. It can be set
- * to %FALSE if the application wants to handle its own event
- * retrieval. Note that Cogl still needs to see all of the X events to
- * function properly so the application should call
- * cogl_xlib_renderer_handle_event() for each event if it disables
- * automatic event retrieval.
- *
- * Since: 1.10
- * Stability: unstable
- */
-void
-cogl_xlib_renderer_set_event_retrieval_enabled (CoglRenderer *renderer,
-                                                CoglBool enable);
-
-/**
- * cogl_xlib_renderer_set_threaded_swap_wait_enabled: (skip)
- * @renderer: a #CoglRenderer
- * @enable: The new value
- *
- * Sets whether Cogl is allowed to use a separate threaded to wait for the
- * completion of glXSwapBuffers() and call the frame callback for the
- * corresponding #CoglOnscreen. This is a way of emulating the
- * INTEL_swap_event extension, and will only ever be used if
- * INTEL_swap_event is not present; it will also only be used for
- * specific white-listed drivers that are known to work correctly with
- * multiple contexts sharing state between threads.
- *
- * The advantage of enabling this is that it will allow your main loop
- * to do other work while waiting for the system to be ready to draw
- * the next frame, instead of blocking in glXSwapBuffers(). A disadvantage
- * is that the driver will be prevented from buffering up multiple frames
- * even if it thinks that it would be advantageous. In general, this
- * will work best for something like a system compositor that is doing
- * simple drawing but handling lots of other complex tasks.
- * 
- * If you enable this, you must call XInitThreads() before any other
- * X11 calls in your program. (See the documentation for XInitThreads())
- *
- * Stability: unstable
- */
-void
-cogl_xlib_renderer_set_threaded_swap_wait_enabled (CoglRenderer *renderer,
-						   CoglBool enable);
-
-/**
  * cogl_xlib_renderer_get_display: (skip)
  */
-Display *
+COGL_EXPORT Display *
 cogl_xlib_renderer_get_display (CoglRenderer *renderer);
-
-/**
- * cogl_xlib_renderer_get_visual_info: (skip)
- */
-XVisualInfo *
-cogl_xlib_renderer_get_visual_info (CoglRenderer *renderer);
 
 /**
  * cogl_xlib_renderer_request_reset_on_video_memory_purge: (skip)
@@ -247,10 +189,10 @@ cogl_xlib_renderer_get_visual_info (CoglRenderer *renderer);
  * This defaults to %FALSE and is effective only if called before
  * cogl_display_setup() .
  */
-void
+COGL_EXPORT void
 cogl_xlib_renderer_request_reset_on_video_memory_purge (CoglRenderer *renderer,
-                                                        CoglBool enable);
-COGL_END_DECLS
+                                                        gboolean enable);
+G_END_DECLS
 
 /* The gobject introspection scanner seems to parse public headers in
  * isolation which means we need to be extra careful about how we

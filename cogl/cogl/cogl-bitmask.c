@@ -56,7 +56,7 @@ _COGL_STATIC_ASSERT (sizeof (unsigned long) <= sizeof (void *),
 #define BIT_MASK(bit_num) \
   (1UL << BIT_INDEX (bit_num))
 
-CoglBool
+gboolean
 _cogl_bitmask_get_from_array (const CoglBitmask *bitmask,
                               unsigned int bit_num)
 {
@@ -90,7 +90,7 @@ _cogl_bitmask_convert_to_array (CoglBitmask *bitmask)
 void
 _cogl_bitmask_set_in_array (CoglBitmask *bitmask,
                             unsigned int bit_num,
-                            CoglBool value)
+                            gboolean value)
 {
   GArray *array;
   unsigned int array_index;
@@ -154,7 +154,7 @@ _cogl_bitmask_set_bits (CoglBitmask *dst,
 void
 _cogl_bitmask_set_range_in_array (CoglBitmask *bitmask,
                                   unsigned int n_bits,
-                                  CoglBool value)
+                                  gboolean value)
 {
   GArray *array;
   unsigned int array_index, bit_index;
@@ -326,7 +326,7 @@ typedef struct
   int *bits;
 } CheckData;
 
-static CoglBool
+static gboolean
 check_bit (int bit_num, void *user_data)
 {
   CheckData *data = user_data;

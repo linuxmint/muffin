@@ -21,23 +21,21 @@
  * Author: Jonas Ådahl <jadahl@gmail.com>
  */
 
-#ifdef HAVE_CONFIG_H
 #include "clutter-build-config.h"
-#endif
 
 #include <glib-object.h>
 
 #include "clutter-virtual-input-device.h"
 
-#include "clutter-device-manager.h"
-#include "clutter-private.h"
 #include "clutter-enum-types.h"
+#include "clutter-private.h"
+#include "clutter-seat.h"
 
 enum
 {
   PROP_0,
 
-  PROP_DEVICE_MANAGER,
+  PROP_SEAT,
   PROP_DEVICE_TYPE,
 
   PROP_LAST
@@ -47,7 +45,7 @@ static GParamSpec *obj_props[PROP_LAST];
 
 typedef struct _ClutterVirtualInputDevicePrivate
 {
-  ClutterDeviceManager *manager;
+  ClutterSeat *seat;
   ClutterInputDeviceType device_type;
 } ClutterVirtualInputDevicePrivate;
 
@@ -183,23 +181,6 @@ clutter_virtual_input_device_notify_touch_up (ClutterVirtualInputDevice *virtual
                           slot);
 }
 
-/**
- * clutter_virtual_input_device_get_manager:
- * @virtual_device: a virtual device
- *
- * Gets the device manager of this virtual device.
- *
- * Returns: (transfer none): The #ClutterDeviceManager of this virtual device
- **/
-ClutterDeviceManager *
-clutter_virtual_input_device_get_manager (ClutterVirtualInputDevice *virtual_device)
-{
-  ClutterVirtualInputDevicePrivate *priv =
-    clutter_virtual_input_device_get_instance_private (virtual_device);
-
-  return priv->manager;
-}
-
 int
 clutter_virtual_input_device_get_device_type (ClutterVirtualInputDevice *virtual_device)
 {
@@ -222,8 +203,8 @@ clutter_virtual_input_device_get_property (GObject    *object,
 
   switch (prop_id)
     {
-    case PROP_DEVICE_MANAGER:
-      g_value_set_object (value, priv->manager);
+    case PROP_SEAT:
+      g_value_set_object (value, priv->seat);
       break;
     case PROP_DEVICE_TYPE:
       g_value_set_enum (value, priv->device_type);
@@ -247,8 +228,8 @@ clutter_virtual_input_device_set_property (GObject      *object,
 
   switch (prop_id)
     {
-    case PROP_DEVICE_MANAGER:
-      priv->manager = g_value_get_object (value);
+    case PROP_SEAT:
+      priv->seat = g_value_get_object (value);
       break;
     case PROP_DEVICE_TYPE:
       priv->device_type = g_value_get_enum (value);
@@ -272,11 +253,11 @@ clutter_virtual_input_device_class_init (ClutterVirtualInputDeviceClass *klass)
   object_class->get_property = clutter_virtual_input_device_get_property;
   object_class->set_property = clutter_virtual_input_device_set_property;
 
-  obj_props[PROP_DEVICE_MANAGER] =
-    g_param_spec_object ("device-manager",
-                         P_("Device Manager"),
-                         P_("The device manager instance"),
-                         CLUTTER_TYPE_DEVICE_MANAGER,
+  obj_props[PROP_SEAT] =
+    g_param_spec_object ("seat",
+                         P_("Seat"),
+                         P_("Seat"),
+                         CLUTTER_TYPE_SEAT,
                          CLUTTER_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY);
   obj_props[PROP_DEVICE_TYPE] =
     g_param_spec_enum ("device-type",

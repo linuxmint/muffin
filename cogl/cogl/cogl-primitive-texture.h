@@ -37,19 +37,18 @@
 
 #include "cogl-types.h"
 
-COGL_BEGIN_DECLS
+G_BEGIN_DECLS
 
 /**
  * SECTION:cogl-primitive-texture
  * @short_description: Interface for low-level textures like
- *                     #CoglTexture2D and #CoglTexture3D.
+ *                     #CoglTexture2D.
  *
  * A #CoglPrimitiveTexture is a texture that is directly represented
- * by a single texture on the GPU. For example these could be a
- * #CoglTexture2D, #CoglTexture3D or #CoglTextureRectangle. This is
- * opposed to high level meta textures which may be composed of
- * multiple primitive textures or a sub-region of another texture such
- * as #CoglAtlasTexture and #CoglTexture2DSliced.
+ * by a single texture on the GPU. For example this could be a
+ * #CoglTexture2D. This is opposed to high level meta textures which
+ * may be composed of multiple primitive textures or a sub-region of
+ * another texture such as #CoglAtlasTexture and #CoglTexture2DSliced.
  *
  * A texture that implements this interface can be directly used with
  * the low level cogl_primitive_draw() API. Other types of textures
@@ -63,7 +62,7 @@ COGL_BEGIN_DECLS
  * primitive textures.</note>
  */
 
-#if defined(__COGL_H_INSIDE__) && !defined(COGL_ENABLE_MUFFIN_API) && \
+#if defined(__COGL_H_INSIDE__) && !defined(COGL_ENABLE_MUTTER_API) && \
   !defined(COGL_GIR_SCANNING)
 /* For the public C api we typedef interface types as void to avoid needing
  * lots of casting in code and instead we will rely on runtime type checking
@@ -85,7 +84,7 @@ typedef struct _CoglPrimitiveTexture CoglPrimitiveTexture;
  * Since: 2.0
  * Stability: unstable
  */
-CoglBool
+gboolean
 cogl_is_primitive_texture (void *object);
 
 /**
@@ -103,10 +102,10 @@ cogl_is_primitive_texture (void *object);
  * Since: 2.0
  * Stability: unstable
  */
-void
+COGL_EXPORT void
 cogl_primitive_texture_set_auto_mipmap (CoglPrimitiveTexture *primitive_texture,
-                                        CoglBool value);
+                                        gboolean value);
 
-COGL_END_DECLS
+G_END_DECLS
 
 #endif /* __COGL_PRIMITIVE_TEXTURE_H__ */

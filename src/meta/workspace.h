@@ -15,28 +15,14 @@
  * General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street - Suite 500, Boston, MA
- * 02110-1335, USA.
+ * along with this program; if not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef META_WORKSPACE_H
 #define META_WORKSPACE_H
 
-/**
- * SECTION:Workspaces
- * @short_description:Workspaces
- *
- * A workspace is a set of windows which all live on the same
- * screen.  (You may also see the name "desktop" around the place,
- * which is the EWMH's name for the same thing.)  Only one workspace
- * of a screen may be active at once; all windows on all other workspaces
- * are unmapped.
- */
-
 #include <meta/types.h>
 #include <meta/boxes.h>
-#include <meta/screen.h>
 
 #define META_TYPE_WORKSPACE            (meta_workspace_get_type ())
 #define META_WORKSPACE(obj)            (G_TYPE_CHECK_INSTANCE_CAST ((obj), META_TYPE_WORKSPACE, MetaWorkspace))
@@ -47,31 +33,41 @@
 
 typedef struct _MetaWorkspaceClass   MetaWorkspaceClass;
 
+META_EXPORT
 GType meta_workspace_get_type (void);
 
+META_EXPORT
 int  meta_workspace_index (MetaWorkspace *workspace);
+
+META_EXPORT
+MetaDisplay *meta_workspace_get_display (MetaWorkspace *workspace);
+
+META_EXPORT
 GList* meta_workspace_list_windows (MetaWorkspace *workspace);
+
+META_EXPORT
 void meta_workspace_get_work_area_for_monitor (MetaWorkspace *workspace,
                                                int            which_monitor,
                                                MetaRectangle *area);
+
+META_EXPORT
 void meta_workspace_get_work_area_all_monitors (MetaWorkspace *workspace,
                                                 MetaRectangle *area);
+
+META_EXPORT
 void meta_workspace_activate (MetaWorkspace *workspace, guint32 timestamp);
+
+META_EXPORT
 void meta_workspace_activate_with_focus (MetaWorkspace *workspace,
                                          MetaWindow    *focus_this,
                                          guint32        timestamp);
-void meta_workspace_activate_with_direction_hint (MetaWorkspace       *workspace,
-                                                  MetaMotionDirection  direction,
-                                                  guint32              timestamp);
 
-void meta_workspace_update_window_hints (MetaWorkspace *workspace);
+META_EXPORT
 void meta_workspace_set_builtin_struts (MetaWorkspace *workspace,
                                         GSList        *struts);
-MetaWorkspace *meta_workspace_get_neighbor (MetaWorkspace      *workspace,
-                                            MetaMotionDirection direction);
 
-void meta_workspace_focus_default_window (MetaWorkspace *workspace,
-                                          MetaWindow    *not_this_one,
-                                          guint32        timestamp);
+META_EXPORT
+MetaWorkspace* meta_workspace_get_neighbor (MetaWorkspace      *workspace,
+                                            MetaMotionDirection direction);
 
 #endif

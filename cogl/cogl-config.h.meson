@@ -1,0 +1,16 @@
+/* Have GL for rendering */
+#mesondefine HAVE_COGL_GL
+
+/* Have GLES 2.0 for rendering */
+#mesondefine HAVE_COGL_GLES2
+
+/* Building with Sysprof profiling suport */
+#mesondefine HAVE_TRACING
+
+/* Enable unit tests */
+#mesondefine ENABLE_UNIT_TESTS
+
+/* Default COGL driver */
+#mesondefine COGL_DEFAULT_DRIVER
+
+#define COGL_CONFIG_H_INCLUDED 1

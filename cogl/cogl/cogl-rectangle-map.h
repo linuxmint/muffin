@@ -50,7 +50,7 @@ _cogl_rectangle_map_new (unsigned int width,
                          unsigned int height,
                          GDestroyNotify value_destroy_func);
 
-CoglBool
+gboolean
 _cogl_rectangle_map_add (CoglRectangleMap *map,
                          unsigned int width,
                          unsigned int height,

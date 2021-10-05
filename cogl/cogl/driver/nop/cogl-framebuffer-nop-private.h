@@ -37,9 +37,9 @@
 #include "cogl-types.h"
 #include "cogl-context-private.h"
 
-CoglBool
+gboolean
 _cogl_offscreen_nop_allocate (CoglOffscreen *offscreen,
-                             CoglError **error);
+                              GError **error);
 
 void
 _cogl_offscreen_nop_free (CoglOffscreen *offscreen);
@@ -63,6 +63,9 @@ _cogl_framebuffer_nop_query_bits (CoglFramebuffer *framebuffer,
 
 void
 _cogl_framebuffer_nop_finish (CoglFramebuffer *framebuffer);
+
+void
+_cogl_framebuffer_nop_flush (CoglFramebuffer *framebuffer);
 
 void
 _cogl_framebuffer_nop_discard_buffers (CoglFramebuffer *framebuffer,
@@ -89,12 +92,12 @@ _cogl_framebuffer_nop_draw_indexed_attributes (CoglFramebuffer *framebuffer,
                                                int n_attributes,
                                                CoglDrawFlags flags);
 
-CoglBool
+gboolean
 _cogl_framebuffer_nop_read_pixels_into_bitmap (CoglFramebuffer *framebuffer,
                                                int x,
                                                int y,
                                                CoglReadPixelsFlags source,
                                                CoglBitmap *bitmap,
-                                               CoglError **error);
+                                               GError **error);
 
 #endif /* _COGL_FRAMEBUFFER_NOP_PRIVATE_H_ */

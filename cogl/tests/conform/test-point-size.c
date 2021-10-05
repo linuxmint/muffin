@@ -1,5 +1,6 @@
 #include <cogl/cogl.h>
 
+#include "test-declarations.h"
 #include "test-utils.h"
 
 /* This test assumes the GL driver supports point sizes up to 16
@@ -21,6 +22,7 @@ calc_coord_offset (int pos, int pos_index, int point_size)
     }
 
   g_assert_not_reached ();
+  return 0;
 }
 
 static void
@@ -34,7 +36,7 @@ verify_point_size (CoglFramebuffer *test_fb,
   for (y = 0; y < 4; y++)
     for (x = 0; x < 4; x++)
       {
-        CoglBool in_point = x >= 1 && x <= 2 && y >= 1 && y <= 2;
+        gboolean in_point = x >= 1 && x <= 2 && y >= 1 && y <= 2;
         uint32_t expected_pixel = in_point ? 0x00ff00ff : 0xff0000ff;
 
         test_utils_check_pixel (test_fb,

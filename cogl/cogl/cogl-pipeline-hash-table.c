@@ -31,9 +31,7 @@
  *   Robert Bragg <robert@linux.intel.com>
  */
 
-#ifdef HAVE_CONFIG_H
 #include "cogl-config.h"
-#endif
 
 #include "cogl-context-private.h"
 #include "cogl-pipeline-private.h"
@@ -79,7 +77,7 @@ entry_hash (const void *data)
   return entry->hash_value;
 }
 
-static CoglBool
+static gboolean
 entry_equal (const void *a,
              const void *b)
 {

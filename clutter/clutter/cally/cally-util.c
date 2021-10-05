@@ -38,9 +38,7 @@
  * available any accessible object.
  */
 
-#ifdef HAVE_CONFIG_H
 #include "clutter-build-config.h"
-#endif
 
 #include <stdlib.h>
 #include <string.h>
@@ -144,7 +142,7 @@ cally_util_get_toolkit_name (void)
 static const gchar *
 cally_util_get_toolkit_version (void)
 {
-  return CLUTTER_VERSION_S;
+  return MUTTER_VERSION;
 }
 
 static guint
@@ -156,7 +154,7 @@ cally_util_add_key_event_listener (AtkKeySnoopFunc  listener,
 
   if (!key_listener_list)
   {
-    key_listener_list = g_hash_table_new_full (NULL, NULL, NULL, free);
+    key_listener_list = g_hash_table_new_full (NULL, NULL, NULL, g_free);
 
     cally_util_simulate_snooper_install ();
   }
@@ -414,8 +412,8 @@ cally_key_snooper (ClutterActor *actor,
       consumed = g_hash_table_foreach_steal (new_hash, notify_hf, key_event);
       g_hash_table_destroy (new_hash);
 
-      free (key_event->string);
-      free (key_event);
+      g_free (key_event->string);
+      g_free (key_event);
     }
 
   return (consumed ? 1 : 0);

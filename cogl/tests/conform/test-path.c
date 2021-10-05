@@ -3,6 +3,7 @@
 
 #include <string.h>
 
+#include "test-declarations.h"
 #include "test-utils.h"
 
 #define BLOCK_SIZE 16
@@ -21,9 +22,7 @@ draw_path_at (CoglPath *path, CoglPipeline *pipeline, int x, int y)
   cogl_framebuffer_push_matrix (test_fb);
   cogl_framebuffer_translate (test_fb, x * BLOCK_SIZE, y * BLOCK_SIZE, 0.0f);
 
-  cogl_set_framebuffer (test_fb);
-  cogl_set_source (pipeline);
-  cogl_path_fill (path);
+  cogl_framebuffer_fill_path (test_fb, pipeline, path);
 
   cogl_framebuffer_pop_matrix (test_fb);
 }
@@ -61,7 +60,7 @@ check_block (int block_x, int block_y, int block_mask)
                                         (y + TEST_INSET) * BLOCK_SIZE);
 	      char *screen_pixel = g_strdup_printf ("#%06x", GUINT32_FROM_BE (*p) >> 8);
 	      g_assert_cmpstr (screen_pixel, ==, intended_pixel);
-	      free (screen_pixel);
+	      g_free (screen_pixel);
             }
       }
 }
@@ -177,7 +176,7 @@ paint (TestState *state)
 }
 
 static void
-validate_result ()
+validate_result (void)
 {
   check_block (0, 0, 0x8 /* bottom right */);
   check_block (1, 0, 0xf /* all of them */);

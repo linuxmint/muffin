@@ -1,7 +1,3 @@
 usr/lib/*/libmuffin.so.*
-usr/lib/*/libmuffin*.so
-usr/lib/*/muffin/*.so
-usr/include
-usr/lib/*/pkgconfig/*.pc
-usr/lib/*/muffin/*.gir
+usr/lib/*/muffin/*.so.*
 usr/libexec/muffin-restart-helper

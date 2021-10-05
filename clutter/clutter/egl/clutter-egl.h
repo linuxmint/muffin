@@ -37,43 +37,10 @@
 
 #include <glib.h>
 
-#ifdef COGL_HAS_XLIB_SUPPORT
-#include <X11/Xlib.h>
-#include <X11/Xatom.h>
-#include <X11/Xutil.h>
-#endif
-
 #include "clutter-egl-headers.h"
 #include <clutter/clutter.h>
 
 G_BEGIN_DECLS
-
-/**
- * clutter_eglx_display:
- *
- * Retrieves the #EGLDisplay used by Clutter,
- * if Clutter has been compiled with EGL and X11 support.
- *
- * Return value: the EGL display
- *
- * Since: 0.4
- *
- * Deprecated: 1.6: Use clutter_egl_get_egl_display() instead
- */
-CLUTTER_DEPRECATED_FOR(clutter_egl_get_egl_display)
-EGLDisplay      clutter_eglx_display            (void);
-
-/**
- * clutter_egl_display:
- *
- * Retrieves the #EGLDisplay used by Clutter
- *
- * Return value: the EGL display
- *
- * Deprecated: 1.6: Use clutter_egl_get_egl_display() instead
- */
-CLUTTER_DEPRECATED_FOR(clutter_egl_get_egl_display)
-EGLDisplay      clutter_egl_display             (void);
 
 /**
  * clutter_egl_get_egl_display:
@@ -84,18 +51,8 @@ EGLDisplay      clutter_egl_display             (void);
  *
  * Since: 1.6
  */
-CLUTTER_AVAILABLE_IN_1_6
+CLUTTER_EXPORT
 EGLDisplay      clutter_egl_get_egl_display     (void);
-
-#ifdef COGL_HAS_EGL_PLATFORM_KMS_SUPPORT
-CLUTTER_AVAILABLE_IN_1_18
-void            clutter_egl_set_kms_fd          (int fd);
-#endif
-
-CLUTTER_AVAILABLE_IN_1_20
-void            clutter_egl_freeze_master_clock (void);
-CLUTTER_AVAILABLE_IN_1_20
-void            clutter_egl_thaw_master_clock   (void);
 
 G_END_DECLS
 

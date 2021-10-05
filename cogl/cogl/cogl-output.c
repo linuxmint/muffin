@@ -28,9 +28,7 @@
  *
  */
 
-#ifdef HAVE_CONFIG_H
 #include "cogl-config.h"
-#endif
 
 #include "cogl-output-private.h"
 #include "cogl-gtype-private.h"
@@ -56,7 +54,7 @@ _cogl_output_new (const char *name)
 static void
 _cogl_output_free (CoglOutput *output)
 {
-  free (output->name);
+  g_free (output->name);
 
   g_slice_free (CoglOutput, output);
 }

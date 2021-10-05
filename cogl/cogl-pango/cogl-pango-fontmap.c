@@ -34,9 +34,7 @@
  *
  */
 
-#ifdef HAVE_CONFIG_H
 #include "cogl-config.h"
-#endif
 
 /* This is needed to get the Pango headers to export stuff needed to
    subclass */
@@ -69,14 +67,14 @@ free_priv (gpointer data)
   cogl_object_unref (priv->ctx);
   cogl_object_unref (priv->renderer);
 
-  free (priv);
+  g_free (priv);
 }
 
 PangoFontMap *
 cogl_pango_font_map_new (void)
 {
   PangoFontMap *fm = pango_cairo_font_map_new ();
-  CoglPangoFontMapPriv *priv = g_new0 (CoglPangoFontMapPriv, 1);
+  g_autofree CoglPangoFontMapPriv *priv = g_new0 (CoglPangoFontMapPriv, 1);
 
   _COGL_GET_CONTEXT (context, NULL);
 
@@ -87,7 +85,7 @@ cogl_pango_font_map_new (void)
    * for now. */
   g_object_set_qdata_full (G_OBJECT (fm),
                            cogl_pango_font_map_get_priv_key (),
-                           priv,
+                           g_steal_pointer (&priv),
                            free_priv);
 
   return fm;
@@ -96,7 +94,7 @@ cogl_pango_font_map_new (void)
 PangoContext *
 cogl_pango_font_map_create_context (CoglPangoFontMap *fm)
 {
-  _COGL_RETURN_VAL_IF_FAIL (COGL_PANGO_IS_FONT_MAP (fm), NULL);
+  g_return_val_if_fail (COGL_PANGO_IS_FONT_MAP (fm), NULL);
 
 #if PANGO_VERSION_CHECK (1, 22, 0)
   /* We can just directly use the pango context from the Cairo font
@@ -140,7 +138,7 @@ void
 cogl_pango_font_map_set_resolution (CoglPangoFontMap *font_map,
 				    double            dpi)
 {
-  _COGL_RETURN_IF_FAIL (COGL_PANGO_IS_FONT_MAP (font_map));
+  g_return_if_fail (COGL_PANGO_IS_FONT_MAP (font_map));
 
   pango_cairo_font_map_set_resolution (PANGO_CAIRO_FONT_MAP (font_map), dpi);
 }
@@ -155,7 +153,7 @@ cogl_pango_font_map_clear_glyph_cache (CoglPangoFontMap *fm)
 
 void
 cogl_pango_font_map_set_use_mipmapping (CoglPangoFontMap *fm,
-                                        CoglBool          value)
+                                        gboolean          value)
 {
   PangoRenderer *renderer = _cogl_pango_font_map_get_renderer (fm);
 
@@ -163,7 +161,7 @@ cogl_pango_font_map_set_use_mipmapping (CoglPangoFontMap *fm,
                                            value);
 }
 
-CoglBool
+gboolean
 cogl_pango_font_map_get_use_mipmapping (CoglPangoFontMap *fm)
 {
   PangoRenderer *renderer = _cogl_pango_font_map_get_renderer (fm);

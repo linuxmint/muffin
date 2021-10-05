@@ -89,8 +89,8 @@ clutter_input_focus_reset (ClutterInputFocus *focus)
 }
 
 void
-clutter_input_focus_set_cursor_location (ClutterInputFocus *focus,
-                                         const ClutterRect *rect)
+clutter_input_focus_set_cursor_location (ClutterInputFocus     *focus,
+                                         const graphene_rect_t *rect)
 {
   ClutterInputFocusPrivate *priv;
 
@@ -147,8 +147,8 @@ clutter_input_focus_set_content_purpose (ClutterInputFocus          *focus,
 }
 
 gboolean
-clutter_input_focus_filter_key_event (ClutterInputFocus     *focus,
-                                      const ClutterKeyEvent *key)
+clutter_input_focus_filter_event (ClutterInputFocus  *focus,
+                                  const ClutterEvent *event)
 {
   ClutterInputFocusPrivate *priv;
 
@@ -157,7 +157,30 @@ clutter_input_focus_filter_key_event (ClutterInputFocus     *focus,
 
   priv = clutter_input_focus_get_instance_private (focus);
 
-  return clutter_input_method_filter_key_event (priv->im, key);
+  if (event->type == CLUTTER_KEY_PRESS ||
+      event->type == CLUTTER_KEY_RELEASE)
+    {
+      return clutter_input_method_filter_key_event (priv->im, &event->key);
+    }
+  else if (event->type == CLUTTER_IM_COMMIT)
+    {
+      clutter_input_focus_commit (focus, event->im.text);
+      return TRUE;
+    }
+  else if (event->type == CLUTTER_IM_DELETE)
+    {
+      clutter_input_focus_delete_surrounding (focus, event->im.offset,
+                                              event->im.len);
+      return TRUE;
+    }
+  else if (event->type == CLUTTER_IM_PREEDIT)
+    {
+      clutter_input_focus_set_preedit_text (focus, event->im.text,
+                                            event->im.offset);
+      return TRUE;
+    }
+
+  return FALSE;
 }
 
 void
@@ -175,7 +198,8 @@ clutter_input_focus_set_can_show_preedit (ClutterInputFocus *focus,
 }
 
 void
-clutter_input_focus_request_toggle_input_panel (ClutterInputFocus *focus)
+clutter_input_focus_set_input_panel_state (ClutterInputFocus      *focus,
+                                           ClutterInputPanelState  state)
 {
   ClutterInputFocusPrivate *priv;
 
@@ -184,7 +208,7 @@ clutter_input_focus_request_toggle_input_panel (ClutterInputFocus *focus)
 
   priv = clutter_input_focus_get_instance_private (focus);
 
-  clutter_input_method_toggle_input_panel (priv->im);
+  clutter_input_method_set_input_panel_state (priv->im, state);
 }
 
 void
@@ -216,7 +240,7 @@ clutter_input_focus_commit (ClutterInputFocus *focus,
 
 void
 clutter_input_focus_delete_surrounding (ClutterInputFocus *focus,
-                                        guint              offset,
+                                        int                offset,
                                         guint              len)
 {
   g_return_if_fail (CLUTTER_IS_INPUT_FOCUS (focus));
