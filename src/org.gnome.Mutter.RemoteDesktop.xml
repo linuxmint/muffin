@@ -1,0 +1,191 @@
+<!DOCTYPE node PUBLIC
+'-//freedesktop//DTD D-BUS Object Introspection 1.0//EN'
+'http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd'>
+<node>
+
+  <!--
+      org.gnome.Mutter.RemoteDesktop:
+      @short_description: Remote desktop interface
+
+      This API is private and not intended to be used outside of the integrated
+      system that uses libmutter. No compatibility between versions are
+      promised.
+  -->
+  <interface name="org.gnome.Mutter.RemoteDesktop">
+
+    <!--
+	CreateSession:
+	@session_path: Path to the new session object
+    -->
+    <method name="CreateSession">
+      <arg name="session_path" type="o" direction="out" />
+    </method>
+
+    <!--
+	SupportedDeviceTypes:
+	@short_description: Bit mask of supported device types
+
+	Device types:
+	  1: keyboard
+	  2: pointer
+	  4: touchscreen
+    -->
+    <property name="SupportedDeviceTypes" type="u" access="read" />
+
+    <!--
+	Version:
+	@short_description: API version
+    -->
+    <property name="Version" type="i" access="read" />
+
+  </interface>
+
+  <!--
+       org.gnome.Mutter.RemoteDesktop.Session:
+       @short_description: Remote desktop session
+  -->
+  <interface name="org.gnome.Mutter.RemoteDesktop.Session">
+
+    <!--
+	SessionId:
+
+	An identification string used for identifying a remote desktop session.
+	It can be used to associate screen cast sessions with a remote desktop session.
+    -->
+    <property name="SessionId" type="s" access="read" />
+
+    <!--
+	Start:
+
+	Start the remote desktop session
+    -->
+    <method name="Start" />
+
+    <!--
+	Stop:
+
+	Stop the remote desktop session
+    -->
+    <method name="Stop" />
+
+    <!--
+	Closed:
+
+	The session has closed.
+
+	A session doesn't have to have been started before it may be closed.
+	After it being closed, it can no longer be used.
+    -->
+    <signal name="Closed" />
+
+    <!--
+	NotifyKeyboardKeycode:
+
+	A key identified by a keysym was pressed or released
+     -->
+    <method name="NotifyKeyboardKeycode">
+      <arg name="keycode" type="u" direction="in" />
+      <arg name="state" type="b" direction="in" />
+    </method>
+
+    <!--
+	NotifyKeyboardKeysym:
+
+	A key identified by a keysym was pressed or released
+     -->
+    <method name="NotifyKeyboardKeysym">
+      <arg name="keysym" type="u" direction="in" />
+      <arg name="state" type="b" direction="in" />
+    </method>
+
+    <!--
+	NotifyPointerButton:
+
+	A pointer button was pressed or released
+     -->
+    <method name="NotifyPointerButton">
+      <arg name="button" type="i" direction="in" />
+      <arg name="state" type="b" direction="in" />
+    </method>
+
+    <!--
+	NotifyPointerAxis:
+
+	A smooth pointer axis event notification
+
+	Possible @flags:
+	  1: finish - scroll motion was finished (e.g. fingers lifted)
+     -->
+    <method name="NotifyPointerAxis">
+      <arg name="dx" type="d" direction="in" />
+      <arg name="dy" type="d" direction="in" />
+      <arg name="flags" type="u" direction="in" />
+    </method>
+
+    <!--
+	NotifyPointerAxisDiscrete:
+
+	A discrete pointer axis event notification
+     -->
+    <method name="NotifyPointerAxisDiscrete">
+      <arg name="axis" type="u" direction="in" />
+      <arg name="steps" type="i" direction="in" />
+    </method>
+
+    <!--
+	NotifyPointerMotionRelative:
+
+	A relative pointer motion event notification
+     -->
+    <method name="NotifyPointerMotionRelative">
+      <arg name="dx" type="d" direction="in" />
+      <arg name="dy" type="d" direction="in" />
+    </method>
+
+    <!--
+	NotifyPointerMotionAbsolute:
+
+	A absolute pointer motion event notification
+     -->
+    <method name="NotifyPointerMotionAbsolute">
+      <arg name="stream" type="s" direction="in" />
+      <arg name="x" type="d" direction="in" />
+      <arg name="y" type="d" direction="in" />
+    </method>
+
+    <!--
+	NotifyTouchDown:
+
+	A absolute pointer motion event notification
+     -->
+    <method name="NotifyTouchDown">
+      <arg name="stream" type="s" direction="in" />
+      <arg name="slot" type="u" direction="in" />
+      <arg name="x" type="d" direction="in" />
+      <arg name="y" type="d" direction="in" />
+    </method>
+
+    <!--
+	NotifyTouchMotion:
+
+	A absolute pointer motion event notification
+     -->
+    <method name="NotifyTouchMotion">
+      <arg name="stream" type="s" direction="in" />
+      <arg name="slot" type="u" direction="in" />
+      <arg name="x" type="d" direction="in" />
+      <arg name="y" type="d" direction="in" />
+    </method>
+
+    <!--
+	NotifyTouchUp:
+
+	A absolute pointer motion event notification
+     -->
+    <method name="NotifyTouchUp">
+      <arg name="slot" type="u" direction="in" />
+    </method>
+
+  </interface>
+
+</node>

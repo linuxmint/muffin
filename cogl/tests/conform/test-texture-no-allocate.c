@@ -1,5 +1,6 @@
 #include <cogl/cogl.h>
 
+#include "test-declarations.h"
 #include "test-utils.h"
 
 /* Tests that the various texture types can be freed without being
@@ -18,7 +19,7 @@ test_texture_no_allocate (void)
   CoglTexture2D *texture_2d;
   GError *error = NULL;
 
-  tex_data = malloc (BIG_TEX_WIDTH * BIG_TEX_HEIGHT * 4);
+  tex_data = g_malloc (BIG_TEX_WIDTH * BIG_TEX_HEIGHT * 4);
 
   /* NB: if we make the atlas and sliced texture APIs public then this
    * could changed to explicitly use that instead of the magic texture
@@ -37,13 +38,13 @@ test_texture_no_allocate (void)
                                       tex_data,
                                       &error);
 
-  free (tex_data);
+  g_free (tex_data);
 
   /* It's ok if this causes an error, we just don't want it to
    * crash */
 
   if (texture == NULL)
-    cogl_error_free (error);
+    g_error_free (error);
   else
     cogl_object_unref (texture);
 
@@ -59,22 +60,4 @@ test_texture_no_allocate (void)
   texture_2d = cogl_texture_2d_new_with_size (test_ctx,
                                               64, 64);
   cogl_object_unref (texture_2d);
-
-  /* 3D texture */
-  if (cogl_has_feature (test_ctx, COGL_FEATURE_ID_TEXTURE_3D))
-    {
-      CoglTexture3D *texture_3d =
-        cogl_texture_3d_new_with_size (test_ctx,
-                                       64, 64, 64);
-      cogl_object_unref (texture_3d);
-    }
-
-  /* Rectangle texture */
-  if (cogl_has_feature (test_ctx, COGL_FEATURE_ID_TEXTURE_RECTANGLE))
-    {
-      CoglTextureRectangle *texture_rect =
-        cogl_texture_rectangle_new_with_size (test_ctx,
-                                              64, 64);
-      cogl_object_unref (texture_rect);
-    }
 }

@@ -36,9 +36,7 @@
  * #ClutterScriptable is available since Clutter 0.6
  */
 
-#ifdef HAVE_CONFIG_H
 #include "clutter-build-config.h"
-#endif
 
 #include <string.h>
 #include <stdlib.h>
@@ -90,7 +88,7 @@ clutter_scriptable_set_id (ClutterScriptable *scriptable,
     g_object_set_data_full (G_OBJECT (scriptable),
                             "clutter-script-id",
                             g_strdup (id_),
-                            free);
+                            g_free);
 }
 
 /**

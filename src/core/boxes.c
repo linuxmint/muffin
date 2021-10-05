@@ -2,8 +2,8 @@
 
 /**
  * SECTION:boxes
- * @title: MetaRectangle
- * @short_description: Simple box operations
+ * @Title: MetaRectangle
+ * @Short_Description: Simple box operations
  */
 
 /*
@@ -25,21 +25,22 @@
  * General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street - Suite 500, Boston, MA
- * 02110-1335, USA.
+ * along with this program; if not, see <http://www.gnu.org/licenses/>.
  */
-#if HAVE_CONFIG_H
-#include <config.h>
-#endif
 
-#include "boxes-private.h"
-#include <meta/util.h>
-#include <X11/Xutil.h>  /* Just for the definition of the various gravities */
+#include "config.h"
+
+#include "backends/meta-monitor-transform.h"
+#include "core/boxes-private.h"
+
+#include <math.h>
+#include <X11/Xutil.h>
+
+#include "meta/util.h"
 
 /* It would make sense to use GSlice here, but until we clean up the
  * rest of this file and the internal API to use these functions, we
- * leave it using malloc()/free() for consistency.
+ * leave it using g_malloc()/g_free() for consistency.
  */
 
 MetaRectangle *
@@ -51,22 +52,13 @@ meta_rectangle_copy (const MetaRectangle *rect)
 void
 meta_rectangle_free (MetaRectangle *rect)
 {
-  free (rect);
+  g_free (rect);
 }
 
-GType
-meta_rectangle_get_type (void)
-{
-  static GType type_id = 0;
+G_DEFINE_BOXED_TYPE (MetaRectangle, meta_rectangle,
+                     meta_rectangle_copy, meta_rectangle_free);
 
-  if (!type_id)
-    type_id = g_boxed_type_register_static (g_intern_static_string ("MetaRectangle"),
-					    (GBoxedCopyFunc) meta_rectangle_copy,
-					    (GBoxedFreeFunc) meta_rectangle_free);
-  return type_id;
-}
-
-LOCAL_SYMBOL char*
+char*
 meta_rectangle_to_string (const MetaRectangle *rect,
                           char                *output)
 {
@@ -80,7 +72,7 @@ meta_rectangle_to_string (const MetaRectangle *rect,
   return output;
 }
 
-LOCAL_SYMBOL char*
+char*
 meta_rectangle_region_to_string (GList      *region,
                                  const char *separator_string,
                                  char       *output)
@@ -112,7 +104,7 @@ meta_rectangle_region_to_string (GList      *region,
   return output;
 }
 
-LOCAL_SYMBOL char*
+char*
 meta_rectangle_edge_to_string (const MetaEdge *edge,
                                char           *output)
 {
@@ -130,7 +122,7 @@ meta_rectangle_edge_to_string (const MetaEdge *edge,
   return output;
 }
 
-LOCAL_SYMBOL char*
+char*
 meta_rectangle_edge_list_to_string (GList      *edge_list,
                                     const char *separator_string,
                                     char       *output)
@@ -332,10 +324,10 @@ meta_rectangle_contains_rect  (const MetaRectangle *outer_rect,
     inner_rect->y + inner_rect->height <= outer_rect->y + outer_rect->height;
 }
 
-LOCAL_SYMBOL void
+void
 meta_rectangle_resize_with_gravity (const MetaRectangle *old_rect,
                                     MetaRectangle       *rect,
-                                    int                  gravity,
+                                    MetaGravity          gravity,
                                     int                  new_width,
                                     int                  new_height)
 {
@@ -350,12 +342,12 @@ meta_rectangle_resize_with_gravity (const MetaRectangle *old_rect,
    * border_width, and old and new client area widths (instead of old total
    * width and new total width) and you come up with the same formulas.
    *
-   * Also, note that the reason we can treat NorthWestGravity and
-   * StaticGravity the same is because we're not given a location at
+   * Also, note that the reason we can treat META_GRAVITY_NORTH_WEST and
+   * META_GRAVITY_STATIC the same is because we're not given a location at
    * which to place the window--the window was already placed
-   * appropriately before.  So, NorthWestGravity for this function
+   * appropriately before.  So, META_GRAVITY_NORTH_WEST for this function
    * means to just leave the upper left corner of the outer window
-   * where it already is, and StaticGravity for this function means to
+   * where it already is, and META_GRAVITY_STATIC for this function means to
    * just leave the upper left corner of the inner window where it
    * already is.  But leaving either of those two corners where they
    * already are will ensure that the other corner is fixed as well
@@ -366,15 +358,15 @@ meta_rectangle_resize_with_gravity (const MetaRectangle *old_rect,
   /* First, the x direction */
   switch (gravity)
     {
-    case NorthWestGravity:
-    case WestGravity:
-    case SouthWestGravity:
+    case META_GRAVITY_NORTH_WEST:
+    case META_GRAVITY_WEST:
+    case META_GRAVITY_SOUTH_WEST:
       rect->x = old_rect->x;
       break;
 
-    case NorthGravity:
-    case CenterGravity:
-    case SouthGravity:
+    case META_GRAVITY_NORTH:
+    case META_GRAVITY_CENTER:
+    case META_GRAVITY_SOUTH:
       /* FIXME: Needing to adjust new_width kind of sucks, but not doing so
        * would cause drift.
        */
@@ -382,13 +374,13 @@ meta_rectangle_resize_with_gravity (const MetaRectangle *old_rect,
       rect->x = old_rect->x + (old_rect->width - new_width)/2;
       break;
 
-    case NorthEastGravity:
-    case EastGravity:
-    case SouthEastGravity:
+    case META_GRAVITY_NORTH_EAST:
+    case META_GRAVITY_EAST:
+    case META_GRAVITY_SOUTH_EAST:
       rect->x = old_rect->x + (old_rect->width - new_width);
       break;
 
-    case StaticGravity:
+    case META_GRAVITY_STATIC:
     default:
       rect->x = old_rect->x;
       break;
@@ -398,15 +390,15 @@ meta_rectangle_resize_with_gravity (const MetaRectangle *old_rect,
   /* Next, the y direction */
   switch (gravity)
     {
-    case NorthWestGravity:
-    case NorthGravity:
-    case NorthEastGravity:
+    case META_GRAVITY_NORTH_WEST:
+    case META_GRAVITY_NORTH:
+    case META_GRAVITY_NORTH_EAST:
       rect->y = old_rect->y;
       break;
 
-    case WestGravity:
-    case CenterGravity:
-    case EastGravity:
+    case META_GRAVITY_WEST:
+    case META_GRAVITY_CENTER:
+    case META_GRAVITY_EAST:
       /* FIXME: Needing to adjust new_height kind of sucks, but not doing so
        * would cause drift.
        */
@@ -414,13 +406,13 @@ meta_rectangle_resize_with_gravity (const MetaRectangle *old_rect,
       rect->y = old_rect->y + (old_rect->height - new_height)/2;
       break;
 
-    case SouthWestGravity:
-    case SouthGravity:
-    case SouthEastGravity:
+    case META_GRAVITY_SOUTH_WEST:
+    case META_GRAVITY_SOUTH:
+    case META_GRAVITY_SOUTH_EAST:
       rect->y = old_rect->y + (old_rect->height - new_height);
       break;
 
-    case StaticGravity:
+    case META_GRAVITY_STATIC:
     default:
       rect->y = old_rect->y;
       break;
@@ -442,8 +434,8 @@ merge_spanning_rects_in_region (GList *region)
 
   if (region == NULL)
     {
-      meta_warning ("Region to merge was empty!  Either you have a some "
-                    "pathological STRUT list or there's a bug somewhere!\n");
+      g_warning ("Region to merge was empty!  Either you have a some "
+                 "pathological STRUT list or there's a bug somewhere!\n");
       return NULL;
     }
 
@@ -526,7 +518,7 @@ merge_spanning_rects_in_region (GList *region)
                 }
 
               /* Okay, we can free it now */
-              free (delete_me->data);
+              g_free (delete_me->data);
               region = g_list_delete_link (region, delete_me);
             }
 
@@ -591,7 +583,7 @@ check_strut_align (MetaStrut *strut, const MetaRectangle *rect)
  *
  * Returns: (transfer full) (element-type Meta.Rectangle): Minimal spanning set
  */
-LOCAL_SYMBOL GList*
+GList*
 meta_rectangle_get_minimal_spanning_set_for_region (
   const MetaRectangle *basic_rect,
   const GSList  *all_struts)
@@ -708,7 +700,7 @@ meta_rectangle_get_minimal_spanning_set_for_region (
                   temp_rect->y = new_y;
                   ret = g_list_prepend (ret, temp_rect);
                 }
-              free (rect);
+              g_free (rect);
             }
           rect_iter = rect_iter->next;
         }
@@ -728,7 +720,7 @@ meta_rectangle_get_minimal_spanning_set_for_region (
  * meta_rectangle_expand_region: (skip)
  *
  */
-LOCAL_SYMBOL GList*
+GList*
 meta_rectangle_expand_region (GList     *region,
                               const int  left_expand,
                               const int  right_expand,
@@ -748,7 +740,7 @@ meta_rectangle_expand_region (GList     *region,
  * meta_rectangle_expand_region_conditionally: (skip)
  *
  */
-LOCAL_SYMBOL GList*
+GList*
 meta_rectangle_expand_region_conditionally (GList     *region,
                                             const int  left_expand,
                                             const int  right_expand,
@@ -777,163 +769,7 @@ meta_rectangle_expand_region_conditionally (GList     *region,
   return region;
 }
 
-LOCAL_SYMBOL void
-meta_rectangle_expand_to_snapped_borders (MetaRectangle       *rect,
-                                          const MetaRectangle *expand_to,
-                                          const GSList        *all_struts,
-                                          const GSList        *snapped_windows_as_struts,
-                                          const MetaRectangle *user_rect)
-{
-  const GSList *strut_iter;
-  gint x_c, y_c, max_x, max_y, min_x, min_y, fallback_x, fallback_y, fallback_width, fallback_height;
-  gboolean ulc = FALSE, llc = FALSE, urc = FALSE, lrc = FALSE;
-
-  x_c = BOX_CENTER_X (*user_rect);
-  y_c = BOX_TOP (*user_rect);
-  min_x = BOX_LEFT (*expand_to);
-  max_x = BOX_RIGHT (*expand_to);
-  min_y = BOX_TOP (*expand_to);
-  max_y = BOX_BOTTOM (*expand_to);
-
-  /* Iterate over all struts, find a box containing the center of the current rectangle */
-  for (strut_iter = all_struts; strut_iter; strut_iter = strut_iter->next)
-    {
-      MetaStrut *strut = (MetaStrut*) strut_iter->data;
-
-      if (!meta_rectangle_overlap (&strut->rect, expand_to))
-        continue;
-
-      if (strut->side & META_SIDE_LEFT)
-        if (BOX_RIGHT (strut->rect) > min_x)
-            min_x = BOX_RIGHT (strut->rect);
-      if (strut->side & META_SIDE_RIGHT)
-        if (BOX_LEFT (strut->rect) < max_x)
-            max_x = BOX_LEFT (strut->rect);
-      if (strut->side & META_SIDE_TOP)
-        if (BOX_BOTTOM (strut->rect) > min_y)
-            min_y = BOX_BOTTOM (strut->rect);
-      if (strut->side & META_SIDE_BOTTOM)
-        if (BOX_TOP (strut->rect) < max_y)
-            max_y = BOX_TOP (strut->rect);
-    } /* end loop over struts */
-
-/* store safe fallback values if we end up with an impossible situation at the end */
-  fallback_x = min_x;
-  fallback_y = min_y;
-  fallback_width = max_x - min_x;
-  fallback_height = max_y - min_y;
-
-  for (strut_iter = snapped_windows_as_struts; strut_iter; strut_iter = strut_iter->next)
-    {
-
-      MetaStrut *strut = (MetaStrut*) strut_iter->data;
-
-      if (strut->side == (META_SIDE_LEFT | META_SIDE_TOP) ||
-          strut->side == (META_SIDE_LEFT | META_SIDE_BOTTOM) ||
-          strut->side == (META_SIDE_RIGHT | META_SIDE_TOP) ||
-          strut->side == (META_SIDE_RIGHT | META_SIDE_BOTTOM)) {
-        ulc = ulc || strut->side == (META_SIDE_LEFT | META_SIDE_TOP);
-        llc = llc || strut->side == (META_SIDE_LEFT | META_SIDE_BOTTOM);
-        urc = urc || strut->side == (META_SIDE_RIGHT | META_SIDE_TOP);
-        lrc = lrc || strut->side == (META_SIDE_RIGHT | META_SIDE_BOTTOM);
-        continue;
-      }
-      if (strut->side & META_SIDE_LEFT)
-        if (BOX_RIGHT (strut->rect) > min_x)
-            min_x = BOX_RIGHT (strut->rect);
-      if (strut->side & META_SIDE_RIGHT)
-        if (BOX_LEFT (strut->rect) < max_x)
-            max_x = BOX_LEFT (strut->rect);
-      if (strut->side & META_SIDE_TOP)
-        if (BOX_BOTTOM (strut->rect) > min_y)
-            min_y = BOX_BOTTOM (strut->rect);
-      if (strut->side & META_SIDE_BOTTOM)
-        if (BOX_TOP (strut->rect) < max_y)
-            max_y = BOX_TOP (strut->rect);
-    } /* end loop over struts */
-
-  for (strut_iter = snapped_windows_as_struts; strut_iter; strut_iter = strut_iter->next)
-    {
-      MetaStrut *strut = (MetaStrut*) strut_iter->data;
-
-      if (strut->side == (META_SIDE_LEFT | META_SIDE_TOP)) {
-        if (llc) {
-            min_x = BOX_RIGHT (strut->rect);
-        }
-        if (urc) {
-            min_y = BOX_BOTTOM (strut->rect);
-        }
-        if (!llc && !urc) {
-            if (x_c > BOX_RIGHT (strut->rect) &&
-                y_c < BOX_BOTTOM (strut->rect))
-                min_x = BOX_RIGHT (strut->rect);
-            else
-                min_y = BOX_BOTTOM (strut->rect);
-        }
-      } else if (strut->side == (META_SIDE_LEFT | META_SIDE_BOTTOM)) {
-        if (ulc) {
-            min_x = BOX_RIGHT (strut->rect);
-        }
-        if (lrc) {
-            max_y = BOX_TOP (strut->rect);
-        }
-        if (!ulc && !lrc) {
-            if (x_c > BOX_RIGHT (strut->rect) &&
-                y_c > BOX_TOP (strut->rect)) {
-                min_x = BOX_RIGHT (strut->rect);
-            } else {
-                max_y = BOX_TOP (strut->rect);
-            }
-        }
-      } else if (strut->side == (META_SIDE_RIGHT | META_SIDE_TOP)) {
-        if (lrc) {
-            max_x = BOX_LEFT (strut->rect);
-        }
-        if (ulc) {
-            min_y = BOX_BOTTOM (strut->rect);
-        }
-        if (!lrc && !ulc) {
-            if (x_c < BOX_LEFT (strut->rect) &&
-                y_c < BOX_BOTTOM (strut->rect))
-                max_x = BOX_LEFT (strut->rect);
-            else
-                min_y = BOX_BOTTOM (strut->rect);
-        }
-      } else if (strut->side == (META_SIDE_RIGHT | META_SIDE_BOTTOM)) {
-        if (urc) {
-            max_x = BOX_LEFT (strut->rect);
-        }
-        if (llc) {
-            max_y = BOX_TOP (strut->rect);
-        }
-        if (!urc && !llc) {
-            if (x_c < BOX_LEFT (strut->rect) &&
-                y_c > BOX_TOP (strut->rect))
-                max_x = BOX_LEFT (strut->rect);
-            else
-                max_y = BOX_TOP (strut->rect);
-        }
-      } else {
-        continue;
-      }
-    } /* end loop over struts */
-
-  rect->x = min_x;
-  rect->y = min_y;
-  rect->width = max_x - min_x;
-  rect->height = max_y - min_y;
-
-  if (rect->width <= 0) {
-    rect->x = fallback_x;
-    rect->width = fallback_width;
-  }
-  if (rect->height <= 0) {
-    rect->y = fallback_y;
-    rect->height = fallback_height;
-  }
-}
-
-LOCAL_SYMBOL void
+void
 meta_rectangle_expand_to_avoiding_struts (MetaRectangle       *rect,
                                           const MetaRectangle *expand_to,
                                           const MetaDirection  direction,
@@ -1003,16 +839,13 @@ meta_rectangle_expand_to_avoiding_struts (MetaRectangle       *rect,
     } /* end loop over struts */
 } /* end meta_rectangle_expand_to_avoiding_struts */
 
-LOCAL_SYMBOL void
+void
 meta_rectangle_free_list_and_elements (GList *filled_list)
 {
-  g_list_foreach (filled_list,
-                  (void (*)(gpointer,gpointer))&free, /* ew, for ugly */
-                  NULL);
-  g_list_free (filled_list);
+  g_list_free_full (filled_list, g_free);
 }
 
-LOCAL_SYMBOL gboolean
+gboolean
 meta_rectangle_could_fit_in_region (const GList         *spanning_rects,
                                     const MetaRectangle *rect)
 {
@@ -1030,7 +863,7 @@ meta_rectangle_could_fit_in_region (const GList         *spanning_rects,
   return could_fit;
 }
 
-LOCAL_SYMBOL gboolean
+gboolean
 meta_rectangle_contained_in_region (const GList         *spanning_rects,
                                     const MetaRectangle *rect)
 {
@@ -1048,7 +881,7 @@ meta_rectangle_contained_in_region (const GList         *spanning_rects,
   return contained;
 }
 
-LOCAL_SYMBOL gboolean
+gboolean
 meta_rectangle_overlaps_with_region (const GList         *spanning_rects,
                                      const MetaRectangle *rect)
 {
@@ -1066,8 +899,29 @@ meta_rectangle_overlaps_with_region (const GList         *spanning_rects,
   return overlaps;
 }
 
+gboolean
+meta_rectangle_has_adjacent_in_region (const GList         *spanning_rects,
+                                       const MetaRectangle *rect)
+{
+  const GList *l;
 
-LOCAL_SYMBOL void
+  for (l = spanning_rects; l; l = l->next)
+    {
+      MetaRectangle *other = (MetaRectangle *) l->data;
+
+      if (rect == other || meta_rectangle_equal (rect, other))
+        continue;
+
+      if (meta_rectangle_is_adjacent_to ((MetaRectangle *) rect, other))
+        {
+          return TRUE;
+        }
+    }
+
+  return FALSE;
+}
+
+void
 meta_rectangle_clamp_to_fit_into_region (const GList         *spanning_rects,
                                          FixedDirections      fixed_directions,
                                          MetaRectangle       *rect,
@@ -1122,7 +976,7 @@ meta_rectangle_clamp_to_fit_into_region (const GList         *spanning_rects,
   /* Clamp rect appropriately */
   if (best_rect == NULL)
     {
-      meta_warning ("No rect whose size to clamp to found!\n");
+      g_warning ("No rect whose size to clamp to found!\n");
 
       /* If it doesn't fit, at least make it no bigger than it has to be */
       if (!(fixed_directions & FIXED_DIRECTION_X))
@@ -1137,7 +991,7 @@ meta_rectangle_clamp_to_fit_into_region (const GList         *spanning_rects,
     }
 }
 
-LOCAL_SYMBOL void
+void
 meta_rectangle_clip_to_region (const GList         *spanning_rects,
                                FixedDirections      fixed_directions,
                                MetaRectangle       *rect)
@@ -1185,7 +1039,9 @@ meta_rectangle_clip_to_region (const GList         *spanning_rects,
 
   /* Clip rect appropriately */
   if (best_rect == NULL)
-    meta_warning ("No rect to clip to found!\n");
+    {
+      g_warning ("No rect to clip to found!\n");
+    }
   else
     {
       /* Extra precaution with checking fixed direction shouldn't be needed
@@ -1214,7 +1070,7 @@ meta_rectangle_clip_to_region (const GList         *spanning_rects,
     }
 }
 
-LOCAL_SYMBOL void
+void
 meta_rectangle_shove_into_region (const GList         *spanning_rects,
                                   FixedDirections      fixed_directions,
                                   MetaRectangle       *rect)
@@ -1281,7 +1137,9 @@ meta_rectangle_shove_into_region (const GList         *spanning_rects,
 
   /* Shove rect appropriately */
   if (best_rect == NULL)
-    meta_warning ("No rect to shove into found!\n");
+    {
+      g_warning ("No rect to shove into found!\n");
+    }
   else
     {
       /* Extra precaution with checking fixed direction shouldn't be needed
@@ -1314,7 +1172,7 @@ meta_rectangle_shove_into_region (const GList         *spanning_rects,
     }
 }
 
-LOCAL_SYMBOL void
+void
 meta_rectangle_find_linepoint_closest_to_point (double x1,
                                                 double y1,
                                                 double x2,
@@ -1377,7 +1235,7 @@ meta_rectangle_find_linepoint_closest_to_point (double x1,
 /*                                                                         */
 /***************************************************************************/
 
-LOCAL_SYMBOL gboolean
+gboolean
 meta_rectangle_edge_aligns (const MetaRectangle *rect, const MetaEdge *edge)
 {
   /* The reason for the usage of <= below instead of < is because we are
@@ -1398,6 +1256,7 @@ meta_rectangle_edge_aligns (const MetaRectangle *rect, const MetaEdge *edge)
              BOX_LEFT (edge->rect) <= BOX_RIGHT (*rect);
     default:
       g_assert_not_reached ();
+      return FALSE;
     }
 }
 
@@ -1476,7 +1335,7 @@ replace_rect_with_list (GList *old_element,
     }
 
   /* Free the old_element and return the appropriate "next" point */
-  free (old_element->data);
+  g_free (old_element->data);
   g_list_free_1 (old_element);
   return ret;
 }
@@ -1504,7 +1363,7 @@ get_disjoint_strut_rect_list_in_region (const GSList        *old_struts,
       if (meta_rectangle_intersect (copy, region, copy))
         strut_rects = g_list_prepend (strut_rects, copy);
       else
-        free (copy);
+        g_free (copy);
 
       old_struts = old_struts->next;
     }
@@ -1563,7 +1422,7 @@ get_disjoint_strut_rect_list_in_region (const GSList        *old_struts,
   return strut_rects;
 }
 
-LOCAL_SYMBOL gint
+gint
 meta_rectangle_edge_cmp_ignore_type (gconstpointer a, gconstpointer b)
 {
   const MetaEdge *a_edge_rect = (gconstpointer) a;
@@ -1607,7 +1466,7 @@ meta_rectangle_edge_cmp_ignore_type (gconstpointer a, gconstpointer b)
 }
 
 /* To make things easily testable, provide a nice way of sorting edges */
-LOCAL_SYMBOL gint
+gint
 meta_rectangle_edge_cmp (gconstpointer a, gconstpointer b)
 {
   const MetaEdge *a_edge_rect = (gconstpointer) a;
@@ -1872,7 +1731,7 @@ fix_up_edges (MetaRectangle *rect,         MetaEdge *edge,
 
               /* Delete the old one */
               tmp = tmp->next;
-              free (cur);
+              g_free (cur);
               *strut_edges = g_list_delete_link (*strut_edges, delete_me);
             }
           else
@@ -1887,7 +1746,7 @@ fix_up_edges (MetaRectangle *rect,         MetaEdge *edge,
  * This function removes intersections of edges with the rectangles from the
  * list of edges.
  */
-LOCAL_SYMBOL GList*
+GList*
 meta_rectangle_remove_intersections_with_boxes_from_edges (
   GList        *edges,
   const GSList *rectangles)
@@ -1935,7 +1794,7 @@ meta_rectangle_remove_intersections_with_boxes_from_edges (
                   edges = split_edge (edges, edge, &overlap);
 
                   /* Now free the edge... */
-                  free (edge);
+                  g_free (edge);
                   edges = g_list_delete_link (edges, delete_me);
                 }
             }
@@ -1955,7 +1814,7 @@ meta_rectangle_remove_intersections_with_boxes_from_edges (
  *
  * This function is trying to find all the edges of an onscreen region.
  */
-LOCAL_SYMBOL GList*
+GList*
 meta_rectangle_find_onscreen_edges (const MetaRectangle *basic_rect,
                                     const GSList        *all_struts)
 {
@@ -2010,7 +1869,7 @@ meta_rectangle_find_onscreen_edges (const MetaRectangle *basic_rect,
               /* Delete the old edge */
               GList *delete_me = edge_iter;
               edge_iter = edge_iter->next;
-              free (cur_edge);
+              g_free (cur_edge);
               ret = g_list_delete_link (ret, delete_me);
 
               /* Add the new split parts of the edge */
@@ -2041,7 +1900,7 @@ meta_rectangle_find_onscreen_edges (const MetaRectangle *basic_rect,
  * meta_rectangle_find_nonintersected_monitor_edges: (skip)
  *
  */
-LOCAL_SYMBOL GList*
+GList*
 meta_rectangle_find_nonintersected_monitor_edges (
                                     const GList         *monitor_rects,
                                     const GSList        *all_struts)
@@ -2173,4 +2032,173 @@ meta_rectangle_find_nonintersected_monitor_edges (
   ret = g_list_sort (ret, meta_rectangle_edge_cmp);
 
   return ret;
+}
+
+gboolean
+meta_rectangle_is_adjacent_to (MetaRectangle *rect,
+                               MetaRectangle *other)
+{
+  int rect_x1 = rect->x;
+  int rect_y1 = rect->y;
+  int rect_x2 = rect->x + rect->width;
+  int rect_y2 = rect->y + rect->height;
+  int other_x1 = other->x;
+  int other_y1 = other->y;
+  int other_x2 = other->x + other->width;
+  int other_y2 = other->y + other->height;
+
+  if ((rect_x1 == other_x2 || rect_x2 == other_x1) &&
+      !(rect_y2 <= other_y1 || rect_y1 >= other_y2))
+    return TRUE;
+  else if ((rect_y1 == other_y2 || rect_y2 == other_y1) &&
+           !(rect_x2 <= other_x1 || rect_x1 >= other_x2))
+    return TRUE;
+  else
+    return FALSE;
+}
+
+void
+meta_rectangle_scale_double (const MetaRectangle  *rect,
+                             double                scale,
+                             MetaRoundingStrategy  rounding_strategy,
+                             MetaRectangle        *dest)
+{
+  graphene_rect_t tmp = GRAPHENE_RECT_INIT (rect->x, rect->y,
+                                            rect->width, rect->height);
+
+  graphene_rect_scale (&tmp, scale, scale, &tmp);
+  meta_rectangle_from_graphene_rect (&tmp, rounding_strategy, dest);
+}
+
+void
+meta_rectangle_transform (const MetaRectangle  *rect,
+                          MetaMonitorTransform  transform,
+                          int                   width,
+                          int                   height,
+                          MetaRectangle        *dest)
+{
+  switch (transform)
+    {
+    case META_MONITOR_TRANSFORM_NORMAL:
+      *dest = *rect;
+      break;
+    case META_MONITOR_TRANSFORM_90:
+      *dest = (MetaRectangle) {
+        .x = width - (rect->y + rect->height),
+        .y = rect->x,
+        .width = rect->height,
+        .height = rect->width,
+      };
+      break;
+    case META_MONITOR_TRANSFORM_180:
+      *dest = (MetaRectangle) {
+        .x = width - (rect->x + rect->width),
+        .y = height - (rect->y + rect->height),
+        .width = rect->width,
+        .height = rect->height,
+      };
+      break;
+    case META_MONITOR_TRANSFORM_270:
+      *dest = (MetaRectangle) {
+        .x = rect->y,
+        .y = height - (rect->x + rect->width),
+        .width = rect->height,
+        .height = rect->width,
+      };
+      break;
+    case META_MONITOR_TRANSFORM_FLIPPED:
+      *dest = (MetaRectangle) {
+        .x = width - (rect->x + rect->width),
+        .y = rect->y,
+        .width = rect->width,
+        .height = rect->height,
+      };
+      break;
+    case META_MONITOR_TRANSFORM_FLIPPED_90:
+      *dest = (MetaRectangle) {
+        .x = width - (rect->y + rect->height),
+        .y = height - (rect->x + rect->width),
+        .width = rect->height,
+        .height = rect->width,
+      };
+      break;
+    case META_MONITOR_TRANSFORM_FLIPPED_180:
+      *dest = (MetaRectangle) {
+        .x = rect->x,
+        .y = height - (rect->y + rect->height),
+        .width = rect->width,
+        .height = rect->height,
+      };
+      break;
+    case META_MONITOR_TRANSFORM_FLIPPED_270:
+      *dest = (MetaRectangle) {
+        .x = rect->y,
+        .y = rect->x,
+        .width = rect->height,
+        .height = rect->width,
+      };
+      break;
+    }
+}
+
+void
+meta_rectangle_from_graphene_rect (const graphene_rect_t *rect,
+                                   MetaRoundingStrategy   rounding_strategy,
+                                   MetaRectangle         *dest)
+{
+  switch (rounding_strategy)
+    {
+    case META_ROUNDING_STRATEGY_SHRINK:
+      {
+        *dest = (MetaRectangle) {
+          .x = ceilf (rect->origin.x),
+          .y = ceilf (rect->origin.y),
+          .width = floorf (rect->size.width),
+          .height = floorf (rect->size.height),
+        };
+      }
+      break;
+    case META_ROUNDING_STRATEGY_GROW:
+      {
+        graphene_rect_t clamped = *rect;
+
+        graphene_rect_round_extents (&clamped, &clamped);
+
+        *dest = (MetaRectangle) {
+          .x = clamped.origin.x,
+          .y = clamped.origin.y,
+          .width = clamped.size.width,
+          .height = clamped.size.height,
+        };
+      }
+      break;
+    case META_ROUNDING_STRATEGY_ROUND:
+      {
+        *dest = (MetaRectangle) {
+          .x = roundf (rect->origin.x),
+          .y = roundf (rect->origin.y),
+          .width = roundf (rect->size.width),
+          .height = roundf (rect->size.height),
+        };
+      }
+    }
+}
+
+void
+meta_rectangle_crop_and_scale (const MetaRectangle *rect,
+                               graphene_rect_t     *src_rect,
+                               int                  dst_width,
+                               int                  dst_height,
+                               MetaRectangle       *dest)
+{
+  graphene_rect_t tmp = GRAPHENE_RECT_INIT (rect->x, rect->y,
+                                            rect->width, rect->height);
+
+  graphene_rect_scale (&tmp,
+                       src_rect->size.width / dst_width,
+                       src_rect->size.height / dst_height,
+                       &tmp);
+  graphene_rect_offset (&tmp, src_rect->origin.x, src_rect->origin.y);
+
+  meta_rectangle_from_graphene_rect (&tmp, META_ROUNDING_STRATEGY_GROW, dest);
 }

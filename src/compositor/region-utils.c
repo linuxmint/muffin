@@ -15,18 +15,25 @@
  * General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street - Suite 500, Boston, MA
- * 02110-1335, USA.
+ * along with this program; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#if HAVE_CONFIG_H
-#include <config.h>
-#endif
+#include "config.h"
 
-#include "region-utils.h"
+#include "backends/meta-monitor-transform.h"
+#include "compositor/region-utils.h"
+#include "core/boxes-private.h"
 
 #include <math.h>
+
+#define META_REGION_MAX_STACK_RECTS 256
+
+#define META_REGION_CREATE_RECTANGLE_ARRAY_SCOPED(n_rects, rects) \
+  g_autofree cairo_rectangle_int_t *G_PASTE(__n, __LINE__) = NULL; \
+  if (n_rects < META_REGION_MAX_STACK_RECTS) \
+    rects = g_newa (cairo_rectangle_int_t, n_rects); \
+  else \
+    rects = G_PASTE(__n, __LINE__) = g_new (cairo_rectangle_int_t, n_rects);
 
 /* MetaRegionBuilder */
 
@@ -47,34 +54,17 @@
 /* Optimium performance seems to be with MAX_CHUNK_RECTANGLES=4; 8 is about 10% slower.
  * But using 8 may be more robust to systems with slow malloc(). */
 #define MAX_CHUNK_RECTANGLES 8
-#define MAX_LEVELS 16
 
-typedef struct
-{
-  /* To merge regions in binary tree order, we need to keep track of
-   * the regions that we've already merged together at different
-   * levels of the tree. We fill in an array in the pattern:
-   *
-   * |a  |
-   * |b  |a  |
-   * |c  |   |ab |
-   * |d  |c  |ab |
-   * |e  |   |   |abcd|
-   */
-  cairo_region_t *levels[MAX_LEVELS];
-  int n_levels;
-} MetaRegionBuilder;
-
-static void
+void
 meta_region_builder_init (MetaRegionBuilder *builder)
 {
   int i;
-  for (i = 0; i < MAX_LEVELS; i++)
+  for (i = 0; i < META_REGION_BUILDER_MAX_LEVELS; i++)
     builder->levels[i] = NULL;
   builder->n_levels = 1;
 }
 
-static void
+void
 meta_region_builder_add_rectangle (MetaRegionBuilder *builder,
                                    int                x,
                                    int                y,
@@ -99,7 +89,7 @@ meta_region_builder_add_rectangle (MetaRegionBuilder *builder,
         {
           if (builder->levels[i] == NULL)
             {
-              if (i < MAX_LEVELS)
+              if (i < META_REGION_BUILDER_MAX_LEVELS)
                 {
                   builder->levels[i] = builder->levels[i - 1];
                   builder->levels[i - 1] = NULL;
@@ -119,7 +109,7 @@ meta_region_builder_add_rectangle (MetaRegionBuilder *builder,
     }
 }
 
-static cairo_region_t *
+cairo_region_t *
 meta_region_builder_finish (MetaRegionBuilder *builder)
 {
   cairo_region_t *result = NULL;
@@ -144,11 +134,11 @@ meta_region_builder_finish (MetaRegionBuilder *builder)
 
   return result;
 }
-
+
 
 /* MetaRegionIterator */
 
-LOCAL_SYMBOL void
+void
 meta_region_iterator_init (MetaRegionIterator *iter,
                            cairo_region_t     *region)
 {
@@ -171,13 +161,13 @@ meta_region_iterator_init (MetaRegionIterator *iter,
     }
 }
 
-LOCAL_SYMBOL gboolean
+gboolean
 meta_region_iterator_at_end (MetaRegionIterator *iter)
 {
   return iter->i >= iter->n_rectangles;
 }
 
-LOCAL_SYMBOL void
+void
 meta_region_iterator_next (MetaRegionIterator *iter)
 {
   iter->i++;
@@ -194,7 +184,62 @@ meta_region_iterator_next (MetaRegionIterator *iter)
       iter->line_end = TRUE;
     }
 }
-
+
+cairo_region_t *
+meta_region_scale_double (cairo_region_t       *region,
+                          double                scale,
+                          MetaRoundingStrategy  rounding_strategy)
+{
+  int n_rects, i;
+  cairo_rectangle_int_t *rects;
+  cairo_region_t *scaled_region;
+
+  g_return_val_if_fail (scale > 0.0, NULL);
+
+  if (G_APPROX_VALUE (scale, 1.f, FLT_EPSILON))
+    return cairo_region_copy (region);
+
+  n_rects = cairo_region_num_rectangles (region);
+  META_REGION_CREATE_RECTANGLE_ARRAY_SCOPED (n_rects, rects);
+  for (i = 0; i < n_rects; i++)
+    {
+      cairo_region_get_rectangle (region, i, &rects[i]);
+
+      meta_rectangle_scale_double (&rects[i], scale, rounding_strategy,
+                                   &rects[i]);
+    }
+
+  scaled_region = cairo_region_create_rectangles (rects, n_rects);
+
+  return scaled_region;
+}
+
+cairo_region_t *
+meta_region_scale (cairo_region_t *region, int scale)
+{
+  int n_rects, i;
+  cairo_rectangle_int_t *rects;
+  cairo_region_t *scaled_region;
+
+  if (scale == 1)
+    return cairo_region_copy (region);
+
+  n_rects = cairo_region_num_rectangles (region);
+  META_REGION_CREATE_RECTANGLE_ARRAY_SCOPED (n_rects, rects);
+  for (i = 0; i < n_rects; i++)
+    {
+      cairo_region_get_rectangle (region, i, &rects[i]);
+      rects[i].x *= scale;
+      rects[i].y *= scale;
+      rects[i].width *= scale;
+      rects[i].height *= scale;
+    }
+
+  scaled_region = cairo_region_create_rectangles (rects, n_rects);
+
+  return scaled_region;
+}
+
 static void
 add_expanded_rect (MetaRegionBuilder  *builder,
                    int                 x,
@@ -316,7 +361,7 @@ expand_region_inverse (cairo_region_t *region,
  *
  * Return value: a new region which is the border of the given region
  */
-LOCAL_SYMBOL cairo_region_t *
+cairo_region_t *
 meta_make_border_region (cairo_region_t *region,
                          int             x_amount,
                          int             y_amount,
@@ -331,4 +376,83 @@ meta_make_border_region (cairo_region_t *region,
   cairo_region_destroy (inverse_region);
 
   return border_region;
+}
+
+cairo_region_t *
+meta_region_transform (cairo_region_t       *region,
+                       MetaMonitorTransform  transform,
+                       int                   width,
+                       int                   height)
+{
+  int n_rects, i;
+  cairo_rectangle_int_t *rects;
+  cairo_region_t *transformed_region;
+
+  if (transform == META_MONITOR_TRANSFORM_NORMAL)
+    return cairo_region_copy (region);
+
+  n_rects = cairo_region_num_rectangles (region);
+  META_REGION_CREATE_RECTANGLE_ARRAY_SCOPED (n_rects, rects);
+  for (i = 0; i < n_rects; i++)
+    {
+      cairo_region_get_rectangle (region, i, &rects[i]);
+
+      meta_rectangle_transform (&rects[i],
+                                transform,
+                                width,
+                                height,
+                                &rects[i]);
+    }
+
+  transformed_region = cairo_region_create_rectangles (rects, n_rects);
+
+  return transformed_region;
+}
+
+cairo_region_t *
+meta_region_crop_and_scale (cairo_region_t  *region,
+                            graphene_rect_t *src_rect,
+                            int              dst_width,
+                            int              dst_height)
+{
+  int n_rects, i;
+  cairo_rectangle_int_t *rects;
+  cairo_region_t *viewport_region;
+
+  if (G_APPROX_VALUE (src_rect->size.width, dst_width, FLT_EPSILON) &&
+      G_APPROX_VALUE (src_rect->size.height, dst_height, FLT_EPSILON) &&
+      G_APPROX_VALUE (roundf (src_rect->origin.x),
+                      src_rect->origin.x, FLT_EPSILON) &&
+      G_APPROX_VALUE (roundf (src_rect->origin.y),
+                      src_rect->origin.y, FLT_EPSILON))
+    {
+      viewport_region = cairo_region_copy (region);
+
+      if (G_APPROX_VALUE (src_rect->origin.x, 0, FLT_EPSILON) ||
+          G_APPROX_VALUE (src_rect->origin.y, 0, FLT_EPSILON))
+        {
+          cairo_region_translate (viewport_region,
+                                  (int) src_rect->origin.x,
+                                  (int) src_rect->origin.y);
+        }
+
+      return viewport_region;
+    }
+
+  n_rects = cairo_region_num_rectangles (region);
+  META_REGION_CREATE_RECTANGLE_ARRAY_SCOPED (n_rects, rects);
+  for (i = 0; i < n_rects; i++)
+    {
+      cairo_region_get_rectangle (region, i, &rects[i]);
+
+      meta_rectangle_crop_and_scale (&rects[i],
+                                     src_rect,
+                                     dst_width,
+                                     dst_height,
+                                     &rects[i]);
+    }
+
+  viewport_region = cairo_region_create_rectangles (rects, n_rects);
+
+  return viewport_region;
 }

@@ -32,14 +32,11 @@
  *   Robert Bragg <robert@linux.intel.com>
  */
 
-#ifdef HAVE_CONFIG_H
 #include "cogl-config.h"
-#endif
 
 #include "cogl-context-private.h"
-#include "cogl-buffer-gl-private.h"
-#include "cogl-error-private.h"
-#include "cogl-util-gl-private.h"
+#include "driver/gl/cogl-buffer-gl-private.h"
+#include "driver/gl/cogl-util-gl-private.h"
 
 /*
  * GL/GLES compatibility defines for the buffer API:
@@ -107,14 +104,14 @@ update_hints_to_gl_enum (CoglBuffer *buffer)
     case COGL_BUFFER_UPDATE_HINT_STREAM:
       /* OpenGL ES 1.1 only knows about STATIC_DRAW and DYNAMIC_DRAW */
 #if defined(HAVE_COGL_GL) || defined(HAVE_COGL_GLES2)
-      if (buffer->context->driver != COGL_DRIVER_GLES1)
-        return GL_STREAM_DRAW;
+      return GL_STREAM_DRAW;
 #else
       return GL_DYNAMIC_DRAW;
 #endif
     }
 
   g_assert_not_reached ();
+  return 0;
 }
 
 static GLenum
@@ -135,9 +132,9 @@ convert_bind_target_to_gl_target (CoglBufferBindTarget target)
     }
 }
 
-static CoglBool
+static gboolean
 recreate_store (CoglBuffer *buffer,
-                CoglError **error)
+                GError **error)
 {
   CoglContext *ctx = buffer->context;
   GLenum gl_target;
@@ -163,7 +160,7 @@ recreate_store (CoglBuffer *buffer,
   return TRUE;
 }
 
-GLenum
+static GLenum
 _cogl_buffer_access_to_gl_enum (CoglBufferAccess access)
 {
   if ((access & COGL_BUFFER_ACCESS_READ_WRITE) == COGL_BUFFER_ACCESS_READ_WRITE)
@@ -180,14 +177,14 @@ _cogl_buffer_bind_no_create (CoglBuffer *buffer,
 {
   CoglContext *ctx = buffer->context;
 
-  _COGL_RETURN_VAL_IF_FAIL (buffer != NULL, NULL);
+  g_return_val_if_fail (buffer != NULL, NULL);
 
   /* Don't allow binding the buffer to multiple targets at the same time */
-  _COGL_RETURN_VAL_IF_FAIL (ctx->current_buffer[buffer->last_target] != buffer,
-                            NULL);
+  g_return_val_if_fail (ctx->current_buffer[buffer->last_target] != buffer,
+                        NULL);
 
   /* Don't allow nesting binds to the same target */
-  _COGL_RETURN_VAL_IF_FAIL (ctx->current_buffer[target] == NULL, NULL);
+  g_return_val_if_fail (ctx->current_buffer[target] == NULL, NULL);
 
   buffer->last_target = target;
   ctx->current_buffer[target] = buffer;
@@ -208,7 +205,7 @@ _cogl_buffer_gl_map_range (CoglBuffer *buffer,
                            size_t size,
                            CoglBufferAccess access,
                            CoglBufferMapHint hints,
-                           CoglError **error)
+                           GError **error)
 {
   uint8_t *data;
   CoglBufferBindTarget target;
@@ -220,10 +217,10 @@ _cogl_buffer_gl_map_range (CoglBuffer *buffer,
       ((access & COGL_BUFFER_ACCESS_WRITE) &&
        !cogl_has_feature (ctx, COGL_FEATURE_ID_MAP_BUFFER_FOR_WRITE)))
     {
-      _cogl_set_error (error,
-                       COGL_SYSTEM_ERROR,
-                       COGL_SYSTEM_ERROR_UNSUPPORTED,
-                       "Tried to map a buffer with unsupported access mode");
+      g_set_error_literal (error,
+                           COGL_SYSTEM_ERROR,
+                           COGL_SYSTEM_ERROR_UNSUPPORTED,
+                           "Tried to map a buffer with unsupported access mode");
       return NULL;
     }
 
@@ -243,7 +240,7 @@ _cogl_buffer_gl_map_range (CoglBuffer *buffer,
   if (ctx->glMapBufferRange)
     {
       GLbitfield gl_access = 0;
-      CoglBool should_recreate_store = !buffer->store_created;
+      gboolean should_recreate_store = !buffer->store_created;
 
       if ((access & COGL_BUFFER_ACCESS_READ))
         gl_access |= GL_MAP_READ_BIT;
@@ -292,7 +289,7 @@ _cogl_buffer_gl_map_range (CoglBuffer *buffer,
           return NULL;
         }
 
-      _COGL_RETURN_VAL_IF_FAIL (data != NULL, NULL);
+      g_return_val_if_fail (data != NULL, NULL);
     }
   else
     {
@@ -321,7 +318,7 @@ _cogl_buffer_gl_map_range (CoglBuffer *buffer,
           return NULL;
         }
 
-      _COGL_RETURN_VAL_IF_FAIL (data != NULL, NULL);
+      g_return_val_if_fail (data != NULL, NULL);
 
       data += offset;
     }
@@ -348,18 +345,18 @@ _cogl_buffer_gl_unmap (CoglBuffer *buffer)
   _cogl_buffer_gl_unbind (buffer);
 }
 
-CoglBool
+gboolean
 _cogl_buffer_gl_set_data (CoglBuffer *buffer,
                           unsigned int offset,
                           const void *data,
                           unsigned int size,
-                          CoglError **error)
+                          GError **error)
 {
   CoglBufferBindTarget target;
   GLenum gl_target;
   CoglContext *ctx = buffer->context;
-  CoglBool status = TRUE;
-  CoglError *internal_error = NULL;
+  gboolean status = TRUE;
+  GError *internal_error = NULL;
 
   target = buffer->last_target;
 
@@ -371,7 +368,7 @@ _cogl_buffer_gl_set_data (CoglBuffer *buffer,
    */
   if (internal_error)
     {
-      _cogl_propagate_error (error, internal_error);
+      g_propagate_error (error, internal_error);
       return FALSE;
     }
 
@@ -393,7 +390,7 @@ _cogl_buffer_gl_set_data (CoglBuffer *buffer,
 void *
 _cogl_buffer_gl_bind (CoglBuffer *buffer,
                       CoglBufferBindTarget target,
-                      CoglError **error)
+                      GError **error)
 {
   void *ret;
 
@@ -420,10 +417,10 @@ _cogl_buffer_gl_unbind (CoglBuffer *buffer)
 {
   CoglContext *ctx = buffer->context;
 
-  _COGL_RETURN_IF_FAIL (buffer != NULL);
+  g_return_if_fail (buffer != NULL);
 
   /* the unbind should pair up with a previous bind */
-  _COGL_RETURN_IF_FAIL (ctx->current_buffer[buffer->last_target] == buffer);
+  g_return_if_fail (ctx->current_buffer[buffer->last_target] == buffer);
 
   if (buffer->flags & COGL_BUFFER_FLAG_BUFFER_OBJECT)
     {

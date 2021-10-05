@@ -41,7 +41,7 @@
 
 typedef struct _CoglBlitData CoglBlitData;
 
-typedef CoglBool (* CoglBlitBeginFunc) (CoglBlitData *data);
+typedef gboolean (* CoglBlitBeginFunc) (CoglBlitData *data);
 typedef void (* CoglBlitEndFunc) (CoglBlitData *data);
 
 typedef void (* CoglBlitFunc) (CoglBlitData *data,
@@ -69,7 +69,7 @@ struct _CoglBlitData
 
   const CoglBlitMode *blit_mode;
 
-  /* If we're not using an FBO then we malloc a buffer and copy the
+  /* If we're not using an FBO then we g_malloc a buffer and copy the
      complete texture data in */
   unsigned char *image_data;
   CoglPixelFormat format;

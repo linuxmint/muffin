@@ -2,8 +2,8 @@
 
 /**
  * SECTION:compositor
- * @title: MetaCompositor
- * @short_Description: Compositor API
+ * @Title: MetaCompositor
+ * @Short_Description: Compositor API
  *
  * At a high-level, a window is not-visible or visible. When a
  * window is added (with meta_compositor_add_window()) it is not visible.
@@ -37,69 +37,114 @@
  * compositor needs to delay hiding the windows until the switch
  * workspace animation completes.
  *
- * meta_compositor_maximize_window() and meta_compositor_unmaximize_window()
- * are transitions within the visible state. The window is resized __before__
- * the call, so it may be necessary to readjust the display based on the
- * old_rect to start the animation.
- *
  * # Containers #
  *
  * There's two containers in the stage that are used to place window actors, here
  * are listed in the order in which they are painted:
  *
- * - window group, accessible with meta_get_window_group_for_screen()
- * - top window group, accessible with meta_get_top_window_group_for_screen()
+ * - window group, accessible with meta_get_window_group_for_display()
+ * - top window group, accessible with meta_get_top_window_group_for_display()
  *
- * Muffin will place actors representing windows in the window group, except for
+ * Mutter will place actors representing windows in the window group, except for
  * override-redirect windows (ie. popups and menus) which will be placed in the
  * top window group.
  */
 
+#include "config.h"
 
-#include <config.h>
+#include "compositor/compositor-private.h"
 
-#include <clutter/x11/clutter-x11.h>
-
-#include <meta/screen.h>
-#include <meta/errors.h>
-#include <meta/window.h>
-#include "compositor-private.h"
-#include <meta/compositor-muffin.h>
-#include "xprops.h"
-#include <meta/prefs.h>
-#include <meta/main.h>
-#include <meta/meta-shadow-factory.h>
-#include "meta-window-actor-private.h"
-#include "meta-window-group.h"
-#include "meta-background-actor-private.h"
-#include "window-private.h" /* to check window->hidden */
-#include "display-private.h" /* for meta_display_lookup_x_window() */
-#include "util-private.h"
-#include <X11/extensions/shape.h>
 #include <X11/extensions/Xcomposite.h>
-#include "meta-sync-ring.h"
 
-/* #define DEBUG_TRACE g_print */
-#define DEBUG_TRACE(X)
+#include "backends/meta-dnd-private.h"
+#include "backends/x11/meta-backend-x11.h"
+#include "backends/x11/meta-event-x11.h"
+#include "backends/x11/meta-stage-x11.h"
+#include "clutter/clutter-mutter.h"
+#include "cogl/cogl.h"
+#include "compositor/meta-window-actor-x11.h"
+#include "compositor/meta-window-actor-private.h"
+#include "compositor/meta-window-group-private.h"
+#include "core/display-private.h"
+#include "core/frame.h"
+#include "core/util-private.h"
+#include "core/window-private.h"
+#include "meta/compositor-mutter.h"
+#include "meta/main.h"
+#include "meta/meta-backend.h"
+#include "meta/meta-background-actor.h"
+#include "meta/meta-background-group.h"
+#include "meta/meta-shadow-factory.h"
+#include "meta/meta-x11-errors.h"
+#include "meta/prefs.h"
+#include "meta/window.h"
+#include "x11/meta-x11-display-private.h"
 
-static MetaCompositor *compositor_global = NULL;
+#ifdef HAVE_WAYLAND
+#include "compositor/meta-window-actor-wayland.h"
+#include "wayland/meta-wayland-private.h"
+#endif
+
+enum
+{
+  PROP_0,
+
+  PROP_DISPLAY,
+
+  N_PROPS
+};
+
+static GParamSpec *obj_props[N_PROPS] = { NULL, };
+
+typedef struct _MetaCompositorPrivate
+{
+  GObject parent;
+
+  MetaDisplay *display;
+
+  guint pre_paint_func_id;
+  guint post_paint_func_id;
+
+  gulong stage_presented_id;
+  gulong stage_after_paint_id;
+
+  ClutterActor *stage;
+
+  ClutterActor *window_group;
+  ClutterActor *top_window_group;
+  ClutterActor *feedback_group;
+
+  GList *windows;
+
+  CoglContext *context;
+
+  MetaWindowActor *top_window_actor;
+  gulong top_window_actor_destroy_id;
+
+  int disable_unredirect_count;
+
+  int switch_workspace_in_progress;
+
+  MetaPluginManager *plugin_mgr;
+} MetaCompositorPrivate;
+
+G_DEFINE_ABSTRACT_TYPE_WITH_PRIVATE (MetaCompositor, meta_compositor,
+                                     G_TYPE_OBJECT)
 
 static void
-frame_callback (ClutterStage     *stage,
-                CoglFrameEvent    event,
-                ClutterFrameInfo *frame_info,
-                MetaCompositor   *compositor);
+on_presented (ClutterStage     *stage,
+              CoglFrameEvent    event,
+              ClutterFrameInfo *frame_info,
+              MetaCompositor   *compositor);
 
-static inline gboolean
-composite_at_least_version (MetaDisplay *display, int maj, int min)
+static void
+on_top_window_actor_destroyed (MetaWindowActor *window_actor,
+                               MetaCompositor  *compositor);
+
+static gboolean
+is_modal (MetaDisplay *display)
 {
-  static int major = -1;
-  static int minor = -1;
-
-  if (major == -1)
-    meta_display_get_compositor_version (display, &major, &minor);
-
-  return (major > maj || (major == maj && minor >= min));
+  return display->event_route == META_EVENT_ROUTE_COMPOSITOR_GRAB;
 }
 
 static void sync_actor_stacking (MetaCompositor *compositor);
@@ -107,332 +152,208 @@ static void sync_actor_stacking (MetaCompositor *compositor);
 static void
 meta_finish_workspace_switch (MetaCompositor *compositor)
 {
+  MetaCompositorPrivate *priv =
+    meta_compositor_get_instance_private (compositor);
   GList *l;
 
   /* Finish hiding and showing actors for the new workspace */
-  for (l = compositor->windows; l; l = l->next)
+  for (l = priv->windows; l; l = l->next)
     meta_window_actor_sync_visibility (l->data);
 
-  /*
-   * Fix up stacking order in case the plugin messed it up.
-   */
+  /* Fix up stacking order. */
   sync_actor_stacking (compositor);
-
-/*   printf ("... FINISHED DESKTOP SWITCH\n"); */
-
 }
 
-LOCAL_SYMBOL void
-meta_switch_workspace_completed (MetaScreen *screen)
+void
+meta_switch_workspace_completed (MetaCompositor *compositor)
 {
-  MetaCompositor *compositor = screen->display->compositor;
+  MetaCompositorPrivate *priv =
+    meta_compositor_get_instance_private (compositor);
 
   /* FIXME -- must redo stacking order */
-  compositor->switch_workspace_in_progress--;
-  if (compositor->switch_workspace_in_progress < 0)
+  priv->switch_workspace_in_progress--;
+  if (priv->switch_workspace_in_progress < 0)
     {
       g_warning ("Error in workspace_switch accounting!");
-      compositor->switch_workspace_in_progress = 0;
+      priv->switch_workspace_in_progress = 0;
     }
 
-  if (!compositor->switch_workspace_in_progress)
+  if (!priv->switch_workspace_in_progress)
     meta_finish_workspace_switch (compositor);
 }
 
 void
 meta_compositor_destroy (MetaCompositor *compositor)
 {
-  clutter_threads_remove_repaint_func (compositor->pre_paint_func_id);
-  clutter_threads_remove_repaint_func (compositor->post_paint_func_id);
-
-  if (compositor->have_x11_sync_object)
-    meta_sync_ring_destroy ();
+  g_object_run_dispose (G_OBJECT (compositor));
+  g_object_unref (compositor);
 }
 
-static void
-add_win (MetaWindow *window)
+/* compat helper */
+static MetaCompositor *
+get_compositor_for_display (MetaDisplay *display)
 {
-  meta_window_actor_new (window);
-
-  sync_actor_stacking (window->screen->display->compositor);
-}
-
-static void
-process_damage (MetaCompositor     *compositor,
-                XDamageNotifyEvent *event,
-                MetaWindow         *window)
-{
-  MetaWindowActor *window_actor;
-
-  if (window == NULL)
-    return;
-
-  window_actor = META_WINDOW_ACTOR (meta_window_get_compositor_private (window));
-  if (window_actor == NULL)
-    return;
-
-  meta_window_actor_process_damage (window_actor, event);
-
-  compositor->frame_has_updated_xsurfaces = TRUE;
-}
-
-static void
-process_property_notify (MetaCompositor	*compositor,
-                         XPropertyEvent *event,
-                         MetaWindow     *window)
-{
-  MetaWindowActor *window_actor;
-
-  if (event->atom == compositor->atom_x_root_pixmap)
-    {
-      GSList *l;
-
-      for (l = meta_display_get_screens (compositor->display); l; l = l->next)
-        {
-	  MetaScreen  *screen = l->data;
-          if (event->window == meta_screen_get_xroot (screen))
-            {
-              meta_background_actor_update (screen);
-              return;
-            }
-        }
-    }
-
-  if (window == NULL)
-    return;
-
-  window_actor = META_WINDOW_ACTOR (meta_window_get_compositor_private (window));
-  if (window_actor == NULL)
-    return;
-
-  /* Check for the opacity changing */
-  if (event->atom == compositor->atom_net_wm_window_opacity)
-    {
-      meta_window_actor_update_opacity (window_actor);
-      DEBUG_TRACE ("process_property_notify: net_wm_window_opacity\n");
-      return;
-    }
-
-  DEBUG_TRACE ("process_property_notify: unknown\n");
-}
-
-static Window
-get_output_window (MetaScreen *screen)
-{
-  MetaDisplay *display = meta_screen_get_display (screen);
-  Display     *xdisplay = meta_display_get_xdisplay (display);
-  Window       output, xroot;
-  XWindowAttributes attr;
-  long         event_mask;
-
-  xroot = meta_screen_get_xroot (screen);
-
-  event_mask = FocusChangeMask |
-               ExposureMask |
-               EnterWindowMask | LeaveWindowMask |
-	       PointerMotionMask |
-               PropertyChangeMask |
-               ButtonPressMask | ButtonReleaseMask |
-               KeyPressMask | KeyReleaseMask;
-
-  output = screen->composite_overlay_window;
-
-  if (XGetWindowAttributes (xdisplay, output, &attr))
-      {
-        event_mask |= attr.your_event_mask;
-      }
-
-  XSelectInput (xdisplay, output, event_mask);
-
-  return output;
+  return display->compositor;
 }
 
 /**
- * meta_get_stage_for_screen:
- * @screen: a #MetaScreen
+ * meta_get_stage_for_display:
+ * @display: a #MetaDisplay
  *
- * Returns: (transfer none): The #ClutterStage for the screen
+ * Returns: (transfer none): The #ClutterStage for the display
  */
 ClutterActor *
-meta_get_stage_for_screen (MetaScreen *screen)
+meta_get_stage_for_display (MetaDisplay *display)
 {
-  return screen->display->compositor->stage;
+  MetaCompositor *compositor;
+  MetaCompositorPrivate *priv;
+
+  g_return_val_if_fail (display, NULL);
+
+  compositor = get_compositor_for_display (display);
+  g_return_val_if_fail (compositor, NULL);
+  priv = meta_compositor_get_instance_private (compositor);
+
+  return priv->stage;
 }
 
 /**
- * meta_get_overlay_group_for_screen:
- * @screen: a #MetaScreen
+ * meta_get_window_group_for_display:
+ * @display: a #MetaDisplay
  *
- * Returns: (transfer none): The overlay group corresponding to @screen
+ * Returns: (transfer none): The window group corresponding to @display
  */
 ClutterActor *
-meta_get_overlay_group_for_screen (MetaScreen *screen)
+meta_get_window_group_for_display (MetaDisplay *display)
 {
-  return screen->display->compositor->overlay_group;
+  MetaCompositor *compositor;
+  MetaCompositorPrivate *priv;
+
+  g_return_val_if_fail (display, NULL);
+
+  compositor = get_compositor_for_display (display);
+  g_return_val_if_fail (compositor, NULL);
+  priv = meta_compositor_get_instance_private (compositor);
+
+  return priv->window_group;
 }
 
 /**
- * meta_get_window_group_for_screen:
- * @screen: a #MetaScreen
+ * meta_get_top_window_group_for_display:
+ * @display: a #MetaDisplay
  *
- * Returns: (transfer none): The window group corresponding to @screen
+ * Returns: (transfer none): The top window group corresponding to @display
  */
 ClutterActor *
-meta_get_window_group_for_screen (MetaScreen *screen)
+meta_get_top_window_group_for_display (MetaDisplay *display)
 {
-  return screen->display->compositor->window_group;
+  MetaCompositor *compositor;
+  MetaCompositorPrivate *priv;
+
+  g_return_val_if_fail (display, NULL);
+
+  compositor = get_compositor_for_display (display);
+  g_return_val_if_fail (compositor, NULL);
+  priv = meta_compositor_get_instance_private (compositor);
+
+  return priv->top_window_group;
 }
 
 /**
- * meta_get_bottom_window_group_for_screen:
- * @screen: a #MetaScreen
+ * meta_get_feedback_group_for_display:
+ * @display: a #MetaDisplay
  *
- * Returns: (transfer none): The bottom window group corresponding to @screen
+ * Returns: (transfer none): The feedback group corresponding to @display
  */
 ClutterActor *
-meta_get_bottom_window_group_for_screen (MetaScreen *screen)
+meta_get_feedback_group_for_display (MetaDisplay *display)
 {
-  return screen->display->compositor->bottom_window_group;
-}
+  MetaCompositor *compositor;
+  MetaCompositorPrivate *priv;
 
-/**
- * meta_get_top_window_group_for_screen:
- * @screen: a #MetaScreen
- *
- * Returns: (transfer none): The top window group corresponding to @screen
- */
-ClutterActor *
-meta_get_top_window_group_for_screen (MetaScreen *screen)
-{
-  return screen->display->compositor->top_window_group;
-}
+  g_return_val_if_fail (display, NULL);
 
-/**
- * meta_get_background_actor_for_screen:
- * @screen: a #MetaScreen
- *
- * Gets the actor that draws the root window background under the windows.
- * The root window background automatically tracks the image or color set
- * by the environment.
- *
- * Returns: (transfer none): The background actor corresponding to @screen
- */
-ClutterActor *
-meta_get_background_actor_for_screen (MetaScreen *screen)
-{
-  return screen->display->compositor->background_actor;
+  compositor = get_compositor_for_display (display);
+  g_return_val_if_fail (compositor, NULL);
+  priv = meta_compositor_get_instance_private (compositor);
+
+  return priv->feedback_group;
 }
 
 /**
  * meta_get_window_actors:
- * @screen: a #MetaScreen
+ * @display: a #MetaDisplay
  *
- * Returns: (transfer none) (element-type Clutter.Actor): The set of #MetaWindowActor on @screen
+ * Returns: (transfer none) (element-type Clutter.Actor): The set of #MetaWindowActor on @display
  */
 GList *
-meta_get_window_actors (MetaScreen *screen)
+meta_get_window_actors (MetaDisplay *display)
 {
-  return screen->display->compositor->windows;
-}
+  MetaCompositor *compositor;
+  MetaCompositorPrivate *priv;
 
-static void
-do_set_stage_input_region (MetaScreen   *screen,
-                           XserverRegion region)
-{
-  MetaDisplay *display = screen->display;
-  MetaCompositor *compositor = display->compositor;
-  Display *xdpy = display->xdisplay;
-  Window xstage = clutter_x11_get_stage_window (CLUTTER_STAGE (compositor->stage));
+  g_return_val_if_fail (display, NULL);
 
-  XFixesSetWindowShapeRegion (xdpy, xstage, ShapeInput, 0, 0, region);
+  compositor = get_compositor_for_display (display);
+  g_return_val_if_fail (compositor, NULL);
+  priv = meta_compositor_get_instance_private (compositor);
 
-  /* It's generally a good heuristic that when a crossing event is generated because
-   * we reshape the overlay, we don't want it to affect focus-follows-mouse focus -
-   * it's not the user doing something, it's the environment changing under the user.
-   */
-  meta_display_add_ignored_crossing_serial (display, XNextRequest (xdpy));
-  XFixesSetWindowShapeRegion (xdpy, compositor->output, ShapeInput, 0, 0, region);
+  return priv->windows;
 }
 
 void
-meta_set_stage_input_region (MetaScreen   *screen,
-                             XserverRegion region)
+meta_focus_stage_window (MetaDisplay *display,
+                         guint32      timestamp)
 {
-  MetaDisplay  *display = screen->display;
-  MetaCompositor *compositor = display->compositor;
-  Display *xdpy = display->xdisplay;
+  ClutterStage *stage;
+  Window window;
 
-  if (compositor->stage && compositor->output)
-    {
-      do_set_stage_input_region (screen, region);
-    }
-  else
-    {
-      /* Reset compositor->pending_input_region if one existed before and set the new
-       * one to use it later. */
-      if (compositor->pending_input_region)
-        {
-          XFixesDestroyRegion (xdpy, compositor->pending_input_region);
-          compositor->pending_input_region = None;
-        }
-      if (region != None)
-        {
-          compositor->pending_input_region = XFixesCreateRegion (xdpy, NULL, 0);
-          XFixesCopyRegion (xdpy, compositor->pending_input_region, region);
-        }
-    }
+  stage = CLUTTER_STAGE (meta_get_stage_for_display (display));
+  if (!stage)
+    return;
+
+  window = meta_x11_get_stage_window (stage);
+
+  if (window == None)
+    return;
+
+  meta_x11_display_set_input_focus_xwindow (display->x11_display,
+                                            window,
+                                            timestamp);
 }
 
-void
-meta_empty_stage_input_region (MetaScreen *screen)
+gboolean
+meta_stage_is_focused (MetaDisplay *display)
 {
-  /* Using a static region here is a bit hacky, but Metacity never opens more than
-   * one XDisplay, so it works fine. */
-  static XserverRegion region = None;
+  ClutterStage *stage;
+  Window window;
 
-  if (region == None)
-    {
-      MetaDisplay  *display = meta_screen_get_display (screen);
-      Display      *xdpy    = meta_display_get_xdisplay (display);
-      region = XFixesCreateRegion (xdpy, NULL, 0);
-    }
+  if (meta_is_wayland_compositor ())
+    return TRUE;
 
-  meta_set_stage_input_region (screen, region);
-}
-
-LOCAL_SYMBOL gboolean
-meta_begin_modal_for_plugin (MetaScreen       *screen,
-                             MetaPlugin       *plugin,
-                             Window            grab_window,
-                             Cursor            cursor,
-                             MetaModalOptions  options,
-                             guint32           timestamp)
-{
-  /* To some extent this duplicates code in meta_display_begin_grab_op(), but there
-   * are significant differences in how we handle grabs that make it difficult to
-   * merge the two.
-   */
-
-  MetaDisplay    *display    = meta_screen_get_display (screen);
-  Display        *xdpy       = meta_display_get_xdisplay (display);
-  MetaCompositor *compositor = display->compositor;
-  gboolean pointer_grabbed = FALSE;
-  int result;
-
-  if (compositor->modal_plugin != NULL || display->grab_op != META_GRAB_OP_NONE)
+  stage = CLUTTER_STAGE (meta_get_stage_for_display (display));
+  if (!stage)
     return FALSE;
+
+  window = meta_x11_get_stage_window (stage);
+
+  if (window == None)
+    return FALSE;
+
+  return (display->x11_display->focus_xwindow == window);
+}
+
+static gboolean
+grab_devices (MetaModalOptions  options,
+              guint32           timestamp)
+{
+  MetaBackend *backend = META_BACKEND (meta_get_backend ());
+  gboolean pointer_grabbed = FALSE;
+  gboolean keyboard_grabbed = FALSE;
 
   if ((options & META_MODAL_POINTER_ALREADY_GRABBED) == 0)
     {
-      result = XGrabPointer (xdpy, grab_window,
-                             False, /* owner_events */
-                             (ButtonPressMask | ButtonReleaseMask |
-                              EnterWindowMask | LeaveWindowMask | PointerMotionMask),
-                             GrabModeAsync, GrabModeAsync,
-                             None, /* confine to */
-                             cursor,
-                             timestamp);
-      if (result != Success)
+      if (!meta_backend_grab_device (backend, META_VIRTUAL_CORE_POINTER_ID, timestamp))
         goto fail;
 
       pointer_grabbed = TRUE;
@@ -440,94 +361,140 @@ meta_begin_modal_for_plugin (MetaScreen       *screen,
 
   if ((options & META_MODAL_KEYBOARD_ALREADY_GRABBED) == 0)
     {
-      result = XGrabKeyboard (xdpy, grab_window,
-                              False, /* owner_events */
-                              GrabModeAsync, GrabModeAsync,
-                              timestamp);
-
-      if (result != Success)
+      if (!meta_backend_grab_device (backend, META_VIRTUAL_CORE_KEYBOARD_ID, timestamp))
         goto fail;
+
+      keyboard_grabbed = TRUE;
     }
-
-  display->grab_op = META_GRAB_OP_COMPOSITOR;
-  display->grab_window = NULL;
-  display->grab_screen = screen;
-  display->grab_have_pointer = TRUE;
-  display->grab_have_keyboard = TRUE;
-
-  compositor->modal_plugin = plugin;
 
   return TRUE;
 
  fail:
   if (pointer_grabbed)
-    XUngrabPointer (xdpy, timestamp);
+    meta_backend_ungrab_device (backend, META_VIRTUAL_CORE_POINTER_ID, timestamp);
+  if (keyboard_grabbed)
+    meta_backend_ungrab_device (backend, META_VIRTUAL_CORE_KEYBOARD_ID, timestamp);
 
   return FALSE;
 }
 
-LOCAL_SYMBOL void
-meta_end_modal_for_plugin (MetaScreen     *screen,
+gboolean
+meta_begin_modal_for_plugin (MetaCompositor   *compositor,
+                             MetaPlugin       *plugin,
+                             MetaModalOptions  options,
+                             guint32           timestamp)
+{
+  /* To some extent this duplicates code in meta_display_begin_grab_op(), but there
+   * are significant differences in how we handle grabs that make it difficult to
+   * merge the two.
+   */
+  MetaCompositorPrivate *priv =
+    meta_compositor_get_instance_private (compositor);
+  MetaDisplay *display = priv->display;
+
+#ifdef HAVE_WAYLAND
+  if (display->grab_op == META_GRAB_OP_WAYLAND_POPUP)
+    {
+      MetaWaylandSeat *seat = meta_wayland_compositor_get_default ()->seat;
+      meta_wayland_pointer_end_popup_grab (seat->pointer);
+    }
+#endif
+
+  if (is_modal (display) || display->grab_op != META_GRAB_OP_NONE)
+    return FALSE;
+
+  if (display->x11_display)
+    {
+      /* XXX: why is this needed? */
+      XIUngrabDevice (display->x11_display->xdisplay,
+                      META_VIRTUAL_CORE_POINTER_ID,
+                      timestamp);
+      XSync (display->x11_display->xdisplay, False);
+    }
+
+  if (!grab_devices (options, timestamp))
+    return FALSE;
+
+  display->grab_op = META_GRAB_OP_COMPOSITOR;
+  display->event_route = META_EVENT_ROUTE_COMPOSITOR_GRAB;
+  display->grab_window = NULL;
+  display->grab_have_pointer = TRUE;
+  display->grab_have_keyboard = TRUE;
+
+  g_signal_emit_by_name (display, "grab-op-begin",
+                         meta_plugin_get_display (plugin),
+                         display->grab_window, display->grab_op);
+
+  if (meta_is_wayland_compositor ())
+    {
+      meta_display_sync_wayland_input_focus (display);
+      meta_display_cancel_touch (display);
+
+#ifdef HAVE_WAYLAND
+      meta_dnd_wayland_handle_begin_modal (compositor);
+#endif
+    }
+
+  return TRUE;
+}
+
+void
+meta_end_modal_for_plugin (MetaCompositor *compositor,
                            MetaPlugin     *plugin,
                            guint32         timestamp)
 {
-  MetaDisplay    *display    = meta_screen_get_display (screen);
-  Display        *xdpy = meta_display_get_xdisplay (display);
-  MetaCompositor *compositor = display->compositor;
+  MetaCompositorPrivate *priv =
+    meta_compositor_get_instance_private (compositor);
+  MetaDisplay *display = priv->display;
+  MetaBackend *backend = meta_get_backend ();
+  MetaWindow *grab_window = display->grab_window;
+  MetaGrabOp grab_op = display->grab_op;
 
-  g_return_if_fail (compositor->modal_plugin == plugin);
-
-  XUngrabPointer (xdpy, timestamp);
-  XUngrabKeyboard (xdpy, timestamp);
+  g_return_if_fail (is_modal (display));
 
   display->grab_op = META_GRAB_OP_NONE;
+  display->event_route = META_EVENT_ROUTE_NORMAL;
   display->grab_window = NULL;
-  display->grab_screen = NULL;
   display->grab_have_pointer = FALSE;
   display->grab_have_keyboard = FALSE;
 
-  compositor->modal_plugin = NULL;
-}
+  meta_backend_ungrab_device (backend, META_VIRTUAL_CORE_POINTER_ID, timestamp);
+  meta_backend_ungrab_device (backend, META_VIRTUAL_CORE_KEYBOARD_ID, timestamp);
 
-/* This is used when reloading plugins to make sure we don't have
- * a left-over modal grab for this screen.
- */
-LOCAL_SYMBOL void
-meta_check_end_modal (MetaScreen *screen)
-{
-  MetaDisplay    *display    = meta_screen_get_display (screen);
-  MetaCompositor *compositor = display->compositor;
-
-  if (compositor->modal_plugin &&
-      meta_plugin_get_screen (compositor->modal_plugin) == screen)
+#ifdef HAVE_WAYLAND
+  if (meta_is_wayland_compositor ())
     {
-      meta_end_modal_for_plugin (screen,
-                                 compositor->modal_plugin,
-                                 CurrentTime);
+      meta_dnd_wayland_handle_end_modal (compositor);
+      meta_display_sync_wayland_input_focus (display);
     }
+#endif
+
+  g_signal_emit_by_name (display, "grab-op-end",
+                         meta_plugin_get_display (plugin),
+                         grab_window, grab_op);
 }
 
 static void
 after_stage_paint (ClutterStage *stage,
                    gpointer      data)
 {
-  MetaCompositor *compositor = (MetaCompositor*) data;
+  MetaCompositor *compositor = data;
+  MetaCompositorPrivate *priv =
+    meta_compositor_get_instance_private (compositor);
   GList *l;
 
-  for (l = compositor->windows; l; l = l->next)
+  for (l = priv->windows; l; l = l->next)
     meta_window_actor_post_paint (l->data);
 }
 
 static void
-redirect_windows (MetaCompositor *compositor,
-                  MetaScreen     *screen)
+redirect_windows (MetaX11Display *x11_display)
 {
-  MetaDisplay *display       = meta_screen_get_display (screen);
-  Display     *xdisplay      = meta_display_get_xdisplay (display);
-  Window       xroot         = meta_screen_get_xroot (screen);
-  int          screen_number = meta_screen_get_screen_number (screen);
-  guint        n_retries;
-  guint        max_retries;
+  Display *xdisplay = meta_x11_display_get_xdisplay (x11_display);
+  Window xroot = meta_x11_display_get_xroot (x11_display);
+  int screen_number = meta_x11_display_get_screen_number (x11_display);
+  guint n_retries;
+  guint max_retries;
 
   if (meta_get_replace_current_wm ())
     max_retries = 5;
@@ -536,25 +503,25 @@ redirect_windows (MetaCompositor *compositor,
 
   n_retries = 0;
 
-  /* Some compositors (like old versions of Muffin) might not properly unredirect
+  /* Some compositors (like old versions of Mutter) might not properly unredirect
    * subwindows before destroying the WM selection window; so we wait a while
    * for such a compositor to exit before giving up.
    */
   while (TRUE)
     {
-      meta_error_trap_push_with_return (display);
+      meta_x11_error_trap_push (x11_display);
       XCompositeRedirectSubwindows (xdisplay, xroot, CompositeRedirectManual);
       XSync (xdisplay, FALSE);
 
-      if (!meta_error_trap_pop_with_return (display))
+      if (!meta_x11_error_trap_pop_with_return (x11_display))
         break;
 
       if (n_retries == max_retries)
         {
           /* This probably means that a non-WM compositor like xcompmgr is running;
            * we have no way to get it to exit */
-          meta_fatal ("Another compositing manager is already running on screen %i on display \"%s\".",
-                      screen_number, display->name);
+          meta_fatal (_("Another compositing manager is already running on screen %i on display “%s”."),
+                      screen_number, x11_display->name);
         }
 
       n_retries++;
@@ -562,244 +529,143 @@ redirect_windows (MetaCompositor *compositor,
     }
 }
 
-LOCAL_SYMBOL void
-meta_compositor_toggle_send_frame_timings (MetaScreen *screen)
+void
+meta_compositor_redirect_x11_windows (MetaCompositor *compositor)
 {
-  MetaCompositor *compositor = screen->display->compositor;
-  if (meta_prefs_get_send_frame_timings())
-    {
-      g_signal_connect_after (CLUTTER_STAGE (compositor->stage), "presented",
-                              G_CALLBACK (frame_callback), compositor);
-    }
-  else
-    {
-      g_signal_handlers_disconnect_by_func (CLUTTER_STAGE (compositor->stage),
-                                            frame_callback, NULL);
-    }
+  MetaCompositorPrivate *priv =
+    meta_compositor_get_instance_private (compositor);
+  MetaDisplay *display = priv->display;
+
+  if (display->x11_display)
+    redirect_windows (display->x11_display);
 }
 
 void
-meta_compositor_manage_screen (MetaCompositor *compositor,
-                               MetaScreen     *screen)
+meta_compositor_manage (MetaCompositor *compositor)
 {
-  MetaDisplay    *display       = meta_screen_get_display (screen);
-  Display        *xdisplay      = meta_display_get_xdisplay (display);
-  Window          xwin;
-  gint            width, height;
-  XWindowAttributes attr;
-  long            event_mask;
+  MetaCompositorPrivate *priv =
+    meta_compositor_get_instance_private (compositor);
+  MetaDisplay *display = priv->display;
+  MetaBackend *backend = meta_get_backend ();
 
-  redirect_windows (compositor, screen);
+  priv->stage = meta_backend_get_stage (backend);
 
-  /*
-   * We use an empty input region for Clutter as a default because that allows
-   * the user to interact with all the windows displayed on the screen.
-   * We have to initialize compositor->pending_input_region to an empty region explicitly,
-   * because None value is used to mean that the whole screen is an input region.
+  priv->stage_presented_id =
+    g_signal_connect (priv->stage, "presented",
+                      G_CALLBACK (on_presented),
+                      compositor);
+
+  /* We use connect_after() here to accomodate code in GNOME Shell that,
+   * when benchmarking drawing performance, connects to ::after-paint
+   * and calls glFinish(). The timing information from that will be
+   * more accurate if we hold off until that completes before we signal
+   * apps to begin drawing the next frame. If there are no other
+   * connections to ::after-paint, connect() vs. connect_after() doesn't
+   * matter.
    */
-  compositor->pending_input_region = XFixesCreateRegion (xdisplay, NULL, 0);
+  priv->stage_after_paint_id =
+    g_signal_connect_after (priv->stage, "after-paint",
+                            G_CALLBACK (after_stage_paint), compositor);
 
-  compositor->screen = screen;
-  compositor->output = None;
-  compositor->windows = NULL;
+  clutter_stage_set_sync_delay (CLUTTER_STAGE (priv->stage), META_SYNC_DELAY);
 
-  meta_screen_set_cm_selection (screen);
+  priv->window_group = meta_window_group_new (display);
+  priv->top_window_group = meta_window_group_new (display);
+  priv->feedback_group = meta_window_group_new (display);
 
-  compositor->stage = clutter_stage_new ();
+  clutter_actor_add_child (priv->stage, priv->window_group);
+  clutter_actor_add_child (priv->stage, priv->top_window_group);
+  clutter_actor_add_child (priv->stage, priv->feedback_group);
 
-  meta_compositor_toggle_send_frame_timings(screen);
+  META_COMPOSITOR_GET_CLASS (compositor)->manage (compositor);
 
-  g_signal_connect_after (CLUTTER_STAGE (compositor->stage), "after-paint",
-                          G_CALLBACK (after_stage_paint), compositor);
-
-  clutter_stage_set_sync_delay (CLUTTER_STAGE (compositor->stage), META_SYNC_DELAY);
-
-  meta_screen_get_size (screen, &width, &height);
-  clutter_actor_realize (compositor->stage);
-
-  xwin = clutter_x11_get_stage_window (CLUTTER_STAGE (compositor->stage));
-
-  XResizeWindow (xdisplay, xwin, width, height);
-
-  event_mask = FocusChangeMask |
-               ExposureMask |
-               EnterWindowMask | LeaveWindowMask |
-               PointerMotionMask |
-               PropertyChangeMask |
-               ButtonPressMask | ButtonReleaseMask |
-               KeyPressMask | KeyReleaseMask |
-               StructureNotifyMask;
-
-  if (XGetWindowAttributes (xdisplay, xwin, &attr))
-      {
-        event_mask |= attr.your_event_mask;
-      }
-
-  XSelectInput (xdisplay, xwin, event_mask);
-
-  compositor->window_group = meta_window_group_new (screen);
-  compositor->background_actor = meta_background_actor_new_for_screen (screen);
-  compositor->bottom_window_group = clutter_actor_new();
-  compositor->overlay_group = clutter_actor_new ();
-  compositor->top_window_group = meta_window_group_new (screen);
-  compositor->hidden_group = clutter_actor_new ();
-
-  clutter_actor_add_child (compositor->window_group, compositor->background_actor);
-  clutter_actor_add_child (compositor->stage, compositor->window_group);
-  clutter_actor_add_child (compositor->stage, compositor->top_window_group);
-  clutter_actor_add_child (compositor->stage, compositor->overlay_group);
-  clutter_actor_add_child (compositor->stage, compositor->hidden_group);
-
-  clutter_actor_hide (compositor->hidden_group);
-
-  compositor->plugin_mgr = meta_plugin_manager_new (screen);
-
-  /*
-   * Delay the creation of the overlay window as long as we can, to avoid
-   * blanking out the screen. This means that during the plugin loading, the
-   * overlay window is not accessible; if the plugin needs to access it
-   * directly, it should hook into the "show" signal on stage, and do
-   * its stuff there.
-   */
-  compositor->output = get_output_window (screen);
-  XReparentWindow (xdisplay, xwin, compositor->output, 0, 0);
-
- /* Make sure there isn't any left-over output shape on the
-  * overlay window by setting the whole screen to be an
-  * output region.
-  *
-  * Note: there doesn't seem to be any real chance of that
-  *  because the X server will destroy the overlay window
-  *  when the last client using it exits.
-  */
-  XFixesSetWindowShapeRegion (xdisplay, compositor->output, ShapeBounding, 0, 0, None);
-
-  do_set_stage_input_region (screen, compositor->pending_input_region);
-  if (compositor->pending_input_region != None)
-    {
-      XFixesDestroyRegion (xdisplay, compositor->pending_input_region);
-      compositor->pending_input_region = None;
-    }
-
-  clutter_actor_show (compositor->overlay_group);
-  clutter_actor_show (compositor->stage);
-
-  /* Map overlay window before redirecting windows offscreen so we catch their
-   * contents until we show the stage.
-   */
-  XMapWindow (xdisplay, compositor->output);
-
-  compositor->have_x11_sync_object = meta_sync_ring_init (xdisplay);
+  priv->plugin_mgr = meta_plugin_manager_new (compositor);
 }
 
 void
-meta_compositor_unmanage_screen (MetaCompositor *compositor,
-                                 MetaScreen     *screen)
+meta_compositor_unmanage (MetaCompositor *compositor)
 {
-  MetaDisplay    *display       = meta_screen_get_display (screen);
-  Display        *xdisplay      = meta_display_get_xdisplay (display);
-  Window          xroot         = meta_screen_get_xroot (screen);
-
-  /* This is the most important part of cleanup - we have to do this
-   * before giving up the window manager selection or the next
-   * window manager won't be able to redirect subwindows */
-  XCompositeUnredirectSubwindows (xdisplay, xroot, CompositeRedirectManual);
-}
-
-/*
- * Shapes the cow so that the given window is exposed,
- * when metaWindow is NULL it clears the shape again
- */
-static void
-meta_shape_cow_for_window (MetaScreen *screen,
-                           MetaWindow *metaWindow)
-{
-  MetaDisplay *display = screen->display;
-  MetaCompositor *compositor = display->compositor;
-  Display *xdisplay = display->xdisplay;
-
-  if (metaWindow == NULL)
-      XFixesSetWindowShapeRegion (xdisplay, compositor->output, ShapeBounding, 0, 0, None);
-  else
-    {
-      XserverRegion output_region;
-      XRectangle screen_rect, window_bounds;
-      int width, height;
-      MetaRectangle rect;
-
-      meta_window_get_outer_rect (metaWindow, &rect);
-
-      window_bounds.x = rect.x;
-      window_bounds.y = rect.y;
-      window_bounds.width = rect.width;
-      window_bounds.height = rect.height;
-
-      meta_screen_get_size (screen, &width, &height);
-      screen_rect.x = 0;
-      screen_rect.y = 0;
-      screen_rect.width = width;
-      screen_rect.height = height;
-
-      output_region = XFixesCreateRegion (xdisplay, &window_bounds, 1);
-
-      XFixesInvertRegion (xdisplay, output_region, &screen_rect, output_region);
-      XFixesSetWindowShapeRegion (xdisplay, compositor->output, ShapeBounding, 0, 0, output_region);
-      XFixesDestroyRegion (xdisplay, output_region);
-    }
+  META_COMPOSITOR_GET_CLASS (compositor)->unmanage (compositor);
 }
 
 void
 meta_compositor_add_window (MetaCompositor    *compositor,
                             MetaWindow        *window)
 {
-  MetaScreen *screen = meta_window_get_screen (window);
-  MetaDisplay *display = meta_screen_get_display (screen);
+  MetaCompositorPrivate *priv =
+    meta_compositor_get_instance_private (compositor);
+  MetaWindowActor *window_actor;
+  ClutterActor *window_group;
+  GType window_actor_type = G_TYPE_INVALID;
 
-  DEBUG_TRACE ("meta_compositor_add_window\n");
-  meta_error_trap_push (display);
+  switch (window->client_type)
+    {
+    case META_WINDOW_CLIENT_TYPE_X11:
+      window_actor_type = META_TYPE_WINDOW_ACTOR_X11;
+      break;
 
-  add_win (window);
+#ifdef HAVE_WAYLAND
+    case META_WINDOW_CLIENT_TYPE_WAYLAND:
+      window_actor_type = META_TYPE_WINDOW_ACTOR_WAYLAND;
+      break;
+#endif
 
-  meta_error_trap_pop (display);
+    default:
+      g_return_if_reached ();
+    }
+
+  window_actor = g_object_new (window_actor_type,
+                               "meta-window", window,
+                               "show-on-set-parent", FALSE,
+                               NULL);
+
+  if (window->layer == META_LAYER_OVERRIDE_REDIRECT)
+    window_group = priv->top_window_group;
+  else
+    window_group = priv->window_group;
+
+  clutter_actor_add_child (window_group, CLUTTER_ACTOR (window_actor));
+
+  /* Initial position in the stack is arbitrary; stacking will be synced
+   * before we first paint.
+   */
+  priv->windows = g_list_append (priv->windows, window_actor);
+  sync_actor_stacking (compositor);
+}
+
+static void
+meta_compositor_real_remove_window (MetaCompositor *compositor,
+                                    MetaWindow     *window)
+{
+  MetaWindowActor *window_actor = meta_window_actor_from_window (window);
+
+  meta_window_actor_queue_destroy (window_actor);
 }
 
 void
 meta_compositor_remove_window (MetaCompositor *compositor,
                                MetaWindow     *window)
 {
-  MetaWindowActor         *window_actor     = NULL;
-  MetaScreen *screen;
-
-  DEBUG_TRACE ("meta_compositor_remove_window\n");
-  window_actor = META_WINDOW_ACTOR (meta_window_get_compositor_private (window));
-  if (!window_actor)
-    return;
-
-  screen = window->screen;
-
-  if (window_actor == compositor->unredirected_window)
-    {
-      meta_window_actor_set_redirected (window_actor, TRUE);
-      meta_shape_cow_for_window (screen,  NULL);
-      compositor->unredirected_window = NULL;
-    }
-
-  meta_window_actor_destroy (window_actor);
+  META_COMPOSITOR_GET_CLASS (compositor)->remove_window (compositor, window);
 }
 
 void
-meta_compositor_set_updates_frozen (MetaCompositor *compositor,
-                                    MetaWindow     *window,
-                                    gboolean        updates_frozen)
+meta_compositor_remove_window_actor (MetaCompositor  *compositor,
+                                     MetaWindowActor *window_actor)
 {
-  MetaWindowActor *window_actor;
+  MetaCompositorPrivate *priv =
+    meta_compositor_get_instance_private (compositor);
 
-  DEBUG_TRACE ("meta_compositor_set_updates_frozen\n");
-  window_actor = META_WINDOW_ACTOR (meta_window_get_compositor_private (window));
-  if (!window_actor)
-    return;
+  priv->windows = g_list_remove (priv->windows, window_actor);
+}
 
-  meta_window_actor_set_updates_frozen (window_actor, updates_frozen);
+void
+meta_compositor_sync_updates_frozen (MetaCompositor *compositor,
+                                     MetaWindow     *window)
+{
+  MetaWindowActor *window_actor = meta_window_actor_from_window (window);
+
+  meta_window_actor_sync_updates_frozen (window_actor);
 }
 
 void
@@ -807,32 +673,9 @@ meta_compositor_queue_frame_drawn (MetaCompositor *compositor,
                                    MetaWindow     *window,
                                    gboolean        no_delay_frame)
 {
-  MetaWindowActor *window_actor;
-
-  DEBUG_TRACE ("meta_compositor_queue_frame_drawn\n");
-  window_actor = META_WINDOW_ACTOR (meta_window_get_compositor_private (window));
-  if (!window_actor)
-    return;
+  MetaWindowActor *window_actor = meta_window_actor_from_window (window);
 
   meta_window_actor_queue_frame_drawn (window_actor, no_delay_frame);
-}
-
-static gboolean
-is_grabbed_event (XEvent *event)
-{
-  switch (event->xany.type)
-    {
-    case ButtonPress:
-    case ButtonRelease:
-    case EnterNotify:
-    case LeaveNotify:
-    case MotionNotify:
-    case KeyPress:
-    case KeyRelease:
-      return TRUE;
-    }
-
-  return FALSE;
 }
 
 void
@@ -840,90 +683,43 @@ meta_compositor_window_shape_changed (MetaCompositor *compositor,
                                       MetaWindow     *window)
 {
   MetaWindowActor *window_actor;
-  window_actor = META_WINDOW_ACTOR (meta_window_get_compositor_private (window));
+
+  window_actor = meta_window_actor_from_window (window);
   if (!window_actor)
     return;
 
-  meta_window_actor_update_shape (window_actor);
+  meta_window_actor_x11_update_shape (META_WINDOW_ACTOR_X11 (window_actor));
 }
 
-/**
- * meta_compositor_process_event: (skip)
- *
- */
-gboolean
-meta_compositor_process_event (MetaCompositor *compositor,
-                               XEvent         *event,
-                               MetaWindow     *window)
+void
+meta_compositor_window_opacity_changed (MetaCompositor *compositor,
+                                        MetaWindow     *window)
 {
-  if (compositor->modal_plugin && is_grabbed_event (event))
-    {
-      MetaPluginClass *klass = META_PLUGIN_GET_CLASS (compositor->modal_plugin);
+  MetaWindowActor *window_actor;
 
-      if (klass->xevent_filter)
-        klass->xevent_filter (compositor->modal_plugin, event);
+  window_actor = meta_window_actor_from_window (window);
+  if (!window_actor)
+    return;
 
-      /* We always consume events even if the plugin says it didn't handle them;
-       * exclusive is exclusive */
-      return TRUE;
-    }
+  meta_window_actor_update_opacity (window_actor);
+}
 
-  if (meta_plugin_manager_xevent_filter (compositor->plugin_mgr, event))
-    {
-      DEBUG_TRACE ("meta_compositor_process_event (filtered,window==NULL)\n");
-      return TRUE;
-    }
+gboolean
+meta_compositor_filter_keybinding (MetaCompositor *compositor,
+                                   MetaKeyBinding *binding)
+{
+  MetaCompositorPrivate *priv =
+    meta_compositor_get_instance_private (compositor);
 
-  switch (event->type)
-    {
-    case PropertyNotify:
-      process_property_notify (compositor, (XPropertyEvent *) event, window);
-      break;
-
-    default:
-      if (event->type == meta_display_get_damage_event_base (compositor->display) + XDamageNotify)
-        {
-          /* Core code doesn't handle damage events, so we need to extract the MetaWindow
-           * ourselves
-           */
-          if (window == NULL)
-            {
-              Window xwin = ((XDamageNotifyEvent *) event)->drawable;
-              window = meta_display_lookup_x_window (compositor->display, xwin);
-            }
-
-          DEBUG_TRACE ("meta_compositor_process_event (process_damage)\n");
-
-          if (window)
-            process_damage (compositor, (XDamageNotifyEvent *) event, window);
-        }
-      break;
-    }
-
-  if (compositor->have_x11_sync_object)
-    meta_sync_ring_handle_event (event);
-
-  /* Clutter needs to know about MapNotify events otherwise it will
-     think the stage is invisible */
-  if (event->type == MapNotify)
-    clutter_x11_handle_event (event);
-
-  /* The above handling is basically just "observing" the events, so we return
-   * FALSE to indicate that the event should not be filtered out; if we have
-   * GTK+ windows in the same process, GTK+ needs the ConfigureNotify event, for example.
-   */
-  return FALSE;
+  return meta_plugin_manager_filter_keybinding (priv->plugin_mgr, binding);
 }
 
 void
 meta_compositor_show_window (MetaCompositor *compositor,
-			     MetaWindow	    *window,
+                             MetaWindow     *window,
                              MetaCompEffect  effect)
 {
-  MetaWindowActor *window_actor = META_WINDOW_ACTOR (meta_window_get_compositor_private (window));
-  DEBUG_TRACE ("meta_compositor_show_window\n");
-  if (!window_actor)
-    return;
+  MetaWindowActor *window_actor = meta_window_actor_from_window (window);
 
   meta_window_actor_show (window_actor, effect);
 }
@@ -933,64 +729,47 @@ meta_compositor_hide_window (MetaCompositor *compositor,
                              MetaWindow     *window,
                              MetaCompEffect  effect)
 {
-  MetaWindowActor *window_actor = META_WINDOW_ACTOR (meta_window_get_compositor_private (window));
-  DEBUG_TRACE ("meta_compositor_hide_window\n");
-  if (!window_actor)
-    return;
+  MetaCompositorPrivate *priv =
+    meta_compositor_get_instance_private (compositor);
+  MetaWindowActor *window_actor = meta_window_actor_from_window (window);
 
   meta_window_actor_hide (window_actor, effect);
+  meta_stack_tracker_queue_sync_stack (priv->display->stack_tracker);
 }
 
 void
-meta_compositor_maximize_window (MetaCompositor    *compositor,
-                                 MetaWindow        *window,
-				 MetaRectangle	   *old_rect,
-				 MetaRectangle	   *new_rect)
+meta_compositor_size_change_window (MetaCompositor    *compositor,
+                                    MetaWindow        *window,
+                                    MetaSizeChange     which_change,
+                                    MetaRectangle     *old_frame_rect,
+                                    MetaRectangle     *old_buffer_rect)
 {
-  MetaWindowActor *window_actor = META_WINDOW_ACTOR (meta_window_get_compositor_private (window));
-  DEBUG_TRACE ("meta_compositor_maximize_window\n");
-  if (!window_actor)
-    return;
+  MetaWindowActor *window_actor = meta_window_actor_from_window (window);
 
-  meta_window_actor_maximize (window_actor, old_rect, new_rect);
-}
-
-void
-meta_compositor_unmaximize_window (MetaCompositor    *compositor,
-                                   MetaWindow        *window,
-				   MetaRectangle     *old_rect,
-				   MetaRectangle     *new_rect)
-{
-  MetaWindowActor *window_actor = META_WINDOW_ACTOR (meta_window_get_compositor_private (window));
-  DEBUG_TRACE ("meta_compositor_unmaximize_window\n");
-  if (!window_actor)
-    return;
-
-  meta_window_actor_unmaximize (window_actor, old_rect, new_rect);
+  meta_window_actor_size_change (window_actor, which_change, old_frame_rect, old_buffer_rect);
 }
 
 void
 meta_compositor_switch_workspace (MetaCompositor     *compositor,
-                                  MetaScreen         *screen,
                                   MetaWorkspace      *from,
                                   MetaWorkspace      *to,
                                   MetaMotionDirection direction)
 {
+  MetaCompositorPrivate *priv =
+    meta_compositor_get_instance_private (compositor);
   gint to_indx, from_indx;
+
   to_indx   = meta_workspace_index (to);
   from_indx = meta_workspace_index (from);
 
-  DEBUG_TRACE ("meta_compositor_switch_workspace\n");
+  priv->switch_workspace_in_progress++;
 
-  compositor->switch_workspace_in_progress++;
-
-  if (!compositor->plugin_mgr ||
-      !meta_plugin_manager_switch_workspace (compositor->plugin_mgr,
+  if (!meta_plugin_manager_switch_workspace (priv->plugin_mgr,
                                              from_indx,
                                              to_indx,
                                              direction))
     {
-      compositor->switch_workspace_in_progress--;
+      priv->switch_workspace_in_progress--;
 
       /* We have to explicitely call this to fix up stacking order of the
        * actors; this is because the abs stacking position of actors does not
@@ -1001,26 +780,17 @@ meta_compositor_switch_workspace (MetaCompositor     *compositor,
     }
 }
 
-void
-meta_compositor_tile_window (MetaCompositor    *compositor,
-                                 MetaWindow        *window,
-                               MetaRectangle     *old_rect,
-                               MetaRectangle     *new_rect)
-{
-  MetaWindowActor *window_actor = META_WINDOW_ACTOR (meta_window_get_compositor_private (window));
-  DEBUG_TRACE ("meta_compositor_tile_window\n");
-  if (!window_actor)
-    return;
-
-  meta_window_actor_tile (window_actor, old_rect, new_rect);
-}
-
 static void
 sync_actor_stacking (MetaCompositor *compositor)
 {
+  MetaCompositorPrivate *priv =
+    meta_compositor_get_instance_private (compositor);
   GList *children;
+  GList *expected_window_node;
   GList *tmp;
   GList *old;
+  GList *backgrounds;
+  gboolean has_windows;
   gboolean reordered;
 
   /* NB: The first entries in the lists are stacked the lowest */
@@ -1029,74 +799,132 @@ sync_actor_stacking (MetaCompositor *compositor)
    * little effort to make sure we actually need to restack before
    * we go ahead and do it */
 
-  children = clutter_actor_get_children (compositor->window_group);
+  children = clutter_actor_get_children (priv->window_group);
+  has_windows = FALSE;
   reordered = FALSE;
-
-  old = children;
 
   /* We allow for actors in the window group other than the actors we
    * know about, but it's up to a plugin to try and keep them stacked correctly
    * (we really need extra API to make that reliable.)
    */
 
-  /* Of the actors we know, the bottom actor should be the background actor */
-
-  while (old && old->data != compositor->background_actor && !META_IS_WINDOW_ACTOR (old->data))
-    old = old->next;
-  if (old == NULL || old->data != compositor->background_actor)
+  /* First we collect a list of all backgrounds, and check if they're at the
+   * bottom. Then we check if the window actors are in the correct sequence */
+  backgrounds = NULL;
+  expected_window_node = priv->windows;
+  for (old = children; old != NULL; old = old->next)
     {
-      reordered = TRUE;
-      goto done_with_check;
-    }
+      ClutterActor *actor = old->data;
 
-  /* Then the window actors should follow in sequence */
-
-  old = old->next;
-  for (tmp = compositor->windows; tmp != NULL; tmp = tmp->next)
-    {
-      while (old && !META_IS_WINDOW_ACTOR (old->data))
-        old = old->next;
-
-      /* old == NULL: someone reparented a window out of the window group,
-       * order undefined, always restack */
-      if (old == NULL || old->data != tmp->data)
+      if (META_IS_BACKGROUND_GROUP (actor) ||
+          META_IS_BACKGROUND_ACTOR (actor))
         {
-          reordered = TRUE;
-          goto done_with_check;
+          backgrounds = g_list_prepend (backgrounds, actor);
+
+          if (has_windows)
+            reordered = TRUE;
         }
+      else if (META_IS_WINDOW_ACTOR (actor) && !reordered)
+        {
+          has_windows = TRUE;
 
-      old = old->next;
+          if (expected_window_node != NULL && actor == expected_window_node->data)
+            expected_window_node = expected_window_node->next;
+          else
+            reordered = TRUE;
+        }
     }
-
- done_with_check:
 
   g_list_free (children);
 
   if (!reordered)
-    return;
-
-  ClutterActor *parent;
-
-  for (tmp = g_list_last (compositor->windows); tmp != NULL; tmp = tmp->prev)
     {
-      ClutterActor *actor = tmp->data;
+      g_list_free (backgrounds);
+      return;
+    }
+
+  /* reorder the actors by lowering them in turn to the bottom of the stack.
+   * windows first, then background.
+   *
+   * We reorder the actors even if they're not parented to the window group,
+   * to allow stacking to work with intermediate actors (eg during effects)
+   */
+  for (tmp = g_list_last (priv->windows); tmp != NULL; tmp = tmp->prev)
+    {
+      ClutterActor *actor = tmp->data, *parent;
 
       parent = clutter_actor_get_parent (actor);
       clutter_actor_set_child_below_sibling (parent, actor, NULL);
     }
 
-  parent = clutter_actor_get_parent (compositor->background_actor);
-  clutter_actor_set_child_below_sibling (parent, compositor->background_actor, NULL);
+  /* we prepended the backgrounds above so the last actor in the list
+   * should get lowered to the bottom last.
+   */
+  for (tmp = backgrounds; tmp != NULL; tmp = tmp->next)
+    {
+      ClutterActor *actor = tmp->data, *parent;
+
+      parent = clutter_actor_get_parent (actor);
+      clutter_actor_set_child_below_sibling (parent, actor, NULL);
+    }
+  g_list_free (backgrounds);
+}
+
+/*
+ * Find the top most window that is visible on the screen. The intention of
+ * this is to avoid offscreen windows that isn't actually part of the visible
+ * desktop (such as the UI frames override redirect window).
+ */
+static MetaWindowActor *
+get_top_visible_window_actor (MetaCompositor *compositor)
+{
+  MetaCompositorPrivate *priv =
+    meta_compositor_get_instance_private (compositor);
+  GList *l;
+
+  for (l = g_list_last (priv->windows); l; l = l->prev)
+    {
+      MetaWindowActor *window_actor = l->data;
+      MetaWindow *window = meta_window_actor_get_meta_window (window_actor);
+      MetaRectangle buffer_rect;
+      MetaRectangle display_rect = { 0 };
+
+      if (!window->visible_to_compositor)
+        continue;
+
+      meta_window_get_buffer_rect (window, &buffer_rect);
+      meta_display_get_size (priv->display,
+                             &display_rect.width, &display_rect.height);
+
+      if (meta_rectangle_overlap (&display_rect, &buffer_rect))
+        return window_actor;
+    }
+
+  return NULL;
+}
+
+static void
+on_top_window_actor_destroyed (MetaWindowActor *window_actor,
+                               MetaCompositor  *compositor)
+{
+  MetaCompositorPrivate *priv =
+    meta_compositor_get_instance_private (compositor);
+
+  priv->top_window_actor = NULL;
+  priv->top_window_actor_destroy_id = 0;
+  priv->windows = g_list_remove (priv->windows, window_actor);
+
+  meta_stack_tracker_queue_sync_stack (priv->display->stack_tracker);
 }
 
 void
 meta_compositor_sync_stack (MetaCompositor  *compositor,
-                            MetaScreen	    *screen,
-                            GList	          *stack)
+                            GList           *stack)
 {
+  MetaCompositorPrivate *priv =
+    meta_compositor_get_instance_private (compositor);
+  MetaWindowActor *top_window_actor;
   GList *old_stack;
-
-  DEBUG_TRACE ("meta_compositor_sync_stack\n");
 
   /* This is painful because hidden windows that we are in the process
    * of animating out of existence. They'll be at the bottom of the
@@ -1106,8 +934,8 @@ meta_compositor_sync_stack (MetaCompositor  *compositor,
 
   /* Sources: first window is the highest */
   stack = g_list_copy (stack); /* The new stack of MetaWindow */
-  old_stack = g_list_reverse (compositor->windows); /* The old stack of MetaWindowActor */
-  compositor->windows = NULL;
+  old_stack = g_list_reverse (priv->windows); /* The old stack of MetaWindowActor */
+  priv->windows = NULL;
 
   while (TRUE)
     {
@@ -1135,7 +963,7 @@ meta_compositor_sync_stack (MetaCompositor  *compositor,
       while (stack)
         {
           stack_window = stack->data;
-          stack_actor = META_WINDOW_ACTOR (meta_window_get_compositor_private (stack_window));
+          stack_actor = meta_window_actor_from_window (stack_window);
           if (!stack_actor)
             {
               meta_verbose ("Failed to find corresponding MetaWindowActor "
@@ -1171,60 +999,55 @@ meta_compositor_sync_stack (MetaCompositor  *compositor,
        * be at the front of at least one, hopefully it will be
        * near the front of the other.)
        */
-      compositor->windows = g_list_prepend (compositor->windows, actor);
+      priv->windows = g_list_prepend (priv->windows, actor);
 
       stack = g_list_remove (stack, window);
       old_stack = g_list_remove (old_stack, actor);
     }
 
   sync_actor_stacking (compositor);
+
+  top_window_actor = get_top_visible_window_actor (compositor);
+
+  if (priv->top_window_actor == top_window_actor)
+    return;
+
+  g_clear_signal_handler (&priv->top_window_actor_destroy_id,
+                          priv->top_window_actor);
+
+  priv->top_window_actor = top_window_actor;
+
+  if (priv->top_window_actor)
+    priv->top_window_actor_destroy_id =
+      g_signal_connect (priv->top_window_actor, "destroy",
+                        G_CALLBACK (on_top_window_actor_destroyed),
+                        compositor);
 }
 
 void
 meta_compositor_sync_window_geometry (MetaCompositor *compositor,
-				                              MetaWindow *window,
-                                      gboolean did_placement)
+                                      MetaWindow     *window,
+                                      gboolean        did_placement)
 {
-  MetaWindowActor *window_actor = META_WINDOW_ACTOR (meta_window_get_compositor_private (window));
+  MetaCompositorPrivate *priv =
+    meta_compositor_get_instance_private (compositor);
+  MetaWindowActor *window_actor = meta_window_actor_from_window (window);
+  MetaWindowActorChanges changes;
 
-  DEBUG_TRACE ("meta_compositor_sync_window_geometry\n");
+  changes = meta_window_actor_sync_actor_geometry (window_actor, did_placement);
 
-  if (!window_actor)
-    return;
-
-  meta_window_actor_sync_actor_geometry (window_actor, did_placement);
-}
-
-void
-meta_compositor_sync_screen_size (MetaCompositor *compositor,
-                                  MetaScreen	   *screen,
-                                  guint		        width,
-                                  guint		        height)
-{
-  MetaDisplay *display = compositor->display;
-  Display *xdisplay;
-  Window xwin;
-
-  DEBUG_TRACE ("meta_compositor_sync_screen_size\n");
-
-  xdisplay = meta_display_get_xdisplay (display);
-  xwin = clutter_x11_get_stage_window (CLUTTER_STAGE (compositor->stage));
-
-  XResizeWindow (xdisplay, xwin, width, height);
-
-  meta_background_actor_screen_size_changed (screen);
-
-  meta_verbose ("Changed size for stage on screen %d to %dx%d\n",
-		meta_screen_get_screen_number (screen),
-		width, height);
+  if (changes & META_WINDOW_ACTOR_CHANGE_SIZE)
+    meta_plugin_manager_event_size_changed (priv->plugin_mgr, window_actor);
 }
 
 static void
-frame_callback (ClutterStage     *stage,
-                CoglFrameEvent    event,
-                ClutterFrameInfo *frame_info,
-                MetaCompositor   *compositor)
+on_presented (ClutterStage     *stage,
+              CoglFrameEvent    event,
+              ClutterFrameInfo *frame_info,
+              MetaCompositor   *compositor)
 {
+  MetaCompositorPrivate *priv =
+    meta_compositor_get_instance_private (compositor);
   GList *l;
 
   if (event == COGL_FRAME_EVENT_COMPLETE)
@@ -1243,7 +1066,7 @@ frame_callback (ClutterStage     *stage,
            * is fairly fast, so calling it twice and subtracting to get a
            * nearly-zero number is acceptable, if a litle ugly.
            */
-          gint64 current_cogl_time = cogl_get_clock_time (compositor->context);
+          gint64 current_cogl_time = cogl_get_clock_time (priv->context);
           gint64 current_monotonic_time = g_get_monotonic_time ();
 
           presentation_time =
@@ -1254,115 +1077,61 @@ frame_callback (ClutterStage     *stage,
           presentation_time = 0;
         }
 
-      for (l = compositor->windows; l; l = l->next)
+      for (l = priv->windows; l; l = l->next)
         meta_window_actor_frame_complete (l->data, frame_info, presentation_time);
     }
+}
+
+static void
+meta_compositor_real_pre_paint (MetaCompositor *compositor)
+{
+  MetaCompositorPrivate *priv =
+    meta_compositor_get_instance_private (compositor);
+  GList *l;
+
+  for (l = priv->windows; l; l = l->next)
+    meta_window_actor_pre_paint (l->data);
+}
+
+static void
+meta_compositor_pre_paint (MetaCompositor *compositor)
+{
+  COGL_TRACE_BEGIN_SCOPED (MetaCompositorPrePaint,
+                           "Compositor (pre-paint)");
+  META_COMPOSITOR_GET_CLASS (compositor)->pre_paint (compositor);
 }
 
 static gboolean
 meta_pre_paint_func (gpointer data)
 {
-  GList *l;
   MetaCompositor *compositor = data;
-  GSList *screens = compositor->display->screens;
-  MetaWindowActor *top_window = NULL;
-  MetaWindowActor *expected_unredirected_window = NULL;
 
-  if (compositor->windows == NULL)
-    return TRUE;
-
-  for (l = g_list_last (compositor->windows); l; l = l->prev)
-    {
-      MetaRectangle *rect = &meta_window_actor_get_meta_window (l->data)->rect;
-      if (rect->x + rect->width > 0 && rect->y + rect->height > 0)
-        {
-          top_window = l->data;
-          break;
-        }
-    }
-
-  if (top_window != NULL &&
-      meta_window_actor_should_unredirect (top_window) &&
-      compositor->disable_unredirect_count == 0)
-    expected_unredirected_window = top_window;
-
-  if (compositor->unredirected_window != expected_unredirected_window)
-    {
-      if (compositor->unredirected_window != NULL)
-        {
-          meta_window_actor_set_redirected (compositor->unredirected_window, TRUE);
-          meta_shape_cow_for_window (compositor->display->active_screen, NULL);
-        }
-
-      if (expected_unredirected_window != NULL)
-        {
-          meta_shape_cow_for_window (compositor->display->active_screen,
-                                     meta_window_actor_get_meta_window (top_window));
-          meta_window_actor_set_redirected (top_window, FALSE);
-        }
-
-      compositor->unredirected_window = expected_unredirected_window;
-    }
-
-  for (l = compositor->windows; l; l = l->next)
-    meta_window_actor_pre_paint (l->data);
-
-  if (compositor->frame_has_updated_xsurfaces)
-    {
-      /* We need to make sure that any X drawing that happens before
-       * the XDamageSubtract() for each window above is visible to
-       * subsequent GL rendering; the standardized way to do this is
-       * GL_EXT_X11_sync_object. Since this isn't implemented yet in
-       * mesa, we also have a path that relies on the implementation
-       * of the open source drivers.
-       *
-       * Anything else, we just hope for the best.
-       *
-       * Xorg and open source driver specifics:
-       *
-       * The X server makes sure to flush drawing to the kernel before
-       * sending out damage events, but since we use
-       * DamageReportBoundingBox there may be drawing between the last
-       * damage event and the XDamageSubtract() that needs to be
-       * flushed as well.
-       *
-       * Xorg always makes sure that drawing is flushed to the kernel
-       * before writing events or responses to the client, so any
-       * round trip request at this point is sufficient to flush the
-       * GLX buffers.
-       */
-      if (compositor->have_x11_sync_object)
-        compositor->have_x11_sync_object = meta_sync_ring_insert_wait ();
-      else
-        XSync (compositor->display->xdisplay, False);
-    }
+  meta_compositor_pre_paint (compositor);
 
   return TRUE;
 }
 
-static gboolean
-meta_post_paint_func (gpointer data)
+static void
+meta_compositor_real_post_paint (MetaCompositor *compositor)
 {
-  MetaCompositor *compositor = data;
+  MetaCompositorPrivate *priv =
+    meta_compositor_get_instance_private (compositor);
   CoglGraphicsResetStatus status;
 
-  if (compositor->frame_has_updated_xsurfaces)
-    {
-      if (compositor->have_x11_sync_object)
-        compositor->have_x11_sync_object = meta_sync_ring_after_frame ();
+#ifdef HAVE_WAYLAND
+  if (meta_is_wayland_compositor ())
+    meta_wayland_compositor_paint_finished (meta_wayland_compositor_get_default ());
+#endif
 
-      compositor->frame_has_updated_xsurfaces = FALSE;
-    }
-
-  status = cogl_get_graphics_reset_status (compositor->context);
+  status = cogl_get_graphics_reset_status (priv->context);
   switch (status)
     {
     case COGL_GRAPHICS_RESET_STATUS_NO_ERROR:
       break;
 
     case COGL_GRAPHICS_RESET_STATUS_PURGED_CONTEXT_RESET:
-      g_signal_emit_by_name (compositor->display, "gl-video-memory-purged");
-      clutter_actor_queue_redraw (CLUTTER_ACTOR (compositor->stage));
+      g_signal_emit_by_name (priv->display, "gl-video-memory-purged");
+      clutter_actor_queue_redraw (CLUTTER_ACTOR (priv->stage));
       break;
 
     default:
@@ -1372,114 +1141,197 @@ meta_post_paint_func (gpointer data)
          restart the process. Obviously we can't do this when we are
          a wayland compositor but in that case we shouldn't get here
          since we don't enable robustness in that case. */
-      meta_restart ();
+      g_assert (!meta_is_wayland_compositor ());
+      meta_restart (NULL);
       break;
     }
+}
+
+static void
+meta_compositor_post_paint (MetaCompositor *compositor)
+{
+  COGL_TRACE_BEGIN_SCOPED (MetaCompositorPostPaint,
+                           "Compositor (post-paint)");
+  META_COMPOSITOR_GET_CLASS (compositor)->post_paint (compositor);
+}
+
+static gboolean
+meta_post_paint_func (gpointer data)
+{
+  MetaCompositor *compositor = data;
+
+  meta_compositor_post_paint (compositor);
 
   return TRUE;
 }
 
-void
-meta_compositor_on_shadow_factory_changed (void)
+static void
+meta_compositor_set_property (GObject      *object,
+                              guint         prop_id,
+                              const GValue *value,
+                              GParamSpec   *pspec)
 {
-  GList *l;
+  MetaCompositor *compositor = META_COMPOSITOR (object);
+  MetaCompositorPrivate *priv =
+    meta_compositor_get_instance_private (compositor);
 
-  for (l = compositor_global->windows; l; l = l->next)
-    meta_window_actor_invalidate_shadow (l->data);
+  switch (prop_id)
+    {
+    case PROP_DISPLAY:
+      priv->display = g_value_get_object (value);
+      break;
+    default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+    }
 }
 
-/**
- * meta_compositor_new: (skip)
- *
- */
-MetaCompositor *
-meta_compositor_new (MetaDisplay *display)
+static void
+meta_compositor_get_property (GObject    *object,
+                              guint       prop_id,
+                              GValue     *value,
+                              GParamSpec *pspec)
 {
-  char *atom_names[] = {
-    "_XROOTPMAP_ID",
-    "_XSETROOT_ID",
-    "_NET_WM_WINDOW_OPACITY",
-  };
-  Atom                   atoms[G_N_ELEMENTS(atom_names)];
-  MetaCompositor        *compositor;
-  Display               *xdisplay = meta_display_get_xdisplay (display);
+  MetaCompositor *compositor = META_COMPOSITOR (object);
+  MetaCompositorPrivate *priv =
+    meta_compositor_get_instance_private (compositor);
 
-  if (!composite_at_least_version (display, 0, 3))
-    return NULL;
+  switch (prop_id)
+    {
+    case PROP_DISPLAY:
+      g_value_set_object (value, priv->display);
+      break;
+    default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+    }
+}
 
-  compositor = g_new0 (MetaCompositor, 1);
+static void
+meta_compositor_init (MetaCompositor *compositor)
+{
+  MetaCompositorPrivate *priv =
+    meta_compositor_get_instance_private (compositor);
+  MetaBackend *backend = meta_get_backend ();
+  ClutterBackend *clutter_backend = meta_backend_get_clutter_backend (backend);
 
-  compositor->display = display;
-  compositor->context = clutter_backend_get_cogl_context (clutter_get_default_backend ());
+  priv->context = clutter_backend->cogl_context;
 
-  if (g_getenv("META_DISABLE_MIPMAPS"))
-    compositor->no_mipmaps = TRUE;
-
-  meta_verbose ("Creating %d atoms\n", (int) G_N_ELEMENTS (atom_names));
-  XInternAtoms (xdisplay, atom_names, G_N_ELEMENTS (atom_names),
-                False, atoms);
-
-  compositor->atom_x_root_pixmap = atoms[0];
-  compositor->atom_x_set_root = atoms[1];
-  compositor->atom_net_wm_window_opacity = atoms[2];
-
-  compositor->pre_paint_func_id =
+  priv->pre_paint_func_id =
     clutter_threads_add_repaint_func_full (CLUTTER_REPAINT_FLAGS_PRE_PAINT,
                                            meta_pre_paint_func,
                                            compositor,
                                            NULL);
-  compositor->post_paint_func_id =
+  priv->post_paint_func_id =
     clutter_threads_add_repaint_func_full (CLUTTER_REPAINT_FLAGS_POST_PAINT,
                                            meta_post_paint_func,
                                            compositor,
                                            NULL);
-
-  compositor_global = compositor;
-
-  return compositor;
 }
 
-/**
- * meta_get_overlay_window: (skip)
- *
- */
-Window
-meta_get_overlay_window (MetaScreen *screen)
+static void
+meta_compositor_dispose (GObject *object)
 {
-  return screen->display->compositor->output;
+  MetaCompositor *compositor = META_COMPOSITOR (object);
+  MetaCompositorPrivate *priv =
+    meta_compositor_get_instance_private (compositor);
+
+  g_clear_signal_handler (&priv->stage_after_paint_id, priv->stage);
+  g_clear_signal_handler (&priv->stage_presented_id, priv->stage);
+
+  g_clear_handle_id (&priv->pre_paint_func_id,
+                     clutter_threads_remove_repaint_func);
+  g_clear_handle_id (&priv->post_paint_func_id,
+                     clutter_threads_remove_repaint_func);
+
+  g_clear_signal_handler (&priv->top_window_actor_destroy_id,
+                          priv->top_window_actor);
+
+  g_clear_pointer (&priv->window_group, clutter_actor_destroy);
+  g_clear_pointer (&priv->top_window_group, clutter_actor_destroy);
+  g_clear_pointer (&priv->feedback_group, clutter_actor_destroy);
+  g_clear_pointer (&priv->windows, g_list_free);
+
+  G_OBJECT_CLASS (meta_compositor_parent_class)->dispose (object);
+}
+
+static void
+meta_compositor_class_init (MetaCompositorClass *klass)
+{
+  GObjectClass *object_class = G_OBJECT_CLASS (klass);
+
+  object_class->set_property = meta_compositor_set_property;
+  object_class->get_property = meta_compositor_get_property;
+  object_class->dispose = meta_compositor_dispose;
+
+  klass->remove_window = meta_compositor_real_remove_window;
+  klass->pre_paint = meta_compositor_real_pre_paint;
+  klass->post_paint = meta_compositor_real_post_paint;
+
+  obj_props[PROP_DISPLAY] =
+    g_param_spec_object ("display",
+                         "display",
+                         "MetaDisplay",
+                         META_TYPE_DISPLAY,
+                         G_PARAM_READWRITE |
+                         G_PARAM_CONSTRUCT_ONLY |
+                         G_PARAM_STATIC_STRINGS);
+  g_object_class_install_properties (object_class, N_PROPS, obj_props);
 }
 
 /**
- * meta_disable_unredirect_for_screen:
- * @screen: a #MetaScreen
+ * meta_disable_unredirect_for_display:
+ * @display: a #MetaDisplay
  *
  * Disables unredirection, can be usefull in situations where having
  * unredirected windows is undesireable like when recording a video.
  *
  */
 void
-meta_disable_unredirect_for_screen (MetaScreen *screen)
+meta_disable_unredirect_for_display (MetaDisplay *display)
 {
-  MetaCompositor *compositor = screen->display->compositor;
+  MetaCompositor *compositor;
+  MetaCompositorPrivate *priv;
 
-  compositor->disable_unredirect_count = compositor->disable_unredirect_count + 1;
+  if (display->closing)
+    return;
+
+  compositor = get_compositor_for_display (display);
+  priv = meta_compositor_get_instance_private (compositor);
+
+  priv->disable_unredirect_count++;
 }
 
 /**
- * meta_enable_unredirect_for_screen:
- * @screen: a #MetaScreen
+ * meta_enable_unredirect_for_display:
+ * @display: a #MetaDisplay
  *
  * Enables unredirection which reduces the overhead for apps like games.
  *
  */
 void
-meta_enable_unredirect_for_screen (MetaScreen *screen)
+meta_enable_unredirect_for_display (MetaDisplay *display)
 {
-  MetaCompositor *compositor = screen->display->compositor;
-  if (compositor->disable_unredirect_count == 0)
-    g_warning ("Called enable_unredirect_for_screen while unredirection is enabled.");
-  if (compositor->disable_unredirect_count > 0)
-   compositor->disable_unredirect_count = compositor->disable_unredirect_count - 1;
+  MetaCompositor *compositor;
+  MetaCompositorPrivate *priv;
+
+  if (display->closing)
+    return;
+
+  compositor = get_compositor_for_display (display);
+  priv = meta_compositor_get_instance_private (compositor);
+
+  if (priv->disable_unredirect_count == 0)
+    g_warning ("Called enable_unredirect_for_display while unredirection is enabled.");
+  if (priv->disable_unredirect_count > 0)
+    priv->disable_unredirect_count--;
+}
+
+gboolean
+meta_compositor_is_unredirect_inhibited (MetaCompositor *compositor)
+{
+  MetaCompositorPrivate *priv =
+    meta_compositor_get_instance_private (compositor);
+
+  return priv->disable_unredirect_count > 0;
 }
 
 #define FLASH_TIME_MS 50
@@ -1494,15 +1346,15 @@ flash_out_completed (ClutterTimeline *timeline,
 }
 
 void
-meta_compositor_flash_screen (MetaCompositor *compositor,
-                              MetaScreen     *screen)
+meta_compositor_flash_display (MetaCompositor *compositor,
+                               MetaDisplay    *display)
 {
   ClutterActor *stage;
   ClutterActor *flash;
   ClutterTransition *transition;
   gfloat width, height;
 
-  stage = meta_get_stage_for_screen (screen);
+  stage = meta_get_stage_for_display (display);
   clutter_actor_get_size (stage, &width, &height);
 
   flash = clutter_actor_new ();
@@ -1526,48 +1378,50 @@ meta_compositor_flash_screen (MetaCompositor *compositor,
   clutter_actor_restore_easing_state (flash);
 }
 
-void
-meta_compositor_show_tile_preview (MetaCompositor *compositor,
-                                   MetaScreen     *screen,
-                                   MetaWindow     *window,
-                                   MetaRectangle  *tile_rect,
-                                   int            tile_monitor_number,
-                                   guint          snap_queued)
+static void
+window_flash_out_completed (ClutterTimeline *timeline,
+                            gboolean         is_finished,
+                            gpointer         user_data)
 {
-  meta_plugin_manager_show_tile_preview (compositor->plugin_mgr,
-                                          window, tile_rect, tile_monitor_number,
-                                          snap_queued);
+  ClutterActor *flash = CLUTTER_ACTOR (user_data);
+  clutter_actor_destroy (flash);
 }
 
 void
-meta_compositor_hide_tile_preview (MetaCompositor *compositor,
-                                   MetaScreen     *screen)
+meta_compositor_flash_window (MetaCompositor *compositor,
+                              MetaWindow     *window)
 {
-  meta_plugin_manager_hide_tile_preview (compositor->plugin_mgr);
-}
+  ClutterActor *window_actor =
+    CLUTTER_ACTOR (meta_window_actor_from_window (window));
+  ClutterActor *flash;
+  ClutterTransition *transition;
 
-void
-meta_compositor_show_hud_preview (MetaCompositor *compositor,
-                                  MetaScreen     *screen,
-                                  guint          current_proximity_zone,
-                                  MetaRectangle  *work_area,
-                                  guint          snap_queued)
-{
-  meta_plugin_manager_show_hud_preview (compositor->plugin_mgr,
-                                        current_proximity_zone,
-                                        work_area,
-                                        snap_queued);
-}
+  flash = clutter_actor_new ();
+  clutter_actor_set_background_color (flash, CLUTTER_COLOR_Black);
+  clutter_actor_set_size (flash, window->rect.width, window->rect.height);
+  clutter_actor_set_position (flash,
+                              window->custom_frame_extents.left,
+                              window->custom_frame_extents.top);
+  clutter_actor_set_opacity (flash, 0);
+  clutter_actor_add_child (window_actor, flash);
 
-void
-meta_compositor_hide_hud_preview (MetaCompositor *compositor,
-                                  MetaScreen     *screen)
-{
-  meta_plugin_manager_hide_hud_preview (compositor->plugin_mgr);
+  clutter_actor_save_easing_state (flash);
+  clutter_actor_set_easing_mode (flash, CLUTTER_EASE_IN_QUAD);
+  clutter_actor_set_easing_duration (flash, FLASH_TIME_MS);
+  clutter_actor_set_opacity (flash, 192);
+
+  transition = clutter_actor_get_transition (flash, "opacity");
+  clutter_timeline_set_auto_reverse (CLUTTER_TIMELINE (transition), TRUE);
+  clutter_timeline_set_repeat_count (CLUTTER_TIMELINE (transition), 2);
+
+  g_signal_connect (transition, "stopped",
+                    G_CALLBACK (window_flash_out_completed), flash);
+
+  clutter_actor_restore_easing_state (flash);
 }
 
 /**
- * meta_compositor_monotonic_time_to_server_time:
+ * meta_compositor_monotonic_to_high_res_xserver_time:
  * @display: a #MetaDisplay
  * @monotonic_time: time in the units of g_get_monotonic_time()
  *
@@ -1580,64 +1434,134 @@ meta_compositor_hide_hud_preview (MetaCompositor *compositor,
  * a time representation with high accuracy. If there is not a common
  * time source, then the time synchronization will be less accurate.
  */
-gint64
-meta_compositor_monotonic_time_to_server_time (MetaDisplay *display,
-                                               gint64       monotonic_time)
+int64_t
+meta_compositor_monotonic_to_high_res_xserver_time (MetaCompositor *compositor,
+                                                   int64_t         monotonic_time_us)
 {
-  MetaCompositor *compositor = display->compositor;
+  MetaCompositorClass *klass = META_COMPOSITOR_GET_CLASS (compositor);
 
-  if (compositor->server_time_query_time == 0 ||
-      (!compositor->server_time_is_monotonic_time &&
-       monotonic_time > compositor->server_time_query_time + 10*1000*1000)) /* 10 seconds */
-    {
-      guint32 server_time = meta_display_get_current_time_roundtrip (display);
-      gint64 server_time_usec = (gint64)server_time * 1000;
-      gint64 current_monotonic_time = g_get_monotonic_time ();
-      compositor->server_time_query_time = current_monotonic_time;
-
-      /* If the server time is within a second of the monotonic time,
-       * we assume that they are identical. This seems like a big margin,
-       * but we want to be as robust as possible even if the system
-       * is under load and our processing of the server response is
-       * delayed.
-       */
-      if (server_time_usec > current_monotonic_time - 1000*1000 &&
-          server_time_usec < current_monotonic_time + 1000*1000)
-        compositor->server_time_is_monotonic_time = TRUE;
-
-      compositor->server_time_offset = server_time_usec - current_monotonic_time;
-    }
-
-  if (compositor->server_time_is_monotonic_time)
-    return monotonic_time;
-  else
-    return monotonic_time + compositor->server_time_offset;
+  return klass->monotonic_to_high_res_xserver_time (compositor, monotonic_time_us);
 }
 
 void
-meta_compositor_grab_op_begin (MetaCompositor *compositor)
+meta_compositor_show_tile_preview (MetaCompositor *compositor,
+                                   MetaWindow     *window,
+                                   MetaRectangle  *tile_rect,
+                                   int             tile_monitor_number)
 {
-  // CLUTTER_ACTOR_NO_LAYOUT set on the window group improves responsiveness of windows,
-  // but causes windows to flicker in and out of view sporadically on some configurations
-  // while dragging windows. Make sure it is disabled during the grab.
-  clutter_actor_unset_flags (compositor->window_group, CLUTTER_ACTOR_NO_LAYOUT);
+  MetaCompositorPrivate *priv =
+    meta_compositor_get_instance_private (compositor);
+
+  meta_plugin_manager_show_tile_preview (priv->plugin_mgr,
+                                         window, tile_rect, tile_monitor_number);
 }
 
 void
-meta_compositor_grab_op_end (MetaCompositor *compositor)
+meta_compositor_hide_tile_preview (MetaCompositor *compositor)
 {
-  clutter_actor_set_flags (compositor->window_group, CLUTTER_ACTOR_NO_LAYOUT);
-}
+  MetaCompositorPrivate *priv =
+    meta_compositor_get_instance_private (compositor);
 
-CoglContext *
-meta_compositor_get_cogl_context (void)
-{
-  return compositor_global->context;
+  meta_plugin_manager_hide_tile_preview (priv->plugin_mgr);
 }
 
 void
-meta_compositor_update_sync_state (MetaCompositor *compositor,
-                                   MetaSyncMethod  method)
+meta_compositor_show_window_menu (MetaCompositor     *compositor,
+                                  MetaWindow         *window,
+                                  MetaWindowMenuType  menu,
+                                  int                 x,
+                                  int                 y)
 {
-  clutter_stage_x11_update_sync_state (compositor->stage, method);
+  MetaCompositorPrivate *priv =
+    meta_compositor_get_instance_private (compositor);
+
+  meta_plugin_manager_show_window_menu (priv->plugin_mgr, window, menu, x, y);
+}
+
+void
+meta_compositor_show_window_menu_for_rect (MetaCompositor     *compositor,
+                                           MetaWindow         *window,
+                                           MetaWindowMenuType  menu,
+                                           MetaRectangle      *rect)
+{
+  MetaCompositorPrivate *priv =
+    meta_compositor_get_instance_private (compositor);
+
+  meta_plugin_manager_show_window_menu_for_rect (priv->plugin_mgr, window, menu, rect);
+}
+
+MetaCloseDialog *
+meta_compositor_create_close_dialog (MetaCompositor *compositor,
+                                     MetaWindow     *window)
+{
+  MetaCompositorPrivate *priv =
+    meta_compositor_get_instance_private (compositor);
+
+  return meta_plugin_manager_create_close_dialog (priv->plugin_mgr,
+                                                  window);
+}
+
+MetaInhibitShortcutsDialog *
+meta_compositor_create_inhibit_shortcuts_dialog (MetaCompositor *compositor,
+                                                 MetaWindow     *window)
+{
+  MetaCompositorPrivate *priv =
+    meta_compositor_get_instance_private (compositor);
+
+  return meta_plugin_manager_create_inhibit_shortcuts_dialog (priv->plugin_mgr,
+                                                              window);
+}
+
+void
+meta_compositor_locate_pointer (MetaCompositor *compositor)
+{
+  MetaCompositorPrivate *priv =
+    meta_compositor_get_instance_private (compositor);
+
+  meta_plugin_manager_locate_pointer (priv->plugin_mgr);
+}
+
+MetaPluginManager *
+meta_compositor_get_plugin_manager (MetaCompositor *compositor)
+{
+  MetaCompositorPrivate *priv =
+    meta_compositor_get_instance_private (compositor);
+
+  return priv->plugin_mgr;
+}
+
+MetaDisplay *
+meta_compositor_get_display (MetaCompositor *compositor)
+{
+  MetaCompositorPrivate *priv =
+    meta_compositor_get_instance_private (compositor);
+
+  return priv->display;
+}
+
+ClutterStage *
+meta_compositor_get_stage (MetaCompositor *compositor)
+{
+  MetaCompositorPrivate *priv =
+    meta_compositor_get_instance_private (compositor);
+
+  return CLUTTER_STAGE (priv->stage);
+}
+
+MetaWindowActor *
+meta_compositor_get_top_window_actor (MetaCompositor *compositor)
+{
+  MetaCompositorPrivate *priv =
+    meta_compositor_get_instance_private (compositor);
+
+  return priv->top_window_actor;
+}
+
+gboolean
+meta_compositor_is_switching_workspace (MetaCompositor *compositor)
+{
+  MetaCompositorPrivate *priv =
+    meta_compositor_get_instance_private (compositor);
+
+  return priv->switch_workspace_in_progress > 0;
 }

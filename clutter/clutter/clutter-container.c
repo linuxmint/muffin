@@ -26,9 +26,7 @@
  * Author: Emmanuele Bassi <ebassi@openedhand.com>
  */
 
-#ifdef HAVE_CONFIG_H
 #include "clutter-build-config.h"
-#endif
 
 #include <stdarg.h>
 #include <glib-object.h>
@@ -39,6 +37,7 @@
 
 #include "clutter-actor-private.h"
 #include "clutter-child-meta.h"
+#include "clutter-container-private.h"
 #include "clutter-debug.h"
 #include "clutter-main.h"
 #include "clutter-marshal.h"
@@ -120,37 +119,6 @@ container_real_remove (ClutterContainer *container,
   clutter_actor_remove_child (CLUTTER_ACTOR (container), actor);
 }
 
-typedef struct {
-  ClutterCallback callback;
-  gpointer data;
-} ForeachClosure;
-
-static gboolean
-foreach_cb (ClutterActor *actor,
-            gpointer      data)
-{
-  ForeachClosure *clos = data;
-
-  clos->callback (actor, clos->data);
-
-  return TRUE;
-}
-
-static void
-container_real_foreach (ClutterContainer *container,
-                        ClutterCallback   callback,
-                        gpointer          user_data)
-{
-  ForeachClosure clos;
-
-  clos.callback = callback;
-  clos.data = user_data;
-
-  _clutter_actor_foreach_child (CLUTTER_ACTOR (container),
-                                foreach_cb,
-                                &clos);
-}
-
 static void
 container_real_raise (ClutterContainer *container,
                       ClutterActor     *child,
@@ -199,8 +167,7 @@ clutter_container_default_init (ClutterContainerInterface *iface)
                   iface_type,
                   G_SIGNAL_RUN_FIRST,
                   G_STRUCT_OFFSET (ClutterContainerIface, actor_added),
-                  NULL, NULL,
-                  _clutter_marshal_VOID__OBJECT,
+                  NULL, NULL, NULL,
                   G_TYPE_NONE, 1,
                   CLUTTER_TYPE_ACTOR);
   /**
@@ -218,8 +185,7 @@ clutter_container_default_init (ClutterContainerInterface *iface)
                   iface_type,
                   G_SIGNAL_RUN_FIRST,
                   G_STRUCT_OFFSET (ClutterContainerIface, actor_removed),
-                  NULL, NULL,
-                  _clutter_marshal_VOID__OBJECT,
+                  NULL, NULL, NULL,
                   G_TYPE_NONE, 1,
                   CLUTTER_TYPE_ACTOR);
 
@@ -247,7 +213,6 @@ clutter_container_default_init (ClutterContainerInterface *iface)
 
   iface->add = container_real_add;
   iface->remove = container_real_remove;
-  iface->foreach = container_real_foreach;
   iface->raise = container_real_raise;
   iface->lower = container_real_lower;
   iface->sort_depth_order = container_real_sort_depth_order;
@@ -421,33 +386,6 @@ clutter_container_add_actor (ClutterContainer *container,
 }
 
 /**
- * clutter_container_add_valist: (skip)
- * @container: a #ClutterContainer
- * @first_actor: the first #ClutterActor to add
- * @var_args: list of actors to add, followed by %NULL
- *
- * Alternative va_list version of clutter_container_add().
- *
- * This function will call #ClutterContainerIface.add(), which is a
- * deprecated virtual function. The default implementation will
- * call clutter_actor_add_child().
- *
- * Since: 0.4
- *
- * Deprecated: 1.10: Use clutter_actor_add_child() instead.
- */
-void
-clutter_container_add_valist (ClutterContainer *container,
-                              ClutterActor     *first_actor,
-                              va_list           var_args)
-{
-  g_return_if_fail (CLUTTER_IS_CONTAINER (container));
-  g_return_if_fail (CLUTTER_IS_ACTOR (first_actor));
-
-  container_add_valist (container, first_actor, var_args);
-}
-
-/**
  * clutter_container_remove: (skip)
  * @container: a #ClutterContainer
  * @first_actor: first #ClutterActor to remove
@@ -511,42 +449,6 @@ clutter_container_remove_actor (ClutterContainer *container,
 }
 
 /**
- * clutter_container_remove_valist: (skip)
- * @container: a #ClutterContainer
- * @first_actor: the first #ClutterActor to add
- * @var_args: list of actors to remove, followed by %NULL
- *
- * Alternative va_list version of clutter_container_remove().
- *
- * This function will call #ClutterContainerIface.remove(), which is a
- * deprecated virtual function. The default implementation will call
- * clutter_actor_remove_child().
- *
- * Since: 0.4
- *
- * Deprecated: 1.10: Use clutter_actor_remove_child() instead.
- */
-void
-clutter_container_remove_valist (ClutterContainer *container,
-                                 ClutterActor     *first_actor,
-                                 va_list           var_args)
-{
-  g_return_if_fail (CLUTTER_IS_CONTAINER (container));
-  g_return_if_fail (CLUTTER_IS_ACTOR (first_actor));
-
-  container_remove_valist (container, first_actor, var_args);
-}
-
-static void
-get_children_cb (ClutterActor *child,
-                 gpointer      data)
-{
-  GList **children = data;
-
-  *children = g_list_prepend (*children, child);
-}
-
-/**
  * clutter_container_get_children:
  * @container: a #ClutterContainer
  *
@@ -563,108 +465,9 @@ get_children_cb (ClutterActor *child,
 GList *
 clutter_container_get_children (ClutterContainer *container)
 {
-  GList *retval;
-
   g_return_val_if_fail (CLUTTER_IS_CONTAINER (container), NULL);
 
-  retval = NULL;
-  clutter_container_foreach (container, get_children_cb, &retval);
-
-  return g_list_reverse (retval);
-}
-
-/**
- * clutter_container_foreach:
- * @container: a #ClutterContainer
- * @callback: (scope call): a function to be called for each child
- * @user_data: data to be passed to the function, or %NULL
- *
- * Calls @callback for each child of @container that was added
- * by the application (with clutter_container_add_actor()). Does
- * not iterate over "internal" children that are part of the
- * container's own implementation, if any.
- *
- * This function calls the #ClutterContainerIface.foreach()
- * virtual function, which has been deprecated.
- *
- * Since: 0.4
- *
- * Deprecated: 1.10: Use clutter_actor_get_first_child() or
- *   clutter_actor_get_last_child() to retrieve the beginning of
- *   the list of children, and clutter_actor_get_next_sibling()
- *   and clutter_actor_get_previous_sibling() to iterate over it;
- *   alternatively, use the #ClutterActorIter API.
- */
-void
-clutter_container_foreach (ClutterContainer *container,
-                           ClutterCallback   callback,
-                           gpointer          user_data)
-{
-  g_return_if_fail (CLUTTER_IS_CONTAINER (container));
-  g_return_if_fail (callback != NULL);
-
-#ifdef CLUTTER_ENABLE_DEBUG
-  if (G_UNLIKELY (_clutter_diagnostic_enabled ()))
-    {
-      ClutterContainerIface *iface = CLUTTER_CONTAINER_GET_IFACE (container);
-
-      if (iface->foreach != container_real_foreach)
-        _clutter_diagnostic_message ("The ClutterContainer::foreach() "
-                                     "virtual function has been deprecated "
-                                     "and it should not be overridden by "
-                                     "newly written code");
-    }
-#endif /* CLUTTER_ENABLE_DEBUG */
-
-  CLUTTER_CONTAINER_GET_IFACE (container)->foreach (container,
-                                                    callback,
-                                                    user_data);
-}
-
-/**
- * clutter_container_foreach_with_internals:
- * @container: a #ClutterContainer
- * @callback: (scope call): a function to be called for each child
- * @user_data: data to be passed to the function, or %NULL
- *
- * Calls @callback for each child of @container, including "internal"
- * children built in to the container itself that were never added
- * by the application.
- *
- * This function calls the #ClutterContainerIface.foreach_with_internals()
- * virtual function, which has been deprecated.
- *
- * Since: 1.0
- *
- * Deprecated: 1.10: See clutter_container_foreach().
- */
-void
-clutter_container_foreach_with_internals (ClutterContainer *container,
-                                          ClutterCallback   callback,
-                                          gpointer          user_data)
-{
-  ClutterContainerIface *iface;
-
-  g_return_if_fail (CLUTTER_IS_CONTAINER (container));
-  g_return_if_fail (callback != NULL);
-
-  iface = CLUTTER_CONTAINER_GET_IFACE (container);
-
-#ifdef CLUTTER_ENABLE_DEBUG
-  if (G_UNLIKELY (_clutter_diagnostic_enabled ()))
-    {
-      if (iface->foreach_with_internals != NULL)
-        _clutter_diagnostic_message ("The ClutterContainer::foreach_with_internals() "
-                                     "virtual function has been deprecated "
-                                     "and it should not be overridden by "
-                                     "newly written code");
-    }
-#endif /* CLUTTER_ENABLE_DEBUG */
-
-  if (iface->foreach_with_internals != NULL)
-    iface->foreach_with_internals (container, callback, user_data);
-  else
-    iface->foreach (container, callback, user_data);
+  return clutter_actor_get_children (CLUTTER_ACTOR (container));
 }
 
 /**
@@ -1222,7 +1025,7 @@ clutter_container_child_set (ClutterContainer *container,
   GObjectClass *klass;
   const gchar *name;
   va_list var_args;
-
+  
   g_return_if_fail (CLUTTER_IS_CONTAINER (container));
   g_return_if_fail (CLUTTER_IS_ACTOR (actor));
 
@@ -1236,7 +1039,7 @@ clutter_container_child_set (ClutterContainer *container,
       GValue value = G_VALUE_INIT;
       gchar *error = NULL;
       GParamSpec *pspec;
-
+    
       pspec = clutter_container_class_find_child_property (klass, name);
       if (!pspec)
         {
@@ -1265,7 +1068,7 @@ clutter_container_child_set (ClutterContainer *container,
            * on it might crash
            */
           g_warning ("%s: %s", G_STRLOC, error);
-          free (error);
+          g_free (error);
           break;
         }
 
@@ -1357,7 +1160,7 @@ clutter_container_child_get_property (ClutterContainer *container,
  *
  * In general, a copy is made of the property contents and the caller is
  * responsible for freeing the memory in the appropriate manner for the type, for
- * instance by calling free() or g_object_unref().
+ * instance by calling g_free() or g_object_unref(). 
  *
  * Since: 0.8
  */
@@ -1370,7 +1173,7 @@ clutter_container_child_get (ClutterContainer *container,
   GObjectClass *klass;
   const gchar *name;
   va_list var_args;
-
+  
   g_return_if_fail (CLUTTER_IS_CONTAINER (container));
   g_return_if_fail (CLUTTER_IS_ACTOR (actor));
 
@@ -1384,7 +1187,7 @@ clutter_container_child_get (ClutterContainer *container,
       GValue value = G_VALUE_INIT;
       gchar *error = NULL;
       GParamSpec *pspec;
-
+    
       pspec = clutter_container_class_find_child_property (klass, name);
       if (!pspec)
         {
@@ -1408,7 +1211,7 @@ clutter_container_child_get (ClutterContainer *container,
       if (error)
         {
           g_warning ("%s: %s", G_STRLOC, error);
-          free (error);
+          g_free (error);
           g_value_unset (&value);
           break;
         }
@@ -1447,4 +1250,24 @@ clutter_container_child_notify (ClutterContainer *container,
   CLUTTER_CONTAINER_GET_IFACE (container)->child_notify (container,
                                                          child,
                                                          pspec);
+}
+
+void
+_clutter_container_emit_actor_added (ClutterContainer *container,
+                                     ClutterActor     *actor)
+{
+  g_return_if_fail (CLUTTER_IS_CONTAINER (container));
+  g_return_if_fail (CLUTTER_IS_ACTOR (actor));
+
+  g_signal_emit (container, container_signals[ACTOR_ADDED], 0, actor);
+}
+
+void
+_clutter_container_emit_actor_removed (ClutterContainer *container,
+                                       ClutterActor     *actor)
+{
+  g_return_if_fail (CLUTTER_IS_CONTAINER (container));
+  g_return_if_fail (CLUTTER_IS_ACTOR (actor));
+
+  g_signal_emit (container, container_signals[ACTOR_REMOVED], 0, actor);
 }

@@ -79,7 +79,7 @@ struct _ClutterZoomActionClass
   /*< public >*/
   gboolean (* zoom)  (ClutterZoomAction *action,
                       ClutterActor      *actor,
-                      ClutterPoint      *focal_point,
+                      graphene_point_t  *focal_point,
                       gdouble            factor);
 
   /*< private >*/
@@ -90,24 +90,24 @@ struct _ClutterZoomActionClass
   void (* _clutter_zoom_action5) (void);
 };
 
-CLUTTER_AVAILABLE_IN_1_12
+CLUTTER_EXPORT
 GType clutter_zoom_action_get_type (void) G_GNUC_CONST;
 
-CLUTTER_AVAILABLE_IN_1_12
+CLUTTER_EXPORT
 ClutterAction * clutter_zoom_action_new                         (void);
 
-CLUTTER_AVAILABLE_IN_1_12
+CLUTTER_EXPORT
 void            clutter_zoom_action_set_zoom_axis               (ClutterZoomAction *action,
                                                                  ClutterZoomAxis    axis);
-CLUTTER_AVAILABLE_IN_1_12
+CLUTTER_EXPORT
 ClutterZoomAxis clutter_zoom_action_get_zoom_axis               (ClutterZoomAction *action);
 
-CLUTTER_AVAILABLE_IN_1_12
+CLUTTER_EXPORT
 void            clutter_zoom_action_get_focal_point             (ClutterZoomAction *action,
-                                                                 ClutterPoint      *point);
-CLUTTER_AVAILABLE_IN_1_12
+                                                                 graphene_point_t  *point);
+CLUTTER_EXPORT
 void            clutter_zoom_action_get_transformed_focal_point (ClutterZoomAction *action,
-                                                                 ClutterPoint      *point);
+                                                                 graphene_point_t  *point);
 
 G_END_DECLS
 

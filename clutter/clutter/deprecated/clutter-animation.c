@@ -50,19 +50,9 @@
  * emitted if #ClutterAnimation:loop is set to %TRUE - that is, a looping
  * animation never completes.
  *
- * If your animation depends on user control you can force its completion
- * using clutter_animation_completed().
- *
  * If the #GObject instance bound to a #ClutterAnimation implements the
  * #ClutterAnimatable interface it is possible for that instance to
  * control the way the initial and final states are interpolated.
- *
- * #ClutterAnimations are distinguished from #ClutterBehaviours
- * because the former can only control #GObject properties of a single
- * #GObject instance, while the latter can control multiple properties
- * using accessor functions inside the #ClutterBehaviour
- * `alpha_notify` virtual function, and can control multiple #ClutterActors
- * as well.
  *
  * For convenience, it is possible to use the clutter_actor_animate()
  * function call which will take care of setting up and tearing down
@@ -97,9 +87,7 @@
  *  - easeInBounce, easeOutBounce, easeInOutBounce
  */
 
-#ifdef HAVE_CONFIG_H
 #include "clutter-build-config.h"
-#endif
 
 #include <glib-object.h>
 #include <gobject/gvaluecollector.h>
@@ -569,8 +557,7 @@ clutter_animation_class_init (ClutterAnimationClass *klass)
                   G_TYPE_FROM_CLASS (klass),
                   G_SIGNAL_RUN_LAST,
                   G_STRUCT_OFFSET (ClutterAnimationClass, started),
-                  NULL, NULL,
-                  _clutter_marshal_VOID__VOID,
+                  NULL, NULL, NULL,
                   G_TYPE_NONE, 0);
 
   /**
@@ -591,8 +578,7 @@ clutter_animation_class_init (ClutterAnimationClass *klass)
                   G_TYPE_FROM_CLASS (klass),
                   G_SIGNAL_RUN_LAST,
                   G_STRUCT_OFFSET (ClutterAnimationClass, completed),
-                  NULL, NULL,
-                  _clutter_marshal_VOID__VOID,
+                  NULL, NULL, NULL,
                   G_TYPE_NONE, 0);
 }
 
@@ -603,7 +589,7 @@ clutter_animation_init (ClutterAnimation *self)
 
   self->priv->properties =
     g_hash_table_new_full (g_str_hash, g_str_equal,
-                           (GDestroyNotify) free,
+                           (GDestroyNotify) g_free,
                            (GDestroyNotify) g_object_unref);
 }
 
@@ -649,231 +635,6 @@ clutter_animation_update_property_internal (ClutterAnimation *animation,
                         g_object_ref_sink (interval));
 }
 
-static GParamSpec *
-clutter_animation_validate_bind (ClutterAnimation *animation,
-                                 const char       *property_name,
-                                 GType             argtype)
-{
-  ClutterAnimationPrivate *priv;
-  GParamSpec *pspec;
-  GType pspec_type;
-
-  priv = animation->priv;
-
-  if (G_UNLIKELY (!priv->object))
-    {
-      g_warning ("Cannot bind property '%s': the animation has no "
-                 "object set. You need to call clutter_animation_set_object() "
-                 "first to be able to bind a property",
-                 property_name);
-      return NULL;
-    }
-
-  if (G_UNLIKELY (clutter_animation_has_property (animation, property_name)))
-    {
-      g_warning ("Cannot bind property '%s': the animation already has "
-                 "a bound property with the same name",
-                 property_name);
-      return NULL;
-    }
-
-  if (CLUTTER_IS_ANIMATABLE (priv->object))
-    {
-      ClutterAnimatable *animatable = CLUTTER_ANIMATABLE (priv->object);
-
-      pspec = clutter_animatable_find_property (animatable, property_name);
-    }
-  else
-    {
-      GObjectClass *klass = G_OBJECT_GET_CLASS (priv->object);
-
-      pspec = g_object_class_find_property (klass, property_name);
-    }
-
-  if (pspec == NULL)
-    {
-      g_warning ("Cannot bind property '%s': objects of type '%s' have "
-                 "no such property",
-                 property_name,
-                 g_type_name (G_OBJECT_TYPE (priv->object)));
-      return NULL;
-    }
-
-  if (!(pspec->flags & G_PARAM_WRITABLE))
-    {
-      g_warning ("Cannot bind property '%s': the property is not writable",
-                 property_name);
-      return NULL;
-    }
-
-  pspec_type = G_PARAM_SPEC_VALUE_TYPE (pspec);
-
-  if (g_value_type_transformable (argtype, pspec_type))
-    return pspec;
-  else
-    {
-      g_warning ("Cannot bind property '%s': the interval value of "
-                 "type '%s' is not compatible with the property value "
-                 "of type '%s'",
-                 property_name,
-                 g_type_name (argtype),
-                 g_type_name (pspec_type));
-      return NULL;
-    }
-}
-
-/**
- * clutter_animation_bind_interval:
- * @animation: a #ClutterAnimation
- * @property_name: the property to control
- * @interval: (transfer full): a #ClutterInterval
- *
- * Binds @interval to the @property_name of the #GObject
- * attached to @animation. The #ClutterAnimation will take
- * ownership of the passed #ClutterInterval.  For more information
- * about animations, see clutter_actor_animate().
- *
- * If you need to update the interval instance use
- * clutter_animation_update_interval() instead.
- *
- * Return value: (transfer none): The animation itself.
- * Since: 1.0
- * Deprecated: 1.12: Use #ClutterPropertyTransition instead
- */
-ClutterAnimation *
-clutter_animation_bind_interval (ClutterAnimation *animation,
-                                 const gchar      *property_name,
-                                 ClutterInterval  *interval)
-{
-  GParamSpec *pspec;
-
-  g_return_val_if_fail (CLUTTER_IS_ANIMATION (animation), NULL);
-  g_return_val_if_fail (property_name != NULL, NULL);
-  g_return_val_if_fail (CLUTTER_IS_INTERVAL (interval), NULL);
-
-  pspec = clutter_animation_validate_bind (animation, property_name,
-                                           clutter_interval_get_value_type (interval));
-  if (pspec == NULL)
-    return NULL;
-
-  clutter_animation_bind_property_internal (animation, property_name,
-                                            pspec,
-                                            interval);
-
-  return animation;
-}
-
-
-/**
- * clutter_animation_bind:
- * @animation: a #ClutterAnimation
- * @property_name: the property to control
- * @final: The final value of the property
- *
- * Adds a single property with name @property_name to the
- * animation @animation.  For more information about animations,
- * see clutter_actor_animate().
- *
- * This method returns the animation primarily to make chained
- * calls convenient in language bindings.
- *
- * Return value: (transfer none): The animation itself.
- *
- * Since: 1.0
- * Deprecated: 1.12: Use #ClutterPropertyTransition instead
- */
-ClutterAnimation *
-clutter_animation_bind (ClutterAnimation *animation,
-                        const gchar      *property_name,
-                        const GValue     *final)
-{
-  ClutterAnimationPrivate *priv;
-  GParamSpec *pspec;
-  ClutterInterval *interval;
-  GType type;
-  GValue initial = G_VALUE_INIT;
-  GValue real_final = G_VALUE_INIT;
-
-  g_return_val_if_fail (CLUTTER_IS_ANIMATION (animation), NULL);
-  g_return_val_if_fail (property_name != NULL, NULL);
-
-  priv = animation->priv;
-
-  type = G_VALUE_TYPE (final);
-  pspec = clutter_animation_validate_bind (animation, property_name, type);
-  if (pspec == NULL)
-    return NULL;
-
-  g_value_init (&real_final, G_PARAM_SPEC_VALUE_TYPE (pspec));
-  if (!g_value_transform (final, &real_final))
-    {
-      g_value_unset (&real_final);
-      g_warning ("Unable to transform the value of type '%s' to a value "
-                 "of '%s' compatible with the property '%s'of the object "
-                 "of type '%s'",
-                 g_type_name (type),
-                 g_type_name (G_PARAM_SPEC_VALUE_TYPE (pspec)),
-                 property_name,
-                 G_OBJECT_TYPE_NAME (priv->object));
-      return NULL;
-    }
-
-  g_value_init (&initial, G_PARAM_SPEC_VALUE_TYPE (pspec));
-
-  if (CLUTTER_IS_ANIMATABLE (priv->object))
-    clutter_animatable_get_initial_state (CLUTTER_ANIMATABLE (priv->object),
-                                          property_name,
-                                          &initial);
-  else
-    g_object_get_property (priv->object, property_name, &initial);
-
-  interval = clutter_interval_new_with_values (G_PARAM_SPEC_VALUE_TYPE (pspec),
-                                               &initial,
-                                               &real_final);
-
-  g_value_unset (&initial);
-  g_value_unset (&real_final);
-
-  clutter_animation_bind_property_internal (animation, property_name,
-                                            pspec,
-                                            interval);
-
-  return animation;
-}
-
-
-/**
- * clutter_animation_unbind_property:
- * @animation: a #ClutterAnimation
- * @property_name: name of the property
- *
- * Removes @property_name from the list of animated properties.
- *
- * Since: 1.0
- * Deprecated: 1.12: Use #ClutterPropertyTransition instead
- */
-void
-clutter_animation_unbind_property (ClutterAnimation *animation,
-                                   const gchar      *property_name)
-{
-  ClutterAnimationPrivate *priv;
-
-  g_return_if_fail (CLUTTER_IS_ANIMATION (animation));
-  g_return_if_fail (property_name != NULL);
-
-  priv = animation->priv;
-
-  if (!clutter_animation_has_property (animation, property_name))
-    {
-      g_warning ("Cannot unbind property '%s': the animation has "
-                 "no bound property with that name",
-                 property_name);
-      return;
-    }
-
-  g_hash_table_remove (priv->properties, property_name);
-}
-
 /**
  * clutter_animation_has_property:
  * @animation: a #ClutterAnimation
@@ -899,137 +660,6 @@ clutter_animation_has_property (ClutterAnimation *animation,
   priv = animation->priv;
 
   return g_hash_table_lookup (priv->properties, property_name) != NULL;
-}
-
-/**
- * clutter_animation_update_interval:
- * @animation: a #ClutterAnimation
- * @property_name: name of the property
- * @interval: a #ClutterInterval
- *
- * Changes the @interval for @property_name. The #ClutterAnimation
- * will take ownership of the passed #ClutterInterval.
- *
- * Since: 1.0
- * Deprecated: 1.12: Use #ClutterPropertyTransition instead
- */
-void
-clutter_animation_update_interval (ClutterAnimation *animation,
-                                   const gchar      *property_name,
-                                   ClutterInterval  *interval)
-{
-  ClutterAnimationPrivate *priv;
-  GParamSpec *pspec;
-  GType pspec_type, int_type;
-
-  g_return_if_fail (CLUTTER_IS_ANIMATION (animation));
-  g_return_if_fail (property_name != NULL);
-  g_return_if_fail (CLUTTER_IS_INTERVAL (interval));
-
-  priv = animation->priv;
-
-  if (!clutter_animation_has_property (animation, property_name))
-    {
-      g_warning ("Cannot update property '%s': the animation has "
-                 "no bound property with that name",
-                 property_name);
-      return;
-    }
-
-  if (CLUTTER_IS_ANIMATABLE (priv->object))
-    {
-      ClutterAnimatable *animatable = CLUTTER_ANIMATABLE (priv->object);
-
-      pspec = clutter_animatable_find_property (animatable, property_name);
-    }
-  else
-    {
-      GObjectClass *klass = G_OBJECT_GET_CLASS (priv->object);
-
-      pspec = g_object_class_find_property (klass, property_name);
-    }
-
-  if (pspec == NULL)
-    {
-      g_warning ("Cannot update property '%s': objects of type '%s' have "
-                 "no such property",
-                 property_name,
-                 g_type_name (G_OBJECT_TYPE (priv->object)));
-      return;
-    }
-
-  pspec_type = G_PARAM_SPEC_VALUE_TYPE (pspec);
-  int_type = clutter_interval_get_value_type (interval);
-
-  if (!g_value_type_compatible (int_type, pspec_type) ||
-      !g_value_type_transformable (int_type, pspec_type))
-    {
-      g_warning ("Cannot update property '%s': the interval value of "
-                 "type '%s' is not compatible with the property value "
-                 "of type '%s'",
-                 property_name,
-                 g_type_name (int_type),
-                 g_type_name (pspec_type));
-      return;
-    }
-
-  clutter_animation_update_property_internal (animation, property_name,
-                                              pspec,
-                                              interval);
-}
-
-/**
- * clutter_animation_update:
- * @animation: a #ClutterAnimation
- * @property_name: name of the property
- * @final: The final value of the property
- *
- * Updates the @final value of the interval for @property_name
- *
- * Return value: (transfer none): The animation itself.
- *
- * Since: 1.0
- * Deprecated: 1.12: Use #ClutterPropertyTransition instead
- */
-ClutterAnimation *
-clutter_animation_update (ClutterAnimation *animation,
-                          const gchar      *property_name,
-                          const GValue     *final)
-{
-  ClutterInterval *interval;
-  GType int_type;
-
-  g_return_val_if_fail (CLUTTER_IS_ANIMATION (animation), NULL);
-  g_return_val_if_fail (property_name != NULL, NULL);
-  g_return_val_if_fail (final != NULL, NULL);
-  g_return_val_if_fail (G_VALUE_TYPE (final) != G_TYPE_INVALID, NULL);
-
-  interval = clutter_animation_get_interval (animation, property_name);
-  if (interval == NULL)
-    {
-      g_warning ("Cannot update property '%s': the animation has "
-                 "no bound property with that name",
-                 property_name);
-      return NULL;
-    }
-
-  int_type = clutter_interval_get_value_type (interval);
-
-  if (!g_value_type_compatible (G_VALUE_TYPE (final), int_type) ||
-      !g_value_type_transformable (G_VALUE_TYPE (final), int_type))
-    {
-      g_warning ("Cannot update property '%s': the interval value of "
-                 "type '%s' is not compatible with the property value "
-                 "of type '%s'",
-                 property_name,
-                 g_type_name (int_type),
-                 g_type_name (G_VALUE_TYPE (final)));
-      return NULL;
-    }
-
-  clutter_interval_set_final_value (interval, final);
-
-  return animation;
 }
 
 /**
@@ -1295,10 +925,6 @@ out:
  * set the duration with clutter_animation_set_duration() and the
  * easing mode using clutter_animation_set_mode().
  *
- * Use clutter_animation_bind() or clutter_animation_bind_interval()
- * to define the properties to be animated. The interval and the
- * animated properties can be updated at runtime.
- *
  * The clutter_actor_animate() and relative family of functions provide
  * an easy way to animate a #ClutterActor and automatically manage the
  * lifetime of a #ClutterAnimation instance, so you should consider using
@@ -1350,25 +976,6 @@ clutter_animation_set_object (ClutterAnimation *animation,
     priv->object = g_object_ref (object);
 
   g_object_notify_by_pspec (G_OBJECT (animation), obj_props[PROP_OBJECT]);
-}
-
-/**
- * clutter_animation_get_object:
- * @animation: a #ClutterAnimation
- *
- * Retrieves the #GObject attached to @animation.
- *
- * Return value: (transfer none): a #GObject
- *
- * Since: 1.0
- * Deprecated: 1.12: Use #ClutterPropertyTransition instead
- */
-GObject *
-clutter_animation_get_object (ClutterAnimation *animation)
-{
-  g_return_val_if_fail (CLUTTER_IS_ANIMATION (animation), NULL);
-
-  return animation->priv->object;
 }
 
 /**
@@ -1661,76 +1268,6 @@ clutter_animation_get_timeline (ClutterAnimation *animation)
   return clutter_animation_get_timeline_internal (animation);
 }
 
-/**
- * clutter_animation_set_alpha:
- * @animation: a #ClutterAnimation
- * @alpha: a #ClutterAlpha, or %NULL to unset the current #ClutterAlpha
- *
- * Sets @alpha as the #ClutterAlpha used by @animation.
- *
- * If @alpha is not %NULL, the #ClutterAnimation will take ownership
- * of the #ClutterAlpha instance.
- *
- * Since: 1.0
- *
- * Deprecated: 1.10: Use clutter_animation_get_timeline() and
- *   clutter_timeline_set_progress_mode() instead.
- */
-void
-clutter_animation_set_alpha (ClutterAnimation *animation,
-                             ClutterAlpha     *alpha)
-{
-  g_return_if_fail (CLUTTER_IS_ANIMATION (animation));
-  g_return_if_fail (alpha == NULL || CLUTTER_IS_ALPHA (alpha));
-
-  clutter_animation_set_alpha_internal (animation, alpha);
-}
-
-/**
- * clutter_animation_get_alpha:
- * @animation: a #ClutterAnimation
- *
- * Retrieves the #ClutterAlpha used by @animation.
- *
- * Return value: (transfer none): the alpha object used by the animation
- *
- * Since: 1.0
- *
- * Deprecated: 1.10: Use clutter_animation_get_timeline() and
- *   clutter_timeline_get_progress_mode() instead.
- */
-ClutterAlpha *
-clutter_animation_get_alpha (ClutterAnimation *animation)
-{
-  g_return_val_if_fail (CLUTTER_IS_ANIMATION (animation), NULL);
-
-  return clutter_animation_get_alpha_internal (animation);
-}
-
-/**
- * clutter_animation_completed:
- * @animation: a #ClutterAnimation
- *
- * Emits the ::completed signal on @animation
- *
- * When using this function with a #ClutterAnimation created
- * by the clutter_actor_animate() family of functions, @animation
- * will be unreferenced and it will not be valid anymore,
- * unless g_object_ref() was called before calling this function
- * or unless a reference was taken inside a handler for the
- * #ClutterAnimation::completed signal
- *
- * Since: 1.0
- * Deprecated: 1.12: Use #ClutterPropertyTransition instead
- */
-void
-clutter_animation_completed (ClutterAnimation *animation)
-{
-  g_return_if_fail (CLUTTER_IS_ANIMATION (animation));
-
-  g_signal_emit (animation, animation_signals[COMPLETED], 0);
-}
-
 /*
  * starts the timeline
  */
@@ -1864,55 +1401,6 @@ done:
   g_value_unset (&real_value);
 }
 
-static void
-clutter_animation_setupv (ClutterAnimation    *animation,
-                          gint                 n_properties,
-                          const gchar * const  properties[],
-                          const GValue        *values)
-{
-  ClutterAnimationPrivate *priv = animation->priv;
-  ClutterAnimatable *animatable = NULL;
-  GObjectClass *klass = NULL;
-  gint i;
-
-  if (CLUTTER_IS_ANIMATABLE (priv->object))
-    animatable = CLUTTER_ANIMATABLE (priv->object);
-  else
-    klass = G_OBJECT_GET_CLASS (priv->object);
-
-  for (i = 0; i < n_properties; i++)
-    {
-      const gchar *property_name = properties[i];
-      GParamSpec *pspec;
-      gboolean is_fixed = FALSE;
-
-      if (g_str_has_prefix (property_name, "fixed::"))
-        {
-          property_name += 7; /* strlen("fixed::") */
-          is_fixed = TRUE;
-        }
-
-      if (animatable != NULL)
-        pspec = clutter_animatable_find_property (animatable, property_name);
-      else
-        pspec = g_object_class_find_property (klass, property_name);
-
-      if (pspec == NULL)
-        {
-          g_warning ("Cannot bind property '%s': objects of type '%s' do "
-                     "not have this property",
-                     property_name,
-                     g_type_name (G_OBJECT_TYPE (priv->object)));
-          break;
-        }
-
-      clutter_animation_setup_property (animation, property_name,
-                                        &values[i],
-                                        pspec,
-                                        is_fixed);
-    }
-}
-
 static const struct
 {
   const gchar *name;
@@ -2013,7 +1501,7 @@ clutter_animation_setup_valist (ClutterAnimation *animation,
           if (error)
             {
               g_warning ("%s: %s", G_STRLOC, error);
-              free (error);
+              g_free (error);
               break;
             }
 
@@ -2062,67 +1550,6 @@ animation_create_for_actor (ClutterActor *actor)
                     animation,
                     actor);
     }
-
-  return animation;
-}
-
-/**
- * clutter_actor_animate_with_alpha:
- * @actor: a #ClutterActor
- * @alpha: a #ClutterAlpha
- * @first_property_name: the name of a property
- * @...: a %NULL terminated list of property names and
- *   property values
- *
- * Animates the given list of properties of @actor between the current
- * value for each property and a new final value. The animation has a
- * definite behaviour given by the passed @alpha.
- *
- * See clutter_actor_animate() for further details.
- *
- * This function is useful if you want to use an existing #ClutterAlpha
- * to animate @actor.
- *
- * Return value: (transfer none): a #ClutterAnimation object. The object is owned by the
- *   #ClutterActor and should not be unreferenced with g_object_unref()
- *
- * Since: 1.0
- *
- * Deprecated: 1.10: Use the implicit transition for animatable properties
- *   in #ClutterActor instead. See clutter_actor_save_easing_state(),
- *   clutter_actor_set_easing_mode(), clutter_actor_set_easing_duration(),
- *   clutter_actor_set_easing_delay(), and clutter_actor_restore_easing_state().
- */
-ClutterAnimation *
-clutter_actor_animate_with_alpha (ClutterActor *actor,
-                                  ClutterAlpha *alpha,
-                                  const gchar  *first_property_name,
-                                  ...)
-{
-  ClutterAnimation *animation;
-  ClutterTimeline *timeline;
-  va_list args;
-
-  g_return_val_if_fail (CLUTTER_IS_ACTOR (actor), NULL);
-  g_return_val_if_fail (CLUTTER_IS_ALPHA (alpha), NULL);
-  g_return_val_if_fail (first_property_name != NULL, NULL);
-
-  timeline = clutter_alpha_get_timeline (alpha);
-  if (timeline == NULL)
-    {
-      g_warning ("The passed ClutterAlpha does not have an "
-                 "associated ClutterTimeline.");
-      return NULL;
-    }
-
-  animation = animation_create_for_actor (actor);
-  clutter_animation_set_alpha_internal (animation, alpha);
-
-  va_start (args, first_property_name);
-  clutter_animation_setup_valist (animation, first_property_name, args);
-  va_end (args);
-
-  clutter_animation_start (animation);
 
   return animation;
 }
@@ -2224,7 +1651,7 @@ clutter_actor_animate_with_timeline (ClutterActor    *actor,
  *
  * Will animate the "rotation-angle-z" property between the current value
  * and 360 degrees, and set the "rotation-center-z" property to the fixed
- * value of the #ClutterVertex "center".
+ * value of the #graphene_point3d_t "center".
  *
  * This function will implicitly create a #ClutterAnimation object which
  * will be assigned to the @actor and will be returned to the developer
@@ -2369,264 +1796,4 @@ clutter_actor_animate (ClutterActor *actor,
   clutter_animation_start (animation);
 
   return animation;
-}
-
-/**
- * clutter_actor_animatev:
- * @actor: a #ClutterActor
- * @mode: an animation mode logical id
- * @duration: duration of the animation, in milliseconds
- * @n_properties: number of property names and values
- * @properties: (array length=n_properties) (element-type utf8): a vector
- *    containing the property names to set
- * @values: (array length=n_properties): a vector containing the
- *    property values to set
- *
- * Animates the given list of properties of @actor between the current
- * value for each property and a new final value. The animation has a
- * definite duration and a speed given by the @mode.
- *
- * This is the vector-based variant of clutter_actor_animate(), useful
- * for language bindings.
- *
- * Unlike clutter_actor_animate(), this function will not
- * allow you to specify "signal::" names and callbacks.
- *
- * Return value: (transfer none): a #ClutterAnimation object. The object is
- *   owned by the #ClutterActor and should not be unreferenced with
- *   g_object_unref()
- *
- * Since: 1.0
- * Deprecated: 1.12: Use the implicit transition for animatable properties
- *   in #ClutterActor instead. See clutter_actor_save_easing_state(),
- *   clutter_actor_set_easing_mode(), clutter_actor_set_easing_duration(),
- *   clutter_actor_set_easing_delay(), and clutter_actor_restore_easing_state().
- */
-ClutterAnimation *
-clutter_actor_animatev (ClutterActor        *actor,
-                        gulong               mode,
-                        guint                duration,
-                        gint                 n_properties,
-                        const gchar * const  properties[],
-                        const GValue        *values)
-{
-  ClutterAnimation *animation;
-
-  g_return_val_if_fail (CLUTTER_IS_ACTOR (actor), NULL);
-  g_return_val_if_fail (mode != CLUTTER_CUSTOM_MODE, NULL);
-  g_return_val_if_fail (duration > 0, NULL);
-  g_return_val_if_fail (properties != NULL, NULL);
-  g_return_val_if_fail (values != NULL, NULL);
-
-  animation = animation_create_for_actor (actor);
-  clutter_animation_set_mode (animation, mode);
-  clutter_animation_set_duration (animation, duration);
-  clutter_animation_setupv (animation, n_properties, properties, values);
-  clutter_animation_start (animation);
-
-  return animation;
-}
-
-/**
- * clutter_actor_animate_with_timelinev:
- * @actor: a #ClutterActor
- * @mode: an animation mode logical id
- * @timeline: a #ClutterTimeline
- * @n_properties: number of property names and values
- * @properties: (array length=n_properties) (element-type utf8): a vector
- *    containing the property names to set
- * @values: (array length=n_properties): a vector containing the
- *    property values to set
- *
- * Animates the given list of properties of @actor between the current
- * value for each property and a new final value. The animation has a
- * definite duration given by @timeline and a speed given by the @mode.
- *
- * See clutter_actor_animate() for further details.
- *
- * This function is useful if you want to use an existing timeline
- * to animate @actor.
- *
- * This is the vector-based variant of clutter_actor_animate_with_timeline(),
- * useful for language bindings.
- *
- * Unlike clutter_actor_animate_with_timeline(), this function
- * will not allow you to specify "signal::" names and callbacks.
- *
- * Return value: (transfer none): a #ClutterAnimation object. The object is
- *    owned by the #ClutterActor and should not be unreferenced with
- *    g_object_unref()
- *
- * Since: 1.0
- * Deprecated: 1.12: Use the implicit transition for animatable properties
- *   in #ClutterActor instead. See clutter_actor_save_easing_state(),
- *   clutter_actor_set_easing_mode(), clutter_actor_set_easing_duration(),
- *   clutter_actor_set_easing_delay(), and clutter_actor_restore_easing_state().
- */
-ClutterAnimation *
-clutter_actor_animate_with_timelinev (ClutterActor        *actor,
-                                      gulong               mode,
-                                      ClutterTimeline     *timeline,
-                                      gint                 n_properties,
-                                      const gchar * const  properties[],
-                                      const GValue        *values)
-{
-  ClutterAnimation *animation;
-
-  g_return_val_if_fail (CLUTTER_IS_ACTOR (actor), NULL);
-  g_return_val_if_fail (CLUTTER_IS_TIMELINE (timeline), NULL);
-  g_return_val_if_fail (properties != NULL, NULL);
-  g_return_val_if_fail (values != NULL, NULL);
-
-  animation = animation_create_for_actor (actor);
-  clutter_animation_set_mode (animation, mode);
-  clutter_animation_set_timeline (animation, timeline);
-  clutter_animation_setupv (animation, n_properties, properties, values);
-  clutter_animation_start (animation);
-
-  return animation;
-}
-
-/**
- * clutter_actor_animate_with_alphav:
- * @actor: a #ClutterActor
- * @alpha: a #ClutterAlpha
- * @n_properties: number of property names and values
- * @properties: (array length=n_properties) (element-type utf8): a vector
- *    containing the property names to set
- * @values: (array length=n_properties): a vector containing the
- *    property values to set
- *
- * Animates the given list of properties of @actor between the current
- * value for each property and a new final value. The animation has a
- * definite behaviour given by the passed @alpha.
- *
- * See clutter_actor_animate() for further details.
- *
- * This function is useful if you want to use an existing #ClutterAlpha
- * to animate @actor.
- *
- * This is the vector-based variant of clutter_actor_animate_with_alpha(),
- * useful for language bindings.
- *
- * Unlike clutter_actor_animate_with_alpha(), this function will
- * not allow you to specify "signal::" names and callbacks.
- *
- * Return value: (transfer none): a #ClutterAnimation object. The object is owned by the
- *   #ClutterActor and should not be unreferenced with g_object_unref()
- *
- * Since: 1.0
- *
- * Deprecated: 1.10: Use the implicit transition for animatable properties
- *   in #ClutterActor instead. See clutter_actor_save_easing_state(),
- *   clutter_actor_set_easing_mode(), clutter_actor_set_easing_duration(),
- *   clutter_actor_set_easing_delay(), and clutter_actor_restore_easing_state().
- */
-ClutterAnimation *
-clutter_actor_animate_with_alphav (ClutterActor        *actor,
-                                   ClutterAlpha        *alpha,
-                                   gint                 n_properties,
-                                   const gchar * const  properties[],
-                                   const GValue        *values)
-{
-  ClutterAnimation *animation;
-  ClutterTimeline *timeline;
-
-  g_return_val_if_fail (CLUTTER_IS_ACTOR (actor), NULL);
-  g_return_val_if_fail (CLUTTER_IS_ALPHA (alpha), NULL);
-  g_return_val_if_fail (properties != NULL, NULL);
-  g_return_val_if_fail (values != NULL, NULL);
-
-  timeline = clutter_alpha_get_timeline (alpha);
-  if (timeline == NULL)
-    {
-      g_warning ("The passed ClutterAlpha does not have an "
-                 "associated ClutterTimeline.");
-      return NULL;
-    }
-
-  animation = animation_create_for_actor (actor);
-  clutter_animation_set_alpha_internal (animation, alpha);
-  clutter_animation_setupv (animation, n_properties, properties, values);
-  clutter_animation_start (animation);
-
-  return animation;
-}
-
-/**
- * clutter_actor_get_animation:
- * @actor: a #ClutterActor
- *
- * Retrieves the #ClutterAnimation used by @actor, if clutter_actor_animate()
- * has been called on @actor.
- *
- * Return value: (transfer none): a #ClutterAnimation, or %NULL
- *
- * Since: 1.0
- * Deprecated: 1.12: Use the implicit transition for animatable properties
- *   in #ClutterActor instead, and clutter_actor_get_transition() to retrieve
- *   the transition.
- */
-ClutterAnimation *
-clutter_actor_get_animation (ClutterActor *actor)
-{
-  g_return_val_if_fail (CLUTTER_IS_ACTOR (actor), NULL);
-
-  return g_object_get_qdata (G_OBJECT (actor), quark_object_animation);
-}
-
-/**
- * clutter_actor_detach_animation:
- * @actor: a #ClutterActor
- *
- * Detaches the #ClutterAnimation used by @actor, if clutter_actor_animate()
- * has been called on @actor.
- *
- * Once the animation has been detached, it loses a reference. If it was
- * the only reference then the #ClutterAnimation becomes invalid.
- *
- * The #ClutterAnimation::completed signal will not be emitted.
- *
- * Since: 1.4
- * Deprecated: 1.12: Use the implicit transition for animatable properties
- *   in #ClutterActor instead, and clutter_actor_remove_transition() to
- *   remove the transition.
- */
-void
-clutter_actor_detach_animation (ClutterActor *actor)
-{
-  ClutterAnimation *animation;
-  ClutterAnimationPrivate *priv;
-
-  g_return_if_fail (CLUTTER_IS_ACTOR (actor));
-
-  animation = g_object_get_qdata (G_OBJECT (actor), quark_object_animation);
-  if (animation == NULL)
-    return;
-
-  priv = animation->priv;
-
-  g_assert (priv->object == G_OBJECT (actor));
-
-  /* we can't call get_timeline_internal() here because it would be
-   * pointless to create a timeline on an animation we want to detach
-   */
-  if (priv->alpha != NULL)
-    {
-      ClutterTimeline *timeline;
-
-      timeline = clutter_alpha_get_timeline (priv->alpha);
-      if (timeline != NULL)
-        clutter_timeline_stop (timeline);
-    }
-
-  /* disconnect the ::destroy handler added by animation_create_for_actor() */
-  g_signal_handlers_disconnect_by_func (actor,
-                                        G_CALLBACK (on_actor_destroy),
-                                        animation);
-
-  clutter_animation_set_object (animation, NULL);
-
-  /* drop the reference on the animation */
-  g_object_unref (animation);
 }

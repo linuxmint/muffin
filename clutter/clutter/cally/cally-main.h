@@ -34,9 +34,9 @@
 
 G_BEGIN_DECLS
 
-CLUTTER_AVAILABLE_IN_1_4
+CLUTTER_EXPORT
 gboolean cally_get_cally_initialized (void);
-CLUTTER_AVAILABLE_IN_1_4
+CLUTTER_EXPORT
 gboolean cally_accessibility_init    (void);
 
 G_END_DECLS

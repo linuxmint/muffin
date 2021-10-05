@@ -32,29 +32,25 @@
  *   Neil Roberts <neil@linux.intel.com>
  */
 
-#ifdef HAVE_CONFIG_H
 #include "cogl-config.h"
-#endif
 
 #include <string.h>
 
 #include "cogl-context-private.h"
-#include "cogl-util-gl-private.h"
 #include "cogl-pipeline-private.h"
 #include "cogl-pipeline-layer-private.h"
 #include "cogl-blend-string.h"
 #include "cogl-snippet-private.h"
 #include "cogl-list.h"
-
-#ifdef COGL_PIPELINE_FRAGEND_GLSL
+#include "driver/gl/cogl-util-gl-private.h"
 
 #include "cogl-context-private.h"
 #include "cogl-object-private.h"
-#include "cogl-shader-private.h"
-#include "cogl-program-private.h"
 #include "cogl-pipeline-cache.h"
-#include "cogl-pipeline-fragend-glsl-private.h"
 #include "cogl-glsl-shader-private.h"
+#include "driver/gl/cogl-pipeline-fragend-glsl-private.h"
+#include "deprecated/cogl-shader-private.h"
+#include "deprecated/cogl-program-private.h"
 
 #include <glib.h>
 
@@ -148,7 +144,7 @@ destroy_shader_state (void *user_data,
       if (shader_state->gl_shader)
         GE( ctx, glDeleteShader (shader_state->gl_shader) );
 
-      free (shader_state->unit_state);
+      g_free (shader_state->unit_state);
 
       g_slice_free (CoglPipelineShaderState, shader_state);
     }
@@ -213,7 +209,7 @@ get_layer_fragment_snippets (CoglPipelineLayer *layer)
   return &layer->big_state->fragment_snippets;
 }
 
-static CoglBool
+static gboolean
 has_replace_hook (CoglPipelineLayer *layer,
                   CoglSnippetHook hook)
 {
@@ -230,20 +226,14 @@ has_replace_hook (CoglPipelineLayer *layer,
   return FALSE;
 }
 
-static CoglBool
+static gboolean
 add_layer_declaration_cb (CoglPipelineLayer *layer,
                           void *user_data)
 {
   CoglPipelineShaderState *shader_state = user_data;
-  CoglTextureType texture_type =
-    _cogl_pipeline_layer_get_texture_type (layer);
-  const char *target_string;
-
-  _cogl_gl_util_get_texture_target_string (texture_type, &target_string, NULL);
 
   g_string_append_printf (shader_state->header,
-                          "uniform sampler%s cogl_sampler%i;\n",
-                          target_string,
+                          "uniform sampler2D cogl_sampler%i;\n",
                           layer->index);
 
   return TRUE;
@@ -413,19 +403,11 @@ ensure_texture_lookup_generated (CoglPipelineShaderState *shader_state,
 {
   int unit_index = _cogl_pipeline_layer_get_unit_index (layer);
   CoglPipelineSnippetData snippet_data;
-  CoglTextureType texture_type;
-  const char *target_string, *tex_coord_swizzle;
 
   _COGL_GET_CONTEXT (ctx, NO_RETVAL);
 
   if (shader_state->unit_state[unit_index].sampled)
     return;
-
-  texture_type =
-    _cogl_pipeline_layer_get_texture_type (layer);
-  _cogl_gl_util_get_texture_target_string (texture_type,
-                                           &target_string,
-                                           &tex_coord_swizzle);
 
   shader_state->unit_state[unit_index].sampled = TRUE;
 
@@ -457,20 +439,18 @@ ensure_texture_lookup_generated (CoglPipelineShaderState *shader_state,
     {
       g_string_append_printf (shader_state->header,
                               "vec4\n"
-                              "cogl_real_texture_lookup%i (sampler%s tex,\n"
+                              "cogl_real_texture_lookup%i (sampler2D tex,\n"
                               "                            vec4 coords)\n"
                               "{\n"
                               "  return ",
-                              layer->index,
-                              target_string);
+                              layer->index);
 
       if (G_UNLIKELY (COGL_DEBUG_ENABLED (COGL_DEBUG_DISABLE_TEXTURING)))
         g_string_append (shader_state->header,
                          "vec4 (1.0, 1.0, 1.0, 1.0);\n");
       else
-        g_string_append_printf (shader_state->header,
-                                "texture%s (tex, coords.%s);\n",
-                                target_string, tex_coord_swizzle);
+        g_string_append (shader_state->header,
+                         "texture2D (tex, coords.st);\n");
 
       g_string_append (shader_state->header, "}\n");
     }
@@ -489,16 +469,15 @@ ensure_texture_lookup_generated (CoglPipelineShaderState *shader_state,
   snippet_data.return_variable = "cogl_texel";
   snippet_data.arguments = "cogl_sampler, cogl_tex_coord";
   snippet_data.argument_declarations =
-    g_strdup_printf ("sampler%s cogl_sampler, vec4 cogl_tex_coord",
-                     target_string);
+    g_strdup ("sampler2D cogl_sampler, vec4 cogl_tex_coord");
   snippet_data.source_buf = shader_state->header;
 
   _cogl_pipeline_snippet_generate_code (&snippet_data);
 
-  free ((char *) snippet_data.chain_function);
-  free ((char *) snippet_data.final_name);
-  free ((char *) snippet_data.function_prefix);
-  free ((char *) snippet_data.argument_declarations);
+  g_free ((char *) snippet_data.chain_function);
+  g_free ((char *) snippet_data.final_name);
+  g_free ((char *) snippet_data.function_prefix);
+  g_free ((char *) snippet_data.argument_declarations);
 }
 
 static void
@@ -569,7 +548,7 @@ add_arg (CoglPipelineShaderState *shader_state,
 
         if (other_layer == NULL)
           {
-            static CoglBool warning_seen = FALSE;
+            static gboolean warning_seen = FALSE;
             if (!warning_seen)
               {
                 g_warning ("The application is trying to use a texture "
@@ -881,9 +860,9 @@ ensure_layer_generated (CoglPipeline *pipeline,
 
   _cogl_pipeline_snippet_generate_code (&snippet_data);
 
-  free ((char *) snippet_data.chain_function);
-  free ((char *) snippet_data.final_name);
-  free ((char *) snippet_data.function_prefix);
+  g_free ((char *) snippet_data.chain_function);
+  g_free ((char *) snippet_data.final_name);
+  g_free ((char *) snippet_data.function_prefix);
 
   g_string_append_printf (shader_state->source,
                           "  cogl_layer%i = cogl_generate_layer%i ();\n",
@@ -893,7 +872,7 @@ ensure_layer_generated (CoglPipeline *pipeline,
   g_slice_free (LayerData, layer_data);
 }
 
-static CoglBool
+static gboolean
 _cogl_pipeline_fragend_glsl_add_layer (CoglPipeline *pipeline,
                                         CoglPipelineLayer *layer,
                                         unsigned long layers_difference)
@@ -991,7 +970,7 @@ add_alpha_test_snippet (CoglPipeline *pipeline,
 
 #endif /*  HAVE_COGL_GLES2 */
 
-static CoglBool
+static gboolean
 _cogl_pipeline_fragend_glsl_end (CoglPipeline *pipeline,
                                  unsigned long pipelines_difference)
 {
@@ -1043,10 +1022,7 @@ _cogl_pipeline_fragend_glsl_end (CoglPipeline *pipeline,
         g_string_append (shader_state->source,
                          "  cogl_color_out = cogl_color_in;\n");
 
-#if defined(HAVE_COGL_GLES2) || defined (HAVE_COGL_GL)
-      if (!_cogl_has_private_feature (ctx, COGL_PRIVATE_FEATURE_ALPHA_TEST))
-        add_alpha_test_snippet (pipeline, shader_state);
-#endif
+      add_alpha_test_snippet (pipeline, shader_state);
 
       /* Close the function surrounding the generated fragment processing */
       g_string_append (shader_state->source, "}\n");
@@ -1138,12 +1114,7 @@ const CoglPipelineFragend _cogl_pipeline_glsl_fragend =
 {
   _cogl_pipeline_fragend_glsl_start,
   _cogl_pipeline_fragend_glsl_add_layer,
-  NULL, /* passthrough */
   _cogl_pipeline_fragend_glsl_end,
   _cogl_pipeline_fragend_glsl_pre_change_notify,
-  NULL, /* pipeline_set_parent_notify */
   _cogl_pipeline_fragend_glsl_layer_pre_change_notify
 };
-
-#endif /* COGL_PIPELINE_FRAGEND_GLSL */
-

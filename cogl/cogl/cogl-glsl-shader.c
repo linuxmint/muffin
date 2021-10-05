@@ -32,20 +32,18 @@
  *   Neil Roberts <neil@linux.intel.com>
  */
 
-#ifdef HAVE_CONFIG_H
 #include "cogl-config.h"
-#endif
 
 #include "cogl-context-private.h"
-#include "cogl-util-gl-private.h"
 #include "cogl-glsl-shader-private.h"
 #include "cogl-glsl-shader-boilerplate.h"
+#include "driver/gl/cogl-util-gl-private.h"
 
 #include <string.h>
 
 #include <glib.h>
 
-static CoglBool
+static gboolean
 add_layer_vertex_boilerplate_cb (CoglPipelineLayer *layer,
                                  void *user_data)
 {
@@ -63,7 +61,7 @@ add_layer_vertex_boilerplate_cb (CoglPipelineLayer *layer,
   return TRUE;
 }
 
-static CoglBool
+static gboolean
 add_layer_fragment_boilerplate_cb (CoglPipelineLayer *layer,
                                    void *user_data)
 {
@@ -102,21 +100,12 @@ _cogl_glsl_shader_set_source_with_boilerplate (CoglContext *ctx,
   strings[count] = version_string;
   lengths[count++] = -1;
 
-  if (_cogl_has_private_feature (ctx, COGL_PRIVATE_FEATURE_GL_EMBEDDED) &&
-      cogl_has_feature (ctx, COGL_FEATURE_ID_TEXTURE_3D))
-    {
-      static const char texture_3d_extension[] =
-        "#extension GL_OES_texture_3D : enable\n";
-      strings[count] = texture_3d_extension;
-      lengths[count++] = sizeof (texture_3d_extension) - 1;
-    }
-
   if (cogl_has_feature (ctx, COGL_FEATURE_ID_TEXTURE_EGL_IMAGE_EXTERNAL))
     {
-      static const char texture_3d_extension[] =
+      static const char image_external_extension[] =
         "#extension GL_OES_EGL_image_external : require\n";
-      strings[count] = texture_3d_extension;
-      lengths[count++] = sizeof (texture_3d_extension) - 1;
+      strings[count] = image_external_extension;
+      lengths[count++] = sizeof (image_external_extension) - 1;
     }
 
   if (shader_gl_type == GL_VERTEX_SHADER)
@@ -196,5 +185,5 @@ _cogl_glsl_shader_set_source_with_boilerplate (CoglContext *ctx,
   GE( ctx, glShaderSource (shader_gl_handle, count,
                            (const char **) strings, lengths) );
 
-  free (version_string);
+  g_free (version_string);
 }

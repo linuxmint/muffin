@@ -28,9 +28,7 @@
  *
  */
 
-#ifdef HAVE_CONFIG_H
 #include "cogl-config.h"
-#endif
 
 #include <string.h>
 #include <errno.h>
@@ -53,7 +51,7 @@ typedef struct CoglGpuInfoArchitectureDescription
   CoglGpuInfoArchitecture architecture;
   const char *name;
   CoglGpuInfoArchitectureFlag flags;
-  CoglBool (* check_function) (const CoglGpuInfoStrings *strings);
+  gboolean (* check_function) (const CoglGpuInfoStrings *strings);
 
 } CoglGpuInfoArchitectureDescription;
 
@@ -61,7 +59,7 @@ typedef struct
 {
   CoglGpuInfoVendor vendor;
   const char *name;
-  CoglBool (* check_function) (const CoglGpuInfoStrings *strings);
+  gboolean (* check_function) (const CoglGpuInfoStrings *strings);
   const CoglGpuInfoArchitectureDescription *architectures;
 
 } CoglGpuInfoVendorDescription;
@@ -70,11 +68,11 @@ typedef struct
 {
   CoglGpuInfoDriverPackage driver_package;
   const char *name;
-  CoglBool (* check_function) (const CoglGpuInfoStrings *strings,
+  gboolean (* check_function) (const CoglGpuInfoStrings *strings,
                                int *version_out);
 } CoglGpuInfoDriverPackageDescription;
 
-static CoglBool
+static gboolean
 _cogl_gpu_info_parse_version_string (const char *version_string,
                                      int n_components,
                                      const char **tail,
@@ -113,7 +111,7 @@ _cogl_gpu_info_parse_version_string (const char *version_string,
   return TRUE;
 }
 
-static CoglBool
+static gboolean
 match_phrase (const char *string, const char *phrase)
 {
   const char *part = strstr (string, phrase);
@@ -136,13 +134,13 @@ match_phrase (const char *string, const char *phrase)
   return TRUE;
 }
 
-static CoglBool
+static gboolean
 check_intel_vendor (const CoglGpuInfoStrings *strings)
 {
   return match_phrase (strings->renderer_string, "Intel(R)");
 }
 
-static CoglBool
+static gboolean
 check_imagination_technologies_vendor (const CoglGpuInfoStrings *strings)
 {
   if (strcmp (strings->vendor_string, "Imagination Technologies") != 0)
@@ -150,7 +148,7 @@ check_imagination_technologies_vendor (const CoglGpuInfoStrings *strings)
   return TRUE;
 }
 
-static CoglBool
+static gboolean
 check_arm_vendor (const CoglGpuInfoStrings *strings)
 {
   if (strcmp (strings->vendor_string, "ARM") != 0)
@@ -158,7 +156,7 @@ check_arm_vendor (const CoglGpuInfoStrings *strings)
   return TRUE;
 }
 
-static CoglBool
+static gboolean
 check_qualcomm_vendor (const CoglGpuInfoStrings *strings)
 {
   if (strcmp (strings->vendor_string, "Qualcomm") != 0)
@@ -166,7 +164,7 @@ check_qualcomm_vendor (const CoglGpuInfoStrings *strings)
   return TRUE;
 }
 
-static CoglBool
+static gboolean
 check_nvidia_vendor (const CoglGpuInfoStrings *strings)
 {
   if (strcmp (strings->vendor_string, "NVIDIA") != 0 &&
@@ -176,7 +174,7 @@ check_nvidia_vendor (const CoglGpuInfoStrings *strings)
   return TRUE;
 }
 
-static CoglBool
+static gboolean
 check_ati_vendor (const CoglGpuInfoStrings *strings)
 {
   if (strcmp (strings->vendor_string, "ATI") != 0)
@@ -185,7 +183,7 @@ check_ati_vendor (const CoglGpuInfoStrings *strings)
   return TRUE;
 }
 
-static CoglBool
+static gboolean
 check_mesa_vendor (const CoglGpuInfoStrings *strings)
 {
   if (strcmp (strings->vendor_string, "Tungsten Graphics, Inc") == 0)
@@ -198,39 +196,39 @@ check_mesa_vendor (const CoglGpuInfoStrings *strings)
   return FALSE;
 }
 
-static CoglBool
+static gboolean
 check_true (const CoglGpuInfoStrings *strings)
 {
   /* This is a last resort so it always matches */
   return TRUE;
 }
 
-static CoglBool
+static gboolean
 check_sandybridge_architecture (const CoglGpuInfoStrings *strings)
 {
   return match_phrase (strings->renderer_string, "Sandybridge");
 }
 
-static CoglBool
+static gboolean
 check_llvmpipe_architecture (const CoglGpuInfoStrings *strings)
 {
   return match_phrase (strings->renderer_string, "llvmpipe");
 }
 
-static CoglBool
+static gboolean
 check_softpipe_architecture (const CoglGpuInfoStrings *strings)
 {
   return match_phrase (strings->renderer_string, "softpipe");
 }
 
-static CoglBool
+static gboolean
 check_swrast_architecture (const CoglGpuInfoStrings *strings)
 {
   return match_phrase (strings->renderer_string, "software rasterizer") ||
     match_phrase (strings->renderer_string, "Software Rasterizer");
 }
 
-static CoglBool
+static gboolean
 check_sgx_architecture (const CoglGpuInfoStrings *strings)
 {
   if (strncmp (strings->renderer_string, "PowerVR SGX", 12) != 0)
@@ -239,7 +237,7 @@ check_sgx_architecture (const CoglGpuInfoStrings *strings)
   return TRUE;
 }
 
-static CoglBool
+static gboolean
 check_mali_architecture (const CoglGpuInfoStrings *strings)
 {
   if (strncmp (strings->renderer_string, "Mali-", 5) != 0)
@@ -410,7 +408,7 @@ _cogl_gpu_info_vendors[] =
     }
   };
 
-static CoglBool
+static gboolean
 check_mesa_driver_package (const CoglGpuInfoStrings *strings,
                            int *version_ret)
 {
@@ -482,7 +480,7 @@ UNIT_TEST (check_mesa_driver_package_parser,
     }
 }
 
-static CoglBool
+static gboolean
 check_unknown_driver_package (const CoglGpuInfoStrings *strings,
                               int *version_out)
 {
@@ -570,13 +568,5 @@ probed:
              gpu->architecture_name);
 
   /* Determine the driver bugs */
-
-  /* In Mesa the glReadPixels implementation is really slow
-     when using the Intel driver. The Intel
-     driver has a fast blit path when reading into a PBO. Reading into
-     a temporary PBO and then memcpying back out to the application's
-     memory is faster than a regular glReadPixels in this case */
-  if (gpu->vendor == COGL_GPU_INFO_VENDOR_INTEL &&
-      gpu->driver_package == COGL_GPU_INFO_DRIVER_PACKAGE_MESA)
-    gpu->driver_bugs |= COGL_GPU_INFO_DRIVER_BUG_MESA_46631_SLOW_READ_PIXELS;
+  gpu->driver_bugs = 0;
 }

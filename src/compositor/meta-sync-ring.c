@@ -28,20 +28,18 @@
  * Authors: James Jones <jajones@nvidia.com>
  */
 
-#include <string.h>
-#include <stdlib.h>
+#include "config.h"
 
+#include "compositor/meta-sync-ring.h"
+
+#include <string.h>
 #include <GL/gl.h>
 #include <GL/glx.h>
 #include <X11/extensions/sync.h>
 
-#include <cogl/cogl.h>
-#include <clutter/clutter.h>
-
-#include <meta/util.h>
-
-#include "cogl-utils.h"
-#include "meta-sync-ring.h"
+#include "clutter/clutter.h"
+#include "cogl/cogl.h"
+#include "meta/util.h"
 
 /* Theory of operation:
  *
@@ -159,25 +157,13 @@ check_gl_extensions (void)
   cogl_display = cogl_context_get_display (cogl_context);
   cogl_renderer = cogl_display_get_renderer (cogl_display);
 
-  meta_cogl_hardware_supports_npot_sizes ();
-
   switch (cogl_renderer_get_driver (cogl_renderer))
     {
     case COGL_DRIVER_GL3:
       {
-
-        int major, minor;
-        gboolean version_ok = FALSE;
         int num_extensions, i;
         gboolean arb_sync = FALSE;
         gboolean x11_sync_object = FALSE;
-
-        meta_gl_get_integerv (GL_MAJOR_VERSION, &major);
-        meta_gl_get_integerv (GL_MINOR_VERSION, &minor);
-
-        version_ok = (major >= 3);
-
-        g_printerr ("openGL version %d.%d detected (GL3 Cogl Driver)\n", major, minor);
 
         meta_gl_get_integerv (GL_NUM_EXTENSIONS, &num_extensions);
 
@@ -191,48 +177,15 @@ check_gl_extensions (void)
               x11_sync_object = TRUE;
           }
 
-        return version_ok && arb_sync && x11_sync_object;
+        return arb_sync && x11_sync_object;
       }
     case COGL_DRIVER_GL:
       {
-        gboolean version_ok = FALSE;
-        const char *extensions;
-        const char *version_string = meta_gl_get_string (GL_VERSION);
-
-        /* From the spec:
-
-           The string returned starts with "<major version>.<minor version>".
-           Following the minor version, there can be another '.',
-           then a vendor-specific build number. The string may have more content,
-           which is completely vendor-specific (thus not a part of the OpenGL standard).
-
-           So, we can split this by . and care only about the first two substrings returned.
-           Anything else is dumped in the third substring.
-         */
-
-        gchar **split = g_strsplit (version_string, ".", 3);
-
-        if (g_strv_length (split) >= 2)
-          {
-            g_printerr ("openGL version %s.%s detected (GL Cogl Driver)\n", split[0], split[1]);
-
-            version_ok = (atoi (split[0]) >= 3);
-          }
-
-        g_strfreev (split);
-
-        extensions = meta_gl_get_string (GL_EXTENSIONS);
-        return version_ok &&
-               (extensions != NULL &&
+        const char *extensions = meta_gl_get_string (GL_EXTENSIONS);
+        return (extensions != NULL &&
                 strstr (extensions, "GL_ARB_sync") != NULL &&
                 strstr (extensions, "GL_EXT_x11_sync_object") != NULL);
       }
-    case  COGL_DRIVER_ANY:
-    case  COGL_DRIVER_NOP:
-    case  COGL_DRIVER_GLES1:
-    case  COGL_DRIVER_GLES2:
-    case  COGL_DRIVER_WEBGL:
-      break;
     default:
       break;
     }
@@ -262,7 +215,7 @@ load_required_symbols (void)
 
   if (!check_gl_extensions ())
     {
-      g_printerr ("MetaSyncRing disabled: couldn't find required GL extensions, or the minimum safe openGL version was not met\n");
+      meta_verbose ("MetaSyncRing: couldn't find required GL extensions\n");
       goto out;
     }
 
@@ -316,9 +269,6 @@ meta_sync_check_update_finished (MetaSync *self,
           self->gpu_fence = 0;
         }
       break;
-    case META_SYNC_STATE_READY:
-    case META_SYNC_STATE_RESET_PENDING:
-      break;
     default:
       break;
     }
@@ -367,7 +317,7 @@ meta_sync_new (Display *xdisplay)
   MetaSync *self;
   XSyncAlarmAttributes attrs;
 
-  self = calloc (1, sizeof (MetaSync));
+  self = g_malloc0 (sizeof (MetaSync));
 
   self->xdisplay = xdisplay;
 
@@ -444,7 +394,7 @@ meta_sync_free (MetaSync *self)
         XIfEvent (self->xdisplay, &event, alarm_event_predicate, (XPointer) self);
         meta_sync_handle_event (self, (XSyncAlarmNotifyEvent *) &event);
       }
-      /* fall through */
+      G_GNUC_FALLTHROUGH;
     case META_SYNC_STATE_READY:
       XSyncTriggerFence (self->xdisplay, self->xfence);
       XFlush (self->xdisplay);
@@ -458,7 +408,7 @@ meta_sync_free (MetaSync *self)
   XSyncDestroyCounter (self->xdisplay, self->xcounter);
   XSyncDestroyAlarm (self->xdisplay, self->xalarm);
 
-  free (self);
+  g_free (self);
 }
 
 gboolean

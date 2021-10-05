@@ -16,30 +16,26 @@
  * General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street - Suite 500, Boston, MA
- * 02110-1335, USA.
+ * along with this program; if not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef META_PLUGIN_MANAGER_H_
 #define META_PLUGIN_MANAGER_H_
 
-#include <meta/types.h>
-#include <meta/screen.h>
+#include "core/util-private.h"
+#include "meta/meta-plugin.h"
+#include "meta/types.h"
 
-#define  META_PLUGIN_FROM_MANAGER_
-#include <meta/meta-plugin.h>
-#undef   META_PLUGIN_FROM_MANAGER_
-
-#define META_PLUGIN_MINIMIZE         (1<<0)
-#define META_PLUGIN_MAXIMIZE         (1<<1)
-#define META_PLUGIN_UNMAXIMIZE       (1<<2)
-#define META_PLUGIN_TILE             (1<<6)
-#define META_PLUGIN_MAP              (1<<3)
-#define META_PLUGIN_DESTROY          (1<<4)
-#define META_PLUGIN_SWITCH_WORKSPACE (1<<5)
-
-#define META_PLUGIN_ALL_EFFECTS      (~0)
+typedef enum
+{
+  META_PLUGIN_NONE,
+  META_PLUGIN_MINIMIZE,
+  META_PLUGIN_MAP,
+  META_PLUGIN_DESTROY,
+  META_PLUGIN_SWITCH_WORKSPACE,
+  META_PLUGIN_UNMINIMIZE,
+  META_PLUGIN_SIZE_CHANGE,
+} MetaPluginEffect;
 
 /**
  * MetaPluginManager: (skip)
@@ -47,47 +43,63 @@
  */
 typedef struct MetaPluginManager MetaPluginManager;
 
-MetaPluginManager * meta_plugin_manager_new (MetaScreen *screen);
+MetaPluginManager * meta_plugin_manager_new (MetaCompositor *compositor);
 
+META_EXPORT_TEST
 void     meta_plugin_manager_load         (const gchar       *plugin_name);
 
 gboolean meta_plugin_manager_event_simple (MetaPluginManager *mgr,
                                            MetaWindowActor   *actor,
-                                           unsigned long      event);
+                                           MetaPluginEffect   event);
 
-gboolean meta_plugin_manager_event_maximize    (MetaPluginManager *mgr,
-                                                MetaWindowActor   *actor,
-                                                unsigned long      event,
-                                                gint               target_x,
-                                                gint               target_y,
-                                                gint               target_width,
-                                                gint               target_height);
-void     meta_plugin_manager_update_workspaces (MetaPluginManager *mgr);
+void     meta_plugin_manager_event_size_changed   (MetaPluginManager *mgr,
+                                                   MetaWindowActor   *actor);
 
-void meta_plugin_manager_update_workspace (MetaPluginManager *mgr,
-                                           MetaWorkspace     *w);
+gboolean meta_plugin_manager_event_size_change    (MetaPluginManager *mgr,
+                                                   MetaWindowActor   *actor,
+                                                   MetaSizeChange     which_change,
+                                                   MetaRectangle     *old_frame_rect,
+                                                   MetaRectangle     *old_buffer_rect);
 
 gboolean meta_plugin_manager_switch_workspace (MetaPluginManager   *mgr,
                                                gint                 from,
                                                gint                 to,
                                                MetaMotionDirection  direction);
 
+gboolean meta_plugin_manager_filter_keybinding (MetaPluginManager  *mgr,
+                                                MetaKeyBinding     *binding);
+
 gboolean meta_plugin_manager_xevent_filter (MetaPluginManager *mgr,
                                             XEvent            *xev);
+gboolean _meta_plugin_xevent_filter (MetaPlugin *plugin,
+                                     XEvent     *xev);
 
-gboolean meta_plugin_manager_show_tile_preview (MetaPluginManager *plugin_mgr,
+void     meta_plugin_manager_confirm_display_change (MetaPluginManager *mgr);
+
+gboolean meta_plugin_manager_show_tile_preview (MetaPluginManager *mgr,
                                                 MetaWindow        *window,
                                                 MetaRectangle     *tile_rect,
-                                                int                tile_monitor_number,
-                                                guint              snap_queued);
+                                                int                tile_monitor_number);
+gboolean meta_plugin_manager_hide_tile_preview (MetaPluginManager *mgr);
 
-gboolean meta_plugin_manager_hide_tile_preview (MetaPluginManager *plugin_mgr);
+void meta_plugin_manager_show_window_menu (MetaPluginManager  *mgr,
+                                           MetaWindow         *window,
+                                           MetaWindowMenuType  menu,
+                                           int                 x,
+                                           int                 y);
 
-gboolean meta_plugin_manager_show_hud_preview (MetaPluginManager *plugin_mgr,
-                                               guint              current_proximity_zone,
-                                               MetaRectangle     *work_area,
-                                               guint              snap_queued);
+void meta_plugin_manager_show_window_menu_for_rect (MetaPluginManager  *mgr,
+		                                    MetaWindow         *window,
+						    MetaWindowMenuType  menu,
+						    MetaRectangle      *rect);
 
-gboolean meta_plugin_manager_hide_hud_preview (MetaPluginManager *plugin_mgr);
+MetaCloseDialog * meta_plugin_manager_create_close_dialog (MetaPluginManager *plugin_mgr,
+                                                           MetaWindow        *window);
+
+MetaInhibitShortcutsDialog *
+  meta_plugin_manager_create_inhibit_shortcuts_dialog (MetaPluginManager *plugin_mgr,
+                                                       MetaWindow        *window);
+
+void meta_plugin_manager_locate_pointer (MetaPluginManager *mgr);
 
 #endif

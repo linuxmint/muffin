@@ -15,40 +15,25 @@
  * General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street - Suite 500, Boston, MA
- * 02110-1335, USA.
+ * along with this program; if not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef __META_COGL_UTILS_H__
 #define __META_COGL_UTILS_H__
 
-#include <cogl/cogl.h>
-#include <clutter/clutter.h>
-#include <compositor/compositor-private.h>
-
-CoglTexture * meta_create_color_texture_4ub (guint8           red,
-                                             guint8           green,
-                                             guint8           blue,
-                                             guint8           alpha,
-                                             CoglTextureFlags flags);
+#include "cogl/cogl.h"
 
 CoglPipeline * meta_create_texture_pipeline (CoglTexture *texture);
 
-gboolean meta_cogl_hardware_supports_npot_sizes (void);
+typedef enum
+{
+  META_TEXTURE_FLAGS_NONE = 0,
+  META_TEXTURE_ALLOW_SLICING = 1 << 1
+} MetaTextureFlags;
 
-CoglTexture * meta_cogl_texture_new_from_data_wrapper                (int  width,
-                                                                      int  height,
-                                                         CoglTextureFlags  flags,
-                                                          CoglPixelFormat  format,
-                                                          CoglPixelFormat  internal_format,
-                                                                      int  rowstride,
-                                                            const uint8_t *data);
-
-CoglTexture * meta_cogl_rectangle_new (int width,
-                                       int height,
-                                       CoglPixelFormat format,
-                                       int stride,
-                                       const uint8_t *data);
+CoglTexture *meta_create_texture (int                   width,
+                                  int                   height,
+                                  CoglTextureComponents components,
+                                  MetaTextureFlags      flags);
 
 #endif /* __META_COGL_UTILS_H__ */

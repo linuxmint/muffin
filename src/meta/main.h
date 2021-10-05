@@ -1,6 +1,6 @@
 /* -*- mode: C; c-file-style: "gnu"; indent-tabs-mode: nil; -*- */
 
-/* Muffin main */
+/* Mutter main */
 
 /*
  * Copyright (C) 2001 Havoc Pennington
@@ -16,9 +16,7 @@
  * General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street - Suite 500, Boston, MA
- * 02110-1335, USA.
+ * along with this program; if not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef META_MAIN_H
@@ -26,15 +24,37 @@
 
 #include <glib.h>
 
-GOptionContext *meta_get_option_context (void);
-void            meta_init               (void);
-int             meta_run                (void);
+#include <meta/common.h>
+
+META_EXPORT
+GOptionContext *meta_get_option_context     (void);
+
+META_EXPORT
+void            meta_init                   (void);
+
+META_EXPORT
+int             meta_run                    (void);
+
+META_EXPORT
+void            meta_register_with_session  (void);
+
+META_EXPORT
+gboolean        meta_activate_session       (void);  /* Actually defined in meta-backend.c */
+
+META_EXPORT
 gboolean        meta_get_replace_current_wm (void);  /* Actually defined in util.c */
 
+META_EXPORT
 void            meta_set_wm_name              (const char *wm_name);
+
+META_EXPORT
 void            meta_set_gnome_wm_keybindings (const char *wm_keybindings);
 
-void            meta_restart                (void);
+META_EXPORT
+void            meta_restart                (const char *message);
+
+META_EXPORT
+gboolean        meta_is_restart             (void);
 
 /**
  * MetaExitCode:
@@ -48,9 +68,15 @@ typedef enum
 } MetaExitCode;
 
 /* exit immediately */
-void meta_exit (MetaExitCode code);
+META_EXPORT
+void meta_exit (MetaExitCode code) G_GNUC_NORETURN;
 
 /* g_main_loop_quit() then fall out of main() */
+META_EXPORT
 void meta_quit (MetaExitCode code);
+
+META_EXPORT
+void            meta_test_init               (void);
+
 
 #endif

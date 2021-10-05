@@ -42,7 +42,7 @@
 #include "cogl-context.h"
 #include "cogl-gl-header.h"
 
-COGL_BEGIN_DECLS
+G_BEGIN_DECLS
 
 typedef struct _CoglBufferVtable CoglBufferVtable;
 
@@ -53,15 +53,15 @@ struct _CoglBufferVtable
                         size_t size,
                         CoglBufferAccess access,
                         CoglBufferMapHint hints,
-                        CoglError **error);
+                        GError **error);
 
   void (* unmap) (CoglBuffer *buffer);
 
-  CoglBool (* set_data) (CoglBuffer *buffer,
+  gboolean (* set_data) (CoglBuffer *buffer,
                          unsigned int offset,
                          const void *data,
                          unsigned int size,
-                         CoglError **error);
+                         GError **error);
 };
 
 typedef enum _CoglBufferFlags
@@ -72,13 +72,15 @@ typedef enum _CoglBufferFlags
   COGL_BUFFER_FLAG_MAPPED_FALLBACK = 1UL << 2
 } CoglBufferFlags;
 
-typedef enum {
+typedef enum
+{
   COGL_BUFFER_USAGE_HINT_TEXTURE,
   COGL_BUFFER_USAGE_HINT_ATTRIBUTE_BUFFER,
   COGL_BUFFER_USAGE_HINT_INDEX_BUFFER
 } CoglBufferUsageHint;
 
-typedef enum {
+typedef enum
+{
   COGL_BUFFER_BIND_TARGET_PIXEL_PACK,
   COGL_BUFFER_BIND_TARGET_PIXEL_UNPACK,
   COGL_BUFFER_BIND_TARGET_ATTRIBUTE_BUFFER,
@@ -137,27 +139,24 @@ _cogl_buffer_fini (CoglBuffer *buffer);
 CoglBufferUsageHint
 _cogl_buffer_get_usage_hint (CoglBuffer *buffer);
 
-GLenum
-_cogl_buffer_access_to_gl_enum (CoglBufferAccess access);
-
 CoglBuffer *
 _cogl_buffer_immutable_ref (CoglBuffer *buffer);
 
 void
 _cogl_buffer_immutable_unref (CoglBuffer *buffer);
 
-CoglBool
+gboolean
 _cogl_buffer_set_data (CoglBuffer *buffer,
                        size_t offset,
                        const void *data,
                        size_t size,
-                       CoglError **error);
+                       GError **error);
 
 void *
 _cogl_buffer_map (CoglBuffer *buffer,
                   CoglBufferAccess access,
                   CoglBufferMapHint hints,
-                  CoglError **error);
+                  GError **error);
 
 /* This is a wrapper around cogl_buffer_map_range for internal use
    when we want to map the buffer for write only to replace the entire
@@ -169,12 +168,12 @@ void *
 _cogl_buffer_map_range_for_fill_or_fallback (CoglBuffer *buffer,
                                              size_t offset,
                                              size_t size);
-void *
+COGL_EXPORT void *
 _cogl_buffer_map_for_fill_or_fallback (CoglBuffer *buffer);
 
-void
+COGL_EXPORT void
 _cogl_buffer_unmap_for_fill_or_fallback (CoglBuffer *buffer);
 
-COGL_END_DECLS
+G_END_DECLS
 
 #endif /* __COGL_BUFFER_PRIVATE_H__ */

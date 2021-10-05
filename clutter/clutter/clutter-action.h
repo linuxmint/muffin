@@ -78,32 +78,32 @@ struct _ClutterActionClass
   void (* _clutter_action8) (void);
 };
 
-CLUTTER_AVAILABLE_IN_1_4
+CLUTTER_EXPORT
 GType clutter_action_get_type (void) G_GNUC_CONST;
 
 /* ClutterActor API */
-CLUTTER_AVAILABLE_IN_1_4
+CLUTTER_EXPORT
 void           clutter_actor_add_action            (ClutterActor  *self,
                                                     ClutterAction *action);
-CLUTTER_AVAILABLE_IN_1_4
+CLUTTER_EXPORT
 void           clutter_actor_add_action_with_name  (ClutterActor  *self,
                                                     const gchar   *name,
                                                     ClutterAction *action);
-CLUTTER_AVAILABLE_IN_1_4
+CLUTTER_EXPORT
 void           clutter_actor_remove_action         (ClutterActor  *self,
                                                     ClutterAction *action);
-CLUTTER_AVAILABLE_IN_1_4
+CLUTTER_EXPORT
 void           clutter_actor_remove_action_by_name (ClutterActor  *self,
                                                     const gchar   *name);
-CLUTTER_AVAILABLE_IN_1_4
+CLUTTER_EXPORT
 ClutterAction *clutter_actor_get_action            (ClutterActor  *self,
                                                     const gchar   *name);
-CLUTTER_AVAILABLE_IN_1_4
+CLUTTER_EXPORT
 GList *        clutter_actor_get_actions           (ClutterActor  *self);
-CLUTTER_AVAILABLE_IN_1_4
+CLUTTER_EXPORT
 void           clutter_actor_clear_actions         (ClutterActor  *self);
 
-CLUTTER_AVAILABLE_IN_1_10
+CLUTTER_EXPORT
 gboolean       clutter_actor_has_actions           (ClutterActor  *self);
 
 G_END_DECLS

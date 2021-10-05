@@ -18,74 +18,46 @@
  * General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street - Suite 500, Boston, MA
- * 02110-1335, USA.
+ * along with this program; if not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef __META_SHAPED_TEXTURE_H__
 #define __META_SHAPED_TEXTURE_H__
 
-#include <clutter/clutter.h>
 #include <X11/Xlib.h>
+
+#include "clutter/clutter.h"
+#include <meta/common.h>
 
 G_BEGIN_DECLS
 
-#define META_TYPE_SHAPED_TEXTURE            (meta_shaped_texture_get_type())
-#define META_SHAPED_TEXTURE(obj)            (G_TYPE_CHECK_INSTANCE_CAST ((obj),META_TYPE_SHAPED_TEXTURE, MetaShapedTexture))
-#define META_SHAPED_TEXTURE_CLASS(klass)    (G_TYPE_CHECK_CLASS_CAST ((klass), META_TYPE_SHAPED_TEXTURE, MetaShapedTextureClass))
-#define META_IS_SHAPED_TEXTURE(obj)         (G_TYPE_CHECK_INSTANCE_TYPE ((obj), META_TYPE_SHAPED_TEXTURE))
-#define META_IS_SHAPED_TEXTURE_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), META_TYPE_SHAPED_TEXTURE))
-#define META_SHAPED_TEXTURE_GET_CLASS(obj)  (G_TYPE_INSTANCE_GET_CLASS ((obj), META_TYPE_SHAPED_TEXTURE, MetaShapedTextureClass))
+#define META_TYPE_SHAPED_TEXTURE (meta_shaped_texture_get_type ())
 
-typedef struct _MetaShapedTexture        MetaShapedTexture;
-typedef struct _MetaShapedTextureClass   MetaShapedTextureClass;
-typedef struct _MetaShapedTexturePrivate MetaShapedTexturePrivate;
+META_EXPORT
+G_DECLARE_FINAL_TYPE (MetaShapedTexture,
+                      meta_shaped_texture,
+                      META, SHAPED_TEXTURE,
+                      GObject)
 
-struct _MetaShapedTextureClass
-{
-  ClutterActorClass parent_class;
-};
 
-struct _MetaShapedTexture
-{
-  ClutterActor parent;
-
-  MetaShapedTexturePrivate *priv;
-};
-
-GType meta_shaped_texture_get_type (void) G_GNUC_CONST;
-
+META_EXPORT
 void meta_shaped_texture_set_create_mipmaps (MetaShapedTexture *stex,
 					     gboolean           create_mipmaps);
 
-gboolean meta_shaped_texture_update_area (MetaShapedTexture *stex,
-                                          int                x,
-                                          int                y,
-                                          int                width,
-                                          int                height,
-                                          cairo_region_t    *unobscured_region);
+META_EXPORT
+CoglTexture * meta_shaped_texture_get_texture (MetaShapedTexture *stex);
 
-CoglTexture *meta_shaped_texture_get_texture (MetaShapedTexture *stex);
+META_EXPORT
+void meta_shaped_texture_set_mask_texture (MetaShapedTexture *stex,
+                                           CoglTexture       *mask_texture);
 
-void meta_shaped_texture_set_overlay_path (MetaShapedTexture *stex,
-                                           cairo_region_t    *overlay_region,
-                                           cairo_path_t      *overlay_path);
-
-void meta_shaped_texture_set_clip_region (MetaShapedTexture *stex,
-					  cairo_region_t    *clip_region);
-
+META_EXPORT
 void meta_shaped_texture_set_opaque_region (MetaShapedTexture *stex,
                                             cairo_region_t    *opaque_region);
 
+META_EXPORT
 cairo_surface_t * meta_shaped_texture_get_image (MetaShapedTexture     *stex,
                                                  cairo_rectangle_int_t *clip);
-
-void meta_shaped_texture_ensure_mask (MetaShapedTexture *stex,
-                                      cairo_region_t    *shape_region,
-                                      gboolean           has_frame);
-
-void meta_shaped_texture_dirty_mask (MetaShapedTexture *stex);
 
 G_END_DECLS
 

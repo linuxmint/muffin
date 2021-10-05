@@ -32,22 +32,19 @@
  *  Robert Bragg   <robert@linux.intel.com>
  */
 
-#ifdef HAVE_CONFIG_H
 #include "cogl-config.h"
-#endif
 
 #include <string.h>
 
 #include "cogl-private.h"
-#include "cogl-util-gl-private.h"
-#include "cogl-pipeline-opengl-private.h"
-#include "cogl-error-private.h"
 #include "cogl-context-private.h"
 #include "cogl-attribute.h"
 #include "cogl-attribute-private.h"
-#include "cogl-attribute-gl-private.h"
-#include "cogl-pipeline-progend-glsl-private.h"
-#include "cogl-buffer-gl-private.h"
+#include "driver/gl/cogl-attribute-gl-private.h"
+#include "driver/gl/cogl-buffer-gl-private.h"
+#include "driver/gl/cogl-pipeline-opengl-private.h"
+#include "driver/gl/cogl-pipeline-progend-glsl-private.h"
+#include "driver/gl/cogl-util-gl-private.h"
 
 typedef struct _ForeachChangedBitState
 {
@@ -56,76 +53,11 @@ typedef struct _ForeachChangedBitState
   CoglPipeline *pipeline;
 } ForeachChangedBitState;
 
-static CoglBool
-toggle_builtin_attribute_enabled_cb (int bit_num, void *user_data)
-{
-  ForeachChangedBitState *state = user_data;
-  CoglContext *context = state->context;
-
-  _COGL_RETURN_VAL_IF_FAIL (_cogl_has_private_feature
-                            (context, COGL_PRIVATE_FEATURE_GL_FIXED),
-                            FALSE);
-
-#if defined (HAVE_COGL_GL) || defined (HAVE_COGL_GLES)
-  {
-    CoglBool enabled = _cogl_bitmask_get (state->new_bits, bit_num);
-    GLenum cap;
-
-    switch (bit_num)
-      {
-      case COGL_ATTRIBUTE_NAME_ID_COLOR_ARRAY:
-        cap = GL_COLOR_ARRAY;
-        break;
-      case COGL_ATTRIBUTE_NAME_ID_POSITION_ARRAY:
-        cap = GL_VERTEX_ARRAY;
-        break;
-      case COGL_ATTRIBUTE_NAME_ID_NORMAL_ARRAY:
-        cap = GL_NORMAL_ARRAY;
-        break;
-      default:
-        g_assert_not_reached ();
-      }
-    if (enabled)
-      GE (context, glEnableClientState (cap));
-    else
-      GE (context, glDisableClientState (cap));
-  }
-#endif
-
-  return TRUE;
-}
-
-static CoglBool
-toggle_texcood_attribute_enabled_cb (int bit_num, void *user_data)
-{
-  ForeachChangedBitState *state = user_data;
-  CoglContext *context = state->context;
-
-  _COGL_RETURN_VAL_IF_FAIL (_cogl_has_private_feature
-                            (context, COGL_PRIVATE_FEATURE_GL_FIXED),
-                            FALSE);
-
-#if defined (HAVE_COGL_GL) || defined (HAVE_COGL_GLES)
-  {
-    CoglBool enabled = _cogl_bitmask_get (state->new_bits, bit_num);
-
-    GE( context, glClientActiveTexture (GL_TEXTURE0 + bit_num) );
-
-    if (enabled)
-      GE( context, glEnableClientState (GL_TEXTURE_COORD_ARRAY) );
-    else
-      GE( context, glDisableClientState (GL_TEXTURE_COORD_ARRAY) );
-  }
-#endif
-
-  return TRUE;
-}
-
-static CoglBool
+static gboolean
 toggle_custom_attribute_enabled_cb (int bit_num, void *user_data)
 {
   ForeachChangedBitState *state = user_data;
-  CoglBool enabled = _cogl_bitmask_get (state->new_bits, bit_num);
+  gboolean enabled = _cogl_bitmask_get (state->new_bits, bit_num);
   CoglContext *context = state->context;
 
   if (enabled)
@@ -158,8 +90,6 @@ foreach_changed_bit_and_save (CoglContext *context,
   _cogl_bitmask_clear_all (current_bits);
   _cogl_bitmask_set_bits (current_bits, new_bits);
 }
-
-#ifdef COGL_PIPELINE_PROGEND_GLSL
 
 static void
 setup_generic_buffered_attribute (CoglContext *context,
@@ -232,136 +162,6 @@ setup_generic_const_attribute (CoglContext *context,
     }
 }
 
-#endif /* COGL_PIPELINE_PROGEND_GLSL */
-
-static void
-setup_legacy_buffered_attribute (CoglContext *ctx,
-                                 CoglPipeline *pipeline,
-                                 CoglAttribute *attribute,
-                                 uint8_t *base)
-{
-  switch (attribute->name_state->name_id)
-    {
-    case COGL_ATTRIBUTE_NAME_ID_COLOR_ARRAY:
-      _cogl_bitmask_set (&ctx->enable_builtin_attributes_tmp,
-                         COGL_ATTRIBUTE_NAME_ID_COLOR_ARRAY, TRUE);
-      GE (ctx, glColorPointer (attribute->d.buffered.n_components,
-                               attribute->d.buffered.type,
-                               attribute->d.buffered.stride,
-                               base + attribute->d.buffered.offset));
-      break;
-    case COGL_ATTRIBUTE_NAME_ID_NORMAL_ARRAY:
-      _cogl_bitmask_set (&ctx->enable_builtin_attributes_tmp,
-                         COGL_ATTRIBUTE_NAME_ID_NORMAL_ARRAY, TRUE);
-      GE (ctx, glNormalPointer (attribute->d.buffered.type,
-                                attribute->d.buffered.stride,
-                                base + attribute->d.buffered.offset));
-      break;
-    case COGL_ATTRIBUTE_NAME_ID_TEXTURE_COORD_ARRAY:
-      {
-        int layer_number = attribute->name_state->layer_number;
-        const CoglPipelineGetLayerFlags flags =
-          COGL_PIPELINE_GET_LAYER_NO_CREATE;
-        CoglPipelineLayer *layer =
-          _cogl_pipeline_get_layer_with_flags (pipeline, layer_number, flags);
-
-        if (layer)
-          {
-            int unit = _cogl_pipeline_layer_get_unit_index (layer);
-
-            _cogl_bitmask_set (&ctx->enable_texcoord_attributes_tmp,
-                               unit,
-                               TRUE);
-
-            GE (ctx, glClientActiveTexture (GL_TEXTURE0 + unit));
-            GE (ctx, glTexCoordPointer (attribute->d.buffered.n_components,
-                                        attribute->d.buffered.type,
-                                        attribute->d.buffered.stride,
-                                        base + attribute->d.buffered.offset));
-          }
-        break;
-      }
-    case COGL_ATTRIBUTE_NAME_ID_POSITION_ARRAY:
-      _cogl_bitmask_set (&ctx->enable_builtin_attributes_tmp,
-                         COGL_ATTRIBUTE_NAME_ID_POSITION_ARRAY, TRUE);
-      GE (ctx, glVertexPointer (attribute->d.buffered.n_components,
-                                attribute->d.buffered.type,
-                                attribute->d.buffered.stride,
-                                base + attribute->d.buffered.offset));
-      break;
-    case COGL_ATTRIBUTE_NAME_ID_CUSTOM_ARRAY:
-#ifdef COGL_PIPELINE_PROGEND_GLSL
-      if (_cogl_has_private_feature (ctx, COGL_PRIVATE_FEATURE_GL_PROGRAMMABLE))
-        setup_generic_buffered_attribute (ctx, pipeline, attribute, base);
-#endif
-      break;
-    default:
-      g_warn_if_reached ();
-    }
-}
-
-static void
-setup_legacy_const_attribute (CoglContext *ctx,
-                              CoglPipeline *pipeline,
-                              CoglAttribute *attribute)
-{
-#ifdef COGL_PIPELINE_PROGEND_GLSL
-  if (attribute->name_state->name_id == COGL_ATTRIBUTE_NAME_ID_CUSTOM_ARRAY)
-    {
-      if (_cogl_has_private_feature (ctx, COGL_PRIVATE_FEATURE_GL_PROGRAMMABLE))
-        setup_generic_const_attribute (ctx, pipeline, attribute);
-    }
-  else
-#endif
-    {
-      float vector[4] = { 0, 0, 0, 1 };
-      float *boxed = attribute->d.constant.boxed.v.float_value;
-      int n_components = attribute->d.constant.boxed.size;
-      int i;
-
-      for (i = 0; i < n_components; i++)
-        vector[i] = boxed[i];
-
-      switch (attribute->name_state->name_id)
-        {
-        case COGL_ATTRIBUTE_NAME_ID_COLOR_ARRAY:
-          GE (ctx, glColor4f (vector[0], vector[1], vector[2], vector[3]));
-          break;
-        case COGL_ATTRIBUTE_NAME_ID_NORMAL_ARRAY:
-          GE (ctx, glNormal3f (vector[0], vector[1], vector[2]));
-          break;
-        case COGL_ATTRIBUTE_NAME_ID_TEXTURE_COORD_ARRAY:
-          {
-            int layer_number = attribute->name_state->layer_number;
-            const CoglPipelineGetLayerFlags flags =
-              COGL_PIPELINE_GET_LAYER_NO_CREATE;
-            CoglPipelineLayer *layer =
-              _cogl_pipeline_get_layer_with_flags (pipeline,
-                                                   layer_number,
-                                                   flags);
-
-            if (layer)
-              {
-                int unit = _cogl_pipeline_layer_get_unit_index (layer);
-
-                GE (ctx, glClientActiveTexture (GL_TEXTURE0 + unit));
-
-                GE (ctx, glMultiTexCoord4f (vector[0],
-                                            vector[1],
-                                            vector[2],
-                                            vector[3]));
-              }
-            break;
-          }
-        case COGL_ATTRIBUTE_NAME_ID_POSITION_ARRAY:
-          GE (ctx, glVertex4f (vector[0], vector[1], vector[2], vector[3]));
-          break;
-        default:
-          g_warn_if_reached ();
-        }
-    }
-}
-
 static void
 apply_attribute_enable_updates (CoglContext *context,
                                 CoglPipeline *pipeline)
@@ -369,22 +169,7 @@ apply_attribute_enable_updates (CoglContext *context,
   ForeachChangedBitState changed_bits_state;
 
   changed_bits_state.context = context;
-  changed_bits_state.new_bits = &context->enable_builtin_attributes_tmp;
   changed_bits_state.pipeline = pipeline;
-
-  foreach_changed_bit_and_save (context,
-                                &context->enabled_builtin_attributes,
-                                &context->enable_builtin_attributes_tmp,
-                                toggle_builtin_attribute_enabled_cb,
-                                &changed_bits_state);
-
-  changed_bits_state.new_bits = &context->enable_texcoord_attributes_tmp;
-  foreach_changed_bit_and_save (context,
-                                &context->enabled_texcoord_attributes,
-                                &context->enable_texcoord_attributes_tmp,
-                                toggle_texcood_attribute_enabled_cb,
-                                &changed_bits_state);
-
   changed_bits_state.new_bits = &context->enable_custom_attributes_tmp;
   foreach_changed_bit_and_save (context,
                                 &context->enabled_custom_attributes,
@@ -403,8 +188,8 @@ _cogl_gl_flush_attributes_state (CoglFramebuffer *framebuffer,
 {
   CoglContext *ctx = framebuffer->context;
   int i;
-  CoglBool with_color_attrib = FALSE;
-  CoglBool unknown_color_alpha = FALSE;
+  gboolean with_color_attrib = FALSE;
+  gboolean unknown_color_alpha = FALSE;
   CoglPipeline *copy = NULL;
 
   /* Iterate the attributes to see if we have a color attribute which
@@ -442,7 +227,6 @@ _cogl_gl_flush_attributes_state (CoglFramebuffer *framebuffer,
        *   {
        *     age = cogl_pipeline_get_age (pipeline);
        *     XXX: actually we also need to check for legacy_state
-       *     and blending overrides for use of glColorPointer...
        *     if (overrides->ags != age ||
        *         memcmp (&overrides->options, &options,
        *                 sizeof (options) != 0)
@@ -475,8 +259,6 @@ _cogl_gl_flush_attributes_state (CoglFramebuffer *framebuffer,
                                  with_color_attrib,
                                  unknown_color_alpha);
 
-  _cogl_bitmask_clear_all (&ctx->enable_builtin_attributes_tmp);
-  _cogl_bitmask_clear_all (&ctx->enable_texcoord_attributes_tmp);
   _cogl_bitmask_clear_all (&ctx->enable_custom_attributes_tmp);
 
   /* Bind the attribute pointers. We need to do this after the
@@ -505,19 +287,13 @@ _cogl_gl_flush_attributes_state (CoglFramebuffer *framebuffer,
                                   COGL_BUFFER_BIND_TARGET_ATTRIBUTE_BUFFER,
                                   NULL);
 
-          if (pipeline->progend == COGL_PIPELINE_PROGEND_GLSL)
-            setup_generic_buffered_attribute (ctx, pipeline, attribute, base);
-          else
-            setup_legacy_buffered_attribute (ctx, pipeline, attribute, base);
+          setup_generic_buffered_attribute (ctx, pipeline, attribute, base);
 
           _cogl_buffer_gl_unbind (buffer);
         }
       else
         {
-          if (pipeline->progend == COGL_PIPELINE_PROGEND_GLSL)
-            setup_generic_const_attribute (ctx, pipeline, attribute);
-          else
-            setup_legacy_const_attribute (ctx, pipeline, attribute);
+          setup_generic_const_attribute (ctx, pipeline, attribute);
         }
     }
 
@@ -525,17 +301,4 @@ _cogl_gl_flush_attributes_state (CoglFramebuffer *framebuffer,
 
   if (copy)
     cogl_object_unref (copy);
-}
-
-void
-_cogl_gl_disable_all_attributes (CoglContext *ctx)
-{
-  _cogl_bitmask_clear_all (&ctx->enable_builtin_attributes_tmp);
-  _cogl_bitmask_clear_all (&ctx->enable_texcoord_attributes_tmp);
-  _cogl_bitmask_clear_all (&ctx->enable_custom_attributes_tmp);
-
-  /* XXX: we can pass a NULL source pipeline here because we know a
-   * source pipeline only needs to be referenced when enabling
-   * attributes. */
-  apply_attribute_enable_updates (ctx, NULL);
 }

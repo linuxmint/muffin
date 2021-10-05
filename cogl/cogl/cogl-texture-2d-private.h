@@ -44,9 +44,9 @@ struct _CoglTexture2D
      CoglPixelFormat */
   CoglPixelFormat internal_format;
 
-  CoglBool auto_mipmap;
-  CoglBool mipmaps_dirty;
-  CoglBool is_foreign;
+  gboolean auto_mipmap;
+  gboolean mipmaps_dirty;
+  gboolean is_get_data_supported;
 
   /* TODO: factor out these OpenGL specific members into some form
    * of driver private state. */
@@ -70,7 +70,7 @@ struct _CoglTexture2D
 
 CoglTexture2D *
 _cogl_texture_2d_new_from_bitmap (CoglBitmap *bmp,
-                                  CoglBool can_convert_in_place);
+                                  gboolean can_convert_in_place);
 
 CoglTexture2D *
 _cogl_texture_2d_create_base (CoglContext *ctx,
@@ -81,7 +81,7 @@ _cogl_texture_2d_create_base (CoglContext *ctx,
 
 void
 _cogl_texture_2d_set_auto_mipmap (CoglTexture *tex,
-                                  CoglBool value);
+                                  gboolean value);
 
 /*
  * _cogl_texture_2d_externally_modified:

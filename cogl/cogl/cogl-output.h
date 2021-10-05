@@ -41,7 +41,7 @@
 
 #include <glib-object.h>
 
-COGL_BEGIN_DECLS
+G_BEGIN_DECLS
 
 /**
  * SECTION:cogl-output
@@ -73,6 +73,7 @@ typedef struct _CoglOutput CoglOutput;
  *
  * Returns: a #GType that can be used with the GLib type system.
  */
+COGL_EXPORT
 GType cogl_output_get_gtype (void);
 
 /**
@@ -106,7 +107,8 @@ GType cogl_output_get_gtype (void);
  * Since: 1.14
  * Stability: unstable
  */
-typedef enum {
+typedef enum
+{
   COGL_SUBPIXEL_ORDER_UNKNOWN,
   COGL_SUBPIXEL_ORDER_NONE,
   COGL_SUBPIXEL_ORDER_HORIZONTAL_RGB,
@@ -126,7 +128,7 @@ typedef enum {
  * Since: 1.14
  * Stability: unstable
  */
-CoglBool
+COGL_EXPORT gboolean
 cogl_is_output (void *object);
 
 /**
@@ -141,7 +143,7 @@ cogl_is_output (void *object);
  * Since: 1.14
  * Stability: unstable
  */
-int
+COGL_EXPORT int
 cogl_output_get_x (CoglOutput *output);
 
 /**
@@ -156,7 +158,7 @@ cogl_output_get_x (CoglOutput *output);
  * Since: 1.14
  * Stability: unstable
  */
-int
+COGL_EXPORT int
 cogl_output_get_y (CoglOutput *output);
 
 /**
@@ -169,7 +171,7 @@ cogl_output_get_y (CoglOutput *output);
  * Since: 1.14
  * Stability: unstable
  */
-int
+COGL_EXPORT int
 cogl_output_get_width (CoglOutput *output);
 
 /**
@@ -182,7 +184,7 @@ cogl_output_get_width (CoglOutput *output);
  * Since: 1.14
  * Stability: unstable
  */
-int
+COGL_EXPORT int
 cogl_output_get_height (CoglOutput *output);
 
 /**
@@ -199,7 +201,7 @@ cogl_output_get_height (CoglOutput *output);
  * Since: 1.14
  * Stability: unstable
  */
-int
+COGL_EXPORT int
 cogl_output_get_mm_width (CoglOutput *output);
 
 /**
@@ -216,7 +218,7 @@ cogl_output_get_mm_width (CoglOutput *output);
  * Since: 1.14
  * Stability: unstable
  */
-int
+COGL_EXPORT int
 cogl_output_get_mm_height (CoglOutput *output);
 
 /**
@@ -231,7 +233,7 @@ cogl_output_get_mm_height (CoglOutput *output);
  * Since: 1.14
  * Stability: unstable
  */
-CoglSubpixelOrder
+COGL_EXPORT CoglSubpixelOrder
 cogl_output_get_subpixel_order (CoglOutput *output);
 
 /**
@@ -246,10 +248,10 @@ cogl_output_get_subpixel_order (CoglOutput *output);
  * Since: 1.14
  * Stability: unstable
  */
-float
+COGL_EXPORT float
 cogl_output_get_refresh_rate (CoglOutput *output);
 
-COGL_END_DECLS
+G_END_DECLS
 
 #endif /* __COGL_OUTPUT_H */
 

@@ -2,6 +2,7 @@
 
 #include <string.h>
 
+#include "test-declarations.h"
 #include "test-utils.h"
 
 /* Non-power-of-two sized texture that should cause slicing */
@@ -60,7 +61,7 @@ make_texture (void)
   CoglTexture *tex;
   int partx, party, width, height;
 
-  p = tex_data = malloc (TEXTURE_SIZE * TEXTURE_SIZE * 4);
+  p = tex_data = g_malloc (TEXTURE_SIZE * TEXTURE_SIZE * 4);
 
   /* Make a texture with a different color for each part */
   for (party = 0; party < PARTS; party++)
@@ -95,7 +96,7 @@ make_texture (void)
                                           TEXTURE_SIZE * 4,
                                           tex_data);
 
-  free (tex_data);
+  g_free (tex_data);
 
   if (cogl_test_verbose ())
     {
@@ -105,10 +106,8 @@ make_texture (void)
         g_print ("Texture is not sliced\n");
     }
 
-  /* The texture should be sliced unless NPOTs are supported */
-  g_assert (cogl_has_feature (test_ctx, COGL_FEATURE_ID_TEXTURE_NPOT)
-            ? !cogl_texture_is_sliced (tex)
-            : cogl_texture_is_sliced (tex));
+  /* The texture should be sliced unless NPOTs are supported, which they are */
+  g_assert (!cogl_texture_is_sliced (tex));
 
   return tex;
 }
@@ -146,14 +145,6 @@ paint (void)
 void
 test_npot_texture (void)
 {
-  if (cogl_test_verbose ())
-    {
-      if (cogl_has_feature (test_ctx, COGL_FEATURE_ID_TEXTURE_NPOT))
-        g_print ("NPOT textures are supported\n");
-      else
-        g_print ("NPOT textures are not supported\n");
-    }
-
   cogl_framebuffer_orthographic (test_fb,
                                  0, 0,
                                  cogl_framebuffer_get_width (test_fb),

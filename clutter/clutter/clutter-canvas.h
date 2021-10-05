@@ -85,21 +85,21 @@ struct _ClutterCanvasClass
   gpointer _padding[16];
 };
 
-CLUTTER_AVAILABLE_IN_1_10
+CLUTTER_EXPORT
 GType clutter_canvas_get_type (void) G_GNUC_CONST;
 
-CLUTTER_AVAILABLE_IN_1_10
+CLUTTER_EXPORT
 ClutterContent *        clutter_canvas_new                      (void);
-CLUTTER_AVAILABLE_IN_1_10
+CLUTTER_EXPORT
 gboolean                clutter_canvas_set_size                 (ClutterCanvas *canvas,
                                                                  int            width,
                                                                  int            height);
 
-CLUTTER_AVAILABLE_IN_1_18
+CLUTTER_EXPORT
 void                    clutter_canvas_set_scale_factor         (ClutterCanvas *canvas,
-                                                                 int            scale);
-CLUTTER_AVAILABLE_IN_1_18
-int                     clutter_canvas_get_scale_factor         (ClutterCanvas *canvas);
+                                                                 float          scale);
+CLUTTER_EXPORT
+float                   clutter_canvas_get_scale_factor         (ClutterCanvas *canvas);
 
 G_END_DECLS
 

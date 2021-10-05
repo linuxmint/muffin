@@ -33,7 +33,7 @@
 
 #include <glib.h>
 
-COGL_BEGIN_DECLS
+G_BEGIN_DECLS
 
 /* Draws a rectangle without going through the journal so that it will
    be flushed immediately. This should only be used in situations
@@ -47,6 +47,13 @@ _cogl_rectangle_immediate (CoglFramebuffer *framebuffer,
                            float x_2,
                            float y_2);
 
+void
+cogl_2d_primitives_immediate (CoglFramebuffer *framebuffer,
+                              CoglPipeline *pipeline,
+                              CoglVerticesMode mode,
+                              const CoglVertexP2 *vertices,
+                              unsigned int n_vertices);
+
 typedef struct _CoglMultiTexturedRect
 {
   const float *position; /* x0,y0,x1,y1 */
@@ -59,9 +66,8 @@ _cogl_framebuffer_draw_multitextured_rectangles (
                                         CoglFramebuffer *framebuffer,
                                         CoglPipeline *pipeline,
                                         CoglMultiTexturedRect *rects,
-                                        int n_rects,
-                                        CoglBool disable_legacy_state);
+                                        int n_rects);
 
-COGL_END_DECLS
+G_END_DECLS
 
 #endif /* __COGL_PRIMITIVES_PRIVATE_H */

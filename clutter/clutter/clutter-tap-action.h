@@ -92,10 +92,10 @@ struct _ClutterTapActionClass
   void (* _clutter_tap_action6) (void);
 };
 
-CLUTTER_AVAILABLE_IN_1_14
+CLUTTER_EXPORT
 GType clutter_tap_action_get_type (void) G_GNUC_CONST;
 
-CLUTTER_AVAILABLE_IN_1_14
+CLUTTER_EXPORT
 ClutterAction * clutter_tap_action_new   (void);
 G_END_DECLS
 

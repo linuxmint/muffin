@@ -1,0 +1,71 @@
+<Project xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+         xmlns:foaf="http://xmlns.com/foaf/0.1/"
+         xmlns:gnome="http://api.gnome.org/doap-extensions#"
+         xmlns="http://usefulinc.com/ns/doap#">
+
+  <name xml:lang="en">mutter</name>
+  <shortdesc xml:lang="en">Window and compositing manager based on Clutter</shortdesc>
+  <description>Mutter is a window and compositing manager that displays and
+manages your desktop via OpenGL. Mutter combines a sophisticated display engine
+using the Clutter toolkit with solid window-management logic inherited from the
+Metacity window manager.
+
+While Mutter can be used stand-alone, it is primarily intended to be used as
+the display core of a larger system such as GNOME Shell. For this reason,
+Mutter is very extensible via plugins, which are used both to add fancy visual
+effects and to rework the window management behaviors to meet the needs of the
+environment.</description>
+  <!--
+  <homepage rdf:resource="http://www.gnome.org/" />
+  -->
+  <mailing-list rdf:resource="http://mail.gnome.org/mailman/listinfo/gnome-shell-list" />
+  <download-page rdf:resource="http://download.gnome.org/sources/mutter/" />
+  <bug-database rdf:resource="https://gitlab.gnome.org/GNOME/mutter/issues/" />
+
+  <category rdf:resource="http://api.gnome.org/doap-extensions#core" />
+  <programming-language>C</programming-language>
+
+  <author>
+    <foaf:Person>
+      <foaf:name>Tomas Frydrych</foaf:name>
+      <foaf:mbox rdf:resource="mailto:tf@linux.intel.com" />
+      <gnome:userid>tomasf</gnome:userid>
+    </foaf:Person>
+  </author>
+  <author>
+    <foaf:Person>
+      <foaf:name>Owen Taylor</foaf:name>
+      <foaf:mbox rdf:resource="mailto:otaylor@redhat.com" />
+      <gnome:userid>otaylor</gnome:userid>
+    </foaf:Person>
+  </author>
+  <maintainer>
+    <foaf:Person>
+      <foaf:name>Jonas Ådahl</foaf:name>
+      <foaf:mbox rdf:resource="mailto:jadahl@gmail.com" />
+      <gnome:userid>jadahl</gnome:userid>
+    </foaf:Person>
+  </maintainer>
+  <maintainer>
+    <foaf:Person>
+      <foaf:name>Carlos Garnacho</foaf:name>
+      <foaf:mbox rdf:resource="mailto:carlosg@gnome.org" />
+      <gnome:userid>carlosg</gnome:userid>
+    </foaf:Person>
+  </maintainer>
+  <maintainer>
+    <foaf:Person>
+      <foaf:name>Georges Basile Stavracas Neto</foaf:name>
+      <foaf:mbox rdf:resource="mailto:gbsneto@gnome.org" />
+      <gnome:userid>gbsneto</gnome:userid>
+    </foaf:Person>
+  </maintainer>
+  <maintainer>
+    <foaf:Person>
+      <foaf:name>Florian Müllner</foaf:name>
+      <foaf:mbox rdf:resource="mailto:fmuellner@gnome.org" />
+      <gnome:userid>fmuellner</gnome:userid>
+    </foaf:Person>
+  </maintainer>
+</Project>

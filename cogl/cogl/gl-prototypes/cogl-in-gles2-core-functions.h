@@ -95,8 +95,6 @@ COGL_EXT_FUNCTION (void, glFramebufferRenderbuffer,
                     GLenum                attachment,
                     GLenum                renderbuffertarget,
                     GLuint                renderbuffer))
-COGL_EXT_FUNCTION (GLboolean, glIsRenderbuffer,
-                   (GLuint                renderbuffer))
 COGL_EXT_FUNCTION (GLenum, glCheckFramebufferStatus,
                    (GLenum                target))
 COGL_EXT_FUNCTION (void, glDeleteFramebuffers,
@@ -109,20 +107,12 @@ COGL_EXT_FUNCTION (void, glGetFramebufferAttachmentParameteriv,
                     GLenum                attachment,
                     GLenum                pname,
                     GLint                *params))
-COGL_EXT_FUNCTION (void, glGetRenderbufferParameteriv,
-                   (GLenum                target,
-                    GLenum                pname,
-                    GLint                *params))
-COGL_EXT_FUNCTION (GLboolean, glIsFramebuffer,
-                   (GLuint                framebuffer))
 COGL_EXT_END ()
 
 COGL_EXT_BEGIN (blending, 1, 2,
                 COGL_EXT_IN_GLES2,
                 "\0",
                 "\0")
-COGL_EXT_FUNCTION (void, glBlendEquation,
-                   (GLenum                mode))
 COGL_EXT_FUNCTION (void, glBlendColor,
                    (GLclampf              red,
                     GLclampf              green,
@@ -150,37 +140,4 @@ COGL_EXT_BEGIN (blend_equation_separate, 2, 0,
 COGL_EXT_FUNCTION (void, glBlendEquationSeparate,
                    (GLenum                modeRGB,
                     GLenum                modeAlpha))
-COGL_EXT_END ()
-
-COGL_EXT_BEGIN (gles2_only_api,
-                4, 1,
-                COGL_EXT_IN_GLES2,
-                "ARB:\0",
-                "ES2_compatibility\0")
-COGL_EXT_FUNCTION (void, glReleaseShaderCompiler, (void))
-COGL_EXT_FUNCTION (void, glGetShaderPrecisionFormat,
-                   (GLenum shadertype,
-                    GLenum precisiontype,
-                    GLint* range,
-                    GLint* precision))
-COGL_EXT_FUNCTION (void, glShaderBinary,
-                   (GLsizei n,
-                    const GLuint* shaders,
-                    GLenum binaryformat,
-                    const GLvoid* binary,
-                    GLsizei length))
-COGL_EXT_END ()
-
-/* GL and GLES 2.0 apis */
-COGL_EXT_BEGIN (two_point_zero_api,
-                2, 0,
-                COGL_EXT_IN_GLES2,
-                "\0",
-                "\0")
-COGL_EXT_FUNCTION (void, glStencilFuncSeparate,
-                   (GLenum face, GLenum func, GLint ref, GLuint mask))
-COGL_EXT_FUNCTION (void, glStencilMaskSeparate,
-                   (GLenum face, GLuint mask))
-COGL_EXT_FUNCTION (void, glStencilOpSeparate,
-                   (GLenum face, GLenum fail, GLenum zfail, GLenum zpass))
 COGL_EXT_END ()

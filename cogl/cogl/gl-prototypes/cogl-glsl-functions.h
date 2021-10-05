@@ -93,17 +93,6 @@ COGL_EXT_FUNCTION (void, glGetProgramiv,
                    (GLuint                program,
                     GLenum                pname,
                     GLint                *params))
-COGL_EXT_FUNCTION (void, glDetachShader,
-                   (GLuint program, GLuint shader))
-COGL_EXT_FUNCTION (void, glGetAttachedShaders,
-                   (GLuint program,
-                    GLsizei maxcount,
-                    GLsizei* count,
-                    GLuint* shaders))
-COGL_EXT_FUNCTION (GLboolean, glIsShader,
-                   (GLuint shader))
-COGL_EXT_FUNCTION (GLboolean, glIsProgram,
-                   (GLuint program))
 COGL_EXT_END ()
 
 /* These functions are provided by GL_ARB_shader_objects or are in GL
@@ -127,21 +116,6 @@ COGL_EXT_FUNCTION (GLint, glGetUniformLocation,
 COGL_EXT_FUNCTION (void, glUniform1f,
                    (GLint                 location,
                     GLfloat               v0))
-COGL_EXT_FUNCTION (void, glUniform2f,
-                   (GLint                 location,
-                    GLfloat               v0,
-                    GLfloat               v1))
-COGL_EXT_FUNCTION (void, glUniform3f,
-                   (GLint                 location,
-                    GLfloat               v0,
-                    GLfloat               v1,
-                    GLfloat               v2))
-COGL_EXT_FUNCTION (void, glUniform4f,
-                   (GLint                 location,
-                    GLfloat               v0,
-                    GLfloat               v1,
-                    GLfloat               v2,
-                    GLfloat               v3))
 COGL_EXT_FUNCTION (void, glUniform1fv,
                    (GLint                 location,
                     GLsizei               count,
@@ -161,21 +135,6 @@ COGL_EXT_FUNCTION (void, glUniform4fv,
 COGL_EXT_FUNCTION (void, glUniform1i,
                    (GLint                 location,
                     GLint                 v0))
-COGL_EXT_FUNCTION (void, glUniform2i,
-                   (GLint                 location,
-                    GLint                 v0,
-                    GLint                 v1))
-COGL_EXT_FUNCTION (void, glUniform3i,
-                   (GLint                 location,
-                    GLint                 v0,
-                    GLint                 v1,
-                    GLint                 v2))
-COGL_EXT_FUNCTION (void, glUniform4i,
-                   (GLint                 location,
-                    GLint                 v0,
-                    GLint                 v1,
-                    GLint                 v2,
-                    GLint                 v3))
 COGL_EXT_FUNCTION (void, glUniform1iv,
                    (GLint                 location,
                     GLsizei               count,
@@ -207,29 +166,6 @@ COGL_EXT_FUNCTION (void, glUniformMatrix4fv,
                     GLsizei               count,
                     GLboolean             transpose,
                     const GLfloat        *value))
-
-COGL_EXT_FUNCTION (void, glGetUniformfv,
-                   (GLuint                program,
-                    GLint                 location,
-                    GLfloat              *params))
-COGL_EXT_FUNCTION (void, glGetUniformiv,
-                   (GLuint                program,
-                    GLint                 location,
-                    GLint                *params))
-COGL_EXT_FUNCTION (void, glGetActiveUniform,
-                   (GLuint program,
-                    GLuint index,
-                    GLsizei bufsize,
-                    GLsizei* length,
-                    GLint* size,
-                    GLenum* type,
-                    GLchar* name))
-COGL_EXT_FUNCTION (void, glGetShaderSource,
-                   (GLuint shader,
-                    GLsizei bufsize,
-                    GLsizei* length,
-                    GLchar* source))
-COGL_EXT_FUNCTION (void, glValidateProgram, (GLuint program))
 COGL_EXT_END ()
 
 /* These functions are provided by GL_ARB_vertex_shader or are in GL
@@ -249,38 +185,20 @@ COGL_EXT_FUNCTION (void, glEnableVertexAttribArray,
                    (GLuint		 index))
 COGL_EXT_FUNCTION (void, glDisableVertexAttribArray,
                    (GLuint		 index))
-COGL_EXT_FUNCTION (void, glVertexAttrib1f, (GLuint indx, GLfloat x))
 COGL_EXT_FUNCTION (void, glVertexAttrib1fv,
                    (GLuint indx, const GLfloat* values))
-COGL_EXT_FUNCTION (void, glVertexAttrib2f, (GLuint indx, GLfloat x, GLfloat y))
 COGL_EXT_FUNCTION (void, glVertexAttrib2fv,
                    (GLuint indx, const GLfloat* values))
-COGL_EXT_FUNCTION (void, glVertexAttrib3f,
-                   (GLuint indx, GLfloat x, GLfloat y, GLfloat z))
 COGL_EXT_FUNCTION (void, glVertexAttrib3fv,
                    (GLuint indx, const GLfloat* values))
 COGL_EXT_FUNCTION (void, glVertexAttrib4f,
                    (GLuint index, GLfloat x, GLfloat y, GLfloat z, GLfloat w))
 COGL_EXT_FUNCTION (void, glVertexAttrib4fv,
                    (GLuint indx, const GLfloat* values))
-COGL_EXT_FUNCTION (void, glGetVertexAttribfv,
-                   (GLuint index, GLenum pname, GLfloat* params))
-COGL_EXT_FUNCTION (void, glGetVertexAttribiv,
-                   (GLuint index, GLenum pname, GLint* params))
-COGL_EXT_FUNCTION (void, glGetVertexAttribPointerv,
-                   (GLuint index, GLenum pname, GLvoid** pointer))
 COGL_EXT_FUNCTION (GLint, glGetAttribLocation,
                    (GLuint program, const char *name))
 COGL_EXT_FUNCTION (void, glBindAttribLocation,
                    (GLuint program,
                     GLuint index,
                     const GLchar* name))
-COGL_EXT_FUNCTION (void, glGetActiveAttrib,
-                   (GLuint program,
-                    GLuint index,
-                    GLsizei bufsize,
-                    GLsizei* length,
-                    GLint* size,
-                    GLenum* type,
-                    GLchar* name))
 COGL_EXT_END ()

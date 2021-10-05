@@ -36,17 +36,14 @@
  * #ClutterContent is available since Clutter 1.10.
  */
 
-#ifdef HAVE_CONFIG_H
 #include "clutter-build-config.h"
-#endif
 
+#include "clutter-actor-private.h"
 #include "clutter-content-private.h"
 
 #include "clutter-debug.h"
 #include "clutter-marshal.h"
 #include "clutter-private.h"
-
-typedef struct _ClutterContentIface     ClutterContentInterface;
 
 enum
 {
@@ -94,9 +91,15 @@ clutter_content_real_invalidate (ClutterContent *content)
 }
 
 static void
-clutter_content_real_paint_content (ClutterContent   *content,
-                                    ClutterActor     *actor,
-                                    ClutterPaintNode *context)
+clutter_content_real_invalidate_size (ClutterContent *content)
+{
+}
+
+static void
+clutter_content_real_paint_content (ClutterContent      *content,
+                                    ClutterActor        *actor,
+                                    ClutterPaintNode    *context,
+                                    ClutterPaintContext *paint_context)
 {
 }
 
@@ -110,6 +113,7 @@ clutter_content_default_init (ClutterContentInterface *iface)
   iface->attached = clutter_content_real_attached;
   iface->detached = clutter_content_real_detached;
   iface->invalidate = clutter_content_real_invalidate;
+  iface->invalidate_size = clutter_content_real_invalidate_size;
 
   /**
    * ClutterContent::attached:
@@ -125,9 +129,8 @@ clutter_content_default_init (ClutterContentInterface *iface)
     g_signal_new (I_("attached"),
                   G_TYPE_FROM_INTERFACE (iface),
                   G_SIGNAL_RUN_FIRST,
-                  G_STRUCT_OFFSET (ClutterContentIface, attached),
-                  NULL, NULL,
-                  _clutter_marshal_VOID__OBJECT,
+                  G_STRUCT_OFFSET (ClutterContentInterface, attached),
+                  NULL, NULL, NULL,
                   G_TYPE_NONE, 1,
                   CLUTTER_TYPE_ACTOR);
 
@@ -145,9 +148,8 @@ clutter_content_default_init (ClutterContentInterface *iface)
     g_signal_new (I_("detached"),
                   G_TYPE_FROM_INTERFACE (iface),
                   G_SIGNAL_RUN_FIRST,
-                  G_STRUCT_OFFSET (ClutterContentIface, detached),
-                  NULL, NULL,
-                  _clutter_marshal_VOID__OBJECT,
+                  G_STRUCT_OFFSET (ClutterContentInterface, detached),
+                  NULL, NULL, NULL,
                   G_TYPE_NONE, 1,
                   CLUTTER_TYPE_ACTOR);
 }
@@ -190,6 +192,45 @@ clutter_content_invalidate (ClutterContent *content)
     }
 }
 
+/**
+ * clutter_content_invalidate_size:
+ * @content: a #ClutterContent
+ *
+ * Signals that @content's size changed. Attached actors with request mode
+ * set to %CLUTTER_REQUEST_CONTENT_SIZE will have a relayout queued.
+ *
+ * Attached actors with other request modes are not redrawn. To redraw them
+ * too, use clutter_content_invalidate().
+ */
+void
+clutter_content_invalidate_size (ClutterContent *content)
+{
+  ClutterActor *actor;
+  GHashTable *actors;
+  GHashTableIter iter;
+
+  g_return_if_fail (CLUTTER_IS_CONTENT (content));
+
+  CLUTTER_CONTENT_GET_IFACE (content)->invalidate_size (content);
+
+  actors = g_object_get_qdata (G_OBJECT (content), quark_content_actors);
+  if (actors == NULL)
+    return;
+
+  g_hash_table_iter_init (&iter, actors);
+  while (g_hash_table_iter_next (&iter, (gpointer *) &actor, NULL))
+    {
+      ClutterRequestMode request_mode;
+
+      g_assert (actor != NULL);
+
+      request_mode = clutter_actor_get_request_mode (actor);
+
+      if (request_mode == CLUTTER_REQUEST_CONTENT_SIZE)
+        _clutter_actor_queue_only_relayout (actor);
+    }
+}
+
 /*< private >
  * _clutter_content_attached:
  * @content: a #ClutterContent
@@ -201,7 +242,7 @@ clutter_content_invalidate (ClutterContent *content)
  * is associated to a #ClutterContent, to set up a backpointer from
  * the @content to the @actor.
  *
- * This function will invoke the #ClutterContentIface.attached() virtual
+ * This function will invoke the #ClutterContentInterface.attached() virtual
  * function.
  */
 void
@@ -235,7 +276,7 @@ _clutter_content_attached (ClutterContent *content,
  * This function should be used internally every time a #ClutterActor
  * removes the association with a #ClutterContent.
  *
- * This function will invoke the #ClutterContentIface.detached() virtual
+ * This function will invoke the #ClutterContentInterface.detached() virtual
  * function.
  */
 void
@@ -260,19 +301,22 @@ _clutter_content_detached (ClutterContent *content,
  * _clutter_content_paint_content:
  * @content: a #ClutterContent
  * @actor: a #ClutterActor
- * @context: a #ClutterPaintNode
+ * @node: a #ClutterPaintNode
+ * @paint_context: a #ClutterPaintContext
  *
  * Creates the render tree for the @content and @actor.
  *
- * This function will invoke the #ClutterContentIface.paint_content()
+ * This function will invoke the #ClutterContentInterface.paint_content()
  * virtual function.
  */
 void
-_clutter_content_paint_content (ClutterContent   *content,
-                                ClutterActor     *actor,
-                                ClutterPaintNode *node)
+_clutter_content_paint_content (ClutterContent      *content,
+                                ClutterActor        *actor,
+                                ClutterPaintNode    *node,
+                                ClutterPaintContext *paint_context)
 {
-  CLUTTER_CONTENT_GET_IFACE (content)->paint_content (content, actor, node);
+  CLUTTER_CONTENT_GET_IFACE (content)->paint_content (content, actor, node,
+                                                      paint_context);
 }
 
 /**

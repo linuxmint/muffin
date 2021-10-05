@@ -95,7 +95,7 @@ _cogl_path_data_clear_vbos (CoglPathData *data)
       for (i = 0; i < data->stroke_n_attributes; i++)
         cogl_object_unref (data->stroke_attributes[i]);
 
-      free (data->stroke_attributes);
+      g_free (data->stroke_attributes);
 
       data->stroke_attribute_buffer = NULL;
     }
@@ -149,7 +149,7 @@ void
 cogl2_path_set_fill_rule (CoglPath *path,
                           CoglPathFillRule fill_rule)
 {
-  _COGL_RETURN_IF_FAIL (cogl_is_path (path));
+  g_return_if_fail (cogl_is_path (path));
 
   if (path->data->fill_rule != fill_rule)
     {
@@ -162,14 +162,14 @@ cogl2_path_set_fill_rule (CoglPath *path,
 CoglPathFillRule
 cogl2_path_get_fill_rule (CoglPath *path)
 {
-  _COGL_RETURN_VAL_IF_FAIL (cogl_is_path (path), COGL_PATH_FILL_RULE_NON_ZERO);
+  g_return_val_if_fail (cogl_is_path (path), COGL_PATH_FILL_RULE_NON_ZERO);
 
   return path->data->fill_rule;
 }
 
 static void
 _cogl_path_add_node (CoglPath *path,
-                     CoglBool new_sub_path,
+                     gboolean new_sub_path,
 		     float x,
 		     float y)
 {
@@ -225,9 +225,9 @@ _cogl_path_stroke_nodes (CoglPath *path,
   int path_num = 0;
   CoglPathNode *node;
 
-  _COGL_RETURN_IF_FAIL (cogl_is_path (path));
-  _COGL_RETURN_IF_FAIL (cogl_is_framebuffer (framebuffer));
-  _COGL_RETURN_IF_FAIL (cogl_is_pipeline (pipeline));
+  g_return_if_fail (cogl_is_path (path));
+  g_return_if_fail (cogl_is_framebuffer (framebuffer));
+  g_return_if_fail (cogl_is_pipeline (pipeline));
 
   data = path->data;
 
@@ -299,7 +299,7 @@ _cogl_path_fill_nodes_with_clipped_rectangle (CoglPath *path,
   /* We need at least three stencil bits to combine clips */
   if (_cogl_framebuffer_get_stencil_bits (framebuffer) >= 3)
     {
-      static CoglBool seen_warning = FALSE;
+      static gboolean seen_warning = FALSE;
 
       if (!seen_warning)
         {
@@ -320,10 +320,10 @@ _cogl_path_fill_nodes_with_clipped_rectangle (CoglPath *path,
   cogl_framebuffer_pop_clip (framebuffer);
 }
 
-static CoglBool
+static gboolean
 validate_layer_cb (CoglPipelineLayer *layer, void *user_data)
 {
-  CoglBool *needs_fallback = user_data;
+  gboolean *needs_fallback = user_data;
   CoglTexture *texture = _cogl_pipeline_layer_get_texture (layer);
 
   /* If any of the layers of the current pipeline contain sliced
@@ -365,7 +365,7 @@ _cogl_path_fill_nodes (CoglPath *path,
     }
   else
     {
-      CoglBool needs_fallback = FALSE;
+      gboolean needs_fallback = FALSE;
       CoglPrimitive *primitive;
 
       _cogl_pipeline_foreach_layer_internal (pipeline,
@@ -385,38 +385,6 @@ _cogl_path_fill_nodes (CoglPath *path,
     }
 }
 
-/* TODO: Update to the protoype used in the Cogl master branch.
- * This is experimental API but not in sync with the cogl_path_fill()
- * api in Cogl master which takes explicit framebuffer and pipeline
- * arguments */
-void
-cogl2_path_fill (CoglPath *path)
-{
-  _COGL_RETURN_IF_FAIL (cogl_is_path (path));
-
-  _cogl_path_fill_nodes (path,
-                         cogl_get_draw_framebuffer (),
-                         cogl_get_source (),
-                         0 /* flags */);
-}
-
-/* TODO: Update to the protoype used in the Cogl master branch.
- * This is experimental API but not in sync with the cogl_path_fill()
- * api in Cogl master which takes explicit framebuffer and pipeline
- * arguments */
-void
-cogl2_path_stroke (CoglPath *path)
-{
-  _COGL_RETURN_IF_FAIL (cogl_is_path (path));
-
-  if (path->data->path_nodes->len == 0)
-    return;
-
-  _cogl_path_stroke_nodes (path,
-                           cogl_get_draw_framebuffer (),
-                           cogl_get_source ());
-}
-
 void
 cogl2_path_move_to (CoglPath *path,
                     float x,
@@ -424,7 +392,7 @@ cogl2_path_move_to (CoglPath *path,
 {
   CoglPathData *data;
 
-  _COGL_RETURN_IF_FAIL (cogl_is_path (path));
+  g_return_if_fail (cogl_is_path (path));
 
   _cogl_path_add_node (path, TRUE, x, y);
 
@@ -443,7 +411,7 @@ cogl2_path_rel_move_to (CoglPath *path,
 {
   CoglPathData *data;
 
-  _COGL_RETURN_IF_FAIL (cogl_is_path (path));
+  g_return_if_fail (cogl_is_path (path));
 
   data = path->data;
 
@@ -459,7 +427,7 @@ cogl2_path_line_to (CoglPath *path,
 {
   CoglPathData *data;
 
-  _COGL_RETURN_IF_FAIL (cogl_is_path (path));
+  g_return_if_fail (cogl_is_path (path));
 
   _cogl_path_add_node (path, FALSE, x, y);
 
@@ -476,7 +444,7 @@ cogl2_path_rel_line_to (CoglPath *path,
 {
   CoglPathData *data;
 
-  _COGL_RETURN_IF_FAIL (cogl_is_path (path));
+  g_return_if_fail (cogl_is_path (path));
 
   data = path->data;
 
@@ -488,7 +456,7 @@ cogl2_path_rel_line_to (CoglPath *path,
 void
 cogl2_path_close (CoglPath *path)
 {
-  _COGL_RETURN_IF_FAIL (cogl_is_path (path));
+  g_return_if_fail (cogl_is_path (path));
 
   _cogl_path_add_node (path, FALSE, path->data->path_start.x,
                        path->data->path_start.y);
@@ -514,7 +482,7 @@ cogl2_path_polyline (CoglPath *path,
 {
   int c = 0;
 
-  _COGL_RETURN_IF_FAIL (cogl_is_path (path));
+  g_return_if_fail (cogl_is_path (path));
 
   cogl2_path_move_to (path, coords[0], coords[1]);
 
@@ -538,7 +506,7 @@ cogl2_path_rectangle (CoglPath *path,
                       float x_2,
                       float y_2)
 {
-  CoglBool is_rectangle;
+  gboolean is_rectangle;
 
   /* If the path was previously empty and the rectangle isn't mirrored
      then we'll record that this is a simple rectangle path so that we
@@ -556,7 +524,7 @@ cogl2_path_rectangle (CoglPath *path,
   path->data->is_rectangle = is_rectangle;
 }
 
-CoglBool
+gboolean
 _cogl_path_is_rectangle (CoglPath *path)
 {
   return path->data->is_rectangle;
@@ -639,7 +607,7 @@ cogl2_path_arc (CoglPath *path,
 {
   float angle_step = 10;
 
-  _COGL_RETURN_IF_FAIL (cogl_is_path (path));
+  g_return_if_fail (cogl_is_path (path));
 
   /* it is documented that a move to is needed to create a freestanding
    * arc
@@ -683,7 +651,7 @@ cogl2_path_ellipse (CoglPath *path,
 {
   float angle_step = 10;
 
-  _COGL_RETURN_IF_FAIL (cogl_is_path (path));
+  g_return_if_fail (cogl_is_path (path));
 
   /* FIXME: if shows to be slow might be optimized
    * by mirroring just a quarter of it */
@@ -709,7 +677,7 @@ cogl2_path_round_rectangle (CoglPath *path,
   float inner_width = x_2 - x_1 - radius * 2;
   float inner_height = y_2 - y_1 - radius * 2;
 
-  _COGL_RETURN_IF_FAIL (cogl_is_path (path));
+  g_return_if_fail (cogl_is_path (path));
 
   cogl2_path_move_to (path, x_1, y_1 + radius);
   _cogl_path_rel_arc (path,
@@ -860,7 +828,7 @@ cogl2_path_curve_to (CoglPath *path,
 {
   CoglBezCubic cubic;
 
-  _COGL_RETURN_IF_FAIL (cogl_is_path (path));
+  g_return_if_fail (cogl_is_path (path));
 
   /* Prepare cubic curve */
   cubic.p1 = path->data->path_pen;
@@ -890,7 +858,7 @@ cogl2_path_rel_curve_to (CoglPath *path,
 {
   CoglPathData *data;
 
-  _COGL_RETURN_IF_FAIL (cogl_is_path (path));
+  g_return_if_fail (cogl_is_path (path));
 
   data = path->data;
 
@@ -932,7 +900,7 @@ cogl_path_copy (CoglPath *old_path)
 {
   CoglPath *new_path;
 
-  _COGL_RETURN_VAL_IF_FAIL (cogl_is_path (old_path), NULL);
+  g_return_val_if_fail (cogl_is_path (old_path), NULL);
 
   new_path = g_slice_new (CoglPath);
   new_path->data = old_path->data;
@@ -1053,7 +1021,7 @@ cogl_rel_curve2_to (CoglPath *path,
 {
   CoglPathData *data;
 
-  _COGL_RETURN_IF_FAIL (cogl_is_path (path));
+  g_return_if_fail (cogl_is_path (path));
 
   data = path->data;
 
@@ -1358,13 +1326,13 @@ _cogl_path_build_fill_attribute_buffer (CoglPath *path)
   gluTessNormal (tess.glu_tess, 0.0, 0.0, 1.0);
 
   gluTessCallback (tess.glu_tess, GLU_TESS_BEGIN_DATA,
-                   _cogl_path_tesselator_begin);
+                   (GCallback) _cogl_path_tesselator_begin);
   gluTessCallback (tess.glu_tess, GLU_TESS_VERTEX_DATA,
-                   _cogl_path_tesselator_vertex);
+                   (GCallback) _cogl_path_tesselator_vertex);
   gluTessCallback (tess.glu_tess, GLU_TESS_END_DATA,
-                   _cogl_path_tesselator_end);
+                   (GCallback) _cogl_path_tesselator_end);
   gluTessCallback (tess.glu_tess, GLU_TESS_COMBINE_DATA,
-                   _cogl_path_tesselator_combine);
+                   (GCallback) _cogl_path_tesselator_combine);
 
   gluTessBeginPolygon (tess.glu_tess, &tess);
 
@@ -1504,13 +1472,6 @@ cogl_framebuffer_push_path_clip (CoglFramebuffer *framebuffer,
       COGL_FRAMEBUFFER_STATE_CLIP;
 }
 
-/* XXX: deprecated */
-void
-cogl_clip_push_from_path (CoglPath *path)
-{
-  cogl_framebuffer_push_path_clip (cogl_get_draw_framebuffer (), path);
-}
-
 static void
 _cogl_path_build_stroke_attribute_buffer (CoglPath *path)
 {
@@ -1575,28 +1536,26 @@ _cogl_path_build_stroke_attribute_buffer (CoglPath *path)
   data->stroke_n_attributes = n_attributes;
 }
 
-/* XXX: deprecated */
 void
 cogl_framebuffer_fill_path (CoglFramebuffer *framebuffer,
                             CoglPipeline *pipeline,
                             CoglPath *path)
 {
-  _COGL_RETURN_IF_FAIL (cogl_is_framebuffer (framebuffer));
-  _COGL_RETURN_IF_FAIL (cogl_is_pipeline (pipeline));
-  _COGL_RETURN_IF_FAIL (cogl_is_path (path));
+  g_return_if_fail (cogl_is_framebuffer (framebuffer));
+  g_return_if_fail (cogl_is_pipeline (pipeline));
+  g_return_if_fail (cogl_is_path (path));
 
   _cogl_path_fill_nodes (path, framebuffer, pipeline, 0 /* flags */);
 }
 
-/* XXX: deprecated */
 void
 cogl_framebuffer_stroke_path (CoglFramebuffer *framebuffer,
                               CoglPipeline *pipeline,
                               CoglPath *path)
 {
-  _COGL_RETURN_IF_FAIL (cogl_is_framebuffer (framebuffer));
-  _COGL_RETURN_IF_FAIL (cogl_is_pipeline (pipeline));
-  _COGL_RETURN_IF_FAIL (cogl_is_path (path));
+  g_return_if_fail (cogl_is_framebuffer (framebuffer));
+  g_return_if_fail (cogl_is_pipeline (pipeline));
+  g_return_if_fail (cogl_is_path (path));
 
   _cogl_path_stroke_nodes (path, framebuffer, pipeline);
 }

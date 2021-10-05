@@ -36,7 +36,7 @@ G_BEGIN_DECLS
 
 typedef struct _ClutterBezier ClutterBezier;
 
-ClutterBezier *_clutter_bezier_new ();
+ClutterBezier *_clutter_bezier_new (void);
 
 void           _clutter_bezier_free (ClutterBezier * b);
 

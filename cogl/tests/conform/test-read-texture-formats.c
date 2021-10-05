@@ -1,6 +1,7 @@
 #include <cogl/cogl.h>
 #include <stdarg.h>
 
+#include "test-declarations.h"
 #include "test-utils.h"
 
 /*
@@ -60,8 +61,8 @@ test_read_short (CoglTexture2D *tex_2d,
   received_value_str = g_strdup_printf ("0x%04x", received_value);
   expected_value_str = g_strdup_printf ("0x%04x", expected_value);
   g_assert_cmpstr (received_value_str, ==, expected_value_str);
-  free (received_value_str);
-  free (expected_value_str);
+  g_free (received_value_str);
+  g_free (expected_value_str);
 }
 
 static void
@@ -115,8 +116,8 @@ test_read_8888 (CoglTexture2D *tex_2d,
   received_value_str = g_strdup_printf ("0x%08x", received_pixel);
   expected_value_str = g_strdup_printf ("0x%08x", expected_pixel);
   g_assert_cmpstr (received_value_str, ==, expected_value_str);
-  free (received_value_str);
-  free (expected_value_str);
+  g_free (received_value_str);
+  g_free (expected_value_str);
 }
 
 static void
@@ -154,8 +155,8 @@ test_read_int (CoglTexture2D *tex_2d,
   received_value_str = g_strdup_printf ("0x%08x", received_value);
   expected_value_str = g_strdup_printf ("0x%08x", expected_value);
   g_assert_cmpstr (received_value_str, ==, expected_value_str);
-  free (received_value_str);
-  free (expected_value_str);
+  g_free (received_value_str);
+  g_free (expected_value_str);
 }
 
 void

@@ -39,9 +39,7 @@
  *
  */
 
-#ifdef HAVE_CONFIG_H
 #include "clutter-build-config.h"
-#endif
 
 #include "cally-text.h"
 #include "cally-actor-private.h"
@@ -249,11 +247,7 @@ cally_text_finalize   (GObject *obj)
 /*   g_object_unref (cally_text->priv->textutil); */
 /*   cally_text->priv->textutil = NULL; */
 
-  if (cally_text->priv->insert_idle_handler)
-    {
-      g_source_remove (cally_text->priv->insert_idle_handler);
-      cally_text->priv->insert_idle_handler = 0;
-    }
+  g_clear_handle_id (&cally_text->priv->insert_idle_handler, g_source_remove);
 
   G_OBJECT_CLASS (cally_text_parent_class)->finalize (obj);
 }
@@ -750,7 +744,7 @@ pango_layout_get_line_after (PangoLayout     *layout,
  * atk_text_get_text_after_offset().
  *
  * Returns: a newly allocated string containing a slice of text
- *     from layout. Free with free().
+ *     from layout. Free with g_free().
  */
 static gchar *
 _gtk_pango_get_text_at (PangoLayout     *layout,
@@ -849,7 +843,7 @@ _gtk_pango_get_text_at (PangoLayout     *layout,
  * atk_text_get_text_before_offset().
  *
  * Returns: a newly allocated string containing a slice of text
- *     from layout. Free with free().
+ *     from layout. Free with g_free().
  */
 static gchar *
 _gtk_pango_get_text_before (PangoLayout     *layout,
@@ -950,7 +944,7 @@ _gtk_pango_get_text_before (PangoLayout     *layout,
  * atk_text_get_text_after_offset().
  *
  * Returns: a newly allocated string containing a slice of text
- *     from layout. Free with free().
+ *     from layout. Free with g_free().
  */
 static gchar *
 _gtk_pango_get_text_after (PangoLayout     *layout,
@@ -1440,7 +1434,7 @@ static void cally_text_get_character_extents (AtkText *text,
   PangoLayout *layout;
   PangoRectangle extents;
   const gchar *text_value;
-  ClutterVertex verts[4];
+  graphene_point3d_t verts[4];
 
   actor = CALLY_GET_CLUTTER_ACTOR (text);
   if (actor == NULL) /* State is defunct */
@@ -1860,7 +1854,7 @@ _cally_misc_add_attribute (AtkAttributeSet *attrib_set,
                            gchar           *value)
 {
   AtkAttributeSet *return_set;
-  AtkAttribute *at = malloc (sizeof (AtkAttribute));
+  AtkAttribute *at = g_malloc (sizeof (AtkAttribute));
   at->name = g_strdup (atk_text_attribute_get_name (attr));
   at->value = value;
   return_set = g_slist_prepend(attrib_set, at);
@@ -2296,7 +2290,7 @@ _cally_misc_get_index_at_point (ClutterText *clutter_text,
   gint index, x_window, y_window, x_toplevel, y_toplevel;
   gint x_temp, y_temp;
   gboolean ret;
-  ClutterVertex verts[4];
+  graphene_point3d_t verts[4];
   PangoLayout *layout;
   gint x_layout, y_layout;
 

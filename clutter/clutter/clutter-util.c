@@ -30,39 +30,15 @@
  * Various miscellaneous utilility functions.
  */
 
-#ifdef HAVE_CONFIG_H
 #include "clutter-build-config.h"
-#endif
 
+#include <fribidi.h>
 #include <math.h>
 
 #include "clutter-debug.h"
 #include "clutter-main.h"
 #include "clutter-interval.h"
 #include "clutter-private.h"
-
-#include "deprecated/clutter-util.h"
-
-/**
- * clutter_util_next_p2:
- * @a: Value to get the next power
- *
- * Calculates the nearest power of two, greater than or equal to @a.
- *
- * Return value: The nearest power of two, greater or equal to @a.
- *
- * Deprecated: 1.2
- */
-gint
-clutter_util_next_p2 (gint a)
-{
-  int rval = 1;
-
-  while (rval < a)
-    rval <<= 1;
-
-  return rval;
-}
 
 /* Help macros to scale from OpenGL <-1,1> coordinates system to
  * window coordinates ranging [0,window-size]
@@ -75,8 +51,8 @@ void
 _clutter_util_fully_transform_vertices (const CoglMatrix *modelview,
                                         const CoglMatrix *projection,
                                         const float *viewport,
-                                        const ClutterVertex *vertices_in,
-                                        ClutterVertex *vertices_out,
+                                        const graphene_point3d_t *vertices_in,
+                                        graphene_point3d_t *vertices_out,
                                         int n_vertices)
 {
   CoglMatrix modelview_projection;
@@ -93,7 +69,7 @@ _clutter_util_fully_transform_vertices (const CoglMatrix *modelview,
                             modelview);
       cogl_matrix_project_points (&modelview_projection,
                                   3,
-                                  sizeof (ClutterVertex),
+                                  sizeof (graphene_point3d_t),
                                   vertices_in,
                                   sizeof (ClutterVertex4),
                                   vertices_tmp,
@@ -103,7 +79,7 @@ _clutter_util_fully_transform_vertices (const CoglMatrix *modelview,
     {
       cogl_matrix_transform_points (modelview,
                                     3,
-                                    sizeof (ClutterVertex),
+                                    sizeof (graphene_point3d_t),
                                     vertices_in,
                                     sizeof (ClutterVertex4),
                                     vertices_tmp,
@@ -121,13 +97,57 @@ _clutter_util_fully_transform_vertices (const CoglMatrix *modelview,
   for (i = 0; i < n_vertices; i++)
     {
       ClutterVertex4 vertex_tmp = vertices_tmp[i];
-      ClutterVertex *vertex_out = &vertices_out[i];
+      graphene_point3d_t *vertex_out = &vertices_out[i];
       /* Finally translate from OpenGL coords to window coords */
       vertex_out->x = MTX_GL_SCALE_X (vertex_tmp.x, vertex_tmp.w,
                                       viewport[2], viewport[0]);
       vertex_out->y = MTX_GL_SCALE_Y (vertex_tmp.y, vertex_tmp.w,
                                       viewport[3], viewport[1]);
     }
+}
+
+void
+_clutter_util_rect_from_rectangle (const cairo_rectangle_int_t *src,
+                                   graphene_rect_t             *dest)
+{
+  *dest = (graphene_rect_t) {
+    .origin = {
+      .x = src->x,
+      .y = src->y
+    },
+    .size = {
+      .width = src->width,
+      .height = src->height
+    }
+  };
+}
+
+void
+_clutter_util_rectangle_int_extents (const graphene_rect_t *src,
+                                     cairo_rectangle_int_t *dest)
+{
+  graphene_rect_t tmp = *src;
+
+  graphene_rect_round_extents (&tmp, &tmp);
+
+  *dest = (cairo_rectangle_int_t) {
+    .x = tmp.origin.x,
+    .y = tmp.origin.y,
+    .width = tmp.size.width,
+    .height = tmp.size.height,
+  };
+}
+
+void
+_clutter_util_rectangle_offset (const cairo_rectangle_int_t *src,
+                                int                          x,
+                                int                          y,
+                                cairo_rectangle_int_t       *dest)
+{
+  *dest = *src;
+
+  dest->x += x;
+  dest->y += y;
 }
 
 /*< private >
@@ -192,6 +212,16 @@ _clutter_util_rectangle_intersection (const cairo_rectangle_int_t *src1,
 
       return TRUE;
     }
+}
+
+gboolean
+clutter_util_rectangle_equal (const cairo_rectangle_int_t *src1,
+                              const cairo_rectangle_int_t *src2)
+{
+  return ((src1->x == src2->x) &&
+          (src1->y == src2->y) &&
+          (src1->width == src2->width) &&
+          (src1->height == src2->height));
 }
 
 float
@@ -279,48 +309,12 @@ _clutter_util_matrix_skew_yz (ClutterMatrix *matrix,
   matrix->zw += matrix->yw * factor;
 }
 
-static float
-_clutter_util_vertex_length (const ClutterVertex *vertex)
-{
-  return sqrtf (vertex->x * vertex->x + vertex->y * vertex->y + vertex->z * vertex->z);
-}
-
 static void
-_clutter_util_vertex_normalize (ClutterVertex *vertex)
-{
-  float factor = _clutter_util_vertex_length (vertex);
-
-  if (factor == 0.f)
-    return;
-
-  vertex->x /= factor;
-  vertex->y /= factor;
-  vertex->z /= factor;
-}
-
-static float
-_clutter_util_vertex_dot (const ClutterVertex *v1,
-                          const ClutterVertex *v2)
-{
-  return v1->x * v2->x + v1->y * v2->y + v1->z * v2->z;
-}
-
-static void
-_clutter_util_vertex_cross (const ClutterVertex *v1,
-                            const ClutterVertex *v2,
-                            ClutterVertex       *res)
-{
-  res->x = v1->y * v2->z - v2->y * v1->z;
-  res->y = v1->z * v2->x - v2->z * v1->x;
-  res->z = v1->x * v2->y - v2->x * v1->y;
-}
-
-static void
-_clutter_util_vertex_combine (const ClutterVertex *a,
-                              const ClutterVertex *b,
-                              double               ascl,
-                              double               bscl,
-                              ClutterVertex       *res)
+_clutter_util_vertex_combine (const graphene_point3d_t *a,
+                              const graphene_point3d_t *b,
+                              double                    ascl,
+                              double                    bscl,
+                              graphene_point3d_t       *res)
 {
   res->x = (ascl * a->x) + (bscl * b->x);
   res->y = (ascl * a->y) + (bscl * b->y);
@@ -368,16 +362,16 @@ _clutter_util_vertex4_interpolate (const ClutterVertex4 *a,
  */
 gboolean
 _clutter_util_matrix_decompose (const ClutterMatrix *src,
-                                ClutterVertex       *scale_p,
+                                graphene_point3d_t  *scale_p,
                                 float                shear_p[3],
-                                ClutterVertex       *rotate_p,
-                                ClutterVertex       *translate_p,
+                                graphene_point3d_t  *rotate_p,
+                                graphene_point3d_t  *translate_p,
                                 ClutterVertex4      *perspective_p)
 {
   CoglMatrix matrix = *src;
   CoglMatrix perspective;
   ClutterVertex4 vertex_tmp;
-  ClutterVertex row[3], pdum;
+  graphene_point3d_t row[3], pdum;
   int i, j;
 
 #define XY_SHEAR        0
@@ -465,34 +459,34 @@ _clutter_util_matrix_decompose (const ClutterMatrix *src,
     }
 
   /* compute scale.x and normalize the first row */
-  scale_p->x = _clutter_util_vertex_length (&row[0]);
-  _clutter_util_vertex_normalize (&row[0]);
+  scale_p->x = graphene_point3d_length (&row[0]);
+  graphene_point3d_normalize (&row[0], &row[0]);
 
   /* compute XY shear and make the second row orthogonal to the first */
-  shear_p[XY_SHEAR] = _clutter_util_vertex_dot (&row[0], &row[1]);
+  shear_p[XY_SHEAR] = graphene_point3d_dot (&row[0], &row[1]);
   _clutter_util_vertex_combine (&row[1], &row[0],
                                 1.0, -shear_p[XY_SHEAR],
                                 &row[1]);
 
   /* compute the Y scale and normalize the second row */
-  scale_p->y = _clutter_util_vertex_length (&row[1]);
-  _clutter_util_vertex_normalize (&row[1]);
+  scale_p->y = graphene_point3d_length (&row[1]);
+  graphene_point3d_normalize (&row[1], &row[1]);
   shear_p[XY_SHEAR] /= scale_p->y;
 
   /* compute XZ and YZ shears, orthogonalize the third row */
-  shear_p[XZ_SHEAR] = _clutter_util_vertex_dot (&row[0], &row[2]);
+  shear_p[XZ_SHEAR] = graphene_point3d_dot (&row[0], &row[2]);
   _clutter_util_vertex_combine (&row[2], &row[0],
                                 1.0, -shear_p[XZ_SHEAR],
                                 &row[2]);
 
-  shear_p[YZ_SHEAR] = _clutter_util_vertex_dot (&row[1], &row[2]);
+  shear_p[YZ_SHEAR] = graphene_point3d_dot (&row[1], &row[2]);
   _clutter_util_vertex_combine (&row[2], &row[1],
                                 1.0, -shear_p[YZ_SHEAR],
                                 &row[2]);
 
   /* get the Z scale and normalize the third row*/
-  scale_p->z = _clutter_util_vertex_length (&row[2]);
-  _clutter_util_vertex_normalize (&row[2]);
+  scale_p->z = graphene_point3d_length (&row[2]);
+  graphene_point3d_normalize (&row[2], &row[2]);
   shear_p[XZ_SHEAR] /= scale_p->z;
   shear_p[YZ_SHEAR] /= scale_p->z;
 
@@ -500,8 +494,8 @@ _clutter_util_matrix_decompose (const ClutterMatrix *src,
    * check for a coordinate system flip; if the determinant
    * is -1, then negate the matrix and scaling factors
    */
-  _clutter_util_vertex_cross (&row[1], &row[2], &pdum);
-  if (_clutter_util_vertex_dot (&row[0], &pdum) < 0.f)
+  graphene_point3d_cross (&row[1], &row[2], &pdum);
+  if (graphene_point3d_dot (&row[0], &pdum) < 0.f)
     {
       scale_p->x *= -1.f;
 
@@ -679,4 +673,46 @@ clutter_interval_register_progress_func (GType               value_type,
     }
 
   G_UNLOCK (progress_funcs);
+}
+
+PangoDirection
+_clutter_pango_unichar_direction (gunichar ch)
+{
+  FriBidiCharType fribidi_ch_type;
+
+  G_STATIC_ASSERT (sizeof (FriBidiChar) == sizeof (gunichar));
+
+  fribidi_ch_type = fribidi_get_bidi_type (ch);
+
+  if (!FRIBIDI_IS_STRONG (fribidi_ch_type))
+    return PANGO_DIRECTION_NEUTRAL;
+  else if (FRIBIDI_IS_RTL (fribidi_ch_type))
+    return PANGO_DIRECTION_RTL;
+  else
+    return PANGO_DIRECTION_LTR;
+}
+
+PangoDirection
+_clutter_pango_find_base_dir (const gchar *text,
+                              gint         length)
+{
+  PangoDirection dir = PANGO_DIRECTION_NEUTRAL;
+  const gchar *p;
+
+  g_return_val_if_fail (text != NULL || length == 0, PANGO_DIRECTION_NEUTRAL);
+
+  p = text;
+  while ((length < 0 || p < text + length) && *p)
+    {
+      gunichar wc = g_utf8_get_char (p);
+
+      dir = _clutter_pango_unichar_direction (wc);
+
+      if (dir != PANGO_DIRECTION_NEUTRAL)
+        break;
+
+      p = g_utf8_next_char (p);
+    }
+
+  return dir;
 }

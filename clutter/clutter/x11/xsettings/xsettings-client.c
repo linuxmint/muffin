@@ -480,7 +480,7 @@ xsettings_client_new_with_grab_funcs (Display             *display,
 {
   XSettingsClient *client;
   char buffer[256];
-  char *atom_names[3];
+  const char *atom_names[3];
   Atom atoms[3];
   
   client = malloc (sizeof *client);

@@ -1,0 +1,70 @@
+Intro
+=====
+
+In general, the compositor splits the window from the contents of
+the window from the shape of the window. In other words, a window
+has contents, and the contents of the window have a shape. This is
+represented by the actor hierarchy:
+
+ +--------------------------------------+
+ | MetaWindowActor                      |
+ | +----------------------------------+ |
+ | | MetaSurfaceActor                 | |
+ | | +------------------------------+ | |
+ | | | MetaShapedTexture            | | |
+ | | |                              | | |
+ | | |                              | | |
+ | | |                              | | |
+ | | |                              | | |
+ | | +------------------------------+ | |
+ | +----------------------------------+ |
+ +--------------------------------------+
+
+Surfaces may also contain subsurfaces. The MetaWindowActor and
+MetaSurfaceActor subclasses that will be created depend on the client
+type, and the display server type.
+
+## Subsurfaces
+
+Additionally, there is also the case of subsurfaces: surfaces that
+are child of other surfaces. That is also represented in the actor
+hierarchy by having one or many MetaSurfaceActors (the subsurfaces)
+added as children of a parent MetaSurfaceActor. There are no limits
+to how many subsurfaces a surface may have. With subsurfaces, the
+actor hierarchy looks like this:
+
+ MetaWindowActor
+  ↳ MetaSurfaceActor (surface)
+     ↳ MetaShapedTexture
+     ↳ MetaSurfaceActor (subsurface)
+        ↳ MetaShapedTexture
+        ↳ MetaSurfaceActor (sub-subsurface)
+           ↳ MetaShapedTexture
+     ↳ MetaSurfaceActor (subsurface)
+        ↳ MetaShapedTexture
+
+In this example, the main surface has 2 subsurfaces. One of these
+subsurfaces contains a subsurface as well.
+
+All MetaWindowActors contain at least one MetaSurfaceActor, and all
+MetaSurfaceActors contain a MetaShapedTexture.
+
+## Client and compositor
+
+MetaWindowActor and its subclasses represent the client window's
+type. A X11 client will have a MetaWindowActorX11 representing it,
+and a Wayland client will have a MetaWindowActorWayland.
+
+On the compositor side, the surface where the contents of the window
+are drawn into are represented by MetaSurfaceActor subclasses. On a
+Wayland session, windows are backed by a MetaSurfaceActorWayland
+surface, whereas on X11 sessions, by MetaSurfaceActorX11.
+
+XWayland windows are X11 client windows (MetaWindowActorX11) backed
+by Wayland surfaces (MetaWindowActorWayland).
+
+
+Env Vars
+========
+
+MUTTER_DISABLE_MIPMAPS - set to disable use of mipmaped windows.

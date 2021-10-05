@@ -79,7 +79,8 @@ struct _ClutterOffscreenEffectClass
   CoglHandle (* create_texture) (ClutterOffscreenEffect *effect,
                                  gfloat                  width,
                                  gfloat                  height);
-  void       (* paint_target)   (ClutterOffscreenEffect *effect);
+  void       (* paint_target)   (ClutterOffscreenEffect *effect,
+                                 ClutterPaintContext    *paint_context);
 
   /*< private >*/
   void (* _clutter_offscreen1) (void);
@@ -91,30 +92,31 @@ struct _ClutterOffscreenEffectClass
   void (* _clutter_offscreen7) (void);
 };
 
-CLUTTER_AVAILABLE_IN_1_4
+CLUTTER_EXPORT
 GType clutter_offscreen_effect_get_type (void) G_GNUC_CONST;
 
-CLUTTER_AVAILABLE_IN_1_4
+CLUTTER_EXPORT
 CoglMaterial *  clutter_offscreen_effect_get_target             (ClutterOffscreenEffect *effect);
 
-CLUTTER_AVAILABLE_IN_1_10
+CLUTTER_EXPORT
 CoglHandle      clutter_offscreen_effect_get_texture            (ClutterOffscreenEffect *effect);
 
-CLUTTER_AVAILABLE_IN_1_4
-void            clutter_offscreen_effect_paint_target           (ClutterOffscreenEffect *effect);
-CLUTTER_AVAILABLE_IN_1_4
+CLUTTER_EXPORT
+void            clutter_offscreen_effect_paint_target           (ClutterOffscreenEffect *effect,
+                                                                 ClutterPaintContext    *paint_context);
+CLUTTER_EXPORT
 CoglHandle      clutter_offscreen_effect_create_texture         (ClutterOffscreenEffect *effect,
                                                                  gfloat                  width,
                                                                  gfloat                  height);
 
-CLUTTER_DEPRECATED_IN_1_14_FOR (clutter_offscreen_effect_get_target_rect)
+CLUTTER_DEPRECATED_FOR (clutter_offscreen_effect_get_target_rect)
 gboolean        clutter_offscreen_effect_get_target_size        (ClutterOffscreenEffect *effect,
                                                                  gfloat                 *width,
                                                                  gfloat                 *height);
 
-CLUTTER_AVAILABLE_IN_1_14
+CLUTTER_EXPORT
 gboolean        clutter_offscreen_effect_get_target_rect        (ClutterOffscreenEffect *effect,
-                                                                 ClutterRect            *rect);
+                                                                 graphene_rect_t        *rect);
 
 G_END_DECLS
 

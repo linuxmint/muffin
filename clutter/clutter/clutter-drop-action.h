@@ -104,10 +104,10 @@ struct _ClutterDropActionClass
   void (*_clutter_drop_action8) (void);
 };
 
-CLUTTER_AVAILABLE_IN_1_8
+CLUTTER_EXPORT
 GType clutter_drop_action_get_type (void) G_GNUC_CONST;
 
-CLUTTER_AVAILABLE_IN_1_8
+CLUTTER_EXPORT
 ClutterAction *         clutter_drop_action_new         (void);
 
 G_END_DECLS

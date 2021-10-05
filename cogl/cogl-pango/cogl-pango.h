@@ -54,7 +54,7 @@
 #include "cogl/cogl-macros.h"
 #endif
 
-COGL_BEGIN_DECLS
+G_BEGIN_DECLS
 
 /* It's too difficult to actually subclass the pango cairo font
  * map. Instead we just make a fake set of macros that actually just
@@ -75,7 +75,7 @@ typedef PangoCairoFontMap CoglPangoFontMap;
  *
  * Since: 1.14
  */
-PangoFontMap *
+COGL_EXPORT PangoFontMap *
 cogl_pango_font_map_new (void);
 
 /**
@@ -86,7 +86,7 @@ cogl_pango_font_map_new (void);
  *
  * Returns: (transfer full): the newly created context: free with g_object_unref().
  */
-PangoContext *
+COGL_EXPORT PangoContext *
 cogl_pango_font_map_create_context (CoglPangoFontMap *font_map);
 
 /**
@@ -102,7 +102,7 @@ cogl_pango_font_map_create_context (CoglPangoFontMap *font_map);
  *
  * Since: 1.14
  */
-void
+COGL_EXPORT void
 cogl_pango_font_map_set_resolution (CoglPangoFontMap *font_map,
                                     double dpi);
 
@@ -114,7 +114,7 @@ cogl_pango_font_map_set_resolution (CoglPangoFontMap *font_map,
  *
  * Since: 1.0
  */
-void
+COGL_EXPORT void
 cogl_pango_font_map_clear_glyph_cache (CoglPangoFontMap *font_map);
 
 /**
@@ -129,7 +129,7 @@ cogl_pango_font_map_clear_glyph_cache (CoglPangoFontMap *font_map);
  *
  * Since: 1.0
  */
-void
+COGL_EXPORT void
 cogl_pango_ensure_glyph_cache_for_layout (PangoLayout *layout);
 
 /**
@@ -142,9 +142,9 @@ cogl_pango_ensure_glyph_cache_for_layout (PangoLayout *layout);
  *
  * Since: 1.0
  */
-void
+COGL_EXPORT void
 cogl_pango_font_map_set_use_mipmapping (CoglPangoFontMap *font_map,
-                                        CoglBool value);
+                                        gboolean value);
 
 /**
  * cogl_pango_font_map_get_use_mipmapping:
@@ -157,7 +157,7 @@ cogl_pango_font_map_set_use_mipmapping (CoglPangoFontMap *font_map,
  *
  * Since: 1.0
  */
-CoglBool
+COGL_EXPORT gboolean
 cogl_pango_font_map_get_use_mipmapping (CoglPangoFontMap *font_map);
 
 /**
@@ -170,7 +170,7 @@ cogl_pango_font_map_get_use_mipmapping (CoglPangoFontMap *font_map);
  *
  * Since: 1.0
  */
-PangoRenderer *
+COGL_EXPORT PangoRenderer *
 cogl_pango_font_map_get_renderer (CoglPangoFontMap *font_map);
 
 /**
@@ -187,7 +187,7 @@ cogl_pango_font_map_get_renderer (CoglPangoFontMap *font_map);
  *
  * Since: 1.14
  */
-void
+COGL_EXPORT void
 cogl_pango_show_layout (CoglFramebuffer *framebuffer,
                         PangoLayout *layout,
                         float x,
@@ -208,7 +208,7 @@ cogl_pango_show_layout (CoglFramebuffer *framebuffer,
  *
  * Since: 1.14
  */
-void
+COGL_EXPORT void
 cogl_pango_show_layout_line (CoglFramebuffer *framebuffer,
                              PangoLayoutLine *line,
                              float x,
@@ -227,73 +227,8 @@ cogl_pango_show_layout_line (CoglFramebuffer *framebuffer,
 typedef struct _CoglPangoRenderer      CoglPangoRenderer;
 typedef struct _CoglPangoRendererClass CoglPangoRendererClass;
 
-GType cogl_pango_renderer_get_type (void) G_GNUC_CONST;
+COGL_EXPORT GType cogl_pango_renderer_get_type (void) G_GNUC_CONST;
 
-/**
- * cogl_pango_render_layout_subpixel:
- * @layout: a #PangoLayout
- * @x: X coordinate (in Pango units) to render the layout at
- * @y: Y coordinate (in Pango units) to render the layout at
- * @color: color to use when rendering the layout
- * @flags:
- *
- * Draws a solidly coloured @layout on the given @framebuffer at (@x,
- * @y) within the @framebuffer<!-- -->'s current model-view coordinate
- * space.
- *
- * Since: 1.0
- * Deprecated: 1.16: Use cogl_pango_show_layout() instead
- */
-COGL_DEPRECATED_IN_1_16_FOR (cogl_pango_show_layout)
-void
-cogl_pango_render_layout_subpixel (PangoLayout *layout,
-                                   int x,
-                                   int y,
-                                   const CoglColor *color,
-                                   int flags);
-
-/**
- * cogl_pango_render_layout:
- * @layout: a #PangoLayout
- * @x: X coordinate to render the layout at
- * @y: Y coordinate to render the layout at
- * @color: color to use when rendering the layout
- * @flags:
- *
- * Draws a solidly coloured @layout on the given @framebuffer at (@x,
- * @y) within the @framebuffer<!-- -->'s current model-view coordinate
- * space.
- *
- * Since: 1.0
- * Deprecated: 1.16: Use cogl_pango_show_layout() instead
- */
-COGL_DEPRECATED_IN_1_16_FOR (cogl_pango_show_layout)
-void
-cogl_pango_render_layout (PangoLayout *layout,
-                          int x,
-                          int y,
-                          const CoglColor *color,
-                          int flags);
-
-/**
- * cogl_pango_render_layout_line:
- * @line: a #PangoLayoutLine
- * @x: X coordinate to render the line at
- * @y: Y coordinate to render the line at
- * @color: color to use when rendering the line
- *
- * Renders @line at the given coordinates using the given color.
- *
- * Since: 1.0
- * Deprecated: 1.16: Use cogl_pango_show_layout() instead
- */
-COGL_DEPRECATED_IN_1_16_FOR (cogl_pango_show_layout_line)
-void
-cogl_pango_render_layout_line (PangoLayoutLine *line,
-                               int x,
-                               int y,
-                               const CoglColor *color);
-
-COGL_END_DECLS
+G_END_DECLS
 
 #endif /* __COGL_PANGO_H__ */

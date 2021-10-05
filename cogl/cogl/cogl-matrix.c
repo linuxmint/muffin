@@ -69,17 +69,12 @@
  *   the inverse of the identity matrix)
  */
 
-#ifdef HAVE_CONFIG_H
 #include "cogl-config.h"
-#endif
 
 #include <cogl-util.h>
 #include <cogl-debug.h>
-#include <cogl-quaternion.h>
-#include <cogl-quaternion-private.h>
 #include <cogl-matrix.h>
 #include <cogl-matrix-private.h>
-#include <cogl-quaternion-private.h>
 
 #include <glib.h>
 #include <math.h>
@@ -378,7 +373,7 @@ _cogl_matrix_prefix_print (const char *prefix, const CoglMatrix *matrix)
 {
   if (!(matrix->flags & MAT_DIRTY_TYPE))
     {
-      _COGL_RETURN_IF_FAIL (matrix->type < COGL_MATRIX_N_TYPES);
+      g_return_if_fail (matrix->type < COGL_MATRIX_N_TYPES);
       g_print ("%sMatrix type: %s, flags: %x\n",
                prefix, types[matrix->type], (int)matrix->flags);
     }
@@ -444,7 +439,7 @@ cogl_debug_matrix_print (const CoglMatrix *matrix)
  * with partial pivoting followed by back/substitution with the loops manually
  * unrolled.
  */
-static CoglBool
+static gboolean
 invert_matrix_general (CoglMatrix *matrix)
 {
   const float *m = (float *)matrix;
@@ -583,7 +578,7 @@ invert_matrix_general (CoglMatrix *matrix)
  * element. Finally deals with the translation part by transforming the
  * original translation vector using by the calculated submatrix inverse.
  */
-static CoglBool
+static gboolean
 invert_matrix_3d_general (CoglMatrix *matrix)
 {
   const float *in = (float *)matrix;
@@ -665,7 +660,7 @@ invert_matrix_3d_general (CoglMatrix *matrix)
  * the inverse matrix analyzing and inverting each of the scaling, rotation and
  * translation parts.
  */
-static CoglBool
+static gboolean
 invert_matrix_3d (CoglMatrix *matrix)
 {
   const float *in = (float *)matrix;
@@ -750,7 +745,7 @@ invert_matrix_3d (CoglMatrix *matrix)
  *
  * Simply copies identity into CoglMatrix::inv.
  */
-static CoglBool
+static gboolean
 invert_matrix_identity (CoglMatrix *matrix)
 {
   memcpy (matrix->inv, identity, 16 * sizeof (float));
@@ -767,7 +762,7 @@ invert_matrix_identity (CoglMatrix *matrix)
  *
  * Calculates the
  */
-static CoglBool
+static gboolean
 invert_matrix_3d_no_rotation (CoglMatrix *matrix)
 {
   const float *in = (float *)matrix;
@@ -802,7 +797,7 @@ invert_matrix_3d_no_rotation (CoglMatrix *matrix)
  * Calculates the inverse matrix by applying the inverse scaling and
  * translation to the identity matrix.
  */
-static CoglBool
+static gboolean
 invert_matrix_2d_no_rotation (CoglMatrix *matrix)
 {
   const float *in = (float *)matrix;
@@ -826,7 +821,7 @@ invert_matrix_2d_no_rotation (CoglMatrix *matrix)
 
 #if 0
 /* broken */
-static CoglBool
+static gboolean
 invert_matrix_perspective (CoglMatrix *matrix)
 {
   const float *in = matrix;
@@ -856,7 +851,7 @@ invert_matrix_perspective (CoglMatrix *matrix)
 /*
  * Matrix inversion function pointer type.
  */
-typedef CoglBool (*inv_mat_func)(CoglMatrix *matrix);
+typedef gboolean (*inv_mat_func)(CoglMatrix *matrix);
 
 /*
  * Table of the matrix inversion functions according to the matrix type.
@@ -1114,7 +1109,7 @@ _cogl_matrix_update_type_and_flags (CoglMatrix *matrix)
  * given matrix type.  In case of failure, updates the MAT_FLAG_SINGULAR flag,
  * and copies the identity matrix into CoglMatrix::inv.
  */
-static CoglBool
+static gboolean
 _cogl_matrix_update_inverse (CoglMatrix *matrix)
 {
   if (matrix->flags & MAT_DIRTY_FLAGS ||
@@ -1139,7 +1134,7 @@ _cogl_matrix_update_inverse (CoglMatrix *matrix)
     return TRUE;
 }
 
-CoglBool
+gboolean
 cogl_matrix_get_inverse (const CoglMatrix *matrix, CoglMatrix *inverse)
 {
   if (_cogl_matrix_update_inverse ((CoglMatrix *)matrix))
@@ -1171,7 +1166,7 @@ _cogl_matrix_rotate (CoglMatrix *matrix,
 {
   float xx, yy, zz, xy, yz, zx, xs, ys, zs, one_c, s, c;
   float m[16];
-  CoglBool optimized;
+  gboolean optimized;
 
   s = sinf (angle * DEG2RAD);
   c = cosf (angle * DEG2RAD);
@@ -1361,18 +1356,8 @@ cogl_matrix_rotate (CoglMatrix *matrix,
 }
 
 void
-cogl_matrix_rotate_quaternion (CoglMatrix *matrix,
-                               const CoglQuaternion *quaternion)
-{
-  CoglMatrix rotation_transform;
-
-  cogl_matrix_init_from_quaternion (&rotation_transform, quaternion);
-  cogl_matrix_multiply (matrix, matrix, &rotation_transform);
-}
-
-void
 cogl_matrix_rotate_euler (CoglMatrix *matrix,
-                          const CoglEuler *euler)
+                          const graphene_euler_t *euler)
 {
   CoglMatrix rotation_transform;
 
@@ -1489,19 +1474,6 @@ _cogl_matrix_orthographic (CoglMatrix *matrix,
   matrix_multiply_array_with_flags (matrix, m,
                                     (MAT_FLAG_GENERAL_SCALE |
                                      MAT_FLAG_TRANSLATION));
-}
-
-void
-cogl_matrix_ortho (CoglMatrix *matrix,
-                   float left,
-                   float right,
-                   float bottom,
-                   float top,
-                   float near,
-                   float far)
-{
-  _cogl_matrix_orthographic (matrix, left, top, right, bottom, near, far);
-  _COGL_MATRIX_DEBUG_PRINT (matrix);
 }
 
 void
@@ -1669,7 +1641,7 @@ cogl_matrix_init_translation (CoglMatrix *matrix,
 /*
  * Test if the given matrix preserves vector lengths.
  */
-static CoglBool
+static gboolean
 _cogl_matrix_is_length_preserving (const CoglMatrix *m)
 {
   return TEST_MAT_FLAGS (m, MAT_FLAGS_LENGTH_PRESERVING);
@@ -1679,7 +1651,7 @@ _cogl_matrix_is_length_preserving (const CoglMatrix *m)
  * Test if the given matrix does any rotation.
  * (or perhaps if the upper-left 3x3 is non-identity)
  */
-static CoglBool
+static gboolean
 _cogl_matrix_has_rotation (const CoglMatrix *matrix)
 {
   if (matrix->flags & (MAT_FLAG_GENERAL |
@@ -1691,13 +1663,13 @@ _cogl_matrix_has_rotation (const CoglMatrix *matrix)
     return FALSE;
 }
 
-static CoglBool
+static gboolean
 _cogl_matrix_is_general_scale (const CoglMatrix *matrix)
 {
   return (matrix->flags & MAT_FLAG_GENERAL_SCALE) ? TRUE : FALSE;
 }
 
-static CoglBool
+static gboolean
 _cogl_matrix_is_dirty (const CoglMatrix *matrix)
 {
   return (matrix->flags & MAT_DIRTY_ALL) ? TRUE : FALSE;
@@ -1737,56 +1709,14 @@ _cogl_matrix_init_from_matrix_without_inverse (CoglMatrix *matrix,
   matrix->flags = src->flags | MAT_DIRTY_INVERSE;
 }
 
-static void
-_cogl_matrix_init_from_quaternion (CoglMatrix *matrix,
-                                   const CoglQuaternion *quaternion)
-{
-  float qnorm = _COGL_QUATERNION_NORM (quaternion);
-  float s = (qnorm > 0.0f) ? (2.0f / qnorm) : 0.0f;
-  float xs = quaternion->x * s;
-  float ys = quaternion->y * s;
-  float zs = quaternion->z * s;
-  float wx = quaternion->w * xs;
-  float wy = quaternion->w * ys;
-  float wz = quaternion->w * zs;
-  float xx = quaternion->x * xs;
-  float xy = quaternion->x * ys;
-  float xz = quaternion->x * zs;
-  float yy = quaternion->y * ys;
-  float yz = quaternion->y * zs;
-  float zz = quaternion->z * zs;
-
-  matrix->xx = 1.0f - (yy + zz);
-  matrix->yx = xy + wz;
-  matrix->zx = xz - wy;
-  matrix->xy = xy - wz;
-  matrix->yy = 1.0f - (xx + zz);
-  matrix->zy = yz + wx;
-  matrix->xz = xz + wy;
-  matrix->yz = yz - wx;
-  matrix->zz = 1.0f - (xx + yy);
-  matrix->xw = matrix->yw = matrix->zw = 0.0f;
-  matrix->wx = matrix->wy = matrix->wz = 0.0f;
-  matrix->ww = 1.0f;
-
-  matrix->flags = (MAT_FLAG_GENERAL | MAT_DIRTY_ALL);
-}
-
-void
-cogl_matrix_init_from_quaternion (CoglMatrix *matrix,
-                                  const CoglQuaternion *quaternion)
-{
-  _cogl_matrix_init_from_quaternion (matrix, quaternion);
-}
-
 void
 cogl_matrix_init_from_euler (CoglMatrix *matrix,
-                             const CoglEuler *euler)
+                             const graphene_euler_t *euler)
 {
   /* Convert angles to radians */
-  float heading_rad = euler->heading / 180.0f * G_PI;
-  float pitch_rad = euler->pitch / 180.0f * G_PI;
-  float roll_rad = euler->roll / 180.0f * G_PI;
+  float heading_rad = graphene_euler_get_y (euler) / 180.0f * G_PI;
+  float pitch_rad = graphene_euler_get_x (euler) / 180.0f * G_PI;
+  float roll_rad = graphene_euler_get_z (euler) / 180.0f * G_PI;
   /* Pre-calculate the sin and cos */
   float sin_heading = sinf (heading_rad);
   float cos_heading = cosf (heading_rad);
@@ -1938,14 +1868,14 @@ cogl_matrix_view_2d_in_perspective (CoglMatrix *matrix,
                                   height_2d);
 }
 
-CoglBool
+gboolean
 cogl_matrix_equal (const void *v1, const void *v2)
 {
   const CoglMatrix *a = v1;
   const CoglMatrix *b = v2;
 
-  _COGL_RETURN_VAL_IF_FAIL (v1 != NULL, FALSE);
-  _COGL_RETURN_VAL_IF_FAIL (v2 != NULL, FALSE);
+  g_return_val_if_fail (v1 != NULL, FALSE);
+  g_return_val_if_fail (v2 != NULL, FALSE);
 
   /* We want to avoid having a fuzzy _equal() function (e.g. that uses
    * an arbitrary epsilon value) since this function noteably conforms
@@ -2169,7 +2099,7 @@ cogl_matrix_transform_points (const CoglMatrix *matrix,
                               int n_points)
 {
   /* The results of transforming always have three components... */
-  _COGL_RETURN_IF_FAIL (stride_out >= sizeof (Point3f));
+  g_return_if_fail (stride_out >= sizeof (Point3f));
 
   if (n_components == 2)
     _cogl_matrix_transform_points_f2 (matrix,
@@ -2178,7 +2108,7 @@ cogl_matrix_transform_points (const CoglMatrix *matrix,
                                       n_points);
   else
     {
-      _COGL_RETURN_IF_FAIL (n_components == 3);
+      g_return_if_fail (n_components == 3);
 
       _cogl_matrix_transform_points_f3 (matrix,
                                         stride_in, points_in,
@@ -2208,7 +2138,7 @@ cogl_matrix_project_points (const CoglMatrix *matrix,
                                     n_points);
   else
     {
-      _COGL_RETURN_IF_FAIL (n_components == 4);
+      g_return_if_fail (n_components == 4);
 
       _cogl_matrix_project_points_f4 (matrix,
                                       stride_in, points_in,
@@ -2217,7 +2147,7 @@ cogl_matrix_project_points (const CoglMatrix *matrix,
     }
 }
 
-CoglBool
+gboolean
 cogl_matrix_is_identity (const CoglMatrix *matrix)
 {
   if (!(matrix->flags & MAT_DIRTY_TYPE) &&
@@ -2240,41 +2170,41 @@ cogl_matrix_look_at (CoglMatrix *matrix,
                      float world_up_z)
 {
   CoglMatrix tmp;
-  float forward[3];
-  float side[3];
-  float up[3];
+  graphene_vec3_t forward;
+  graphene_vec3_t side;
+  graphene_vec3_t up;
 
   /* Get a unit viewing direction vector */
-  cogl_vector3_init (forward,
-                     object_x - eye_position_x,
-                     object_y - eye_position_y,
-                     object_z - eye_position_z);
-  cogl_vector3_normalize (forward);
+  graphene_vec3_init (&forward,
+                      object_x - eye_position_x,
+                      object_y - eye_position_y,
+                      object_z - eye_position_z);
+  graphene_vec3_normalize (&forward, &forward);
 
-  cogl_vector3_init (up, world_up_x, world_up_y, world_up_z);
+  graphene_vec3_init (&up, world_up_x, world_up_y, world_up_z);
 
   /* Take the sideways direction as being perpendicular to the viewing
    * direction and the word up vector. */
-  cogl_vector3_cross_product (side, forward, up);
-  cogl_vector3_normalize (side);
+  graphene_vec3_cross (&forward, &up, &side);
+  graphene_vec3_normalize (&side, &side);
 
   /* Now we have unit sideways and forward-direction vectors calculate
    * a new mutually perpendicular up vector. */
-  cogl_vector3_cross_product (up, side, forward);
+  graphene_vec3_cross (&side, &forward, &up);
 
-  tmp.xx = side[0];
-  tmp.yx = side[1];
-  tmp.zx = side[2];
+  tmp.xx = graphene_vec3_get_x (&side);
+  tmp.yx = graphene_vec3_get_y (&side);
+  tmp.zx = graphene_vec3_get_z (&side);
   tmp.wx = 0;
 
-  tmp.xy = up[0];
-  tmp.yy = up[1];
-  tmp.zy = up[2];
+  tmp.xy = graphene_vec3_get_x (&up);
+  tmp.yy = graphene_vec3_get_y (&up);
+  tmp.zy = graphene_vec3_get_z (&up);
   tmp.wy = 0;
 
-  tmp.xz = -forward[0];
-  tmp.yz = -forward[1];
-  tmp.zz = -forward[2];
+  tmp.xz = -graphene_vec3_get_x (&forward);
+  tmp.yz = -graphene_vec3_get_y (&forward);
+  tmp.zz = -graphene_vec3_get_z (&forward);
   tmp.wz = 0;
 
   tmp.xw = 0;

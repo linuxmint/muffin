@@ -52,7 +52,7 @@
 #include <cogl/cogl-context.h>
 #include <cogl/cogl-texture-2d.h>
 
-COGL_BEGIN_DECLS
+G_BEGIN_DECLS
 
 /**
  * cogl_wayland_display_set_compositor_display:
@@ -66,86 +66,11 @@ COGL_BEGIN_DECLS
  * Since: 1.10
  * Stability: unstable
  */
-void
+COGL_EXPORT void
 cogl_wayland_display_set_compositor_display (CoglDisplay *display,
                                           struct wl_display *wayland_display);
 
-/**
- * cogl_wayland_texture_2d_new_from_buffer:
- * @ctx: A #CoglContext
- * @buffer: A Wayland resource for a buffer
- * @error: A #CoglError for exceptions
- *
- * Uploads the @buffer referenced by the given Wayland resource to a
- * #CoglTexture2D. The buffer resource may refer to a wl_buffer or a
- * wl_shm_buffer.
- *
- * <note>The results are undefined for passing an invalid @buffer
- * pointer</note>
- * <note>It is undefined if future updates to @buffer outside the
- * control of Cogl will affect the allocated #CoglTexture2D. In some
- * cases the contents of the buffer are copied (such as shm buffers),
- * and in other cases the underlying storage is re-used directly (such
- * as drm buffers)</note>
- *
- * Returns: A newly allocated #CoglTexture2D, or if Cogl could not
- *          validate the @buffer in some way (perhaps because of
- *          an unsupported format) it will return %NULL and set
- *          @error.
- *
- * Since: 1.10
- * Stability: unstable
- */
-CoglTexture2D *
-cogl_wayland_texture_2d_new_from_buffer (CoglContext *ctx,
-                                         struct wl_resource *buffer,
-                                         CoglError **error);
-
-/**
- * cogl_wayland_texture_set_region_from_shm_buffer:
- * @texture: a #CoglTexture
- * @width: The width of the region to copy
- * @height: The height of the region to copy
- * @shm_buffer: The source buffer
- * @src_x: The X offset within the source bufer to copy from
- * @src_y: The Y offset within the source bufer to copy from
- * @dst_x: The X offset within the texture to copy to
- * @dst_y: The Y offset within the texture to copy to
- * @level: The mipmap level of the texture to copy to
- * @error: A #CoglError to return exceptional errors
- *
- * Sets the pixels in a rectangular subregion of @texture from a
- * Wayland SHM buffer. Generally this would be used in response to
- * wl_surface.damage event in a compositor in order to update the
- * texture with the damaged region. This is just a convenience wrapper
- * around getting the SHM buffer pointer and calling
- * cogl_texture_set_region(). See that function for a description of
- * the level parameter.
- *
- * <note>Since the storage for a #CoglTexture is allocated lazily then
- * if the given @texture has not previously been allocated then this
- * api can return %FALSE and throw an exceptional @error if there is
- * not enough memory to allocate storage for @texture.</note>
- *
- * Return value: %TRUE if the subregion upload was successful, and
- *   %FALSE otherwise
- * Since: 1.18
- * Stability: unstable
- */
-CoglBool
-cogl_wayland_texture_set_region_from_shm_buffer (CoglTexture *texture,
-                                                 int src_x,
-                                                 int src_y,
-                                                 int width,
-                                                 int height,
-                                                 struct wl_shm_buffer *
-                                                   shm_buffer,
-                                                 int dst_x,
-                                                 int dst_y,
-                                                 int level,
-                                                 CoglError **error);
-
-COGL_END_DECLS
+G_END_DECLS
 
 /* The gobject introspection scanner seems to parse public headers in
  * isolation which means we need to be extra careful about how we

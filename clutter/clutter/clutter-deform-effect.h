@@ -92,24 +92,24 @@ struct _ClutterDeformEffectClass
   void (*_clutter_deform7) (void);
 };
 
-CLUTTER_AVAILABLE_IN_1_4
+CLUTTER_EXPORT
 GType clutter_deform_effect_get_type (void) G_GNUC_CONST;
 
-CLUTTER_AVAILABLE_IN_1_4
+CLUTTER_EXPORT
 void            clutter_deform_effect_set_back_material (ClutterDeformEffect *effect,
                                                          CoglHandle           material);
-CLUTTER_AVAILABLE_IN_1_4
+CLUTTER_EXPORT
 CoglHandle      clutter_deform_effect_get_back_material (ClutterDeformEffect *effect);
-CLUTTER_AVAILABLE_IN_1_4
+CLUTTER_EXPORT
 void            clutter_deform_effect_set_n_tiles       (ClutterDeformEffect *effect,
                                                          guint                x_tiles,
                                                          guint                y_tiles);
-CLUTTER_AVAILABLE_IN_1_4
+CLUTTER_EXPORT
 void            clutter_deform_effect_get_n_tiles       (ClutterDeformEffect *effect,
                                                          guint               *x_tiles,
                                                          guint               *y_tiles);
 
-CLUTTER_AVAILABLE_IN_1_4
+CLUTTER_EXPORT
 void            clutter_deform_effect_invalidate        (ClutterDeformEffect *effect);
 
 G_END_DECLS

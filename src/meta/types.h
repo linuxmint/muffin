@@ -14,9 +14,7 @@
  * General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street - Suite 500, Boston, MA
- * 02110-1335, USA.
+ * along with this program; if not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef META_TYPES_H
@@ -26,10 +24,11 @@
  * MetaCompositor: (skip)
  *
  */
+typedef struct _MetaBackend     MetaBackend;
 typedef struct _MetaCompositor  MetaCompositor;
 typedef struct _MetaDisplay     MetaDisplay;
+typedef struct _MetaX11Display  MetaX11Display;
 typedef struct _MetaFrame       MetaFrame;
-typedef struct _MetaScreen      MetaScreen;
 typedef struct _MetaWindow      MetaWindow;
 typedef struct _MetaWorkspace   MetaWorkspace;
 /**
@@ -38,5 +37,12 @@ typedef struct _MetaWorkspace   MetaWorkspace;
  */
 typedef struct _MetaGroup       MetaGroup;
 typedef struct _MetaKeyBinding  MetaKeyBinding;
+typedef struct _MetaCursorTracker MetaCursorTracker;
+
+typedef struct _MetaDnd         MetaDnd;
+typedef struct _MetaSettings    MetaSettings;
+
+typedef struct _MetaWorkspaceManager MetaWorkspaceManager;
+typedef struct _MetaSelection   MetaSelection;
 
 #endif

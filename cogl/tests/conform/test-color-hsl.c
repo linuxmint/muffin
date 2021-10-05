@@ -3,6 +3,7 @@
 
 #include <cogl/cogl.h>
 
+#include "test-declarations.h"
 #include "test-utils.h"
 
 #define cogl_assert_float(a, b)         \

@@ -46,9 +46,7 @@
  * Since: 1.12
  */
 
-#ifdef HAVE_CONFIG_H
 #include "clutter-build-config.h"
-#endif
 
 #include <math.h>
 
@@ -82,9 +80,9 @@ struct _ClutterZoomActionPrivate
 
   ZoomPoint points[2];
 
-  ClutterPoint initial_focal_point;
-  ClutterPoint focal_point;
-  ClutterPoint transformed_focal_point;
+  graphene_point_t initial_focal_point;
+  graphene_point_t focal_point;
+  graphene_point_t transformed_focal_point;
 
   gfloat initial_x;
   gfloat initial_y;
@@ -240,13 +238,13 @@ clutter_zoom_action_gesture_cancel (ClutterGestureAction *action,
 static gboolean
 clutter_zoom_action_real_zoom (ClutterZoomAction *action,
                                ClutterActor      *actor,
-                               ClutterPoint      *focal_point,
+                               graphene_point_t  *focal_point,
                                gdouble            factor)
 {
   ClutterZoomActionPrivate *priv = action->priv;
   gfloat x, y, z;
   gdouble scale_x, scale_y;
-  ClutterVertex out, in;
+  graphene_point3d_t out, in;
 
   in.x = priv->transformed_focal_point.x;
   in.y = priv->transformed_focal_point.y;
@@ -402,7 +400,7 @@ clutter_zoom_action_class_init (ClutterZoomActionClass *klass)
                   _clutter_marshal_BOOLEAN__OBJECT_BOXED_DOUBLE,
                   G_TYPE_BOOLEAN, 3,
                   CLUTTER_TYPE_ACTOR,
-                  CLUTTER_TYPE_POINT,
+                  GRAPHENE_TYPE_POINT,
                   G_TYPE_DOUBLE);
 }
 
@@ -480,7 +478,7 @@ clutter_zoom_action_get_zoom_axis (ClutterZoomAction *action)
 /**
  * clutter_zoom_action_get_focal_point:
  * @action: a #ClutterZoomAction
- * @point: (out): a #ClutterPoint
+ * @point: (out): a #graphene_point_t
  *
  * Retrieves the focal point of the current zoom
  *
@@ -488,7 +486,7 @@ clutter_zoom_action_get_zoom_axis (ClutterZoomAction *action)
  */
 void
 clutter_zoom_action_get_focal_point (ClutterZoomAction *action,
-                                     ClutterPoint      *point)
+                                     graphene_point_t  *point)
 {
   g_return_if_fail (CLUTTER_IS_ZOOM_ACTION (action));
   g_return_if_fail (point != NULL);
@@ -499,7 +497,7 @@ clutter_zoom_action_get_focal_point (ClutterZoomAction *action,
 /**
  * clutter_zoom_action_get_transformed_focal_point:
  * @action: a #ClutterZoomAction
- * @point: (out): a #ClutterPoint
+ * @point: (out): a #graphene_point_t
  *
  * Retrieves the focal point relative to the actor's coordinates of
  * the current zoom
@@ -508,7 +506,7 @@ clutter_zoom_action_get_focal_point (ClutterZoomAction *action,
  */
 void
 clutter_zoom_action_get_transformed_focal_point (ClutterZoomAction *action,
-                                                 ClutterPoint      *point)
+                                                 graphene_point_t  *point)
 {
   g_return_if_fail (CLUTTER_IS_ZOOM_ACTION (action));
   g_return_if_fail (point != NULL);

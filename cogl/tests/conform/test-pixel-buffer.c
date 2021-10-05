@@ -1,6 +1,7 @@
 #include <cogl/cogl.h>
 #include <string.h>
 
+#include "test-declarations.h"
 #include "test-utils.h"
 
 #define BITMAP_SIZE 256
@@ -174,7 +175,7 @@ test_pixel_buffer_set_data (void)
 
   stride = cogl_bitmap_get_rowstride (bitmap);
 
-  data = malloc (stride * BITMAP_SIZE);
+  data = g_malloc (stride * BITMAP_SIZE);
 
   generate_bitmap_data (data, stride);
 
@@ -184,7 +185,7 @@ test_pixel_buffer_set_data (void)
                         stride * (BITMAP_SIZE - 1) +
                         BITMAP_SIZE * 4);
 
-  free (data);
+  g_free (data);
 
   texture = create_texture_from_bitmap (bitmap);
   pipeline = create_pipeline_from_texture (texture);
@@ -211,7 +212,7 @@ static CoglTexture *
 create_white_texture (void)
 {
   CoglTexture2D *texture;
-  uint8_t *data = malloc (BITMAP_SIZE * BITMAP_SIZE * 4);
+  uint8_t *data = g_malloc (BITMAP_SIZE * BITMAP_SIZE * 4);
 
   memset (data, 255, BITMAP_SIZE * BITMAP_SIZE * 4);
 
@@ -223,7 +224,7 @@ create_white_texture (void)
                                            data,
                                            NULL); /* don't catch errors */
 
-  free (data);
+  g_free (data);
 
   return texture;
 }

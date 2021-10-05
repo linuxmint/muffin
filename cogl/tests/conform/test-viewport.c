@@ -24,7 +24,7 @@ assert_region_color (int x,
                      uint8_t blue,
                      uint8_t alpha)
 {
-  uint8_t *data = calloc (1, width * height * 4);
+  uint8_t *data = g_malloc0 (width * height * 4);
   cogl_read_pixels (x, y, width, height,
                     COGL_READ_PIXELS_COLOR_BUFFER,
                     COGL_PIXEL_FORMAT_RGBA_8888_PRE,
@@ -40,7 +40,7 @@ assert_region_color (int x,
                   pixel[ALPHA] == alpha);
 #endif
       }
-  free (data);
+  g_free (data);
 }
 
 static void
@@ -66,7 +66,9 @@ assert_rectangle_color_and_black_border (int x,
 
 
 static void
-on_paint (ClutterActor *actor, void *state)
+on_paint (ClutterActor        *actor,
+          ClutterPaintContext *paint_context,
+          void                *state)
 {
   float saved_viewport[4];
   CoglMatrix saved_projection;
@@ -209,14 +211,14 @@ on_paint (ClutterActor *actor, void *state)
   /*
    * Next test offscreen drawing...
    */
-  data = malloc (FRAMEBUFFER_WIDTH * 4 * FRAMEBUFFER_HEIGHT);
+  data = g_malloc (FRAMEBUFFER_WIDTH * 4 * FRAMEBUFFER_HEIGHT);
   tex = test_utils_texture_new_from_data (FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT,
                                     TEST_UTILS_TEXTURE_NO_SLICING,
                                     COGL_PIXEL_FORMAT_RGBA_8888, /* data fmt */
                                     COGL_PIXEL_FORMAT_ANY, /* internal fmt */
                                     FRAMEBUFFER_WIDTH * 4, /* rowstride */
                                     data);
-  free (data);
+  g_free (data);
   offscreen = cogl_offscreen_new_with_texture (tex);
 
   cogl_push_framebuffer (offscreen);
@@ -335,7 +337,7 @@ on_paint (ClutterActor *actor, void *state)
   cogl_set_viewport (0, 0, 10, 10);
 
   cogl_pop_framebuffer ();
-  cogl_handle_unref (offscreen);
+  cogl_object_unref (offscreen);
 
   /*
    * Verify that the previous onscreen framebuffer's viewport was restored
@@ -361,7 +363,7 @@ on_paint (ClutterActor *actor, void *state)
   cogl_rectangle (-1, 1, 1, -1);
 #endif
 
-  cogl_handle_unref (tex);
+  cogl_object_unref (tex);
 
   /* Finally restore the stage's original state... */
   cogl_pop_matrix ();
@@ -376,7 +378,7 @@ on_paint (ClutterActor *actor, void *state)
   clutter_main_quit ();
 }
 
-static CoglBool
+static gboolean
 queue_redraw (void *stage)
 {
   clutter_actor_queue_redraw (CLUTTER_ACTOR (stage));
@@ -403,12 +405,10 @@ test_viewport (TestUtilsGTestFixture *fixture,
   clutter_actor_show (stage);
   clutter_main ();
 
-  g_source_remove (idle_source);
+  g_clear_handle_id (&idle_source, g_source_remove);
 
   /* Remove all of the actors from the stage */
-  clutter_container_foreach (CLUTTER_CONTAINER (stage),
-                             (ClutterCallback) clutter_actor_destroy,
-                             NULL);
+  clutter_actor_remove_all_children (stage);
 
   if (cogl_test_verbose ())
     g_print ("OK\n");
