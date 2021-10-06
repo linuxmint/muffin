@@ -99,11 +99,11 @@ Description: Example window manager using GNOME's window manager library
  This package contains the muffin executable. It can be used as a
  standalone window manager, but is primarily intended for debugging.
 
-Package: gir1.2-muffin-6
+Package: gir1.2-meta-muffin-0.0
 Section: introspection
 Architecture: any
 Multi-Arch: same
-Depends: libmuffin-6-0 (= ${binary:Version}),
+Depends: libmuffin0 (= ${binary:Version}),
          ${gir:Depends},
          ${misc:Depends},
          ${shlibs:Depends}
@@ -120,7 +120,7 @@ Description: GObject introspection data for Mutter
  This package contains the GObject introspection data which may be
  used to generate dynamic bindings.
 
-Package: libmuffin-6-0
+Package: libmuffin0
 Section: libs
 Architecture: any
 Multi-Arch: same
@@ -148,11 +148,11 @@ Description: window manager library from the Mutter window manager
  This package contains the window manager shared library, used by muffin
  itself, and gnome-shell.
 
-Package: libmuffin-6-dev
+Package: libmuffin-dev
 Section: libdevel
 Architecture: any
 Multi-Arch: same
-Depends: gir1.2-muffin-6 (= ${binary:Version}),
+Depends: gir1.2-meta-muffin-0.0 (= ${binary:Version}),
          gsettings-desktop-schemas-dev (>= 3.33.0),
          libatk1.0-dev,
          libcairo2-dev,
@@ -166,7 +166,7 @@ Depends: gir1.2-muffin-6 (= ${binary:Version}),
          libgtk-3-dev,
          libinput-dev (>= 1.7),
          libjson-glib-dev,
-         libmuffin-6-0 (= ${binary:Version}),
+         libmuffin0 (= ${binary:Version}),
          libpango1.0-dev,
          libudev-dev,
          libwayland-dev,
