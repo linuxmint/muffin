@@ -431,7 +431,6 @@ subdir('clutter')
 subdir('data')
 subdir('src')
 subdir('po')
-subdir('doc/man')
 
 meson.add_install_script('meson/meson-postinstall.sh')
 
