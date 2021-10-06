@@ -1,5 +1,5 @@
 <schemalist>
-  <schema id="org.gnome.mutter" path="/org/gnome/mutter/"
+  <schema id="org.cinnamon.muffin" path="/org/cinnamon/muffin/"
           gettext-domain="@GETTEXT_DOMAIN@">
 
     <key name="overlay-key" type="s">
@@ -41,7 +41,7 @@
       <description>
         Determines whether workspaces are managed dynamically or
         whether there’s a static number of workspaces (determined
-        by the num-workspaces key in org.gnome.desktop.wm.preferences).
+        by the num-workspaces key in org.cinnamon.desktop.wm.preferences).
       </description>
     </key>
 
@@ -114,13 +114,13 @@
 
         Currently possible keywords:
 
-        • “scale-monitor-framebuffer” — makes mutter default to layout logical
+        • “scale-monitor-framebuffer” — makes muffin default to layout logical
                                         monitors in a logical pixel coordinate
                                         space, while scaling monitor
                                         framebuffers instead of window content,
                                         to manage HiDPI monitors. Does not
                                         require a restart.
-        • “rt-scheduler”              — makes mutter request a low priority
+        • “rt-scheduler”              — makes muffin request a low priority
                                         real-time scheduling. The executable
                                         or user must have CAP_SYS_NICE.
                                         Requires a restart.
@@ -151,10 +151,10 @@
       </description>
     </key>
 
-    <child name="keybindings" schema="org.gnome.mutter.keybindings"/>
+    <child name="keybindings" schema="org.cinnamon.muffin.keybindings"/>
 
   </schema>
-  <schema id="org.gnome.mutter.keybindings" path="/org/gnome/mutter/keybindings/">
+  <schema id="org.cinnamon.muffin.keybindings" path="/org/cinnamon/muffin/keybindings/">
 
     <key name="toggle-tiled-left" type="as">
       <default><![CDATA[['<Super>Left']]]></default>

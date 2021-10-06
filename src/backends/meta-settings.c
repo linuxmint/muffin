@@ -576,15 +576,15 @@ meta_settings_init (MetaSettings *settings)
   g_signal_connect (settings->interface_settings, "changed",
                     G_CALLBACK (interface_settings_changed),
                     settings);
-  settings->mutter_settings = g_settings_new ("org.gnome.mutter");
+  settings->mutter_settings = g_settings_new ("org.cinnamon.muffin");
   g_signal_connect (settings->mutter_settings, "changed",
                     G_CALLBACK (mutter_settings_changed),
                     settings);
-  settings->wayland_settings = g_settings_new ("org.gnome.mutter.wayland");
+  settings->wayland_settings = g_settings_new ("org.cinnamon.muffin.wayland");
   g_signal_connect (settings->wayland_settings, "changed",
                     G_CALLBACK (wayland_settings_changed),
                     settings);
-  settings->x11_settings = g_settings_new ("org.gnome.mutter.x11");
+  settings->x11_settings = g_settings_new ("org.cinnamon.muffin.x11");
   g_signal_connect (settings->x11_settings, "changed",
                     G_CALLBACK (x11_settings_changed),
                     settings);
