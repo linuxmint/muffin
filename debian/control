@@ -203,3 +203,17 @@ Description: shared files for the Mutter window manager
  of Clutter, a scene graph and user interface toolkit.
  .
  This package contains the shared files.
+
+Package: muffin-dbg
+Section: debug
+Priority: extra
+Architecture: any
+Depends:
+ libmuffin0 (= ${binary:Version}),
+ muffin (= ${binary:Version}),
+ ${misc:Depends},
+Description: window and compositing manager (debugging symbols)
+ Muffin is a window manager performing compositing as well based on
+ GTK+ and Clutter and used in Cinnamon desktop environment.
+ .
+ This package contains the debugging symbols.
