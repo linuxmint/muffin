@@ -62,6 +62,3 @@ configure_file(
   install_dir: schemadir
 )
 
-install_data(['mutter-schemas.convert'],
-  install_dir: join_paths(datadir, 'GConf/gsettings'),
-)
