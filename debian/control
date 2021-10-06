@@ -127,7 +127,7 @@ Depends: adwaita-icon-theme,
          muffin-common (>= ${source:Version}),
          ${misc:Depends},
          ${shlibs:Depends}
-Replaces: libmuffin0
+Replaces: libmuffin-dev
 Breaks: apparmor (<< 2.13.3-5~),
         gnome-control-center (<< 1:3.25.2),
         gnome-settings-daemon (<< 3.31.91),
@@ -144,48 +144,6 @@ Description: window manager library from the Mutter window manager
  .
  This package contains the window manager shared library, used by muffin
  itself, and gnome-shell.
-
-Package: libmuffin-dev
-Section: libdevel
-Architecture: any
-Multi-Arch: same
-Depends: gir1.2-meta-muffin-0.0 (= ${binary:Version}),
-         gsettings-desktop-schemas-dev (>= 3.33.0),
-         libatk1.0-dev,
-         libcairo2-dev,
-         libdrm-dev,
-         libegl1-mesa-dev,
-         libgbm-dev,
-         libgdk-pixbuf2.0-dev,
-         libgles2-mesa-dev (>= 7.1~rc3-1~) | libgles2-dev,
-         libglib2.0-dev,
-         libgraphene-1.0-dev (>= 1.9.3),
-         libgtk-3-dev,
-         libinput-dev (>= 1.7),
-         libjson-glib-dev,
-         libmuffin0 (= ${binary:Version}),
-         libpango1.0-dev,
-         libudev-dev,
-         libwayland-dev,
-         libx11-dev,
-         libxcomposite-dev,
-         libxdamage-dev,
-         libxext-dev,
-         libxfixes-dev,
-         libxi-dev,
-         libxrandr-dev,
-         ${misc:Depends}
-Description: Development files for the Mutter window manager
- Mutter is a Wayland display server and X11 window manager and
- compositor library. It contains functionality related to, among other
- things, window management, window compositing, focus tracking, workspace
- management, keybindings and monitor configuration.
- .
- Internally it uses a fork of Cogl, a hardware acceleration abstraction
- library used to simplify usage of OpenGL pipelines, as well as a fork
- of Clutter, a scene graph and user interface toolkit.
- .
- This package contains the development files.
 
 Package: muffin-common
 Section: misc
