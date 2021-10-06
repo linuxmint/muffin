@@ -97,13 +97,13 @@ override_dh_missing:
 	dh_missing --fail-missing
 
 override_dh_girepository:
-	dh_girepository /usr/lib/$(DEB_HOST_MULTIARCH)/muffin-6
+	dh_girepository /usr/lib/$(DEB_HOST_MULTIARCH)/muffin
 
 override_dh_makeshlibs:
 	dh_makeshlibs -V
 
 override_dh_shlibdeps:
-	dh_shlibdeps -Llibmuffin-6-0 -l/usr/lib/$(DEB_HOST_MULTIARCH)/muffin-6
+	dh_shlibdeps -Llibmuffin-0 -l/usr/lib/$(DEB_HOST_MULTIARCH)/muffin
 
 override_dh_strip:
 	dh_strip --dbg-package=muffin-dbg

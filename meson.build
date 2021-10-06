@@ -69,7 +69,7 @@ libexecdir = join_paths(prefix, get_option('libexecdir'))
 includedir = join_paths(prefix, get_option('includedir'))
 sysconfdir = get_option('sysconfdir')
 
-pkgname = '@0@-@1@'.format(meson.project_name(), libmutter_api_version)
+pkgname = '@0@'.format(meson.project_name())
 
 pkgdatadir = join_paths(datadir, pkgname)
 pkglibdir = join_paths(libdir, pkgname)
@@ -80,7 +80,7 @@ pcdir = join_paths(libdir, 'pkgconfig')
 gettext_package = meson.project_name()
 localedir = join_paths(datadir, 'locale')
 
-libmutter_name = 'muffin-' + libmutter_api_version
+libmutter_name = 'muffin'
 
 mutter_installed_tests_datadir = join_paths(
   datadir, 'installed-tests', libmutter_name)
