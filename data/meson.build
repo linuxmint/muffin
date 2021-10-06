@@ -42,22 +42,22 @@ gschema_config.set('XWAYLAND_GRAB_DEFAULT_ACCESS_RULES',
 
 schemadir = join_paths(datadir, 'glib-2.0', 'schemas')
 configure_file(
-  input: 'org.gnome.mutter.gschema.xml.in',
-  output: 'org.gnome.mutter.gschema.xml',
+  input: 'org.cinnamon.muffin.gschema.xml.in',
+  output: 'org.cinnamon.muffin.gschema.xml',
   configuration: gschema_config,
   install_dir: schemadir
 )
 
 configure_file(
-  input: 'org.gnome.mutter.wayland.gschema.xml.in',
-  output: 'org.gnome.mutter.wayland.gschema.xml',
+  input: 'org.cinnamon.muffin.wayland.gschema.xml.in',
+  output: 'org.cinnamon.muffin.wayland.gschema.xml',
   configuration: gschema_config,
   install_dir: schemadir
 )
 
 configure_file(
-  input: 'org.gnome.mutter.x11.gschema.xml.in',
-  output: 'org.gnome.mutter.x11.gschema.xml',
+  input: 'org.cinnamon.muffin.x11.gschema.xml.in',
+  output: 'org.cinnamon.muffin.x11.gschema.xml',
   configuration: gschema_config,
   install_dir: schemadir
 )

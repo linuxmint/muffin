@@ -65,7 +65,7 @@
 /* These are the different schemas we are keeping
  * a GSettings instance for */
 #define SCHEMA_GENERAL         "org.gnome.desktop.wm.preferences"
-#define SCHEMA_MUTTER          "org.gnome.mutter"
+#define SCHEMA_MUTTER          "org.cinnamon.muffin"
 #define SCHEMA_INTERFACE       "org.gnome.desktop.interface"
 #define SCHEMA_INPUT_SOURCES   "org.gnome.desktop.input-sources"
 #define SCHEMA_XSETTINGS       "org.gnome.settings-daemon.plugins.xsettings"

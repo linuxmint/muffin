@@ -1,5 +1,5 @@
 <schemalist>
-  <schema id="org.gnome.mutter.wayland.keybindings" path="/org/gnome/mutter/wayland/keybindings/"
+  <schema id="org.cinnamon.muffin.wayland.keybindings" path="/org/cinnamon/muffin/wayland/keybindings/"
 	  gettext-domain="@GETTEXT_DOMAIN@">
     <key name="switch-to-session-1" type="as">
       <default><![CDATA[['<Primary><Alt>F1']]]></default>
@@ -56,7 +56,7 @@
   </schema>
 
 
-  <schema id="org.gnome.mutter.wayland" path="/org/gnome/mutter/wayland/"
+  <schema id="org.cinnamon.muffin.wayland" path="/org/cinnamon/muffin/wayland/"
           gettext-domain="@GETTEXT_DOMAIN@">
 
     <key name="xwayland-allow-grabs" type="b">

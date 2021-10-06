@@ -1,14 +1,14 @@
 <schemalist>
 
-  <enum id="org.gnome.mutter.X11.scale-mode">
+  <enum id="org.cinnamon.muffin.X11.scale-mode">
     <value nick="scale-up" value="1"/>
     <value nick="scale-ui-down" value="2"/>
   </enum>
 
-  <schema id="org.gnome.mutter.x11" path="/org/gnome/mutter/x11/"
+  <schema id="org.cinnamon.muffin.x11" path="/org/cinnamon/muffin/x11/"
           gettext-domain="@GETTEXT_DOMAIN@">
 
-    <key name="fractional-scale-mode" enum="org.gnome.mutter.X11.scale-mode">
+    <key name="fractional-scale-mode" enum="org.cinnamon.muffin.X11.scale-mode">
       <default>"scale-ui-down"</default>
       <description>
         Choose the scaling mode to be used under X11 via Randr extension.

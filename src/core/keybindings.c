@@ -57,8 +57,8 @@
 #endif
 
 #define SCHEMA_COMMON_KEYBINDINGS "org.gnome.desktop.wm.keybindings"
-#define SCHEMA_MUTTER_KEYBINDINGS "org.gnome.mutter.keybindings"
-#define SCHEMA_MUTTER_WAYLAND_KEYBINDINGS "org.gnome.mutter.wayland.keybindings"
+#define SCHEMA_MUTTER_KEYBINDINGS "org.cinnamon.muffin.keybindings"
+#define SCHEMA_MUTTER_WAYLAND_KEYBINDINGS "org.cinnamon.muffin.wayland.keybindings"
 
 #define META_KEY_BINDING_PRIMARY_LAYOUT 0
 #define META_KEY_BINDING_SECONDARY_LAYOUT 1
