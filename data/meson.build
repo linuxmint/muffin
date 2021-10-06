@@ -1,8 +1,8 @@
 msgfmt = find_program('msgfmt')
 
-custom_target('mutter.desktop',
-  input: 'mutter.desktop.in',
-  output: 'mutter.desktop',
+custom_target('muffin.desktop',
+  input: 'muffin.desktop.in',
+  output: 'muffin.desktop',
   command: [
     msgfmt,
     '--desktop', '--template',
