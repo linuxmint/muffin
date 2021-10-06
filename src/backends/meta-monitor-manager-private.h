@@ -25,7 +25,7 @@
 
 #include <cogl/cogl.h>
 #include <graphene.h>
-#include <libgnome-desktop/gnome-pnp-ids.h>
+#include <libcinnamon-desktop/gnome-pnp-ids.h>
 
 #include "backends/meta-backend-private.h"
 #include "backends/meta-cursor.h"
