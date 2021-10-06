@@ -91,7 +91,7 @@ Description: GObject introspection data for Muffin
 Package: libmuffin0
 Section: libs
 Architecture: any
-Replaces: libmuffin-dev
+Replaces: libmuffin-dev, muffin-doc
 Pre-Depends: ${misc:Pre-Depends}
 Depends: muffin-common (= ${source:Version}), ${misc:Depends}, ${shlibs:Depends}
 Description: window and compositing manager (shared library)
