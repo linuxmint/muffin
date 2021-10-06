@@ -1,3 +1,8 @@
 usr/lib/*/libmuffin-6.so.*
 usr/lib/*/muffin-6/*.so.*
 usr/libexec/muffin-restart-helper
+usr/include
+usr/lib/*/lib*.so
+usr/lib/*/muffin-6/*.so
+usr/lib/*/muffin-6/*.gir
+usr/lib/*/pkgconfig/*.pc
