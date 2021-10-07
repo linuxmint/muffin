@@ -57,4 +57,7 @@ void meta_focus_stage_window       (MetaDisplay  *display,
 META_EXPORT
 gboolean meta_stage_is_focused     (MetaDisplay  *display);
 
+META_EXPORT
+ClutterActor *meta_get_x11_background_actor_for_display (MetaDisplay *display);
+
 #endif

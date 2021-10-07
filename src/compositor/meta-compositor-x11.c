@@ -33,6 +33,7 @@
 #include "core/display-private.h"
 #include "core/window-private.h"
 #include "x11/meta-x11-display-private.h"
+#include "x11/meta-x11-background-actor-private.h"
 
 struct _MetaCompositorX11
 {
@@ -94,6 +95,17 @@ meta_compositor_x11_process_xevent (MetaCompositorX11 *compositor_x11,
 
       if (window)
         process_damage (compositor_x11, (XDamageNotifyEvent *) xevent, window);
+    }
+  else if (xevent->type == PropertyNotify)
+    {
+      if (((XPropertyEvent *) xevent)->atom == x11_display->atom_x_root_pixmap)
+        {
+          if (((XPropertyEvent *) xevent)->window == meta_x11_display_get_xroot (x11_display))
+            {
+              meta_x11_background_actor_update (display);
+              return;
+            }
+        }
     }
 
   if (compositor_x11->have_x11_sync_object)

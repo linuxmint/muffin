@@ -45,8 +45,9 @@ mutter_public_headers = [
 
 if have_x11
   mutter_public_headers += [
+    'meta-x11-background-actor.h',
     'meta-x11-display.h',
-    'meta-x11-errors.h',
+    'meta-x11-errors.h'
   ]
 endif
 
