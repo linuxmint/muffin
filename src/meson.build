@@ -1002,8 +1002,8 @@ pkg.generate(libmutter,
   version: meson.project_version(),
   variables: [
     'apiversion=' + libmutter_api_version,
-    'girdir=${libdir}/muffin-' + libmutter_api_version,
-    'typelibdir=${libdir}/muffin-' + libmutter_api_version,
+    'girdir=${libdir}/muffin',
+    'typelibdir=${libdir}/muffin',
   ],
   install_dir: pcdir,
 )
