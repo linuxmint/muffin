@@ -10,7 +10,7 @@ split_version = meson.project_version().split('.')
 
 # Automatically increase API version each development cycle,
 # starting with 0 in 3.23.x
-api_version = 6
+api_version = 0
 libmutter_api_version = '@0@'.format(api_version)
 
 # generic version requirements
