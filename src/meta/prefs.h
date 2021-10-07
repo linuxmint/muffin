@@ -106,6 +106,7 @@ typedef enum
   META_PREF_DRAG_THRESHOLD,
   META_PREF_LOCATE_POINTER,
   META_PREF_CHECK_ALIVE_TIMEOUT,
+  META_PREF_BACKGROUND_TRANSITION
 } MetaPreference;
 
 typedef void (* MetaPrefsChangedFunc) (MetaPreference pref,
@@ -484,5 +485,7 @@ GDesktopVisualBellType meta_prefs_get_visual_bell_type (void);
 
 META_EXPORT
 unsigned int meta_prefs_get_check_alive_timeout (void);
+
+MetaX11BackgroundTransition meta_prefs_get_background_transition (void);
 
 #endif

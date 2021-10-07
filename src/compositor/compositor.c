@@ -76,6 +76,7 @@
 #include "meta/meta-background-group.h"
 #include "meta/meta-shadow-factory.h"
 #include "meta/meta-x11-errors.h"
+#include "meta/meta-x11-background-actor.h"
 #include "meta/prefs.h"
 #include "meta/window.h"
 #include "x11/meta-x11-display-private.h"
@@ -113,6 +114,8 @@ typedef struct _MetaCompositorPrivate
   ClutterActor *window_group;
   ClutterActor *top_window_group;
   ClutterActor *feedback_group;
+
+  ClutterActor *background_actor;
 
   GList *windows;
 
@@ -572,7 +575,9 @@ meta_compositor_manage (MetaCompositor *compositor)
   priv->window_group = meta_window_group_new (display);
   priv->top_window_group = meta_window_group_new (display);
   priv->feedback_group = meta_window_group_new (display);
+  priv->background_actor = g_object_ref_sink (meta_x11_background_actor_new_for_display (display));
 
+  clutter_actor_add_child (priv->window_group, priv->background_actor);
   clutter_actor_add_child (priv->stage, priv->window_group);
   clutter_actor_add_child (priv->stage, priv->top_window_group);
   clutter_actor_add_child (priv->stage, priv->feedback_group);
@@ -817,7 +822,8 @@ sync_actor_stacking (MetaCompositor *compositor)
       ClutterActor *actor = old->data;
 
       if (META_IS_BACKGROUND_GROUP (actor) ||
-          META_IS_BACKGROUND_ACTOR (actor))
+          META_IS_BACKGROUND_ACTOR (actor) ||
+          META_IS_X11_BACKGROUND_ACTOR (actor))
         {
           backgrounds = g_list_prepend (backgrounds, actor);
 
@@ -1245,6 +1251,7 @@ meta_compositor_dispose (GObject *object)
   g_clear_signal_handler (&priv->top_window_actor_destroy_id,
                           priv->top_window_actor);
 
+  g_clear_pointer (&priv->background_actor, clutter_actor_destroy);
   g_clear_pointer (&priv->window_group, clutter_actor_destroy);
   g_clear_pointer (&priv->top_window_group, clutter_actor_destroy);
   g_clear_pointer (&priv->feedback_group, clutter_actor_destroy);
@@ -1564,4 +1571,23 @@ meta_compositor_is_switching_workspace (MetaCompositor *compositor)
     meta_compositor_get_instance_private (compositor);
 
   return priv->switch_workspace_in_progress > 0;
+}
+
+/**
+ * meta_get_x11_background_actor_for_display:
+ * @display: a #MetaDisplay
+ *
+ * Gets the actor that draws the root window background under the windows.
+ * The root window background automatically tracks the image or color set
+ * by the environment.
+ *
+ * Return value: (transfer none): The background actor corresponding to @display
+ */
+ClutterActor *
+meta_get_x11_background_actor_for_display (MetaDisplay *display)
+{
+  MetaCompositorPrivate *priv =
+    meta_compositor_get_instance_private (display->compositor);
+
+  return priv->background_actor;
 }

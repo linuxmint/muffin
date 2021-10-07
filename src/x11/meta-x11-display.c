@@ -1217,6 +1217,7 @@ meta_x11_display_new (MetaDisplay *display, GError **error)
   x11_display = g_object_new (META_TYPE_X11_DISPLAY, NULL);
   x11_display->gdk_display = gdk_display;
   x11_display->display = display;
+  x11_display->atom_x_root_pixmap = XInternAtom (xdisplay, "_XROOTPMAP_ID", False);
 
   /* here we use XDisplayName which is what the user
    * probably put in, vs. DisplayString(display) which is
