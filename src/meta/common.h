@@ -548,4 +548,14 @@ typedef enum _MetaGravity
   META_GRAVITY_STATIC = 10,
 } MetaGravity;
 
+/*
+ * Background transition
+ */
+typedef enum
+{
+  META_X11_BACKGROUND_TRANSITION_NONE,
+  META_X11_BACKGROUND_TRANSITION_FADEIN,
+  META_X11_BACKGROUND_TRANSITION_BLEND
+} MetaX11BackgroundTransition;
+
 #endif

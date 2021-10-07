@@ -1,4 +1,10 @@
 <schemalist>
+  <enum id="background_transition">
+    <value value="0" nick="none"/>
+    <value value="1" nick="fade-in"/>
+    <value value="2" nick="blend"/>
+  </enum>
+
   <schema id="org.cinnamon.muffin" path="/org/cinnamon/muffin/"
           gettext-domain="@GETTEXT_DOMAIN@">
 
@@ -99,6 +105,16 @@
       <description>
         When true, the new windows will always be put in the center of the
         active screen of the monitor.
+      </description>
+    </key>
+
+    <key name="background-transition" enum="background_transition">
+      <default>'blend'</default>
+      <summary>Background transition</summary>
+      <description>The type of animation performed when changing background.
+      "none" means no animation at all.
+      "fade-in" means the old background switches to black and the new background appears with a fade-in effect.
+      "blend" means the old background disappears as the new background appears with a fade-in effect.
       </description>
     </key>
 

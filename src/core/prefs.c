@@ -127,6 +127,8 @@ static gboolean workspaces_only_on_primary = FALSE;
 
 static char *iso_next_group_option = NULL;
 
+static MetaX11BackgroundTransition background_transition = META_X11_BACKGROUND_TRANSITION_BLEND;
+
 static void handle_preference_update_enum (GSettings *settings,
                                            gchar     *key);
 static gboolean update_binding         (MetaKeyPref *binding,
@@ -276,6 +278,13 @@ static MetaEnumPreference preferences_enum[] =
         META_PREF_ACTION_RIGHT_CLICK_TITLEBAR,
       },
       &action_right_click_titlebar,
+    },
+    {
+      { "background-transition",
+        SCHEMA_MUTTER,
+        META_PREF_BACKGROUND_TRANSITION,
+      },
+      &background_transition,
     },
     { { NULL, 0, 0 }, NULL },
   };
@@ -2224,4 +2233,10 @@ void
 meta_prefs_set_force_fullscreen (gboolean whether)
 {
   force_fullscreen = whether;
+}
+
+MetaX11BackgroundTransition
+meta_prefs_get_background_transition (void)
+{
+  return background_transition;
 }
