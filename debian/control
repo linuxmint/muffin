@@ -11,7 +11,7 @@ Build-Depends:
         dmz-cursor-theme <!nocheck>,
         gnome-control-center-data,
         gnome-pkg-tools (>= 0.10),
-        gnome-settings-daemon-common <!nocheck>,
+        cinnamon-settings-daemon <!nocheck>,
         gobject-introspection (>= 1.41.3),
         gsettings-desktop-schemas-dev (>= 3.33.0),
         gtk-doc-tools (>= 1.15),
