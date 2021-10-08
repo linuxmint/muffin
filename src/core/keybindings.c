@@ -56,7 +56,7 @@
 #define KEY_GRAVE 0x29 /* assume the use of xf86-input-keyboard */
 #endif
 
-#define SCHEMA_COMMON_KEYBINDINGS "org.gnome.desktop.wm.keybindings"
+#define SCHEMA_COMMON_KEYBINDINGS "org.cinnamon.desktop.keybindings.wm"
 #define SCHEMA_MUTTER_KEYBINDINGS "org.cinnamon.muffin.keybindings"
 #define SCHEMA_MUTTER_WAYLAND_KEYBINDINGS "org.cinnamon.muffin.wayland.keybindings"
 
@@ -3841,15 +3841,6 @@ init_builtin_key_bindings (MetaDisplay *display)
                           META_KEYBINDING_ACTION_WORKSPACE_DOWN,
                           handle_switch_to_workspace, META_MOTION_DOWN);
 
-  add_builtin_keybinding (display,
-                          "switch-to-workspace-last",
-                          common_keybindings,
-                          META_KEY_BINDING_NONE,
-                          META_KEYBINDING_ACTION_WORKSPACE_LAST,
-                          handle_switch_to_last_workspace, 0);
-
-
-
   /* The ones which have inverses.  These can't be bound to any keystroke
    * containing Shift because Shift will invert their "backward" state.
    *
@@ -3874,19 +3865,19 @@ init_builtin_key_bindings (MetaDisplay *display)
                           META_KEYBINDING_ACTION_SWITCH_GROUP_BACKWARD,
                           handle_switch, META_TAB_LIST_GROUP);
 
-  add_builtin_keybinding (display,
-                          "switch-applications",
-                          common_keybindings,
-                          META_KEY_BINDING_NONE,
-                          META_KEYBINDING_ACTION_SWITCH_APPLICATIONS,
-                          handle_switch, META_TAB_LIST_NORMAL);
+  // add_builtin_keybinding (display,
+  //                         "switch-applications",
+  //                         common_keybindings,
+  //                         META_KEY_BINDING_NONE,
+  //                         META_KEYBINDING_ACTION_SWITCH_APPLICATIONS,
+  //                         handle_switch, META_TAB_LIST_NORMAL);
 
-  add_builtin_keybinding (display,
-                          "switch-applications-backward",
-                          common_keybindings,
-                          META_KEY_BINDING_IS_REVERSED,
-                          META_KEYBINDING_ACTION_SWITCH_APPLICATIONS_BACKWARD,
-                          handle_switch, META_TAB_LIST_NORMAL);
+  // add_builtin_keybinding (display,
+  //                         "switch-applications-backward",
+  //                         common_keybindings,
+  //                         META_KEY_BINDING_IS_REVERSED,
+  //                         META_KEYBINDING_ACTION_SWITCH_APPLICATIONS_BACKWARD,
+  //                         handle_switch, META_TAB_LIST_NORMAL);
 
   add_builtin_keybinding (display,
                           "switch-windows",
@@ -3916,47 +3907,47 @@ init_builtin_key_bindings (MetaDisplay *display)
                           META_KEYBINDING_ACTION_SWITCH_PANELS_BACKWARD,
                           handle_switch, META_TAB_LIST_DOCKS);
 
-  add_builtin_keybinding (display,
-                          "cycle-group",
-                          common_keybindings,
-                          META_KEY_BINDING_NONE,
-                          META_KEYBINDING_ACTION_CYCLE_GROUP,
-                          handle_cycle, META_TAB_LIST_GROUP);
+  // add_builtin_keybinding (display,
+  //                         "cycle-group",
+  //                         common_keybindings,
+  //                         META_KEY_BINDING_NONE,
+  //                         META_KEYBINDING_ACTION_CYCLE_GROUP,
+  //                         handle_cycle, META_TAB_LIST_GROUP);
 
-  add_builtin_keybinding (display,
-                          "cycle-group-backward",
-                          common_keybindings,
-                          META_KEY_BINDING_IS_REVERSED,
-                          META_KEYBINDING_ACTION_CYCLE_GROUP_BACKWARD,
-                          handle_cycle, META_TAB_LIST_GROUP);
+  // add_builtin_keybinding (display,
+  //                         "cycle-group-backward",
+  //                         common_keybindings,
+  //                         META_KEY_BINDING_IS_REVERSED,
+  //                         META_KEYBINDING_ACTION_CYCLE_GROUP_BACKWARD,
+  //                         handle_cycle, META_TAB_LIST_GROUP);
 
-  add_builtin_keybinding (display,
-                          "cycle-windows",
-                          common_keybindings,
-                          META_KEY_BINDING_NONE,
-                          META_KEYBINDING_ACTION_CYCLE_WINDOWS,
-                          handle_cycle, META_TAB_LIST_NORMAL);
+  // add_builtin_keybinding (display,
+  //                         "cycle-windows",
+  //                         common_keybindings,
+  //                         META_KEY_BINDING_NONE,
+  //                         META_KEYBINDING_ACTION_CYCLE_WINDOWS,
+  //                         handle_cycle, META_TAB_LIST_NORMAL);
 
-  add_builtin_keybinding (display,
-                          "cycle-windows-backward",
-                          common_keybindings,
-                          META_KEY_BINDING_IS_REVERSED,
-                          META_KEYBINDING_ACTION_CYCLE_WINDOWS_BACKWARD,
-                          handle_cycle, META_TAB_LIST_NORMAL);
+  // add_builtin_keybinding (display,
+  //                         "cycle-windows-backward",
+  //                         common_keybindings,
+  //                         META_KEY_BINDING_IS_REVERSED,
+  //                         META_KEYBINDING_ACTION_CYCLE_WINDOWS_BACKWARD,
+  //                         handle_cycle, META_TAB_LIST_NORMAL);
 
-  add_builtin_keybinding (display,
-                          "cycle-panels",
-                          common_keybindings,
-                          META_KEY_BINDING_NONE,
-                          META_KEYBINDING_ACTION_CYCLE_PANELS,
-                          handle_cycle, META_TAB_LIST_DOCKS);
+  // add_builtin_keybinding (display,
+  //                         "cycle-panels",
+  //                         common_keybindings,
+  //                         META_KEY_BINDING_NONE,
+  //                         META_KEYBINDING_ACTION_CYCLE_PANELS,
+  //                         handle_cycle, META_TAB_LIST_DOCKS);
 
-  add_builtin_keybinding (display,
-                          "cycle-panels-backward",
-                          common_keybindings,
-                          META_KEY_BINDING_IS_REVERSED,
-                          META_KEYBINDING_ACTION_CYCLE_PANELS_BACKWARD,
-                          handle_cycle, META_TAB_LIST_DOCKS);
+  // add_builtin_keybinding (display,
+  //                         "cycle-panels-backward",
+  //                         common_keybindings,
+  //                         META_KEY_BINDING_IS_REVERSED,
+  //                         META_KEYBINDING_ACTION_CYCLE_PANELS_BACKWARD,
+  //                         handle_cycle, META_TAB_LIST_DOCKS);
 
   /***********************************/
 
@@ -3967,12 +3958,12 @@ init_builtin_key_bindings (MetaDisplay *display)
                           META_KEYBINDING_ACTION_SHOW_DESKTOP,
                           handle_show_desktop, 0);
 
-  add_builtin_keybinding (display,
-                          "panel-main-menu",
-                          common_keybindings,
-                          META_KEY_BINDING_NONE,
-                          META_KEYBINDING_ACTION_PANEL_MAIN_MENU,
-                          handle_panel, META_KEYBINDING_ACTION_PANEL_MAIN_MENU);
+  // add_builtin_keybinding (display,
+  //                         "panel-main-menu",
+  //                         common_keybindings,
+  //                         META_KEY_BINDING_NONE,
+  //                         META_KEYBINDING_ACTION_PANEL_MAIN_MENU,
+  //                         handle_panel, META_KEYBINDING_ACTION_PANEL_MAIN_MENU);
 
   add_builtin_keybinding (display,
                           "panel-run-dialog",
@@ -3989,18 +3980,25 @@ init_builtin_key_bindings (MetaDisplay *display)
                           handle_set_spew_mark, 0);
 
   add_builtin_keybinding (display,
-                          "switch-monitor",
-                          mutter_keybindings,
+                          "toggle-recording",
+                          common_keybindings,
                           META_KEY_BINDING_NONE,
-                          META_KEYBINDING_ACTION_SWITCH_MONITOR,
-                          handle_switch_monitor, 0);
+                          META_KEYBINDING_ACTION_TOGGLE_RECORDING,
+                          NULL, 0);
 
-  add_builtin_keybinding (display,
-                          "rotate-monitor",
-                          mutter_keybindings,
-                          META_KEY_BINDING_NONE,
-                          META_KEYBINDING_ACTION_ROTATE_MONITOR,
-                          handle_rotate_monitor, 0);
+  // add_builtin_keybinding (display,
+  //                         "switch-monitor",
+  //                         mutter_keybindings,
+  //                         META_KEY_BINDING_NONE,
+  //                         META_KEYBINDING_ACTION_SWITCH_MONITOR,
+  //                         handle_switch_monitor, 0);
+
+  // add_builtin_keybinding (display,
+  //                         "rotate-monitor",
+  //                         mutter_keybindings,
+  //                         META_KEY_BINDING_NONE,
+  //                         META_KEYBINDING_ACTION_ROTATE_MONITOR,
+  //                         handle_rotate_monitor, 0);
 
 #ifdef HAVE_NATIVE_BACKEND
   MetaBackend *backend = meta_get_backend ();
@@ -4314,14 +4312,6 @@ init_builtin_key_bindings (MetaDisplay *display)
                           handle_move_to_workspace, 11);
 
   add_builtin_keybinding (display,
-                          "move-to-workspace-last",
-                          common_keybindings,
-                          META_KEY_BINDING_PER_WINDOW |
-                          META_KEY_BINDING_IGNORE_AUTOREPEAT,
-                          META_KEYBINDING_ACTION_MOVE_TO_WORKSPACE_LAST,
-                          handle_move_to_workspace_last, 0);
-
-  add_builtin_keybinding (display,
                           "move-to-workspace-left",
                           common_keybindings,
                           META_KEY_BINDING_PER_WINDOW,
@@ -4417,13 +4407,13 @@ init_builtin_key_bindings (MetaDisplay *display)
                           META_KEYBINDING_ACTION_MAXIMIZE_HORIZONTALLY,
                           handle_maximize_horizontally, 0);
 
-  add_builtin_keybinding (display,
-                          "always-on-top",
-                          common_keybindings,
-                          META_KEY_BINDING_PER_WINDOW |
-                          META_KEY_BINDING_IGNORE_AUTOREPEAT,
-                          META_KEYBINDING_ACTION_ALWAYS_ON_TOP,
-                          handle_always_on_top, 0);
+  // add_builtin_keybinding (display,
+  //                         "always-on-top",
+  //                         common_keybindings,
+  //                         META_KEY_BINDING_PER_WINDOW |
+  //                         META_KEY_BINDING_IGNORE_AUTOREPEAT,
+  //                         META_KEYBINDING_ACTION_ALWAYS_ON_TOP,
+  //                         handle_always_on_top, 0);
 
   add_builtin_keybinding (display,
                           "move-to-corner-nw",
