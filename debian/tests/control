@@ -1,7 +1,7 @@
-Tests: libmutter-6-dev
+Tests: libmuffin-dev
 Depends: build-essential,
          dbus,
-         libmutter-6-dev,
+         libmuffin-dev,
          xauth,
          xvfb
 Restrictions: allow-stderr superficial
