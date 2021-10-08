@@ -14,25 +14,6 @@ custom_target('muffin.desktop',
   install_dir: join_paths(datadir, 'applications'),
 )
 
-# Unconditionally use this dir to avoid a circular dep with gnomecc
-gnome_keybindings_keysdir = join_paths(datadir, 'gnome-control-center/keybindings')
-
-keybinding_xml_files = [
-  '50-mutter-navigation.xml',
-  '50-mutter-system.xml',
-  '50-mutter-windows.xml',
-]
-
-if have_wayland
-  keybinding_xml_files += [
-    '50-mutter-wayland.xml',
-  ]
-endif
-
-install_data(keybinding_xml_files,
-  install_dir: gnome_keybindings_keysdir,
-)
-
 xwayland_grab_default_access_rules = get_option('xwayland_grab_default_access_rules')
 
 gschema_config = configuration_data()
