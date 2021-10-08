@@ -75,6 +75,7 @@ Standards-Version: 4.5.0
 Package: gir1.2-meta-muffin-0.0
 Section: introspection
 Architecture: any
+Multi-Arch: same
 Breaks: gir1.2-muffin-3.0
 Replaces: gir1.2-muffin-3.0
 Depends: libmuffin0 (= ${binary:Version}),
@@ -91,9 +92,15 @@ Description: GObject introspection data for Muffin
 Package: libmuffin0
 Section: libs
 Architecture: any
-Replaces: muffin-doc
+Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends}
-Depends: muffin-common (= ${source:Version}), ${misc:Depends}, ${shlibs:Depends}
+Depends: adwaita-icon-theme,
+         gsettings-desktop-schemas (>= 3.33.0),
+         muffin-common (>= ${source:Version}),
+         ${misc:Depends},
+         ${shlibs:Depends}
+Replaces: muffin-doc
+Breaks: apparmor (<< 2.13.3-5~)
 Description: window and compositing manager (shared library)
  Muffin is a window manager performing compositing as well based on
  GTK+ and Clutter and used in Cinnamon desktop environment.
@@ -103,13 +110,14 @@ Description: window and compositing manager (shared library)
 Package: muffin
 Architecture: any
 Pre-Depends: ${misc:Pre-Depends}
-Depends:
- muffin-common (= ${source:Version}),
- zenity,
- ${misc:Depends},
- ${shlibs:Depends},
+Depends: adwaita-icon-theme,
+         gsettings-desktop-schemas (>= 3.33.0),
+         muffin-common (>= ${source:Version}),
+         zenity,
+         ${misc:Depends},
+         ${shlibs:Depends}
 Provides: x-window-manager
-Suggests: gnome-themes, xdg-user-dirs
+Suggests: xdg-user-dirs
 Description: window and compositing manager
  Muffin is a window manager performing compositing as well based on
  GTK+ and Clutter and used in Cinnamon desktop environment.
@@ -119,6 +127,7 @@ Description: window and compositing manager
 Package: muffin-common
 Section: misc
 Architecture: all
+Multi-Arch: foreign
 Depends: ${misc:Depends}
 Description: window and compositing manager (data files)
  Muffin is a window manager performing compositing as well based on
