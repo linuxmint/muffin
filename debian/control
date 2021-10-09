@@ -91,7 +91,7 @@ Description: GObject introspection data for Muffin
 Package: libmuffin0
 Section: libs
 Architecture: any
-Replaces: libmuffin-dev, muffin-doc
+Replaces: muffin-doc
 Pre-Depends: ${misc:Pre-Depends}
 Depends: muffin-common (= ${source:Version}), ${misc:Depends}, ${shlibs:Depends}
 Description: window and compositing manager (shared library)
@@ -139,3 +139,41 @@ Description: window and compositing manager (debugging symbols)
  GTK+ and Clutter and used in Cinnamon desktop environment.
  .
  This package contains the debugging symbols.
+
+Package: libmuffin-dev
+Section: libdevel
+Architecture: any
+Multi-Arch: same
+Breaks: libmuffin0 (<< 5.1)
+Replaces: libmuffin0 (<< 5.1)
+Depends: gir1.2-meta-muffin-0.0 (= ${binary:Version}),
+         gsettings-desktop-schemas-dev (>= 3.33.0),
+         libatk1.0-dev,
+         libcairo2-dev,
+         libdrm-dev,
+         libegl1-mesa-dev,
+         libgbm-dev,
+         libgdk-pixbuf2.0-dev,
+         libgles2-mesa-dev (>= 7.1~rc3-1~) | libgles2-dev,
+         libglib2.0-dev,
+         libgraphene-1.0-dev (>= 1.9.3),
+         libgtk-3-dev,
+         libinput-dev (>= 1.7),
+         libjson-glib-dev,
+         libmuffin0 (= ${binary:Version}),
+         libpango1.0-dev,
+         libudev-dev,
+         libwayland-dev,
+         libx11-dev,
+         libxcomposite-dev,
+         libxdamage-dev,
+         libxext-dev,
+         libxfixes-dev,
+         libxi-dev,
+         libxrandr-dev,
+         ${misc:Depends}
+Description: window and compositing manager (development files)
+ Muffin is a window manager performing compositing as well based on
+ GTK+ and Clutter and used in Cinnamon desktop environment.
+ .
+ This package contains the development files.
