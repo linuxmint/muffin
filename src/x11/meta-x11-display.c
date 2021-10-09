@@ -1209,7 +1209,7 @@ meta_x11_display_new (MetaDisplay *display, GError **error)
 
   xscreen = ScreenOfDisplay (xdisplay, number);
 
-  atom_restart_helper = XInternAtom (xdisplay, "_MUTTER_RESTART_HELPER", False);
+  atom_restart_helper = XInternAtom (xdisplay, "_MUFFIN_RESTART_HELPER", False);
   restart_helper_window = XGetSelectionOwner (xdisplay, atom_restart_helper);
   if (restart_helper_window)
     meta_set_is_restart (TRUE);

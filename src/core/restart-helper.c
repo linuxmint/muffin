@@ -58,7 +58,7 @@ main (int    argc,
 				    mask, &xwa);
 
   XSetSelectionOwner (display,
-		      XInternAtom (display, "_MUTTER_RESTART_HELPER", False),
+		      XInternAtom (display, "_MUFFIN_RESTART_HELPER", False),
 		      selection_window,
 		      CurrentTime);
 
