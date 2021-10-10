@@ -112,10 +112,8 @@ typedef struct
   xkb_mod_mask_t virtual_meta_mask;
   MetaKeyCombo overlay_key_combo;
   MetaResolvedKeyCombo overlay_resolved_key_combo;
-  gboolean overlay_key_only_pressed;
   MetaKeyCombo locate_pointer_key_combo;
   MetaResolvedKeyCombo locate_pointer_resolved_key_combo;
-  gboolean locate_pointer_key_only_pressed;
   MetaResolvedKeyCombo iso_next_group_combo[2];
   int n_iso_next_group_combos;
 
@@ -145,6 +143,7 @@ ClutterModifierType meta_display_get_window_grab_modifiers (MetaDisplay *display
 
 gboolean meta_prefs_add_keybinding          (const char           *name,
                                              GSettings            *settings,
+                                             const gchar         **bindings,
                                              MetaKeyBindingAction  action,
                                              MetaKeyBindingFlags   flags);
 

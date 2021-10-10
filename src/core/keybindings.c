@@ -587,8 +587,9 @@ index_binding (MetaKeyBindingManager *keys,
           if (i > 0)
             continue;
 
-          meta_warning ("Overwriting existing binding of keysym %x"
+          meta_warning ("%s - Overwriting existing binding of keysym %x"
                         " with keysym %x (keycode %x).\n",
+                        binding->name,
                         binding->combo.keysym,
                         existing->combo.keysym,
                         binding->resolved_combo.keycodes[i]);
@@ -958,6 +959,7 @@ static gboolean
 add_keybinding_internal (MetaDisplay          *display,
                          const char           *name,
                          GSettings            *settings,
+                         const char          **bindings,
                          MetaKeyBindingFlags   flags,
                          MetaKeyBindingAction  action,
                          MetaKeyHandlerFunc    func,
@@ -967,7 +969,7 @@ add_keybinding_internal (MetaDisplay          *display,
 {
   MetaKeyHandler *handler;
 
-  if (!meta_prefs_add_keybinding (name, settings, action, flags))
+  if (!meta_prefs_add_keybinding (name, settings, bindings, action, flags))
     return FALSE;
 
   handler = g_new0 (MetaKeyHandler, 1);
@@ -993,7 +995,7 @@ add_builtin_keybinding (MetaDisplay          *display,
                         MetaKeyHandlerFunc    handler,
                         int                   handler_arg)
 {
-  return add_keybinding_internal (display, name, settings,
+  return add_keybinding_internal (display, name, settings, NULL,
                                   flags | META_KEY_BINDING_BUILTIN,
                                   action, handler, handler_arg, NULL, NULL);
 }
@@ -1032,7 +1034,39 @@ meta_display_add_keybinding (MetaDisplay         *display,
 {
   guint new_action = next_dynamic_keybinding_action ();
 
-  if (!add_keybinding_internal (display, name, settings, flags, new_action,
+  if (!add_keybinding_internal (display, name, settings, NULL, flags, new_action,
+                                handler, 0, user_data, free_data))
+    return META_KEYBINDING_ACTION_NONE;
+
+  return new_action;
+}
+
+/**
+ * meta_display_add_custom_keybinding:
+ * @display: a #MetaDisplay
+ * @name: the binding's unique name
+ * @bindings: (allow-none) (array zero-terminated=1): array of parseable keystrokes
+ * @callback: function to run when the keybinding is invoked
+ * @user_data: the data to pass to @handler
+ * @free_data: function to free @user_data
+ *
+ *
+ * Use meta_display_remove_custom_keybinding() to remove the binding.
+ *
+ * Returns: %TRUE if the keybinding was added successfully,
+ *          otherwise %FALSE
+ */
+guint
+meta_display_add_custom_keybinding (MetaDisplay         *display,
+                                    const char          *name,
+                                    const char         **bindings,
+                                    MetaKeyHandlerFunc   handler,
+                                    gpointer             user_data,
+                                    GDestroyNotify       free_data)
+{
+  guint new_action = next_dynamic_keybinding_action ();
+
+  if (!add_keybinding_internal (display, name, NULL, bindings, META_KEY_BINDING_PER_WINDOW, new_action,
                                 handler, 0, user_data, free_data))
     return META_KEYBINDING_ACTION_NONE;
 
@@ -1062,7 +1096,7 @@ meta_display_remove_keybinding (MetaDisplay *display,
   return TRUE;
 }
 
-static guint
+guint
 get_keybinding_action (MetaKeyBindingManager *keys,
                        MetaResolvedKeyCombo  *resolved_combo)
 {
