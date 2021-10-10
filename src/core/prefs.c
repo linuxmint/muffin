@@ -2050,7 +2050,15 @@ meta_prefs_add_keybinding (const char           *name,
       queue_changed (META_PREF_KEYBINDINGS);
     }
 
-  strokes = g_settings_get_strv (settings, name);
+  if (g_str_has_prefix (name, "RUNTIME-"))
+    {
+      strokes = g_settings_get_strv (settings, "bindings");
+    }
+  else
+  {
+    strokes = g_settings_get_strv (settings, name);
+  }
+
   update_binding (pref, strokes);
   g_strfreev (strokes);
 
