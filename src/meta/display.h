@@ -153,6 +153,14 @@ guint meta_display_add_keybinding    (MetaDisplay         *display,
                                       GDestroyNotify       free_data);
 
 META_EXPORT
+guint meta_display_add_custom_keybinding    (MetaDisplay         *display,
+                                                const char          *name,
+                                                const char         **bindings,
+                                                MetaKeyHandlerFunc   callback,
+                                                gpointer             user_data,
+                                                GDestroyNotify       free_data);
+
+META_EXPORT
 gboolean meta_display_remove_keybinding (MetaDisplay         *display,
                                          const char          *name);
 
