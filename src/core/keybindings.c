@@ -1062,7 +1062,7 @@ meta_display_remove_keybinding (MetaDisplay *display,
   return TRUE;
 }
 
-static guint
+guint
 get_keybinding_action (MetaKeyBindingManager *keys,
                        MetaResolvedKeyCombo  *resolved_combo)
 {
