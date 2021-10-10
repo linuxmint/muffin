@@ -1075,9 +1075,6 @@ get_keybinding_action (MetaKeyBindingManager *keys,
    * of mutter keybindings while holding a grab, the overlay-key-only-pressed
    * tracking is left to the plugin here.
    */
-  if (resolved_key_combo_intersect (resolved_combo,
-                                    &keys->overlay_resolved_key_combo))
-    return META_KEYBINDING_ACTION_OVERLAY_KEY;
 
   if (resolved_key_combo_intersect (resolved_combo,
                                     &keys->locate_pointer_resolved_key_combo))
