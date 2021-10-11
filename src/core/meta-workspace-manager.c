@@ -993,6 +993,23 @@ meta_workspace_manager_unshow_desktop (MetaWorkspaceManager *workspace_manager)
                  0, NULL);
 }
 
+void
+meta_workspace_manager_toggle_desktop (MetaWorkspaceManager *workspace_manager,
+                                       guint32               timestamp)
+{
+  if (workspace_manager->active_workspace->showing_desktop)
+    {
+      meta_workspace_manager_unshow_desktop (workspace_manager);
+      meta_workspace_focus_default_window (workspace_manager->active_workspace,
+                                           NULL,
+                                           timestamp);
+    }
+  else
+    {
+      meta_workspace_manager_show_desktop (workspace_manager, timestamp);
+    }
+}
+
 /**
  * meta_workspace_manager_get_workspaces: (skip)
  * @workspace_manager: a #MetaWorkspaceManager
