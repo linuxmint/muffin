@@ -75,4 +75,15 @@ void meta_workspace_manager_override_workspace_layout (MetaWorkspaceManager *wor
                                                        gboolean              vertical_layout,
                                                        int                   n_rows,
                                                        int                   n_columns);
+
+/* Show/hide the desktop (temporarily hide all windows) */
+META_EXPORT
+void meta_workspace_manager_show_desktop   (MetaWorkspaceManager *workspace_manager,
+                                            guint32               timestamp);
+META_EXPORT
+void meta_workspace_manager_unshow_desktop (MetaWorkspaceManager *workspace_manager);
+META_EXPORT
+void meta_workspace_manager_toggle_desktop (MetaWorkspaceManager *workspace_manager,
+                                            guint32               timestamp);
+
 #endif /* META_WORKSPACE_MANAGER_H */

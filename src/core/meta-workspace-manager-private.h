@@ -79,11 +79,6 @@ void meta_workspace_manager_free_workspace_layout (MetaWorkspaceLayout *layout);
 void meta_workspace_manager_minimize_all_on_active_workspace_except (MetaWorkspaceManager *workspace_manager,
                                                                      MetaWindow           *keep);
 
-/* Show/hide the desktop (temporarily hide all windows) */
-void meta_workspace_manager_show_desktop   (MetaWorkspaceManager *workspace_manager,
-                                            guint32               timestamp);
-void meta_workspace_manager_unshow_desktop (MetaWorkspaceManager *workspace_manager);
-
 void meta_workspace_manager_workspace_switched (MetaWorkspaceManager *workspace_manager,
                                                 int                   from,
                                                 int                   to,

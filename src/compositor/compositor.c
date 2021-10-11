@@ -114,6 +114,7 @@ typedef struct _MetaCompositorPrivate
   ClutterActor *window_group;
   ClutterActor *top_window_group;
   ClutterActor *feedback_group;
+  ClutterActor *bottom_window_group;
 
   ClutterActor *background_actor;
 
@@ -281,6 +282,27 @@ meta_get_feedback_group_for_display (MetaDisplay *display)
   priv = meta_compositor_get_instance_private (compositor);
 
   return priv->feedback_group;
+}
+
+/**
+ * meta_get_bottom_window_group_for_display:
+ * @display: a #MetaDisplay
+ *
+ * Returns: (transfer none): The bottom window group corresponding to @display
+ */
+ClutterActor *
+meta_get_bottom_window_group_for_display (MetaDisplay *display)
+{
+  MetaCompositor *compositor;
+  MetaCompositorPrivate *priv;
+
+  g_return_val_if_fail (display, NULL);
+
+  compositor = get_compositor_for_display (display);
+  g_return_val_if_fail (compositor, NULL);
+  priv = meta_compositor_get_instance_private (compositor);
+
+  return priv->bottom_window_group;
 }
 
 /**
@@ -574,12 +596,14 @@ meta_compositor_manage (MetaCompositor *compositor)
 
   priv->window_group = meta_window_group_new (display);
   priv->top_window_group = meta_window_group_new (display);
+  priv->bottom_window_group = meta_window_group_new (display);
   priv->feedback_group = meta_window_group_new (display);
   priv->background_actor = meta_x11_background_actor_new_for_display (display);
 
   clutter_actor_add_child (priv->window_group, priv->background_actor);
   clutter_actor_add_child (priv->stage, priv->window_group);
   clutter_actor_add_child (priv->stage, priv->top_window_group);
+  clutter_actor_add_child (priv->stage, priv->bottom_window_group);
   clutter_actor_add_child (priv->stage, priv->feedback_group);
 
   META_COMPOSITOR_GET_CLASS (compositor)->manage (compositor);
@@ -628,6 +652,8 @@ meta_compositor_add_window (MetaCompositor    *compositor,
 
   if (window->layer == META_LAYER_OVERRIDE_REDIRECT)
     window_group = priv->top_window_group;
+  else if (window->type == META_WINDOW_DESKTOP)
+    window_group = priv->bottom_window_group;
   else
     window_group = priv->window_group;
 
@@ -1256,6 +1282,7 @@ meta_compositor_dispose (GObject *object)
   g_clear_pointer (&priv->background_actor, clutter_actor_destroy);
   g_clear_pointer (&priv->window_group, clutter_actor_destroy);
   g_clear_pointer (&priv->top_window_group, clutter_actor_destroy);
+  g_clear_pointer (&priv->bottom_window_group, clutter_actor_destroy);
   g_clear_pointer (&priv->feedback_group, clutter_actor_destroy);
   g_clear_pointer (&priv->windows, g_list_free);
 
