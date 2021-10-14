@@ -43,7 +43,13 @@ MUFFIN_PLUGIN_DIR="$libdir/$PACKAGE/plugins"
 AC_SUBST(MUFFIN_PLUGIN_DIR)
 
 # Honor aclocal flags
-AC_SUBST([ACLOCAL_AMFLAGS], ["-I $ac_macro_dir \${ACLOCAL_FLAGS}"])
+  dnl ensure that when the Automake generated makefile calls aclocal,
+  dnl it honours the $ACLOCAL_FLAGS environment variable
+  ACLOCAL_AMFLAGS="\${ACLOCAL_FLAGS}"
+  if test -n "$ac_macro_dir"; then
+    ACLOCAL_AMFLAGS="-I $ac_macro_dir $ACLOCAL_AMFLAGS"
+  fi
+  AC_SUBST([ACLOCAL_AMFLAGS])
 
 GETTEXT_PACKAGE=muffin
 AC_SUBST(GETTEXT_PACKAGE)
