@@ -1,3 +1,21 @@
+muffin (5.0.2) uma; urgency=medium
+
+  [ Michael Webster ]
+  * Don't allow fullscreen windows to also become decorated.
+  * window.c: Fix de-tiling using keyboard shortcuts.
+
+  [ Nikita Karnauhov ]
+  * compositor.c: Skip offscreen windows when unredirecting.
+
+  [ Michael Webster ]
+  * Fix regression caused by 610d60d953cb1 - it was affecting programs that started in fullscreen mode.
+
+  [ JosephMcc ]
+  * window.c: Properly update gtK_edge_constraints
+  * window.c: Update a wrong value in our edge constraints
+
+ -- Clement Lefebvre <root@linuxmint.com>  Fri, 15 Oct 2021 15:40:26 +0100
+
 muffin (5.0.1) uma; urgency=medium
 
   [ Michael Webster ]
