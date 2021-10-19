@@ -358,7 +358,8 @@ meta_display_handle_event (MetaDisplay        *display,
    * in a keyboard-grabbed mode like moving a window, we don't
    * want to pass the key event to the compositor or Wayland at all.
    */
-  if (meta_keybindings_process_event (display, window, event))
+  if (display->event_route != META_EVENT_ROUTE_COMPOSITOR_GRAB &&
+      meta_keybindings_process_event (display, window, event))
     {
       bypass_clutter = TRUE;
       bypass_wayland = TRUE;

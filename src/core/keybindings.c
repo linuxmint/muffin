@@ -72,6 +72,8 @@
                            CLUTTER_BUTTON4_MASK |       \
                            CLUTTER_BUTTON5_MASK)
 
+static gboolean modifier_key_only_pressed = FALSE;
+
 static gboolean add_builtin_keybinding (MetaDisplay          *display,
                                         const char           *name,
                                         GSettings            *settings,
@@ -190,9 +192,6 @@ static gboolean process_keyboard_move_grab (MetaDisplay     *display,
 static gboolean process_keyboard_resize_grab (MetaDisplay     *display,
                                               MetaWindow      *window,
                                               ClutterKeyEvent *event);
-
-static void maybe_update_locate_pointer_keygrab (MetaDisplay *display,
-                                                 gboolean     grab);
 
 static GHashTable *key_handlers;
 static GHashTable *external_grabs;
@@ -1069,17 +1068,6 @@ get_keybinding_action (MetaKeyBindingManager *keys,
 {
   MetaKeyBinding *binding;
 
-  /* This is much more vague than the MetaDisplay::overlay-key signal,
-   * which is only emitted if the overlay-key is the only key pressed;
-   * as this method is primarily intended for plugins to allow processing
-   * of mutter keybindings while holding a grab, the overlay-key-only-pressed
-   * tracking is left to the plugin here.
-   */
-
-  if (resolved_key_combo_intersect (resolved_combo,
-                                    &keys->locate_pointer_resolved_key_combo))
-    return META_KEYBINDING_ACTION_LOCATE_POINTER_KEY;
-
   binding = get_keybinding (keys, resolved_combo);
   if (binding)
     {
@@ -1352,8 +1340,6 @@ prefs_changed_callback (MetaPreference pref,
   switch (pref)
     {
     case META_PREF_LOCATE_POINTER:
-      maybe_update_locate_pointer_keygrab (display,
-                                           meta_prefs_is_locate_pointer_enabled());
       break;
     case META_PREF_KEYBINDINGS:
       ungrab_key_bindings (display);
@@ -1525,12 +1511,6 @@ meta_x11_display_change_keygrabs (MetaX11Display *x11_display,
 {
   MetaKeyBindingManager *keys = &x11_display->display->key_binding_manager;
   int i;
-
-  if (keys->overlay_resolved_key_combo.len != 0)
-    meta_change_keygrab (keys, x11_display->xroot,
-                         grab, &keys->overlay_resolved_key_combo);
-
-  maybe_update_locate_pointer_keygrab (x11_display->display, grab);
 
   for (i = 0; i < keys->n_iso_next_group_combos; i++)
     meta_change_keygrab (keys, x11_display->xroot,
@@ -1946,10 +1926,44 @@ meta_key_binding_has_handler_func (MetaKeyBinding *binding)
   return (!!binding->handler->func || !!binding->handler->default_func);
 }
 
+static void
+strip_self_mod (guint                keyval,
+                ClutterModifierType  event_state,
+                ClutterModifierType *stripped_mod)
+{
+  unsigned long mod = 0;
+
+  switch (keyval)
+    {
+      case CLUTTER_KEY_Super_L:
+      case CLUTTER_KEY_Super_R:
+        mod = CLUTTER_MOD4_MASK;
+        break;
+      case CLUTTER_KEY_Control_L:
+      case CLUTTER_KEY_Control_R:
+        mod = CLUTTER_CONTROL_MASK;
+        break;
+      case CLUTTER_KEY_Alt_L:
+      case CLUTTER_KEY_Alt_R:
+        mod = CLUTTER_MOD1_MASK;
+        break;
+      case CLUTTER_KEY_Shift_L:
+      case CLUTTER_KEY_Shift_R:
+        mod = CLUTTER_SHIFT_MASK;
+        break;
+      default:
+        mod = 0;
+        break;
+    }
+
+  *stripped_mod = event_state & ~mod;
+}
+
 static gboolean
 process_event (MetaDisplay          *display,
                MetaWindow           *window,
-               ClutterKeyEvent      *event)
+               ClutterKeyEvent      *event,
+               gboolean              allow_release)
 {
   MetaKeyBindingManager *keys = &display->key_binding_manager;
   xkb_keycode_t keycode = (xkb_keycode_t) event->hardware_keycode;
@@ -1957,10 +1971,14 @@ process_event (MetaDisplay          *display,
   MetaKeyBinding *binding;
 
   /* we used to have release-based bindings but no longer. */
-  if (event->type == CLUTTER_KEY_RELEASE)
+  if (event->type == CLUTTER_KEY_RELEASE && !allow_release)
     return FALSE;
 
   resolved_combo.mask = mask_from_event_params (keys, event->modifier_state);
+
+  strip_self_mod (event->keyval,
+                  mask_from_event_params (keys, event->modifier_state),
+                  &resolved_combo.mask);
 
   binding = get_keybinding (keys, &resolved_combo);
 
@@ -2020,11 +2038,36 @@ process_event (MetaDisplay          *display,
 }
 
 static gboolean
+modifier_only_keyval (guint keyval)
+{
+  return keyval == CLUTTER_KEY_Super_L ||
+         keyval == CLUTTER_KEY_Super_R ||
+         keyval == CLUTTER_KEY_Control_L ||
+         keyval == CLUTTER_KEY_Control_R ||
+         keyval == CLUTTER_KEY_Alt_L ||
+         keyval == CLUTTER_KEY_Alt_R ||
+         keyval == CLUTTER_KEY_Shift_L ||
+         keyval == CLUTTER_KEY_Shift_R;
+}
+
+static void
+get_combo (MetaKeyBindingManager *keys,
+           unsigned int           code,
+           unsigned long          mask,
+           MetaResolvedKeyCombo  *combo)
+{
+  xkb_keycode_t keycode = (xkb_keycode_t) code;
+  MetaResolvedKeyCombo resolved_combo = { &keycode, 1 };
+
+  resolved_combo.mask = mask_from_event_params (keys, mask);
+  *combo = resolved_combo;
+}
+
+static gboolean
 process_special_modifier_key (MetaDisplay          *display,
                               ClutterKeyEvent      *event,
                               MetaWindow           *window,
-                              gboolean             *modifier_press_only,
-                              MetaResolvedKeyCombo *resolved_key_combo,
+                              gboolean             *allow_key_up,
                               GFunc                 trigger_callback)
 {
   MetaKeyBindingManager *keys = &display->key_binding_manager;
@@ -2036,33 +2079,27 @@ process_special_modifier_key (MetaDisplay          *display,
   else
     xdisplay = NULL;
 
-  if (*modifier_press_only)
+  if (event->type == CLUTTER_KEY_PRESS)
     {
-      if (! resolved_key_combo_has_keycode (resolved_key_combo,
-                                            event->hardware_keycode))
+        /* check if we're just Pressing a captured modifier at this time */
+      if (modifier_only_keyval (event->keyval))
         {
-          *modifier_press_only = FALSE;
+          /* remember this state, because we'll need to know it for subsequent events */
+          modifier_key_only_pressed = TRUE;
+          /* We keep the keyboard frozen - this allows us to use ReplayKeyboard
+           * on the next event if it's not the release of this modifier key */
+          if (xdisplay)
+            XIAllowEvents (xdisplay,
+                           clutter_input_device_get_device_id (event->device),
+                           XISyncDevice, event->time);
 
-          /* If this is a wayland session, we can avoid the shenanigans
-           * about passive grabs below, and let the event continue to
-           * be processed through the regular paths.
-           */
-          if (!xdisplay)
-            return FALSE;
+          return TRUE;
+        }
+      else
+        {
+          modifier_key_only_pressed = FALSE;
 
-          /* OK, the user hit modifier+key rather than pressing and
-           * releasing the modifier key alone. We want to handle the key
-           * sequence "normally". Unfortunately, using
-           * XAllowEvents(..., ReplayKeyboard, ...) doesn't quite
-           * work, since global keybindings won't be activated ("this
-           * time, however, the function ignores any passive grabs at
-           * above (toward the root of) the grab_window of the grab
-           * just released.") So, we first explicitly check for one of
-           * our global keybindings, and if not found, we then replay
-           * the event. Other clients with global grabs will be out of
-           * luck.
-           */
-          if (process_event (display, window, event))
+          if (process_event (display, window, event, FALSE))
             {
               /* As normally, after we've handled a global key
                * binding, we unfreeze the keyboard but keep the grab
@@ -2073,6 +2110,7 @@ process_special_modifier_key (MetaDisplay          *display,
                 XIAllowEvents (xdisplay,
                                clutter_input_device_get_device_id (event->device),
                                XIAsyncDevice, event->time);
+              return TRUE;
             }
           else
             {
@@ -2082,77 +2120,38 @@ process_special_modifier_key (MetaDisplay          *display,
                 XIAllowEvents (xdisplay,
                                clutter_input_device_get_device_id (event->device),
                                XIReplayDevice, event->time);
+              return FALSE;
             }
         }
-      else if (event->type == CLUTTER_KEY_RELEASE)
-        {
-          MetaKeyBinding *binding;
-
-          *modifier_press_only = FALSE;
-
-          /* We want to unfreeze events, but keep the grab so that if the user
-           * starts typing into the overlay we get all the keys */
-          if (xdisplay)
-            XIAllowEvents (xdisplay,
-                           clutter_input_device_get_device_id (event->device),
-                           XIAsyncDevice, event->time);
-
-          binding = get_keybinding (keys, resolved_key_combo);
-          if (binding &&
-              meta_compositor_filter_keybinding (display->compositor, binding))
-            return TRUE;
-          trigger_callback (display, NULL);
-        }
-      else
-        {
-          /* In some rare race condition, mutter might not receive the Super_L
-           * KeyRelease event because:
-           * - the compositor might end the modal mode and call XIUngrabDevice
-           *   while the key is still down
-           * - passive grabs are only activated on KeyPress and not KeyRelease.
-           *
-           * In this case, modifier_press_only might be wrong.
-           * Mutter still ought to acknowledge events, otherwise the X server
-           * will not send the next events.
-           *
-           * https://bugzilla.gnome.org/show_bug.cgi?id=666101
-           */
-          if (xdisplay)
-            XIAllowEvents (xdisplay,
-                           clutter_input_device_get_device_id (event->device),
-                           XIAsyncDevice, event->time);
-        }
-
-      return TRUE;
-    }
-  else if (event->type == CLUTTER_KEY_PRESS &&
-           ((event->modifier_state & ~(IGNORED_MODIFIERS)) & CLUTTER_MODIFIER_MASK) == 0 &&
-           resolved_key_combo_has_keycode (resolved_key_combo,
-                                           event->hardware_keycode))
-    {
-      *modifier_press_only = TRUE;
-      /* We keep the keyboard frozen - this allows us to use ReplayKeyboard
-       * on the next event if it's not the release of the modifier key */
-      if (xdisplay)
-        XIAllowEvents (xdisplay,
-                       clutter_input_device_get_device_id (event->device),
-                       XISyncDevice, event->time);
-
-      return TRUE;
     }
   else
-    return FALSE;
+    {
+      /* We only care about key releases for modifier-only bindings -
+       * and only when that release directly follows a press.  When this happens,
+       * negate modifier_only_is_down, and allow the binding handler to accept
+       * a key release.
+       */
+      if (modifier_only_keyval (event->keyval))
+        {
+          if (modifier_key_only_pressed)
+            *allow_key_up = TRUE;
+          modifier_key_only_pressed = FALSE;
+        }
+    }
+
+  return FALSE;
 }
 
 
 static gboolean
-process_overlay_key (MetaDisplay     *display,
-                     ClutterKeyEvent *event,
-                     MetaWindow      *window)
+process_modifier_only (MetaDisplay     *display,
+                       ClutterKeyEvent *event,
+                       MetaWindow      *window,
+                       gboolean        *allow_key_up)
 {
   MetaKeyBindingManager *keys = &display->key_binding_manager;
 
-  if (display->focus_window && !keys->overlay_key_only_pressed)
+  if (display->focus_window && !modifier_key_only_pressed)
     {
       ClutterInputDevice *source;
 
@@ -2164,8 +2163,7 @@ process_overlay_key (MetaDisplay     *display,
   return process_special_modifier_key (display,
                                        event,
                                        window,
-                                       &keys->overlay_key_only_pressed,
-                                       &keys->overlay_resolved_key_combo,
+                                       allow_key_up,
                                        (GFunc) meta_display_overlay_key_activate);
 }
 
@@ -2173,21 +2171,6 @@ static void
 handle_locate_pointer (MetaDisplay *display)
 {
   meta_compositor_locate_pointer (display->compositor);
-}
-
-static gboolean
-process_locate_pointer_key (MetaDisplay     *display,
-                            ClutterKeyEvent *event,
-                            MetaWindow      *window)
-{
-  MetaKeyBindingManager *keys = &display->key_binding_manager;
-
-  return process_special_modifier_key (display,
-                                       event,
-                                       window,
-                                       &keys->locate_pointer_key_only_pressed,
-                                       &keys->locate_pointer_resolved_key_combo,
-                                       (GFunc) handle_locate_pointer);
 }
 
 static gboolean
@@ -2234,15 +2217,13 @@ process_key_event (MetaDisplay     *display,
 {
   gboolean keep_grab;
   gboolean all_keys_grabbed;
+  gboolean allow_key_up = FALSE;
 
   all_keys_grabbed = window ? window->all_keys_grabbed : FALSE;
   if (!all_keys_grabbed)
     {
-      if (process_overlay_key (display, event, window))
+      if (process_modifier_only (display, event, window, &allow_key_up))
         return TRUE;
-
-      if (process_locate_pointer_key (display, event, window))
-        return FALSE;  /* Continue with the event even if handled */
 
       if (process_iso_next_group (display, event))
         return TRUE;
@@ -2300,7 +2281,7 @@ process_key_event (MetaDisplay     *display,
     }
 
   /* Do the normal keybindings */
-  return process_event (display, window, event);
+  return process_event (display, window, event, allow_key_up);
 }
 
 /* Handle a key event. May be called recursively: some key events cause
@@ -2330,8 +2311,7 @@ meta_keybindings_process_event (MetaDisplay        *display,
     case CLUTTER_BUTTON_RELEASE:
     case CLUTTER_TOUCH_BEGIN:
     case CLUTTER_TOUCH_END:
-      keys->overlay_key_only_pressed = FALSE;
-      keys->locate_pointer_key_only_pressed = FALSE;
+      modifier_key_only_pressed = FALSE;
       return FALSE;
 
     case CLUTTER_KEY_PRESS:
