@@ -598,7 +598,7 @@ meta_compositor_manage (MetaCompositor *compositor)
   priv->top_window_group = meta_window_group_new (display);
   priv->bottom_window_group = meta_window_group_new (display);
   priv->feedback_group = meta_window_group_new (display);
-  priv->background_actor = g_object_ref_sink (meta_x11_background_actor_new_for_display (display));
+  priv->background_actor = meta_x11_background_actor_new_for_display (display);
 
   clutter_actor_add_child (priv->window_group, priv->background_actor);
   clutter_actor_add_child (priv->stage, priv->window_group);
@@ -609,6 +609,8 @@ meta_compositor_manage (MetaCompositor *compositor)
   META_COMPOSITOR_GET_CLASS (compositor)->manage (compositor);
 
   priv->plugin_mgr = meta_plugin_manager_new (compositor);
+
+  clutter_actor_show (priv->stage);
 }
 
 void
