@@ -189,10 +189,11 @@ create_context (GSettings *settings)
       return NULL;
     }
 
-  ca_proplist_sets (props, CA_PROP_APPLICATION_NAME, "Mutter");
+  ca_proplist_sets (props, CA_PROP_APPLICATION_NAME, "Muffin");
 
-  enabled = g_settings_get_boolean (settings, EVENT_SOUNDS_KEY);
-  ca_proplist_sets (props, CA_PROP_CANBERRA_ENABLE, enabled ? "1" : "0");
+  // enabled = g_settings_get_boolean (settings, EVENT_SOUNDS_KEY);
+  // ca_proplist_sets (props, CA_PROP_CANBERRA_ENABLE, enabled ? "1" : "0");
+  ca_proplist_sets (props, CA_PROP_CANBERRA_ENABLE, "1");
 
   theme_name = g_settings_get_string (settings, THEME_NAME_KEY);
   ca_proplist_sets (props, CA_PROP_CANBERRA_XDG_THEME_NAME, theme_name);
@@ -209,7 +210,7 @@ meta_sound_player_init (MetaSoundPlayer *player)
 {
   player->queue = g_thread_pool_new ((GFunc) play_sound,
 				     player, 1, FALSE, NULL);
-  player->settings = g_settings_new ("org.gnome.desktop.sound");
+  player->settings = g_settings_new ("org.cinnamon.desktop.sound");
   player->context = create_context (player->settings);
 
   g_signal_connect (player->settings, "changed",
