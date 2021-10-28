@@ -52,13 +52,6 @@ typedef struct _MetaUISlave    MetaUISlave;
 
 typedef struct MetaEdgeResistanceData MetaEdgeResistanceData;
 
-typedef enum
-{
-  META_LIST_DEFAULT                   = 0,      /* normal windows */
-  META_LIST_INCLUDE_OVERRIDE_REDIRECT = 1 << 0, /* normal and O-R */
-  META_LIST_SORTED                    = 1 << 1, /* sort list by mru */
-} MetaListWindowsFlags;
-
 #define _NET_WM_STATE_REMOVE        0    /* remove/unset property */
 #define _NET_WM_STATE_ADD           1    /* add/set property */
 #define _NET_WM_STATE_TOGGLE        2    /* toggle property  */
@@ -303,10 +296,6 @@ void        meta_display_unregister_wayland_window (MetaDisplay *display,
 
 void        meta_display_notify_window_created (MetaDisplay  *display,
                                                 MetaWindow   *window);
-
-META_EXPORT_TEST
-GSList*     meta_display_list_windows        (MetaDisplay          *display,
-                                              MetaListWindowsFlags  flags);
 
 MetaDisplay* meta_display_for_x_display  (Display     *xdisplay);
 
