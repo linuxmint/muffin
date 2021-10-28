@@ -334,6 +334,9 @@ META_EXPORT
 guint32     meta_window_get_user_time (MetaWindow *window);
 
 META_EXPORT
+uint32_t meta_window_get_client_pid (MetaWindow *window);
+
+META_EXPORT
 int         meta_window_get_pid (MetaWindow *window);
 
 META_EXPORT

@@ -314,4 +314,15 @@ META_EXPORT
 void meta_display_unset_input_focus (MetaDisplay *display,
                                      guint32      timestamp);
 
+typedef enum
+{
+  META_LIST_DEFAULT                   = 0,      /* normal windows */
+  META_LIST_INCLUDE_OVERRIDE_REDIRECT = 1 << 0, /* normal and O-R */
+  META_LIST_SORTED                    = 1 << 1, /* sort list by mru */
+} MetaListWindowsFlags;
+
+META_EXPORT
+GSList*     meta_display_list_windows        (MetaDisplay          *display,
+                                              MetaListWindowsFlags  flags);
+
 #endif
