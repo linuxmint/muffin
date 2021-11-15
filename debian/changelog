@@ -1,3 +1,30 @@
+muffin (5.2.0) una; urgency=medium
+
+  [ Michael Webster ]
+  * Don't allow fullscreen windows to also become decorated.
+  * window.c: Fix de-tiling using keyboard shortcuts.
+
+  [ Nikita Karnauhov ]
+  * compositor.c: Skip offscreen windows when unredirecting.
+
+  [ Michael Webster ]
+  * Fix regression caused by 610d60d953cb1 - it was affecting programs that started in fullscreen mode.
+
+  [ JosephMcc ]
+  * window.c: Properly update gtK_edge_constraints
+  * window.c: Update a wrong value in our edge constraints
+
+  [ Michael Webster ]
+  * debian/control: Update build dep, remove transitional package.
+
+  [ JosephMcc ]
+  * meta-shadow-factory: Tweak window shadows
+
+  [ Pro-pra ]
+  * build: improve check ACLOCAL_AMFLAGS (#605)
+
+ -- Clement Lefebvre <root@linuxmint.com>  Mon, 15 Nov 2021 12:53:52 +0000
+
 muffin (5.0.1) uma; urgency=medium
 
   [ Michael Webster ]
