@@ -2664,23 +2664,24 @@ handle_move_to_center  (MetaDisplay    *display,
                         gpointer        dummy)
 {
   MetaFrameBorders borders;
-  const MetaMonitorInfo *monitor;
-  int window_width, window_height;
+  MetaRectangle work_area, outer_rect;
   int center_x, center_y;
+  int x, y;
 
-  monitor = meta_screen_get_current_monitor_info (window->screen);
+  meta_window_get_work_area_current_monitor (window, &work_area);
+  meta_window_get_input_rect (window, &outer_rect);
   meta_frame_calc_borders (window->frame, &borders);
 
-  window_width = (window->frame ? window->frame->rect.width : window->rect.width);
-  window_height = (window->frame ? window->frame->rect.height : window->rect.height);
+  center_x = work_area.x + work_area.width / 2;
+  center_y = work_area.y + work_area.height / 2;
 
-  center_x = monitor->rect.x + monitor->rect.width / 2;
-  center_y = monitor->rect.y + monitor->rect.height / 2;
+  x = center_x - (window->rect.width / 2);
+  y = center_y - (outer_rect.height / 2) + borders.visible.top + borders.invisible.top;
 
   meta_window_move_resize (window,
           TRUE,
-          center_x + borders.visible.left - window_width / 2,
-          center_y + borders.visible.top - window_height / 2,
+          x,
+          y,
           window->rect.width,
           window->rect.height);
 }

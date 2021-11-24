@@ -136,25 +136,19 @@ place_in_center (MetaWindow *window,
                  int *new_x,
                  int *new_y)
 {
-  int center_x, center_y;
-  const MetaMonitorInfo *xi;
+  int center_x, center_y, monitor_n;
+  MetaRectangle work_area, outer_rect;
 
-  xi = meta_screen_get_current_monitor_info (window->screen);
-  center_x = *new_x + xi->rect.width / 2;
-  center_y = *new_y + xi->rect.height / 2;
+  monitor_n = meta_screen_get_current_monitor (window->screen);
 
-  int window_width, window_height;
-  window_width = window->frame ? window->frame->rect.width : window->rect.width;
-  window_height = window->frame ? window->frame->rect.height : window->rect.height;
+  meta_window_get_work_area_for_monitor (window, monitor_n, &work_area);
+  meta_window_get_input_rect (window, &outer_rect);
 
-  if (borders) {
-    *new_x = center_x + borders->visible.left - window_width / 2;
-    *new_y = center_y + borders->visible.top  - window_height / 2;
-  }
-  else {
-    *new_x = center_x - window_width / 2;
-    *new_y = center_y - window_height / 2;
-  }
+  center_x = work_area.x + work_area.width / 2;
+  center_y = work_area.y + work_area.height / 2;
+
+  *new_x = center_x - (window->rect.width / 2);
+  *new_y = center_y - (outer_rect.height / 2) + borders->visible.top + borders->invisible.top;
 
   return TRUE;
 }
