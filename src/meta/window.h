@@ -452,4 +452,7 @@ uint64_t meta_window_get_id (MetaWindow *window);
 META_EXPORT
 MetaWindowClientType meta_window_get_client_type (MetaWindow *window);
 
+META_EXPORT
+const char *meta_window_get_icon_name (MetaWindow *window);
+
 #endif

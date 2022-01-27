@@ -186,6 +186,12 @@ struct _MetaWindow
   cairo_surface_t *icon;
   cairo_surface_t *mini_icon;
 
+  /* XAppGtkWindow */
+  char *theme_icon_name;
+  guint progress;
+  guint progress_pulse : 1;
+  /* /XappGtkWindow */
+
   MetaWindowType type;
 
   /* NOTE these five are not in UTF-8, we just treat them as random
