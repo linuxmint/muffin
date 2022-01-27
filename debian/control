@@ -36,7 +36,7 @@ Build-Depends:
         libnvidia-egl-wayland-dev [linux-any],
         libpam0g-dev,
         libpango1.0-dev (>= 1.2.0),
-        libpipewire-0.2-dev (>= 0.2.2) [linux-any],
+        libpipewire-0.3-dev (>= 0.3.19) [linux-any],
         libsm-dev,
         libstartup-notification0-dev (>= 0.7),
         libsystemd-dev (>= 212) [linux-any],
