@@ -143,6 +143,7 @@ ClutterModifierType meta_display_get_window_grab_modifiers (MetaDisplay *display
 
 gboolean meta_prefs_add_keybinding          (const char           *name,
                                              GSettings            *settings,
+                                             const gchar         **bindings,
                                              MetaKeyBindingAction  action,
                                              MetaKeyBindingFlags   flags);
 

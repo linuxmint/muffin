@@ -1794,7 +1794,7 @@ meta_key_pref_free (MetaKeyPref *pref)
   update_binding (pref, NULL);
 
   g_free (pref->name);
-  g_object_unref (pref->settings);
+  g_clear_object (&pref->settings);
 
   g_free (pref);
 }
@@ -2009,11 +2009,12 @@ meta_prefs_get_visual_bell_type (void)
 gboolean
 meta_prefs_add_keybinding (const char           *name,
                            GSettings            *settings,
+                           const gchar         **bindings,
                            MetaKeyBindingAction  action,
                            MetaKeyBindingFlags   flags)
 {
   MetaKeyPref  *pref;
-  char        **strokes;
+  char        **strokes = NULL;
   guint         id;
 
   if (g_hash_table_lookup (key_bindings, name))
@@ -2024,7 +2025,7 @@ meta_prefs_add_keybinding (const char           *name,
 
   pref = g_new0 (MetaKeyPref, 1);
   pref->name = g_strdup (name);
-  pref->settings = g_object_ref (settings);
+  pref->settings = settings != NULL? g_object_ref (settings) : NULL;
   pref->action = action;
   pref->combos = NULL;
   pref->builtin = (flags & META_KEY_BINDING_BUILTIN) != 0;
@@ -2037,27 +2038,28 @@ meta_prefs_add_keybinding (const char           *name,
                                  G_CALLBACK (bindings_changed), NULL);
           g_object_set_data (G_OBJECT (settings), "changed-signal", GUINT_TO_POINTER (id));
         }
+
+      strokes = g_settings_get_strv (settings, name);
     }
   else
     {
-      char *changed_signal = g_strdup_printf ("changed::%s", name);
-      id = g_signal_connect (settings, changed_signal,
-                             G_CALLBACK (bindings_changed), NULL);
-      g_free (changed_signal);
+      if (pref->settings != NULL)
+        {
+          char *changed_signal = g_strdup_printf ("changed::%s", name);
+          id = g_signal_connect (settings, changed_signal,
+                                 G_CALLBACK (bindings_changed), NULL);
+          g_free (changed_signal);
 
-      g_object_set_data (G_OBJECT (settings), name, GUINT_TO_POINTER (id));
+          g_object_set_data (G_OBJECT (settings), name, GUINT_TO_POINTER (id));
 
-      queue_changed (META_PREF_KEYBINDINGS);
+          queue_changed (META_PREF_KEYBINDINGS);
+          strokes = g_settings_get_strv (settings, name);
+        }
+      else
+        {
+          strokes = g_strdupv (bindings);
+        }
     }
-
-  if (g_str_has_prefix (name, "RUNTIME-"))
-    {
-      strokes = g_settings_get_strv (settings, "bindings");
-    }
-  else
-  {
-    strokes = g_settings_get_strv (settings, name);
-  }
 
   update_binding (pref, strokes);
   g_strfreev (strokes);
@@ -2086,8 +2088,11 @@ meta_prefs_remove_keybinding (const char *name)
       return FALSE;
     }
 
-  id = GPOINTER_TO_UINT (g_object_steal_data (G_OBJECT (pref->settings), name));
-  g_clear_signal_handler (&id, pref->settings);
+  if (pref->settings != NULL)
+    {
+      id = GPOINTER_TO_UINT (g_object_steal_data (G_OBJECT (pref->settings), name));
+      g_clear_signal_handler (&id, pref->settings);
+    }
 
   g_hash_table_remove (key_bindings, name);
 
