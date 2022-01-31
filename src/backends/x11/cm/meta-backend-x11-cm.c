@@ -360,9 +360,10 @@ meta_backend_x11_cm_handle_host_xevent (MetaBackendX11 *backend_x11,
             case XkbStateNotify:
               if (xkb_ev->state.changed & XkbGroupLockMask)
                 {
-                  if (x11_cm->locked_group != xkb_ev->state.locked_group)
-                    XkbLockGroup (xdisplay, XkbUseCoreKbd,
-                                  x11_cm->locked_group);
+                  // TODO: Restore this, ditch libgnomekbd
+                  // if (x11_cm->locked_group != xkb_ev->state.locked_group)
+                  //   XkbLockGroup (xdisplay, XkbUseCoreKbd,
+                  //                 x11_cm->locked_group);
                 }
               break;
             default:
