@@ -568,6 +568,7 @@ is_freeze_thaw_effect (MetaPluginEffect event)
   {
   case META_PLUGIN_DESTROY:
   case META_PLUGIN_SIZE_CHANGE:
+  case META_PLUGIN_UNMINIMIZE:
     return TRUE;
     break;
   default:
