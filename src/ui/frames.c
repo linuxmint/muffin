@@ -1109,6 +1109,9 @@ meta_frame_left_click_event (MetaUIFrame        *frame,
       /* We can get this for example when trying to resize window
        * that cannot be resized (e. g. it is maximized and the theme
        * currently used has borders for maximized windows), see #751884 */
+    case META_FRAME_CONTROL_CLIENT_AREA:
+      /* See https://gitlab.gnome.org/GNOME/mutter/-/issues/1668#note_1046828.
+       * This can happen when clicking on the frame of a tiles, unfocused window. */
       return FALSE;
     default:
       g_assert_not_reached ();
