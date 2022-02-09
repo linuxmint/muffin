@@ -73,7 +73,6 @@ struct _MetaInputSettingsPrivate
   GSettings *touchpad_settings;
   GSettings *trackball_settings;
   GSettings *keyboard_settings;
-  GSettings *csd_settings;
   GSettings *keyboard_a11y_settings;
   GSettings *mouse_a11y_settings;
 
@@ -159,7 +158,6 @@ meta_input_settings_dispose (GObject *object)
   g_clear_object (&priv->touchpad_settings);
   g_clear_object (&priv->trackball_settings);
   g_clear_object (&priv->keyboard_settings);
-  g_clear_object (&priv->csd_settings);
   g_clear_object (&priv->keyboard_a11y_settings);
   g_clear_object (&priv->mouse_a11y_settings);
   g_clear_object (&priv->input_mapper);
@@ -263,7 +261,7 @@ update_touchpad_left_handed (MetaInputSettings  *input_settings,
                              ClutterInputDevice *device)
 {
   MetaInputSettingsClass *input_settings_class;
-  GDesktopTouchpadHandedness handedness;
+  CDesktopTouchpadHandedness handedness;
   MetaInputSettingsPrivate *priv;
   gboolean enabled = FALSE;
 
@@ -277,13 +275,13 @@ update_touchpad_left_handed (MetaInputSettings  *input_settings,
 
   switch (handedness)
     {
-    case G_DESKTOP_TOUCHPAD_HANDEDNESS_RIGHT:
+    case C_DESKTOP_TOUCHPAD_HANDEDNESS_RIGHT:
       enabled = FALSE;
       break;
-    case G_DESKTOP_TOUCHPAD_HANDEDNESS_LEFT:
+    case C_DESKTOP_TOUCHPAD_HANDEDNESS_LEFT:
       enabled = TRUE;
       break;
-    case G_DESKTOP_TOUCHPAD_HANDEDNESS_MOUSE:
+    case C_DESKTOP_TOUCHPAD_HANDEDNESS_MOUSE:
       enabled = g_settings_get_boolean (priv->mouse_settings, "left-handed");
       break;
     default:
@@ -328,7 +326,7 @@ update_mouse_left_handed (MetaInputSettings  *input_settings,
     }
   else
     {
-      GDesktopTouchpadHandedness touchpad_handedness;
+      CDesktopTouchpadHandedness touchpad_handedness;
 
       settings_set_bool_setting (input_settings, CLUTTER_POINTER_DEVICE, NULL,
                                  input_settings_class->set_left_handed,
@@ -338,7 +336,7 @@ update_mouse_left_handed (MetaInputSettings  *input_settings,
                                                  "left-handed");
 
       /* Also update touchpads if they're following mouse settings */
-      if (touchpad_handedness == G_DESKTOP_TOUCHPAD_HANDEDNESS_MOUSE)
+      if (touchpad_handedness == C_DESKTOP_TOUCHPAD_HANDEDNESS_MOUSE)
         update_touchpad_left_handed (input_settings, NULL);
     }
 }
@@ -347,7 +345,7 @@ static void
 do_update_pointer_accel_profile (MetaInputSettings          *input_settings,
                                  GSettings                  *settings,
                                  ClutterInputDevice         *device,
-                                 GDesktopPointerAccelProfile profile)
+                                 CDesktopPointerAccelProfile profile)
 {
   MetaInputSettingsPrivate *priv =
     meta_input_settings_get_instance_private (input_settings);
@@ -369,7 +367,7 @@ update_pointer_accel_profile (MetaInputSettings  *input_settings,
                               GSettings          *settings,
                               ClutterInputDevice *device)
 {
-  GDesktopPointerAccelProfile profile;
+  CDesktopPointerAccelProfile profile;
 
   profile = g_settings_get_enum (settings, "accel-profile");
 
@@ -733,7 +731,7 @@ update_touchpad_click_method (MetaInputSettings *input_settings,
                               ClutterInputDevice *device)
 {
   MetaInputSettingsClass *input_settings_class;
-  GDesktopTouchpadClickMethod method;
+  CDesktopTouchpadClickMethod method;
   MetaInputSettingsPrivate *priv;
 
   if (device &&
@@ -764,7 +762,7 @@ update_touchpad_send_events (MetaInputSettings  *input_settings,
 {
   MetaInputSettingsClass *input_settings_class;
   MetaInputSettingsPrivate *priv;
-  GDesktopDeviceSendEvents mode;
+  CDesktopDeviceSendEvents mode;
 
   if (device &&
       clutter_input_device_get_device_type (device) != CLUTTER_TOUCHPAD_DEVICE)
@@ -1057,7 +1055,7 @@ update_tablet_mapping (MetaInputSettings  *input_settings,
                        ClutterInputDevice *device)
 {
   MetaInputSettingsClass *input_settings_class;
-  GDesktopTabletMapping mapping;
+  CDesktopTabletMapping mapping;
 
   if (clutter_input_device_get_device_type (device) != CLUTTER_TABLET_DEVICE &&
       clutter_input_device_get_device_type (device) != CLUTTER_PEN_DEVICE &&
@@ -1370,21 +1368,21 @@ pointer_a11y_dwell_direction_from_setting (MetaInputSettings *input_settings,
                                            const char        *key)
 {
   MetaInputSettingsPrivate *priv = meta_input_settings_get_instance_private (input_settings);
-  GDesktopMouseDwellDirection dwell_gesture_direction;
+  CDesktopMouseDwellDirection dwell_gesture_direction;
 
   dwell_gesture_direction = g_settings_get_enum (priv->mouse_a11y_settings, key);
   switch (dwell_gesture_direction)
     {
-    case G_DESKTOP_MOUSE_DWELL_DIRECTION_LEFT:
+    case C_DESKTOP_MOUSE_DWELL_DIRECTION_LEFT:
       return CLUTTER_A11Y_DWELL_DIRECTION_LEFT;
       break;
-    case G_DESKTOP_MOUSE_DWELL_DIRECTION_RIGHT:
+    case C_DESKTOP_MOUSE_DWELL_DIRECTION_RIGHT:
       return CLUTTER_A11Y_DWELL_DIRECTION_RIGHT;
       break;
-    case G_DESKTOP_MOUSE_DWELL_DIRECTION_UP:
+    case C_DESKTOP_MOUSE_DWELL_DIRECTION_UP:
       return CLUTTER_A11Y_DWELL_DIRECTION_UP;
       break;
-    case G_DESKTOP_MOUSE_DWELL_DIRECTION_DOWN:
+    case C_DESKTOP_MOUSE_DWELL_DIRECTION_DOWN:
       return CLUTTER_A11Y_DWELL_DIRECTION_DOWN;
       break;
     default:
@@ -1400,7 +1398,7 @@ load_pointer_a11y_settings (MetaInputSettings  *input_settings,
   MetaInputSettingsPrivate *priv = meta_input_settings_get_instance_private (input_settings);
   ClutterPointerA11ySettings pointer_a11y_settings;
   ClutterInputDevice *core_pointer;
-  GDesktopMouseDwellMode dwell_mode;
+  CDesktopMouseDwellMode dwell_mode;
   guint i;
 
   core_pointer = clutter_seat_get_pointer (priv->seat);
@@ -1426,7 +1424,7 @@ load_pointer_a11y_settings (MetaInputSettings  *input_settings,
                                                               "dwell-threshold");
 
   dwell_mode = g_settings_get_enum (priv->mouse_a11y_settings, "dwell-mode");
-  if (dwell_mode == G_DESKTOP_MOUSE_DWELL_MODE_WINDOW)
+  if (dwell_mode == C_DESKTOP_MOUSE_DWELL_MODE_WINDOW)
     pointer_a11y_settings.dwell_mode = CLUTTER_A11Y_DWELL_MODE_WINDOW;
   else
     pointer_a11y_settings.dwell_mode = CLUTTER_A11Y_DWELL_MODE_GESTURE;
@@ -1760,7 +1758,7 @@ update_stylus_buttonmap (MetaInputSettings      *input_settings,
                          ClutterInputDeviceTool *tool)
 {
   MetaInputSettingsClass *input_settings_class;
-  GDesktopStylusButtonAction primary, secondary, tertiary;
+  CDesktopStylusButtonAction primary, secondary, tertiary;
   GSettings *tool_settings;
 
   if (clutter_input_device_get_device_type (device) != CLUTTER_TABLET_DEVICE &&
@@ -1997,35 +1995,29 @@ meta_input_settings_init (MetaInputSettings *settings)
   g_signal_connect (priv->seat, "tool-changed",
                     G_CALLBACK (meta_input_settings_tool_changed), settings);
 
-  priv->mouse_settings = g_settings_new ("org.gnome.desktop.peripherals.mouse");
+  priv->mouse_settings = g_settings_new ("org.cinnamon.desktop.peripherals.mouse");
   g_signal_connect (priv->mouse_settings, "changed",
                     G_CALLBACK (meta_input_settings_changed_cb), settings);
 
-  priv->touchpad_settings = g_settings_new ("org.gnome.desktop.peripherals.touchpad");
+  priv->touchpad_settings = g_settings_new ("org.cinnamon.desktop.peripherals.touchpad");
   g_signal_connect (priv->touchpad_settings, "changed",
                     G_CALLBACK (meta_input_settings_changed_cb), settings);
 
-  priv->trackball_settings = g_settings_new ("org.gnome.desktop.peripherals.trackball");
+  priv->trackball_settings = g_settings_new ("org.cinnamon.desktop.peripherals.trackball");
   g_signal_connect (priv->trackball_settings, "changed",
                     G_CALLBACK (meta_input_settings_changed_cb), settings);
 
-  priv->keyboard_settings = g_settings_new ("org.gnome.desktop.peripherals.keyboard");
+  priv->keyboard_settings = g_settings_new ("org.cinnamon.desktop.peripherals.keyboard");
   g_signal_connect (priv->keyboard_settings, "changed",
                     G_CALLBACK (meta_input_settings_changed_cb), settings);
 
-  priv->csd_settings = g_settings_new ("org.cinnamon.settings-daemon.peripherals.mouse");
-
-  g_settings_bind (priv->csd_settings, "double-click",
-                   clutter_settings_get_default(), "double-click-time",
-                   G_SETTINGS_BIND_GET);
-
-  priv->keyboard_a11y_settings = g_settings_new ("org.gnome.desktop.a11y.keyboard");
+  priv->keyboard_a11y_settings = g_settings_new ("org.cinnamon.desktop.a11y.keyboard");
   g_signal_connect (priv->keyboard_a11y_settings, "changed",
                     G_CALLBACK (meta_input_keyboard_a11y_settings_changed), settings);
   g_signal_connect (priv->seat, "kbd-a11y-flags-changed",
                     G_CALLBACK (on_keyboard_a11y_settings_changed), settings);
 
-  priv->mouse_a11y_settings = g_settings_new ("org.gnome.desktop.a11y.mouse");
+  priv->mouse_a11y_settings = g_settings_new ("org.cinnamon.desktop.a11y.mouse");
   g_signal_connect (priv->mouse_a11y_settings, "changed",
                     G_CALLBACK (meta_input_mouse_a11y_settings_changed), settings);
 
@@ -2137,7 +2129,7 @@ meta_input_settings_get_tablet_logical_monitor (MetaInputSettings  *settings,
   return logical_monitor;
 }
 
-GDesktopTabletMapping
+CDesktopTabletMapping
 meta_input_settings_get_tablet_mapping (MetaInputSettings  *settings,
                                         ClutterInputDevice *device)
 {
@@ -2145,29 +2137,29 @@ meta_input_settings_get_tablet_mapping (MetaInputSettings  *settings,
   DeviceMappingInfo *info;
 
   g_return_val_if_fail (META_IS_INPUT_SETTINGS (settings),
-                        G_DESKTOP_TABLET_MAPPING_ABSOLUTE);
+                        C_DESKTOP_TABLET_MAPPING_ABSOLUTE);
   g_return_val_if_fail (CLUTTER_IS_INPUT_DEVICE (device),
-                        G_DESKTOP_TABLET_MAPPING_ABSOLUTE);
+                        C_DESKTOP_TABLET_MAPPING_ABSOLUTE);
 
   priv = meta_input_settings_get_instance_private (settings);
   info = g_hash_table_lookup (priv->mappable_devices, device);
-  g_return_val_if_fail (info != NULL, G_DESKTOP_TABLET_MAPPING_ABSOLUTE);
+  g_return_val_if_fail (info != NULL, C_DESKTOP_TABLET_MAPPING_ABSOLUTE);
 
   return g_settings_get_enum (info->settings, "mapping");
 }
 
-static GDesktopPadButtonAction
+static CDesktopPadButtonAction
 meta_input_settings_get_pad_button_action (MetaInputSettings   *input_settings,
                                            ClutterInputDevice  *pad,
                                            guint                button)
 {
-  GDesktopPadButtonAction action;
+  CDesktopPadButtonAction action;
   GSettings *settings;
 
   g_return_val_if_fail (META_IS_INPUT_SETTINGS (input_settings),
-                        G_DESKTOP_PAD_BUTTON_ACTION_NONE);
+                        C_DESKTOP_PAD_BUTTON_ACTION_NONE);
   g_return_val_if_fail (CLUTTER_IS_INPUT_DEVICE (pad),
-                        G_DESKTOP_PAD_BUTTON_ACTION_NONE);
+                        C_DESKTOP_PAD_BUTTON_ACTION_NONE);
 
   settings = lookup_pad_action_settings (pad, META_PAD_ACTION_BUTTON,
                                          button, META_PAD_DIRECTION_NONE, -1);
@@ -2356,7 +2348,7 @@ meta_input_settings_is_pad_button_grabbed (MetaInputSettings  *input_settings,
                         CLUTTER_PAD_DEVICE, FALSE);
 
   return (meta_input_settings_get_pad_button_action (input_settings, pad, button) !=
-          G_DESKTOP_PAD_BUTTON_ACTION_NONE);
+          C_DESKTOP_PAD_BUTTON_ACTION_NONE);
 }
 
 static gboolean
@@ -2364,7 +2356,7 @@ meta_input_settings_handle_pad_button (MetaInputSettings           *input_settin
                                        ClutterInputDevice          *pad,
                                        const ClutterPadButtonEvent *event)
 {
-  GDesktopPadButtonAction action;
+  CDesktopPadButtonAction action;
   gint button, group, mode;
   gboolean is_press;
   GSettings *settings;
@@ -2407,15 +2399,15 @@ meta_input_settings_handle_pad_button (MetaInputSettings           *input_settin
 
   switch (action)
     {
-    case G_DESKTOP_PAD_BUTTON_ACTION_SWITCH_MONITOR:
+    case C_DESKTOP_PAD_BUTTON_ACTION_SWITCH_MONITOR:
       if (is_press)
         meta_input_settings_cycle_tablet_output (input_settings, pad);
       return TRUE;
-    case G_DESKTOP_PAD_BUTTON_ACTION_HELP:
+    case C_DESKTOP_PAD_BUTTON_ACTION_HELP:
       if (is_press)
         meta_display_request_pad_osd (meta_get_display (), pad, FALSE);
       return TRUE;
-    case G_DESKTOP_PAD_BUTTON_ACTION_KEYBINDING:
+    case C_DESKTOP_PAD_BUTTON_ACTION_KEYBINDING:
       settings = lookup_pad_action_settings (pad, META_PAD_ACTION_BUTTON,
                                              button, META_PAD_DIRECTION_NONE, -1);
       accel = g_settings_get_string (settings, "keybinding");
@@ -2423,7 +2415,7 @@ meta_input_settings_handle_pad_button (MetaInputSettings           *input_settin
       g_object_unref (settings);
       g_free (accel);
       return TRUE;
-    case G_DESKTOP_PAD_BUTTON_ACTION_NONE:
+    case C_DESKTOP_PAD_BUTTON_ACTION_NONE:
     default:
       return FALSE;
     }
@@ -2613,7 +2605,7 @@ meta_input_settings_get_button_label (MetaInputSettings  *input_settings,
                                       ClutterInputDevice *pad,
                                       guint               button)
 {
-  GDesktopPadButtonAction action;
+  CDesktopPadButtonAction action;
   gint group;
 
   g_return_val_if_fail (META_IS_INPUT_SETTINGS (input_settings), NULL);
@@ -2635,7 +2627,7 @@ meta_input_settings_get_button_label (MetaInputSettings  *input_settings,
 
   switch (action)
     {
-    case G_DESKTOP_PAD_BUTTON_ACTION_KEYBINDING:
+    case C_DESKTOP_PAD_BUTTON_ACTION_KEYBINDING:
       {
         GSettings *settings;
         gchar *accel;
@@ -2647,14 +2639,14 @@ meta_input_settings_get_button_label (MetaInputSettings  *input_settings,
 
         return accel;
       }
-    case G_DESKTOP_PAD_BUTTON_ACTION_SWITCH_MONITOR:
+    case C_DESKTOP_PAD_BUTTON_ACTION_SWITCH_MONITOR:
       /* TRANSLATORS: This string refers to an action, cycles drawing tablets'
        * mapping through the available outputs.
        */
       return g_strdup (_("Switch monitor"));
-    case G_DESKTOP_PAD_BUTTON_ACTION_HELP:
+    case C_DESKTOP_PAD_BUTTON_ACTION_HELP:
       return g_strdup (_("Show on-screen help"));
-    case G_DESKTOP_PAD_BUTTON_ACTION_NONE:
+    case C_DESKTOP_PAD_BUTTON_ACTION_NONE:
     default:
       return NULL;
     }

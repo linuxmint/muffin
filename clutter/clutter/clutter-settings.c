@@ -485,7 +485,7 @@ clutter_settings_class_init (ClutterSettingsClass *klass)
                       P_("Double Click Time"),
                       P_("The time between clicks necessary to detect a multiple click"),
                       0, G_MAXINT,
-                      250,
+                      400,
                       CLUTTER_PARAM_READWRITE);
 
   /**
@@ -695,7 +695,7 @@ clutter_settings_init (ClutterSettings *self)
   self->font_dpi = -1;
   self->unscaled_font_dpi = -1;
 
-  self->double_click_time = 250;
+  self->double_click_time = 400;
   self->double_click_distance = 5;
 
   self->dnd_drag_threshold = 8;

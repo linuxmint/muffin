@@ -171,10 +171,10 @@ bell_visual_notify (MetaDisplay *display,
 {
   switch (meta_prefs_get_visual_bell_type ())
     {
-    case G_DESKTOP_VISUAL_BELL_FULLSCREEN_FLASH:
+    case C_DESKTOP_VISUAL_BELL_FULLSCREEN_FLASH:
       bell_flash_fullscreen (display);
       break;
-    case G_DESKTOP_VISUAL_BELL_FRAME_FLASH:
+    case C_DESKTOP_VISUAL_BELL_FRAME_FLASH:
       bell_flash_frame (display, window);
       break;
     }

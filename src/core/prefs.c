@@ -64,12 +64,11 @@
 
 /* These are the different schemas we are keeping
  * a GSettings instance for */
-#define SCHEMA_GENERAL         "org.gnome.desktop.wm.preferences"
+#define SCHEMA_GENERAL         "org.cinnamon.desktop.wm.preferences"
 #define SCHEMA_MUTTER          "org.cinnamon.muffin"
-#define SCHEMA_INTERFACE       "org.gnome.desktop.interface"
-#define SCHEMA_INPUT_SOURCES   "org.gnome.desktop.input-sources"
-#define SCHEMA_XSETTINGS       "org.gnome.settings-daemon.plugins.xsettings"
-#define SCHEMA_MOUSE           "org.gnome.settings-daemon.peripherals.mouse"
+#define SCHEMA_INTERFACE       "org.cinnamon.desktop.interface"
+#define SCHEMA_INPUT_SOURCES   "org.cinnamon.desktop.input-sources"
+#define SCHEMA_MOUSE           "org.cinnamon.desktop.peripherals.mouse"
 
 #define SETTINGS(s) g_hash_table_lookup (settings_schemas, (s))
 
@@ -83,15 +82,15 @@ static PangoFontDescription *titlebar_font = NULL;
 static MetaVirtualModifier mouse_button_mods = Mod1Mask;
 static MetaKeyCombo overlay_key_combo = { 0, 0, 0 };
 static MetaKeyCombo locate_pointer_key_combo = { 0, 0, 0 };
-static GDesktopFocusMode focus_mode = G_DESKTOP_FOCUS_MODE_CLICK;
-static GDesktopFocusNewWindows focus_new_windows = G_DESKTOP_FOCUS_NEW_WINDOWS_SMART;
+static CDesktopFocusMode focus_mode = C_DESKTOP_FOCUS_MODE_CLICK;
+static CDesktopFocusNewWindows focus_new_windows = C_DESKTOP_FOCUS_NEW_WINDOWS_SMART;
 static gboolean raise_on_click = TRUE;
 static gboolean center_new_windows = FALSE;
 static gboolean attach_modal_dialogs = FALSE;
 static int num_workspaces = 4;
-static GDesktopTitlebarAction action_double_click_titlebar = G_DESKTOP_TITLEBAR_ACTION_TOGGLE_MAXIMIZE;
-static GDesktopTitlebarAction action_middle_click_titlebar = G_DESKTOP_TITLEBAR_ACTION_LOWER;
-static GDesktopTitlebarAction action_right_click_titlebar = G_DESKTOP_TITLEBAR_ACTION_MENU;
+static CDesktopTitlebarAction action_double_click_titlebar = C_DESKTOP_TITLEBAR_ACTION_TOGGLE_MAXIMIZE;
+static CDesktopTitlebarAction action_middle_click_titlebar = C_DESKTOP_TITLEBAR_ACTION_LOWER;
+static CDesktopTitlebarAction action_right_click_titlebar = C_DESKTOP_TITLEBAR_ACTION_MENU;
 static gboolean dynamic_workspaces = FALSE;
 static gboolean disable_workarounds = FALSE;
 static gboolean auto_raise = FALSE;
@@ -117,7 +116,7 @@ static gboolean force_fullscreen = TRUE;
 static gboolean auto_maximize = TRUE;
 static gboolean show_fallback_app_menu = TRUE;
 
-static GDesktopVisualBellType visual_bell_type = G_DESKTOP_VISUAL_BELL_FULLSCREEN_FLASH;
+static CDesktopVisualBellType visual_bell_type = C_DESKTOP_VISUAL_BELL_FULLSCREEN_FLASH;
 static MetaButtonLayout button_layout;
 
 /* NULL-terminated array */
@@ -405,7 +404,7 @@ static MetaBoolPreference preferences_bool[] =
     },
     {
       { KEY_LOCATE_POINTER,
-        SCHEMA_INTERFACE,
+        SCHEMA_MOUSE,
         META_PREF_LOCATE_POINTER,
       },
       &locate_pointer_is_enabled,
@@ -1177,13 +1176,13 @@ meta_prefs_get_mouse_button_mods  (void)
   return mouse_button_mods;
 }
 
-GDesktopFocusMode
+CDesktopFocusMode
 meta_prefs_get_focus_mode (void)
 {
   return focus_mode;
 }
 
-GDesktopFocusNewWindows
+CDesktopFocusNewWindows
 meta_prefs_get_focus_new_windows (void)
 {
   return focus_new_windows;
@@ -2000,7 +1999,7 @@ meta_prefs_bell_is_audible (void)
   return bell_is_audible;
 }
 
-GDesktopVisualBellType
+CDesktopVisualBellType
 meta_prefs_get_visual_bell_type (void)
 {
   return visual_bell_type;
@@ -2137,19 +2136,19 @@ meta_prefs_get_iso_next_group_option (void)
   return iso_next_group_option;
 }
 
-GDesktopTitlebarAction
+CDesktopTitlebarAction
 meta_prefs_get_action_double_click_titlebar (void)
 {
   return action_double_click_titlebar;
 }
 
-GDesktopTitlebarAction
+CDesktopTitlebarAction
 meta_prefs_get_action_middle_click_titlebar (void)
 {
   return action_middle_click_titlebar;
 }
 
-GDesktopTitlebarAction
+CDesktopTitlebarAction
 meta_prefs_get_action_right_click_titlebar (void)
 {
   return action_right_click_titlebar;

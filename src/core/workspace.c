@@ -1215,7 +1215,7 @@ meta_workspace_focus_default_window (MetaWorkspace *workspace,
     meta_warning ("META_CURRENT_TIME used to choose focus window; "
                   "focus window may not be correct.\n");
 
-  if (meta_prefs_get_focus_mode () == G_DESKTOP_FOCUS_MODE_CLICK ||
+  if (meta_prefs_get_focus_mode () == C_DESKTOP_FOCUS_MODE_CLICK ||
       !workspace->display->mouse_mode)
     focus_ancestor_or_top_window (workspace, not_this_one, timestamp);
   else
@@ -1252,9 +1252,9 @@ meta_workspace_focus_default_window (MetaWorkspace *workspace,
               meta_display_queue_autoraise_callback (workspace->display, window);
             }
         }
-      else if (meta_prefs_get_focus_mode () == G_DESKTOP_FOCUS_MODE_SLOPPY)
+      else if (meta_prefs_get_focus_mode () == C_DESKTOP_FOCUS_MODE_SLOPPY)
         focus_ancestor_or_top_window (workspace, not_this_one, timestamp);
-      else if (meta_prefs_get_focus_mode () == G_DESKTOP_FOCUS_MODE_MOUSE)
+      else if (meta_prefs_get_focus_mode () == C_DESKTOP_FOCUS_MODE_MOUSE)
         {
           meta_topic (META_DEBUG_FOCUS,
                       "Setting focus to no_focus_window, since no valid "
@@ -1352,7 +1352,7 @@ focus_ancestor_or_top_window (MetaWorkspace *workspace,
           if (try_to_set_focus_and_check (ancestor, not_this_one, timestamp))
             {
               /* Also raise the window if in click-to-focus */
-              if (meta_prefs_get_focus_mode () == G_DESKTOP_FOCUS_MODE_CLICK)
+              if (meta_prefs_get_focus_mode () == C_DESKTOP_FOCUS_MODE_CLICK)
                 meta_window_raise (ancestor);
 
               return;
@@ -1371,7 +1371,7 @@ focus_ancestor_or_top_window (MetaWorkspace *workspace,
       if (try_to_set_focus_and_check (window, not_this_one, timestamp))
         {
           /* Also raise the window if in click-to-focus */
-          if (meta_prefs_get_focus_mode () == G_DESKTOP_FOCUS_MODE_CLICK)
+          if (meta_prefs_get_focus_mode () == C_DESKTOP_FOCUS_MODE_CLICK)
             meta_window_raise (window);
 
           return;

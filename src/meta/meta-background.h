@@ -21,7 +21,7 @@
 #ifndef META_BACKGROUND_H
 #define META_BACKGROUND_H
 
-#include <gsettings-desktop-schemas/gdesktop-enums.h>
+#include <libcinnamon-desktop/cdesktop-enums.h>
 
 #include "clutter/clutter.h"
 #include "meta/display.h"
@@ -55,20 +55,20 @@ void meta_background_set_color    (MetaBackground            *self,
 
 META_EXPORT
 void meta_background_set_gradient (MetaBackground            *self,
-                                   GDesktopBackgroundShading  shading_direction,
+                                   CDesktopBackgroundShading  shading_direction,
                                    ClutterColor              *color,
                                    ClutterColor              *second_color);
 
 META_EXPORT
 void meta_background_set_file     (MetaBackground            *self,
                                    GFile                     *file,
-                                   GDesktopBackgroundStyle    style);
+                                   CDesktopBackgroundStyle    style);
 
 META_EXPORT
 void meta_background_set_blend    (MetaBackground            *self,
                                    GFile                     *file1,
                                    GFile                     *file2,
                                    double                     blend_factor,
-                                   GDesktopBackgroundStyle    style);
+                                   CDesktopBackgroundStyle    style);
 
 #endif /* META_BACKGROUND_H */

@@ -22,7 +22,7 @@
 #ifndef META_INPUT_SETTINGS_PRIVATE_H
 #define META_INPUT_SETTINGS_PRIVATE_H
 
-#include <gsettings-desktop-schemas/gdesktop-enums.h>
+#include <libcinnamon-desktop/cdesktop-enums.h>
 
 #ifdef HAVE_LIBWACOM
 #include <libwacom/libwacom.h>
@@ -42,7 +42,7 @@ struct _MetaInputSettingsClass
 
   void (* set_send_events)   (MetaInputSettings        *settings,
                               ClutterInputDevice       *device,
-                              GDesktopDeviceSendEvents  mode);
+                              CDesktopDeviceSendEvents  mode);
   void (* set_matrix)        (MetaInputSettings  *settings,
                               ClutterInputDevice *device,
                               gfloat              matrix[6]);
@@ -76,7 +76,7 @@ struct _MetaInputSettingsClass
 
   void (* set_click_method)  (MetaInputSettings            *settings,
                               ClutterInputDevice           *device,
-                              GDesktopTouchpadClickMethod   mode);
+                              CDesktopTouchpadClickMethod   mode);
 
   void (* set_keyboard_repeat) (MetaInputSettings *settings,
                                 gboolean           repeat,
@@ -85,7 +85,7 @@ struct _MetaInputSettingsClass
 
   void (* set_tablet_mapping)        (MetaInputSettings      *settings,
                                       ClutterInputDevice     *device,
-                                      GDesktopTabletMapping   mapping);
+                                      CDesktopTabletMapping   mapping);
   void (* set_tablet_keep_aspect)    (MetaInputSettings      *settings,
                                       ClutterInputDevice     *device,
                                       MetaLogicalMonitor     *logical_monitor,
@@ -99,10 +99,10 @@ struct _MetaInputSettingsClass
 
   void (* set_mouse_accel_profile) (MetaInputSettings          *settings,
                                     ClutterInputDevice         *device,
-                                    GDesktopPointerAccelProfile profile);
+                                    CDesktopPointerAccelProfile profile);
   void (* set_trackball_accel_profile) (MetaInputSettings          *settings,
                                         ClutterInputDevice         *device,
-                                        GDesktopPointerAccelProfile profile);
+                                        CDesktopPointerAccelProfile profile);
 
   void (* set_stylus_pressure) (MetaInputSettings            *settings,
                                 ClutterInputDevice           *device,
@@ -111,9 +111,9 @@ struct _MetaInputSettingsClass
   void (* set_stylus_button_map) (MetaInputSettings          *settings,
                                   ClutterInputDevice         *device,
                                   ClutterInputDeviceTool     *tool,
-                                  GDesktopStylusButtonAction  primary,
-                                  GDesktopStylusButtonAction  secondary,
-                                  GDesktopStylusButtonAction  tertiary);
+                                  CDesktopStylusButtonAction  primary,
+                                  CDesktopStylusButtonAction  secondary,
+                                  CDesktopStylusButtonAction  tertiary);
 
   void (* set_mouse_middle_click_emulation) (MetaInputSettings  *settings,
                                              ClutterInputDevice *device,
@@ -136,7 +136,7 @@ GSettings *           meta_input_settings_get_tablet_settings (MetaInputSettings
 MetaLogicalMonitor *  meta_input_settings_get_tablet_logical_monitor (MetaInputSettings  *settings,
                                                                       ClutterInputDevice *device);
 
-GDesktopTabletMapping meta_input_settings_get_tablet_mapping (MetaInputSettings  *settings,
+CDesktopTabletMapping meta_input_settings_get_tablet_mapping (MetaInputSettings  *settings,
                                                               ClutterInputDevice *device);
 
 gboolean                   meta_input_settings_is_pad_button_grabbed     (MetaInputSettings  *input_settings,

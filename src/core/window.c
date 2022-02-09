@@ -1953,7 +1953,7 @@ idle_calc_showing (gpointer data)
       tmp = tmp->next;
     }
 
-  if (meta_prefs_get_focus_mode () != G_DESKTOP_FOCUS_MODE_CLICK)
+  if (meta_prefs_get_focus_mode () != C_DESKTOP_FOCUS_MODE_CLICK)
     {
       /* When display->mouse_mode is false, we want to ignore
        * EnterNotify events unless they come from mouse motion.  To do
@@ -2292,7 +2292,7 @@ window_state_on_map (MetaWindow *window,
    * approximation to enforce so we do that.
    */
   if (*takes_focus &&
-      meta_prefs_get_focus_new_windows () == G_DESKTOP_FOCUS_NEW_WINDOWS_STRICT &&
+      meta_prefs_get_focus_new_windows () == C_DESKTOP_FOCUS_NEW_WINDOWS_STRICT &&
       !window->display->allow_terminal_deactivation &&
       window_is_terminal (window->display->focus_window) &&
       !meta_window_is_ancestor_of_transient (window->display->focus_window,
@@ -2529,7 +2529,7 @@ meta_window_show (MetaWindow *window)
        * that new window below a lot of other windows.
        */
       if (overlap ||
-          (meta_prefs_get_focus_mode () == G_DESKTOP_FOCUS_MODE_CLICK &&
+          (meta_prefs_get_focus_mode () == C_DESKTOP_FOCUS_MODE_CLICK &&
            meta_prefs_get_raise_on_click ()))
         meta_window_stack_just_below (window, focus_window);
 
@@ -5371,7 +5371,7 @@ meta_window_set_focused_internal (MetaWindow *window,
        *
        * There is dicussion in bugs 102209, 115072, and 461577
        */
-      if (meta_prefs_get_focus_mode () == G_DESKTOP_FOCUS_MODE_CLICK ||
+      if (meta_prefs_get_focus_mode () == C_DESKTOP_FOCUS_MODE_CLICK ||
           !meta_prefs_get_raise_on_click())
         {
           meta_display_ungrab_focus_window_button (window->display, window);
@@ -5399,7 +5399,7 @@ meta_window_set_focused_internal (MetaWindow *window,
         meta_window_appears_focused_changed (window);
 
       /* Re-grab for click to focus and raise-on-click, if necessary */
-      if (meta_prefs_get_focus_mode () == G_DESKTOP_FOCUS_MODE_CLICK ||
+      if (meta_prefs_get_focus_mode () == C_DESKTOP_FOCUS_MODE_CLICK ||
           !meta_prefs_get_raise_on_click ())
         meta_display_grab_focus_window_button (window->display, window);
     }
@@ -7176,7 +7176,7 @@ meta_window_set_user_time (MetaWindow *window,
       /* If this is a terminal, user interaction with it means the user likely
        * doesn't want to have focus transferred for now due to new windows.
        */
-      if (meta_prefs_get_focus_new_windows () == G_DESKTOP_FOCUS_NEW_WINDOWS_STRICT &&
+      if (meta_prefs_get_focus_new_windows () == C_DESKTOP_FOCUS_NEW_WINDOWS_STRICT &&
           window_is_terminal (window))
         window->display->allow_terminal_deactivation = FALSE;
 
@@ -8183,7 +8183,7 @@ mouse_mode_focus (MetaWindow  *window,
        * EnterNotify events on override-redirect windows, this
        * alternative mechanism works great.
        */
-      if (meta_prefs_get_focus_mode() == G_DESKTOP_FOCUS_MODE_MOUSE &&
+      if (meta_prefs_get_focus_mode() == C_DESKTOP_FOCUS_MODE_MOUSE &&
           display->focus_window != NULL)
         {
           meta_topic (META_DEBUG_FOCUS,
@@ -8253,7 +8253,7 @@ window_focus_on_pointer_rest_callback (gpointer data)
   int root_x, root_y;
   guint32 timestamp;
 
-  if (meta_prefs_get_focus_mode () == G_DESKTOP_FOCUS_MODE_CLICK)
+  if (meta_prefs_get_focus_mode () == C_DESKTOP_FOCUS_MODE_CLICK)
     goto out;
 
   meta_cursor_tracker_get_pointer (cursor_tracker, &root_x, &root_y, NULL);
@@ -8318,8 +8318,8 @@ meta_window_handle_enter (MetaWindow  *window,
 
   switch (meta_prefs_get_focus_mode ())
     {
-    case G_DESKTOP_FOCUS_MODE_SLOPPY:
-    case G_DESKTOP_FOCUS_MODE_MOUSE:
+    case C_DESKTOP_FOCUS_MODE_SLOPPY:
+    case C_DESKTOP_FOCUS_MODE_MOUSE:
       display->mouse_mode = TRUE;
       if (window->type != META_WINDOW_DOCK)
         {
@@ -8332,7 +8332,7 @@ meta_window_handle_enter (MetaWindow  *window,
           reset_ignored_crossing_serials (display);
         }
       break;
-    case G_DESKTOP_FOCUS_MODE_CLICK:
+    case C_DESKTOP_FOCUS_MODE_CLICK:
       break;
     }
 

@@ -168,7 +168,7 @@ change_property (ClutterInputDevice *device,
 static void
 meta_input_settings_x11_set_send_events (MetaInputSettings        *settings,
                                          ClutterInputDevice       *device,
-                                         GDesktopDeviceSendEvents  mode)
+                                         CDesktopDeviceSendEvents  mode)
 {
   guchar values[2] = { 0 }; /* disabled, disabled-on-external-mouse */
   guchar *available;
@@ -178,10 +178,10 @@ meta_input_settings_x11_set_send_events (MetaInputSettings        *settings,
 
   switch (mode)
     {
-    case G_DESKTOP_DEVICE_SEND_EVENTS_DISABLED:
+    case C_DESKTOP_DEVICE_SEND_EVENTS_DISABLED:
       values[0] = 1;
       break;
-    case G_DESKTOP_DEVICE_SEND_EVENTS_DISABLED_ON_EXTERNAL_MOUSE:
+    case C_DESKTOP_DEVICE_SEND_EVENTS_DISABLED_ON_EXTERNAL_MOUSE:
       values[1] = 1;
       break;
     default:
@@ -452,7 +452,7 @@ meta_input_settings_x11_set_scroll_button (MetaInputSettings  *settings,
 static void
 meta_input_settings_x11_set_click_method_synaptics (MetaInputSettings *settings,
                                           ClutterInputDevice          *device,
-                                          GDesktopTouchpadClickMethod  mode)
+                                          CDesktopTouchpadClickMethod  mode)
 {
   /* { RT corner, RB, LT, LB, 1 finger, 2 fingers, 3 fingers } */
   guchar tap_action_default[7] = { 2, 3, 0, 0, 1, 3, 0 };
@@ -468,21 +468,21 @@ meta_input_settings_x11_set_click_method_synaptics (MetaInputSettings *settings,
 
   switch (mode)
     {
-    case G_DESKTOP_TOUCHPAD_CLICK_METHOD_DEFAULT:
+    case C_DESKTOP_TOUCHPAD_CLICK_METHOD_DEFAULT:
       tap_action = tap_action_default;
       /* Doing nothing right now will give the correct default, unless changed
          during the session */
       break;
-    case G_DESKTOP_TOUCHPAD_CLICK_METHOD_NONE:
+    case C_DESKTOP_TOUCHPAD_CLICK_METHOD_NONE:
       tap_action = tap_action_none;
       button_areas_known = zero_button_areas;
       break;
-    case G_DESKTOP_TOUCHPAD_CLICK_METHOD_AREAS:
+    case C_DESKTOP_TOUCHPAD_CLICK_METHOD_AREAS:
       tap_action = tap_action_areas;
       /* Doing nothing right now will give the correct default, unless changed
          during the session */
       break;
-    case G_DESKTOP_TOUCHPAD_CLICK_METHOD_FINGERS:
+    case C_DESKTOP_TOUCHPAD_CLICK_METHOD_FINGERS:
       tap_action = tap_action_fingers;
       button_areas_known = zero_button_areas;
       break;
@@ -504,7 +504,7 @@ meta_input_settings_x11_set_click_method_synaptics (MetaInputSettings *settings,
 static void
 meta_input_settings_x11_set_click_method (MetaInputSettings           *settings,
                                           ClutterInputDevice          *device,
-                                          GDesktopTouchpadClickMethod  mode)
+                                          CDesktopTouchpadClickMethod  mode)
 {
   guchar values[2] = { 0 }; /* buttonareas, clickfinger */
   guchar *defaults, *available;
@@ -520,7 +520,7 @@ meta_input_settings_x11_set_click_method (MetaInputSettings           *settings,
 
   switch (mode)
     {
-    case G_DESKTOP_TOUCHPAD_CLICK_METHOD_DEFAULT:
+    case C_DESKTOP_TOUCHPAD_CLICK_METHOD_DEFAULT:
       defaults = get_property (device, "libinput Click Method Enabled Default",
                                XA_INTEGER, 8, 2);
       if (!defaults)
@@ -528,12 +528,12 @@ meta_input_settings_x11_set_click_method (MetaInputSettings           *settings,
       memcpy (values, defaults, 2);
       meta_XFree (defaults);
       break;
-    case G_DESKTOP_TOUCHPAD_CLICK_METHOD_NONE:
+    case C_DESKTOP_TOUCHPAD_CLICK_METHOD_NONE:
       break;
-    case G_DESKTOP_TOUCHPAD_CLICK_METHOD_AREAS:
+    case C_DESKTOP_TOUCHPAD_CLICK_METHOD_AREAS:
       values[0] = 1;
       break;
-    case G_DESKTOP_TOUCHPAD_CLICK_METHOD_FINGERS:
+    case C_DESKTOP_TOUCHPAD_CLICK_METHOD_FINGERS:
       values[1] = 1;
       break;
     default:
@@ -650,7 +650,7 @@ meta_input_settings_x11_is_trackball_device (MetaInputSettings  *settings,
 
 static void
 set_device_accel_profile (ClutterInputDevice         *device,
-                          GDesktopPointerAccelProfile profile)
+                          CDesktopPointerAccelProfile profile)
 {
   guchar *defaults, *available;
   guchar values[2] = { 0 }; /* adaptive, flat */
@@ -667,17 +667,17 @@ set_device_accel_profile (ClutterInputDevice         *device,
 
   switch (profile)
     {
-    case G_DESKTOP_POINTER_ACCEL_PROFILE_FLAT:
+    case C_DESKTOP_POINTER_ACCEL_PROFILE_FLAT:
       values[0] = 0;
       values[1] = 1;
       break;
-    case G_DESKTOP_POINTER_ACCEL_PROFILE_ADAPTIVE:
+    case C_DESKTOP_POINTER_ACCEL_PROFILE_ADAPTIVE:
       values[0] = 1;
       values[1] = 0;
       break;
     default:
       g_warn_if_reached ();
-    case G_DESKTOP_POINTER_ACCEL_PROFILE_DEFAULT:
+    case C_DESKTOP_POINTER_ACCEL_PROFILE_DEFAULT:
       values[0] = defaults[0];
       values[1] = defaults[1];
       break;
@@ -695,7 +695,7 @@ err_available:
 static void
 meta_input_settings_x11_set_mouse_accel_profile (MetaInputSettings          *settings,
                                                  ClutterInputDevice         *device,
-                                                 GDesktopPointerAccelProfile profile)
+                                                 CDesktopPointerAccelProfile profile)
 {
   if (!is_mouse (settings, device))
     return;
@@ -706,7 +706,7 @@ meta_input_settings_x11_set_mouse_accel_profile (MetaInputSettings          *set
 static void
 meta_input_settings_x11_set_trackball_accel_profile (MetaInputSettings          *settings,
                                                      ClutterInputDevice         *device,
-                                                     GDesktopPointerAccelProfile profile)
+                                                     CDesktopPointerAccelProfile profile)
 {
   if (!meta_input_settings_x11_is_trackball_device (settings, device))
     return;
@@ -717,7 +717,7 @@ meta_input_settings_x11_set_trackball_accel_profile (MetaInputSettings          
 static void
 meta_input_settings_x11_set_tablet_mapping (MetaInputSettings     *settings,
                                             ClutterInputDevice    *device,
-                                            GDesktopTabletMapping  mapping)
+                                            CDesktopTabletMapping  mapping)
 {
   MetaDisplay *display = meta_get_display ();
   MetaBackend *backend = meta_get_backend ();
@@ -733,7 +733,7 @@ meta_input_settings_x11_set_tablet_mapping (MetaInputSettings     *settings,
   if (xdev)
     {
       XSetDeviceMode (xdisplay, xdev,
-                      mapping == G_DESKTOP_TABLET_MAPPING_ABSOLUTE ?
+                      mapping == C_DESKTOP_TABLET_MAPPING_ABSOLUTE ?
                       Absolute : Relative);
     }
 
@@ -746,7 +746,7 @@ meta_input_settings_x11_set_tablet_mapping (MetaInputSettings     *settings,
     {
       ClutterInputDeviceMapping dev_mapping;
 
-      dev_mapping = (mapping == G_DESKTOP_TABLET_MAPPING_ABSOLUTE) ?
+      dev_mapping = (mapping == C_DESKTOP_TABLET_MAPPING_ABSOLUTE) ?
         CLUTTER_INPUT_DEVICE_MAPPING_ABSOLUTE :
         CLUTTER_INPUT_DEVICE_MAPPING_RELATIVE;
       clutter_input_device_set_mapping_mode (device, dev_mapping);
@@ -888,20 +888,20 @@ meta_input_settings_x11_dispose (GObject *object)
 }
 
 static guint
-action_to_button (GDesktopStylusButtonAction action,
+action_to_button (CDesktopStylusButtonAction action,
                   guint                      button)
 {
   switch (action)
     {
-    case G_DESKTOP_STYLUS_BUTTON_ACTION_MIDDLE:
+    case C_DESKTOP_STYLUS_BUTTON_ACTION_MIDDLE:
       return CLUTTER_BUTTON_MIDDLE;
-    case G_DESKTOP_STYLUS_BUTTON_ACTION_RIGHT:
+    case C_DESKTOP_STYLUS_BUTTON_ACTION_RIGHT:
       return CLUTTER_BUTTON_SECONDARY;
-    case G_DESKTOP_STYLUS_BUTTON_ACTION_BACK:
+    case C_DESKTOP_STYLUS_BUTTON_ACTION_BACK:
       return 8;
-    case G_DESKTOP_STYLUS_BUTTON_ACTION_FORWARD:
+    case C_DESKTOP_STYLUS_BUTTON_ACTION_FORWARD:
       return 9;
-    case G_DESKTOP_STYLUS_BUTTON_ACTION_DEFAULT:
+    case C_DESKTOP_STYLUS_BUTTON_ACTION_DEFAULT:
     default:
       return button;
     }
@@ -911,9 +911,9 @@ static void
 meta_input_settings_x11_set_stylus_button_map (MetaInputSettings          *settings,
                                                ClutterInputDevice         *device,
                                                ClutterInputDeviceTool     *tool,
-                                               GDesktopStylusButtonAction  primary,
-                                               GDesktopStylusButtonAction  secondary,
-                                               GDesktopStylusButtonAction  tertiary)
+                                               CDesktopStylusButtonAction  primary,
+                                               CDesktopStylusButtonAction  secondary,
+                                               CDesktopStylusButtonAction  tertiary)
 {
   MetaDisplay *display = meta_get_display ();
   MetaBackend *backend = meta_get_backend ();

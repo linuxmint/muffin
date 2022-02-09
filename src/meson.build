@@ -16,7 +16,7 @@ mutter_pkg_deps = [
   cairo_dep,
   gio_unix_dep,
   glib_dep,
-  gsettings_desktop_schemas_dep,
+  cinnamon_desktop_dep,
   gtk3_dep,
   pango_dep,
 ]
@@ -977,7 +977,7 @@ if have_introspection
     symbol_prefix: 'meta',
     includes: [
       'GObject-2.0',
-      'GDesktopEnums-3.0',
+      'CDesktopEnums-3.0',
       'Gdk-3.0',
       'Gtk-3.0',
       'xlib-2.0',

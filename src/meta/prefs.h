@@ -27,7 +27,7 @@
 #include <meta/common.h>
 #include <meta/types.h>
 #include <pango/pango-font.h>
-#include <gdesktop-enums.h>
+#include <libcinnamon-desktop/cdesktop-enums.h>
 #include <gio/gio.h>
 
 /**
@@ -136,10 +136,10 @@ META_EXPORT
 gint                        meta_prefs_get_mouse_button_menu  (void);
 
 META_EXPORT
-GDesktopFocusMode           meta_prefs_get_focus_mode         (void);
+CDesktopFocusMode           meta_prefs_get_focus_mode         (void);
 
 META_EXPORT
-GDesktopFocusNewWindows     meta_prefs_get_focus_new_windows  (void);
+CDesktopFocusNewWindows     meta_prefs_get_focus_new_windows  (void);
 
 META_EXPORT
 gboolean                    meta_prefs_get_attach_modal_dialogs (void);
@@ -195,13 +195,13 @@ void                        meta_prefs_get_button_layout (MetaButtonLayout *butt
 
 /* Double, right, middle click can be configured to any titlebar meta-action */
 META_EXPORT
-GDesktopTitlebarAction      meta_prefs_get_action_double_click_titlebar (void);
+CDesktopTitlebarAction      meta_prefs_get_action_double_click_titlebar (void);
 
 META_EXPORT
-GDesktopTitlebarAction      meta_prefs_get_action_middle_click_titlebar (void);
+CDesktopTitlebarAction      meta_prefs_get_action_middle_click_titlebar (void);
 
 META_EXPORT
-GDesktopTitlebarAction      meta_prefs_get_action_right_click_titlebar (void);
+CDesktopTitlebarAction      meta_prefs_get_action_right_click_titlebar (void);
 
 META_EXPORT
 void meta_prefs_set_num_workspaces (int n_workspaces);
@@ -481,7 +481,7 @@ META_EXPORT
 gboolean           meta_prefs_bell_is_audible      (void);
 
 META_EXPORT
-GDesktopVisualBellType meta_prefs_get_visual_bell_type (void);
+CDesktopVisualBellType meta_prefs_get_visual_bell_type (void);
 
 META_EXPORT
 unsigned int meta_prefs_get_check_alive_timeout (void);

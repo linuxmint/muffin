@@ -24,7 +24,6 @@ uprof_req = '>= 0.3'
 pango_req = '>= 1.2.0'
 cairo_req = '>= 1.10.0'
 pangocairo_req = '>= 1.20'
-gsettings_desktop_schemas_req = '>= 3.33.0'
 json_glib_req = '>= 0.12.0'
 upower_glib_req = '>= 0.99.0'
 xcomposite_req = '>= 0.4'
@@ -98,8 +97,6 @@ cairo_dep = dependency('cairo', version: cairo_req)
 cairo_gobject_dep = dependency('cairo-gobject', version: cairo_req)
 pangocairo_dep = dependency('pangocairo', version: pangocairo_req)
 fribidi_dep = dependency('fribidi', version: fribidi_req)
-gsettings_desktop_schemas_dep = dependency('gsettings-desktop-schemas',
-                                           version: gsettings_desktop_schemas_req)
 glib_dep = dependency('glib-2.0', version: glib_req)
 gio_dep = dependency('gio-unix-2.0', version: glib_req)
 gio_unix_dep = dependency('gio-unix-2.0', version: glib_req)
@@ -107,7 +104,7 @@ gobject_dep = dependency('gobject-2.0', version: glib_req)
 gthread_dep = dependency('gobject-2.0', version: glib_req)
 gmodule_no_export_dep = dependency('gmodule-no-export-2.0', version: glib_req)
 json_glib_dep = dependency('json-glib-1.0', version: json_glib_req)
-cinnamon_desktop_dep = dependency('cinnamon-desktop')
+cinnamon_desktop_dep = dependency('cinnamon-desktop', version: '>= 5.3')
 xcomposite_dep = dependency('xcomposite', version: xcomposite_req)
 xcursor_dep = dependency('xcursor')
 xdamage_dep = dependency('xdamage')

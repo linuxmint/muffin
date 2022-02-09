@@ -56,8 +56,8 @@ struct _MetaBackground
   MetaBackgroundMonitor *monitors;
   int n_monitors;
 
-  GDesktopBackgroundStyle   style;
-  GDesktopBackgroundShading shading_direction;
+  CDesktopBackgroundStyle   style;
+  CDesktopBackgroundShading shading_direction;
   ClutterColor              color;
   ClutterColor              second_color;
 
@@ -209,7 +209,7 @@ need_prerender (MetaBackground *self)
   if (texture1 == NULL && texture2 == NULL)
     return FALSE;
 
-  if (texture2 == NULL && self->style == G_DESKTOP_BACKGROUND_STYLE_WALLPAPER)
+  if (texture2 == NULL && self->style == C_DESKTOP_BACKGROUND_STYLE_WALLPAPER)
     return FALSE;
 
   return TRUE;
@@ -411,14 +411,14 @@ get_texture_area (MetaBackground          *self,
 
   switch (self->style)
     {
-    case G_DESKTOP_BACKGROUND_STYLE_STRETCHED:
+    case C_DESKTOP_BACKGROUND_STYLE_STRETCHED:
     default:
       /* paint region is whole actor, and the texture
        * is scaled disproportionately to fit the actor
        */
       set_texture_area_from_monitor_area (monitor_rect, texture_area);
       break;
-    case G_DESKTOP_BACKGROUND_STYLE_WALLPAPER:
+    case C_DESKTOP_BACKGROUND_STYLE_WALLPAPER:
       meta_display_get_size (self->display, &screen_width, &screen_height);
 
       /* Start off by centering a tile in the middle of the
@@ -435,7 +435,7 @@ get_texture_area (MetaBackground          *self,
 
       *texture_area = image_area;
       break;
-    case G_DESKTOP_BACKGROUND_STYLE_CENTERED:
+    case C_DESKTOP_BACKGROUND_STYLE_CENTERED:
       /* paint region is the original image size centered in the actor,
        * and the texture is scaled to the original image size */
       image_area.width = texture_width;
@@ -445,8 +445,8 @@ get_texture_area (MetaBackground          *self,
 
       *texture_area = image_area;
       break;
-    case G_DESKTOP_BACKGROUND_STYLE_SCALED:
-    case G_DESKTOP_BACKGROUND_STYLE_ZOOM:
+    case C_DESKTOP_BACKGROUND_STYLE_SCALED:
+    case C_DESKTOP_BACKGROUND_STYLE_ZOOM:
       /* paint region is the actor size in one dimension, and centered and
        * scaled by proportional amount in the other dimension.
        *
@@ -456,9 +456,9 @@ get_texture_area (MetaBackground          *self,
       monitor_x_scale = monitor_rect->width / texture_width;
       monitor_y_scale = monitor_rect->height / texture_height;
 
-      if ((self->style == G_DESKTOP_BACKGROUND_STYLE_SCALED &&
+      if ((self->style == C_DESKTOP_BACKGROUND_STYLE_SCALED &&
            (monitor_x_scale < monitor_y_scale)) ||
-          (self->style == G_DESKTOP_BACKGROUND_STYLE_ZOOM &&
+          (self->style == C_DESKTOP_BACKGROUND_STYLE_ZOOM &&
            (monitor_x_scale > monitor_y_scale)))
         {
           /* Fill image to exactly fit actor horizontally */
@@ -483,7 +483,7 @@ get_texture_area (MetaBackground          *self,
       *texture_area = image_area;
       break;
 
-    case G_DESKTOP_BACKGROUND_STYLE_SPANNED:
+    case C_DESKTOP_BACKGROUND_STYLE_SPANNED:
       {
         /* paint region is the union of all monitors, with the origin
          * of the region set to align with monitor associated with the background.
@@ -519,10 +519,10 @@ draw_texture (MetaBackground        *self,
 
   switch (self->style)
     {
-    case G_DESKTOP_BACKGROUND_STYLE_STRETCHED:
-    case G_DESKTOP_BACKGROUND_STYLE_WALLPAPER:
-    case G_DESKTOP_BACKGROUND_STYLE_ZOOM:
-    case G_DESKTOP_BACKGROUND_STYLE_SPANNED:
+    case C_DESKTOP_BACKGROUND_STYLE_STRETCHED:
+    case C_DESKTOP_BACKGROUND_STYLE_WALLPAPER:
+    case C_DESKTOP_BACKGROUND_STYLE_ZOOM:
+    case C_DESKTOP_BACKGROUND_STYLE_SPANNED:
       /* Draw the entire monitor */
       cogl_framebuffer_draw_textured_rectangle (framebuffer,
                                                 pipeline,
@@ -539,8 +539,8 @@ draw_texture (MetaBackground        *self,
 
       /* Draw just the texture */
       break;
-    case G_DESKTOP_BACKGROUND_STYLE_CENTERED:
-    case G_DESKTOP_BACKGROUND_STYLE_SCALED:
+    case C_DESKTOP_BACKGROUND_STYLE_CENTERED:
+    case C_DESKTOP_BACKGROUND_STYLE_SCALED:
       cogl_framebuffer_draw_textured_rectangle (framebuffer,
                                                 pipeline,
                                                 texture_area.x, texture_area.y,
@@ -549,7 +549,7 @@ draw_texture (MetaBackground        *self,
                                                 0, 0, 1.0, 1.0);
       bare_region_visible = texture_has_alpha (texture) || memcmp (&texture_area, monitor_area, sizeof (cairo_rectangle_int_t)) != 0;
       break;
-    case G_DESKTOP_BACKGROUND_STYLE_NONE:
+    case C_DESKTOP_BACKGROUND_STYLE_NONE:
       bare_region_visible = TRUE;
       break;
     default:
@@ -570,7 +570,7 @@ ensure_color_texture (MetaBackground *self)
       uint8_t pixels[6];
       int width, height;
 
-      if (self->shading_direction == G_DESKTOP_BACKGROUND_SHADING_SOLID)
+      if (self->shading_direction == C_DESKTOP_BACKGROUND_SHADING_SOLID)
         {
           width = 1;
           height = 1;
@@ -583,11 +583,11 @@ ensure_color_texture (MetaBackground *self)
         {
           switch (self->shading_direction)
             {
-            case G_DESKTOP_BACKGROUND_SHADING_VERTICAL:
+            case C_DESKTOP_BACKGROUND_SHADING_VERTICAL:
               width = 1;
               height = 2;
               break;
-            case G_DESKTOP_BACKGROUND_SHADING_HORIZONTAL:
+            case C_DESKTOP_BACKGROUND_SHADING_HORIZONTAL:
               width = 2;
               height = 1;
               break;
@@ -730,18 +730,18 @@ ensure_wallpaper_texture (MetaBackground *self,
 }
 
 static CoglPipelineWrapMode
-get_wrap_mode (GDesktopBackgroundStyle style)
+get_wrap_mode (CDesktopBackgroundStyle style)
 {
   switch (style)
     {
-      case G_DESKTOP_BACKGROUND_STYLE_WALLPAPER:
+      case C_DESKTOP_BACKGROUND_STYLE_WALLPAPER:
           return COGL_PIPELINE_WRAP_MODE_REPEAT;
-      case G_DESKTOP_BACKGROUND_STYLE_NONE:
-      case G_DESKTOP_BACKGROUND_STYLE_STRETCHED:
-      case G_DESKTOP_BACKGROUND_STYLE_CENTERED:
-      case G_DESKTOP_BACKGROUND_STYLE_SCALED:
-      case G_DESKTOP_BACKGROUND_STYLE_ZOOM:
-      case G_DESKTOP_BACKGROUND_STYLE_SPANNED:
+      case C_DESKTOP_BACKGROUND_STYLE_NONE:
+      case C_DESKTOP_BACKGROUND_STYLE_STRETCHED:
+      case C_DESKTOP_BACKGROUND_STYLE_CENTERED:
+      case C_DESKTOP_BACKGROUND_STYLE_SCALED:
+      case C_DESKTOP_BACKGROUND_STYLE_ZOOM:
+      case C_DESKTOP_BACKGROUND_STYLE_SPANNED:
       default:
           return COGL_PIPELINE_WRAP_MODE_CLAMP_TO_EDGE;
     }
@@ -803,8 +803,8 @@ meta_background_get_texture (MetaBackground         *self,
       return self->color_texture;
     }
 
-  if (texture2 == NULL && self->style == G_DESKTOP_BACKGROUND_STYLE_WALLPAPER &&
-      self->shading_direction == G_DESKTOP_BACKGROUND_SHADING_SOLID &&
+  if (texture2 == NULL && self->style == C_DESKTOP_BACKGROUND_STYLE_WALLPAPER &&
+      self->shading_direction == C_DESKTOP_BACKGROUND_SHADING_SOLID &&
       ensure_wallpaper_texture (self, texture1))
     {
       if (texture_area)
@@ -844,7 +844,7 @@ meta_background_get_texture (MetaBackground         *self,
           monitor->fbo = COGL_FRAMEBUFFER (offscreen);
         }
 
-      if (self->style != G_DESKTOP_BACKGROUND_STYLE_WALLPAPER)
+      if (self->style != C_DESKTOP_BACKGROUND_STYLE_WALLPAPER)
         {
           monitor_area.x *= monitor_scale;
           monitor_area.y *= monitor_scale;
@@ -967,13 +967,13 @@ meta_background_set_color (MetaBackground *self,
   g_return_if_fail (color != NULL);
 
   meta_background_set_gradient (self,
-                                G_DESKTOP_BACKGROUND_SHADING_SOLID,
+                                C_DESKTOP_BACKGROUND_SHADING_SOLID,
                                 color, &dummy);
 }
 
 void
 meta_background_set_gradient (MetaBackground            *self,
-                              GDesktopBackgroundShading  shading_direction,
+                              CDesktopBackgroundShading  shading_direction,
                               ClutterColor              *color,
                               ClutterColor              *second_color)
 {
@@ -1001,7 +1001,7 @@ meta_background_set_gradient (MetaBackground            *self,
 void
 meta_background_set_file (MetaBackground            *self,
                           GFile                     *file,
-                          GDesktopBackgroundStyle    style)
+                          CDesktopBackgroundStyle    style)
 {
   g_return_if_fail (META_IS_BACKGROUND (self));
 
@@ -1013,7 +1013,7 @@ meta_background_set_blend (MetaBackground          *self,
                            GFile                   *file1,
                            GFile                   *file2,
                            double                   blend_factor,
-                           GDesktopBackgroundStyle  style)
+                           CDesktopBackgroundStyle  style)
 {
   g_return_if_fail (META_IS_BACKGROUND (self));
   g_return_if_fail (blend_factor >= 0.0 && blend_factor <= 1.0);

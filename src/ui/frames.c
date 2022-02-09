@@ -785,7 +785,7 @@ meta_frame_titlebar_event (MetaUIFrame        *frame,
 
   switch (action)
     {
-    case G_DESKTOP_TITLEBAR_ACTION_TOGGLE_SHADE:
+    case C_DESKTOP_TITLEBAR_ACTION_TOGGLE_SHADE:
       {
         if (flags & META_FRAME_ALLOWS_SHADE)
           {
@@ -797,7 +797,7 @@ meta_frame_titlebar_event (MetaUIFrame        *frame,
       }
       break;
 
-    case G_DESKTOP_TITLEBAR_ACTION_TOGGLE_MAXIMIZE:
+    case C_DESKTOP_TITLEBAR_ACTION_TOGGLE_MAXIMIZE:
       {
         if (flags & META_FRAME_ALLOWS_MAXIMIZE)
           {
@@ -806,7 +806,7 @@ meta_frame_titlebar_event (MetaUIFrame        *frame,
       }
       break;
 
-    case G_DESKTOP_TITLEBAR_ACTION_TOGGLE_MAXIMIZE_HORIZONTALLY:
+    case C_DESKTOP_TITLEBAR_ACTION_TOGGLE_MAXIMIZE_HORIZONTALLY:
       {
         if (flags & META_FRAME_ALLOWS_MAXIMIZE)
           {
@@ -816,7 +816,7 @@ meta_frame_titlebar_event (MetaUIFrame        *frame,
       }
       break;
 
-    case G_DESKTOP_TITLEBAR_ACTION_TOGGLE_MAXIMIZE_VERTICALLY:
+    case C_DESKTOP_TITLEBAR_ACTION_TOGGLE_MAXIMIZE_VERTICALLY:
       {
         if (flags & META_FRAME_ALLOWS_MAXIMIZE)
           {
@@ -825,24 +825,24 @@ meta_frame_titlebar_event (MetaUIFrame        *frame,
       }
       break;
 
-    case G_DESKTOP_TITLEBAR_ACTION_MINIMIZE:
+    case C_DESKTOP_TITLEBAR_ACTION_MINIMIZE:
       {
         if (flags & META_FRAME_ALLOWS_MINIMIZE)
           meta_window_minimize (frame->meta_window);
       }
       break;
 
-    case G_DESKTOP_TITLEBAR_ACTION_NONE:
+    case C_DESKTOP_TITLEBAR_ACTION_NONE:
       /* Yaay, a sane user that doesn't use that other weird crap! */
       break;
 
-    case G_DESKTOP_TITLEBAR_ACTION_LOWER:
+    case C_DESKTOP_TITLEBAR_ACTION_LOWER:
       meta_x11_wm_user_lower_and_unfocus (x11_display,
                                           frame->xwindow,
                                           evtime);
       break;
 
-    case G_DESKTOP_TITLEBAR_ACTION_MENU:
+    case C_DESKTOP_TITLEBAR_ACTION_MENU:
       meta_x11_wm_show_window_menu (x11_display,
                                     frame->xwindow,
                                     META_WINDOW_MENU_WM,
