@@ -437,29 +437,72 @@ meta_workspace_queue_calc_showing  (MetaWorkspace *workspace)
     meta_window_queue (l->data, META_QUEUE_CALC_SHOWING);
 }
 
-/**
- * meta_workspace_activate_with_focus:
- * @workspace: a #MetaWorkspace
- * @focus_this: the #MetaWindow to be focused, or %NULL
- * @timestamp: timestamp for @focus_this
- *
- * Switches to @workspace and possibly activates the window @focus_this.
- *
- * The window @focus_this is activated by calling meta_window_activate()
- * which will unminimize it and transient parents, raise it and give it
- * the focus.
- *
- * If a window is currently being moved by the user, it will be
- * moved to @workspace.
- *
- * The advantage of calling this function instead of meta_workspace_activate()
- * followed by meta_window_activate() is that it happens as a unit, so
- * no other window gets focused first before @focus_this.
- */
-void
-meta_workspace_activate_with_focus (MetaWorkspace *workspace,
-                                    MetaWindow    *focus_this,
-                                    guint32        timestamp)
+static MetaMotionDirection
+get_wrapped_horizontal_direction (gint                from,
+                                  gint                to,
+                                  MetaMotionDirection suggested_dir,
+                                  gint                num_workspaces)
+{
+  MetaMotionDirection ret = 0;
+  gboolean wrap = meta_prefs_get_workspace_cycle();
+
+  if (suggested_dir != 0 && wrap)
+    {
+      if (meta_get_locale_direction () == META_LOCALE_DIRECTION_RTL)
+        {
+          if (suggested_dir == META_MOTION_LEFT)
+            suggested_dir = META_MOTION_RIGHT;
+          else
+          if (suggested_dir == META_MOTION_RIGHT)
+            suggested_dir = META_MOTION_LEFT;
+        }
+
+      return suggested_dir;
+    }
+
+  if (meta_get_locale_direction () == META_LOCALE_DIRECTION_RTL)
+    {
+      if (from < to)
+      {
+        if (wrap)
+          ret = (to - from) <= ((num_workspaces - to) + from) ? META_MOTION_LEFT : META_MOTION_RIGHT;
+        else
+          ret = META_MOTION_LEFT;
+      }
+      else if (from > to)
+      {
+        if (wrap)
+          ret = (from - to) <= ((num_workspaces - from) + to) ? META_MOTION_RIGHT : META_MOTION_LEFT;
+        else
+          ret = META_MOTION_RIGHT;
+      }
+    }
+  else
+    {
+      if (from < to)
+      {
+        if (wrap)
+          ret = (to - from) <= ((num_workspaces - to) + from) ? META_MOTION_RIGHT : META_MOTION_LEFT;
+        else
+          ret = META_MOTION_RIGHT;
+      }
+      else if (from > to)
+      {
+        if (wrap)
+          ret = (from - to) <= ((num_workspaces - from) + to) ? META_MOTION_LEFT : META_MOTION_RIGHT;
+        else
+          ret = META_MOTION_LEFT;
+      }
+    }
+
+  return ret;
+}
+
+static void
+meta_workspace_activate_internal (MetaWorkspace       *workspace,
+                                  MetaWindow          *focus_this,
+                                  MetaMotionDirection  suggested_dir,
+                                  guint32              timestamp)
 {
   MetaWorkspace  *old;
   MetaWindow     *move_window;
@@ -534,20 +577,7 @@ meta_workspace_activate_with_focus (MetaWorkspace *workspace,
    meta_workspace_manager_calc_workspace_layout (workspace->manager, num_workspaces,
                                                  new_space, &layout2);
 
-   if (meta_get_locale_direction () == META_LOCALE_DIRECTION_RTL)
-     {
-       if (layout1.current_col > layout2.current_col)
-         direction = META_MOTION_RIGHT;
-       else if (layout1.current_col < layout2.current_col)
-         direction = META_MOTION_LEFT;
-     }
-   else
-    {
-       if (layout1.current_col < layout2.current_col)
-         direction = META_MOTION_RIGHT;
-       else if (layout1.current_col > layout2.current_col)
-         direction = META_MOTION_LEFT;
-    }
+   direction = get_wrapped_horizontal_direction (layout1.current_col, layout2.current_col, suggested_dir, num_workspaces);
 
    if (layout1.current_row < layout2.current_row)
      {
@@ -597,11 +627,57 @@ meta_workspace_activate_with_focus (MetaWorkspace *workspace,
                                               new_space, direction);
 }
 
+/**
+ * meta_workspace_activate_with_focus:
+ * @workspace: a #MetaWorkspace
+ * @focus_this: the #MetaWindow to be focused, or %NULL
+ * @timestamp: timestamp for @focus_this
+ *
+ * Switches to @workspace and possibly activates the window @focus_this.
+ *
+ * The window @focus_this is activated by calling meta_window_activate()
+ * which will unminimize it and transient parents, raise it and give it
+ * the focus.
+ *
+ * If a window is currently being moved by the user, it will be
+ * moved to @workspace.
+ *
+ * The advantage of calling this function instead of meta_workspace_activate()
+ * followed by meta_window_activate() is that it happens as a unit, so
+ * no other window gets focused first before @focus_this.
+ */
+void
+meta_workspace_activate_with_focus (MetaWorkspace *workspace,
+                                    MetaWindow    *focus_this,
+                                    guint32        timestamp)
+{
+  meta_workspace_activate_internal (workspace, focus_this, 0, timestamp);
+}
+
 void
 meta_workspace_activate (MetaWorkspace *workspace,
                          guint32        timestamp)
 {
-  meta_workspace_activate_with_focus (workspace, NULL, timestamp);
+  meta_workspace_activate_internal (workspace, NULL, 0, timestamp);
+}
+
+/**
+ * meta_workspace_activate_with_direction_hint:
+ * @workspace: a #MetaWorkspace
+ * @direction: the suggested #MetaMotionDirection
+ * @timestamp: timestamp for @focus_this
+ *
+ * Switches to @workspace in the specified @direction (if possible)
+ */
+
+void
+meta_workspace_activate_with_direction_hint (MetaWorkspace       *workspace,
+                                             MetaMotionDirection  direction,
+                                             guint32              timestamp)
+{
+  g_return_if_fail (META_IS_WORKSPACE (workspace));
+
+  meta_workspace_activate_internal (workspace, NULL, direction, timestamp);
 }
 
 int
@@ -1145,12 +1221,14 @@ meta_workspace_get_neighbor (MetaWorkspace      *workspace,
 {
   MetaWorkspaceLayout layout;
   int i, current_space, num_workspaces;
-  gboolean ltr;
+  gboolean ltr, cycle;
 
   current_space = meta_workspace_index (workspace);
   num_workspaces = meta_workspace_manager_get_n_workspaces (workspace->manager);
   meta_workspace_manager_calc_workspace_layout (workspace->manager, num_workspaces,
                                                 current_space, &layout);
+
+  cycle = meta_prefs_get_workspace_cycle();
 
   meta_verbose ("Getting neighbor of %d in direction %s\n",
                 current_space, meta_motion_direction_to_string (direction));
@@ -1175,9 +1253,9 @@ meta_workspace_get_neighbor (MetaWorkspace      *workspace,
     }
 
   if (layout.current_col < 0)
-    layout.current_col = 0;
+    layout.current_col = (cycle == 1) ? layout.cols - 1 : 0;
   if (layout.current_col >= layout.cols)
-    layout.current_col = layout.cols - 1;
+    layout.current_col = (cycle == 1) ? 0 : layout.cols - 1;
   if (layout.current_row < 0)
     layout.current_row = 0;
   if (layout.current_row >= layout.rows)
