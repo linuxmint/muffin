@@ -88,6 +88,7 @@ static gboolean raise_on_click = TRUE;
 static gboolean center_new_windows = FALSE;
 static gboolean attach_modal_dialogs = FALSE;
 static int num_workspaces = 4;
+static gboolean workspace_cycle = FALSE;
 static CDesktopTitlebarAction action_double_click_titlebar = C_DESKTOP_TITLEBAR_ACTION_TOGGLE_MAXIMIZE;
 static CDesktopTitlebarAction action_middle_click_titlebar = C_DESKTOP_TITLEBAR_ACTION_LOWER;
 static CDesktopTitlebarAction action_right_click_titlebar = C_DESKTOP_TITLEBAR_ACTION_MENU;
@@ -416,6 +417,13 @@ static MetaBoolPreference preferences_bool[] =
         META_PREF_UNREDIRECT_FULLSCREEN_WINDOWS,
       },
       &unredirect_fullscreen_windows,
+    },
+    {
+      { "workspace-cycle",
+        SCHEMA_MUFFIN,
+        META_PREF_WORKSPACE_CYCLE,
+      },
+      &workspace_cycle,
     },
     { { NULL, 0, 0 }, NULL },
   };
@@ -1668,6 +1676,12 @@ meta_prefs_get_unredirect_fullscreen_windows (void)
   return unredirect_fullscreen_windows;
 }
 
+gboolean
+meta_prefs_get_workspace_cycle (void)
+{
+  return workspace_cycle;
+}
+
 #ifdef WITH_VERBOSE_MODE
 const char*
 meta_preference_to_string (MetaPreference pref)
@@ -1782,6 +1796,9 @@ meta_preference_to_string (MetaPreference pref)
 
     case META_PREF_UNREDIRECT_FULLSCREEN_WINDOWS:
       return "UNREDIRECT_FULLSCREEN_WINDOWS";
+
+    case META_PREF_WORKSPACE_CYCLE:
+      return "WORKSPACE_CYCLE";
     }
 
   return "(unknown)";

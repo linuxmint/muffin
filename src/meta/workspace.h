@@ -63,6 +63,12 @@ void meta_workspace_activate_with_focus (MetaWorkspace *workspace,
                                          guint32        timestamp);
 
 META_EXPORT
+void
+meta_workspace_activate_with_direction_hint (MetaWorkspace       *workspace,
+                                             MetaMotionDirection  direction,
+                                             guint32              timestamp);
+
+META_EXPORT
 void meta_workspace_set_builtin_struts (MetaWorkspace *workspace,
                                         GSList        *struts);
 
