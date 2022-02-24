@@ -106,7 +106,8 @@ typedef enum
   META_PREF_DRAG_THRESHOLD,
   META_PREF_LOCATE_POINTER,
   META_PREF_CHECK_ALIVE_TIMEOUT,
-  META_PREF_BACKGROUND_TRANSITION
+  META_PREF_BACKGROUND_TRANSITION,
+  META_PREF_UNREDIRECT_FULLSCREEN_WINDOWS
 } MetaPreference;
 
 typedef void (* MetaPrefsChangedFunc) (MetaPreference pref,
@@ -236,6 +237,9 @@ int      meta_prefs_get_draggable_border_width (void);
 
 META_EXPORT
 int      meta_prefs_get_drag_threshold (void);
+
+META_EXPORT
+gboolean    meta_prefs_get_unredirect_fullscreen_windows (void);
 
 /**
  * MetaKeyBindingAction:

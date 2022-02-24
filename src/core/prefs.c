@@ -65,7 +65,7 @@
 /* These are the different schemas we are keeping
  * a GSettings instance for */
 #define SCHEMA_GENERAL         "org.cinnamon.desktop.wm.preferences"
-#define SCHEMA_MUTTER          "org.cinnamon.muffin"
+#define SCHEMA_MUFFIN          "org.cinnamon.muffin"
 #define SCHEMA_INTERFACE       "org.cinnamon.desktop.interface"
 #define SCHEMA_INPUT_SOURCES   "org.cinnamon.desktop.input-sources"
 #define SCHEMA_MOUSE           "org.cinnamon.desktop.peripherals.mouse"
@@ -127,6 +127,7 @@ static gboolean workspaces_only_on_primary = FALSE;
 static char *iso_next_group_option = NULL;
 
 static MetaX11BackgroundTransition background_transition = META_X11_BACKGROUND_TRANSITION_BLEND;
+static gboolean unredirect_fullscreen_windows = FALSE;
 
 static void handle_preference_update_enum (GSettings *settings,
                                            gchar     *key);
@@ -280,7 +281,7 @@ static MetaEnumPreference preferences_enum[] =
     },
     {
       { "background-transition",
-        SCHEMA_MUTTER,
+        SCHEMA_MUFFIN,
         META_PREF_BACKGROUND_TRANSITION,
       },
       &background_transition,
@@ -292,14 +293,14 @@ static MetaBoolPreference preferences_bool[] =
   {
     {
       { "attach-modal-dialogs",
-        SCHEMA_MUTTER,
+        SCHEMA_MUFFIN,
         META_PREF_ATTACH_MODAL_DIALOGS,
       },
       &attach_modal_dialogs,
     },
     {
       { "center-new-windows",
-        SCHEMA_MUTTER,
+        SCHEMA_MUFFIN,
         META_PREF_CENTER_NEW_WINDOWS,
       },
       &center_new_windows,
@@ -320,7 +321,7 @@ static MetaBoolPreference preferences_bool[] =
     },
     {
       { "dynamic-workspaces",
-        SCHEMA_MUTTER,
+        SCHEMA_MUFFIN,
         META_PREF_DYNAMIC_WORKSPACES,
       },
       &dynamic_workspaces,
@@ -341,7 +342,7 @@ static MetaBoolPreference preferences_bool[] =
     },
     {
       { "focus-change-on-pointer-rest",
-        SCHEMA_MUTTER,
+        SCHEMA_MUFFIN,
         META_PREF_FOCUS_CHANGE_ON_POINTER_REST,
       },
       &focus_change_on_pointer_rest
@@ -383,21 +384,21 @@ static MetaBoolPreference preferences_bool[] =
     },
     {
       { "edge-tiling",
-        SCHEMA_MUTTER,
+        SCHEMA_MUFFIN,
         META_PREF_EDGE_TILING,
       },
       &edge_tiling,
     },
     {
       { "workspaces-only-on-primary",
-        SCHEMA_MUTTER,
+        SCHEMA_MUFFIN,
         META_PREF_WORKSPACES_ONLY_ON_PRIMARY,
       },
       &workspaces_only_on_primary,
     },
     {
       { "auto-maximize",
-        SCHEMA_MUTTER,
+        SCHEMA_MUFFIN,
         META_PREF_AUTO_MAXIMIZE,
       },
       &auto_maximize,
@@ -408,6 +409,13 @@ static MetaBoolPreference preferences_bool[] =
         META_PREF_LOCATE_POINTER,
       },
       &locate_pointer_is_enabled,
+    },
+    {
+      { "unredirect-fullscreen-windows",
+        SCHEMA_MUFFIN,
+        META_PREF_UNREDIRECT_FULLSCREEN_WINDOWS,
+      },
+      &unredirect_fullscreen_windows,
     },
     { { NULL, 0, 0 }, NULL },
   };
@@ -448,7 +456,7 @@ static MetaStringPreference preferences_string[] =
     },
     {
       { "overlay-key",
-        SCHEMA_MUTTER,
+        SCHEMA_MUFFIN,
         META_PREF_KEYBINDINGS,
       },
       overlay_key_handler,
@@ -456,7 +464,7 @@ static MetaStringPreference preferences_string[] =
     },
     {
       { "locate-pointer-key",
-        SCHEMA_MUTTER,
+        SCHEMA_MUFFIN,
         META_PREF_KEYBINDINGS,
       },
       locate_pointer_key_handler,
@@ -504,7 +512,7 @@ static MetaIntPreference preferences_int[] =
     },
     {
       { "draggable-border-width",
-        SCHEMA_MUTTER,
+        SCHEMA_MUFFIN,
         META_PREF_DRAGGABLE_BORDER_WIDTH,
       },
       &draggable_border_width
@@ -530,7 +538,7 @@ static MetaUintPreference preferences_uint[] =
   {
     {
       { "check-alive-timeout",
-        SCHEMA_MUTTER,
+        SCHEMA_MUFFIN,
         META_PREF_CHECK_ALIVE_TIMEOUT,
       },
       &check_alive_timeout,
@@ -1016,9 +1024,9 @@ meta_prefs_init (void)
   g_signal_connect (settings, "changed", G_CALLBACK (settings_changed), NULL);
   g_hash_table_insert (settings_schemas, g_strdup (SCHEMA_GENERAL), settings);
 
-  settings = g_settings_new (SCHEMA_MUTTER);
+  settings = g_settings_new (SCHEMA_MUFFIN);
   g_signal_connect (settings, "changed", G_CALLBACK (settings_changed), NULL);
-  g_hash_table_insert (settings_schemas, g_strdup (SCHEMA_MUTTER), settings);
+  g_hash_table_insert (settings_schemas, g_strdup (SCHEMA_MUFFIN), settings);
 
   settings = g_settings_new (SCHEMA_MOUSE);
   g_signal_connect (settings, "changed", G_CALLBACK (settings_changed), NULL);
@@ -1654,6 +1662,12 @@ meta_prefs_get_disable_workarounds (void)
   return disable_workarounds;
 }
 
+gboolean
+meta_prefs_get_unredirect_fullscreen_windows (void)
+{
+  return unredirect_fullscreen_windows;
+}
+
 #ifdef WITH_VERBOSE_MODE
 const char*
 meta_preference_to_string (MetaPreference pref)
@@ -1765,6 +1779,9 @@ meta_preference_to_string (MetaPreference pref)
 
     case META_PREF_CHECK_ALIVE_TIMEOUT:
       return "CHECK_ALIVE_TIMEOUT";
+
+    case META_PREF_UNREDIRECT_FULLSCREEN_WINDOWS:
+      return "UNREDIRECT_FULLSCREEN_WINDOWS";
     }
 
   return "(unknown)";

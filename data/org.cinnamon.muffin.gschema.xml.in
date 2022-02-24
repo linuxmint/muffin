@@ -46,6 +46,14 @@
       </description>
     </key>
 
+    <key name="unredirect-fullscreen-windows" type="b">
+      <default>false</default>
+      <summary>Fullscreen windows are unredirected (i.e. they bypass compositing)</summary>
+      <description>
+        Determines whether fullscreen windows bypass compositing. False is better for vsync/screen-tearing, True gives games and apps i
+      </description>
+    </key>
+
     <key name="workspaces-only-on-primary" type="b">
       <default>false</default>
       <summary>Workspaces only on primary</summary>
