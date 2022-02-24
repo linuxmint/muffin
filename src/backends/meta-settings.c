@@ -572,7 +572,7 @@ meta_settings_dispose (GObject *object)
 static void
 meta_settings_init (MetaSettings *settings)
 {
-  settings->interface_settings = g_settings_new ("org.gnome.desktop.interface");
+  settings->interface_settings = g_settings_new ("org.cinnamon.desktop.interface");
   g_signal_connect (settings->interface_settings, "changed",
                     G_CALLBACK (interface_settings_changed),
                     settings);
