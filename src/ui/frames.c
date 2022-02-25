@@ -77,6 +77,7 @@ enum
   META_ACTION_RIGHT_CLICK,
   META_ACTION_MIDDLE_CLICK,
   META_ACTION_DOUBLE_CLICK,
+  META_ACTION_SCROLL,
   META_ACTION_IGNORE
 };
 
@@ -774,7 +775,8 @@ meta_frame_titlebar_event (MetaUIFrame        *frame,
   float x, y;
 
   g_assert (event->type == CLUTTER_BUTTON_PRESS ||
-            event->type == CLUTTER_TOUCH_BEGIN);
+            event->type == CLUTTER_TOUCH_BEGIN ||
+            event->type == CLUTTER_SCROLL);
 
   x11_display = frame->frames->x11_display;
 
@@ -842,11 +844,68 @@ meta_frame_titlebar_event (MetaUIFrame        *frame,
                                           evtime);
       break;
 
+    case C_DESKTOP_TITLEBAR_ACTION_TOGGLE_STUCK:
+      {
+        if (flags & META_FRAME_STUCK)
+          {
+            meta_window_unstick (frame->meta_window);
+          }
+        else
+        {
+            meta_window_stick (frame->meta_window);
+        }
+      }
+      break;
+
+    case C_DESKTOP_TITLEBAR_ACTION_TOGGLE_ABOVE:
+      {
+        if (flags & META_FRAME_ABOVE)
+          {
+            meta_window_unmake_above (frame->meta_window);
+          }
+        else
+        {
+            meta_window_make_above (frame->meta_window);
+        }
+      }
+      break;
+
     case C_DESKTOP_TITLEBAR_ACTION_MENU:
       meta_x11_wm_show_window_menu (x11_display,
                                     frame->xwindow,
                                     META_WINDOW_MENU_WM,
                                     x, y, evtime);
+      break;
+
+    case C_DESKTOP_TITLEBAR_SCROLL_ACTION_SHADE:
+      {
+        if (flags & META_FRAME_ALLOWS_SHADE)
+          {
+            if (event->scroll.direction == CLUTTER_SCROLL_UP && !(flags & META_FRAME_SHADED))
+              {
+                meta_window_shade (frame->meta_window, evtime);
+              }
+            else
+            if (event->scroll.direction == CLUTTER_SCROLL_DOWN && (flags & META_FRAME_SHADED))
+              {
+                meta_window_unshade (frame->meta_window, evtime);
+              }
+          }
+      }
+      break;
+
+    case C_DESKTOP_TITLEBAR_SCROLL_ACTION_OPACITY:
+      {
+        if (event->scroll.direction == CLUTTER_SCROLL_UP)
+          {
+            meta_window_increase_opacity (frame->meta_window);
+          }
+        else
+        if (event->scroll.direction == CLUTTER_SCROLL_DOWN)
+          {
+            meta_window_decrease_opacity (frame->meta_window);
+          }
+      }
       break;
     }
 
@@ -877,6 +936,16 @@ meta_frame_right_click_event (MetaUIFrame *frame,
                               ClutterButtonEvent *event)
 {
   int action = meta_prefs_get_action_right_click_titlebar();
+
+  return meta_frame_titlebar_event (frame, (const ClutterEvent *) event,
+                                    action);
+}
+
+static gboolean
+meta_frame_scroll_event (MetaUIFrame *frame,
+                         ClutterScrollEvent *event)
+{
+  int action = meta_prefs_get_action_scroll_wheel_titlebar();
 
   return meta_frame_titlebar_event (frame, (const ClutterEvent *) event,
                                     action);
@@ -998,6 +1067,10 @@ get_action (const ClutterEvent *event)
            event->type == CLUTTER_TOUCH_END)
     {
       return META_ACTION_CLICK;
+    }
+  else if (event->type == CLUTTER_SCROLL)
+    {
+      return META_ACTION_SCROLL;
     }
 
   return META_ACTION_IGNORE;
@@ -1238,6 +1311,33 @@ handle_release_event (MetaUIFrame        *frame,
     }
 
   return TRUE;
+}
+
+static gboolean
+handle_scroll_event (MetaUIFrame        *frame,
+                     const ClutterEvent *event)
+{
+  MetaFrameControl control;
+  uint32_t action;
+  float x, y;
+  g_assert (event->type == CLUTTER_SCROLL);
+
+  action = get_action (event);
+  if (action == META_ACTION_IGNORE)
+    return FALSE;
+
+  clutter_event_get_coords (event, &x, &y);
+  control = get_control (frame, x, y);
+
+  if (control != META_FRAME_CONTROL_TITLE)
+    {
+      return FALSE;
+    }
+
+  if (meta_x11_wm_get_grab_op (frame->frames->x11_display) != META_GRAB_OP_NONE)
+    return FALSE; /* already up to something */
+
+  return meta_frame_scroll_event (frame, (ClutterScrollEvent *) event);
 }
 
 static void
@@ -1663,6 +1763,8 @@ meta_ui_frame_handle_event (MetaUIFrame *frame,
     case CLUTTER_BUTTON_RELEASE:
     case CLUTTER_TOUCH_END:
       return handle_release_event (frame, event);
+    case CLUTTER_SCROLL:
+      return handle_scroll_event (frame, event);
     case CLUTTER_MOTION:
     case CLUTTER_TOUCH_UPDATE:
       return handle_motion_event (frame, event);
