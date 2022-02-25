@@ -92,6 +92,8 @@ static gboolean workspace_cycle = FALSE;
 static CDesktopTitlebarAction action_double_click_titlebar = C_DESKTOP_TITLEBAR_ACTION_TOGGLE_MAXIMIZE;
 static CDesktopTitlebarAction action_middle_click_titlebar = C_DESKTOP_TITLEBAR_ACTION_LOWER;
 static CDesktopTitlebarAction action_right_click_titlebar = C_DESKTOP_TITLEBAR_ACTION_MENU;
+static CDesktopTitlebarScrollAction action_scroll_titlebar = C_DESKTOP_TITLEBAR_SCROLL_ACTION_NONE;
+static int min_window_opacity = 0;
 static gboolean dynamic_workspaces = FALSE;
 static gboolean disable_workarounds = FALSE;
 static gboolean auto_raise = FALSE;
@@ -136,6 +138,8 @@ static gboolean update_binding         (MetaKeyPref *binding,
                                         gchar      **strokes);
 static gboolean update_key_binding     (const char  *key,
                                         gchar      **strokes);
+static void update_min_win_opacity (void);
+
 
 static void settings_changed (GSettings      *settings,
                               gchar          *key,
@@ -279,6 +283,13 @@ static MetaEnumPreference preferences_enum[] =
         META_PREF_ACTION_RIGHT_CLICK_TITLEBAR,
       },
       &action_right_click_titlebar,
+    },
+    {
+      { "action-scroll-titlebar",
+        SCHEMA_GENERAL,
+        META_PREF_ACTION_SCROLL_WHEEL_TITLEBAR,
+      },
+      &action_scroll_titlebar,
     },
     {
       { "background-transition",
@@ -1067,6 +1078,7 @@ meta_prefs_init (void)
   handle_preference_init_string_array ();
   handle_preference_init_int ();
   handle_preference_init_uint ();
+  update_min_win_opacity ();
 
   init_bindings ();
 }
@@ -1119,7 +1131,17 @@ settings_changed (GSettings *settings,
   if (g_variant_type_equal (type, G_VARIANT_TYPE_BOOLEAN))
     handle_preference_update_bool (settings, key);
   else if (g_variant_type_equal (type, G_VARIANT_TYPE_INT32))
-    handle_preference_update_int (settings, key);
+    {
+      if (strcmp (key, "min-window-opacity") == 0)
+        {
+          update_min_win_opacity ();
+          queue_changed (META_PREF_MIN_WIN_OPACITY);
+        }
+      else
+        {
+          handle_preference_update_int (settings, key);
+        }
+    }
   else if (g_variant_type_equal (type, G_VARIANT_TYPE_UINT32))
     handle_preference_update_uint (settings, key);
   else if (g_variant_type_equal (type, G_VARIANT_TYPE_STRING_ARRAY))
@@ -1728,6 +1750,9 @@ meta_preference_to_string (MetaPreference pref)
     case META_PREF_ACTION_RIGHT_CLICK_TITLEBAR:
       return "ACTION_RIGHT_CLICK_TITLEBAR";
 
+    case META_PREF_ACTION_SCROLL_WHEEL_TITLEBAR:
+      return "ACTION_SCROLL_WHEEL_TITLEBAR";
+
     case META_PREF_AUTO_RAISE:
       return "AUTO_RAISE";
 
@@ -1799,6 +1824,9 @@ meta_preference_to_string (MetaPreference pref)
 
     case META_PREF_WORKSPACE_CYCLE:
       return "WORKSPACE_CYCLE";
+
+    case META_PREF_MIN_WIN_OPACITY:
+      return "MIN_WIN_OPACITY";
     }
 
   return "(unknown)";
@@ -1939,6 +1967,18 @@ update_key_binding (const char *key,
     return update_binding (pref, strokes);
   else
     return FALSE;
+}
+
+static void
+update_min_win_opacity (void)
+{
+  int pct;
+  int mapped;
+
+  pct = g_settings_get_int (SETTINGS (SCHEMA_GENERAL), "min-window-opacity");
+  mapped = (int)(((double)pct / 100.0) * 255.0);
+
+  min_window_opacity = CLAMP (mapped, 0, 255);
 }
 
 const char*
@@ -2189,6 +2229,12 @@ meta_prefs_get_action_right_click_titlebar (void)
   return action_right_click_titlebar;
 }
 
+CDesktopTitlebarScrollAction
+meta_prefs_get_action_scroll_wheel_titlebar (void)
+{
+  return action_scroll_titlebar;
+}
+
 gboolean
 meta_prefs_get_auto_raise (void)
 {
@@ -2286,4 +2332,10 @@ MetaX11BackgroundTransition
 meta_prefs_get_background_transition (void)
 {
   return background_transition;
+}
+
+gint
+meta_prefs_get_min_win_opacity (void)
+{
+  return min_window_opacity;
 }
