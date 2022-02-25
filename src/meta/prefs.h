@@ -40,6 +40,7 @@
  * @META_PREF_ACTION_DOUBLE_CLICK_TITLEBAR: action double click titlebar
  * @META_PREF_ACTION_MIDDLE_CLICK_TITLEBAR: action middle click titlebar
  * @META_PREF_ACTION_RIGHT_CLICK_TITLEBAR: action right click titlebar
+ * @META_PREF_ACTION_SCROLL_WHEEL_TITLEBAR: action scroll wheel titlebar
  * @META_PREF_AUTO_RAISE: auto-raise
  * @META_PREF_AUTO_RAISE_DELAY: auto-raise delay
  * @META_PREF_FOCUS_CHANGE_ON_POINTER_REST: focus change on pointer rest
@@ -79,6 +80,7 @@ typedef enum
   META_PREF_ACTION_DOUBLE_CLICK_TITLEBAR,
   META_PREF_ACTION_MIDDLE_CLICK_TITLEBAR,
   META_PREF_ACTION_RIGHT_CLICK_TITLEBAR,
+  META_PREF_ACTION_SCROLL_WHEEL_TITLEBAR,
   META_PREF_AUTO_RAISE,
   META_PREF_AUTO_RAISE_DELAY,
   META_PREF_FOCUS_CHANGE_ON_POINTER_REST,
@@ -108,7 +110,8 @@ typedef enum
   META_PREF_CHECK_ALIVE_TIMEOUT,
   META_PREF_BACKGROUND_TRANSITION,
   META_PREF_UNREDIRECT_FULLSCREEN_WINDOWS,
-  META_PREF_WORKSPACE_CYCLE
+  META_PREF_WORKSPACE_CYCLE,
+  META_PREF_MIN_WIN_OPACITY
 } MetaPreference;
 
 typedef void (* MetaPrefsChangedFunc) (MetaPreference pref,
@@ -206,6 +209,9 @@ META_EXPORT
 CDesktopTitlebarAction      meta_prefs_get_action_right_click_titlebar (void);
 
 META_EXPORT
+CDesktopTitlebarScrollAction meta_prefs_get_action_scroll_wheel_titlebar (void);
+
+META_EXPORT
 void meta_prefs_set_num_workspaces (int n_workspaces);
 
 META_EXPORT
@@ -244,6 +250,10 @@ gboolean    meta_prefs_get_unredirect_fullscreen_windows (void);
 
 META_EXPORT
 gboolean    meta_prefs_get_workspace_cycle (void);
+
+META_EXPORT
+gint meta_prefs_get_min_win_opacity (void);
+
 /**
  * MetaKeyBindingAction:
  * @META_KEYBINDING_ACTION_NONE: FILLME

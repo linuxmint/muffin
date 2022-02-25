@@ -8131,6 +8131,25 @@ meta_window_set_opacity (MetaWindow *window,
   meta_compositor_window_opacity_changed (window->display->compositor, window);
 }
 
+#define OPACITY_STEP 32
+
+void
+meta_window_increase_opacity (MetaWindow *window)
+{
+  window->opacity = MIN (255, window->opacity + OPACITY_STEP);
+
+  meta_compositor_window_opacity_changed (window->display->compositor, window);
+}
+
+void
+meta_window_decrease_opacity (MetaWindow *window)
+{
+  window->opacity = MAX (meta_prefs_get_min_win_opacity (),
+                         window->opacity - OPACITY_STEP);
+
+  meta_compositor_window_opacity_changed (window->display->compositor, window);
+}
+
 static void
 reset_ignored_crossing_serials (MetaDisplay *display)
 {
