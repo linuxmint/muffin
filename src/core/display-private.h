@@ -425,4 +425,6 @@ gboolean meta_display_init_x11_finish (MetaDisplay   *display,
 
 void     meta_display_shutdown_x11 (MetaDisplay  *display);
 
+void meta_display_a11y_zoom (MetaDisplay *display, gboolean in);
+
 #endif

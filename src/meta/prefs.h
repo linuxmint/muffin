@@ -33,6 +33,7 @@
 /**
  * MetaPreference:
  * @META_PREF_MOUSE_BUTTON_MODS: mouse button modifiers
+ * @META_PREF_MOUSE_BUTTON_ZOOM_MODS: mouse button zoom modifiers
  * @META_PREF_FOCUS_MODE: focus mode
  * @META_PREF_FOCUS_NEW_WINDOWS: focus new windows
  * @META_PREF_ATTACH_MODAL_DIALOGS: attach modal dialogs
@@ -73,6 +74,7 @@
 typedef enum
 {
   META_PREF_MOUSE_BUTTON_MODS,
+  META_PREF_MOUSE_BUTTON_ZOOM_MODS,
   META_PREF_FOCUS_MODE,
   META_PREF_FOCUS_NEW_WINDOWS,
   META_PREF_ATTACH_MODAL_DIALOGS,
@@ -111,7 +113,8 @@ typedef enum
   META_PREF_BACKGROUND_TRANSITION,
   META_PREF_UNREDIRECT_FULLSCREEN_WINDOWS,
   META_PREF_WORKSPACE_CYCLE,
-  META_PREF_MIN_WIN_OPACITY
+  META_PREF_MIN_WIN_OPACITY,
+  META_PREF_MOUSE_ZOOM_ENABLED
 } MetaPreference;
 
 typedef void (* MetaPrefsChangedFunc) (MetaPreference pref,
@@ -133,6 +136,12 @@ const char* meta_preference_to_string (MetaPreference pref);
 
 META_EXPORT
 MetaVirtualModifier         meta_prefs_get_mouse_button_mods  (void);
+
+META_EXPORT
+MetaVirtualModifier         meta_prefs_get_mouse_button_zoom_mods  (void);
+
+META_EXPORT
+gboolean                    meta_prefs_get_mouse_zoom_enabled (void);
 
 META_EXPORT
 gint                        meta_prefs_get_mouse_button_resize (void);
