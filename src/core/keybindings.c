@@ -1274,6 +1274,8 @@ meta_display_grab_window_buttons (MetaDisplay *display,
    * Grab Alt + button2 for resizing window.
    * Grab Alt + button3 for popping up window menu.
    * Grab Alt + Shift + button1 for snap-moving window.
+   * Grab Alt + button4 for scrolling in
+   * Grab Alt + button5 for scrolling out
    */
   meta_verbose ("Grabbing window buttons for 0x%lx\n", xwindow);
 
@@ -1298,6 +1300,18 @@ meta_display_grab_window_buttons (MetaDisplay *display,
                                FALSE,
                                1, keys->window_grab_modifiers | ShiftMask);
     }
+
+  if (meta_prefs_get_mouse_zoom_enabled () && keys->mouse_zoom_modifiers != 0)
+    {
+      int i;
+      for (i = 4; i < 6; i++)
+        {
+          meta_change_button_grab (keys, xwindow,
+                                   TRUE,
+                                   FALSE,
+                                   i, keys->mouse_zoom_modifiers);
+        }
+    }
 }
 
 void
@@ -1306,11 +1320,21 @@ meta_display_ungrab_window_buttons (MetaDisplay *display,
 {
   MetaKeyBindingManager *keys = &display->key_binding_manager;
 
-  if (keys->window_grab_modifiers == 0)
-    return;
+  if (keys->window_grab_modifiers != 0)
+    {
+      meta_change_buttons_grab (keys, xwindow, FALSE, FALSE,
+                                keys->window_grab_modifiers);
+    }
 
-  meta_change_buttons_grab (keys, xwindow, FALSE, FALSE,
-                            keys->window_grab_modifiers);
+  int i = 4;
+  while (i < 6)
+    {
+      meta_change_button_grab (keys, xwindow,
+                               FALSE, FALSE, i,
+                               keys->mouse_zoom_modifiers);
+
+      ++i;
+    }
 }
 
 static void
@@ -1323,6 +1347,18 @@ update_window_grab_modifiers (MetaKeyBindingManager *keys)
   devirtualize_modifiers (keys, virtual_mods, &mods);
 
   keys->window_grab_modifiers = mods;
+}
+
+static void
+update_mouse_zoom_modifiers (MetaKeyBindingManager *keys)
+{
+  MetaVirtualModifier virtual_mods;
+  unsigned int mods;
+
+  virtual_mods = meta_prefs_get_mouse_button_zoom_mods ();
+  devirtualize_modifiers (keys, virtual_mods, &mods);
+
+  keys->mouse_zoom_modifiers = mods;
 }
 
 void
@@ -1383,6 +1419,8 @@ prefs_changed_callback (MetaPreference pref,
       grab_key_bindings (display);
       break;
     case META_PREF_MOUSE_BUTTON_MODS:
+    case META_PREF_MOUSE_BUTTON_ZOOM_MODS:
+    case META_PREF_MOUSE_ZOOM_ENABLED:
       {
         GSList *windows, *l;
         windows = meta_display_list_windows (display, META_LIST_DEFAULT);
@@ -1394,6 +1432,7 @@ prefs_changed_callback (MetaPreference pref,
           }
 
         update_window_grab_modifiers (keys);
+        update_mouse_zoom_modifiers (keys);
 
         for (l = windows; l; l = l->next)
           {
@@ -3732,6 +3771,22 @@ meta_keybindings_set_custom_handler (const gchar        *name,
   return TRUE;
 }
 
+int
+meta_keybindings_get_mouse_zoom_modifiers (MetaDisplay *display)
+{
+    MetaKeyBindingManager *keys = &display->key_binding_manager;
+
+    return keys->mouse_zoom_modifiers;
+}
+
+uint
+meta_keybindings_get_ignored_modifier_mask (MetaDisplay *display)
+{
+    MetaKeyBindingManager *keys = &display->key_binding_manager;
+
+    return keys->ignored_modifier_mask;
+}
+
 static void
 init_builtin_key_bindings (MetaDisplay *display)
 {
@@ -4563,6 +4618,7 @@ meta_display_init_keys (MetaDisplay *display)
   reload_combos (keys);
 
   update_window_grab_modifiers (keys);
+  update_mouse_zoom_modifiers (keys);
 
   /* Keys are actually grabbed in meta_screen_grab_keys() */
 
