@@ -2098,7 +2098,7 @@ meta_prefs_add_keybinding (const char           *name,
 
   pref = g_new0 (MetaKeyPref, 1);
   pref->name = g_strdup (name);
-  pref->settings = settings != NULL? g_object_ref (settings) : NULL;
+  pref->settings = settings != NULL ? g_object_ref (settings) : NULL;
   pref->action = action;
   pref->combos = NULL;
   pref->builtin = (flags & META_KEY_BINDING_BUILTIN) != 0;
@@ -2125,13 +2125,14 @@ meta_prefs_add_keybinding (const char           *name,
 
           g_object_set_data (G_OBJECT (settings), name, GUINT_TO_POINTER (id));
 
-          queue_changed (META_PREF_KEYBINDINGS);
           strokes = g_settings_get_strv (settings, name);
         }
       else
         {
           strokes = g_strdupv (bindings);
         }
+
+      queue_changed (META_PREF_KEYBINDINGS);
     }
 
   update_binding (pref, strokes);
