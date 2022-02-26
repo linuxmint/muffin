@@ -159,6 +159,8 @@ enum
   WORKAREAS_CHANGED,
   CLOSING,
   INIT_XSERVER,
+  ZOOM_SCROLL_IN,
+  ZOOM_SCROLL_OUT,
   LAST_SIGNAL
 };
 
@@ -510,6 +512,20 @@ meta_display_class_init (MetaDisplayClass *klass)
                   0, g_signal_accumulator_first_wins,
                   NULL, NULL,
                   G_TYPE_BOOLEAN, 1, G_TYPE_TASK);
+
+  display_signals[ZOOM_SCROLL_IN] =
+    g_signal_new ("zoom-scroll-in",
+                  G_TYPE_FROM_CLASS (klass),
+                  G_SIGNAL_RUN_LAST,
+                  0, NULL, NULL, NULL,
+                  G_TYPE_NONE, 0);
+
+  display_signals[ZOOM_SCROLL_OUT] =
+    g_signal_new ("zoom-scroll-out",
+                  G_TYPE_FROM_CLASS (klass),
+                  G_SIGNAL_RUN_LAST,
+                  0, NULL, NULL, NULL,
+                  G_TYPE_NONE, 0);
 
   g_object_class_install_property (object_class,
                                    PROP_FOCUS_WINDOW,
@@ -3870,4 +3886,10 @@ MetaSelection *
 meta_display_get_selection (MetaDisplay *display)
 {
   return display->selection;
+}
+
+void
+meta_display_a11y_zoom (MetaDisplay *display, gboolean in)
+{
+  g_signal_emit (display, display_signals[in ? ZOOM_SCROLL_IN : ZOOM_SCROLL_OUT], 0);
 }
