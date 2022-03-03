@@ -103,6 +103,8 @@ struct _MetaWindowActorX11
   gboolean is_frozen;
 };
 
+static MetaShadowMode user_shadow_mode = META_SHADOW_MODE_AUTO;
+
 static MetaCullableInterface *cullable_parent_iface;
 
 static void cullable_iface_init (MetaCullableInterface *iface);
@@ -1628,6 +1630,8 @@ meta_window_actor_x11_class_init (MetaWindowActorX11Class *klass)
   g_object_class_install_property (object_class,
                                    PROP_SHADOW_CLASS,
                                    pspec);
+
+  user_shadow_mode = (g_strcmp0 ("1", g_getenv ("MUFFIN_NO_SHADOWS")) == 0) ? META_SHADOW_MODE_FORCED_OFF : META_SHADOW_MODE_AUTO;
 }
 
 static void
@@ -1642,4 +1646,6 @@ meta_window_actor_x11_init (MetaWindowActorX11 *self)
                               "changed",
                               G_CALLBACK (invalidate_shadow),
                               self);
+
+  self->shadow_mode = user_shadow_mode;
 }
