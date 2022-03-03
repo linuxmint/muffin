@@ -1610,13 +1610,10 @@ constrain_partially_onscreen (MetaWindow         *window,
       bottom_amount = info->current.height + info->borders->visible.bottom;
       vert_amount_onscreen = info->borders->visible.top;
     }
-  else if (meta_window_is_client_decorated (window))
-    {
-      top_amount = vert_amount_onscreen = CSD_TITLEBAR_HEIGHT * scale; /* Hardcoded for now, we don't get this from Gtk */
-      bottom_amount = vert_amount_offscreen = MAX ((info->current.height - (vert_amount_onscreen * 2)), 0);
-    }
   else
-    bottom_amount = vert_amount_offscreen;
+    {
+      bottom_amount = vert_amount_offscreen;
+    }
 
   /* Extend the region, have a helper function handle the constraint,
    * then return the region to its original size.
