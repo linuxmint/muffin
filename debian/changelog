@@ -1,3 +1,11 @@
+muffin (5.2.1) una; urgency=medium
+
+  [ Michael Webster ]
+  * Fix window centering calculations, and now include the frame if there is one.
+  * constraints: Fix inability to drag c-s-d windows up beyond their titlebars.
+
+ -- Clement Lefebvre <root@linuxmint.com>  Mon, 07 Mar 2022 13:29:30 +0000
+
 muffin (5.2.0) una; urgency=medium
 
   [ Michael Webster ]
