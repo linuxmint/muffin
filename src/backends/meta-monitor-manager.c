@@ -62,6 +62,11 @@
 
 #define DEFAULT_DISPLAY_CONFIGURATION_TIMEOUT 20
 
+// Fractional scales in cinnamon-monitors.xml are only stored to 6 digits,
+// So migrating from 1.503759 to 1.5037590265274048 will fail because FLT_EPSILON
+// is 0.00000011920928955078 which is less than the difference of those two scales.
+#define CINNAMON_SCALE_EPSILON 0.000001f
+
 enum
 {
   PROP_0,
@@ -1872,7 +1877,7 @@ meta_monitor_manager_is_scale_supported (MetaMonitorManager          *manager,
                                                                  monitor,
                                                                  monitor_mode,
                                                                  scale,
-                                                                 FLT_EPSILON,
+                                                                 CINNAMON_SCALE_EPSILON,
                                                                  NULL);
 }
 

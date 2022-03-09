@@ -1559,8 +1559,25 @@ meta_monitor_config_store_constructed (GObject *object)
     }
 
   user_file_path = g_build_filename (g_get_user_config_dir (),
-                                     "monitors.xml",
+                                     "cinnamon-monitors.xml",
                                      NULL);
+  if (!g_file_test (user_file_path, G_FILE_TEST_EXISTS))
+    {
+      g_free (user_file_path);
+
+      user_file_path = g_build_filename (g_get_user_config_dir (),
+                                         "monitors.xml",
+                                         NULL);
+
+      if (!g_file_test (user_file_path, G_FILE_TEST_EXISTS))
+        {
+          g_free (user_file_path);
+
+          G_OBJECT_CLASS (meta_monitor_config_store_parent_class)->constructed (object);
+          return;
+        }
+    }
+
   config_store->user_file = g_file_new_for_path (user_file_path);
 
   if (g_file_test (user_file_path, G_FILE_TEST_EXISTS))
@@ -1574,7 +1591,7 @@ meta_monitor_config_store_constructed (GObject *object)
               error->code == META_MONITOR_CONFIG_STORE_ERROR_NEEDS_MIGRATION)
             {
               g_clear_error (&error);
-              if (!meta_migrate_old_user_monitors_config (config_store, &error))
+              if (!meta_migrate_old_user_monitors_config (config_store, user_file_path, &error))
                 {
                   g_warning ("Failed to migrate old monitors config file: %s",
                              error->message);

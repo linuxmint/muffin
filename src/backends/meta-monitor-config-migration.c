@@ -69,6 +69,7 @@ typedef struct
   gboolean enabled;
   MetaRectangle rect;
   float refresh_rate;
+  float scale;
   MetaMonitorTransform transform;
 
   gboolean is_primary;
@@ -268,7 +269,7 @@ handle_start_element (GMarkupParseContext *context,
 
             memset (&parser->key, 0, sizeof (MetaOutputKey));
             memset (&parser->output, 0, sizeof (MetaOutputConfig));
-
+            parser->output.scale = -1.0f;
             parser->key.connector = g_strdup (name);
             parser->state = STATE_OUTPUT;
           }
@@ -295,7 +296,8 @@ handle_start_element (GMarkupParseContext *context,
              strcmp (element_name, "reflect_y") == 0 ||
              strcmp (element_name, "primary") == 0 ||
              strcmp (element_name, "presentation") == 0 ||
-             strcmp (element_name, "underscanning") == 0) &&
+             strcmp (element_name, "underscanning") == 0 ||
+             strcmp (element_name, "scale") == 0) &&
             parser->unknown_count == 0)
           {
             parser->state = STATE_OUTPUT_FIELD;
@@ -605,6 +607,8 @@ handle_text (GMarkupParseContext *context,
           parser->output.is_presentation = read_bool (text, text_len, error);
         else if (strcmp (parser->output_field, "underscanning") == 0)
           parser->output.is_underscanning = read_bool (text, text_len, error);
+        else if (strcmp (parser->output_field, "scale") == 0)
+          read_float (text, text_len, &parser->output.scale, error);
         else
           g_assert_not_reached ();
         return;
@@ -935,7 +939,7 @@ ensure_logical_monitor (GList           **logical_monitor_configs,
     .is_primary = output_config->is_primary,
     .is_presentation = output_config->is_presentation,
     .transform = output_config->transform,
-    .scale = -1.0,
+    .scale = output_config->scale,
   };
 
   *logical_monitor_configs = g_list_append (*logical_monitor_configs,
@@ -1152,16 +1156,13 @@ meta_migrate_old_monitors_config (MetaMonitorConfigStore *config_store,
 
 gboolean
 meta_migrate_old_user_monitors_config (MetaMonitorConfigStore *config_store,
+                                       const gchar            *user_file_path,
                                        GError                **error)
 {
   g_autofree char *backup_path = NULL;
   g_autoptr (GFile) backup_file = NULL;
-  g_autofree char *user_file_path = NULL;
   g_autoptr (GFile) user_file = NULL;
 
-  user_file_path = g_build_filename (g_get_user_config_dir (),
-                                     "monitors.xml",
-                                     NULL);
   user_file = g_file_new_for_path (user_file_path);
   backup_path = g_build_filename (g_get_user_config_dir (),
                                   "monitors-v1-backup.xml",
@@ -1217,11 +1218,14 @@ meta_finish_monitors_config_migration (MetaMonitorManager *monitor_manager,
           return FALSE;
         }
 
-      logical_monitor_config->scale =
-        meta_monitor_manager_calculate_monitor_mode_scale (monitor_manager,
-                                                           layout_mode,
-                                                           monitor,
-                                                           monitor_mode);
+      if (logical_monitor_config->scale < 0.0f)
+        {
+          logical_monitor_config->scale =
+          meta_monitor_manager_calculate_monitor_mode_scale (monitor_manager,
+                                                             layout_mode,
+                                                             monitor,
+                                                             monitor_mode);
+        }
     }
 
   config->layout_mode = layout_mode;
