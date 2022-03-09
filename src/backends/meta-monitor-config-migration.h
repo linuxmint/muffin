@@ -31,6 +31,7 @@ gboolean meta_migrate_old_monitors_config (MetaMonitorConfigStore *config_store,
 
 META_EXPORT_TEST
 gboolean meta_migrate_old_user_monitors_config (MetaMonitorConfigStore *config_store,
+                                                const gchar            *user_file_path,
                                                 GError                **error);
 
 META_EXPORT_TEST
