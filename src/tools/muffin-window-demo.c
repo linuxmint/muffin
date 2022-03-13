@@ -19,6 +19,8 @@
  * 02110-1335, USA.
  */
 
+#include "config.h"
+
 #include <gtk/gtk.h>
 #include <gdk/gdkx.h>
 #include <X11/Xatom.h>
@@ -1045,5 +1047,3 @@ do_appwindow (void)
 
   return window;
 }
-
-

@@ -21,6 +21,8 @@
  * 02110-1335, USA.
  */
 
+#include <config.h>
+
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
 #endif
@@ -511,5 +513,3 @@ meta_preview_get_clip_region (MetaPreview *preview, gint new_window_width, gint 
 
   return window_xregion;
 }
-
-
