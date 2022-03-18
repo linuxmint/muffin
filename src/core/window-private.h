@@ -255,6 +255,7 @@ struct _MetaWindow
   } edge_constraints;
 
   double tile_hfraction;
+  double tile_vfraction;
 
   uint64_t preferred_output_winsys_id;
 
@@ -542,8 +543,11 @@ struct _MetaWindow
   /* Focused window that is (directly or indirectly) attached to this one */
   MetaWindow *attached_focus_window;
 
-  /* The currently complementary tiled window, if any */
-  MetaWindow *tile_match;
+  /* The currently complementary tiled windows, if any. */
+  MetaWindow *vtile_match;
+  MetaWindow *htile_match;
+
+  // MetaWindow *tile_match;
 
   /* Bypass compositor hints */
   guint bypass_compositor;
@@ -633,13 +637,29 @@ struct _MetaWindowClass
                                         (w)->maximized_vertically)
 #define META_WINDOW_MAXIMIZED_VERTICALLY(w)    ((w)->maximized_vertically)
 #define META_WINDOW_MAXIMIZED_HORIZONTALLY(w)  ((w)->maximized_horizontally)
-#define META_WINDOW_TILED_SIDE_BY_SIDE(w)      ((w)->maximized_vertically && \
-                                                !(w)->maximized_horizontally && \
-                                                 (w)->tile_mode != META_TILE_NONE)
-#define META_WINDOW_TILED_LEFT(w)     (META_WINDOW_TILED_SIDE_BY_SIDE(w) && \
+#define META_WINDOW_TILED(w)           ((w)->maximized_vertically && \
+                                        !(w)->maximized_horizontally && \
+                                        (w)->tile_mode != META_TILE_NONE)
+#define META_WINDOW_TILED_LEFT(w)     (META_WINDOW_TILED(w) && \
                                        (w)->tile_mode == META_TILE_LEFT)
-#define META_WINDOW_TILED_RIGHT(w)    (META_WINDOW_TILED_SIDE_BY_SIDE(w) && \
+#define META_WINDOW_TILED_RIGHT(w)    (META_WINDOW_TILED(w) && \
                                        (w)->tile_mode == META_TILE_RIGHT)
+#define META_WINDOW_TILED_LEFT_RIGHT(w) (META_WINDOW_TILED_LEFT(w) || META_WINDOW_TILED_RIGHT(w))
+#define META_WINDOW_TILED_TOP(w)      (META_WINDOW_TILED(w) && \
+                                       (w)->tile_mode == META_TILE_TOP)
+#define META_WINDOW_TILED_BOTTOM(w)   (META_WINDOW_TILED(w) && \
+                                       (w)->tile_mode == META_TILE_BOTTOM)
+#define META_WINDOW_TILED_TOP_BOTTOM(w) (META_WINDOW_TILED_TOP(w) || META_WINDOW_TILED_BOTTOM(w))
+#define META_WINDOW_TILED_ULC(w)      (META_WINDOW_TILED(w) && \
+                                       (w)->tile_mode == META_TILE_ULC)
+#define META_WINDOW_TILED_URC(w)      (META_WINDOW_TILED(w) && \
+                                       (w)->tile_mode == META_TILE_URC)
+#define META_WINDOW_TILED_LRC(w)      (META_WINDOW_TILED(w) && \
+                                       (w)->tile_mode == META_TILE_LRC)
+#define META_WINDOW_TILED_LLC(w)      (META_WINDOW_TILED(w) && \
+                                       (w)->tile_mode == META_TILE_LLC)
+#define META_WINDOW_TILED_CORNER(w)   (META_WINDOW_TILED_ULC(w) || META_WINDOW_TILED_URC(w) || \
+                                       META_WINDOW_TILED_LRC(w) || META_WINDOW_TILED_LLC(w))
 #define META_WINDOW_TILED_MAXIMIZED(w)(META_WINDOW_MAXIMIZED(w) && \
                                        (w)->tile_mode == META_TILE_MAXIMIZED)
 #define META_WINDOW_ALLOWS_MOVE(w)     ((w)->has_move_func && !(w)->fullscreen)
@@ -796,9 +816,11 @@ void meta_window_update_for_monitors_changed (MetaWindow *window);
 void meta_window_on_all_workspaces_changed (MetaWindow *window);
 
 gboolean meta_window_should_attach_to_parent (MetaWindow *window);
-gboolean meta_window_can_tile_side_by_side   (MetaWindow *window);
+gboolean meta_window_can_tile_left_right     (MetaWindow *window);
+gboolean meta_window_can_tile_top_bottom     (MetaWindow *window);
+gboolean meta_window_can_tile_corner         (MetaWindow *window);
 
-void meta_window_compute_tile_match (MetaWindow *window);
+void meta_window_compute_tile_matches (MetaWindow *window);
 
 gboolean meta_window_updates_are_frozen (MetaWindow *window);
 

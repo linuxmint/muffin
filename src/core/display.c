@@ -3223,7 +3223,13 @@ meta_display_update_tile_preview_timeout (gpointer data)
         {
         case META_TILE_LEFT:
         case META_TILE_RIGHT:
-          if (!META_WINDOW_TILED_SIDE_BY_SIDE (window))
+        case META_TILE_TOP:
+        case META_TILE_BOTTOM:
+        case META_TILE_ULC:
+        case META_TILE_URC:
+        case META_TILE_LRC:
+        case META_TILE_LLC:
+          if (!META_WINDOW_TILED (window))
             needs_preview = TRUE;
           break;
 

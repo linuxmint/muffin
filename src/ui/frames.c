@@ -1867,12 +1867,12 @@ get_control (MetaUIFrame *frame, int root_x, int root_y)
   has_vert = (flags & META_FRAME_ALLOWS_VERTICAL_RESIZE) != 0;
   has_horiz = (flags & META_FRAME_ALLOWS_HORIZONTAL_RESIZE) != 0;
 
-  if (flags & META_FRAME_TILED_LEFT || flags & META_FRAME_TILED_RIGHT)
+  if (flags & META_FRAME_TILED_ANY)
     has_vert = has_horiz = FALSE;
 
   if (META_POINT_IN_RECT (x, y, fgeom.title_rect))
     {
-      if (has_vert && y <= TOP_RESIZE_HEIGHT && has_north_resize)
+      if (has_vert && y <= TOP_RESIZE_HEIGHT && !(flags & META_FRAME_TILED_TOP_EDGES) && has_north_resize)
         return META_FRAME_CONTROL_RESIZE_N;
       else
         return META_FRAME_CONTROL_TITLE;
@@ -1932,22 +1932,22 @@ get_control (MetaUIFrame *frame, int root_x, int root_y)
     }
   else if (y < (fgeom.borders.invisible.top + TOP_RESIZE_HEIGHT))
     {
-      if (has_vert && has_north_resize)
+      if ((has_vert || flags & (META_FRAME_TILED_BOTTOM | META_FRAME_TILED_LLC | META_FRAME_TILED_LRC)) && has_north_resize)
         return META_FRAME_CONTROL_RESIZE_N;
     }
   else if (y >= (fgeom.height - fgeom.borders.total.bottom))
     {
-      if (has_vert)
+      if (has_vert || flags & (META_FRAME_TILED_TOP | META_FRAME_TILED_ULC | META_FRAME_TILED_URC))
         return META_FRAME_CONTROL_RESIZE_S;
     }
   else if (x <= fgeom.borders.total.left)
     {
-      if (has_horiz || flags & META_FRAME_TILED_RIGHT)
+      if (has_horiz || flags & (META_FRAME_TILED_RIGHT | META_FRAME_TILED_URC | META_FRAME_TILED_LRC))
         return META_FRAME_CONTROL_RESIZE_W;
     }
   else if (x >= (fgeom.width - fgeom.borders.total.right))
     {
-      if (has_horiz || flags & META_FRAME_TILED_LEFT)
+      if (has_horiz || flags & (META_FRAME_TILED_LEFT | META_FRAME_TILED_ULC | META_FRAME_TILED_LLC))
         return META_FRAME_CONTROL_RESIZE_E;
     }
 

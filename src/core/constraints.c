@@ -1157,7 +1157,7 @@ constrain_maximization (MetaWindow         *window,
 
   /* Determine whether constraint applies; exit if it doesn't */
   if ((!window->maximized_horizontally && !window->maximized_vertically) ||
-      META_WINDOW_TILED_SIDE_BY_SIDE (window))
+      META_WINDOW_TILED (window))
     return TRUE;
 
   /* Calculate target_size = maximized size of (window + frame) */
@@ -1244,7 +1244,7 @@ constrain_tiling (MetaWindow         *window,
     return TRUE;
 
   /* Determine whether constraint applies; exit if it doesn't */
-  if (!META_WINDOW_TILED_SIDE_BY_SIDE (window))
+  if (!META_WINDOW_TILED (window))
     return TRUE;
 
   /* Calculate target_size - as the tile previews need this as well, we
@@ -1332,7 +1332,7 @@ constrain_size_increments (MetaWindow         *window,
 
   /* Determine whether constraint applies; exit if it doesn't */
   if (META_WINDOW_MAXIMIZED (window) || window->fullscreen ||
-      META_WINDOW_TILED_SIDE_BY_SIDE (window) ||
+      META_WINDOW_TILED (window) ||
       info->action_type == ACTION_MOVE)
     return TRUE;
 
@@ -1463,7 +1463,7 @@ constrain_aspect_ratio (MetaWindow         *window,
   constraints_are_inconsistent = minr > maxr;
   if (constraints_are_inconsistent ||
       META_WINDOW_MAXIMIZED (window) || window->fullscreen ||
-      META_WINDOW_TILED_SIDE_BY_SIDE (window) ||
+      META_WINDOW_TILED (window) ||
       info->action_type == ACTION_MOVE)
     return TRUE;
 

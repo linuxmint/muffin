@@ -518,7 +518,7 @@ has_shadow (MetaWindowActorX11 *actor_x11)
    * If we have two snap-tiled windows, we don't want the shadow to obstruct
    * the other window.
    */
-  if (meta_window_get_tile_match (window))
+  if (meta_window_get_tile_match (window, TRUE) || meta_window_get_tile_match (window, FALSE))
     return FALSE;
 
   /*
