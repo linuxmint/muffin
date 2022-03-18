@@ -3340,29 +3340,134 @@ handle_toggle_above       (MetaDisplay     *display,
     meta_window_make_above (window);
 }
 
+static MetaTileMode
+get_new_tile_mode (MetaTileMode direction,
+                   MetaTileMode current)
+{
+    MetaTileMode ret = META_TILE_NONE;
+    switch (current) {
+        case META_TILE_NONE:
+            ret = direction;
+            break;
+        case META_TILE_MAXIMIZED:
+            if (direction == META_TILE_LEFT)
+                ret = META_TILE_LEFT;
+            else if (direction == META_TILE_RIGHT)
+                ret = META_TILE_RIGHT;
+            else if (direction == META_TILE_TOP)
+                ret = direction;
+            else if (direction == META_TILE_BOTTOM)
+                ret = META_TILE_TOP;
+            else
+                ret = META_TILE_NONE;
+            break;
+        case META_TILE_LEFT:
+            if (direction == META_TILE_LEFT)
+                ret = META_TILE_LEFT;
+            else if (direction == META_TILE_RIGHT)
+                ret = META_TILE_NONE;
+            else if (direction == META_TILE_TOP)
+                ret = META_TILE_ULC;
+            else
+                ret = META_TILE_LLC;
+            break;
+        case META_TILE_RIGHT:
+            if (direction == META_TILE_LEFT)
+                ret = META_TILE_NONE;
+            else if (direction == META_TILE_RIGHT)
+                ret = META_TILE_RIGHT;
+            else if (direction == META_TILE_TOP)
+                ret = META_TILE_URC;
+            else
+                ret = META_TILE_LRC;
+            break;
+        case META_TILE_TOP:
+            if (direction == META_TILE_LEFT)
+                ret = META_TILE_ULC;
+            else if (direction == META_TILE_RIGHT)
+                ret = META_TILE_URC;
+            else if (direction == META_TILE_TOP)
+                ret = META_TILE_MAXIMIZED;
+            else
+                ret = META_TILE_NONE;
+            break;
+        case META_TILE_BOTTOM:
+            if (direction == META_TILE_LEFT)
+                ret = META_TILE_LLC;
+            else if (direction == META_TILE_RIGHT)
+                ret = META_TILE_LRC;
+            else if (direction == META_TILE_TOP)
+                ret = META_TILE_NONE;
+            else
+                ret = META_TILE_BOTTOM;
+            break;
+        case META_TILE_ULC:
+            if (direction == META_TILE_LEFT)
+                ret = META_TILE_ULC;
+            else if (direction == META_TILE_RIGHT)
+                ret = META_TILE_TOP;
+            else if (direction == META_TILE_TOP)
+                ret = META_TILE_ULC;
+            else
+                ret = META_TILE_LEFT;
+            break;
+        case META_TILE_LLC:
+            if (direction == META_TILE_LEFT)
+                ret = META_TILE_LLC;
+            else if (direction == META_TILE_RIGHT)
+                ret = META_TILE_BOTTOM;
+            else if (direction == META_TILE_TOP)
+                ret = META_TILE_LEFT;
+            else
+                ret = META_TILE_LLC;
+            break;
+        case META_TILE_URC:
+            if (direction == META_TILE_LEFT)
+                ret = META_TILE_TOP;
+            else if (direction == META_TILE_RIGHT)
+                ret = META_TILE_URC;
+            else if (direction == META_TILE_TOP)
+                ret = META_TILE_URC;
+            else
+                ret = META_TILE_RIGHT;
+            break;
+        case META_TILE_LRC:
+            if (direction == META_TILE_LEFT)
+                ret = META_TILE_BOTTOM;
+            else if (direction == META_TILE_RIGHT)
+                ret = META_TILE_LRC;
+            else if (direction == META_TILE_TOP)
+                ret = META_TILE_RIGHT;
+            else
+                ret = META_TILE_LRC;
+            break;
+        default:
+            ret = current;
+            break;
+    }
+    return ret;
+}
+
 static void
-handle_toggle_tiled (MetaDisplay     *display,
-                     MetaWindow      *window,
-                     ClutterKeyEvent *event,
-                     MetaKeyBinding  *binding,
-                     gpointer         dummy)
+handle_tile_action (MetaDisplay     *display,
+                    MetaWindow      *window,
+                    ClutterKeyEvent *event,
+                    MetaKeyBinding  *binding,
+                    gpointer         dummy)
 {
   MetaTileMode mode = binding->handler->data;
+  MetaTileMode new_mode;
 
-  if ((META_WINDOW_TILED_LEFT (window) && mode == META_TILE_LEFT) ||
-      (META_WINDOW_TILED_RIGHT (window) && mode == META_TILE_RIGHT))
+  new_mode = get_new_tile_mode (mode, META_WINDOW_MAXIMIZED (window) ? META_TILE_MAXIMIZED : window->tile_mode);
+
+  if (new_mode == window->tile_mode)
+    return;
+
+  if (new_mode == META_TILE_NONE)
     {
-      window->tile_monitor_number = window->saved_maximize ? window->monitor->number
-        : -1;
-      window->tile_mode = window->saved_maximize ? META_TILE_MAXIMIZED
-        : META_TILE_NONE;
-
-      if (window->saved_maximize)
-        meta_window_maximize (window, META_MAXIMIZE_BOTH);
-      else
-        meta_window_unmaximize (window, META_MAXIMIZE_BOTH);
+      meta_window_unmaximize (window, META_MAXIMIZE_BOTH);
     }
-  else if (meta_window_can_tile_side_by_side (window))
+  else
     {
       window->tile_monitor_number = window->monitor->number;
       /* Maximization constraints beat tiling constraints, so if the window
@@ -3372,7 +3477,8 @@ handle_toggle_tiled (MetaDisplay     *display,
        * save an additional roundtrip.
        */
       window->maximized_horizontally = FALSE;
-      meta_window_tile (window, mode);
+      window->maximized_vertically = FALSE;
+      meta_window_tile (window, new_mode);
     }
 }
 
@@ -4194,20 +4300,36 @@ init_builtin_key_bindings (MetaDisplay *display)
                           handle_toggle_maximized, 0);
 
   add_builtin_keybinding (display,
-                          "toggle-tiled-left",
+                          "push-tile-left",
                           mutter_keybindings,
                           META_KEY_BINDING_PER_WINDOW |
                           META_KEY_BINDING_IGNORE_AUTOREPEAT,
-                          META_KEYBINDING_ACTION_TOGGLE_TILED_LEFT,
-                          handle_toggle_tiled, META_TILE_LEFT);
+                          META_KEYBINDING_ACTION_PUSH_TILE_LEFT,
+                          handle_tile_action, META_TILE_LEFT);
 
   add_builtin_keybinding (display,
-                          "toggle-tiled-right",
+                          "push-tile-right",
                           mutter_keybindings,
                           META_KEY_BINDING_PER_WINDOW |
                           META_KEY_BINDING_IGNORE_AUTOREPEAT,
-                          META_KEYBINDING_ACTION_TOGGLE_TILED_RIGHT,
-                          handle_toggle_tiled, META_TILE_RIGHT);
+                          META_KEYBINDING_ACTION_PUSH_TILE_RIGHT,
+                          handle_tile_action, META_TILE_RIGHT);
+
+  add_builtin_keybinding (display,
+                          "push-tile-up",
+                          mutter_keybindings,
+                          META_KEY_BINDING_PER_WINDOW |
+                          META_KEY_BINDING_IGNORE_AUTOREPEAT,
+                          META_KEYBINDING_ACTION_PUSH_TILE_UP,
+                          handle_tile_action, META_TILE_TOP);
+
+  add_builtin_keybinding (display,
+                          "push-tile-down",
+                          mutter_keybindings,
+                          META_KEY_BINDING_PER_WINDOW |
+                          META_KEY_BINDING_IGNORE_AUTOREPEAT,
+                          META_KEYBINDING_ACTION_PUSH_TILE_DOWN,
+                          handle_tile_action, META_TILE_BOTTOM);
 
   add_builtin_keybinding (display,
                           "toggle-above",

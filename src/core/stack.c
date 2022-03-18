@@ -434,7 +434,7 @@ meta_stack_update_window_tile_matches (MetaStack     *stack,
   tmp = windows;
   while (tmp)
     {
-      meta_window_compute_tile_match ((MetaWindow *) tmp->data);
+      meta_window_compute_tile_matches ((MetaWindow *) tmp->data);
       tmp = tmp->next;
     }
 

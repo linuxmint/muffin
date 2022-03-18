@@ -166,8 +166,9 @@ static void set_workspace_state (MetaWindow    *window,
                                  gboolean       on_all_workspaces,
                                  MetaWorkspace *workspace);
 
-static MetaWindow * meta_window_find_tile_match (MetaWindow   *window,
-                                                 MetaTileMode  mode);
+static MetaWindow *meta_window_find_tile_match (MetaWindow   *window,
+                                                MetaTileMode  mode,
+                                                gboolean      vertical);
 static void update_edge_constraints (MetaWindow *window);
 
 /* Idle handlers for the three queues (run with meta_later_add()). The
@@ -1109,6 +1110,7 @@ _meta_window_shared_new (MetaDisplay         *display,
   window->on_all_workspaces_requested = FALSE;
   window->tile_mode = META_TILE_NONE;
   window->tile_monitor_number = -1;
+  window->tile_vfraction = -1.;
   window->tile_hfraction = -1.;
   window->shaded = FALSE;
   window->initially_iconic = FALSE;
@@ -1212,7 +1214,8 @@ _meta_window_shared_new (MetaDisplay         *display,
   else
     window->preferred_output_winsys_id = UINT_MAX;
 
-  window->tile_match = NULL;
+  window->vtile_match = NULL;
+  window->htile_match = NULL;
 
   /* Assign this #MetaWindow a sequence number which can be used
    * for sorting.
@@ -2831,7 +2834,7 @@ ensure_size_hints_satisfied (MetaRectangle    *rect,
 static void
 meta_window_save_rect (MetaWindow *window)
 {
-  if (!(META_WINDOW_MAXIMIZED (window) || META_WINDOW_TILED_SIDE_BY_SIDE (window) || window->fullscreen))
+  if (!(META_WINDOW_MAXIMIZED (window) || META_WINDOW_TILED (window) || window->fullscreen))
     {
       /* save size/pos as appropriate args for move_resize */
       if (!window->maximized_horizontally)
@@ -3089,52 +3092,128 @@ meta_window_requested_dont_bypass_compositor (MetaWindow *window)
 }
 
 static void
-meta_window_get_tile_fraction (MetaWindow   *window,
-                               MetaTileMode  tile_mode,
-                               double       *fraction)
+get_default_tile_fractions (MetaTileMode for_mode,
+                            double *hfraction,
+                            double *vfraction)
 {
-  MetaWindow *tile_match;
+  switch (for_mode)
+    {
+      case META_TILE_LEFT:
+      case META_TILE_RIGHT:
+      {
+        *hfraction = 0.5;
+        *vfraction = 1.0;
+        break;
+      }
+      case META_TILE_TOP:
+      case META_TILE_BOTTOM:
+      {
+        *hfraction = 1.0;
+        *vfraction = 0.5;
+        break;
+      }
+      case META_TILE_ULC:
+      case META_TILE_URC:
+      case META_TILE_LRC:
+      case META_TILE_LLC:
+      default:
+      {
+        *hfraction = 0.5;
+        *vfraction = 0.5;
+        break;
+      }
+    }
+}
+
+static void
+meta_window_get_tile_fractions (MetaWindow   *window,
+                               MetaTileMode  tile_mode,
+                               double       *hfraction,
+                               double       *vfraction)
+{
+  MetaWindow *htile_match, *vtile_match;
+  double new_hfraction, new_vfraction;
 
   /* Make sure the tile match is up-to-date and matches the
    * passed in mode rather than the current state
    */
-  tile_match = meta_window_find_tile_match (window, tile_mode);
 
   if (tile_mode == META_TILE_NONE)
-    *fraction = -1.;
+    {
+      *hfraction = -1.;
+      *vfraction = -1.;
+      return;
+    }
   else if (tile_mode == META_TILE_MAXIMIZED)
-    *fraction = 1.;
-  else if (tile_match)
-    *fraction = 1. - tile_match->tile_hfraction;
-  else if (META_WINDOW_TILED_SIDE_BY_SIDE (window))
+    {
+      *hfraction = 1.;
+      *vfraction = 1.;
+      return;
+    }
+
+  // FIXME: should we fill both or just vtile if htile fails - both i think.
+  htile_match = meta_window_find_tile_match (window, tile_mode, FALSE);
+  vtile_match = meta_window_find_tile_match (window, tile_mode, TRUE);
+
+  get_default_tile_fractions (tile_mode, &new_hfraction, &new_vfraction);
+
+  if (vtile_match)
+    {
+      new_vfraction = 1. - vtile_match->tile_vfraction;
+    }
+
+  if (htile_match)
+    {
+      new_hfraction = 1. - htile_match->tile_hfraction;
+    }
+
+  if (META_WINDOW_TILED (window))
     {
       if (window->tile_mode != tile_mode)
-        *fraction = 1. - window->tile_hfraction;
+        {
+          new_hfraction = 1. - window->tile_hfraction;
+          new_vfraction = 1. - window->tile_vfraction;
+        }
       else
-        *fraction = window->tile_hfraction;
+        {
+          if (!htile_match)
+            {
+              new_hfraction = window->tile_hfraction;
+            }
+          if (!vtile_match)
+            {
+              new_vfraction = window->tile_vfraction;
+            }
+        }
     }
-  else
-    *fraction = .5;
+
+    *hfraction = new_hfraction;
+    *vfraction = new_vfraction;
 }
 
 static void
-meta_window_update_tile_fraction (MetaWindow *window,
-                                  int         new_w,
-                                  int         new_h)
+meta_window_update_tile_fractions (MetaWindow *window,
+                                   int         new_w,
+                                   int         new_h)
 {
-  MetaWindow *tile_match = window->tile_match;
+  MetaWindow *vtile_match = window->vtile_match;
+  MetaWindow *htile_match = window->htile_match;
   MetaRectangle work_area;
 
-  if (!META_WINDOW_TILED_SIDE_BY_SIDE (window))
+  if (!META_WINDOW_TILED (window))
     return;
 
   meta_window_get_work_area_for_monitor (window,
                                          window->tile_monitor_number,
                                          &work_area);
   window->tile_hfraction = (double)new_w / work_area.width;
+  window->tile_vfraction = (double)new_h / work_area.height;
 
-  if (tile_match && window->display->grab_window == window)
-    meta_window_tile (tile_match, tile_match->tile_mode);
+  if (htile_match && window->display->grab_window == window)
+    meta_window_tile (htile_match, htile_match->tile_mode);
+
+  if (vtile_match && window->display->grab_window == window)
+    meta_window_tile (vtile_match, vtile_match->tile_mode);
 }
 
 static void
@@ -3159,7 +3238,7 @@ update_edge_constraints (MetaWindow *window)
     case META_TILE_LEFT:
       window->edge_constraints.top = META_EDGE_CONSTRAINT_MONITOR;
 
-      if (window->tile_match)
+      if (window->htile_match)
         window->edge_constraints.right = META_EDGE_CONSTRAINT_WINDOW;
       else
         window->edge_constraints.right = META_EDGE_CONSTRAINT_NONE;
@@ -3173,12 +3252,100 @@ update_edge_constraints (MetaWindow *window)
       window->edge_constraints.right = META_EDGE_CONSTRAINT_MONITOR;
       window->edge_constraints.bottom = META_EDGE_CONSTRAINT_MONITOR;
 
-      if (window->tile_match)
+      if (window->htile_match)
+        window->edge_constraints.left = META_EDGE_CONSTRAINT_WINDOW;
+      else
+        window->edge_constraints.left = META_EDGE_CONSTRAINT_NONE;
+      break;
+
+    case META_TILE_TOP:
+      window->edge_constraints.top = META_EDGE_CONSTRAINT_MONITOR;
+      window->edge_constraints.right = META_EDGE_CONSTRAINT_MONITOR;
+
+      if (window->vtile_match)
+        window->edge_constraints.bottom = META_EDGE_CONSTRAINT_WINDOW;
+      else
+        window->edge_constraints.bottom = META_EDGE_CONSTRAINT_NONE;
+
+      window->edge_constraints.left = META_EDGE_CONSTRAINT_MONITOR;
+
+      break;
+
+    case META_TILE_BOTTOM:
+      if (window->vtile_match)
+        window->edge_constraints.top = META_EDGE_CONSTRAINT_WINDOW;
+      else
+        window->edge_constraints.top = META_EDGE_CONSTRAINT_NONE;
+
+      window->edge_constraints.right = META_EDGE_CONSTRAINT_MONITOR;
+      window->edge_constraints.bottom = META_EDGE_CONSTRAINT_MONITOR;
+      window->edge_constraints.left = META_EDGE_CONSTRAINT_MONITOR;
+      break;
+
+    case META_TILE_ULC:
+      window->edge_constraints.top = META_EDGE_CONSTRAINT_MONITOR;
+
+      if (window->htile_match)
+        window->edge_constraints.right = META_EDGE_CONSTRAINT_WINDOW;
+      else
+        window->edge_constraints.right = META_EDGE_CONSTRAINT_NONE;
+
+      if (window->vtile_match)
+        window->edge_constraints.bottom = META_EDGE_CONSTRAINT_WINDOW;
+      else
+        window->edge_constraints.bottom = META_EDGE_CONSTRAINT_NONE;
+
+      window->edge_constraints.left = META_EDGE_CONSTRAINT_MONITOR;
+      break;
+
+    case META_TILE_LLC:
+      if (window->vtile_match)
+        window->edge_constraints.top = META_EDGE_CONSTRAINT_WINDOW;
+      else
+        window->edge_constraints.top = META_EDGE_CONSTRAINT_NONE;
+
+      if (window->htile_match)
+        window->edge_constraints.right = META_EDGE_CONSTRAINT_WINDOW;
+      else
+        window->edge_constraints.right = META_EDGE_CONSTRAINT_NONE;
+
+      window->edge_constraints.bottom = META_EDGE_CONSTRAINT_MONITOR;
+      window->edge_constraints.left = META_EDGE_CONSTRAINT_MONITOR;
+      break;
+
+    case META_TILE_URC:
+      window->edge_constraints.top = META_EDGE_CONSTRAINT_MONITOR;
+      window->edge_constraints.right = META_EDGE_CONSTRAINT_MONITOR;
+
+      if (window->vtile_match)
+        window->edge_constraints.bottom = META_EDGE_CONSTRAINT_WINDOW;
+      else
+        window->edge_constraints.bottom = META_EDGE_CONSTRAINT_NONE;
+
+      if (window->htile_match)
+        window->edge_constraints.left = META_EDGE_CONSTRAINT_WINDOW;
+      else
+        window->edge_constraints.left = META_EDGE_CONSTRAINT_NONE;
+      break;
+
+    case META_TILE_LRC:
+      if (window->vtile_match)
+        window->edge_constraints.top = META_EDGE_CONSTRAINT_WINDOW;
+      else
+        window->edge_constraints.top = META_EDGE_CONSTRAINT_NONE;
+
+      window->edge_constraints.right = META_EDGE_CONSTRAINT_MONITOR;
+      window->edge_constraints.bottom = META_EDGE_CONSTRAINT_MONITOR;
+
+      if (window->htile_match)
         window->edge_constraints.left = META_EDGE_CONSTRAINT_WINDOW;
       else
         window->edge_constraints.left = META_EDGE_CONSTRAINT_NONE;
       break;
     }
+
+  if (window->tile_mode != META_TILE_NONE)
+    return;
 
   /* h/vmaximize also modify the edge constraints */
   if (window->maximized_vertically)
@@ -3200,8 +3367,9 @@ meta_window_tile (MetaWindow   *window,
 {
   MetaMaximizeFlags directions;
   MetaRectangle old_frame_rect, old_buffer_rect;
+  gboolean was_already_tiled = window->tile_mode != META_TILE_NONE && window->tile_mode != META_TILE_NONE;
 
-  meta_window_get_tile_fraction (window, tile_mode, &window->tile_hfraction);
+  meta_window_get_tile_fractions (window, tile_mode, &window->tile_hfraction, &window->tile_vfraction);
   window->tile_mode = tile_mode;
 
   /* Don't do anything if no tiling is requested */
@@ -3216,7 +3384,7 @@ meta_window_tile (MetaWindow   *window,
   else
     directions = META_MAXIMIZE_VERTICAL;
 
-  meta_window_maximize_internal (window, directions, NULL);
+  meta_window_maximize_internal (window, directions, was_already_tiled ? &window->saved_rect : NULL);
   meta_display_update_tile_preview (window->display, FALSE);
 
   /* Setup the edge constraints */
@@ -3252,7 +3420,7 @@ meta_window_restore_tile (MetaWindow   *window,
                           int           width,
                           int           height)
 {
-  meta_window_update_tile_fraction (window, width, height);
+  meta_window_update_tile_fractions (window, width, height);
   meta_window_tile (window, mode);
 }
 
@@ -3262,12 +3430,13 @@ meta_window_can_tile_maximized (MetaWindow *window)
   return window->has_maximize_func;
 }
 
-gboolean
-meta_window_can_tile_side_by_side (MetaWindow *window)
+static gboolean
+is_valid_tile_mode (MetaWindow *window, MetaTileMode mode)
 {
   int monitor;
   MetaRectangle tile_area;
   MetaRectangle client_rect;
+  double hfraction, vfraction;
 
   if (!meta_window_can_tile_maximized (window))
     return FALSE;
@@ -3279,12 +3448,33 @@ meta_window_can_tile_side_by_side (MetaWindow *window)
   if (tile_area.height > tile_area.width)
     return FALSE;
 
-  tile_area.width /= 2;
+  get_default_tile_fractions (mode, &hfraction, &vfraction);
+
+  tile_area.width *= hfraction;
+  tile_area.height *= vfraction;
 
   meta_window_frame_rect_to_client_rect (window, &tile_area, &client_rect);
 
   return client_rect.width >= window->size_hints.min_width &&
          client_rect.height >= window->size_hints.min_height;
+}
+
+gboolean
+meta_window_can_tile_left_right (MetaWindow *window)
+{
+  return is_valid_tile_mode (window, META_TILE_LEFT);
+}
+
+gboolean
+meta_window_can_tile_top_bottom (MetaWindow *window)
+{
+  return is_valid_tile_mode (window, META_TILE_TOP);
+}
+
+gboolean
+meta_window_can_tile_corner (MetaWindow *window)
+{
+  return is_valid_tile_mode (window, META_TILE_ULC);
 }
 
 static void
@@ -4354,10 +4544,11 @@ adjust_size_for_tile_match (MetaWindow *window,
                             int        *new_w,
                             int        *new_h)
 {
-  MetaRectangle work_area, rect;
-  MetaWindow *tile_match = window->tile_match;
+  MetaRectangle work_area, rect, match_rect;
+  MetaWindow *vtile_match = window->vtile_match;
+  MetaWindow *htile_match = window->htile_match;
 
-  if (!META_WINDOW_TILED_SIDE_BY_SIDE (window) || !tile_match)
+  if (!META_WINDOW_TILED (window) || (!vtile_match && !htile_match))
     return;
 
   meta_window_get_work_area_for_monitor (window, window->tile_monitor_number, &work_area);
@@ -4365,16 +4556,30 @@ adjust_size_for_tile_match (MetaWindow *window,
   /* Make sure the resize does not break minimum sizes */
   rect = work_area;
   rect.width = *new_w;
+  rect.height = *new_h;
 
   meta_window_frame_rect_to_client_rect (window, &rect, &rect);
   *new_w += MAX(0, window->size_hints.min_width - rect.width);
+  *new_h += MAX(0, window->size_hints.min_height - rect.height);
 
   /* Make sure we're not resizing the tile match below its min width */
   rect = work_area;
   rect.width = work_area.width - *new_w;
+  rect.height = work_area.height - *new_h;
 
-  meta_window_frame_rect_to_client_rect (tile_match, &rect, &rect);
-  *new_w -= MAX(0, tile_match->size_hints.min_width - rect.width);
+  if (vtile_match)
+    {
+      meta_window_frame_rect_to_client_rect (vtile_match, &rect, &match_rect);
+
+      *new_h -= MAX(0, vtile_match->size_hints.min_height - match_rect.height);
+    }
+
+  if (htile_match)
+    {
+      meta_window_frame_rect_to_client_rect (htile_match, &rect, &match_rect);
+
+      *new_w -= MAX(0, htile_match->size_hints.min_width - match_rect.width);
+    }
 }
 
 void
@@ -4397,7 +4602,7 @@ meta_window_resize_frame_with_gravity (MetaWindow *window,
        */
       if (window->display->grab_window == window)
         adjust_size_for_tile_match (window, &w, &h);
-      meta_window_update_tile_fraction (window, w, h);
+      meta_window_update_tile_fractions (window, w, h);
     }
 
   flags = (user_op ? META_MOVE_RESIZE_USER_ACTION : 0) | META_MOVE_RESIZE_RESIZE_ACTION;
@@ -6040,6 +6245,37 @@ update_move_timeout (gpointer data)
   return FALSE;
 }
 
+enum {
+    ZONE_NONE =   0,
+    ZONE_TOP =    1 << 0,
+    ZONE_RIGHT =  1 << 1,
+    ZONE_BOTTOM = 1 << 2,
+    ZONE_LEFT =   1 << 3
+};
+
+static gint
+get_tile_zone_at_pointer (MetaLogicalMonitor *logical_monitor,
+                          MetaRectangle      *work_area,
+                          int                 shake_threshold,
+                          int                 x,
+                          int                 y)
+{
+  gint zones = ZONE_NONE;
+
+  if (x >= logical_monitor->rect.x && x < (work_area->x + shake_threshold))
+    zones |= ZONE_LEFT;
+  if (x >= work_area->x + work_area->width - shake_threshold &&
+      x < (logical_monitor->rect.x + logical_monitor->rect.width))
+    zones |= ZONE_RIGHT;
+  if (y >= logical_monitor->rect.y && y < (work_area->y + shake_threshold))
+    zones |= ZONE_TOP;
+  if (y >= work_area->y + work_area->height - shake_threshold &&
+      y < (logical_monitor->rect.y + logical_monitor->rect.height))
+    zones |= ZONE_BOTTOM;
+
+  return zones;
+}
+
 static void
 update_move_maybe_tile (MetaWindow *window,
                         int         shake_threshold,
@@ -6078,16 +6314,31 @@ update_move_maybe_tile (MetaWindow *window,
   /* Check if the cursor is in a position which triggers tiling
    * and set tile_mode accordingly.
    */
-  if (meta_window_can_tile_side_by_side (window) &&
-      x >= logical_monitor->rect.x && x < (work_area.x + shake_threshold))
+  if (meta_window_can_tile_left_right (window) &&
+           get_tile_zone_at_pointer (logical_monitor, &work_area, shake_threshold, x, y) == ZONE_LEFT)
     display->preview_tile_mode = META_TILE_LEFT;
-  else if (meta_window_can_tile_side_by_side (window) &&
-           x >= work_area.x + work_area.width - shake_threshold &&
-           x < (logical_monitor->rect.x + logical_monitor->rect.width))
+  else if (meta_window_can_tile_left_right (window) &&
+           get_tile_zone_at_pointer (logical_monitor, &work_area, shake_threshold, x, y) == ZONE_RIGHT)
     display->preview_tile_mode = META_TILE_RIGHT;
-  else if (meta_window_can_tile_maximized (window) &&
-           y >= logical_monitor->rect.y && y <= work_area.y)
-    display->preview_tile_mode = META_TILE_MAXIMIZED;
+  else if (meta_window_can_tile_top_bottom (window) &&
+           // TODO: Handle maximize/tile preference
+           get_tile_zone_at_pointer (logical_monitor, &work_area, shake_threshold, x, y) == ZONE_TOP)
+    display->preview_tile_mode = meta_prefs_get_tile_maximize() ? META_TILE_MAXIMIZED : META_TILE_TOP;
+  else if (meta_window_can_tile_top_bottom (window) &&
+           get_tile_zone_at_pointer (logical_monitor, &work_area, shake_threshold, x, y) == ZONE_BOTTOM)
+    display->preview_tile_mode = META_TILE_BOTTOM;
+  else if (meta_window_can_tile_corner (window) && 
+           get_tile_zone_at_pointer (logical_monitor, &work_area, shake_threshold, x, y) == (ZONE_LEFT | ZONE_TOP))
+    display->preview_tile_mode = META_TILE_ULC;
+  else if (meta_window_can_tile_corner (window) && 
+           get_tile_zone_at_pointer (logical_monitor, &work_area, shake_threshold, x, y) == (ZONE_RIGHT | ZONE_TOP))
+    display->preview_tile_mode = META_TILE_URC;
+  else if (meta_window_can_tile_corner (window) && 
+           get_tile_zone_at_pointer (logical_monitor, &work_area, shake_threshold, x, y) == (ZONE_RIGHT | ZONE_BOTTOM))
+    display->preview_tile_mode = META_TILE_LRC;
+  else if (meta_window_can_tile_corner (window) && 
+           get_tile_zone_at_pointer (logical_monitor, &work_area, shake_threshold, x, y) == (ZONE_LEFT | ZONE_BOTTOM))
+    display->preview_tile_mode = META_TILE_LLC;
   else
     display->preview_tile_mode = META_TILE_NONE;
 
@@ -6148,7 +6399,7 @@ update_move (MetaWindow  *window,
     }
   else if (meta_prefs_get_edge_tiling () &&
            !META_WINDOW_MAXIMIZED (window) &&
-           !META_WINDOW_TILED_SIDE_BY_SIDE (window))
+           !META_WINDOW_TILED (window))
     {
       update_move_maybe_tile (window, shake_threshold, x, y);
     }
@@ -6159,7 +6410,7 @@ update_move (MetaWindow  *window,
    */
 
   if ((META_WINDOW_MAXIMIZED (window) && ABS (dy) >= shake_threshold) ||
-      (META_WINDOW_TILED_SIDE_BY_SIDE (window) && (MAX (ABS (dx), ABS (dy)) >= shake_threshold)))
+      (META_WINDOW_TILED (window) && (MAX (ABS (dx), ABS (dy)) >= shake_threshold)))
     {
       double prop;
 
@@ -6198,7 +6449,7 @@ update_move (MetaWindow  *window,
    * loose or it is still maximized (then move straight)
    */
   else if ((window->shaken_loose || META_WINDOW_MAXIMIZED (window)) &&
-           window->tile_mode != META_TILE_LEFT && window->tile_mode != META_TILE_RIGHT)
+           (window->tile_mode == META_TILE_NONE || window->tile_mode == META_TILE_MAXIMIZED))
     {
       MetaBackend *backend = meta_get_backend ();
       MetaMonitorManager *monitor_manager =
@@ -6265,9 +6516,9 @@ update_move (MetaWindow  *window,
   meta_window_get_frame_rect (window, &old);
 
   /* Don't allow movement in the maximized directions or while tiled */
-  if (window->maximized_horizontally || META_WINDOW_TILED_SIDE_BY_SIDE (window))
+  if (window->maximized_horizontally || META_WINDOW_TILED (window))
     new_x = old.x;
-  if (window->maximized_vertically)
+  if (window->maximized_vertically || META_WINDOW_TILED (window))
     new_y = old.y;
 
   /* Do any edge resistance/snapping */
@@ -6433,7 +6684,7 @@ maybe_maximize_tiled_window (MetaWindow *window)
   MetaRectangle work_area;
   gint shake_threshold;
 
-  if (!META_WINDOW_TILED_SIDE_BY_SIDE (window))
+  if (!META_WINDOW_TILED (window))
     return;
 
   shake_threshold = meta_prefs_get_drag_threshold ();
@@ -6485,10 +6736,10 @@ end_grab_op (MetaWindow *window,
       else if (meta_grab_op_is_resizing (window->display->grab_op))
         {
           update_resize (window,
-                         modifiers & CLUTTER_SHIFT_MASK || window->tile_match != NULL,
+                         modifiers & CLUTTER_SHIFT_MASK || (window->htile_match != NULL || window->vtile_match != NULL),
                          x, y,
                          TRUE);
-          maybe_maximize_tiled_window (window);
+          // maybe_maximize_tiled_window (window);
         }
     }
   window->display->preview_tile_mode = META_TILE_NONE;
@@ -6562,7 +6813,7 @@ meta_window_handle_mouse_grab_op_event  (MetaWindow         *window,
       else if (meta_grab_op_is_resizing (window->display->grab_op))
         {
           update_resize (window,
-                         modifier_state & CLUTTER_SHIFT_MASK || window->tile_match != NULL,
+                         modifier_state & CLUTTER_SHIFT_MASK || (window->htile_match != NULL || window->vtile_match != NULL),
                          x, y,
                          FALSE);
         }
@@ -6706,20 +6957,36 @@ meta_window_get_tile_area (MetaWindow    *window,
 {
   MetaRectangle work_area;
   int tile_monitor_number;
-  double fraction;
+  double vfraction, hfraction;
 
   g_return_if_fail (tile_mode != META_TILE_NONE);
 
   tile_monitor_number = meta_window_get_current_tile_monitor_number (window);
 
   meta_window_get_work_area_for_monitor (window, tile_monitor_number, &work_area);
-  meta_window_get_tile_fraction (window, tile_mode, &fraction);
-
+  meta_window_get_tile_fractions (window, tile_mode, &hfraction, &vfraction);
   *tile_area = work_area;
-  tile_area->width = round (tile_area->width * fraction);
 
-  if (tile_mode == META_TILE_RIGHT)
-    tile_area->x += work_area.width - tile_area->width;
+  tile_area->width = round (tile_area->width * hfraction);
+  tile_area->height = round (tile_area->height * vfraction);
+
+  switch (tile_mode)
+    {
+      case META_TILE_RIGHT:
+      case META_TILE_URC:
+        tile_area->x += work_area.width - tile_area->width;
+        break;
+      case META_TILE_BOTTOM:
+      case META_TILE_LLC:
+        tile_area->y += work_area.height - tile_area->height;
+        break;
+      case META_TILE_LRC:
+        tile_area->x += work_area.width - tile_area->width;
+        tile_area->y += work_area.height - tile_area->height;
+        break;
+      default:
+        break;
+    }
 }
 
 gboolean
@@ -7854,38 +8121,148 @@ meta_window_is_attached_dialog (MetaWindow *window)
  *  - there is no 3rd window stacked between both tiled windows that's
  *    partially visible in the common edge.
  *
- * Return value: (transfer none) (nullable): the matching tiled window or
- * %NULL if it doesn't exist.
+ * Return value: (transfer none) (nullable) (element-type MetaWindow): An array of matching tiled windows or
+ * %NULL if none exist.
  */
+
 MetaWindow *
-meta_window_get_tile_match (MetaWindow *window)
+meta_window_get_tile_match (MetaWindow *window, gboolean vertical)
 {
-  return window->tile_match;
+  return vertical ? window->vtile_match :
+                    window->htile_match;
 }
 
 void
-meta_window_compute_tile_match (MetaWindow *window)
+meta_window_compute_tile_matches (MetaWindow *window)
 {
-  window->tile_match = meta_window_find_tile_match (window, window->tile_mode);
+  window->vtile_match = meta_window_find_tile_match (window, window->tile_mode, TRUE);
+  window->htile_match = meta_window_find_tile_match (window, window->tile_mode, FALSE);
+}
+
+static gint LEFT_VMATCHES[] = { META_TILE_NONE, -1 };
+static gint LEFT_HMATCHES[] = { META_TILE_RIGHT, META_TILE_URC, META_TILE_LRC, -1 };
+static gint RIGHT_VMATCHES[] = { META_TILE_NONE, -1 };
+static gint RIGHT_HMATCHES[] = { META_TILE_LEFT, META_TILE_ULC, META_TILE_LLC, -1 };
+static gint TOP_VMATCHES[] = { META_TILE_BOTTOM, META_TILE_LLC, META_TILE_LRC, -1 };
+static gint TOP_HMATCHES[] = { META_TILE_NONE, -1 };
+static gint BOTTOM_VMATCHES[] = { META_TILE_TOP, META_TILE_ULC, META_TILE_URC, -1 };
+static gint BOTTOM_HMATCHES[] = { META_TILE_NONE, -1 };
+static gint ULC_VMATCHES[] = { META_TILE_LLC, META_TILE_LRC, META_TILE_BOTTOM, -1 };
+static gint ULC_HMATCHES[] = { META_TILE_URC, META_TILE_LRC, META_TILE_RIGHT, -1 };
+static gint URC_VMATCHES[] = { META_TILE_LLC, META_TILE_LRC, META_TILE_BOTTOM, -1 };
+static gint URC_HMATCHES[] = { META_TILE_LLC, META_TILE_ULC, META_TILE_LEFT, -1 };
+static gint LRC_VMATCHES[] = { META_TILE_ULC, META_TILE_URC, META_TILE_TOP, -1 };
+static gint LRC_HMATCHES[] = { META_TILE_ULC, META_TILE_LLC, META_TILE_LEFT, -1 };
+static gint LLC_VMATCHES[] = { META_TILE_ULC, META_TILE_URC, META_TILE_TOP, -1 };
+static gint LLC_HMATCHES[] = { META_TILE_URC, META_TILE_LRC, META_TILE_RIGHT, -1 };
+
+static gboolean
+can_match_mode (MetaWindow *match,
+                gint       *modes)
+{
+    gint i = 0;
+
+    while (modes[i] != -1)
+      {
+        if (modes[i++] == match->tile_mode)
+          return TRUE;
+      }
+
+    return FALSE;
+}
+
+static gboolean
+vert_overlap (const MetaRectangle *rect1,
+              const MetaRectangle *rect2)
+{
+  return (rect1->y < rect2->y + rect2->height - meta_prefs_get_drag_threshold () &&
+          rect2->y < rect1->y + rect1->height - meta_prefs_get_drag_threshold ());
+}
+
+static gboolean
+horiz_overlap (const MetaRectangle *rect1,
+               const MetaRectangle *rect2)
+{
+  return (rect1->x < rect2->x + rect2->width - meta_prefs_get_drag_threshold () &&
+          rect2->x < rect1->x + rect1->width - meta_prefs_get_drag_threshold ());
 }
 
 static MetaWindow *
 meta_window_find_tile_match (MetaWindow   *window,
-                             MetaTileMode  current_mode)
+                             MetaTileMode  current_mode,
+                             gboolean      vertical)
 {
   MetaWindow *match;
   MetaStack *stack;
-  MetaTileMode match_tile_mode = META_TILE_NONE;
+  gint *match_tile_modes;
 
   if (window->shaded || window->minimized)
     return NULL;
 
-  if (current_mode == META_TILE_LEFT)
-    match_tile_mode = META_TILE_RIGHT;
-  else if (current_mode == META_TILE_RIGHT)
-    match_tile_mode = META_TILE_LEFT;
+  if (vertical)
+    {
+      switch (current_mode)
+        {
+        case META_TILE_LEFT:
+          match_tile_modes = LEFT_VMATCHES;
+          break;
+        case META_TILE_RIGHT:
+          match_tile_modes = RIGHT_VMATCHES;
+          break;
+        case META_TILE_TOP:
+          match_tile_modes = TOP_VMATCHES;
+          break;
+        case META_TILE_BOTTOM:
+          match_tile_modes = BOTTOM_VMATCHES;
+          break;
+        case META_TILE_ULC:
+          match_tile_modes = ULC_VMATCHES;
+          break;
+        case META_TILE_LLC:
+          match_tile_modes = LLC_VMATCHES;
+          break;
+        case META_TILE_URC:
+          match_tile_modes = URC_VMATCHES;
+          break;
+        case META_TILE_LRC:
+          match_tile_modes = LRC_VMATCHES;
+          break;
+        default:
+          return NULL;
+        }
+    }
   else
-    return NULL;
+    {
+      switch (current_mode)
+        {
+        case META_TILE_LEFT:
+          match_tile_modes = LEFT_HMATCHES;
+          break;
+        case META_TILE_RIGHT:
+          match_tile_modes = RIGHT_HMATCHES;
+          break;
+        case META_TILE_TOP:
+          match_tile_modes = TOP_HMATCHES;
+          break;
+        case META_TILE_BOTTOM:
+          match_tile_modes = BOTTOM_HMATCHES;
+          break;
+        case META_TILE_ULC:
+          match_tile_modes = ULC_HMATCHES;
+          break;
+        case META_TILE_LLC:
+          match_tile_modes = LLC_HMATCHES;
+          break;
+        case META_TILE_URC:
+          match_tile_modes = URC_HMATCHES;
+          break;
+        case META_TILE_LRC:
+          match_tile_modes = LRC_HMATCHES;
+          break;
+        default:
+          return NULL;
+        }
+    }
 
   stack = window->display->stack;
 
@@ -7895,7 +8272,9 @@ meta_window_find_tile_match (MetaWindow   *window,
     {
       if (!match->shaded &&
           !match->minimized &&
-          match->tile_mode == match_tile_mode &&
+          META_WINDOW_TILED (match) &&
+          can_match_mode (match, match_tile_modes) &&
+          (window != match) &&
           match->tile_monitor_number == window->tile_monitor_number &&
           meta_window_get_workspace (match) == meta_window_get_workspace (window))
         break;
@@ -7920,20 +8299,44 @@ meta_window_find_tile_match (MetaWindow   *window,
       meta_window_get_frame_rect (bottommost, &bottommost_rect);
       meta_window_get_frame_rect (topmost, &topmost_rect);
 
+      /* 
+       * Don't extend window edges to infinity when looking for matches. Tiling
+       * in a given direction requires some amount of overlap in the other.
+       */
+
+      if (!vert_overlap (&bottommost_rect, &topmost_rect) && !horiz_overlap (&bottommost_rect, &topmost_rect))
+        return NULL;
+
       /*
        * If we are looking for a tile match while actually being tiled,
        * rather than a match for a potential tile mode, then discard
        * windows with too much gap or overlap
        */
+      gboolean have_match = vertical ? window->vtile_match != NULL :
+                                       window->htile_match != NULL;
+
       if (window->tile_mode == current_mode &&
           !(meta_grab_op_is_resizing (window->display->grab_op) &&
             window->display->grab_window == window &&
-            window->tile_match != NULL))
+            have_match))
         {
           int threshold = meta_prefs_get_drag_threshold ();
-          if (ABS (topmost_rect.x - bottommost_rect.x - bottommost_rect.width) > threshold &&
-              ABS (bottommost_rect.x - topmost_rect.x - topmost_rect.width) > threshold)
-            return NULL;
+
+          if (!vertical)
+            {
+              if (ABS (topmost_rect.x - bottommost_rect.x - bottommost_rect.width) > threshold &&
+                  ABS (bottommost_rect.x - topmost_rect.x - topmost_rect.width) > threshold)
+              {
+                return NULL;
+
+              }
+            }
+          else
+            {
+              if (ABS (topmost_rect.y - bottommost_rect.y - bottommost_rect.height) > threshold &&
+                  ABS (bottommost_rect.y - topmost_rect.y - topmost_rect.height) > threshold)
+                return NULL;
+            }
         }
 
       /*

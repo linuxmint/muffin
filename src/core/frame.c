@@ -294,11 +294,29 @@ meta_frame_get_flags (MetaFrame *frame)
   if (META_WINDOW_MAXIMIZED (frame->window))
     flags |= META_FRAME_MAXIMIZED;
 
-  if (META_WINDOW_TILED_LEFT (frame->window))
-    flags |= META_FRAME_TILED_LEFT;
+  if (META_WINDOW_TILED_TOP (frame->window))
+    flags |= META_FRAME_TILED_TOP;
 
   if (META_WINDOW_TILED_RIGHT (frame->window))
     flags |= META_FRAME_TILED_RIGHT;
+
+  if (META_WINDOW_TILED_BOTTOM (frame->window))
+    flags |= META_FRAME_TILED_BOTTOM;
+
+  if (META_WINDOW_TILED_LEFT (frame->window))
+    flags |= META_FRAME_TILED_LEFT;
+
+  if (META_WINDOW_TILED_ULC (frame->window))
+    flags |= META_FRAME_TILED_ULC;
+
+  if (META_WINDOW_TILED_URC (frame->window))
+    flags |= META_FRAME_TILED_URC;
+
+  if (META_WINDOW_TILED_LRC (frame->window))
+    flags |= META_FRAME_TILED_LRC;
+
+  if (META_WINDOW_TILED_LLC (frame->window))
+    flags |= META_FRAME_TILED_LLC;
 
   if (frame->window->fullscreen)
     flags |= META_FRAME_FULLSCREEN;
