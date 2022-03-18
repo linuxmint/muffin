@@ -136,6 +136,7 @@ static char *iso_next_group_option = NULL;
 
 static MetaX11BackgroundTransition background_transition = META_X11_BACKGROUND_TRANSITION_BLEND;
 static gboolean unredirect_fullscreen_windows = FALSE;
+static gboolean tile_maximize = FALSE;
 
 static void handle_preference_update_enum (GSettings *settings,
                                            gchar     *key);
@@ -448,6 +449,13 @@ static MetaBoolPreference preferences_bool[] =
         META_PREF_MOUSE_ZOOM_ENABLED,
       },
       &mouse_zoom_enabled,
+    },
+    {
+      { "tile-maximize",
+        SCHEMA_MUFFIN,
+        META_PREF_TILE_MAXIMIZE,
+      },
+      &tile_maximize,
     },
     { { NULL, 0, 0 }, NULL },
   };
@@ -1774,9 +1782,6 @@ meta_preference_to_string (MetaPreference pref)
     case META_PREF_MOUSE_BUTTON_ZOOM_MODS:
       return "MOUSE_BUTTON_ZOOM_MODS";
 
-    case META_PREF_MOUSE_ZOOM_ENABLED:
-      return "MOUSE_ZOOM_ENABLED";
-
     case META_PREF_FOCUS_MODE:
       return "FOCUS_MODE";
 
@@ -1890,6 +1895,12 @@ meta_preference_to_string (MetaPreference pref)
 
     case META_PREF_MIN_WIN_OPACITY:
       return "MIN_WIN_OPACITY";
+
+    case META_PREF_MOUSE_ZOOM_ENABLED:
+      return "MOUSE_ZOOM_ENABLED";
+
+    case META_PREF_TILE_MAXIMIZE:
+      return "TILE_MAXIMIZE";
     }
 
   return "(unknown)";
@@ -2332,6 +2343,12 @@ gboolean
 meta_prefs_get_edge_tiling (void)
 {
   return edge_tiling;
+}
+
+gboolean
+meta_prefs_get_tile_maximize (void)
+{
+    return tile_maximize;
 }
 
 gboolean

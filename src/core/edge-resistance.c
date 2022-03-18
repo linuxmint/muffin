@@ -556,7 +556,7 @@ apply_edge_resistance_to_each_side (MetaDisplay         *display,
 
   edge_data = display->grab_edge_resistance_data;
 
-  if (auto_snap && !META_WINDOW_TILED_SIDE_BY_SIDE (window))
+  if (auto_snap && !META_WINDOW_TILED (window))
     {
       /* Do the auto snapping instead of normal edge resistance; in all
        * cases, we allow snapping to opposite kinds of edges (e.g. left
@@ -591,7 +591,7 @@ apply_edge_resistance_to_each_side (MetaDisplay         *display,
                                         FALSE,
                                         keyboard_op);
     }
-  else if (auto_snap && META_WINDOW_TILED_SIDE_BY_SIDE (window))
+  else if (auto_snap && META_WINDOW_TILED (window))
     {
       MetaRectangle workarea;
       guint i;
@@ -622,6 +622,7 @@ apply_edge_resistance_to_each_side (MetaDisplay         *display,
       for (i = 0; i < G_N_ELEMENTS (tile_edges); i++)
         {
           guint horizontal_point = workarea.x + floor (workarea.width * tile_edges[i]);
+          guint vertical_point = workarea.y + floor (workarea.height * tile_edges[i]);
 
           if (ABS (horizontal_point - new_left) < 16)
             {
@@ -632,6 +633,18 @@ apply_edge_resistance_to_each_side (MetaDisplay         *display,
             {
               new_left = workarea.x;
               new_right = horizontal_point;
+            }
+
+
+          if (ABS (vertical_point - new_left) < 16)
+            {
+              new_top = vertical_point;
+              new_bottom = workarea.y + workarea.height;
+            }
+          else if (ABS (vertical_point - new_bottom) < 16)
+            {
+              new_top = workarea.y;
+              new_bottom = vertical_point;
             }
         }
     }

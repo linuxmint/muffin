@@ -358,7 +358,7 @@ META_EXPORT
 cairo_region_t *meta_window_get_frame_bounds (MetaWindow *window);
 
 META_EXPORT
-MetaWindow *meta_window_get_tile_match (MetaWindow *window);
+MetaWindow *meta_window_get_tile_match (MetaWindow *window, gboolean vertical);
 
 META_EXPORT
 void        meta_window_make_fullscreen    (MetaWindow  *window);

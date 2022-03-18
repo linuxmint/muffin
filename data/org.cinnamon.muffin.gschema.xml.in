@@ -27,12 +27,20 @@
     </key>
 
     <key name="edge-tiling" type="b">
-      <default>false</default>
+      <default>true</default>
       <summary>Enable edge tiling when dropping windows on screen edges</summary>
       <description>
         If enabled, dropping windows on vertical screen edges maximizes them
         vertically and resizes them horizontally to cover half of the available
         area. Dropping windows on the top screen edge maximizes them completely.
+      </description>
+    </key>
+
+    <key name="tile-maximize" type="b">
+      <default>false</default>
+      <summary>Sets maximize as the tile action for the top edge of the screen</summary>
+      <description>
+        Makes tiling to the top maximize the window
       </description>
     </key>
 
@@ -184,12 +192,20 @@
   </schema>
   <schema id="org.cinnamon.muffin.keybindings" path="/org/cinnamon/muffin/keybindings/">
 
-    <key name="toggle-tiled-left" type="as">
+    <key name="push-tile-left" type="as">
       <default><![CDATA[['<Super>Left']]]></default>
     </key>
 
-    <key name="toggle-tiled-right" type="as">
+    <key name="push-tile-right" type="as">
       <default><![CDATA[['<Super>Right']]]></default>
+    </key>
+
+    <key name="push-tile-up" type="as">
+      <default><![CDATA[['<Super>Up']]]></default>
+    </key>
+
+    <key name="push-tile-down" type="as">
+      <default><![CDATA[['<Super>Down']]]></default>
     </key>
 
     <key name="tab-popup-select" type="as">
