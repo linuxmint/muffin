@@ -3132,45 +3132,63 @@ meta_window_get_tile_fractions (MetaWindow   *window,
                                double       *vfraction)
 {
   MetaWindow *htile_match, *vtile_match;
+  double new_hfraction, new_vfraction;
 
   /* Make sure the tile match is up-to-date and matches the
    * passed in mode rather than the current state
    */
-  htile_match = meta_window_find_tile_match (window, tile_mode, FALSE);
-  vtile_match = meta_window_find_tile_match (window, tile_mode, TRUE);
-
-  get_default_tile_fractions (tile_mode, hfraction, vfraction);
 
   if (tile_mode == META_TILE_NONE)
     {
       *hfraction = -1.;
       *vfraction = -1.;
+      return;
     }
   else if (tile_mode == META_TILE_MAXIMIZED)
     {
       *hfraction = 1.;
       *vfraction = 1.;
+      return;
     }
-  else if (vtile_match || htile_match)
+
+  // FIXME: should we fill both or just vtile if htile fails - both i think.
+  htile_match = meta_window_find_tile_match (window, tile_mode, FALSE);
+  vtile_match = meta_window_find_tile_match (window, tile_mode, TRUE);
+
+  get_default_tile_fractions (tile_mode, &new_hfraction, &new_vfraction);
+
+  if (vtile_match)
     {
-      if (htile_match)
-        *hfraction = 1. - htile_match->tile_hfraction;
-      if (vtile_match)
-        *vfraction = 1. - vtile_match->tile_vfraction;
+      new_vfraction = 1. - vtile_match->tile_vfraction;
     }
-  else if (META_WINDOW_TILED (window))
+
+  if (htile_match)
+    {
+      new_hfraction = 1. - htile_match->tile_hfraction;
+    }
+
+  if (META_WINDOW_TILED (window))
     {
       if (window->tile_mode != tile_mode)
         {
-          *hfraction = 1. - window->tile_hfraction;
-          *vfraction = 1. - window->tile_vfraction;
+          new_hfraction = 1. - window->tile_hfraction;
+          new_vfraction = 1. - window->tile_vfraction;
         }
       else
         {
-          *hfraction = window->tile_hfraction;
-          *vfraction = window->tile_vfraction;
+          if (!htile_match)
+            {
+              new_hfraction = window->tile_hfraction;
+            }
+          if (!vtile_match)
+            {
+              new_vfraction = window->tile_vfraction;
+            }
         }
     }
+
+    *hfraction = new_hfraction;
+    *vfraction = new_vfraction;
 }
 
 static void
@@ -3196,7 +3214,6 @@ meta_window_update_tile_fractions (MetaWindow *window,
 
   if (vtile_match && window->display->grab_window == window)
     meta_window_tile (vtile_match, vtile_match->tile_mode);
-
 }
 
 static void
@@ -4553,7 +4570,6 @@ adjust_size_for_tile_match (MetaWindow *window,
     {
       meta_window_frame_rect_to_client_rect (vtile_match, &rect, &match_rect);
 
-      *new_w -= MAX(0, vtile_match->size_hints.min_width - match_rect.width);
       *new_h -= MAX(0, vtile_match->size_hints.min_height - match_rect.height);
     }
 
@@ -4562,7 +4578,6 @@ adjust_size_for_tile_match (MetaWindow *window,
       meta_window_frame_rect_to_client_rect (htile_match, &rect, &match_rect);
 
       *new_w -= MAX(0, htile_match->size_hints.min_width - match_rect.width);
-      *new_h -= MAX(0, htile_match->size_hints.min_height - match_rect.height);
     }
 }
 
@@ -6948,10 +6963,11 @@ meta_window_get_tile_area (MetaWindow    *window,
   tile_monitor_number = meta_window_get_current_tile_monitor_number (window);
 
   meta_window_get_work_area_for_monitor (window, tile_monitor_number, &work_area);
-  meta_window_get_tile_fractions (window, tile_mode, &vfraction, &hfraction);
+  meta_window_get_tile_fractions (window, tile_mode, &hfraction, &vfraction);
   *tile_area = work_area;
-  tile_area->width = round (tile_area->width * vfraction);
-  tile_area->height = round (tile_area->height * hfraction);
+
+  tile_area->width = round (tile_area->width * hfraction);
+  tile_area->height = round (tile_area->height * vfraction);
 
   switch (tile_mode)
     {
@@ -8154,6 +8170,22 @@ can_match_mode (MetaWindow *match,
     return FALSE;
 }
 
+static gboolean
+vert_overlap (const MetaRectangle *rect1,
+              const MetaRectangle *rect2)
+{
+  return (rect1->y < rect2->y + rect2->height - meta_prefs_get_drag_threshold () &&
+          rect2->y < rect1->y + rect1->height - meta_prefs_get_drag_threshold ());
+}
+
+static gboolean
+horiz_overlap (const MetaRectangle *rect1,
+               const MetaRectangle *rect2)
+{
+  return (rect1->x < rect2->x + rect2->width - meta_prefs_get_drag_threshold () &&
+          rect2->x < rect1->x + rect1->width - meta_prefs_get_drag_threshold ());
+}
+
 static MetaWindow *
 meta_window_find_tile_match (MetaWindow   *window,
                              MetaTileMode  current_mode,
@@ -8264,6 +8296,14 @@ meta_window_find_tile_match (MetaWindow   *window,
 
       meta_window_get_frame_rect (bottommost, &bottommost_rect);
       meta_window_get_frame_rect (topmost, &topmost_rect);
+
+      /* 
+       * Don't extend window edges to infinity when looking for matches. Tiling
+       * in a given direction requires some amount of overlap in the other.
+       */
+
+      if (!vert_overlap (&bottommost_rect, &topmost_rect) && !horiz_overlap (&bottommost_rect, &topmost_rect))
+        return NULL;
 
       /*
        * If we are looking for a tile match while actually being tiled,
