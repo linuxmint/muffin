@@ -36,6 +36,14 @@
       </description>
     </key>
 
+    <key name="tile-maximize" type="b">
+      <default>false</default>
+      <summary>Sets maximize as the tile action for the top edge of the screen</summary>
+      <description>
+        Makes tiling to the top maximize the window
+      </description>
+    </key>
+
     <key name="dynamic-workspaces" type="b">
       <default>false</default>
       <summary>Workspaces are managed dynamically</summary>

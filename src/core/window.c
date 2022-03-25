@@ -6323,7 +6323,7 @@ update_move_maybe_tile (MetaWindow *window,
   else if (meta_window_can_tile_top_bottom (window) &&
            // TODO: Handle maximize/tile preference
            get_tile_zone_at_pointer (logical_monitor, &work_area, shake_threshold, x, y) == ZONE_TOP)
-    display->preview_tile_mode = META_TILE_TOP;
+    display->preview_tile_mode = meta_prefs_get_tile_maximize() ? META_TILE_MAXIMIZED : META_TILE_TOP;
   else if (meta_window_can_tile_top_bottom (window) &&
            get_tile_zone_at_pointer (logical_monitor, &work_area, shake_threshold, x, y) == ZONE_BOTTOM)
     display->preview_tile_mode = META_TILE_BOTTOM;

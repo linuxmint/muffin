@@ -114,7 +114,8 @@ typedef enum
   META_PREF_UNREDIRECT_FULLSCREEN_WINDOWS,
   META_PREF_WORKSPACE_CYCLE,
   META_PREF_MIN_WIN_OPACITY,
-  META_PREF_MOUSE_ZOOM_ENABLED
+  META_PREF_MOUSE_ZOOM_ENABLED,
+  META_PREF_TILE_MAXIMIZE
 } MetaPreference;
 
 typedef void (* MetaPrefsChangedFunc) (MetaPreference pref,
@@ -191,6 +192,9 @@ gboolean                    meta_prefs_get_gnome_animations   (void);
 
 META_EXPORT
 gboolean                    meta_prefs_get_edge_tiling        (void);
+
+META_EXPORT
+gboolean                    meta_prefs_get_tile_maximize      (void);
 
 META_EXPORT
 gboolean                    meta_prefs_get_auto_maximize      (void);
