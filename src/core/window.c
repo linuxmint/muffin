@@ -3367,6 +3367,7 @@ meta_window_tile (MetaWindow   *window,
 {
   MetaMaximizeFlags directions;
   MetaRectangle old_frame_rect, old_buffer_rect;
+  gboolean was_already_tiled = window->tile_mode != META_TILE_NONE && window->tile_mode != META_TILE_NONE;
 
   meta_window_get_tile_fractions (window, tile_mode, &window->tile_hfraction, &window->tile_vfraction);
   window->tile_mode = tile_mode;
@@ -3383,7 +3384,7 @@ meta_window_tile (MetaWindow   *window,
   else
     directions = META_MAXIMIZE_VERTICAL;
 
-  meta_window_maximize_internal (window, directions, NULL);
+  meta_window_maximize_internal (window, directions, was_already_tiled ? &window->saved_rect : NULL);
   meta_display_update_tile_preview (window->display, FALSE);
 
   /* Setup the edge constraints */
