@@ -161,7 +161,9 @@ if have_gles2
   endif
 endif
 
-have_wayland = get_option('wayland')
+#have_wayland = get_option('wayland')
+have_wayland = false
+
 if have_wayland
   wayland_server_dep = dependency('wayland-server', version: wayland_server_req)
   wayland_client_dep = dependency('wayland-client', version: wayland_server_req)
@@ -180,7 +182,9 @@ if have_libgudev
   gudev_dep = dependency('gudev-1.0', version: gudev_req)
 endif
 
-have_native_backend = get_option('native_backend')
+# have_native_backend = get_option('native_backend')
+have_native_backend = false
+
 if have_native_backend
   libdrm_dep = dependency('libdrm')
   libgbm_dep = dependency('gbm', version: gbm_req)
@@ -206,9 +210,12 @@ if have_native_backend
   endif
 endif
 
-have_egl_device = get_option('egl_device')
+#have_egl_device = get_option('egl_device')
+have_egl_device = false
 
-have_wayland_eglstream = get_option('wayland_eglstream')
+#have_wayland_eglstream = get_option('wayland_eglstream')
+have_wayland_eglstream = false
+
 if have_wayland_eglstream
   wayland_eglstream_protocols_dep = dependency('wayland-eglstream-protocols')
   dl_dep = cc.find_library('dl', required: true)
@@ -225,7 +232,9 @@ if have_sm
   sm_dep = dependency('sm')
 endif
 
-have_libwacom = get_option('libwacom')
+#have_libwacom = get_option('libwacom')
+have_libwacom = false
+
 if have_libwacom
   libwacom_dep = dependency('libwacom', version: libwacom_req)
 endif
@@ -406,7 +415,9 @@ if have_wayland
   endif
 endif
 
-xwayland_grab_default_access_rules = get_option('xwayland_grab_default_access_rules')
+#xwayland_grab_default_access_rules = get_option('xwayland_grab_default_access_rules')
+xwayland_grab_default_access_rules = ''
+
 cdata.set_quoted('XWAYLAND_GRAB_DEFAULT_ACCESS_RULES',
                  xwayland_grab_default_access_rules)
 
