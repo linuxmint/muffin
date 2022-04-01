@@ -179,7 +179,10 @@ enum
   ACTIVATE,
   DEACTIVATE,
   DELETE_EVENT,
+  BEFORE_UPDATE,
+  BEFORE_PAINT,
   AFTER_PAINT,
+  AFTER_UPDATE,
   PAINT_VIEW,
   PRESENTED,
 
@@ -968,10 +971,27 @@ clutter_stage_paint_view (ClutterStage         *stage,
     CLUTTER_STAGE_GET_CLASS (stage)->paint_view (stage, view, redraw_clip);
 }
 
-void
-_clutter_stage_emit_after_paint (ClutterStage *stage)
+clutter_stage_emit_before_update (ClutterStage *stage)
 {
-  g_signal_emit (stage, stage_signals[AFTER_PAINT], 0);
+  g_signal_emit (stage, stage_signals[BEFORE_UPDATE], 0);
+}
+
+void
+clutter_stage_emit_before_paint (ClutterStage *stage)
+{
+  g_signal_emit (stage, stage_signals[BEFORE_PAINT], 0);
+}
+
+void
+clutter_stage_emit_after_paint (ClutterStage *stage)
+{
+   g_signal_emit (stage, stage_signals[AFTER_PAINT], 0);
+}
+
+void
+clutter_stage_emit_after_update (ClutterStage *stage)
+{
+  g_signal_emit (stage, stage_signals[AFTER_UPDATE], 0);
 }
 
 /* If we don't implement this here, we get the paint function
@@ -1522,6 +1542,8 @@ _clutter_stage_do_update (ClutterStage *stage)
 
   COGL_TRACE_BEGIN_SCOPED (ClutterStageDoUpdate, "Update");
 
+  clutter_stage_emit_before_update (stage);
+
   /* NB: We need to ensure we have an up to date layout *before* we
    * check or clear the pending redraws flag since a relayout may
    * queue a redraw.
@@ -1533,7 +1555,10 @@ _clutter_stage_do_update (ClutterStage *stage)
   COGL_TRACE_END (ClutterStageRelayout);
 
   if (!priv->redraw_pending)
-    return FALSE;
+    {
+      clutter_stage_emit_after_update (stage);
+      return FALSE;
+    }
 
   if (stage_was_relayout)
     pointers = _clutter_stage_check_updated_pointers (stage);
@@ -1567,6 +1592,8 @@ _clutter_stage_do_update (ClutterStage *stage)
     }
 
   COGL_TRACE_END (ClutterStagePick);
+
+  clutter_stage_emit_after_update (stage);
 
   return TRUE;
 }
@@ -2209,6 +2236,31 @@ clutter_stage_class_init (ClutterStageClass *klass)
                   CLUTTER_TYPE_EVENT | G_SIGNAL_TYPE_STATIC_SCOPE);
 
   /**
+   * ClutterStage::before-update:
+   * @stage: the #ClutterStage
+   */
+  stage_signals[BEFORE_UPDATE] =
+    g_signal_new (I_("before-update"),
+                  G_TYPE_FROM_CLASS (gobject_class),
+                  G_SIGNAL_RUN_LAST,
+                  0,
+                  NULL, NULL, NULL,
+                  G_TYPE_NONE, 0);
+
+  /**
+   * ClutterStage::before-paint:
+   * @stage: the stage that received the event
+   *
+   * The ::before-paint signal is emitted before the stage is painted.
+   */
+  stage_signals[BEFORE_PAINT] =
+    g_signal_new (I_("before-paint"),
+                  G_TYPE_FROM_CLASS (gobject_class),
+                  G_SIGNAL_RUN_LAST,
+                  0,
+                  NULL, NULL, NULL,
+                  G_TYPE_NONE, 0);
+  /**
    * ClutterStage::after-paint:
    * @stage: the stage that received the event
    * @paint_Context: the paint context
@@ -2223,6 +2275,18 @@ clutter_stage_class_init (ClutterStageClass *klass)
                   G_TYPE_FROM_CLASS (gobject_class),
                   G_SIGNAL_RUN_LAST,
                   0, /* no corresponding vfunc */
+                  NULL, NULL, NULL,
+                  G_TYPE_NONE, 0);
+
+  /**
+   * ClutterStage::after-update:
+   * @stage: the #ClutterStage
+   */
+  stage_signals[AFTER_UPDATE] =
+    g_signal_new (I_("after-update"),
+                  G_TYPE_FROM_CLASS (gobject_class),
+                  G_SIGNAL_RUN_LAST,
+                  0,
                   NULL, NULL, NULL,
                   G_TYPE_NONE, 0);
 

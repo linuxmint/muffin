@@ -993,6 +993,7 @@ static void
 clutter_stage_cogl_redraw (ClutterStageWindow *stage_window)
 {
   ClutterStageCogl *stage_cogl = CLUTTER_STAGE_COGL (stage_window);
+  gboolean has_redraw_clip = FALSE;
   gboolean swap_event = FALSE;
   GList *l;
 
@@ -1005,10 +1006,25 @@ clutter_stage_cogl_redraw (ClutterStageWindow *stage_window)
       if (!clutter_stage_view_has_redraw_clip (view))
         continue;
 
+      has_redraw_clip = TRUE;
+      break;
+    }
+
+  if (has_redraw_clip)
+    clutter_stage_emit_before_paint (stage_cogl->wrapper);
+
+  for (l = _clutter_stage_window_get_views (stage_window); l; l = l->next)
+    {
+      ClutterStageView *view = l->data;
+
+      if (!clutter_stage_view_has_redraw_clip (view))
+        continue;
+
       swap_event |= clutter_stage_cogl_redraw_view (stage_window, view);
     }
 
-  _clutter_stage_emit_after_paint (stage_cogl->wrapper);
+  if (has_redraw_clip)
+    clutter_stage_emit_after_paint (stage_cogl->wrapper);
 
   _clutter_stage_window_finish_frame (stage_window);
 
