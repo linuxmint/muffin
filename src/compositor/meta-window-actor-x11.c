@@ -489,8 +489,7 @@ meta_window_actor_x11_queue_frame_drawn (MetaWindowActor *actor,
         }
       else if (surface)
         {
-          const cairo_rectangle_int_t clip = { 0, 0, 1, 1 };
-          clutter_actor_queue_redraw_with_clip (CLUTTER_ACTOR (surface), &clip);
+          clutter_actor_queue_redraw (CLUTTER_ACTOR (surface));
           actor_x11->repaint_scheduled = TRUE;
         }
     }

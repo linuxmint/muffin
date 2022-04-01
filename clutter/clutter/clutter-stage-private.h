@@ -40,7 +40,10 @@ void                clutter_stage_paint_view             (ClutterStage          
                                                           ClutterStageView      *view,
                                                           const cairo_region_t  *redraw_clip);
 
-void                _clutter_stage_emit_after_paint      (ClutterStage          *stage);
+void                clutter_stage_emit_before_update     (ClutterStage          *stage);
+void                clutter_stage_emit_before_paint      (ClutterStage          *stage);
+void                clutter_stage_emit_after_paint       (ClutterStage          *stage);
+void                clutter_stage_emit_after_update      (ClutterStage          *stage);
 
 CLUTTER_EXPORT
 void                _clutter_stage_set_window            (ClutterStage          *stage,
