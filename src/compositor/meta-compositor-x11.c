@@ -58,6 +58,12 @@ struct _MetaCompositorX11
 
 G_DEFINE_TYPE (MetaCompositorX11, meta_compositor_x11, META_TYPE_COMPOSITOR)
 
+static void on_before_update (ClutterStage     *stage,
+                              MetaCompositor   *compositor);
+
+static void on_after_update (ClutterStage     *stage,
+                              MetaCompositor   *compositor);
+
 static void
 process_damage (MetaCompositorX11  *compositor_x11,
                 XDamageNotifyEvent *damage_xevent,
@@ -185,6 +191,15 @@ meta_compositor_x11_manage (MetaCompositor *compositor)
    * contents until we show the stage.
    */
   XMapWindow (xdisplay, compositor_x11->output);
+
+  ClutterStage *stage = meta_compositor_get_stage (compositor);
+
+  compositor_x11->before_update_handler_id =
+    g_signal_connect (stage, "before-update",
+                      G_CALLBACK (on_before_update), compositor);
+  compositor_x11->after_update_handler_id =
+    g_signal_connect (stage, "after-update",
+                      G_CALLBACK (on_after_update), compositor);
 
   compositor_x11->have_x11_sync_object = meta_sync_ring_init (xdisplay);
 
@@ -388,7 +403,6 @@ out:
 
 static void
 on_before_update (ClutterStage     *stage,
-                  ClutterStageView *stage_view,
                   MetaCompositor   *compositor)
 {
   MetaCompositorX11 *compositor_x11 = META_COMPOSITOR_X11 (compositor);
@@ -426,7 +440,6 @@ on_before_update (ClutterStage     *stage,
 
 static void
 on_after_update (ClutterStage     *stage,
-                 ClutterStageView *stage_view,
                  MetaCompositor   *compositor)
 {
   MetaCompositorX11 *compositor_x11 = META_COMPOSITOR_X11 (compositor);
@@ -513,23 +526,6 @@ meta_compositor_x11_new (MetaDisplay *display)
 }
 
 static void
-meta_compositor_x11_constructed (GObject *object)
-{
-  MetaCompositorX11 *compositor_x11 = META_COMPOSITOR_X11 (object);
-  MetaCompositor *compositor = META_COMPOSITOR (compositor_x11);
-  ClutterStage *stage = meta_compositor_get_stage (compositor);
-
-  compositor_x11->before_update_handler_id =
-    g_signal_connect (stage, "before-update",
-                      G_CALLBACK (on_before_update), compositor);
-  compositor_x11->after_update_handler_id =
-    g_signal_connect (stage, "after-update",
-                      G_CALLBACK (on_after_update), compositor);
-
-  G_OBJECT_CLASS (meta_compositor_x11_parent_class)->constructed (object);
-}
-
-static void
 meta_compositor_x11_dispose (GObject *object)
 {
   MetaCompositorX11 *compositor_x11 = META_COMPOSITOR_X11 (object);
@@ -560,7 +556,6 @@ meta_compositor_x11_class_init (MetaCompositorX11Class *klass)
   MetaCompositorClass *compositor_class = META_COMPOSITOR_CLASS (klass);
 
   object_class->dispose = meta_compositor_x11_dispose;
-  object_class->constructed = meta_compositor_x11_constructed;
 
   compositor_class->manage = meta_compositor_x11_manage;
   compositor_class->unmanage = meta_compositor_x11_unmanage;
