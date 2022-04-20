@@ -6267,7 +6267,7 @@ get_tile_zone_at_pointer (MetaLogicalMonitor *logical_monitor,
   if (x >= work_area->x + work_area->width - shake_threshold &&
       x < (logical_monitor->rect.x + logical_monitor->rect.width))
     zones |= ZONE_RIGHT;
-  if (y >= logical_monitor->rect.y && y < (work_area->y + shake_threshold))
+  if (y >= logical_monitor->rect.y && y <= work_area->y)
     zones |= ZONE_TOP;
   if (y >= work_area->y + work_area->height - shake_threshold &&
       y < (logical_monitor->rect.y + logical_monitor->rect.height))
