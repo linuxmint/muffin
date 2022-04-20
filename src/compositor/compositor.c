@@ -69,6 +69,7 @@
 #include "core/frame.h"
 #include "core/util-private.h"
 #include "core/window-private.h"
+#include "core/meta-workspace-manager-private.h"
 #include "meta/compositor-mutter.h"
 #include "meta/main.h"
 #include "meta/meta-backend.h"
@@ -117,6 +118,7 @@ typedef struct _MetaCompositorPrivate
   ClutterActor *bottom_window_group;
 
   ClutterActor *background_actor;
+  ClutterActor *desklet_container;
 
   GList *windows;
 
@@ -600,10 +602,16 @@ meta_compositor_manage (MetaCompositor *compositor)
   priv->feedback_group = meta_window_group_new (display);
   priv->background_actor = meta_x11_background_actor_new_for_display (display);
 
+  // This needs to remain stacked just above the background actor in the window group.
+  // So sync_actor_stacking() has to be able to reference it. The deskletManager
+  // will take this and finish setting it up.
+  priv->desklet_container = clutter_actor_new ();
+
   clutter_actor_add_child (priv->window_group, priv->background_actor);
+  clutter_actor_add_child (priv->window_group, priv->bottom_window_group);
+  clutter_actor_add_child (priv->window_group, priv->desklet_container);
   clutter_actor_add_child (priv->stage, priv->window_group);
   clutter_actor_add_child (priv->stage, priv->top_window_group);
-  clutter_actor_add_child (priv->stage, priv->bottom_window_group);
   clutter_actor_add_child (priv->stage, priv->feedback_group);
 
   META_COMPOSITOR_GET_CLASS (compositor)->manage (compositor);
@@ -890,6 +898,21 @@ sync_actor_stacking (MetaCompositor *compositor)
       parent = clutter_actor_get_parent (actor);
       clutter_actor_set_child_below_sibling (parent, actor, NULL);
     }
+
+  // Place the desklet container above or below windows.
+  if (priv->display->desklets_above)
+    {
+      clutter_actor_set_child_above_sibling (priv->window_group, priv->desklet_container, NULL);
+    }
+  else
+    {
+      clutter_actor_set_child_below_sibling (priv->window_group, priv->desklet_container, NULL);
+    }
+
+  // Then the bottom window group (which META_WINDOW_DESKTOP windows like nemo-desktop's get placed in).
+  clutter_actor_set_child_below_sibling (priv->window_group, priv->bottom_window_group, NULL);
+
+  // and finally backgrounds..
 
   /* we prepended the backgrounds above so the last actor in the list
    * should get lowered to the bottom last.
@@ -1280,6 +1303,7 @@ meta_compositor_dispose (GObject *object)
                           priv->top_window_actor);
 
   g_clear_pointer (&priv->background_actor, clutter_actor_destroy);
+  g_clear_pointer (&priv->desklet_container, clutter_actor_destroy);
   g_clear_pointer (&priv->window_group, clutter_actor_destroy);
   g_clear_pointer (&priv->top_window_group, clutter_actor_destroy);
   g_clear_pointer (&priv->bottom_window_group, clutter_actor_destroy);
@@ -1610,7 +1634,7 @@ meta_compositor_is_switching_workspace (MetaCompositor *compositor)
  * The root window background automatically tracks the image or color set
  * by the environment.
  *
- * Return value: (transfer none): The background actor corresponding to @display
+ * Returns: (transfer none): The background actor corresponding to @display
  */
 ClutterActor *
 meta_get_x11_background_actor_for_display (MetaDisplay *display)
@@ -1619,4 +1643,30 @@ meta_get_x11_background_actor_for_display (MetaDisplay *display)
     meta_compositor_get_instance_private (display->compositor);
 
   return priv->background_actor;
+}
+
+/**
+ * meta_get_desklet_container_for_display:
+ * @display: a #MetaDisplay
+ *
+ * Returns the desklet container actor.
+ *
+ * Return value: (transfer none): The desklet container actor.
+ */
+ClutterActor *
+meta_get_desklet_container_for_display (MetaDisplay *display)
+{
+  MetaCompositorPrivate *priv =
+    meta_compositor_get_instance_private (display->compositor);
+
+  return priv->desklet_container;
+}
+
+void
+meta_update_desklet_stacking (MetaCompositor *compositor)
+{
+  MetaCompositorPrivate *priv =
+    meta_compositor_get_instance_private (compositor);
+
+  meta_stack_tracker_queue_sync_stack (priv->display->stack_tracker);
 }

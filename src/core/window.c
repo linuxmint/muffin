@@ -8191,7 +8191,7 @@ meta_window_is_attached_dialog (MetaWindow *window)
  *  - there is no 3rd window stacked between both tiled windows that's
  *    partially visible in the common edge.
  *
- * Return value: (transfer none) (nullable) (element-type MetaWindow): An array of matching tiled windows or
+ * Return value: (transfer none) (nullable): An array of matching tiled windows or
  * %NULL if none exist.
  */
 
