@@ -8272,6 +8272,7 @@ meta_window_find_tile_match (MetaWindow   *window,
     {
       if (!match->shaded &&
           !match->minimized &&
+          META_WINDOW_TILED (match) &&
           can_match_mode (match, match_tile_modes) &&
           (window != match) &&
           match->tile_monitor_number == window->tile_monitor_number &&
