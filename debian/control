@@ -32,15 +32,12 @@ Build-Depends:
         libice-dev,
         libinput-dev (>= 1.7) [linux-any],
         libjson-glib-dev (>= 0.13.2-1~),
-        libnvidia-egl-wayland-dev [linux-any],
         libpam0g-dev,
         libpango1.0-dev (>= 1.2.0),
         libpipewire-0.2-dev | libpipewire-0.3-dev,
         libsm-dev,
         libstartup-notification0-dev (>= 0.7),
         libsystemd-dev (>= 212) [linux-any],
-        libwacom-dev (>= 0.13) [linux-any],
-        libwayland-dev (>= 1.13.0) [linux-any],
         libxau-dev,
         libx11-dev,
         libx11-xcb-dev,
@@ -61,12 +58,10 @@ Build-Depends:
         libxt-dev,
         meson (>= 0.50),
         pkg-config (>= 0.22),
-        wayland-protocols (>= 1.19) [linux-any],
         xauth <!nocheck>,
         xkb-data,
         xserver-xorg-core [linux-any],
         xvfb <!nocheck>,
-        xwayland [linux-any],
         zenity
 Rules-Requires-Root: no
 Standards-Version: 4.5.0
@@ -94,7 +89,6 @@ Architecture: any
 Multi-Arch: same
 Pre-Depends: ${misc:Pre-Depends}
 Depends: adwaita-icon-theme,
-         gsettings-desktop-schemas (>= 3.33.0),
          muffin-common (>= ${source:Version}),
          ${misc:Depends},
          ${shlibs:Depends}
@@ -110,7 +104,6 @@ Package: muffin
 Architecture: any
 Pre-Depends: ${misc:Pre-Depends}
 Depends: adwaita-icon-theme,
-         gsettings-desktop-schemas (>= 3.33.0),
          muffin-common (>= ${source:Version}),
          zenity,
          ${misc:Depends},
@@ -155,7 +148,6 @@ Multi-Arch: same
 Breaks: libmuffin0 (<< 5.1)
 Replaces: libmuffin0 (<< 5.1)
 Depends: gir1.2-meta-muffin-0.0 (= ${binary:Version}),
-         gsettings-desktop-schemas-dev (>= 3.33.0),
          libatk1.0-dev,
          libcairo2-dev,
          libdrm-dev,
@@ -170,7 +162,6 @@ Depends: gir1.2-meta-muffin-0.0 (= ${binary:Version}),
          libmuffin0 (= ${binary:Version}),
          libpango1.0-dev,
          libudev-dev,
-         libwayland-dev,
          libx11-dev,
          libxcomposite-dev,
          libxdamage-dev,

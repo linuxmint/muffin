@@ -10,12 +10,9 @@ override_dh_autoreconf:
 	dh_autoreconf --as-needed
 
 CONFFLAGS = \
-	-Degl_device=true \
 	-Dwayland=false \
-	-Dwayland_eglstream=false \
 	-Dnative_backend=false \
-	-Dlibwacom=false \
-	-Dremote_desktop=false
+	-Dlibwacom=false
 
 ifeq ($(DEB_HOST_ARCH),$(findstring $(DEB_HOST_ARCH),armel armhf))
 CONFFLAGS += \
