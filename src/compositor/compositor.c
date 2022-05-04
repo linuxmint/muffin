@@ -607,8 +607,8 @@ meta_compositor_manage (MetaCompositor *compositor)
   priv->desklet_container = clutter_actor_new ();
 
   clutter_actor_add_child (priv->window_group, priv->background_actor);
-  clutter_actor_add_child (priv->window_group, priv->desklet_container);
   clutter_actor_add_child (priv->window_group, priv->bottom_window_group);
+  clutter_actor_add_child (priv->window_group, priv->desklet_container);
   clutter_actor_add_child (priv->stage, priv->window_group);
   clutter_actor_add_child (priv->stage, priv->top_window_group);
   clutter_actor_add_child (priv->stage, priv->feedback_group);
