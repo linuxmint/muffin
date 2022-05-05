@@ -3367,7 +3367,7 @@ meta_window_tile (MetaWindow   *window,
 {
   MetaMaximizeFlags directions;
   MetaRectangle old_frame_rect, old_buffer_rect;
-  gboolean was_already_tiled = window->tile_mode != META_TILE_NONE && window->tile_mode != META_TILE_NONE;
+  gboolean was_already_tiled = window->tile_mode != META_TILE_NONE;
 
   meta_window_get_tile_fractions (window, tile_mode, &window->tile_hfraction, &window->tile_vfraction);
   window->tile_mode = tile_mode;
