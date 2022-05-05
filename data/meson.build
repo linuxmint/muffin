@@ -14,7 +14,8 @@ custom_target('muffin.desktop',
   install_dir: join_paths(datadir, 'applications'),
 )
 
-xwayland_grab_default_access_rules = get_option('xwayland_grab_default_access_rules')
+#xwayland_grab_default_access_rules = get_option('xwayland_grab_default_access_rules')
+xwayland_grab_default_access_rules = ''
 
 gschema_config = configuration_data()
 gschema_config.set('GETTEXT_DOMAIN', meson.project_name())
