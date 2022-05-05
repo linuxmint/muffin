@@ -971,6 +971,7 @@ clutter_stage_paint_view (ClutterStage         *stage,
     CLUTTER_STAGE_GET_CLASS (stage)->paint_view (stage, view, redraw_clip);
 }
 
+void
 clutter_stage_emit_before_update (ClutterStage *stage)
 {
   g_signal_emit (stage, stage_signals[BEFORE_UPDATE], 0);
