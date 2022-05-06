@@ -69,6 +69,7 @@
 #include "core/frame.h"
 #include "core/util-private.h"
 #include "core/window-private.h"
+#include "core/meta-workspace-manager-private.h"
 #include "meta/compositor-mutter.h"
 #include "meta/main.h"
 #include "meta/meta-backend.h"
@@ -898,8 +899,16 @@ sync_actor_stacking (MetaCompositor *compositor)
       clutter_actor_set_child_below_sibling (parent, actor, NULL);
     }
 
-  // Place the desklet container below windows.
-  clutter_actor_set_child_below_sibling (priv->window_group, priv->desklet_container, NULL);
+  // Place the desklet container above or below windows.
+  if (priv->display->desklets_above)
+    {
+      clutter_actor_set_child_above_sibling (priv->window_group, priv->desklet_container, NULL);
+    }
+  else
+    {
+      clutter_actor_set_child_below_sibling (priv->window_group, priv->desklet_container, NULL);
+    }
+
   // Then the bottom window group (which META_WINDOW_DESKTOP windows like nemo-desktop's get placed in).
   clutter_actor_set_child_below_sibling (priv->window_group, priv->bottom_window_group, NULL);
 
@@ -1643,4 +1652,13 @@ meta_get_desklet_container_for_display (MetaDisplay *display)
     meta_compositor_get_instance_private (display->compositor);
 
   return priv->desklet_container;
+}
+
+void
+meta_update_desklet_stacking (MetaCompositor *compositor)
+{
+  MetaCompositorPrivate *priv =
+    meta_compositor_get_instance_private (compositor);
+
+  meta_stack_tracker_queue_sync_stack (priv->display->stack_tracker);
 }

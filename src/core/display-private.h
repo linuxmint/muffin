@@ -239,6 +239,8 @@ struct _MetaDisplay
   GBytes *saved_clipboard;
   gchar *saved_clipboard_mimetype;
   MetaSelection *selection;
+
+  gboolean desklets_above;
 };
 
 struct _MetaDisplayClass

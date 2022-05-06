@@ -3899,3 +3899,30 @@ meta_display_a11y_zoom (MetaDisplay *display, gboolean in)
 {
   g_signal_emit (display, display_signals[in ? ZOOM_SCROLL_IN : ZOOM_SCROLL_OUT], 0);
 }
+
+/**
+ * meta_display_set_desklets_above:
+ * @display: a #MetaDisplay
+ * @above: Whether to set above or not
+ *
+ * Raises the desklet container to the top of the stage temporatily.
+ */
+void
+meta_display_set_desklets_above (MetaDisplay *display, gboolean above)
+{
+    display->desklets_above = above;
+
+    meta_update_desklet_stacking (display->compositor);
+}
+
+/**
+ * meta_display_get_desklets_above:
+ * @display: a #MetaDisplay
+ *
+ * Returns: Whether or not desklets are currently raised to the top.
+ */
+gboolean
+meta_display_get_desklets_above (MetaDisplay *display)
+{
+    return display->desklets_above;
+}

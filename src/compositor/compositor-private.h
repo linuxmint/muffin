@@ -69,6 +69,8 @@ ClutterStage * meta_compositor_get_stage (MetaCompositor *compositor);
 
 gboolean meta_compositor_is_switching_workspace (MetaCompositor *compositor);
 
+void meta_update_desklet_stacking (MetaCompositor *compositor);
+
 static inline int64_t
 us (int64_t us)
 {
