@@ -34,7 +34,7 @@ Build-Depends:
         libjson-glib-dev (>= 0.13.2-1~),
         libpam0g-dev,
         libpango1.0-dev (>= 1.2.0),
-        libpipewire-0.2-dev | libpipewire-0.3-dev,
+        libpipewire-0.3-dev [linux-any] | libpipewire-0.2-dev [linux-any],
         libsm-dev,
         libstartup-notification0-dev (>= 0.7),
         libsystemd-dev (>= 212) [linux-any],
