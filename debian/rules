@@ -11,7 +11,7 @@ override_dh_autoreconf:
 
 CONFFLAGS = \
 	-Dprofiler=false \
-	-Ddefault_driver=gl3
+	-Ddefault_driver=gl
 
 override_dh_auto_configure:
 	dh_auto_configure -- \
