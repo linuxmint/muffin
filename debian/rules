@@ -11,13 +11,20 @@ override_dh_autoreconf:
 
 CONFFLAGS = \
 	-Dprofiler=false \
-	-Ddefault_driver=gl \
 	-Dremote_desktop=false
 
 ifneq ($(DEB_HOST_ARCH_OS),linux)
 CONFFLAGS += \
 	-Dudev=false \
 	-Dcore_tests=false
+endif
+
+ifeq ($(DEB_HOST_ARCH),$(findstring $(DEB_HOST_ARCH),armel armhf))
+CONFFLAGS += \
+	-Ddefault_driver=gles2
+else
+CONFFLAGS += \
+	-Ddefault_driver=gl
 endif
 
 override_dh_auto_configure:
