@@ -507,18 +507,12 @@ has_shadow (MetaWindowActorX11 *actor_x11)
   if (actor_x11->shadow_mode == META_SHADOW_MODE_FORCED_ON)
     return TRUE;
 
-  /* Leaving out shadows for maximized and fullscreen windows is an effeciency
+  /* Leaving out shadows for tiled, maximized and fullscreen windows is an effeciency
    * win and also prevents the unsightly effect of the shadow of maximized
    * window appearing on an adjacent window */
   if ((meta_window_get_maximized (window) == META_MAXIMIZE_BOTH) ||
-      meta_window_is_fullscreen (window))
-    return FALSE;
-
-  /*
-   * If we have two snap-tiled windows, we don't want the shadow to obstruct
-   * the other window.
-   */
-  if (meta_window_get_tile_match (window, TRUE) || meta_window_get_tile_match (window, FALSE))
+      meta_window_is_fullscreen (window) ||
+      META_WINDOW_TILED (window))
     return FALSE;
 
   /*
