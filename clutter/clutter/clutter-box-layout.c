@@ -1036,7 +1036,8 @@ clutter_box_layout_allocate (ClutterLayoutManager   *layout,
 
       /* Assert the api is working properly */
       if (sizes[i].minimum_size < 0)
-        g_error ("ClutterBoxLayout child %s minimum %s: %f < 0 for %s %f",
+      {
+        g_critical ("ClutterBoxLayout child %s minimum %s: %f < 0 for %s %f",
                  _clutter_actor_get_debug_name (child),
                  priv->orientation == CLUTTER_ORIENTATION_VERTICAL
                    ? "height"
@@ -1049,8 +1050,12 @@ clutter_box_layout_allocate (ClutterLayoutManager   *layout,
                    ? box->x2 - box->x1
                    : box->y2 - box->y1);
 
+        sizes[i].minimum_size = 0;
+      }
+
       if (sizes[i].natural_size < sizes[i].minimum_size)
-        g_error ("ClutterBoxLayout child %s natural %s: %f < minimum %f for %s %f",
+      {
+        g_critical ("ClutterBoxLayout child %s natural %s: %f < minimum %f for %s %f",
                  _clutter_actor_get_debug_name (child),
                  priv->orientation == CLUTTER_ORIENTATION_VERTICAL
                    ? "height"
@@ -1063,6 +1068,9 @@ clutter_box_layout_allocate (ClutterLayoutManager   *layout,
                  priv->orientation == CLUTTER_ORIENTATION_VERTICAL
                    ? box->x2 - box->x1
                    : box->y2 - box->y1);
+
+        sizes[i].natural_size = sizes[i].minimum_size;
+      }
 
       size -= sizes[i].minimum_size;
 
