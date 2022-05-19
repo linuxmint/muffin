@@ -97,7 +97,7 @@ dbus_idle_callback (MetaIdleMonitor *monitor,
   g_dbus_connection_emit_signal (g_dbus_interface_skeleton_get_connection (skeleton),
                                  watch->dbus_name,
                                  g_dbus_interface_skeleton_get_object_path (skeleton),
-                                 "org.gnome.Mutter.IdleMonitor",
+                                 "org.cinnamon.Muffin.IdleMonitor",
                                  "WatchFired",
                                  g_variant_new ("(u)", watch_id),
                                  NULL);
@@ -218,12 +218,12 @@ on_bus_acquired (GDBusConnection *connection,
   MetaIdleMonitor *monitor;
   char *path;
 
-  manager = g_dbus_object_manager_server_new ("/org/gnome/Mutter/IdleMonitor");
+  manager = g_dbus_object_manager_server_new ("/org/cinnamon/Muffin/IdleMonitor");
 
   /* We never clear the core monitor, as that's supposed to cumulate idle times from
      all devices */
   monitor = meta_idle_monitor_get_core ();
-  path = g_strdup ("/org/gnome/Mutter/IdleMonitor/Core");
+  path = g_strdup ("/org/cinnamon/Muffin/IdleMonitor/Core");
   create_monitor_skeleton (manager, monitor, path);
   g_free (path);
 
@@ -255,7 +255,7 @@ meta_idle_monitor_init_dbus (void)
     return;
 
   dbus_name_id = g_bus_own_name (G_BUS_TYPE_SESSION,
-                                 "org.gnome.Mutter.IdleMonitor",
+                                 "org.cinnamon.Muffin.IdleMonitor",
                                  G_BUS_NAME_OWNER_FLAGS_ALLOW_REPLACEMENT |
                                  (meta_get_replace_current_wm () ?
                                   G_BUS_NAME_OWNER_FLAGS_REPLACE : 0),

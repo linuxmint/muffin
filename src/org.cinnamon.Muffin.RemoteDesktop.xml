@@ -4,14 +4,14 @@
 <node>
 
   <!--
-      org.gnome.Mutter.RemoteDesktop:
+      org.cinnamon.Muffin.RemoteDesktop:
       @short_description: Remote desktop interface
 
       This API is private and not intended to be used outside of the integrated
       system that uses libmutter. No compatibility between versions are
       promised.
   -->
-  <interface name="org.gnome.Mutter.RemoteDesktop">
+  <interface name="org.cinnamon.Muffin.RemoteDesktop">
 
     <!--
 	CreateSession:
@@ -41,10 +41,10 @@
   </interface>
 
   <!--
-       org.gnome.Mutter.RemoteDesktop.Session:
+       org.cinnamon.Muffin.RemoteDesktop.Session:
        @short_description: Remote desktop session
   -->
-  <interface name="org.gnome.Mutter.RemoteDesktop.Session">
+  <interface name="org.cinnamon.Muffin.RemoteDesktop.Session">
 
     <!--
 	SessionId:

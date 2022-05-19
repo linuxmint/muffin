@@ -32,7 +32,7 @@
 #include "backends/meta-screen-cast-window-stream.h"
 #include "core/display-private.h"
 
-#define META_SCREEN_CAST_SESSION_DBUS_PATH "/org/gnome/Mutter/ScreenCast/Session"
+#define META_SCREEN_CAST_SESSION_DBUS_PATH "/org/cinnamon/Muffin/ScreenCast/Session"
 
 struct _MetaScreenCastSession
 {

@@ -26,8 +26,8 @@
 
 #include "backends/meta-screen-cast-session.h"
 
-#define META_SCREEN_CAST_STREAM_DBUS_IFACE "org.gnome.Mutter.ScreenCast.Stream"
-#define META_SCREEN_CAST_STREAM_DBUS_PATH "/org/gnome/Mutter/ScreenCast/Stream"
+#define META_SCREEN_CAST_STREAM_DBUS_IFACE "org.cinnamon.Muffin.ScreenCast.Stream"
+#define META_SCREEN_CAST_STREAM_DBUS_PATH "/org/cinnamon/Muffin/ScreenCast/Stream"
 
 enum
 {

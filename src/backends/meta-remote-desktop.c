@@ -38,8 +38,8 @@
 
 #include "meta-dbus-remote-desktop.h"
 
-#define META_REMOTE_DESKTOP_DBUS_SERVICE "org.gnome.Mutter.RemoteDesktop"
-#define META_REMOTE_DESKTOP_DBUS_PATH "/org/gnome/Mutter/RemoteDesktop"
+#define META_REMOTE_DESKTOP_DBUS_SERVICE "org.cinnamon.Muffin.RemoteDesktop"
+#define META_REMOTE_DESKTOP_DBUS_PATH "/org/cinnamon/Muffin/RemoteDesktop"
 #define META_REMOTE_DESKTOP_API_VERSION 1
 
 typedef enum _MetaRemoteDesktopDeviceTypes
