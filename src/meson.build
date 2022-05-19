@@ -706,15 +706,15 @@ endif
 mutter_built_sources = []
 
 dbus_display_config_built_sources = gnome.gdbus_codegen('meta-dbus-display-config',
-    'org.gnome.Mutter.DisplayConfig.xml',
-    interface_prefix: 'org.gnome.Mutter.',
+    'org.cinnamon.Muffin.DisplayConfig.xml',
+    interface_prefix: 'org.cinnamon.Muffin.',
     namespace: 'MetaDBus',
   )
 mutter_built_sources += dbus_display_config_built_sources
 
 dbus_idle_monitor_built_sources = gnome.gdbus_codegen('meta-dbus-idle-monitor',
-    'org.gnome.Mutter.IdleMonitor.xml',
-    interface_prefix: 'org.gnome.Mutter.',
+    'org.cinnamon.Muffin.IdleMonitor.xml',
+    interface_prefix: 'org.cinnamon.Muffin.',
     namespace: 'MetaDBus',
     object_manager: true,
   )
@@ -777,15 +777,15 @@ endif
 
 if have_remote_desktop
   dbus_remote_desktop_built_sources = gnome.gdbus_codegen('meta-dbus-remote-desktop',
-      'org.gnome.Mutter.RemoteDesktop.xml',
-      interface_prefix: 'org.gnome.Mutter.',
+      'org.cinnamon.Muffin.RemoteDesktop.xml',
+      interface_prefix: 'org.cinnamon.Muffin.',
       namespace: 'MetaDBus',
     )
   mutter_built_sources += dbus_remote_desktop_built_sources
 
   dbus_screen_cast_built_sources = gnome.gdbus_codegen('meta-dbus-screen-cast',
-      'org.gnome.Mutter.ScreenCast.xml',
-      interface_prefix: 'org.gnome.Mutter.',
+      'org.cinnamon.Muffin.ScreenCast.xml',
+      interface_prefix: 'org.cinnamon.Muffin.',
       namespace: 'MetaDBus',
     )
   mutter_built_sources += dbus_screen_cast_built_sources

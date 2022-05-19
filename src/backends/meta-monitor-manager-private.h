@@ -49,7 +49,7 @@ typedef enum _MetaMonitorManagerCapability
   META_MONITOR_MANAGER_CAPABILITY_NATIVE_OUTPUT_SCALING = (1 << 3),
 } MetaMonitorManagerCapability;
 
-/* Equivalent to the 'method' enum in org.gnome.Mutter.DisplayConfig */
+/* Equivalent to the 'method' enum in org.cinnamon.Muffin.DisplayConfig */
 typedef enum _MetaMonitorsConfigMethod
 {
   META_MONITORS_CONFIG_METHOD_VERIFY = 0,
@@ -57,7 +57,7 @@ typedef enum _MetaMonitorsConfigMethod
   META_MONITORS_CONFIG_METHOD_PERSISTENT = 2
 } MetaMonitorsConfigMethod;
 
-/* Equivalent to the 'layout-mode' enum in org.gnome.Mutter.DisplayConfig */
+/* Equivalent to the 'layout-mode' enum in org.cinnamon.Muffin.DisplayConfig */
 typedef enum _MetaLogicalMonitorLayoutMode
 {
   META_LOGICAL_MONITOR_LAYOUT_MODE_LOGICAL = 1,

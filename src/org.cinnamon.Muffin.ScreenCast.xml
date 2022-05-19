@@ -4,14 +4,14 @@
 <node>
 
   <!--
-      org.gnome.Mutter.ScreenCast:
+      org.cinnamon.Muffin.ScreenCast:
       @short_description: Screen cast interface
 
       This API is private and not intended to be used outside of the integrated
       system that uses libmutter. No compatibility between versions are
       promised.
   -->
-  <interface name="org.gnome.Mutter.ScreenCast">
+  <interface name="org.cinnamon.Muffin.ScreenCast">
 
     <!--
 	CreateSession:
@@ -41,10 +41,10 @@
   </interface>
 
   <!--
-       org.gnome.Mutter.ScreenCast.Session:
+       org.cinnamon.Muffin.ScreenCast.Session:
        @short_description: Screen cast session
   -->
-  <interface name="org.gnome.Mutter.ScreenCast.Session">
+  <interface name="org.cinnamon.Muffin.ScreenCast.Session">
 
     <!--
 	Start:
@@ -114,10 +114,10 @@
   </interface>
 
   <!--
-       org.gnome.Mutter.ScreenCast.Stream:
+       org.cinnamon.Muffin.ScreenCast.Stream:
        @short_description: Screen cast stream
   -->
-  <interface name="org.gnome.Mutter.ScreenCast.Stream">
+  <interface name="org.cinnamon.Muffin.ScreenCast.Stream">
 
     <!--
 	PipeWireStreamAdded:

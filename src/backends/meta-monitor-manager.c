@@ -33,7 +33,7 @@
  * (#MetaGpu). Its functions include reading and/or changing the current
  * configuration and available capabiliies.
  *
- * The #MetaMonitorManager also provides the "org.gnome.Mutter.DisplayConfig"
+ * The #MetaMonitorManager also provides the "org.cinnamon.Muffin.DisplayConfig"
  * DBus service, so apps like GNOME Settings can use this functionality.
  */
 
@@ -2729,7 +2729,7 @@ on_bus_acquired (GDBusConnection *connection,
 
   g_dbus_interface_skeleton_export (G_DBUS_INTERFACE_SKELETON (manager->display_config),
                                     connection,
-                                    "/org/gnome/Mutter/DisplayConfig",
+                                    "/org/cinnamon/Muffin/DisplayConfig",
                                     NULL);
 }
 
@@ -2753,7 +2753,7 @@ static void
 initialize_dbus_interface (MetaMonitorManager *manager)
 {
   manager->dbus_name_id = g_bus_own_name (G_BUS_TYPE_SESSION,
-                                          "org.gnome.Mutter.DisplayConfig",
+                                          "org.cinnamon.Muffin.DisplayConfig",
                                           G_BUS_NAME_OWNER_FLAGS_ALLOW_REPLACEMENT |
                                           (meta_get_replace_current_wm () ?
                                            G_BUS_NAME_OWNER_FLAGS_REPLACE : 0),

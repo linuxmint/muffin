@@ -37,7 +37,7 @@
 
 #include "meta-dbus-remote-desktop.h"
 
-#define META_REMOTE_DESKTOP_SESSION_DBUS_PATH "/org/gnome/Mutter/RemoteDesktop/Session"
+#define META_REMOTE_DESKTOP_SESSION_DBUS_PATH "/org/cinnamon/Muffin/RemoteDesktop/Session"
 
 enum _MetaRemoteDesktopNotifyAxisFlags
 {
