@@ -86,3 +86,5 @@ override_dh_shlibdeps:
 
 override_dh_strip:
 	dh_strip --dbg-package=muffin-dbg
+
+override_dh_dwz:
