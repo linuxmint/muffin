@@ -289,6 +289,14 @@ META_EXPORT
 void meta_display_focus_default_window (MetaDisplay *display,
                                         guint32      timestamp);
 
+META_EXPORT
+gint meta_display_xinerama_index_to_logical_index (MetaDisplay *display,
+                                                   gint         x_index);
+
+META_EXPORT
+gint meta_display_logical_index_to_xinerama_index (MetaDisplay *display,
+                                                   gint         log_index);
+
 /**
  * MetaDisplayCorner:
  * @META_DISPLAY_TOPLEFT: top-left corner

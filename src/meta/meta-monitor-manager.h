@@ -33,6 +33,14 @@ typedef enum
   META_MONITOR_SWITCH_CONFIG_UNKNOWN,
 } MetaMonitorSwitchConfigType;
 
+typedef enum
+{
+  META_XRANDR_ROTATION_NORMAL,
+  META_XRANDR_ROTATION_LEFT,
+  META_XRANDR_ROTATION_FLIPPED,
+  META_XRANDR_ROTATION_RIGHT
+} MetaXrandrRotation;
+
 typedef struct _MetaMonitorManagerClass    MetaMonitorManagerClass;
 typedef struct _MetaMonitorManager         MetaMonitorManager;
 
@@ -62,4 +70,12 @@ MetaMonitorSwitchConfigType meta_monitor_manager_get_switch_config (MetaMonitorM
 META_EXPORT
 gint meta_monitor_manager_get_display_configuration_timeout (void);
 
+META_EXPORT
+gboolean meta_monitor_manager_can_apply_rotation (MetaMonitorManager *manager, MetaXrandrRotation rotation);
+
+META_EXPORT
+gboolean meta_monitor_manager_apply_temporary_rotation (MetaMonitorManager *manager, MetaXrandrRotation rotation);
+
+META_EXPORT
+gboolean meta_monitor_manager_get_current_rotation (MetaMonitorManager *manager, MetaXrandrRotation *rotation);
 #endif /* META_MONITOR_MANAGER_H */
