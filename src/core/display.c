@@ -3926,3 +3926,39 @@ meta_display_get_desklets_above (MetaDisplay *display)
 {
     return display->desklets_above;
 }
+
+gint
+meta_display_xinerama_index_to_logical_index (MetaDisplay *display,
+                                              gint         x_index)
+{
+    MetaLogicalMonitor *monitor;
+
+    monitor = meta_x11_display_xinerama_index_to_logical_monitor (display->x11_display, x_index);
+
+    if (monitor == NULL)
+      {
+        return 0;
+      }
+
+    return monitor->number;
+}
+
+gint
+meta_display_logical_index_to_xinerama_index (MetaDisplay *display,
+                                              gint         log_index)
+{
+    MetaBackend *backend = meta_get_backend ();
+    MetaMonitorManager *manager;
+    MetaLogicalMonitor *monitor;
+
+    manager = meta_backend_get_monitor_manager (backend);
+    monitor = meta_monitor_manager_get_logical_monitor_from_number (manager, log_index);
+
+    if (monitor == NULL)
+      {
+        return 0;
+      }
+
+    return meta_x11_display_logical_monitor_to_xinerama_index (display->x11_display, monitor);
+
+}

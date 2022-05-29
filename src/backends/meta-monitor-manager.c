@@ -3564,3 +3564,150 @@ meta_monitor_manager_get_vendor_name (MetaMonitorManager *manager,
 
   return gnome_pnp_ids_get_pnp_id (manager->pnp_ids, vendor);
 }
+
+#define META_MONITOR_TRANSFORM_INVALID -1
+
+MetaMonitorTransform
+xrandr_to_monitor_transform (MetaXrandrRotation rotation)
+{
+    switch (rotation)
+      {
+      case META_XRANDR_ROTATION_NORMAL:
+        return META_MONITOR_TRANSFORM_NORMAL;
+      case META_XRANDR_ROTATION_LEFT:
+        return META_MONITOR_TRANSFORM_90;
+      case META_XRANDR_ROTATION_FLIPPED:
+        return META_MONITOR_TRANSFORM_180;
+      case META_XRANDR_ROTATION_RIGHT:
+        return META_MONITOR_TRANSFORM_270;
+
+      default:
+        g_return_val_if_reached (META_MONITOR_TRANSFORM_INVALID);
+      }
+}
+
+gboolean
+meta_monitor_manager_can_apply_rotation (MetaMonitorManager *manager,
+                                         MetaXrandrRotation  rotation)
+{
+  gboolean ret = FALSE;
+
+  if (!meta_monitor_manager_get_is_builtin_display_on (manager))
+    return FALSE;
+
+  MetaOrientation orientation = xrandr_to_monitor_transform (rotation);
+
+  if (orientation == META_MONITOR_TRANSFORM_INVALID)
+    {
+      meta_warning ("Invalid orientation requested.");
+      return ret;
+    }
+
+  MetaMonitorsConfig *config = meta_monitor_config_manager_create_for_orientation (manager->config_manager, orientation);
+
+  ret = config != NULL;
+
+  g_clear_object (&config);
+
+  if (ret)
+    return TRUE;
+
+  MetaXrandrRotation current_rotation;
+  meta_monitor_manager_get_current_rotation (manager, &current_rotation);
+
+  if (current_rotation == rotation)
+    return TRUE;
+
+  return FALSE;
+}
+
+gboolean
+meta_monitor_manager_apply_temporary_rotation (MetaMonitorManager *manager,
+                                               MetaXrandrRotation  rotation)
+{
+  MetaOrientation orientation = xrandr_to_monitor_transform (rotation);
+
+  if (orientation == META_MONITOR_TRANSFORM_INVALID)
+    {
+      meta_warning ("Invalid orientation requested.");
+      return FALSE;
+    }
+
+  GError *error = NULL;
+  MetaMonitorsConfig *config = meta_monitor_config_manager_create_for_orientation (manager->config_manager, orientation);
+
+  if (!config)
+    {
+      meta_warning ("Could not create config for rotation.");
+      return FALSE;
+    }
+
+  if (!meta_monitor_manager_apply_monitors_config (manager,
+                                                   config,
+                                                   META_MONITORS_CONFIG_METHOD_TEMPORARY,
+                                                   &error))
+    {
+      g_warning ("Failed to use rotate monitor configuration: %s",
+                 error->message);
+      g_error_free (error);
+      g_object_unref (config);
+      return FALSE;
+    }
+
+  g_object_unref (config);
+
+  return TRUE;
+}
+
+MetaXrandrRotation
+monitor_transform_to_xrandr_rotation (MetaMonitorTransform transform)
+{
+    switch (transform)
+      {
+      case META_MONITOR_TRANSFORM_NORMAL:
+        return META_XRANDR_ROTATION_NORMAL;
+      case META_MONITOR_TRANSFORM_90:
+        return META_XRANDR_ROTATION_LEFT;
+      case META_MONITOR_TRANSFORM_180:
+        return META_XRANDR_ROTATION_FLIPPED;
+      case META_MONITOR_TRANSFORM_270:
+        return META_XRANDR_ROTATION_RIGHT;
+      default:
+        g_return_val_if_reached (META_XRANDR_ROTATION_NORMAL);
+      }
+}
+
+/**
+ * meta_monitor_manager_get_current_rotation:
+ * @manager: A #MetaMonitorManager object
+ * @rotation: (out): The current #MetaXrandrRotation applied to the laptop panel.
+ * 
+ * Returns %TRUE if there is a laptop panel and its current rotation
+ * can be determined, otherwise %FALSE
+ */
+gboolean
+meta_monitor_manager_get_current_rotation (MetaMonitorManager *manager,
+                                           MetaXrandrRotation *rotation)
+{
+  MetaMonitor *monitor;
+  MetaLogicalMonitor *logical_monitor;
+
+  *rotation = META_XRANDR_ROTATION_NORMAL;
+  monitor = meta_monitor_manager_get_laptop_panel (manager);
+
+  if (monitor == NULL || !meta_monitor_is_active (monitor))
+    {
+      return FALSE;
+    }
+
+  logical_monitor = meta_monitor_get_logical_monitor (monitor);
+
+  if (logical_monitor != NULL)
+    {
+      MetaMonitorTransform transform = meta_logical_monitor_get_transform (logical_monitor);
+      *rotation = monitor_transform_to_xrandr_rotation (transform);
+      return TRUE;
+    }
+
+  return FALSE;
+}
