@@ -150,6 +150,9 @@ prefs_changed_callback (MetaPreference pref,
     case META_PREF_BUTTON_LAYOUT:
       meta_frames_button_layout_changed (META_FRAMES (data));
       break;
+    case META_PREF_GTK_THEME:
+      meta_frames_style_updated (GTK_WIDGET (data));
+      break;
     default:
       break;
     }

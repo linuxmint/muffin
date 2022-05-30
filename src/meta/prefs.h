@@ -68,6 +68,7 @@
  * @META_PREF_CENTER_NEW_WINDOWS: center new windows
  * @META_PREF_DRAG_THRESHOLD: drag threshold
  * @META_PREF_LOCATE_POINTER: show pointer location
+ * @META_PREF_GTK_THEME: gtk theme name
  */
 
 /* Keep in sync with GSettings schemas! */
@@ -115,7 +116,8 @@ typedef enum
   META_PREF_WORKSPACE_CYCLE,
   META_PREF_MIN_WIN_OPACITY,
   META_PREF_MOUSE_ZOOM_ENABLED,
-  META_PREF_TILE_MAXIMIZE
+  META_PREF_TILE_MAXIMIZE,
+  META_PREF_GTK_THEME
 } MetaPreference;
 
 typedef void (* MetaPrefsChangedFunc) (MetaPreference pref,
