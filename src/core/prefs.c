@@ -64,6 +64,8 @@
 #define KEY_WORKSPACES_ONLY_ON_PRIMARY "workspaces-only-on-primary"
 #define KEY_LOCATE_POINTER "locate-pointer"
 
+#define KEY_GTK_THEME "gtk-theme"
+
 /* These are the different schemas we are keeping
  * a GSettings instance for */
 #define SCHEMA_GENERAL         "org.cinnamon.desktop.wm.preferences"
@@ -137,6 +139,7 @@ static char *iso_next_group_option = NULL;
 static MetaX11BackgroundTransition background_transition = META_X11_BACKGROUND_TRANSITION_BLEND;
 static gboolean unredirect_fullscreen_windows = FALSE;
 static gboolean tile_maximize = FALSE;
+static char *gtk_theme = NULL;
 
 static void handle_preference_update_enum (GSettings *settings,
                                            gchar     *key);
@@ -517,6 +520,14 @@ static MetaStringPreference preferences_string[] =
       },
       locate_pointer_key_handler,
       NULL,
+    },
+    {
+      { "gtk-theme",
+        SCHEMA_INTERFACE,
+        META_PREF_GTK_THEME,
+      },
+      NULL,
+      &gtk_theme,
     },
     { { NULL, 0, 0 }, NULL },
   };
@@ -1097,6 +1108,8 @@ meta_prefs_init (void)
   g_signal_connect (settings, "changed::" KEY_GNOME_CURSOR_SIZE,
                     G_CALLBACK (settings_changed), NULL);
   g_signal_connect (settings, "changed::" KEY_LOCATE_POINTER,
+                    G_CALLBACK (settings_changed), NULL);
+  g_signal_connect (settings, "changed::" KEY_GTK_THEME,
                     G_CALLBACK (settings_changed), NULL);
   g_hash_table_insert (settings_schemas, g_strdup (SCHEMA_INTERFACE), settings);
 
@@ -1901,6 +1914,9 @@ meta_preference_to_string (MetaPreference pref)
 
     case META_PREF_TILE_MAXIMIZE:
       return "TILE_MAXIMIZE";
+
+    case META_PREF_GTK_THEME:
+      return "GTK_THEME";
     }
 
   return "(unknown)";
