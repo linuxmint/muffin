@@ -4158,19 +4158,19 @@ init_builtin_key_bindings (MetaDisplay *display)
                           META_KEYBINDING_ACTION_TOGGLE_RECORDING,
                           NULL, 0);
 
-  // add_builtin_keybinding (display,
-  //                         "switch-monitor",
-  //                         mutter_keybindings,
-  //                         META_KEY_BINDING_NONE,
-  //                         META_KEYBINDING_ACTION_SWITCH_MONITOR,
-  //                         handle_switch_monitor, 0);
+  add_builtin_keybinding (display,
+                          "switch-monitor",
+                          common_keybindings,
+                          META_KEY_BINDING_NONE,
+                          META_KEYBINDING_ACTION_SWITCH_MONITOR,
+                          handle_switch_monitor, 0);
 
-  // add_builtin_keybinding (display,
-  //                         "rotate-monitor",
-  //                         mutter_keybindings,
-  //                         META_KEY_BINDING_NONE,
-  //                         META_KEYBINDING_ACTION_ROTATE_MONITOR,
-  //                         handle_rotate_monitor, 0);
+  add_builtin_keybinding (display,
+                          "rotate-monitor",
+                          common_keybindings,
+                          META_KEY_BINDING_NONE,
+                          META_KEYBINDING_ACTION_ROTATE_MONITOR,
+                          handle_rotate_monitor, 0);
 
 #ifdef HAVE_NATIVE_BACKEND
   MetaBackend *backend = meta_get_backend ();
@@ -4301,7 +4301,7 @@ init_builtin_key_bindings (MetaDisplay *display)
 
   add_builtin_keybinding (display,
                           "push-tile-left",
-                          mutter_keybindings,
+                          common_keybindings,
                           META_KEY_BINDING_PER_WINDOW |
                           META_KEY_BINDING_IGNORE_AUTOREPEAT,
                           META_KEYBINDING_ACTION_PUSH_TILE_LEFT,
@@ -4309,7 +4309,7 @@ init_builtin_key_bindings (MetaDisplay *display)
 
   add_builtin_keybinding (display,
                           "push-tile-right",
-                          mutter_keybindings,
+                          common_keybindings,
                           META_KEY_BINDING_PER_WINDOW |
                           META_KEY_BINDING_IGNORE_AUTOREPEAT,
                           META_KEYBINDING_ACTION_PUSH_TILE_RIGHT,
@@ -4317,7 +4317,7 @@ init_builtin_key_bindings (MetaDisplay *display)
 
   add_builtin_keybinding (display,
                           "push-tile-up",
-                          mutter_keybindings,
+                          common_keybindings,
                           META_KEY_BINDING_PER_WINDOW |
                           META_KEY_BINDING_IGNORE_AUTOREPEAT,
                           META_KEYBINDING_ACTION_PUSH_TILE_UP,
@@ -4325,7 +4325,7 @@ init_builtin_key_bindings (MetaDisplay *display)
 
   add_builtin_keybinding (display,
                           "push-tile-down",
-                          mutter_keybindings,
+                          common_keybindings,
                           META_KEY_BINDING_PER_WINDOW |
                           META_KEY_BINDING_IGNORE_AUTOREPEAT,
                           META_KEYBINDING_ACTION_PUSH_TILE_DOWN,
@@ -4594,6 +4594,8 @@ init_builtin_key_bindings (MetaDisplay *display)
                           META_KEY_BINDING_IGNORE_AUTOREPEAT,
                           META_KEYBINDING_ACTION_MAXIMIZE_HORIZONTALLY,
                           handle_maximize_horizontally, 0);
+
+  /* Handled already by toggle_above */
 
   // add_builtin_keybinding (display,
   //                         "always-on-top",
