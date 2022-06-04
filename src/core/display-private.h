@@ -67,20 +67,6 @@ typedef struct MetaEdgeResistanceData MetaEdgeResistanceData;
 
 typedef enum
 {
-  META_TILE_NONE,
-  META_TILE_LEFT,
-  META_TILE_RIGHT,
-  META_TILE_ULC,
-  META_TILE_LLC,
-  META_TILE_URC,
-  META_TILE_LRC,
-  META_TILE_TOP,
-  META_TILE_BOTTOM,
-  META_TILE_MAXIMIZED
-} MetaTileMode;
-
-typedef enum
-{
   /* Normal interaction where you're interacting with windows.
    * Events go to windows normally. */
   META_EVENT_ROUTE_NORMAL,

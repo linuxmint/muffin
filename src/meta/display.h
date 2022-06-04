@@ -63,6 +63,20 @@ typedef enum
   META_PAD_ACTION_STRIP,  /* Action is a strip */
 } MetaPadActionType;
 
+typedef enum
+{
+  META_TILE_NONE,
+  META_TILE_LEFT,
+  META_TILE_RIGHT,
+  META_TILE_ULC,
+  META_TILE_LLC,
+  META_TILE_URC,
+  META_TILE_LRC,
+  META_TILE_TOP,
+  META_TILE_BOTTOM,
+  META_TILE_MAXIMIZED
+} MetaTileMode;
+
 typedef struct _MetaDisplayClass MetaDisplayClass;
 
 #define META_TYPE_DISPLAY              (meta_display_get_type ())
