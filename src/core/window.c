@@ -215,6 +215,7 @@ enum
   PROP_ON_ALL_WORKSPACES,
   PROP_PROGRESS,
   PROP_PROGRESS_PULSE,
+  PROP_TILE_MODE,
   PROP_LAST,
 };
 
@@ -443,6 +444,9 @@ meta_window_get_property(GObject         *object,
     case PROP_PROGRESS_PULSE:
       g_value_set_boolean (value, win->progress_pulse);
       break;
+    case PROP_TILE_MODE:
+      g_value_set_enum (value, win->tile_mode);
+      break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
       break;
@@ -646,6 +650,14 @@ meta_window_class_init (MetaWindowClass *klass)
                           "Show indeterminate or ongoing progress of an operation.",
                           FALSE,
                           G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
+
+ obj_props[PROP_TILE_MODE] =
+    g_param_spec_enum ("tile-mode",
+                       "Window Tile Mode",
+                       "The tile state of the window",
+                       META_TYPE_TILE_MODE,
+                       META_TILE_NONE,
+                       G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
   g_object_class_install_properties (object_class, PROP_LAST, obj_props);
 
@@ -6253,24 +6265,82 @@ enum {
     ZONE_LEFT =   1 << 3
 };
 
+#define BOX_CENTER_X(box)  ((box).x + (box).width / 2)  /* Center in X */
+#define BOX_CENTER_Y(box)  ((box).y + (box).height / 2)  /* Center in Y */
+
+#define ORIGIN_CONSTANT 1
+#define EXTREME_CONSTANT 2
+#define COMMON_EDGE_PADDING 5
+
+static void
+get_extra_padding_for_common_monitor_edges (MetaWindow        *window,
+                                                  gint         monitor_num,
+                                         MetaRectangle         cur_rect,
+                                                  gint        *left_shift,
+                                                  gint        *right_shift,
+                                                  gint        *up_shift,
+                                                  gint        *down_shift)
+{
+    gint num_mons;
+    gint i;
+    MetaRectangle other_rect;
+    num_mons = meta_display_get_n_monitors (window->display);
+
+    if (num_mons == 1)
+        return;
+
+    for (i = 0; i < num_mons; i++) {
+        if (i == monitor_num)
+            continue;
+
+        meta_display_get_monitor_geometry (window->display, i, &other_rect);
+
+        if (BOX_CENTER_X (other_rect) < BOX_LEFT (cur_rect)) {
+            *left_shift = COMMON_EDGE_PADDING;
+            continue;
+        }
+        if (BOX_CENTER_X (other_rect) > BOX_RIGHT (cur_rect)) {
+            *right_shift = COMMON_EDGE_PADDING;
+            continue;
+        }
+        if (BOX_CENTER_Y (other_rect) < BOX_TOP (cur_rect)) {
+            *up_shift = COMMON_EDGE_PADDING;
+            continue;
+        }
+        if (BOX_CENTER_Y (other_rect) > BOX_BOTTOM (cur_rect)) {
+            *down_shift = COMMON_EDGE_PADDING;
+            continue;
+        }
+    }
+}
+
 static gint
-get_tile_zone_at_pointer (MetaLogicalMonitor *logical_monitor,
-                          MetaRectangle      *work_area,
-                          int                 shake_threshold,
+get_tile_zone_at_pointer (MetaWindow         *window,
+                          MetaLogicalMonitor *logical_monitor,
+                          MetaRectangle       work_area,
                           int                 x,
                           int                 y)
 {
   gint zones = ZONE_NONE;
+  gint left_shift, right_shift, up_shift, down_shift;
+  left_shift = right_shift = up_shift = down_shift = 0;
+  MetaRectangle lm_rect = logical_monitor->rect;
 
-  if (x >= logical_monitor->rect.x && x < (work_area->x + shake_threshold))
+  get_extra_padding_for_common_monitor_edges (window,
+                                              logical_monitor->number,
+                                              work_area,
+                                              &left_shift,
+                                              &right_shift,
+                                              &up_shift,
+                                              &down_shift);
+
+  if (x >= BOX_LEFT (lm_rect) && x <= (BOX_LEFT (work_area) + ORIGIN_CONSTANT + left_shift))
     zones |= ZONE_LEFT;
-  if (x >= work_area->x + work_area->width - shake_threshold &&
-      x < (logical_monitor->rect.x + logical_monitor->rect.width))
+  if ((x >= BOX_RIGHT (work_area) - EXTREME_CONSTANT - right_shift) && x < BOX_RIGHT (lm_rect))
     zones |= ZONE_RIGHT;
-  if (y >= logical_monitor->rect.y && y <= work_area->y)
+  if (y >= BOX_TOP (lm_rect) && y <= (BOX_TOP (work_area) + ORIGIN_CONSTANT + up_shift))
     zones |= ZONE_TOP;
-  if (y >= work_area->y + work_area->height - shake_threshold &&
-      y < (logical_monitor->rect.y + logical_monitor->rect.height))
+  if ((y >= BOX_BOTTOM (work_area) - EXTREME_CONSTANT - down_shift) && y < BOX_RIGHT (lm_rect))
     zones |= ZONE_BOTTOM;
 
   return zones;
@@ -6315,29 +6385,29 @@ update_move_maybe_tile (MetaWindow *window,
    * and set tile_mode accordingly.
    */
   if (meta_window_can_tile_left_right (window) &&
-           get_tile_zone_at_pointer (logical_monitor, &work_area, shake_threshold, x, y) == ZONE_LEFT)
+           get_tile_zone_at_pointer (window, logical_monitor, work_area, x, y) == ZONE_LEFT)
     display->preview_tile_mode = META_TILE_LEFT;
   else if (meta_window_can_tile_left_right (window) &&
-           get_tile_zone_at_pointer (logical_monitor, &work_area, shake_threshold, x, y) == ZONE_RIGHT)
+           get_tile_zone_at_pointer (window, logical_monitor, work_area, x, y) == ZONE_RIGHT)
     display->preview_tile_mode = META_TILE_RIGHT;
   else if (meta_window_can_tile_top_bottom (window) &&
            // TODO: Handle maximize/tile preference
-           get_tile_zone_at_pointer (logical_monitor, &work_area, shake_threshold, x, y) == ZONE_TOP)
+           get_tile_zone_at_pointer (window, logical_monitor, work_area, x, y) == ZONE_TOP)
     display->preview_tile_mode = meta_prefs_get_tile_maximize() ? META_TILE_MAXIMIZED : META_TILE_TOP;
   else if (meta_window_can_tile_top_bottom (window) &&
-           get_tile_zone_at_pointer (logical_monitor, &work_area, shake_threshold, x, y) == ZONE_BOTTOM)
+           get_tile_zone_at_pointer (window, logical_monitor, work_area, x, y) == ZONE_BOTTOM)
     display->preview_tile_mode = META_TILE_BOTTOM;
   else if (meta_window_can_tile_corner (window) && 
-           get_tile_zone_at_pointer (logical_monitor, &work_area, shake_threshold, x, y) == (ZONE_LEFT | ZONE_TOP))
+           get_tile_zone_at_pointer (window, logical_monitor, work_area, x, y) == (ZONE_LEFT | ZONE_TOP))
     display->preview_tile_mode = META_TILE_ULC;
   else if (meta_window_can_tile_corner (window) && 
-           get_tile_zone_at_pointer (logical_monitor, &work_area, shake_threshold, x, y) == (ZONE_RIGHT | ZONE_TOP))
+           get_tile_zone_at_pointer (window, logical_monitor, work_area, x, y) == (ZONE_RIGHT | ZONE_TOP))
     display->preview_tile_mode = META_TILE_URC;
   else if (meta_window_can_tile_corner (window) && 
-           get_tile_zone_at_pointer (logical_monitor, &work_area, shake_threshold, x, y) == (ZONE_RIGHT | ZONE_BOTTOM))
+           get_tile_zone_at_pointer (window, logical_monitor, work_area, x, y) == (ZONE_RIGHT | ZONE_BOTTOM))
     display->preview_tile_mode = META_TILE_LRC;
   else if (meta_window_can_tile_corner (window) && 
-           get_tile_zone_at_pointer (logical_monitor, &work_area, shake_threshold, x, y) == (ZONE_LEFT | ZONE_BOTTOM))
+           get_tile_zone_at_pointer (window, logical_monitor, work_area, x, y) == (ZONE_LEFT | ZONE_BOTTOM))
     display->preview_tile_mode = META_TILE_LLC;
   else
     display->preview_tile_mode = META_TILE_NONE;
