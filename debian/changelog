@@ -1,8 +1,66 @@
-muffin (5.3.0) UNRELEASED; urgency=medium
+muffin (5.4.0) vanessa; urgency=medium
 
+  [ Michael Webster ]
   * Mutter 3.36.9-0ubuntu0.20.04.1 rebase
+  * Restore x root window backgrounds.
+  * Allow custom and mod-only keybindings.
+  * Reintroduce the bottom window group.
 
- -- Michael Webster <miketwebster@gmail.com>  Wed, 08 Jun 2022 12:00:00 -0500
+  [ Fabio Fantoni ]
+  * debian/control: restore something removed in 8dbf865
+  * debian/tests: mutter->muffin
+
+  [ Michael Webster ]
+  * Make a couple of methods public to restore some old MetaScreen functionality we rely on.
+  * XApp themed icon names, progress.
+  * x11 backend: Don't let muffin reset the keyboard layout any time some outside force tries to change it (libgnomekbd).
+  * Freeze the window actor during unminimize.
+  * Restore 'unredirect-fullscreen-windows'
+  * Restore workspace wraparound.
+  * Restore additional titlebar actions.
+  * Restore desktop zoom mousewheel handling.
+  * Add MUFFIN_NO_SHADOWS support.
+  * Implement migration from old cinnamon-monitors.xml
+  * Enabled xrandr scaling by default.
+  * Re-implement corner/top/bottom tiling.
+  * Disable ssd shadows when tiled, even without matching windows.
+
+  [ JosephMcc ]
+  * window.c: Reduce the tile area along the top edge of the screen
+
+  [ Michael Webster ]
+  * Expose a window's tile mode. Fix tile zone calculation.
+  * Fix random crash when clicking the frame of a tiled window.
+  * Cleanup deps, build flags
+  * Work around an issue with nvidia sync waiting ref: https://gitlab.gnome.org/GNOME/mutter/-/commit/2afe3e922344a77f42afd388ad6c2ac456b314ce
+  * Manage stacking for the desklet and desktop actors in the compositor so they can be managed properly with the background.
+
+  [ Stephen Collins ]
+  * x11 input settings: Fix middle click emulation setting not working right
+
+  [ Michael Webster ]
+  * Fix a couple of build warnings
+
+  [ Fabio Fantoni ]
+  * debian: restore kfreebsd support d/rules: restore armel and armhf default_driver change
+
+  [ Michael Webster ]
+  * Don't terminate on a bad allocation.
+  * x11 backend: Don't rebuild all keybindings every time a different keyboard device is used.
+  * Use cinnamon for interface names.
+  * Remove some unused files, dependency.
+  * rules: disable dh_dwz (build warnings)
+  * Catch gtk theme name changes instead of simply relying on monitored style classes and elements changing.
+  * Move some keybindings, re-enable monitor switch, rotate.
+  * Add some api for the display applet.
+
+  [ Clement Lefebvre ]
+  * CI: Update targets
+
+  [ Michael Webster ]
+  * Add debian/ symbols file.
+
+ -- Clement Lefebvre <root@linuxmint.com>  Fri, 10 Jun 2022 15:31:39 +0200
 
 muffin (5.2.1) una; urgency=medium
 
