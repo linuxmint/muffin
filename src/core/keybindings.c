@@ -1066,7 +1066,7 @@ meta_display_add_custom_keybinding (MetaDisplay         *display,
 {
   guint new_action = next_dynamic_keybinding_action ();
 
-  if (!add_keybinding_internal (display, name, NULL, bindings, META_KEY_BINDING_PER_WINDOW, new_action,
+  if (!add_keybinding_internal (display, name, NULL, bindings, META_KEY_BINDING_NONE, new_action,
                                 handler, 0, user_data, free_data))
     return META_KEYBINDING_ACTION_NONE;
 
