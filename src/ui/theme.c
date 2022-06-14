@@ -94,28 +94,38 @@ meta_frame_layout_get_borders (const MetaFrameLayout *layout,
   borders->visible.right  = layout->frame_border.right;
   borders->visible.bottom = layout->frame_border.bottom;
 
-  borders->invisible = layout->invisible_border;
-
   draggable_borders = meta_prefs_get_draggable_border_width ();
 
   if (flags & META_FRAME_ALLOWS_HORIZONTAL_RESIZE)
     {
-      borders->invisible.left   = MAX (borders->invisible.left,
-                                       draggable_borders - borders->visible.left);
-      borders->invisible.right  = MAX (borders->invisible.right,
-                                       draggable_borders - borders->visible.right);
+      if (!(flags & META_FRAME_TILED_LEFT_EDGES))
+        borders->invisible.left   = MAX (layout->invisible_border.left,
+                                         draggable_borders - borders->visible.left);
+      else
+        borders->invisible.left   = 0;
+
+      if (!(flags & META_FRAME_TILED_RIGHT_EDGES))
+        borders->invisible.right  = MAX (layout->invisible_border.right,
+                                         draggable_borders - borders->visible.right);
+      else
+        borders->invisible.right  = 0;
     }
 
   if (flags & META_FRAME_ALLOWS_VERTICAL_RESIZE)
     {
-      borders->invisible.bottom = MAX (borders->invisible.bottom,
-                                       draggable_borders - borders->visible.bottom);
+      if (!(flags & META_FRAME_TILED_BOTTOM_EDGES))
+        borders->invisible.bottom = MAX (layout->invisible_border.bottom,
+                                         draggable_borders - borders->visible.bottom);
+      else
+        borders->invisible.bottom = 0;
 
       /* borders.visible.top is the height of the *title bar*. We can't do the same
        * algorithm here, titlebars are expectedly much bigger. Just subtract a couple
        * pixels to get a proper feel. */
-      if (type != META_FRAME_TYPE_ATTACHED)
-        borders->invisible.top    = MAX (borders->invisible.top, draggable_borders - 2);
+      if (type != META_FRAME_TYPE_ATTACHED && !(flags & META_FRAME_TILED_TOP_EDGES))
+        borders->invisible.top    = MAX (layout->invisible_border.top, draggable_borders - 2);
+      else
+        borders->invisible.top    = 0;
     }
 
   borders->total.left   = borders->invisible.left   + borders->visible.left;
