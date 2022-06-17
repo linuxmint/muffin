@@ -69,6 +69,7 @@
  * @META_PREF_DRAG_THRESHOLD: drag threshold
  * @META_PREF_LOCATE_POINTER: show pointer location
  * @META_PREF_GTK_THEME: gtk theme name
+ * @META_PREF_BELL_SOUND: sound to use for audible event bell
  */
 
 /* Keep in sync with GSettings schemas! */
@@ -117,7 +118,8 @@ typedef enum
   META_PREF_MIN_WIN_OPACITY,
   META_PREF_MOUSE_ZOOM_ENABLED,
   META_PREF_TILE_MAXIMIZE,
-  META_PREF_GTK_THEME
+  META_PREF_GTK_THEME,
+  META_PREF_BELL_SOUND
 } MetaPreference;
 
 typedef void (* MetaPrefsChangedFunc) (MetaPreference pref,
@@ -268,6 +270,9 @@ gboolean    meta_prefs_get_workspace_cycle (void);
 
 META_EXPORT
 gint meta_prefs_get_min_win_opacity (void);
+
+META_EXPORT
+const char* meta_prefs_get_bell_sound (void);
 
 /**
  * MetaKeyBindingAction:

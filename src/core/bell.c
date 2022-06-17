@@ -75,6 +75,13 @@ prefs_changed_callback (MetaPreference pref,
       g_signal_emit (bell, bell_signals[IS_AUDIBLE_CHANGED], 0,
                      meta_prefs_bell_is_audible ());
     }
+  else
+  if (pref == META_PREF_BELL_SOUND)
+    {
+      g_clear_object (&bell->bell_sound_file);
+
+      bell->bell_sound_file = g_file_new_for_path (meta_prefs_get_bell_sound ());
+    }
 }
 
 static void
@@ -83,6 +90,7 @@ meta_bell_finalize (GObject *object)
   MetaBell *bell = META_BELL (object);
 
   meta_prefs_remove_listener (prefs_changed_callback, bell);
+  g_clear_object (&bell->bell_sound_file);
 
   G_OBJECT_CLASS (meta_bell_parent_class)->finalize (object);
 }
@@ -108,6 +116,7 @@ static void
 meta_bell_init (MetaBell *bell)
 {
   meta_prefs_add_listener (prefs_changed_callback, bell);
+  bell->bell_sound_file = g_file_new_for_path (meta_prefs_get_bell_sound ());
 }
 
 MetaBell *
@@ -187,10 +196,10 @@ bell_audible_notify (MetaDisplay *display,
   MetaSoundPlayer *player;
 
   player = meta_display_get_sound_player (display);
-  meta_sound_player_play_from_theme (player,
-                                     "bell-window-system",
-                                     _("Bell event"),
-                                     NULL);
+  meta_sound_player_play_from_file (player,
+                                    display->bell->bell_sound_file,
+                                    _("Bell event"),
+                                    NULL);
   return TRUE;
 }
 

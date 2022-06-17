@@ -23,6 +23,8 @@
 struct _MetaBell
 {
   GObject parent;
+
+  GFile *bell_sound_file;
 };
 
 #define META_TYPE_BELL (meta_bell_get_type ())

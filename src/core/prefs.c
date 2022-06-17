@@ -140,6 +140,7 @@ static MetaX11BackgroundTransition background_transition = META_X11_BACKGROUND_T
 static gboolean unredirect_fullscreen_windows = FALSE;
 static gboolean tile_maximize = FALSE;
 static char *gtk_theme = NULL;
+static char *bell_sound = NULL;
 
 static void handle_preference_update_enum (GSettings *settings,
                                            gchar     *key);
@@ -528,6 +529,14 @@ static MetaStringPreference preferences_string[] =
       },
       NULL,
       &gtk_theme,
+    },
+    {
+      { "bell-sound",
+        SCHEMA_GENERAL,
+        META_PREF_BELL_SOUND,
+      },
+      NULL,
+      &bell_sound,
     },
     { { NULL, 0, 0 }, NULL },
   };
@@ -1917,6 +1926,9 @@ meta_preference_to_string (MetaPreference pref)
 
     case META_PREF_GTK_THEME:
       return "GTK_THEME";
+
+    case META_PREF_BELL_SOUND:
+      return "BELL_SOUND";
     }
 
   return "(unknown)";
@@ -2434,4 +2446,10 @@ gint
 meta_prefs_get_min_win_opacity (void)
 {
   return min_window_opacity;
+}
+
+const char *
+meta_prefs_get_bell_sound (void)
+{
+    return bell_sound;
 }
