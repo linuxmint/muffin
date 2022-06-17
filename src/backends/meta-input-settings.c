@@ -1282,7 +1282,6 @@ struct _keyboard_a11y_settings_flags_pair {
   { "slowkeys-beep-reject",      CLUTTER_A11Y_SLOW_KEYS_BEEP_REJECT },
   { "bouncekeys-enable",         CLUTTER_A11Y_BOUNCE_KEYS_ENABLED },
   { "bouncekeys-beep-reject",    CLUTTER_A11Y_BOUNCE_KEYS_BEEP_REJECT },
-  { "togglekeys-enable",         CLUTTER_A11Y_TOGGLE_KEYS_ENABLED },
   { "stickykeys-enable",         CLUTTER_A11Y_STICKY_KEYS_ENABLED },
   { "stickykeys-modifier-beep",  CLUTTER_A11Y_STICKY_KEYS_BEEP },
   { "stickykeys-two-key-off",    CLUTTER_A11Y_STICKY_KEYS_TWO_KEY_OFF },
