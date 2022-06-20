@@ -1688,9 +1688,11 @@ constrain_fully_onscreen (MetaWindow         *window,
                           ConstraintPriority  priority,
                           gboolean            check_only)
 {
+  MetaWindow *transient_for;
   if (priority > PRIORITY_ENTIRELY_VISIBLE_ON_WORKAREA)
     return TRUE;
 
+  transient_for = meta_window_get_transient_for(window);
   /* Exit early if we know the constraint won't apply--note that this constraint
    * is only meant for normal windows (e.g. we don't want docks to be shoved
    * "onscreen" by their own strut).
@@ -1698,6 +1700,7 @@ constrain_fully_onscreen (MetaWindow         *window,
   if (window->type == META_WINDOW_DESKTOP ||
       window->type == META_WINDOW_DOCK    ||
       window->fullscreen                  ||
+      (transient_for && transient_for->fullscreen) ||
       !window->require_fully_onscreen     ||
       info->is_user_action                ||
       meta_window_get_placement_rule (window))
