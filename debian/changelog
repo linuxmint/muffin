@@ -1,3 +1,14 @@
+muffin (5.4.1) vanessa; urgency=medium
+
+  [ Michael Webster ]
+  * Add ClutterTextureContent.
+  * keybindings: Don't make custom shortcuts per-window.
+  * Suppress 'invisible' borders and theme shadows for maximized and tiled windows.
+  * bell: Restore configurability.
+  * meta-input-settings.c (a11y): Don't handle togglekeys.
+
+ -- Clement Lefebvre <root@linuxmint.com>  Mon, 20 Jun 2022 10:22:22 +0200
+
 muffin (5.4.0) vanessa; urgency=medium
 
   [ Michael Webster ]
