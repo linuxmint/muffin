@@ -6476,10 +6476,15 @@ update_move (MetaWindow  *window,
 
   /* shake loose (unmaximize) maximized or tiled window if dragged beyond
    * the threshold in the Y direction. Tiled windows can also be pulled
-   * loose via X motion.
+   * loose via X motion. The fact you can 'slide' one-way-maximized
+   * windows along their maximized edge is useful but it's easy to accidentally
+   * pull them loose while doing so. Double their thresholds to make this less
+   * likely to happen.
    */
 
   if ((META_WINDOW_MAXIMIZED (window) && ABS (dy) >= shake_threshold) ||
+      (META_WINDOW_MAXIMIZED_HORIZONTALLY (window) && ABS (dx) >= (shake_threshold * 2)) ||
+      (META_WINDOW_MAXIMIZED_VERTICALLY (window) && ABS (dy) >= (shake_threshold * 2)) ||
       (META_WINDOW_TILED (window) && (MAX (ABS (dx), ABS (dy)) >= shake_threshold)))
     {
       double prop;

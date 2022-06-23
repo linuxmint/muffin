@@ -1095,6 +1095,27 @@ get_button_number (const ClutterEvent *event)
 }
 
 static gboolean
+meta_frame_double_click_edge_event (MetaUIFrame        *frame,
+                                    const ClutterEvent *event,
+                                    MetaFrameControl    control)
+{
+    switch (control) {
+        case META_FRAME_CONTROL_RESIZE_N:
+        case META_FRAME_CONTROL_RESIZE_S:
+            return meta_frame_titlebar_event (frame,
+                                              event,
+                                              C_DESKTOP_TITLEBAR_ACTION_TOGGLE_MAXIMIZE_VERTICALLY);
+        case META_FRAME_CONTROL_RESIZE_E:
+        case META_FRAME_CONTROL_RESIZE_W:
+            return meta_frame_titlebar_event (frame,
+                                              event,
+                                              C_DESKTOP_TITLEBAR_ACTION_TOGGLE_MAXIMIZE_HORIZONTALLY);
+        default:
+            return FALSE;
+        }
+}
+
+static gboolean
 meta_frame_left_click_event (MetaUIFrame        *frame,
                              const ClutterEvent *event)
 {
@@ -1236,6 +1257,16 @@ handle_press_event (MetaUIFrame        *frame,
     {
       meta_x11_wm_end_grab_op (frame->frames->x11_display, evtime);
       return meta_frame_double_click_event (frame, event);
+    }
+
+  if ((control == META_FRAME_CONTROL_RESIZE_N ||
+       control == META_FRAME_CONTROL_RESIZE_S ||
+       control == META_FRAME_CONTROL_RESIZE_E ||
+       control == META_FRAME_CONTROL_RESIZE_W) &&
+       action == META_ACTION_DOUBLE_CLICK)
+    {
+      meta_x11_wm_end_grab_op (frame->frames->x11_display, evtime);
+      return meta_frame_double_click_edge_event (frame, event, control);
     }
 
   if (meta_x11_wm_get_grab_op (frame->frames->x11_display) != META_GRAB_OP_NONE)
