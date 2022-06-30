@@ -94,6 +94,8 @@ meta_frame_layout_get_borders (const MetaFrameLayout *layout,
   borders->visible.right  = layout->frame_border.right;
   borders->visible.bottom = layout->frame_border.bottom;
 
+  borders->invisible = layout->invisible_border;
+
   draggable_borders = meta_prefs_get_draggable_border_width ();
 
   if (flags & META_FRAME_ALLOWS_HORIZONTAL_RESIZE)
