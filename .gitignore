@@ -1,0 +1,12 @@
+debian/*.debhelper.log
+debian/*.substvars
+debian/.debhelper/
+debian/debhelper-build-stamp
+debian/files
+debian/gir1.2-meta-muffin-0.0/
+debian/libmuffin-dev/
+debian/libmuffin0/
+debian/muffin-common/
+debian/muffin-dbg/
+debian/muffin/
+debian/tmp/
