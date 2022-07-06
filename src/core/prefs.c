@@ -59,6 +59,7 @@
 #define KEY_XKB_OPTIONS "xkb-options"
 
 #define KEY_MOUSEWHEEL_ZOOM_ENABLED "screen-magnifier-enabled"
+#define KEY_BRING_ACTIVATED_WINDOWS_TO_CURRENT_WORKSPACE "bring-windows-to-current-workspace"
 
 #define KEY_OVERLAY_KEY "overlay-key"
 #define KEY_WORKSPACES_ONLY_ON_PRIMARY "workspaces-only-on-primary"
@@ -74,6 +75,7 @@
 #define SCHEMA_INPUT_SOURCES   "org.cinnamon.desktop.input-sources"
 #define SCHEMA_MOUSE           "org.cinnamon.desktop.peripherals.mouse"
 #define SCHEMA_A11Y_APPLICATIONS "org.cinnamon.desktop.a11y.applications"
+#define SCHEMA_CINNAMON        "org.cinnamon"
 
 #define SETTINGS(s) g_hash_table_lookup (settings_schemas, (s))
 
@@ -141,6 +143,7 @@ static gboolean unredirect_fullscreen_windows = FALSE;
 static gboolean tile_maximize = FALSE;
 static char *gtk_theme = NULL;
 static char *bell_sound = NULL;
+static gboolean bring_user_activated_windows_to_current_workspace = FALSE;
 
 static void handle_preference_update_enum (GSettings *settings,
                                            gchar     *key);
@@ -460,6 +463,13 @@ static MetaBoolPreference preferences_bool[] =
         META_PREF_TILE_MAXIMIZE,
       },
       &tile_maximize,
+    },
+    {
+      { "bring-windows-to-current-workspace",
+        SCHEMA_CINNAMON,
+        META_PREF_BRING_WINDOWS_TO_CURRENT_WORKSPACE,
+      },
+      &bring_user_activated_windows_to_current_workspace,
     },
     { { NULL, 0, 0 }, NULL },
   };
@@ -1103,8 +1113,12 @@ meta_prefs_init (void)
   settings = g_settings_new (SCHEMA_A11Y_APPLICATIONS);
   g_signal_connect (settings, "changed::" KEY_MOUSEWHEEL_ZOOM_ENABLED,
                     G_CALLBACK (settings_changed), NULL);
-  
   g_hash_table_insert (settings_schemas, g_strdup (SCHEMA_A11Y_APPLICATIONS), settings);
+
+  settings = g_settings_new (SCHEMA_CINNAMON);
+  g_signal_connect (settings, "changed::" KEY_BRING_ACTIVATED_WINDOWS_TO_CURRENT_WORKSPACE,
+                    G_CALLBACK (settings_changed), NULL);
+  g_hash_table_insert (settings_schemas, g_strdup (SCHEMA_CINNAMON), settings);
 
   /* Individual keys we watch outside of our schemas */
   settings = g_settings_new (SCHEMA_INTERFACE);
@@ -1311,6 +1325,15 @@ gboolean
 meta_prefs_get_raise_on_click (void)
 {
   return raise_on_click;
+}
+
+gboolean
+meta_prefs_get_bring_windows_to_current_workspace (void)
+{
+  /* Windows that the user activates (with a current timestamp) will
+   * be brought to the currently active workspace if necessary. Normally
+   * the user is brought to the window's workspace instead. */
+  return bring_user_activated_windows_to_current_workspace;
 }
 
 gboolean
@@ -1929,6 +1952,9 @@ meta_preference_to_string (MetaPreference pref)
 
     case META_PREF_BELL_SOUND:
       return "BELL_SOUND";
+
+    case META_PREF_BRING_WINDOWS_TO_CURRENT_WORKSPACE:
+      return "BRING_WINDOWS_TO_CURRENT_WORKSPACE";
     }
 
   return "(unknown)";

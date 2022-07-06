@@ -70,6 +70,7 @@
  * @META_PREF_LOCATE_POINTER: show pointer location
  * @META_PREF_GTK_THEME: gtk theme name
  * @META_PREF_BELL_SOUND: sound to use for audible event bell
+ * @META_PREF_BRING_WINDOWS_TO_CURRENT_WORKSPACE: behavior when use activates an off-workspace window.
  */
 
 /* Keep in sync with GSettings schemas! */
@@ -119,7 +120,8 @@ typedef enum
   META_PREF_MOUSE_ZOOM_ENABLED,
   META_PREF_TILE_MAXIMIZE,
   META_PREF_GTK_THEME,
-  META_PREF_BELL_SOUND
+  META_PREF_BELL_SOUND,
+  META_PREF_BRING_WINDOWS_TO_CURRENT_WORKSPACE
 } MetaPreference;
 
 typedef void (* MetaPrefsChangedFunc) (MetaPreference pref,
@@ -159,6 +161,9 @@ CDesktopFocusMode           meta_prefs_get_focus_mode         (void);
 
 META_EXPORT
 CDesktopFocusNewWindows     meta_prefs_get_focus_new_windows  (void);
+
+META_EXPORT
+gboolean                    meta_prefs_get_bring_windows_to_current_workspace (void);
 
 META_EXPORT
 gboolean                    meta_prefs_get_attach_modal_dialogs (void);

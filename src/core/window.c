@@ -3969,16 +3969,30 @@ meta_window_activate_full (MetaWindow     *window,
   if (workspace == NULL)
     workspace = workspace_manager->active_workspace;
 
-  /* For non-transient windows, we just set up a pulsing indicator,
-     rather than move windows or workspaces.
-     See http://bugzilla.gnome.org/show_bug.cgi?id=482354 */
-  if (window->transient_for == NULL &&
-      !allow_workspace_switch &&
-      !meta_window_located_on_workspace (window, workspace))
+  // allow_workspace_switch == "user action"
+
+  if (window->transient_for == NULL)
     {
-      meta_window_set_demands_attention (window);
-      /* We've marked it as demanding, don't need to do anything else. */
-      return;
+      if (!allow_workspace_switch &&
+          !meta_window_located_on_workspace (window, workspace))
+        {
+          meta_window_set_demands_attention (window);
+          return;
+        }
+      else
+        {
+          if (!meta_window_located_on_workspace (window, workspace))
+            {
+              if (meta_prefs_get_bring_windows_to_current_workspace ())
+                {
+                  meta_window_change_workspace (window, workspace);
+                }
+              else
+                {
+                  meta_workspace_activate (window->workspace, timestamp);
+                }
+            }
+        }
     }
   else if (window->transient_for != NULL)
     {
