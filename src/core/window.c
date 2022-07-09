@@ -216,6 +216,7 @@ enum
   PROP_PROGRESS,
   PROP_PROGRESS_PULSE,
   PROP_TILE_MODE,
+  PROP_OPACITY,
   PROP_LAST,
 };
 
@@ -447,6 +448,9 @@ meta_window_get_property(GObject         *object,
     case PROP_TILE_MODE:
       g_value_set_enum (value, win->tile_mode);
       break;
+    case PROP_OPACITY:
+      g_value_set_uint (value, win->opacity);
+      break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
       break;
@@ -657,6 +661,15 @@ meta_window_class_init (MetaWindowClass *klass)
                        "The tile state of the window",
                        META_TYPE_TILE_MODE,
                        META_TILE_NONE,
+                       G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
+
+  obj_props[PROP_OPACITY] =
+    g_param_spec_uint ("opacity",
+                       "Opacity",
+                       "The window's 'real' opacity (not the current opacity of the window actor",
+                       0,
+                       0xFF,
+                       0xFF,
                        G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
   g_object_class_install_properties (object_class, PROP_LAST, obj_props);
@@ -8618,9 +8631,21 @@ void
 meta_window_set_opacity (MetaWindow *window,
                          guint8      opacity)
 {
+  g_return_if_fail (META_IS_WINDOW (window));
+
   window->opacity = opacity;
 
   meta_compositor_window_opacity_changed (window->display->compositor, window);
+
+  g_object_notify_by_pspec (G_OBJECT (window), obj_props[PROP_OPACITY]);
+}
+
+guint8
+meta_window_get_opacity (MetaWindow *window)
+{
+  g_return_val_if_fail (META_IS_WINDOW (window), 0xFF);
+
+  return window->opacity;
 }
 
 #define OPACITY_STEP 32

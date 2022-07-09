@@ -842,9 +842,6 @@ gboolean meta_window_has_transient_type   (MetaWindow *window);
 void meta_window_set_transient_for        (MetaWindow *window,
                                            MetaWindow *parent);
 
-void meta_window_set_opacity              (MetaWindow *window,
-                                           guint8      opacity);
-
 void meta_window_increase_opacity         (MetaWindow *window);
 void meta_window_decrease_opacity         (MetaWindow *window);
 

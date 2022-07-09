@@ -458,4 +458,11 @@ MetaWindowClientType meta_window_get_client_type (MetaWindow *window);
 META_EXPORT
 const char *meta_window_get_icon_name (MetaWindow *window);
 
+META_EXPORT
+void meta_window_set_opacity              (MetaWindow *window,
+                                           guint8      opacity);
+
+META_EXPORT
+guint8 meta_window_get_opacity              (MetaWindow *window);
+
 #endif
