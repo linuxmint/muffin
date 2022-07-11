@@ -3162,7 +3162,7 @@ handle_move_to_center  (MetaDisplay     *display,
   MetaRectangle work_area;
   MetaRectangle frame_rect;
 
-  meta_window_get_work_area_all_monitors (window, &work_area);
+  meta_window_get_work_area_current_monitor (window, &work_area);
   meta_window_get_frame_rect (window, &frame_rect);
 
   meta_window_move_frame (window,
