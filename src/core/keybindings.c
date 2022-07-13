@@ -2422,7 +2422,7 @@ process_mouse_move_resize_grab (MetaDisplay     *display,
        * need to remaximize it.  In normal cases, we need to do a
        * moveresize now to get the position back to the original.
        */
-      if (window->shaken_loose || tile_mode == META_TILE_MAXIMIZED)
+      if (window->saved_maximize || tile_mode == META_TILE_MAXIMIZED)
         meta_window_maximize (window, META_MAXIMIZE_BOTH);
       else if (tile_mode != META_TILE_NONE)
         meta_window_restore_tile (window,
@@ -2483,13 +2483,29 @@ process_keyboard_move_grab (MetaDisplay     *display,
 
   if (event->keyval == CLUTTER_KEY_Escape)
     {
+      MetaTileMode tile_mode;
+
+      /* Hide the tiling preview if necessary */
+      if (display->preview_tile_mode != META_TILE_NONE)
+        meta_display_hide_tile_preview (display);
+
+      /* Restore the original tile mode */
+      tile_mode = display->grab_tile_mode;
+      window->tile_monitor_number = display->grab_tile_monitor_number;
+
       /* End move and restore to original state.  If the window was a
        * maximized window that had been "shaken loose" we need to
        * remaximize it.  In normal cases, we need to do a moveresize
        * now to get the position back to the original.
        */
-      if (window->shaken_loose)
+      if (window->saved_maximize)
         meta_window_maximize (window, META_MAXIMIZE_BOTH);
+      else
+      if (tile_mode != META_TILE_NONE)
+        meta_window_restore_tile (window,
+                                  tile_mode,
+                                  display->grab_initial_window_pos.width,
+                                  display->grab_initial_window_pos.height);
       else
         meta_window_move_resize_frame (display->grab_window,
                                        TRUE,
