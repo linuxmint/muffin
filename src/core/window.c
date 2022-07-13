@@ -2963,12 +2963,16 @@ meta_window_maximize (MetaWindow        *window,
 	  return;
 	}
 
+      gboolean from_tiled = FALSE;
+      MetaRectangle resize_rect;
+
       if (window->tile_mode != META_TILE_NONE)
         {
           saved_rect = &window->saved_rect;
 
           window->maximized_vertically = FALSE;
           window->tile_mode = META_TILE_NONE;
+          from_tiled = TRUE;
         }
 
       meta_window_maximize_internal (window,
@@ -2984,12 +2988,20 @@ meta_window_maximize (MetaWindow        *window,
                                           META_SIZE_CHANGE_MAXIMIZE,
                                           &old_frame_rect, &old_buffer_rect);
 
+      resize_rect = window->unconstrained_rect;
+
+      if (from_tiled)
+        {
+          resize_rect.x = old_frame_rect.x;
+          resize_rect.y = old_frame_rect.y;
+        }
+
       meta_window_move_resize_internal (window,
                                         (META_MOVE_RESIZE_MOVE_ACTION |
                                          META_MOVE_RESIZE_RESIZE_ACTION |
                                          META_MOVE_RESIZE_STATE_CHANGED),
                                         META_GRAVITY_NORTH_WEST,
-                                        window->unconstrained_rect);
+                                        resize_rect);
     }
 }
 
@@ -6785,6 +6797,8 @@ end_grab_op (MetaWindow *window,
         }
     }
   window->display->preview_tile_mode = META_TILE_NONE;
+
+  meta_window_update_monitor (window, META_WINDOW_UPDATE_MONITOR_FLAGS_USER_OP);
 
   if (!(window->maximized_horizontally && window->maximized_vertically))
     window->saved_maximize = FALSE;
