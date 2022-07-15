@@ -3430,7 +3430,7 @@ meta_window_tile (MetaWindow   *window,
   meta_window_get_buffer_rect (window, &old_buffer_rect);
 
   meta_compositor_size_change_window (window->display->compositor, window,
-                                      META_SIZE_CHANGE_MAXIMIZE,
+                                      META_SIZE_CHANGE_TILE,
                                       &old_frame_rect, &old_buffer_rect);
 
   meta_window_move_resize_internal (window,
