@@ -1,3 +1,26 @@
+muffin (5.4.2) vanessa; urgency=medium
+
+  [ Cobinja ]
+  * Fix placement of transient children of fullscreen windows
+
+  [ Michael Webster ]
+  * frames.c: Re-implement directional maximization when double-clicking the frame edges.
+  * theme.c: Don't suppress the invisible border for non-tile/maximized non-resizable windows.
+  * Restore the 'bring windows which require attention to the current workspace' feature.
+  * window.c: Make opacity a public property.
+
+  [ Latchezar Tzvetkoff ]
+  * Fix "Center window in screen" behavior (#623)
+
+  [ Michael Webster ]
+  * frames.c: Fix calculations for determining resize zones in a tiled state.
+  * tiling: re-maximize previously-maximized windows when dragging, regardless of the tile-maximize preference.
+  * grabs: Fix restoration of window state when resize or move actions are cancelled via Escape.
+  * window.c: If maximizing a tiled window via titlebar, use the window's current, not its unconstrained position and size to pass to the constraints call.
+  * compositor: Add a MetaSizeChange value for tiling.
+
+ -- Clement Lefebvre <root@linuxmint.com>  Fri, 15 Jul 2022 15:06:59 +0200
+
 muffin (5.4.1) vanessa; urgency=medium
 
   [ Michael Webster ]
