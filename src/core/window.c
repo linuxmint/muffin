@@ -3403,7 +3403,15 @@ meta_window_tile (MetaWindow   *window,
 {
   MetaMaximizeFlags directions;
   MetaRectangle old_frame_rect, old_buffer_rect;
-  gboolean was_already_tiled = window->tile_mode != META_TILE_NONE;
+  gboolean was_already_tiled = window->tile_mode != META_TILE_NONE || META_WINDOW_MAXIMIZED (window);
+  /* Maximization constraints beat tiling constraints, so if the window
+   * is maximized, tiling won't have any effect unless we unmaximize it
+   * horizontally first; rather than calling meta_window_unmaximize(),
+   * we just set the flag and rely on meta_window_tile() syncing it to
+   * save an additional roundtrip.
+   */
+  window->maximized_horizontally = FALSE;
+  window->maximized_vertically = FALSE;
 
   meta_window_get_tile_fractions (window, tile_mode, &window->tile_hfraction, &window->tile_vfraction);
   window->tile_mode = tile_mode;
