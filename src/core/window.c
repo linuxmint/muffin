@@ -3428,7 +3428,20 @@ meta_window_tile (MetaWindow   *window,
   else
     directions = META_MAXIMIZE_VERTICAL;
 
-  meta_window_maximize_internal (window, directions, was_already_tiled ? &window->saved_rect : NULL);
+
+  GdkRectangle *maybe_saved_rect = NULL;
+
+  if (window->display->grab_op != META_GRAB_OP_NONE)
+    {
+      maybe_saved_rect = &window->display->grab_initial_window_pos;
+    }
+  else
+  if (was_already_tiled)
+    {
+      maybe_saved_rect = &window->saved_rect;
+    }
+
+  meta_window_maximize_internal (window, directions, maybe_saved_rect);
   meta_display_update_tile_preview (window->display, FALSE);
 
   /* Setup the edge constraints */

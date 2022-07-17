@@ -2026,6 +2026,7 @@ meta_display_end_grab_op (MetaDisplay *display,
   display->grab_window = NULL;
   display->grab_tile_mode = META_TILE_NONE;
   display->grab_tile_monitor_number = -1;
+  memset(&display->grab_initial_window_pos, 0, sizeof(MetaRectangle));
 
   meta_display_update_cursor (display);
 
