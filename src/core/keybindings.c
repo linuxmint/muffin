@@ -3464,6 +3464,30 @@ get_new_tile_mode (MetaTileMode direction,
     return ret;
 }
 
+static gboolean
+can_tile (MetaWindow  *window,
+          MetaTileMode mode)
+{
+  switch (mode) {
+    case META_TILE_LEFT:
+    case META_TILE_RIGHT:
+        return meta_window_can_tile_left_right (window);
+    case META_TILE_TOP:
+    case META_TILE_BOTTOM:
+        return meta_window_can_tile_top_bottom (window);
+    case META_TILE_ULC:
+    case META_TILE_LLC:
+    case META_TILE_URC:
+    case META_TILE_LRC:
+        return meta_window_can_tile_corner (window);
+    case META_TILE_MAXIMIZED:
+    case META_TILE_NONE:
+        return TRUE;
+    default:
+        return FALSE;
+  }
+}
+
 static void
 handle_tile_action (MetaDisplay     *display,
                     MetaWindow      *window,
@@ -3483,7 +3507,7 @@ handle_tile_action (MetaDisplay     *display,
     {
       meta_window_unmaximize (window, META_MAXIMIZE_BOTH);
     }
-  else
+  else if (can_tile (window, new_mode))
     {
       window->tile_monitor_number = window->monitor->number;
       /* Maximization constraints beat tiling constraints, so if the window
