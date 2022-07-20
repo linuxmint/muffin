@@ -1,3 +1,17 @@
+muffin (5.4.3) vanessa; urgency=medium
+
+  [ JosephMcc ]
+  * keybindings.c: Make sure we can tile before we attempt to (#624)
+
+  [ Michael Webster ]
+  * tiling: Treat a maximized window as tiled for the purposes of determining whether or not to save the window's original position and size.
+  * tiling: When tiling at the end of a grab, use the initial position and size from when the grab began instead of it's last position before tiling.
+
+  [ Rick Calixte ]
+  * Fix .gitignore for builds
+
+ -- Clement Lefebvre <root@linuxmint.com>  Wed, 20 Jul 2022 07:58:37 +0200
+
 muffin (5.4.2) vanessa; urgency=medium
 
   [ Cobinja ]
