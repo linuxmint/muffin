@@ -1548,7 +1548,7 @@ meta_monitor_config_store_constructed (GObject *object)
                                    META_MONITOR_CONFIG_STORE_ERROR_NEEDS_MIGRATION))
                 g_warning ("System monitor configuration file (%s) is "
                            "incompatible; ask your administrator to migrate "
-                           "the system monitor configuation.",
+                           "the system monitor configuration.",
                            system_file_path);
               else
                 g_warning ("Failed to read monitors config file '%s': %s",
