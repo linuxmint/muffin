@@ -45,6 +45,12 @@ option('udev',
   description: 'Enable udev support when using the X11 backend'
 )
 
+option('libwacom',
+  type: 'boolean',
+  value: true,
+  description: 'Enable libwacom support'
+)
+
 option('pango_ft2',
   type: 'boolean',
   value: true,

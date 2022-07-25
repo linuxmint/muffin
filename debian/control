@@ -37,6 +37,7 @@ Build-Depends:
         libsm-dev,
         libstartup-notification0-dev (>= 0.7),
         libsystemd-dev (>= 212) [linux-any],
+        libwacom-dev (>= 0.13) [linux-any],
         libxau-dev,
         libx11-dev,
         libx11-xcb-dev,

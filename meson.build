@@ -232,8 +232,7 @@ if have_sm
   sm_dep = dependency('sm')
 endif
 
-#have_libwacom = get_option('libwacom')
-have_libwacom = false
+have_libwacom = get_option('libwacom')
 
 if have_libwacom
   libwacom_dep = dependency('libwacom', version: libwacom_req)
