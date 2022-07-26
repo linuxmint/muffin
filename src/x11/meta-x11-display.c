@@ -82,8 +82,8 @@ typedef struct _MetaX11DisplayLogicalMonitorData
 
 static GdkDisplay *prepared_gdk_display = NULL;
 
-static const char *gnome_wm_keybindings = "Mutter";
-static const char *net_wm_name = "Mutter";
+static const char *gnome_wm_keybindings = "Mutter,Metacity";
+static const char *net_wm_name = "Mutter (Muffin)";
 
 static char *get_screen_name (Display *xdisplay,
                               int      number);
