@@ -170,10 +170,10 @@
     </key>
 
     <key name="locate-pointer-key" type="s">
-      <default>'Control_L'</default>
-      <summary>Modifier to use to locate the pointer</summary>
+      <default>''</default>
+      <summary>DO NOT USE</summary>
       <description>
-        This key will initiate the “locate pointer” action.
+        Use keybinding mechanisms in cinnamon instead.
       </description>
     </key>
 
