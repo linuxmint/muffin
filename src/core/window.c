@@ -3501,10 +3501,6 @@ is_valid_tile_mode (MetaWindow *window, MetaTileMode mode)
   monitor = meta_display_get_current_monitor (window->display);
   meta_window_get_work_area_for_monitor (window, monitor, &tile_area);
 
-  /* Do not allow tiling in portrait orientation */
-  if (tile_area.height > tile_area.width)
-    return FALSE;
-
   get_default_tile_fractions (mode, &hfraction, &vfraction);
 
   tile_area.width *= hfraction;
