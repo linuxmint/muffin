@@ -2422,7 +2422,7 @@ process_mouse_move_resize_grab (MetaDisplay     *display,
        * need to remaximize it.  In normal cases, we need to do a
        * moveresize now to get the position back to the original.
        */
-      if (window->saved_maximize || tile_mode == META_TILE_MAXIMIZED)
+      if (window->saved_tile_mode == META_TILE_MAXIMIZED)
         meta_window_maximize (window, META_MAXIMIZE_BOTH);
       else if (tile_mode != META_TILE_NONE)
         meta_window_restore_tile (window,
@@ -2498,7 +2498,7 @@ process_keyboard_move_grab (MetaDisplay     *display,
        * remaximize it.  In normal cases, we need to do a moveresize
        * now to get the position back to the original.
        */
-      if (window->saved_maximize)
+      if (window->saved_tile_mode == META_TILE_MAXIMIZED)
         meta_window_maximize (window, META_MAXIMIZE_BOTH);
       else
       if (tile_mode != META_TILE_NONE)

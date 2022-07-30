@@ -243,8 +243,8 @@ struct _MetaWindow
   MetaTileMode tile_mode;
 
   /* The last "full" maximized/unmaximized state. We need to keep track of
-   * that to decide whether to tile-top or restore maximization during a drag. */
-  guint saved_maximize : 1;
+   * that to toggle between normal/tiled or maximized/tiled states. */
+  MetaTileMode saved_tile_mode;
   int tile_monitor_number;
 
   struct {

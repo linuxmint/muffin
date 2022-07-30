@@ -2898,7 +2898,10 @@ meta_window_maximize_internal (MetaWindow        *window,
   else
     meta_window_save_rect (window);
 
-  window->saved_maximize = maximize_horizontally && maximize_vertically;
+  if (maximize_horizontally && maximize_vertically)
+    window->saved_tile_mode = META_TILE_MAXIMIZED;
+  else
+    window->saved_tile_mode = window->tile_mode;
 
   window->maximized_horizontally =
     window->maximized_horizontally || maximize_horizontally;
@@ -2966,7 +2969,7 @@ meta_window_maximize (MetaWindow        *window,
       gboolean from_tiled = FALSE;
       MetaRectangle resize_rect;
 
-      if (window->tile_mode != META_TILE_NONE)
+      if (META_WINDOW_MAXIMIZED (window) || META_WINDOW_TILED (window))
         {
           saved_rect = &window->saved_rect;
 
@@ -3403,7 +3406,6 @@ meta_window_tile (MetaWindow   *window,
 {
   MetaMaximizeFlags directions;
   MetaRectangle old_frame_rect, old_buffer_rect;
-  gboolean was_already_tiled = window->tile_mode != META_TILE_NONE || META_WINDOW_MAXIMIZED (window);
   /* Maximization constraints beat tiling constraints, so if the window
    * is maximized, tiling won't have any effect unless we unmaximize it
    * horizontally first; rather than calling meta_window_unmaximize(),
@@ -3431,12 +3433,14 @@ meta_window_tile (MetaWindow   *window,
 
   GdkRectangle *maybe_saved_rect = NULL;
 
-  if (window->display->grab_op != META_GRAB_OP_NONE)
+  if (window->saved_tile_mode == META_TILE_NONE && window->display->grab_op != META_GRAB_OP_NONE)
     {
+      // If we let it save the current rect when initially tiling, the rect position
+      // may end up on a different monitor (depending on where the grab anchor is positioned).
       maybe_saved_rect = &window->display->grab_initial_window_pos;
     }
   else
-  if (was_already_tiled)
+  if (window->saved_tile_mode != META_TILE_NONE)
     {
       maybe_saved_rect = &window->saved_rect;
     }
@@ -3586,10 +3590,8 @@ meta_window_unmaximize (MetaWindow        *window,
   unmaximize_vertically   = directions & META_MAXIMIZE_VERTICAL;
   g_assert (unmaximize_horizontally || unmaximize_vertically);
 
-  // Window can be unmaximized (temporarily) during a drag, but saved_maximize should be preserved
-  // in case we're to restore a previously maximized window (ignoring the tile_maximize pref).
-  if (unmaximize_horizontally && unmaximize_vertically && (window->display->grab_op == META_GRAB_OP_NONE))
-    window->saved_maximize = FALSE;
+  if (unmaximize_vertically && window->display->grab_op == META_GRAB_OP_NONE)
+    window->saved_tile_mode = META_TILE_NONE;
 
   /* Only do something if the window isn't already maximized in the
    * given direction(s).
@@ -6438,21 +6440,6 @@ update_move_maybe_tile (MetaWindow *window,
                                          logical_monitor->number,
                                          &work_area);
 
-  if (!meta_prefs_get_edge_tiling ())
-    {
-      if ((get_tile_zone_at_pointer (window, logical_monitor, work_area, x, y) == ZONE_TOP) && meta_window_can_maximize (window))
-        {
-          display->preview_tile_mode = META_TILE_MAXIMIZED;
-          window->tile_monitor_number = logical_monitor->number;
-        }
-      else
-        {
-          display->preview_tile_mode = META_TILE_NONE;
-        }
-
-      return;
-    }
-
   /* Check if the cursor is in a position which triggers tiling
    * and set tile_mode accordingly.
    */
@@ -6462,12 +6449,13 @@ update_move_maybe_tile (MetaWindow *window,
   else if (meta_window_can_tile_left_right (window) &&
            get_tile_zone_at_pointer (window, logical_monitor, work_area, x, y) == ZONE_RIGHT)
     display->preview_tile_mode = META_TILE_RIGHT;
-  else if (get_tile_zone_at_pointer (window, logical_monitor, work_area, x, y) == ZONE_TOP)
+  else if (meta_window_can_tile_top_bottom (window) &&
+           // TODO: Handle maximize/tile preference
+           get_tile_zone_at_pointer (window, logical_monitor, work_area, x, y) == ZONE_TOP)
     {
-      if (window->saved_maximize || (meta_prefs_get_tile_maximize () && meta_window_can_maximize (window)))
+      if (window->saved_tile_mode == META_TILE_MAXIMIZED || meta_prefs_get_tile_maximize ())
         display->preview_tile_mode = META_TILE_MAXIMIZED;
       else
-      if (meta_window_can_tile_top_bottom (window))
         display->preview_tile_mode = META_TILE_TOP;
     }
   else if (meta_window_can_tile_top_bottom (window) &&
@@ -6543,7 +6531,8 @@ update_move (MetaWindow  *window,
       display->preview_tile_mode = META_TILE_NONE;
       window->tile_monitor_number = -1;
     }
-  else if (!META_WINDOW_MAXIMIZED (window) &&
+  else if (meta_prefs_get_edge_tiling () &&
+           !META_WINDOW_MAXIMIZED (window) &&
            !META_WINDOW_TILED (window))
     {
       update_move_maybe_tile (window, shake_threshold, x, y);
@@ -6593,6 +6582,61 @@ update_move (MetaWindow  *window,
 
       meta_window_unmaximize (window, META_MAXIMIZE_BOTH);
       return;
+    }
+
+  /* remaximize window on another monitor if window has been shaken
+   * loose or it is still maximized (then move straight)
+   */
+  else if (window->shaken_loose &&
+           (window->tile_mode == META_TILE_NONE || window->tile_mode == META_TILE_MAXIMIZED))
+    {
+      MetaBackend *backend = meta_get_backend ();
+      MetaMonitorManager *monitor_manager =
+        meta_backend_get_monitor_manager (backend);
+      int n_logical_monitors;
+      const MetaLogicalMonitor *wmonitor;
+      MetaRectangle work_area;
+      int monitor;
+
+      window->tile_mode = META_TILE_NONE;
+      wmonitor = window->monitor;
+      n_logical_monitors =
+        meta_monitor_manager_get_num_logical_monitors (monitor_manager);
+
+      for (monitor = 0; monitor < n_logical_monitors; monitor++)
+        {
+          meta_window_get_work_area_for_monitor (window, monitor, &work_area);
+
+          /* check if cursor is near the top of a monitor work area */
+          if (x >= work_area.x &&
+              x < (work_area.x + work_area.width) &&
+              y <= work_area.y)
+            {
+              window->saved_rect.x = work_area.x;
+              window->saved_rect.y = work_area.y;
+
+              if (window->frame)
+                {
+                  window->saved_rect.x += window->frame->child_x;
+                  window->saved_rect.y += window->frame->child_y;
+                }
+
+              window->unconstrained_rect.x = window->saved_rect.x;
+              window->unconstrained_rect.y = window->saved_rect.y;
+
+              if (monitor != wmonitor->number && window->saved_tile_mode == META_TILE_NONE)
+                meta_window_unmaximize (window, META_MAXIMIZE_BOTH);
+
+              display->grab_initial_window_pos = work_area;
+              display->grab_anchor_root_x = x;
+              display->grab_anchor_root_y = y;
+              window->shaken_loose = FALSE;
+
+              meta_window_maximize (window, META_MAXIMIZE_BOTH);
+
+              return;
+            }
+        }
     }
 
   /* Delay showing the tile preview slightly to make it more unlikely to
@@ -6767,6 +6811,24 @@ update_resize (MetaWindow *window,
     window->display->grab_last_moveresize_time = g_get_real_time ();
 }
 
+static void
+maybe_maximize_tiled_window (MetaWindow *window)
+{
+  MetaRectangle work_area;
+  gint shake_threshold;
+
+  if (!META_WINDOW_TILED (window))
+    return;
+
+  shake_threshold = meta_prefs_get_drag_threshold ();
+
+  meta_window_get_work_area_for_monitor (window,
+                                         window->tile_monitor_number,
+                                         &work_area);
+  if (window->rect.width >= work_area.width - shake_threshold)
+    meta_window_maximize (window, META_MAXIMIZE_BOTH);
+}
+
 void
 meta_window_update_resize (MetaWindow *window,
                            gboolean    snap,
@@ -6817,8 +6879,8 @@ end_grab_op (MetaWindow *window,
 
   meta_window_update_monitor (window, META_WINDOW_UPDATE_MONITOR_FLAGS_USER_OP);
 
-  if (!(window->maximized_horizontally && window->maximized_vertically))
-    window->saved_maximize = FALSE;
+  if (!META_WINDOW_MAXIMIZED (window) && !META_WINDOW_TILED (window))
+    window->saved_tile_mode = META_TILE_NONE;
 
   meta_display_end_grab_op (window->display, clutter_event_get_time (event));
 }
