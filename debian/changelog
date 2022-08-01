@@ -1,3 +1,14 @@
+muffin (5.4.5) vanessa; urgency=medium
+
+  [ Fabio Fantoni ]
+  * fix a spelling error spotted by lintian
+
+  [ Michael Webster ]
+  * window.c: Allow tiling in any monitor orientataion.
+  * tiling: Disable drag-to-maximize behavior if tiling is disabled, fix drag re-tile/maximize behavior in all scenarios.
+
+ -- Clement Lefebvre <root@linuxmint.com>  Mon, 01 Aug 2022 16:03:55 +0200
+
 muffin (5.4.4) vanessa; urgency=medium
 
   [ Michael Webster ]
