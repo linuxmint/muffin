@@ -6113,7 +6113,7 @@ meta_test_monitor_wm_tiling (void)
     g_error ("Failed to find the window: %s", error->message);
   test_client_wait_for_window_shown (test_client, test_window);
 
-  meta_window_tile (test_window, META_TILE_MAXIMIZED);
+  meta_window_tile (test_window, META_TILE_MAXIMIZED, FALSE);
   meta_window_move_to_monitor (test_window, 1);
   check_test_client_state (test_client);
 
@@ -6144,14 +6144,14 @@ meta_test_monitor_wm_tiling (void)
   emulate_hotplug (test_setup);
 
   meta_window_move_to_monitor (test_window, 1);
-  meta_window_tile (test_window, META_TILE_NONE);
+  meta_window_tile (test_window, META_TILE_NONE, FALSE);
 
   test_case.setup.n_outputs = 1;
   test_setup = create_monitor_test_setup (&test_case,
                                           MONITOR_TEST_FLAG_NO_STORED);
   emulate_hotplug (test_setup);
 
-  meta_window_tile (test_window, META_TILE_MAXIMIZED);
+  meta_window_tile (test_window, META_TILE_MAXIMIZED, FALSE);
 
   test_client_destroy (test_client);
 }
