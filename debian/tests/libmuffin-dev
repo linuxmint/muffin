@@ -34,7 +34,7 @@ EOF
 
 # Deliberately word-splitting pkg-config's output:
 # shellcheck disable=SC2046
-"${CROSS_COMPILE}gcc" -o trivial trivial.c $("${CROSS_COMPILE}pkg-config" --cflags --libs libmuffin)
+"${CROSS_COMPILE}gcc" -o trivial trivial.c $("${CROSS_COMPILE}pkg-config" --cflags --libs libmuffin-0)
 echo "build: OK"
 [ -x trivial ]
 xvfb-run -a dbus-run-session -- ./trivial

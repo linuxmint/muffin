@@ -145,11 +145,12 @@ Package: libmuffin-dev
 Section: libdevel
 Architecture: any
 Multi-Arch: same
-Breaks: libmuffin0 (<< 5.1)
-Replaces: libmuffin0 (<< 5.1)
+Breaks: libmuffin0 (<< 5.3)
+Replaces: libmuffin0 (<< 5.3)
 Depends: gir1.2-meta-muffin-0.0 (= ${binary:Version}),
          libatk1.0-dev,
          libcairo2-dev,
+         libcinnamon-desktop-dev (>= 5.4),
          libdrm-dev,
          libegl1-mesa-dev,
          libgdk-pixbuf2.0-dev,
