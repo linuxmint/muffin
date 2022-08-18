@@ -3166,12 +3166,18 @@ get_default_tile_fractions (MetaTileMode for_mode,
 
 static void
 meta_window_get_tile_fractions (MetaWindow   *window,
-                               MetaTileMode  tile_mode,
-                               double       *hfraction,
-                               double       *vfraction)
+                               MetaTileMode   tile_mode,
+                               double        *hfraction,
+                               double        *vfraction,
+                               gboolean      *is_valid)
 {
   MetaWindow *htile_match, *vtile_match;
+  MetaRectangle client_rect, tile_area, work_area;
   double new_hfraction, new_vfraction;
+  gint monitor;
+
+  monitor = meta_display_get_current_monitor (window->display);
+  meta_window_get_work_area_for_monitor (window, monitor, &work_area);
 
   /* Make sure the tile match is up-to-date and matches the
    * passed in mode rather than the current state
@@ -3226,8 +3232,43 @@ meta_window_get_tile_fractions (MetaWindow   *window,
         }
     }
 
-    *hfraction = new_hfraction;
-    *vfraction = new_vfraction;
+  tile_area = work_area;
+
+  tile_area.width = work_area.width * new_hfraction;
+  tile_area.height = work_area.height * new_vfraction;
+
+  meta_window_frame_rect_to_client_rect (window, &tile_area, &client_rect);
+
+  if (client_rect.width >= window->size_hints.min_width &&
+      client_rect.height >= window->size_hints.min_height)
+    {
+      *hfraction = new_hfraction;
+      *vfraction = new_vfraction;
+      
+      if (is_valid)
+        *is_valid = TRUE;
+      return;
+    }
+
+  if (meta_grab_op_is_resizing (window->display->grab_op))
+    return;
+
+  get_default_tile_fractions (tile_mode, &new_hfraction, &new_vfraction);
+  tile_area = work_area;
+
+  tile_area.width = work_area.width * new_hfraction;
+  tile_area.height = work_area.height * new_vfraction;
+
+  meta_window_frame_rect_to_client_rect (window, &tile_area, &client_rect);
+
+  if (client_rect.width >= window->size_hints.min_width &&
+      client_rect.height >= window->size_hints.min_height)
+    {
+      *hfraction = new_hfraction;
+      *vfraction = new_vfraction;
+      if (is_valid)
+        *is_valid = TRUE;
+    }
 }
 
 static void
@@ -3413,10 +3454,10 @@ meta_window_tile (MetaWindow   *window,
    * we just set the flag and rely on meta_window_tile() syncing it to
    * save an additional roundtrip.
    */
+  meta_window_get_tile_fractions (window, tile_mode, &window->tile_hfraction, &window->tile_vfraction, NULL);
+
   window->maximized_horizontally = FALSE;
   window->maximized_vertically = FALSE;
-
-  meta_window_get_tile_fractions (window, tile_mode, &window->tile_hfraction, &window->tile_vfraction);
   window->tile_mode = tile_mode;
 
   /* Don't do anything if no tiling is requested */
@@ -3499,26 +3540,15 @@ meta_window_can_tile_maximized (MetaWindow *window)
 static gboolean
 is_valid_tile_mode (MetaWindow *window, MetaTileMode mode)
 {
-  int monitor;
-  MetaRectangle tile_area;
-  MetaRectangle client_rect;
   double hfraction, vfraction;
+  gboolean is_valid = FALSE;
 
   if (!meta_window_can_tile_maximized (window))
     return FALSE;
 
-  monitor = meta_display_get_current_monitor (window->display);
-  meta_window_get_work_area_for_monitor (window, monitor, &tile_area);
+  meta_window_get_tile_fractions (window, mode, &hfraction, &vfraction, &is_valid);
 
-  get_default_tile_fractions (mode, &hfraction, &vfraction);
-
-  tile_area.width *= hfraction;
-  tile_area.height *= vfraction;
-
-  meta_window_frame_rect_to_client_rect (window, &tile_area, &client_rect);
-
-  return client_rect.width >= window->size_hints.min_width &&
-         client_rect.height >= window->size_hints.min_height;
+  return is_valid;
 }
 
 gboolean
@@ -7108,7 +7138,7 @@ meta_window_get_tile_area (MetaWindow    *window,
   tile_monitor_number = meta_window_get_current_tile_monitor_number (window);
 
   meta_window_get_work_area_for_monitor (window, tile_monitor_number, &work_area);
-  meta_window_get_tile_fractions (window, tile_mode, &hfraction, &vfraction);
+  meta_window_get_tile_fractions (window, tile_mode, &hfraction, &vfraction, NULL);
   *tile_area = work_area;
 
   tile_area->width = round (tile_area->width * hfraction);
