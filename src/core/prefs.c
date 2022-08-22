@@ -141,6 +141,7 @@ static char *iso_next_group_option = NULL;
 static MetaX11BackgroundTransition background_transition = META_X11_BACKGROUND_TRANSITION_BLEND;
 static gboolean unredirect_fullscreen_windows = FALSE;
 static gboolean tile_maximize = FALSE;
+static gboolean invert_workspace_flip = FALSE;
 static char *gtk_theme = NULL;
 static char *bell_sound = NULL;
 static gboolean bring_user_activated_windows_to_current_workspace = FALSE;
@@ -421,6 +422,13 @@ static MetaBoolPreference preferences_bool[] =
         META_PREF_WORKSPACES_ONLY_ON_PRIMARY,
       },
       &workspaces_only_on_primary,
+    },
+       {
+      { "invert-workspace-flip-direction",
+        SCHEMA_MUFFIN,
+        META_PREF_INVERT_WORKSPACE_FLIP_DIRECTION,
+      },
+      &invert_workspace_flip,
     },
     {
       { "auto-maximize",
@@ -2393,6 +2401,12 @@ gboolean
 meta_prefs_get_auto_maximize (void)
 {
   return auto_maximize;
+}
+
+gboolean
+meta_prefs_get_invert_flip_direction (void)
+{
+    return invert_workspace_flip;
 }
 
 MetaKeyBindingAction

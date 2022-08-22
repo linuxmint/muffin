@@ -2033,15 +2033,47 @@ strip_self_mod (guint                keyval,
 }
 
 static gboolean
+is_workspace_action (gint action)
+{
+    if (action == META_MOTION_LEFT || action == META_MOTION_RIGHT)
+      {
+        return TRUE;
+      }
+
+    switch (action)
+      {
+        case META_MOTION_LEFT:
+        case META_MOTION_RIGHT:
+        case META_KEYBINDING_ACTION_WORKSPACE_1:
+        case META_KEYBINDING_ACTION_WORKSPACE_2:
+        case META_KEYBINDING_ACTION_WORKSPACE_3:
+        case META_KEYBINDING_ACTION_WORKSPACE_4:
+        case META_KEYBINDING_ACTION_WORKSPACE_5:
+        case META_KEYBINDING_ACTION_WORKSPACE_6:
+        case META_KEYBINDING_ACTION_WORKSPACE_7:
+        case META_KEYBINDING_ACTION_WORKSPACE_8:
+        case META_KEYBINDING_ACTION_WORKSPACE_9:
+        case META_KEYBINDING_ACTION_WORKSPACE_10:
+        case META_KEYBINDING_ACTION_WORKSPACE_11:
+        case META_KEYBINDING_ACTION_WORKSPACE_12:
+          return TRUE;
+      }
+
+    return FALSE;
+}
+
+static gboolean
 process_event (MetaDisplay          *display,
                MetaWindow           *window,
                ClutterKeyEvent      *event,
-               gboolean              allow_release)
+               gboolean              allow_release,
+               gboolean              mouse_grab_move)
 {
   MetaKeyBindingManager *keys = &display->key_binding_manager;
   xkb_keycode_t keycode = (xkb_keycode_t) event->hardware_keycode;
   MetaResolvedKeyCombo resolved_combo = { &keycode, 1 };
   MetaKeyBinding *binding;
+  MetaKeyBindingAction action;
 
   /* we used to have release-based bindings but no longer. */
   if (event->type == CLUTTER_KEY_RELEASE && !allow_release)
@@ -2057,6 +2089,11 @@ process_event (MetaDisplay          *display,
 
   if (!binding ||
       (!window && binding->flags & META_KEY_BINDING_PER_WINDOW))
+    goto not_found;
+
+  action = binding->handler->data;
+
+  if (mouse_grab_move && !is_workspace_action (action))
     goto not_found;
 
   if (binding->handler == NULL)
@@ -2107,7 +2144,7 @@ process_event (MetaDisplay          *display,
  not_found:
   meta_topic (META_DEBUG_KEYBINDINGS,
               "No handler found for this event in this binding table\n");
-  return FALSE;
+  return mouse_grab_move;
 }
 
 static gboolean
@@ -2172,7 +2209,7 @@ process_special_modifier_key (MetaDisplay          *display,
         {
           modifier_key_only_pressed = FALSE;
 
-          if (process_event (display, window, event, FALSE))
+          if (process_event (display, window, event, FALSE, FALSE))
             {
               /* As normally, after we've handled a global key
                * binding, we unfreeze the keyboard but keep the grab
@@ -2288,7 +2325,7 @@ process_key_event (MetaDisplay     *display,
                    MetaWindow      *window,
                    ClutterKeyEvent *event)
 {
-  gboolean keep_grab;
+  gboolean keep_grab, mouse_grab_move;
   gboolean all_keys_grabbed;
   gboolean allow_key_up = FALSE;
 
@@ -2314,6 +2351,8 @@ process_key_event (MetaDisplay     *display,
   }
 
   keep_grab = TRUE;
+  mouse_grab_move = FALSE;
+
   if (all_keys_grabbed)
     {
       if (display->grab_op == META_GRAB_OP_NONE)
@@ -2345,16 +2384,20 @@ process_key_event (MetaDisplay     *display,
               meta_topic (META_DEBUG_KEYBINDINGS,
                           "Processing event for mouse-only move/resize\n");
               keep_grab = process_mouse_move_resize_grab (display, window, event);
+              mouse_grab_move = display->grab_op == META_GRAB_OP_MOVING;
             }
         }
       if (!keep_grab)
         meta_display_end_grab_op (display, event->time);
 
-      return TRUE;
+      if (!mouse_grab_move)
+        {
+          return TRUE;
+        }
     }
 
   /* Do the normal keybindings */
-  return process_event (display, window, event, allow_key_up);
+  return process_event (display, window, event, allow_key_up, mouse_grab_move);
 }
 
 /* Handle a key event. May be called recursively: some key events cause
@@ -2393,6 +2436,40 @@ meta_keybindings_process_event (MetaDisplay        *display,
 
     default:
       return FALSE;
+    }
+}
+
+static void
+handle_workspace_shift (MetaWindow      *window,
+                        ClutterKeyEvent *event,
+                        guint            keyval)
+{
+  MetaWorkspace *target_workspace;
+  guint motion = META_MOTION_LEFT;
+  gboolean should_handle = FALSE;
+
+  if (keyval == CLUTTER_KEY_Left || keyval == CLUTTER_KEY_KP_Left)
+    {
+      motion = meta_prefs_get_invert_flip_direction () ? META_MOTION_RIGHT : META_MOTION_LEFT;
+      should_handle = TRUE;
+    }
+  else
+  if (keyval == CLUTTER_KEY_Right || keyval == CLUTTER_KEY_KP_Right)
+    {
+      motion = meta_prefs_get_invert_flip_direction () ? META_MOTION_LEFT : META_MOTION_RIGHT;
+      should_handle = TRUE;
+    }
+
+  if (!should_handle)
+    {
+      return;
+    }
+
+  target_workspace = meta_workspace_get_neighbor (meta_workspace_manager_get_active_workspace (window->display->workspace_manager), motion);
+
+  if (target_workspace)
+    {
+      meta_workspace_activate (target_workspace, event->time);
     }
 }
 
@@ -2439,6 +2516,90 @@ process_mouse_move_resize_grab (MetaDisplay     *display,
 
       /* End grab */
       return FALSE;
+    }
+
+  MetaWorkspace *target_workspace;
+  gulong mask;
+
+    /* Only proceed if no mod or only numlock */
+  mask = event->modifier_state & ~(CLUTTER_BUTTON2_MASK | CLUTTER_BUTTON3_MASK | CLUTTER_BUTTON4_MASK | CLUTTER_BUTTON5_MASK);
+
+  if (mask != CLUTTER_BUTTON1_MASK)
+    return TRUE;
+
+  gint index = -1;
+
+  switch (event->keyval)
+    {
+      case CLUTTER_KEY_Left:
+      case CLUTTER_KEY_KP_Left:
+      case CLUTTER_KEY_Right:
+      case CLUTTER_KEY_KP_Right:
+        handle_workspace_shift (window, event, event->keyval);
+        return TRUE;
+
+      case CLUTTER_KEY_KP_1:
+      case CLUTTER_KEY_1:
+        index = 0;
+        break;
+
+      case CLUTTER_KEY_KP_2:
+      case CLUTTER_KEY_2:
+        index = 1;
+        break;
+
+      case CLUTTER_KEY_KP_3:
+      case CLUTTER_KEY_3:
+        index = 2;
+        break;
+
+      case CLUTTER_KEY_KP_4:
+      case CLUTTER_KEY_4:
+        index = 3;
+        break;
+
+      case CLUTTER_KEY_KP_5:
+      case CLUTTER_KEY_5:
+        index = 4;
+        break;
+
+      case CLUTTER_KEY_KP_6:
+      case CLUTTER_KEY_6:
+        index = 5;
+        break;
+
+      case CLUTTER_KEY_KP_7:
+      case CLUTTER_KEY_7:
+        index = 6;
+        break;
+
+      case CLUTTER_KEY_KP_8:
+      case CLUTTER_KEY_8:
+        index = 7;
+        break;
+
+      case CLUTTER_KEY_KP_9:
+      case CLUTTER_KEY_9:
+        index = 8;
+        break;
+
+      case CLUTTER_KEY_KP_0:
+      case CLUTTER_KEY_0:
+        index = 9;
+        break;
+
+      default:
+        break;
+    }
+
+  if (index >= 0)
+    {
+      target_workspace = meta_workspace_manager_get_workspace_by_index (window->display->workspace_manager, index);
+
+      if (target_workspace)
+        {
+          meta_workspace_activate (target_workspace, event->time);
+        }
     }
 
   return TRUE;

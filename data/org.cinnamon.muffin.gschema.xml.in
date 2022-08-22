@@ -44,6 +44,16 @@
       </description>
     </key>
 
+    <key name="invert-workspace-flip-direction" type="b">
+      <default>false</default>
+      <summary>Inverts the direction the left and right arrows take you when
+         you switch workspaces during a window drag</summary>
+      <description>
+        Changes left-right arrow keys to window-centric directions rather than
+        workspace-centric
+      </description>
+    </key>
+
     <key name="dynamic-workspaces" type="b">
       <default>false</default>
       <summary>Workspaces are managed dynamically</summary>

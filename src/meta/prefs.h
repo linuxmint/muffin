@@ -71,6 +71,7 @@
  * @META_PREF_GTK_THEME: gtk theme name
  * @META_PREF_BELL_SOUND: sound to use for audible event bell
  * @META_PREF_BRING_WINDOWS_TO_CURRENT_WORKSPACE: behavior when use activates an off-workspace window.
+ * @META_PREF_INVERT_WORKSPACE_FLIP_DIRECTION: Flip arrow direction when changing workspaces during a window grab move.
  */
 
 /* Keep in sync with GSettings schemas! */
@@ -121,7 +122,8 @@ typedef enum
   META_PREF_TILE_MAXIMIZE,
   META_PREF_GTK_THEME,
   META_PREF_BELL_SOUND,
-  META_PREF_BRING_WINDOWS_TO_CURRENT_WORKSPACE
+  META_PREF_BRING_WINDOWS_TO_CURRENT_WORKSPACE,
+  META_PREF_INVERT_WORKSPACE_FLIP_DIRECTION
 } MetaPreference;
 
 typedef void (* MetaPrefsChangedFunc) (MetaPreference pref,
@@ -278,6 +280,9 @@ gint meta_prefs_get_min_win_opacity (void);
 
 META_EXPORT
 const char* meta_prefs_get_bell_sound (void);
+
+META_EXPORT
+gboolean    meta_prefs_get_invert_flip_direction (void);
 
 /**
  * MetaKeyBindingAction:
