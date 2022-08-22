@@ -16,7 +16,8 @@ CONFFLAGS = \
 ifneq ($(DEB_HOST_ARCH_OS),linux)
 CONFFLAGS += \
 	-Dudev=false \
-	-Dcore_tests=false
+	-Dcore_tests=false \
+	-Dlibwacom=false
 endif
 
 ifeq ($(DEB_HOST_ARCH),$(findstring $(DEB_HOST_ARCH),armel armhf))
