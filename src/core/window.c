@@ -6484,14 +6484,17 @@ update_move_maybe_tile (MetaWindow *window,
   else if (meta_window_can_tile_left_right (window) &&
            get_tile_zone_at_pointer (window, logical_monitor, work_area, x, y) == ZONE_RIGHT)
     display->preview_tile_mode = META_TILE_RIGHT;
-  else if (meta_window_can_tile_top_bottom (window) &&
-           // TODO: Handle maximize/tile preference
-           get_tile_zone_at_pointer (window, logical_monitor, work_area, x, y) == ZONE_TOP)
+  else if (get_tile_zone_at_pointer (window, logical_monitor, work_area, x, y) == ZONE_TOP)
     {
-      if (window->saved_tile_mode == META_TILE_MAXIMIZED || meta_prefs_get_tile_maximize ())
-        display->preview_tile_mode = META_TILE_MAXIMIZED;
-      else
-        display->preview_tile_mode = META_TILE_TOP;
+      if (meta_window_can_maximize (window) &&
+             (meta_prefs_get_tile_maximize () || window->saved_tile_mode == META_TILE_MAXIMIZED))
+        {
+          display->preview_tile_mode = META_TILE_MAXIMIZED;
+        }
+      else if (meta_window_can_tile_top_bottom (window))
+        {
+          display->preview_tile_mode = META_TILE_TOP;
+        }
     }
   else if (meta_window_can_tile_top_bottom (window) &&
            get_tile_zone_at_pointer (window, logical_monitor, work_area, x, y) == ZONE_BOTTOM)
