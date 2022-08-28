@@ -6849,24 +6849,6 @@ update_resize (MetaWindow *window,
     window->display->grab_last_moveresize_time = g_get_real_time ();
 }
 
-static void
-maybe_maximize_tiled_window (MetaWindow *window)
-{
-  MetaRectangle work_area;
-  gint shake_threshold;
-
-  if (!META_WINDOW_TILED (window))
-    return;
-
-  shake_threshold = meta_prefs_get_drag_threshold ();
-
-  meta_window_get_work_area_for_monitor (window,
-                                         window->tile_monitor_number,
-                                         &work_area);
-  if (window->rect.width >= work_area.width - shake_threshold)
-    meta_window_maximize (window, META_MAXIMIZE_BOTH);
-}
-
 void
 meta_window_update_resize (MetaWindow *window,
                            gboolean    snap,
@@ -6910,7 +6892,6 @@ end_grab_op (MetaWindow *window,
                          modifiers & CLUTTER_SHIFT_MASK || (window->htile_match != NULL || window->vtile_match != NULL),
                          x, y,
                          TRUE);
-          // maybe_maximize_tiled_window (window);
         }
     }
   window->display->preview_tile_mode = META_TILE_NONE;
