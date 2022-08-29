@@ -3963,3 +3963,33 @@ meta_display_logical_index_to_xinerama_index (MetaDisplay *display,
     return meta_x11_display_logical_monitor_to_xinerama_index (display->x11_display, monitor);
 
 }
+
+const gchar *
+meta_display_get_tile_mode_str (MetaTileMode mode)
+{
+    switch (mode)
+      {
+      case META_TILE_NONE:
+        return "META_TILE_NONE     ";
+      case META_TILE_LEFT:
+        return "META_TILE_LEFT     ";
+      case META_TILE_RIGHT:
+        return "META_TILE_RIGHT    ";
+      case META_TILE_ULC:
+        return "META_TILE_ULC      ";
+      case META_TILE_LLC:
+        return "META_TILE_LLC      ";
+      case META_TILE_URC:
+        return "META_TILE_URC      ";
+      case META_TILE_LRC:
+        return "META_TILE_LRC      ";
+      case META_TILE_TOP:
+        return "META_TILE_TOP      ";
+      case META_TILE_BOTTOM:
+        return "META_TILE_BOTTOM   ";
+      case META_TILE_MAXIMIZED:
+        return "META_TILE_MAXIMIZED";
+      default:
+        return "(unknown)          ";
+      }
+}

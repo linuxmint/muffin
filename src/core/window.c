@@ -3199,7 +3199,11 @@ meta_window_get_tile_fractions (MetaWindow   *window,
   // FIXME: should we fill both or just vtile if htile fails - both i think.
   htile_match = meta_window_find_tile_match (window, tile_mode, FALSE);
   vtile_match = meta_window_find_tile_match (window, tile_mode, TRUE);
-
+#if 0
+  g_printerr ("htile: %p (%s), vtile: %p (%s)\n",
+              htile_match, htile_match ? htile_match->title : "",
+              vtile_match, vtile_match ? vtile_match->title: "");
+#endif
   get_default_tile_fractions (tile_mode, &new_hfraction, &new_vfraction);
 
   if (vtile_match)
@@ -8421,6 +8425,16 @@ meta_window_find_tile_match (MetaWindow   *window,
           return NULL;
         }
     }
+
+#if 0
+    if (match_tile_modes) {
+        g_printerr ("%s matches: ", vertical ? "vertical  " : "horizontal");
+        for (int i = 0; match_tile_modes[i] > -1; i++) {
+            g_printerr ("%s ", meta_display_get_tile_mode_str (match_tile_modes[i]));
+        }
+        g_printerr ("\n");
+    }
+#endif
 
   stack = window->display->stack;
 

@@ -421,4 +421,6 @@ void     meta_display_shutdown_x11 (MetaDisplay  *display);
 
 void meta_display_a11y_zoom (MetaDisplay *display, gboolean in);
 
+const gchar *meta_display_get_tile_mode_str (MetaTileMode mode);
+
 #endif
