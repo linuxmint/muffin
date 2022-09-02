@@ -75,7 +75,6 @@
 #define SCHEMA_INPUT_SOURCES   "org.cinnamon.desktop.input-sources"
 #define SCHEMA_MOUSE           "org.cinnamon.desktop.peripherals.mouse"
 #define SCHEMA_A11Y_APPLICATIONS "org.cinnamon.desktop.a11y.applications"
-#define SCHEMA_CINNAMON        "org.cinnamon"
 
 #define SETTINGS(s) g_hash_table_lookup (settings_schemas, (s))
 
@@ -474,7 +473,7 @@ static MetaBoolPreference preferences_bool[] =
     },
     {
       { "bring-windows-to-current-workspace",
-        SCHEMA_CINNAMON,
+        SCHEMA_MUFFIN,
         META_PREF_BRING_WINDOWS_TO_CURRENT_WORKSPACE,
       },
       &bring_user_activated_windows_to_current_workspace,
@@ -1122,11 +1121,6 @@ meta_prefs_init (void)
   g_signal_connect (settings, "changed::" KEY_MOUSEWHEEL_ZOOM_ENABLED,
                     G_CALLBACK (settings_changed), NULL);
   g_hash_table_insert (settings_schemas, g_strdup (SCHEMA_A11Y_APPLICATIONS), settings);
-
-  settings = g_settings_new (SCHEMA_CINNAMON);
-  g_signal_connect (settings, "changed::" KEY_BRING_ACTIVATED_WINDOWS_TO_CURRENT_WORKSPACE,
-                    G_CALLBACK (settings_changed), NULL);
-  g_hash_table_insert (settings_schemas, g_strdup (SCHEMA_CINNAMON), settings);
 
   /* Individual keys we watch outside of our schemas */
   settings = g_settings_new (SCHEMA_INTERFACE);
