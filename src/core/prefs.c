@@ -1719,29 +1719,44 @@ locate_pointer_key_handler (GVariant *value,
                             gpointer *result,
                             gpointer  data)
 {
-  MetaKeyCombo combo;
-  const gchar *string_value;
+  MetaKeyCombo *combo;
+  const gchar **string_values;
+  gboolean output;
+  int i;
 
   *result = NULL; /* ignored */
-  string_value = g_variant_get_string (value, NULL);
+  string_values = g_variant_get_strv (value, NULL);
+  output = TRUE;
 
-  if (!string_value || !meta_parse_accelerator (string_value, &combo))
+  for (i = 0; string_values && string_values[i]; i++)
     {
-      meta_topic (META_DEBUG_KEYBINDINGS,
-                  "Failed to parse value for locate-pointer-key\n");
-      return FALSE;
+
+      combo = g_malloc0 (sizeof(MetaKeyCombo));
+
+      if (!meta_parse_accelerator (string_values[i], combo))
+        {
+          meta_topic (META_DEBUG_KEYBINDINGS,
+                      "Failed to parse keybinding value \"%s\" for locate-pointer-key\n",
+                      string_values[i]);
+
+          g_free (combo);
+
+          output = FALSE;
+        }
+
+      combo->modifiers = 0;
     }
 
-  combo.modifiers = 0;
-
-  if (locate_pointer_key_combo.keysym != combo.keysym ||
-      locate_pointer_key_combo.keycode != combo.keycode)
+  if (locate_pointer_key_combo.keysym != combo->keysym ||
+      locate_pointer_key_combo.keycode != combo->keycode)
     {
-      locate_pointer_key_combo = combo;
+      locate_pointer_key_combo = *combo;
       queue_changed (META_PREF_KEYBINDINGS);
     }
 
-  return TRUE;
+  g_free (string_values);
+
+  return output;
 }
 
 static gboolean

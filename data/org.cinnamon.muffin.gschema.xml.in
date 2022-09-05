@@ -179,8 +179,8 @@
       </description>
     </key>
 
-    <key name="locate-pointer-key" type="s">
-      <default>'Control_L'</default>
+    <key name="locate-pointer-key" type="as">
+      <default>['Control_L']</default>
       <summary>Modifier to use to locate the pointer</summary>
       <description>
         This key will initiate the “locate pointer” action.
