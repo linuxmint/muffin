@@ -1,5 +1,5 @@
 project('muffin', 'c',
-  version: '5.4.6',
+  version: '5.4.7',
   meson_version: '>= 0.50.0',
   license: 'GPLv2+'
 )

@@ -1,3 +1,18 @@
+muffin (5.4.7) vanessa; urgency=medium
+
+  [ Fabio Fantoni ]
+  * some fixes to debian packaging (#635)
+
+  [ Michael Webster ]
+  * keybindings: Fix workspace navigation while dragging a window with the mouse.
+  * tiling: Try to tile to the default size if a match exists, but is impossible to satisfy due to min/max size constraints.
+  * tiling: Fix tile top/maximize tests.
+  * window.c: Remove unused code.
+  * tiling: Make it easier to debug.
+  * Relocate bring-windows-to-current-workspace from org.cinnamon to org.cinnamon.muffin.
+
+ -- Clement Lefebvre <root@linuxmint.com>  Mon, 05 Sep 2022 15:35:56 +0100
+
 muffin (5.4.6) vanessa; urgency=medium
 
   [ JosephMcc ]
