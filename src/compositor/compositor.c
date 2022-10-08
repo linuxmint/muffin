@@ -627,6 +627,75 @@ meta_compositor_unmanage (MetaCompositor *compositor)
   META_COMPOSITOR_GET_CLASS (compositor)->unmanage (compositor);
 }
 
+static void
+ensure_tooltip_visible (MetaWindow *window)
+{
+  const MetaLogicalMonitor *monitor;
+  MetaRectangle work_area, win_rect;
+  gint new_x, new_y;
+
+  /* Why this is here:
+   * As of gtk 3.24, tooltips for GtkStatusIcons began displaying their tool tip
+   * off the screen in certain situations.
+   *
+   * See: https://github.com/GNOME/gtk/commit/14d22cb3233e
+   *
+   * If the status icon is too small relative to its panel (which has been assigned
+   * as a strut to muffin), tooltip positioning fails both tests in gdkwindowimpl.c
+   * (maybe_flip_position()) skipping repositioning of the tooltip inside the workarea.
+   * This only occurs on bottom panels, and only begins happening when the status icon
+   * becomes 10px or more smaller than the panel it's *centered* on.
+   *
+   * Since the calculations are based upon the monitor's workarea and the status icon
+   * plug window's size, there's no way to compensate for or fool gtk into displaying it
+   * correctly.  So here, we do our own check and adjustment if a part of the tooltip
+   * window falls outside the current monitor's work area.  This is also useful since
+   * muffin knows *exactly* the work area for each monitor, whereas gtk only has
+   * _NET_WORKAREA to go by, which only keeps track of (primary monitor * n_workspaces),
+   * so an odd monitor layout would trip this up anyhow.
+   *
+   * This may cause regressions - see: https://github.com/linuxmint/muffin/commit/050038690,
+   * but without being able to reproduce the issue mentioned there, we'll just have to address
+   * it if it appears again as a result of this change. */
+
+  monitor = window->monitor;
+
+  if (!monitor)
+    return;
+
+  meta_workspace_get_work_area_for_monitor (meta_workspace_manager_get_active_workspace (window->display->workspace_manager),
+                                            monitor->number,
+                                            &work_area);
+
+  meta_window_get_buffer_rect (window, &win_rect);
+
+  new_x = win_rect.x;
+  new_y = win_rect.y;
+
+  if (win_rect.y < work_area.y)
+    {
+      new_y = work_area.y;
+    }
+  else if (win_rect.y + win_rect.height > work_area.y + work_area.height)
+    {
+      new_y = (work_area.y + work_area.height - win_rect.height);
+    }
+
+  if (win_rect.x < work_area.x)
+    {
+      new_x = work_area.x;
+    }
+  else if (win_rect.x + win_rect.width > work_area.x + work_area.width)
+    {
+      new_x = (work_area.x + work_area.width - win_rect.width);
+    }
+
+  if (new_x != win_rect.x || new_y != win_rect.y)
+    {
+      meta_window_move_frame (window, FALSE, new_x, new_y);
+    }
+}
+
 void
 meta_compositor_add_window (MetaCompositor    *compositor,
                             MetaWindow        *window)
@@ -659,7 +728,15 @@ meta_compositor_add_window (MetaCompositor    *compositor,
                                NULL);
 
   if (window->layer == META_LAYER_OVERRIDE_REDIRECT)
-    window_group = priv->top_window_group;
+    {
+      if (window->type == META_WINDOW_TOOLTIP)
+        {
+          ensure_tooltip_visible (window);
+        }
+
+      window_group = priv->top_window_group;
+    }
+
   else if (window->type == META_WINDOW_DESKTOP)
     window_group = priv->bottom_window_group;
   else

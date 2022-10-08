@@ -4361,7 +4361,10 @@ meta_window_move_resize_internal (MetaWindow          *window,
   gboolean moved_or_resized = FALSE;
   MetaWindowUpdateMonitorFlags update_monitor_flags;
 
-  g_return_if_fail (!window->override_redirect);
+  if (window->type != META_WINDOW_TOOLTIP)
+    {
+      g_return_if_fail (!window->override_redirect);
+    }
 
   /* The action has to be a move, a resize or the wayland client
    * acking our choice of size.
@@ -4535,7 +4538,10 @@ meta_window_move_frame (MetaWindow *window,
   MetaMoveResizeFlags flags;
   MetaRectangle rect = { root_x_nw, root_y_nw, 0, 0 };
 
-  g_return_if_fail (!window->override_redirect);
+  if (window->type != META_WINDOW_TOOLTIP)
+    {
+      g_return_if_fail (!window->override_redirect);
+    }
 
   flags = (user_op ? META_MOVE_RESIZE_USER_ACTION : 0) | META_MOVE_RESIZE_MOVE_ACTION;
   meta_window_move_resize_internal (window, flags, META_GRAVITY_NORTH_WEST, rect);

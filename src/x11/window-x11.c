@@ -1440,7 +1440,8 @@ meta_window_x11_move_resize_internal (MetaWindow                *window,
    * the client window may not get a real event
    */
   if ((need_move_client || need_move_frame) &&
-      !(need_resize_client || need_resize_frame))
+      !(need_resize_client || need_resize_frame) &&
+      window->type != META_WINDOW_TOOLTIP)
     need_configure_notify = TRUE;
 
   /* MapRequest events with a PPosition or UPosition hint with a frame
