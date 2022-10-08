@@ -1748,8 +1748,9 @@ reload_transient_for (MetaWindow    *window,
                                                  transient_for);
       if (!parent)
         {
-          meta_warning ("Invalid WM_TRANSIENT_FOR window 0x%lx specified for %s.\n",
-                        transient_for, window->desc);
+          meta_topic (META_DEBUG_WINDOW_STATE,
+                      "Invalid WM_TRANSIENT_FOR window 0x%lx specified for %s.\n",
+                      transient_for, window->desc);
           transient_for = None;
         }
       else if (parent->override_redirect)
