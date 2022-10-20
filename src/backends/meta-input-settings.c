@@ -1952,9 +1952,8 @@ power_save_mode_changed_cb (MetaMonitorManager *manager,
 }
 
 static void
-meta_input_settings_constructed (GObject *object)
+refresh_input_settings (MetaInputSettings *input_settings)
 {
-  MetaInputSettings *input_settings = META_INPUT_SETTINGS (object);
   GSList *devices, *d;
 
   devices = meta_input_settings_get_devices (input_settings, CLUTTER_TOUCHPAD_DEVICE);
@@ -1966,6 +1965,14 @@ meta_input_settings_constructed (GObject *object)
   apply_device_settings (input_settings, NULL);
   update_keyboard_repeat (input_settings);
   check_mappable_devices (input_settings);
+}
+
+static void
+meta_input_settings_constructed (GObject *object)
+{
+  MetaInputSettings *input_settings = META_INPUT_SETTINGS (object);
+
+  refresh_input_settings (input_settings);
 }
 
 static void
@@ -2739,4 +2746,12 @@ meta_input_settings_maybe_restore_numlock_state (MetaInputSettings *input_settin
 
   numlock_state = g_settings_get_boolean (priv->keyboard_settings, "numlock-state");
   meta_backend_set_numlock (meta_get_backend (), numlock_state);
+}
+
+void
+meta_input_settings_refresh (MetaInputSettings *input_settings)
+{
+    g_return_if_fail (META_IS_INPUT_SETTINGS (input_settings));
+
+    refresh_input_settings (input_settings);
 }

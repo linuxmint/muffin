@@ -985,6 +985,8 @@ meta_display_open (void)
 
   display->sound_player = g_object_new (META_TYPE_SOUND_PLAYER, NULL);
 
+  meta_input_settings_refresh (meta_backend_get_input_settings (backend));
+
   /* Done opening new display */
   display->display_opening = FALSE;
 
