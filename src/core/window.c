@@ -3502,9 +3502,6 @@ meta_window_tile (MetaWindow   *window,
   meta_window_maximize_internal (window, directions, maybe_saved_rect);
   meta_display_update_tile_preview (window->display, FALSE);
 
-  /* Setup the edge constraints */
-  update_edge_constraints (window);
-
   if ((!window->htile_match || window->htile_match != window->display->grab_window) &&
       (!window->vtile_match || window->vtile_match != window->display->grab_window))
     {
