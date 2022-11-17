@@ -1,3 +1,19 @@
+muffin (5.6.0) vera; urgency=medium
+
+  [ Michael Webster ]
+  * Use github instead of circleci.
+  * tooltips: ensure tooltips are viewable.
+  * window-props: Change a warning to a debug message.
+  * meta-input-settings: Re-apply settings once the display is done setting up.
+
+  [ Rick Calixte ]
+  * Support multiple key bindings for 'locate-pointer-key' (#638)
+
+  [ Cobinja ]
+  * Revert renaming of the X11 atoms wm_name and gnome_wm_keybindings
+
+ -- Clement Lefebvre <root@linuxmint.com>  Thu, 17 Nov 2022 10:01:55 +0000
+
 muffin (5.4.7) vanessa; urgency=medium
 
   [ Fabio Fantoni ]
