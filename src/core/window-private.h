@@ -238,6 +238,7 @@ struct _MetaWindow
   guint maximize_horizontally_after_placement : 1;
   guint maximize_vertically_after_placement : 1;
   guint minimize_after_placement : 1;
+  guint move_after_placement : 1;
 
   /* The current tile mode */
   MetaTileMode tile_mode;

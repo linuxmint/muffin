@@ -2386,7 +2386,7 @@ libmuffin.so.0 libmuffin0 #MINVER#
  meta_prefs_get_auto_raise@Base 5.3.0
  meta_prefs_get_auto_raise_delay@Base 5.3.0
  meta_prefs_get_button_layout@Base 5.3.0
- meta_prefs_get_center_new_windows@Base 5.3.0
+ meta_prefs_get_new_window_placement_mode@Base 5.3.0
  meta_prefs_get_check_alive_timeout@Base 5.3.0
  meta_prefs_get_cursor_size@Base 5.3.0
  meta_prefs_get_cursor_theme@Base 5.3.0

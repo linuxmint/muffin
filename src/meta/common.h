@@ -548,6 +548,25 @@ typedef enum
   META_LAYER_LAST	       = 8
 } MetaStackLayer;
 
+
+/**
+ * MetaPlacementMode:
+ * @META_PLACEMENT_MODE_AUTOMATIC: Automatic
+ * @META_PLACEMENT_MODE_POINTER: Pointer
+ * @META_PLACEMENT_MODE_MANUAL: Manual
+ * @META_PLACEMENT_MODE_CENTER: Center
+ *
+ * How new windows should be placed.
+ */
+typedef enum
+{
+  META_PLACEMENT_MODE_AUTOMATIC,
+  META_PLACEMENT_MODE_POINTER,
+  META_PLACEMENT_MODE_MANUAL,
+  META_PLACEMENT_MODE_CENTER
+} MetaPlacementMode;
+
+
 /* MetaGravity: (skip)
  *
  * Identical to the corresponding gravity value macros from libX11.

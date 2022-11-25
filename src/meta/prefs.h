@@ -65,7 +65,7 @@
  * @META_PREF_WORKSPACES_ONLY_ON_PRIMARY: workspaces only on primary
  * @META_PREF_DRAGGABLE_BORDER_WIDTH: draggable border width
  * @META_PREF_AUTO_MAXIMIZE: auto-maximize
- * @META_PREF_CENTER_NEW_WINDOWS: center new windows
+ * @META_PREF_NEW_WINDOW_PLACEMENT_MODE: new window placement mode
  * @META_PREF_DRAG_THRESHOLD: drag threshold
  * @META_PREF_LOCATE_POINTER: show pointer location
  * @META_PREF_GTK_THEME: gtk theme name
@@ -110,7 +110,7 @@ typedef enum
   META_PREF_WORKSPACES_ONLY_ON_PRIMARY,
   META_PREF_DRAGGABLE_BORDER_WIDTH,
   META_PREF_AUTO_MAXIMIZE,
-  META_PREF_CENTER_NEW_WINDOWS,
+  META_PREF_NEW_WINDOW_PLACEMENT_MODE,
   META_PREF_DRAG_THRESHOLD,
   META_PREF_LOCATE_POINTER,
   META_PREF_CHECK_ALIVE_TIMEOUT,
@@ -211,7 +211,7 @@ META_EXPORT
 gboolean                    meta_prefs_get_auto_maximize      (void);
 
 META_EXPORT
-gboolean                    meta_prefs_get_center_new_windows (void);
+MetaPlacementMode           meta_prefs_get_new_window_placement_mode (void);
 
 META_EXPORT
 gboolean                    meta_prefs_get_show_fallback_app_menu (void);

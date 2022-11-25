@@ -93,7 +93,7 @@ static MetaKeyCombo locate_pointer_key_combo = { 0, 0, 0 };
 static CDesktopFocusMode focus_mode = C_DESKTOP_FOCUS_MODE_CLICK;
 static CDesktopFocusNewWindows focus_new_windows = C_DESKTOP_FOCUS_NEW_WINDOWS_SMART;
 static gboolean raise_on_click = TRUE;
-static gboolean center_new_windows = FALSE;
+static MetaPlacementMode new_window_placement_mode = META_PLACEMENT_MODE_AUTOMATIC;
 static gboolean attach_modal_dialogs = FALSE;
 static int num_workspaces = 4;
 static gboolean workspace_cycle = FALSE;
@@ -271,6 +271,13 @@ static MetaEnumPreference preferences_enum[] =
       &focus_mode,
     },
     {
+      { "placement-mode",
+        SCHEMA_MUFFIN,
+        META_PREF_NEW_WINDOW_PLACEMENT_MODE,
+      },
+      &new_window_placement_mode,
+    },
+    {
       { "visual-bell-type",
         SCHEMA_GENERAL,
         META_PREF_VISUAL_BELL_TYPE,
@@ -323,13 +330,6 @@ static MetaBoolPreference preferences_bool[] =
         META_PREF_ATTACH_MODAL_DIALOGS,
       },
       &attach_modal_dialogs,
-    },
-    {
-      { "center-new-windows",
-        SCHEMA_MUFFIN,
-        META_PREF_CENTER_NEW_WINDOWS,
-      },
-      &center_new_windows,
     },
     {
       { "raise-on-click",
@@ -1311,10 +1311,10 @@ meta_prefs_get_focus_new_windows (void)
   return focus_new_windows;
 }
 
-gboolean
-meta_prefs_get_center_new_windows (void)
+MetaPlacementMode
+meta_prefs_get_new_window_placement_mode (void)
 {
-  return center_new_windows;
+  return new_window_placement_mode;
 }
 
 gboolean
@@ -1850,8 +1850,8 @@ meta_preference_to_string (MetaPreference pref)
     case META_PREF_FOCUS_NEW_WINDOWS:
       return "FOCUS_NEW_WINDOWS";
 
-    case META_PREF_CENTER_NEW_WINDOWS:
-      return "CENTER_NEW_WINDOWS";
+    case META_PREF_NEW_WINDOW_PLACEMENT_MODE:
+      return "NEW_WINDOW_PLACEMENT_MODE";
 
     case META_PREF_ATTACH_MODAL_DIALOGS:
       return "ATTACH_MODAL_DIALOGS";

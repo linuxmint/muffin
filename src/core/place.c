@@ -75,6 +75,32 @@ northwestcmp (gconstpointer a, gconstpointer b)
     return 0;
 }
 
+
+static gboolean
+place_by_pointer(MetaWindow *window,
+                 MetaPlacementMode placement_mode,
+                 int *new_x,
+                 int *new_y)
+{
+  MetaBackend *backend = meta_get_backend ();
+  MetaCursorTracker *cursor_tracker = meta_backend_get_cursor_tracker (backend);
+  int root_x, root_y;
+
+  meta_cursor_tracker_get_pointer (cursor_tracker, &root_x, &root_y, NULL);
+
+  MetaRectangle frame_rect;
+  meta_window_get_frame_rect (window, &frame_rect);
+
+  *new_x = root_x - frame_rect.width / 2;
+  *new_y = root_y - frame_rect.height / 2;
+
+  if (placement_mode == META_PLACEMENT_MODE_MANUAL)
+    window->move_after_placement = TRUE;
+
+  return TRUE;
+}
+
+
 static void
 find_next_cascade (MetaWindow *window,
                    /* visible windows on relevant workspaces */
@@ -323,7 +349,8 @@ window_place_centered (MetaWindow *window)
   return (type == META_WINDOW_DIALOG ||
     type == META_WINDOW_MODAL_DIALOG ||
     type == META_WINDOW_SPLASHSCREEN ||
-    (type == META_WINDOW_NORMAL && meta_prefs_get_center_new_windows ()));
+    (type == META_WINDOW_NORMAL &&
+     meta_prefs_get_new_window_placement_mode () == META_PLACEMENT_MODE_CENTER));
 }
 
 static void
@@ -668,6 +695,7 @@ meta_window_place (MetaWindow        *window,
   MetaBackend *backend = meta_get_backend ();
   GList *windows = NULL;
   MetaLogicalMonitor *logical_monitor;
+  MetaPlacementMode placement_mode;
 
   meta_topic (META_DEBUG_PLACEMENT, "Placing window %s\n", window->desc);
 
@@ -883,6 +911,18 @@ meta_window_place (MetaWindow        *window,
   /* "Origin" placement algorithm */
   x = logical_monitor->rect.x;
   y = logical_monitor->rect.y;
+
+
+  /* Placement based on pointer position */
+  placement_mode = meta_prefs_get_new_window_placement_mode();
+
+  if (placement_mode == META_PLACEMENT_MODE_POINTER ||
+      placement_mode == META_PLACEMENT_MODE_MANUAL)
+    {
+      if (place_by_pointer (window, placement_mode, &x, &y))
+        goto done_check_denied_focus;
+    }
+
 
   if (find_first_fit (window, windows,
                       logical_monitor,
