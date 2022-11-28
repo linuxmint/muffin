@@ -138,11 +138,7 @@
 
     <key name="center-new-windows" type="b">
       <default>false</default>
-      <summary>Place new windows in the center</summary>
-      <description>
-        When true, the new windows will always be put in the center of the
-        active screen of the monitor.
-      </description>
+      <summary>Obsolete — not used</summary>
     </key>
 
     <key name="placement-mode" enum="placement_mode">
