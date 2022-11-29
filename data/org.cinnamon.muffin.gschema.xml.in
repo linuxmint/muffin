@@ -5,6 +5,13 @@
     <value value="2" nick="blend"/>
   </enum>
 
+  <enum id="placement_mode">
+    <value value="0" nick="automatic"/>
+    <value value="1" nick="pointer"/>
+    <value value="2" nick="manual"/>
+    <value value="3" nick="center"/>
+  </enum>
+
   <schema id="org.cinnamon.muffin" path="/org/cinnamon/muffin/"
           gettext-domain="@GETTEXT_DOMAIN@">
 
@@ -131,10 +138,27 @@
 
     <key name="center-new-windows" type="b">
       <default>false</default>
-      <summary>Place new windows in the center</summary>
+      <summary>Obsolete — not used</summary>
+    </key>
+
+    <key name="placement-mode" enum="placement_mode">
+      <default>'automatic'</default>
+      <summary>Window placement mode</summary>
       <description>
-        When true, the new windows will always be put in the center of the
-        active screen of the monitor.
+        The window placement mode indicates how new windows are positioned.
+
+        • “automatic” — the system chooses a location automatically based on
+                        the space available on the desktop, or by a simple
+                        cascade if there is no space
+
+        • “pointer”   — new windows are placed according to the mouse pointer
+                        position
+
+        • “manual”    — the user must manually place the new window with the
+                        mouse or keyboard.
+
+        • “center”    — new windows are always put in the center of the active
+                        screen of the monitor
       </description>
     </key>
 

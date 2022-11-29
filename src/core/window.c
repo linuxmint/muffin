@@ -1127,6 +1127,7 @@ _meta_window_shared_new (MetaDisplay         *display,
   window->maximize_horizontally_after_placement = FALSE;
   window->maximize_vertically_after_placement = FALSE;
   window->minimize_after_placement = FALSE;
+  window->move_after_placement = FALSE;
   window->fullscreen = FALSE;
   window->require_fully_onscreen = TRUE;
   window->require_on_single_monitor = TRUE;
@@ -2631,6 +2632,14 @@ meta_window_show (MetaWindow *window)
           timestamp = meta_display_get_current_time_roundtrip (window->display);
 
           meta_window_focus (window, timestamp);
+
+          if (window->move_after_placement)
+            {
+              timestamp = meta_display_get_current_time_roundtrip (window->display);
+              meta_window_begin_grab_op(window, META_GRAB_OP_KEYBOARD_MOVING,
+                                        FALSE, timestamp);
+              window->move_after_placement = FALSE;
+            }
         }
       else if (display->x11_display)
         {
