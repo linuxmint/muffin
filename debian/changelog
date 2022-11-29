@@ -1,3 +1,13 @@
+muffin (5.6.1) vera; urgency=medium
+
+  [ Duncan Grisby ]
+  * Bring back window placement-mode  (#649)
+
+  [ Michael Webster ]
+  * Update debian symbols file.
+
+ -- Clement Lefebvre <root@linuxmint.com>  Tue, 29 Nov 2022 16:32:53 +0000
+
 muffin (5.6.0) vera; urgency=medium
 
   [ Michael Webster ]
