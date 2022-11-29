@@ -1273,6 +1273,9 @@ libmuffin-clutter-0.so.0 libmuffin0 #MINVER#
  clutter_text_set_single_line_mode@Base 5.3.0
  clutter_text_set_text@Base 5.3.0
  clutter_text_set_use_markup@Base 5.3.0
+ clutter_texture_content_get_texture@Base 5.4.1
+ clutter_texture_content_get_type@Base 5.4.1
+ clutter_texture_content_new_from_texture@Base 5.4.1
  clutter_texture_flags_get_type@Base 5.3.0
  clutter_texture_node_get_type@Base 5.3.0
  clutter_texture_node_new@Base 5.3.0
@@ -2357,6 +2360,7 @@ libmuffin.so.0 libmuffin0 #MINVER#
  meta_output_unassign_crtc@Base 5.3.0
  meta_override_compositor_configuration@Base 5.3.0
  meta_pad_action_type_get_type@Base 5.3.0
+ meta_placement_mode_get_type@Base 5.6.1
  meta_plugin_begin_modal@Base 5.3.0
  meta_plugin_complete_display_change@Base 5.3.0
  meta_plugin_destroy_completed@Base 5.3.0
@@ -2385,8 +2389,9 @@ libmuffin.so.0 libmuffin0 #MINVER#
  meta_prefs_get_auto_maximize@Base 5.3.0
  meta_prefs_get_auto_raise@Base 5.3.0
  meta_prefs_get_auto_raise_delay@Base 5.3.0
+ meta_prefs_get_bell_sound@Base 5.4.1
+ meta_prefs_get_bring_windows_to_current_workspace@Base 5.4.2
  meta_prefs_get_button_layout@Base 5.3.0
- meta_prefs_get_center_new_windows@Base 5.3.0
  meta_prefs_get_check_alive_timeout@Base 5.3.0
  meta_prefs_get_cursor_size@Base 5.3.0
  meta_prefs_get_cursor_theme@Base 5.3.0
@@ -2401,6 +2406,7 @@ libmuffin.so.0 libmuffin0 #MINVER#
  meta_prefs_get_force_fullscreen@Base 5.3.0
  meta_prefs_get_gnome_accessibility@Base 5.3.0
  meta_prefs_get_gnome_animations@Base 5.3.0
+ meta_prefs_get_invert_flip_direction@Base 5.4.7
  meta_prefs_get_keybinding_action@Base 5.3.0
  meta_prefs_get_min_win_opacity@Base 5.3.0
  meta_prefs_get_mouse_button_menu@Base 5.3.0
@@ -2408,6 +2414,7 @@ libmuffin.so.0 libmuffin0 #MINVER#
  meta_prefs_get_mouse_button_resize@Base 5.3.0
  meta_prefs_get_mouse_button_zoom_mods@Base 5.3.0
  meta_prefs_get_mouse_zoom_enabled@Base 5.3.0
+ meta_prefs_get_new_window_placement_mode@Base 5.6.1
  meta_prefs_get_num_workspaces@Base 5.3.0
  meta_prefs_get_raise_on_click@Base 5.3.0
  meta_prefs_get_show_fallback_app_menu@Base 5.3.0
@@ -2605,6 +2612,7 @@ libmuffin.so.0 libmuffin0 #MINVER#
  meta_window_get_maximized@Base 5.3.0
  meta_window_get_monitor@Base 5.3.0
  meta_window_get_mutter_hints@Base 5.3.0
+ meta_window_get_opacity@Base 5.4.2
  meta_window_get_pid@Base 5.3.0
  meta_window_get_role@Base 5.3.0
  meta_window_get_sandboxed_app_id@Base 5.3.0
@@ -2658,6 +2666,7 @@ libmuffin.so.0 libmuffin0 #MINVER#
  meta_window_set_compositor_private@Base 5.3.0
  meta_window_set_demands_attention@Base 5.3.0
  meta_window_set_icon_geometry@Base 5.3.0
+ meta_window_set_opacity@Base 5.4.2
  meta_window_shade@Base 5.3.0
  meta_window_shape_equal@Base 5.3.0
  meta_window_shape_get_borders@Base 5.3.0
