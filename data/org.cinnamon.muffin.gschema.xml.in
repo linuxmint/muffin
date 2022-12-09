@@ -128,7 +128,7 @@
     </key>
 
     <key name="auto-maximize" type="b">
-      <default>true</default>
+      <default>false</default>
       <summary>Auto maximize nearly monitor sized windows</summary>
       <description>
         If enabled, new windows that are initially the size of the monitor
