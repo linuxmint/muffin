@@ -1380,10 +1380,10 @@ meta_compositor_dispose (GObject *object)
                           priv->top_window_actor);
 
   g_clear_pointer (&priv->background_actor, clutter_actor_destroy);
+  g_clear_pointer (&priv->bottom_window_group, clutter_actor_destroy);
   g_clear_pointer (&priv->desklet_container, clutter_actor_destroy);
   g_clear_pointer (&priv->window_group, clutter_actor_destroy);
   g_clear_pointer (&priv->top_window_group, clutter_actor_destroy);
-  g_clear_pointer (&priv->bottom_window_group, clutter_actor_destroy);
   g_clear_pointer (&priv->feedback_group, clutter_actor_destroy);
   g_clear_pointer (&priv->windows, g_list_free);
 
