@@ -3287,8 +3287,7 @@ meta_window_get_tile_fractions (MetaWindow   *window,
 static void
 meta_window_update_tile_fractions (MetaWindow *window,
                                    int         new_w,
-                                   int         new_h,
-                                   gboolean    in_update_resize)
+                                   int         new_h)
 {
   MetaWindow *vtile_match = window->vtile_match;
   MetaWindow *htile_match = window->htile_match;
@@ -3304,10 +3303,10 @@ meta_window_update_tile_fractions (MetaWindow *window,
   window->tile_vfraction = (double)new_h / work_area.height;
 
   if (htile_match && window->display->grab_window == window)
-    meta_window_tile (htile_match, htile_match->tile_mode, in_update_resize);
+    meta_window_tile (htile_match, htile_match->tile_mode);
 
   if (vtile_match && window->display->grab_window == window)
-    meta_window_tile (vtile_match, vtile_match->tile_mode, in_update_resize);
+    meta_window_tile (vtile_match, vtile_match->tile_mode);
 }
 
 static void
@@ -3457,10 +3456,10 @@ update_edge_constraints (MetaWindow *window)
 
 void
 meta_window_tile (MetaWindow   *window,
-                  MetaTileMode  tile_mode,
-                  gboolean      in_update_resize)
+                  MetaTileMode  tile_mode)
 {
   MetaMaximizeFlags directions;
+
   /* Maximization constraints beat tiling constraints, so if the window
    * is maximized, tiling won't have any effect unless we unmaximize it
    * horizontally first; rather than calling meta_window_unmaximize(),
@@ -3506,12 +3505,14 @@ meta_window_tile (MetaWindow   *window,
   /* Setup the edge constraints */
   update_edge_constraints (window);
 
-  if (!in_update_resize)
+  if ((!window->htile_match || window->htile_match != window->display->grab_window) &&
+      (!window->vtile_match || window->vtile_match != window->display->grab_window))
     {
       MetaRectangle old_frame_rect, old_buffer_rect;
 
       meta_window_get_frame_rect (window, &old_frame_rect);
       meta_window_get_buffer_rect (window, &old_buffer_rect);
+
       meta_compositor_size_change_window (window->display->compositor, window,
                                           META_SIZE_CHANGE_TILE,
                                           &old_frame_rect, &old_buffer_rect);
@@ -3540,8 +3541,8 @@ meta_window_restore_tile (MetaWindow   *window,
                           int           width,
                           int           height)
 {
-  meta_window_update_tile_fractions (window, width, height, FALSE);
-  meta_window_tile (window, mode, FALSE);
+  meta_window_update_tile_fractions (window, width, height);
+  meta_window_tile (window, mode);
 }
 
 static gboolean
@@ -4727,7 +4728,7 @@ meta_window_resize_frame_with_gravity (MetaWindow *window,
        */
       if (window->display->grab_window == window)
         adjust_size_for_tile_match (window, &w, &h);
-      meta_window_update_tile_fractions (window, w, h, TRUE);
+      meta_window_update_tile_fractions (window, w, h);
     }
 
   flags = (user_op ? META_MOVE_RESIZE_USER_ACTION : 0) | META_MOVE_RESIZE_RESIZE_ACTION;
@@ -6899,7 +6900,7 @@ end_grab_op (MetaWindow *window,
       if (meta_grab_op_is_moving (window->display->grab_op))
         {
           if (window->display->preview_tile_mode != META_TILE_NONE)
-            meta_window_tile (window, window->display->preview_tile_mode, FALSE);
+            meta_window_tile (window, window->display->preview_tile_mode);
           else
             update_move (window,
                          modifiers & CLUTTER_SHIFT_MASK,

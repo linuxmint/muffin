@@ -686,8 +686,7 @@ void        meta_window_queue              (MetaWindow  *window,
                                             guint queuebits);
 META_EXPORT_TEST
 void        meta_window_tile               (MetaWindow        *window,
-                                            MetaTileMode       mode,
-                                            gboolean           in_update_resize);
+                                            MetaTileMode       mode);
 MetaTileMode meta_window_get_tile_mode     (MetaWindow        *window);
 void        meta_window_restore_tile       (MetaWindow        *window,
                                             MetaTileMode       mode,

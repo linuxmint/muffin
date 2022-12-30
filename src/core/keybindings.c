@@ -3672,7 +3672,7 @@ handle_tile_action (MetaDisplay     *display,
     {
       window->tile_monitor_number = window->monitor->number;
       window->tile_mode = META_TILE_NONE;
-      meta_window_tile (window, new_mode, FALSE);
+      meta_window_tile (window, new_mode);
     }
 }
 
