@@ -2284,7 +2284,10 @@ window_is_terminal (MetaWindow *window)
   /* Terminal -- XFCE Terminal */
   else if (strcmp (window->res_class, "Terminal") == 0)
     return TRUE;
-
+  else if (strcmp (window->res_class, "Tilix") == 0)
+    return TRUE;
+  else if (strcmp (window->res_class, "qterminal") == 0)
+    return TRUE;
   return FALSE;
 }
 
