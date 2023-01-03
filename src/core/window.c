@@ -4043,12 +4043,31 @@ meta_window_activate_full (MetaWindow     *window,
   if (timestamp != 0 &&
       XSERVER_TIME_IS_BEFORE (timestamp, window->display->last_user_time))
     {
-      meta_topic (META_DEBUG_FOCUS,
-                  "last_user_time (%u) is more recent; ignoring "
-                  " _NET_ACTIVE_WINDOW message.\n",
-                  window->display->last_user_time);
-      meta_window_set_demands_attention(window);
-      return;
+      // If the window is modal its parent is currently the focused window, always give
+      // focus, even if its timestamp is wrong. Check also for an xdg-portal dialog, which
+      // probably won't have the correct timestamp either.
+      //
+      // Otherwise, these windows will either start below their parent window, or they may
+      // start above the parent, but with the parent retaining focus.
+      if (window->type == META_WINDOW_MODAL_DIALOG &&
+              ((window->transient_for && window->display->focus_window == window->transient_for) ||
+              g_strcmp0 (window->res_class, "Xdg-desktop-portal-gtk") == 0))
+        {
+          meta_topic (META_DEBUG_FOCUS,
+                      "Window is a modal dialog and and its parent is currently focused, or it's an xdg-desktop-portal-gtk dialog), "
+                      "adjusting its timestamp so it will be focused and brought forward.\n");
+
+          timestamp = meta_display_get_current_time_roundtrip (window->display);
+        }
+      else
+        {
+          meta_topic (META_DEBUG_FOCUS,
+                      "last_user_time (%u) is more recent; ignoring "
+                      " _NET_ACTIVE_WINDOW message.\n",
+                      window->display->last_user_time);
+          meta_window_set_demands_attention(window);
+          return;
+        }
     }
 
   if (timestamp == 0)
