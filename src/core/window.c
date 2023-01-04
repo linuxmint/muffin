@@ -2390,12 +2390,16 @@ windows_overlap (const MetaWindow *w1, const MetaWindow *w2)
  * (say) ninety per cent and almost indistinguishable from total.
  */
 static gboolean
-window_would_be_covered (const MetaWindow *newbie)
+window_may_be_covered_by_above (const MetaWindow *newbie)
 {
+  MetaBackend *backend = meta_get_backend ();
+  MetaLogicalMonitor *monitor;
   MetaWorkspace *workspace = meta_window_get_workspace ((MetaWindow *)newbie);
   GList *tmp, *windows;
 
+  monitor = meta_backend_get_current_logical_monitor (backend);
   windows = meta_workspace_list_windows (workspace);
+  gboolean overlaps = FALSE;
 
   tmp = windows;
   while (tmp != NULL)
@@ -2404,11 +2408,41 @@ window_would_be_covered (const MetaWindow *newbie)
 
       if (w->wm_state_above && w != newbie)
         {
-          /* We have found a window that is "above". Perhaps it overlaps. */
-          if (windows_overlap (w, newbie))
+          /* We have found a window that is "above". Do some tests. This is run before
+           * newbie is actually placed, so its position and monitor are not yet accurate,
+           * but it's not feasible to do it after either (because then it's too late). These
+           * tests can eliminate a lot of silly false positives, however. */
+
+          // Minimized - no overlap
+          if (w->minimized)
             {
-              g_list_free (windows); /* clean up... */
-              return TRUE; /* yes, it does */
+              tmp = tmp->next;
+              continue;
+            }
+
+          // Maximized, same monitor, overlap.
+          if (w->monitor->number == monitor->number && meta_window_get_maximized (w))
+            {
+              overlaps = TRUE;
+              break;
+            }
+
+          MetaRectangle w_rect, w_in_area_rect, work_area;
+          meta_window_get_frame_rect (w, &w_rect);
+          meta_workspace_get_work_area_for_monitor (workspace, monitor->number, &work_area);
+
+          // If the above window is at least partially on the target monitor, check if the new window
+          // would theoretically have enough room leftover to be completely uncovered. This is no
+          // guarantee it *will* be uncovered, but it's the best we can do without an accurate position
+          // for the new window.
+          if (meta_rectangle_intersect (&work_area, &w_rect, &w_in_area_rect))
+            {
+              if ((newbie->rect.width + w_in_area_rect.width > work_area.width) &&
+                  (newbie->rect.height + w_in_area_rect.height > work_area.height))
+                {
+                  overlaps = TRUE;
+                  break;
+                }
             }
         }
 
@@ -2416,7 +2450,7 @@ window_would_be_covered (const MetaWindow *newbie)
     }
 
   g_list_free (windows);
-  return FALSE; /* none found */
+  return overlaps;
 }
 
 void
@@ -2499,7 +2533,7 @@ meta_window_show (MetaWindow *window)
 
   if ( focus_window != NULL && window->showing_for_first_time &&
       ( (!place_on_top_on_map && !takes_focus_on_map) ||
-      window_would_be_covered (window) )
+      window_may_be_covered_by_above (window) )
     ) {
       if (!meta_window_is_ancestor_of_transient (focus_window, window))
         {
