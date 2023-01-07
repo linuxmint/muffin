@@ -1,3 +1,17 @@
+muffin (5.6.3) vera; urgency=medium
+
+  [ Bobby Rong ]
+  * compositor: Fix possible crash when restarting Cinnamon (#655)
+
+  [ Michael Webster ]
+  * tiling: Skip the resize effect for tiled windows during user grabs.
+  * tiling: Remove unnecessary update_edge_constraints().
+  * Add tilix and qterminal to the new-window focus list.
+  * window activation: Detect a couple of conditions that might cause initial window focus and stacking to be wrong (mostly because of bad timestamps), and correct them.
+  * window.c: Improve the test for checking if an 'above' window may cover a new window.
+
+ -- Clement Lefebvre <root@linuxmint.com>  Sat, 07 Jan 2023 15:54:38 +0000
+
 muffin (5.6.2) vera; urgency=medium
 
   [ Michael Webster ]
