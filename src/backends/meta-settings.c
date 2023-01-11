@@ -223,6 +223,12 @@ meta_settings_update_font_dpi (MetaSettings *settings)
     g_signal_emit (settings, signals[FONT_DPI_CHANGED], 0);
 }
 
+double
+meta_settings_get_font_scaling_factor(MetaSettings *settings)
+{
+    return g_settings_get_double (settings->interface_settings, "text-scaling-factor");
+}
+
 int
 meta_settings_get_font_dpi (MetaSettings *settings)
 {

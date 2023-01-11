@@ -98,6 +98,10 @@ static int
 get_current_dpi_scale (MetaMonitorManagerXrandr *manager_xrandr,
                        MetaGpuXrandr            *gpu_xrandr)
 {
+  MetaMonitorManager *monitor_manager = META_MONITOR_MANAGER (manager_xrandr);
+  MetaBackend *backend = meta_monitor_manager_get_backend (monitor_manager);
+  MetaSettings *settings = meta_backend_get_settings (backend);
+
   Atom actual;
   int result, format;
   unsigned long n, left;
@@ -109,10 +113,6 @@ get_current_dpi_scale (MetaMonitorManagerXrandr *manager_xrandr,
   if (gpu_xrandr->resources->timestamp ==
       meta_monitor_manager_xrandr_get_config_timestamp (manager_xrandr))
     {
-      MetaMonitorManager *monitor_manager = META_MONITOR_MANAGER (manager_xrandr);
-      MetaBackend *backend = meta_monitor_manager_get_backend (monitor_manager);
-      MetaSettings *settings = meta_backend_get_settings (backend);
-
       return meta_settings_get_ui_scaling_factor (settings);
     }
 
@@ -139,7 +139,10 @@ get_current_dpi_scale (MetaMonitorManagerXrandr *manager_xrandr,
               dpi = g_ascii_strtoull (res[1], NULL, 10);
 
               if (dpi > 0 && dpi < 96 * 10)
-                return MAX (1, roundf ((float) dpi / 96.0f));
+                {
+                  double factor = meta_settings_get_font_scaling_factor (settings);
+                  return MAX (1, roundf ((float) dpi / 96.0f / factor));
+                }
             }
         }
     }
