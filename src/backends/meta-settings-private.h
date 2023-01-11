@@ -58,6 +58,8 @@ void meta_settings_update_ui_scaling_factor (MetaSettings *settings);
 gboolean meta_settings_get_global_scaling_factor (MetaSettings *settings,
                                                   int          *scaing_factor);
 
+double meta_settings_get_font_scaling_factor (MetaSettings *settings);
+
 META_EXPORT_TEST
 gboolean meta_settings_is_experimental_feature_enabled (MetaSettings           *settings,
                                                         MetaExperimentalFeature feature);
