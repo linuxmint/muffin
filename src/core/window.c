@@ -7871,9 +7871,10 @@ meta_window_get_display (MetaWindow *window)
 }
 
 /**
- * meta_window_get_xwindow: (skip)
+ * meta_window_get_xwindow:
  * @window: a #MetaWindow
  *
+ * Returns: (type gulong): The Window (XID) of @window
  */
 Window
 meta_window_get_xwindow (MetaWindow *window)
