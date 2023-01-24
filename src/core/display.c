@@ -149,6 +149,9 @@ enum
   PAD_MODE_SWITCH,
   WINDOW_ENTERED_MONITOR,
   WINDOW_LEFT_MONITOR,
+  WINDOW_MONITOR_CHANGED,
+  WINDOW_WORKSPACE_CHANGED,
+  WINDOW_SKIP_TASKBAR_CHANGED,
   WORKSPACE_ADDED,
   WORKSPACE_REMOVED,
   WORKSPACE_SWITCHED,
@@ -468,6 +471,35 @@ meta_display_class_init (MetaDisplayClass *klass)
                   0, NULL, NULL, NULL,
                   G_TYPE_NONE, 2,
                   G_TYPE_INT,
+                  META_TYPE_WINDOW);
+
+  display_signals[WINDOW_MONITOR_CHANGED] =
+    g_signal_new ("window-monitor-changed",
+                  G_TYPE_FROM_CLASS (klass),
+                  G_SIGNAL_RUN_LAST,
+                  0,
+                  NULL, NULL, NULL,
+                  G_TYPE_NONE, 2,
+                  META_TYPE_WINDOW,
+                  G_TYPE_INT);
+
+  display_signals[WINDOW_WORKSPACE_CHANGED] =
+    g_signal_new ("window-workspace-changed",
+                  G_TYPE_FROM_CLASS (klass),
+                  G_SIGNAL_RUN_LAST,
+                  0,
+                  NULL, NULL, NULL,
+                  G_TYPE_NONE, 2,
+                  META_TYPE_WINDOW,
+                  META_TYPE_WORKSPACE);
+
+  display_signals[WINDOW_SKIP_TASKBAR_CHANGED] =
+    g_signal_new ("window-skip-taskbar-changed",
+                  G_TYPE_FROM_CLASS (klass),
+                  G_SIGNAL_RUN_LAST,
+                  0,
+                  NULL, NULL, NULL,
+                  G_TYPE_NONE, 1,
                   META_TYPE_WINDOW);
 
   display_signals[IN_FULLSCREEN_CHANGED] =

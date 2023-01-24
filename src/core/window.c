@@ -1005,8 +1005,13 @@ meta_window_main_monitor_changed (MetaWindow               *window,
     g_signal_emit_by_name (window->display, "window-left-monitor",
                            old->number, window);
   if (window->monitor)
-    g_signal_emit_by_name (window->display, "window-entered-monitor",
-                           window->monitor->number, window);
+    {
+      g_signal_emit_by_name (window->display, "window-entered-monitor",
+                             window->monitor->number, window);
+
+      g_signal_emit_by_name (window->display, "window-monitor-changed",
+                             window, window->monitor->number);
+    }
 }
 
 MetaLogicalMonitor *
@@ -5320,6 +5325,7 @@ set_workspace_state (MetaWindow    *window,
   meta_window_current_workspace_changed (window);
   g_object_notify_by_pspec (G_OBJECT (window), obj_props[PROP_ON_ALL_WORKSPACES]);
   g_signal_emit (window, window_signals[WORKSPACE_CHANGED], 0);
+  g_signal_emit_by_name (window->display, "window-workspace-changed", window, window->workspace);
 }
 
 static gboolean
@@ -6238,7 +6244,10 @@ meta_window_recalc_features (MetaWindow *window)
               window->skip_pager);
 
   if (old_skip_taskbar != window->skip_taskbar)
-    g_object_notify_by_pspec (G_OBJECT (window), obj_props[PROP_SKIP_TASKBAR]);
+    {
+      g_object_notify_by_pspec (G_OBJECT (window), obj_props[PROP_SKIP_TASKBAR]);
+      g_signal_emit_by_name (window->display, "window-skip-taskbar-changed", window);
+    }
 
   /* FIXME:
    * Lame workaround for recalc_features being used overzealously.
