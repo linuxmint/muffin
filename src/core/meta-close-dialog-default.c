@@ -153,7 +153,7 @@ meta_close_dialog_default_show (MetaCloseDialog *dialog)
     tmp = g_strdup (_("Application is not responding."));
 
   window_content = g_strdup_printf (
-      "<big><b>%s</b></big>\n\n%s",
+      "<big>%s</big>\n\n%s",
       tmp,
       _("You may choose to wait a short while for it to "
         "continue or force the application to quit entirely."));
