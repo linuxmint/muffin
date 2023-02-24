@@ -171,6 +171,8 @@ static MetaWindow *meta_window_find_tile_match (MetaWindow   *window,
                                                 gboolean      vertical);
 static void update_edge_constraints (MetaWindow *window);
 
+static void notify_tile_mode (MetaWindow *window);
+
 /* Idle handlers for the three queues (run with meta_later_add()). The
  * "data" parameter in each case will be a GINT_TO_POINTER of the
  * index into the queue arrays to use.
@@ -3022,6 +3024,7 @@ meta_window_maximize (MetaWindow        *window,
           window->maximized_vertically = FALSE;
           window->tile_mode = META_TILE_NONE;
           from_tiled = TRUE;
+          notify_tile_mode (window);
         }
 
       meta_window_maximize_internal (window,
@@ -3491,11 +3494,20 @@ update_edge_constraints (MetaWindow *window)
     }
 }
 
+static void
+notify_tile_mode (MetaWindow *window)
+{
+  g_object_freeze_notify (G_OBJECT (window));
+  g_object_notify_by_pspec (G_OBJECT (window), obj_props[PROP_TILE_MODE]);
+  g_object_thaw_notify (G_OBJECT (window));
+}
+
 void
 meta_window_tile (MetaWindow   *window,
                   MetaTileMode  tile_mode)
 {
   MetaMaximizeFlags directions;
+  gboolean changed = FALSE;
 
   /* Maximization constraints beat tiling constraints, so if the window
    * is maximized, tiling won't have any effect unless we unmaximize it
@@ -3507,6 +3519,8 @@ meta_window_tile (MetaWindow   *window,
 
   window->maximized_horizontally = FALSE;
   window->maximized_vertically = FALSE;
+
+  changed = tile_mode != window->tile_mode;
   window->tile_mode = tile_mode;
 
   /* Don't do anything if no tiling is requested */
@@ -3561,6 +3575,9 @@ meta_window_tile (MetaWindow   *window,
 
   if (window->frame)
     meta_frame_queue_draw (window->frame);
+
+  if (changed)
+    notify_tile_mode (window);
 }
 
 MetaTileMode
@@ -3692,7 +3709,10 @@ meta_window_unmaximize (MetaWindow        *window,
       meta_window_get_buffer_rect (window, &old_buffer_rect);
 
       if (unmaximize_vertically)
-        window->tile_mode = META_TILE_NONE;
+        {
+          window->tile_mode = META_TILE_NONE;
+          notify_tile_mode (window);
+        }
 
       meta_topic (META_DEBUG_WINDOW_OPS,
                   "Unmaximizing %s%s\n",
@@ -6669,7 +6689,12 @@ update_move (MetaWindow  *window,
        * is enabled, as top edge tiling can be used in that case
        */
       window->shaken_loose = !meta_prefs_get_edge_tiling ();
-      window->tile_mode = META_TILE_NONE;
+
+      if (window->tile_mode != META_TILE_NONE)
+        {
+          window->tile_mode = META_TILE_NONE;
+          notify_tile_mode (window);
+        }
 
       /* move the unmaximized window to the cursor */
       prop =
@@ -6709,7 +6734,12 @@ update_move (MetaWindow  *window,
       MetaRectangle work_area;
       int monitor;
 
-      window->tile_mode = META_TILE_NONE;
+      if (window->tile_mode != META_TILE_NONE)
+        {
+          window->tile_mode = META_TILE_NONE;
+          notify_tile_mode (window);
+        }
+
       wmonitor = window->monitor;
       n_logical_monitors =
         meta_monitor_manager_get_num_logical_monitors (monitor_manager);
