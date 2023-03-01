@@ -36,6 +36,7 @@
 #include "meta/meta-backend.h"
 #include "meta/prefs.h"
 #include "meta/workspace.h"
+#include "meta/meta-cursor-tracker.h"
 
 typedef enum
 {
