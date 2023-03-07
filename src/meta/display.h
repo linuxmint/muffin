@@ -286,6 +286,10 @@ int meta_display_get_monitor_neighbor_index (MetaDisplay         *display,
                                              MetaDisplayDirection dir);
 
 META_EXPORT
+MetaWindow *meta_display_get_pointer_window (MetaDisplay *display,
+                                             MetaWindow  *not_this_one);
+
+META_EXPORT
 void meta_display_focus_default_window (MetaDisplay *display,
                                         guint32      timestamp);
 

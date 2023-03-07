@@ -3788,6 +3788,16 @@ meta_display_get_monitor_in_fullscreen (MetaDisplay *display,
   purposes */ return logical_monitor->in_fullscreen == TRUE;
 }
 
+/**
+ * meta_display_get_pointer_window:
+ * @display: the #MetaDisplay.
+ * @not_this_one: (nullable): window to be excluded
+ *
+ * Gets the #MetaWindow pointed by the mouse
+ *
+ * Return value: (transfer none): the #MetaWindow pointed by the mouse
+ *  %NULL when window not found
+ */
 MetaWindow *
 meta_display_get_pointer_window (MetaDisplay *display,
                                  MetaWindow  *not_this_one)
