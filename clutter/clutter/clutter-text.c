@@ -1807,7 +1807,6 @@ clutter_text_finalize (GObject *gobject)
 
   clutter_text_dirty_paint_volume (self);
 
-  clutter_text_set_buffer (self, NULL);
   g_free (priv->font_name);
 
   g_clear_object (&priv->input_focus);
