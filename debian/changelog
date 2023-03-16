@@ -1,3 +1,15 @@
+muffin (5.6.4) vera; urgency=medium
+
+  [ Michael Webster ]
+  * meta-gpu-xrandr: Account for the current user text scale factor when calculating the crtc scale based on Xft.dpi.
+  * window.c: Allow meta_window_get_xwindow() to be used with introspection.
+  * window.c: Restore property notify for the tile mode property.
+  * place.c: Add missing import.
+  * display.c: Make meta_display_get_pointer_window() available to cinnamon again.
+  * clutter-text.c: Remove redundant clutter_text_set_buffer call in finalize.
+
+ -- Clement Lefebvre <root@linuxmint.com>  Thu, 16 Mar 2023 13:59:23 +0000
+
 muffin (5.6.3) vera; urgency=medium
 
   [ Bobby Rong ]
