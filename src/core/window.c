@@ -6536,7 +6536,7 @@ get_tile_zone_at_pointer (MetaWindow         *window,
     zones |= ZONE_RIGHT;
   if (y >= BOX_TOP (lm_rect) && y <= (BOX_TOP (work_area) + ORIGIN_CONSTANT + up_shift))
     zones |= ZONE_TOP;
-  if ((y >= BOX_BOTTOM (work_area) - EXTREME_CONSTANT - down_shift) && y < BOX_RIGHT (lm_rect))
+  if ((y >= BOX_BOTTOM (work_area) - EXTREME_CONSTANT - down_shift) && y < BOX_BOTTOM (lm_rect))
     zones |= ZONE_BOTTOM;
 
   return zones;
