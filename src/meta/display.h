@@ -357,6 +357,9 @@ void meta_display_set_desklets_above (MetaDisplay *display, gboolean above);
 META_EXPORT
 gboolean meta_display_get_desklets_above (MetaDisplay *display);
 
+META_EXPORT
+void meta_display_push_tile (MetaDisplay *display, MetaWindow *window, MetaMotionDirection direction);
+
 #endif
 
 
