@@ -1,3 +1,19 @@
+muffin (5.8.0) victoria; urgency=medium
+
+  [ Michael Webster ]
+  * meta-gpu-xrandr: Account for the current user text scale factor when calculating the crtc scale based on Xft.dpi.
+  * window.c: Allow meta_window_get_xwindow() to be used with introspection.
+  * Restore some global signals.
+  * window.c: Restore property notify for the tile mode property.
+  * place.c: Add missing import.
+  * display.c: Make meta_display_get_pointer_window() available to cinnamon again.
+  * clutter-text.c: Remove redundant clutter_text_set_buffer call in finalize.
+  * window.c: Fix copy/paste error in tile zone detection.
+  * github workflow: Add optional ssh session.
+  * tiling: Expose tile 'push' actions that are currently used by keybindings.
+
+ -- Clement Lefebvre <root@linuxmint.com>  Thu, 01 Jun 2023 16:15:07 +0100
+
 muffin (5.6.3) vera; urgency=medium
 
   [ Bobby Rong ]
