@@ -8,7 +8,7 @@
       <monitor>
         <monitorspec>
           <connector>DP-1</connector>
-          <vendor>MetaProduct's Inc.</vendor>
+          <vendor>MetaProduct&apos;s Inc.</vendor>
           <product>MetaMonitor</product>
           <serial>0x123456</serial>
         </monitorspec>
@@ -22,7 +22,7 @@
     <disabled>
       <monitorspec>
         <connector>DP-2</connector>
-        <vendor>MetaProduct's Inc.</vendor>
+        <vendor>MetaProduct&apos;s Inc.</vendor>
         <product>MetaMonitor</product>
         <serial>0x654321</serial>
       </monitorspec>

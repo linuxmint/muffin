@@ -1155,19 +1155,34 @@ append_monitor_spec (GString         *buffer,
                      MetaMonitorSpec *monitor_spec,
                      const char      *indentation)
 {
+  char *escaped;
+
   g_string_append_printf (buffer, "%s<monitorspec>\n", indentation);
+
+  escaped = g_markup_escape_text (monitor_spec->connector, -1);
   g_string_append_printf (buffer, "%s  <connector>%s</connector>\n",
                           indentation,
-                          monitor_spec->connector);
+                          escaped);
+  g_free (escaped);
+
+  escaped = g_markup_escape_text (monitor_spec->vendor, -1);
   g_string_append_printf (buffer, "%s  <vendor>%s</vendor>\n",
                           indentation,
-                          monitor_spec->vendor);
+                          escaped);
+  g_free (escaped);
+
+  escaped = g_markup_escape_text (monitor_spec->product, -1);
   g_string_append_printf (buffer, "%s  <product>%s</product>\n",
                           indentation,
-                          monitor_spec->product);
+                          escaped);
+  g_free (escaped);
+
+  escaped = g_markup_escape_text (monitor_spec->serial, -1);
   g_string_append_printf (buffer, "%s  <serial>%s</serial>\n",
                           indentation,
-                          monitor_spec->serial);
+                          escaped);
+  g_free (escaped);
+
   g_string_append_printf (buffer, "%s</monitorspec>\n", indentation);
 }
 

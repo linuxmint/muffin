@@ -2,7 +2,7 @@
   <configuration>
     <clone>no</clone>
     <output name="DP-1">
-      <vendor>MetaProduct's Inc.</vendor>
+      <vendor>MetaProduct&apos;s Inc.</vendor>
       <product>MetaMonitor</product>
       <serial>0x123456</serial>
       <width>600</width>

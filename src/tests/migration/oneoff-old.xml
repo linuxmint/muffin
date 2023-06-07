@@ -2,7 +2,7 @@
   <configuration>
     <clone>no</clone>
     <output name="DP-1">
-      <vendor>MetaProduct's Inc.</vendor>
+      <vendor>MetaProduct&apos;s Inc.</vendor>
       <product>MetaMonitor</product>
       <serial>0x123456</serial>
       <width>800</width>
@@ -18,7 +18,7 @@
       <underscanning>no</underscanning>
     </output>
     <output name="DP-2">
-      <vendor>MetaProduct's Inc.</vendor>
+      <vendor>MetaProduct&apos;s Inc.</vendor>
       <product>MetaMonitor</product>
       <serial>0x654321</serial>
     </output>

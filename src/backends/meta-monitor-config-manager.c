@@ -1521,11 +1521,12 @@ meta_monitor_config_manager_class_init (MetaMonitorConfigManagerClass *klass)
 void
 meta_monitor_config_free (MetaMonitorConfig *monitor_config)
 {
-  meta_monitor_spec_free (monitor_config->monitor_spec);
+  if (monitor_config->monitor_spec)
+    meta_monitor_spec_free (monitor_config->monitor_spec);
   g_free (monitor_config->mode_spec);
   g_free (monitor_config);
 }
-
+k
 void
 meta_logical_monitor_config_free (MetaLogicalMonitorConfig *logical_monitor_config)
 {

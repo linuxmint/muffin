@@ -75,7 +75,7 @@ test_migration (const char *old_config,
   g_assert_nonnull (expected_data);
   g_assert_nonnull (migrated_data);
 
-  g_assert (strcmp (expected_data, migrated_data) == 0);
+  g_assert_cmpstr (expected_data, ==, migrated_data);
 
   migrated_file = g_file_new_for_path (migrated_path);
   if (!g_file_delete (migrated_file, NULL, &error))
