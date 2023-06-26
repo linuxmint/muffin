@@ -173,29 +173,11 @@
     </key>
 
     <key name="experimental-features" type="as">
-      <default>['x11-randr-fractional-scaling']</default>
+      <default>[]</default>
       <summary>Enable experimental features</summary>
       <description>
-        To enable experimental features, add the feature keyword to the list.
-        Whether the feature requires restarting the compositor depends on the
-        given feature. Any experimental feature is not required to still be
-        available, or configurable. Don’t expect adding anything in this
-        setting to be future proof.
+        Currently only 'x11-randr-fractional-scaling' is useful in Cinnamon
 
-        Currently possible keywords:
-
-        • “scale-monitor-framebuffer” — makes muffin default to layout logical
-                                        monitors in a logical pixel coordinate
-                                        space, while scaling monitor
-                                        framebuffers instead of window content,
-                                        to manage HiDPI monitors. Does not
-                                        require a restart.
-        • “rt-scheduler”              — makes muffin request a low priority
-                                        real-time scheduling. The executable
-                                        or user must have CAP_SYS_NICE.
-                                        Requires a restart.
-        • “autostart-xwayland”        — initializes Xwayland lazily if there are
-                                        X11 clients. Requires restart.
         • “x11-randr-fractional-scaling” — enable fractional scaling under X11
                                            using xrandr scaling. It might reduce
                                            performances.
