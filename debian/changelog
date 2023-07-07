@@ -1,3 +1,12 @@
+muffin (5.8.1) victoria; urgency=medium
+
+  [ Michael Webster ]
+  * Escape vendor info for the monitor/layout configuration, don't call meta_monitor_spec_free() on a NULL pointer.
+  * Fix build...
+  * Disable fractional scaling by default.
+
+ -- Clement Lefebvre <root@linuxmint.com>  Fri, 07 Jul 2023 15:25:00 +0200
+
 muffin (5.8.0) victoria; urgency=medium
 
   [ Michael Webster ]
