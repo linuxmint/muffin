@@ -910,7 +910,6 @@ confirm_display_change (MetaPlugin *plugin)
                           NULL,
                           "_Keep This Configuration",
                           "_Restore Previous Configuration",
-                          "preferences-desktop-display",
                           0,
                           NULL, NULL);
 

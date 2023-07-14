@@ -594,13 +594,11 @@ append_argument (GPtrArray  *args,
 
 /**
  * meta_show_dialog: (skip)
- * @type: type of dialog
  * @message: message
  * @timeout: timeout
  * @display: display
  * @ok_text: text for Ok button
  * @cancel_text: text for Cancel button
- * @icon_name: icon name
  * @transient_for: window XID of parent
  * @columns: columns
  * @entries: entries
@@ -613,7 +611,6 @@ meta_show_dialog (const char *type,
                   const char *display,
                   const char *ok_text,
                   const char *cancel_text,
-                  const char *icon_name,
                   const int transient_for,
                   GSList *columns,
                   GSList *entries)
@@ -634,8 +631,6 @@ meta_show_dialog (const char *type,
       append_argument (args, display);
     }
 
-  append_argument (args, "--class");
-  append_argument (args, "mutter-dialog");
   append_argument (args, "--title");
   append_argument (args, "");
   append_argument (args, "--text");
@@ -657,12 +652,6 @@ meta_show_dialog (const char *type,
     {
       append_argument (args, "--cancel-label");
       append_argument (args, cancel_text);
-    }
-
-  if (icon_name)
-    {
-      append_argument (args, "--icon-name");
-      append_argument (args, icon_name);
     }
 
   tmp = columns;

@@ -1823,7 +1823,7 @@ warn_about_lame_clients_and_finish_interact (gboolean shutdown)
                            "you log in."),
                          "240",
                          meta_get_display()->x11_display->screen_name,
-                         NULL, NULL, NULL,
+                         NULL, NULL,
                          None,
                          columns,
                          lame_details);

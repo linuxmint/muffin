@@ -163,7 +163,7 @@ meta_close_dialog_default_show (MetaCloseDialog *dialog)
                       window_content, NULL,
                       window->display->x11_display->screen_name,
                       _("_Force Quit"), _("_Wait"),
-                      "face-sad-symbolic", window->xwindow,
+                      window->xwindow,
                       NULL, NULL);
 
   g_free (window_content);
