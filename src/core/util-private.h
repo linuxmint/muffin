@@ -34,7 +34,6 @@
  * for testability purposes */
 #define META_EXPORT_TEST META_EXPORT
 
-void     meta_set_verbose (gboolean setting);
 void     meta_set_debugging (gboolean setting);
 void     meta_set_syncing (gboolean setting);
 void     meta_set_replace_current_wm (gboolean setting);

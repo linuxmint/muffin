@@ -119,6 +119,8 @@ META_EXPORT
 void meta_topic_real      (MetaDebugTopic topic,
                            const char    *format,
                            ...) G_GNUC_PRINTF (2, 3);
+META_EXPORT
+void     meta_set_verbose (gboolean setting);
 
 META_EXPORT
 void meta_add_verbose_topic    (MetaDebugTopic topic);
