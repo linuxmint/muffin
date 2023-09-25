@@ -734,7 +734,7 @@ if have_profiler
     'backends/meta-profiler.h',
   ]
 
-  sysprof_dbus_interfaces_dir = join_paths(sysprof_dep.get_pkgconfig_variable('datadir'), 'dbus-1', 'interfaces')
+  sysprof_dbus_interfaces_dir = join_paths(sysprof_dep.get_variable(pkgconfig: 'datadir'), 'dbus-1', 'interfaces')
   sysprof3_dbus_file = join_paths(sysprof_dbus_interfaces_dir, 'org.gnome.Sysprof3.Profiler.xml')
 
   dbus_sysprof3_profiler_built_sources = gnome.gdbus_codegen('meta-dbus-sysprof3-profiler',
@@ -820,14 +820,14 @@ if have_wayland
     ['xwayland-keyboard-grab', 'unstable', 'v1', ],
   ]
   if have_wayland_eglstream
-    wayland_eglstream_protocols_dir = wayland_eglstream_protocols_dep.get_pkgconfig_variable('pkgdatadir')
+    wayland_eglstream_protocols_dir = wayland_eglstream_protocols_dep.get_variable(pkgconfig: 'pkgdatadir')
     wayland_protocols += [
       ['wayland-eglstream-controller', 'third-party', wayland_eglstream_protocols_dir],
     ]
   endif
 
   wayland_scanner = find_program('wayland-scanner')
-  protocols_dir = wayland_protocols_dep.get_pkgconfig_variable('pkgdatadir')
+  protocols_dir = wayland_protocols_dep.get_variable(pkgconfig: 'pkgdatadir')
   assert(protocols_dir != '', 'Could not get pkgdatadir from wayland-protocols.pc')
 
   foreach p: wayland_protocols
