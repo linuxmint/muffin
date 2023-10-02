@@ -1,6 +1,6 @@
 project('muffin', 'c',
   version: '5.8.1',
-  meson_version: '>= 0.50.0',
+  meson_version: '>=0.56.0',
   license: 'GPLv2+'
 )
 
@@ -376,7 +376,7 @@ cdata.set('HAVE_STARTUP_NOTIFICATION', have_startup_notification)
 cdata.set('HAVE_INTROSPECTION', have_introspection)
 cdata.set('HAVE_PROFILER', have_profiler)
 
-xkb_base = xkeyboard_config_dep.get_pkgconfig_variable('xkb_base')
+xkb_base = xkeyboard_config_dep.get_variable(pkgconfig: 'xkb_base')
 cdata.set_quoted('XKB_BASE', xkb_base)
 
 if cc.has_header_symbol('sys/prctl.h', 'prctl')
@@ -483,7 +483,7 @@ output = [
   '        Clutter tests............ ' + have_clutter_tests.to_string(),
   '        Installed tests.......... ' + have_installed_tests.to_string(),
   '',
-  '  Now type \'ninja -C ' + meson.build_root() + '\' to build ' + meson.project_name(),
+  '  Now type \'ninja -C ' + meson.project_build_root() + '\' to build ' + meson.project_name(),
   '',
   '',
 ]

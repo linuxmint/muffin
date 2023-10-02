@@ -7,7 +7,7 @@ custom_target('muffin.desktop',
     msgfmt,
     '--desktop', '--template',
     '@INPUT@',
-    '-d', join_paths(meson.source_root(), 'po'),
+    '-d', join_paths(meson.project_source_root(), 'po'),
     '-o', '@OUTPUT@'
   ],
   install: true,
