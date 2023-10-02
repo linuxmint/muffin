@@ -403,7 +403,7 @@ if have_wayland
   # For Xwayland -initfd usage
   use_initfd = get_option('xwayland_initfd')
   if use_initfd.auto()
-    xwayland_options = run_command(xwayland_path, '-help')
+    xwayland_options = run_command([xwayland_path, '-help'], check: true)
     have_xwayland_initfd = xwayland_options.stderr().contains('-initfd')
   else
     have_xwayland_initfd = use_initfd.enabled()
