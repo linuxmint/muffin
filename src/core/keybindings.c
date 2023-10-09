@@ -4073,6 +4073,25 @@ handle_rotate_monitor (MetaDisplay    *display,
 }
 
 static void
+handle_opacity (MetaDisplay    *display,
+                MetaWindow     *window,
+                ClutterKeyEvent *event,
+                MetaKeyBinding *binding,
+                gpointer        dummy)
+{
+    MetaKeyBindingAction action = meta_prefs_get_keybinding_action (binding->name);
+
+    if (action == META_KEYBINDING_ACTION_DECREASE_OPACITY)
+      {
+        meta_window_decrease_opacity (window);
+      }
+    else
+      {
+        meta_window_increase_opacity (window);
+      }
+}
+
+static void
 handle_restore_shortcuts (MetaDisplay     *display,
                           MetaWindow      *window,
                           ClutterKeyEvent *event,
@@ -4924,6 +4943,20 @@ init_builtin_key_bindings (MetaDisplay *display)
                           META_KEY_BINDING_IGNORE_AUTOREPEAT,
                           META_KEYBINDING_ACTION_MOVE_TO_CENTER,
                           handle_move_to_center, 0);
+
+  add_builtin_keybinding (display,
+                          "increase-opacity",
+                          common_keybindings,
+                          META_KEY_BINDING_PER_WINDOW,
+                          META_KEYBINDING_ACTION_INCREASE_OPACITY,
+                          handle_opacity, 0);
+
+  add_builtin_keybinding (display,
+                          "decrease-opacity",
+                          common_keybindings,
+                          META_KEY_BINDING_PER_WINDOW,
+                          META_KEYBINDING_ACTION_DECREASE_OPACITY,
+                          handle_opacity, 0);
 
   g_object_unref (common_keybindings);
   g_object_unref (mutter_keybindings);
