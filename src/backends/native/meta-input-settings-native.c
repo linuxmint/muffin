@@ -547,6 +547,8 @@ action_to_evcode (CDesktopStylusButtonAction action)
       return BTN_BACK;
     case C_DESKTOP_STYLUS_BUTTON_ACTION_FORWARD:
       return BTN_FORWARD;
+    case C_DESKTOP_STYLUS_BUTTON_ACTION_DISABLED:
+      return BTN_DEAD; // This needs testing under wayland?
     case C_DESKTOP_STYLUS_BUTTON_ACTION_DEFAULT:
     default:
       return 0;

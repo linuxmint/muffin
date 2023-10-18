@@ -901,6 +901,8 @@ action_to_button (CDesktopStylusButtonAction action,
       return 8;
     case C_DESKTOP_STYLUS_BUTTON_ACTION_FORWARD:
       return 9;
+    case C_DESKTOP_STYLUS_BUTTON_ACTION_DISABLED:
+      return 0;
     case C_DESKTOP_STYLUS_BUTTON_ACTION_DEFAULT:
     default:
       return button;
