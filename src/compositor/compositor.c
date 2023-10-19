@@ -600,15 +600,19 @@ meta_compositor_manage (MetaCompositor *compositor)
   priv->top_window_group = meta_window_group_new (display);
   priv->bottom_window_group = meta_window_group_new (display);
   priv->feedback_group = meta_window_group_new (display);
-  priv->background_actor = meta_x11_background_actor_new_for_display (display);
+
+  if (!meta_is_wayland_compositor ())
+    {
+      priv->background_actor = meta_x11_background_actor_new_for_display (display);
+      clutter_actor_add_child (priv->window_group, priv->background_actor);
+    }
+
+  clutter_actor_add_child (priv->window_group, priv->bottom_window_group);
 
   // This needs to remain stacked just above the background actor in the window group.
   // So sync_actor_stacking() has to be able to reference it. The deskletManager
   // will take this and finish setting it up.
   priv->desklet_container = clutter_actor_new ();
-
-  clutter_actor_add_child (priv->window_group, priv->background_actor);
-  clutter_actor_add_child (priv->window_group, priv->bottom_window_group);
   clutter_actor_add_child (priv->window_group, priv->desklet_container);
   clutter_actor_add_child (priv->stage, priv->window_group);
   clutter_actor_add_child (priv->stage, priv->top_window_group);
@@ -954,7 +958,7 @@ sync_actor_stacking (MetaCompositor *compositor)
         }
     }
 
-  g_list_free (children);
+  g_clear_pointer (&children, g_list_free);
 
   if (!reordered)
     {
@@ -988,6 +992,31 @@ sync_actor_stacking (MetaCompositor *compositor)
 
   // Then the bottom window group (which META_WINDOW_DESKTOP windows like nemo-desktop's get placed in).
   clutter_actor_set_child_below_sibling (priv->window_group, priv->bottom_window_group, NULL);
+
+  if (meta_is_wayland_compositor ())
+    {
+      children = clutter_actor_get_children (priv->bottom_window_group);
+      for (tmp = children; tmp != NULL; tmp = tmp->next)
+        {
+          MetaWindowActor *child = tmp->data;
+          MetaWindow *mw = meta_window_actor_get_meta_window (child);
+
+          if (mw != NULL)
+            {
+              // CsdBackground manager sets _NET_WM_STATE_BELOW (gtk_window_set_keep_below)
+              // This sets its stack layer to META_LAYER_BOTTOM, so we can keep these below
+              // the nemo-desktop, etc..
+              MetaStackLayer layer = meta_window_get_default_layer (mw);
+
+              if (layer == META_LAYER_BOTTOM)
+                {
+                  clutter_actor_set_child_below_sibling (priv->bottom_window_group, CLUTTER_ACTOR (child), NULL);
+                }
+            }
+        }
+
+        g_list_free (children);
+    }
 
   // and finally backgrounds..
 
@@ -1718,6 +1747,11 @@ meta_get_x11_background_actor_for_display (MetaDisplay *display)
 {
   MetaCompositorPrivate *priv =
     meta_compositor_get_instance_private (display->compositor);
+
+  if (meta_is_wayland_compositor ())
+    {
+      return NULL;
+    }
 
   return priv->background_actor;
 }

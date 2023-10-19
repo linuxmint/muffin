@@ -534,6 +534,9 @@ meta_x11_background_actor_new_for_display (MetaDisplay *display)
 
   g_return_val_if_fail (META_IS_DISPLAY (display), NULL);
 
+  if (meta_is_wayland_compositor ())
+    return NULL;
+
   self = g_object_new (META_TYPE_X11_BACKGROUND_ACTOR, NULL);
   priv = self->priv;
 
@@ -567,7 +570,6 @@ meta_x11_background_actor_update (MetaDisplay *display)
 {
   MetaX11Display *x11_display;
   MetaDisplayBackground *background;
-  MetaCompositor *compositor;
   Atom type;
   int format;
   gulong nitems;
@@ -577,7 +579,6 @@ meta_x11_background_actor_update (MetaDisplay *display)
 
   x11_display = meta_display_get_x11_display (display);
   background = meta_display_background_get (display);
-  compositor = meta_display_get_compositor (display);
 
   root_pixmap_id = None;
   if (!XGetWindowProperty (meta_x11_display_get_xdisplay (x11_display),
@@ -665,30 +666,4 @@ meta_x11_background_actor_screen_size_changed (MetaDisplay *x11_display)
   MetaDisplayBackground *background = meta_display_background_get (x11_display);
 
   update_wrap_mode (background);
-}
-
-static MetaDisplayBackground *
-display_background_get (MetaDisplay *display)
-{
-  MetaDisplayBackground *background;
-
-  background = g_object_get_data (G_OBJECT (display), "meta-display-background");
-  if (background == NULL)
-    {
-      ClutterActor *stage;
-
-      background = g_new0 (MetaDisplayBackground, 1);
-
-      background->x11_display = meta_display_get_x11_display (display);
-      g_object_set_data_full (G_OBJECT (display), "meta-screen-background",
-                              background, (GDestroyNotify) free_display_background);
-
-      stage = meta_get_stage_for_display (display);
-      g_signal_connect (stage, "notify::background-color",
-                        G_CALLBACK (on_notify_stage_color), background);
-
-      meta_x11_background_actor_update (display);
-    }
-
-  return background;
 }
