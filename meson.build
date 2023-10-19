@@ -161,8 +161,7 @@ if have_gles2
   endif
 endif
 
-#have_wayland = get_option('wayland')
-have_wayland = false
+have_wayland = get_option('wayland')
 
 if have_wayland
   wayland_server_dep = dependency('wayland-server', version: wayland_server_req)
@@ -182,8 +181,7 @@ if have_libgudev
   gudev_dep = dependency('gudev-1.0', version: gudev_req)
 endif
 
-# have_native_backend = get_option('native_backend')
-have_native_backend = false
+have_native_backend = get_option('native_backend')
 
 if have_native_backend
   libdrm_dep = dependency('libdrm')
@@ -210,11 +208,9 @@ if have_native_backend
   endif
 endif
 
-#have_egl_device = get_option('egl_device')
-have_egl_device = false
+have_egl_device = get_option('egl_device')
 
-#have_wayland_eglstream = get_option('wayland_eglstream')
-have_wayland_eglstream = false
+have_wayland_eglstream = get_option('wayland_eglstream')
 
 if have_wayland_eglstream
   wayland_eglstream_protocols_dep = dependency('wayland-eglstream-protocols')

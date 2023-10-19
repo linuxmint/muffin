@@ -13,11 +13,20 @@ CONFFLAGS = \
 	-Dprofiler=false \
 	-Dremote_desktop=false
 
-ifneq ($(DEB_HOST_ARCH_OS),linux)
+ifeq ($(DEB_HOST_ARCH_OS),linux)
+CONFFLAGS += \
+	-Degl_device=true\
+	-Dwayland=true \
+	-Dwayland_eglstream=true \
+	-Dnative_backend=true
+else
 CONFFLAGS += \
 	-Dudev=false \
 	-Dcore_tests=false \
-	-Dlibwacom=false
+	-Dlibwacom=false \
+	-Dwayland=false \
+	-Dnative_backend=false \
+	-Ddefault_driver=gl
 endif
 
 ifeq ($(DEB_HOST_ARCH),$(findstring $(DEB_HOST_ARCH),armel armhf))
