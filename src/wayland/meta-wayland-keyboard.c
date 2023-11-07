@@ -64,7 +64,7 @@
 #include "backends/native/meta-event-native.h"
 #endif
 
-#define GSD_KEYBOARD_SCHEMA "org.gnome.settings-daemon.peripherals.keyboard"
+#define GSD_KEYBOARD_SCHEMA "org.cinnamon.settings-daemon.peripherals.keyboard"
 
 G_DEFINE_TYPE (MetaWaylandKeyboard, meta_wayland_keyboard,
                META_TYPE_WAYLAND_INPUT_DEVICE)

@@ -229,7 +229,7 @@ on_xsettings_change_event (GSettings *xsettings,
 static void
 clutter_backend_egl_native_init (ClutterBackendEglNative *backend_egl_native)
 {
-  static const gchar xsettings_path[] = "org.gnome.settings-daemon.plugins.xsettings";
+  static const gchar xsettings_path[] = "org.cinnamon.settings-daemon.plugins.xsettings";
   GSettingsSchemaSource *source = g_settings_schema_source_get_default ();
   GSettingsSchema *schema = g_settings_schema_source_lookup (source,
                                                              xsettings_path,
