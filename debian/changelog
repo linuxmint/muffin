@@ -1,3 +1,30 @@
+muffin (6.0.0) virginia; urgency=medium
+
+  [ Michael Webster ]
+  * Remove deprecated/removed zenity arguments.
+  * Update issue templates.
+  * bug report: Mention crashes.
+  * Update issue template with a link to open and closed issues.
+  * meta-monitor.c: Allow 75% scaling once more.
+  * Make meta_set_verbose() public.
+
+  [ Rick Calixte ]
+  * Fix a meson warning (#674)
+  * Fix meson.build deprecations up to 0.56.0 (#675)
+
+  [ Michael Webster ]
+  * keybindings: Restore window opacity keybindings.
+  * input settings: Allow disabling stylus buttons.
+
+  [ Clement Lefebvre ]
+  * Fix some incorrect gsettings schemas
+
+  [ Michael Webster ]
+  * build/packaging: Restore Wayland support
+  * wayland: Fix desktop background
+
+ -- Clement Lefebvre <root@linuxmint.com>  Sun, 19 Nov 2023 13:47:31 +0000
+
 muffin (5.8.1) victoria; urgency=medium
 
   [ Michael Webster ]
