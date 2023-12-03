@@ -383,7 +383,7 @@ have_xwayland_initfd = false
 if have_wayland
   xwayland_path = get_option('xwayland_path')
   if xwayland_path == ''
-    xwayland_path = find_program('Xwayland').path()
+    xwayland_path = find_program('Xwayland').full_path()
   endif
   cdata.set_quoted('XWAYLAND_PATH', xwayland_path)
 
