@@ -125,7 +125,6 @@ struct _MetaMonitorManager
   int screen_height;
 
   GList *monitors;
-  GList *scale_override_monitors;
 
   GList *logical_monitors;
   MetaLogicalMonitor *primary_logical_monitor;
@@ -377,9 +376,6 @@ gboolean           meta_monitor_manager_is_scale_supported (MetaMonitorManager  
                                                             float                        scale);
 
 float              meta_monitor_manager_get_maximum_crtc_scale (MetaMonitorManager *manager);
-
-gboolean           meta_monitor_manager_disable_scale_for_monitor (MetaMonitorManager *manager,
-                                                                   MetaLogicalMonitor *monitor);
 
 MetaMonitorManagerCapability
                    meta_monitor_manager_get_capabilities (MetaMonitorManager *manager);

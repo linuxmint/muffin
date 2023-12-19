@@ -272,89 +272,18 @@ shape_cow_for_window (MetaCompositorX11 *compositor_x11,
 }
 
 static void
-on_redirected_monitor_changed (MetaWindow        *window,
-                               int                old_monitor,
-                               MetaCompositorX11 *compositor_x11)
-{
-  MetaBackend *backend = meta_get_backend ();
-  MetaMonitorManager *monitor_manager =
-    meta_backend_get_monitor_manager (backend);
-
-  if (old_monitor >= 0 && window->monitor &&
-      window->monitor->number != old_monitor)
-    {
-      g_signal_handlers_block_by_func (window,
-                                       on_redirected_monitor_changed,
-                                       compositor_x11);
-
-      if (!compositor_x11->randr_scale_disabled)
-        {
-          compositor_x11->randr_scale_disabled =
-            meta_monitor_manager_disable_scale_for_monitor (monitor_manager,
-                                                            window->monitor);
-        }
-
-      g_signal_handlers_unblock_by_func (window,
-                                         on_redirected_monitor_changed,
-                                         compositor_x11);
-    }
-  else
-    shape_cow_for_window (META_COMPOSITOR_X11 (compositor_x11), window);
-}
-
-static MetaWindow *
-get_unredirectable_window (MetaCompositorX11 *compositor_x11)
-{
-  MetaCompositor *compositor = META_COMPOSITOR (compositor_x11);
-  MetaWindowActor *window_actor;
-  MetaWindowActorX11 *window_actor_x11;
-
-  window_actor = meta_compositor_get_top_window_actor (compositor);
-  if (!window_actor)
-    return NULL;
-
-  window_actor_x11 = META_WINDOW_ACTOR_X11 (window_actor);
-  if (!meta_window_actor_x11_should_unredirect (window_actor_x11))
-    return NULL;
-
-  return meta_window_actor_get_meta_window (window_actor);
-}
-
-static void
 set_unredirected_window (MetaCompositorX11 *compositor_x11,
                          MetaWindow        *window)
 {
-  MetaBackend *backend;
-  MetaMonitorManager *monitor_manager;
   MetaWindow *prev_unredirected_window = compositor_x11->unredirected_window;
 
   if (prev_unredirected_window == window)
-    {
-      if (!window && compositor_x11->randr_scale_disabled &&
-          !get_unredirectable_window (compositor_x11))
-        {
-          backend = meta_get_backend ();
-          monitor_manager = meta_backend_get_monitor_manager (backend);
-
-          compositor_x11->randr_scale_disabled =
-            meta_monitor_manager_disable_scale_for_monitor (monitor_manager,
-                                                            NULL);
-        }
-
-      return;
-    }
-
-  backend = meta_get_backend ();
-  monitor_manager = meta_backend_get_monitor_manager (backend);
+    return;
 
   if (prev_unredirected_window)
     {
       MetaWindowActor *window_actor;
       MetaWindowActorX11 *window_actor_x11;
-
-      g_signal_handlers_disconnect_by_func (prev_unredirected_window,
-                                            on_redirected_monitor_changed,
-                                            compositor_x11);
 
       window_actor = meta_window_actor_from_window (prev_unredirected_window);
       window_actor_x11 = META_WINDOW_ACTOR_X11 (window_actor);
@@ -369,17 +298,6 @@ set_unredirected_window (MetaCompositorX11 *compositor_x11,
       MetaWindowActor *window_actor;
       MetaWindowActorX11 *window_actor_x11;
 
-      if (!compositor_x11->randr_scale_disabled)
-        {
-          compositor_x11->randr_scale_disabled =
-            meta_monitor_manager_disable_scale_for_monitor (monitor_manager,
-                                                            window->monitor);
-        }
-
-      g_signal_connect_object (window, "monitor-changed",
-                              G_CALLBACK (on_redirected_monitor_changed),
-                              compositor_x11, 0);
-
       window_actor = meta_window_actor_from_window (window);
       window_actor_x11 = META_WINDOW_ACTOR_X11 (window_actor);
       meta_window_actor_x11_set_unredirected (window_actor_x11, TRUE);
@@ -391,11 +309,21 @@ maybe_unredirect_top_window (MetaCompositorX11 *compositor_x11)
 {
   MetaCompositor *compositor = META_COMPOSITOR (compositor_x11);
   MetaWindow *window_to_unredirect = NULL;
+  MetaWindowActor *window_actor;
+  MetaWindowActorX11 *window_actor_x11;
 
   if (meta_compositor_is_unredirect_inhibited (compositor))
     goto out;
 
-  window_to_unredirect = get_unredirectable_window (compositor_x11);
+  window_actor = meta_compositor_get_top_window_actor (compositor);
+  if (!window_actor)
+    goto out;
+
+  window_actor_x11 = META_WINDOW_ACTOR_X11 (window_actor);
+  if (!meta_window_actor_x11_should_unredirect (window_actor_x11))
+    goto out;
+
+  window_to_unredirect = meta_window_actor_get_meta_window (window_actor);
 
 out:
   set_unredirected_window (compositor_x11, window_to_unredirect);

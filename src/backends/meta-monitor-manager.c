@@ -561,9 +561,6 @@ meta_monitor_manager_calculate_monitor_mode_scale (MetaMonitorManager           
                                                        monitor,
                                                        monitor_mode);
 
-  if (g_list_find (manager->scale_override_monitors, monitor))
-    return ceilf (scale);
-
   return scale;
 }
 
@@ -678,8 +675,7 @@ static gboolean
 should_use_stored_config (MetaMonitorManager *manager)
 {
   return (manager->in_init ||
-          (!manager->scale_override_monitors &&
-           !meta_monitor_manager_has_hotplug_mode_update (manager)));
+           !meta_monitor_manager_has_hotplug_mode_update (manager));
 }
 
 MetaMonitorsConfig *
@@ -1535,41 +1531,6 @@ request_persistent_confirmation (MetaMonitorManager *manager)
                            "[mutter] save_config_timeout");
 
   g_signal_emit (manager, signals[CONFIRM_DISPLAY_CHANGE], 0);
-}
-
-gboolean
-meta_monitor_manager_disable_scale_for_monitor (MetaMonitorManager *manager,
-                                                MetaLogicalMonitor *monitor)
-{
-  switch (manager->layout_mode)
-    {
-    case META_LOGICAL_MONITOR_LAYOUT_MODE_LOGICAL:
-    case META_LOGICAL_MONITOR_LAYOUT_MODE_GLOBAL_UI_LOGICAL:
-      break;
-    default:
-      return FALSE;
-    }
-
-  if (monitor && fmodf (monitor->scale, 1.0) != 0.0f)
-    {
-      if (manager->scale_override_monitors)
-        {
-          g_clear_pointer (&manager->scale_override_monitors, g_list_free);
-          g_object_unref (meta_monitor_config_manager_pop_previous (manager->config_manager));
-        }
-
-      manager->scale_override_monitors = g_list_copy (monitor->monitors);
-      meta_monitor_manager_ensure_configured (manager);
-      return TRUE;
-    }
-
-  if (manager->scale_override_monitors)
-    {
-      g_clear_pointer (&manager->scale_override_monitors, g_list_free);
-      restore_previous_config (manager);
-    }
-
-  return FALSE;
 }
 
 #define META_DISPLAY_CONFIG_MODE_FLAGS_PREFERRED (1 << 0)
