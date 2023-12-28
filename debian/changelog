@@ -1,3 +1,10 @@
+muffin (6.0.1) virginia; urgency=medium
+
+  [ Michael Webster ]
+  * meta-compositor-x11.c: Don't disable fractional scaling when unredirecting a fullscreen window.
+
+ -- Clement Lefebvre <root@linuxmint.com>  Thu, 28 Dec 2023 11:53:02 +0000
+
 muffin (6.0.0) virginia; urgency=medium
 
   [ Michael Webster ]
