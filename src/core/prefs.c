@@ -2258,7 +2258,7 @@ meta_prefs_add_keybinding (const char           *name,
         }
       else
         {
-          strokes = g_strdupv (bindings);
+          strokes = g_strdupv((gchar **)bindings);
         }
 
       queue_changed (META_PREF_KEYBINDINGS);
