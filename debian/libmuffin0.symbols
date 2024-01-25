@@ -371,6 +371,7 @@ libmuffin-clutter-0.so.0 libmuffin0 #MINVER#
  clutter_animation_set_mode@Base 5.3.0
  clutter_animation_set_object@Base 5.3.0
  clutter_animation_set_timeline@Base 5.3.0
+ clutter_backend_egl_native_get_type@Base 6.0.0
  clutter_backend_get_cogl_context@Base 5.3.0
  clutter_backend_get_default_seat@Base 5.3.0
  clutter_backend_get_font_options@Base 5.3.0
@@ -565,6 +566,7 @@ libmuffin-clutter-0.so.0 libmuffin0 #MINVER#
  clutter_effect_get_type@Base 5.3.0
  clutter_effect_paint_flags_get_type@Base 5.3.0
  clutter_effect_queue_repaint@Base 5.3.0
+ clutter_egl_get_egl_display@Base 6.0.0
  clutter_event_add_filter@Base 5.3.0
  clutter_event_copy@Base 5.3.0
  clutter_event_flags_get_type@Base 5.3.0
@@ -1390,6 +1392,7 @@ libmuffin-clutter-0.so.0 libmuffin0 #MINVER#
  clutter_virtual_input_device_notify_touch_down@Base 5.3.0
  clutter_virtual_input_device_notify_touch_motion@Base 5.3.0
  clutter_virtual_input_device_notify_touch_up@Base 5.3.0
+ clutter_wayland_set_compositor_display@Base 6.0.0
  clutter_x11_add_filter@Base 5.3.0
  clutter_x11_filter_return_get_type@Base 5.3.0
  clutter_x11_get_default_display@Base 5.3.0
@@ -1961,6 +1964,7 @@ libmuffin-cogl-0.so.0 libmuffin0 #MINVER#
  cogl_texture_set_premultiplied@Base 5.3.0
  cogl_texture_set_region@Base 5.3.0
  cogl_texture_set_region_from_bitmap@Base 5.3.0
+ cogl_wayland_display_set_compositor_display@Base 6.0.0
  cogl_x11_onscreen_get_window_xid@Base 5.3.0
  cogl_xlib_renderer_add_filter@Base 5.3.0
  cogl_xlib_renderer_get_display@Base 5.3.0
@@ -2010,6 +2014,7 @@ libmuffin-cogl-path-0.so.0 libmuffin0 #MINVER#
  cogl_path_copy@Base 5.3.0
  cogl_path_get_gtype@Base 5.3.0
 libmuffin.so.0 libmuffin0 #MINVER#
+ meta_activate_session@Base 6.0.0
  meta_add_clutter_debug_flags@Base 5.3.0
  meta_add_verbose_topic@Base 5.3.0
  meta_backend_add_gpu@Base 5.3.0
@@ -2131,6 +2136,7 @@ libmuffin.so.0 libmuffin0 #MINVER#
  meta_display_get_monitor_scale@Base 5.3.0
  meta_display_get_n_monitors@Base 5.3.0
  meta_display_get_pad_action_label@Base 5.3.0
+ meta_display_get_pointer_window@Base 6.0.0
  meta_display_get_primary_monitor@Base 5.3.0
  meta_display_get_selection@Base 5.3.0
  meta_display_get_size@Base 5.3.0
@@ -2147,6 +2153,7 @@ libmuffin.so.0 libmuffin0 #MINVER#
  meta_display_list_windows@Base 5.3.0
  meta_display_logical_index_to_xinerama_index@Base 5.3.0
  meta_display_lookup_stack_id@Base 5.3.0
+ meta_display_push_tile@Base 6.0.0
  meta_display_remove_keybinding@Base 5.3.0
  meta_display_request_pad_osd@Base 5.3.0
  meta_display_set_cursor@Base 5.3.0
@@ -2491,6 +2498,7 @@ libmuffin.so.0 libmuffin0 #MINVER#
  meta_selection_type_get_type@Base 5.3.0
  meta_selection_unset_owner@Base 5.3.0
  meta_set_gnome_wm_keybindings@Base 5.3.0
+ meta_set_verbose@Base 6.0.0
  meta_set_wm_name@Base 5.3.0
  meta_settings_enable_experimental_feature@Base 5.3.0
  meta_settings_get_font_dpi@Base 5.3.0
@@ -2558,6 +2566,11 @@ libmuffin.so.0 libmuffin0 #MINVER#
  meta_verify_monitors_config@Base 5.3.0
  meta_virtual_modifier_get_type@Base 5.3.0
  meta_warning@Base 5.3.0
+ meta_wayland_actor_surface_get_actor@Base 6.0.0
+ meta_wayland_compositor_get_default@Base 6.0.0
+ meta_wayland_get_wayland_display_name@Base 6.0.0
+ meta_wayland_get_xwayland_display_name@Base 6.0.0
+ meta_wayland_override_display_name@Base 6.0.0
  meta_window_activate@Base 5.3.0
  meta_window_activate_with_workspace@Base 5.3.0
  meta_window_actor_get_image@Base 5.3.0
@@ -2737,3 +2750,4 @@ libmuffin.so.0 libmuffin0 #MINVER#
  meta_x11_error_trap_push@Base 5.3.0
  meta_x11_init_gdk_display@Base 5.3.0
  meta_xrandr_rotation_get_type@Base 5.3.0
+ meta_xwayland_override_display_number@Base 6.0.0
