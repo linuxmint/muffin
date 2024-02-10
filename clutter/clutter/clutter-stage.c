@@ -99,6 +99,15 @@ typedef struct _PickClipRecord
   graphene_point_t vertex[4];
 } PickClipRecord;
 
+typedef struct _PointerDeviceEntry
+{
+  ClutterStage *stage;
+  ClutterInputDevice *device;
+  ClutterEventSequence *sequence;
+  graphene_point_t coords;
+  ClutterActor *current_actor;
+} PointerDeviceEntry;
+
 struct _ClutterStagePrivate
 {
   /* the stage implementation */
@@ -146,6 +155,9 @@ struct _ClutterStagePrivate
   int update_freeze_count;
 
   gboolean needs_update;
+
+  GHashTable *pointer_devices;
+  GHashTable *touch_sequences;
 
   guint redraw_pending         : 1;
   guint is_cursor_visible      : 1;
@@ -195,6 +207,7 @@ static const ClutterColor default_stage_color = { 255, 255, 255, 255 };
 
 static void clutter_stage_maybe_finish_queue_redraws (ClutterStage *stage);
 static void free_queue_redraw_entry (ClutterStageQueueRedrawEntry *entry);
+static void free_pointer_device_entry (PointerDeviceEntry *entry);
 static void capture_view_into (ClutterStage          *stage,
                                gboolean               paint,
                                ClutterStageView      *view,
@@ -2010,6 +2023,9 @@ clutter_stage_finalize (GObject *object)
   g_queue_foreach (priv->event_queue, (GFunc) clutter_event_free, NULL);
   g_queue_free (priv->event_queue);
 
+  g_hash_table_destroy (priv->pointer_devices);
+  g_hash_table_destroy (priv->touch_sequences);
+
   g_free (priv->title);
 
   g_array_free (priv->paint_volume_stack, TRUE);
@@ -2386,6 +2402,13 @@ clutter_stage_init (ClutterStage *self)
   priv->min_size_changed = FALSE;
   priv->sync_delay = -1;
   priv->motion_events_enabled = TRUE;
+
+  priv->pointer_devices =
+    g_hash_table_new_full (NULL, NULL,
+                           NULL, (GDestroyNotify) free_pointer_device_entry);
+  priv->touch_sequences =
+    g_hash_table_new_full (NULL, NULL,
+                           NULL, (GDestroyNotify) free_pointer_device_entry);
 
   clutter_actor_set_background_color (CLUTTER_ACTOR (self),
                                       &default_stage_color);
@@ -4795,4 +4818,70 @@ _clutter_stage_get_max_view_scale_factor_for_rect (ClutterStage    *stage,
 
   *view_scale = scale;
   return TRUE;
+}
+
+static void
+on_device_actor_reactive_changed (ClutterActor       *actor,
+                                  GParamSpec         *pspec,
+                                  PointerDeviceEntry *entry)
+{
+}
+
+static void
+on_device_actor_destroyed (ClutterActor       *actor,
+                           PointerDeviceEntry *entry)
+{
+  /* Simply unset the current_actor pointer here, there's no need to
+   * unset has_pointer or to disconnect any signals because the actor
+   * is gone anyway.
+   * Also, as soon as the next repaint happens, a repick should be triggered
+   * and the PointerDeviceEntry will get updated again, so no need to
+   * trigger a repick here.
+   */
+  entry->current_actor = NULL;
+}
+
+
+static void
+free_pointer_device_entry (PointerDeviceEntry *entry)
+{
+  if (entry->current_actor)
+    {
+      ClutterActor *actor = entry->current_actor;
+
+      g_signal_handlers_disconnect_by_func (actor,
+                                            G_CALLBACK (on_device_actor_reactive_changed),
+                                            entry);
+      g_signal_handlers_disconnect_by_func (actor,
+                                            G_CALLBACK (on_device_actor_destroyed),
+                                            entry);
+
+      _clutter_actor_set_has_pointer (actor, FALSE);
+   }
+
+  g_free (entry);
+}
+
+/**
+ * clutter_stage_get_device_coords: (skip):
+ */
+void
+clutter_stage_get_device_coords (ClutterStage         *stage,
+                                 ClutterInputDevice   *device,
+                                 ClutterEventSequence *sequence,
+                                 graphene_point_t     *coords)
+{
+  ClutterStagePrivate *priv = stage->priv;
+  PointerDeviceEntry *entry = NULL;
+
+  g_return_if_fail (CLUTTER_IS_STAGE (stage));
+  g_return_if_fail (device != NULL);
+
+  if (sequence != NULL)
+    entry = g_hash_table_lookup (priv->touch_sequences, sequence);
+  else
+    entry = g_hash_table_lookup (priv->pointer_devices, device);
+
+  if (entry && coords)
+    *coords = entry->coords;
 }

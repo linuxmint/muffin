@@ -1566,12 +1566,15 @@ meta_wayland_surface_get_relative_coordinates (MetaWaylandSurface *surface,
                                                float               *sx,
                                                float               *sy)
 {
-  MetaWaylandSurfaceRoleClass *surface_role_class =
-    META_WAYLAND_SURFACE_ROLE_GET_CLASS (surface->role);
+  if (surface != NULL && surface->role)
+    {
+      MetaWaylandSurfaceRoleClass *surface_role_class =
+        META_WAYLAND_SURFACE_ROLE_GET_CLASS (surface->role);
 
-  surface_role_class->get_relative_coordinates (surface->role,
-                                                abs_x, abs_y,
-                                                sx, sy);
+      surface_role_class->get_relative_coordinates (surface->role,
+                                                    abs_x, abs_y,
+                                                    sx, sy);
+    }
 }
 
 void
