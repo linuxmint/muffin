@@ -388,7 +388,7 @@ if have_wayland
     if xwayland_dep.found()
       xwayland_path = xwayland_dep.get_pkgconfig_variable('xwayland')
     else
-      xwayland_path = find_program('Xwayland').path()
+      xwayland_path = find_program('Xwayland').full_path()
     endif
   endif
   cdata.set_quoted('XWAYLAND_PATH', xwayland_path)
