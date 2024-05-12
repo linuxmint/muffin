@@ -669,7 +669,7 @@ apply_crtc_assignments (MetaMonitorManager *manager,
   if (!n_crtcs)
     goto out;
 
-  if (width > manager->screen_width || height > manager->screen_height)
+  if (width > 0 && height > 0)
     {
       meta_monitor_manager_xrandr_update_screen_size (manager_xrandr,
                                                       width, height,
@@ -789,13 +789,6 @@ apply_crtc_assignments (MetaMonitorManager *manager,
 
       meta_output_unassign_crtc (output);
       output->is_primary = FALSE;
-    }
-
-  if (width > 0 && height > 0)
-    {
-      meta_monitor_manager_xrandr_update_screen_size (manager_xrandr,
-                                                      width, height,
-                                                      avg_screen_scale);
     }
 
 out:
