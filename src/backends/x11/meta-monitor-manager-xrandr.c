@@ -847,7 +847,7 @@ meta_monitor_manager_xrandr_update_screen_size_derived (MetaMonitorManager *mana
       if (!crtc || !crtc->config)
         continue;
 
-      if (!have_scaling || scale_mode != META_X11_SCALE_MODE_UI_DOWN)
+      if (!have_scaling)
         {
           /* When scaling up we should not reduce the screen size, or X will
            * fail miserably, while we must do it when scaling down, in order to
