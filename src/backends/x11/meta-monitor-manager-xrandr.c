@@ -550,7 +550,7 @@ apply_crtc_assignments (MetaMonitorManager *manager,
   MetaX11ScaleMode scale_mode = meta_settings_get_x11_scale_mode (settings);
   unsigned i, valid_crtcs;
   GList *l;
-  int width, height;
+  int width, height, scaled_width, scaled_height;
   float max_scale;
   float avg_screen_scale;
   gboolean have_scaling;
@@ -563,6 +563,7 @@ apply_crtc_assignments (MetaMonitorManager *manager,
   /* Compute the new size of the screen (framebuffer) */
   max_scale = get_maximum_crtc_info_scale (crtcs, n_crtcs);
   width = 0; height = 0;
+  scaled_width = 0; scaled_height = 0;
   avg_screen_scale = 0;
   valid_crtcs = 0;
   for (i = 0; i < n_crtcs; i++)
@@ -578,6 +579,13 @@ apply_crtc_assignments (MetaMonitorManager *manager,
 
       if (have_scaling && scale_mode == META_X11_SCALE_MODE_UI_DOWN)
         scale = (ceilf (max_scale) / crtc_info->scale) * crtc_info->scale;
+      else
+        {
+          scaled_width = MAX (scaled_width, crtc_info->layout.origin.x +
+                              crtc_info->layout.size.width * crtc_info->scale);
+          scaled_height = MAX (scaled_height, crtc_info->layout.origin.y +
+                               crtc_info->layout.size.height * crtc_info->scale);
+        }
 
       width = MAX (width, (int) roundf (crtc_info->layout.origin.x +
                                         crtc_info->layout.size.width * scale));
@@ -609,7 +617,7 @@ apply_crtc_assignments (MetaMonitorManager *manager,
       y2 = (int) roundf (crtc_config->layout.origin.y +
                          crtc_config->layout.size.height);
 
-      if (!crtc_info->mode || x2 > width || y2 > height)
+      if (!crtc_info->mode || width < scaled_width || height < scaled_height || x2 > width || y2 > height)
         {
           xrandr_set_crtc_config (manager_xrandr,
                                   crtc,
