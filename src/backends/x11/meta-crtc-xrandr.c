@@ -135,6 +135,7 @@ meta_crtc_xrandr_set_scale (MetaCrtc         *crtc,
     DOUBLE_TO_FIXED (0), DOUBLE_TO_FIXED (1), DOUBLE_TO_FIXED (0),
     DOUBLE_TO_FIXED (0), DOUBLE_TO_FIXED (0), DOUBLE_TO_FIXED (1)
   };
+  float integer_scale;
 
   if (!(meta_monitor_manager_get_capabilities (monitor_manager) &
         META_MONITOR_MANAGER_CAPABILITY_NATIVE_OUTPUT_SCALING))
@@ -145,9 +146,19 @@ meta_crtc_xrandr_set_scale (MetaCrtc         *crtc,
 
   if (fabsf (scale - 1.0f) > 0.001)
     {
-      scale_filter = FilterGood;
-      transformation.matrix11 = DOUBLE_TO_FIXED (1.0 / scale);
-      transformation.matrix22 = DOUBLE_TO_FIXED (1.0 / scale);
+      integer_scale = roundf (scale);
+      if (fabsf (scale - integer_scale) > 0.001)
+        {
+          scale_filter = FilterGood;
+          transformation.matrix11 = DOUBLE_TO_FIXED (1.0 / scale);
+          transformation.matrix22 = DOUBLE_TO_FIXED (1.0 / scale);
+        }
+      else /* if integer multiple then use nearest neighbor filter */
+        {
+          scale_filter = "nearest";
+          transformation.matrix11 = DOUBLE_TO_FIXED (1.0 / integer_scale);
+          transformation.matrix22 = DOUBLE_TO_FIXED (1.0 / integer_scale);
+        }
     }
   else
     scale_filter = FilterFast;
