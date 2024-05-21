@@ -1082,6 +1082,8 @@ meta_monitor_manager_xrandr_tiled_monitor_added (MetaMonitorManager *manager,
   GList *outputs;
   GList *l;
   int i;
+  xcb_connection_t *xcb_conn;
+  xcb_void_cookie_t cookie;
 
   if (!(meta_monitor_manager_get_capabilities (manager) &
         META_MONITOR_MANAGER_CAPABILITY_TILING))
@@ -1117,6 +1119,11 @@ meta_monitor_manager_xrandr_tiled_monitor_added (MetaMonitorManager *manager,
       xrandr_monitor_info->outputs[i] = output->winsys_id;
     }
 
+  xcb_conn = XGetXCBConnection (manager_xrandr->xdisplay);
+  cookie = xcb_randr_delete_monitor_checked (xcb_conn,
+                                             DefaultRootWindow (manager_xrandr->xdisplay),
+                                             name_atom);
+  free (xcb_request_check (xcb_conn, cookie)); /* ignore DeleteMonitor errors */
   XRRSetMonitor (manager_xrandr->xdisplay,
                  DefaultRootWindow (manager_xrandr->xdisplay),
                  xrandr_monitor_info);
