@@ -1,3 +1,30 @@
+muffin (6.2.0) wilma; urgency=medium
+
+  [ Clement Lefebvre ]
+  * packaging: Forbid compilation if the symbols file is outdated
+  * packaging: Update symbols file
+
+  [ Leigh Scott ]
+  * Fix compile issue (#683)
+  * build: Use Xwayland pkg-config if available (#682)
+
+  [ Michael Webster ]
+  * meta-input-settings-x11.c: Don't warn about receiving more values than expected from libinput.
+
+  [ Rick Calixte ]
+  * Fix segfault during Alt-Tab when window focus mode is either 'Sloppy' or 'Mouse' (gdb backtrace attached) (#680)
+
+  [ jknockel ]
+  * meta-crtc-xrandr.c: use nearest neighbor filter for integer randr scales (#692)
+  * meta-monitor-manager-xrandr.c: DeleteMonitor before SetMonitor (#693)
+
+  [ Jeffrey Knockel ]
+  * meta-monitor-manager-xrandr.c: fix crtc disabling
+  * meta-monitor-manager-xrandr.c: fix screen size
+  * meta-monitor-manager-xrandr.c: screen size fixes
+
+ -- Clement Lefebvre <root@linuxmint.com>  Tue, 11 Jun 2024 17:06:29 +0100
+
 muffin (6.0.1) virginia; urgency=medium
 
   [ Michael Webster ]

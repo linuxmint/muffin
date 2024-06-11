@@ -1,8 +1,4 @@
-project('muffin', 'c',
-  version: '6.0.1',
-  meson_version: '>=0.56.0',
-  license: 'GPLv2+'
-)
+project('muffin', 'c', version : '6.2.0', meson_version : '>=0.56.0', license : 'GPLv2+')
 
 mutter_plugin_api_version = '3'
 
