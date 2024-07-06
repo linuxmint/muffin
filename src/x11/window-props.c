@@ -2060,9 +2060,11 @@ meta_x11_display_init_window_prop_hooks (MetaX11Display *x11_display)
     { x11_display->atom__NET_WM_XAPP_PROGRESS_PULSE, META_PROP_VALUE_CARDINAL, reload_progress_pulse, LOAD_INIT | INCLUDE_OR },
     { 0 },
   };
+  MetaWindowPropHooks *table;
+  MetaWindowPropHooks *cursor;
 
-  MetaWindowPropHooks *table = g_memdup (hooks, sizeof (hooks)),
-    *cursor = table;
+  table = g_memdup2 (hooks, sizeof (hooks)),
+  cursor = table;
 
   g_assert (x11_display->prop_hooks == NULL);
 

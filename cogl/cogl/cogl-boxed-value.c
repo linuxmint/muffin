@@ -254,21 +254,21 @@ _cogl_boxed_value_copy (CoglBoxedValue *dst,
           break;
 
         case COGL_BOXED_INT:
-          dst->v.int_array = g_memdup (src->v.int_array,
-                                       src->size * src->count * sizeof (int));
+          dst->v.int_array = g_memdup2 (src->v.int_array,
+                                        src->size * src->count * sizeof (int));
           break;
 
         case COGL_BOXED_FLOAT:
-          dst->v.float_array = g_memdup (src->v.float_array,
-                                         src->size *
-                                         src->count *
-                                         sizeof (float));
+          dst->v.float_array = g_memdup2 (src->v.float_array,
+                                          src->size *
+                                          src->count *
+                                          sizeof (float));
           break;
 
         case COGL_BOXED_MATRIX:
-          dst->v.float_array = g_memdup (src->v.float_array,
-                                         src->size * src->size *
-                                         src->count * sizeof (float));
+          dst->v.float_array = g_memdup2 (src->v.float_array,
+                                          src->size * src->size *
+                                          src->count * sizeof (float));
           break;
         }
     }

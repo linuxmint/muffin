@@ -46,7 +46,7 @@
 MetaRectangle *
 meta_rectangle_copy (const MetaRectangle *rect)
 {
-  return g_memdup (rect, sizeof (MetaRectangle));
+  return g_memdup2 (rect, sizeof (MetaRectangle));
 }
 
 void

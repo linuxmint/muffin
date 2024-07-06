@@ -411,7 +411,7 @@ get_edid_property (Display  *xdisplay,
 
   if (actual_type == XA_INTEGER && actual_format == 8)
     {
-      result = g_memdup (prop, nitems);
+      result = g_memdup2 (prop, nitems);
       if (len)
         *len = nitems;
     }
