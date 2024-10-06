@@ -395,8 +395,8 @@ GType cogl_frame_closure_get_gtype (void);
 /**
  * cogl_onscreen_add_frame_callback:
  * @onscreen: A #CoglOnscreen framebuffer
- * @callback: (scope notified): A callback function to call for frame events
- * @user_data: (closure): A private pointer to be passed to @callback
+ * @callback: (scope notified) (closure user_data): A callback function to call for frame events
+ * @user_data: A private pointer to be passed to @callback
  * @destroy: (allow-none): An optional callback to destroy @user_data
  *           when the @callback is removed or @onscreen is freed.
  *
@@ -568,9 +568,9 @@ GType cogl_onscreen_resize_closure_get_gtype (void);
 /**
  * cogl_onscreen_add_resize_callback:
  * @onscreen: A #CoglOnscreen framebuffer
- * @callback: (scope notified): A #CoglOnscreenResizeCallback to call when
+ * @callback: (scope notified) (closure user_data): A #CoglOnscreenResizeCallback to call when
  *            the @onscreen changes size.
- * @user_data: (closure): Private data to be passed to @callback.
+ * @user_data: Private data to be passed to @callback.
  * @destroy: (allow-none): An optional callback to destroy @user_data
  *           when the @callback is removed or @onscreen is freed.
  *
@@ -683,8 +683,8 @@ GType cogl_onscreen_dirty_closure_get_gtype (void);
 /**
  * cogl_onscreen_add_dirty_callback:
  * @onscreen: A #CoglOnscreen framebuffer
- * @callback: (scope notified): A callback function to call for dirty events
- * @user_data: (closure): A private pointer to be passed to @callback
+ * @callback: (scope notified) (closure user_data): A callback function to call for dirty events
+ * @user_data: A private pointer to be passed to @callback
  * @destroy: (allow-none): An optional callback to destroy @user_data when the
  *           @callback is removed or @onscreen is freed.
  *

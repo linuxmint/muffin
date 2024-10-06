@@ -142,9 +142,9 @@ typedef gboolean (*CoglPipelineLayerCallback) (CoglPipeline *pipeline,
 /**
  * cogl_pipeline_foreach_layer:
  * @pipeline: A #CoglPipeline object
- * @callback: (scope call): A #CoglPipelineLayerCallback to be
+ * @callback: (scope call) (closure user_data): A #CoglPipelineLayerCallback to be
  *            called for each layer index
- * @user_data: (closure): Private data that will be passed to the
+ * @user_data: Private data that will be passed to the
  *             callback
  *
  * Iterates all the layer indices of the given @pipeline.
