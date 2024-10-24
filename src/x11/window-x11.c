@@ -1436,12 +1436,25 @@ meta_window_x11_move_resize_internal (MetaWindow                *window,
          priv->border_width != 0))
     need_configure_notify = TRUE;
 
-  /* We must send configure notify if we move but don't resize, since
-   * the client window may not get a real event
+  /* When tiling a window, the frame sizes changes - which edges depend on
+   * the tile direction. For every direction but META_TILE_RIGHT and
+   * META_TILE_LRC (lower-right-corner), the client position needs to be
+   * shifted in at least one direction relative to the frame window, and
+   * will need to tell the client window about it.
    */
   if ((need_move_client || need_move_frame) &&
       !(need_resize_client || need_resize_frame) &&
       window->type != META_WINDOW_TOOLTIP)
+    need_configure_notify = TRUE;
+
+  /* For META_TILE_RIGHT and META_TILE_LRC, the right border and
+   * bottom border (for lrc) are removed, but the client size may not
+   * change, if it was already the tiled size. The client position
+   * won't need to change either, from the frame's upper-left-corner,
+   * so the window may not be notified.
+   */
+
+  if (need_resize_frame && !need_resize_client && window->type != META_WINDOW_TOOLTIP)
     need_configure_notify = TRUE;
 
   /* MapRequest events with a PPosition or UPosition hint with a frame
