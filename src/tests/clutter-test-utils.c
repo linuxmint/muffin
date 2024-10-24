@@ -199,8 +199,8 @@ clutter_test_add_data (const char    *test_path,
 /**
  * clutter_test_add_data_full:
  * @test_path: unique path for identifying the test
- * @test_func: (scope notified): function containing the test
- * @test_data: (closure): data to pass to the test function
+ * @test_func: (scope notified) (closure test_data): function containing the test
+ * @test_data: data to pass to the test function
  * @test_notify: function called when the test function ends
  *
  * Adds a test unit to the Clutter test environment.

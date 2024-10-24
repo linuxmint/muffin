@@ -13069,8 +13069,8 @@ typedef enum
  * @self: a #ClutterActor
  * @child: a #ClutterActor
  * @flags: control flags for actions
- * @add_func: delegate function
- * @data: (closure): data to pass to @add_func
+ * @add_func (closure data): delegate function
+ * @data: data to pass to @add_func
  *
  * Adds @child to the list of children of @self.
  *

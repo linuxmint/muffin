@@ -2184,8 +2184,8 @@ clutter_timeline_get_repeat_count (ClutterTimeline *timeline)
 /**
  * clutter_timeline_set_progress_func:
  * @timeline: a #ClutterTimeline
- * @func: (scope notified) (allow-none): a progress function, or %NULL
- * @data: (closure): data to pass to @func
+ * @func: (scope notified) (allow-none) (closure data): a progress function, or %NULL
+ * @data: data to pass to @func
  * @notify: a function to be called when the progress function is removed
  *    or the timeline is disposed
  *
