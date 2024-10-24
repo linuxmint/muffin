@@ -4958,6 +4958,20 @@ init_builtin_key_bindings (MetaDisplay *display)
                           META_KEYBINDING_ACTION_DECREASE_OPACITY,
                           handle_opacity, 0);
 
+  add_builtin_keybinding (display,
+                          "toggle-workspace-selection",
+                          common_keybindings,
+                          META_KEY_BINDING_NONE,
+                          META_KEYBINDING_ACTION_TOGGLE_WORKSPACE_SELECTION,
+                          NULL, 0);
+
+  add_builtin_keybinding (display,
+                          "toggle-window-selection",
+                          common_keybindings,
+                          META_KEY_BINDING_NONE,
+                          META_KEYBINDING_ACTION_TOGGLE_WINDOW_SELECTION,
+                          NULL, 0);
+
   g_object_unref (common_keybindings);
   g_object_unref (mutter_keybindings);
   g_object_unref (mutter_wayland_keybindings);
