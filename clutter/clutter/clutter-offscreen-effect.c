@@ -579,7 +579,7 @@ clutter_offscreen_effect_get_texture (ClutterOffscreenEffect *effect)
 }
 
 /**
- * clutter_offscreen_effect_get_target: (skip)
+ * clutter_offscreen_effect_get_target:
  * @effect: a #ClutterOffscreenEffect
  *
  * Retrieves the material used as a render target for the offscreen
