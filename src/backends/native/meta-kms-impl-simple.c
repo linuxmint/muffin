@@ -145,7 +145,7 @@ cached_mode_set_new (GList                 *connectors,
   cached_mode_set = g_new0 (CachedModeSet, 1);
   *cached_mode_set = (CachedModeSet) {
     .connectors = g_list_copy (connectors),
-    .drm_mode = g_memdup (drm_mode, sizeof *drm_mode),
+    .drm_mode = g_memdup2 (drm_mode, sizeof *drm_mode),
   };
 
   return cached_mode_set;

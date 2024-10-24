@@ -221,7 +221,7 @@ meta_kms_update_mode_set (MetaKmsUpdate   *update,
   *mode_set = (MetaKmsModeSet) {
     .crtc = crtc,
     .connectors = connectors,
-    .drm_mode = drm_mode ? g_memdup (drm_mode, sizeof *drm_mode) : NULL,
+    .drm_mode = drm_mode ? g_memdup2 (drm_mode, sizeof *drm_mode) : NULL,
   };
 
   update->mode_sets = g_list_prepend (update->mode_sets, mode_set);
@@ -273,9 +273,9 @@ meta_kms_update_set_crtc_gamma (MetaKmsUpdate  *update,
   *gamma = (MetaKmsCrtcGamma) {
     .crtc = crtc,
     .size = size,
-    .red = g_memdup (red, size * sizeof *red),
-    .green = g_memdup (green, size * sizeof *green),
-    .blue = g_memdup (blue, size * sizeof *blue),
+    .red = g_memdup2 (red, size * sizeof *red),
+    .green = g_memdup2 (green, size * sizeof *green),
+    .blue = g_memdup2 (blue, size * sizeof *blue),
   };
 
   update->crtc_gammas = g_list_prepend (update->crtc_gammas, gamma);

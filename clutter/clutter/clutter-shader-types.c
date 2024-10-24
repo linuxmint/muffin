@@ -157,7 +157,8 @@ clutter_value_lcopy_shader_float (const GValue *value,
                             G_VALUE_TYPE_NAME (value));
 
   *float_count = shader_float->size;
-  *floats = g_memdup (shader_float->value, shader_float->size * sizeof (float));
+  *floats = g_memdup2 (shader_float->value,
+                       shader_float->size * sizeof (float));
 
   return NULL;
 }
@@ -248,7 +249,7 @@ clutter_value_lcopy_shader_int (const GValue *value,
                             G_VALUE_TYPE_NAME (value));
 
   *int_count = shader_int->size;
-  *ints = g_memdup (shader_int->value, shader_int->size * sizeof (int));
+  *ints = g_memdup2 (shader_int->value, shader_int->size * sizeof (int));
 
   return NULL;
 }
@@ -339,8 +340,10 @@ clutter_value_lcopy_shader_matrix (const GValue *value,
                             G_VALUE_TYPE_NAME (value));
 
   *float_count = shader_float->size;
-  *floats = g_memdup (shader_float->value,
-                      shader_float->size * shader_float->size * sizeof (float));
+  *floats = g_memdup2 (shader_float->value,
+                       shader_float->size *
+                       shader_float->size *
+                       sizeof (float));
 
   return NULL;
 }

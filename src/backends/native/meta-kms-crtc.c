@@ -201,11 +201,11 @@ meta_kms_crtc_predict_state (MetaKmsCrtc   *crtc,
       clear_gamma_state (crtc);
       crtc->current_state.gamma.size = gamma->size;
       crtc->current_state.gamma.red =
-        g_memdup (gamma->red, gamma->size * sizeof (uint16_t));
+        g_memdup2 (gamma->red, gamma->size * sizeof (uint16_t));
       crtc->current_state.gamma.green =
-        g_memdup (gamma->green, gamma->size * sizeof (uint16_t));
+        g_memdup2 (gamma->green, gamma->size * sizeof (uint16_t));
       crtc->current_state.gamma.blue =
-        g_memdup (gamma->blue, gamma->size * sizeof (uint16_t));
+        g_memdup2 (gamma->blue, gamma->size * sizeof (uint16_t));
 
       break;
     }

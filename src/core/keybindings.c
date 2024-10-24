@@ -95,8 +95,8 @@ resolved_key_combo_copy (MetaResolvedKeyCombo *from,
                          MetaResolvedKeyCombo *to)
 {
   to->len = from->len;
-  to->keycodes = g_memdup (from->keycodes,
-                           from->len * sizeof (xkb_keycode_t));
+  to->keycodes = g_memdup2 (from->keycodes,
+                            from->len * sizeof (xkb_keycode_t));
 }
 
 static gboolean

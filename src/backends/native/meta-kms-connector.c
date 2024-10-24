@@ -354,7 +354,7 @@ state_set_modes (MetaKmsConnectorState *state,
                  drmModeConnector      *drm_connector)
 {
   state->modes =
-    g_memdup (drm_connector->modes,
+    g_memdup2 (drm_connector->modes,
               drm_connector->count_modes * sizeof (drmModeModeInfo));
   state->n_modes = drm_connector->count_modes;
 }

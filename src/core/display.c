@@ -2653,7 +2653,7 @@ meta_display_manage_all_xwindows (MetaDisplay *display)
   meta_stack_tracker_get_stack (display->stack_tracker, &_children, &n_children);
 
   /* Copy the stack as it will be modified as part of the loop */
-  children = g_memdup (_children, sizeof (guint64) * n_children);
+  children = g_memdup2 (_children, sizeof (uint64_t) * n_children);
 
   for (i = 0; i < n_children; ++i)
     {
