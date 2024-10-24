@@ -2146,6 +2146,7 @@ libmuffin.so.0 libmuffin0 #MINVER#
  meta_display_get_tab_current@Base 5.3.0
  meta_display_get_tab_list@Base 5.3.0
  meta_display_get_tab_next@Base 5.3.0
+ meta_display_get_tab_in_direction@Base 6.0.1
  meta_display_get_type@Base 5.3.0
  meta_display_get_workspace_manager@Base 5.3.0
  meta_display_get_x11_display@Base 5.3.0

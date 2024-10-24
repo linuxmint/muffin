@@ -2418,6 +2418,94 @@ find_tab_backward (MetaDisplay   *display,
   return NULL;
 }
 
+static bool
+tab_position_nearer(MetaWindow* test,
+                    MetaWindow* current,
+                    MetaWindow* target)
+{
+  int test_center_x = test->rect.x + test->rect.width / 2;
+  int test_center_y = test->rect.y + test->rect.height / 2;
+  int current_center_x = current->rect.x + current->rect.width / 2;
+  int current_center_y = current->rect.y + current->rect.height / 2;
+  int target_center_x = target->rect.x + target->rect.width / 2;
+  int target_center_y = target->rect.y + target->rect.height / 2;
+
+  float test_distance = sqrt(pow(test_center_x - current_center_x, 2) +
+                             pow(test_center_y - current_center_y, 2));
+  float target_distance = sqrt(pow(target_center_x - current_center_x, 2) +
+                               pow(target_center_y - current_center_y, 2));
+
+  return (test_distance < target_distance);
+}
+
+static bool
+tab_position_behind(MetaWindow* test,
+                    MetaWindow* current,
+                    MetaDirection direction)
+{
+  int test_center_x = test->rect.x + test->rect.width / 2;
+  int test_center_y = test->rect.y + test->rect.height / 2;
+  int current_center_x = current->rect.x + current->rect.width / 2;
+  int current_center_y = current->rect.y + current->rect.height / 2;
+
+  return ((direction == META_DIRECTION_RIGHT &&
+            test_center_x > current_center_x) ||
+          (direction == META_DIRECTION_LEFT &&
+            test_center_x < current_center_x) ||
+          (direction == META_DIRECTION_UP &&
+            test_center_y < current_center_y) ||
+          (direction == META_DIRECTION_DOWN &&
+            test_center_y > current_center_y));
+}
+
+static bool
+tab_is_next_in_direction (MetaWindow*          test,
+                          MetaWindow*          current,
+                          MetaWindow*          target,
+                          MetaDirection        direction)
+{
+  return (tab_position_behind(test, current, direction) &&
+          (target == current || tab_position_nearer(test, current, target)));
+}
+
+static MetaWindow*
+find_tab_in_direction (MetaDisplay          *display,
+                       MetaTabList          type,
+                       MetaWorkspace        *workspace,
+                       GList                *start,
+                       MetaDirection        direction)
+{
+  GList *result;
+  GList *tmp;
+
+  g_return_val_if_fail (start != NULL, NULL);
+  g_return_val_if_fail (workspace != NULL, NULL);
+
+  result = start;
+  tmp = start->next;
+
+  while (tmp != NULL) {
+    MetaWindow *window = tmp->data;
+    if (IN_TAB_CHAIN (window, type) &&
+        !window->minimized &&
+        tab_is_next_in_direction(window, start->data, result->data, direction))
+        result = tmp;
+    tmp = tmp->next;
+  }
+
+  tmp = workspace->mru_list;
+  while (tmp != start && tmp != NULL) {
+    MetaWindow *window = tmp->data;
+    if (IN_TAB_CHAIN (window, type) &&
+        !window->minimized &&
+        tab_is_next_in_direction(window, start->data, result->data, direction))
+        result = tmp;
+    tmp = tmp->next;
+  }
+
+  return result->data;
+}
+
 static int
 mru_cmp (gconstpointer a,
          gconstpointer b)
@@ -2590,6 +2678,40 @@ meta_display_get_tab_current (MetaDisplay   *display,
     return window;
   else
     return NULL;
+}
+
+/**
+ * meta_display_get_tab_in_direction:
+ * @display: a #MetaDisplay
+ * @type: type of tab list
+ * @workspace: origin workspace
+ * @window: (nullable): starting window
+ * @direction: The direction that should be searched.
+ *
+ * Determine the nearest window in the given direction.
+ *
+ * Returns: (transfer none): The next window in the given direction
+ *
+ */
+MetaWindow*
+meta_display_get_tab_in_direction (MetaDisplay   *display,
+                                   MetaTabList    type,
+                                   MetaWorkspace *workspace,
+                                   MetaWindow    *window,
+                                   MetaDirection direction)
+{
+  gboolean skip;
+  GList *tab_list;
+  MetaWindow *ret;
+  tab_list = meta_display_get_tab_list (display, type, workspace);
+
+  if (tab_list == NULL)
+    return NULL;
+
+  ret = find_tab_in_direction (display, type, workspace, tab_list, direction);
+
+  g_list_free (tab_list);
+  return ret;
 }
 
 MetaGravity
