@@ -359,9 +359,9 @@ meta_monitor_manager_kms_get_crtc_gamma (MetaMonitorManager  *manager,
   crtc_state = meta_kms_crtc_get_current_state (kms_crtc);
 
   *size = crtc_state->gamma.size;
-  *red = g_memdup (crtc_state->gamma.red, *size * sizeof **red);
-  *green = g_memdup (crtc_state->gamma.green, *size * sizeof **green);
-  *blue = g_memdup (crtc_state->gamma.blue, *size * sizeof **blue);
+  *red = g_memdup2 (crtc_state->gamma.red, *size * sizeof **red);
+  *green = g_memdup2 (crtc_state->gamma.green, *size * sizeof **green);
+  *blue = g_memdup2 (crtc_state->gamma.blue, *size * sizeof **blue);
 }
 
 static char *

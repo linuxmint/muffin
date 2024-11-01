@@ -1412,20 +1412,29 @@ clutter_event_copy (const ClutterEvent *event)
     case CLUTTER_BUTTON_PRESS:
     case CLUTTER_BUTTON_RELEASE:
       if (event->button.axes != NULL)
-        new_event->button.axes = g_memdup (event->button.axes,
-                                           sizeof (gdouble) * n_axes);
+        {
+          new_event->button.axes =
+            g_memdup2 (event->button.axes,
+                       sizeof (double) * n_axes);
+        }
       break;
 
     case CLUTTER_SCROLL:
       if (event->scroll.axes != NULL)
-        new_event->scroll.axes = g_memdup (event->scroll.axes,
-                                           sizeof (gdouble) * n_axes);
+        {
+          new_event->scroll.axes =
+            g_memdup2 (event->scroll.axes,
+                       sizeof (double) * n_axes);
+        }
       break;
 
     case CLUTTER_MOTION:
       if (event->motion.axes != NULL)
-        new_event->motion.axes = g_memdup (event->motion.axes,
-                                           sizeof (gdouble) * n_axes);
+        {
+          new_event->motion.axes =
+            g_memdup2 (event->motion.axes,
+                       sizeof (double) * n_axes);
+        }
       break;
 
     case CLUTTER_TOUCH_BEGIN:
@@ -1433,8 +1442,11 @@ clutter_event_copy (const ClutterEvent *event)
     case CLUTTER_TOUCH_END:
     case CLUTTER_TOUCH_CANCEL:
       if (event->touch.axes != NULL)
-        new_event->touch.axes = g_memdup (event->touch.axes,
-                                          sizeof (gdouble) * n_axes);
+        {
+          new_event->touch.axes =
+            g_memdup2 (event->touch.axes,
+                      sizeof (double) * n_axes);
+        }
       break;
 
     case CLUTTER_IM_COMMIT:

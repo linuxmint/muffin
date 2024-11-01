@@ -646,7 +646,7 @@ create_monitor_config (MetaMonitor     *monitor,
   monitor_config = g_new0 (MetaMonitorConfig, 1);
   *monitor_config = (MetaMonitorConfig) {
     .monitor_spec = meta_monitor_spec_clone (monitor_spec),
-    .mode_spec = g_memdup (mode_spec, sizeof (MetaMonitorModeSpec)),
+    .mode_spec = g_memdup2 (mode_spec, sizeof (MetaMonitorModeSpec)),
     .enable_underscanning = meta_monitor_is_underscanning (monitor)
   };
 
@@ -1030,8 +1030,8 @@ clone_monitor_config_list (GList *monitor_configs_in)
       monitor_config_out = g_new0 (MetaMonitorConfig, 1);
       *monitor_config_out = (MetaMonitorConfig) {
         .monitor_spec = meta_monitor_spec_clone (monitor_config_in->monitor_spec),
-        .mode_spec = g_memdup (monitor_config_in->mode_spec,
-                               sizeof (MetaMonitorModeSpec)),
+        .mode_spec = g_memdup2 (monitor_config_in->mode_spec,
+                                sizeof (MetaMonitorModeSpec)),
         .enable_underscanning = monitor_config_in->enable_underscanning
       };
       monitor_configs_out =
@@ -1054,7 +1054,8 @@ clone_logical_monitor_config_list (GList *logical_monitor_configs_in)
       logical_monitor_config_in = l->data;
 
       logical_monitor_config_out =
-        g_memdup (logical_monitor_config_in, sizeof (MetaLogicalMonitorConfig));
+        g_memdup2 (logical_monitor_config_in,
+                   sizeof (MetaLogicalMonitorConfig));
       logical_monitor_config_out->monitor_configs =
         clone_monitor_config_list (logical_monitor_config_in->monitor_configs);
 
