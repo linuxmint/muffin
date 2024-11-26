@@ -1,3 +1,25 @@
+muffin (6.4.0) xia; urgency=medium
+
+  [ Michael Webster ]
+  * window-x11.c: Handle a special case for sending a ConfigureNotify event.
+
+  [ Leigh Scott ]
+  * Change all g_memdup() to g_memdup2() (#699)
+
+  [ Kevin Langman ]
+  * Make clutter_offscreen_effect_get_target available to Cjs (#702)
+
+  [ Rick Calixte ]
+  * gir: Correct usage of the closure annotation (#704)
+
+  [ AxeldeWater ]
+  * Update README.md to mention the fact that Muffin is a fork of Mutter, instead of the default readme from Mutter (#697)
+
+  [ jknockel ]
+  * constraints: Allow resize of windows moved above screen (#696)
+
+ -- Clement Lefebvre <root@linuxmint.com>  Tue, 26 Nov 2024 12:49:42 +0000
+
 muffin (6.2.0) wilma; urgency=medium
 
   [ Clement Lefebvre ]
