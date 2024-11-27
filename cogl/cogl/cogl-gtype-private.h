@@ -64,16 +64,16 @@ struct _CoglGtypeClass
 GType \
 cogl_##underscore_name##_get_gtype (void) \
 { \
-   static volatile size_t type_volatile = 0; \
-   if (g_once_init_enter (&type_volatile)) \
+   static gsize g_type_id = 0; \
+   if (g_once_init_enter (&g_type_id)) \
      { \
        GType type = \
          g_boxed_type_register_static (g_intern_static_string (I_("Cogl" # Name)), \
                                        (GBoxedCopyFunc)copy_func, \
                                        (GBoxedFreeFunc)free_func); \
-       g_once_init_leave (&type_volatile, type); \
+       g_once_init_leave (&g_type_id, type); \
      } \
-   return type_volatile; \
+   return g_type_id; \
 }
 
 #define COGL_GTYPE_IMPLEMENT_INTERFACE(name) {                          \
@@ -89,8 +89,8 @@ cogl_##underscore_name##_get_gtype (void) \
 GType                                                                   \
 cogl_##name##_get_gtype (void)                                      \
 {                                                                       \
-  static volatile gsize type_id__volatile = 0;                          \
-  if (g_once_init_enter (&type_id__volatile))                           \
+  static gsize g_type_id = 0;                                           \
+  if (g_once_init_enter (&g_type_id))                                   \
     {                                                                   \
       static const GTypeFundamentalInfo finfo = {                       \
         (G_TYPE_FLAG_CLASSED |                                          \
@@ -125,12 +125,12 @@ cogl_##name##_get_gtype (void)                                      \
                                      I_("Cogl" # Name),                 \
                                      &node_info, &finfo,                \
                                      G_TYPE_FLAG_ABSTRACT);             \
-      g_once_init_leave (&type_id__volatile,                            \
+      g_once_init_leave (&g_type_id,                                    \
                          fundamental_type_id);
 
 #define _COGL_GTYPE_DEFINE_BASE_CLASS_END()                             \
     }                                                                   \
-    return type_id__volatile;                                           \
+    return g_type_id;                                                   \
   }
 
 #define COGL_GTYPE_DEFINE_BASE_CLASS(Name,name,...)      \
@@ -144,8 +144,8 @@ cogl_##name##_get_gtype (void)                                      \
   GType                                                                 \
   name##_get_gtype (void)                                               \
   {                                                                     \
-    static volatile gsize type_id__volatile = 0;                        \
-    if (g_once_init_enter (&type_id__volatile))                         \
+    static gsize g_type_id = 0;                                         \
+    if (g_once_init_enter (&g_type_id))                                 \
       {                                                                 \
         GType fundamental_type_id =                                     \
           g_type_register_static_simple (G_TYPE_INTERFACE,              \
@@ -162,10 +162,10 @@ cogl_##name##_get_gtype (void)                                      \
 #define _COGL_GTYPE_DEFINE_INTERFACE_EXTENDED_END()                     \
   /* following custom code */                                           \
   }                                                                     \
-    g_once_init_leave (&type_id__volatile,                              \
+    g_once_init_leave (&g_type_id,                                      \
                        fundamental_type_id);                            \
     }                                                                   \
-    return type_id__volatile;                                           \
+    return g_type_id;                                                   \
     } /* closes name##_get_type() */
 
 
@@ -207,8 +207,8 @@ cogl_##name##_get_gtype (void)                                      \
   GType                                                                 \
   name##_get_gtype (void)                                               \
   {                                                                     \
-    static volatile gsize type_id__volatile = 0;                        \
-    if (g_once_init_enter (&type_id__volatile))                         \
+    static gsize g_type_id = 0;                                         \
+    if (g_once_init_enter (&g_type_id))                                 \
       {                                                                 \
         GType fundamental_type_id =                                     \
           g_type_register_static_simple (parent,                        \
@@ -223,10 +223,10 @@ cogl_##name##_get_gtype (void)                                      \
 #define _COGL_GTYPE_DEFINE_TYPE_EXTENDED_END()                          \
   /* following custom code */                                           \
   }                                                                     \
-    g_once_init_leave (&type_id__volatile,                              \
+    g_once_init_leave (&g_type_id,                                      \
                        fundamental_type_id);                            \
     }                                                                   \
-    return type_id__volatile;                                           \
+    return g_type_id;                                                   \
     } /* closes name##_get_type() */
 
 

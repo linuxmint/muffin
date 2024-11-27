@@ -57,9 +57,9 @@ G_DEFINE_TYPE (ClutterBackendX11, clutter_backend_x11, CLUTTER_TYPE_BACKEND)
 GType
 clutter_x11_filter_return_get_type (void)
 {
-  static volatile gsize g_define_type__volatile;
+  static gsize g_define_type;
 
-  if (g_once_init_enter (&g_define_type__volatile))
+  if (g_once_init_enter (&g_define_type))
     {
       static const GEnumValue values[] = {
         { CLUTTER_X11_FILTER_CONTINUE, "CLUTTER_X11_FILTER_CONTINUE", "continue" },
@@ -68,13 +68,13 @@ clutter_x11_filter_return_get_type (void)
         { 0, NULL, NULL },
       };
 
-      GType g_define_type =
+      GType id =
         g_enum_register_static (g_intern_static_string ("ClutterX11FilterReturn"), values);
 
-      g_once_init_leave (&g_define_type__volatile, g_define_type);
+      g_once_init_leave (&g_define_type, id);
     }
 
-  return g_define_type__volatile;
+  return g_define_type;
 }
 
 /* atoms; remember to add the code that assigns the atom value to

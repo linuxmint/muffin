@@ -236,9 +236,9 @@ clutter_paint_node_init (ClutterPaintNode *self)
 GType
 clutter_paint_node_get_type (void)
 {
-  static volatile gsize paint_node_type_id__volatile = 0;
+  static gsize paint_node_type_id = 0;
 
-  if (g_once_init_enter (&paint_node_type_id__volatile))
+  if (g_once_init_enter (&paint_node_type_id))
     {
       static const GTypeFundamentalInfo finfo = {
         (G_TYPE_FLAG_CLASSED |
@@ -274,16 +274,16 @@ clutter_paint_node_get_type (void)
         &value_table,
       };
 
-      GType paint_node_type_id =
+      GType id =
         g_type_register_fundamental (g_type_fundamental_next (),
                                      I_("ClutterPaintNode"),
                                      &node_info, &finfo,
                                      G_TYPE_FLAG_ABSTRACT);
 
-      g_once_init_leave (&paint_node_type_id__volatile, paint_node_type_id);
+      g_once_init_leave (&paint_node_type_id, id);
     }
 
-  return paint_node_type_id__volatile;
+  return paint_node_type_id;
 }
 
 /**
