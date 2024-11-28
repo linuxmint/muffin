@@ -264,6 +264,10 @@ META_EXPORT
 int  meta_display_get_current_monitor  (MetaDisplay   *display);
 
 META_EXPORT
+const gchar* meta_display_get_monitor_name (MetaDisplay *display,
+                                            int          monitor);
+
+META_EXPORT
 void meta_display_get_monitor_geometry (MetaDisplay   *display,
                                         int            monitor,
                                         MetaRectangle *geometry);

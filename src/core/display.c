@@ -3719,6 +3719,50 @@ meta_display_get_primary_monitor (MetaDisplay *display)
 }
 
 /**
+ * meta_display_get_monitor_name:
+ * @display: a #MetaDisplay
+ * @monitor: the monitor number
+ *
+ * Return value: (transfer none): the monitor vendor name
+ */
+const gchar*
+meta_display_get_monitor_name (MetaDisplay *display,
+                               int          monitor)
+{
+  MetaBackend *backend = meta_get_backend ();
+  MetaMonitorManager *monitor_manager =
+    meta_backend_get_monitor_manager (backend);
+  #ifndef G_DISABLE_CHECKS
+  int n_logical_monitors =
+    meta_monitor_manager_get_num_logical_monitors (monitor_manager);
+#endif
+
+  g_return_val_if_fail (META_IS_DISPLAY (display), NULL);
+  g_return_val_if_fail (monitor >= 0 && monitor < n_logical_monitors, NULL);
+
+  GList *l;
+
+  for (l = monitor_manager->logical_monitors; l; l = l->next) {
+        MetaLogicalMonitor *other = l->data;
+
+        if (other->number != monitor) {
+          continue;
+        }
+
+        GList *m;
+        for (m = other->monitors; m; m = m->next)
+        {
+            MetaMonitor *monitor = m->data;
+            const char* name = meta_monitor_get_display_name (monitor);
+            if (name != NULL) {
+                return name;
+            }
+        }
+  }
+  return NULL;
+}
+
+/**
  * meta_display_get_monitor_geometry:
  * @display: a #MetaDisplay
  * @monitor: the monitor number
