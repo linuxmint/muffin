@@ -2133,6 +2133,7 @@ libmuffin.so.0 libmuffin0 #MINVER#
  meta_display_get_monitor_geometry@Base 5.3.0
  meta_display_get_monitor_in_fullscreen@Base 5.3.0
  meta_display_get_monitor_index_for_rect@Base 5.3.0
+ meta_display_get_monitor_name@Base 6.4.1
  meta_display_get_monitor_neighbor_index@Base 5.3.0
  meta_display_get_monitor_scale@Base 5.3.0
  meta_display_get_n_monitors@Base 5.3.0
