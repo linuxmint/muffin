@@ -1,3 +1,16 @@
+muffin (6.4.1) xia; urgency=medium
+
+  [ Michael Webster ]
+  * Remove volatile qualifier for g_once_init handles.
+
+  [ Cobinja ]
+  * Exposes monitor names (#706)
+
+  [ Michael Webster ]
+  * Build: Update symbol file.
+
+ -- Clement Lefebvre <root@linuxmint.com>  Mon, 02 Dec 2024 16:43:49 +0000
+
 muffin (6.4.0) xia; urgency=medium
 
   [ Michael Webster ]
