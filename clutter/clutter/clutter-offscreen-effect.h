@@ -99,6 +99,9 @@ CLUTTER_EXPORT
 CoglMaterial *  clutter_offscreen_effect_get_target             (ClutterOffscreenEffect *effect);
 
 CLUTTER_EXPORT
+CoglPipeline *  clutter_offscreen_effect_get_pipeline           (ClutterOffscreenEffect *effect);
+
+CLUTTER_EXPORT
 CoglHandle      clutter_offscreen_effect_get_texture            (ClutterOffscreenEffect *effect);
 
 CLUTTER_EXPORT
