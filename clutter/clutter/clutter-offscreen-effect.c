@@ -604,6 +604,30 @@ clutter_offscreen_effect_get_target (ClutterOffscreenEffect *effect)
 }
 
 /**
+ * clutter_offscreen_effect_get_pipeline:
+ * @effect: a #ClutterOffscreenEffect
+ *
+ * Retrieves the pipeline used as a render target for the offscreen
+ * buffer created by @effect
+ *
+ * You should only use the returned #CoglPipeline when painting. The
+ * returned pipeline might change between different frames.
+ *
+ * Return value: (transfer none): a #CoglPipeline or %NULL. The
+ *   returned pipeline is owned by Clutter and it should not be
+ *   modified or freed
+ *
+ */
+CoglPipeline *
+clutter_offscreen_effect_get_pipeline (ClutterOffscreenEffect *effect)
+{
+  g_return_val_if_fail (CLUTTER_IS_OFFSCREEN_EFFECT (effect),
+                        NULL);
+
+  return effect->priv->target;
+}
+
+/**
  * clutter_offscreen_effect_paint_target:
  * @effect: a #ClutterOffscreenEffect
  * @paint_context: a #ClutterPaintContext
