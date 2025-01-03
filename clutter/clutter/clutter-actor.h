@@ -303,6 +303,8 @@ struct _ClutterActorClass
 
   /*< private >*/
   /* padding for future expansion */
+  GType layout_manager_type;
+
   gpointer _padding_dummy[25];
 };
 
@@ -925,6 +927,13 @@ CLUTTER_EXPORT
 void clutter_actor_pick_box (ClutterActor          *self,
                              ClutterPickContext    *pick_context,
                              const ClutterActorBox *box);
+
+CLUTTER_EXPORT
+void clutter_actor_class_set_layout_manager_type (ClutterActorClass *actor_class,
+                                                  GType              type);
+
+CLUTTER_EXPORT
+GType clutter_actor_class_get_layout_manager_type (ClutterActorClass *actor_class);
 
 G_END_DECLS
 

@@ -6555,11 +6555,19 @@ clutter_actor_constructor (GType gtype,
 
   if (self->priv->layout_manager == NULL)
     {
+      ClutterActorClass *actor_class;
       ClutterLayoutManager *default_layout;
+      GType layout_manager_type;
+
+      actor_class = CLUTTER_ACTOR_GET_CLASS (self);
+
+      layout_manager_type = clutter_actor_class_get_layout_manager_type (actor_class);
+      if (layout_manager_type == G_TYPE_INVALID)
+        layout_manager_type = CLUTTER_TYPE_FIXED_LAYOUT;
 
       CLUTTER_NOTE (LAYOUT, "Creating default layout manager");
 
-      default_layout = clutter_fixed_layout_new ();
+      default_layout = g_object_new (layout_manager_type, NULL);
       clutter_actor_set_layout_manager (self, default_layout);
     }
 
@@ -6615,6 +6623,8 @@ clutter_actor_class_init (ClutterActorClass *klass)
   klass->has_overlaps = clutter_actor_real_has_overlaps;
   klass->paint = clutter_actor_real_paint;
   klass->destroy = clutter_actor_real_destroy;
+
+  klass->layout_manager_type = G_TYPE_INVALID;
 
   /**
    * ClutterActor:x:
@@ -18305,11 +18315,24 @@ clutter_actor_set_layout_manager (ClutterActor         *self,
                                   ClutterLayoutManager *manager)
 {
   ClutterActorPrivate *priv;
+  GType expected_type, manager_type;
 
   g_return_if_fail (CLUTTER_IS_ACTOR (self));
   g_return_if_fail (manager == NULL || CLUTTER_IS_LAYOUT_MANAGER (manager));
 
   priv = self->priv;
+
+  expected_type = clutter_actor_class_get_layout_manager_type (CLUTTER_ACTOR_GET_CLASS (self));
+  manager_type = manager != NULL ? G_TYPE_FROM_INSTANCE (manager) : G_TYPE_INVALID;
+
+  if (expected_type != G_TYPE_INVALID &&
+      manager_type != G_TYPE_INVALID &&
+      !g_type_is_a (manager_type, expected_type))
+    {
+      g_warning ("Trying to set layout manager of type %s, but actor only accepts %s",
+                 g_type_name (manager_type), g_type_name (expected_type));
+      return;
+    }
 
   if (priv->layout_manager != NULL)
     {
@@ -21414,4 +21437,44 @@ clutter_actor_has_accessible (ClutterActor *actor)
     return CLUTTER_ACTOR_GET_CLASS (actor)->has_accessible (actor);
 
   return TRUE;
+}
+
+/**
+ * clutter_actor_class_set_layout_manager_type
+ * @actor_class: A #ClutterActor class
+ * @type: A #GType
+ *
+ * Sets the type to be used for creating layout managers for
+ * actors of @actor_class.
+ *
+ * The given @type must be a subtype of [class@Clutter.LayoutManager].
+ *
+ * This function should only be called from class init functions of actors.
+ */
+void
+clutter_actor_class_set_layout_manager_type (ClutterActorClass *actor_class,
+                                             GType              type)
+{
+  g_return_if_fail (CLUTTER_IS_ACTOR_CLASS (actor_class));
+  g_return_if_fail (g_type_is_a (type, CLUTTER_TYPE_LAYOUT_MANAGER));
+
+  actor_class->layout_manager_type = type;
+}
+/**
+ * clutter_actor_class_get_layout_manager_type
+ * @actor_class: A #ClutterActor class
+ *
+ * Retrieves the type of the [class@Clutter.LayoutManager]
+ * used by actors of class @actor_class.
+ *
+ * See also: [method@Clutter.ActorClass.set_layout_manager_type].
+ *
+ * Returns: type of a `ClutterLayoutManager` subclass, or %G_TYPE_INVALID
+ */
+GType
+clutter_actor_class_get_layout_manager_type (ClutterActorClass *actor_class)
+{
+  g_return_val_if_fail (CLUTTER_IS_ACTOR_CLASS (actor_class), G_TYPE_INVALID);
+
+  return actor_class->layout_manager_type;
 }
