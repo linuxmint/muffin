@@ -2203,6 +2203,10 @@ process_special_modifier_key (MetaDisplay          *display,
                            clutter_input_device_get_device_id (event->device),
                            XISyncDevice, event->time);
 
+          /* treat modifier keys the same as normal keys on Wayland */
+          if (meta_is_wayland_compositor ())
+            return FALSE;
+
           return TRUE;
         }
       else
