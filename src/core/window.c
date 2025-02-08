@@ -3106,6 +3106,54 @@ meta_window_is_screen_sized (MetaWindow *window)
   meta_display_get_size (window->display, &screen_width, &screen_height);
   meta_window_get_frame_rect (window, &window_rect);
 
+  /* Workaround, obtain focused window size and rectangles manually if window has 'x' and 'y' set to '0' and size to '1x1'
+   * Fixes issue with inability to unredirect software which runs through Wine/Proton, and even native one which runs through Steam
+   * But that is not perfect solution as still BLIT instead of FLIP being used
+   * Using already obtained info by WM instead of obtaining new one causes the same buggy result
+   */
+  if (window_rect.x == 0 && window_rect.y == 0 &&
+      window_rect.width == 1 && window_rect.height == 1)
+    {
+      Window active_window;
+      Atom actual_type;
+      int actual_format;
+      unsigned long nitems, bytes_after;
+      unsigned char *prop = NULL;
+
+      Display *display = XOpenDisplay(NULL);
+      Window root = DefaultRootWindow(display);
+
+      Atom atom = XInternAtom(display, "_NET_ACTIVE_WINDOW", False);
+
+      if (XGetWindowProperty(display, root, atom, 0, 1, False, XA_WINDOW,
+          &actual_type, &actual_format, &nitems, &bytes_after, &prop) == Success &&
+          prop != NULL)
+        {
+          active_window = *((Window *)prop);
+          XFree(prop);
+
+          if (active_window != None)
+            {
+              Window root, parent;
+              Window *children;
+              unsigned int nchildren;
+              XQueryTree(display, active_window, &root, &parent, &children, &nchildren);
+
+              XWindowAttributes window_attributes;
+              XGetWindowAttributes(display, active_window, &window_attributes);
+
+              window_rect.x = window_attributes.x;
+              window_rect.y = window_attributes.y;
+              window_rect.width = window_attributes.width;
+              window_rect.height = window_attributes.height;
+            }
+        }
+
+      XCloseDisplay(display);
+    }
+  /* End of workaround
+   */
+
   if (window_rect.x == 0 && window_rect.y == 0 &&
       window_rect.width == screen_width && window_rect.height == screen_height)
     return TRUE;
