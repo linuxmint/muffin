@@ -3106,6 +3106,65 @@ meta_window_is_screen_sized (MetaWindow *window)
   meta_display_get_size (window->display, &screen_width, &screen_height);
   meta_window_get_frame_rect (window, &window_rect);
 
+  /* Workaround, obtain currently focused window rectangles if window has 'x' and 'y' set to '0' and size to '1x1' (i.e. child with broken rectangles)
+   * Fixes issue with inability to unredirect fullscreen games running through Wine/Proton, and even native ones running through Steam
+   * In such cases parent window accepts input while child one responsible for output, that is why parent appears skipped (and still redirected) but child is handled
+   * To make sure in that, run any game through Steam, run 'xwininfo -tree -root', find game window there and unmap child window using 'xdotool windowunmap <child>'
+   * After that switch back to game (screen becomes blank) and press any random buttons, then map window back ('xdotool windowmap <child>') and you will see that game handled input
+   * That is not perfect solution as still BLIT instead of FLIP being used (due to reason described above), but at least that allows tearing and removes hiccups caused by compositor
+   * Unredirection with BLIT is known to break in-game VSYNC completely on Intel Graphics
+   * But it works fine in case with NVIDIA (at least with proprietary driver) and do not have AMD GPU to test
+   * Using ID of focused window (i.e. parent) is needed to avoid the same buggy rectangles
+   */
+  if (window_rect.x == 0 && window_rect.y == 0 &&
+      window_rect.width == 1 && window_rect.height == 1)
+    {
+      Window active_window;
+      Atom actual_type;
+      int actual_format;
+      unsigned long nitems, bytes_after;
+      unsigned char *prop = NULL;
+
+      MetaX11Display *x11_display = window->display->x11_display;
+      Window root = meta_x11_display_get_xroot (x11_display);
+      Display *xdisplay = meta_x11_display_get_xdisplay (x11_display);
+
+      Atom net_active_window = XInternAtom (xdisplay, "_NET_ACTIVE_WINDOW", False);
+
+      if (XGetWindowProperty (xdisplay, root, net_active_window, 0, 1, False, XA_WINDOW,
+          &actual_type, &actual_format, &nitems, &bytes_after, &prop) == Success &&
+          prop != NULL &&
+          actual_type == XA_WINDOW &&
+          nitems == 1)
+        {
+          active_window = *((Window *)prop);
+
+          XFree (prop);
+
+          if (active_window != None)
+            {
+              Window parent;
+              Window *children = NULL;
+              unsigned int nchildren;
+              XQueryTree (xdisplay, active_window, &root, &parent, &children, &nchildren);
+
+              if (children)
+                XFree (children);
+
+              XWindowAttributes window_attributes;
+              if (XGetWindowAttributes (xdisplay, active_window, &window_attributes))
+                {
+                  window_rect.x = window_attributes.x;
+                  window_rect.y = window_attributes.y;
+                  window_rect.width = window_attributes.width;
+                  window_rect.height = window_attributes.height;
+                }
+            }
+        }
+    }
+  /* End of workaround
+   */
+
   if (window_rect.x == 0 && window_rect.y == 0 &&
       window_rect.width == screen_width && window_rect.height == screen_height)
     return TRUE;
