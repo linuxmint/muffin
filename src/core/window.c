@@ -3541,21 +3541,43 @@ meta_window_tile (MetaWindow   *window,
     directions = META_MAXIMIZE_VERTICAL;
 
 
-  GdkRectangle *maybe_saved_rect = NULL;
+  MetaRectangle existing_rect, work_area, tile_area;
+  meta_window_get_frame_rect(window, &existing_rect);
+  meta_window_get_work_area_for_monitor(window, window->tile_monitor_number, &work_area);
+  tile_area = existing_rect;
 
-  if (window->saved_tile_mode == META_TILE_NONE && window->display->grab_op != META_GRAB_OP_NONE)
+  switch (tile_mode)
     {
-      // If we let it save the current rect when initially tiling, the rect position
-      // may end up on a different monitor (depending on where the grab anchor is positioned).
-      maybe_saved_rect = &window->display->grab_initial_window_pos;
-    }
-  else
-  if (window->saved_tile_mode != META_TILE_NONE)
-    {
-      maybe_saved_rect = &window->saved_rect;
-    }
+    case META_TILE_LEFT:
+      tile_area.x = work_area.x;
+      tile_area.y = work_area.y;
+      break;
 
-  meta_window_maximize_internal (window, directions, maybe_saved_rect);
+    case META_TILE_RIGHT:
+      tile_area.x = work_area.x + work_area.width - existing_rect.width;
+      tile_area.y = work_area.y;
+      break;
+
+    case META_TILE_TOP:
+      tile_area.x = work_area.x;
+      tile_area.y = work_area.y;
+      break;
+
+    case META_TILE_BOTTOM:
+      tile_area.x = work_area.x;
+      tile_area.y = work_area.y + work_area.height - existing_rect.height;
+      break;
+
+    default:
+      tile_area.x = work_area.x + (work_area.width - existing_rect.width) / 2;
+      tile_area.y = work_area.y + (work_area.height - existing_rect.height) / 2;
+      break;
+  }
+
+  window->saved_rect = tile_area;
+  window->unconstrained_rect = tile_area;
+
+  meta_window_maximize_internal (window, directions, &window->saved_rect);
   meta_display_update_tile_preview (window->display, FALSE);
 
   if ((!window->htile_match || window->htile_match != window->display->grab_window) &&
