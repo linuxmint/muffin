@@ -421,6 +421,7 @@ libmutter_clutter = shared_library(libmutter_clutter_name,
     cally_sources,
     cally_headers,
     cally_private_headers,
+    libmutter_cogl_path_enum_types_h
   ],
   version: '0.0.0',
   soversion: 0,

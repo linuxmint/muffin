@@ -903,6 +903,7 @@ libmutter = shared_library(libmutter_name,
   sources: [
     mutter_sources,
     mutter_built_sources,
+    libmutter_cogl_path_enum_types_h,
   ],
   version: '0.0.0',
   soversion: 0,
@@ -933,6 +934,7 @@ libmutter_dep = declare_dependency(
 executable('muffin',
   sources: [
     files('core/mutter.c'),
+    libmutter_cogl_path_enum_types_h,
   ],
   include_directories: mutter_includes,
   c_args: mutter_c_args,
