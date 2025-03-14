@@ -876,6 +876,7 @@ libmuffin-clutter-0.so.0 libmuffin0 #MINVER#
  clutter_matrix_init_identity@Base 5.3.0
  clutter_modifier_type_get_type@Base 5.3.0
  clutter_offscreen_effect_create_texture@Base 5.3.0
+ clutter_offscreen_effect_get_pipeline@Base 6.6.0
  clutter_offscreen_effect_get_target@Base 5.3.0
  clutter_offscreen_effect_get_target_rect@Base 5.3.0
  clutter_offscreen_effect_get_target_size@Base 5.3.0
