@@ -3817,10 +3817,14 @@ meta_window_x11_configure_notify (MetaWindow      *window,
   g_assert (window->override_redirect);
   g_assert (window->frame == NULL);
 
-  window->rect.x = event->x;
-  window->rect.y = event->y;
-  window->rect.width = event->width;
-  window->rect.height = event->height;
+  if (event->width != 1 &&
+      event->height != 1)
+    {
+      window->rect.x = event->x;
+      window->rect.y = event->y;
+      window->rect.width = event->width;
+      window->rect.height = event->height;
+    }
 
   priv->client_rect = window->rect;
   window->buffer_rect = window->rect;
