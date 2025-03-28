@@ -5,7 +5,7 @@ default_plugin_c_args = [
 ]
 
 default_plugin = shared_module('default',
-  sources: ['default.c'],
+  sources: ['default.c', libmutter_cogl_path_enum_types_h],
   include_directories: mutter_includes,
   c_args: default_plugin_c_args,
   dependencies: [
