@@ -106,6 +106,8 @@ libmuffin-clutter-0.so.0 libmuffin0 #MINVER#
  clutter_actor_box_set_origin@Base 5.3.0
  clutter_actor_box_set_size@Base 5.3.0
  clutter_actor_box_union@Base 5.3.0
+ clutter_actor_class_get_layout_manager_type@Base 6.4.0
+ clutter_actor_class_set_layout_manager_type@Base 6.4.0
  clutter_actor_clear_actions@Base 5.3.0
  clutter_actor_clear_constraints@Base 5.3.0
  clutter_actor_clear_effects@Base 5.3.0
