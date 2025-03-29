@@ -254,6 +254,9 @@ meta_surface_actor_x11_is_opaque (MetaSurfaceActor *actor)
 gboolean
 meta_surface_actor_x11_should_unredirect (MetaSurfaceActorX11 *self)
 {
+  if (!meta_prefs_get_unredirect_fullscreen_windows ())
+    return FALSE;
+
   MetaWindow *window = self->window;
 
   if (meta_window_requested_dont_bypass_compositor (window))
@@ -277,7 +280,7 @@ meta_surface_actor_x11_should_unredirect (MetaSurfaceActorX11 *self)
   if (meta_window_is_override_redirect (window))
     return TRUE;
 
-  if (self->does_full_damage && meta_prefs_get_unredirect_fullscreen_windows ())
+  if (self->does_full_damage)
     return TRUE;
 
   return FALSE;
