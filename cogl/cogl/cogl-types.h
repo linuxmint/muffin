@@ -67,12 +67,15 @@ G_BEGIN_DECLS
  * be stack allocated we use this macro to compile time assert that
  * a struct size is as expected.
  */
+#ifndef __GI_SCANNER__
 #define COGL_STRUCT_SIZE_ASSERT(TYPE, SIZE) \
 typedef struct { \
           char compile_time_assert_ ## TYPE ## _size[ \
               (sizeof (TYPE) == (SIZE)) ? 1 : -1]; \
         } _ ## TYPE ## SizeCheck
-
+#else
+#define COGL_STRUCT_SIZE_ASSERT(TYPE, SIZE)
+#endif
 /**
  * CoglHandle:
  *
