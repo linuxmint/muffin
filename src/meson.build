@@ -489,6 +489,8 @@ if have_wayland
     'wayland/meta-pointer-lock-wayland.h',
     'wayland/meta-selection-source-wayland.c',
     'wayland/meta-selection-source-wayland-private.h',
+    'wayland/meta-wayland-activation.c',
+    'wayland/meta-wayland-activation.h',
     'wayland/meta-wayland-actor-surface.c',
     'wayland/meta-wayland-actor-surface.h',
     'wayland/meta-wayland-buffer.c',
@@ -813,6 +815,7 @@ if have_wayland
     ['tablet', 'unstable', 'v2', ],
     ['text-input', 'unstable', 'v3', ],
     ['viewporter', 'stable', ],
+    ['xdg-activation', 'staging', 'v1', ],
     ['xdg-foreign', 'unstable', 'v1', ],
     ['xdg-output', 'unstable', 'v1', ],
     ['xdg-shell', 'unstable', 'v6', ],
@@ -836,6 +839,13 @@ if have_wayland
 
     if protocol_type == 'stable'
       output_base = protocol_name
+      input = join_paths(protocols_dir,
+                         '@0@/@1@/@2@.xml'.format(protocol_type,
+                         protocol_name,
+                         output_base))
+    elif protocol_type == 'staging'
+      protocol_version = p.get(2)
+      output_base = '@0@-@1@'.format(protocol_name, protocol_version)
       input = join_paths(protocols_dir,
                          '@0@/@1@/@2@.xml'.format(protocol_type,
                          protocol_name,
