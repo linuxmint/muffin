@@ -61,7 +61,7 @@
 #include "backends/meta-settings-private.h"
 #include "backends/meta-stage-private.h"
 #include "backends/x11/meta-backend-x11.h"
-#include "clutter/clutter-mutter.h"
+#include "clutter/clutter-muffin.h"
 #include "meta/main.h"
 #include "meta/meta-backend.h"
 #include "meta/util.h"
@@ -742,7 +742,7 @@ meta_backend_constructed (GObject *object)
 static void
 meta_backend_class_init (MetaBackendClass *klass)
 {
-  const gchar *mutter_stage_views;
+  const gchar *muffin_stage_views;
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
   object_class->finalize = meta_backend_finalize;
@@ -796,8 +796,8 @@ meta_backend_class_init (MetaBackendClass *klass)
                   NULL, NULL, NULL,
                   G_TYPE_NONE, 1, META_TYPE_GPU);
 
-  mutter_stage_views = g_getenv ("MUTTER_STAGE_VIEWS");
-  stage_views_disabled = g_strcmp0 (mutter_stage_views, "0") == 0;
+  muffin_stage_views = g_getenv ("MUFFIN_STAGE_VIEWS");
+  stage_views_disabled = g_strcmp0 (muffin_stage_views, "0") == 0;
 }
 
 static MetaMonitorManager *
@@ -1331,7 +1331,7 @@ meta_backend_update_last_device (MetaBackend        *backend,
       priv->device_update_idle_id =
         g_idle_add ((GSourceFunc) update_last_device, backend);
       g_source_set_name_by_id (priv->device_update_idle_id,
-                               "[mutter] update_last_device");
+                               "[muffin] update_last_device");
     }
 }
 

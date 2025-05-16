@@ -1,6 +1,6 @@
-# Turkish translation of mutter.
+# Turkish translation of muffin.
 # Copyright (C) 2003, 2004, 2005, 2008, 2009, 2011 Free Software Foundation.
-# This file is distributed under the same license as the mutter package.
+# This file is distributed under the same license as the muffin package.
 #
 # Sinan İmamoğlu <sinan@myrealbox.com>, 2003.
 # Baris Cicek <baris@teamforce.name.tr>, 2004, 2005, 2008, 2009.
@@ -12,8 +12,8 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: mutter master\n"
-"Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/mutter/issues\n"
+"Project-Id-Version: muffin master\n"
+"Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/muffin/issues\n"
 "POT-Creation-Date: 2020-02-23 17:41+0000\n"
 "PO-Revision-Date: 2020-02-24 17:57+0300\n"
 "Last-Translator: Emin Tufan Çetin <etcetin@gmail.com>\n"
@@ -26,241 +26,241 @@ msgstr ""
 "X-DamnedLies-Scope: partial\n"
 "X-Generator: Poedit 2.2.3\n"
 
-#: data/50-mutter-navigation.xml:6
+#: data/50-muffin-navigation.xml:6
 msgid "Navigation"
 msgstr "Gezinme"
 
-#: data/50-mutter-navigation.xml:9
+#: data/50-muffin-navigation.xml:9
 msgid "Move window to workspace 1"
 msgstr "Pencereyi çalışma alanı 1’e taşı"
 
-#: data/50-mutter-navigation.xml:12
+#: data/50-muffin-navigation.xml:12
 msgid "Move window to workspace 2"
 msgstr "Pencereyi çalışma alanı 2’ye taşı"
 
-#: data/50-mutter-navigation.xml:15
+#: data/50-muffin-navigation.xml:15
 msgid "Move window to workspace 3"
 msgstr "Pencereyi çalışma alanı 3’e taşı"
 
-#: data/50-mutter-navigation.xml:18
+#: data/50-muffin-navigation.xml:18
 msgid "Move window to workspace 4"
 msgstr "Pencereyi çalışma alanı 4’e taşı"
 
-#: data/50-mutter-navigation.xml:21
+#: data/50-muffin-navigation.xml:21
 msgid "Move window to last workspace"
 msgstr "Pencereyi son çalışma alanına taşı"
 
-#: data/50-mutter-navigation.xml:24
+#: data/50-muffin-navigation.xml:24
 msgid "Move window one workspace up"
 msgstr "Pencereyi üstteki çalışma alanına taşı"
 
-#: data/50-mutter-navigation.xml:27
+#: data/50-muffin-navigation.xml:27
 msgid "Move window one workspace down"
 msgstr "Pencereyi alttaki çalışma alanına taşı"
 
-#: data/50-mutter-navigation.xml:30
+#: data/50-muffin-navigation.xml:30
 msgid "Move window one monitor to the left"
 msgstr "Pencereyi soldaki monitöre taşı"
 
-#: data/50-mutter-navigation.xml:33
+#: data/50-muffin-navigation.xml:33
 msgid "Move window one monitor to the right"
 msgstr "Pencereyi sağdaki monitöre taşı"
 
-#: data/50-mutter-navigation.xml:36
+#: data/50-muffin-navigation.xml:36
 msgid "Move window one monitor up"
 msgstr "Pencereyi üstteki monitöre taşı"
 
-#: data/50-mutter-navigation.xml:39
+#: data/50-muffin-navigation.xml:39
 msgid "Move window one monitor down"
 msgstr "Pencereyi alttaki monitöre taşı"
 
-#: data/50-mutter-navigation.xml:43
+#: data/50-muffin-navigation.xml:43
 msgid "Switch applications"
 msgstr "Uygulamalar arasında geçiş yap"
 
-#: data/50-mutter-navigation.xml:48
+#: data/50-muffin-navigation.xml:48
 msgid "Switch to previous application"
 msgstr "Önceki uygulamaya geç"
 
-#: data/50-mutter-navigation.xml:52
+#: data/50-muffin-navigation.xml:52
 msgid "Switch windows"
 msgstr "Pencereler arasında geçiş yap"
 
-#: data/50-mutter-navigation.xml:57
+#: data/50-muffin-navigation.xml:57
 msgid "Switch to previous window"
 msgstr "Önceki pencereye geç"
 
-#: data/50-mutter-navigation.xml:61
+#: data/50-muffin-navigation.xml:61
 msgid "Switch windows of an application"
 msgstr "Uygulamanın pencereleri arasında geçiş yap"
 
-#: data/50-mutter-navigation.xml:66
+#: data/50-muffin-navigation.xml:66
 msgid "Switch to previous window of an application"
 msgstr "Uygulamanın bir önceki penceresine geç"
 
-#: data/50-mutter-navigation.xml:70
+#: data/50-muffin-navigation.xml:70
 msgid "Switch system controls"
 msgstr "Sistem denetimleri arasında geçiş yap"
 
-#: data/50-mutter-navigation.xml:75
+#: data/50-muffin-navigation.xml:75
 msgid "Switch to previous system control"
 msgstr "Önceki sistem denetimine geç"
 
-#: data/50-mutter-navigation.xml:79
+#: data/50-muffin-navigation.xml:79
 msgid "Switch windows directly"
 msgstr "Pencereler arasında doğrudan geçiş yap"
 
-#: data/50-mutter-navigation.xml:84
+#: data/50-muffin-navigation.xml:84
 msgid "Switch directly to previous window"
 msgstr "Önceki pencereye doğrudan geç"
 
-#: data/50-mutter-navigation.xml:88
+#: data/50-muffin-navigation.xml:88
 msgid "Switch windows of an app directly"
 msgstr "Uygulamanın pencereleri arasında anında geçiş yap"
 
-#: data/50-mutter-navigation.xml:93
+#: data/50-muffin-navigation.xml:93
 msgid "Switch directly to previous window of an app"
 msgstr "Bir uygulamanın önceki penceresine doğrudan geç"
 
-#: data/50-mutter-navigation.xml:97
+#: data/50-muffin-navigation.xml:97
 msgid "Switch system controls directly"
 msgstr "Sistem denetimleri arasında doğrudan geçiş yap"
 
-#: data/50-mutter-navigation.xml:102
+#: data/50-muffin-navigation.xml:102
 msgid "Switch directly to previous system control"
 msgstr "Önceki sistem denetimine doğrudan geç"
 
-#: data/50-mutter-navigation.xml:105
+#: data/50-muffin-navigation.xml:105
 msgid "Hide all normal windows"
 msgstr "Tüm normal pencereleri gizle"
 
-#: data/50-mutter-navigation.xml:108
+#: data/50-muffin-navigation.xml:108
 msgid "Switch to workspace 1"
 msgstr "Çalışma alanı 1’e geç"
 
-#: data/50-mutter-navigation.xml:111
+#: data/50-muffin-navigation.xml:111
 msgid "Switch to workspace 2"
 msgstr "Çalışma alanı 2’ye geç"
 
-#: data/50-mutter-navigation.xml:114
+#: data/50-muffin-navigation.xml:114
 msgid "Switch to workspace 3"
 msgstr "Çalışma alanı 3’e geç"
 
-#: data/50-mutter-navigation.xml:117
+#: data/50-muffin-navigation.xml:117
 msgid "Switch to workspace 4"
 msgstr "Çalışma alanı 4’e geç"
 
-#: data/50-mutter-navigation.xml:120
+#: data/50-muffin-navigation.xml:120
 msgid "Switch to last workspace"
 msgstr "Son çalışma alanına geç"
 
-#: data/50-mutter-navigation.xml:123
+#: data/50-muffin-navigation.xml:123
 msgid "Move to workspace above"
 msgstr "Üstteki çalışma alanına taşı"
 
-#: data/50-mutter-navigation.xml:126
+#: data/50-muffin-navigation.xml:126
 msgid "Move to workspace below"
 msgstr "Alttaki çalışma alanına taşı"
 
-#: data/50-mutter-system.xml:6 data/50-mutter-wayland.xml:6
+#: data/50-muffin-system.xml:6 data/50-muffin-wayland.xml:6
 msgid "System"
 msgstr "Sistem"
 
-#: data/50-mutter-system.xml:8
+#: data/50-muffin-system.xml:8
 msgid "Show the run command prompt"
 msgstr "Komut çalıştırma istemini göster"
 
-#: data/50-mutter-system.xml:10
+#: data/50-muffin-system.xml:10
 msgid "Show the activities overview"
 msgstr "Etkinlik genel görünümünü göster"
 
-#: data/50-mutter-wayland.xml:8
+#: data/50-muffin-wayland.xml:8
 msgid "Restore the keyboard shortcuts"
 msgstr "Klavye kısayollarını geri yükle"
 
-#: data/50-mutter-windows.xml:6
+#: data/50-muffin-windows.xml:6
 msgid "Windows"
 msgstr "Pencereler"
 
-#: data/50-mutter-windows.xml:8
+#: data/50-muffin-windows.xml:8
 msgid "Activate the window menu"
 msgstr "Pencere menüsünü etkinleştir"
 
-#: data/50-mutter-windows.xml:10
+#: data/50-muffin-windows.xml:10
 msgid "Toggle fullscreen mode"
 msgstr "Tam ekran kipini değiştir"
 
-#: data/50-mutter-windows.xml:12
+#: data/50-muffin-windows.xml:12
 msgid "Toggle maximization state"
 msgstr "Ekranı kaplama durumunu değiştir"
 
-#: data/50-mutter-windows.xml:14
+#: data/50-muffin-windows.xml:14
 msgid "Maximize window"
 msgstr "Bencereyi büyült"
 
-#: data/50-mutter-windows.xml:16
+#: data/50-muffin-windows.xml:16
 msgid "Restore window"
 msgstr "Pencereyi eski haline getir"
 
-#: data/50-mutter-windows.xml:18
+#: data/50-muffin-windows.xml:18
 msgid "Close window"
 msgstr "Pencereyi kapat"
 
-#: data/50-mutter-windows.xml:20
+#: data/50-muffin-windows.xml:20
 msgid "Hide window"
 msgstr "Pencereyi gizle"
 
-#: data/50-mutter-windows.xml:22
+#: data/50-muffin-windows.xml:22
 msgid "Move window"
 msgstr "Pencere taşı"
 
-#: data/50-mutter-windows.xml:24
+#: data/50-muffin-windows.xml:24
 msgid "Resize window"
 msgstr "Pencereyi yeniden boyutlandır"
 
-#: data/50-mutter-windows.xml:27
+#: data/50-muffin-windows.xml:27
 msgid "Toggle window on all workspaces or one"
 msgstr ""
 "Pencerenin tüm çalışma alanlarında veya yalnızca bir tanesi üzerinde "
 "olmasını seç"
 
-#: data/50-mutter-windows.xml:29
+#: data/50-muffin-windows.xml:29
 msgid "Raise window if covered, otherwise lower it"
 msgstr "Pencere altta kalmışsa yükselt, aksi halde alçalt"
 
-#: data/50-mutter-windows.xml:31
+#: data/50-muffin-windows.xml:31
 msgid "Raise window above other windows"
 msgstr "Pencereyi diğerlerinin üstüne çıkar"
 
-#: data/50-mutter-windows.xml:33
+#: data/50-muffin-windows.xml:33
 msgid "Lower window below other windows"
 msgstr "Pencereyi diğerlerinin altına gönder"
 
-#: data/50-mutter-windows.xml:35
+#: data/50-muffin-windows.xml:35
 msgid "Maximize window vertically"
 msgstr "Pencereyi dikey olarak büyült"
 
-#: data/50-mutter-windows.xml:37
+#: data/50-muffin-windows.xml:37
 msgid "Maximize window horizontally"
 msgstr "Pencereyi yatay olarak büyült"
 
-#: data/50-mutter-windows.xml:41
+#: data/50-muffin-windows.xml:41
 msgid "View split on left"
 msgstr "Solda bölünmüş olarak göster"
 
-#: data/50-mutter-windows.xml:45
+#: data/50-muffin-windows.xml:45
 msgid "View split on right"
 msgstr "Sağda bölünmüş olarak göster"
 
-#: data/mutter.desktop.in:4
+#: data/muffin.desktop.in:4
 msgid "Mutter"
 msgstr "Mutter"
 
-#: data/org.gnome.mutter.gschema.xml.in:7
+#: data/org.gnome.muffin.gschema.xml.in:7
 msgid "Modifier to use for extended window management operations"
 msgstr "Genişletilmiş pencere yönetimi işlemleri için kullanılacak değiştirici"
 
-#: data/org.gnome.mutter.gschema.xml.in:8
+#: data/org.gnome.muffin.gschema.xml.in:8
 msgid ""
 "This key will initiate the “overlay”, which is a combination window overview "
 "and application launching system. The default is intended to be the “Windows "
@@ -272,11 +272,11 @@ msgstr ""
 "“Windows tuşu” olması tasarlanmıştır. Bu bağlayıcının öntanımlı veya boş "
 "dizge olarak ayarlanması beklenir."
 
-#: data/org.gnome.mutter.gschema.xml.in:20
+#: data/org.gnome.muffin.gschema.xml.in:20
 msgid "Attach modal dialogs"
 msgstr "Yardımcı diyalogları ekle"
 
-#: data/org.gnome.mutter.gschema.xml.in:21
+#: data/org.gnome.muffin.gschema.xml.in:21
 msgid ""
 "When true, instead of having independent titlebars, modal dialogs appear "
 "attached to the titlebar of the parent window and are moved together with "
@@ -286,12 +286,12 @@ msgstr ""
 "diyaloglar üst pencerenin başlık çubuğunda ekli gözükür ve üst pencere ile "
 "birlikte hareket ettirilebilirler."
 
-#: data/org.gnome.mutter.gschema.xml.in:30
+#: data/org.gnome.muffin.gschema.xml.in:30
 msgid "Enable edge tiling when dropping windows on screen edges"
 msgstr ""
 "Pencereler ekran kenarlarında bırakıldığında kenar döşemeyi etkinleştir"
 
-#: data/org.gnome.mutter.gschema.xml.in:31
+#: data/org.gnome.muffin.gschema.xml.in:31
 msgid ""
 "If enabled, dropping windows on vertical screen edges maximizes them "
 "vertically and resizes them horizontally to cover half of the available "
@@ -302,11 +302,11 @@ msgstr ""
 "şekilde yeniden boyutlandırılır. Ekranın tepedeki kenarına bırakılan "
 "pencereler ekranı tamamen kaplar."
 
-#: data/org.gnome.mutter.gschema.xml.in:40
+#: data/org.gnome.muffin.gschema.xml.in:40
 msgid "Workspaces are managed dynamically"
 msgstr "Çalışma alanları dinamik olarak yönetilir"
 
-#: data/org.gnome.mutter.gschema.xml.in:41
+#: data/org.gnome.muffin.gschema.xml.in:41
 msgid ""
 "Determines whether workspaces are managed dynamically or whether there’s a "
 "static number of workspaces (determined by the num-workspaces key in org."
@@ -316,11 +316,11 @@ msgstr ""
 "çalışma alanı mı olacağını belirler (org.gnome.desktop.wm.preferences "
 "içindeki num-workspaces değişkeni tarafından belirlenir)."
 
-#: data/org.gnome.mutter.gschema.xml.in:50
+#: data/org.gnome.muffin.gschema.xml.in:50
 msgid "Workspaces only on primary"
 msgstr "Yalnızca birincil monitördeki çalışma alanları"
 
-#: data/org.gnome.mutter.gschema.xml.in:51
+#: data/org.gnome.muffin.gschema.xml.in:51
 msgid ""
 "Determines whether workspace switching should happen for windows on all "
 "monitors or only for windows on the primary monitor."
@@ -328,11 +328,11 @@ msgstr ""
 "Çalışma alanı değiştirilmesinin, tüm monitörlerdeki pencerelerde mi yoksa "
 "yalnızca birincil monitördekilerde mi gerçekleşeceğini belirler."
 
-#: data/org.gnome.mutter.gschema.xml.in:59
+#: data/org.gnome.muffin.gschema.xml.in:59
 msgid "No tab popup"
 msgstr "Sekme açılır penceresi yok"
 
-#: data/org.gnome.mutter.gschema.xml.in:60
+#: data/org.gnome.muffin.gschema.xml.in:60
 msgid ""
 "Determines whether the use of popup and highlight frame should be disabled "
 "for window cycling."
@@ -340,11 +340,11 @@ msgstr ""
 "Pencere geçişinde çerçeve vurgulanması ve açılır pencere kullanımının "
 "kapatılıp kapatılmayacağını belirler."
 
-#: data/org.gnome.mutter.gschema.xml.in:68
+#: data/org.gnome.muffin.gschema.xml.in:68
 msgid "Delay focus changes until the pointer stops moving"
 msgstr "Odak değişikliklerini işaretçi hareketi durana kadar ertele"
 
-#: data/org.gnome.mutter.gschema.xml.in:69
+#: data/org.gnome.muffin.gschema.xml.in:69
 msgid ""
 "If set to true, and the focus mode is either “sloppy” or “mouse” then the "
 "focus will not be changed immediately when entering a window, but only after "
@@ -354,11 +354,11 @@ msgstr ""
 "geçişte odak hemen değil, yanlızca işaretçi hareket etmeyi bıraktığında "
 "değişir."
 
-#: data/org.gnome.mutter.gschema.xml.in:79
+#: data/org.gnome.muffin.gschema.xml.in:79
 msgid "Draggable border width"
 msgstr "Sürüklenebilir kenarlık genişliği"
 
-#: data/org.gnome.mutter.gschema.xml.in:80
+#: data/org.gnome.muffin.gschema.xml.in:80
 msgid ""
 "The amount of total draggable borders. If the theme’s visible borders are "
 "not enough, invisible borders will be added to meet this value."
@@ -367,11 +367,11 @@ msgstr ""
 "kenarlıkları yetersiz gelirse, bu değere ulaşmak için görünmez kenarlıklar "
 "eklenir."
 
-#: data/org.gnome.mutter.gschema.xml.in:89
+#: data/org.gnome.muffin.gschema.xml.in:89
 msgid "Auto maximize nearly monitor sized windows"
 msgstr "Ekran boyutuna yakın pencereleri kendiliğinden ekranı kaplattır"
 
-#: data/org.gnome.mutter.gschema.xml.in:90
+#: data/org.gnome.muffin.gschema.xml.in:90
 msgid ""
 "If enabled, new windows that are initially the size of the monitor "
 "automatically get maximized."
@@ -379,11 +379,11 @@ msgstr ""
 "Etkinleştirildiğinde ekran boyutunda başlayan yeni pencereler kendiliğinden "
 "ekranı kaplar."
 
-#: data/org.gnome.mutter.gschema.xml.in:98
+#: data/org.gnome.muffin.gschema.xml.in:98
 msgid "Place new windows in the center"
 msgstr "Yeni pencereleri ekranın ortasına yerleştir"
 
-#: data/org.gnome.mutter.gschema.xml.in:99
+#: data/org.gnome.muffin.gschema.xml.in:99
 msgid ""
 "When true, the new windows will always be put in the center of the active "
 "screen of the monitor."
@@ -391,21 +391,21 @@ msgstr ""
 "Etkinleştirildiğinde, yeni pencereler her zaman monitörün etkin ekranında "
 "ortaya yerleştirilir."
 
-#: data/org.gnome.mutter.gschema.xml.in:107
+#: data/org.gnome.muffin.gschema.xml.in:107
 msgid "Enable experimental features"
 msgstr "Deneysel özellikleri etkinleştir"
 
-#: data/org.gnome.mutter.gschema.xml.in:108
+#: data/org.gnome.muffin.gschema.xml.in:108
 msgid ""
 "To enable experimental features, add the feature keyword to the list. "
 "Whether the feature requires restarting the compositor depends on the given "
 "feature. Any experimental feature is not required to still be available, or "
 "configurable. Don’t expect adding anything in this setting to be future "
 "proof. Currently possible keywords: • “scale-monitor-framebuffer” — makes "
-"mutter default to layout logical monitors in a logical pixel coordinate "
+"muffin default to layout logical monitors in a logical pixel coordinate "
 "space, while scaling monitor framebuffers instead of window content, to "
 "manage HiDPI monitors. Does not require a restart. • “rt-scheduler” — makes "
-"mutter request a low priority real-time scheduling. The executable or user "
+"muffin request a low priority real-time scheduling. The executable or user "
 "must have CAP_SYS_NICE. Requires a restart. • “autostart-xwayland” — "
 "initializes Xwayland lazily if there are X11 clients. Requires restart."
 msgstr ""
@@ -415,28 +415,28 @@ msgstr ""
 "yapılandırılabilir olmak zorunda değildir. Bu ayara eklenecek herhangi bir "
 "şeyin gelecekte olabilecek değişikliklerden etkilenmeyeceğini düşünmeyin. Şu "
 "anda kullanılabilir anahtar sözcükler: • “scale-monitor-framebuffer” — "
-"mutter’in HiDPI monitörleri yönetmesi için pencere içeriği yerine monitör "
+"muffin’in HiDPI monitörleri yönetmesi için pencere içeriği yerine monitör "
 "çerçeve arabelleğini ölçeklendirirken, mantıksal monitörleri mantıksal "
 "piksel koordinat aralığına yerleştirmesini öntanımlı yapar. Yeniden başlatma "
-"gerektirmez. • “rt-scheduler” — mutter isteğini bir düşük öncelikli gerçek "
+"gerektirmez. • “rt-scheduler” — muffin isteğini bir düşük öncelikli gerçek "
 "zamanlı sıralandırma yapar. Çalıştırılabilir (executable) veya kullanıcı "
 "CAP_SYS_NICE’ye sahip olmalıdır. Yeniden başlatma gerektirir. • “autostart-"
 "xwayland” — eğer X11 istemcileri varsa Xwayland’i miskin miskin başlatır. "
 "Yeniden başlatma gerektirir."
 
-#: data/org.gnome.mutter.gschema.xml.in:134
+#: data/org.gnome.muffin.gschema.xml.in:134
 msgid "Modifier to use to locate the pointer"
 msgstr "İşaretçiyi konumlamada kullanılacak değiştirici"
 
-#: data/org.gnome.mutter.gschema.xml.in:135
+#: data/org.gnome.muffin.gschema.xml.in:135
 msgid "This key will initiate the “locate pointer” action."
 msgstr "Bu anahtar “işaretçiyi konumla” eylemini başlatacak."
 
-#: data/org.gnome.mutter.gschema.xml.in:142
+#: data/org.gnome.muffin.gschema.xml.in:142
 msgid "Timeout for check-alive ping"
 msgstr "Canlılık denetim pingi için zaman aşımı"
 
-#: data/org.gnome.mutter.gschema.xml.in:143
+#: data/org.gnome.muffin.gschema.xml.in:143
 msgid ""
 "Number of milliseconds a client has to respond to a ping request in order to "
 "not be detected as frozen. Using 0 will disable the alive check completely."
@@ -444,79 +444,79 @@ msgstr ""
 "İstemcinin donuk olarak saptanmaması için ping istemini yanıtlaması gereken "
 "milisaniye sayısı. 0 kullanmak canlılık denetimini tümüyle devre dışı bırakır."
 
-#: data/org.gnome.mutter.gschema.xml.in:165
+#: data/org.gnome.muffin.gschema.xml.in:165
 msgid "Select window from tab popup"
 msgstr "Pencereyi, sekme açılır penceresinden seç"
 
-#: data/org.gnome.mutter.gschema.xml.in:170
+#: data/org.gnome.muffin.gschema.xml.in:170
 msgid "Cancel tab popup"
 msgstr "Sekmeyi yeni pencerede açmayı iptal et"
 
-#: data/org.gnome.mutter.gschema.xml.in:175
+#: data/org.gnome.muffin.gschema.xml.in:175
 msgid "Switch monitor configurations"
 msgstr "Monitör yapılandırmaları arasında geçiş yap"
 
-#: data/org.gnome.mutter.gschema.xml.in:180
+#: data/org.gnome.muffin.gschema.xml.in:180
 msgid "Rotates the built-in monitor configuration"
 msgstr "Yerleşik monitör yapılandırmaları arasında geçiş yapar"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:6
+#: data/org.gnome.muffin.wayland.gschema.xml.in:6
 msgid "Switch to VT 1"
 msgstr "VT 1’e geç"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:10
+#: data/org.gnome.muffin.wayland.gschema.xml.in:10
 msgid "Switch to VT 2"
 msgstr "VT 2’ye geç"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:14
+#: data/org.gnome.muffin.wayland.gschema.xml.in:14
 msgid "Switch to VT 3"
 msgstr "VT 3’e geç"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:18
+#: data/org.gnome.muffin.wayland.gschema.xml.in:18
 msgid "Switch to VT 4"
 msgstr "VT 4’e geç"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:22
+#: data/org.gnome.muffin.wayland.gschema.xml.in:22
 msgid "Switch to VT 5"
 msgstr "VT 5’e geç"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:26
+#: data/org.gnome.muffin.wayland.gschema.xml.in:26
 msgid "Switch to VT 6"
 msgstr "VT 6’ya geç"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:30
+#: data/org.gnome.muffin.wayland.gschema.xml.in:30
 msgid "Switch to VT 7"
 msgstr "VT 7’ye geç"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:34
+#: data/org.gnome.muffin.wayland.gschema.xml.in:34
 msgid "Switch to VT 8"
 msgstr "VT 8’e geç"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:38
+#: data/org.gnome.muffin.wayland.gschema.xml.in:38
 msgid "Switch to VT 9"
 msgstr "VT 9’a geç"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:42
+#: data/org.gnome.muffin.wayland.gschema.xml.in:42
 msgid "Switch to VT 10"
 msgstr "VT 10’a geç"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:46
+#: data/org.gnome.muffin.wayland.gschema.xml.in:46
 msgid "Switch to VT 11"
 msgstr "VT 11’e geç"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:50
+#: data/org.gnome.muffin.wayland.gschema.xml.in:50
 msgid "Switch to VT 12"
 msgstr "VT 12’ye geç"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:54
+#: data/org.gnome.muffin.wayland.gschema.xml.in:54
 msgid "Re-enable shortcuts"
 msgstr "Kısayolları yeniden etkinleştir"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:64
+#: data/org.gnome.muffin.wayland.gschema.xml.in:64
 msgid "Allow X11 grabs to lock keyboard focus with Xwayland"
 msgstr "X11 yakalamalarının Xwayland ile klavye odağı kilitlemesine izin ver"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:65
+#: data/org.gnome.muffin.wayland.gschema.xml.in:65
 msgid ""
 "Allow all keyboard events to be routed to X11 “override redirect” windows "
 "with a grab when running in Xwayland. This option is to support X11 clients "
@@ -538,11 +538,11 @@ msgstr ""
 "pencereye belirli X11 ClientMessage’ı göndermeli ya da “xwayland-grab-access-"
 "rules” anahtarındaki beyaz listeli uygulamalar arasında olmalıdır."
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:84
+#: data/org.gnome.muffin.wayland.gschema.xml.in:84
 msgid "Xwayland applications allowed to issue keyboard grabs"
 msgstr "Klavye yakalamaları yapabilen Xwayland uygulamaları"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:85
+#: data/org.gnome.muffin.wayland.gschema.xml.in:85
 msgid ""
 "List the resource names or resource class of X11 windows either allowed or "
 "not allowed to issue X11 keyboard grabs under Xwayland. The resource name or "
@@ -701,26 +701,26 @@ msgstr "_Zorla Çık"
 msgid "_Wait"
 msgstr "_Bekle"
 
-#: src/core/mutter.c:38
+#: src/core/muffin.c:38
 #, c-format
 msgid ""
-"mutter %s\n"
+"muffin %s\n"
 "Copyright © 2001-%d Havoc Pennington, Red Hat, Inc., and others\n"
 "This is free software; see the source for copying conditions.\n"
 "There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A "
 "PARTICULAR PURPOSE.\n"
 msgstr ""
-"mutter %s\n"
+"muffin %s\n"
 "Telif Hakkı © 2001-%d Havoc Pennington, Red Hat, Inc., ve diğerleri\n"
 "Bu bir özgür yazılımdır; kopyalama koşullarını öğrenmek için kaynağa bakın.\n"
 "Hiçbir garanti YOK; BELİRLİ BİR AMACA UYGUNLUK ya da SATILABİLİRLİK için "
 "dahi.\n"
 
-#: src/core/mutter.c:52
+#: src/core/muffin.c:52
 msgid "Print version"
 msgstr "Sürümü yazdır"
 
-#: src/core/mutter.c:58
+#: src/core/muffin.c:58
 msgid "Mutter plugin to use"
 msgstr "Kullanılacak Mutter eklentisi"
 
@@ -1329,7 +1329,7 @@ msgstr "%s (%s üzerinde)"
 #~ msgid "Failed to parse saved session file: %s\n"
 #~ msgstr "Kaydedilmiş oturum dosyası ayrıştırırken hata: %s\n"
 
-#~ msgid "<mutter_session> attribute seen but we already have the session ID"
+#~ msgid "<muffin_session> attribute seen but we already have the session ID"
 #~ msgstr ""
 #~ "Geçerli bir oturum kimliği bulunmasına karşın <metacity_session> "
 #~ "özniteliğiyle karşılaşıldı"

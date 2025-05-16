@@ -10,7 +10,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: or\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
-"product=mutter&keywords=I18N+L10N&component=general\n"
+"product=muffin&keywords=I18N+L10N&component=general\n"
 "POT-Creation-Date: 2014-09-15 09:53+0000\n"
 "PO-Revision-Date: 2014-09-17 16:56+0530\n"
 "Last-Translator: Manoj Kumar Giri <mgiri@redhat.com>\n"
@@ -25,267 +25,267 @@ msgstr ""
 "\n"
 "\n"
 
-#: ../data/50-mutter-navigation.xml.in.h:1
+#: ../data/50-muffin-navigation.xml.in.h:1
 msgid "Navigation"
 msgstr "ଅନ୍ୱେଷଣ"
 
-#: ../data/50-mutter-navigation.xml.in.h:2
+#: ../data/50-muffin-navigation.xml.in.h:2
 msgid "Move window to workspace 1"
 msgstr "ୱିଣ୍ଡୋକୁ କାର୍ଯ୍ଯକ୍ଷେତ୍ର ୧କୁ ଘୁଞ୍ଚାନ୍ତୁ"
 
-#: ../data/50-mutter-navigation.xml.in.h:3
+#: ../data/50-muffin-navigation.xml.in.h:3
 msgid "Move window to workspace 2"
 msgstr "ୱିଣ୍ଡୋକୁ କାର୍ଯ୍ଯକ୍ଷେତ୍ର ୨କୁ ଘୁଞ୍ଚାନ୍ତୁ"
 
-#: ../data/50-mutter-navigation.xml.in.h:4
+#: ../data/50-muffin-navigation.xml.in.h:4
 msgid "Move window to workspace 3"
 msgstr "ୱିଣ୍ଡୋକୁ କାର୍ଯ୍ଯକ୍ଷେତ୍ର ୩କୁ ଘୁଞ୍ଚାନ୍ତୁ"
 
-#: ../data/50-mutter-navigation.xml.in.h:5
+#: ../data/50-muffin-navigation.xml.in.h:5
 msgid "Move window to workspace 4"
 msgstr "ୱିଣ୍ଡୋକୁ କାର୍ଯ୍ଯକ୍ଷେତ୍ର ୪କୁ ଘୁଞ୍ଚାନ୍ତୁ"
 
-#: ../data/50-mutter-navigation.xml.in.h:6
+#: ../data/50-muffin-navigation.xml.in.h:6
 #| msgid "Move window to workspace 1"
 msgid "Move window to last workspace"
 msgstr "ୱିଣ୍ଡୋକୁ ଶେଷ କାର୍ଯ୍ଯକ୍ଷେତ୍ରକୁ ଘୁଞ୍ଚାନ୍ତୁ"
 
-#: ../data/50-mutter-navigation.xml.in.h:7
+#: ../data/50-muffin-navigation.xml.in.h:7
 msgid "Move window one workspace to the left"
 msgstr "ୱିଣ୍ଡୋକୁ ଗୋଟିଏ କାର୍ଯ୍ଯକ୍ଷେତ୍ର ବାମକୁ ଘୁଞ୍ଚାନ୍ତୁ"
 
-#: ../data/50-mutter-navigation.xml.in.h:8
+#: ../data/50-muffin-navigation.xml.in.h:8
 msgid "Move window one workspace to the right"
 msgstr "ୱିଣ୍ଡୋକୁ ଗୋଟିଏ କାର୍ଯ୍ଯକ୍ଷେତ୍ର ଡାହାଣକୁ ଘୁଞ୍ଚାନ୍ତୁ"
 
-#: ../data/50-mutter-navigation.xml.in.h:9
+#: ../data/50-muffin-navigation.xml.in.h:9
 msgid "Move window one workspace up"
 msgstr "ୱିଣ୍ଡୋକୁ ଗୋଟିଏ କାର୍ଯ୍ଯକ୍ଷେତ୍ର ଉପରକୁ ଘୁଞ୍ଚାନ୍ତୁ"
 
-#: ../data/50-mutter-navigation.xml.in.h:10
+#: ../data/50-muffin-navigation.xml.in.h:10
 msgid "Move window one workspace down"
 msgstr "ୱିଣ୍ଡୋକୁ ଗୋଟିଏ କାର୍ଯ୍ଯକ୍ଷେତ୍ର ତଳକୁ ଘୁଞ୍ଚାନ୍ତୁ"
 
-#: ../data/50-mutter-navigation.xml.in.h:11
+#: ../data/50-muffin-navigation.xml.in.h:11
 #| msgid "Move window one workspace to the left"
 msgid "Move window one monitor to the left"
 msgstr "ୱିଣ୍ଡୋକୁ ବାମକୁ ଗୋଟିଏ ମନିଟର ପରେ ଘୁଞ୍ଚାନ୍ତୁ"
 
-#: ../data/50-mutter-navigation.xml.in.h:12
+#: ../data/50-muffin-navigation.xml.in.h:12
 #| msgid "Move window one workspace to the right"
 msgid "Move window one monitor to the right"
 msgstr "ୱିଣ୍ଡୋକୁ ଡ଼ାହାଣକୁ ଗୋଟିଏ ମନିଟର ପରେ ଘୁଞ୍ଚାନ୍ତୁ"
 
-#: ../data/50-mutter-navigation.xml.in.h:13
+#: ../data/50-muffin-navigation.xml.in.h:13
 #| msgid "Move window one workspace up"
 msgid "Move window one monitor up"
 msgstr "ୱିଣ୍ଡୋକୁ ଉପକରକୁ ଗୋଟିଏ ମନିଟର ପରେ ଘୁଞ୍ଚାନ୍ତୁ"
 
-#: ../data/50-mutter-navigation.xml.in.h:14
+#: ../data/50-muffin-navigation.xml.in.h:14
 #| msgid "Move window one workspace down"
 msgid "Move window one monitor down"
 msgstr "ୱିଣ୍ଡୋକୁ ତଳକୁ ଗୋଟିଏ ମନିଟର ପରେ ଘୁଞ୍ଚାନ୍ତୁ"
 
-#: ../data/50-mutter-navigation.xml.in.h:15
+#: ../data/50-muffin-navigation.xml.in.h:15
 msgid "Switch applications"
 msgstr "ପ୍ରୟୋଗଗୁଡ଼ିକୁ ବଦଳାନ୍ତୁ"
 
-#: ../data/50-mutter-navigation.xml.in.h:16
+#: ../data/50-muffin-navigation.xml.in.h:16
 #| msgid "Switch applications"
 msgid "Switch to previous application"
 msgstr "ପୂର୍ବବର୍ତ୍ତୀ ପ୍ରୟୋଗକୁ ବଦଳ କରନ୍ତୁ"
 
-#: ../data/50-mutter-navigation.xml.in.h:17
+#: ../data/50-muffin-navigation.xml.in.h:17
 msgid "Switch windows"
 msgstr "ୱିଣ୍ଡୋଗୁଡ଼ିକୁ ବଦଳାନ୍ତୁ"
 
-#: ../data/50-mutter-navigation.xml.in.h:18
+#: ../data/50-muffin-navigation.xml.in.h:18
 #| msgid "Switch windows"
 msgid "Switch to previous window"
 msgstr "ପୂର୍ବବର୍ତ୍ତୀ ୱିଣ୍ଡୋକୁ ବଦଳ କରନ୍ତୁ"
 
-#: ../data/50-mutter-navigation.xml.in.h:19
+#: ../data/50-muffin-navigation.xml.in.h:19
 msgid "Switch windows of an application"
 msgstr "ଗୋଟିଏ ପ୍ରୟୋଗର ୱିଣ୍ଡୋଗୁଡ଼ିକ ମଧ୍ଯରେ ଚାଲନ୍ତୁ"
 
-#: ../data/50-mutter-navigation.xml.in.h:20
+#: ../data/50-muffin-navigation.xml.in.h:20
 #| msgid "Switch windows of an application"
 msgid "Switch to previous window of an application"
 msgstr "ପ୍ରୟୋଗର ପୂର୍ବବର୍ତ୍ତୀ ୱିଣ୍ଡୋକୁ ବଦଳ କରନ୍ତୁ"
 
-#: ../data/50-mutter-navigation.xml.in.h:21
+#: ../data/50-muffin-navigation.xml.in.h:21
 msgid "Switch system controls"
 msgstr "ତନ୍ତ୍ର ନିୟନ୍ତ୍ରଣଗୁଡିକୁ ବଦଳାନ୍ତୁ"
 
-#: ../data/50-mutter-navigation.xml.in.h:22
+#: ../data/50-muffin-navigation.xml.in.h:22
 #| msgid "Switch system controls"
 msgid "Switch to previous system control"
 msgstr "ପୂର୍ବବର୍ତ୍ତୀ ତନ୍ତ୍ର ନିୟନ୍ତ୍ରଣକୁ ବଦଳାନ୍ତୁ"
 
-#: ../data/50-mutter-navigation.xml.in.h:23
+#: ../data/50-muffin-navigation.xml.in.h:23
 msgid "Switch windows directly"
 msgstr "ୱିଣ୍ଡୋଗୁଡ଼ିକୁ ସିଧାସଳଖ ଭାବରେ ବଦଳାନ୍ତୁ"
 
-#: ../data/50-mutter-navigation.xml.in.h:24
+#: ../data/50-muffin-navigation.xml.in.h:24
 msgid "Switch directly to previous window"
 msgstr "ପୂର୍ବବର୍ତ୍ତୀ ୱିଣ୍ଡୋକୁ ସିଧାସଳଖ ଭାବରେ ବଦଳ କରନ୍ତୁ"
 
-#: ../data/50-mutter-navigation.xml.in.h:25
+#: ../data/50-muffin-navigation.xml.in.h:25
 msgid "Switch windows of an app directly"
 msgstr "ଗୋଟିଏ ପ୍ରୟୋଗର ୱିଣ୍ଡୋଗୁଡ଼ିକୁ ଓଲଟା ଭାବରେ ବଦଳାନ୍ତୁ"
 
-#: ../data/50-mutter-navigation.xml.in.h:26
+#: ../data/50-muffin-navigation.xml.in.h:26
 #| msgid "Switch windows of an application"
 msgid "Switch directly to previous window of an app"
 msgstr "ଏକ ପ୍ରୟୋଗର ପୂର୍ବବର୍ତ୍ତୀ ୱିଣ୍ଡୋକୁ ସିଧାସଳଖ ଭାବରେ ବଦଳ କରନ୍ତୁ"
 
-#: ../data/50-mutter-navigation.xml.in.h:27
+#: ../data/50-muffin-navigation.xml.in.h:27
 msgid "Switch system controls directly"
 msgstr "ତନ୍ତ୍ର ନିୟନ୍ତ୍ରଣଗୁଡିକୁ ସିଧାସଳଖ ଭାବରେ ବଦଳାନ୍ତୁ"
 
-#: ../data/50-mutter-navigation.xml.in.h:28
+#: ../data/50-muffin-navigation.xml.in.h:28
 #| msgid "Switch system controls"
 msgid "Switch directly to previous system control"
 msgstr "ପୂର୍ବବର୍ତ୍ତୀ ତନ୍ତ୍ର ନିୟନ୍ତ୍ରଣକୁ ସିଧାସଳଖ ଭାବରେ ବଦଳାନ୍ତୁ"
 
-#: ../data/50-mutter-navigation.xml.in.h:29
+#: ../data/50-muffin-navigation.xml.in.h:29
 msgid "Hide all normal windows"
 msgstr "ସମସ୍ତ ସାଧାରଣ ୱିଣ୍ଡୋଗୁଡ଼ିକୁ ଲୁଚାନ୍ତୁ"
 
-#: ../data/50-mutter-navigation.xml.in.h:30
+#: ../data/50-muffin-navigation.xml.in.h:30
 msgid "Switch to workspace 1"
 msgstr "କାର୍ଯ୍ଯକ୍ଷେତ୍ର ୧କୁ ଯାଆନ୍ତୁ"
 
-#: ../data/50-mutter-navigation.xml.in.h:31
+#: ../data/50-muffin-navigation.xml.in.h:31
 msgid "Switch to workspace 2"
 msgstr "କାର୍ଯ୍ଯକ୍ଷେତ୍ର ୨କୁ ଯାଆନ୍ତୁ"
 
-#: ../data/50-mutter-navigation.xml.in.h:32
+#: ../data/50-muffin-navigation.xml.in.h:32
 msgid "Switch to workspace 3"
 msgstr "କାର୍ଯ୍ଯକ୍ଷେତ୍ର ୩କୁ ଯାଆନ୍ତୁ"
 
-#: ../data/50-mutter-navigation.xml.in.h:33
+#: ../data/50-muffin-navigation.xml.in.h:33
 msgid "Switch to workspace 4"
 msgstr "କାର୍ଯ୍ଯକ୍ଷେତ୍ର ୪କୁ ଯାଆନ୍ତୁ"
 
-#: ../data/50-mutter-navigation.xml.in.h:34
+#: ../data/50-muffin-navigation.xml.in.h:34
 #| msgid "Switch to workspace 1"
 msgid "Switch to last workspace"
 msgstr "ଶେଷ କାର୍ଯ୍ଯକ୍ଷେତ୍ରକୁ ଯାଆନ୍ତୁ"
 
-#: ../data/50-mutter-navigation.xml.in.h:35
+#: ../data/50-muffin-navigation.xml.in.h:35
 msgid "Move to workspace left"
 msgstr "ବାମ କାର୍ଯ୍ଯକ୍ଷେତ୍ରକୁ ପଠାନ୍ତୁ"
 
-#: ../data/50-mutter-navigation.xml.in.h:36
+#: ../data/50-muffin-navigation.xml.in.h:36
 msgid "Move to workspace right"
 msgstr "ଡାହାଣ କାର୍ଯ୍ଯକ୍ଷେତ୍ରକୁ ପଠାନ୍ତୁ"
 
-#: ../data/50-mutter-navigation.xml.in.h:37
+#: ../data/50-muffin-navigation.xml.in.h:37
 msgid "Move to workspace above"
 msgstr "ଉପର କାର୍ଯ୍ଯକ୍ଷେତ୍ରକୁ ପଠାନ୍ତୁ"
 
-#: ../data/50-mutter-navigation.xml.in.h:38
+#: ../data/50-muffin-navigation.xml.in.h:38
 msgid "Move to workspace below"
 msgstr "ତଳ କାର୍ଯ୍ଯକ୍ଷେତ୍ରକୁ ପଠାନ୍ତୁ"
 
-#: ../data/50-mutter-system.xml.in.h:1
+#: ../data/50-muffin-system.xml.in.h:1
 msgid "System"
 msgstr "ତନ୍ତ୍ର"
 
-#: ../data/50-mutter-system.xml.in.h:2
+#: ../data/50-muffin-system.xml.in.h:2
 msgid "Show the run command prompt"
 msgstr "ନିର୍ଦ୍ଦେଶ ପ୍ରମ୍ପଟକୁ ଚଲାନ୍ତୁକୁ ଦେଖାନ୍ତୁ"
 
-#: ../data/50-mutter-system.xml.in.h:3
+#: ../data/50-muffin-system.xml.in.h:3
 msgid "Show the activities overview"
 msgstr "କାର୍ଯ୍ୟକଳାପଗୁଡ଼ିକର ସମୀକ୍ଷାକୁ ଦର୍ଶାନ୍ତୁ"
 
-#: ../data/50-mutter-windows.xml.in.h:1
+#: ../data/50-muffin-windows.xml.in.h:1
 msgid "Windows"
 msgstr "ୱିଣ୍ଡୋମାନ"
 
-#: ../data/50-mutter-windows.xml.in.h:2
+#: ../data/50-muffin-windows.xml.in.h:2
 msgid "Activate the window menu"
 msgstr "ୱିଣ୍ଡୋ ମେନୁ ସକ୍ରିୟ କରନ୍ତୁ"
 
-#: ../data/50-mutter-windows.xml.in.h:3
+#: ../data/50-muffin-windows.xml.in.h:3
 msgid "Toggle fullscreen mode"
 msgstr "ପୂର୍ଣ୍ମପରଦା ଧାରା ଅଦଳବଦଳ କରନ୍ତୁ"
 
-#: ../data/50-mutter-windows.xml.in.h:4
+#: ../data/50-muffin-windows.xml.in.h:4
 msgid "Toggle maximization state"
 msgstr "ବୃହତ୍ତମ ଅବସ୍ଥା ଅଦଳବଦଳ କରନ୍ତୁ"
 
-#: ../data/50-mutter-windows.xml.in.h:5
+#: ../data/50-muffin-windows.xml.in.h:5
 msgid "Maximize window"
 msgstr "ୱିଣ୍ଡୋକୁ ଯଥାସମ୍ଭବ ବଢ଼ାନ୍ତୁ"
 
-#: ../data/50-mutter-windows.xml.in.h:6
+#: ../data/50-muffin-windows.xml.in.h:6
 msgid "Restore window"
 msgstr "ୱିଣ୍ଡୋକୁ ପୁନଃସ୍ଥାପନ କରନ୍ତୁ"
 
-#: ../data/50-mutter-windows.xml.in.h:7
+#: ../data/50-muffin-windows.xml.in.h:7
 msgid "Toggle shaded state"
 msgstr "ଘୋଡାହୋଇଥିବା ଅବସ୍ଥା ଅଦଳବଦଳ କରନ୍ତୁ"
 
-#: ../data/50-mutter-windows.xml.in.h:8
+#: ../data/50-muffin-windows.xml.in.h:8
 msgid "Close window"
 msgstr "ୱିଣ୍ଡୋ ବନ୍ଦ କରନ୍ତୁ"
 
-#: ../data/50-mutter-windows.xml.in.h:9
+#: ../data/50-muffin-windows.xml.in.h:9
 msgid "Hide window"
 msgstr "ୱିଣ୍ଡୋ ଲୁଚାନ୍ତୁ"
 
-#: ../data/50-mutter-windows.xml.in.h:10
+#: ../data/50-muffin-windows.xml.in.h:10
 msgid "Move window"
 msgstr "ୱିଣ୍ଡୋକୁ ଘୁଞ୍ଚାନ୍ତୁ"
 
-#: ../data/50-mutter-windows.xml.in.h:11
+#: ../data/50-muffin-windows.xml.in.h:11
 msgid "Resize window"
 msgstr "ୱିଣ୍ଡୋର ଆକାର ବଦଳାନ୍ତୁ"
 
-#: ../data/50-mutter-windows.xml.in.h:12
+#: ../data/50-muffin-windows.xml.in.h:12
 msgid "Toggle window on all workspaces or one"
 msgstr "ହଲୁଥିବା ୱିଣ୍ଡୋ ସବୁ କାର୍ଯ୍ଯକ୍ଷେତ୍ରରେ ଅଛି ଅଥବା କେବଳ ଗୋଟିକରେ ଅଛି"
 
-#: ../data/50-mutter-windows.xml.in.h:13
+#: ../data/50-muffin-windows.xml.in.h:13
 msgid "Raise window if covered, otherwise lower it"
 msgstr "ୱିଣ୍ଡୋ ଲୁଚାହୋଇଥିଲେ ତାହାକୁ ସାମନାକୁ ଆଣନ୍ତୁ, ନଚେତ ତାହାକୁ ତଳକୁ କରନ୍ତୁ"
 
-#: ../data/50-mutter-windows.xml.in.h:14
+#: ../data/50-muffin-windows.xml.in.h:14
 msgid "Raise window above other windows"
 msgstr "ୱିଣ୍ଡୋକୁ ଅଲଗା ୱିଣ୍ଡୋଗୁଡ଼ିକର ସାମନାକୁ ଆଣନ୍ତୁ"
 
-#: ../data/50-mutter-windows.xml.in.h:15
+#: ../data/50-muffin-windows.xml.in.h:15
 msgid "Lower window below other windows"
 msgstr "ୱିଣ୍ଡୋକୁ ଅଲଗା ୱିଣ୍ଡୋ ପଛକୁ ନିଅନ୍ତୁ"
 
-#: ../data/50-mutter-windows.xml.in.h:16
+#: ../data/50-muffin-windows.xml.in.h:16
 msgid "Maximize window vertically"
 msgstr "ୱିଣ୍ଡୋକୁ ଭୂଲମ୍ବ ଭାବରେ ଯଥାସମ୍ଭବ ବଢ଼ାନ୍ତୁ"
 
-#: ../data/50-mutter-windows.xml.in.h:17
+#: ../data/50-muffin-windows.xml.in.h:17
 msgid "Maximize window horizontally"
 msgstr "ୱିଣ୍ଡୋକୁ ଭୂସମାନ୍ତର ଭାବରେ ଯଥାସମ୍ଭବ ବଢ଼ାନ୍ତୁ"
 
-#: ../data/50-mutter-windows.xml.in.h:18
+#: ../data/50-muffin-windows.xml.in.h:18
 msgid "View split on left"
 msgstr "ବାମ ପାଖରେ ବିଭାଜନକୁ ଦେଖନ୍ତୁ"
 
-#: ../data/50-mutter-windows.xml.in.h:19
+#: ../data/50-muffin-windows.xml.in.h:19
 msgid "View split on right"
 msgstr "ଡ଼ାହାଣ ପାଖରେ ବିଭାଜନକୁ ଦେଖନ୍ତୁ"
 
-#: ../data/mutter.desktop.in.h:1
+#: ../data/muffin.desktop.in.h:1
 msgid "Mutter"
 msgstr "Mutter"
 
-#: ../data/org.gnome.mutter.gschema.xml.in.h:1
+#: ../data/org.gnome.muffin.gschema.xml.in.h:1
 msgid "Modifier to use for extended window management operations"
 msgstr "ବିସ୍ତାରିତ ୱିଣ୍ଡୋ ପରିଚାଳନା କାର୍ଯ୍ଯଗୁଡ଼ିକ ପାଇଁ ରୂପାନ୍ତରକ"
 
-#: ../data/org.gnome.mutter.gschema.xml.in.h:2
+#: ../data/org.gnome.muffin.gschema.xml.in.h:2
 msgid ""
 "This key will initiate the \"overlay\", which is a combination window "
 "overview and application launching system. The default is intended to be the "
@@ -298,11 +298,11 @@ msgstr ""
 "ଉଦ୍ଦିଷ୍ଟ। ଏହା "
 "ଆଶାକରାଯାଇଥାଏ ଯେ ଏହି ମିଶ୍ରଣଟି ହୁଏତଃ ପୂର୍ବନିର୍ଦ୍ଧାରିତ ଅଥବା ଖାଲି ବାକ୍ୟଖଣ୍ଡ ଅଟେ।"
 
-#: ../data/org.gnome.mutter.gschema.xml.in.h:3
+#: ../data/org.gnome.muffin.gschema.xml.in.h:3
 msgid "Attach modal dialogs"
 msgstr "କ୍ରିୟାତ୍ମକ ସଂଳାପଗୁଡ଼ିକୁ ଲଗାନ୍ତୁ"
 
-#: ../data/org.gnome.mutter.gschema.xml.in.h:4
+#: ../data/org.gnome.muffin.gschema.xml.in.h:4
 msgid ""
 "When true, instead of having independent titlebars, modal dialogs appear "
 "attached to the titlebar of the parent window and are moved together with "
@@ -312,11 +312,11 @@ msgstr ""
 "ମୂଖ୍ୟ ୱିଣ୍ଡୋର ଶୀର୍ଷକ "
 "ପଟି ସହିତ ସଂଲଗ୍ନ ଥିବା ପରି ଲାଗିଥାଏ ଏବଂ ମୂଖ୍ୟ ୱିଣ୍ଡୋ ସହିତ ଗତି କରିଥାଏ।"
 
-#: ../data/org.gnome.mutter.gschema.xml.in.h:5
+#: ../data/org.gnome.muffin.gschema.xml.in.h:5
 msgid "Enable edge tiling when dropping windows on screen edges"
 msgstr "ୱିଣ୍ଡୋଗୁଡ଼ିକୁ ପରଦା ଧାରରେ ରଖିବା ସମୟରେ ଧାର ଟାଇଲକୁ ସକ୍ରିୟ କରନ୍ତୁ"
 
-#: ../data/org.gnome.mutter.gschema.xml.in.h:6
+#: ../data/org.gnome.muffin.gschema.xml.in.h:6
 msgid ""
 "If enabled, dropping windows on vertical screen edges maximizes them "
 "vertically and resizes them horizontally to cover half of the available "
@@ -329,11 +329,11 @@ msgstr ""
 "ୱିଣ୍ଡୋଗୁଡ଼ିକୁ ପରଦାର ଉପର ସୀମାରେ ରଖିବା ଫଳରେ ତାହା ସମ୍ପୂର୍ଣ୍ଣ ଭାବରେ ଆକାର ବୃଦ୍ଧି "
 "କରିଥାଏ।"
 
-#: ../data/org.gnome.mutter.gschema.xml.in.h:7
+#: ../data/org.gnome.muffin.gschema.xml.in.h:7
 msgid "Workspaces are managed dynamically"
 msgstr "କାର୍ଯ୍ୟକ୍ଷେତ୍ରଗୁଡ଼ିକ ଅସ୍ଥାୟୀ ଭାବରେ ପରିଚାଳିତ ହୋଇଥାଏ"
 
-#: ../data/org.gnome.mutter.gschema.xml.in.h:8
+#: ../data/org.gnome.muffin.gschema.xml.in.h:8
 msgid ""
 "Determines whether workspaces are managed dynamically or whether there's a "
 "static number of workspaces (determined by the num-workspaces key in org."
@@ -344,11 +344,11 @@ msgstr ""
 "ଥାଏ ତାହା ନିର୍ଦ୍ଧାରଣ କରିଥାଏ (org.gnome.desktop.wm.preferences ଦ୍ୱାରା num-"
 "workspaces କି ଦ୍ୱାରା ନିର୍ଦ୍ଧାରିତ ହୋଇଥାଏ)।"
 
-#: ../data/org.gnome.mutter.gschema.xml.in.h:9
+#: ../data/org.gnome.muffin.gschema.xml.in.h:9
 msgid "Workspaces only on primary"
 msgstr "କାର୍ଯ୍ୟକ୍ଷେତ୍ର କେବଳ ପ୍ରାଥମିକ ସ୍ଥାନରେ ଥାଏ"
 
-#: ../data/org.gnome.mutter.gschema.xml.in.h:10
+#: ../data/org.gnome.muffin.gschema.xml.in.h:10
 msgid ""
 "Determines whether workspace switching should happen for windows on all "
 "monitors or only for windows on the primary monitor."
@@ -357,11 +357,11 @@ msgstr ""
 "ତାହା ନିର୍ଦ୍ଧାରଣ "
 "କରିଥାଏ।"
 
-#: ../data/org.gnome.mutter.gschema.xml.in.h:11
+#: ../data/org.gnome.muffin.gschema.xml.in.h:11
 msgid "No tab popup"
 msgstr "କୌଣସି ଟ୍ୟାବ ପପଅପ ନାହିଁ"
 
-#: ../data/org.gnome.mutter.gschema.xml.in.h:12
+#: ../data/org.gnome.muffin.gschema.xml.in.h:12
 msgid ""
 "Determines whether the use of popup and highlight frame should be disabled "
 "for window cycling."
@@ -370,12 +370,12 @@ msgstr ""
 "ନୁହଁ ତାହା ନିର୍ଦ୍ଧାରଣ "
 "କରିଥାଏ।"
 
-#: ../data/org.gnome.mutter.gschema.xml.in.h:13
+#: ../data/org.gnome.muffin.gschema.xml.in.h:13
 msgid "Delay focus changes until the pointer stops moving"
 msgstr ""
 "ସୂଚକ ଗତି କରିବା ବନ୍ଦ ନହେଲା ପର୍ଯ୍ୟନ୍ତ ଲକ୍ଷ୍ଯସ୍ଥଳ ପରିବର୍ତ୍ତନକୁ ବିଳମ୍ବ କରନ୍ତୁ"
 
-#: ../data/org.gnome.mutter.gschema.xml.in.h:14
+#: ../data/org.gnome.muffin.gschema.xml.in.h:14
 msgid ""
 "If set to true, and the focus mode is either \"sloppy\" or \"mouse\" then "
 "the focus will not be changed immediately when entering a window, but only "
@@ -387,11 +387,11 @@ msgstr ""
 "କରିବା ବନ୍ଦ  ହେଲେ "
 "ସାମନାକୁ ଅଣାଯିବ।"
 
-#: ../data/org.gnome.mutter.gschema.xml.in.h:15
+#: ../data/org.gnome.muffin.gschema.xml.in.h:15
 msgid "Draggable border width"
 msgstr "ଟଣାଯୋଗ୍ୟ ସୀମା ଓସାର"
 
-#: ../data/org.gnome.mutter.gschema.xml.in.h:16
+#: ../data/org.gnome.muffin.gschema.xml.in.h:16
 msgid ""
 "The amount of total draggable borders. If the theme's visible borders are "
 "not enough, invisible borders will be added to meet this value."
@@ -400,11 +400,11 @@ msgstr ""
 "ଅଦୃଶ୍ୟ ସୀମାଗୁଡ଼ିକୁ "
 "ମୂଲ୍ୟାଙ୍କନ ପାଇଁ ଯୋଗ କରାଯିବ।"
 
-#: ../data/org.gnome.mutter.gschema.xml.in.h:17
+#: ../data/org.gnome.muffin.gschema.xml.in.h:17
 msgid "Auto maximize nearly monitor sized windows"
 msgstr "ସ୍ୱୟଂଚାଳିତ ଭାବରେ ମନିଟର ଆକାରର ୱିଣ୍ଡୋ ବର୍ଦ୍ଧନ କରନ୍ତୁ"
 
-#: ../data/org.gnome.mutter.gschema.xml.in.h:18
+#: ../data/org.gnome.muffin.gschema.xml.in.h:18
 msgid ""
 "If enabled, new windows that are initially the size of the monitor "
 "automatically get maximized."
@@ -412,56 +412,56 @@ msgstr ""
 "ଯଦି ସକ୍ରିୟ କରାଯାଏ, ନୂତନ ୱିଣ୍ଡୋଗୁଡ଼ିକ ଯାହାକି ପ୍ରଥମେ ମନିଟର ଆକାର ସ୍ୱୟଂଚାଳିତ "
 "ଭାବରେ ବଢ଼ିଥାଏ।"
 
-#: ../data/org.gnome.mutter.gschema.xml.in.h:19
+#: ../data/org.gnome.muffin.gschema.xml.in.h:19
 msgid "Place new windows in the center"
 msgstr "କେନ୍ଦ୍ରରେ ନୂତନ ୱିଣ୍ଡୋଗୁଡ଼ିକୁ ରଖନ୍ତୁ"
 
-#: ../data/org.gnome.mutter.gschema.xml.in.h:20
+#: ../data/org.gnome.muffin.gschema.xml.in.h:20
 msgid ""
 "When true, the new windows will always be put in the center of the active "
 "screen of the monitor."
 msgstr ""
 "ଯଦି true, ତେବେ ନୂତନ ୱିଣ୍ଡୋଗୁଡ଼ିକୁ ସର୍ବଦା ମନିଟରର ସକ୍ରିୟ ପରଦାର କେନ୍ଦ୍ରରେ ରଖାଯିବ।"
 
-#: ../data/org.gnome.mutter.gschema.xml.in.h:21
+#: ../data/org.gnome.muffin.gschema.xml.in.h:21
 msgid "Select window from tab popup"
 msgstr "ଟ୍ୟାବ ପପଅପରୁ ୱିଣ୍ଡୋକୁ ବାଛନ୍ତୁ"
 
-#: ../data/org.gnome.mutter.gschema.xml.in.h:22
+#: ../data/org.gnome.muffin.gschema.xml.in.h:22
 msgid "Cancel tab popup"
 msgstr "ଟ୍ୟାବ ପପଅପକୁ ବାତିଲ କରନ୍ତୁ"
 
-#: ../data/org.gnome.mutter.wayland.gschema.xml.in.h:1
+#: ../data/org.gnome.muffin.wayland.gschema.xml.in.h:1
 #| msgid "Switch to workspace 1"
 msgid "Switch to VT 1"
 msgstr "VT 1 କୁ ବଦଳାନ୍ତୁ"
 
-#: ../data/org.gnome.mutter.wayland.gschema.xml.in.h:2
+#: ../data/org.gnome.muffin.wayland.gschema.xml.in.h:2
 #| msgid "Switch to workspace 2"
 msgid "Switch to VT 2"
 msgstr "VT 2 କୁ ବଦଳାନ୍ତୁ"
 
-#: ../data/org.gnome.mutter.wayland.gschema.xml.in.h:3
+#: ../data/org.gnome.muffin.wayland.gschema.xml.in.h:3
 #| msgid "Switch to workspace 3"
 msgid "Switch to VT 3"
 msgstr "VT 3 କୁ ବଦଳାନ୍ତୁ"
 
-#: ../data/org.gnome.mutter.wayland.gschema.xml.in.h:4
+#: ../data/org.gnome.muffin.wayland.gschema.xml.in.h:4
 #| msgid "Switch to workspace 4"
 msgid "Switch to VT 4"
 msgstr "VT 4 କୁ ବଦଳାନ୍ତୁ"
 
-#: ../data/org.gnome.mutter.wayland.gschema.xml.in.h:5
+#: ../data/org.gnome.muffin.wayland.gschema.xml.in.h:5
 #| msgid "Switch to workspace 5"
 msgid "Switch to VT 5"
 msgstr "VT 5 କୁ ବଦଳାନ୍ତୁ"
 
-#: ../data/org.gnome.mutter.wayland.gschema.xml.in.h:6
+#: ../data/org.gnome.muffin.wayland.gschema.xml.in.h:6
 #| msgid "Switch to workspace 6"
 msgid "Switch to VT 6"
 msgstr "VT 6 କୁ ବଦଳାନ୍ତୁ"
 
-#: ../data/org.gnome.mutter.wayland.gschema.xml.in.h:7
+#: ../data/org.gnome.muffin.wayland.gschema.xml.in.h:7
 #| msgid "Switch to workspace 7"
 msgid "Switch to VT 7"
 msgstr "VT 7 କୁ ବଦଳାନ୍ତୁ"
@@ -576,26 +576,26 @@ msgstr ""
 "ପ୍ରସଙ୍ଗ ମିଳିଲା ନାହିଁ! ନିଶ୍ଚିତ କରନ୍ତୁ କି %s ବାସ୍ତବରେ ଅଛି ଓ ତାହା ଭିତରେ ସାଧାରଣ "
 "ପ୍ରସଙ୍ଗଗୁଡ଼ିକ ରହିଛି।\n"
 
-#: ../src/core/mutter.c:39
+#: ../src/core/muffin.c:39
 #, c-format
 msgid ""
-"mutter %s\n"
+"muffin %s\n"
 "Copyright (C) 2001-%d Havoc Pennington, Red Hat, Inc., and others\n"
 "This is free software; see the source for copying conditions.\n"
 "There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A "
 "PARTICULAR PURPOSE.\n"
 msgstr ""
-"mutter %s\n"
+"muffin %s\n"
 "Copyright (C) 2001-%d Havoc Pennington, Red Hat, Inc., and others\n"
 "This is free software; see the source for copying conditions.\n"
 "There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A "
 "PARTICULAR PURPOSE.\n"
 
-#: ../src/core/mutter.c:53
+#: ../src/core/muffin.c:53
 msgid "Print version"
 msgstr "ସଂସ୍କରଣ ମୁଦ୍ରଣ କରନ୍ତୁ"
 
-#: ../src/core/mutter.c:59
+#: ../src/core/muffin.c:59
 msgid "Mutter plugin to use"
 msgstr "ବ୍ୟବହାର କରିବାକୁ ଥିବା Mutter ପ୍ଲଗଇନ"
 
@@ -1395,8 +1395,8 @@ msgstr "%s (%s ଉପରେ)"
 #~ msgid "Failed to parse saved session file: %s\n"
 #~ msgstr "ସଞ୍ଚିତ ଅଧିବେଶନ ଫାଇଲ ବିଶ୍ଳେଷଣ କରିବାରେ ଅସଫଳ: %s\n"
 
-#~ msgid "<mutter_session> attribute seen but we already have the session ID"
-#~ msgstr "<mutter_session> ଗୁଣ ଦେଖାଗଲା, କିନ୍ତୁ ଆମ ପାଖରେ ଅଧିବେଶନ ID ପୂର୍ବରୁ ଅଛି"
+#~ msgid "<muffin_session> attribute seen but we already have the session ID"
+#~ msgstr "<muffin_session> ଗୁଣ ଦେଖାଗଲା, କିନ୍ତୁ ଆମ ପାଖରେ ଅଧିବେଶନ ID ପୂର୍ବରୁ ଅଛି"
 
 #~ msgid "Unknown attribute %s on <%s> element"
 #~ msgstr "<%s> ଉପାଦାନ ଉପରେ ଅଜଣା ଗୁଣଧର୍ମ %s"

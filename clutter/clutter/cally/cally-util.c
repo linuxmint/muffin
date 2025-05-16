@@ -142,7 +142,7 @@ cally_util_get_toolkit_name (void)
 static const gchar *
 cally_util_get_toolkit_version (void)
 {
-  return MUTTER_VERSION;
+  return MUFFIN_VERSION;
 }
 
 static guint

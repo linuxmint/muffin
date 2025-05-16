@@ -1,13 +1,13 @@
 project('muffin', 'c', version : '6.4.1', meson_version : '>=0.56.0', license : 'GPLv2+')
 
-mutter_plugin_api_version = '3'
+muffin_plugin_api_version = '3'
 
 split_version = meson.project_version().split('.')
 
 # Automatically increase API version each development cycle,
 # starting with 0 in 3.23.x
 api_version = 0
-libmutter_api_version = '@0@'.format(api_version)
+libmuffin_api_version = '@0@'.format(api_version)
 
 # generic version requirements
 fribidi_req = '>= 1.0.0'
@@ -75,13 +75,13 @@ pcdir = join_paths(libdir, 'pkgconfig')
 gettext_package = meson.project_name()
 localedir = join_paths(datadir, 'locale')
 
-libmutter_name = 'muffin'
+libmuffin_name = 'muffin'
 
-mutter_installed_tests_datadir = join_paths(
-  datadir, 'installed-tests', libmutter_name)
+muffin_installed_tests_datadir = join_paths(
+  datadir, 'installed-tests', libmuffin_name)
 
-mutter_installed_tests_libexecdir = join_paths(
-  libexecdir, 'installed-tests', libmutter_name)
+muffin_installed_tests_libexecdir = join_paths(
+  libexecdir, 'installed-tests', libmuffin_name)
 
 m_dep = cc.find_library('m', required: true)
 x11_dep = dependency('x11')
@@ -424,10 +424,10 @@ xwayland_grab_default_access_rules = ''
 cdata.set_quoted('XWAYLAND_GRAB_DEFAULT_ACCESS_RULES',
                  xwayland_grab_default_access_rules)
 
-cdata.set_quoted('MUTTER_PLUGIN_DIR', join_paths(pkglibdir, 'plugins'))
-cdata.set_quoted('MUTTER_LOCALEDIR', localedir)
-cdata.set_quoted('MUTTER_LIBEXECDIR', libexecdir)
-cdata.set_quoted('MUTTER_PKGDATADIR', pkgdatadir)
+cdata.set_quoted('MUFFIN_PLUGIN_DIR', join_paths(pkglibdir, 'plugins'))
+cdata.set_quoted('MUFFIN_LOCALEDIR', localedir)
+cdata.set_quoted('MUFFIN_LIBEXECDIR', libexecdir)
+cdata.set_quoted('MUFFIN_PKGDATADIR', pkgdatadir)
 
 config_h = configure_file(
   input: 'config.h.meson',

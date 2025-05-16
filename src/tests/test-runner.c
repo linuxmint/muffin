@@ -854,7 +854,7 @@ main (int argc, char **argv)
 
   if (all_tests)
     {
-      GFile *test_dir = g_file_new_for_path (MUTTER_PKGDATADIR "/tests");
+      GFile *test_dir = g_file_new_for_path (MUFFIN_PKGDATADIR "/tests");
 
       if (!find_metatests_in_directory (test_dir, tests, &error))
         {
@@ -878,7 +878,7 @@ main (int argc, char **argv)
       g_free (curdir);
     }
 
-  /* Then initalize mutter with a different set of arguments */
+  /* Then initalize muffin with a different set of arguments */
 
   char *fake_args[] = { NULL, (char *)"--wayland", (char *)"--nested" };
   fake_args[0] = argv[0];
@@ -888,7 +888,7 @@ main (int argc, char **argv)
   ctx = meta_get_option_context ();
   if (!g_option_context_parse (ctx, &fake_argc, &fake_argv, &error))
     {
-      g_printerr ("mutter: %s\n", error->message);
+      g_printerr ("muffin: %s\n", error->message);
       exit (1);
     }
   g_option_context_free (ctx);

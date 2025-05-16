@@ -65,14 +65,14 @@ static FILE* logfile = NULL;
 static void
 ensure_logfile (void)
 {
-  if (logfile == NULL && g_getenv ("MUTTER_USE_LOGFILE"))
+  if (logfile == NULL && g_getenv ("MUFFIN_USE_LOGFILE"))
     {
       char *filename = NULL;
       char *tmpl;
       int fd;
       GError *err;
 
-      tmpl = g_strdup_printf ("mutter-%d-debug-log-XXXXXX",
+      tmpl = g_strdup_printf ("muffin-%d-debug-log-XXXXXX",
                               (int) getpid ());
 
       err = NULL;
@@ -927,7 +927,7 @@ meta_later_add (MetaLaterType  when,
        * there so it will happen before GTK+ repaints.
        */
       later->source = g_idle_add_full (META_PRIORITY_RESIZE, call_idle_later, later, NULL);
-      g_source_set_name_by_id (later->source, "[mutter] call_idle_later");
+      g_source_set_name_by_id (later->source, "[muffin] call_idle_later");
       ensure_later_repaint_func ();
       break;
     case META_LATER_CALC_SHOWING:
@@ -938,7 +938,7 @@ meta_later_add (MetaLaterType  when,
       break;
     case META_LATER_IDLE:
       later->source = g_idle_add_full (G_PRIORITY_DEFAULT_IDLE, call_idle_later, later, NULL);
-      g_source_set_name_by_id (later->source, "[mutter] call_idle_later");
+      g_source_set_name_by_id (later->source, "[muffin] call_idle_later");
       break;
     }
 

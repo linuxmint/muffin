@@ -257,7 +257,7 @@ static GOptionEntry meta_options[] = {
 /**
  * meta_get_option_context: (skip)
  *
- * Returns a #GOptionContext initialized with mutter-related options.
+ * Returns a #GOptionContext initialized with muffin-related options.
  * Parse the command-line args with this before calling meta_init().
  *
  * Return value: the #GOptionContext
@@ -269,7 +269,7 @@ meta_get_option_context (void)
 
   if (setlocale (LC_ALL, "") == NULL)
     meta_warning ("Locale not understood by C library, internationalization will not work\n");
-  bindtextdomain (GETTEXT_PACKAGE, MUTTER_LOCALEDIR);
+  bindtextdomain (GETTEXT_PACKAGE, MUFFIN_LOCALEDIR);
   bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
 
   ctx = g_option_context_new (NULL);
@@ -282,7 +282,7 @@ meta_get_option_context (void)
  *
  * Selects which display Mutter should use. It first tries to use
  * @display_name as the display. If @display_name is %NULL then
- * try to use the environment variable MUTTER_DISPLAY. If that
+ * try to use the environment variable MUFFIN_DISPLAY. If that
  * also is %NULL, use the default - :0.0
  */
 static void
@@ -293,7 +293,7 @@ meta_select_display (char *display_arg)
   if (display_arg)
     display_name = (const char *) display_arg;
   else
-    display_name = g_getenv ("MUTTER_DISPLAY");
+    display_name = g_getenv ("MUFFIN_DISPLAY");
 
   if (display_name)
     g_setenv ("DISPLAY", display_name, TRUE);
@@ -384,7 +384,7 @@ find_session_type (void)
     }
 
   /* Legacy support for starting through xinit */
-  if (is_tty && (g_getenv ("MUTTER_DISPLAY") || g_getenv ("DISPLAY")))
+  if (is_tty && (g_getenv ("MUFFIN_DISPLAY") || g_getenv ("DISPLAY")))
     {
       session_type = strdup ("x11");
       goto out;
@@ -525,7 +525,7 @@ meta_override_compositor_configuration (MetaCompositorType compositor_type,
 /**
  * meta_init: (skip)
  *
- * Initialize mutter. Call this after meta_get_option_context() and
+ * Initialize muffin. Call this after meta_get_option_context() and
  * meta_plugin_manager_set_plugin_type(), and before meta_run().
  */
 void
@@ -555,9 +555,9 @@ meta_init (void)
 
   g_unix_signal_add (SIGTERM, on_sigterm, NULL);
 
-  if (g_getenv ("MUTTER_VERBOSE"))
+  if (g_getenv ("MUFFIN_VERBOSE"))
     meta_set_verbose (TRUE);
-  if (g_getenv ("MUTTER_DEBUG"))
+  if (g_getenv ("MUFFIN_DEBUG"))
     meta_set_debugging (TRUE);
 
   if (_compositor_configuration_overridden)
@@ -583,7 +583,7 @@ meta_init (void)
   meta_print_self_identity ();
 
 #ifdef HAVE_INTROSPECTION
-  g_irepository_prepend_search_path (MUTTER_PKGLIBDIR);
+  g_irepository_prepend_search_path (MUFFIN_PKGLIBDIR);
 #endif
 
   /* NB: When running as a hybrid wayland compositor we run our own headless X
@@ -593,7 +593,7 @@ meta_init (void)
 
   meta_init_backend (backend_gtype);
 
-  meta_set_syncing (opt_sync || (g_getenv ("MUTTER_SYNC") != NULL));
+  meta_set_syncing (opt_sync || (g_getenv ("MUFFIN_SYNC") != NULL));
 
   if (opt_replace_wm)
     meta_set_replace_current_wm (TRUE);
@@ -607,7 +607,7 @@ meta_init (void)
 /**
  * meta_register_with_session:
  *
- * Registers mutter with the session manager.  Call this after completing your own
+ * Registers muffin with the session manager.  Call this after completing your own
  * initialization.
  *
  * This should be called when the session manager can safely continue to the
@@ -645,10 +645,10 @@ meta_register_with_session (void)
 /**
  * meta_run: (skip)
  *
- * Runs mutter. Call this after completing initialization that doesn't require
+ * Runs muffin. Call this after completing initialization that doesn't require
  * an event loop.
  *
- * Return value: mutter's exit status
+ * Return value: muffin's exit status
  */
 int
 meta_run (void)
@@ -742,7 +742,7 @@ void
 meta_test_init (void)
 {
 #if defined(HAVE_WAYLAND)
-  g_autofree char *display_name = g_strdup ("mutter-test-display-XXXXXX");
+  g_autofree char *display_name = g_strdup ("muffin-test-display-XXXXXX");
   int fd = g_mkstemp (display_name);
 
   meta_override_compositor_configuration (META_COMPOSITOR_TYPE_WAYLAND,

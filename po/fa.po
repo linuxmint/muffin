@@ -8,7 +8,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: metacity HEAD\n"
-"Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?product=mutter&keywords=I18N+L10N&component=general\n"
+"Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?product=muffin&keywords=I18N+L10N&component=general\n"
 "POT-Creation-Date: 2012-03-15 21:29+0000\n"
 "PO-Revision-Date: 2012-04-01 00:10+0330\n"
 "Last-Translator: Arash Mousavi <mousavi.arash@gmail.com>\n"
@@ -21,15 +21,15 @@ msgstr ""
 "X-Poedit-Country: IRAN, ISLAMIC REPUBLIC OF\n"
 "X-Poedit-SourceCharset: utf-8\n"
 
-#: ../src/50-mutter-windows.xml.in.h:1 ../src/50-mutter-windows.xml.in.h:17
+#: ../src/50-muffin-windows.xml.in.h:1 ../src/50-muffin-windows.xml.in.h:17
 msgid "Windows"
 msgstr "پنجره‌ها"
 
-#: ../src/50-mutter-windows.xml.in.h:2
+#: ../src/50-muffin-windows.xml.in.h:2
 msgid "View split on left"
 msgstr "نمایش انشعاب در سمت راست"
 
-#: ../src/50-mutter-windows.xml.in.h:3
+#: ../src/50-muffin-windows.xml.in.h:3
 msgid "View split on right"
 msgstr "نمایش انشعاب در سمت راست"
 
@@ -126,7 +126,7 @@ msgstr "شکست در پویش شاخه‌ی تم‌ها: %s\n"
 msgid "Could not find a theme! Be sure %s exists and contains the usual themes.\n"
 msgstr "تم پیدا نشد! مطمئن شوید %s وجود دارد و شامل تم‌های معمول است.\n"
 
-#: ../src/core/mutter.c:40
+#: ../src/core/muffin.c:40
 #, c-format
 #| msgid ""
 #| "metacity %s\n"
@@ -135,7 +135,7 @@ msgstr "تم پیدا نشد! مطمئن شوید %s وجود دارد و شام
 #| "There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A "
 #| "PARTICULAR PURPOSE.\n"
 msgid ""
-"mutter %s\n"
+"muffin %s\n"
 "Copyright (C) 2001-%d Havoc Pennington, Red Hat, Inc., and others\n"
 "This is free software; see the source for copying conditions.\n"
 "There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n"
@@ -146,11 +146,11 @@ msgstr ""
 "هیچ تضمینی وجود ندارد؛ حتی در مورد قابلیت تجاری یا مناسبت برای\n"
 " یک هدف به خصوص.\n"
 
-#: ../src/core/mutter.c:54
+#: ../src/core/muffin.c:54
 msgid "Print version"
 msgstr "نسخه چاپی"
 
-#: ../src/core/mutter.c:60
+#: ../src/core/muffin.c:60
 msgid "Comma-separated list of compositor plugins"
 msgstr ""
 
@@ -233,7 +233,7 @@ msgstr "شکست در تجزیه‌ی پرونده‌ی نشست ذخیره شد
 #: ../src/core/session.c:1185
 #, fuzzy, c-format
 #| msgid "<metacity_session> attribute seen but we already have the session ID"
-msgid "<mutter_session> attribute seen but we already have the session ID"
+msgid "<muffin_session> attribute seen but we already have the session ID"
 msgstr "مشخصه‌ی <metacity_session> دیده شد اما شناسه‌ی نشست از قبل موجود بود"
 
 #: ../src/core/session.c:1198
@@ -280,7 +280,7 @@ msgid "Opened log file %s\n"
 msgstr "پرونده‌ی ثبتی %s باز شد\n"
 
 #: ../src/core/util.c:146
-#: ../src/tools/mutter-message.c:149
+#: ../src/tools/muffin-message.c:149
 #, c-format
 #| msgid "Metacity was compiled without support for verbose mode\n"
 msgid "Mutter was compiled without support for verbose mode\n"
@@ -365,88 +365,88 @@ msgstr "ویژگی %s روی پنجره‌ی 0x%lx UTf-8 نامعتبر دارد
 msgid "Property %s on window 0x%lx contained invalid UTF-8 for item %d in the list\n"
 msgstr "ویژگی %s روی پنجره‌ی 0x%lx برای مورد %Id در فهرست، UTf-8 نامعتبر دارد\n"
 
-#: ../src/mutter.desktop.in.h:1
-#: ../src/mutter-wm.desktop.in.h:1
+#: ../src/muffin.desktop.in.h:1
+#: ../src/muffin-wm.desktop.in.h:1
 msgid "Mutter"
 msgstr "ماتر"
 
-#: ../src/org.gnome.mutter.gschema.xml.in.h:1
+#: ../src/org.gnome.muffin.gschema.xml.in.h:1
 #, fuzzy
 #| msgid "Modifier to use for modified window click actions"
 msgid "Modifier to use for extended window management operations"
 msgstr "تغییردهنده‌ای که برای کنش‌های کلیک روی پنجره‌ی تغییر داده شده به کار می‌رود"
 
-#: ../src/org.gnome.mutter.gschema.xml.in.h:2
+#: ../src/org.gnome.muffin.gschema.xml.in.h:2
 msgid "This key will initiate the \"overlay\", which is a combination window overview and application launching system. The default is intended to be the \"Windows key\" on PC hardware. It's expected that this binding either the default or set to the empty string."
 msgstr ""
 
-#: ../src/org.gnome.mutter.gschema.xml.in.h:3
+#: ../src/org.gnome.muffin.gschema.xml.in.h:3
 msgid "Attach modal dialogs"
 msgstr "ضمیمه‌کردن محاوره‌های معین"
 
-#: ../src/org.gnome.mutter.gschema.xml.in.h:4
+#: ../src/org.gnome.muffin.gschema.xml.in.h:4
 msgid "When true, instead of having independent titlebars, modal dialogs appear attached to the titlebar of the parent window and are moved together with the parent window."
 msgstr ""
 
-#: ../src/org.gnome.mutter.gschema.xml.in.h:5
+#: ../src/org.gnome.muffin.gschema.xml.in.h:5
 msgid "Live Hidden Windows"
 msgstr "پنجره‌های مخفی زنده"
 
-#: ../src/org.gnome.mutter.gschema.xml.in.h:6
+#: ../src/org.gnome.muffin.gschema.xml.in.h:6
 msgid "Determines whether hidden windows (i.e., minimized windows and windows on other workspaces than the current one) should be kept alive."
 msgstr ""
 
-#: ../src/org.gnome.mutter.gschema.xml.in.h:7
+#: ../src/org.gnome.muffin.gschema.xml.in.h:7
 msgid "Enable edge tiling when dropping windows on screen edges"
 msgstr ""
 
-#: ../src/org.gnome.mutter.gschema.xml.in.h:8
+#: ../src/org.gnome.muffin.gschema.xml.in.h:8
 msgid "If enabled, dropping windows on vertical screen edges maximizes them vertically and resizes them horizontally to cover half of the available area. Dropping windows on the top screen edge maximizes them completely."
 msgstr ""
 
-#: ../src/org.gnome.mutter.gschema.xml.in.h:9
+#: ../src/org.gnome.muffin.gschema.xml.in.h:9
 msgid "Workspaces are managed dynamically"
 msgstr "فضاهای‌کاری بصورت پویا مدیریت می‌شوند"
 
-#: ../src/org.gnome.mutter.gschema.xml.in.h:10
+#: ../src/org.gnome.muffin.gschema.xml.in.h:10
 msgid "Determines whether workspaces are managed dynamically or whether there's a static number of workspaces (determined by the num-workspaces key in org.gnome.desktop.wm.preferences)."
 msgstr ""
 
-#: ../src/org.gnome.mutter.gschema.xml.in.h:11
+#: ../src/org.gnome.muffin.gschema.xml.in.h:11
 msgid "Workspaces only on primary"
 msgstr ""
 
-#: ../src/org.gnome.mutter.gschema.xml.in.h:12
+#: ../src/org.gnome.muffin.gschema.xml.in.h:12
 msgid "Determines whether workspace switching should happen for windows on all monitors or only for windows on the primary monitor."
 msgstr ""
 
-#: ../src/org.gnome.mutter.gschema.xml.in.h:13
+#: ../src/org.gnome.muffin.gschema.xml.in.h:13
 msgid "No tab popup"
 msgstr ""
 
-#: ../src/org.gnome.mutter.gschema.xml.in.h:14
+#: ../src/org.gnome.muffin.gschema.xml.in.h:14
 msgid "Determines whether the use of popup and highlight frame should be disabled for window cycling."
 msgstr ""
 
-#: ../src/org.gnome.mutter.gschema.xml.in.h:15
+#: ../src/org.gnome.muffin.gschema.xml.in.h:15
 msgid "Draggable border width"
 msgstr ""
 
-#: ../src/org.gnome.mutter.gschema.xml.in.h:16
+#: ../src/org.gnome.muffin.gschema.xml.in.h:16
 msgid "The amount of total draggable borders. If the theme's visible borders are not enough, invisible borders will be added to meet this value."
 msgstr ""
 
-#: ../src/org.gnome.mutter.gschema.xml.in.h:17
+#: ../src/org.gnome.muffin.gschema.xml.in.h:17
 #, fuzzy
 #| msgid "Move between windows with popup"
 msgid "Select window from tab popup"
 msgstr "جابه‌جایی بین پنجره‌ها با واشو"
 
-#: ../src/org.gnome.mutter.gschema.xml.in.h:18
+#: ../src/org.gnome.muffin.gschema.xml.in.h:18
 msgid "Cancel tab popup"
 msgstr ""
 
-#: ../src/tools/mutter-message.c:123
+#: ../src/tools/muffin-message.c:123
 #, c-format
 msgid "Usage: %s\n"
 msgstr "کاربرد: %s\n"
@@ -1486,17 +1486,17 @@ msgstr "مقدار y %Id بود، %Id انتظار می‌رفت"
 msgid "%d coordinate expressions parsed in %g seconds (%g seconds average)\n"
 msgstr "%Id عبارت مختصاتی در %Ig ثانیه تجزیه شد (متوسط %Ig ثانیه)\n"
 
-#: ../src/50-mutter-windows.xml.in.h:2
+#: ../src/50-muffin-windows.xml.in.h:2
 #, fuzzy
 msgid "Close window"
 msgstr "بستن پنجره"
 
-#: ../src/50-mutter-windows.xml.in.h:3
+#: ../src/50-muffin-windows.xml.in.h:3
 #, fuzzy
 msgid "Lower window below other windows"
 msgstr "پایین بردن پنجره زیر پنجره‌های دیگر"
 
-#: ../src/50-mutter-windows.xml.in.h:4
+#: ../src/50-muffin-windows.xml.in.h:4
 #, fuzzy
 msgid "Maximize window"
 msgstr ""
@@ -1505,17 +1505,17 @@ msgstr ""
 "#-#-#-#-#  fa.po (metacity HEAD)  #-#-#-#-#\n"
 "بیشینه کردن پنجره"
 
-#: ../src/50-mutter-windows.xml.in.h:5
+#: ../src/50-muffin-windows.xml.in.h:5
 #, fuzzy
 msgid "Maximize window horizontally"
 msgstr "حداکثر کردن افقی پنجره"
 
-#: ../src/50-mutter-windows.xml.in.h:6
+#: ../src/50-muffin-windows.xml.in.h:6
 #, fuzzy
 msgid "Maximize window vertically"
 msgstr "حداکثر کردن عمودی پنجره"
 
-#: ../src/50-mutter-windows.xml.in.h:7
+#: ../src/50-muffin-windows.xml.in.h:7
 #, fuzzy
 msgid "Minimize window"
 msgstr ""
@@ -1524,12 +1524,12 @@ msgstr ""
 "#-#-#-#-#  fa.po (metacity HEAD)  #-#-#-#-#\n"
 "کمینه کردن پنجره"
 
-#: ../src/50-mutter-windows.xml.in.h:8
+#: ../src/50-muffin-windows.xml.in.h:8
 #, fuzzy
 msgid "Move window"
 msgstr "جابه‌جایی پنجره"
 
-#: ../src/50-mutter-navigation.xml.in.h:6
+#: ../src/50-muffin-navigation.xml.in.h:6
 #, fuzzy
 msgid "Move window one workspace down"
 msgstr ""
@@ -1538,7 +1538,7 @@ msgstr ""
 "#-#-#-#-#  fa.po (metacity HEAD)  #-#-#-#-#\n"
 "جابه‌جایی پنجره به فضای‌کاری پایینی"
 
-#: ../src/50-mutter-navigation.xml.in.h:7
+#: ../src/50-muffin-navigation.xml.in.h:7
 #, fuzzy
 msgid "Move window one workspace to the left"
 msgstr ""
@@ -1547,7 +1547,7 @@ msgstr ""
 "#-#-#-#-#  fa.po (metacity HEAD)  #-#-#-#-#\n"
 "جابه‌جایی پنجره به فضای‌کاری چپ "
 
-#: ../src/50-mutter-navigation.xml.in.h:8
+#: ../src/50-muffin-navigation.xml.in.h:8
 #, fuzzy
 msgid "Move window one workspace to the right"
 msgstr ""
@@ -1556,7 +1556,7 @@ msgstr ""
 "#-#-#-#-#  fa.po (metacity HEAD)  #-#-#-#-#\n"
 "جابه‌جایی پنجره به فضای‌کاری راست"
 
-#: ../src/50-mutter-navigation.xml.in.h:9
+#: ../src/50-muffin-navigation.xml.in.h:9
 #, fuzzy
 msgid "Move window one workspace up"
 msgstr ""
@@ -1565,7 +1565,7 @@ msgstr ""
 "#-#-#-#-#  fa.po (metacity HEAD)  #-#-#-#-#\n"
 "جابه‌جایی پنجره به فضای‌کاری بالایی"
 
-#: ../src/50-mutter-navigation.xml.in.h:10
+#: ../src/50-muffin-navigation.xml.in.h:10
 #, fuzzy
 msgid "Move window to workspace 1"
 msgstr ""
@@ -1574,7 +1574,7 @@ msgstr ""
 "#-#-#-#-#  fa.po (metacity HEAD)  #-#-#-#-#\n"
 "جابه‌جایی پنجره به فضای‌کاری ۱"
 
-#: ../src/50-mutter-navigation.xml.in.h:11
+#: ../src/50-muffin-navigation.xml.in.h:11
 #, fuzzy
 msgid "Move window to workspace 2"
 msgstr ""
@@ -1583,7 +1583,7 @@ msgstr ""
 "#-#-#-#-#  fa.po (metacity HEAD)  #-#-#-#-#\n"
 "جابه‌جایی پنجره به فضای‌کاری ۲"
 
-#: ../src/50-mutter-navigation.xml.in.h:12
+#: ../src/50-muffin-navigation.xml.in.h:12
 #, fuzzy
 msgid "Move window to workspace 3"
 msgstr ""
@@ -1592,7 +1592,7 @@ msgstr ""
 "#-#-#-#-#  fa.po (metacity HEAD)  #-#-#-#-#\n"
 "جابه‌جایی پنجره به فضای‌کاری ۳"
 
-#: ../src/50-mutter-navigation.xml.in.h:13
+#: ../src/50-muffin-navigation.xml.in.h:13
 #, fuzzy
 msgid "Move window to workspace 4"
 msgstr ""
@@ -1601,17 +1601,17 @@ msgstr ""
 "#-#-#-#-#  fa.po (metacity HEAD)  #-#-#-#-#\n"
 "جابه‌جایی پنجره به فضای‌کاری ۴"
 
-#: ../src/50-mutter-windows.xml.in.h:9
+#: ../src/50-muffin-windows.xml.in.h:9
 #, fuzzy
 msgid "Raise window above other windows"
 msgstr "پیش آوردن پنجره روی همه‌ی پنجره‌ها"
 
-#: ../src/50-mutter-windows.xml.in.h:11
+#: ../src/50-muffin-windows.xml.in.h:11
 #, fuzzy
 msgid "Resize window"
 msgstr "تغییر اندازه‌ی پنجره"
 
-#: ../src/50-mutter-navigation.xml.in.h:18
+#: ../src/50-muffin-navigation.xml.in.h:18
 #, fuzzy
 msgid "Switch to workspace 1"
 msgstr ""
@@ -1620,7 +1620,7 @@ msgstr ""
 "#-#-#-#-#  fa.po (metacity HEAD)  #-#-#-#-#\n"
 "رفتن به فضای‌کاری ۱"
 
-#: ../src/50-mutter-navigation.xml.in.h:19
+#: ../src/50-muffin-navigation.xml.in.h:19
 #, fuzzy
 msgid "Switch to workspace 2"
 msgstr ""
@@ -1629,7 +1629,7 @@ msgstr ""
 "#-#-#-#-#  fa.po (metacity HEAD)  #-#-#-#-#\n"
 "رفتن به فضای‌کاری ۲"
 
-#: ../src/50-mutter-navigation.xml.in.h:20
+#: ../src/50-muffin-navigation.xml.in.h:20
 #, fuzzy
 msgid "Switch to workspace 3"
 msgstr ""
@@ -1638,7 +1638,7 @@ msgstr ""
 "#-#-#-#-#  fa.po (metacity HEAD)  #-#-#-#-#\n"
 "رفتن به فضای‌کاری ۳"
 
-#: ../src/50-mutter-navigation.xml.in.h:21
+#: ../src/50-muffin-navigation.xml.in.h:21
 #, fuzzy
 msgid "Switch to workspace 4"
 msgstr ""
@@ -1647,12 +1647,12 @@ msgstr ""
 "#-#-#-#-#  fa.po (metacity HEAD)  #-#-#-#-#\n"
 "رفتن به فضای‌کاری ۴"
 
-#: ../src/50-mutter-windows.xml.in.h:13
+#: ../src/50-muffin-windows.xml.in.h:13
 #, fuzzy
 msgid "Toggle fullscreen mode"
 msgstr "ضامن حالت تمام صفحه"
 
-#: ../src/50-mutter-windows.xml.in.h:14
+#: ../src/50-muffin-windows.xml.in.h:14
 #, fuzzy
 msgid "Toggle maximization state"
 msgstr ""
@@ -1661,111 +1661,111 @@ msgstr ""
 "#-#-#-#-#  fa.po (metacity HEAD)  #-#-#-#-#\n"
 "ضامن همیشه در وضعیت حداکثر"
 
-#: ../src/50-mutter-windows.xml.in.h:15
+#: ../src/50-muffin-windows.xml.in.h:15
 #, fuzzy
 msgid "Toggle shaded state"
 msgstr "ضامن وضعیت سایه خورده"
 
-#: ../src/50-mutter-navigation.xml.in.h:1
+#: ../src/50-muffin-navigation.xml.in.h:1
 #, fuzzy
 #| msgid "Hide all normal windows and set focus to the desktop"
 msgid "Hide all normal windows"
 msgstr "مخفی کردن همه‌ی پنجره‌های معمول"
 
-#: ../src/50-mutter-navigation.xml.in.h:2
+#: ../src/50-muffin-navigation.xml.in.h:2
 #, fuzzy
 #| msgid "Move to Workspace _Left"
 msgid "Move to workspace above"
 msgstr "جابه‌جایی به فضای‌کاری _چپ"
 
-#: ../src/50-mutter-navigation.xml.in.h:3
+#: ../src/50-muffin-navigation.xml.in.h:3
 #, fuzzy
 #| msgid "Move to Workspace _Down"
 msgid "Move to workspace below"
 msgstr "جابه‌جایی به فضای‌کاری پایین"
 
-#: ../src/50-mutter-navigation.xml.in.h:4
+#: ../src/50-muffin-navigation.xml.in.h:4
 #, fuzzy
 #| msgid "Move to Workspace _Left"
 msgid "Move to workspace left"
 msgstr "جابه‌جایی به فضای‌کاری سمت چپ"
 
-#: ../src/50-mutter-navigation.xml.in.h:5
+#: ../src/50-muffin-navigation.xml.in.h:5
 #, fuzzy
 #| msgid "Move to Workspace R_ight"
 msgid "Move to workspace right"
 msgstr "جابه‌جایی به فضای‌کاری سمت راست"
 
-#: ../src/50-mutter-navigation.xml.in.h:14
+#: ../src/50-muffin-navigation.xml.in.h:14
 #, fuzzy
 msgid "Navigation"
 msgstr "جابه‌جایی"
 
-#: ../src/50-mutter-navigation.xml.in.h:15
+#: ../src/50-muffin-navigation.xml.in.h:15
 #, fuzzy
 msgid "Switch applications"
 msgstr "تعویض برنامه‌ها"
 
-#: ../src/50-mutter-navigation.xml.in.h:16
+#: ../src/50-muffin-navigation.xml.in.h:16
 #, fuzzy
 msgid "Switch system controls"
 msgstr "تعویض کنترل‌های سیستم"
 
-#: ../src/50-mutter-navigation.xml.in.h:17
+#: ../src/50-muffin-navigation.xml.in.h:17
 #, fuzzy
 msgid "Switch system controls directly"
 msgstr "تعویض مستقیمِ کنترل‌های سیستم"
 
-#: ../src/50-mutter-navigation.xml.in.h:22
+#: ../src/50-muffin-navigation.xml.in.h:22
 #, fuzzy
 msgid "Switch windows directly"
 msgstr "تعویض مستیقیم پنجره‌ها"
 
-#: ../src/50-mutter-navigation.xml.in.h:23
+#: ../src/50-muffin-navigation.xml.in.h:23
 #, fuzzy
 #| msgid "Move between windows of an application immediately"
 msgid "Switch windows of an app directly"
 msgstr "تعویض مستقیمِ پنجره‌های یک برنامه"
 
-#: ../src/50-mutter-navigation.xml.in.h:24
+#: ../src/50-muffin-navigation.xml.in.h:24
 #, fuzzy
 #| msgid "Move between windows of an application immediately"
 msgid "Switch windows of an application"
 msgstr "تعویض پنجره‌های یک برنامه"
 
-#: ../src/50-mutter-system.xml.in.h:1
+#: ../src/50-muffin-system.xml.in.h:1
 #, fuzzy
 msgid "Show the activities overview"
 msgstr "نمایش نمای‌کلی فعالیت‌ها"
 
-#: ../src/50-mutter-system.xml.in.h:2
+#: ../src/50-muffin-system.xml.in.h:2
 #, fuzzy
 #| msgid "Show the panel's main menu"
 msgid "Show the run command prompt"
 msgstr "نمایش خط فرمان اجرا"
 
-#: ../src/50-mutter-system.xml.in.h:3
+#: ../src/50-muffin-system.xml.in.h:3
 #, fuzzy
 msgid "System"
 msgstr "سیستم"
 
-#: ../src/50-mutter-windows.xml.in.h:1
+#: ../src/50-muffin-windows.xml.in.h:1
 #, fuzzy
 msgid "Activate the window menu"
 msgstr "فعال کردن منوی پنجره"
 
-#: ../src/50-mutter-windows.xml.in.h:10
+#: ../src/50-muffin-windows.xml.in.h:10
 #, fuzzy
 #| msgid "Raise window if it's covered by another window, otherwise lower it"
 msgid "Raise window if covered, otherwise lower it"
 msgstr "بالا آوردن پنجره در صورتی که پوشیده شده است، در غیر اینصورت پایین برود"
 
-#: ../src/50-mutter-windows.xml.in.h:12
+#: ../src/50-muffin-windows.xml.in.h:12
 #, fuzzy
 msgid "Restore window"
 msgstr "بازگرداندن پنجره"
 
-#: ../src/50-mutter-windows.xml.in.h:16
+#: ../src/50-muffin-windows.xml.in.h:16
 #, fuzzy
 #| msgid "Toggle whether window is on all workspaces or just one"
 msgid "Toggle window on all workspaces or one"
