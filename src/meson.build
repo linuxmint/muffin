@@ -500,20 +500,14 @@ if have_wayland
     'wayland/meta-wayland-data-device.h',
     'wayland/meta-wayland-data-device-primary.c',
     'wayland/meta-wayland-data-device-primary.h',
-    'wayland/meta-wayland-data-device-primary-legacy.c',
-    'wayland/meta-wayland-data-device-primary-legacy.h',
     'wayland/meta-wayland-data-offer.c',
     'wayland/meta-wayland-data-offer.h',
     'wayland/meta-wayland-data-offer-primary.c',
     'wayland/meta-wayland-data-offer-primary.h',
-    'wayland/meta-wayland-data-offer-primary-legacy.c',
-    'wayland/meta-wayland-data-offer-primary-legacy.h',
     'wayland/meta-wayland-data-source.c',
     'wayland/meta-wayland-data-source.h',
     'wayland/meta-wayland-data-source-primary.c',
     'wayland/meta-wayland-data-source-primary.h',
-    'wayland/meta-wayland-data-source-primary-legacy.c',
-    'wayland/meta-wayland-data-source-primary-legacy.h',
     'wayland/meta-wayland-dma-buf.c',
     'wayland/meta-wayland-dma-buf.h',
     'wayland/meta-wayland-dnd-surface.c',
@@ -801,7 +795,6 @@ if have_wayland
   #  - protocol stability ('private', 'stable' or 'unstable')
   #  - protocol version (if stability is 'unstable')
   wayland_protocols = [
-    ['gtk-primary-selection', 'private', ],
     ['gtk-shell', 'private', ],
     ['gtk-text-input', 'private', ],
     ['keyboard-shortcuts-inhibit', 'unstable', 'v1', ],

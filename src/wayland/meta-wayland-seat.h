@@ -27,7 +27,6 @@
 #include "clutter/clutter.h"
 #include "wayland/meta-wayland-data-device.h"
 #include "wayland/meta-wayland-data-device-primary.h"
-#include "wayland/meta-wayland-data-device-primary-legacy.h"
 #include "wayland/meta-wayland-input-device.h"
 #include "wayland/meta-wayland-keyboard.h"
 #include "wayland/meta-wayland-pointer.h"
@@ -48,7 +47,6 @@ struct _MetaWaylandSeat
 
   MetaWaylandDataDevice data_device;
   MetaWaylandDataDevicePrimary primary_data_device;
-  MetaWaylandDataDevicePrimaryLegacy primary_legacy_data_device;
 
   MetaWaylandGtkTextInput *gtk_text_input;
   MetaWaylandTextInput *text_input;
