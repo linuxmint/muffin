@@ -518,8 +518,8 @@ struct _MetaWindow
    * For X11 windows, this matches XGetGeometry of the toplevel.
    *
    * For Wayland windows, the position matches the position of the
-   * surface associated with shell surface (wl_shell_surface, xdg_surface
-   * etc). The size matches the size surface size as displayed in the stage.
+   * surface associated with shell surface (xdg_surface etc).
+   * The size matches the size surface size as displayed in the stage.
    */
   MetaRectangle buffer_rect;
 

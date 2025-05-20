@@ -51,7 +51,6 @@
 #include "wayland/meta-wayland-seat.h"
 #include "wayland/meta-wayland-subsurface.h"
 #include "wayland/meta-wayland-viewporter.h"
-#include "wayland/meta-wayland-wl-shell.h"
 #include "wayland/meta-wayland-xdg-shell.h"
 #include "wayland/meta-window-wayland.h"
 #include "wayland/meta-xwayland-private.h"
@@ -1438,14 +1437,13 @@ meta_wayland_surface_begin_grab_op (MetaWaylandSurface *surface,
  * @compositor: The #MetaWaylandCompositor object
  *
  * Initializes the Wayland interfaces providing features that deal with
- * desktop-specific conundrums, like XDG shell, wl_shell (deprecated), etc.
+ * desktop-specific conundrums, like XDG shell, etc.
  */
 void
 meta_wayland_shell_init (MetaWaylandCompositor *compositor)
 {
   meta_wayland_xdg_shell_init (compositor);
   meta_wayland_legacy_xdg_shell_init (compositor);
-  meta_wayland_wl_shell_init (compositor);
   meta_wayland_init_gtk_shell (compositor);
   meta_wayland_init_viewporter (compositor);
 }

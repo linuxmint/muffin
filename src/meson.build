@@ -580,8 +580,6 @@ if have_wayland
     'wayland/meta-wayland-viewporter.h',
     'wayland/meta-wayland-window-configuration.c',
     'wayland/meta-wayland-window-configuration.h',
-    'wayland/meta-wayland-wl-shell.c',
-    'wayland/meta-wayland-wl-shell.h',
     'wayland/meta-wayland-xdg-foreign.c',
     'wayland/meta-wayland-xdg-foreign.h',
     'wayland/meta-wayland-xdg-shell.c',
