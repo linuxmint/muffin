@@ -43,7 +43,6 @@
 #include "wayland/meta-wayland-data-device.h"
 #include "wayland/meta-wayland-gtk-shell.h"
 #include "wayland/meta-wayland-keyboard.h"
-#include "wayland/meta-wayland-legacy-xdg-shell.h"
 #include "wayland/meta-wayland-outputs.h"
 #include "wayland/meta-wayland-pointer.h"
 #include "wayland/meta-wayland-private.h"
@@ -1443,7 +1442,6 @@ void
 meta_wayland_shell_init (MetaWaylandCompositor *compositor)
 {
   meta_wayland_xdg_shell_init (compositor);
-  meta_wayland_legacy_xdg_shell_init (compositor);
   meta_wayland_init_gtk_shell (compositor);
   meta_wayland_init_viewporter (compositor);
 }

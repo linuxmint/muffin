@@ -523,8 +523,6 @@ if have_wayland
     'wayland/meta-wayland-input-device.h',
     'wayland/meta-wayland-keyboard.c',
     'wayland/meta-wayland-keyboard.h',
-    'wayland/meta-wayland-legacy-xdg-shell.c',
-    'wayland/meta-wayland-legacy-xdg-shell.h',
     'wayland/meta-wayland-outputs.c',
     'wayland/meta-wayland-outputs.h',
     'wayland/meta-wayland-pointer.c',
@@ -803,7 +801,6 @@ if have_wayland
     ['viewporter', 'stable', ],
     ['xdg-foreign', 'unstable', 'v1', ],
     ['xdg-output', 'unstable', 'v1', ],
-    ['xdg-shell', 'unstable', 'v6', ],
     ['xdg-shell', 'stable', ],
     ['xwayland-keyboard-grab', 'unstable', 'v1', ],
   ]
