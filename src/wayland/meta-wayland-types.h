@@ -61,4 +61,6 @@ typedef struct _MetaWaylandWindowConfiguration MetaWaylandWindowConfiguration;
 
 typedef struct _MetaWaylandPointerClient MetaWaylandPointerClient;
 
+typedef struct _MetaWaylandXdgForeign MetaWaylandXdgForeign;
+
 #endif
