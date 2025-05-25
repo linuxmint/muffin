@@ -26,7 +26,7 @@ debugging purposes.
 
 ## Contributing
 
-To contribute, open merge requests at <https://gitlab.gnome.org/GNOME/mutter>.
+To contribute, open merge requests at https://gitlab.gnome.org/GNOME/mutter.
 
 The coding style used is primarily the GNU flavor of the [GNOME coding
 style](https://developer.gnome.org/programming-guidelines/stable/c-coding-style.html.en)
@@ -43,4 +43,5 @@ to either an issue or a merge request in each commit.
 Mutter is distributed under the terms of the GNU General Public License,
 version 2 or later. See the [COPYING][license] file for detalis.
 
+[bug-tracker]: https://gitlab.gnome.org/GNOME/mutter/issues
 [license]: COPYING

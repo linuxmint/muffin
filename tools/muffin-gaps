@@ -1,0 +1,141 @@
+#!/bin/bash
+
+# Muffin Tiling Gaps Control Script
+# Provides command-line interface for configuring tiling gaps
+
+# Function to show usage
+show_usage() {
+    echo "Muffin Tiling Gaps Control"
+    echo ""
+    echo "Usage: $0 [COMMAND] [OPTIONS]"
+    echo ""
+    echo "Commands:"
+    echo "    enable              Enable tiling gaps"
+    echo "    disable             Disable tiling gaps"
+    echo "    status              Show current gap settings"
+    echo "    set-inner SIZE      Set inner gap size (0-100)"
+    echo "    set-outer SIZE      Set outer gap size (0-100)"
+    echo "    reset               Reset all gap settings to defaults"
+    echo "    gui                 Launch graphical configuration tool"
+    echo ""
+    echo "Examples:"
+    echo "    $0 enable                    # Enable tiling gaps"
+    echo "    $0 set-inner 15             # Set inner gap to 15 pixels"
+    echo "    $0 set-outer 10             # Set outer gap to 10 pixels"
+    echo "    $0 status                   # Show current settings"
+    echo ""
+}
+
+# Function to validate gap size
+validate_size() {
+    local size=$1
+    if ! [[ "$size" =~ ^[0-9]+$ ]] || [ "$size" -lt 0 ] || [ "$size" -gt 100 ]; then
+        echo "Error: Gap size must be a number between 0 and 100"
+        exit 1
+    fi
+}
+
+# Function to enable gaps
+enable_gaps() {
+    gsettings set org.cinnamon.muffin tiling-gaps-enabled true
+    echo "Tiling gaps enabled"
+}
+
+# Function to disable gaps
+disable_gaps() {
+    gsettings set org.cinnamon.muffin tiling-gaps-enabled false
+    echo "Tiling gaps disabled"
+}
+
+# Function to show status
+show_status() {
+    local enabled=$(gsettings get org.cinnamon.muffin tiling-gaps-enabled)
+    local inner_gap=$(gsettings get org.cinnamon.muffin tiling-gap-size)
+    local outer_gap=$(gsettings get org.cinnamon.muffin tiling-outer-gap-size)
+
+    echo "Tiling Gaps Status:"
+    echo "  Enabled: $enabled"
+    echo "  Inner gap size: $inner_gap pixels"
+    echo "  Outer gap size: $outer_gap pixels"
+}
+
+# Function to set inner gap
+set_inner_gap() {
+    local size=$1
+    validate_size "$size"
+    gsettings set org.cinnamon.muffin tiling-gap-size "$size"
+    echo "Inner gap size set to $size pixels"
+}
+
+# Function to set outer gap
+set_outer_gap() {
+    local size=$1
+    validate_size "$size"
+    gsettings set org.cinnamon.muffin tiling-outer-gap-size "$size"
+    echo "Outer gap size set to $size pixels"
+}
+
+# Function to reset settings
+reset_settings() {
+    gsettings reset org.cinnamon.muffin tiling-gaps-enabled
+    gsettings reset org.cinnamon.muffin tiling-gap-size
+    gsettings reset org.cinnamon.muffin tiling-outer-gap-size
+    echo "Gap settings reset to defaults"
+}
+
+# Function to launch GUI
+launch_gui() {
+    if [ -f "$(dirname "$0")/tiling-gaps-config.py" ]; then
+        python3 "$(dirname "$0")/tiling-gaps-config.py"
+    else
+        echo "Error: GUI configuration tool not found"
+        exit 1
+    fi
+}
+
+# Main script logic
+case "$1" in
+    enable)
+        enable_gaps
+        ;;
+    disable)
+        disable_gaps
+        ;;
+    status)
+        show_status
+        ;;
+    set-inner)
+        if [ -z "$2" ]; then
+            echo "Error: Please specify gap size"
+            echo "Usage: $0 set-inner SIZE"
+            exit 1
+        fi
+        set_inner_gap "$2"
+        ;;
+    set-outer)
+        if [ -z "$2" ]; then
+            echo "Error: Please specify gap size"
+            echo "Usage: $0 set-outer SIZE"
+            exit 1
+        fi
+        set_outer_gap "$2"
+        ;;
+    reset)
+        reset_settings
+        ;;
+    gui)
+        launch_gui
+        ;;
+    help|--help|-h)
+        show_usage
+        ;;
+    "")
+        show_usage
+        ;;
+    *)
+        echo "Error: Unknown command '$1'"
+        echo ""
+        show_usage
+        exit 1
+        ;;
+esac

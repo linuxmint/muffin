@@ -3302,7 +3302,7 @@ meta_window_get_tile_fractions (MetaWindow   *window,
     {
       *hfraction = new_hfraction;
       *vfraction = new_vfraction;
-      
+
       if (is_valid)
         *is_valid = TRUE;
       return;
@@ -6623,16 +6623,16 @@ update_move_maybe_tile (MetaWindow *window,
   else if (meta_window_can_tile_top_bottom (window) &&
            get_tile_zone_at_pointer (window, logical_monitor, work_area, x, y) == ZONE_BOTTOM)
     display->preview_tile_mode = META_TILE_BOTTOM;
-  else if (meta_window_can_tile_corner (window) && 
+  else if (meta_window_can_tile_corner (window) &&
            get_tile_zone_at_pointer (window, logical_monitor, work_area, x, y) == (ZONE_LEFT | ZONE_TOP))
     display->preview_tile_mode = META_TILE_ULC;
-  else if (meta_window_can_tile_corner (window) && 
+  else if (meta_window_can_tile_corner (window) &&
            get_tile_zone_at_pointer (window, logical_monitor, work_area, x, y) == (ZONE_RIGHT | ZONE_TOP))
     display->preview_tile_mode = META_TILE_URC;
-  else if (meta_window_can_tile_corner (window) && 
+  else if (meta_window_can_tile_corner (window) &&
            get_tile_zone_at_pointer (window, logical_monitor, work_area, x, y) == (ZONE_RIGHT | ZONE_BOTTOM))
     display->preview_tile_mode = META_TILE_LRC;
-  else if (meta_window_can_tile_corner (window) && 
+  else if (meta_window_can_tile_corner (window) &&
            get_tile_zone_at_pointer (window, logical_monitor, work_area, x, y) == (ZONE_LEFT | ZONE_BOTTOM))
     display->preview_tile_mode = META_TILE_LLC;
   else
@@ -7242,6 +7242,68 @@ meta_window_get_current_tile_monitor_number (MetaWindow *window)
   return tile_monitor_number;
 }
 
+static void
+apply_tiling_gaps (MetaWindow    *window,
+                   MetaTileMode   tile_mode,
+                   MetaRectangle *tile_area,
+                   MetaRectangle *work_area)
+{
+  gint gap, outer_gap;
+
+  if (!meta_prefs_get_tiling_gaps_enabled ())
+    return;
+
+  gap = meta_prefs_get_tiling_gap_size ();
+  outer_gap = meta_prefs_get_tiling_outer_gap_size ();
+
+  /* Apply outer gaps */
+  tile_area->x += outer_gap;
+  tile_area->y += outer_gap;
+  tile_area->width -= 2 * outer_gap;
+  tile_area->height -= 2 * outer_gap;
+
+  /* Apply inner gaps based on tile mode */
+  switch (tile_mode)
+    {
+    case META_TILE_LEFT:
+      tile_area->width -= gap / 2;
+      break;
+    case META_TILE_RIGHT:
+      tile_area->x += gap / 2;
+      tile_area->width -= gap / 2;
+      break;
+    case META_TILE_TOP:
+      tile_area->height -= gap / 2;
+      break;
+    case META_TILE_BOTTOM:
+      tile_area->y += gap / 2;
+      tile_area->height -= gap / 2;
+      break;
+    case META_TILE_ULC:
+      tile_area->width -= gap / 2;
+      tile_area->height -= gap / 2;
+      break;
+    case META_TILE_URC:
+      tile_area->x += gap / 2;
+      tile_area->width -= gap / 2;
+      tile_area->height -= gap / 2;
+      break;
+    case META_TILE_LLC:
+      tile_area->width -= gap / 2;
+      tile_area->y += gap / 2;
+      tile_area->height -= gap / 2;
+      break;
+    case META_TILE_LRC:
+      tile_area->x += gap / 2;
+      tile_area->width -= gap / 2;
+      tile_area->y += gap / 2;
+      tile_area->height -= gap / 2;
+      break;
+    default:
+      break;
+    }
+}
+
 void
 meta_window_get_tile_area (MetaWindow    *window,
                            MetaTileMode   tile_mode,
@@ -7279,6 +7341,9 @@ meta_window_get_tile_area (MetaWindow    *window,
       default:
         break;
     }
+
+  /* Apply tiling gaps if enabled */
+  apply_tiling_gaps (window, tile_mode, tile_area, &work_area);
 }
 
 gboolean
@@ -8602,7 +8667,7 @@ meta_window_find_tile_match (MetaWindow   *window,
       meta_window_get_frame_rect (bottommost, &bottommost_rect);
       meta_window_get_frame_rect (topmost, &topmost_rect);
 
-      /* 
+      /*
        * Don't extend window edges to infinity when looking for matches. Tiling
        * in a given direction requires some amount of overlap in the other.
        */
