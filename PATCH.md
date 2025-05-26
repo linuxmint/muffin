@@ -59,7 +59,7 @@ sudo dnf install @development-tools meson ninja-build muffin-devel gtk3-devel go
 1. Open a terminal and navigate to the patch directory:
 
    ```zsh
-   cd /path/to/tiling-project/library/muffin_mod
+   cd /path/to/muffin
    ```
 
 2. Run the install script:
@@ -85,7 +85,7 @@ sudo dnf install @development-tools meson ninja-build muffin-devel gtk3-devel go
 1. If you want to revert to the original Muffin:
 
    ```zsh
-   cd /path/to/tiling-project/library/muffin_mod
+   cd /path/to/muffin
    ./uninstall.sh
    ```
 
@@ -96,7 +96,7 @@ sudo dnf install @development-tools meson ninja-build muffin-devel gtk3-devel go
 - If a system update overwrites Muffin, simply re-run the install script to reapply the patch:
 
    ```zsh
-   cd /path/to/tiling-project/library/muffin_mod
+   cd /path/to/muffin
    ./install.sh
    ```
 
