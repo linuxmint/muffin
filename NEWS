@@ -1,5 +1,6 @@
 3.36.9
 ======
+
 * Do not ping unmanaging windows [Florian; gnome-shell#2467]
 * Improve freezes when switching workspace [Jonas Å.; !1616]
 * Fix drag cancel animation when using geometry scaling [Robert; !1683]
@@ -12,6 +13,7 @@ Contributors:
 
 3.36.8
 ======
+
 * Fix _NET_WM_FRAME_DRAWN timestamps [Jonas; !1360]
 * Fix unwanted position changes on window resize
   [Jonas, Olivier, Robert; !1477, !1495]
@@ -27,9 +29,9 @@ Contributors:
   Jonas Ådahl, Kai-Heng Feng, Olivier Fourdan, Carlos Garnacho, Robert Mader,
   Christian Rauch, Ray Strode, Daniel van Vugt
 
-
 3.36.7
 ======
+
 * Fix Night Light updates after DPMS [Jonas, Benjamin; #1392]
 * Fix IM handling on X11 [Carlos; #1413]
 * Fix resizing of attached modal dialogs on wayland [Jonas; !1446]
@@ -47,6 +49,7 @@ Translators:
 
 3.36.6
 ======
+
 * Fix stale cursor positions in remote desktop sessions [Georges; !1417]
 * Limit mipmap levels when rendering background [Daniel; !1003]
 * Improve support for Hangul input method [Carlos; !1423]
@@ -60,6 +63,7 @@ Contributors:
 
 3.36.5
 ======
+
 * Screencast fixes and improvements [Jonas; !1351, !1365]
 * Fix glitches when subsurfaces extend outside the toplevel [Robert; #1316]
 * Mipmap background texture rendering [Daniel; !1347]
@@ -75,6 +79,7 @@ Translators:
 
 3.36.4
 ======
+
 * Fix crash on area screenshots with fractional scaling [Sebastian; !1320]
 * Do not paint textures of fully obscured windows [Robert; !1326]
 * Turn off CRTCs as well when enabling DPMS [Michel; !1240]
@@ -92,9 +97,9 @@ Contributors:
   Jonas Dreßler, Michel Dänzer, Olivier Fourdan, Carlos Garnacho,
   Sebastian Keller, Robert Mader, Corentin Noël, Daniel van Vugt, Jonas Ådahl
 
-
 3.36.3
 ======
+
 * Broadcast clipboard/primary offers [Carlos; !1262]
 * Fix monitor screen cast on X11 [Jonas Å.; !1251]
 * Implement touch-mode detecation for the X11 backend [Carlos; !1278]
@@ -107,6 +112,7 @@ Contributors:
 
 3.36.2
 ======
+
 * Sync timelines to hardware vsync [Daniel; !724]
 * Fix screencasting non-maximized windows [Jonas; !1174]
 * Make window-aliveness checks less aggressive [Jonas; !1182]
@@ -134,6 +140,7 @@ Translators:
 
 3.36.1
 ======
+
 * Fix hardware cursor on GPU hotplpug [Pekka; !1097]
 * Fix black areas around XWayland windows when resizing [Robert, Olivier; !1091]
 * Fix applying wrong scale to monitors on X11 [Jonas; !1118]
@@ -177,6 +184,7 @@ Translators:
 
 3.36.0
 ======
+
 * Fix placement of popup windows in multi-monitor setups [Jonas; !1110]
 * Fix invisible mouse cursor on some hardware [Jonas; !1079]
 
@@ -190,6 +198,7 @@ Translators:
 
 3.35.92
 =======
+
 * Fix visibility of initially hidden windows [Jonas Å.; !1066]
 * Avoid flicker when (un)redirecting windows [Sebastian; #997]
 * Let BindConstraints update the preferred size [Emmanuele; !1070]
@@ -229,6 +238,7 @@ Translators:
 
 3.35.91
 =======
+
 * Honor accelerometer orientation on monitor config changes [Hans; !959]
 * Enable culling for integer-scaled actors [Robert; !1036]
 * Add ClutterSeat::touch-mode property [Carlos; !1044]
@@ -249,6 +259,7 @@ Translators:
 
 3.35.90
 =======
+
 * Cull out clip region [Robert; !985]
 * Always enable tap-to-click/drag on opaque Wacom tablets [Carlos; !968]
 * Fix visual glitches with offscreen effects applied [Georges; !992]
@@ -283,6 +294,7 @@ Translators:
 
 3.35.3
 ======
+
 * backends/native: Correct dy value in pinch gesture event [Yariv; !974]
 * Upload clipping rectangles in parallel [Daniel; !969]
 * More cogl API cleanups [Adam; !978, !977, !973]
@@ -298,6 +310,7 @@ Translators:
 
 3.35.2
 ======
+
 * Don't emit focus event after destruction [Marco; gnome-shell#1704, !860]
 * Add a notion of pixel format planes [Niels; !858]
 * Replace various Cogl/Clutter types with Graphene [Georges; !458]
@@ -348,6 +361,7 @@ Translators:
 
 3.35.1
 ======
+
 * Fix immediate screen blank after releaseing inhibitor [Tim; #573]
 * Respond to frame callbacks regardless of damage [Jonas; !839]
 * selection [Carlos; !842]
@@ -363,6 +377,7 @@ Contributors:
 
 3.34.1
 ======
+
 * Fix startup of X11 session services on wayland [Carlos; #771]
 * Fix _NET_ACTIVE_WINDOW emission [Carlos; #751]
 * Fix initial view perspective [Marco; !803]
@@ -393,6 +408,7 @@ Translators:
 
 3.34.0
 ======
+
 * Fix xdg-output v3 support [Olivier; !771]
 * Fix crash when changing decoration state [Jonas; !773]
 * Add and remove connectors on hot-plug [Jonas; !743]
@@ -407,6 +423,7 @@ Translators:
 
 3.33.92
 =======
+
 * Turn MetaShapedTexture into a ClutterContent implementation [Georges; !409]
 * Restore inhibit shortcut for overlay key [Olivier; #734]
 * Misc. pointer a11y improvements [Jonas D., Olivier; !746, !747, !745, !761]
@@ -435,6 +452,7 @@ Translators:
 
 3.33.91
 =======
+
 * Fix primary selection copy and paste between X11 and wayland [Hans; #702]
 * Improve monitor hotplug support [Hans; !713]
 * Remove a source of frame skips [Daniel; !719]
@@ -456,6 +474,7 @@ Translators:
 
 3.33.90
 =======
+
 * Fix visibility of clones with hidden source [Florian; #683]
 * Reduce freezes when opening some popup windows [Carlos; #556]
 * Be more thorough when excluding obscured areas from painting [Carlos; !698]
@@ -474,6 +493,7 @@ Translators:
 
 3.33.4
 ======
+
 * Discard page flip retries on hotplug [Jonas; !630]
 * Add xdg-output v2 support [Olivier; #645]
 * Restore DRM format fallbacks [Jonas; !662]
@@ -505,6 +525,7 @@ Translators:
 
 3.33.3
 ======
+
 * Prepare for running Xwayland on demand [Carlos; !420]
 * Fix text selection color rendering [Florian; #494]
 * Fix black shadows when using fractional scaling [Robert; #609]
@@ -540,6 +561,7 @@ Translators:
 
 3.33.2
 ======
+
 * Fix rendering lag on Xorg [Daniel; !520, !281]
 * Misc. bug fixes and cleanups [Carlos, Marco, Jonas D., Florian, Niels,
   Daniel, Benjamin, Jonas Å., Ignacio, Vasilis; #598, !576, !547, !578,
@@ -555,6 +577,7 @@ Translators:
 
 3.33.1
 ======
+
 * Remove unused APIs and outdated driver support
   [Adam; !481, !468, !489, !487, !546]
 * Enable EGL_IMG_context_priority [Adam; !454]
@@ -580,6 +603,7 @@ Translators:
 
 3.32.1
 ======
+
 * Fix fallback app menu on wayland [Florian; #493]
 * Fix elogind support [Tom; !491]
 * Fix startup notifications not timing out [Carlos; #501]
@@ -610,6 +634,7 @@ Translators:
 
 3.32.0
 ======
+
 * Fix deadlock when cancelling a theme sound [Andrea; !474]
 * Stop swizzling BGRA buffers (bye-bye inverted colors in screenshots
   and animations) [Carlos; !486]
@@ -619,6 +644,7 @@ Contributors:
 
 3.31.92
 =======
+
 * Fix flicker of apps that use multiple SHM buffers [Jonas Å.; #199]
 * Don't disable page flips after temporary failues [Jonas Å.; #460]
 * Improve redraw performance [Carlos; !196]
@@ -643,6 +669,7 @@ Translators:
 
 3.31.91
 =======
+
 * Fix infinite loop in EDID matching [Marco; #459]
 * wayland: Don't resetin text-input state prematurely [Carlos; !410]
 * wayland: Don't maximize windows if minimum size is too big [Olivier; #463]
@@ -666,6 +693,7 @@ Translators:
 
 3.31.90
 =======
+
 * Fix support of extended characters in on-screen keyboard [Andrea; #109]
 * Improve selection of the primary GPU [Pekka, Emilio; !271]
 * Screen-cast cursor updates as PipeWire stream metadata [Jonas; !357]
@@ -691,6 +719,7 @@ Translators:
 
 3.31.4
 ======
+
 * keybindings: Limit corner move to current monitor [Jānis; #320]
 * xdg-output: Report rotated physical dimensions [Olivier; #369]
 * Add continuous integration pipeline [Jonas; #193]
@@ -720,6 +749,7 @@ Contributors:
 
 3.31.2
 ======
+
 * Fix handling of non-UTF8 encodings [Florian; !227]
 * Fix memory leaks introduced in 3.30.1 [Jonas; #653]
 * Fix regression when overriding workspace layout [Ron; #270]
@@ -737,6 +767,7 @@ Contributors:
 
 3.30.1
 ======
+
 * Improve trackball detection [Tony; #258]
 * Fix clipping of scaled surfaces [Jonas; #300]
 * Improve tracking of monitor switch configuration [Daniel; !213]
@@ -762,6 +793,7 @@ Translators:
 
 3.29.92
 =======
+
 * Avoid crash when a cursor is not found [Sebastian; #254]
 * Fix screen rotation regression [Jonas; #216]
 * Handle requests to unmanaged windows gracefully [Jonas; #240]
@@ -779,6 +811,7 @@ Translators:
 
 3.29.91
 =======
+
 * Various crash fixes [Olivier, Iain; #255, #223]
 * Fix lock up with some DRI drivers [Alex; #127]
 * Send correct button codes from virtual evdev devices [Jonas; !190]
@@ -797,6 +830,7 @@ Translators:
 
 3.29.90
 =======
+
 * Various crash fixes [Olivier, Jonas, Florian; #189, #70, #194, #15, #130]
 * Don't expose resolutions that are below the minimum [Andrea; #793223]
 * Remove support for preference overrides [Florian; #786496]
@@ -811,6 +845,7 @@ Translators:
 
 3.29.4
 ======
+
 * Fix crash with parent-less modal dialogs [Olivier; #174]
 * Preserve paint volumes where possible to optimize CPU usage [Carlos; #782344]
 
@@ -822,6 +857,7 @@ Translators:
 
 3.29.3
 ======
+
 * Fix Korean Hangul support on wayland [Changwoo; #152]
 * Improve support for proprietary Nvidia driver [Jonas; #790316]
 * Only upload HW cursor sprite to the GPU that will display them [Jonas; #77]
@@ -840,6 +876,7 @@ Translators:
 
 3.29.2
 ======
+
 * Fix size change animations on wayland [Georges; #780292]
 * Handle touch events on server-side titlebars [Carlos; #770185]
 * Misc. bug fixes [Florian, Olivier, Jonas, Georges; #134, #124, !96, #138,
@@ -854,6 +891,7 @@ Translators:
 
 3.29.1
 ======
+
 * Fix various input-method regressions [Carlos, Olivier; #65, #74, #66, #112]
 * Fix wayland build on FreeBSD [Ting-Wei; #792280, #792717]
 * Fix swapped colors in screenshots (again) [Carlos; #72]
@@ -876,6 +914,7 @@ Translators:
 
 3.28.0
 ======
+
 * Fix xdg-foreign regression [Carlos; #63]
 
 Contributors:
@@ -887,6 +926,7 @@ Translators:
 
 3.27.92
 =======
+
 * Fix use of modifiers with multi-GPU systems [Louis-Francis; #18]
 * Add xdg-shell stable support [Jonas; #791938]
 * Fix scaling of icons in titlebar buttons [Egmont; #23]
@@ -906,6 +946,7 @@ Translators:
 
 3.27.91
 =======
+
 * Fix handling of trackball settings on wayland [Carlos; #787804]
 * Apply font settings on wayland [Daniel; #645433]
 * Fix keybindings getting mixed up with some layouts [Jonas; #789300]
@@ -954,6 +995,7 @@ Translators:
 
 3.27.1
 ======
+
 * Work with clients that require older linux_dmabuf protocol [Daniel; #788558]
 * Support hybrid GPU systems [Jonas; #785381]
 * Prevent crash when closing maximized windows [Jonni; #788666]
@@ -972,6 +1014,7 @@ Translations:
 
 3.26.1
 ======
+
 * Fix crash when respawning shortcut inhibitor dialog [Olivier; #787568]
 * Fix crash during monitor configuration migration [Carlos, Jonas; #787668]
 * Fix multihead regressions in X11 session [Jonas; #787477]
@@ -998,6 +1041,7 @@ Translations:
 
 3.26.0
 ======
+
 Contributors:
   Florian Müllner
 
@@ -1008,6 +1052,7 @@ Translations:
 
 3.25.92
 =======
+
 * Add screencast and remote desktop support [Jonas; #784199]
 * Support running with no attached monitors [Jonas; #730551]
 * Add a vertical gradient effect to background actor [Alessandro; #786618]
@@ -1030,6 +1075,7 @@ Translations:
 
 3.25.91
 =======
+
 * Reduce memory use of suspended instances [Jonas; #786299]
 * Make supported scales determination saner [Rui; #786474]
 * Fix crash on inhibit-shortcuts dialog reponse [Jonas; #786385]
@@ -1049,6 +1095,7 @@ Translations:
 
 3.25.90
 =======
+
 * Add zwp_linux_dmabuf_v1 support [Daniel; #785262]
 * Add (x)wayland shortcut inhibitor support [Olivier; #783342]
 * Misc. bug fixes [Daniel, Carlos, Cosimo; #785263, #785347, #767805]
@@ -1064,6 +1111,7 @@ Translations:
 
 3.25.4
 ======
+
 * Do not throttle motion events on tablet tools [Carlos; #783535]
 * Handle left-handed mode on pen/eraser devices [Carlos; #782027]
 * Add wl_surface.damage_buffer() support [Jonas; #784080]
@@ -1083,6 +1131,7 @@ Contributors:
 
 3.25.3
 ======
+
 * Ignore hotplug-mode-update value on startup [Marco; #783073]
 * Implement configurable monitor scales on X11 [Jonas; #777732]
 * Fix handling of tiled monitors [Jonas; #781723]
@@ -1107,6 +1156,7 @@ Translations:
 
 3.25.2
 ======
+
 * Fix frame updates on hide-titlebar-when-maximized changes [Florian; #781862]
 * Fix accessible screen coordinates on X11 [Florian; #781902]
 * Use less CPU when rendering fast-updating windows [Carlos, Emmanuele; #782344]
@@ -1133,6 +1183,7 @@ Translations:
 
 3.25.1
 ======
+
 * Always sync window geometry on state changes [Jonas; #780292]
 * Use EGL instead of GLX when drawing using GLES [Jonas; #771636]
 * Fix HiDPI detection on vertical monitor layouts [Carlos; #777687]
@@ -1160,6 +1211,7 @@ Translations:
 
 3.23.92
 =======
+
 * Properly handle EGLOutput acquire errors [Jonas, Miguel; #779112]
 * Fix crash when a window closes during Alt+Tab [Rui; #779483]
 * Implement DnD handling code in wayland [Hyungwon; #765003]
@@ -1181,6 +1233,7 @@ Translations:
 
 3.23.91
 =======
+
 * Give libinput read-only access to /sys [Carlos; #778472]
 * Allow edge-scrolling without 2-finger-scroll capable devices [Rui; #778554]
 * Fullscreen windows on the requested monitor on wayland [Rui; #772525]
@@ -1200,6 +1253,7 @@ Translations:
 
 3.23.90
 =======
+
 * Fix window menu placement with HiDPI [Jonas; #776055]
 * Improve EGLStream support [Jonas; #773629]
 * Start moving low-level monitor configuration into mutter [Jonas; #777732]
@@ -1228,6 +1282,7 @@ Translations:
 
 3.23.3
 ======
+
 * Fix frequent freezes in multihead setups on wayland [Rui; #774557]
 * Preserve root window mask on XSelectionRequest [Olivier; #776128]
 * Misc. bug fixes [Carlos, Florian, Rui, Olivier; #775478, #774891, #775986,
@@ -1238,6 +1293,7 @@ Contributors:
 
 3.23.2
 ======
+
 * Stack docks below other windows on fullscreen monitors [Rui; #772937]
 * Fix popup grabs blocking screen lock on wayland [Rui; #771235]
 * Handle touchpad pinch gestures with more than two fingers [Carlos; #765937]
@@ -1258,6 +1314,7 @@ Translations:
 
 3.23.1
 ======
+
 * Fix handling of Escape shortcut in force-quit dialog [Landry; #737109]
 * Improve pointer constraints support [Jonas; #771859]
 * Really fix framebuffer capture origin offset [Rui; #771502]
@@ -1279,6 +1336,7 @@ Translations:
 
 3.22.1
 ======
+
 * Fix feedback loop between StClipboard and X11 bridge [Carlos; #760745]
 * Fall back gracefully if DRM plane rotation fails [Carlos; #772512]
 * Approximate native monitor backend behavior to X [Rui; #772176]
@@ -1293,6 +1351,7 @@ Translations:
 
 3.22.0
 ======
+
 * Fix wayland crashes [Jonas; #771305, #771345, #770940, #771495]
 * Fix display rotation on wayland [Jonas; #770672]
 * Fix framebuffer capture origin offset [Rui; #771502]
@@ -1307,6 +1366,7 @@ Translations:
 
 3.21.92
 =======
+
 * Fix absolute pointer motion events on wayland [Jonas; #770557]
 * Default to using stage views [Jonas; #770366]
 * Fix animated cursors on wayland [Rui; #749913]
@@ -1329,6 +1389,7 @@ Translations:
 
 3.21.91
 =======
+
 * Add support for xdg-foreign protocol [Jonas; #769786]
 * Support monitor rotation on wayland [Carlos; #745079]
 * Port xdg-shell implementation to unstable v6 [Jonas; #769936]
@@ -1348,6 +1409,7 @@ Translations:
 
 3.21.90
 =======
+
 * Consider XDG_SESSION_TYPE when determining session type [Jouke; #759388]
 * Re-add support for edge scrolling on some touchpads [Bastien; #768245]
 * Support mouse and trackball acceleration profile [Jonas; #769179]
@@ -1369,6 +1431,7 @@ Translations:
 
 3.21.4
 ======
+
 * Fix missing frame border around GTK+ dialogs [Florian; #745060]
 * Improve X11 <-> wayland copy and paste interaction [Carlos; #768007]
 * Add support for NV_robustness_video_memory_purge extension [Rui; #739178]
@@ -1389,6 +1452,7 @@ Translations:
 
 3.21.3
 ======
+
 * Don't create invalid UTF-8 window description strings [Rui; #765535]
 * Convert window titles and wm_class to UTF-8 [Rui; #752788]
 * Communicate tiled state to GTK+ on wayland [Olivier; #766860]
@@ -1404,6 +1468,7 @@ Translations:
 
 3.21.2
 ======
+
 * Clean up surface <-> shell interaction [Jonas; #763431]
 * Fix grabbing random keys for disabled shortcuts [Rui; #766270]
 * Fix stacking of hidden windows on wayland [Rui; #764844]
@@ -1419,6 +1484,7 @@ Translations:
 
 3.21.1
 ======
+
 * Notify clients of pending modifier state changes [Rui; #748526]
 * Add get_is_builtin_display_on() method [Florian; #765267]
 * Fix 2-finger titlebar taps on wayland [Carlos; #764519]
@@ -1434,6 +1500,7 @@ Translations:
 
 3.20.1
 ======
+
 * Constrain window move/resizes on wayland as on X11 [Rui; #748819]
 * Don't crash with invalid previous monitor configurations [Rui; #764286]
 * Misc. bug fixes and cleanups [Jonas, Cosimo; #762828, #764807]
@@ -1447,6 +1514,7 @@ Translations:
 
 3.20.0
 ======
+
 * Fix crash when using visual bell [Jonas; #763858]
 
 Contributors:
@@ -1457,6 +1525,7 @@ Translations:
 
 3.19.92
 =======
+
 * Add system bell support on wayland [Jonas; #763284]
 * Add gtk_surface.present to gtk-shell [Jonas; #763295]
 * Handle DND drops on the root window [Carlos; #762104]
@@ -1473,6 +1542,7 @@ Translations:
 
 3.19.91
 =======
+
 * Add --nested CLI argument to fix nested wayland session [Jonas; #758658]
 * Fix stack - scene graph stacking synchronization issues [Jonas; #755605]
 * Rate-limit last-device changes to fix freezes [Carlos; #753527]
@@ -1490,6 +1560,7 @@ Translations:
 
 3.19.90
 =======
+
 * Release buffer after processing commit [Ray; #761312, #761613]
 * Implement pointer motion, locks and confinement on wayland [Jonas; #744104]
 * Add basic startup notification support on wayland [Carlos; #762268]
@@ -1501,6 +1572,7 @@ Contributors:
 
 3.19.4
 ======
+
 * Fix updating stacking order when setting transient_for [Jonas; #755606]
 * Support screen rotation when supported by the driver [Carlos; #745079]
 * Protect against broken WM_CLASS property implementations [Sebastian; #759658]
@@ -1518,6 +1590,7 @@ Translations:
 
 3.19.3
 ======
+
 * Correct refresh rate units on KMS/Wayland [Daniel; #758653]
 * Fix crash when initial cursor position is not on a monitor [Marek; #756698]
 * Fix crash when more CRTs are enabled than outputs connected [Rui; #751638]
@@ -1535,6 +1608,7 @@ Contributors:
 
 3.19.2
 ======
+
 * Fix crash on monitor unplug [Rui; #756796]
 * Exit cleanly on initialization errors [Owen; #757311]
 * Allow to determine backend setting from session type [Ray; #741666]
@@ -1548,6 +1622,7 @@ Contributors:
 
 3.19.1
 ======
+
 * wayland: Allow to trigger popups through keyboard/touch [Carlos; #756296]
 * Fix modifiers-only input source switching on Ubuntu [Alberts; #756543]
 * Misc. bug fixes [Jonas, Rui, Giovanni, Florian; #756675, #756660, #746420,
@@ -1562,6 +1637,7 @@ Translations:
 
 3.18.1
 ======
+
 * Misc. crash fixes [Jonas, Rui, Carlos, Owen, Florian; #755096, #754979,
   #755490, #754357, #745785, #756642]
 * Improve HiDPI support on wayland [Jonas; #755097]
@@ -1576,6 +1652,7 @@ Contributors:
 
 3.18.0
 ======
+
 * Misc. fixes [Florian, Jonas; #753434]
 
 Contributors:
@@ -1586,6 +1663,7 @@ Translations:
 
 3.17.92
 =======
+
 * Don't omit the background color for backgrounds that don't fill the screen
   [Ray; #754476]
 * Fix up key state on FocusIn when running nested [Owen; #753948]
@@ -1600,6 +1678,7 @@ Contributors:
 
 3.17.91
 =======
+
 * Send error on pointer-gesture protocol version mismatch [Jonas; #753855]
 * Misc. cleanups [Jonas; #744932]
 
@@ -1611,6 +1690,7 @@ Translations:
 
 3.17.90
 =======
+
 * Fix glitch with some fullscreen apps [Rui; #753020]
 * Fix screen update issue with NVidia driver [Aaron, Rui; #728464]
 * Only call frame callbacks for surfaces that get drawn [Adel; #739163]
@@ -1626,6 +1706,7 @@ Translations:
 
 3.17.4
 ======
+
 * nested: Allow basic configuration of dummy outputs [Jonas; #747089]
 * Send wl_surface.enter and wl_surface.leave on output changes [Jonas; #744453]
 * Improve HiDPI handling on wayland [Jonas; #745655, #744934]
@@ -1639,6 +1720,7 @@ Contributors:
 
 3.17.3
 ======
+
 * Add X11/wayland clipboard interaction [Carlos; #738312]
 * Support VM monitor layout hints on wayland [Thomas; #750363]
 * Misc. bug fixes [Rui, Jonas, Olivier, Carlos, Ting-Wei, Peter, Florian;
@@ -1655,6 +1737,7 @@ Translations:
 
 3.17.2
 ======
+
 * Honor default value for click method setting [Rui; #746290]
 * Add X11/wayland clipboard interoperation [Carlos; #738312]
 * Misc. bug fixes [Rui; #749076, #749711]
@@ -1664,6 +1747,7 @@ Contributors:
 
 3.17.1
 ======
+
 * Add public method to get neighboring monitor [Florian; #633994]
 * Apply the right settings to the right input devices [Carlos; #747886]
 * Fix scroll button setting [Ondrej; #747967]
@@ -1677,6 +1761,7 @@ Contributors:
 
 3.16.1
 ======
+
 * Add function to refresh all background instances [Rui; #739178]
 * Fix swapped scroll methods on wayland [Ondrej; #746870]
 * Manually activate stage to fix accessibility on wayland [Ray, Rui; #746670]
@@ -1695,6 +1780,7 @@ Translations:
 
 3.16.0
 ======
+
 * wayland: Don't skip notifying about initial maximized state [Jonas; #745303]
 
 Contributors:
@@ -1706,6 +1792,7 @@ Translations:
 
 3.15.92
 =======
+
 * Ensure pointer visibility on monitor changes [Rui, Marek; #745121, #745752]
 * Fix geometry of shaded windows [Florian; #746145]
 * Take over cursor visibility handling from gsd [Carlos; #712775]
@@ -1726,6 +1813,7 @@ Translations:
 
 3.15.91
 =======
+
 * wayland: Fix nested compositor mode [Jonas; #745401]
 * wayland: Fix pointer constraining [Marek; #727337]
 * wayland: Fix input region on HiDPI [Jonas; #744933]
@@ -1745,6 +1833,7 @@ Translations:
 
 3.15.90
 =======
+
 * Initialize MetaOutput even when we can't get the EDID [Rui; #743412]
 * Expose MetaMonitorManager to introspection [Rui; #743745]
 * Fix flash on unredirection [Chris; #743858]
@@ -1763,6 +1852,7 @@ Translations:
 
 3.15.4
 ======
+
 * Use GTK+ theme for window decorations instead of metacity [Florian; #741917]
 * Export the same EDID information on X11 and wayland [Carlos; #742882]
 * Apply input device configuration on wayland [Carlos; #739397]
@@ -1783,6 +1873,7 @@ Translations:
 
 3.15.3
 ======
+
 * Don't leave left-over frames queued [Owen; #738686]
 * Set CRTC configuration even if it might be redundant [Rui; #740838]
 
@@ -1794,6 +1885,7 @@ Translations:
 
 3.15.2
 ======
+
 * Don't enable hiDPI on monitors with broken EDID [Bastien; #734839]
 * Prevent crash applying monitor config for a closed lid [Rui; #739450]
 * Fix "flicker" during startup transition [Ray; #740377]
@@ -1808,6 +1900,7 @@ Translations:
 
 3.15.1
 ======
+
 * Use GResources for theme loading [Cosimo; #736936]
 * Fix headerbar drag getting stuck on xwayland [Carlos; #738411]
 * Fix wayland hiDPI regressions [Adel; #739161]
@@ -1820,6 +1913,7 @@ Contributors:
 
 3.14.1
 ======
+
 * Fix move-titlebar-onscreen function [Florian; #736915]
 * Fix stacking of the guard window [Owen; #737233]
 * Fix keycode lookup for non-default layouts [Rui; #737134]
@@ -1846,6 +1940,7 @@ Translations:
 
 3.14.0
 ======
+
 * Fix placement of popup windows on wayland [Jasper; #736812]
 * Only increment serial once per event [Jasper; #736840]
 * Fix window positioning regression with non-GTK+ toolkits [Owen; #736719]
@@ -1860,6 +1955,7 @@ Translations:
 
 3.13.92
 =======
+
 * Rewrite background code [Owen; #735637, #736568]
 * Fix size in nested mode [Owen; #736279]
 * Fix destroy animation of background windows [Florian; #735927]
@@ -1881,6 +1977,7 @@ Translations:
 
 3.13.91
 =======
+
 * Misc. bug fixes [Carlos; #735452]
 
 Contributors:
@@ -1894,6 +1991,7 @@ Translations:
 
 3.13.90
 =======
+
 * Only call XSync() once per frame [Rui; #728464]
 * Update capabilities on device list changes [Carlos; #733563]
 * Make use of GLSL optional [Adel; #733623]
@@ -1919,6 +2017,7 @@ Translations:
 
 3.13.4
 ======
+
 * Fix move/resize operations for wayland clients [Marek; #731237]
 * Add ::first-frame signal to MetaWindowActor [Owen; #732343]
 * Handle keysyms without the XF86 prefix [Owen; #727993]
@@ -1940,6 +2039,7 @@ Translations:
 
 3.13.3
 ======
+
 * Improve behavior of window buttons with compositor menus [Florian; #731058]
 * Implement touch support on wayland [Carlos; #724442]
 * Update window shadows [Nikita; #731866]
@@ -1953,6 +2053,7 @@ Contributors:
 
 3.13.2
 ======
+
 * Add basic HiDPI support on wayland [Adel; #728902]
 * Fix crash when monitors change during suspend [Giovanni; #725637]
 * Replace mutter-launch with logind integration [Jasper; #724604]
@@ -1971,6 +2072,7 @@ Translations:
 
 3.13.1
 ======
+
 * Fix opacity values from _NET_WM_WINDOW_OPACITY [Nirbheek; #727874]
 * Merge wayland branch [Jasper, Giovanni, Robert B., Neil, Adel, Rui, Jonas,
   Lionel, Tim, Owen, Florian, Colin W., Cosimo, Ray, Kalev, Pavel, Robert A.,
@@ -2001,6 +2103,7 @@ Translations:
 
 3.12.0
 ======
+
 * Fix grab issue with SSD xwayland windows [Rui; #726123]
 * Misc. bug fixes [Jasper, Ray, Rui, Florian; #727011]
 
@@ -2009,6 +2112,7 @@ Contributors:
 
 3.11.92
 =======
+
 * Fix identification of CSD windows [Owen; #723029]
 * Update keyboard state unconditionally [Rui; #722847]
 * Misc bug fixes and cleanups [Owen, Rui, Giovanni, Matthias, Adel, Ryan,
@@ -2020,6 +2124,7 @@ Contributors:
 
 3.11.91
 =======
+
 * Don't use keysym to match keybindings [Rui; #678001]
 * Fix message tray icons showing up blank (again) [Adel; #725180]
 * Improve keybinding lookups [Rui; #725588]
@@ -2034,6 +2139,7 @@ Contributors:
 
 3.11.90
 =======
+
 * Fix double-scaling on high DPI resolutions [Adel; #723931]
 * Make tile previews a compositor effect [Stefano, Florian; #665758]
 * Misc. bug fixes and cleanups [Ryan, Giovanni, Jasper, Adel; #722530, #724257,
@@ -2045,6 +2151,7 @@ Contributors:
 
 3.11.5
 ======
+
 * Fix CSD titlebars being placed off-screen [Jasper; #719772]
 * Add support for subsurfaces [Jonas; #705502]
 * Expose MetaWindow:skip-taskbar property [Florian; #723307]
@@ -2058,6 +2165,7 @@ Contributors:
 
 3.11.4
 ======
+
 * Don't leave focus on windows that are being unmanaged [Owen; #711618]
 * Reduce server grabs [Daniel Drake; #721345, #721709]
 * Improve heuristic to determine display output name [Cosimo Cecchi; #721674]
@@ -2070,6 +2178,7 @@ Contributors:
 
 3.11.3
 ======
+
 * Fix focus issues with external OSKs[Jasper; #715030]
 * Add a MetaCullable interface [Jasper; #714706]
 * Fix window keybindings [Rui; #719724]
@@ -2087,6 +2196,7 @@ Contributors:
 
 3.11.2
 ======
+
 * Support setting a NULL opaque region [Andreas; #711518]
 * Sync keymap from X to wayland [Giovanni; #707446]
 * Implement support for subsurfaces [Jonas; #705502]
@@ -2103,6 +2213,7 @@ Contributors:
 
 3.11.1
 ======
+
 * Fix tile previews getting stuck on right click during drags [Lionel; #704759]
 * Use new UPower API [Bastien]
 * Set hot spot when cursor set from wl_buffer [Jonas; #709593]
@@ -2115,6 +2226,7 @@ Contributors:
 
 3.10.1
 ======
+
 * Don't apply fullscreen workarounds to CSD windows [Giovanni; #708718]
 * Fix hangs during DND operations [Adel; #709340]
 * Misc bug fixes [Dan, Giovanni, Jasper; #708813, #708420]
@@ -2125,6 +2237,7 @@ Contributors:
 
 3.10.0.1
 ========
+
 * Fix bug when a window changed size twice in a single frame - this
   can happen with GTK+ client-side decorations [Giovanni, Owen; #708367]
 
@@ -2133,10 +2246,12 @@ Contributors:
 
 3.10.0
 ======
+
 * Update dependencies [Giovanni; #708210]
 
 3.9.92
 ======
+
 * Constrain the pointer position onto visible monitors [Giovanni; #706655]
 * Fix keyboard state handling in face of event compression [Giovanni; #706963]
 * Extend the MetaCursorTracker API with query pointer and cursor visibility [Giovanni; #707474]
@@ -2161,7 +2276,7 @@ Contributors:
   Adel Gadllah, Giovanni Campagna, Kalev Lember, Pavel Vasin
 
 Translations:
-  Мирослав Николић po/sr, sr@latin.po, Мирослав Николић [sr, sr@latin],
+  Мирослав Николић po/sr, <sr@latin.po>, Мирослав Николић [sr, sr@latin],
   Chao-Hsiung Liao [zh_HK, zh_TW], Yuri Myasoedov [ru],
   Ville-Pekka Vainio [fi], Changwoo Ryu [ko], A S Alam [pa],
   Mattias Põldaru [et], Rūdolfs Mazurs [lv], Ihar Hrachyshka [be],
@@ -2170,6 +2285,7 @@ Translations:
 
 3.9.91
 ======
+
 * Drop man pages for removed utilities [Kalev; #706579]
 * Add support for idle tracking [Giovanni, Cosimo; #706005, #707250]
 * Skip CRTC reconfigurations that have no effect [Giovanni; #706672]
@@ -2203,15 +2319,18 @@ Translations:
 
 3.9.90
 ======
+
 * First release from the wayland branch, includes basic support for running
   as a wayland compositor [Robert, Neil, Giovanni]
 * Add support for _GTK_FRAME_EXTENTS [Jasper; #705766]
 * Fix quick consecutive <super> presses breaking keyboard input [Alban; #666101]
 * Work towards running as wayland compositor [Giovanni]
- - Add DBus API for display configuration
+
+* Add DBus API for display configuration
    [#705670, #706231, #706233, #706322, #706382]
- - Add abstraction layer for cursor tracking [#705911]
- - Add support for plugin modality under wayland [#705917]
+* Add abstraction layer for cursor tracking [#705911]
+* Add support for plugin modality under wayland [#705917]
+
 * Disable GTK+ scaling [Alexander; #706388]
 * Disable blending while updating tower [Robert]
 * Misc bug fixes and cleanups [Adel, Jasper, Giovanni, Colin, Rico, Florian;
@@ -2229,6 +2348,7 @@ Translations:
 
 3.9.5
 =====
+
 * Don't select for touch events on the stage [Jasper; #697192]
 * Don't queue redraws for obscured regions [Adel; #703332]
 * Export timestamp of global keybinding events [Bastien; #704858]
@@ -2239,6 +2359,7 @@ Contributors:
 
 3.9.4
 =====
+
 * Tweak window shadows [Allan; #702141]
 * Ignore our own focus events for focus prediction [Jasper; #701017]
 * Add API to query if the stage is focused [Jasper; #700735]
@@ -2252,6 +2373,7 @@ Contributors:
 
 3.9.3
 =====
+
 * Ensure events are always reported to the grab window [Rui; #701219]
 * Use new clutter_stage_set_paint_callback() function to prevent dropping
   frames with frame synced toolkits [Owen; #698794]
@@ -2261,6 +2383,7 @@ Contributors:
 
 3.9.2
 =====
+
 * Add meta_window_can_close() function [Jasper; #699269]
 * Add support for string-array preferences [Florian; #700223]
 * Fix a potential race condition with _NET_WM_MOVERESIZE [Jasper; #699777]
@@ -2280,6 +2403,7 @@ Translations:
 
 3.9.1
 =====
+
 * Fix miscellaneous memory leaks [Pavel; #698710]
 * Misc fixes and cleanups [Stef, Simon; #698179, #697758]
 
@@ -2288,6 +2412,7 @@ Contributors:
 
 3.8.1
 =====
+
 * Fix crash when getting default font [Bastien; #696814]
 * Fix ungrabbing of keybindings [Rui; #697003]
 * Misc fixes and cleanups [Jasper, Simon; #697758]
@@ -2302,6 +2427,7 @@ Translations:
 
 3.8.0
 =====
+
 * Address major memory leak when changing backgrounds [Ray; #696157]
 
 Contributors:
@@ -2316,6 +2442,7 @@ Translations:
 
 3.7.92
 ======
+
 * Build and improve reference docs [Tomeu; #676856, #695641, #695935]
 * Add tracking of whether there are fullscreen windows [Owen; 649748]
 * Misc bug fixes and cleanups [Adel, Giovanni, Owen, Jasper, Florian; #695269,
@@ -2337,6 +2464,7 @@ Translations:
 
 3.7.91
 ======
+
 * Fix windows being treated as remote after hostname changes [Ray; #688716]
 * Add meta_window_get_all_monitors() method [Adel; #646861]
 * Add grab API for externally defined accelerators [Florian; #643111]
@@ -2358,6 +2486,7 @@ Translations:
 
 3.7.90
 ======
+
 * Support _NET_WM_OPAQUE_REGION [Jasper, Adel; #679901]
 * Add wrapper for XI2.3 pointer barriers [Jasper; #677215]
 * Update style of resize popups [Cosimo; #692741]
@@ -2382,6 +2511,7 @@ Translations:
 
 3.7.5
 =====
+
 * Don't allow multiline window titles [Jon; #683056]
 * Make meta_window_located_on_workspace() public [Jasper; #691744]
 * Request XI2.3 [Colin; #692877]
@@ -2403,6 +2533,7 @@ Translations:
 
 3.7.4
 =====
+
 * Add support for bypass compositor hints [Adel; #683020]
 * Make automaximization optional [Adel; #680990]
 * Add method for checking if the application is responding [Giovanni; #684340]
@@ -2424,6 +2555,7 @@ Translations:
 
 3.7.3
 =====
+
 * Fix maximized windows jumping to other monitors [Alban; #556696]
 * Add 'switch-applications' keybinding [Florian; #688913]
 * Add a convenience method to focus the default window [Jasper; #689652]
@@ -2441,6 +2573,7 @@ Translations:
 
 3.7.2
 =====
+
 * Fix spurious focus changes when showing desktop [Florian; #686928]
 * MetaPluginManager: don't send events to Clutter twice [Owen; #686406]
 * Add the ability to add shader hooks to MetaBackgroundActor [Giovanni; #669798]
@@ -2459,6 +2592,7 @@ Translations:
 
 3.7.1
 =====
+
 * screen: Ignore num-workspaces when using dynamic workspaces [Florian; #685439]
 
 Contributors:
@@ -2471,6 +2605,7 @@ Translations:
 
 3.6.1
 =====
+
 * Fix crash when opening large popup menus [Jasper; #681676]
 * window: Don't move the desktop window after monitor hotplug [Jasper; #681159]
 * Expose MetaPlugin to introspection [Evan; #671098]
@@ -2503,6 +2638,7 @@ Translations:
 
 3.5.92
 ======
+
 * screen: Allow NULL out arguments in meta_screen_get_size [Tomeu]
 * display: Add API to set wm_name / wm_keybindings [Florian; #671010]
 * Improve the not responding dialog [Jon, Florian; #684306]
@@ -2520,6 +2656,7 @@ Translations:
 
 3.5.91
 ======
+
 * Do not include markup in app not responding dialog [Alex]
 * Fix subtracting unredirected windows from visible region [Jasper; #677116]
 * Minor improvements and bugfixes [Jasper, Florian; #682648, #682993]
@@ -2535,6 +2672,7 @@ Translations:
 
 3.5.90
 ======
+
 * Fix logic for handling translations of the windows group [Owen; #681221]
 * Handle painting inside a Clutter clone [Owen; #681953]
 * Update overlay-key on settings changes [Florian; #681906]
@@ -2550,6 +2688,7 @@ Translations:
 
 3.5.5
 =====
+
 * Fix flickering around windows when using window group [Tom; #681221]
 
 Contributor(s):
@@ -2561,6 +2700,7 @@ Translations:
 
 3.5.4
 =====
+
 * Make it possible to reimplement move-to-workspace keybindings from plugins
   [Giovanni; #674104]
 * Add a preference to ignore hide-titlebar-when-maximized hint [Rico; #678947]
@@ -2584,6 +2724,7 @@ Translations:
 
 3.5.3
 =====
+
 * Simplify plugin system [Jasper; #676855]
 * meta-window-actor: Don't unredirect shaped windows [Jasper; #677657]
 * screen: Add new public meta_screen_get_current_monitor API [Tim; #642591]
@@ -2603,6 +2744,7 @@ Translations:
 
 3.5.2
 =====
+
 * keybindings: Remove 'toggle-recording' binding [Florian; #674376]
 * Switch to gtk-doc syntax [Jasper; #673752]
 * shaped-texture: never slice shape mask texture [Robert; #674731]
@@ -2617,7 +2759,7 @@ Translations:
 * Misc. fixes [Javier, Jasper, Owen, Rico]
 
 Contributors:
- Robert Bragg, Javier Járdon, Florian Müllner, Neil Roberts, Jasper St. Pierre, 
+ Robert Bragg, Javier Járdon, Florian Müllner, Neil Roberts, Jasper St. Pierre,
  Owen Taylor, Rico Tzschichholz, Pavel Vasin
 
 Translations:
@@ -2625,6 +2767,7 @@ Translations:
 
 3.4.1
 =====
+
 * API change: the meta_display_add_keybinding() function added in 3.4
   wasn't usable from a GNOME Shell extension, so has been changed to take
   a GSettings object rather than the name of a schema [Jasper; #673014]
@@ -2646,6 +2789,7 @@ Translations:
 
 3.4.0
 =====
+
 * Fix crash when a full-screen window is opened [Jasper; #672797]
 * Fix memory leaks [Pavel; #672640]
 
@@ -2659,6 +2803,7 @@ Translations:
 
 3.3.92
 ======
+
 * Automaximize large windows on map [Adel; #671677]
 * When unmaximizing windows, make sure the unminimized size
   is signficantly less than the maximized size [Adel; #671677]
@@ -2698,6 +2843,7 @@ Translations:
 
 3.3.90
 ======
+
 * Update for Cogl API changes [Robert]
 * Bug fixes [Adel, Jasper;  #659643]
 * Build fixes [Jasper, Owen]
@@ -2710,6 +2856,7 @@ Translations:
 
 3.3.5
 =====
+
 * MetaShapedTexture no longer is a ClutterTexture subclass [Jasper; #660941]
 * Add meta_shaped_texture_get_image() [Jasper; #660941]
 * Cleanups [Rui, Jasper; #657639]
@@ -2723,9 +2870,10 @@ Translations:
 
 3.3.4
 =====
+
 * Adapt to changes in GtkStateFlags [Owen]
 * Redo properties for applications menu corresponding to GTK+ changes -
-  they are now _GTK_* not DBUS_*. [Ryan]
+  they are now _GTK_*not DBUS_*. [Ryan]
 * Fix crash on gnome-shell restart when a modal dialog is open [Owen; #668299]
 * Code cleanup [Florian; #666039]
 
@@ -2737,9 +2885,10 @@ Translations:
 
 3.3.3
 =====
+
 * Add keybindings for tiling to left or right [Florian; #648700]
 * Support GTK+'s hide-titlebar-when-maximized hint [Florian; #665617]
-* Load _DBUS_APPLICATION_ID, _DBUS_UNIQUE_NAME, _DBUS_OBJECT_PATH
+* Load _DBUS_APPLICATION_ID,_DBUS_UNIQUE_NAME, _DBUS_OBJECT_PATH
   property [Colin, Ryan; #664851]
 * Handle changes to workspaces-only-on-primary GSetting [Florian; #664853]
 * Don't use the Clutter default stage [Jasper; #664028]
@@ -2782,6 +2931,7 @@ Translations:
 
 3.2.1
 =====
+
 * Allow keyboard window switching (alt-Tab) during drag-and-drop
   [Matthias, #660457]
 * Don't add invisible resize borders to fullscreen windows
@@ -2805,6 +2955,7 @@ Translations:
 
 3.2.0
 =====
+
 * Fix _NET_WM_FRAME_EXTENTS not to include invisible borders [Jasper; #659848]
 * Fix application-specified window placement (-geometry) for
   invisible borders [Jasper; #659848]
@@ -2819,6 +2970,7 @@ Translations:
 
 3.1.92
 ======
+
 * Fix bug with unredirecting full-screen windows on multi-monitor -
   notably affected gnome-screensaver [Adel; #657869]
 * Disable top resizing of attached dialogs [Jasper; #657795]
@@ -2834,6 +2986,7 @@ Translations:
 
 3.1.91.1
 ========
+
 * Fix problem where certain application updates would get lost [#657071, Owen]
 * Fix a problem where after resuming from the screensaver, things got
   slow [#658228, Jasper, Adel]
@@ -2860,6 +3013,7 @@ Translations:
 
 3.1.90.1
 ========
+
 * Fix crash when no windows are open [Adel; #657692]
 * Fix annotations for new strictness in gobject-introspection [Jasper, Owen]
 * Fix some errors with rounded frame drawing [Jasper; #657661]
@@ -2869,6 +3023,7 @@ Contributors:
 
 3.1.90
 ======
+
 * Extend the draggable portion of window borders outside the visible frame
   for easy resizing with thin borders. (New draggable_border_width GConf key
   controls the total width of visible and invisible borders.)
@@ -2900,6 +3055,7 @@ Translations:
 
 3.1.4
 =====
+
 * Use better, much more subtle shadow definitions [Jakub; #649374]
 * Add the ability to use named GTK+ colors in theme files as
   gtk:custom(name,fallback) [Florian; #648709]
@@ -2926,6 +3082,7 @@ Translations:
 
 3.1.3.1
 =======
+
 * Back API version down to "3.0" - the change to Meta-3.1.gir
   was unintentional [Owen]
 
@@ -2934,6 +3091,7 @@ Translations:
 
 3.1.3
 =====
+
 * Support dark window theme variants for windows with a dark
   widget theme; this is selected by the _GTK_THEME_VARIANT
   property [Florian, #645355]
@@ -2965,9 +3123,10 @@ Translations:
 
 3.0.2.1
 =======
+
 * When saving the session, use the "program name" rather than
   harcoding mutter, fixing session saving for gnome-shell [Matthias]
-  https://bugzilla.gnome.org/show_bug.cgi?id=648828
+  <https://bugzilla.gnome.org/show_bug.cgi?id=648828>
 
 Contributors:
  Matthias Clasen
@@ -2976,18 +3135,18 @@ Contributors:
 =====
 
 * Fix a crash when running without XKB support [Adam]
-  https://bugzilla.gnome.org/show_bug.cgi?id=647777
+  <https://bugzilla.gnome.org/show_bug.cgi?id=647777>
 * Fix smallish memory leaks [Colin]
-  https://bugzilla.gnome.org/show_bug.cgi?id=649500
-  https://bugzilla.gnome.org/show_bug.cgi?id=649504
+  <https://bugzilla.gnome.org/show_bug.cgi?id=649500>
+  <https://bugzilla.gnome.org/show_bug.cgi?id=649504>
 * Ignore mirrored monitors when listing monitors, fixing
   drag-and-drop problems in GNOME Shell [Owen]
-  https://bugzilla.gnome.org/show_bug.cgi?id=649299
+  <https://bugzilla.gnome.org/show_bug.cgi?id=649299>
 * Don't allow side-by-side tiling of non-maximizable windows
   like dialogs and utility windows [Dan]
 * Fix interaction of _NET_WM_WINDOW_OPACITY with window effects,
   making it work again with GNOME Shell
-  https://bugzilla.gnome.org/show_bug.cgi?id=648613
+  <https://bugzilla.gnome.org/show_bug.cgi?id=648613>
 
 Contributors:
  Adam Jackson, Colin Walters, Dan Winship
@@ -3000,10 +3159,10 @@ Translations:
 
 * If WM_CLIENT_MACHINE isn't set, don't assume a window is remote;
   fixes behavior of Fox toolkit applications under GNOME Shell.
-  https://bugzilla.gnome.org/show_bug.cgi?id=647662 [Colin]
+  <https://bugzilla.gnome.org/show_bug.cgi?id=647662> [Colin]
 * Fix cases where windows could get stuck drawing as focused after
   an attached modal dialog was closed. [Dan]
-  https://bugzilla.gnome.org/show_bug.cgi?id=647613
+  <https://bugzilla.gnome.org/show_bug.cgi?id=647613>
 * Fix a bug where a window that is too big to be tiled side-by-side
   would behave strangely when using the gesture of dragging to
   the top to maximize. [Florian]
@@ -3019,7 +3178,7 @@ Translations:
 
 * Avoid crashing when you have a single window and try to move it between
   workspaces. [Dan]
-  https://bugzilla.gnome.org/show_bug.cgi?id=642957
+  <https://bugzilla.gnome.org/show_bug.cgi?id=642957>
 
 Contributors:
  Dan Winship
@@ -3038,17 +3197,17 @@ Translations:
   would collapse to a single workspace. (There are still issues
   when a secondary monitor is hot-plugged to the left of the
   primary monitor.) [Alex]
-  https://bugzilla.gnome.org/show_bug.cgi?id=645408)
+  <https://bugzilla.gnome.org/show_bug.cgi?id=645408>)
 
 * Fix a crash for the cycle_group action [Jasper]
-  https://bugzilla.gnome.org/show_bug.cgi?id=645843
+  <https://bugzilla.gnome.org/show_bug.cgi?id=645843>
 
 * Fix misdrawing of window shadows on some focus changes [Dan]
-  https://bugzilla.gnome.org/show_bug.cgi?id=636904
+  <https://bugzilla.gnome.org/show_bug.cgi?id=636904>
 
 * Export meta_get_replace_current_wm() to allow fixing a
   GNOME Shell bug with --replace [Colin]
-  https://bugzilla.gnome.org/show_bug.cgi?id=645590
+  <https://bugzilla.gnome.org/show_bug.cgi?id=645590>
 
 Contributors:
  Alexander Larsson, Jasper St. Pierre, Colin Walters, Dan Winship
@@ -3061,32 +3220,32 @@ Translations:
 2.91.92
 =======
 
- * Add a workspaces_only_on_primary preferences. When set, this makes
+* Add a workspaces_only_on_primary preferences. When set, this makes
    workspaces switching only apply to windows on the primary monitor,
    while windows on other monitors are unaffected.
- * Export API for monitor handling [Alex]
+* Export API for monitor handling [Alex]
     MetaScreen::monitors-changed signal
     meta_screen_get_primary_monitor()
     meta_window_is_on_primary_monitor()
     meta_window_get_monitor()
     MetaWindow::window-entered-monitor, <etaWindow::window-left-monitor
     meta_window_move_to_monitor() [Florian]
- * Behavior improvemnts for attached modal dialogs:
-   - Allow dragging dragging on the titlebar to move the  parent ["Ron"]
-   - Allow resizing [Florian]
-   - Constrain to be on the current monitor [Florian]
- * Don't turn on XSMP autorestart [Colin]
- * Combine libmutter-wm and libmutter-private into a single libmutter
+* Behavior improvemnts for attached modal dialogs:
+  * Allow dragging dragging on the titlebar to move the  parent ["Ron"]
+  * Allow resizing [Florian]
+  * Constrain to be on the current monitor [Florian]
+* Don't turn on XSMP autorestart [Colin]
+* Combine libmutter-wm and libmutter-private into a single libmutter
    [Frédéric]
- * Export methods to move and resize windows [Jeffery]
+* Export methods to move and resize windows [Jeffery]
    meta_window_move(), meta_window_resize(), meta_window_move_frame()
- * Add a MUTTER_WM_CLASS_FILTER environment variable to allow existing
+* Add a MUTTER_WM_CLASS_FILTER environment variable to allow existing
    windows to be ignored when performance testing. [Owen]
- * Add a new compositor-based flash for visual bell [Dan]
- * Fix bug where application specified values for properties like
+* Add a new compositor-based flash for visual bell [Dan]
+* Fix bug where application specified values for properties like
    "skip taskbar" were sometimes ignored [Dan]
- * Bug fixes [Dan, Florian, Giovanni, Jasper, Owen]
- * Build fixes [Rico]
+* Bug fixes [Dan, Florian, Giovanni, Jasper, Owen]
+* Build fixes [Rico]
 
 Contributors:
  Giovanni Campagna, Florian Müllner, Alexander Larsson, Jeffery Olson,
@@ -3122,19 +3281,19 @@ Bugs fixed:
 2.91.91
 =======
 
- * Build a libmutter-wm that contains all of the logic and that
+* Build a libmutter-wm that contains all of the logic and that
    can be linked to to create custom executables. The mutter executable
    becomes a small stub linked to this library [Dan]
- * Move installed headers files into a meta/ subdirectory instead
+* Move installed headers files into a meta/ subdirectory instead
    of polluting the toplevel namespace [Dan]
- * Remove various unused complications: [Dan]
-   - Ability to set the set of plugins via GConf
-   - Plugin 'params'
-   - meta_restart() and "mutter-message restart"
- * Don't exit when we are requested to exit via XSMP, assume we'll be
+* Remove various unused complications: [Dan]
+  * Ability to set the set of plugins via GConf
+  * Plugin 'params'
+  * meta_restart() and "mutter-message restart"
+* Don't exit when we are requested to exit via XSMP, assume we'll be
    killed along with the X server; this avoids visual artifacts from
    unmanaging windows when logging out [Colin]
- * Build fixes [Dan, Jani, Jeff]
+* Build fixes [Dan, Jani, Jeff]
 
 Contributors:
  Jani Monoses, Jeff Olson, Colin Walters, Dan Winship
@@ -3150,13 +3309,13 @@ Bugs fixed:
 2.91.90
 =======
 
- * Change <Alt>Above_Tab from being a cycle_group binding to
+* Change <Alt>Above_Tab from being a cycle_group binding to
    a switch_group binding [Rui]
- * Make plugin-loading failure fatal [Colin]
- * Add 'position-changed' signal to MetaWindowActor [Owen]
- * When 'live_hidden_previews' is enabled, position hidden windows
+* Make plugin-loading failure fatal [Colin]
+* Add 'position-changed' signal to MetaWindowActor [Owen]
+* When 'live_hidden_previews' is enabled, position hidden windows
    to allow the creation of workspace previews [Owen]
- * Fix bug with opacity of MetaBackgroundActor
+* Fix bug with opacity of MetaBackgroundActor
 
 Contributors:
   Rui Matos, Owen Taylor, Colin Walters
@@ -3175,15 +3334,15 @@ Bugs fixed:
 2.91.6
 ======
 
- * Add meta_screen_override_window_layout() to let a plugin set the workspace
+* Add meta_screen_override_window_layout() to let a plugin set the workspace
    layout [Owen]
- * Add a 'size-changed' signal to MetaWindowActor [Florian]
- * Add meta_window_actor_is_destroyed() [Adel]
- * Fix problems with window tile previews when cancelling a move [Florian]
- * Port theme elements that use GTK+ drawing to use GtkStyleContext instead
+* Add a 'size-changed' signal to MetaWindowActor [Florian]
+* Add meta_window_actor_is_destroyed() [Adel]
+* Fix problems with window tile previews when cancelling a move [Florian]
+* Port theme elements that use GTK+ drawing to use GtkStyleContext instead
    of the deprecated GtkStyle. [Florian]
- * Fix compiler warnings that were causing compilation failures [Jasper, Owen]
- * Misc bug fixes [Gabor, Jasper, Owen, Rui]
+* Fix compiler warnings that were causing compilation failures [Jasper, Owen]
+* Misc bug fixes [Gabor, Jasper, Owen, Rui]
 
 Contributors:
  Adel Gadllah, Gabor Kelemen, Rui Matos, Florian Müllner, Jasper St. Pierre,
@@ -3251,26 +3410,26 @@ Bugs fixed:
 ======
 
 * Better shadows: [Owen]
-   - Shadows can be different for different window types and focus states
-   - Shadows are larger by default, especially for the currently active
+  * Shadows can be different for different window types and focus states
+  * Shadows are larger by default, especially for the currently active
      window
-   - Shadows for attached modal dialogs and menus are drawn not to
+  * Shadows for attached modal dialogs and menus are drawn not to
      overlap the attachment point.
-   - Shadows follow the shape of shaped windows
- * Optimization: [Owen]
-   - Avoid repainting in situations when windows are potentially restacked
+  * Shadows follow the shape of shaped windows
+* Optimization: [Owen]
+  * Avoid repainting in situations when windows are potentially restacked
      but aren't actually restacked.
-   - Pay attention to partial stage repaints in obscured window calculations
-   - Better optimization of painting obscured shadows; turn off shadows
+  * Pay attention to partial stage repaints in obscured window calculations
+  * Better optimization of painting obscured shadows; turn off shadows
      for maximized windows.
-   - Move background repainting into Mutter; doing it here rather than
+  * Move background repainting into Mutter; doing it here rather than
      in plugins allows not painting obscured parts of the background.
- * A new frame type 'attached' is added for attached modal dialogs
+* A new frame type 'attached' is added for attached modal dialogs
    and can be referenced in theme files with a theme version of 3.2.
- * Fix updating key bindings when the keyboard layout changes
+* Fix updating key bindings when the keyboard layout changes
    [Derek, Owen, Thomas]
- * Bug fixes [Adel, Florian]
- * Build fixes [Dan Williams, Diego, Javier, Owen]
+* Bug fixes [Adel, Florian]
+* Build fixes [Dan Williams, Diego, Javier, Owen]
 
 Contributors:
  Adel Gadllah, Javier Jardón, Florian Müllner, Derek Poon, Owen Taylor,
@@ -3319,7 +3478,7 @@ Bugs fixed:
 
 * Default build is now GTK+ 3 build
 * Mutter namespace prefix is removed, in favor of consistent
-  meta_ namespace prefixing [Owen]. Naming changes:
+  meta_namespace prefixing [Owen]. Naming changes:
     MutterWindow              => MetaWindowActor
     mutter_get_windows        => meta_get_window_actors
     mutter_plugin_get_windows => meta_plugin_get_window_actors
@@ -3355,26 +3514,26 @@ Fixed bugs:
 2.91.0
 ======
 
- * Enable side-by-side tiling via a gesture of dragging to the left or right
+* Enable side-by-side tiling via a gesture of dragging to the left or right
    edge of the screen. (enabled with an off-by-default GConf key) [Florian]
- * Allow breaking out of maximization/tiling using a alt-middle-button window
+* Allow breaking out of maximization/tiling using a alt-middle-button window
    resize [Owen, Florian]
- * Add the ability to have modal dialogs attached to their parent window
+* Add the ability to have modal dialogs attached to their parent window
    (enabled with an off-by-default GConf key) [Maxim]
- * Draw with Cairo rather than GDK [Florian, Benjamin]
- * Add compatibility for changes in GTK+ 3
+* Draw with Cairo rather than GDK [Florian, Benjamin]
+* Add compatibility for changes in GTK+ 3
    [Benjamin, Alban, Florian, Jasper, Matthias, Owen, Thierry]
-   - libmutter-private is now only installed for GTK+ 3 builds
-   - Theme parts of libmutter-private API are changed to take cairo_t
+  * libmutter-private is now only installed for GTK+ 3 builds
+  * Theme parts of libmutter-private API are changed to take cairo_t
      rather than GdkDrawable
- * Update introspection build and annotations for new behavior of
+* Update introspection build and annotations for new behavior of
    g-ir-scanner [Colin]
- * Fix bug that caused window menu options not to work [Owen]
- * Fix misbehavior of Wine windows [Owen, Alban]
- * Fix crashes from missing error traps [Adel]
- * Build fixes [Colin, Florian, Owen, Rob, Tomas]
- * Misc bug fixes [Adel, Jon, Owen, Nickolas, Tomas]
- * Cleanups [Adel, Benjamin, Florian]
+* Fix bug that caused window menu options not to work [Owen]
+* Fix misbehavior of Wine windows [Owen, Alban]
+* Fix crashes from missing error traps [Adel]
+* Build fixes [Colin, Florian, Owen, Rob, Tomas]
+* Misc bug fixes [Adel, Jon, Owen, Nickolas, Tomas]
+* Cleanups [Adel, Benjamin, Florian]
 
 Contributors:
  Alban Browaeys, Matthias Clasen, Maxim Ermilov, Tomas Frydrych, Adel Gadllah,
@@ -3473,16 +3632,16 @@ Fixed Bugs:
 ======
 
 * Theme enhancements [Owen]
-  - Add a flexible version mechanism for themes -
+  * Add a flexible version mechanism for themes -
     metacity-theme-3.xml is now supported, and can include
     version="> 3.2" type attributes on the root element or
     any subelement.
-  - Add frame_x_center/frame_y_center variables
-  - Allow a theme to turn on title ellipsization
+  * Add frame_x_center/frame_y_center variables
+  * Allow a theme to turn on title ellipsization
 * Performance enhancements:
-  - Stream raw damage updates to ClutterX11TexturePixmap
+  * Stream raw damage updates to ClutterX11TexturePixmap
     to enable partial stage updates when windos change [Robert]
-  - Don't trap XErrors in meta_compositor_process_event [Adel]
+  * Don't trap XErrors in meta_compositor_process_event [Adel]
 * Add meta_prefs_override_preference_location(); this allows
   a plugin like GNOME Shell to redirect preferences to a
   plugin-specific location. [Owen]
@@ -3639,7 +3798,7 @@ Translations:
 2.27.5
 ======
 
- * Fix bug in GConf schemas where the overview activation key was specified as
+* Fix bug in GConf schemas where the overview activation key was specified as
    '<Super_L>' not 'Super_L'.
 
 Contributors:
@@ -3663,7 +3822,7 @@ Translation:
 
   [Colin, Dan]
 
-* Set _GNOME_WM_KEYBINDINGS=Metacity,Mutter on the _NET_SUPPORTING_WM_CHECK
+* Set _GNOME_WM_KEYBINDINGS=Metacity,Mutter on the_NET_SUPPORTING_WM_CHECK
   window so that gnome-keybinding-properties can figure out to show the
   Metacity keybindings when Mutter is running. [Owen]
 
@@ -3684,18 +3843,18 @@ Bugs fixed:
   593404 - Make MUTTER_DEBUG_XINERAMA override active Xinerama
   593407 - Add 'skip-taskbar' accessor to MetaWindow.
   593686 - Add meta_screen_get_monitors()
-  594067 - Export a _GNOME_WM_KEYBINDINGS property
+  594067 - Export a_GNOME_WM_KEYBINDINGS property
 
 2.27.3
 ======
 
 * Key handling improvements:
 
-  - enforce that every key is handled no more than once.
-  - mutter_plugin_begin_modal() and mutter_plugin_begin_modal() allow
+  * enforce that every key is handled no more than once.
+  * mutter_plugin_begin_modal() and mutter_plugin_begin_modal() allow
     putting a plugin into a "modal" state where it has exclusive access
     to key and pointer events.
-  - Add "tab_popup_select", "tab_pop_cancel" pseudo-keypress-handlers
+  * Add "tab_popup_select", "tab_pop_cancel" pseudo-keypress-handlers
     that plugins can use to get notification when Alt-Tab ends
 
   [Owen]
@@ -3747,9 +3906,9 @@ Bugs fixed:
 Thanks to Luca Ferretti, Matt Kraai, and Neil Jagdish Patel for
 improvements in this version.
 
-  - queue frame resize on window undecorate (Neil)
-  - fix description of desktop background (Luca) (#569649)
-  - wrap g_error calls in braces (Matt)
+* queue frame resize on window undecorate (Neil)
+* fix description of desktop background (Luca) (#569649)
+* wrap g_error calls in braces (Matt)
 
 Translations
   Amitakhya Phukan (as), Mikel González (ast), Ihar Hrachyshka (be@latin), Runa
@@ -3770,13 +3929,13 @@ Translations
 Thanks to Matthias Claesen, Matt Kraai, Elijah Newren, Owen Taylor, and Thomas
 Thurman for improvements in this version.
 
-  - Optimise window property lookup (Thomas) (#549886)
-  - Fix slip in the above (Matt)
-  - Several memory leaks fixed (Matthias) (#552303, #552973, #552307)
-  - Fix longstanding crasher about colourmaps (Owen) (#568365)
-  - Alt+middle/right buttons can be switched (Thomas) (#437910)
-  - Support _NET_WM_MOVERESIZE_CANCEL (Elijah)
-  - minor fix paving the way for a theme editor (Thomas)
+* Optimise window property lookup (Thomas) (#549886)
+* Fix slip in the above (Matt)
+* Several memory leaks fixed (Matthias) (#552303, #552973, #552307)
+* Fix longstanding crasher about colourmaps (Owen) (#568365)
+* Alt+middle/right buttons can be switched (Thomas) (#437910)
+* Support _NET_WM_MOVERESIZE_CANCEL (Elijah)
+* minor fix paving the way for a theme editor (Thomas)
 
 Translations
   David Planella (ca), Jorge González (es), Mattias Põldaru (et), saudat
@@ -3790,14 +3949,14 @@ Translations
 Thanks to Yanko Kaneti, Frederic Peters, Thomas Thurman, and Colin Walters for
 improvements in this version.
 
-  - The maximisation key is a toggle. (Thomas) (#343824)
-  - "Unmaximise" is now called "restore". (Thomas) (#343824)
-  - New thread handling call for gconf (Frederic) (#565517)
-  - Add screenshot commands back which had been removed (Yanko) (#565343)
-  - move_to_corner_se keybinding fixed (Thomas)
-  - Windows on other workspaces which attempt to present themselves
+* The maximisation key is a toggle. (Thomas) (#343824)
+* "Unmaximise" is now called "restore". (Thomas) (#343824)
+* New thread handling call for gconf (Frederic) (#565517)
+* Add screenshot commands back which had been removed (Yanko) (#565343)
+* move_to_corner_se keybinding fixed (Thomas)
+* Windows on other workspaces which attempt to present themselves
     are marked as needing attention (Colin) (#482354)
-  - End the grab op when the user clicks the titlebar (Thomas) (#401028)
+* End the grab op when the user clicks the titlebar (Thomas) (#401028)
 
 Translations
   Jorge González (es)
@@ -3807,7 +3966,7 @@ Translations
 
 Thanks to Erwann Chenede for improvements in this version.
 
-  - Fix build on Solaris (Erwann) (#564123)
+* Fix build on Solaris (Erwann) (#564123)
 
 Translations
   Mattias Põldaru (et), Luca Ferretti (it)
@@ -3817,7 +3976,7 @@ Translations
 
 Thanks to Matt Kraai for improvements in this version.
 
-  - Fixes to Thomas's earlier fixes (Matt) (#562939)
+* Fixes to Thomas's earlier fixes (Matt) (#562939)
 
 Translations
   None
@@ -3827,20 +3986,19 @@ Translations
 
 Thanks to Thomas Thurman for improvements in this version.
 
-  - Fixes to allow building without compositor again (Thomas)
-  - Fixes for -Wall problems (Thomas)
-  - Various tool updates (Thomas)
+* Fixes to allow building without compositor again (Thomas)
+* Fixes for -Wall problems (Thomas)
+* Various tool updates (Thomas)
 
 Translations: none
-
 
 2.25.13
 =======
 
 Thanks to Thomas Thurman for improvements in this version.
 
-  - Add casts to fix failure to build from source on 64bit hosts (Thomas) (#562106)
-  - Added script to produce annoucements (Thomas)
+* Add casts to fix failure to build from source on 64bit hosts (Thomas) (#562106)
+* Added script to produce annoucements (Thomas)
 
 Translations
   Jorge González (es)
@@ -3852,24 +4010,24 @@ Thanks to Brian Cameron, Maxim Ermilov, Daniel Macks, Elijah Newren, Frederic
 Peters, Thomas Thurman, David Trowbridge, and Olav Vitters for improvements in
 this version.
 
-  - Reorder compiler flags (Daniel) (#562033)
-  - Fix compositor switch (Daniel) (#560990)
-  - Remove spurious warnings about operations on window "none" (Thomas)
-  - Fix _POSIX_C_SOURCE which was breaking OS X builds (Thomas) (#561962)
-  - -Werror -Wall and -ansi are now standard compile flags (Thomas)
-  - Merge screen and window keybindings files; fix minor alt-tab bug
+* Reorder compiler flags (Daniel) (#562033)
+* Fix compositor switch (Daniel) (#560990)
+* Remove spurious warnings about operations on window "none" (Thomas)
+* Fix _POSIX_C_SOURCE which was breaking OS X builds (Thomas) (#561962)
+* -Werror -Wall and -ansi are now standard compile flags (Thomas)
+* Merge screen and window keybindings files; fix minor alt-tab bug
     in the process (Thomas) (#528337)
-  - Support _NET_WM_FULLSCREEN_MONITORS (David)
-  - Remove some deprecated calls (Thomas) (#560445)
-  - Clean up #includes (Maxim) (#560449)
-  - Update description of raise_on_click (Elijah)
-  - First dialogue delegated to zenity (Thomas)
-  - fix theme-parser typo (Olav)
-  - double-quote variable names in messages (Thomas) (#558309)
-  - fix accidental renaming of run_command_terminal (Thomas) (#557943)
-  - some null checks; problems exposed by new GDM (Brian) (#558058)
-  - ignore mouse button modifier if it's missing (Thomas) (Launchpad 258054, Launchpad 266929)
-  - fix docbook markup (Frederic)
+* Support _NET_WM_FULLSCREEN_MONITORS (David)
+* Remove some deprecated calls (Thomas) (#560445)
+* Clean up #includes (Maxim) (#560449)
+* Update description of raise_on_click (Elijah)
+* First dialogue delegated to zenity (Thomas)
+* fix theme-parser typo (Olav)
+* double-quote variable names in messages (Thomas) (#558309)
+* fix accidental renaming of run_command_terminal (Thomas) (#557943)
+* some null checks; problems exposed by new GDM (Brian) (#558058)
+* ignore mouse button modifier if it's missing (Thomas) (Launchpad 258054, Launchpad 266929)
+* fix docbook markup (Frederic)
 
 Translations
   Astur (ast), Jorge González (es), Thomas Thurman (la), Leonardo Ferreira
@@ -3880,9 +4038,9 @@ Translations
 
 Thanks to Thomas Thurman for improvements in this version.
 
-  - Allow third-party apps to decide whether a window appears
+* Allow third-party apps to decide whether a window appears
     on all workspaces (Thomas) (#557536)
-  - Fixed keybindings script (again) (Thomas)
+* Fixed keybindings script (again) (Thomas)
 
 Translations
   David Planella (ca), Robert Millan (ca@valencia)
@@ -3896,9 +4054,9 @@ release of 2.25.2.  Apologies.
 Thanks to Murray Cumming, Thomas Thurman, and Götz Waschk for improvements
 in this version.
 
-  - Fix distcheck (Thomas) (#557356)
-  - add libm reference (Götz) (#557357)
-  - fix docbook tags (Murray) (#557337)
+* Fix distcheck (Thomas) (#557356)
+* add libm reference (Götz) (#557357)
+* fix docbook tags (Murray) (#557337)
 
 Translations
   Yavor Doganov (bg), David Planella (ca), Robert Millan (ca@valencia), Kenneth
@@ -3916,15 +4074,15 @@ Thanks to Joe Marcus Clarke, Murray Cumming, Tomas Frydrych, William Lachance,
 Matthew Martin, Christian Persch, Thomas Thurman, and Vincent Untz for
 improvements in this version.
 
-  - Add handler for SIGTERM (Joe) (#553980)
-  - Minimised windows are necessarily obscured (Matthew) (#528927)
-  - Build fixes with the above (Christian, Tomas, Thomas) (#557335)
+* Add handler for SIGTERM (Joe) (#553980)
+* Minimised windows are necessarily obscured (Matthew) (#528927)
+* Build fixes with the above (Christian, Tomas, Thomas) (#557335)
     (#557201) (#469361)
-  - Changed keybindings to be in a single place (Thomas) (#469361)
-  - Add new document about themes (Murray)
-  - Remove obsolete support for fallback icons (Thomas)
-  - Pass modified mouse events to panels (William) (#554428)
-  - Change where desktop files should go (Vincent) (#549479)
+* Changed keybindings to be in a single place (Thomas) (#469361)
+* Add new document about themes (Murray)
+* Remove obsolete support for fallback icons (Thomas)
+* Pass modified mouse events to panels (William) (#554428)
+* Change where desktop files should go (Vincent) (#549479)
 
 Translations
   Yavor Doganov (bg), David Planella (ca), Kenneth Nielsen (da), Hendrik
@@ -3938,10 +4096,10 @@ Translations
 
 Thanks to Thomas Thurman for improvements in this version.
 
-  - Fix small memory leak, found by Matthias Clasen (Thomas) (#549952)
-  - Added move_to_center keybinding suggested by
+* Fix small memory leak, found by Matthias Clasen (Thomas) (#549952)
+* Added move_to_center keybinding suggested by
     Khanh-Dang Nguyen Thu Lam (Thomas) (#549979)
-  - Compositor can be turned on and off from the command line
+* Compositor can be turned on and off from the command line
     (#545323) (Thomas)
 
 Translations
@@ -3955,13 +4113,13 @@ Translations
 Thanks to Patrick Niklaus, Ted Percival, Eric Piel, Akira TAGOH, and Thomas
 Thurman for improvements in this version.
 
-  - Fix memory allocation problem in struts (Eric) (probably #468075)
-  - Ensure windows which start maximised know where to jump back
+* Fix memory allocation problem in struts (Eric) (probably #468075)
+* Ensure windows which start maximised know where to jump back
     to, so they don't warp to other screens (Ted) (#504692)
-  - Added header comments to some files (Thomas)
-  - Icons for windows which are uncooperative enough not to provide
+* Added header comments to some files (Thomas)
+* Icons for windows which are uncooperative enough not to provide
     an icon are taken from the theme, not built in (Patrick) (#524343)
-  - Added manual page for metacity-message (Akira, from Debian downstream)
+* Added manual page for metacity-message (Akira, from Debian downstream)
 
 Translations
   Khaled Hosny (ar), Petr Kovar (cs), Ilkka Tuohela (fi), Duarte Loreto (pt), Djavan
@@ -3972,7 +4130,7 @@ Translations
 
 Thanks to Thomas Thurman for improvements in this version.
 
-  - Added DOAP file. (Thomas)
+* Added DOAP file. (Thomas)
 
 Translations
   Khaled Hosny (ar), Luca Ferretti (it), Takeshi AIHANA (ja), Wouter
@@ -3985,27 +4143,26 @@ Thanks to Elijah Newren and Thomas Thurman for improvements in this version.
 
 Contrary to rumour, this release does not add tabbing to everything.
 
-  - Display theme name in title bar of theme viewer (Thomas) (#430198)
-  - Allow toggling of non-compositor effects (Thomas) (#92867)
-  - Add some extra null checks (Thomas) (#422242)
-  - Check for double-freeing at the time of workspace freeing (Elijah) (#361804)
-  - Don't generate log messages unless we're logging (Thomas)
-  - Two windows which don't belong to any application can't be considered to
+* Display theme name in title bar of theme viewer (Thomas) (#430198)
+* Allow toggling of non-compositor effects (Thomas) (#92867)
+* Add some extra null checks (Thomas) (#422242)
+* Check for double-freeing at the time of workspace freeing (Elijah) (#361804)
+* Don't generate log messages unless we're logging (Thomas)
+* Two windows which don't belong to any application can't be considered to
     belong to the same application (Thomas)
-  - Various tidyings (Thomas)
+* Various tidyings (Thomas)
 
 Translations
   Yavor Doganov (bg), Gabor Kelemen (hu), Kjartan Maraas (nb), Matej
   Urbančič (sl), Daniel Nylander (sv), Theppitak Karoonboonyanan (th)
 
-
 2.23.34
 =======
 
 Thanks to Thomas Thurman for improvements in this version.
 
-  - Commenting and tidying (Thomas)
-  - Fix possible compositor crash (Thomas) (#530702)
+* Commenting and tidying (Thomas)
+* Fix possible compositor crash (Thomas) (#530702)
 
 Translations
   Khaled Hosny (ar), Yavor Doganov (bg), Jorge González (es), Kjartan Maraas (nb),
@@ -4017,8 +4174,8 @@ Translations
 
 Thanks to Thomas Thurman for improvements in this version.
 
-  - Commenting and tidying (Thomas)
-  - Fix possible compositor crash (Thomas) (#530702)
+* Commenting and tidying (Thomas)
+* Fix possible compositor crash (Thomas) (#530702)
 
 Translations
   Khaled Hosny (ar), Yavor Doganov (bg), Jorge González (es), Kjartan Maraas (nb),
@@ -4030,9 +4187,9 @@ Translations
 
 Thanks to Thomas Thurman for improvements in this version.
 
-  - Various commenting (Thomas)
-  - Ensure you can turn off compositor with "configure" (Thomas)
-  - Ensure you can turn off gconf with "configure" (Thomas) (#530870)
+* Various commenting (Thomas)
+* Ensure you can turn off compositor with "configure" (Thomas)
+* Ensure you can turn off gconf with "configure" (Thomas) (#530870)
 
 Translations
   Clytie Siddall (vi)
@@ -4043,16 +4200,16 @@ Translations
 Thanks to Robert Escriva, Iain Holmes, Matt Krai, Thomas Thurman,
 and Chris Wang for improvements in this version.
 
-  - Add shadow ability for menus and tooltips (Iain) (#517442) (#517524)
-  - Fix possible crashes in compositor (Iain) (#534569) (#528787)
-  - Major reorganisation of compositor code (Iain)
-  - Initial version of XRender backend for the compositor (Iain)
-  - New basic public API for compositor (Iain)
-  - Window decoration updates colour when GTK theme changes (Robert) (#511826)
-  - Minor code cleanup for pedantic compilers (Thomas)
-  - Further code cleanup for pedantic compilers (Matt) (#526049)
-  - The atom list appears only once in the code (Thomas) (#530843)
-  - Don't attempt to read attributes of invalid windows (Chris) (#530485)
+* Add shadow ability for menus and tooltips (Iain) (#517442) (#517524)
+* Fix possible crashes in compositor (Iain) (#534569) (#528787)
+* Major reorganisation of compositor code (Iain)
+* Initial version of XRender backend for the compositor (Iain)
+* New basic public API for compositor (Iain)
+* Window decoration updates colour when GTK theme changes (Robert) (#511826)
+* Minor code cleanup for pedantic compilers (Thomas)
+* Further code cleanup for pedantic compilers (Matt) (#526049)
+* The atom list appears only once in the code (Thomas) (#530843)
+* Don't attempt to read attributes of invalid windows (Chris) (#530485)
 
 Translations
   Khaled Hosny (ar), Gabor Kelemen (hu), Kjartan Maraas (nb), Tino Meinen (nl),
@@ -4063,11 +4220,12 @@ Translations
 Thanks to Erwann Chenede and Carlos Garnacho for improvements
 in this version.
 
-  - Re-enable cascading (Erwann) (#529925)
-  - Propagate opacity to frame windows (spec compliance!) (Carlos)
+* Re-enable cascading (Erwann) (#529925)
+* Propagate opacity to frame windows (spec compliance!) (Carlos)
 
 Translations
-  - None this time!
+
+* None this time!
 
 2.23.8
 ======
@@ -4097,14 +4255,14 @@ Clytie Siddall (vi), Woodman Tuen (zh_HK), Woodman Tuen (zh_TW)
 Thanks to Lucas Rocha, Owen Taylor, and Thomas Thurman for improvements in this
 version.
 
-  - Updates of useless preferences don't crash (Thomas) (#526016)
-  - Compliance with new gnome-session (Lucas) (#525051)
-  - Preview widget doesn't crash on broken themes (Thomas) (Launchpad 199402)
-  - Initially iconic windows don't unminimise (Owen) (#491090)
-  - Move ~/.metacity to ~/.config/metacity (Thomas) (#518596)
-  - Metacity doesn't stay around when replaced (Thomas)
-  - Extra check for null return in a function (Thomas)
-  - Displays are singletons, simplifying code (Thomas) (#499301)
+* Updates of useless preferences don't crash (Thomas) (#526016)
+* Compliance with new gnome-session (Lucas) (#525051)
+* Preview widget doesn't crash on broken themes (Thomas) (Launchpad 199402)
+* Initially iconic windows don't unminimise (Owen) (#491090)
+* Move ~/.metacity to ~/.config/metacity (Thomas) (#518596)
+* Metacity doesn't stay around when replaced (Thomas)
+* Extra check for null return in a function (Thomas)
+* Displays are singletons, simplifying code (Thomas) (#499301)
 
 Translations
   Jorge González (es), Eskild Hustvedt (nn), Baris Cicek (tr), Clytie Siddall (vi)
@@ -4115,16 +4273,16 @@ Translations
 Thanks to Marco Pesenti Gritti, Iain Holmes, Josh Lee, Thomas Thurman, and
 Matthew Wilson for improvements in this version.
 
-  - Workspaces whose name is the same as the standard name, plus some string,
+* Workspaces whose name is the same as the standard name, plus some string,
     are not cut off. (Thomas) (#453678)
-  - Improve compositor performance (Iain) (#522166)
-  - Draw wallpaper correctly when we start up with compositor
+* Improve compositor performance (Iain) (#522166)
+* Draw wallpaper correctly when we start up with compositor
     (Iain) (#522599)
-  - Several other smaller compositor fixes (Iain)
-  - Don't draw shadows on shaped windows unless they have frames
+* Several other smaller compositor fixes (Iain)
+* Don't draw shadows on shaped windows unless they have frames
     (Iain) (#505333)
-  - Newly-created keep-above windows get focus (Marco) (#519188)
-  - Allow moving workspace when dragging with modifier key (Matthew)
+* Newly-created keep-above windows get focus (Marco) (#519188)
+* Allow moving workspace when dragging with modifier key (Matthew)
     (#474195)
 
 Translations
@@ -4136,7 +4294,6 @@ Translations
 
 Removed some debug statements introduced in 2.23.1.  Brown paper bag release.
 
-
 2.23.1
 ======
 
@@ -4145,13 +4302,13 @@ Thomas Thurman for improvements in this version.
 
 (Cosimo's patch was very similar to another received from Jason Ribero.)
 
-  - Allow horizontal and vertical maximisation using the mouse (Cosimo/Jason)
+* Allow horizontal and vertical maximisation using the mouse (Cosimo/Jason)
     (#358674)
-  - Allow "spacer" as a value for buttons, for blank space (Andrea) (#509165)
-  - Remove unused code (Jim)
-  - refactor preferences handling (Thomas)
-  - make sure we're valid C89 (Jens) (#518917)
-  - some messing with tool scripts (Thomas)
+* Allow "spacer" as a value for buttons, for blank space (Andrea) (#509165)
+* Remove unused code (Jim)
+* refactor preferences handling (Thomas)
+* make sure we're valid C89 (Jens) (#518917)
+* some messing with tool scripts (Thomas)
 
 Translations
   Jorge González (es), Claude Paroz (fr), Woodman Tuen (zh_HK), Woodman
@@ -4163,20 +4320,20 @@ Translations
 Thanks to Matthias Clasen, Mikkel Kamstrup Erlandsen, Jim Huang, Thomas Thurman,
 and Thomas Wood for improvements in this version.
 
-  - the preview widget can draw shaped windows properly! (Thomas W, #460018)
-  - refactored handling of boolean and enumerated gconf preferences;
+* the preview widget can draw shaped windows properly! (Thomas W, #460018)
+* refactored handling of boolean and enumerated gconf preferences;
     refactoring of string and integer preferences will follow shortly (Thomas T)
-  - Applications asking to move and resize windows at the same time have
+* Applications asking to move and resize windows at the same time have
     both their requests granted (Mikkel) (#448183)
-  - Windows marked "skip taskbar" don't appear in the ctrl-alt-tab list
+* Windows marked "skip taskbar" don't appear in the ctrl-alt-tab list
     (Matthias) (#106249)
-  - fix session management detection (Thomas T) (#328210)
-  - when resizing with the keyboard, the cursor stays on a window edge if
+* fix session management detection (Thomas T) (#328210)
+* when resizing with the keyboard, the cursor stays on a window edge if
     you escape, whichever direction you were going (Thomas T) (#436257)
-  - fix major breakage when gconf was turned off in configure (Jim) (#515019)
-  - fix major breakage when verbose was turned off in configure (Jim) (#515152)
-  - fix name of verbose option in help (Thomas T)
-  - various bits of messing around with release scripts (Thomas T)
+* fix major breakage when gconf was turned off in configure (Jim) (#515019)
+* fix major breakage when verbose was turned off in configure (Jim) (#515152)
+* fix name of verbose option in help (Thomas T)
+* various bits of messing around with release scripts (Thomas T)
 
 Translations
   Ihar Hrachyshka (be@latin), Ilkka Tuohela (fi), Ignacio Casal Quinteiro (gl),
@@ -4187,10 +4344,10 @@ Translations
 
 Thanks to Michael Meeks and Thomas Thurman for improvements in this version.
 
-  - Only use compositor version if we have a compositor (Thomas) (#514453)
-  - Remove workaround for a problem in an ancient GTK version (Thomas) (#513737)
-  - Compositor efficiency fixes (Michael)
-  - Various tools added (Thomas)
+* Only use compositor version if we have a compositor (Thomas) (#514453)
+* Remove workaround for a problem in an ancient GTK version (Thomas) (#513737)
+* Compositor efficiency fixes (Michael)
+* Various tools added (Thomas)
 
 Translations
   Amitakhya Phukan (as), Rhys Jones (cy), Andre Klapper (de), Takeshi AIHANA (ja),
@@ -4202,18 +4359,18 @@ Translations
 Thanks to Paolo Borelli, Iain Holmes, Havoc Pennington, Christian Persch, Thomas
 Thurman, and Alex R.M. Turner for improvements in this version.
 
-  - Windows on other workspaces which need attention appear in the alt-tab
+* Windows on other workspaces which need attention appear in the alt-tab
     list too (Alex) (#333548)
-  - Remove deprecated function call (Christian) (#512561)
-  - New release script (Thomas)
-  - Made a start at improving the general number of comments (Thomas)
-  - Updated copyright year to 2008, and some other tiny fixes (Thomas)
-  - Don't do anything unusual when the compositor frees a window (Iain)
-  - Mapping windows doesn't mark them as damaged (Iain)
-  - Compositor uses the overlay window and not the root window (Iain)
-  - Fixed several list leaks (Paolo)
-  - Fixed warnings about printf formats (Havoc)
-  - Move source files into subdirectories of the src directory (Havoc)
+* Remove deprecated function call (Christian) (#512561)
+* New release script (Thomas)
+* Made a start at improving the general number of comments (Thomas)
+* Updated copyright year to 2008, and some other tiny fixes (Thomas)
+* Don't do anything unusual when the compositor frees a window (Iain)
+* Mapping windows doesn't mark them as damaged (Iain)
+* Compositor uses the overlay window and not the root window (Iain)
+* Fixed several list leaks (Paolo)
+* Fixed warnings about printf formats (Havoc)
+* Move source files into subdirectories of the src directory (Havoc)
 
 Translations
   Khaled Hosny (ar), Ihar Hrachyshka (be@latin), Petr Kovar (cs), Andre
@@ -4230,8 +4387,8 @@ This contains the new compositor; downstream maintainers should note that
 its GConf key is initially turned off in src/metacity.schemas.in and consider
 whether to turn it on by default in their packages.
 
-  - merge compositor branch! (Iain) (499081)
-  - print "Subversion" and not "CVS" when building (Thomas)
+* merge compositor branch! (Iain) (499081)
+* print "Subversion" and not "CVS" when building (Thomas)
 
 Translations
   Jorge González (es), Kjartan Maraas (nb), Daniel Nylander (sv)
@@ -4242,13 +4399,13 @@ Translations
 Thanks to Matthias Clasen, Martin Meyer, Kjartan Maraas, Thomas Thurman,
 and Lucas Rocha for improvements in this version.
 
-  - remove dead code (pointed out by Kjartan) (501365)
-  - rewrote long key binding description for the sake of
+* remove dead code (pointed out by Kjartan) (501365)
+* rewrote long key binding description for the sake of
     the translators (Thomas) (474889)
-  - check for null before adding menu (Matthias) (496054)
-  - let keys which end a grab also begin a grab (Thomas) (112560)
-  - check the right variable in theme sanity check (Martin) (501362)
-  - get session ID from environment if it's not passed in on the command
+* check for null before adding menu (Matthias) (496054)
+* let keys which end a grab also begin a grab (Thomas) (112560)
+* check the right variable in theme sanity check (Martin) (501362)
+* get session ID from environment if it's not passed in on the command
     line (Lucas) (498033)
 
 Translations
@@ -4262,11 +4419,11 @@ Translations
 Thanks to Benjamin Gramlich, Thomas Thurman, and Peter Bloomfield
 for improvements in this release.
 
- - Theme parser is compliant to XDG Base Directory Specification
+* Theme parser is compliant to XDG Base Directory Specification
    in searching for theme files. (Benjamin) (#480026)
- - Some source files which didn't get used were removed (Thomas)
+* Some source files which didn't get used were removed (Thomas)
    (#496947)
- - Fullscreen and maximise windows don't try to save their position
+* Fullscreen and maximise windows don't try to save their position
    (Peter) (#461927)
 
 Translations
@@ -4279,13 +4436,13 @@ Thanks to Elijah Newren, Alex R.M. Turner, Peter Bloomfield, Iain Holmes,
 Jans Granseuer, Federico Mena Quintero and Thomas Thurman for improvements
 in this release.
 
- - Add --sync option, like all other GTK apps (Iain)
- - Don't save window's position if it's maximised (Peter) (#461927)
- - Memory leak fix in preview (Jans) (#469682)
- - Truncate tab popup string correctly, and refactor function (Alex)
- - Windows which pop up under always-on-top windows don't get the
+* Add --sync option, like all other GTK apps (Iain)
+* Don't save window's position if it's maximised (Peter) (#461927)
+* Memory leak fix in preview (Jans) (#469682)
+* Truncate tab popup string correctly, and refactor function (Alex)
+* Windows which pop up under always-on-top windows don't get the
    focus, but do get the "needs attention" hint (Thomas) (#486445)
- - Fix error in function call which caused focus problems (Federico)
+* Fix error in function call which caused focus problems (Federico)
    (partial fix of #488468)
 
 Translations
@@ -4303,7 +4460,7 @@ Translations
 
 Thanks to Alexey Rusakov for the fix in this release.
 
- - prevent a crash on logout with metacity subsequently not being
+* prevent a crash on logout with metacity subsequently not being
    restored in future sessions (Alexey) [#433253]
 
 Translations
@@ -4322,14 +4479,14 @@ Translations
 Thanks to Frederic Crozat, Matthias Clasen, and Thomas Thurman for improvements
 in this release.
 
- - Noninteger auto-raise delay is not assumed to be zero (Thomas) (#377491)
- - Fix mangled window title in "Force Quit" (Frederic) (#462734)
- - "Close" can appear at any point in the window menu, and now appears
+* Noninteger auto-raise delay is not assumed to be zero (Thomas) (#377491)
+* Fix mangled window title in "Force Quit" (Frederic) (#462734)
+* "Close" can appear at any point in the window menu, and now appears
    at the bottom (Thomas) (#104026)
- - Windows which are always on top have "stick" insensitive (Thomas) (#460997)
- - All bitfields in window structure are together for optimisation (Thomas)
+* Windows which are always on top have "stick" insensitive (Thomas) (#460997)
+* All bitfields in window structure are together for optimisation (Thomas)
    (#450271)
- - Use the correct directory when installing keybindings (Matthias) (#454055)
+* Use the correct directory when installing keybindings (Matthias) (#454055)
 
 Translations
   Alexander Shopov (bg), Jorge González (es), Iñaki Larrañaga Murgoitio (eu),
@@ -4341,12 +4498,12 @@ Translations
 Thanks to Rob Bradford, Cosimo Cecchi, Yair Hershkovitz and Thomas Thurman
 for improvements in this release.
 
- - Fix a bug where the window can be focused without being raised
+* Fix a bug where the window can be focused without being raised
    if the maximize is aborted. (Rob) [#459027]
- - Unset fullscreen is an allowed action where relevant. (Cosimo) [#449427]
- - Reverse window buttons and align them to the left for RTL locales.
+* Unset fullscreen is an allowed action where relevant. (Cosimo) [#449427]
+* Reverse window buttons and align them to the left for RTL locales.
    (Yair) [#92212]
- - Put all bitfields in window data together to help with optimisation.
+* Put all bitfields in window data together to help with optimisation.
    (Thomas) [#450271]
 
 Translations
@@ -4361,12 +4518,12 @@ Translations
 Thanks to Damien Carbery and Thomas Thurman for improvements in
 this release.
 
- - Fixed build on Solaris (Damien) [#397296, #446535]
- - Only activate windows which change their startup ID if the
+* Fixed build on Solaris (Damien) [#397296, #446535]
+* Only activate windows which change their startup ID if the
    new ID differs from the old. (This fixes the bug where KDE
    apps gained the attention hint when switching workspaces.)
    (Thomas) [#400167]
- - Open new windows on the current xinerama. (Thomas) [#145503].
+* Open new windows on the current xinerama. (Thomas) [#145503].
 
 Translations
   Tshewang Norbu (dz),  Jorge González (es), Funda Wang (zh_CN)
@@ -4377,11 +4534,11 @@ Translations
 Thanks to Elijah Newren and Thomas Thurman for improvements in
 this release.
 
- - Updated the description of raise_on_click (Elijah) [#445447,
+* Updated the description of raise_on_click (Elijah) [#445447,
    #389923]
- - Refactor queueing code in window.c (Thomas) [#376760]
- - Added switch_group to the keybindings file (Thomas) [#444879]
- - New window information accessor function (Thomas) [#377495]
+* Refactor queueing code in window.c (Thomas) [#376760]
+* Added switch_group to the keybindings file (Thomas) [#444879]
+* New window information accessor function (Thomas) [#377495]
 
 2.19.8
 ======
@@ -4389,13 +4546,13 @@ this release.
 Thanks to Linus Torvalds, Yair Hershkovitz and Thomas Thurman for
 improvements in this release.
 
- - Lots of fixups for various alignments in RTL locales (Yair)
+* Lots of fixups for various alignments in RTL locales (Yair)
    [#387893]
- - Add code to configure what happens on right or middle click
+* Add code to configure what happens on right or middle click
    of titlebar (Linus) [#408904]
- - Fix layout for titlebars with mixed LTR/RTL scripts (Thomas)
+* Fix layout for titlebars with mixed LTR/RTL scripts (Thomas)
    [#433400]
- - Fix window menu layout for RTL scripts (Thomas) [#433400]
+* Fix window menu layout for RTL scripts (Thomas) [#433400]
 
 Translations
   Khaled Hosny (ar), Ihar Hrachyshka (be@latin), Jovan Naumovski (mk),
@@ -4407,11 +4564,11 @@ Translations
 2.19.5
 ======
 
- - Prevent metacity from "forgetting" which machine a window is on
+* Prevent metacity from "forgetting" which machine a window is on
    (Elijah) [#418552]
- - Prevent nasty flickering an placement problem introduced in
+* Prevent nasty flickering an placement problem introduced in
    metacity 2.19.2 (Elijah) [fix side-effect of change in #426519]
- - Fix some uninitialized memory usage errors (Elijah) [#427385]
+* Fix some uninitialized memory usage errors (Elijah) [#427385]
 
 Translations
   David Lodge (en_GB), Jorge González (es), Ignacio Casal Quinteiro (gl),
@@ -4423,18 +4580,18 @@ Translations
 Thanks to Magnus Therning, Elijah Newren, Thomas Thurman, and Bruno
 Boaventura for improvements in this release.
 
-  - Add support for _NET_MOVERESIZE_WINDOW (Magnus, Elijah) [#344521]
-  - EWMH compliance: set _NET_WM_ALLOWED_ACTIONS so that pagers know
+* Add support for _NET_MOVERESIZE_WINDOW (Magnus, Elijah) [#344521]
+* EWMH compliance: set _NET_WM_ALLOWED_ACTIONS so that pagers know
     which actions we support (Elijah) [#115247]
-  - Fix crash with apps trying to open an insanely huge window
+* Fix crash with apps trying to open an insanely huge window
     (Thomas) [#399529]
-  - Fix temporary hang/pause with libXt by making sure apps get a
+* Fix temporary hang/pause with libXt by making sure apps get a
     ConfigureNotify on unmap (Elijah) [#399552]
-  - do not auto-maximize windows larger than the workarea in only a
+* do not auto-maximize windows larger than the workarea in only a
     single direction (Elijah) [#419810]
-  - Don't show the current workspace as a possible workspace to switch
+* Don't show the current workspace as a possible workspace to switch
     to (Bruno) [#426791]
-  - Preserve stacking order across restarts (Elijah)
+* Preserve stacking order across restarts (Elijah)
 
 Translations
   Khaled Hosny (ar), Kjartan Maraas (nb)
@@ -4445,17 +4602,17 @@ Translations
 Thanks to Bastien Nocera, Thomas Thurman, and Elijah Newren for
 improvements in this release.
 
-  - Add new control-center key bindings definitions (Bastien) [#420145]
-  - Prevent metacity from crashing when trying to use invalid themes
+* Add new control-center key bindings definitions (Bastien) [#420145]
+* Prevent metacity from crashing when trying to use invalid themes
     (Thomas) [#423855]
-  - Fix invalid free causing crash on metacity close introduced in
+* Fix invalid free causing crash on metacity close introduced in
     2.19.1 (Elijah) [#427385]
-  - Add special keybinding just for debugging spew marks, unbound and
+* Add special keybinding just for debugging spew marks, unbound and
     not even listed in schemas (Elijah)
-  - Fix move/resize events in relation to combinations of
+* Fix move/resize events in relation to combinations of
     ConfigureRequest and WM_NORMAL_HINTS change notifications (Elijah)
     [#426519]
-  - Remove what we believe to be an ancient attempt at working around
+* Remove what we believe to be an ancient attempt at working around
     sloppy/mouse focus bugs that we believe have since been correctly
     fixed.  May fix some ugly race conditions.  May also cause nasty
     bugs in sloppy/mouse focus modes.  Only one way to find
@@ -4471,38 +4628,38 @@ Thanks to Jaap Haitsma, Linus Torvalds, Charlie Brej, Kjartan Maraas,
 Arthur Taylor, Elijah Newren, Josselin Mouette, Havoc Pennington,
 Benjamin Berg, and Carlo Wood for improvements in this release.
 
-  - new icon for the force-quit dialog (Jaap) [#396655]
-  - add configureable mouse click action abilities, and clean up lots of
+* new icon for the force-quit dialog (Jaap) [#396655]
+* add configureable mouse click action abilities, and clean up lots of
     related code (Linus) [#408899, #408902, others]
-  - add schemeas for middle and right click titlebar actions (Charlie)
+* add schemeas for middle and right click titlebar actions (Charlie)
     [#408903]
-  - remove pango/pangox.h include since it's not needed and not
+* remove pango/pangox.h include since it's not needed and not
     installed anymore (Kjartan)
-  - adjust rounded corners so that they fit nicely with the arcs
+* adjust rounded corners so that they fit nicely with the arcs
     around them (Arthur) [#399373]
-  - fix session hang when metacity .sm file is missing (Josselin)
+* fix session hang when metacity .sm file is missing (Josselin)
     [#407981]
-  - add support for _NET_WM_USER_TIME_WINDOW in order to cut down on
+* add support for _NET_WM_USER_TIME_WINDOW in order to cut down on
     context switches (Elijah, Havoc) [#354213]
-  - prevent nasty metacity/gdk interactions causing hangs with gtk
+* prevent nasty metacity/gdk interactions causing hangs with gtk
     trunk (Elijah) [offshoots of #354213]
-  - fix button middle fallback and the prelight state (Benjamin) [#419043]
-  - Lots of code cleanup for the strut lists (Elijah)
-  - fix handling of unidirectional maximization and partial struts +
+* fix button middle fallback and the prelight state (Benjamin) [#419043]
+* Lots of code cleanup for the strut lists (Elijah)
+* fix handling of unidirectional maximization and partial struts +
     some miscellaneous cleanups (Carlo) [#358311]
-  - avoid some crashes when dragging windows partially offscreen
+* avoid some crashes when dragging windows partially offscreen
     (Elijah) [#353513]
-  - avoid mousenav vs. keynav focus problems with the run application
+* avoid mousenav vs. keynav focus problems with the run application
     dialog in mouse/sloppy focus modes (Elijah) [#374752]
-  - _NET_ACTIVE_WINDOW property on the root window should be a single
+* _NET_ACTIVE_WINDOW property on the root window should be a single
     xwindow id, not two (Elijah)
-  - Fix unidirection unmaximization causing jumps (Elijah) [#355497]
-  - fix unfullscreening and unmaximizing with size increment/size
+* Fix unidirection unmaximization causing jumps (Elijah) [#355497]
+* fix unfullscreening and unmaximizing with size increment/size
     constraint windows (such as gnome-terminal) possibly not returning
     to their "original position" (Elijah) [#329152]
-  - fix some issues with min/max and size increment constraints
+* fix some issues with min/max and size increment constraints
     (Elijah) [#418395]
-  - send synthetic configure notify events in response to appropriate
+* send synthetic configure notify events in response to appropriate
     MapRequest events too (Elijah) [#322840]
 
 Translations
@@ -4519,11 +4676,11 @@ Translations
 Thanks to Bruno Boaventura, Mad Alex, and Thomas Thurman for
 improvements in this release.
 
-   - make window menu arrangement more sensible. (Bruno) [#382962]
-   - unmaximise button keeps pressed appearance when moved off and
+* make window menu arrangement more sensible. (Bruno) [#382962]
+* unmaximise button keeps pressed appearance when moved off and
      back. (Alex) [#395560]
-   - fix a couple of compositor crashes (Thomas) [#387761]
-   - new environment variables checked if the compositor is enabled;
+* fix a couple of compositor crashes (Thomas) [#387761]
+* new environment variables checked if the compositor is enabled;
      see the new file doc/compositor-control.txt for details. (Thomas)
 
 Translations
@@ -4538,10 +4695,10 @@ Translations
 Thanks to Christof Krüger, Federico Mena Quintero, Bruno Boaventura,
 and Björn Lindqvist for improvements in this release.
 
-  - fix longstanding problem about windows flickering in and out of
+* fix longstanding problem about windows flickering in and out of
     maximised state when dragging between xineramas (Christof) [#358715]
-  - grab server when switching workspaces (Federico) [#381127] 
-  - replace changing text on window menu with pairs of radio buttons
+* grab server when switching workspaces (Federico) [#381127]
+* replace changing text on window menu with pairs of radio buttons
     and checkboxes (Bruno, Björn) [#343108]
 
 Translations
@@ -4554,11 +4711,11 @@ Translations
 Thanks to Priit Laes, Bruno Boaventura, Kjartan Maraas, Justin Mason,
 Elijah Newren and Dan Mick for improvements in this release.
 
-  - implement handle_move_to_{side|corner}_* to allow the user to flip a
+* implement handle_move_to_{side|corner}_* to allow the user to flip a
     window to the side or corner of the screen. (Justin) [#317884]
-  - fix strict focus mode by picking up on res_class (Dan) [#361054]
-  - remove deprecated gtk stuff (Priit, Bruno)
-  - string fixes (Kjartan) [#363354, #363355]
+* fix strict focus mode by picking up on res_class (Dan) [#361054]
+* remove deprecated gtk stuff (Priit, Bruno)
+* string fixes (Kjartan) [#363354, #363355]
 
 Translations
   Jakub Friedl (cs), Francisco Javier F. Serrador (es), Ilkka Tuohela (fi),
@@ -4570,8 +4727,8 @@ Translations
 Thanks to Bruno Boaventura and Carlo Wood for improvements in this
 release.
 
-  - sync metacity workspace previous with libwnck (Bruno) [#341893]
-  - fix cases when titlebar is allowed offscreen and shouldn't be, and
+* sync metacity workspace previous with libwnck (Bruno) [#341893]
+* fix cases when titlebar is allowed offscreen and shouldn't be, and
     vice-versa (Carlo) [#333995]
 
 Translations
@@ -4583,21 +4740,21 @@ Translations
 Thanks to Elijah Newren, Jens Granseuer, Bruno Boaventura, Carlo Wood,
 and Thomas Thurman for changes in this release.
 
-  - version 2 of theme format: stick, shade and above buttons on titlebar,
+* version 2 of theme format: stick, shade and above buttons on titlebar,
     variable rounding on corners, variable transparency on window
     backgrounds, stock icons in themes, can remove all titlebar buttons
     from certain classes of window, and more (Thomas) [#102547 and
     dependencies]
-  - improve "Force Quit" dialog (Bruno) [#121936]
-  - ignore edge resistance when resizing with keyboard (Elijah) [#346782]
-  - maintain window size and placement across restarts (Carlo) [#358042]
-  - prevent crash when closing certain remote apps (Elijah) [#358514]
-  - longstanding mouse-focus bug fixed which affected firefox's
+* improve "Force Quit" dialog (Bruno) [#121936]
+* ignore edge resistance when resizing with keyboard (Elijah) [#346782]
+* maintain window size and placement across restarts (Carlo) [#358042]
+* prevent crash when closing certain remote apps (Elijah) [#358514]
+* longstanding mouse-focus bug fixed which affected firefox's
     autocompletion (Elijah) [#357695]
-  - ignore maximum size constraints when maximising (Elijah) [#327543]
-  - warn translators to keep translations in sync with libwnck (Bruno)
+* ignore maximum size constraints when maximising (Elijah) [#327543]
+* warn translators to keep translations in sync with libwnck (Bruno)
     [#355620]
-  - fixes for compilation warnings, etc (Elijah, Jens) [#348067, #356631]
+* fixes for compilation warnings, etc (Elijah, Jens) [#348067, #356631]
 
 Translators
   Ivar Smolin (et), Gabor Kelemen (hu), Luca Ferretti (it),
@@ -4609,34 +4766,34 @@ Translators
 Thanks to Eljah Newren, Maik Beckmann, Christian Hamar, Thomas Andersen,
 and Bruno Boaventura de Oliveira for changes in this release.
 
-  - partial audit to fix timestamp usage (Elijah) [part of #355180]
-  - remove compilation warnings (Maik) [#355876]; (Bruno) [#355490,
+* partial audit to fix timestamp usage (Elijah) [part of #355180]
+* remove compilation warnings (Maik) [#355876]; (Bruno) [#355490,
     #355489]
-  - automatic detection of stable/unstable in configure script
+* automatic detection of stable/unstable in configure script
     (Christian/Elijah) [#356122]
-  - make windows be stacked correctly before showing them (Thomas)
+* make windows be stacked correctly before showing them (Thomas)
     [#332385]
-  - use guint32 for timestamps (Elijah) [#348305]
+* use guint32 for timestamps (Elijah) [#348305]
 
 Translators
   Wouter Bolsterlee (nl), Matic Žgur (sl), Francisco Javier F. Serrador (es),
   Vladimir Petkov (bg), Jordi Mallach (ca), Ilkka Tuohela (fi),
   Rajesh Ranjan (hi), Woodman Tuen (zh_HK, zh_TW), Ani Peter (ml),
   Felix (ta), Ankit Patel (gu), Mohammad DAMT (id)
- 
+
 2.16.1
 ======
 
 Thanks to Elijah Newren, Colin Watson, and Bruno Boaventura de Oliveira
 Lacerda for changes in this release.
 
-  - fix stuck grab, letting focus be transferred between windows (Elijah)
+* fix stuck grab, letting focus be transferred between windows (Elijah)
     [#354422 partial]
-  - windows returning from fullscreen are constrained to be onscreen
+* windows returning from fullscreen are constrained to be onscreen
     (Elijah) [#353699]
-  - Clear the transient_for flag of a window after emitting a warning
+* Clear the transient_for flag of a window after emitting a warning
     (Colin)
-  - Replace copy_of_gdk_x11_window_set_user_time() with the real thing
+* Replace copy_of_gdk_x11_window_set_user_time() with the real thing
     (Bruno) [#352293]
 
 Translators
@@ -4648,7 +4805,7 @@ Translators
 
 Thanks to Jens Granseuer for changes in this release.
 
- - Fix the build with c89/gcc 2.95.
+* Fix the build with c89/gcc 2.95.
 
 Translators
   Rahul Bhalerao (mr), Runa Bhattacharjee (bn_IN), Woodman Tuen
@@ -4664,19 +4821,19 @@ Thanks to Stéphane Rosi, Vytautus Liuolia, Will Walker, Baptiste
 Mille-Mathias, Elijah Newren, Ed Catmur, and Thomas Andersen for fixes
 in this release.
 
- - allow moving maximized windows between xineramas again (Stéphane)
+* allow moving maximized windows between xineramas again (Stéphane)
    [#338660]
- - fix an uninitialized-usage bug with net_wm_user_time that breaks
+* fix an uninitialized-usage bug with net_wm_user_time that breaks
    focus with new windows (Vytautus)
- - re-fix accessibility events for the alt-tab popup (Will) [#350624]
- - update the close pixmap to fit better with the other pixmaps of the
+* re-fix accessibility events for the alt-tab popup (Will) [#350624]
+* update the close pixmap to fit better with the other pixmaps of the
    menu (Baptiste) [#345498]
- - fix several fullscreen handling bugs I introduced, causing
+* fix several fullscreen handling bugs I introduced, causing
    fullscreen windows to not actually be shown fullscreen (Elijah)
    [#343115]
- - fix keybindings with hex-values, coming from special extended
+* fix keybindings with hex-values, coming from special extended
    keyboard keys (Ed) [#140448]
- - fix metacity-dialog handling of arguments (Thomas) [#340690]
+* fix metacity-dialog handling of arguments (Thomas) [#340690]
 
 Translators
   Vladimir Petkov (bg), Jordi Mallach (ca), Gabor Kelemen (hu),
@@ -4690,30 +4847,30 @@ Thanks to Vincent Untz, Jens Granseuer, Björn Lindqvist, Dmitry
 Timoshkov, Thomas Thurman, Vytautas Liuolia, Thomas Andersen, Chris
 Ball, and Elijah Newren for fixes in this release.
 
- - kill usage of libegg (Vincent) [#348633]
- - fix another C89 vs. C99 issue (Jens) [#347621]
- - make it so maximized windows do not have rounded corners (Björn)
+* kill usage of libegg (Vincent) [#348633]
+* fix another C89 vs. C99 issue (Jens) [#347621]
+* make it so maximized windows do not have rounded corners (Björn)
    [#336850]
- - fix the heuristic for determining if windows can be made
+* fix the heuristic for determining if windows can be made
    fullscreen, needed for WINE and possible also some legacy
    applications (Dmitry) [#346927]
- - make sure window features get recalculated when the screen is
+* make sure window features get recalculated when the screen is
    resized via XRandR (Dmitry) [#346927]
- - fitts' law fixes for titlebar buttons on maximized windows (Thomas
+* fitts' law fixes for titlebar buttons on maximized windows (Thomas
    Thurman) [#97703]
- - react to _NET_STARTUP_ID changes, as proposed for the new
+* react to _NET_STARTUP_ID changes, as proposed for the new
    startup-notification/EWMH spec (Vytautas) [#347515]
- - return the window to maximized state if the window was "shaken
+* return the window to maximized state if the window was "shaken
    loose" from maximized state during a resize but the resize is later
    aborted (Thomas Andersen) [#346719]
- - fix button lighting with dragged clicks (Björn) [#321474]
- - don't minimize in response to double clicks on the titlebar when
+* fix button lighting with dragged clicks (Björn) [#321474]
+* don't minimize in response to double clicks on the titlebar when
    minimiziation should not be allowed (Chris) [#347377]
- - fix some titlebar-not-on-screen constraint issues (Elijah)
+* fix some titlebar-not-on-screen constraint issues (Elijah)
    [#333328, #345522]
 
 Translators
- Mahay Alam Khan (bn_IN), Jakub Friedl (cs), Iñaki Larrañaga 
+ Mahay Alam Khan (bn_IN), Jakub Friedl (cs), Iñaki Larrañaga
  Murgoitio (eu), Yuval Tanny (he), Rajesh Ranjan (hi), Jovan
  Naumovski (mk) Kjartan Maraas (nb), Leonid Kanter (ru)
 
@@ -4723,8 +4880,8 @@ Translators
 Thanks to Björn Lindqvist and Thomas Thurman for improvements in this
 release.
 
- - grab alt+shift+button1 when trying to snap-move windows (Björn)
- - avoid a case where memory is written after it's freed (Thomas)
+* grab alt+shift+button1 when trying to snap-move windows (Björn)
+* avoid a case where memory is written after it's freed (Thomas)
 
 Translators
  Hendrik Richter (de), Kostas Papadimas (el), Jonathan Ernst (fr),
@@ -4741,7 +4898,7 @@ Translations
 
   Mahay Alam Khan (bn_IN), Rhys Jones (cy), Francisco Javier
   F. Serrador (es), Ilkka Tuohela (fi), Rajesh Ranjan (hi), Changwoo
-  Ryu (ko), Fano Rajaonarisoa (mg), Sanlig Badral (mn), Слободан Д. 
+  Ryu (ko), Fano Rajaonarisoa (mg), Sanlig Badral (mn), Слободан Д.
   Средојевић (sr), Funda Wang (zh_CN)
 
 2.15.5
@@ -4749,20 +4906,20 @@ Translations
 
 Thanks to Björn Lindqvist, Søren Sandmann, Adam Jackson, Elijah
 Newren, and Aidan Delaney for improvements in this release.
-	
- - code cleanup in resizepopup.c (Björn) [#341648]
- - fix a logic bug so that the whole titlebar becomes sensitive to
+ 
+* code cleanup in resizepopup.c (Björn) [#341648]
+* fix a logic bug so that the whole titlebar becomes sensitive to
    mouse clicks (Björn) [#336320]
- - make mouse cursor when moving windows become a hand (Björn) [#337376]
- - lots and lots of compositor improvements -- beginning of a new
+* make mouse cursor when moving windows become a hand (Björn) [#337376]
+* lots and lots of compositor improvements -- beginning of a new
    layer to abstract transition effects, shrinking and minimizing and
    exploding effects, fading in and out, unminimize animation that
    reverses minimize one, translucent menus, bounce on window focus,
    and all kinds of stuff I don't understand and can't summarize well
    (Søren, Adam)
- - Fix a crash on exit/logout from assuming a compositor would always
+* Fix a crash on exit/logout from assuming a compositor would always
    exist (Elijah) [#342166]
- - code cleanup in tabpopup.c (Aidan Delaney) [#166890]
+* code cleanup in tabpopup.c (Aidan Delaney) [#166890]
 
 Translations
   Pema Geyleg (dz), Iñaki Larrañaga Murgoitio (eu), Theppitak
@@ -4772,17 +4929,17 @@ Translations
 ==
 
 Thanks to Søren Sandmann, Elijah Newren, Paolo Borelli, Björn
-Lindqvist, jylefort at FreeBSD org, 
+Lindqvist, jylefort at FreeBSD org,
 
- - various code cleanups (Søren)
- - prevent long titles from "sticking" in the tasklist (Elijah) [#330671]
- - handle sync counter notifications in the compositor (Søren)
- - notes/documentation updates (Elijah)
- - plug a small leak (Paolo)
- - remove a lot of dead code obsoleted by the new edge-resistance
+* various code cleanups (Søren)
+* prevent long titles from "sticking" in the tasklist (Elijah) [#330671]
+* handle sync counter notifications in the compositor (Søren)
+* notes/documentation updates (Elijah)
+* plug a small leak (Paolo)
+* remove a lot of dead code obsoleted by the new edge-resistance
    stuff (Björn) [#341561]
- - prevent a crash when changing resolution (jylefort) [#340847]
- - revert an accessibility module loading workaround from Gnome 2.6
+* prevent a crash when changing resolution (jylefort) [#340847]
+* revert an accessibility module loading workaround from Gnome 2.6
    that has long since been fixed for us in gtk+ (Elijah) [#123372]
 
 Translations
@@ -4795,10 +4952,10 @@ Translations
 
 Here's hoping that "third time's a charm."  ;-) This release just
 fixes the translations-not-included issue.  See
-http://mail.gnome.org/archives/desktop-devel-list/2006-April/msg00483.html
+<http://mail.gnome.org/archives/desktop-devel-list/2006-April/msg00483.html>
 for more details.
 
- - Use gnome-autogen.sh like most other modules (Rodney)
+* Use gnome-autogen.sh like most other modules (Rodney)
 
 2.15.1
 ==
@@ -4806,7 +4963,7 @@ for more details.
 This release just fixes the control-center build (which depends upon
 libmetacity-private).  Thanks to Vincent for catching the problem.
 
- - Include boxes.h in the includes dir (Elijah) [#339708]
+* Include boxes.h in the includes dir (Elijah) [#339708]
 
 2.15.0
 ==
@@ -4817,7 +4974,7 @@ Thomas Andersen, Brian Pepple, and Søren Sandmann for improvements in
 this release. (Note that "Thomas" below refers to Thomas Thurman if
 last name isn't specified)
 
- - An endless array of compositor updates, not all of which are well
+* An endless array of compositor updates, not all of which are well
    explained in the ChangeLog. ;-)  Includes an ability to enable and
    disable the compositor at runtime, fixed up wobbling effect and new
    explosion effect, special magnification handling, different opacity
@@ -4826,41 +4983,41 @@ last name isn't specified)
    moving/resizing, various code restructuring, special runtime checks
    for correct extensions and other compositors, lots of bug fixes,
    and possibly other stuff I'm missing or not understanding (Søren)
- - Removed "move to another workspace" menu when there are exactly two
+* Removed "move to another workspace" menu when there are exactly two
    workspaces (Thomas) [#151183]
- - fix type for compositing_manager schema entry (Elijah) [#335901]
- - Port more properties to our async system for code cleanliness and
+* fix type for compositing_manager schema entry (Elijah) [#335901]
+* Port more properties to our async system for code cleanliness and
    speed improvements (Havoc, Thomas)
- - Lots of code cleanup, even more code cleanup, wow our code was
+* Lots of code cleanup, even more code cleanup, wow our code was
    messy (Björn) [#335177, #337507, #336890, #338359]
- - Abstract out the functions for setting/unsetting demands attention
+* Abstract out the functions for setting/unsetting demands attention
    hint and avoid doing it when the window isn't obscured (Thomas)
    [#305882]
- - Change strings to make them more readable, and more
+* Change strings to make them more readable, and more
    translatable (Gora) [#335720]
- - Reduce compiling warnings -- add a number of casts and change
+* Reduce compiling warnings -- add a number of casts and change
    signedness on a number of variables (Björn) [#336032]
- - Fixed broken links in README (Alejandro) [#333303]
- - Add a tabbing function, bound to alt-f6 by default, to cycle
+* Fixed broken links in README (Alejandro) [#333303]
+* Add a tabbing function, bound to alt-f6 by default, to cycle
    through the windows of the current application (Thomas) [#94682]
- - Fix the build with --disable-xsync (Andy) [#336605]
- - Raise windows on maximize/unmaximize (Dan) [#335076]
- - Don't have confirmation windows make applications appear to be
+* Fix the build with --disable-xsync (Andy) [#336605]
+* Raise windows on maximize/unmaximize (Dan) [#335076]
+* Don't have confirmation windows make applications appear to be
    locked when closing via the window list (Dan) [#334899]
- - Allow any keybinding pref to be specified either with <foo>, a
+* Allow any keybinding pref to be specified either with <foo>, a
    string, or <foo>_list, a list of strings, or both (Thomas)
    [#164831]
- - warn and ignore if transient_for is set to a non-top-level window
+* warn and ignore if transient_for is set to a non-top-level window
    (Thomas Andersen) [#335524]
- - Use po/LINGUAS for listing supported languages (Brian) [#337951]
+* Use po/LINGUAS for listing supported languages (Brian) [#337951]
 
 Translations
   Vladimir Petkov (bg), Jordi Mallach (ca), Miloslav Trmac (cs), Rhys
   Jones (cy), Lasse Bang Mikkelsen (da), Frank Arnold (de), Kostas
   Papadimas (el), Francisco Javier F. Serrador (es), Ivar Smolin (et), Iñaki
   Larrañaga (eu), Farzaneh Sarafraz (fa), Ilkka Tuohela (fi), Ignacio Casal
-  Quinteiro (gl), Ankit Patel (gu), Rajesh Ranjan (hi), Gabor Kelemen (hu), 
-  Satoru SATOH (ja), Alexander Didebulidze (ka), Žygimantas Beručka (lt), 
+  Quinteiro (gl), Ankit Patel (gu), Rajesh Ranjan (hi), Gabor Kelemen (hu),
+  Satoru SATOH (ja), Alexander Didebulidze (ka), Žygimantas Beručka (lt),
   Kjartan Maraas (nb), Michiel Sikkes (nl), Åsmund Skjæveland (nn), Gora
   Mohanty (or), Raphael Higino (pt_BR), Duarte Loreto (pt), Mugurel Tudor (ro),
   Leonid Kanter (ru), Steve Murphy (rw), Laurent Dhima (sq), Слободан Д.
@@ -4872,11 +5029,11 @@ Translations
 
 This release just reverts the widely hated new focus behavior of Metacity
 2.14.x to the behavior found in 2.12.x.  Patch came from Ron Yorston.  
-See http://blogs.gnome.org/view/newren/2006/04/13/0 and
-http://mail.gnome.org/archives/release-team/2006-April/msg00025.html for
+See <http://blogs.gnome.org/view/newren/2006/04/13/0> and
+<http://mail.gnome.org/archives/release-team/2006-April/msg00025.html> for
 more details.
 
- - Add a focus_new_windows gconf key, change the default to 'smart' (2.12
+* Add a focus_new_windows gconf key, change the default to 'smart' (2.12
    behavior) and add a 'strict' option to get 2.14 behavior.  (Ron)
    [#326159]
 
@@ -4891,21 +5048,21 @@ Translations
 Thanks to Thomas Thurman, Paolo Borelli, Björn Lindqvist, and
 Elijah Newren for fixes in this release.
 
- - Fix constraints bug causing negative width windows and crashes
+* Fix constraints bug causing negative width windows and crashes
    (Elijah) [#336651]
- - Fix window grouping with parent/child windows (Björn) [#336184]
- - use g_str_has_prefix instead of a local copy of the function
+* Fix window grouping with parent/child windows (Björn) [#336184]
+* use g_str_has_prefix instead of a local copy of the function
    (Paolo) [#334643]
- - Make sure pager can refresh when window is minimized on a different
+* Make sure pager can refresh when window is minimized on a different
    workspace (Thomas) [#315142]
- - Add debugging information for edge resistance (Elijah)
+* Add debugging information for edge resistance (Elijah)
 
 Translations
 
   Vladimir Petkov (bg), tangi.bzh (br), Jordi Mallach (ca), Miloslav
   Trmac (cs), Rhys Jones (cy), Lasse Bang Mikkelsen (da), Frank
   Arnold (de), Mindu Dorji (dz), Kostas Papadimas (el), Francisco
-  Javier F. Serrador (es), Ivar Smolin (et), Iñaki Larrañaga 
+  Javier F. Serrador (es), Ivar Smolin (et), Iñaki Larrañaga
   Murgoitio (eu), Elnaz Sarbar (fa), Ilkka Tuohela (fi),
   Ignacio Casal Quinteiro (gl), Ankit Patel (gu), Rajesh Ranjan (hi)
   Gabor Kelemen (hu), Luca Ferretti (it), Satoru SATOH (ja), Vladimer
@@ -4929,9 +5086,9 @@ source.
 
 Thanks to Ryan Lortie and Thomas Thurman for fixes in this release.
 
- - Mark the app-running-remotely-window-title string for translation
+* Mark the app-running-remotely-window-title string for translation
    (Thomas) [#334332]
- - Only unmaximise window before freeing if the window is actually
+* Only unmaximise window before freeing if the window is actually
    maximised (Ryan) [#333563]
 
 Translations
@@ -4944,16 +5101,16 @@ Translations
 Thanks to Jens Granseuer, Kristian, Søren Sandmann, Sylvain
 Bertrand, and Thomas Thurman for improvements in this release.
 
- - Fix build with gcc 2.95 (Jens) [#331166]
- - Compositor improvements [remember, still off by default]: add
+* Fix build with gcc 2.95 (Jens) [#331166]
+* Compositor improvements [remember, still off by default]: add
    unused wobbly (un)minimize animation (Kristian), add support for
    turning updates on and off (Søren), use sync counter to make
    composited resizing tear free (Søren), add ability to unmanage
-   the screen (Søren), 
- - Fix build issue with library search order (Sylvain) [#330695]
- - Work around buggy application grouping with transient windows
+   the screen (Søren),
+* Fix build issue with library search order (Sylvain) [#330695]
+* Work around buggy application grouping with transient windows
    (Thomas) [#328211]
- - Prevent setting cycle_windows to keybindings that won't work.
+* Prevent setting cycle_windows to keybindings that won't work.
    (Thomas) [#329676]
 
 2.13.89
@@ -4962,22 +5119,22 @@ Bertrand, and Thomas Thurman for improvements in this release.
 Thanks to Søren Sandmann, Thomas Thurman, Thom May, Akira Tagoh,
 Luke Morton, and Philip O'Brien for improvements in this release.
 
- - Compositor improvements [remember that the compositor is still
+* Compositor improvements [remember that the compositor is still
    disabled by default]: New fancy minimize animation that fades in
    and out, new debug stuff, various bug fixes (Søren)
- - When buggy apps create synthetic button or keypresses without a
+* When buggy apps create synthetic button or keypresses without a
    timestamp, produce a warning instead of failing an assertion
    (Thomas) [#313490]
- - Avoid a memory leak when checking which workspace(s) a window is
+* Avoid a memory leak when checking which workspace(s) a window is
    on (Thomas) [#322059]
- - Add a man page for metacity (Thom, Akira, Luke, Philip) [#321279]
- - Disable alt-f7 if a window can't be moved, and alt-f8 if it can't
+* Add a man page for metacity (Thom, Akira, Luke, Philip) [#321279]
+* Disable alt-f7 if a window can't be moved, and alt-f8 if it can't
    be resized (Thomas) [#328920]
- - Allow alt-escape to cancel alt-tabbing, and vice versa (Thomas)
+* Allow alt-escape to cancel alt-tabbing, and vice versa (Thomas)
    [#141425]
 
 Translations
-  Miloslav Trmac (cs), Kjartan Maraas (nb), Tino Meinen (nl), 
+  Miloslav Trmac (cs), Kjartan Maraas (nb), Tino Meinen (nl),
   Kjartan Maraas (no), Слободан Д. Средојевић (sr), Funda Wang (zh_CN)
 
 2.13.55
@@ -4986,12 +5143,12 @@ Translations
 Thanks to Dick Marinus, Christian Kirbach, and Elijah Newren for
 improvements in this release.
 
- - Add a minimize and none double-click-titlebar-action (Dick)
+* Add a minimize and none double-click-titlebar-action (Dick)
    [#300210]
- - Prevent a critical warning crasher when switching themes
+* Prevent a critical warning crasher when switching themes
    (Christian) [#327847]
- - Fix some uninitialized value problems (Elijah)
- - If the mouse enters a window on a different screen, activate the
+* Fix some uninitialized value problems (Elijah)
+* If the mouse enters a window on a different screen, activate the
    default window on the new screen (Elijah) [#319348]
 
 Translations
@@ -5008,29 +5165,29 @@ Thanks to Damien Carbery, Havoc Pennington, Søren Sandmann,
 Björn Lindqvist, Kjartan Maraas, Elijah Newren for improvements in
 this release.
 
- - manually define HOST_NAME_MAX if not already defined to fix Solaris
+* manually define HOST_NAME_MAX if not already defined to fix Solaris
    compilation issue (Damien, Havoc) [#326745]
- - compositor improvements: port to changes in libcm, do it again, fix
+* compositor improvements: port to changes in libcm, do it again, fix
    unrefing, make minimize animation update again (all done by Søren)
- - make sure an outline border is shown even if a window decoration's
+* make sure an outline border is shown even if a window decoration's
    width is 0 (Björn) [#98340]
- - correctly handle window alt-tab outlines in showing desktop mode
+* correctly handle window alt-tab outlines in showing desktop mode
    (Björn) [#98340]
- - fix lots of tiny issues spotted by the intel compiler (Kjartan)
+* fix lots of tiny issues spotted by the intel compiler (Kjartan)
    [#321439]
- - prevent rapidly repeated visual bells from hanging metacity
+* prevent rapidly repeated visual bells from hanging metacity
    (Elijah) [#322032]
- - more careful error handling of values returned by GConf (Elijah)
+* more careful error handling of values returned by GConf (Elijah)
    [#326615]
- - fix various initialization and default issues, especially for
+* fix various initialization and default issues, especially for
    running with --disable-gconf.  Make --disable-gconf actually work.
    (Elijah) [#326661]
- - fix some reading-from-free'd-data errors (Søren) [#327575]
- - fix an unitialized value problem when in raise-on-click mode
+* fix some reading-from-free'd-data errors (Søren) [#327575]
+* fix an unitialized value problem when in raise-on-click mode
    (Søren) [#327572]
- - avoid flashing original-sized window when closing a maximized
+* avoid flashing original-sized window when closing a maximized
    window (Elijah) [#317254]
- - prevent windows from sometimes getting shoved and smashed by
+* prevent windows from sometimes getting shoved and smashed by
    sliding (and possibly auto-hiding) panels (Elijah) [#327822]
 
 Translations
@@ -5044,20 +5201,20 @@ Thanks to Damien Carbery, Ray Strode, Søren Sandmann, Elijah
 Newren, Jens Granseuer, and Kyle Ambroff for improvements in this
 release.
 
-  - Fix Solaris compilation issues (Ray, Damien) [#326281, #326746]
-  - Merge compositor work from branches to get the beginnings of an openGL
+* Fix Solaris compilation issues (Ray, Damien) [#326281, #326746]
+* Merge compositor work from branches to get the beginnings of an openGL
     based compositor.  Still not ready and thus disabled by default.
     (Søren)
-  - Composite fixes: Only update composite on damage events (Søren), get
+* Composite fixes: Only update composite on damage events (Søren), get
     non-composite compilation working again (Elijah), Really turn off
     draw-in-a-loop (Søren)
-  - Don't dereference a NULL string (Elijah) [#327013]
-  - GCC 2.95 fix; remove more C99 style variable initiailizations (Jens)
+* Don't dereference a NULL string (Elijah) [#327013]
+* GCC 2.95 fix; remove more C99 style variable initiailizations (Jens)
     [#327050]
-  - Fix accidental overzealous focus holding by the terminal (introduced in
+* Fix accidental overzealous focus holding by the terminal (introduced in
     last release) so that windows launched from panel icons, the panel
     menu, or global keybindings should get focus now.  (Elijah) [#326159]
-  - If no valid window is found in the MRU list, then set focus to the
+* If no valid window is found in the MRU list, then set focus to the
     desktop window. (Kyle) [#317405]
 
 Translations
@@ -5071,33 +5228,33 @@ Translations
 Thanks to Jens Granseuer, Björn Lindqvist, and Elijah Newren for
 improvements in this release.
 
- - Remove C99 style variable initiailization (Jens) [#322622]
- - Fix a logic error (Björn) [#322149]
- - Plug a few leaks (Elijah) [#309178]
- - Allow edge resistance at both sides of a window and also when edges
+* Remove C99 style variable initiailization (Jens) [#322622]
+* Fix a logic error (Björn) [#322149]
+* Plug a few leaks (Elijah) [#309178]
+* Allow edge resistance at both sides of a window and also when edges
    don't overlap but are a single pixel away from doing so (Elijah)
    [part of #321905]
- - Remove the timeout resistance at screen/xinerama edges (Elijah)
+* Remove the timeout resistance at screen/xinerama edges (Elijah)
    [part of #321905]
- - Revert to the old edge resistance behavior for keyboard
+* Revert to the old edge resistance behavior for keyboard
    movement/resizing based resistance (Elijah) [part of #321905]
- - Remove the "pull-away" edge resistance (Elijah) [part of #321905]
- - Avoid crashing when visual bell is in use and focus window is
+* Remove the "pull-away" edge resistance (Elijah) [part of #321905]
+* Avoid crashing when visual bell is in use and focus window is
    closed (Elijah) [#322031]
- - Be more strict about what is considered a valid region with partial
+* Be more strict about what is considered a valid region with partial
    struts (Elijah) [#322070]
- - Fix reduced resources resize handling for windows with sizing or
+* Fix reduced resources resize handling for windows with sizing or
    resizing constraints (Elijah) [#325774]
- - Fix window outline for minimized windows when using alt-esc
+* Fix window outline for minimized windows when using alt-esc
    (Elijah) [#325092]
- - Make the taskbar less flash happy and fix up some related stacking
+* Make the taskbar less flash happy and fix up some related stacking
    issues (Elijah) [#326035]
- - More thorough handling of source indication (Elijah) [part of #326041]
- - Don't "steal" focus from terminal windows for new window mappings
+* More thorough handling of source indication (Elijah) [part of #326041]
+* Don't "steal" focus from terminal windows for new window mappings
    as the difference in usage between terminals and other apps seems
    to suggest this difference in treatment.  See bug #326159 for
    details, feedback welcome (Elijah) [#326159]
- - Add a raise on click option, basically only because all the major
+* Add a raise on click option, basically only because all the major
    distros are patching it in anyway (though each and every one of
    them has bugs in their implementations).  (Elijah) [#326156]
 
@@ -5110,10 +5267,10 @@ Translations
 Thanks to Kang Jeong-Hee and Elijah Newren for improvements in this
 release.
 
- - Fix some compilation warnings and issues (Kang)
- - Escape the title since it is going to be treated as Markup (Elijah)
+* Fix some compilation warnings and issues (Kang)
+* Escape the title since it is going to be treated as Markup (Elijah)
    [#324846]
- - Make the workspace switcher work with dual-head (non-xinerama)
+* Make the workspace switcher work with dual-head (non-xinerama)
    setups (Elijah) [#319423]
 
 Translations
@@ -5125,10 +5282,10 @@ Translations
 Thanks to Davyd Madeley, Kjartan Maraas, and Björn Lindqvist for
 improvements in this release.
 
- - Make a debugging message actually correspond to the code (Björn)
+* Make a debugging message actually correspond to the code (Björn)
    [#322051]
- - Make the wireframe a bit slimmer (Kjartan) [#320051]
- - Display hostname in titlebar for remote X clients (Davyd) [#322202]
+* Make the wireframe a bit slimmer (Kjartan) [#320051]
+* Display hostname in titlebar for remote X clients (Davyd) [#322202]
 
 Translations
   Miloslav Trmac (cs), Adam Weinberger (en_CA), Ankit Patel (gu),
@@ -5144,21 +5301,21 @@ last release.
 
 Thanks to Davyd Madeley and Elijah Newren for improvements in this release.
 
- - Differentiate between movement towards an edge and movement away from
+* Differentiate between movement towards an edge and movement away from
    one for edge-resistance.  Pick smaller constants for movement away from
    an edge (Elijah)
- - Use GPOINTER_TO_INT() macro instead of cast to allow compilation on
+* Use GPOINTER_TO_INT() macro instead of cast to allow compilation on
    64-bit architectures without warning (Davyd)
- - compute the frame geometry due to maximization only after actually
+* compute the frame geometry due to maximization only after actually
    maximizing (Elijah) [#321902]
- - add some developer documentation on updating struts, workareas, regions,
+* add some developer documentation on updating struts, workareas, regions,
    and edges (Elijah)
- - When updating the xinerama due to placement, update which
+* When updating the xinerama due to placement, update which
    maximal/spanning rect set to use as well (Elijah) [#322068]
- - Relax the partially onscreen constraint to allow the titlebar to touch
+* Relax the partially onscreen constraint to allow the titlebar to touch
    the bottom panel in order to make the new constraints code function the
    same as the old version (Elijah) [#322071]
- - Don't allow removing a window from maximized or fullscreened state to
+* Don't allow removing a window from maximized or fullscreened state to
    place the titlebar under the top panel (Elijah) [#322075]
 
 Translations
@@ -5199,8 +5356,8 @@ Bugs fixed:
    122670 - jerky/random resizing of window via keyboard[2]
    124582 - keyboard and mouse snap-resizing and snap-moving erroneously
             moves the window multidimensionally
-   136307 - don't allow apps to resize themselves off the screen (*cough*
-            filechooser *cough*)
+   136307 - don't allow apps to resize themselves off the screen (_cough_
+            filechooser _cough_)
    142016, 143784 - windows should not span multiple xineramas unless
             placed there by the user
    143145 - clamp new windows to screensize and force them onscreen, if
@@ -5228,7 +5385,7 @@ Bugs fixed:
    [2] Actually, it's not totally fixed--it's just annoying
        instead of almost completely unusable.  Matthias had a
        suggestion that may fix the remainder of the problems (see
-       http://tinyurl.com/bwzuu).
+       <http://tinyurl.com/bwzuu>).
    [3] This bug was originally about not-quite-so-pathological
        cases but was left open for the worse cases. The code from
        the branch handles the remainder of the cases mentioned in
@@ -5239,7 +5396,7 @@ Bugs fixed:
        onscreen constraints due to not clearing any
        fixed_directions flags (aspect ratio windows get resized in
        both directions and thus aren't fixed in one of them)
-        
+
 New feature:
   81704 - edge resistance for user move and resize operations; in
           particular 3 different kinds of resistance are implemented:
@@ -5254,24 +5411,25 @@ New feature:
        correct direction has been pressed enough times (e.g. 2 or 3 times)
 
 Major code changes:
-  - constraints.c has been rewritten; very few lines of code from the old
+
+* constraints.c has been rewritten; very few lines of code from the old
     version remain.  There is a comment near the top of the function
     explaining the basics of how the new framework works.  A more detailed
     explanation can be found in doc/how-constraints-works.txt
-  - edge-resistance.[ch] are new files implementing edge-resistance.
-  - boxes.[ch] are new files containing low-level error-prone functions
+* edge-resistance.[ch] are new files implementing edge-resistance.
+* boxes.[ch] are new files containing low-level error-prone functions
     used heavily in constraints.c and edge-resistance.c, among various
     places throughout the code.  testboxes.c contains a thorough testsuite
     for the boxes.[ch] functions compiled into a program, testboxes.
-  - meta_window_move_resize_internal() *must* be told the gravity of the
+* meta_window_move_resize_internal() _must_ be told the gravity of the
     associated operation (if it's just a move operation, the gravity will
     be ignored, but for resize and move+resize the correct value is needed)
-  - the craziness of different values that
+* the craziness of different values that
     meta_window_move_resize_internal() accepts has been documented in a
     large comment at the beginning of the function.  It may be possible to
     clean this up some, but until then things will remain as they were
     before--caller beware.
-  - screen and xinerama usable areas (i.e. places not covered by
+* screen and xinerama usable areas (i.e. places not covered by
     e.g. panels) are cached in the workspace now, as are the screen and
     xinerama edges.  These get updated with the workarea in
     src/workspace.c:ensure_work_areas_validated()
@@ -5285,11 +5443,11 @@ Translation
 Thanks to Philip O'Brien, Kjartan Maraas, and Aidan Delaney for
 improvements in this release.
 
- - add handling for META_PREF_CURSOR_THEME and META_PREF_CURSOR_SIZE
+* add handling for META_PREF_CURSOR_THEME and META_PREF_CURSOR_SIZE
    for more complete debug info (Philip) [#318976]
- - Remove possible g_source leak in #ifdef'd out code, in case anyone uses
+* Remove possible g_source leak in #ifdef'd out code, in case anyone uses
    it in the future (Kjartan) [#320050]
- - Changed the 'minimized' field of the MetaTabEntry struct to 'hidden'
+* Changed the 'minimized' field of the MetaTabEntry struct to 'hidden'
    (Aidan) [#168455]
 
 Translations
@@ -5303,27 +5461,27 @@ Thanks to Björn Lindqvist, Kjartan Maraas, Søren Sandmann,
 Elijah Newren, Ross Cohen, and Muktha for improvements in this release
 since 2.12.1.
 
- - Mave ancestors come along with the transient when moving the window from
+* Mave ancestors come along with the transient when moving the window from
    one workspace to another (Björn) [#314977]
- - Fix the workspace switcher tabpopup to display the right windows and to
+* Fix the workspace switcher tabpopup to display the right windows and to
    fix the pick-a-new-window-to-focus algorithm in order to not select
    windows that aren't showing (Björn) [#170475]
- - Fix a couple memory leaks (Kjartan, Søren, Elijah) [#313030]
- - Make alt-esc (the "switch between windows immediately" keybinding)
+* Fix a couple memory leaks (Kjartan, Søren, Elijah) [#313030]
+* Make alt-esc (the "switch between windows immediately" keybinding)
    actually show minimized windows too (Ross) [#107072]
- - Make alt-esc consistent with alt-tab by leaving stacking of unselected
+* Make alt-esc consistent with alt-tab by leaving stacking of unselected
    windows unchanged (Ross) [#314285]
- - Clarify the meaning of the auto_raise preference (Elijah) [#312421]
- - Fix a crash that occurs when removing some virtual desktops and windows
+* Clarify the meaning of the auto_raise preference (Elijah) [#312421]
+* Fix a crash that occurs when removing some virtual desktops and windows
    happen to be on those desktops (Elijah) [#318306]
- - Make the unfocussed Simple window border visible with high contrast
+* Make the unfocussed Simple window border visible with high contrast
    inverse theme (Muktha) [#121361]
- - Fix edge snapping for multi-screen (non-xinerama) setups (Elijah)
+* Fix edge snapping for multi-screen (non-xinerama) setups (Elijah)
    [#319425]
 
 Translations
   Vladimir Petkov (bg), Kostas Papadimas (el), Adam Weinberger (en_CA),
-  Ivar Smolin (et), Michiel Sikkes (nl), Marcel Telka (sk), Funda 
+  Ivar Smolin (et), Michiel Sikkes (nl), Marcel Telka (sk), Funda
   Wang (zh_CN)
 
 2.12.1
@@ -5332,9 +5490,9 @@ Translations
 Thanks to Ray Strode, Havoc Pennington, and Elijah Newren for
 improvements in this release.
 
- - Truncate ridiculously long titles to avoid crashing or letting the
+* Truncate ridiculously long titles to avoid crashing or letting the
    pager crash (Ray, Havoc, Elijah) [#315070]
- - Get the tabbing window outline to work with gtk+ 2.8.4 again
+* Get the tabbing window outline to work with gtk+ 2.8.4 again
    (Elijah) [#317528]
 
 Translations
@@ -5347,7 +5505,7 @@ Translations
 
 Thanks to Brent Smith for finding the crasher in the release candidate!
 
- - Fix an uninitialized variable problem causing crashes (Brent) [#315000]
+* Fix an uninitialized variable problem causing crashes (Brent) [#315000]
 
 Translations
   Bryn Salisbury (cy), Hendrik Richter (de), Christophe Merlet (RedFox) (fr),
@@ -5361,8 +5519,8 @@ Translations
 Thanks to Björn Lindqvist and Elijah Newren for improvements in
 this release.
 
- - Check for the right versions of glib and gtk+ (Björn) [#314116]
- - Avoid obscuring centered-on-desktop windows which are denied focus
+* Check for the right versions of glib and gtk+ (Björn) [#314116]
+* Avoid obscuring centered-on-desktop windows which are denied focus
    (Elijah) [#313234]
 
 Translations
@@ -5377,15 +5535,15 @@ Translations
 Thanks to Elijah Newren, Jaap Haitsma, Ray Strode, and Brent Smith for
 improvements in this release.
 
- - Fix an easy to trigger crasher in 2.11.1 caused by unneeded
+* Fix an easy to trigger crasher in 2.11.1 caused by unneeded
    debugging spew (Elijah) [#311819]
- - Make sure that Metacity dialogs have icons (Jaap) [#309876]
- - Fix an infinite restacking flicker loop in sloppy and mouse focus
+* Make sure that Metacity dialogs have icons (Jaap) [#309876]
+* Fix an infinite restacking flicker loop in sloppy and mouse focus
    with fullscreen windows (Elijah) [#311400]
- - Change default theme from Simple to Clearlooks (Elijah)
- - Vastly improve the behavior of keyboard move/resize and edge
+* Change default theme from Simple to Clearlooks (Elijah)
+* Vastly improve the behavior of keyboard move/resize and edge
    snapping (Ray) [#310888]
- - Remove a duplicate string (Brent) [#309774]
+* Remove a duplicate string (Brent) [#309774]
 
 Translations
   Yuval Tanny (he), Gnome PL Team (pl), Raphael Higino (pt_BR),
@@ -5397,29 +5555,29 @@ Translations
 Thanks to Elijah Newren, Ken Harris, Matthias Clasen, Christian
 Persch, and Billy Biggs for improvements in this release.
 
- - Fix a miscoloring of parts of the titlebar introduced in the last
+* Fix a miscoloring of parts of the titlebar introduced in the last
    unstable release (Elijah) [follow-up to #169982]
- - Provide a more lenient threshold for drawing rounded corners (Ken)
+* Provide a more lenient threshold for drawing rounded corners (Ken)
    [#122065]
- - Make the Xcursor changes in the last unstable release effective
+* Make the Xcursor changes in the last unstable release effective
    (Matthias) [follow-up to #308106]
- - Revert the _NET_ACTIVE_WINDOW behavior change made in the 2.9.x
+* Revert the _NET_ACTIVE_WINDOW behavior change made in the 2.9.x
    unstable series; activation includes changing a window to the
    current workspace again (Elijah) [reversion of #128380]
- - Restore original window size if the window was maximized upon
+* Restore original window size if the window was maximized upon
    withdrawing it (Elijah, Christian) [#137185]
- - Fix a raising bug with a window that has more than one child window
+* Fix a raising bug with a window that has more than one child window
    (Elijah, Billy) [part of #307875]
- - Try to place windows denied focus near the focus window and fix a
+* Try to place windows denied focus near the focus window and fix a
    xinerama bug with the placement (Elijah) [part of #307875]
- - Avoid modal dialogs being obscured in somewhat pathologically
+* Avoid modal dialogs being obscured in somewhat pathologically
    strange circumstances that Eclipse seems to be good at triggering
    (Elijah) [part of #307875]
 
 Translations
   Miloslav Trmac (cs), Kostas Papadimas (el), Adam Weinberger (en_CA),
   Francisco Javier F. Serrador (es), Ilkka Tuohela (fi), Christophe
-  Merlet (RedFox) (fr), Ignacio Casal Quinteiro (gl), Ankit 
+  Merlet (RedFox) (fr), Ignacio Casal Quinteiro (gl), Ankit
   Patel (gu), Yair Hershkovitz (he), Takeshi AIHANA (ja), Kjartan
   Maraas (nb), Kjartan Maraas (no), Marcel Telka (sk), Theppitak
   Karoonboonyanan (th), Clytie Siddall (vi), Funda Wang (zh_CN)
@@ -5432,11 +5590,11 @@ This release contains all fixes up to Metacity 2.10.2 plus some new goodies.
 Thanks to Matthias Clasen, Aivars Kalvans, Björn Lindqvist, and
 Andrew Johnson for improvements in this release.
 
- - React to cursor theme changes (Matthias) [#308106]
- - Plug a small leak with xinerama information (Aivars) [#307884]
- - Split up main() into more manageable chunks and make use of GOpt
+* React to cursor theme changes (Matthias) [#308106]
+* Plug a small leak with xinerama information (Aivars) [#307884]
+* Split up main() into more manageable chunks and make use of GOpt
    (Björn) [#305331]
- - Speed up vertical gradients (Andrew) [#169982]
+* Speed up vertical gradients (Andrew) [#169982]
 
 Translations
   Hendrik Richter (de), Ivar Smolin (et), Ignacio Casal
@@ -5448,21 +5606,21 @@ Translations
 Thanks to Billy Biggs, Greg Hudson, Elijah Newren, Ray Strode, Ryan
 Lortie, and Soeren Sandmann for improvements in this release.
 
- - Makes metacity a bit faster when dragging windows around (Soeren) [#141813]
- - Fix simple memory error, using the address of a local variable as a
+* Makes metacity a bit faster when dragging windows around (Soeren) [#141813]
+* Fix simple memory error, using the address of a local variable as a
    hash key (Ryan) [#307209]
- - Fix a small leak in the case of a SYNC_COUNTER property value and
+* Fix a small leak in the case of a SYNC_COUNTER property value and
    HAVE_XSYNC not defined (Ryan) [#307214]
- - Cleanup font data when done with it (Ray) [#306720]
- - If the window has a modal transient which is being unmanaged, don't
+* Cleanup font data when done with it (Ray) [#306720]
+* If the window has a modal transient which is being unmanaged, don't
    focus it (Elijah) [#305362]
- - Make sure window position is calculated correctly for reconfigure
+* Make sure window position is calculated correctly for reconfigure
    requests when part of the XWindowChanges structure is uninitialized
    (Greg) [#305257]
- - Add a resize popup when resizing constrained windows (Ray) [#305564]
- - Don't accidentally treat maximize vertically as maximize in both
+* Add a resize popup when resizing constrained windows (Ray) [#305564]
+* Don't accidentally treat maximize vertically as maximize in both
    directions (Elijah) [#302204]
- - Put all transients of the new window, if any exist, in the
+* Put all transients of the new window, if any exist, in the
    calc_showing queue (Elijah, Billy) [#303284]
 
 Translations
@@ -5477,10 +5635,10 @@ This is a stable release to coincide with the release of Gnome 2.10.0.
 
 Thanks to Dan Winship and Lex Hider for fixes in this release.
 
- - Make sure the "Close" button has the focus in the
+* Make sure the "Close" button has the focus in the
    buggy-session-management-applications-warning dialog instead of the
    table (Dan) [#172703]
- - add doc/code-overview.txt and doc/how-to-get-focus-right.txt to the
+* add doc/code-overview.txt and doc/how-to-get-focus-right.txt to the
    distributed files (Lex) [#170519]
 
 Translations
@@ -5509,11 +5667,11 @@ This is an unstable release to coincide with the release of Gnome
 Thanks to Aidan Delaney, Elijah Newren, and Joe Marcus Clarke for
 fixes in this release.
 
- - Fix crash that occurs when stupid apps claim that a window is its
+* Fix crash that occurs when stupid apps claim that a window is its
    own parent (Elijah, Joe) [#168207]
- - Prevent the visual bell from changing the focus window (Elijah)
+* Prevent the visual bell from changing the focus window (Elijah)
    [#123366]
- - Make sure that icons in the alt-tab popup are dimmed for all hidden
+* Make sure that icons in the alt-tab popup are dimmed for all hidden
    windows, not just minimized ones (Aidan) [#168455]
 
 Translations
@@ -5532,40 +5690,40 @@ code freeze.
 Thanks to Aidan Delaney, Crispin Flowerday, Elijah Newren, and Joe
 Marcus Clarke for fixes in this release.
 
- - Make sure we get a valid timestamp if one doesn't come with the
+* Make sure we get a valid timestamp if one doesn't come with the
    _NET_ACTIVE_WINDOW message (Elijah, Crispin) [#166728]
- - Avoid sending CurrentTime to our XSetInputFocus wrappers, but
+* Avoid sending CurrentTime to our XSetInputFocus wrappers, but
    handle it better in case we miss any cases (Elijah) [#166732]
- - Remove useless function call (Aidan) [#166730]
- - Avoid new windows being obscured by the focus window and thus
+* Remove useless function call (Aidan) [#166730]
+* Avoid new windows being obscured by the focus window and thus
    possibly lost (Elijah) [#166524]
- - Don't unconditionally place not-to-be-focused windows, such as
+* Don't unconditionally place not-to-be-focused windows, such as
    splashscreens, below the focus window (Elijah) [#167042]
- - Raise the ancestor of a window instead of the window itself
+* Raise the ancestor of a window instead of the window itself
    (Elijah) [#166894]
- - Cover half a dozen issues needed to fix a variety of rare timestamp
+* Cover half a dozen issues needed to fix a variety of rare timestamp
    bugs (Elijah) [#167358]
- - Fix a possible crash on logout (Joe) [#167935]
- - Fix an obscure xinerama placement bug with windows that are too
+* Fix a possible crash on logout (Joe) [#167935]
+* Fix an obscure xinerama placement bug with windows that are too
    large to fit in the workarea in both dimensions (Elijah) [#166757]
- - Ignore all focus and focus-stealing-prevention code in
+* Ignore all focus and focus-stealing-prevention code in
    meta_window_show when not showing the window for the first time
    (Elijah) [#167199]
- - when receiving a _NET_ACTIVE_WINDOW message, switch to the desktop
+* when receiving a _NET_ACTIVE_WINDOW message, switch to the desktop
    where the window is located before activating instead of moving the
    window to the current desktop (Elijah) [#128380]
- - Handle _NET_CURRENT_DESKTOP messages that come with timestamps
+* Handle _NET_CURRENT_DESKTOP messages that come with timestamps
    (Elijah) [#161361]
- - Handle keynav vs. mousenav in mouse and sloppy focus modes (Elijah)
+* Handle keynav vs. mousenav in mouse and sloppy focus modes (Elijah)
    [#167545]
 
 Translations
-  Jordi Mallach (ca), Martin Willemoes Hansen (da), 
-  Kostas Papadimas (el), David Lodge (en_GB), 
+  Jordi Mallach (ca), Martin Willemoes Hansen (da),
+  Kostas Papadimas (el), David Lodge (en_GB),
   Francisco Javier F.  Serrador (es), Tõivo Leedjärv (et),
-  Christophe Merlet (RedFox) (fr), Takeshi AIHANA (ja), 
+  Christophe Merlet (RedFox) (fr), Takeshi AIHANA (ja),
   Young-Ho, Cha (ko), Kjartan Maraas (nb), Michiel Sikkes (nl),
-  Kjartan Maraas (no), Duarte Loreto (pt), Leonid Kanter (ru), 
+  Kjartan Maraas (no), Duarte Loreto (pt), Leonid Kanter (ru),
   Marcel Telka (sk), Laurent Dhima (sq), Maxim Dziumanenko (uk)
 
 2.9.13
@@ -5580,59 +5738,59 @@ Samptur, John Paul Wallington, Tim Herold, Muktha Narayan, Sinisa
 Segvic, Owen Taylor, Crispin Flowerday, "RHEL-3", KWin, and Google for
 improvements in this release.
 
- - Refuse to focus a window with a modal transient, and focus the
+* Refuse to focus a window with a modal transient, and focus the
    transient instead (Elijah) [#164716]
- - Make sure we get gconf notifications about the terminal command
+* Make sure we get gconf notifications about the terminal command
    changing (Balamurali) [#160934]
- - Specify encoding of src/metacity.desktop.in (Stephane) [#151850]
- - New 48x48 default icon (Benjamin, Garrett) [#160660]
- - Add man pages for metacity-window-demo and metacity-theme-viewer
+* Specify encoding of src/metacity.desktop.in (Stephane) [#151850]
+* New 48x48 default icon (Benjamin, Garrett) [#160660]
+* Add man pages for metacity-window-demo and metacity-theme-viewer
    (Jose, Dave) [#143513]
- - Fix minimized window display in workspace switcher after relogin
+* Fix minimized window display in workspace switcher after relogin
    with a saved session (Elijah) [#164677]
- - Ignore sticky windows for non-active workspaces (Elijah) [#165259]
- - Don't wireframe when accessibility is on, it apparently causes a
+* Ignore sticky windows for non-active workspaces (Elijah) [#165259]
+* Don't wireframe when accessibility is on, it apparently causes a
    desktop wide freeze. (Arvind) [#159538]
- - Keep tooltip on screen horizontally for xinerama (John) [#165261]
- - Stick and unstick transients with their parent automatically
+* Keep tooltip on screen horizontally for xinerama (John) [#165261]
+* Stick and unstick transients with their parent automatically
    (Elijah) [#152283]
- - Shaded windows should not show up in pagers (Elijah) [#165377]
- - Treat splashscreens same as other windows for stacking (Elijah)
+* Shaded windows should not show up in pagers (Elijah) [#165377]
+* Treat splashscreens same as other windows for stacking (Elijah)
    [#165243]
- - Plug a pair of leaks (Elijah) [#165378]
- - Take into account the appropriate list of windows when placing a
+* Plug a pair of leaks (Elijah) [#165378]
+* Take into account the appropriate list of windows when placing a
    new one (Elijah) [#165381]
- - Correct misleading and inaccurate wording (Elijah) [#165380]
- - Handle xcomposite pkgconfig version regression (Tim) [#149368]
- - Make the warn-about-buggy-session-management-apps dialog be sticky
+* Correct misleading and inaccurate wording (Elijah) [#165380]
+* Handle xcomposite pkgconfig version regression (Tim) [#149368]
+* Make the warn-about-buggy-session-management-apps dialog be sticky
    (Elijah) [#164745]
- - Fix the problem with fullscreen windows on a different xinerama
+* Fix the problem with fullscreen windows on a different xinerama
    monitor not staying on top ("RHEL-3") [#156511]
- - Make the unfocussed title bar distinguishable in cases where it
+* Make the unfocussed title bar distinguishable in cases where it
    otherwise isn't for the Atlanta, Simple, and Bright themes (Muktha)
    [#125291]
- - Correct the stacking when returning from fullscreen mode (Elijah)
+* Correct the stacking when returning from fullscreen mode (Elijah)
    [#165718]
- - Focus parents of dismissed transient windows in preference to the
+* Focus parents of dismissed transient windows in preference to the
    window that most recently had keyboard focus (Elijah) [#157360]
- - Make sure window->border_only is initialized so we don't get random
+* Make sure window->border_only is initialized so we don't get random
    windows without decorations (Elijah, Sinisa, Owen) [#145131]
- - Add period to the end of reduced_resources' description (Dave)
+* Add period to the end of reduced_resources' description (Dave)
    [#165780]
- - If activation requests are too old, set the demands_attention hint
+* If activation requests are too old, set the demands_attention hint
    instead of actually activating (Elijah, Crispin) [#166395]
- - Ignore xconfigurerequest events for stacking when it should be safe
+* Ignore xconfigurerequest events for stacking when it should be safe
    to do so (Elijah, Crispin, KWin, Google) [#166395]
- - Set a _METACITY_VERSION property (a utf8 string) on the WM check
+* Set a _METACITY_VERSION property (a utf8 string) on the WM check
    window (Elijah) [#165350]
 
 Translations
-  Vladimir Petkov (bg), Miloslav Trmac (cs), Frank Arnold (de), 
-  Adam Weinberger (en_CA), David Lodge (en_GB), 
-  Francisco Javier F. Serrador (es), Pauli Virtanen (fi), 
+  Vladimir Petkov (bg), Miloslav Trmac (cs), Frank Arnold (de),
+  Adam Weinberger (en_CA), David Lodge (en_GB),
+  Francisco Javier F. Serrador (es), Pauli Virtanen (fi),
   Young-Ho, Changwoo Ryu (ko), Žygimantas Berucka (lt),
   Kjartan Maraas (nb),  Kjartan Maraas (no), Duarte Loreto (pt),
-  Marcel Telka (sk), Christian Rose (sv), 
+  Marcel Telka (sk), Christian Rose (sv),
   Theppitak Karoonboonyanan (th)
 
 2.9.8
@@ -5641,10 +5799,10 @@ Translations
 This is a brown paper bag release to cover up the crash I introduced
 in version 2.9.5.  Thanks to Sebastien Bacher and the bleeding edge
 Ubuntu users for quickly catching the occasional crash that my fix in
-#123576 could cause, and for verifying that the patch I made fixed
+# 123576 could cause, and for verifying that the patch I made fixed
 this issue (I couldn't duplicate).
 
- - Don't forget to initialize display->grab_old_window_stacking
+* Don't forget to initialize display->grab_old_window_stacking
    [#165093]
 
 2.9.5
@@ -5656,15 +5814,15 @@ This is an unstable release to coincide with the release of Gnome
 Thanks to Vincent Noel, Elijah Newren, and John Paul Wallington for
 fixes in this release.
 
- - Restore original stacking when aborting an alt-esc window switch
+* Restore original stacking when aborting an alt-esc window switch
    operation (Elijah) [#123576]
- - Fix vertical maximization for second screen (John) [#163420]
- - Show labels in bold for windows that demand attention (Vincent)
+* Fix vertical maximization for second screen (John) [#163420]
+* Show labels in bold for windows that demand attention (Vincent)
    [#164590]
- - In the tab task switcher popup, dim the window icon and put its
+* In the tab task switcher popup, dim the window icon and put its
    name between brackets when the window is minimized (Vincent)
    [#136666]
- - Correct highlighting of windows in workspace switcher popup
+* Correct highlighting of windows in workspace switcher popup
    (Elijah) [#163450]
 
 Translations
@@ -5679,23 +5837,23 @@ This is an unstable release to coincide with the release of Gnome 2.9.4.
 Thanks to Leena Gunda, Thomas Fitzsimmons, and mild7 users sourceforge
 net, and Elijah Newren for fixes in this release.
 
- - Don't focus the panel on click (Elijah) [#160470, and others]
- - Make sure the save session dialog appears focused (Elijah) [#162983]
- - Correctly restore size of window when double clicking the titlebar
+* Don't focus the panel on click (Elijah) [#160470, and others]
+* Make sure the save session dialog appears focused (Elijah) [#162983]
+* Correctly restore size of window when double clicking the titlebar
    to unmaximize (Leena) [#161236]
- - Install schema data from builddir not srcdir (Thomas) [#161417]
- - Provide more documentation to make it easier for people to
+* Install schema data from builddir not srcdir (Thomas) [#161417]
+* Provide more documentation to make it easier for people to
    contribute to Metacity (Elijah) [#162646]
- - Allow users to move the window around immediately after
+* Allow users to move the window around immediately after
    double-clicking to shade (Elijah) [#90290]
- - Focus windows that manually position themselves too (Elijah) [#107347]
- - Don't show window menu if all options are invalid (Elijah) [#148915]
- - Exclude windows with skip_taskbar hint set from the alt-tab list;
+* Focus windows that manually position themselves too (Elijah) [#107347]
+* Don't show window menu if all options are invalid (Elijah) [#148915]
+* Exclude windows with skip_taskbar hint set from the alt-tab list;
    they'll appear in the ctrl-alt-tab list instead. (mild7 users
    sourceforge net) [#106249]
- - Wrap XSetInputFocus to make display->expected_focus_window more
+* Wrap XSetInputFocus to make display->expected_focus_window more
    reliable (Elijah) [#154598]
- - Remove conflict between windows on multiple workspaces and hidden
+* Remove conflict between windows on multiple workspaces and hidden
    being a global quantity (Elijah) [#156182]
 
 Translations
@@ -5710,11 +5868,11 @@ This is an unstable release to coincide with the release of Gnome 2.9.3.
 Thanks to Alex Duggan, ash AT contact bg, Elijah Newren, and Baptiste
 Mille-Mathias for fixes in this release.
 
- - Add a missing period at the end of a sentence (Baptiste) [#158210]
- - When snap-moving don't snap to hidden windows, such as transients
+* Add a missing period at the end of a sentence (Baptiste) [#158210]
+* When snap-moving don't snap to hidden windows, such as transients
    of minimized windows (Elijah) [#157180]
- - Focus the desktop when showing it (Elijah) [#159257]
- - Remove deprecated capplet (Alex, ash) [#160753]
+* Focus the desktop when showing it (Elijah) [#159257]
+* Remove deprecated capplet (Alex, ash) [#160753]
 
 Translations
  da (Martin Willemoes Hansen), bg (Alexander Shopov), en_CA (Adam
@@ -5730,10 +5888,10 @@ time...
 Thanks to Benjamin Kahn, Marco Pesenti Gritti, James Henstridge, and
 Vincent Untz for fixes/features in this release.
 
- - gnome-panel-screenshot was renamed to gnome-screenshot (Vincent) [#157529]
- - Update build stuff (use newer automake, etc.) (James)
- - Fix build out of src directory (Marco) [#158325]
- - Use a better default application icon (Benjamin) [#160373]
+* gnome-panel-screenshot was renamed to gnome-screenshot (Vincent) [#157529]
+* Update build stuff (use newer automake, etc.) (James)
+* Fix build out of src directory (Marco) [#158325]
+* Use a better default application icon (Benjamin) [#160373]
 
 Translations
  da (Martin Willemoes Hansen), fr(Christophe Merlet, Baptiste
@@ -5747,28 +5905,28 @@ This is an unstable release heading towards Gnome 2.10.
 Thanks to Rob Adams, Anders Carlsson, Elijah Newren, Soeren Sandmann,
 and Vincent Untz for fixes and features in this release.
 
- - Add a keybinding to launch a terminal (Vincent) [#154232]
- - Correct the requested number of keycodes (Rob) [#155247]
- - Add tracker bugs to rationales.txt file
- - Make the "showing desktop" mode be per-workspace instead of
+* Add a keybinding to launch a terminal (Vincent) [#154232]
+* Correct the requested number of keycodes (Rob) [#155247]
+* Add tracker bugs to rationales.txt file
+* Make the "showing desktop" mode be per-workspace instead of
    per-screen. (Elijah) [#142198]
- - Don't try to use an ARGB visual at all if the depth isn't
+* Don't try to use an ARGB visual at all if the depth isn't
    32-bit. This caused major slowdowns with Composite
    enabled. (Anders)
- - Fix the modifier key breakage introduced by an Xorg
+* Fix the modifier key breakage introduced by an Xorg
    change. (Soeren) [#151554]
- - Update _NET_WM_STATE_HIDDEN so the pager on the panel will know
+* Update _NET_WM_STATE_HIDDEN so the pager on the panel will know
    whether to display windows as visible or hidden (Elijah) [#105665]
- - Fix the alt-tab order--if the most recently used window is not
+* Fix the alt-tab order--if the most recently used window is not
    focused, start alt tabbing with that window instead of the one
    after it (Elijah) [#156251]
- - Don't lower newly mapped windows when they're denied focus if they
+* Don't lower newly mapped windows when they're denied focus if they
    are transients of the focused window.  Instead, defocus the
    currently focused window (Elijah) [#151996]
- - Re-enable focus stealing prevention (Elijah)
+* Re-enable focus stealing prevention (Elijah)
 
 Translations
- es(Francisco Javier F. Serrador), sq(Laurent Dhima), sr(Danilo Šegan), 
+ es(Francisco Javier F. Serrador), sq(Laurent Dhima), sr(Danilo Šegan),
  cs(Miloslav Trmac), en_CA(Adam Weinberger), en_GB(David Lodge)
 
 2.8.6
@@ -5780,31 +5938,33 @@ Thanks to the Ken Harris, Kjartan Maraas, and the tireless efforts of
 Elijah Newren for fixes in this release.
 
 Fixes
-  * Ensure the correct window is focused when minimizing (Elijah)
-  * Fix keynav with mouse focus (Elijah)
-  * Fix several race conditions in window focusing (Elijah)
-  * Focus the top window when lowering by frame click (Ken)
-  * Fix some compiler warnings (Kjartan)
-  * Fix some valgrind-reported errors (Elijah)
-  * Fix some potential issues with autoraising windows (Elijah)
+
+* Ensure the correct window is focused when minimizing (Elijah)
+* Fix keynav with mouse focus (Elijah)
+* Fix several race conditions in window focusing (Elijah)
+* Focus the top window when lowering by frame click (Ken)
+* Fix some compiler warnings (Kjartan)
+* Fix some valgrind-reported errors (Elijah)
+* Fix some potential issues with autoraising windows (Elijah)
 
 Translations
-  * en_CA(Adam Weinberger), it(Luca Ferretti)
+
+* en_CA(Adam Weinberger), it(Luca Ferretti)
 
 2.8.5
 ==
 
 This is a stable release for Gnome 2.8.  Only translations and some
 new developer documentation were added since the last unstable release.
-This release boasts improved standards-compliance and a number of 
+This release boasts improved standards-compliance and a number of
 bug fixes since the last stable release.
 
 Translations
 
-  * ar(Abdulaziz Al-Arfaj), cs(Miloslav Trmac), cy(Dafydd Harries),
-    en_GB(David Lodge), fr(Christophe Merlet (RedFox)), 
-    nn(Åsmund Skjæveland), or(Gora Mohanty), 
-    pr_BR(Gustavo Noronha Silva), ro(Mugurel Tudor), 
+* ar(Abdulaziz Al-Arfaj), cs(Miloslav Trmac), cy(Dafydd Harries),
+    en_GB(David Lodge), fr(Christophe Merlet (RedFox)),
+    nn(Åsmund Skjæveland), or(Gora Mohanty),
+    pr_BR(Gustavo Noronha Silva), ro(Mugurel Tudor),
     th(Paisa Seeluangsawat), tr(Baris Cicek), zh_TW(Woodman Tuen)
 
 2.8.4
@@ -5819,31 +5979,32 @@ Thanks to Havoc Pennington, Soeren Sandmann, Elijah Newren, and Rich
 Wareham for fixes in this release
 
 Fixes
-  * track the last_xor_rect, for wireframe painting (Havoc)
-  * Move wireframe code before grab is released to prevent endless
+
+* track the last_xor_rect, for wireframe painting (Havoc)
+* Move wireframe code before grab is released to prevent endless
     loops with fullscreen windows. (Soeren)
-  * Make dialogs that Metacity shows follow focus-stealing-prevention
+* Make dialogs that Metacity shows follow focus-stealing-prevention
     conventions. (Elijah; part of #149028)
-  * add render extension check to the display, don't build the
+* add render extension check to the display, don't build the
     compositing manager by default, use an ARGB visual when available
     for the window frame (Rich Wareham; various tweaks added later by
     Havoc)
-  * move the have_xrender variable initialization up in the file since
+* move the have_xrender variable initialization up in the file since
     it can be set as part of composite check (Havoc)
-  * make argb stuff compile, add some code from xcompmgr (Havoc)
-  * fix an assertion failure that would occur after increasing the
+* make argb stuff compile, add some code from xcompmgr (Havoc)
+* fix an assertion failure that would occur after increasing the
     number of workspaces; fix stacking order when a window is denied
     focus (Elijah; #150615)
-  * disable some compositor code that wasn't working, don't grab the
+* disable some compositor code that wasn't working, don't grab the
     server during repaint, various set_background fixes and
     refactoring (Havoc)
 
 Translations
-  * az(Metin Amiroff), bs(Kemal Sanjta), ca(Jordi Mallach), 
-    el(Kostas Papadimas), es(Francisco Javier F. Serrador), 
+
+* az(Metin Amiroff), bs(Kemal Sanjta), ca(Jordi Mallach),
+    el(Kostas Papadimas), es(Francisco Javier F. Serrador),
     eu(Iñaki Larrañaga Murgoitio), fi(Pauli Virtanen),
     nb(Kjartan Maraas), sq(Laurent Dhima), uk(Maxim Dziumanenko)
-
 
 2.8.3
 ==
@@ -5856,19 +6017,21 @@ Sandman, Elijah Newren, and Havoc Pennington for fixes in this
 release.
 
 Fixes
-  * Adjust the MRU list when preventing focus stealing (Elijah)
-  * Ensure that we maintain a focus window when switching workspaces
+
+* Adjust the MRU list when preventing focus stealing (Elijah)
+* Ensure that we maintain a focus window when switching workspaces
     in mouse focus mode (Elijah)
-  * Some improvements in the showing desktop mode, and window
+* Some improvements in the showing desktop mode, and window
     activation (Elijah)
-  * Make sure cursors changes are handled correctly (Havoc, Soeren)
-  * Some fixes to the window menu (Rob)
-  * Fix a compile issue on Solaris (Peter, Mike)
-  * Allow struts to go past the middle of the screen, provided there's
+* Make sure cursors changes are handled correctly (Havoc, Soeren)
+* Some fixes to the window menu (Rob)
+* Fix a compile issue on Solaris (Peter, Mike)
+* Allow struts to go past the middle of the screen, provided there's
     a gap between them, fixing an issue with gnome magnifier (Bill)
 
 Translations
-  * fi (Pauli Virtanen), ja (Takeshi AIHANA), ko (Young-Ho, Cha), 
+
+* fi (Pauli Virtanen), ja (Takeshi AIHANA), ko (Young-Ho, Cha),
     pl (Gnome PL Team), ru (Dmitry G. Mastrukov), sr (Danilo Šegan),
     tk (Gurban M. Tewekgeli), zh_CN (Funda Wang)
 
@@ -5881,28 +6044,28 @@ Thanks to Rob Adams, Anders Carlsson, Elijah Newren, Soeren Sandmann,
 Emil Soleyman-Zomalan, Michael Terry, and Jeff Waugh for fixes in this
 release.
 
-  - set titlebar_uses_system_font = false (it was ugly)
-  - make naming for "move a window"/"move the window"/"move window"
+* set titlebar_uses_system_font = false (it was ugly)
+* make naming for "move a window"/"move the window"/"move window"
     more consistent (fixes #142235)
-  - Add trailing quotes to keybinding explanation text.
-  - support for EWMH update counter spec & add compensation events
+* Add trailing quotes to keybinding explanation text.
+* support for EWMH update counter spec & add compensation events
     when events are ignored. (fixes #143333 and #109362)
-  - Fix focus bugs: remove race condition on window close/minimize
+* Fix focus bugs: remove race condition on window close/minimize
     (#131582), make focus choice consistent for each focus mode
     (#135810), choose correct focus window when "un-showing the
     desktop (#144900), make sure correct window is focused when using
     the workspace switcher (#120100).
-  - Use meta_topic instead of meta_warning when failing to connect to
+* Use meta_topic instead of meta_warning when failing to connect to
     a session manager; reduces metacity verbosity. (fixes #136218)
-  - Make meta_window_delete take a timestamp, and be sure to pass it
+* Make meta_window_delete take a timestamp, and be sure to pass it
     one.
-  - Add support for EWMH _NET_WM_USER_TIME spec.  This enables part of
+* Add support for EWMH _NET_WM_USER_TIME spec.  This enables part of
     preventing focus stealing.  (bug #118372) Also fix bug with
     windows not being focused on unminimizing caused by original
     patch.  (also bug #118372)
-  - Fix some support for EWMH hints, and fix USER_TIME support to
+* Fix some support for EWMH hints, and fix USER_TIME support to
     include the DEMANDS_ATTENTION hint.  Also includes some code for
-    implementing _NET_RESTACK_WINDOW and _NET_MOVERESIZE_WINDOW, but
+    implementing _NET_RESTACK_WINDOW and_NET_MOVERESIZE_WINDOW, but
     this is disabled pending feature thaw.
 
 2.8.1
@@ -5912,12 +6075,12 @@ Thanks to Olivier Crete, Jarrod Johnson, Neil Muller, Elijah Newren,
 Mark McLoughlin, Rob Adams, and foser AT gentoo.org for fixes in this
 release.
 
-  - make the --enable-xinerama switch work properly
-  - prevent unwanted grab op from occurring
-  - don't down-size nitems from a gulong to an int
-  - add a value type check for the visual/audible bell gconf settings
-  - make the no sm support warning resizable
-  - more translations
+* make the --enable-xinerama switch work properly
+* prevent unwanted grab op from occurring
+* don't down-size nitems from a gulong to an int
+* add a value type check for the visual/audible bell gconf settings
+* make the no sm support warning resizable
+* more translations
 
 2.8.0
 ===
@@ -5929,11 +6092,11 @@ No code changes in this release, but some new translations.
 
 Thanks to Rob Adams for fixes in this release.
 
- - bug #122016 - fix a focus race
- - Change move_to_workspace_left/right/up/down keybindings to
+* bug #122016 - fix a focus race
+* Change move_to_workspace_left/right/up/down keybindings to
    <Control><Alt><Shift> arrow to avoid conflicting with new
    keybindings in spacial nautilus.
- - fix dialog stacking order issues so e.g. panel properties 
+* fix dialog stacking order issues so e.g. panel properties
    dialog is above the panel
 
 2.7.0
@@ -5951,97 +6114,97 @@ Thanks to Yukihiro Nakai, Rached Ben Mustapha, Gwenole Beauchesne,
 Padraig O'Briain, Laurent Vivier, Rob Adams for contributions to this
 release.
 
- - fix to repaint after resize always, so on maximize 
+* fix to repaint after resize always, so on maximize
    and theme changes we get things drawn properly
- - fix a compile issue on HPUX
- - fix translations of metacity-message output
- - fix to update window icons when they change
- - put a limit on number of characters displayed in 
+* fix a compile issue on HPUX
+* fix translations of metacity-message output
+* fix to update window icons when they change
+* put a limit on number of characters displayed in
    window titles during Alt+tab
- - fix configure check for Xrandr
- - fix 64-bit bug in property reading that broke 
+* fix configure check for Xrandr
+* fix 64-bit bug in property reading that broke
    things badly on 64-bit
- - don't move focus when clicking close button on a window
- - fix a crash in getting pixmap icons
- - spawn dialogs and child processes on the proper 
+* don't move focus when clicking close button on a window
+* fix a crash in getting pixmap icons
+* spawn dialogs and child processes on the proper
    screen in multihead situations
- - if the focus gets set to None, set it back to 
+* if the focus gets set to None, set it back to
    something sane
- - load accessibility modules and set accessibility roles
- - fix hang after displaying warning dialogs
- - fix a memory corruption when sticking/unsticking windows
-   that lead to a frequent crash and windows appearing 
+* load accessibility modules and set accessibility roles
+* fix hang after displaying warning dialogs
+* fix a memory corruption when sticking/unsticking windows
+   that lead to a frequent crash and windows appearing
    in Alt+tab improperly
- - fix some handling of partial-width panel struts
- - more translations
+* fix some handling of partial-width panel struts
+* more translations
 
 2.6.1
 ===
 
- - rebuild with fixed glib-gettext.m4
+* rebuild with fixed glib-gettext.m4
 
 2.6.0
 ===
 
- - some additional translations
+* some additional translations
 
 2.5.5
 ===
 
  Thanks to Rob Adams, Arvind Samptur, Andreas Volz, Ray Strode, John
- Paul Wallington, Soeren Sandmann for contributions to this release. 
+ Paul Wallington, Soeren Sandmann for contributions to this release.
  And as always thanks to the translators.
 
- - fix aspect ratio handling
- - fix "shake loose" functionality for maximized windows
- - handle Xrandr size changes properly again
- - fix fullscreen window detection
- - fix workspace name handling
- - don't steal button press events on root window
- - nuke metacity.spec due to nonmaintenance
- - allow too-large-for-screen windows to move their titlebar offscreen
- - keep an MRU list of windows per-workspace and use it to focus 
+* fix aspect ratio handling
+* fix "shake loose" functionality for maximized windows
+* handle Xrandr size changes properly again
+* fix fullscreen window detection
+* fix workspace name handling
+* don't steal button press events on root window
+* nuke metacity.spec due to nonmaintenance
+* allow too-large-for-screen windows to move their titlebar offscreen
+* keep an MRU list of windows per-workspace and use it to focus
    the next window when the focused window disappears
- - fix cursor when moving
- - improve appearance of opaque resize
- - make BELOW window state work
- - fix a crash when gdk_pixmap_foreign_new() returned NULL
+* fix cursor when moving
+* improve appearance of opaque resize
+* make BELOW window state work
+* fix a crash when gdk_pixmap_foreign_new() returned NULL
 
 2.5.3
 ===
 
  Thanks to Jordi Mallach, Padraig O'Briain, Rob Adams, Julio Merino,
- Ben Jansens, Jurg Billeter, Ray Strode, marcus@freebsd.org, James
- Laska, for contributions to this release. Thanks also to 
+ Ben Jansens, Jurg Billeter, Ray Strode, <marcus@freebsd.org>, James
+ Laska, for contributions to this release. Thanks also to
  all the tireless translators.
 
- - fixups to .desktop file
- - activate window prior to grab end, avoiding
+* fixups to .desktop file
+* activate window prior to grab end, avoiding
    extra focus events
- - add support for partial-width panels (fixes corner panel 
+* add support for partial-width panels (fixes corner panel
    and xinerama window position constraints)
- - added keybinding to toggle window as "always on top"
- - support --disable-schemas-install option to configure
- - destroy support for legacy GNOME 1.x hints; metacity 
+* added keybinding to toggle window as "always on top"
+* support --disable-schemas-install option to configure
+* destroy support for legacy GNOME 1.x hints; metacity
    no longer works with GNOME 1.x
- - disable raise-on-click for mouse focus modes
- - fix bug that broke many Javascript popup menus with mozilla
- - allow "shaking loose" maximized windows, to move them 
+* disable raise-on-click for mouse focus modes
+* fix bug that broke many Javascript popup menus with mozilla
+* allow "shaking loose" maximized windows, to move them
    between Xinerama heads or whatever
- - honor desktop-wide double click timeout
- - handle window placement properly for windows that 
+* honor desktop-wide double click timeout
+* handle window placement properly for windows that
    start out maximized
- - integrate Ximian patch to go ahead and log out after 4 minutes
+* integrate Ximian patch to go ahead and log out after 4 minutes
    even if a dialog is open
- - fix a segfault
- - fix bug where window groups weren't always kept up to date
- - fix bug where focus got confused when switching workspaces
+* fix a segfault
+* fix bug where window groups weren't always kept up to date
+* fix bug where focus got confused when switching workspaces
    with mouse focus mode
- - fix 64-bit crash on s390x
- - chdir to user's homedir on startup
- - keep window in fullscreen layer when its transients are focused
- - fix keybindings bug when you had ScrollLock enabled
- - many translation updates
+* fix 64-bit crash on s390x
+* chdir to user's homedir on startup
+* keep window in fullscreen layer when its transients are focused
+* fix keybindings bug when you had ScrollLock enabled
+* many translation updates
 
 2.5.2
 ===
@@ -6049,34 +6212,34 @@ release.
  Thanks to David Santiago, Julien Olivier, Anders Carlsson, Rob Adams
  for fixes in this release.
 
- - improved wording/UI for some dialogs
- - while clicking a window button, if you move the mouse outside 
-   the button such that releasing the mouse button won't activate 
+* improved wording/UI for some dialogs
+* while clicking a window button, if you move the mouse outside
+   the button such that releasing the mouse button won't activate
    the window button, visually indicate by "popping out" the button.
- - fix some valgrind errors
- - change "show desktop mode" to convert to "everything is minimized
-   mode" if you open a new window while showing desktop, rather 
+* fix some valgrind errors
+* change "show desktop mode" to convert to "everything is minimized
+   mode" if you open a new window while showing desktop, rather
    than previous behavior of simply leaving show desktop mode.
- - fix a trivial memory leak
- - change "move to workspace N" so it doesn't switch workspaces, 
+* fix a trivial memory leak
+* change "move to workspace N" so it doesn't switch workspaces,
    just moves the window.
- - translation updates
+* translation updates
 
 2.5.1
 ===
 
- Thanks to Rob Adams, Peter O'Shea, Dafydd Harries, Masahiro Sakai, 
+ Thanks to Rob Adams, Peter O'Shea, Dafydd Harries, Masahiro Sakai,
  Soeren Sandmann for fixes in this release.
 
- - fix bug where fullscreen windows were below top panels
- - build fix for Solaris
- - support diagonal window movement with numeric keypad
- - multihead fix
- - build fix for Cygwin 
- - place on xinerama containing the pointer
- - fix totally hosed window placement/movement for frameless
+* fix bug where fullscreen windows were below top panels
+* build fix for Solaris
+* support diagonal window movement with numeric keypad
+* multihead fix
+* build fix for Cygwin
+* place on xinerama containing the pointer
+* fix totally hosed window placement/movement for frameless
    windows
- - improvement to smoothness of window move/resize
+* improvement to smoothness of window move/resize
 
 2.5.0
 ===
@@ -6084,59 +6247,58 @@ release.
  Thanks to Rob Adams, Owen Taylor, Frederic Crozat, Arvind Samptur,
  Bill Haneman, Akira Tagoh for help with fixes in this release.
 
- - many new translations
- - fix an infinite loop while holding a server grab triggered by 
+* many new translations
+* fix an infinite loop while holding a server grab triggered by
    some recent Qt versions doing weird stuff
- - fix bug where Alt+rightclick repeatedly on titlebar resulted 
+* fix bug where Alt+rightclick repeatedly on titlebar resulted
    in zillions of menus
- - fix Alt+Tab to *actually* put minimized windows at the end, 
+* fix Alt+Tab to _actually_ put minimized windows at the end,
    though this was always intended
- - rewrite size/positions constraint code (currently known 
+* rewrite size/positions constraint code (currently known
    to be quite buggy, e.g. xmms is hosed)
- - enforce size of at least 1x1 on windows
- - reduce latency of managing new windows still further 
+* enforce size of at least 1x1 on windows
+* reduce latency of managing new windows still further
    by using async properties code in more places
- - don't grab keybindings on docks, so gnome-panel 
+* don't grab keybindings on docks, so gnome-panel
    can handle them
- - suck in the panel's screenshot and run dialog global 
+* suck in the panel's screenshot and run dialog global
    bindings
- - lots of improvements to window placement
- - sync max number of workspaces with pager applet
- - fix to keep focus when inside window frame in 
+* lots of improvements to window placement
+* sync max number of workspaces with pager applet
+* fix to keep focus when inside window frame in
    strict mouse focus mode
- - make it possible to start a reverse tab with 
+* make it possible to start a reverse tab with
    shift+alt+tab (vs. alt+tab then shift)
- - fix a multihead issue with constraints between two 
+* fix a multihead issue with constraints between two
    windows on different heads
- - require GTK+ 2.2.0 and fontconfig
- - default theme is now Simple
- - add visual bell feature
- - incorporate many fixes from 2.4.34
- - other stuff
+* require GTK+ 2.2.0 and fontconfig
+* default theme is now Simple
+* add visual bell feature
+* incorporate many fixes from 2.4.34
+* other stuff
 
 2.4.13
 ===
 
- - we were making all dialogs skip the taskbar, even non-transient 
+* we were making all dialogs skip the taskbar, even non-transient
    ones, though this was supposedly fixed a while ago. Now really
    fixed.
- - change back to Alt+click by default for the window drag feature.
- - assign Alt+F12 to shade window
- - fix not deleting enough workspaces when the number 
-   was reduced via the pager config dialog (readams@hmc.edu)
- - don't allow windows under the top panel ever, even if they 
+* change back to Alt+click by default for the window drag feature.
+* assign Alt+F12 to shade window
+* fix not deleting enough workspaces when the number
+   was reduced via the pager config dialog (<readams@hmc.edu>)
+* don't allow windows under the top panel ever, even if they
    are tall windows (Arvind)
- - fix up the window layout for directional workspace nav, 
-   so you always stop at the edges and always end up 
-   where you expect (hp, with tweaks from readams@hmc.edu)
- - focus new windows in mouse focus mode (readams@hmc.edu)
- - support xeyes, oclock, etc. by applying shape mask 
+* fix up the window layout for directional workspace nav,
+   so you always stop at the edges and always end up
+   where you expect (hp, with tweaks from <readams@hmc.edu>)
+* focus new windows in mouse focus mode (<readams@hmc.edu>)
+* support xeyes, oclock, etc. by applying shape mask
    to the window manager frame (yeah it resizes slow, deal)
- - fix vertical/horizontal maximize
- - handle crossing events resizing for more opaque resize goodness
+* fix vertical/horizontal maximize
+* handle crossing events resizing for more opaque resize goodness
    (Soeren)
- - add wacky _METACITY_UPDATE_COUNTER experimental extension 
+* add wacky _METACITY_UPDATE_COUNTER experimental extension
    to do nice opaque resizing (does nothing without a GTK patch)
- - fix a crash setting workspace names
- - fix internationalized WM_NAME reading
-
+* fix a crash setting workspace names
+* fix internationalized WM_NAME reading

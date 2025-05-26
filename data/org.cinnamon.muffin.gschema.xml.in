@@ -211,6 +211,32 @@
       </description>
     </key>
 
+    <key name="tiling-gaps-enabled" type="b">
+      <default>false</default>
+      <summary>Enable gaps between tiled windows</summary>
+      <description>
+        When enabled, adds configurable gaps between tiled windows and screen edges.
+      </description>
+    </key>
+
+    <key name="tiling-gap-size" type="i">
+      <default>10</default>
+      <range min="0" max="100"/>
+      <summary>Size of gaps between tiled windows</summary>
+      <description>
+        The size in pixels of gaps between tiled windows and screen edges.
+      </description>
+    </key>
+
+    <key name="tiling-outer-gap-size" type="i">
+      <default>10</default>
+      <range min="0" max="100"/>
+      <summary>Size of outer gaps around screen edges</summary>
+      <description>
+        The size in pixels of gaps between tiled windows and screen edges.
+      </description>
+    </key>
+
     <child name="keybindings" schema="org.cinnamon.muffin.keybindings"/>
 
   </schema>

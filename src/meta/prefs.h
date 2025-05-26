@@ -123,7 +123,10 @@ typedef enum
   META_PREF_GTK_THEME,
   META_PREF_BELL_SOUND,
   META_PREF_BRING_WINDOWS_TO_CURRENT_WORKSPACE,
-  META_PREF_INVERT_WORKSPACE_FLIP_DIRECTION
+  META_PREF_INVERT_WORKSPACE_FLIP_DIRECTION,
+  META_PREF_TILING_GAPS_ENABLED,
+  META_PREF_TILING_GAP_SIZE,
+  META_PREF_TILING_OUTER_GAP_SIZE
 } MetaPreference;
 
 typedef void (* MetaPrefsChangedFunc) (MetaPreference pref,
@@ -277,6 +280,15 @@ gboolean    meta_prefs_get_workspace_cycle (void);
 
 META_EXPORT
 gint meta_prefs_get_min_win_opacity (void);
+
+META_EXPORT
+gboolean meta_prefs_get_tiling_gaps_enabled (void);
+
+META_EXPORT
+gint meta_prefs_get_tiling_gap_size (void);
+
+META_EXPORT
+gint meta_prefs_get_tiling_outer_gap_size (void);
 
 META_EXPORT
 const char* meta_prefs_get_bell_sound (void);

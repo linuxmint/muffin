@@ -1168,6 +1168,16 @@ constrain_maximization (MetaWindow         *window,
   else if (META_WINDOW_MAXIMIZED (window))
     {
       target_size = info->work_area_monitor;
+
+      /* Apply tiling gaps to maximized windows if enabled */
+      if (meta_prefs_get_tiling_gaps_enabled ())
+        {
+          gint outer_gap = meta_prefs_get_tiling_outer_gap_size ();
+          target_size.x += outer_gap;
+          target_size.y += outer_gap;
+          target_size.width -= 2 * outer_gap;
+          target_size.height -= 2 * outer_gap;
+        }
     }
   else
     {

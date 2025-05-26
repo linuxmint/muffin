@@ -144,6 +144,9 @@ static gboolean invert_workspace_flip = FALSE;
 static char *gtk_theme = NULL;
 static char *bell_sound = NULL;
 static gboolean bring_user_activated_windows_to_current_workspace = FALSE;
+static gboolean tiling_gaps_enabled = FALSE;
+static gint tiling_gap_size = 10;
+static gint tiling_outer_gap_size = 10;
 
 static void handle_preference_update_enum (GSettings *settings,
                                            gchar     *key);
@@ -478,6 +481,13 @@ static MetaBoolPreference preferences_bool[] =
       },
       &bring_user_activated_windows_to_current_workspace,
     },
+    {
+      { "tiling-gaps-enabled",
+        SCHEMA_MUFFIN,
+        META_PREF_TILING_GAPS_ENABLED,
+      },
+      &tiling_gaps_enabled,
+    },
     { { NULL, 0, 0 }, NULL },
   };
 
@@ -615,6 +625,20 @@ static MetaIntPreference preferences_int[] =
         META_PREF_CURSOR_SIZE,
       },
       &cursor_size
+    },
+    {
+      { "tiling-gap-size",
+        SCHEMA_MUFFIN,
+        META_PREF_TILING_GAP_SIZE,
+      },
+      &tiling_gap_size
+    },
+    {
+      { "tiling-outer-gap-size",
+        SCHEMA_MUFFIN,
+        META_PREF_TILING_OUTER_GAP_SIZE,
+      },
+      &tiling_outer_gap_size
     },
     { { NULL, 0, 0 }, NULL },
   };
@@ -2416,6 +2440,24 @@ gboolean
 meta_prefs_get_invert_flip_direction (void)
 {
     return invert_workspace_flip;
+}
+
+gboolean
+meta_prefs_get_tiling_gaps_enabled (void)
+{
+  return tiling_gaps_enabled;
+}
+
+gint
+meta_prefs_get_tiling_gap_size (void)
+{
+  return tiling_gap_size;
+}
+
+gint
+meta_prefs_get_tiling_outer_gap_size (void)
+{
+  return tiling_outer_gap_size;
 }
 
 MetaKeyBindingAction
