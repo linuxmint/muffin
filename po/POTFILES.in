@@ -1,12 +1,12 @@
 # List of source files containing translatable strings.
 # Please keep this file sorted alphabetically.
-data/50-mutter-navigation.xml
-data/50-mutter-system.xml
-data/50-mutter-wayland.xml
-data/50-mutter-windows.xml
-data/mutter.desktop.in
-data/org.gnome.mutter.gschema.xml.in
-data/org.gnome.mutter.wayland.gschema.xml.in
+data/50-muffin-navigation.xml
+data/50-muffin-system.xml
+data/50-muffin-wayland.xml
+data/50-muffin-windows.xml
+data/muffin.desktop.in
+data/org.gnome.muffin.gschema.xml.in
+data/org.gnome.muffin.wayland.gschema.xml.in
 src/backends/meta-input-settings.c
 src/backends/meta-monitor.c
 src/backends/meta-monitor-manager.c
@@ -18,7 +18,7 @@ src/core/display.c
 src/core/keybindings.c
 src/core/main.c
 src/core/meta-close-dialog-default.c
-src/core/mutter.c
+src/core/muffin.c
 src/core/prefs.c
 src/core/util.c
 src/core/window.c

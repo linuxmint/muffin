@@ -1740,7 +1740,7 @@ constrain_titlebar_visible (MetaWindow         *window,
    * immediately following an unconstrained move or unconstrained resize that
    * placed the titlebar above the top of the screen, in which case we don't
    * want the titlebar immediately popping back below the screen or other
-   * glitching (https://gitlab.gnome.org/GNOME/mutter/-/issues/1206).
+   * glitching (https://gitlab.gnome.org/GNOME/muffin/-/issues/1206).
    */
   user_nonnorthern_resize =
     info->is_user_action &&

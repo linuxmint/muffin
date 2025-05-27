@@ -1,5 +1,5 @@
 wayland_test_client_installed_tests_libexecdir = join_paths(
-  mutter_installed_tests_libexecdir,
+  muffin_installed_tests_libexecdir,
   'wayland-test-clients',
 )
 

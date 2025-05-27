@@ -36,7 +36,7 @@
 
 #include "backends/meta-screen-cast-session.h"
 #include "backends/meta-screen-cast-stream.h"
-#include "clutter/clutter-mutter.h"
+#include "clutter/clutter-muffin.h"
 #include "core/meta-fraction.h"
 #include "meta/boxes.h"
 
@@ -767,7 +767,7 @@ on_stream_add_buffer (void             *data,
       /* Fallback to a memfd buffer */
       spa_data[0].type = SPA_DATA_MemFd;
       spa_data[0].flags = SPA_DATA_FLAG_READWRITE;
-      spa_data[0].fd = memfd_create ("mutter-screen-cast-memfd",
+      spa_data[0].fd = memfd_create ("muffin-screen-cast-memfd",
                                      MFD_CLOEXEC | MFD_ALLOW_SEALING);
       if (spa_data[0].fd == -1)
         {

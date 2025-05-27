@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: metacity.HEAD.ml\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
-"product=mutter&keywords=I18N+L10N&component=general\n"
+"product=muffin&keywords=I18N+L10N&component=general\n"
 "POT-Creation-Date: 2013-03-01 15:50+0000\n"
 "PO-Revision-Date: 2013-03-26 12:50+0530\n"
 "Last-Translator: Ani Peter <peter.ani@gmail.com>\n"
@@ -20,200 +20,200 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Lokalize 1.5\n"
 
-#: ../src/50-mutter-navigation.xml.in.h:1
+#: ../src/50-muffin-navigation.xml.in.h:1
 msgid "Navigation"
 msgstr ""
 
-#: ../src/50-mutter-navigation.xml.in.h:2
+#: ../src/50-muffin-navigation.xml.in.h:2
 msgid "Move window to workspace 1"
 msgstr "പണിയറ ജാലകം ഒന്നിലേക്ക് നീക്കുക"
 
-#: ../src/50-mutter-navigation.xml.in.h:3
+#: ../src/50-muffin-navigation.xml.in.h:3
 msgid "Move window to workspace 2"
 msgstr "പണിയറ ജാലകം 2ലേക്ക് നീക്കുക"
 
-#: ../src/50-mutter-navigation.xml.in.h:4
+#: ../src/50-muffin-navigation.xml.in.h:4
 msgid "Move window to workspace 3"
 msgstr "പണിയറ ജാലകം 3ലേക്ക് നീക്കുക"
 
-#: ../src/50-mutter-navigation.xml.in.h:5
+#: ../src/50-muffin-navigation.xml.in.h:5
 msgid "Move window to workspace 4"
 msgstr "പണിയറ ജാലകം 4ലേക്ക് നീക്കുക"
 
-#: ../src/50-mutter-navigation.xml.in.h:6
+#: ../src/50-muffin-navigation.xml.in.h:6
 msgid "Move window one workspace to the left"
 msgstr "ഒരു പണിയറ‌‌‌‌‌യ‌്ക്ക് ഇടതുവശത്തേക്ക് ജാലകം നീക്കുക"
 
-#: ../src/50-mutter-navigation.xml.in.h:7
+#: ../src/50-muffin-navigation.xml.in.h:7
 msgid "Move window one workspace to the right"
 msgstr "ഒരു പണിയറ‌‌‌‌‌യ‌്ക്ക് വലതുവശത്തേക്ക് ജാലകം നീക്കുക"
 
-#: ../src/50-mutter-navigation.xml.in.h:8
+#: ../src/50-muffin-navigation.xml.in.h:8
 msgid "Move window one workspace up"
 msgstr "പണിയറകളിലെ ജാലകങ്ങള് മുകളിലേക്ക് ചലിപ്പിക്കുക"
 
-#: ../src/50-mutter-navigation.xml.in.h:9
+#: ../src/50-muffin-navigation.xml.in.h:9
 msgid "Move window one workspace down"
 msgstr "ഒരു പണിയറ‌‌‌‌‌യ‌്ക്ക് താഴെ ജാലകം നീക്കുക"
 
-#: ../src/50-mutter-navigation.xml.in.h:10
+#: ../src/50-muffin-navigation.xml.in.h:10
 msgid "Switch applications"
 msgstr "പ്രയോഗങ്ങള്‍ തമ്മില്‍ മാറ്റുക"
 
-#: ../src/50-mutter-navigation.xml.in.h:11
+#: ../src/50-muffin-navigation.xml.in.h:11
 msgid "Switch windows"
 msgstr "ജാലകങ്ങള്‍ തമ്മില്‍ മാറ്റുക"
 
-#: ../src/50-mutter-navigation.xml.in.h:12
+#: ../src/50-muffin-navigation.xml.in.h:12
 msgid "Switch windows of an application"
 msgstr "ഒരു പ്രയോഗത്തിന്റെ ജാലകങ്ങള്‍ തമ്മില്‍ മാറ്റുക"
 
-#: ../src/50-mutter-navigation.xml.in.h:13
+#: ../src/50-muffin-navigation.xml.in.h:13
 msgid "Switch system controls"
 msgstr "സിസ്റ്റം നിയന്ത്രണങ്ങള്‍ മാറ്റുക"
 
-#: ../src/50-mutter-navigation.xml.in.h:14
+#: ../src/50-muffin-navigation.xml.in.h:14
 msgid "Switch windows directly"
 msgstr "ജാലകങ്ങള്‍ നേരിട്ട് മാറ്റുക"
 
-#: ../src/50-mutter-navigation.xml.in.h:15
+#: ../src/50-muffin-navigation.xml.in.h:15
 msgid "Switch windows of an app directly"
 msgstr ""
 
-#: ../src/50-mutter-navigation.xml.in.h:16
+#: ../src/50-muffin-navigation.xml.in.h:16
 msgid "Switch system controls directly"
 msgstr ""
 
-#: ../src/50-mutter-navigation.xml.in.h:17
+#: ../src/50-muffin-navigation.xml.in.h:17
 msgid "Hide all normal windows"
 msgstr "എല്ലാ സാധാരണ ജാലകങ്ങളും അദൃശ്യമാക്കുക"
 
-#: ../src/50-mutter-navigation.xml.in.h:18
+#: ../src/50-muffin-navigation.xml.in.h:18
 msgid "Switch to workspace 1"
 msgstr "പപണിയറകള് 1ലേക്ക് മാറ്റൂ"
 
-#: ../src/50-mutter-navigation.xml.in.h:19
+#: ../src/50-muffin-navigation.xml.in.h:19
 msgid "Switch to workspace 2"
 msgstr "പണിയറകള് 2ലേക്ക് മാറ്റൂ"
 
-#: ../src/50-mutter-navigation.xml.in.h:20
+#: ../src/50-muffin-navigation.xml.in.h:20
 msgid "Switch to workspace 3"
 msgstr "പണിയറകള് 3ലേക്ക് മാറ്റൂ"
 
-#: ../src/50-mutter-navigation.xml.in.h:21
+#: ../src/50-muffin-navigation.xml.in.h:21
 msgid "Switch to workspace 4"
 msgstr "പണിയറകള് 4ലേക്ക് മാറ്റൂ"
 
-#: ../src/50-mutter-navigation.xml.in.h:22
+#: ../src/50-muffin-navigation.xml.in.h:22
 #| msgid "Move to Workspace _Left"
 msgid "Move to workspace left"
 msgstr "ഇടത്തുളള പണിയറയിലേക്ക് നീങ്ങുക"
 
-#: ../src/50-mutter-navigation.xml.in.h:23
+#: ../src/50-muffin-navigation.xml.in.h:23
 #| msgid "Move to Workspace R_ight"
 msgid "Move to workspace right"
 msgstr "വലത്തുളള പണിയറയിലേക്ക് നീങ്ങുക"
 
-#: ../src/50-mutter-navigation.xml.in.h:24
+#: ../src/50-muffin-navigation.xml.in.h:24
 #| msgid "Move to Workspace _Left"
 msgid "Move to workspace above"
 msgstr "മുകളിലുള്ള പണിയറയിലേക്ക് നീങ്ങുക "
 
-#: ../src/50-mutter-navigation.xml.in.h:25
+#: ../src/50-muffin-navigation.xml.in.h:25
 #| msgid "Move to Workspace _Down"
 msgid "Move to workspace below"
 msgstr "താഴെയുളള പണിയറയിലേക്ക് നീങ്ങുക"
 
-#: ../src/50-mutter-system.xml.in.h:1
+#: ../src/50-muffin-system.xml.in.h:1
 msgid "System"
 msgstr "സിസ്റ്റം"
 
-#: ../src/50-mutter-system.xml.in.h:2
+#: ../src/50-muffin-system.xml.in.h:2
 msgid "Show the run command prompt"
 msgstr "കമാന്‍ഡ് പ്രോപ്റ്റ് കാണിയ്ക്കുക"
 
-#: ../src/50-mutter-system.xml.in.h:3
+#: ../src/50-muffin-system.xml.in.h:3
 msgid "Show the activities overview"
 msgstr "പ്രവര്‍ത്തനങ്ങളുടെ അവലോകനം കാണിയ്ക്കുക"
 
-#: ../src/50-mutter-windows.xml.in.h:1
+#: ../src/50-muffin-windows.xml.in.h:1
 msgid "Windows"
 msgstr "ജാലകങ്ങള്‍ (_W)"
 
-#: ../src/50-mutter-windows.xml.in.h:2
+#: ../src/50-muffin-windows.xml.in.h:2
 #| msgid "Activate window menu"
 msgid "Activate the window menu"
 msgstr "ജാലകത്തിന്റെ മെനു സജീവമാക്കുക"
 
-#: ../src/50-mutter-windows.xml.in.h:3
+#: ../src/50-muffin-windows.xml.in.h:3
 msgid "Toggle fullscreen mode"
 msgstr "അക്ഷര വിവര രീതിയില്‌ അളവ് ദൃശ്യമാക്കുക"
 
-#: ../src/50-mutter-windows.xml.in.h:4
+#: ../src/50-muffin-windows.xml.in.h:4
 msgid "Toggle maximization state"
 msgstr ""
 
-#: ../src/50-mutter-windows.xml.in.h:5
+#: ../src/50-muffin-windows.xml.in.h:5
 msgid "Maximize window"
 msgstr "ജാലകം ഏറ്റവും വലുതാക്കുക"
 
-#: ../src/50-mutter-windows.xml.in.h:6
+#: ../src/50-muffin-windows.xml.in.h:6
 #| msgid "Resize window"
 msgid "Restore window"
 msgstr "ജാലകം വീണ്ടെടുക്കുക"
 
-#: ../src/50-mutter-windows.xml.in.h:7
+#: ../src/50-muffin-windows.xml.in.h:7
 msgid "Toggle shaded state"
 msgstr ""
 
-#: ../src/50-mutter-windows.xml.in.h:8
+#: ../src/50-muffin-windows.xml.in.h:8
 msgid "Close window"
 msgstr "ജാലകം അടയ്‍ക്കുക"
 
-#: ../src/50-mutter-windows.xml.in.h:9
+#: ../src/50-muffin-windows.xml.in.h:9
 #| msgid "Resize window"
 msgid "Hide window"
 msgstr "ജാലകം അദൃശ്യമാക്കുക"
 
-#: ../src/50-mutter-windows.xml.in.h:10
+#: ../src/50-muffin-windows.xml.in.h:10
 msgid "Move window"
 msgstr "ജാലകം നീക്കുക"
 
-#: ../src/50-mutter-windows.xml.in.h:11
+#: ../src/50-muffin-windows.xml.in.h:11
 msgid "Resize window"
 msgstr "ജാലകത്തിന്‍റെ വലിപ്പം മാറ്റുക"
 
-#: ../src/50-mutter-windows.xml.in.h:12
+#: ../src/50-muffin-windows.xml.in.h:12
 #| msgid "Toggle window on all workspaces"
 msgid "Toggle window on all workspaces or one"
 msgstr "എല്ലാ പണിയറകളിലെയും ജാലകങ്ങള്‍ കാണിക്കുക"
 
-#: ../src/50-mutter-windows.xml.in.h:13
+#: ../src/50-muffin-windows.xml.in.h:13
 #| msgid "Raise obscured window, otherwise lower"
 msgid "Raise window if covered, otherwise lower it"
 msgstr ""
 
-#: ../src/50-mutter-windows.xml.in.h:14
+#: ../src/50-muffin-windows.xml.in.h:14
 msgid "Raise window above other windows"
 msgstr "ജാലകം മറ്റ് ജാലകങ്ങള്ക്ക‌‌് മുകളിലേക്ക് ഉയ‌ര്ത്തുക"
 
-#: ../src/50-mutter-windows.xml.in.h:15
+#: ../src/50-muffin-windows.xml.in.h:15
 msgid "Lower window below other windows"
 msgstr "ജാലകം മറ്റ് ജാലകങ്ങള്ക്കടിയിലാക്കുക"
 
-#: ../src/50-mutter-windows.xml.in.h:16
+#: ../src/50-muffin-windows.xml.in.h:16
 msgid "Maximize window vertically"
 msgstr "ജാലകം ലംബമായ് വലുതാക്കുക"
 
-#: ../src/50-mutter-windows.xml.in.h:17
+#: ../src/50-muffin-windows.xml.in.h:17
 msgid "Maximize window horizontally"
 msgstr "ജാലകം തിരശ്ചീനമായ് വലുതാക്കുക"
 
-#: ../src/50-mutter-windows.xml.in.h:18
+#: ../src/50-muffin-windows.xml.in.h:18
 msgid "View split on left"
 msgstr ""
 
-#: ../src/50-mutter-windows.xml.in.h:19
+#: ../src/50-muffin-windows.xml.in.h:19
 msgid "View split on right"
 msgstr ""
 
@@ -322,10 +322,10 @@ msgid ""
 "Could not find a theme! Be sure %s exists and contains the usual themes.\n"
 msgstr ""
 
-#: ../src/core/mutter.c:40
+#: ../src/core/muffin.c:40
 #, c-format
 msgid ""
-"mutter %s\n"
+"muffin %s\n"
 "Copyright (C) 2001-%d Havoc Pennington, Red Hat, Inc., and others\n"
 "This is free software; see the source for copying conditions.\n"
 "There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A "
@@ -340,11 +340,11 @@ msgstr ""
 "ഉപയോഗയോഗ്യമാണന്നോഉള്ള ഉറപ്പ് "
 "പോലും.\n"
 
-#: ../src/core/mutter.c:54
+#: ../src/core/muffin.c:54
 msgid "Print version"
 msgstr "അച്ചടി പതിപ്പ്"
 
-#: ../src/core/mutter.c:60
+#: ../src/core/muffin.c:60
 msgid "Mutter plugin to use"
 msgstr "ഉപയോഗിക്കേണ്ട മട്ടര്‍ പ്ലഗ്ഗിന്‍"
 
@@ -433,7 +433,7 @@ msgstr "രചന  വായിക്കുന്നതില്‌ പരാജ
 
 #: ../src/core/session.c:1185
 #, c-format
-msgid "<mutter_session> attribute seen but we already have the session ID"
+msgid "<muffin_session> attribute seen but we already have the session ID"
 msgstr ""
 
 #: ../src/core/session.c:1198 ../src/core/session.c:1273
@@ -474,7 +474,7 @@ msgstr "fdopen() log രചന %s തുറക്കുന്നതില്‌ 
 msgid "Opened log file %s\n"
 msgstr "തുറന്ന ഒരു ലോഗ് രചന %s\n"
 
-#: ../src/core/util.c:115 ../src/tools/mutter-message.c:149
+#: ../src/core/util.c:115 ../src/tools/muffin-message.c:149
 #, c-format
 msgid "Mutter was compiled without support for verbose mode\n"
 msgstr ""
@@ -560,15 +560,15 @@ msgid ""
 "Property %s on window 0x%lx contained invalid UTF-8 for item %d in the list\n"
 msgstr ""
 
-#: ../src/mutter.desktop.in.h:1 ../src/mutter-wm.desktop.in.h:1
+#: ../src/muffin.desktop.in.h:1 ../src/muffin-wm.desktop.in.h:1
 msgid "Mutter"
 msgstr "മട്ടര്‍"
 
-#: ../src/org.gnome.mutter.gschema.xml.in.h:1
+#: ../src/org.gnome.muffin.gschema.xml.in.h:1
 msgid "Modifier to use for extended window management operations"
 msgstr ""
 
-#: ../src/org.gnome.mutter.gschema.xml.in.h:2
+#: ../src/org.gnome.muffin.gschema.xml.in.h:2
 msgid ""
 "This key will initiate the \"overlay\", which is a combination window "
 "overview and application launching system. The default is intended to be the "
@@ -576,99 +576,99 @@ msgid ""
 "default or set to the empty string."
 msgstr ""
 
-#: ../src/org.gnome.mutter.gschema.xml.in.h:3
+#: ../src/org.gnome.muffin.gschema.xml.in.h:3
 msgid "Attach modal dialogs"
 msgstr "മോഡല്‍ ഡയലോഗ് കൂട്ടിചേര്‍ക്കുക"
 
-#: ../src/org.gnome.mutter.gschema.xml.in.h:4
+#: ../src/org.gnome.muffin.gschema.xml.in.h:4
 msgid ""
 "When true, instead of having independent titlebars, modal dialogs appear "
 "attached to the titlebar of the parent window and are moved together with "
 "the parent window."
 msgstr ""
 
-#: ../src/org.gnome.mutter.gschema.xml.in.h:5
+#: ../src/org.gnome.muffin.gschema.xml.in.h:5
 msgid "Enable edge tiling when dropping windows on screen edges"
 msgstr ""
 
-#: ../src/org.gnome.mutter.gschema.xml.in.h:6
+#: ../src/org.gnome.muffin.gschema.xml.in.h:6
 msgid ""
 "If enabled, dropping windows on vertical screen edges maximizes them "
 "vertically and resizes them horizontally to cover half of the available "
 "area. Dropping windows on the top screen edge maximizes them completely."
 msgstr ""
 
-#: ../src/org.gnome.mutter.gschema.xml.in.h:7
+#: ../src/org.gnome.muffin.gschema.xml.in.h:7
 msgid "Workspaces are managed dynamically"
 msgstr ""
 
-#: ../src/org.gnome.mutter.gschema.xml.in.h:8
+#: ../src/org.gnome.muffin.gschema.xml.in.h:8
 msgid ""
 "Determines whether workspaces are managed dynamically or whether there's a "
 "static number of workspaces (determined by the num-workspaces key in org."
 "gnome.desktop.wm.preferences)."
 msgstr ""
 
-#: ../src/org.gnome.mutter.gschema.xml.in.h:9
+#: ../src/org.gnome.muffin.gschema.xml.in.h:9
 msgid "Workspaces only on primary"
 msgstr ""
 
-#: ../src/org.gnome.mutter.gschema.xml.in.h:10
+#: ../src/org.gnome.muffin.gschema.xml.in.h:10
 msgid ""
 "Determines whether workspace switching should happen for windows on all "
 "monitors or only for windows on the primary monitor."
 msgstr ""
 
-#: ../src/org.gnome.mutter.gschema.xml.in.h:11
+#: ../src/org.gnome.muffin.gschema.xml.in.h:11
 msgid "No tab popup"
 msgstr "റ്റാബ് പോപ്പപ്പ് ലഭ്യമല്ല"
 
-#: ../src/org.gnome.mutter.gschema.xml.in.h:12
+#: ../src/org.gnome.muffin.gschema.xml.in.h:12
 msgid ""
 "Determines whether the use of popup and highlight frame should be disabled "
 "for window cycling."
 msgstr ""
 
-#: ../src/org.gnome.mutter.gschema.xml.in.h:13
+#: ../src/org.gnome.muffin.gschema.xml.in.h:13
 msgid "Delay focus changes until the pointer stops moving"
 msgstr ""
 
-#: ../src/org.gnome.mutter.gschema.xml.in.h:14
+#: ../src/org.gnome.muffin.gschema.xml.in.h:14
 msgid ""
 "If set to true, and the focus mode is either \"sloppy\" or \"mouse\" then "
 "the focus will not be changed immediately when entering a window, but only "
 "after the pointer stops moving."
 msgstr ""
 
-#: ../src/org.gnome.mutter.gschema.xml.in.h:15
+#: ../src/org.gnome.muffin.gschema.xml.in.h:15
 msgid "Draggable border width"
 msgstr ""
 
-#: ../src/org.gnome.mutter.gschema.xml.in.h:16
+#: ../src/org.gnome.muffin.gschema.xml.in.h:16
 msgid ""
 "The amount of total draggable borders. If the theme's visible borders are "
 "not enough, invisible borders will be added to meet this value."
 msgstr ""
 
-#: ../src/org.gnome.mutter.gschema.xml.in.h:17
+#: ../src/org.gnome.muffin.gschema.xml.in.h:17
 msgid "Auto maximize nearly monitor sized windows"
 msgstr ""
 
-#: ../src/org.gnome.mutter.gschema.xml.in.h:18
+#: ../src/org.gnome.muffin.gschema.xml.in.h:18
 msgid ""
 "If enabled, new windows that are initially the size of the monitor "
 "automatically get maximized."
 msgstr ""
 
-#: ../src/org.gnome.mutter.gschema.xml.in.h:19
+#: ../src/org.gnome.muffin.gschema.xml.in.h:19
 msgid "Select window from tab popup"
 msgstr "റ്റാബ് പോപ്പപ്പില്‍ നിന്നും ജാലകം തെരഞ്ഞെടുക്കുക"
 
-#: ../src/org.gnome.mutter.gschema.xml.in.h:20
+#: ../src/org.gnome.muffin.gschema.xml.in.h:20
 msgid "Cancel tab popup"
 msgstr "റ്റാബ് പോപ്പപ്പ് റദ്ദാക്കുക"
 
-#: ../src/tools/mutter-message.c:123
+#: ../src/tools/muffin-message.c:123
 #, c-format
 msgid "Usage: %s\n"
 msgstr "ഉപയോഗം: %s\n"

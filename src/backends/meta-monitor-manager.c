@@ -1528,7 +1528,7 @@ request_persistent_confirmation (MetaMonitorManager *manager)
                                                           save_config_timeout,
                                                           manager);
   g_source_set_name_by_id (manager->persistent_timeout_id,
-                           "[mutter] save_config_timeout");
+                           "[muffin] save_config_timeout");
 
   g_signal_emit (manager, signals[CONFIRM_DISPLAY_CHANGE], 0);
 }

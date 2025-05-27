@@ -38,7 +38,7 @@
 #include "cogl-private.h"
 #include "cogl-object.h"
 #include "cogl-context-private.h"
-#include "cogl-mutter.h"
+#include "cogl-muffin.h"
 
 #include "cogl-renderer.h"
 #include "cogl-renderer-private.h"

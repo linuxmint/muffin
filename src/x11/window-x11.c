@@ -615,7 +615,7 @@ meta_window_x11_unmanage (MetaWindow *window)
         meta_window_x11_set_wm_state (window);
 
       /* If we're unmanaging a window that is not withdrawn, then
-       * either (a) mutter is exiting, in which case we need to map
+       * either (a) muffin is exiting, in which case we need to map
        * the window so the next WM will know that it's not Withdrawn,
        * or (b) we want to create a new MetaWindow to replace the
        * current one, which will happen automatically if we re-map
@@ -1265,7 +1265,7 @@ send_sync_request (MetaWindow *window)
                                                    sync_request_timeout,
                                                    window);
   g_source_set_name_by_id (window->sync_request_timeout_id,
-                           "[mutter] sync_request_timeout");
+                           "[muffin] sync_request_timeout");
 
   meta_compositor_sync_updates_frozen (window->display->compositor, window);
 }
@@ -1458,10 +1458,10 @@ meta_window_x11_move_resize_internal (MetaWindow                *window,
     need_configure_notify = TRUE;
 
   /* MapRequest events with a PPosition or UPosition hint with a frame
-   * are moved by mutter without resizing; send a configure notify
+   * are moved by muffin without resizing; send a configure notify
    * in such cases.  See #322840.  (Note that window->constructing is
    * only true iff this call is due to a MapRequest, and when
-   * PPosition/UPosition hints aren't set, mutter seems to send a
+   * PPosition/UPosition hints aren't set, muffin seems to send a
    * ConfigureNotify anyway due to the above code.)
    */
   if (window->constructing && window->frame &&
@@ -3375,7 +3375,7 @@ meta_window_x11_set_wm_state (MetaWindow *window)
   set_wm_state_on_xwindow (window->display, window->xwindow, state);
 }
 
-/* The MUTTER_WM_CLASS_FILTER environment variable is designed for
+/* The MUFFIN_WM_CLASS_FILTER environment variable is designed for
  * performance and regression testing environments where we want to do
  * tests with only a limited set of windows and ignore all other windows
  *
@@ -3399,7 +3399,7 @@ maybe_filter_xwindow (MetaDisplay       *display,
 
   if (!initialized)
     {
-      const char *filter_string = g_getenv ("MUTTER_WM_CLASS_FILTER");
+      const char *filter_string = g_getenv ("MUFFIN_WM_CLASS_FILTER");
       if (filter_string)
         filter_wm_classes = g_strsplit (filter_string, ",", -1);
       initialized = TRUE;
@@ -3873,8 +3873,8 @@ meta_window_x11_set_allowed_actions_hint (MetaWindow *window)
       data[i] = x11_display->atom__NET_WM_ACTION_SHADE;
       ++i;
     }
-  /* sticky according to EWMH is different from mutter's sticky;
-   * mutter doesn't support EWMH sticky
+  /* sticky according to EWMH is different from muffin's sticky;
+   * muffin doesn't support EWMH sticky
    */
   if (window->has_maximize_func)
     {

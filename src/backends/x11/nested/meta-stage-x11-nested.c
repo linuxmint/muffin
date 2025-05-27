@@ -33,7 +33,7 @@
 #include "backends/meta-output.h"
 #include "backends/meta-renderer.h"
 #include "backends/x11/nested/meta-renderer-x11-nested.h"
-#include "clutter/clutter-mutter.h"
+#include "clutter/clutter-muffin.h"
 
 static ClutterStageWindowInterface *clutter_stage_window_parent_iface = NULL;
 

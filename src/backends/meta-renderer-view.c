@@ -33,7 +33,7 @@
 #include "backends/meta-renderer-view.h"
 
 #include "backends/meta-renderer.h"
-#include "clutter/clutter-mutter.h"
+#include "clutter/clutter-muffin.h"
 
 enum
 {

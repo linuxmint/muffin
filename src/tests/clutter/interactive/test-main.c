@@ -126,7 +126,7 @@ main (int argc, char **argv)
 
   g_option_context_free (context);
 
-  meta_wayland_override_display_name ("mutter-test-display");
+  meta_wayland_override_display_name ("muffin-test-display");
   meta_xwayland_override_display_number (512);
   meta_override_compositor_configuration (META_COMPOSITOR_TYPE_WAYLAND,
                                           META_TYPE_BACKEND_X11_NESTED);

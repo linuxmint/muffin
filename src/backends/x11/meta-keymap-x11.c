@@ -28,7 +28,7 @@
 
 #include "backends/x11/meta-keymap-x11.h"
 #include "clutter/clutter.h"
-#include "clutter/clutter-mutter.h"
+#include "clutter/clutter-muffin.h"
 #include "clutter/x11/clutter-x11.h"
 
 typedef struct _DirectionCacheEntry     DirectionCacheEntry;

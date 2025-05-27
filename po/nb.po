@@ -1,11 +1,11 @@
-# Norwegian bokmål translation of mutter.
+# Norwegian bokmål translation of muffin.
 # Copyright © 2002-2004 Free Software Foundation, Inc.
 # Kjartan Maraas <kmaraas@gnome.org>, 2002-2017.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: mutter 3.27.x\n"
-"Report-Msgid-Bugs-To: https://bugzilla.gnome.org/enter_bug.cgi?product=mutter&keywords=I18N+L10N&component=general\n"
+"Project-Id-Version: muffin 3.27.x\n"
+"Report-Msgid-Bugs-To: https://bugzilla.gnome.org/enter_bug.cgi?product=muffin&keywords=I18N+L10N&component=general\n"
 "POT-Creation-Date: 2017-11-10 18:31+0000\n"
 "PO-Revision-Date: 2017-11-11 18:19+0100\n"
 "Last-Translator: Kjartan Maraas <kmaraas@gnome.org>\n"
@@ -15,259 +15,259 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: data/50-mutter-navigation.xml:6
+#: data/50-muffin-navigation.xml:6
 msgid "Navigation"
 msgstr "Navigasjon"
 
-#: data/50-mutter-navigation.xml:9
+#: data/50-muffin-navigation.xml:9
 msgid "Move window to workspace 1"
 msgstr "Flytt vindu til arbeidsområde 1"
 
-#: data/50-mutter-navigation.xml:12
+#: data/50-muffin-navigation.xml:12
 msgid "Move window to workspace 2"
 msgstr "Flytt vindu til arbeidsområde 2"
 
-#: data/50-mutter-navigation.xml:15
+#: data/50-muffin-navigation.xml:15
 msgid "Move window to workspace 3"
 msgstr "Flytt vindu til arbeidsområde 3"
 
-#: data/50-mutter-navigation.xml:18
+#: data/50-muffin-navigation.xml:18
 msgid "Move window to workspace 4"
 msgstr "Flytt vindu til arbeidsområde 4"
 
-#: data/50-mutter-navigation.xml:21
+#: data/50-muffin-navigation.xml:21
 msgid "Move window to last workspace"
 msgstr "Flytt vindu til siste arbeidsområde"
 
-#: data/50-mutter-navigation.xml:24
+#: data/50-muffin-navigation.xml:24
 msgid "Move window one workspace to the left"
 msgstr "Flytt vindu ett arbeidsområde til venstre"
 
-#: data/50-mutter-navigation.xml:27
+#: data/50-muffin-navigation.xml:27
 msgid "Move window one workspace to the right"
 msgstr "Flytt vindu ett arbeidsområde til høyre"
 
-#: data/50-mutter-navigation.xml:30
+#: data/50-muffin-navigation.xml:30
 msgid "Move window one workspace up"
 msgstr "Flytt vindu ett arbeidsområde opp"
 
-#: data/50-mutter-navigation.xml:33
+#: data/50-muffin-navigation.xml:33
 msgid "Move window one workspace down"
 msgstr "Flytt vindu ett arbeidsområde ned"
 
-#: data/50-mutter-navigation.xml:36
+#: data/50-muffin-navigation.xml:36
 msgid "Move window one monitor to the left"
 msgstr "Flytt vindu en skjerm til venstre"
 
-#: data/50-mutter-navigation.xml:39
+#: data/50-muffin-navigation.xml:39
 msgid "Move window one monitor to the right"
 msgstr "Flytt vindu en skjerm til høyre"
 
-#: data/50-mutter-navigation.xml:42
+#: data/50-muffin-navigation.xml:42
 msgid "Move window one monitor up"
 msgstr "Flytt vindu en skjerm opp"
 
-#: data/50-mutter-navigation.xml:45
+#: data/50-muffin-navigation.xml:45
 msgid "Move window one monitor down"
 msgstr "Flytt vindu en skjerm ned"
 
-#: data/50-mutter-navigation.xml:49
+#: data/50-muffin-navigation.xml:49
 msgid "Switch applications"
 msgstr "Bytt programmer"
 
-#: data/50-mutter-navigation.xml:54
+#: data/50-muffin-navigation.xml:54
 msgid "Switch to previous application"
 msgstr "Bytt til forrige program"
 
-#: data/50-mutter-navigation.xml:58
+#: data/50-muffin-navigation.xml:58
 msgid "Switch windows"
 msgstr "Bytt vinduer"
 
-#: data/50-mutter-navigation.xml:63
+#: data/50-muffin-navigation.xml:63
 msgid "Switch to previous window"
 msgstr "Bytt forrige vindu"
 
-#: data/50-mutter-navigation.xml:67
+#: data/50-muffin-navigation.xml:67
 msgid "Switch windows of an application"
 msgstr "Bytt mellom et programs vinduer"
 
-#: data/50-mutter-navigation.xml:72
+#: data/50-muffin-navigation.xml:72
 msgid "Switch to previous window of an application"
 msgstr "Bytt til forrige vindu i et program"
 
-#: data/50-mutter-navigation.xml:76
+#: data/50-muffin-navigation.xml:76
 msgid "Switch system controls"
 msgstr "Bytt systemkontroller"
 
-#: data/50-mutter-navigation.xml:81
+#: data/50-muffin-navigation.xml:81
 msgid "Switch to previous system control"
 msgstr "Bytt til forrige systemkontroll"
 
-#: data/50-mutter-navigation.xml:85
+#: data/50-muffin-navigation.xml:85
 msgid "Switch windows directly"
 msgstr "Bytt vinduer direkte"
 
-#: data/50-mutter-navigation.xml:90
+#: data/50-muffin-navigation.xml:90
 msgid "Switch directly to previous window"
 msgstr "Bytt direkte til forrige vindu"
 
-#: data/50-mutter-navigation.xml:94
+#: data/50-muffin-navigation.xml:94
 msgid "Switch windows of an app directly"
 msgstr "Bytt mellom et programs vinduer direkte"
 
-#: data/50-mutter-navigation.xml:99
+#: data/50-muffin-navigation.xml:99
 msgid "Switch directly to previous window of an app"
 msgstr "Bytt direkte til forrive vindu i et program"
 
-#: data/50-mutter-navigation.xml:103
+#: data/50-muffin-navigation.xml:103
 msgid "Switch system controls directly"
 msgstr "Bytt systemkontroller direkte"
 
-#: data/50-mutter-navigation.xml:108
+#: data/50-muffin-navigation.xml:108
 msgid "Switch directly to previous system control"
 msgstr "Bytt direkte til forrige systemkontroll"
 
-#: data/50-mutter-navigation.xml:111
+#: data/50-muffin-navigation.xml:111
 msgid "Hide all normal windows"
 msgstr "Skjul alle normale vinduer"
 
-#: data/50-mutter-navigation.xml:114
+#: data/50-muffin-navigation.xml:114
 msgid "Switch to workspace 1"
 msgstr "Bytt til arbeidsområde 1"
 
-#: data/50-mutter-navigation.xml:117
+#: data/50-muffin-navigation.xml:117
 msgid "Switch to workspace 2"
 msgstr "Bytt til arbeidsområde 2"
 
-#: data/50-mutter-navigation.xml:120
+#: data/50-muffin-navigation.xml:120
 msgid "Switch to workspace 3"
 msgstr "Bytt til arbeidsområde 3"
 
-#: data/50-mutter-navigation.xml:123
+#: data/50-muffin-navigation.xml:123
 msgid "Switch to workspace 4"
 msgstr "Bytt til arbeidsområde 4"
 
-#: data/50-mutter-navigation.xml:126
+#: data/50-muffin-navigation.xml:126
 msgid "Switch to last workspace"
 msgstr "Bytt til siste arbeidsområde"
 
-#: data/50-mutter-navigation.xml:129
+#: data/50-muffin-navigation.xml:129
 msgid "Move to workspace left"
 msgstr "Flytt til arbeidsområdet til venstre"
 
-#: data/50-mutter-navigation.xml:132
+#: data/50-muffin-navigation.xml:132
 msgid "Move to workspace right"
 msgstr "Flytt til arbeidsområdet til høyre"
 
-#: data/50-mutter-navigation.xml:135
+#: data/50-muffin-navigation.xml:135
 msgid "Move to workspace above"
 msgstr "Flytt til arbeidsområdet over"
 
-#: data/50-mutter-navigation.xml:138
+#: data/50-muffin-navigation.xml:138
 msgid "Move to workspace below"
 msgstr "Flytt til arbeidsområdet under"
 
-#: data/50-mutter-system.xml:6 data/50-mutter-wayland.xml:6
+#: data/50-muffin-system.xml:6 data/50-muffin-wayland.xml:6
 msgid "System"
 msgstr "System"
 
-#: data/50-mutter-system.xml:8
+#: data/50-muffin-system.xml:8
 msgid "Show the run command prompt"
 msgstr "Vis kommandolinje"
 
-#: data/50-mutter-system.xml:10
+#: data/50-muffin-system.xml:10
 msgid "Show the activities overview"
 msgstr "Vis oversikt over aktiviteter"
 
-#: data/50-mutter-wayland.xml:8
+#: data/50-muffin-wayland.xml:8
 msgid "Restore the keyboard shortcuts"
 msgstr "Gjenopprett tastatursnarveier"
 
-#: data/50-mutter-windows.xml:6
+#: data/50-muffin-windows.xml:6
 msgid "Windows"
 msgstr "Vinduer"
 
-#: data/50-mutter-windows.xml:8
+#: data/50-muffin-windows.xml:8
 msgid "Activate the window menu"
 msgstr "Aktiver vindumenyen"
 
-#: data/50-mutter-windows.xml:10
+#: data/50-muffin-windows.xml:10
 msgid "Toggle fullscreen mode"
 msgstr "Slå av/på fullskjermmodus"
 
-#: data/50-mutter-windows.xml:12
+#: data/50-muffin-windows.xml:12
 msgid "Toggle maximization state"
 msgstr "Endre tilstand for maksimering"
 
-#: data/50-mutter-windows.xml:14
+#: data/50-muffin-windows.xml:14
 msgid "Maximize window"
 msgstr "Maksimer vindu"
 
-#: data/50-mutter-windows.xml:16
+#: data/50-muffin-windows.xml:16
 msgid "Restore window"
 msgstr "Gjenopprett vindu"
 
-#: data/50-mutter-windows.xml:18
+#: data/50-muffin-windows.xml:18
 msgid "Toggle shaded state"
 msgstr "Endre tilstand for skyggelegging"
 
-#: data/50-mutter-windows.xml:20
+#: data/50-muffin-windows.xml:20
 msgid "Close window"
 msgstr "Lukk vindu"
 
-#: data/50-mutter-windows.xml:22
+#: data/50-muffin-windows.xml:22
 msgid "Hide window"
 msgstr "Skjul vindu"
 
-#: data/50-mutter-windows.xml:24
+#: data/50-muffin-windows.xml:24
 msgid "Move window"
 msgstr "Flytt vindu"
 
-#: data/50-mutter-windows.xml:26
+#: data/50-muffin-windows.xml:26
 msgid "Resize window"
 msgstr "Endre størrelse på vindu"
 
-#: data/50-mutter-windows.xml:29
+#: data/50-muffin-windows.xml:29
 msgid "Toggle window on all workspaces or one"
 msgstr "Slå av/på om vinduet skal vises på alle arbeidsområder eller bare ett"
 
-#: data/50-mutter-windows.xml:31
+#: data/50-muffin-windows.xml:31
 msgid "Raise window if covered, otherwise lower it"
 msgstr "Hev vindu hvis skjult av et annet vindu, senk det ellers"
 
-#: data/50-mutter-windows.xml:33
+#: data/50-muffin-windows.xml:33
 msgid "Raise window above other windows"
 msgstr "Hev vinduet over andre vinduer"
 
-#: data/50-mutter-windows.xml:35
+#: data/50-muffin-windows.xml:35
 msgid "Lower window below other windows"
 msgstr "Senk vinduet under andre vinduer"
 
-#: data/50-mutter-windows.xml:37
+#: data/50-muffin-windows.xml:37
 msgid "Maximize window vertically"
 msgstr "Maksimer vinduet vertikalt"
 
-#: data/50-mutter-windows.xml:39
+#: data/50-muffin-windows.xml:39
 msgid "Maximize window horizontally"
 msgstr "Maksimer vinduet horisontalt"
 
-#: data/50-mutter-windows.xml:43
+#: data/50-muffin-windows.xml:43
 msgid "View split on left"
 msgstr "Visning delt til venstre"
 
-#: data/50-mutter-windows.xml:47
+#: data/50-muffin-windows.xml:47
 msgid "View split on right"
 msgstr "Visning delt til høyre"
 
-#: data/mutter.desktop.in:4
+#: data/muffin.desktop.in:4
 msgid "Mutter"
 msgstr "Mutter"
 
-#: data/org.gnome.mutter.gschema.xml.in:7
+#: data/org.gnome.muffin.gschema.xml.in:7
 msgid "Modifier to use for extended window management operations"
 msgstr "Endringstast som skal brukes for utvidede vindushåndteringsoperasjoner"
 
-#: data/org.gnome.mutter.gschema.xml.in:8
+#: data/org.gnome.muffin.gschema.xml.in:8
 msgid ""
 "This key will initiate the “overlay”, which is a combination window overview "
 "and application launching system. The default is intended to be the “Windows "
@@ -279,11 +279,11 @@ msgstr ""
 "tasten» på PC-maskinvare. Det forventes at denne bindingen er satt til "
 "forvalg eller en tom streng."
 
-#: data/org.gnome.mutter.gschema.xml.in:20
+#: data/org.gnome.muffin.gschema.xml.in:20
 msgid "Attach modal dialogs"
 msgstr "Fest modale dialoger"
 
-#: data/org.gnome.mutter.gschema.xml.in:21
+#: data/org.gnome.muffin.gschema.xml.in:21
 msgid ""
 "When true, instead of having independent titlebars, modal dialogs appear "
 "attached to the titlebar of the parent window and are moved together with "
@@ -293,11 +293,11 @@ msgstr ""
 "tittellinjen på opphavsvinduet og flyttes sammen med dette i stedet for å ha "
 "individuelle tittellinjer."
 
-#: data/org.gnome.mutter.gschema.xml.in:30
+#: data/org.gnome.muffin.gschema.xml.in:30
 msgid "Enable edge tiling when dropping windows on screen edges"
 msgstr "Slå på kantflising ved slipp av vinduer på skjermkantene"
 
-#: data/org.gnome.mutter.gschema.xml.in:31
+#: data/org.gnome.muffin.gschema.xml.in:31
 msgid ""
 "If enabled, dropping windows on vertical screen edges maximizes them "
 "vertically and resizes them horizontally to cover half of the available "
@@ -308,11 +308,11 @@ msgstr ""
 "skjermkanter. Hvis vindu slippes på øverste kant av skjermen maksimeres de "
 "fullstendig."
 
-#: data/org.gnome.mutter.gschema.xml.in:40
+#: data/org.gnome.muffin.gschema.xml.in:40
 msgid "Workspaces are managed dynamically"
 msgstr "Arbeidsområder håndteres dynamisk"
 
-#: data/org.gnome.mutter.gschema.xml.in:41
+#: data/org.gnome.muffin.gschema.xml.in:41
 msgid ""
 "Determines whether workspaces are managed dynamically or whether there’s a "
 "static number of workspaces (determined by the num-workspaces key in org."
@@ -322,11 +322,11 @@ msgstr ""
 "antall arbeidsområder (bestemt av num-workspaces nøkkelen i org.gnome."
 "desktop.wm.preferences)."
 
-#: data/org.gnome.mutter.gschema.xml.in:50
+#: data/org.gnome.muffin.gschema.xml.in:50
 msgid "Workspaces only on primary"
 msgstr "Arbeidsområder kun på primær skjerm"
 
-#: data/org.gnome.mutter.gschema.xml.in:51
+#: data/org.gnome.muffin.gschema.xml.in:51
 msgid ""
 "Determines whether workspace switching should happen for windows on all "
 "monitors or only for windows on the primary monitor."
@@ -334,11 +334,11 @@ msgstr ""
 "Bestemmer om bytting mellom arbeidsområder skal skje for vinduer på alle "
 "skjermer eller kun på primær skjerm."
 
-#: data/org.gnome.mutter.gschema.xml.in:59
+#: data/org.gnome.muffin.gschema.xml.in:59
 msgid "No tab popup"
 msgstr "Ingen tabulatordialog"
 
-#: data/org.gnome.mutter.gschema.xml.in:60
+#: data/org.gnome.muffin.gschema.xml.in:60
 msgid ""
 "Determines whether the use of popup and highlight frame should be disabled "
 "for window cycling."
@@ -346,11 +346,11 @@ msgstr ""
 "Bestemmer om bruk av dialog og uthevingsramme skal slås av for bytting "
 "mellom vinduer."
 
-#: data/org.gnome.mutter.gschema.xml.in:68
+#: data/org.gnome.muffin.gschema.xml.in:68
 msgid "Delay focus changes until the pointer stops moving"
 msgstr "Utsett fokusendringer til pekeren slutter å bevege seg"
 
-#: data/org.gnome.mutter.gschema.xml.in:69
+#: data/org.gnome.muffin.gschema.xml.in:69
 msgid ""
 "If set to true, and the focus mode is either “sloppy” or “mouse” then the "
 "focus will not be changed immediately when entering a window, but only after "
@@ -360,11 +360,11 @@ msgstr ""
 "så vil fokus ikke endres med en gang markøren kommer inn i et vindu, men i "
 "stedet når markørens bevegelse stopper."
 
-#: data/org.gnome.mutter.gschema.xml.in:79
+#: data/org.gnome.muffin.gschema.xml.in:79
 msgid "Draggable border width"
 msgstr "Bredde på drakant"
 
-#: data/org.gnome.mutter.gschema.xml.in:80
+#: data/org.gnome.muffin.gschema.xml.in:80
 msgid ""
 "The amount of total draggable borders. If the theme’s visible borders are "
 "not enough, invisible borders will be added to meet this value."
@@ -372,11 +372,11 @@ msgstr ""
 "Total mengde med drakant. Hvis temas synlige kanter ikke er nok vil usynlige "
 "kanter legges til for å imøtekomme denne verdien."
 
-#: data/org.gnome.mutter.gschema.xml.in:89
+#: data/org.gnome.muffin.gschema.xml.in:89
 msgid "Auto maximize nearly monitor sized windows"
 msgstr "Maksimer vinduer automatisk hvis de er nesten like store som skjermen"
 
-#: data/org.gnome.mutter.gschema.xml.in:90
+#: data/org.gnome.muffin.gschema.xml.in:90
 msgid ""
 "If enabled, new windows that are initially the size of the monitor "
 "automatically get maximized."
@@ -384,11 +384,11 @@ msgstr ""
 "Nye vinduer som i utgangspunktet er samme størrelse som skjermen vil "
 "automatisk bli maksimert hvis denne slås på."
 
-#: data/org.gnome.mutter.gschema.xml.in:98
+#: data/org.gnome.muffin.gschema.xml.in:98
 msgid "Place new windows in the center"
 msgstr "Plasser nye vinduer i senter"
 
-#: data/org.gnome.mutter.gschema.xml.in:99
+#: data/org.gnome.muffin.gschema.xml.in:99
 msgid ""
 "When true, the new windows will always be put in the center of the active "
 "screen of the monitor."
@@ -396,18 +396,18 @@ msgstr ""
 "Når denne er «true» vil mye vinduer alltid plasseres midt på aktivt område "
 "på skjermen."
 
-#: data/org.gnome.mutter.gschema.xml.in:107
+#: data/org.gnome.muffin.gschema.xml.in:107
 msgid "Enable experimental features"
 msgstr "Slå på eksperimentelle funksjoner"
 
-#: data/org.gnome.mutter.gschema.xml.in:108
+#: data/org.gnome.muffin.gschema.xml.in:108
 msgid ""
 "To enable experimental features, add the feature keyword to the list. "
 "Whether the feature requires restarting the compositor depends on the given "
 "feature. Any experimental feature is not required to still be available, or "
 "configurable. Don’t expect adding anything in this setting to be future "
 "proof. Currently possible keywords: • “scale-monitor-framebuffer” — makes "
-"mutter default to layout logical monitors in a logical pixel coordinate "
+"muffin default to layout logical monitors in a logical pixel coordinate "
 "space, while scaling monitor framebuffers instead of window content, to "
 "manage HiDPI monitors. Does not require a restart. • “remote-desktop” — "
 "enables remote desktop support. To support remote desktop with screen "
@@ -415,71 +415,71 @@ msgid ""
 "screen cast support."
 msgstr ""
 
-#: data/org.gnome.mutter.gschema.xml.in:145
+#: data/org.gnome.muffin.gschema.xml.in:145
 msgid "Select window from tab popup"
 msgstr "Fjern vindu fra tabulatordialog"
 
-#: data/org.gnome.mutter.gschema.xml.in:150
+#: data/org.gnome.muffin.gschema.xml.in:150
 msgid "Cancel tab popup"
 msgstr "Avbryt tabulatordialog"
 
-#: data/org.gnome.mutter.gschema.xml.in:155
+#: data/org.gnome.muffin.gschema.xml.in:155
 msgid "Switch monitor configurations"
 msgstr "Bytt skjermkonfigurasjon"
 
-#: data/org.gnome.mutter.gschema.xml.in:160
+#: data/org.gnome.muffin.gschema.xml.in:160
 msgid "Rotates the built-in monitor configuration"
 msgstr "Roterer mellom innebyggede skjermkonfigurasjoner"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:6
+#: data/org.gnome.muffin.wayland.gschema.xml.in:6
 msgid "Switch to VT 1"
 msgstr "Bytt til VT 1"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:10
+#: data/org.gnome.muffin.wayland.gschema.xml.in:10
 msgid "Switch to VT 2"
 msgstr "Bytt til VT 2"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:14
+#: data/org.gnome.muffin.wayland.gschema.xml.in:14
 msgid "Switch to VT 3"
 msgstr "Bytt til VT 3"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:18
+#: data/org.gnome.muffin.wayland.gschema.xml.in:18
 msgid "Switch to VT 4"
 msgstr "Bytt til VT 4"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:22
+#: data/org.gnome.muffin.wayland.gschema.xml.in:22
 msgid "Switch to VT 5"
 msgstr "Bytt til VT 5"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:26
+#: data/org.gnome.muffin.wayland.gschema.xml.in:26
 msgid "Switch to VT 6"
 msgstr "Bytt til VT 6"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:30
+#: data/org.gnome.muffin.wayland.gschema.xml.in:30
 msgid "Switch to VT 7"
 msgstr "Bytt til VT 7"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:34
+#: data/org.gnome.muffin.wayland.gschema.xml.in:34
 msgid "Switch to VT 8"
 msgstr "Bytt til VT 8"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:38
+#: data/org.gnome.muffin.wayland.gschema.xml.in:38
 msgid "Switch to VT 9"
 msgstr "Bytt til VT 9"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:42
+#: data/org.gnome.muffin.wayland.gschema.xml.in:42
 msgid "Switch to VT 10"
 msgstr "Bytt til VT 10"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:46
+#: data/org.gnome.muffin.wayland.gschema.xml.in:46
 msgid "Switch to VT 11"
 msgstr "Bytt til VT 11"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:50
+#: data/org.gnome.muffin.wayland.gschema.xml.in:50
 msgid "Switch to VT 12"
 msgstr "Bytt til VT 12"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:54
+#: data/org.gnome.muffin.wayland.gschema.xml.in:54
 msgid "Re-enable shortcuts"
 msgstr "Slå på snarveier igjen"
 
@@ -601,26 +601,26 @@ msgstr "_Tvungen nedstenging"
 msgid "_Wait"
 msgstr "_Vent"
 
-#: src/core/mutter.c:39
+#: src/core/muffin.c:39
 #, c-format
 msgid ""
-"mutter %s\n"
+"muffin %s\n"
 "Copyright © 2001-%d Havoc Pennington, Red Hat, Inc., and others\n"
 "This is free software; see the source for copying conditions.\n"
 "There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A "
 "PARTICULAR PURPOSE.\n"
 msgstr ""
-"mutter %s\n"
+"muffin %s\n"
 "Opphavsrett © 2001-%d Havoc Pennington, Red Hat, Inc, og andre\n"
 "Dette er fri programvare; se i kildekoden for kopibetingelser.\n"
 "Det gis INGEN garanti; ikke en gang for SALGBARHET eller PASSENDE FOR ET "
 "BESTEMT FORMÅL.\n"
 
-#: src/core/mutter.c:53
+#: src/core/muffin.c:53
 msgid "Print version"
 msgstr "Skriv versjonsnummer"
 
-#: src/core/mutter.c:59
+#: src/core/muffin.c:59
 msgid "Mutter plugin to use"
 msgstr "Mutter-tillegg som skal brukes"
 

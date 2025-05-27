@@ -46,7 +46,7 @@
 #include "clutter-debug.h"
 #include "clutter-event-private.h"
 #include "clutter-marshal.h"
-#include "clutter-mutter.h"
+#include "clutter-muffin.h"
 #include "clutter-private.h"
 #include "clutter-stage-manager-private.h"
 #include "clutter-stage-private.h"

@@ -83,7 +83,7 @@ static int
 create_anonymous_file (off_t    size,
                        GError **error)
 {
-  static const char template[] = "mutter-shared-XXXXXX";
+  static const char template[] = "muffin-shared-XXXXXX";
   char *path;
   int fd, flags;
 

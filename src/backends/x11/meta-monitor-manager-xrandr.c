@@ -1168,7 +1168,7 @@ meta_monitor_manager_xrandr_init_monitors (MetaMonitorManagerXrandr *manager_xra
         META_MONITOR_MANAGER_CAPABILITY_TILING))
     return;
 
-  /* delete any tiled monitors setup, as mutter will want to recreate
+  /* delete any tiled monitors setup, as muffin will want to recreate
      things in its image */
   m = XRRGetMonitors (manager_xrandr->xdisplay,
                       DefaultRootWindow (manager_xrandr->xdisplay),

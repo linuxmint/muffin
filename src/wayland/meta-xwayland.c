@@ -469,7 +469,7 @@ prepare_auth_file (MetaXWaylandManager *manager)
   int fd;
 
   manager->auth_file = g_build_filename (g_get_user_runtime_dir (),
-                                         ".mutter-Xwaylandauth.XXXXXX",
+                                         ".muffin-Xwaylandauth.XXXXXX",
                                          NULL);
 
   if (getrandom (auth_data, sizeof (auth_data), 0) != sizeof (auth_data))

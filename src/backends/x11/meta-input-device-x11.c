@@ -21,7 +21,7 @@
 
 #include <X11/extensions/XInput2.h>
 
-#include "clutter/clutter-mutter.h"
+#include "clutter/clutter-muffin.h"
 #include "clutter/x11/clutter-x11.h"
 #include "backends/x11/meta-input-device-x11.h"
 

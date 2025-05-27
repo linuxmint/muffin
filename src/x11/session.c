@@ -819,7 +819,7 @@ decode_text_from_utf8 (const char *text)
 static void
 save_state (void)
 {
-  char *mutter_dir;
+  char *muffin_dir;
   char *session_dir;
   FILE *outfile;
   GSList *windows;
@@ -838,19 +838,19 @@ save_state (void)
    * we probably already have full_save_path figured out and therefore
    * can just use the directory name from that.
    */
-  mutter_dir = g_strconcat (g_get_user_config_dir (),
-                              G_DIR_SEPARATOR_S "mutter",
+  muffin_dir = g_strconcat (g_get_user_config_dir (),
+                              G_DIR_SEPARATOR_S "muffin",
                               NULL);
 
-  session_dir = g_strconcat (mutter_dir,
+  session_dir = g_strconcat (muffin_dir,
                              G_DIR_SEPARATOR_S "sessions",
                              NULL);
 
-  if (mkdir (mutter_dir, 0700) < 0 &&
+  if (mkdir (muffin_dir, 0700) < 0 &&
       errno != EEXIST)
     {
       meta_warning ("Could not create directory '%s': %s\n",
-                    mutter_dir, g_strerror (errno));
+                    muffin_dir, g_strerror (errno));
     }
 
   if (mkdir (session_dir, 0700) < 0 &&
@@ -872,14 +872,14 @@ save_state (void)
     }
 
   /* The file format is:
-   * <mutter_session id="foo">
+   * <muffin_session id="foo">
    *   <window id="bar" class="XTerm" name="xterm" title="/foo/bar" role="blah" type="normal" stacking="5">
    *     <workspace index="2"/>
    *     <workspace index="4"/>
    *     <sticky/> <minimized/> <maximized/>
    *     <geometry x="100" y="100" width="200" height="200" gravity="northwest"/>
    *   </window>
-   * </mutter_session>
+   * </muffin_session>
    *
    * Note that attributes on <window> are the match info we use to
    * see if the saved state applies to a restored window, and
@@ -887,7 +887,7 @@ save_state (void)
    *
    */
 
-  fprintf (outfile, "<mutter_session id=\"%s\">\n",
+  fprintf (outfile, "<muffin_session id=\"%s\">\n",
            client_id);
 
   windows = meta_display_list_windows (meta_get_display (), META_LIST_DEFAULT);
@@ -1002,7 +1002,7 @@ save_state (void)
 
   g_slist_free (windows);
 
-  fputs ("</mutter_session>\n", outfile);
+  fputs ("</muffin_session>\n", outfile);
 
  out:
   if (outfile)
@@ -1020,7 +1020,7 @@ save_state (void)
         }
     }
 
-  g_free (mutter_dir);
+  g_free (muffin_dir);
   g_free (session_dir);
 }
 
@@ -1059,7 +1059,7 @@ static void text_handler          (GMarkupParseContext  *context,
                                    gpointer              user_data,
                                    GError              **error);
 
-static GMarkupParser mutter_session_parser = {
+static GMarkupParser muffin_session_parser = {
   start_element_handler,
   end_element_handler,
   text_handler,
@@ -1080,7 +1080,7 @@ load_state (const char *previous_save_file)
   char *session_file;
 
   session_file = g_strconcat (g_get_user_config_dir (),
-                              G_DIR_SEPARATOR_S "mutter"
+                              G_DIR_SEPARATOR_S "muffin"
                               G_DIR_SEPARATOR_S "sessions" G_DIR_SEPARATOR_S,
                               previous_save_file,
                               NULL);
@@ -1093,9 +1093,9 @@ load_state (const char *previous_save_file)
     {
       char *canonical_session_file = session_file;
 
-      /* Maybe they were doing it the old way, with ~/.mutter */
+      /* Maybe they were doing it the old way, with ~/.muffin */
       session_file = g_strconcat (g_get_home_dir (),
-                                  G_DIR_SEPARATOR_S ".mutter"
+                                  G_DIR_SEPARATOR_S ".muffin"
                                   G_DIR_SEPARATOR_S "sessions"
                                   G_DIR_SEPARATOR_S,
                                   previous_save_file,
@@ -1124,7 +1124,7 @@ load_state (const char *previous_save_file)
   parse_data.info = NULL;
   parse_data.previous_id = NULL;
 
-  context = g_markup_parse_context_new (&mutter_session_parser,
+  context = g_markup_parse_context_new (&muffin_session_parser,
                                         0, &parse_data, NULL);
 
   error = NULL;
@@ -1175,7 +1175,7 @@ start_element_handler  (GMarkupParseContext *context,
 
   pd = user_data;
 
-  if (strcmp (element_name, "mutter_session") == 0)
+  if (strcmp (element_name, "muffin_session") == 0)
     {
       /* Get previous ID */
       int i;
@@ -1194,7 +1194,7 @@ start_element_handler  (GMarkupParseContext *context,
               g_set_error (error,
                            G_MARKUP_ERROR,
                        G_MARKUP_ERROR_PARSE,
-                           "<mutter_session> attribute seen but we already have the session ID");
+                           "<muffin_session> attribute seen but we already have the session ID");
               return;
             }
 
@@ -1208,7 +1208,7 @@ start_element_handler  (GMarkupParseContext *context,
                            G_MARKUP_ERROR,
                            G_MARKUP_ERROR_UNKNOWN_ATTRIBUTE,
                            "Unknown attribute %s on <%s> element",
-                           name, "mutter_session");
+                           name, "muffin_session");
               return;
             }
 
@@ -1532,7 +1532,7 @@ get_possible_matches (MetaWindow *window)
 
   retval = NULL;
 
-  ignore_client_id = g_getenv ("MUTTER_DEBUG_SM") != NULL;
+  ignore_client_id = g_getenv ("MUFFIN_DEBUG_SM") != NULL;
 
   tmp = window_info_list;
   while (tmp != NULL)
@@ -1717,7 +1717,7 @@ regenerate_save_file (void)
 
   if (client_id)
     full_save_path = g_strconcat (g_get_user_config_dir (),
-                                  G_DIR_SEPARATOR_S "mutter"
+                                  G_DIR_SEPARATOR_S "muffin"
                                   G_DIR_SEPARATOR_S "sessions" G_DIR_SEPARATOR_S,
                                   client_id,
                                   ".ms",

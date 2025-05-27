@@ -30,7 +30,7 @@
 
 #include "backends/meta-input-device-private.h"
 #include "backends/native/meta-seat-native.h"
-#include "clutter/clutter-mutter.h"
+#include "clutter/clutter-muffin.h"
 
 #define META_TYPE_INPUT_DEVICE_NATIVE meta_input_device_native_get_type()
 

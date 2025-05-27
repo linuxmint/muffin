@@ -32,7 +32,7 @@
 
 #include "core/keybindings-private.h"
 
-/* This is copied from GTK+ and modified to work with mutter's
+/* This is copied from GTK+ and modified to work with muffin's
  * internal structures. Originating code comes from gtk/gtkaccelgroup.c
  */
 

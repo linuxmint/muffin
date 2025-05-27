@@ -204,7 +204,7 @@ struct _MetaWindow
   char *wm_client_machine;
 
   char *startup_id;
-  char *mutter_hints;
+  char *muffin_hints;
   char *sandboxed_app_id;
   char *gtk_theme_variant;
   char *gtk_application_id;

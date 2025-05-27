@@ -8,7 +8,7 @@
       @short_description: Screen cast interface
 
       This API is private and not intended to be used outside of the integrated
-      system that uses libmutter. No compatibility between versions are
+      system that uses libmuffin. No compatibility between versions are
       promised.
   -->
   <interface name="org.cinnamon.Muffin.ScreenCast">

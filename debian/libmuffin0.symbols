@@ -2629,7 +2629,7 @@ libmuffin.so.0 libmuffin0 #MINVER#
  meta_window_get_layer@Base 5.3.0
  meta_window_get_maximized@Base 5.3.0
  meta_window_get_monitor@Base 5.3.0
- meta_window_get_mutter_hints@Base 5.3.0
+ meta_window_get_muffin_hints@Base 5.3.0
  meta_window_get_opacity@Base 5.4.2
  meta_window_get_pid@Base 5.3.0
  meta_window_get_role@Base 5.3.0

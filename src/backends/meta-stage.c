@@ -25,7 +25,7 @@
 #include "backends/meta-stage-private.h"
 
 #include "backends/meta-backend-private.h"
-#include "clutter/clutter-mutter.h"
+#include "clutter/clutter-muffin.h"
 #include "meta/meta-backend.h"
 #include "meta/meta-monitor-manager.h"
 #include "meta/util.h"

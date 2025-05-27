@@ -40,7 +40,7 @@
  * transactional API, aiming to hide all interaction with the underlying APIs.
  *
  * The subsystem defines two separate contexts, the "main" context, and the
- * "impl" context. The main context is the context of which mutter as a whole
+ * "impl" context. The main context is the context of which muffin as a whole
  * runs in. It uses the main GLib main loop and main context and always runs in
  * the main thread.
  *

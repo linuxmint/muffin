@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: metacity\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
-"product=mutter&keywords=I18N+L10N&component=general\n"
+"product=muffin&keywords=I18N+L10N&component=general\n"
 "POT-Creation-Date: 2016-10-29 18:34+0000\n"
 "PO-Revision-Date: 2017-03-02 11:35+0000\n"
 "Last-Translator: Sveinn í Felli <sv1@fellsnet.is>\n"
@@ -19,265 +19,265 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
 "X-Generator: Lokalize 1.5\n"
 
-#: data/50-mutter-navigation.xml:6
+#: data/50-muffin-navigation.xml:6
 msgid "Navigation"
 msgstr "Flakk"
 
-#: data/50-mutter-navigation.xml:9
+#: data/50-muffin-navigation.xml:9
 msgid "Move window to workspace 1"
 msgstr "Flytja glugga yfir á vinnusvæði 1"
 
-#: data/50-mutter-navigation.xml:12
+#: data/50-muffin-navigation.xml:12
 msgid "Move window to workspace 2"
 msgstr "Flytja glugga yfir á vinnusvæði 2"
 
-#: data/50-mutter-navigation.xml:15
+#: data/50-muffin-navigation.xml:15
 msgid "Move window to workspace 3"
 msgstr "Flytja glugga yfir á vinnusvæði 3"
 
-#: data/50-mutter-navigation.xml:18
+#: data/50-muffin-navigation.xml:18
 msgid "Move window to workspace 4"
 msgstr "Flytja glugga yfir á vinnusvæði 4"
 
-#: data/50-mutter-navigation.xml:21
+#: data/50-muffin-navigation.xml:21
 #| msgid "Move window to workspace 1"
 msgid "Move window to last workspace"
 msgstr "Flytja glugga yfir á síðasta vinnusvæði"
 
-#: data/50-mutter-navigation.xml:24
+#: data/50-muffin-navigation.xml:24
 msgid "Move window one workspace to the left"
 msgstr "Flytja glugga til vinstri um eitt vinnusvæði"
 
-#: data/50-mutter-navigation.xml:27
+#: data/50-muffin-navigation.xml:27
 msgid "Move window one workspace to the right"
 msgstr "Flytja glugga til hægri um eitt vinnusvæði"
 
-#: data/50-mutter-navigation.xml:30
+#: data/50-muffin-navigation.xml:30
 msgid "Move window one workspace up"
 msgstr "Flytja glugga upp um eitt vinnusvæði"
 
-#: data/50-mutter-navigation.xml:33
+#: data/50-muffin-navigation.xml:33
 msgid "Move window one workspace down"
 msgstr "Flytja glugga niður um eitt vinnusvæði"
 
-#: data/50-mutter-navigation.xml:36
+#: data/50-muffin-navigation.xml:36
 #| msgid "Move window one workspace to the left"
 msgid "Move window one monitor to the left"
 msgstr "Flytja glugga á skjá til vinstri"
 
-#: data/50-mutter-navigation.xml:39
+#: data/50-muffin-navigation.xml:39
 #| msgid "Move window one workspace to the right"
 msgid "Move window one monitor to the right"
 msgstr "Flytja glugga á skjá til hægri"
 
-#: data/50-mutter-navigation.xml:42
+#: data/50-muffin-navigation.xml:42
 #| msgid "Move window one workspace up"
 msgid "Move window one monitor up"
 msgstr "Flytja glugga á skjá fyrir ofan"
 
-#: data/50-mutter-navigation.xml:45
+#: data/50-muffin-navigation.xml:45
 #| msgid "Move window one workspace down"
 msgid "Move window one monitor down"
 msgstr "Flytja glugga á skjá fyrir neðan"
 
-#: data/50-mutter-navigation.xml:49
+#: data/50-muffin-navigation.xml:49
 msgid "Switch applications"
 msgstr "Skipta á milli forrita"
 
-#: data/50-mutter-navigation.xml:54
+#: data/50-muffin-navigation.xml:54
 msgid "Switch to previous application"
 msgstr "Skipta í fyrra forrit"
 
-#: data/50-mutter-navigation.xml:58
+#: data/50-muffin-navigation.xml:58
 msgid "Switch windows"
 msgstr "Skipta á milli glugga"
 
-#: data/50-mutter-navigation.xml:63
+#: data/50-muffin-navigation.xml:63
 msgid "Switch to previous window"
 msgstr "Skipta yfir í fyrri glugga"
 
-#: data/50-mutter-navigation.xml:67
+#: data/50-muffin-navigation.xml:67
 msgid "Switch windows of an application"
 msgstr "Skipta um forritsglugga"
 
-#: data/50-mutter-navigation.xml:72
+#: data/50-muffin-navigation.xml:72
 msgid "Switch to previous window of an application"
 msgstr "Skipta í fyrri glugga forrits"
 
-#: data/50-mutter-navigation.xml:76
+#: data/50-muffin-navigation.xml:76
 msgid "Switch system controls"
 msgstr ""
 
-#: data/50-mutter-navigation.xml:81
+#: data/50-muffin-navigation.xml:81
 msgid "Switch to previous system control"
 msgstr ""
 
-#: data/50-mutter-navigation.xml:85
+#: data/50-muffin-navigation.xml:85
 msgid "Switch windows directly"
 msgstr "Skipta beint á milli glugga"
 
-#: data/50-mutter-navigation.xml:90
+#: data/50-muffin-navigation.xml:90
 msgid "Switch directly to previous window"
 msgstr "Skipta beint yfir í fyrri glugga"
 
-#: data/50-mutter-navigation.xml:94
+#: data/50-muffin-navigation.xml:94
 msgid "Switch windows of an app directly"
 msgstr ""
 
-#: data/50-mutter-navigation.xml:99
+#: data/50-muffin-navigation.xml:99
 msgid "Switch directly to previous window of an app"
 msgstr ""
 
-#: data/50-mutter-navigation.xml:103
+#: data/50-muffin-navigation.xml:103
 msgid "Switch system controls directly"
 msgstr ""
 
-#: data/50-mutter-navigation.xml:108
+#: data/50-muffin-navigation.xml:108
 msgid "Switch directly to previous system control"
 msgstr ""
 
-#: data/50-mutter-navigation.xml:111
+#: data/50-muffin-navigation.xml:111
 msgid "Hide all normal windows"
 msgstr "Fela alla venjulega glugga"
 
-#: data/50-mutter-navigation.xml:114
+#: data/50-muffin-navigation.xml:114
 msgid "Switch to workspace 1"
 msgstr "Skipta yfir á vinnusvæði 1"
 
-#: data/50-mutter-navigation.xml:117
+#: data/50-muffin-navigation.xml:117
 msgid "Switch to workspace 2"
 msgstr "Skipta yfir á vinnusvæði 2"
 
-#: data/50-mutter-navigation.xml:120
+#: data/50-muffin-navigation.xml:120
 msgid "Switch to workspace 3"
 msgstr "Skipta yfir á vinnusvæði 3"
 
-#: data/50-mutter-navigation.xml:123
+#: data/50-muffin-navigation.xml:123
 msgid "Switch to workspace 4"
 msgstr "Skipta yfir á vinnusvæði 4"
 
-#: data/50-mutter-navigation.xml:126
+#: data/50-muffin-navigation.xml:126
 #| msgid "Switch to workspace 1"
 msgid "Switch to last workspace"
 msgstr "Skipta yfir á síðasta vinnusvæði"
 
-#: data/50-mutter-navigation.xml:129
+#: data/50-muffin-navigation.xml:129
 msgid "Move to workspace left"
 msgstr "Flytja á vinnusvæðið til vinstri"
 
-#: data/50-mutter-navigation.xml:132
+#: data/50-muffin-navigation.xml:132
 msgid "Move to workspace right"
 msgstr "Flytja á vinnusvæðið til hægri"
 
-#: data/50-mutter-navigation.xml:135
+#: data/50-muffin-navigation.xml:135
 msgid "Move to workspace above"
 msgstr "Flytja á vinnusvæðið fyrir ofan"
 
-#: data/50-mutter-navigation.xml:138
+#: data/50-muffin-navigation.xml:138
 msgid "Move to workspace below"
 msgstr "Flytja á vinnusvæðið fyrir neðan"
 
-#: data/50-mutter-system.xml:6
+#: data/50-muffin-system.xml:6
 msgid "System"
 msgstr "Kerfið"
 
-#: data/50-mutter-system.xml:8
+#: data/50-muffin-system.xml:8
 msgid "Show the run command prompt"
 msgstr "Birta skipanalínuna"
 
-#: data/50-mutter-system.xml:10
+#: data/50-muffin-system.xml:10
 msgid "Show the activities overview"
 msgstr "Birta virkniyfirlit"
 
-#: data/50-mutter-windows.xml:6
+#: data/50-muffin-windows.xml:6
 msgid "Windows"
 msgstr "Gluggar"
 
-#: data/50-mutter-windows.xml:8
+#: data/50-muffin-windows.xml:8
 #| msgid "Activate window menu"
 msgid "Activate the window menu"
 msgstr "Virkja gluggavalmynd"
 
-#: data/50-mutter-windows.xml:10
+#: data/50-muffin-windows.xml:10
 msgid "Toggle fullscreen mode"
 msgstr "Víxla heilskjáham af/á"
 
-#: data/50-mutter-windows.xml:12
+#: data/50-muffin-windows.xml:12
 msgid "Toggle maximization state"
 msgstr "Víxla hámörkunarstöðu af/á"
 
-#: data/50-mutter-windows.xml:14
+#: data/50-muffin-windows.xml:14
 msgid "Maximize window"
 msgstr "Hámarka glugga"
 
-#: data/50-mutter-windows.xml:16
+#: data/50-muffin-windows.xml:16
 msgid "Restore window"
 msgstr "Endurheimta glugga"
 
-#: data/50-mutter-windows.xml:18
+#: data/50-muffin-windows.xml:18
 msgid "Toggle shaded state"
 msgstr "Víxla skyggingarstöðu af/á"
 
-#: data/50-mutter-windows.xml:20
+#: data/50-muffin-windows.xml:20
 msgid "Close window"
 msgstr "Loka glugga"
 
-#: data/50-mutter-windows.xml:22
+#: data/50-muffin-windows.xml:22
 msgid "Hide window"
 msgstr "Fela glugga"
 
-#: data/50-mutter-windows.xml:24
+#: data/50-muffin-windows.xml:24
 msgid "Move window"
 msgstr "Flytja glugga"
 
-#: data/50-mutter-windows.xml:26
+#: data/50-muffin-windows.xml:26
 msgid "Resize window"
 msgstr "Breyta stærð glugga"
 
-#: data/50-mutter-windows.xml:29
+#: data/50-muffin-windows.xml:29
 #| msgid "Move window one workspace down"
 msgid "Toggle window on all workspaces or one"
 msgstr ""
 "Skipta á milli þess hvort glugginn sé á öllum vinnusvæðum eða bara einu"
 
-#: data/50-mutter-windows.xml:31
+#: data/50-muffin-windows.xml:31
 #| msgid "Raise window above other windows"
 msgid "Raise window if covered, otherwise lower it"
 msgstr "Hækka glugga ef annar gluggi hylur hann, annars skal lækka hann"
 
-#: data/50-mutter-windows.xml:33
+#: data/50-muffin-windows.xml:33
 msgid "Raise window above other windows"
 msgstr "Hækka glugga upp fyrir aðra glugga"
 
-#: data/50-mutter-windows.xml:35
+#: data/50-muffin-windows.xml:35
 msgid "Lower window below other windows"
 msgstr "Lækka glugga niður fyrir aðra glugga"
 
-#: data/50-mutter-windows.xml:37
+#: data/50-muffin-windows.xml:37
 msgid "Maximize window vertically"
 msgstr "Hámarka glugga lóðrétt"
 
-#: data/50-mutter-windows.xml:39
+#: data/50-muffin-windows.xml:39
 msgid "Maximize window horizontally"
 msgstr "Hámarka glugga lárétt"
 
-#: data/50-mutter-windows.xml:43
+#: data/50-muffin-windows.xml:43
 msgid "View split on left"
 msgstr "Kljúfa sýn til vinstri"
 
-#: data/50-mutter-windows.xml:47
+#: data/50-muffin-windows.xml:47
 msgid "View split on right"
 msgstr "Kljúfa sýn til hægri"
 
-#: data/mutter.desktop.in:4
+#: data/muffin.desktop.in:4
 msgid "Mutter"
 msgstr "Mutter"
 
-#: data/org.gnome.mutter.gschema.xml.in:7
+#: data/org.gnome.muffin.gschema.xml.in:7
 msgid "Modifier to use for extended window management operations"
 msgstr ""
 
-#: data/org.gnome.mutter.gschema.xml.in:8
+#: data/org.gnome.muffin.gschema.xml.in:8
 msgid ""
 "This key will initiate the \"overlay\", which is a combination window "
 "overview and application launching system. The default is intended to be the "
@@ -285,164 +285,164 @@ msgid ""
 "default or set to the empty string."
 msgstr ""
 
-#: data/org.gnome.mutter.gschema.xml.in:20
+#: data/org.gnome.muffin.gschema.xml.in:20
 msgid "Attach modal dialogs"
 msgstr "Tengja kvaðningarglugga"
 
-#: data/org.gnome.mutter.gschema.xml.in:21
+#: data/org.gnome.muffin.gschema.xml.in:21
 msgid ""
 "When true, instead of having independent titlebars, modal dialogs appear "
 "attached to the titlebar of the parent window and are moved together with "
 "the parent window."
 msgstr ""
 
-#: data/org.gnome.mutter.gschema.xml.in:30
+#: data/org.gnome.muffin.gschema.xml.in:30
 msgid "Enable edge tiling when dropping windows on screen edges"
 msgstr "Virkja flísalögn við jaðra þegar gluggum er sleppt á skjájaðra"
 
-#: data/org.gnome.mutter.gschema.xml.in:31
+#: data/org.gnome.muffin.gschema.xml.in:31
 msgid ""
 "If enabled, dropping windows on vertical screen edges maximizes them "
 "vertically and resizes them horizontally to cover half of the available "
 "area. Dropping windows on the top screen edge maximizes them completely."
 msgstr ""
 
-#: data/org.gnome.mutter.gschema.xml.in:40
+#: data/org.gnome.muffin.gschema.xml.in:40
 msgid "Workspaces are managed dynamically"
 msgstr "Vinnusvæðum er stýrt eftir þörfum"
 
-#: data/org.gnome.mutter.gschema.xml.in:41
+#: data/org.gnome.muffin.gschema.xml.in:41
 msgid ""
 "Determines whether workspaces are managed dynamically or whether there's a "
 "static number of workspaces (determined by the num-workspaces key in org."
 "gnome.desktop.wm.preferences)."
 msgstr ""
 
-#: data/org.gnome.mutter.gschema.xml.in:50
+#: data/org.gnome.muffin.gschema.xml.in:50
 msgid "Workspaces only on primary"
 msgstr "Vinnusvæði einungis á aðalskjá"
 
-#: data/org.gnome.mutter.gschema.xml.in:51
+#: data/org.gnome.muffin.gschema.xml.in:51
 msgid ""
 "Determines whether workspace switching should happen for windows on all "
 "monitors or only for windows on the primary monitor."
 msgstr ""
 
-#: data/org.gnome.mutter.gschema.xml.in:59
+#: data/org.gnome.muffin.gschema.xml.in:59
 msgid "No tab popup"
 msgstr ""
 
-#: data/org.gnome.mutter.gschema.xml.in:60
+#: data/org.gnome.muffin.gschema.xml.in:60
 msgid ""
 "Determines whether the use of popup and highlight frame should be disabled "
 "for window cycling."
 msgstr ""
 
-#: data/org.gnome.mutter.gschema.xml.in:68
+#: data/org.gnome.muffin.gschema.xml.in:68
 msgid "Delay focus changes until the pointer stops moving"
 msgstr ""
 
-#: data/org.gnome.mutter.gschema.xml.in:69
+#: data/org.gnome.muffin.gschema.xml.in:69
 msgid ""
 "If set to true, and the focus mode is either \"sloppy\" or \"mouse\" then "
 "the focus will not be changed immediately when entering a window, but only "
 "after the pointer stops moving."
 msgstr ""
 
-#: data/org.gnome.mutter.gschema.xml.in:79
+#: data/org.gnome.muffin.gschema.xml.in:79
 msgid "Draggable border width"
 msgstr ""
 
-#: data/org.gnome.mutter.gschema.xml.in:80
+#: data/org.gnome.muffin.gschema.xml.in:80
 msgid ""
 "The amount of total draggable borders. If the theme's visible borders are "
 "not enough, invisible borders will be added to meet this value."
 msgstr ""
 
-#: data/org.gnome.mutter.gschema.xml.in:89
+#: data/org.gnome.muffin.gschema.xml.in:89
 msgid "Auto maximize nearly monitor sized windows"
 msgstr ""
 
-#: data/org.gnome.mutter.gschema.xml.in:90
+#: data/org.gnome.muffin.gschema.xml.in:90
 msgid ""
 "If enabled, new windows that are initially the size of the monitor "
 "automatically get maximized."
 msgstr ""
 
-#: data/org.gnome.mutter.gschema.xml.in:98
+#: data/org.gnome.muffin.gschema.xml.in:98
 msgid "Place new windows in the center"
 msgstr "Setja nýja glugga á miðjuna"
 
-#: data/org.gnome.mutter.gschema.xml.in:99
+#: data/org.gnome.muffin.gschema.xml.in:99
 msgid ""
 "When true, the new windows will always be put in the center of the active "
 "screen of the monitor."
 msgstr ""
 
-#: data/org.gnome.mutter.gschema.xml.in:120
+#: data/org.gnome.muffin.gschema.xml.in:120
 msgid "Select window from tab popup"
 msgstr ""
 
-#: data/org.gnome.mutter.gschema.xml.in:125
+#: data/org.gnome.muffin.gschema.xml.in:125
 msgid "Cancel tab popup"
 msgstr ""
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:6
+#: data/org.gnome.muffin.wayland.gschema.xml.in:6
 #| msgid "Switch to workspace 1"
 msgid "Switch to VT 1"
 msgstr "Skipta yfir á vinnusvæði 1"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:10
+#: data/org.gnome.muffin.wayland.gschema.xml.in:10
 #| msgid "Switch to workspace 2"
 msgid "Switch to VT 2"
 msgstr "Skipta yfir á vinnusvæði 2"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:14
+#: data/org.gnome.muffin.wayland.gschema.xml.in:14
 #| msgid "Switch to workspace 3"
 msgid "Switch to VT 3"
 msgstr "Skipta yfir á vinnusvæði 3"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:18
+#: data/org.gnome.muffin.wayland.gschema.xml.in:18
 #| msgid "Switch to workspace 4"
 msgid "Switch to VT 4"
 msgstr "Skipta yfir á vinnusvæði 4"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:22
+#: data/org.gnome.muffin.wayland.gschema.xml.in:22
 #| msgid "Switch to workspace 5"
 msgid "Switch to VT 5"
 msgstr "Skipta yfir á vinnusvæði 5"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:26
+#: data/org.gnome.muffin.wayland.gschema.xml.in:26
 #| msgid "Switch to workspace 6"
 msgid "Switch to VT 6"
 msgstr "Skipta yfir á vinnusvæði 6"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:30
+#: data/org.gnome.muffin.wayland.gschema.xml.in:30
 #| msgid "Switch to workspace 7"
 msgid "Switch to VT 7"
 msgstr "Skipta yfir á vinnusvæði 7"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:34
+#: data/org.gnome.muffin.wayland.gschema.xml.in:34
 #| msgid "Switch to workspace 8"
 msgid "Switch to VT 8"
 msgstr "Skipta yfir á vinnusvæði 8"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:38
+#: data/org.gnome.muffin.wayland.gschema.xml.in:38
 #| msgid "Switch to workspace 9"
 msgid "Switch to VT 9"
 msgstr "Skipta yfir á vinnusvæði 9"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:42
+#: data/org.gnome.muffin.wayland.gschema.xml.in:42
 #| msgid "Switch to workspace 10"
 msgid "Switch to VT 10"
 msgstr "Skipta yfir á vinnusvæði 10"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:46
+#: data/org.gnome.muffin.wayland.gschema.xml.in:46
 #| msgid "Switch to workspace 11"
 msgid "Switch to VT 11"
 msgstr "Skipta yfir á vinnusvæði 11"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:50
+#: data/org.gnome.muffin.wayland.gschema.xml.in:50
 #| msgid "Switch to workspace 12"
 msgid "Switch to VT 12"
 msgstr "Skipta yfir á vinnusvæði 12"
@@ -560,7 +560,7 @@ msgstr ""
 msgid "Run as a full display server, rather than nested"
 msgstr ""
 
-#: src/core/mutter.c:39
+#: src/core/muffin.c:39
 #, c-format
 #| msgid ""
 #| "metacity %s\n"
@@ -569,13 +569,13 @@ msgstr ""
 #| "There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A "
 #| "PARTICULAR PURPOSE.\n"
 msgid ""
-"mutter %s\n"
+"muffin %s\n"
 "Copyright (C) 2001-%d Havoc Pennington, Red Hat, Inc., and others\n"
 "This is free software; see the source for copying conditions.\n"
 "There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A "
 "PARTICULAR PURPOSE.\n"
 msgstr ""
-"mutter %s\n"
+"muffin %s\n"
 "Höfundarréttur (C) 2001-%d Havoc Pennington, Red Hat, Inc., og fleiri\n"
 "Þetta er frjáls hugbúnaður; skoðaðu grunnkóða til að sjá afritunarskilyrði.\n"
 "Hugbúnaðnum er dreift í þeirri von að hann geti verið gagnlegur, en ÁN "
@@ -583,11 +583,11 @@ msgstr ""
 "SELJANLEIKA eða EGINLEIKUM TIL TILTEKINNA NOTA. Sjá almenna GNU GPL "
 "notkunarleyfið fyrir nánari upplýsingar.\n"
 
-#: src/core/mutter.c:53
+#: src/core/muffin.c:53
 msgid "Print version"
 msgstr "Prenta útgáfunúmer"
 
-#: src/core/mutter.c:59
+#: src/core/muffin.c:59
 msgid "Mutter plugin to use"
 msgstr ""
 

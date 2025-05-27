@@ -23,7 +23,7 @@
 
 #include "backends/native/meta-xkb-utils.h"
 #include "clutter/clutter-keysyms.h"
-#include "clutter/clutter-mutter.h"
+#include "clutter/clutter-muffin.h"
 
 /*
  * _clutter_event_new_from_evdev: Create a new Clutter ClutterKeyEvent

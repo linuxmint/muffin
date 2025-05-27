@@ -6,7 +6,7 @@
       org.cinnamon.Muffin.DisplayConfig:
       @short_description: display configuration interface
 
-      This interface is used by mutter and gnome-settings-daemon
+      This interface is used by muffin and gnome-settings-daemon
       to apply multiple monitor configuration.
   -->
 
@@ -26,7 +26,7 @@
         @serial is an unique identifier representing the current state
         of the screen. It must be passed back to ApplyConfiguration()
 	and will be increased for every configuration change (so that
-	mutter can detect that the new configuration is based on old
+	muffin can detect that the new configuration is based on old
 	state).
 
 	A CRTC (CRT controller) is a logical monitor, ie a portion
@@ -128,7 +128,7 @@
 	old monitors with broken EDIDs, but it happens more often with
 	projectors (if for example the kernel driver doesn't add the
 	640x480 - 800x600 - 1024x768 default modes). Probably something
-	that we need to handle in mutter anyway.
+	that we need to handle in muffin anyway.
     -->
     <method name="GetResources">
       <arg name="serial" direction="out" type="u" />
@@ -151,7 +151,7 @@
 	@serial must match the serial from the last GetResources() call,
 	or org.freedesktop.DBus.AccessDenied will be generated.
 
-	If @persistent is true, mutter will attempt to replicate this
+	If @persistent is true, muffin will attempt to replicate this
 	configuration the next time this HW layout appears.
 
 	@crtcs represents the new logical configuration, as a list

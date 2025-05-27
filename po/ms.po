@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Metacity 2.3.x\n"
-"Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/mutter/issues\n"
+"Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/muffin/issues\n"
 "POT-Creation-Date: 2020-01-24 16:29+0000\n"
 "PO-Revision-Date: 2020-01-27 03:54+0800\n"
 "Last-Translator: abuyop <abuyop@gmail.com>\n"
@@ -17,251 +17,251 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
 "X-Generator: Poedit 2.0.6\n"
 
-#: data/50-mutter-navigation.xml:6
+#: data/50-muffin-navigation.xml:6
 msgid "Navigation"
 msgstr "Navigasi"
 
-#: data/50-mutter-navigation.xml:9
+#: data/50-muffin-navigation.xml:9
 msgid "Move window to workspace 1"
 msgstr "Alih tetingkap ke ruang kerja 1"
 
-#: data/50-mutter-navigation.xml:12
+#: data/50-muffin-navigation.xml:12
 msgid "Move window to workspace 2"
 msgstr "Alih tetingkap ke ruang kerja 2"
 
-#: data/50-mutter-navigation.xml:15
+#: data/50-muffin-navigation.xml:15
 msgid "Move window to workspace 3"
 msgstr "Alih tetingkap ke ruang kerja 3"
 
-#: data/50-mutter-navigation.xml:18
+#: data/50-muffin-navigation.xml:18
 msgid "Move window to workspace 4"
 msgstr "Alih tetingkap ke ruang kerja 4"
 
-#: data/50-mutter-navigation.xml:21
+#: data/50-muffin-navigation.xml:21
 #| msgid "Move window to workspace 1"
 msgid "Move window to last workspace"
 msgstr "Alih tetingkap ke ruang kerja terakhir"
 
-#: data/50-mutter-navigation.xml:24
+#: data/50-muffin-navigation.xml:24
 msgid "Move window one workspace up"
 msgstr "Alih tetingkap satu ruang kerja ke atas"
 
-#: data/50-mutter-navigation.xml:27
+#: data/50-muffin-navigation.xml:27
 msgid "Move window one workspace down"
 msgstr "Alih tetingkap satu ruang kerja ke bawah"
 
-#: data/50-mutter-navigation.xml:30
+#: data/50-muffin-navigation.xml:30
 #| msgid "Move window one workspace to the left"
 msgid "Move window one monitor to the left"
 msgstr "Alih tetingkap satu monitor sebelah kiri"
 
-#: data/50-mutter-navigation.xml:33
+#: data/50-muffin-navigation.xml:33
 #| msgid "Move window one workspace to the right"
 msgid "Move window one monitor to the right"
 msgstr "Alih tetingkap satu monitor sebelah kanan"
 
-#: data/50-mutter-navigation.xml:36
+#: data/50-muffin-navigation.xml:36
 #| msgid "Move window one workspace up"
 msgid "Move window one monitor up"
 msgstr "Alih tetingkap satu monitor sebelah atas"
 
-#: data/50-mutter-navigation.xml:39
+#: data/50-muffin-navigation.xml:39
 #| msgid "Move window one workspace down"
 msgid "Move window one monitor down"
 msgstr "Alih tetingkap satu monitor sebelah bawah"
 
-#: data/50-mutter-navigation.xml:43
+#: data/50-muffin-navigation.xml:43
 msgid "Switch applications"
 msgstr "Alih aplikasi"
 
-#: data/50-mutter-navigation.xml:48
+#: data/50-muffin-navigation.xml:48
 msgid "Switch to previous application"
 msgstr "Beralih ke aplikasi terdahulu"
 
-#: data/50-mutter-navigation.xml:52
+#: data/50-muffin-navigation.xml:52
 msgid "Switch windows"
 msgstr "Alih tetingkap"
 
-#: data/50-mutter-navigation.xml:57
+#: data/50-muffin-navigation.xml:57
 msgid "Switch to previous window"
 msgstr "Beralioh ke tetingkap terdahulu"
 
-#: data/50-mutter-navigation.xml:61
+#: data/50-muffin-navigation.xml:61
 msgid "Switch windows of an application"
 msgstr "Alih tetingkap sesebuah aplikasi"
 
-#: data/50-mutter-navigation.xml:66
+#: data/50-muffin-navigation.xml:66
 msgid "Switch to previous window of an application"
 msgstr "Beralih ke tetingkap terdahulu bagi sesebuah aplikasi"
 
-#: data/50-mutter-navigation.xml:70
+#: data/50-muffin-navigation.xml:70
 msgid "Switch system controls"
 msgstr "Alih kawalan sistem"
 
-#: data/50-mutter-navigation.xml:75
+#: data/50-muffin-navigation.xml:75
 msgid "Switch to previous system control"
 msgstr "Beralih ke kawalan sistem terdahulu"
 
-#: data/50-mutter-navigation.xml:79
+#: data/50-muffin-navigation.xml:79
 msgid "Switch windows directly"
 msgstr "Alih tetingkap secara terus"
 
-#: data/50-mutter-navigation.xml:84
+#: data/50-muffin-navigation.xml:84
 msgid "Switch directly to previous window"
 msgstr "Beralih terus ke tetingkap terdahulu"
 
-#: data/50-mutter-navigation.xml:88
+#: data/50-muffin-navigation.xml:88
 msgid "Switch windows of an app directly"
 msgstr "Alih tetingkap satu aplikasi secara terus"
 
-#: data/50-mutter-navigation.xml:93
+#: data/50-muffin-navigation.xml:93
 msgid "Switch directly to previous window of an app"
 msgstr "Beralih terus ke tetingkap terdahulu sesebuah aplikasi"
 
-#: data/50-mutter-navigation.xml:97
+#: data/50-muffin-navigation.xml:97
 msgid "Switch system controls directly"
 msgstr "Alih kawalan sistem secara terus"
 
-#: data/50-mutter-navigation.xml:102
+#: data/50-muffin-navigation.xml:102
 msgid "Switch directly to previous system control"
 msgstr "Beralih terus ke kawalan sistem terdahulu"
 
-#: data/50-mutter-navigation.xml:105
+#: data/50-muffin-navigation.xml:105
 msgid "Hide all normal windows"
 msgstr "Sembunyi semua tetingkap biasa"
 
-#: data/50-mutter-navigation.xml:108
+#: data/50-muffin-navigation.xml:108
 msgid "Switch to workspace 1"
 msgstr "Beralih ke ruang kerja 1"
 
-#: data/50-mutter-navigation.xml:111
+#: data/50-muffin-navigation.xml:111
 msgid "Switch to workspace 2"
 msgstr "Beralih ke ruang kerja 2"
 
-#: data/50-mutter-navigation.xml:114
+#: data/50-muffin-navigation.xml:114
 msgid "Switch to workspace 3"
 msgstr "Beralih ke ruang kerja 3"
 
-#: data/50-mutter-navigation.xml:117
+#: data/50-muffin-navigation.xml:117
 msgid "Switch to workspace 4"
 msgstr "Beralih ke ruang kerja 4"
 
-#: data/50-mutter-navigation.xml:120
+#: data/50-muffin-navigation.xml:120
 #| msgid "Switch to workspace 1"
 msgid "Switch to last workspace"
 msgstr "Beralih ke ruang kerja terakhir"
 
-#: data/50-mutter-navigation.xml:123
+#: data/50-muffin-navigation.xml:123
 #| msgid "Move to Workspace _Left"
 msgid "Move to workspace above"
 msgstr "Alih ke ruang kerja sebelah atas"
 
-#: data/50-mutter-navigation.xml:126
+#: data/50-muffin-navigation.xml:126
 #| msgid "Move to Workspace _Down"
 msgid "Move to workspace below"
 msgstr "Alih ke ruang kerja sebelah bawah"
 
-#: data/50-mutter-system.xml:6 data/50-mutter-wayland.xml:6
+#: data/50-muffin-system.xml:6 data/50-muffin-wayland.xml:6
 msgid "System"
 msgstr "Sistem"
 
-#: data/50-mutter-system.xml:8
+#: data/50-muffin-system.xml:8
 msgid "Show the run command prompt"
 msgstr "Tunjuk bisikan jalan perintah"
 
-#: data/50-mutter-system.xml:10
+#: data/50-muffin-system.xml:10
 msgid "Show the activities overview"
 msgstr "Tunjuk selayang pandang aktiviti"
 
-#: data/50-mutter-wayland.xml:8
+#: data/50-muffin-wayland.xml:8
 msgid "Restore the keyboard shortcuts"
 msgstr "Pulih pintasan papan kekunci"
 
-#: data/50-mutter-windows.xml:6
+#: data/50-muffin-windows.xml:6
 #| msgid "/_Windows"
 msgid "Windows"
 msgstr "Tetingkap"
 
-#: data/50-mutter-windows.xml:8
+#: data/50-muffin-windows.xml:8
 #| msgid "Activate window menu"
 msgid "Activate the window menu"
 msgstr "Aktifkan menu tetingkap"
 
-#: data/50-mutter-windows.xml:10
+#: data/50-muffin-windows.xml:10
 msgid "Toggle fullscreen mode"
 msgstr "Togol mod skrin penuh"
 
-#: data/50-mutter-windows.xml:12
+#: data/50-muffin-windows.xml:12
 msgid "Toggle maximization state"
 msgstr "Togol keadaan maksimum"
 
-#: data/50-mutter-windows.xml:14
+#: data/50-muffin-windows.xml:14
 msgid "Maximize window"
 msgstr "Maksimum tetingkap"
 
-#: data/50-mutter-windows.xml:16
+#: data/50-muffin-windows.xml:16
 msgid "Restore window"
 msgstr "Pulih tetingkap"
 
-#: data/50-mutter-windows.xml:18
+#: data/50-muffin-windows.xml:18
 msgid "Close window"
 msgstr "Tutup tetingkap"
 
-#: data/50-mutter-windows.xml:20
+#: data/50-muffin-windows.xml:20
 msgid "Hide window"
 msgstr "Sembunyi tetingkap"
 
-#: data/50-mutter-windows.xml:22
+#: data/50-muffin-windows.xml:22
 msgid "Move window"
 msgstr "Gerak tetingkap"
 
-#: data/50-mutter-windows.xml:24
+#: data/50-muffin-windows.xml:24
 msgid "Resize window"
 msgstr "Saiz semula tetingkap"
 
-#: data/50-mutter-windows.xml:27
+#: data/50-muffin-windows.xml:27
 #| msgid "Toggle window on all workspaces"
 msgid "Toggle window on all workspaces or one"
 msgstr "Togol tetingkap pada semua ruang kerja atau satu"
 
-#: data/50-mutter-windows.xml:29
+#: data/50-muffin-windows.xml:29
 #| msgid "Raise obscured window, otherwise lower"
 msgid "Raise window if covered, otherwise lower it"
 msgstr "Naikkan tetingkap jika diliputi, jika tidak turunkannya"
 
-#: data/50-mutter-windows.xml:31
+#: data/50-muffin-windows.xml:31
 msgid "Raise window above other windows"
 msgstr "Naikkan tetingkap di atas tetingkap lain"
 
-#: data/50-mutter-windows.xml:33
+#: data/50-muffin-windows.xml:33
 msgid "Lower window below other windows"
 msgstr "Rendahkan tetingkap di bawah tetingkap lain"
 
-#: data/50-mutter-windows.xml:35
+#: data/50-muffin-windows.xml:35
 msgid "Maximize window vertically"
 msgstr "Maksimumkan tetingkap secara menegak"
 
-#: data/50-mutter-windows.xml:37
+#: data/50-muffin-windows.xml:37
 msgid "Maximize window horizontally"
 msgstr "Maksimumkan tetingkap secara mengufuk"
 
-#: data/50-mutter-windows.xml:41
+#: data/50-muffin-windows.xml:41
 msgid "View split on left"
 msgstr "Pisah pandangan di sebelah kiri"
 
-#: data/50-mutter-windows.xml:45
+#: data/50-muffin-windows.xml:45
 msgid "View split on right"
 msgstr "Pisah pandangan di sebelah kanan"
 
-#: data/mutter.desktop.in:4
+#: data/muffin.desktop.in:4
 msgid "Mutter"
 msgstr "Mutter"
 
-#: data/org.gnome.mutter.gschema.xml.in:7
+#: data/org.gnome.muffin.gschema.xml.in:7
 msgid "Modifier to use for extended window management operations"
 msgstr "Penerang yang digunakan untuk operasi pengurusan tetingkap lanjutan"
 
-#: data/org.gnome.mutter.gschema.xml.in:8
+#: data/org.gnome.muffin.gschema.xml.in:8
 msgid ""
 "This key will initiate the “overlay”, which is a combination window overview "
 "and application launching system. The default is intended to be the “Windows "
@@ -273,11 +273,11 @@ msgstr ""
 "key\" iaitu perkakasan PC. Dijangkakan pengikatan ini sama ada lalai atau "
 "ditetapkan pada rentetan kosong."
 
-#: data/org.gnome.mutter.gschema.xml.in:20
+#: data/org.gnome.muffin.gschema.xml.in:20
 msgid "Attach modal dialogs"
 msgstr "Lampir dialog modal"
 
-#: data/org.gnome.mutter.gschema.xml.in:21
+#: data/org.gnome.muffin.gschema.xml.in:21
 msgid ""
 "When true, instead of having independent titlebars, modal dialogs appear "
 "attached to the titlebar of the parent window and are moved together with "
@@ -287,12 +287,12 @@ msgstr ""
 "bersama-sama dengan palang tajuk tetingkap induk dan bergerak bersama-sama "
 "dengannya."
 
-#: data/org.gnome.mutter.gschema.xml.in:30
+#: data/org.gnome.muffin.gschema.xml.in:30
 msgid "Enable edge tiling when dropping windows on screen edges"
 msgstr ""
 "Benarkan penjubinan pinggir ketika melepaskan tetingkap pada pinggir skrin"
 
-#: data/org.gnome.mutter.gschema.xml.in:31
+#: data/org.gnome.muffin.gschema.xml.in:31
 msgid ""
 "If enabled, dropping windows on vertical screen edges maximizes them "
 "vertically and resizes them horizontally to cover half of the available "
@@ -303,11 +303,11 @@ msgstr ""
 "untuk meliputi separuh kawasan yang ada. Melepaskan tetingkap pada pinggir "
 "skrin atas pula dapat memaksimumkan sepenuhnya."
 
-#: data/org.gnome.mutter.gschema.xml.in:40
+#: data/org.gnome.muffin.gschema.xml.in:40
 msgid "Workspaces are managed dynamically"
 msgstr "Ruang kerja diurus secara dinamik"
 
-#: data/org.gnome.mutter.gschema.xml.in:41
+#: data/org.gnome.muffin.gschema.xml.in:41
 msgid ""
 "Determines whether workspaces are managed dynamically or whether there’s a "
 "static number of workspaces (determined by the num-workspaces key in org."
@@ -317,11 +317,11 @@ msgstr ""
 "bilangan ruang kerja statik (ditentukan oleh kunci num-workspaces key dalam "
 "org.gnome.desktop.wm.preferences)."
 
-#: data/org.gnome.mutter.gschema.xml.in:50
+#: data/org.gnome.muffin.gschema.xml.in:50
 msgid "Workspaces only on primary"
 msgstr "Ruang kerja hanya pada utama"
 
-#: data/org.gnome.mutter.gschema.xml.in:51
+#: data/org.gnome.muffin.gschema.xml.in:51
 msgid ""
 "Determines whether workspace switching should happen for windows on all "
 "monitors or only for windows on the primary monitor."
@@ -329,11 +329,11 @@ msgstr ""
 "Tentukan sama ada pertukaran ruang kerja patut berlaku untuk tetingkap pada "
 "semua monitor atau hanya untuk tetingkap pada monitor utama."
 
-#: data/org.gnome.mutter.gschema.xml.in:59
+#: data/org.gnome.muffin.gschema.xml.in:59
 msgid "No tab popup"
 msgstr "Tiada tab timbul"
 
-#: data/org.gnome.mutter.gschema.xml.in:60
+#: data/org.gnome.muffin.gschema.xml.in:60
 msgid ""
 "Determines whether the use of popup and highlight frame should be disabled "
 "for window cycling."
@@ -341,11 +341,11 @@ msgstr ""
 "Tentukan sama ada pengguna timbul dan bingkai sorot patut dilumpuhkan untuk "
 "kitaran tetingkap."
 
-#: data/org.gnome.mutter.gschema.xml.in:68
+#: data/org.gnome.muffin.gschema.xml.in:68
 msgid "Delay focus changes until the pointer stops moving"
 msgstr "Lengah perubahan fokus sehinggalah penuding berhenti gerak"
 
-#: data/org.gnome.mutter.gschema.xml.in:69
+#: data/org.gnome.muffin.gschema.xml.in:69
 msgid ""
 "If set to true, and the focus mode is either “sloppy” or “mouse” then the "
 "focus will not be changed immediately when entering a window, but only after "
@@ -355,11 +355,11 @@ msgstr ""
 "fokus tidak berubah serta-merta ketika memasuki tetingkap, tetapi selepas "
 "penuding berhenti gerak."
 
-#: data/org.gnome.mutter.gschema.xml.in:79
+#: data/org.gnome.muffin.gschema.xml.in:79
 msgid "Draggable border width"
 msgstr "Lebar sempadan boleh diseret"
 
-#: data/org.gnome.mutter.gschema.xml.in:80
+#: data/org.gnome.muffin.gschema.xml.in:80
 msgid ""
 "The amount of total draggable borders. If the theme’s visible borders are "
 "not enough, invisible borders will be added to meet this value."
@@ -367,11 +367,11 @@ msgstr ""
 "Amaun jumlah sempadan boleh diseret. Jika sempadan tampak tema tidak "
 "mencukupi, sempadan halimunan akan ditambah untuk memenuhi nilai ini."
 
-#: data/org.gnome.mutter.gschema.xml.in:89
+#: data/org.gnome.muffin.gschema.xml.in:89
 msgid "Auto maximize nearly monitor sized windows"
 msgstr "Auto maksimum tetingkap bersaiz hampir dengan monitor"
 
-#: data/org.gnome.mutter.gschema.xml.in:90
+#: data/org.gnome.muffin.gschema.xml.in:90
 msgid ""
 "If enabled, new windows that are initially the size of the monitor "
 "automatically get maximized."
@@ -379,11 +379,11 @@ msgstr ""
 "Jika dibenarkan, tetingkap baharu yang awalnya bersaiz monitor akan "
 "dimaksimumkan secara automatik."
 
-#: data/org.gnome.mutter.gschema.xml.in:98
+#: data/org.gnome.muffin.gschema.xml.in:98
 msgid "Place new windows in the center"
 msgstr "Letak tetingkap baharu di tengah-tengah"
 
-#: data/org.gnome.mutter.gschema.xml.in:99
+#: data/org.gnome.muffin.gschema.xml.in:99
 msgid ""
 "When true, the new windows will always be put in the center of the active "
 "screen of the monitor."
@@ -391,21 +391,21 @@ msgstr ""
 "Jika benar, tetingkap baharu akan sentiasa berada ditengah-tengah skrin "
 "aktif monitor."
 
-#: data/org.gnome.mutter.gschema.xml.in:107
+#: data/org.gnome.muffin.gschema.xml.in:107
 msgid "Enable experimental features"
 msgstr "Benarkan fitur-fitur eksperimental"
 
-#: data/org.gnome.mutter.gschema.xml.in:108
+#: data/org.gnome.muffin.gschema.xml.in:108
 msgid ""
 "To enable experimental features, add the feature keyword to the list. "
 "Whether the feature requires restarting the compositor depends on the given "
 "feature. Any experimental feature is not required to still be available, or "
 "configurable. Don’t expect adding anything in this setting to be future "
 "proof. Currently possible keywords: • “scale-monitor-framebuffer” — makes "
-"mutter default to layout logical monitors in a logical pixel coordinate "
+"muffin default to layout logical monitors in a logical pixel coordinate "
 "space, while scaling monitor framebuffers instead of window content, to "
 "manage HiDPI monitors. Does not require a restart. • “rt-scheduler” — makes "
-"mutter request a low priority real-time scheduling. The executable or user "
+"muffin request a low priority real-time scheduling. The executable or user "
 "must have CAP_SYS_NICE. Requires a restart. • “autostart-xwayland” — "
 "initializes Xwayland lazily if there are X11 clients. Requires restart."
 msgstr ""
@@ -414,108 +414,108 @@ msgstr ""
 "pada fitur yang diberi. Mana-mana fitur eksperimental tidak diperlukan untuk "
 "tersedia, atau boleh dikonfigur. Jangan jangka dapat menambah apa-apa dalam "
 "tetapan ini sebagai penambahbaikan akan datang. Kata kunci mungkin buat masa "
-"ini: • “scale-monitor-framebuffer” — jadikan mutter lalai pada monitor "
+"ini: • “scale-monitor-framebuffer” — jadikan muffin lalai pada monitor "
 "logikal bentangan dalam ruang koordinat piksel logikal, ketika mengskalakan "
 "framebuffers monitor selain dari kandungan tetingkap, untuk mengurus monitor "
-"HiDPI. Tidak perlu mula semula. • “rt-scheduler” — menjadikan mutter pinta "
+"HiDPI. Tidak perlu mula semula. • “rt-scheduler” — menjadikan muffin pinta "
 "satu penjadualan masa-nyata berprioriti-rendah. Boleh laku atau pengguna "
 "mesti ada CAP_SYS_NICE. Perlukan mula semula. • “autostart-xwayland” — "
 "mengawalkan Xwayland secara malas jika terdapat klien X11. Perlu mula semula."
 
-#: data/org.gnome.mutter.gschema.xml.in:134
+#: data/org.gnome.muffin.gschema.xml.in:134
 msgid "Modifier to use to locate the pointer"
 msgstr "Penerang digunakan untuk mencari penuding"
 
-#: data/org.gnome.mutter.gschema.xml.in:135
+#: data/org.gnome.muffin.gschema.xml.in:135
 msgid "This key will initiate the “locate pointer” action."
 msgstr "Kunci ini akan mengawalkan tindakan “locate pointer”."
 
-#: data/org.gnome.mutter.gschema.xml.in:155
+#: data/org.gnome.muffin.gschema.xml.in:155
 #| msgid "Move between windows with popup"
 msgid "Select window from tab popup"
 msgstr "Pilih tetingkap dari timbul tab"
 
-#: data/org.gnome.mutter.gschema.xml.in:160
+#: data/org.gnome.muffin.gschema.xml.in:160
 msgid "Cancel tab popup"
 msgstr "Batal timbul tab"
 
-#: data/org.gnome.mutter.gschema.xml.in:165
+#: data/org.gnome.muffin.gschema.xml.in:165
 msgid "Switch monitor configurations"
 msgstr "Alih konfigurasi monitor"
 
-#: data/org.gnome.mutter.gschema.xml.in:170
+#: data/org.gnome.muffin.gschema.xml.in:170
 msgid "Rotates the built-in monitor configuration"
 msgstr "Putarkan konfigurasi monitor terbina-dalam"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:6
+#: data/org.gnome.muffin.wayland.gschema.xml.in:6
 #| msgid "Switch to workspace 1"
 msgid "Switch to VT 1"
 msgstr "Beralih ke VT 1"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:10
+#: data/org.gnome.muffin.wayland.gschema.xml.in:10
 #| msgid "Switch to workspace 2"
 msgid "Switch to VT 2"
 msgstr "Beralih ke VT 2"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:14
+#: data/org.gnome.muffin.wayland.gschema.xml.in:14
 #| msgid "Switch to workspace 3"
 msgid "Switch to VT 3"
 msgstr "Beralih ke VT 3"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:18
+#: data/org.gnome.muffin.wayland.gschema.xml.in:18
 #| msgid "Switch to workspace 4"
 msgid "Switch to VT 4"
 msgstr "Beralih ke VT 4"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:22
+#: data/org.gnome.muffin.wayland.gschema.xml.in:22
 #| msgid "Switch to workspace 5"
 msgid "Switch to VT 5"
 msgstr "Beralih ke VT 5"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:26
+#: data/org.gnome.muffin.wayland.gschema.xml.in:26
 #| msgid "Switch to workspace 6"
 msgid "Switch to VT 6"
 msgstr "Beralih ke VT 6"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:30
+#: data/org.gnome.muffin.wayland.gschema.xml.in:30
 #| msgid "Switch to workspace 7"
 msgid "Switch to VT 7"
 msgstr "Beralih ke VT 7"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:34
+#: data/org.gnome.muffin.wayland.gschema.xml.in:34
 #| msgid "Switch to workspace 8"
 msgid "Switch to VT 8"
 msgstr "Beralih ke VT 8"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:38
+#: data/org.gnome.muffin.wayland.gschema.xml.in:38
 #| msgid "Switch to workspace 9"
 msgid "Switch to VT 9"
 msgstr "Beralih ke VT 9"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:42
+#: data/org.gnome.muffin.wayland.gschema.xml.in:42
 #| msgid "Switch to workspace 10"
 msgid "Switch to VT 10"
 msgstr "Beralih ke VT 10"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:46
+#: data/org.gnome.muffin.wayland.gschema.xml.in:46
 #| msgid "Switch to workspace 11"
 msgid "Switch to VT 11"
 msgstr "Beralih ke VT 11"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:50
+#: data/org.gnome.muffin.wayland.gschema.xml.in:50
 #| msgid "Switch to workspace 12"
 msgid "Switch to VT 12"
 msgstr "Beralih ke VT 12"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:54
+#: data/org.gnome.muffin.wayland.gschema.xml.in:54
 msgid "Re-enable shortcuts"
 msgstr "Benarkan-semula pintasan"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:64
+#: data/org.gnome.muffin.wayland.gschema.xml.in:64
 msgid "Allow X11 grabs to lock keyboard focus with Xwayland"
 msgstr "Benarkan cekau X11 untuk mengunci fokus papan kekunci dengan Xwayland"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:65
+#: data/org.gnome.muffin.wayland.gschema.xml.in:65
 msgid ""
 "Allow all keyboard events to be routed to X11 “override redirect” windows "
 "with a grab when running in Xwayland. This option is to support X11 clients "
@@ -538,11 +538,11 @@ msgstr ""
 "sama ada satu Mesej Klien X11 khusus pada tetingkap root atau berada dalam "
 "aplikasi tersenarai-putih di dalam kunci “xwayland-grab-access-rules”."
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:84
+#: data/org.gnome.muffin.wayland.gschema.xml.in:84
 msgid "Xwayland applications allowed to issue keyboard grabs"
 msgstr "Aplikasi Xwayland dibenarkan membuat cekau papan kekunci"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:85
+#: data/org.gnome.muffin.wayland.gschema.xml.in:85
 msgid ""
 "List the resource names or resource class of X11 windows either allowed or "
 "not allowed to issue X11 keyboard grabs under Xwayland. The resource name or "
@@ -707,26 +707,26 @@ msgstr "_Paksa keluar"
 msgid "_Wait"
 msgstr "_Tunggu"
 
-#: src/core/mutter.c:38
+#: src/core/muffin.c:38
 #, c-format
 msgid ""
-"mutter %s\n"
+"muffin %s\n"
 "Copyright © 2001-%d Havoc Pennington, Red Hat, Inc., and others\n"
 "This is free software; see the source for copying conditions.\n"
 "There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A "
 "PARTICULAR PURPOSE.\n"
 msgstr ""
-"mutter %s\n"
+"muffin %s\n"
 "Hak cipta © 2001-%d Havoc Pennington, Red Hat, Inc., dan lain-lain\n"
 "Ini adalah perisian bebas; sila rujuk sumber untuk syarat penyalinan.\n"
 "TIADA jaminan; walaupun untuk KEBOLEHDAGANGAN atau KESESUAIAN ATAS APA JUA "
 "TUJUAN.\n"
 
-#: src/core/mutter.c:52
+#: src/core/muffin.c:52
 msgid "Print version"
 msgstr "Versi cetak"
 
-#: src/core/mutter.c:58
+#: src/core/muffin.c:58
 msgid "Mutter plugin to use"
 msgstr "Pemalam Mutter yang digunakan"
 

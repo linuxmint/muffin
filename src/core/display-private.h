@@ -139,7 +139,7 @@ struct _MetaDisplay
 
   /* We maintain a sequence counter, incremented for each #MetaWindow
    * created.  This is exposed by meta_window_get_stable_sequence()
-   * but is otherwise not used inside mutter.
+   * but is otherwise not used inside muffin.
    *
    * It can be useful to plugins which want to sort windows in a
    * stable fashion.

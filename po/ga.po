@@ -7,7 +7,7 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: mutter.master\n"
+"Project-Id-Version: muffin.master\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2013-08-26 04:19-0600\n"
 "PO-Revision-Date: 2013-08-26 04:30-0600\n"
@@ -20,191 +20,191 @@ msgstr ""
 "Plural-Forms: nplurals=5; plural=n==1 ? 0 : n==2 ? 1 : n<7 ? 2 : n<11 ? 3 : "
 "4;\n"
 
-#: ../src/50-mutter-navigation.xml.in.h:1
+#: ../src/50-muffin-navigation.xml.in.h:1
 msgid "Navigation"
 msgstr ""
 
-#: ../src/50-mutter-navigation.xml.in.h:2
+#: ../src/50-muffin-navigation.xml.in.h:2
 msgid "Move window to workspace 1"
 msgstr "Bog fuinneog go spás oibre 1"
 
-#: ../src/50-mutter-navigation.xml.in.h:3
+#: ../src/50-muffin-navigation.xml.in.h:3
 msgid "Move window to workspace 2"
 msgstr "Bog fuinneog go spás oibre 2"
 
-#: ../src/50-mutter-navigation.xml.in.h:4
+#: ../src/50-muffin-navigation.xml.in.h:4
 msgid "Move window to workspace 3"
 msgstr "Bog fuinneog go spás oibre 3"
 
-#: ../src/50-mutter-navigation.xml.in.h:5
+#: ../src/50-muffin-navigation.xml.in.h:5
 msgid "Move window to workspace 4"
 msgstr "Bog fuinneog go spás oibre 4"
 
-#: ../src/50-mutter-navigation.xml.in.h:6
+#: ../src/50-muffin-navigation.xml.in.h:6
 msgid "Move window one workspace to the left"
 msgstr "Bog fuinneog spás oibre ar chlé"
 
-#: ../src/50-mutter-navigation.xml.in.h:7
+#: ../src/50-muffin-navigation.xml.in.h:7
 msgid "Move window one workspace to the right"
 msgstr "Bog fuinneog spás oibre ar dheis"
 
-#: ../src/50-mutter-navigation.xml.in.h:8
+#: ../src/50-muffin-navigation.xml.in.h:8
 msgid "Move window one workspace up"
 msgstr "Bog fuinneog spás oibre suas"
 
-#: ../src/50-mutter-navigation.xml.in.h:9
+#: ../src/50-muffin-navigation.xml.in.h:9
 msgid "Move window one workspace down"
 msgstr "Bog fuinneog spás oibre síos"
 
-#: ../src/50-mutter-navigation.xml.in.h:10
+#: ../src/50-muffin-navigation.xml.in.h:10
 msgid "Switch applications"
 msgstr "Athraigh feidhmchlár"
 
-#: ../src/50-mutter-navigation.xml.in.h:11
+#: ../src/50-muffin-navigation.xml.in.h:11
 msgid "Switch windows"
 msgstr "Athraigh fuinneog"
 
-#: ../src/50-mutter-navigation.xml.in.h:12
+#: ../src/50-muffin-navigation.xml.in.h:12
 msgid "Switch windows of an application"
 msgstr "Athraigh fuinneog fheidhmchláir"
 
-#: ../src/50-mutter-navigation.xml.in.h:13
+#: ../src/50-muffin-navigation.xml.in.h:13
 msgid "Switch system controls"
 msgstr ""
 
-#: ../src/50-mutter-navigation.xml.in.h:14
+#: ../src/50-muffin-navigation.xml.in.h:14
 msgid "Switch windows directly"
 msgstr ""
 
-#: ../src/50-mutter-navigation.xml.in.h:15
+#: ../src/50-muffin-navigation.xml.in.h:15
 msgid "Switch windows of an app directly"
 msgstr ""
 
-#: ../src/50-mutter-navigation.xml.in.h:16
+#: ../src/50-muffin-navigation.xml.in.h:16
 msgid "Switch system controls directly"
 msgstr ""
 
-#: ../src/50-mutter-navigation.xml.in.h:17
+#: ../src/50-muffin-navigation.xml.in.h:17
 msgid "Hide all normal windows"
 msgstr ""
 
-#: ../src/50-mutter-navigation.xml.in.h:18
+#: ../src/50-muffin-navigation.xml.in.h:18
 msgid "Switch to workspace 1"
 msgstr "Athraigh go spás oibre 1"
 
-#: ../src/50-mutter-navigation.xml.in.h:19
+#: ../src/50-muffin-navigation.xml.in.h:19
 msgid "Switch to workspace 2"
 msgstr "Athraigh go spás oibre 2"
 
-#: ../src/50-mutter-navigation.xml.in.h:20
+#: ../src/50-muffin-navigation.xml.in.h:20
 msgid "Switch to workspace 3"
 msgstr "Athraigh go spás oibre 3"
 
-#: ../src/50-mutter-navigation.xml.in.h:21
+#: ../src/50-muffin-navigation.xml.in.h:21
 msgid "Switch to workspace 4"
 msgstr "Athraigh go spás oibre 4"
 
-#: ../src/50-mutter-navigation.xml.in.h:22
+#: ../src/50-muffin-navigation.xml.in.h:22
 msgid "Move to workspace left"
 msgstr "Bog go spás oibre ar chlé"
 
-#: ../src/50-mutter-navigation.xml.in.h:23
+#: ../src/50-muffin-navigation.xml.in.h:23
 msgid "Move to workspace right"
 msgstr "Bog go spás oibre ar dheis"
 
-#: ../src/50-mutter-navigation.xml.in.h:24
+#: ../src/50-muffin-navigation.xml.in.h:24
 msgid "Move to workspace above"
 msgstr "Bog go spás oibre os cionn"
 
-#: ../src/50-mutter-navigation.xml.in.h:25
+#: ../src/50-muffin-navigation.xml.in.h:25
 msgid "Move to workspace below"
 msgstr "Bog go spás oibre faoi bhun"
 
-#: ../src/50-mutter-system.xml.in.h:1
+#: ../src/50-muffin-system.xml.in.h:1
 msgid "System"
 msgstr "Córas"
 
-#: ../src/50-mutter-system.xml.in.h:2
+#: ../src/50-muffin-system.xml.in.h:2
 msgid "Show the run command prompt"
 msgstr ""
 
-#: ../src/50-mutter-system.xml.in.h:3
+#: ../src/50-muffin-system.xml.in.h:3
 msgid "Show the activities overview"
 msgstr ""
 
-#: ../src/50-mutter-windows.xml.in.h:1
+#: ../src/50-muffin-windows.xml.in.h:1
 msgid "Windows"
 msgstr "Fuinneoga"
 
-#: ../src/50-mutter-windows.xml.in.h:2
+#: ../src/50-muffin-windows.xml.in.h:2
 msgid "Activate the window menu"
 msgstr ""
 
-#: ../src/50-mutter-windows.xml.in.h:3
+#: ../src/50-muffin-windows.xml.in.h:3
 msgid "Toggle fullscreen mode"
 msgstr ""
 
-#: ../src/50-mutter-windows.xml.in.h:4
+#: ../src/50-muffin-windows.xml.in.h:4
 msgid "Toggle maximization state"
 msgstr ""
 
-#: ../src/50-mutter-windows.xml.in.h:5
+#: ../src/50-muffin-windows.xml.in.h:5
 msgid "Maximize window"
 msgstr "Uasmhéadaigh fuinneog"
 
-#: ../src/50-mutter-windows.xml.in.h:6
+#: ../src/50-muffin-windows.xml.in.h:6
 msgid "Restore window"
 msgstr "Athchóirigh fuinneog"
 
-#: ../src/50-mutter-windows.xml.in.h:7
+#: ../src/50-muffin-windows.xml.in.h:7
 msgid "Toggle shaded state"
 msgstr ""
 
-#: ../src/50-mutter-windows.xml.in.h:8
+#: ../src/50-muffin-windows.xml.in.h:8
 msgid "Close window"
 msgstr "Dún fuinneog"
 
-#: ../src/50-mutter-windows.xml.in.h:9
+#: ../src/50-muffin-windows.xml.in.h:9
 msgid "Hide window"
 msgstr "Folaigh fuinneog"
 
-#: ../src/50-mutter-windows.xml.in.h:10
+#: ../src/50-muffin-windows.xml.in.h:10
 msgid "Move window"
 msgstr "Bog fuinneog"
 
-#: ../src/50-mutter-windows.xml.in.h:11
+#: ../src/50-muffin-windows.xml.in.h:11
 msgid "Resize window"
 msgstr "Athmhéadaigh fuinneog"
 
-#: ../src/50-mutter-windows.xml.in.h:12
+#: ../src/50-muffin-windows.xml.in.h:12
 msgid "Toggle window on all workspaces or one"
 msgstr "Scoránaigh fuinneog ar gach spás oibre nó ceann amháin"
 
-#: ../src/50-mutter-windows.xml.in.h:13
+#: ../src/50-muffin-windows.xml.in.h:13
 msgid "Raise window if covered, otherwise lower it"
 msgstr ""
 
-#: ../src/50-mutter-windows.xml.in.h:14
+#: ../src/50-muffin-windows.xml.in.h:14
 msgid "Raise window above other windows"
 msgstr ""
 
-#: ../src/50-mutter-windows.xml.in.h:15
+#: ../src/50-muffin-windows.xml.in.h:15
 msgid "Lower window below other windows"
 msgstr ""
 
-#: ../src/50-mutter-windows.xml.in.h:16
+#: ../src/50-muffin-windows.xml.in.h:16
 msgid "Maximize window vertically"
 msgstr ""
 
-#: ../src/50-mutter-windows.xml.in.h:17
+#: ../src/50-muffin-windows.xml.in.h:17
 msgid "Maximize window horizontally"
 msgstr ""
 
-#: ../src/50-mutter-windows.xml.in.h:18
+#: ../src/50-muffin-windows.xml.in.h:18
 msgid "View split on left"
 msgstr ""
 
-#: ../src/50-mutter-windows.xml.in.h:19
+#: ../src/50-muffin-windows.xml.in.h:19
 msgid "View split on right"
 msgstr ""
 
@@ -323,21 +323,21 @@ msgstr "Taispeáint ionsuite"
 msgid "Unknown %s"
 msgstr "Anaithnid %s"
 
-#: ../src/core/mutter.c:40
+#: ../src/core/muffin.c:40
 #, c-format
 msgid ""
-"mutter %s\n"
+"muffin %s\n"
 "Copyright (C) 2001-%d Havoc Pennington, Red Hat, Inc., and others\n"
 "This is free software; see the source for copying conditions.\n"
 "There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A "
 "PARTICULAR PURPOSE.\n"
 msgstr ""
 
-#: ../src/core/mutter.c:54
+#: ../src/core/muffin.c:54
 msgid "Print version"
 msgstr "Priontáil leagan"
 
-#: ../src/core/mutter.c:60
+#: ../src/core/muffin.c:60
 msgid "Mutter plugin to use"
 msgstr ""
 
@@ -426,7 +426,7 @@ msgstr ""
 
 #: ../src/core/session.c:1185
 #, c-format
-msgid "<mutter_session> attribute seen but we already have the session ID"
+msgid "<muffin_session> attribute seen but we already have the session ID"
 msgstr ""
 
 #: ../src/core/session.c:1198 ../src/core/session.c:1273
@@ -550,15 +550,15 @@ msgid ""
 "Property %s on window 0x%lx contained invalid UTF-8 for item %d in the list\n"
 msgstr ""
 
-#: ../src/mutter.desktop.in.h:1 ../src/mutter-wm.desktop.in.h:1
+#: ../src/muffin.desktop.in.h:1 ../src/muffin-wm.desktop.in.h:1
 msgid "Mutter"
 msgstr "Mutter"
 
-#: ../src/org.gnome.mutter.gschema.xml.in.h:1
+#: ../src/org.gnome.muffin.gschema.xml.in.h:1
 msgid "Modifier to use for extended window management operations"
 msgstr ""
 
-#: ../src/org.gnome.mutter.gschema.xml.in.h:2
+#: ../src/org.gnome.muffin.gschema.xml.in.h:2
 msgid ""
 "This key will initiate the \"overlay\", which is a combination window "
 "overview and application launching system. The default is intended to be the "
@@ -566,95 +566,95 @@ msgid ""
 "default or set to the empty string."
 msgstr ""
 
-#: ../src/org.gnome.mutter.gschema.xml.in.h:3
+#: ../src/org.gnome.muffin.gschema.xml.in.h:3
 msgid "Attach modal dialogs"
 msgstr ""
 
-#: ../src/org.gnome.mutter.gschema.xml.in.h:4
+#: ../src/org.gnome.muffin.gschema.xml.in.h:4
 msgid ""
 "When true, instead of having independent titlebars, modal dialogs appear "
 "attached to the titlebar of the parent window and are moved together with "
 "the parent window."
 msgstr ""
 
-#: ../src/org.gnome.mutter.gschema.xml.in.h:5
+#: ../src/org.gnome.muffin.gschema.xml.in.h:5
 msgid "Enable edge tiling when dropping windows on screen edges"
 msgstr ""
 
-#: ../src/org.gnome.mutter.gschema.xml.in.h:6
+#: ../src/org.gnome.muffin.gschema.xml.in.h:6
 msgid ""
 "If enabled, dropping windows on vertical screen edges maximizes them "
 "vertically and resizes them horizontally to cover half of the available "
 "area. Dropping windows on the top screen edge maximizes them completely."
 msgstr ""
 
-#: ../src/org.gnome.mutter.gschema.xml.in.h:7
+#: ../src/org.gnome.muffin.gschema.xml.in.h:7
 msgid "Workspaces are managed dynamically"
 msgstr ""
 
-#: ../src/org.gnome.mutter.gschema.xml.in.h:8
+#: ../src/org.gnome.muffin.gschema.xml.in.h:8
 msgid ""
 "Determines whether workspaces are managed dynamically or whether there's a "
 "static number of workspaces (determined by the num-workspaces key in org."
 "gnome.desktop.wm.preferences)."
 msgstr ""
 
-#: ../src/org.gnome.mutter.gschema.xml.in.h:9
+#: ../src/org.gnome.muffin.gschema.xml.in.h:9
 msgid "Workspaces only on primary"
 msgstr ""
 
-#: ../src/org.gnome.mutter.gschema.xml.in.h:10
+#: ../src/org.gnome.muffin.gschema.xml.in.h:10
 msgid ""
 "Determines whether workspace switching should happen for windows on all "
 "monitors or only for windows on the primary monitor."
 msgstr ""
 
-#: ../src/org.gnome.mutter.gschema.xml.in.h:11
+#: ../src/org.gnome.muffin.gschema.xml.in.h:11
 msgid "No tab popup"
 msgstr ""
 
-#: ../src/org.gnome.mutter.gschema.xml.in.h:12
+#: ../src/org.gnome.muffin.gschema.xml.in.h:12
 msgid ""
 "Determines whether the use of popup and highlight frame should be disabled "
 "for window cycling."
 msgstr ""
 
-#: ../src/org.gnome.mutter.gschema.xml.in.h:13
+#: ../src/org.gnome.muffin.gschema.xml.in.h:13
 msgid "Delay focus changes until the pointer stops moving"
 msgstr ""
 
-#: ../src/org.gnome.mutter.gschema.xml.in.h:14
+#: ../src/org.gnome.muffin.gschema.xml.in.h:14
 msgid ""
 "If set to true, and the focus mode is either \"sloppy\" or \"mouse\" then "
 "the focus will not be changed immediately when entering a window, but only "
 "after the pointer stops moving."
 msgstr ""
 
-#: ../src/org.gnome.mutter.gschema.xml.in.h:15
+#: ../src/org.gnome.muffin.gschema.xml.in.h:15
 msgid "Draggable border width"
 msgstr ""
 
-#: ../src/org.gnome.mutter.gschema.xml.in.h:16
+#: ../src/org.gnome.muffin.gschema.xml.in.h:16
 msgid ""
 "The amount of total draggable borders. If the theme's visible borders are "
 "not enough, invisible borders will be added to meet this value."
 msgstr ""
 
-#: ../src/org.gnome.mutter.gschema.xml.in.h:17
+#: ../src/org.gnome.muffin.gschema.xml.in.h:17
 msgid "Auto maximize nearly monitor sized windows"
 msgstr ""
 
-#: ../src/org.gnome.mutter.gschema.xml.in.h:18
+#: ../src/org.gnome.muffin.gschema.xml.in.h:18
 msgid ""
 "If enabled, new windows that are initially the size of the monitor "
 "automatically get maximized."
 msgstr ""
 
-#: ../src/org.gnome.mutter.gschema.xml.in.h:19
+#: ../src/org.gnome.muffin.gschema.xml.in.h:19
 msgid "Select window from tab popup"
 msgstr ""
 
-#: ../src/org.gnome.mutter.gschema.xml.in.h:20
+#: ../src/org.gnome.muffin.gschema.xml.in.h:20
 msgid "Cancel tab popup"
 msgstr ""
 

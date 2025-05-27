@@ -62,18 +62,18 @@ cogl_test_conformance_includes = [
 if have_installed_tests
   cogl_installed_tests_cdata = configuration_data()
   cogl_installed_tests_cdata.set('libexecdir', libexecdir)
-  cogl_installed_tests_cdata.set('apiversion', libmutter_api_version)
+  cogl_installed_tests_cdata.set('apiversion', libmuffin_api_version)
 
   configure_file(
-    input: 'mutter-cogl.test.in',
-    output: 'mutter-cogl.test',
+    input: 'muffin-cogl.test.in',
+    output: 'muffin-cogl.test',
     configuration: cogl_installed_tests_cdata,
     install: true,
-    install_dir: mutter_installed_tests_datadir,
+    install_dir: muffin_installed_tests_datadir,
   )
 endif
 
-libmutter_cogl_test_conformance = executable('test-conformance',
+libmuffin_cogl_test_conformance = executable('test-conformance',
   sources: cogl_test_conformance_sources,
   c_args: cogl_debug_c_args + [
     '-DCOGL_ENABLE_EXPERIMENTAL_API',
@@ -83,9 +83,9 @@ libmutter_cogl_test_conformance = executable('test-conformance',
   ],
   include_directories: cogl_test_conformance_includes,
   dependencies: [
-    libmutter_cogl_dep,
-    libmutter_cogl_path_dep,
-    libmutter_cogl_test_fixtures_dep,
+    libmuffin_cogl_dep,
+    libmuffin_cogl_path_dep,
+    libmuffin_cogl_test_fixtures_dep,
   ],
   install: have_installed_tests,
   install_dir: cogl_installed_tests_libexecdir,
@@ -121,7 +121,7 @@ foreach test_target: cogl_conformance_tests
     env: ['RUN_TESTS_QUIET=1'],
     args: [
       cogl_config_env,
-      libmutter_cogl_test_conformance,
+      libmuffin_cogl_test_conformance,
       test_target
     ],
     is_parallel: false,

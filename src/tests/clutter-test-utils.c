@@ -21,7 +21,7 @@ log_func (const gchar    *log_domain,
           gpointer        user_data)
 {
   if ((log_level & G_LOG_LEVEL_WARNING) &&
-      g_strcmp0 (log_domain, "mutter") == 0 &&
+      g_strcmp0 (log_domain, "muffin") == 0 &&
       g_str_has_prefix (message, DBUS_NAME_WARNING))
     return FALSE;
 

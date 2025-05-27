@@ -12,7 +12,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: metacity\n"
 "Report-Msgid-Bugs-To: "
-"http://bugzilla.gnome.org/enter_bug.cgi?product=mutter&component=general\n"
+"http://bugzilla.gnome.org/enter_bug.cgi?product=muffin&component=general\n"
 "POT-Creation-Date: 2010-03-27 15:48+0000\n"
 "PO-Revision-Date: 2010-03-30 06:02+0200\n"
 "Last-Translator: Xandru Armesto <xandru@softastur.org>\n"
@@ -122,13 +122,13 @@ msgstr "Comandu de terminal nun definíu.\n"
 #: ../src/core/main.c:130
 #, c-format
 msgid ""
-"mutter %s\n"
+"muffin %s\n"
 "Copyright (C) 2001-%d Havoc Pennington, Red Hat, Inc., and others\n"
 "This is free software; see the source for copying conditions.\n"
 "There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A "
 "PARTICULAR PURPOSE.\n"
 msgstr ""
-"mutter %s\n"
+"muffin %s\n"
 "Copyright (C) 2001-%d Havoc Pennington, Red Hat, Inc., y otros\n"
 "Esti software ye llibre, mira'l códigu pa ver les condiciones de copia.\n"
 "Entrégase ensin garantía NENGUNA, yá seya pa usu COMERCIAL o PA FINES "
@@ -351,8 +351,8 @@ msgstr "Falló analizar ficheru de sesión guardáu: %s\n"
 
 #: ../src/core/session.c:1198
 #, c-format
-msgid "<mutter_session> attribute seen but we already have the session ID"
-msgstr "Vióse l'atributu <mutter_session> pero yá tenemos la ID de sesión"
+msgid "<muffin_session> attribute seen but we already have the session ID"
+msgstr "Vióse l'atributu <muffin_session> pero yá tenemos la ID de sesión"
 
 #: ../src/core/session.c:1211 ../src/core/session.c:1286
 #: ../src/core/session.c:1318 ../src/core/session.c:1390
@@ -394,7 +394,7 @@ msgstr "Falló ficheru rexistru actividá fdopen() %s: %s\n"
 msgid "Opened log file %s\n"
 msgstr "Abiertu archivu log %s\n"
 
-#: ../src/core/util.c:139 ../src/tools/mutter-message.c:176
+#: ../src/core/util.c:139 ../src/tools/muffin-message.c:176
 #, c-format
 msgid "Mutter was compiled without support for verbose mode\n"
 msgstr "Mutter compilose ensin sofitu pal mou testu\n"
@@ -417,8 +417,8 @@ msgstr "Error xestor ventanes: "
 
 #. Translators: This is the title used on dialog boxes
 #. eof all-keybindings.h
-#: ../src/core/util.c:573 ../src/mutter.desktop.in.h:1
-#: ../src/mutter-wm.desktop.in.h:1
+#: ../src/core/util.c:573 ../src/muffin.desktop.in.h:1
+#: ../src/muffin-wm.desktop.in.h:1
 msgid "Mutter"
 msgstr "Mutter"
 
@@ -490,19 +490,19 @@ msgid ""
 msgstr "La propiedá %s del ventanu 0x%lx contien un códigu UTF-8 non válidu pal "
 "elementu %d na llista\n"
 
-#: ../src/include/all-keybindings.h:88 ../src/50-mutter-navigation.xml.in.h:18
+#: ../src/include/all-keybindings.h:88 ../src/50-muffin-navigation.xml.in.h:18
 msgid "Switch to workspace 1"
 msgstr "Cambiar a espaciu de trabayu 1"
 
-#: ../src/include/all-keybindings.h:90 ../src/50-mutter-navigation.xml.in.h:19
+#: ../src/include/all-keybindings.h:90 ../src/50-muffin-navigation.xml.in.h:19
 msgid "Switch to workspace 2"
 msgstr "Cambiar a espaciu de trabayu 2"
 
-#: ../src/include/all-keybindings.h:92 ../src/50-mutter-navigation.xml.in.h:20
+#: ../src/include/all-keybindings.h:92 ../src/50-muffin-navigation.xml.in.h:20
 msgid "Switch to workspace 3"
 msgstr "Cambiar a espaciu de trabayu 3"
 
-#: ../src/include/all-keybindings.h:94 ../src/50-mutter-navigation.xml.in.h:21
+#: ../src/include/all-keybindings.h:94 ../src/50-muffin-navigation.xml.in.h:21
 msgid "Switch to workspace 4"
 msgstr "Cambiar a espaciu de trabayu 4"
 
@@ -631,11 +631,11 @@ msgstr "Saca una semeya d'una ventana"
 msgid "Run a terminal"
 msgstr "Executar una terminal"
 
-#: ../src/include/all-keybindings.h:271 ../src/50-mutter-windows.xml.in.h:1
+#: ../src/include/all-keybindings.h:271 ../src/50-muffin-windows.xml.in.h:1
 msgid "Activate the window menu"
 msgstr "Activar el menú de la ventana"
 
-#: ../src/include/all-keybindings.h:274 ../src/50-mutter-windows.xml.in.h:13
+#: ../src/include/all-keybindings.h:274 ../src/50-muffin-windows.xml.in.h:13
 #, fuzzy
 msgid "Toggle fullscreen mode"
 msgstr ""
@@ -644,7 +644,7 @@ msgstr ""
 "#-#-#-#-#  ast.po (metacity)  #-#-#-#-#\n"
 "Camudar a mou pantalla completa"
 
-#: ../src/include/all-keybindings.h:276 ../src/50-mutter-windows.xml.in.h:14
+#: ../src/include/all-keybindings.h:276 ../src/50-muffin-windows.xml.in.h:14
 #, fuzzy
 msgid "Toggle maximization state"
 msgstr ""
@@ -657,31 +657,31 @@ msgstr ""
 msgid "Toggle whether a window will always be visible over other windows"
 msgstr "Conmutar si una ventana siempres se verá encima d'otres ventanes"
 
-#: ../src/include/all-keybindings.h:280 ../src/50-mutter-windows.xml.in.h:4
+#: ../src/include/all-keybindings.h:280 ../src/50-muffin-windows.xml.in.h:4
 msgid "Maximize window"
 msgstr "Maximizar ventana"
 
-#: ../src/include/all-keybindings.h:282 ../src/50-mutter-windows.xml.in.h:12
+#: ../src/include/all-keybindings.h:282 ../src/50-muffin-windows.xml.in.h:12
 msgid "Restore window"
 msgstr "Restaurar la ventana"
 
-#: ../src/include/all-keybindings.h:284 ../src/50-mutter-windows.xml.in.h:15
+#: ../src/include/all-keybindings.h:284 ../src/50-muffin-windows.xml.in.h:15
 msgid "Toggle shaded state"
 msgstr "Activa estáu endolcáu"
 
-#: ../src/include/all-keybindings.h:286 ../src/50-mutter-windows.xml.in.h:7
+#: ../src/include/all-keybindings.h:286 ../src/50-muffin-windows.xml.in.h:7
 msgid "Minimize window"
 msgstr "Minimizar ventana"
 
-#: ../src/include/all-keybindings.h:288 ../src/50-mutter-windows.xml.in.h:2
+#: ../src/include/all-keybindings.h:288 ../src/50-muffin-windows.xml.in.h:2
 msgid "Close window"
 msgstr "Zarrar ventana"
 
-#: ../src/include/all-keybindings.h:290 ../src/50-mutter-windows.xml.in.h:8
+#: ../src/include/all-keybindings.h:290 ../src/50-muffin-windows.xml.in.h:8
 msgid "Move window"
 msgstr "Mover ventana"
 
-#: ../src/include/all-keybindings.h:292 ../src/50-mutter-windows.xml.in.h:11
+#: ../src/include/all-keybindings.h:292 ../src/50-muffin-windows.xml.in.h:11
 msgid "Resize window"
 msgstr "Cambiar el tamañu la ventana"
 
@@ -690,22 +690,22 @@ msgid "Toggle whether window is on all workspaces or just one"
 msgstr "Conmutar si la ventana apaez en toles árees de trabayu o namái nuna"
 
 #: ../src/include/all-keybindings.h:299
-#: ../src/50-mutter-navigation.xml.in.h:10
+#: ../src/50-muffin-navigation.xml.in.h:10
 msgid "Move window to workspace 1"
 msgstr "Mover ventana al espaciu de trabayu 1"
 
 #: ../src/include/all-keybindings.h:302
-#: ../src/50-mutter-navigation.xml.in.h:11
+#: ../src/50-muffin-navigation.xml.in.h:11
 msgid "Move window to workspace 2"
 msgstr "Mover ventana al espaciu de trabayu 2"
 
 #: ../src/include/all-keybindings.h:305
-#: ../src/50-mutter-navigation.xml.in.h:12
+#: ../src/50-muffin-navigation.xml.in.h:12
 msgid "Move window to workspace 3"
 msgstr "Mover ventana al espaciu de trabayu 3"
 
 #: ../src/include/all-keybindings.h:308
-#: ../src/50-mutter-navigation.xml.in.h:13
+#: ../src/50-muffin-navigation.xml.in.h:13
 msgid "Move window to workspace 4"
 msgstr "Mover ventana al espaciu de trabayu 4"
 
@@ -741,11 +741,11 @@ msgstr "Mover ventana al espaciu de trabayu 11"
 msgid "Move window to workspace 12"
 msgstr "Mover ventana al espaciu de trabayu 12"
 
-#: ../src/include/all-keybindings.h:344 ../src/50-mutter-navigation.xml.in.h:7
+#: ../src/include/all-keybindings.h:344 ../src/50-muffin-navigation.xml.in.h:7
 msgid "Move window one workspace to the left"
 msgstr "Mover ventana un espaciu de trabayu a manzorga"
 
-#: ../src/include/all-keybindings.h:347 ../src/50-mutter-navigation.xml.in.h:8
+#: ../src/include/all-keybindings.h:347 ../src/50-muffin-navigation.xml.in.h:8
 #, fuzzy
 msgid "Move window one workspace to the right"
 msgstr ""
@@ -754,11 +754,11 @@ msgstr ""
 "#-#-#-#-#  ast.po (metacity)  #-#-#-#-#\n"
 "Mover ventana un espaciu de trabayu a madrecha"
 
-#: ../src/include/all-keybindings.h:350 ../src/50-mutter-navigation.xml.in.h:9
+#: ../src/include/all-keybindings.h:350 ../src/50-muffin-navigation.xml.in.h:9
 msgid "Move window one workspace up"
 msgstr "Mover ventana un espaciu de trabayu p'arriba"
 
-#: ../src/include/all-keybindings.h:353 ../src/50-mutter-navigation.xml.in.h:6
+#: ../src/include/all-keybindings.h:353 ../src/50-muffin-navigation.xml.in.h:6
 msgid "Move window one workspace down"
 msgstr "Mover ventana un espaciu de trabayu p'abaxo"
 
@@ -767,7 +767,7 @@ msgid "Raise window if it's covered by another window, otherwise lower it"
 msgstr ""
 "Llevantar la ventana si ta cubierta por otra ventana, minimizala n'otru casu"
 
-#: ../src/include/all-keybindings.h:358 ../src/50-mutter-windows.xml.in.h:9
+#: ../src/include/all-keybindings.h:358 ../src/50-muffin-windows.xml.in.h:9
 #, fuzzy
 msgid "Raise window above other windows"
 msgstr ""
@@ -776,7 +776,7 @@ msgstr ""
 "#-#-#-#-#  ast.po (metacity)  #-#-#-#-#\n"
 "Poner la ventana en primer planu"
 
-#: ../src/include/all-keybindings.h:360 ../src/50-mutter-windows.xml.in.h:3
+#: ../src/include/all-keybindings.h:360 ../src/50-muffin-windows.xml.in.h:3
 #, fuzzy
 msgid "Lower window below other windows"
 msgstr ""
@@ -785,11 +785,11 @@ msgstr ""
 "#-#-#-#-#  ast.po (metacity)  #-#-#-#-#\n"
 "Ventana más baxa per debaxo d'otres ventanes"
 
-#: ../src/include/all-keybindings.h:364 ../src/50-mutter-windows.xml.in.h:6
+#: ../src/include/all-keybindings.h:364 ../src/50-muffin-windows.xml.in.h:6
 msgid "Maximize window vertically"
 msgstr "Maximizar ventana verticalmente"
 
-#: ../src/include/all-keybindings.h:368 ../src/50-mutter-windows.xml.in.h:5
+#: ../src/include/all-keybindings.h:368 ../src/50-muffin-windows.xml.in.h:5
 msgid "Maximize window horizontally"
 msgstr "Maximizar ventana horizontalmente"
 
@@ -829,11 +829,11 @@ msgstr "Mover la ventana al llau oeste (esquierda) de la pantalla"
 msgid "Move window to center of screen"
 msgstr "Mover la ventana al centru de la pantalla"
 
-#: ../src/mutter.schemas.in.h:1
+#: ../src/muffin.schemas.in.h:1
 msgid "Clutter Plugins"
 msgstr "Plugins Enllenos"
 
-#: ../src/mutter.schemas.in.h:2
+#: ../src/muffin.schemas.in.h:2
 msgid ""
 "Determines whether hidden windows (i.e., minimized windows and windows on "
 "other workspaces than the current one) should be kept alive."
@@ -841,19 +841,19 @@ msgstr ""
 "Determina si les ventanes anubríes (por exemplu ventanes minimizaes y "
 "ventanes y otros espacios de trabayu actuales) deberíen mantenese."
 
-#: ../src/mutter.schemas.in.h:3
+#: ../src/muffin.schemas.in.h:3
 msgid "Live Hidden Windows"
 msgstr "Amosar Ventanes Anubríes"
 
-#: ../src/mutter.schemas.in.h:4
+#: ../src/muffin.schemas.in.h:4
 msgid "Modifier to use for extended window management operations"
 msgstr "Modificador a usar pa les aiciones de xestión de ventanes estendida"
 
-#: ../src/mutter.schemas.in.h:5
+#: ../src/muffin.schemas.in.h:5
 msgid "Plugins to load for the Clutter-based compositing manager."
 msgstr "Plugins pa cargar dende xestor de composición Clutter-based."
 
-#: ../src/mutter.schemas.in.h:6
+#: ../src/muffin.schemas.in.h:6
 msgid ""
 "This key will initiate the \"overlay\", which is a combination window overview "
 "and application launching system. The default is intended to be the "
@@ -865,7 +865,7 @@ msgstr ""
 "tecla\" nel hardware del PC. Espérase que seya vinculante por defeutu o "
 "afitáu a cadena erma."
 
-#: ../src/tools/mutter-message.c:150
+#: ../src/tools/muffin-message.c:150
 #, c-format
 msgid "Usage: %s\n"
 msgstr "Emplegu: %s\n"
@@ -1954,92 +1954,92 @@ msgid "%d coordinate expressions parsed in %g seconds (%g seconds average)\n"
 msgstr "%d espresiones de coordenaes interpretaes en %g segundos (%g segundos de "
 "media)\n"
 
-#: ../src/50-mutter-navigation.xml.in.h:1
+#: ../src/50-muffin-navigation.xml.in.h:1
 #, fuzzy
 msgid "Hide all normal windows"
 msgstr "Anubrir toles ventanes normales"
 
-#: ../src/50-mutter-navigation.xml.in.h:2
+#: ../src/50-muffin-navigation.xml.in.h:2
 #, fuzzy
 msgid "Move to workspace above"
 msgstr "Mover al área de trabayu d'arriba"
 
-#: ../src/50-mutter-navigation.xml.in.h:3
+#: ../src/50-muffin-navigation.xml.in.h:3
 #, fuzzy
 msgid "Move to workspace below"
 msgstr "Mover al área de trabayu d'abaxo"
 
-#: ../src/50-mutter-navigation.xml.in.h:4
+#: ../src/50-muffin-navigation.xml.in.h:4
 #, fuzzy
 msgid "Move to workspace left"
 msgstr "Mover al área de trabayu de la izquierda"
 
-#: ../src/50-mutter-navigation.xml.in.h:5
+#: ../src/50-muffin-navigation.xml.in.h:5
 #, fuzzy
 msgid "Move to workspace right"
 msgstr "Mover al área de trabayu de la derecha"
 
-#: ../src/50-mutter-navigation.xml.in.h:14
+#: ../src/50-muffin-navigation.xml.in.h:14
 #, fuzzy
 msgid "Navigation"
 msgstr "Navegación"
 
-#: ../src/50-mutter-navigation.xml.in.h:15
+#: ../src/50-muffin-navigation.xml.in.h:15
 #, fuzzy
 msgid "Switch applications"
 msgstr "Movese ente aplicaciones"
 
-#: ../src/50-mutter-navigation.xml.in.h:16
+#: ../src/50-muffin-navigation.xml.in.h:16
 #, fuzzy
 msgid "Switch system controls"
 msgstr "Cambiar ente controles del sistema"
 
-#: ../src/50-mutter-navigation.xml.in.h:17
+#: ../src/50-muffin-navigation.xml.in.h:17
 #, fuzzy
 msgid "Switch system controls directly"
 msgstr "Movese ente los controles del sistema direutamente"
 
-#: ../src/50-mutter-navigation.xml.in.h:22
+#: ../src/50-muffin-navigation.xml.in.h:22
 #, fuzzy
 msgid "Switch windows directly"
 msgstr "Cambiar ventanes direutamente"
 
-#: ../src/50-mutter-navigation.xml.in.h:23
+#: ../src/50-muffin-navigation.xml.in.h:23
 #, fuzzy
 msgid "Switch windows of an app directly"
 msgstr "Movese ente les ventanes d'una aplicación direutamente"
 
-#: ../src/50-mutter-navigation.xml.in.h:24
+#: ../src/50-muffin-navigation.xml.in.h:24
 #, fuzzy
 msgid "Switch windows of an application"
 msgstr "Movese ente les ventanes d'una aplicación"
 
-#: ../src/50-mutter-system.xml.in.h:1
+#: ../src/50-muffin-system.xml.in.h:1
 #, fuzzy
 msgid "Show the activities overview"
 msgstr "Amosar el resume d'actividaes"
 
-#: ../src/50-mutter-system.xml.in.h:2
+#: ../src/50-muffin-system.xml.in.h:2
 #, fuzzy
 msgid "Show the run command prompt"
 msgstr "Amosar l'elementu «executar comando»"
 
-#: ../src/50-mutter-system.xml.in.h:3
+#: ../src/50-muffin-system.xml.in.h:3
 #, fuzzy
 msgid "System"
 msgstr "Sistema"
 
-#: ../src/50-mutter-windows.xml.in.h:10
+#: ../src/50-muffin-windows.xml.in.h:10
 #, fuzzy
 msgid "Raise window if covered, otherwise lower it"
 msgstr "Llevantar la ventana si ta cubierta, minimizala n'otru casu"
 
-#: ../src/50-mutter-windows.xml.in.h:16
+#: ../src/50-muffin-windows.xml.in.h:16
 #, fuzzy
 msgid "Toggle window on all workspaces or one"
 msgstr "Conmutar la ventana en toles árees de trabayu o namái nuna"
 
-#: ../src/50-mutter-windows.xml.in.h:17
+#: ../src/50-muffin-windows.xml.in.h:17
 #, fuzzy
 msgid "Windows"
 msgstr "Ventanes"

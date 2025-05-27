@@ -19,7 +19,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: metacity.gnome-2-26\n"
 "Report-Msgid-Bugs-To: https://bugzilla.gnome.org/enter_bug.cgi?"
-"product=mutter&keywords=I18N+L10N&component=general\n"
+"product=muffin&keywords=I18N+L10N&component=general\n"
 "POT-Creation-Date: 2017-02-28 06:20+0000\n"
 "PO-Revision-Date: 2017-04-07 13:41+0300\n"
 "Last-Translator: Tom Tryfonidis <tomtryf@gnome.org>\n"
@@ -32,255 +32,255 @@ msgstr ""
 "X-Generator: Poedit 1.8.11\n"
 "X-Project-Style: gnome\n"
 
-#: data/50-mutter-navigation.xml:6
+#: data/50-muffin-navigation.xml:6
 msgid "Navigation"
 msgstr "Περιήγηση"
 
-#: data/50-mutter-navigation.xml:9
+#: data/50-muffin-navigation.xml:9
 msgid "Move window to workspace 1"
 msgstr "Μετακίνηση παραθύρου στον χώρο εργασίας 1"
 
-#: data/50-mutter-navigation.xml:12
+#: data/50-muffin-navigation.xml:12
 msgid "Move window to workspace 2"
 msgstr "Μετακίνηση παραθύρου στον χώρο εργασίας 2"
 
-#: data/50-mutter-navigation.xml:15
+#: data/50-muffin-navigation.xml:15
 msgid "Move window to workspace 3"
 msgstr "Μετακίνηση παραθύρου στον χώρο εργασίας 3"
 
-#: data/50-mutter-navigation.xml:18
+#: data/50-muffin-navigation.xml:18
 msgid "Move window to workspace 4"
 msgstr "Μετακίνηση παραθύρου στον χώρο εργασίας 4"
 
-#: data/50-mutter-navigation.xml:21
+#: data/50-muffin-navigation.xml:21
 msgid "Move window to last workspace"
 msgstr "Μετακίνηση παραθύρου στον τελευταίο χώρο εργασίας"
 
-#: data/50-mutter-navigation.xml:24
+#: data/50-muffin-navigation.xml:24
 msgid "Move window one workspace to the left"
 msgstr "Μετακίνηση παραθύρου έναν χώρο εργασίας αριστερά"
 
-#: data/50-mutter-navigation.xml:27
+#: data/50-muffin-navigation.xml:27
 msgid "Move window one workspace to the right"
 msgstr "Μετακίνηση παραθύρου έναν χώρο εργασίας δεξιά"
 
-#: data/50-mutter-navigation.xml:30
+#: data/50-muffin-navigation.xml:30
 msgid "Move window one workspace up"
 msgstr "Μετακίνηση παραθύρου έναν χώρο εργασίας πάνω"
 
-#: data/50-mutter-navigation.xml:33
+#: data/50-muffin-navigation.xml:33
 msgid "Move window one workspace down"
 msgstr "Μετακίνηση παραθύρου έναν χώρο εργασίας κάτω"
 
-#: data/50-mutter-navigation.xml:36
+#: data/50-muffin-navigation.xml:36
 msgid "Move window one monitor to the left"
 msgstr "Μετακίνηση παραθύρου κατά μια οθόνη στα αριστερά"
 
-#: data/50-mutter-navigation.xml:39
+#: data/50-muffin-navigation.xml:39
 msgid "Move window one monitor to the right"
 msgstr "Μετακίνηση παραθύρου κατά μια οθόνη στα δεξιά"
 
-#: data/50-mutter-navigation.xml:42
+#: data/50-muffin-navigation.xml:42
 msgid "Move window one monitor up"
 msgstr "Μετακίνηση παραθύρου κατά μια οθόνη προς τα πάνω"
 
-#: data/50-mutter-navigation.xml:45
+#: data/50-muffin-navigation.xml:45
 msgid "Move window one monitor down"
 msgstr "Μετακίνηση παραθύρου κατά μια οθόνη προς τα κάτω"
 
-#: data/50-mutter-navigation.xml:49
+#: data/50-muffin-navigation.xml:49
 msgid "Switch applications"
 msgstr "Εναλλαγή εφαρμογών"
 
-#: data/50-mutter-navigation.xml:54
+#: data/50-muffin-navigation.xml:54
 msgid "Switch to previous application"
 msgstr "Εναλλαγή στην προηγούμενη εφαρμογή"
 
-#: data/50-mutter-navigation.xml:58
+#: data/50-muffin-navigation.xml:58
 msgid "Switch windows"
 msgstr "Εναλλαγή παραθύρων"
 
-#: data/50-mutter-navigation.xml:63
+#: data/50-muffin-navigation.xml:63
 msgid "Switch to previous window"
 msgstr "Εναλλαγή στο προηγούμενο παράθυρο"
 
-#: data/50-mutter-navigation.xml:67
+#: data/50-muffin-navigation.xml:67
 msgid "Switch windows of an application"
 msgstr "Εναλλαγή παραθύρων μιας εφαρμογής"
 
-#: data/50-mutter-navigation.xml:72
+#: data/50-muffin-navigation.xml:72
 msgid "Switch to previous window of an application"
 msgstr "Εναλλαγή στο προηγούμενο παράθυρο μιας εφαρμογής"
 
-#: data/50-mutter-navigation.xml:76
+#: data/50-muffin-navigation.xml:76
 msgid "Switch system controls"
 msgstr "Εναλλαγή ελέγχων συστήματος"
 
-#: data/50-mutter-navigation.xml:81
+#: data/50-muffin-navigation.xml:81
 msgid "Switch to previous system control"
 msgstr "Εναλλαγή σε προηγούμενους ελέγχους συστήματος"
 
-#: data/50-mutter-navigation.xml:85
+#: data/50-muffin-navigation.xml:85
 msgid "Switch windows directly"
 msgstr "Άμεση εναλλαγή παραθύρων"
 
-#: data/50-mutter-navigation.xml:90
+#: data/50-muffin-navigation.xml:90
 msgid "Switch directly to previous window"
 msgstr "Άμεση εναλλαγή στο προηγούμενο παράθυρο"
 
-#: data/50-mutter-navigation.xml:94
+#: data/50-muffin-navigation.xml:94
 msgid "Switch windows of an app directly"
 msgstr "Άμεση εναλλαγή παραθύρων μιας εφαρμογής"
 
-#: data/50-mutter-navigation.xml:99
+#: data/50-muffin-navigation.xml:99
 msgid "Switch directly to previous window of an app"
 msgstr "Άμεση εναλλαγή στο προηγούμενο παράθυρο μιας εφαρμογής"
 
-#: data/50-mutter-navigation.xml:103
+#: data/50-muffin-navigation.xml:103
 msgid "Switch system controls directly"
 msgstr "Άμεση εναλλαγή ελέγχων συστήματος"
 
-#: data/50-mutter-navigation.xml:108
+#: data/50-muffin-navigation.xml:108
 msgid "Switch directly to previous system control"
 msgstr "Άμεση εναλλαγή σε προηγούμενους ελέγχους συστήματος"
 
-#: data/50-mutter-navigation.xml:111
+#: data/50-muffin-navigation.xml:111
 msgid "Hide all normal windows"
 msgstr "Απόκρυψη όλων των κανονικών παραθύρων"
 
-#: data/50-mutter-navigation.xml:114
+#: data/50-muffin-navigation.xml:114
 msgid "Switch to workspace 1"
 msgstr "Εναλλαγή στον χώρο εργασίας 1"
 
-#: data/50-mutter-navigation.xml:117
+#: data/50-muffin-navigation.xml:117
 msgid "Switch to workspace 2"
 msgstr "Εναλλαγή στον χώρο εργασίας 2"
 
-#: data/50-mutter-navigation.xml:120
+#: data/50-muffin-navigation.xml:120
 msgid "Switch to workspace 3"
 msgstr "Εναλλαγή στον χώρο εργασίας 3"
 
-#: data/50-mutter-navigation.xml:123
+#: data/50-muffin-navigation.xml:123
 msgid "Switch to workspace 4"
 msgstr "Εναλλαγή στον χώρο εργασίας 4"
 
-#: data/50-mutter-navigation.xml:126
+#: data/50-muffin-navigation.xml:126
 msgid "Switch to last workspace"
 msgstr "Εναλλαγή στον τελευταίο χώρο εργασίας"
 
-#: data/50-mutter-navigation.xml:129
+#: data/50-muffin-navigation.xml:129
 msgid "Move to workspace left"
 msgstr "Μετακίνηση στον χώρο εργασίας αριστερά"
 
-#: data/50-mutter-navigation.xml:132
+#: data/50-muffin-navigation.xml:132
 msgid "Move to workspace right"
 msgstr "Μετακίνηση στον χώρο εργασίας δεξιά"
 
-#: data/50-mutter-navigation.xml:135
+#: data/50-muffin-navigation.xml:135
 msgid "Move to workspace above"
 msgstr "Μετακίνηση στον χώρο εργασίας επάνω"
 
-#: data/50-mutter-navigation.xml:138
+#: data/50-muffin-navigation.xml:138
 msgid "Move to workspace below"
 msgstr "Μετακίνηση στον χώρο εργασίας κάτω"
 
-#: data/50-mutter-system.xml:6
+#: data/50-muffin-system.xml:6
 msgid "System"
 msgstr "Σύστημα"
 
-#: data/50-mutter-system.xml:8
+#: data/50-muffin-system.xml:8
 msgid "Show the run command prompt"
 msgstr "Εμφάνιση της προτροπής της εντολής run"
 
-#: data/50-mutter-system.xml:10
+#: data/50-muffin-system.xml:10
 msgid "Show the activities overview"
 msgstr "Εμφάνιση της επισκόπησης των δραστηριοτήτων"
 
-#: data/50-mutter-windows.xml:6
+#: data/50-muffin-windows.xml:6
 msgid "Windows"
 msgstr "Παράθυρα"
 
-#: data/50-mutter-windows.xml:8
+#: data/50-muffin-windows.xml:8
 msgid "Activate the window menu"
 msgstr "Ενεργοποίηση του μενού παραθύρου"
 
-#: data/50-mutter-windows.xml:10
+#: data/50-muffin-windows.xml:10
 msgid "Toggle fullscreen mode"
 msgstr "Εναλλαγή κατάστασης πλήρους οθόνης"
 
-#: data/50-mutter-windows.xml:12
+#: data/50-muffin-windows.xml:12
 msgid "Toggle maximization state"
 msgstr "Εναλλαγή κατάστασης μεγιστοποίησης"
 
-#: data/50-mutter-windows.xml:14
+#: data/50-muffin-windows.xml:14
 msgid "Maximize window"
 msgstr "Μεγιστοποίηση παραθύρου"
 
-#: data/50-mutter-windows.xml:16
+#: data/50-muffin-windows.xml:16
 msgid "Restore window"
 msgstr "Επαναφορά παραθύρου"
 
-#: data/50-mutter-windows.xml:18
+#: data/50-muffin-windows.xml:18
 msgid "Toggle shaded state"
 msgstr "Εναλλαγή σκιασμένης κατάστασης"
 
-#: data/50-mutter-windows.xml:20
+#: data/50-muffin-windows.xml:20
 msgid "Close window"
 msgstr "Κλείσιμο παραθύρου"
 
-#: data/50-mutter-windows.xml:22
+#: data/50-muffin-windows.xml:22
 msgid "Hide window"
 msgstr "Απόκρυψη παραθύρου"
 
-#: data/50-mutter-windows.xml:24
+#: data/50-muffin-windows.xml:24
 msgid "Move window"
 msgstr "Μετακίνηση παραθύρου"
 
-#: data/50-mutter-windows.xml:26
+#: data/50-muffin-windows.xml:26
 msgid "Resize window"
 msgstr "Αυξομείωση παραθύρου"
 
-#: data/50-mutter-windows.xml:29
+#: data/50-muffin-windows.xml:29
 msgid "Toggle window on all workspaces or one"
 msgstr "Εναλλαγή παραθύρου σε όλες τις επιφάνειες εργασίας ή σε μία"
 
-#: data/50-mutter-windows.xml:31
+#: data/50-muffin-windows.xml:31
 msgid "Raise window if covered, otherwise lower it"
 msgstr "Ανύψωση παραθύρου εάν καλύπτεται, αλλιώς βύθισή του"
 
-#: data/50-mutter-windows.xml:33
+#: data/50-muffin-windows.xml:33
 msgid "Raise window above other windows"
 msgstr "Ανύψωση παραθύρου πάνω από τα άλλα παράθυρα"
 
-#: data/50-mutter-windows.xml:35
+#: data/50-muffin-windows.xml:35
 msgid "Lower window below other windows"
 msgstr "Βύθιση παραθύρου κάτω από τα άλλα παράθυρα"
 
-#: data/50-mutter-windows.xml:37
+#: data/50-muffin-windows.xml:37
 msgid "Maximize window vertically"
 msgstr "Μεγιστοποίηση παραθύρου κάθετα"
 
-#: data/50-mutter-windows.xml:39
+#: data/50-muffin-windows.xml:39
 msgid "Maximize window horizontally"
 msgstr "Μεγιστοποίηση παραθύρου οριζόντια"
 
-#: data/50-mutter-windows.xml:43
+#: data/50-muffin-windows.xml:43
 msgid "View split on left"
 msgstr "Μεγιστοποίηση στα αριστερά"
 
-#: data/50-mutter-windows.xml:47
+#: data/50-muffin-windows.xml:47
 msgid "View split on right"
 msgstr "Μεγιστοποίηση στα δεξιά"
 
-#: data/mutter.desktop.in:4
+#: data/muffin.desktop.in:4
 msgid "Mutter"
 msgstr "Mutter"
 
-#: data/org.gnome.mutter.gschema.xml.in:7
+#: data/org.gnome.muffin.gschema.xml.in:7
 msgid "Modifier to use for extended window management operations"
 msgstr "Μετατροπέας για χρήση στις εκτεταμένες ενέργειες διαχείρισης παραθύρων"
 
-#: data/org.gnome.mutter.gschema.xml.in:8
+#: data/org.gnome.muffin.gschema.xml.in:8
 msgid ""
 "This key will initiate the “overlay”, which is a combination window overview "
 "and application launching system. The default is intended to be the “Windows "
@@ -292,11 +292,11 @@ msgstr ""
 "είναι το «πλήκτρο Windows» σε μηχανήματα PC. Αναμένεται ότι αυτή η "
 "αντιστοίχιση θα είναι είτε η προεπιλογή ή θα ορίζεται στην κενή συμβολοσειρά."
 
-#: data/org.gnome.mutter.gschema.xml.in:20
+#: data/org.gnome.muffin.gschema.xml.in:20
 msgid "Attach modal dialogs"
 msgstr "Επισύναψη σχηματικών διαλόγων"
 
-#: data/org.gnome.mutter.gschema.xml.in:21
+#: data/org.gnome.muffin.gschema.xml.in:21
 msgid ""
 "When true, instead of having independent titlebars, modal dialogs appear "
 "attached to the titlebar of the parent window and are moved together with "
@@ -306,13 +306,13 @@ msgstr ""
 "εμφανίζονται στην μπάρα τίτλου του γονικού παραθύρου και μετακινούνται μαζί "
 "με το γονικό παράθυρο."
 
-#: data/org.gnome.mutter.gschema.xml.in:30
+#: data/org.gnome.muffin.gschema.xml.in:30
 msgid "Enable edge tiling when dropping windows on screen edges"
 msgstr ""
 "Ενεργοποίηση της παράθεσης παραθύρων όταν τα μετακινείτε στις άκρες της "
 "οθόνης"
 
-#: data/org.gnome.mutter.gschema.xml.in:31
+#: data/org.gnome.muffin.gschema.xml.in:31
 msgid ""
 "If enabled, dropping windows on vertical screen edges maximizes them "
 "vertically and resizes them horizontally to cover half of the available "
@@ -323,11 +323,11 @@ msgstr ""
 "καλύψουν το μισό της οθόνης. Το σύρσιμο των παραθύρων στο πάνω μέρος της "
 "οθόνης τα μεγιστοποιεί ολοκληρωτικά."
 
-#: data/org.gnome.mutter.gschema.xml.in:40
+#: data/org.gnome.muffin.gschema.xml.in:40
 msgid "Workspaces are managed dynamically"
 msgstr "Οι χώροι εργασίας διαχειρίζονται δυναμικά"
 
-#: data/org.gnome.mutter.gschema.xml.in:41
+#: data/org.gnome.muffin.gschema.xml.in:41
 msgid ""
 "Determines whether workspaces are managed dynamically or whether there’s a "
 "static number of workspaces (determined by the num-workspaces key in org."
@@ -337,11 +337,11 @@ msgstr ""
 "στατικός αριθμός χώρων εργασίας (καθορίζεται από το κλειδί num-workspaces "
 "στο org.gnome.desktop.wm.preferences)."
 
-#: data/org.gnome.mutter.gschema.xml.in:50
+#: data/org.gnome.muffin.gschema.xml.in:50
 msgid "Workspaces only on primary"
 msgstr "Χώροι εργασίας μόνο στην κύρια"
 
-#: data/org.gnome.mutter.gschema.xml.in:51
+#: data/org.gnome.muffin.gschema.xml.in:51
 msgid ""
 "Determines whether workspace switching should happen for windows on all "
 "monitors or only for windows on the primary monitor."
@@ -349,11 +349,11 @@ msgstr ""
 "Καθορίζει εάν η εναλλαγή των χώρων εργασίας θα συμβαίνει για τα παράθυρα σε "
 "όλες τις οθόνες ή μόνο για τα παράθυρα της κύριας οθόνης."
 
-#: data/org.gnome.mutter.gschema.xml.in:59
+#: data/org.gnome.muffin.gschema.xml.in:59
 msgid "No tab popup"
 msgstr "Καμία αναδυόμενη καρτέλα"
 
-#: data/org.gnome.mutter.gschema.xml.in:60
+#: data/org.gnome.muffin.gschema.xml.in:60
 msgid ""
 "Determines whether the use of popup and highlight frame should be disabled "
 "for window cycling."
@@ -361,12 +361,12 @@ msgstr ""
 "Καθορίζει αν πρέπει να απενεργοποιηθεί η χρήση της ανάδυσης και επισήμανσης "
 "του πλαισίου για την κυκλική εναλλαγή των παραθύρων."
 
-#: data/org.gnome.mutter.gschema.xml.in:68
+#: data/org.gnome.muffin.gschema.xml.in:68
 msgid "Delay focus changes until the pointer stops moving"
 msgstr ""
 "Η καθυστέρηση της εστίασης αλλάζει μέχρι ο δείκτης να σταματήσει να κινείται"
 
-#: data/org.gnome.mutter.gschema.xml.in:69
+#: data/org.gnome.muffin.gschema.xml.in:69
 msgid ""
 "If set to true, and the focus mode is either “sloppy” or “mouse” then the "
 "focus will not be changed immediately when entering a window, but only after "
@@ -376,11 +376,11 @@ msgstr ""
 "τότε η εστίαση δεν θα αλλάξει αμέσως όταν ανοίγετε ένα παράθυρο, αλλά μόνο "
 "όταν ο δείκτης σταματήσει να κινείται."
 
-#: data/org.gnome.mutter.gschema.xml.in:79
+#: data/org.gnome.muffin.gschema.xml.in:79
 msgid "Draggable border width"
 msgstr "Συρόμενο πλάτος περιγράμματος"
 
-#: data/org.gnome.mutter.gschema.xml.in:80
+#: data/org.gnome.muffin.gschema.xml.in:80
 msgid ""
 "The amount of total draggable borders. If the theme’s visible borders are "
 "not enough, invisible borders will be added to meet this value."
@@ -389,13 +389,13 @@ msgstr ""
 "θέματος δεν είναι αρκετά, θα προστεθούν αόρατα περιγράμματα για την κάλυψη "
 "αυτής της τιμής."
 
-#: data/org.gnome.mutter.gschema.xml.in:89
+#: data/org.gnome.muffin.gschema.xml.in:89
 msgid "Auto maximize nearly monitor sized windows"
 msgstr ""
 "Αυτόματη μεγιστοποίηση των παραθύρων των οποίων το μέγεθος είναι κοντά με το "
 "μέγεθος της οθόνης"
 
-#: data/org.gnome.mutter.gschema.xml.in:90
+#: data/org.gnome.muffin.gschema.xml.in:90
 msgid ""
 "If enabled, new windows that are initially the size of the monitor "
 "automatically get maximized."
@@ -403,11 +403,11 @@ msgstr ""
 "Εάν ενεργοποιηθεί, τα νέα παράθυρα που είναι αρχικά στο μέγεθος της οθόνης "
 "μεγιστοποιούνται αυτόματα."
 
-#: data/org.gnome.mutter.gschema.xml.in:98
+#: data/org.gnome.muffin.gschema.xml.in:98
 msgid "Place new windows in the center"
 msgstr "Τοποθέτηση νέων παραθύρων στο κέντρο"
 
-#: data/org.gnome.mutter.gschema.xml.in:99
+#: data/org.gnome.muffin.gschema.xml.in:99
 msgid ""
 "When true, the new windows will always be put in the center of the active "
 "screen of the monitor."
@@ -415,59 +415,59 @@ msgstr ""
 "Αν είναι αληθές, τα νέα παράθυρα θα είναι πάντα τοποθετημένα στο κέντρο της "
 "κύριας οθόνης."
 
-#: data/org.gnome.mutter.gschema.xml.in:120
+#: data/org.gnome.muffin.gschema.xml.in:120
 msgid "Select window from tab popup"
 msgstr "Επιλογή παραθύρου από την αναδυόμενη καρτέλα"
 
-#: data/org.gnome.mutter.gschema.xml.in:125
+#: data/org.gnome.muffin.gschema.xml.in:125
 msgid "Cancel tab popup"
 msgstr "Ακύρωση αναδυόμενης καρτέλας"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:6
+#: data/org.gnome.muffin.wayland.gschema.xml.in:6
 msgid "Switch to VT 1"
 msgstr "Εναλλαγή στο VT 1 "
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:10
+#: data/org.gnome.muffin.wayland.gschema.xml.in:10
 msgid "Switch to VT 2"
 msgstr "Εναλλαγή στο VT 2"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:14
+#: data/org.gnome.muffin.wayland.gschema.xml.in:14
 msgid "Switch to VT 3"
 msgstr "Εναλλαγή στο VT 3"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:18
+#: data/org.gnome.muffin.wayland.gschema.xml.in:18
 msgid "Switch to VT 4"
 msgstr "Εναλλαγή στο VT 4"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:22
+#: data/org.gnome.muffin.wayland.gschema.xml.in:22
 msgid "Switch to VT 5"
 msgstr "Εναλλαγή στο VT 5"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:26
+#: data/org.gnome.muffin.wayland.gschema.xml.in:26
 msgid "Switch to VT 6"
 msgstr "Εναλλαγή στο VT 6"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:30
+#: data/org.gnome.muffin.wayland.gschema.xml.in:30
 msgid "Switch to VT 7"
 msgstr "Εναλλαγή στο VT 7"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:34
+#: data/org.gnome.muffin.wayland.gschema.xml.in:34
 msgid "Switch to VT 8"
 msgstr "Εναλλαγή στο VT 8"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:38
+#: data/org.gnome.muffin.wayland.gschema.xml.in:38
 msgid "Switch to VT 9"
 msgstr "Εναλλαγή στο VT 9"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:42
+#: data/org.gnome.muffin.wayland.gschema.xml.in:42
 msgid "Switch to VT 10"
 msgstr "Εναλλαγή στο VT 10"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:46
+#: data/org.gnome.muffin.wayland.gschema.xml.in:46
 msgid "Switch to VT 11"
 msgstr "Εναλλαγή στο VT 11"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:50
+#: data/org.gnome.muffin.wayland.gschema.xml.in:50
 msgid "Switch to VT 12"
 msgstr "Εναλλαγή στο VT 12"
 
@@ -591,26 +591,26 @@ msgstr "Εκτέλεση ως ενσωματωμένος compositor"
 msgid "Run as a full display server, rather than nested"
 msgstr "Εκτέλεση ως διακομιστής πλήρους οθόνης, αντί ενσωματωμένης"
 
-#: src/core/mutter.c:39
+#: src/core/muffin.c:39
 #, c-format
 msgid ""
-"mutter %s\n"
+"muffin %s\n"
 "Copyright © 2001-%d Havoc Pennington, Red Hat, Inc., and others\n"
 "This is free software; see the source for copying conditions.\n"
 "There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A "
 "PARTICULAR PURPOSE.\n"
 msgstr ""
-"mutter %s\n"
+"muffin %s\n"
 "Πνευματικά Δικαιώματα © 2001-%d Havoc Pennington, Red Hat, Inc., και άλλοι\n"
 "Αυτό είναι ελεύθερο λογισμικό, βλ. τον πηγαίο κώδικα για όρους αντιγραφής.\n"
 "ΔΕΝ παρέχεται καμία εγγύηση, ούτε ΕΜΠΟΡΕΥΣΙΜΟΤΗΤΑΣ ούτε ΚΑΤΑΛΛΗΛΟΤΗΤΑΣ ΓΙΑ "
 "ΣΥΓΚΕΚΡΙΜΕΝΟ ΣΚΟΠΟ.\n"
 
-#: src/core/mutter.c:53
+#: src/core/muffin.c:53
 msgid "Print version"
 msgstr "Εμφάνιση έκδοσης"
 
-#: src/core/mutter.c:59
+#: src/core/muffin.c:59
 msgid "Mutter plugin to use"
 msgstr "Πρόσθετα του Mutter για χρήση"
 
@@ -1233,9 +1233,9 @@ msgstr "%s (σε %s)"
 #~ msgid "Failed to parse saved session file: %s\n"
 #~ msgstr "Αποτυχία ανάλυσης αποθηκευμένου αρχείου συνεδρίας: %s\n"
 
-#~ msgid "<mutter_session> attribute seen but we already have the session ID"
+#~ msgid "<muffin_session> attribute seen but we already have the session ID"
 #~ msgstr ""
-#~ "βρέθηκε η ιδιότητα <mutter_session> αλλά ήδη έχουμε την ταυτότητα "
+#~ "βρέθηκε η ιδιότητα <muffin_session> αλλά ήδη έχουμε την ταυτότητα "
 #~ "συνεδρίας"
 
 #~ msgid "Unknown attribute %s on <%s> element"

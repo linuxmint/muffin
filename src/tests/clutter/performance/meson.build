@@ -31,7 +31,7 @@ foreach test : clutter_tests_performance_tests
     c_args: clutter_tests_performance_c_args,
     dependencies: [
       clutter_deps,
-      libmutter_clutter_dep,
+      libmuffin_clutter_dep,
     ],
     install: false,
   )

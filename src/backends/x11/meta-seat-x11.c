@@ -27,7 +27,7 @@
 #include "backends/x11/meta-stage-x11.h"
 #include "backends/x11/meta-virtual-input-device-x11.h"
 #include "backends/x11/meta-xkb-a11y-x11.h"
-#include "clutter/clutter-mutter.h"
+#include "clutter/clutter-muffin.h"
 #include "clutter/x11/clutter-x11.h"
 #include "core/bell.h"
 #include "meta-seat-x11.h"

@@ -20,8 +20,8 @@
  * along with this program; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef MUTTER_H_
-#define MUTTER_H_
+#ifndef MUFFIN_H_
+#define MUFFIN_H_
 
 #include "clutter/clutter.h"
 #include "meta/compositor.h"

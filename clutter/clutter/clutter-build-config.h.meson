@@ -1,5 +1,5 @@
 /* Mutter version */
-#mesondefine MUTTER_VERSION
+#mesondefine MUFFIN_VERSION
 
 /* List of Cogl drivers */
 #mesondefine CLUTTER_DRIVERS

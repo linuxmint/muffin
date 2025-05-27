@@ -17,10 +17,10 @@ cogl_pango_public_headers = [
 cogl_pango_deps = [
   pango_dep,
   pangocairo_dep,
-  libmutter_cogl_dep,
+  libmuffin_cogl_dep,
 ]
 
-libmutter_cogl_pango = shared_library('muffin-cogl-pango-' + libmutter_api_version,
+libmuffin_cogl_pango = shared_library('muffin-cogl-pango-' + libmuffin_api_version,
   sources: [cogl_pango_sources, cogl_pango_public_headers],
   version: '0.0.0',
   soversion: 0,
@@ -33,26 +33,26 @@ libmutter_cogl_pango = shared_library('muffin-cogl-pango-' + libmutter_api_versi
   install: true,
 )
 
-libmutter_cogl_pango_dep = declare_dependency(
-  link_with: libmutter_cogl_pango,
+libmuffin_cogl_pango_dep = declare_dependency(
+  link_with: libmuffin_cogl_pango,
 )
 
 if have_introspection
-  libmutter_cogl_pango_gir = gnome.generate_gir(libmutter_cogl_pango,
+  libmuffin_cogl_pango_gir = gnome.generate_gir(libmuffin_cogl_pango,
     sources: cogl_pango_public_headers,
-    nsversion: libmutter_api_version,
+    nsversion: libmuffin_api_version,
     namespace: 'CoglPango',
     symbol_prefix: 'cogl_pango',
     header: 'cogl-pango.h',
     includes: [
-      libmutter_cogl_gir[0],
+      libmuffin_cogl_gir[0],
       'Pango-1.0',
       'PangoCairo-1.0'
     ],
     dependencies: [
       cogl_deps,
       pango_dep,
-      libmutter_cogl_pango_dep,
+      libmuffin_cogl_pango_dep,
     ],
     extra_args: introspection_args + [
       '-UCOGL_COMPILATION',
@@ -67,15 +67,15 @@ endif
 cogl_pango_includesubdir = join_paths(cogl_includesubdir, 'cogl-pango')
 install_headers(cogl_pango_public_headers, subdir: cogl_pango_includesubdir)
 
-pkg.generate(libmutter_cogl_pango,
+pkg.generate(libmuffin_cogl_pango,
   name: 'CoglPango',
-  filebase: 'muffin-cogl-pango-' + libmutter_api_version,
-  description: 'A text rendering for Cogl in mutter',
+  filebase: 'muffin-cogl-pango-' + libmuffin_api_version,
+  description: 'A text rendering for Cogl in muffin',
   subdirs: join_paths(pkgname, 'cogl'),
-  requires: [cogl_pkg_deps, libmutter_cogl_name],
+  requires: [cogl_pkg_deps, libmuffin_cogl_name],
   version: meson.project_version(),
   variables: [
-    'apiversion=' + libmutter_api_version,
+    'apiversion=' + libmuffin_api_version,
   ],
   install_dir: pcdir,
 )

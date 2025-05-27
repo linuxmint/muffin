@@ -8,7 +8,7 @@ cogl_test_fixtures_sources = [
 
 test_datadir = join_paths(cogl_srcdir, 'tests', 'data')
 
-libmutter_cogl_test_fixtures = static_library('mutter-cogl-test-fixtures',
+libmuffin_cogl_test_fixtures = static_library('muffin-cogl-test-fixtures',
   sources: cogl_test_fixtures_sources,
   c_args: [cogl_c_args, '-DTEST_DATADIR=@0@'.format(test_datadir)],
   link_args: ['-Wl,--no-undefined', '-Wl,--unresolved-symbols=ignore-in-object-files'],
@@ -17,6 +17,6 @@ libmutter_cogl_test_fixtures = static_library('mutter-cogl-test-fixtures',
   install: false,
 )
 
-libmutter_cogl_test_fixtures_dep = declare_dependency(
-  link_with: libmutter_cogl_test_fixtures
+libmuffin_cogl_test_fixtures_dep = declare_dependency(
+  link_with: libmuffin_cogl_test_fixtures
 )

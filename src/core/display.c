@@ -67,7 +67,7 @@
 #include "core/util-private.h"
 #include "core/window-private.h"
 #include "core/workspace-private.h"
-#include "meta/compositor-mutter.h"
+#include "meta/compositor-muffin.h"
 #include "meta/compositor.h"
 #include "meta/main.h"
 #include "meta/meta-backend.h"
@@ -992,7 +992,7 @@ meta_display_open (void)
   g_signal_connect (display->gesture_tracker, "state-changed",
                     G_CALLBACK (gesture_tracker_state_changed), display);
 
-  /* We know that if mutter is running as a Wayland compositor,
+  /* We know that if muffin is running as a Wayland compositor,
    * we start out with no windows.
    */
   if (!meta_is_wayland_compositor ())
@@ -1424,7 +1424,7 @@ meta_display_queue_autoraise_callback (MetaDisplay *display,
                         meta_prefs_get_auto_raise_delay (),
                         window_raise_with_delay_callback,
                         window, NULL);
-  g_source_set_name_by_id (display->autoraise_timeout_id, "[mutter] window_raise_with_delay_callback");
+  g_source_set_name_by_id (display->autoraise_timeout_id, "[muffin] window_raise_with_delay_callback");
   display->autoraise_window = window;
 }
 
@@ -2082,7 +2082,7 @@ meta_display_end_grab_op (MetaDisplay *display,
  * Return value: the current grab operation, or %META_GRAB_OP_NONE if
  * Mutter doesn't currently have a grab. %META_GRAB_OP_COMPOSITOR will
  * be returned if a compositor-plugin modal operation is in effect
- * (See mutter_begin_modal_for_plugin())
+ * (See muffin_begin_modal_for_plugin())
  */
 MetaGrabOp
 meta_display_get_grab_op (MetaDisplay *display)
@@ -2273,7 +2273,7 @@ meta_display_ping_window (MetaWindow *window,
     g_timeout_add (check_alive_timeout,
                    meta_display_ping_timeout,
                    ping_data);
-  g_source_set_name_by_id (ping_data->ping_timeout_id, "[mutter] meta_display_ping_timeout");
+  g_source_set_name_by_id (ping_data->ping_timeout_id, "[muffin] meta_display_ping_timeout");
 
   display->pending_pings = g_slist_prepend (display->pending_pings, ping_data);
 
@@ -3312,7 +3312,7 @@ meta_display_update_tile_preview (MetaDisplay *display,
                        meta_display_update_tile_preview_timeout,
                        display);
       g_source_set_name_by_id (display->tile_preview_timeout_id,
-                               "[mutter] meta_display_update_tile_preview_timeout");
+                               "[muffin] meta_display_update_tile_preview_timeout");
     }
   else
     {

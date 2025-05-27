@@ -118,7 +118,7 @@ meta_restart (const char *message)
   int helper_out_fd;
 
   static const char * const helper_argv[] = {
-    MUTTER_LIBEXECDIR "/muffin-restart-helper", NULL
+    MUFFIN_LIBEXECDIR "/muffin-restart-helper", NULL
   };
 
   if (message && meta_display_show_restart_message (display, message))

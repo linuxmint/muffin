@@ -93,7 +93,7 @@ present_existing_delete_dialog (MetaCloseDialogDefault *dialog)
               window->desc);
 
   /* Activate transient for window that belongs to
-   * mutter-dialog
+   * muffin-dialog
    */
   windows = meta_display_list_windows (window->display, META_LIST_DEFAULT);
   tmp = windows;
@@ -103,7 +103,7 @@ present_existing_delete_dialog (MetaCloseDialogDefault *dialog)
       MetaWindow *w = tmp->data;
 
       if (w->transient_for == window && w->res_class &&
-          g_ascii_strcasecmp (w->res_class, "mutter-dialog") == 0)
+          g_ascii_strcasecmp (w->res_class, "muffin-dialog") == 0)
         {
           meta_window_activate (w, CLUTTER_CURRENT_TIME);
           break;

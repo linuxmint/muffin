@@ -26,7 +26,7 @@
 #include "backends/native/meta-keymap-native.h"
 #include "backends/native/meta-seat-native.h"
 #include "backends/native/meta-virtual-input-device-native.h"
-#include "clutter/clutter-mutter.h"
+#include "clutter/clutter-muffin.h"
 #include "meta/util.h"
 
 enum

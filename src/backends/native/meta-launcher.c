@@ -79,7 +79,7 @@ find_systemd_session (gchar **session_id,
   g_assert (error == NULL || *error == NULL);
 
   /* if we are in a logind session, we can trust that value, so use it. This
-   * happens for example when you run mutter directly from a VT but when
+   * happens for example when you run muffin directly from a VT but when
    * systemd starts us we will not be in a logind session. */
   saved_errno = sd_pid_get_session (0, &local_session_id);
   if (saved_errno < 0)

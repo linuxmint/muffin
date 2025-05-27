@@ -1,4 +1,4 @@
-# Uyghur translation for mutter.
+# Uyghur translation for muffin.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
 # Gheyret Kenji<gheyret@yahoo.com>,2010.
@@ -7,8 +7,8 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: mutter\n"
-"Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?product=mutter&keywords=I18N+L10N&component=general\n"
+"Project-Id-Version: muffin\n"
+"Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?product=muffin&keywords=I18N+L10N&component=general\n"
 "POT-Creation-Date: 2013-03-31 13:47+0000\n"
 "PO-Revision-Date: 2013-04-06 18:40+0900\n"
 "Last-Translator: Gheyret Kenji <gheyret@gmail.com>\n"
@@ -18,191 +18,191 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: ../src/50-mutter-navigation.xml.in.h:1
+#: ../src/50-muffin-navigation.xml.in.h:1
 msgid "Navigation"
 msgstr "يولباشچى"
 
-#: ../src/50-mutter-navigation.xml.in.h:2
+#: ../src/50-muffin-navigation.xml.in.h:2
 msgid "Move window to workspace 1"
 msgstr "كۆزنەكنى 1-خىزمەت رايونىغا يۆتكە"
 
-#: ../src/50-mutter-navigation.xml.in.h:3
+#: ../src/50-muffin-navigation.xml.in.h:3
 msgid "Move window to workspace 2"
 msgstr "كۆزنەكنى 2-خىزمەت رايونىغا يۆتكە"
 
-#: ../src/50-mutter-navigation.xml.in.h:4
+#: ../src/50-muffin-navigation.xml.in.h:4
 msgid "Move window to workspace 3"
 msgstr "كۆزنەكنى 3-خىزمەت رايونىغا يۆتكە"
 
-#: ../src/50-mutter-navigation.xml.in.h:5
+#: ../src/50-muffin-navigation.xml.in.h:5
 msgid "Move window to workspace 4"
 msgstr "كۆزنەكنى 4-خىزمەت رايونىغا يۆتكە"
 
-#: ../src/50-mutter-navigation.xml.in.h:6
+#: ../src/50-muffin-navigation.xml.in.h:6
 msgid "Move window one workspace to the left"
 msgstr "كۆزنەكنى سولدىكى خىزمەت رايونىغا يۆتكەش"
 
-#: ../src/50-mutter-navigation.xml.in.h:7
+#: ../src/50-muffin-navigation.xml.in.h:7
 msgid "Move window one workspace to the right"
 msgstr "كۆزنەكنى ئوڭدىكى خىزمەت رايونىغا يۆتكەش"
 
-#: ../src/50-mutter-navigation.xml.in.h:8
+#: ../src/50-muffin-navigation.xml.in.h:8
 msgid "Move window one workspace up"
 msgstr "كۆزنەكنى يۇقىرىدىكى خىزمەت رايونىغا يۆتكەش"
 
-#: ../src/50-mutter-navigation.xml.in.h:9
+#: ../src/50-muffin-navigation.xml.in.h:9
 msgid "Move window one workspace down"
 msgstr "كۆزنەكنى تۆۋەندىكى خىزمەت رايونىغا يۆتكەش"
 
-#: ../src/50-mutter-navigation.xml.in.h:10
+#: ../src/50-muffin-navigation.xml.in.h:10
 msgid "Switch applications"
 msgstr "پروگراممىلارنى ئالماشتۇرۇش"
 
-#: ../src/50-mutter-navigation.xml.in.h:11
+#: ../src/50-muffin-navigation.xml.in.h:11
 msgid "Switch windows"
 msgstr "كۆزنەكلەرنى ئالماشتۇرۇش"
 
-#: ../src/50-mutter-navigation.xml.in.h:12
+#: ../src/50-muffin-navigation.xml.in.h:12
 msgid "Switch windows of an application"
 msgstr "پروگراممىنىڭ كۆزنىكىنى ئالماشتۇرۇش"
 
-#: ../src/50-mutter-navigation.xml.in.h:13
+#: ../src/50-muffin-navigation.xml.in.h:13
 msgid "Switch system controls"
 msgstr "سىستېما تىزگىنلىرىنى ئالماشتۇرۇش"
 
-#: ../src/50-mutter-navigation.xml.in.h:14
+#: ../src/50-muffin-navigation.xml.in.h:14
 msgid "Switch windows directly"
 msgstr "كۆزنەكلەرنى بىۋاسىتە ئالماشتۇرۇش"
 
-#: ../src/50-mutter-navigation.xml.in.h:15
+#: ../src/50-muffin-navigation.xml.in.h:15
 msgid "Switch windows of an app directly"
 msgstr "بىر پروگراممىنىڭ كۆزنەكلىرىنى بىۋاسىتە ئالماشتۇرۇش"
 
-#: ../src/50-mutter-navigation.xml.in.h:16
+#: ../src/50-muffin-navigation.xml.in.h:16
 msgid "Switch system controls directly"
 msgstr "سىستېما تىزگىنلىرىنى بىۋاسىتە ئالماشتۇرۇش"
 
-#: ../src/50-mutter-navigation.xml.in.h:17
+#: ../src/50-muffin-navigation.xml.in.h:17
 msgid "Hide all normal windows"
 msgstr "بارلىق نورمال كۆزنەكلەرنى يوشۇرۇش"
 
-#: ../src/50-mutter-navigation.xml.in.h:18
+#: ../src/50-muffin-navigation.xml.in.h:18
 msgid "Switch to workspace 1"
 msgstr "1-خىزمەت رايونىغا ئالمىشىش"
 
-#: ../src/50-mutter-navigation.xml.in.h:19
+#: ../src/50-muffin-navigation.xml.in.h:19
 msgid "Switch to workspace 2"
 msgstr "2-خىزمەت رايونىغا ئالمىشىش"
 
-#: ../src/50-mutter-navigation.xml.in.h:20
+#: ../src/50-muffin-navigation.xml.in.h:20
 msgid "Switch to workspace 3"
 msgstr "3-خىزمەت رايونىغا ئالمىشىش"
 
-#: ../src/50-mutter-navigation.xml.in.h:21
+#: ../src/50-muffin-navigation.xml.in.h:21
 msgid "Switch to workspace 4"
 msgstr "4-خىزمەت رايونىغا ئالمىشىش"
 
-#: ../src/50-mutter-navigation.xml.in.h:22
+#: ../src/50-muffin-navigation.xml.in.h:22
 msgid "Move to workspace left"
 msgstr "سولدىكى خىزمەت رايونىغا يۆتكەش"
 
-#: ../src/50-mutter-navigation.xml.in.h:23
+#: ../src/50-muffin-navigation.xml.in.h:23
 msgid "Move to workspace right"
 msgstr "ئوڭدىكى خىزمەت رايونىغا يۆتكەش"
 
-#: ../src/50-mutter-navigation.xml.in.h:24
+#: ../src/50-muffin-navigation.xml.in.h:24
 msgid "Move to workspace above"
 msgstr "ئۇستىدىكى خىزمەت رايونىغا يۆتكەش"
 
-#: ../src/50-mutter-navigation.xml.in.h:25
+#: ../src/50-muffin-navigation.xml.in.h:25
 msgid "Move to workspace below"
 msgstr "تۆۋەندىكى خىزمەت رايونىغا يۆتكەش"
 
-#: ../src/50-mutter-system.xml.in.h:1
+#: ../src/50-muffin-system.xml.in.h:1
 msgid "System"
 msgstr "سىستېما"
 
-#: ../src/50-mutter-system.xml.in.h:2
+#: ../src/50-muffin-system.xml.in.h:2
 msgid "Show the run command prompt"
 msgstr "بۇيرۇق قۇرىنى كۆرسىتىدۇ"
 
-#: ../src/50-mutter-system.xml.in.h:3
+#: ../src/50-muffin-system.xml.in.h:3
 msgid "Show the activities overview"
 msgstr "پائالىيەتلەرنىڭ قىسقىچە بايانىنى كۆرسىتىدۇ"
 
-#: ../src/50-mutter-windows.xml.in.h:1
+#: ../src/50-muffin-windows.xml.in.h:1
 msgid "Windows"
 msgstr "كۆزنەكلەر"
 
-#: ../src/50-mutter-windows.xml.in.h:2
+#: ../src/50-muffin-windows.xml.in.h:2
 msgid "Activate the window menu"
 msgstr "كۆزنەك تىزىملىكىنى ئاكتىپلاش"
 
-#: ../src/50-mutter-windows.xml.in.h:3
+#: ../src/50-muffin-windows.xml.in.h:3
 msgid "Toggle fullscreen mode"
 msgstr "پۈتۈن ئېكران شەكلىگە ئالمىشىش"
 
-#: ../src/50-mutter-windows.xml.in.h:4
+#: ../src/50-muffin-windows.xml.in.h:4
 msgid "Toggle maximization state"
 msgstr "ئەڭ چوڭ ھالەتكە ئالمىشىش"
 
-#: ../src/50-mutter-windows.xml.in.h:5
+#: ../src/50-muffin-windows.xml.in.h:5
 msgid "Maximize window"
 msgstr "كۆزنەكنى چوڭايتىش"
 
-#: ../src/50-mutter-windows.xml.in.h:6
+#: ../src/50-muffin-windows.xml.in.h:6
 msgid "Restore window"
 msgstr "كۆزنەكنى ئەسلىگە كەلتۈرۈش"
 
-#: ../src/50-mutter-windows.xml.in.h:7
+#: ../src/50-muffin-windows.xml.in.h:7
 msgid "Toggle shaded state"
 msgstr "سايىلىك ھالەتكە ئالمىشىش"
 
-#: ../src/50-mutter-windows.xml.in.h:8
+#: ../src/50-muffin-windows.xml.in.h:8
 msgid "Close window"
 msgstr "كۆزنەك ياپ"
 
-#: ../src/50-mutter-windows.xml.in.h:9
+#: ../src/50-muffin-windows.xml.in.h:9
 msgid "Hide window"
 msgstr "كۆزنەكنى يوشۇرۇش"
 
-#: ../src/50-mutter-windows.xml.in.h:10
+#: ../src/50-muffin-windows.xml.in.h:10
 msgid "Move window"
 msgstr "كۆزنەكنى يۆتكەش"
 
-#: ../src/50-mutter-windows.xml.in.h:11
+#: ../src/50-muffin-windows.xml.in.h:11
 msgid "Resize window"
 msgstr "كۆزنەك چوڭلۇقىنى ئۆزگەرتىش"
 
-#: ../src/50-mutter-windows.xml.in.h:12
+#: ../src/50-muffin-windows.xml.in.h:12
 msgid "Toggle window on all workspaces or one"
 msgstr "كۆزنەكنى بارلىق خىزمەت رايونى ياكى بىرىگىلا ئالماشتۇرۇش"
 
-#: ../src/50-mutter-windows.xml.in.h:13
+#: ../src/50-muffin-windows.xml.in.h:13
 msgid "Raise window if covered, otherwise lower it"
 msgstr "كۆزنەك توسۇلۇپ قالغان بولسا كۆتۈرسۇن، بولمىسا پەسلەتسۇن"
 
-#: ../src/50-mutter-windows.xml.in.h:14
+#: ../src/50-muffin-windows.xml.in.h:14
 msgid "Raise window above other windows"
 msgstr "كۆزنەكنى باشقا كۆزنەكنىڭ ئۈستىگە كۆتۈرۈش"
 
-#: ../src/50-mutter-windows.xml.in.h:15
+#: ../src/50-muffin-windows.xml.in.h:15
 msgid "Lower window below other windows"
 msgstr "كۆزنەكنى باشقا كۆزنەكنىڭ ئاستىغا تۆۋەنلىتىش"
 
-#: ../src/50-mutter-windows.xml.in.h:16
+#: ../src/50-muffin-windows.xml.in.h:16
 msgid "Maximize window vertically"
 msgstr "كۆزنەكنى تىك يۆنىلىشتە چوڭايتىش"
 
-#: ../src/50-mutter-windows.xml.in.h:17
+#: ../src/50-muffin-windows.xml.in.h:17
 msgid "Maximize window horizontally"
 msgstr "كۆزنەكنى توغرا يۆنىلىشتە چوڭايتىش"
 
-#: ../src/50-mutter-windows.xml.in.h:18
+#: ../src/50-muffin-windows.xml.in.h:18
 msgid "View split on left"
 msgstr "كۆزنەكنىڭ سول تەرىپىدە كۆرسەتسۇن"
 
-#: ../src/50-mutter-windows.xml.in.h:19
+#: ../src/50-muffin-windows.xml.in.h:19
 msgid "View split on right"
 msgstr "كۆزنەكنىڭ ئوڭ تەرىپىدە كۆرسەتسۇن"
 
@@ -309,24 +309,24 @@ msgid ""
 "Could not find a theme! Be sure %s exists and contains the usual themes.\n"
 msgstr "بىرەر ئۆرنەك تېپىلمىدى. %s نىڭ مەۋجۇتلۇقى ھەم ئىشلىتىشكە بولىدىغان ئۆرنەكنى ئۆز ئىچىگە ئالغانلىقىنى جەزملەڭ.\n"
 
-#: ../src/core/mutter.c:40
+#: ../src/core/muffin.c:40
 #, c-format
 msgid ""
-"mutter %s\n"
+"muffin %s\n"
 "Copyright (C) 2001-%d Havoc Pennington, Red Hat, Inc., and others\n"
 "This is free software; see the source for copying conditions.\n"
 "There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A "
 "PARTICULAR PURPOSE.\n"
-msgstr "mutter %s\n"
+msgstr "muffin %s\n"
 "نەشر ھوقۇقى (C) 2001-%d Havoc Pennington, Red Hat, Inc., ۋە باشقىلارغا تەۋە\n"
 "بۇ ھەقسىز دېتال؛ كۆچۈرۈش شەرتلىرىنى مەنبە كودىدىن كۆرۈڭ.\n"
 "مەيلى قانداق مەقسەتتە ئىشلەتمەڭ، ھېچقانداق كاپالەت يوق؛\n"
 
-#: ../src/core/mutter.c:54
+#: ../src/core/muffin.c:54
 msgid "Print version"
 msgstr "نەشرىنى باس"
 
-#: ../src/core/mutter.c:60
+#: ../src/core/muffin.c:60
 msgid "Mutter plugin to use"
 msgstr "ئىشلىتىدىغان Mutter قىستۇرمىسى"
 
@@ -415,8 +415,8 @@ msgstr "ئەڭگىمە ھۆججىتى تەھلىل قىلىش مەغلۇپ بو�
 
 #: ../src/core/session.c:1185
 #, c-format
-msgid "<mutter_session> attribute seen but we already have the session ID"
-msgstr "<mutter_session> دېگەن خاسلىق بايقالدى، بىراق بىزدە ئەڭگىمە ID سى بار ئىدى."
+msgid "<muffin_session> attribute seen but we already have the session ID"
+msgstr "<muffin_session> دېگەن خاسلىق بايقالدى، بىراق بىزدە ئەڭگىمە ID سى بار ئىدى."
 
 #: ../src/core/session.c:1198 ../src/core/session.c:1273
 #: ../src/core/session.c:1305 ../src/core/session.c:1377
@@ -456,7 +456,7 @@ msgstr "خاتىرە ھۆججىتى %s غا  fdopen()  مەشغۇلاتى قىل
 msgid "Opened log file %s\n"
 msgstr "ئاچقان خاتىرە ھۆججەت %s\n"
 
-#: ../src/core/util.c:119 ../src/tools/mutter-message.c:149
+#: ../src/core/util.c:119 ../src/tools/muffin-message.c:149
 #, c-format
 msgid "Mutter was compiled without support for verbose mode\n"
 msgstr "Mutter تەرجىمە-تەھرىرلىگەندە تەپسىلات قوللاش ھالىتى قوشۇلمىغان\n"
@@ -544,15 +544,15 @@ msgid ""
 "Property %s on window 0x%lx contained invalid UTF-8 for item %d in the list\n"
 msgstr "خاسلىق %s (كۆزنەك 0x%lx) دىكى تىزىمنىڭ %d تۈرى تەركىبىدە ئىناۋەتسىز UTF-8 بار\n"
 
-#: ../src/mutter.desktop.in.h:1 ../src/mutter-wm.desktop.in.h:1
+#: ../src/muffin.desktop.in.h:1 ../src/muffin-wm.desktop.in.h:1
 msgid "Mutter"
 msgstr "Mutter"
 
-#: ../src/org.gnome.mutter.gschema.xml.in.h:1
+#: ../src/org.gnome.muffin.gschema.xml.in.h:1
 msgid "Modifier to use for extended window management operations"
 msgstr "كېڭەيتىلگەن كۆزنەك باشقۇرۇش مەشغۇلاتىغا ئىشلىتىلىدىغان ئۆزگەرتىش"
 
-#: ../src/org.gnome.mutter.gschema.xml.in.h:2
+#: ../src/org.gnome.muffin.gschema.xml.in.h:2
 msgid ""
 "This key will initiate the \"overlay\", which is a combination window "
 "overview and application launching system. The default is intended to be the "
@@ -560,99 +560,99 @@ msgid ""
 "default or set to the empty string."
 msgstr "بۇ كۇنۇپكا كۆرسەتكەن «قاپلا» بىر خىل ئارىلاش كۆزنەك چۈشەندۈرۈشى ۋە قوللىنىشچان پروگرامما ئىجرا قىلىنىدىغان سىستېمىنى كۆرسىتىدۇ. كۆڭۈلدىكى ئەھۋالدا يەككە كومپيۇتېردىكى \"Windows key\" كۇنۇپكىسىنى ئىشلىتىشنى تەلەپ قىلىدۇ. بەلكىم كۆڭۈلدىكى ياكى بوش تىزىقنى ئىشلىتىدۇ."
 
-#: ../src/org.gnome.mutter.gschema.xml.in.h:3
+#: ../src/org.gnome.muffin.gschema.xml.in.h:3
 msgid "Attach modal dialogs"
 msgstr "قوشۇلغان مودېل سۆزلەشكۈ"
 
-#: ../src/org.gnome.mutter.gschema.xml.in.h:4
+#: ../src/org.gnome.muffin.gschema.xml.in.h:4
 msgid ""
 "When true, instead of having independent titlebars, modal dialogs appear "
 "attached to the titlebar of the parent window and are moved together with "
 "the parent window."
 msgstr "true بولغاندا مودېل سۆزلەشكۈ ئاتا كۆزنەكنىڭ ماۋزۇ بالداققا يېپىشىپ كۆرۈنىدۇ ھەمدە ئاتا كۆزنەككە ئەگىشىپ يۆتكىلىدۇ، ئايرىم ماۋزۇ بالدىقى بولمايدۇ."
 
-#: ../src/org.gnome.mutter.gschema.xml.in.h:5
+#: ../src/org.gnome.muffin.gschema.xml.in.h:5
 msgid "Enable edge tiling when dropping windows on screen edges"
 msgstr ""
 
-#: ../src/org.gnome.mutter.gschema.xml.in.h:6
+#: ../src/org.gnome.muffin.gschema.xml.in.h:6
 msgid ""
 "If enabled, dropping windows on vertical screen edges maximizes them "
 "vertically and resizes them horizontally to cover half of the available "
 "area. Dropping windows on the top screen edge maximizes them completely."
 msgstr ""
 
-#: ../src/org.gnome.mutter.gschema.xml.in.h:7
+#: ../src/org.gnome.muffin.gschema.xml.in.h:7
 msgid "Workspaces are managed dynamically"
 msgstr "خىزمەت رايونلىرى جانلىق باشقۇرۇلسۇن"
 
-#: ../src/org.gnome.mutter.gschema.xml.in.h:8
+#: ../src/org.gnome.muffin.gschema.xml.in.h:8
 msgid ""
 "Determines whether workspaces are managed dynamically or whether there's a "
 "static number of workspaces (determined by the num-workspaces key in org."
 "gnome.desktop.wm.preferences)."
 msgstr "خىزمەت رايونلىرى جانلىق باشقۇرۇلامدۇ ياكى خىزمەت رايونلىرىنىڭ سانى مۇقىم بولامدۇ بەلگىلەيدۇ(خىزمەت رايونلىرىنىڭ سانى org.gnome.desktop.wm.preferences دېگەن ئاچقۇچتا بەلگىلىنىدۇ)"
 
-#: ../src/org.gnome.mutter.gschema.xml.in.h:9
+#: ../src/org.gnome.muffin.gschema.xml.in.h:9
 msgid "Workspaces only on primary"
 msgstr "ئاساسىي كۆزەتكۈچتىكى خىزمەت رايونىغىلا"
 
-#: ../src/org.gnome.mutter.gschema.xml.in.h:10
+#: ../src/org.gnome.muffin.gschema.xml.in.h:10
 msgid ""
 "Determines whether workspace switching should happen for windows on all "
 "monitors or only for windows on the primary monitor."
 msgstr "خىزمەت رايونى ئالماشتۇرۇشنىڭ ھەممە ئېكراندىكى كۆزنەككىمۇ ياكى ئاساسىي ئېكرانغىلا قارىتىلغانلىقىنى جەزملەيدۇ."
 
-#: ../src/org.gnome.mutter.gschema.xml.in.h:11
+#: ../src/org.gnome.muffin.gschema.xml.in.h:11
 msgid "No tab popup"
 msgstr "بەتكۈچ سەكرىمىسۇن"
 
-#: ../src/org.gnome.mutter.gschema.xml.in.h:12
+#: ../src/org.gnome.muffin.gschema.xml.in.h:12
 msgid ""
 "Determines whether the use of popup and highlight frame should be disabled "
 "for window cycling."
 msgstr ""
 
-#: ../src/org.gnome.mutter.gschema.xml.in.h:13
+#: ../src/org.gnome.muffin.gschema.xml.in.h:13
 msgid "Delay focus changes until the pointer stops moving"
 msgstr ""
 
-#: ../src/org.gnome.mutter.gschema.xml.in.h:14
+#: ../src/org.gnome.muffin.gschema.xml.in.h:14
 msgid ""
 "If set to true, and the focus mode is either \"sloppy\" or \"mouse\" then "
 "the focus will not be changed immediately when entering a window, but only "
 "after the pointer stops moving."
 msgstr ""
 
-#: ../src/org.gnome.mutter.gschema.xml.in.h:15
+#: ../src/org.gnome.muffin.gschema.xml.in.h:15
 msgid "Draggable border width"
 msgstr "سۆرەشكە بولىدىغان گىرۋەكنىڭ كەڭلىكى"
 
-#: ../src/org.gnome.mutter.gschema.xml.in.h:16
+#: ../src/org.gnome.muffin.gschema.xml.in.h:16
 msgid ""
 "The amount of total draggable borders. If the theme's visible borders are "
 "not enough, invisible borders will be added to meet this value."
 msgstr "سۆرەشكە بولىدىغان گىرۋەكنىڭ كەڭلىكى. ئۆرنەكتە كۆرسىتىلىۋاتقان گىرۋەكنىڭ كەڭلىكى بۇنىڭدىن كىچىك بولسا، كۆرسەتكىلى بولمايدىغان گىرۋەككە مۇشۇ قىممەتكە ماس كېلىدىغان قىلىپ قىممەت قوشۇلىدۇ."
 
-#: ../src/org.gnome.mutter.gschema.xml.in.h:17
+#: ../src/org.gnome.muffin.gschema.xml.in.h:17
 msgid "Auto maximize nearly monitor sized windows"
 msgstr ""
 
-#: ../src/org.gnome.mutter.gschema.xml.in.h:18
+#: ../src/org.gnome.muffin.gschema.xml.in.h:18
 msgid ""
 "If enabled, new windows that are initially the size of the monitor "
 "automatically get maximized."
 msgstr ""
 
-#: ../src/org.gnome.mutter.gschema.xml.in.h:19
+#: ../src/org.gnome.muffin.gschema.xml.in.h:19
 msgid "Select window from tab popup"
 msgstr "سەكرەپ چىققان بەتكۈچتىن كۆزنەك تاللىسۇن"
 
-#: ../src/org.gnome.mutter.gschema.xml.in.h:20
+#: ../src/org.gnome.muffin.gschema.xml.in.h:20
 msgid "Cancel tab popup"
 msgstr "سەكرەپ چىققان بەتكۈچنى ئەمەلدىن قالدۇر"
 
-#: ../src/tools/mutter-message.c:123
+#: ../src/tools/muffin-message.c:123
 #, c-format
 msgid "Usage: %s\n"
 msgstr "ئىشلىتىش ئۇسۇلى: %s\n"

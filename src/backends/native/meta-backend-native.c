@@ -745,7 +745,7 @@ meta_backend_native_get_barrier_manager (MetaBackendNative *native)
 /**
  * meta_activate_session:
  *
- * Tells mutter to activate the session. When mutter is a
+ * Tells muffin to activate the session. When muffin is a
  * display server, this tells logind to switch over to
  * the new session.
  */

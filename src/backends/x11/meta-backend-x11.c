@@ -575,7 +575,7 @@ meta_backend_x11_post_init (MetaBackend *backend)
                     G_CALLBACK (on_monitors_changed), backend);
 
   priv->touch_replay_sync_atom = XInternAtom (priv->xdisplay,
-                                              "_MUTTER_TOUCH_SEQUENCE_SYNC",
+                                              "_MUFFIN_TOUCH_SEQUENCE_SYNC",
                                               False);
 
   clutter_backend = meta_backend_get_clutter_backend (backend);

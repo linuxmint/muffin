@@ -30,7 +30,7 @@
 #include "backends/meta-monitor-manager-private.h"
 #include "backends/meta-renderer-view.h"
 #include "core/util-private.h"
-#include "clutter/clutter-mutter.h"
+#include "clutter/clutter-muffin.h"
 #include "cogl/cogl.h"
 
 #define META_TYPE_RENDERER (meta_renderer_get_type ())

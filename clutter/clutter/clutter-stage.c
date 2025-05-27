@@ -67,7 +67,7 @@
 #include "clutter-main.h"
 #include "clutter-marshal.h"
 #include "clutter-master-clock.h"
-#include "clutter-mutter.h"
+#include "clutter-muffin.h"
 #include "clutter-paint-context-private.h"
 #include "clutter-paint-volume-private.h"
 #include "clutter-pick-context-private.h"
@@ -3212,7 +3212,7 @@ clutter_stage_new (void)
  * be used by applications.
  *
  * Since: 0.8
- * Deprecated: mutter: This function does not do anything.
+ * Deprecated: muffin: This function does not do anything.
  */
 void
 clutter_stage_ensure_current (ClutterStage *stage)

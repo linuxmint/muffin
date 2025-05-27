@@ -16,10 +16,10 @@
  * along with this program; if not, see <http://www.gnu.org/licenses/>.
  */
 
-/* This file is shared between mutter (src/core/meta-display-config-shared.h)
+/* This file is shared between muffin (src/core/meta-display-config-shared.h)
    and gnome-desktop (libgnome-desktop/meta-xrandr-shared.h).
 
-   The canonical place for all changes is mutter.
+   The canonical place for all changes is muffin.
 
    There should be no includes in this file.
 */

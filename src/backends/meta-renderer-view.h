@@ -19,7 +19,7 @@
 #define META_RENDERER_VIEW_H
 
 #include "backends/meta-monitor-manager-private.h"
-#include "clutter/clutter-mutter.h"
+#include "clutter/clutter-muffin.h"
 
 #define META_TYPE_RENDERER_VIEW (meta_renderer_view_get_type ())
 G_DECLARE_FINAL_TYPE (MetaRendererView, meta_renderer_view,

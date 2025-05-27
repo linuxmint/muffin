@@ -438,7 +438,7 @@ apply_edge_resistance (MetaWindow                *window,
                                    edge_resistance_timeout,
                                    resistance_data);
                   g_source_set_name_by_id (resistance_data->timeout_id,
-                                           "[mutter] edge_resistance_timeout");
+                                           "[muffin] edge_resistance_timeout");
                   resistance_data->timeout_setup = TRUE;
                   resistance_data->timeout_edge_pos = compare;
                   resistance_data->timeout_over = FALSE;

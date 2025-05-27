@@ -2,8 +2,8 @@
 # Yuras Shumovich <shumovichy@gmail.com>, 2017.
 msgid ""
 msgstr ""
-"Project-Id-Version: mutter.master\n"
-"Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/mutter/issues\n"
+"Project-Id-Version: muffin.master\n"
+"Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/muffin/issues\n"
 "POT-Creation-Date: 2018-07-07 09:58+0000\n"
 "PO-Revision-Date: 2018-09-06 18:47+0300\n"
 "Last-Translator: Yuras Shumovich <shumovichy@gmail.com>\n"
@@ -16,240 +16,240 @@ msgstr ""
 "%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
 "X-Generator: Poedit 2.1.1\n"
 
-#: data/50-mutter-navigation.xml:6
+#: data/50-muffin-navigation.xml:6
 msgid "Navigation"
 msgstr "Навігацыя"
 
-#: data/50-mutter-navigation.xml:9
+#: data/50-muffin-navigation.xml:9
 msgid "Move window to workspace 1"
 msgstr "Перамясціць акно ў прастору 1"
 
-#: data/50-mutter-navigation.xml:12
+#: data/50-muffin-navigation.xml:12
 msgid "Move window to workspace 2"
 msgstr "Перамясціць акно ў прастору 2"
 
-#: data/50-mutter-navigation.xml:15
+#: data/50-muffin-navigation.xml:15
 msgid "Move window to workspace 3"
 msgstr "Перамясціць акно ў прастору 3"
 
-#: data/50-mutter-navigation.xml:18
+#: data/50-muffin-navigation.xml:18
 msgid "Move window to workspace 4"
 msgstr "Перамясціць акно ў прастору 4"
 
-#: data/50-mutter-navigation.xml:21
+#: data/50-muffin-navigation.xml:21
 msgid "Move window to last workspace"
 msgstr "Перамясціць акно ў апошнюю прастору"
 
-#: data/50-mutter-navigation.xml:24
+#: data/50-muffin-navigation.xml:24
 msgid "Move window one workspace up"
 msgstr "Перамясціць акно ў прастору зверху ад дзейнай"
 
-#: data/50-mutter-navigation.xml:27
+#: data/50-muffin-navigation.xml:27
 msgid "Move window one workspace down"
 msgstr "Перамясціць акно ў прастору знізу ад дзейнай"
 
-#: data/50-mutter-navigation.xml:30
+#: data/50-muffin-navigation.xml:30
 msgid "Move window one monitor to the left"
 msgstr "Перамясціць акно на манітор злева ад дзейнага"
 
-#: data/50-mutter-navigation.xml:33
+#: data/50-muffin-navigation.xml:33
 msgid "Move window one monitor to the right"
 msgstr "Перамясціць акно на манітор справа ад дзейнага"
 
-#: data/50-mutter-navigation.xml:36
+#: data/50-muffin-navigation.xml:36
 msgid "Move window one monitor up"
 msgstr "Перамясціць акно на манітор зверху ад дзейнага"
 
-#: data/50-mutter-navigation.xml:39
+#: data/50-muffin-navigation.xml:39
 msgid "Move window one monitor down"
 msgstr "Перамясціць акно на манітор знізу ад дзейнага"
 
-#: data/50-mutter-navigation.xml:43
+#: data/50-muffin-navigation.xml:43
 msgid "Switch applications"
 msgstr "Пераключэнне праграм"
 
-#: data/50-mutter-navigation.xml:48
+#: data/50-muffin-navigation.xml:48
 msgid "Switch to previous application"
 msgstr "Пераключыць на папярэднюю праграму"
 
-#: data/50-mutter-navigation.xml:52
+#: data/50-muffin-navigation.xml:52
 msgid "Switch windows"
 msgstr "Пераключэнне вокнаў"
 
-#: data/50-mutter-navigation.xml:57
+#: data/50-muffin-navigation.xml:57
 msgid "Switch to previous window"
 msgstr "Перайсці на папярэдняе акно"
 
-#: data/50-mutter-navigation.xml:61
+#: data/50-muffin-navigation.xml:61
 msgid "Switch windows of an application"
 msgstr "Пераключэнне вокнаў праграмы"
 
-#: data/50-mutter-navigation.xml:66
+#: data/50-muffin-navigation.xml:66
 msgid "Switch to previous window of an application"
 msgstr "Перайсці на папярэдняе акно праграмы"
 
-#: data/50-mutter-navigation.xml:70
+#: data/50-muffin-navigation.xml:70
 msgid "Switch system controls"
 msgstr "Пераключэнне паміж сістэмнымі элементамі кіравання"
 
-#: data/50-mutter-navigation.xml:75
+#: data/50-muffin-navigation.xml:75
 msgid "Switch to previous system control"
 msgstr "Пераключыць на папярэдні сістэмны элемент кіравання"
 
-#: data/50-mutter-navigation.xml:79
+#: data/50-muffin-navigation.xml:79
 msgid "Switch windows directly"
 msgstr "Непасрэднае пераключэнне вокнаў"
 
-#: data/50-mutter-navigation.xml:84
+#: data/50-muffin-navigation.xml:84
 msgid "Switch directly to previous window"
 msgstr "Перайсці непасрэдна на папярэдняе акно"
 
-#: data/50-mutter-navigation.xml:88
+#: data/50-muffin-navigation.xml:88
 msgid "Switch windows of an app directly"
 msgstr "Непасрэднае пераключэнне вокнаў праграмы"
 
-#: data/50-mutter-navigation.xml:93
+#: data/50-muffin-navigation.xml:93
 msgid "Switch directly to previous window of an app"
 msgstr "Перайсці непасрэдна на папярэдняе акно праграмы"
 
-#: data/50-mutter-navigation.xml:97
+#: data/50-muffin-navigation.xml:97
 msgid "Switch system controls directly"
 msgstr "Непасрэднае пераключэнне паміж сістэмнымі элементамі кіравання"
 
-#: data/50-mutter-navigation.xml:102
+#: data/50-muffin-navigation.xml:102
 msgid "Switch directly to previous system control"
 msgstr "Перайсці непасрэдна на папярэдні сістэмны элемент кіравання"
 
-#: data/50-mutter-navigation.xml:105
+#: data/50-muffin-navigation.xml:105
 msgid "Hide all normal windows"
 msgstr "Схаваць усе звычайныя вокны"
 
-#: data/50-mutter-navigation.xml:108
+#: data/50-muffin-navigation.xml:108
 msgid "Switch to workspace 1"
 msgstr "Перайсці ў прастору працы 1"
 
-#: data/50-mutter-navigation.xml:111
+#: data/50-muffin-navigation.xml:111
 msgid "Switch to workspace 2"
 msgstr "Перайсці ў прастору працы 2"
 
-#: data/50-mutter-navigation.xml:114
+#: data/50-muffin-navigation.xml:114
 msgid "Switch to workspace 3"
 msgstr "Перайсці ў прастору працы 3"
 
-#: data/50-mutter-navigation.xml:117
+#: data/50-muffin-navigation.xml:117
 msgid "Switch to workspace 4"
 msgstr "Перайсці ў прастору працы 4"
 
-#: data/50-mutter-navigation.xml:120
+#: data/50-muffin-navigation.xml:120
 msgid "Switch to last workspace"
 msgstr "Перайсці ў апошнюю прастору працы"
 
-#: data/50-mutter-navigation.xml:123
+#: data/50-muffin-navigation.xml:123
 msgid "Move to workspace above"
 msgstr "Перамясціць на прастору працы зверху"
 
-#: data/50-mutter-navigation.xml:126
+#: data/50-muffin-navigation.xml:126
 msgid "Move to workspace below"
 msgstr "Перамясціць на прастору працы знізу"
 
-#: data/50-mutter-system.xml:6 data/50-mutter-wayland.xml:6
+#: data/50-muffin-system.xml:6 data/50-muffin-wayland.xml:6
 msgid "System"
 msgstr "Сістэма"
 
-#: data/50-mutter-system.xml:8
+#: data/50-muffin-system.xml:8
 msgid "Show the run command prompt"
 msgstr "Паказаць акенца для выканання загаду"
 
-#: data/50-mutter-system.xml:10
+#: data/50-muffin-system.xml:10
 msgid "Show the activities overview"
 msgstr "Паказаць агляд дзейнасцяў"
 
-#: data/50-mutter-wayland.xml:8
+#: data/50-muffin-wayland.xml:8
 msgid "Restore the keyboard shortcuts"
 msgstr "Аднавіць клавіятурныя скароты"
 
-#: data/50-mutter-windows.xml:6
+#: data/50-muffin-windows.xml:6
 msgid "Windows"
 msgstr "Вокны"
 
-#: data/50-mutter-windows.xml:8
+#: data/50-muffin-windows.xml:8
 msgid "Activate the window menu"
 msgstr "Адкрыць меню акна"
 
-#: data/50-mutter-windows.xml:10
+#: data/50-muffin-windows.xml:10
 msgid "Toggle fullscreen mode"
 msgstr "Перамяніць рэжым \"на ўвесь экран\""
 
-#: data/50-mutter-windows.xml:12
+#: data/50-muffin-windows.xml:12
 msgid "Toggle maximization state"
 msgstr "Перамяніць максімалізацыю акна"
 
-#: data/50-mutter-windows.xml:14
+#: data/50-muffin-windows.xml:14
 msgid "Maximize window"
 msgstr "Максімалізаваць акно"
 
-#: data/50-mutter-windows.xml:16
+#: data/50-muffin-windows.xml:16
 msgid "Restore window"
 msgstr "Аднавіць былы памер акна"
 
-#: data/50-mutter-windows.xml:18
+#: data/50-muffin-windows.xml:18
 msgid "Close window"
 msgstr "Закрыць акно"
 
-#: data/50-mutter-windows.xml:20
+#: data/50-muffin-windows.xml:20
 msgid "Hide window"
 msgstr "Схаваць акно"
 
-#: data/50-mutter-windows.xml:22
+#: data/50-muffin-windows.xml:22
 msgid "Move window"
 msgstr "Перамясціць акно"
 
-#: data/50-mutter-windows.xml:24
+#: data/50-muffin-windows.xml:24
 msgid "Resize window"
 msgstr "Змяніць памер акна"
 
-#: data/50-mutter-windows.xml:27
+#: data/50-muffin-windows.xml:27
 msgid "Toggle window on all workspaces or one"
 msgstr "Перамяніць, ці бачнае акно на ўсіх прасторах працы"
 
-#: data/50-mutter-windows.xml:29
+#: data/50-muffin-windows.xml:29
 msgid "Raise window if covered, otherwise lower it"
 msgstr "Узняць акно, калі яно закрыта іншымі вокнамі, іначай апусціць яго"
 
-#: data/50-mutter-windows.xml:31
+#: data/50-muffin-windows.xml:31
 msgid "Raise window above other windows"
 msgstr "Узняць акно над астатнімі"
 
-#: data/50-mutter-windows.xml:33
+#: data/50-muffin-windows.xml:33
 msgid "Lower window below other windows"
 msgstr "Апусціць акно пад астатнія"
 
-#: data/50-mutter-windows.xml:35
+#: data/50-muffin-windows.xml:35
 msgid "Maximize window vertically"
 msgstr "Вертыкальна максімалізаваць акно"
 
-#: data/50-mutter-windows.xml:37
+#: data/50-muffin-windows.xml:37
 msgid "Maximize window horizontally"
 msgstr "Гарызантальна максімалізаваць акно"
 
-#: data/50-mutter-windows.xml:41
+#: data/50-muffin-windows.xml:41
 msgid "View split on left"
 msgstr "Падзяліць прагляд злева"
 
-#: data/50-mutter-windows.xml:45
+#: data/50-muffin-windows.xml:45
 msgid "View split on right"
 msgstr "Падзяліць прагляд справа"
 
-#: data/mutter.desktop.in:4
+#: data/muffin.desktop.in:4
 msgid "Mutter"
 msgstr "Mutter"
 
-#: data/org.gnome.mutter.gschema.xml.in:7
+#: data/org.gnome.muffin.gschema.xml.in:7
 msgid "Modifier to use for extended window management operations"
 msgstr ""
 "Клавіша-мадыфікатар для доступу да пашыраных аперацый кіравання вокнамі"
 
-#: data/org.gnome.mutter.gschema.xml.in:8
+#: data/org.gnome.muffin.gschema.xml.in:8
 msgid ""
 "This key will initiate the “overlay”, which is a combination window overview "
 "and application launching system. The default is intended to be the “Windows "
@@ -261,11 +261,11 @@ msgstr ""
 "- гэта клавіша \"Windows\" на PC-камп'ютары. Чакаецца, што гэты скарот будзе "
 "або прадвызначаным значэннем, або пустым тэкставым ланцужком."
 
-#: data/org.gnome.mutter.gschema.xml.in:20
+#: data/org.gnome.muffin.gschema.xml.in:20
 msgid "Attach modal dialogs"
 msgstr "Прычапляць мадальныя дыялогавыя акенцы"
 
-#: data/org.gnome.mutter.gschema.xml.in:21
+#: data/org.gnome.muffin.gschema.xml.in:21
 msgid ""
 "When true, instead of having independent titlebars, modal dialogs appear "
 "attached to the titlebar of the parent window and are moved together with "
@@ -275,11 +275,11 @@ msgstr ""
 "акенцы будуць прычэплівацца да загалоўных стужак галоўных вокнаў і "
 "перасоўвацца разам з імі."
 
-#: data/org.gnome.mutter.gschema.xml.in:30
+#: data/org.gnome.muffin.gschema.xml.in:30
 msgid "Enable edge tiling when dropping windows on screen edges"
 msgstr "Уключыць кафляванне пры перацягванні вокнаў на бераг экрана"
 
-#: data/org.gnome.mutter.gschema.xml.in:31
+#: data/org.gnome.muffin.gschema.xml.in:31
 msgid ""
 "If enabled, dropping windows on vertical screen edges maximizes them "
 "vertically and resizes them horizontally to cover half of the available "
@@ -290,11 +290,11 @@ msgstr ""
 "закрывалі палову наяўнага месца. Перацягванне вокнаў на верхні бераг экрана "
 "максімалізуе іх ва ўсіх накірунках."
 
-#: data/org.gnome.mutter.gschema.xml.in:40
+#: data/org.gnome.muffin.gschema.xml.in:40
 msgid "Workspaces are managed dynamically"
 msgstr "Дынамічнае кіраванне прасторамі працы"
 
-#: data/org.gnome.mutter.gschema.xml.in:41
+#: data/org.gnome.muffin.gschema.xml.in:41
 msgid ""
 "Determines whether workspaces are managed dynamically or whether there’s a "
 "static number of workspaces (determined by the num-workspaces key in org."
@@ -304,11 +304,11 @@ msgstr ""
 "проста ўжыць іх нязменную колькасць (канкрэтнае значэнне вызначаецца ключом "
 "num-workspaces у org.gnome.desktop.wm.preferences)."
 
-#: data/org.gnome.mutter.gschema.xml.in:50
+#: data/org.gnome.muffin.gschema.xml.in:50
 msgid "Workspaces only on primary"
 msgstr "Працоўныя прасторы толькі на галоўным экране"
 
-#: data/org.gnome.mutter.gschema.xml.in:51
+#: data/org.gnome.muffin.gschema.xml.in:51
 msgid ""
 "Determines whether workspace switching should happen for windows on all "
 "monitors or only for windows on the primary monitor."
@@ -316,11 +316,11 @@ msgstr ""
 "Вызначае, ці трэба пераменьваць прасторы працы для вокнаў на ўсіх маніторах "
 "або толькі на першым."
 
-#: data/org.gnome.mutter.gschema.xml.in:59
+#: data/org.gnome.muffin.gschema.xml.in:59
 msgid "No tab popup"
 msgstr "Няма выплыўнога акенца"
 
-#: data/org.gnome.mutter.gschema.xml.in:60
+#: data/org.gnome.muffin.gschema.xml.in:60
 msgid ""
 "Determines whether the use of popup and highlight frame should be disabled "
 "for window cycling."
@@ -328,11 +328,11 @@ msgstr ""
 "Вызначае, ці трэба выключыць выплыўную рамку з падсветкай для пракручвання "
 "спіса вокнаў."
 
-#: data/org.gnome.mutter.gschema.xml.in:68
+#: data/org.gnome.muffin.gschema.xml.in:68
 msgid "Delay focus changes until the pointer stops moving"
 msgstr "Затрымліваць змяненне фокусу да спынення паказальніка мышы"
 
-#: data/org.gnome.mutter.gschema.xml.in:69
+#: data/org.gnome.muffin.gschema.xml.in:69
 msgid ""
 "If set to true, and the focus mode is either “sloppy” or “mouse” then the "
 "focus will not be changed immediately when entering a window, but only after "
@@ -342,11 +342,11 @@ msgstr ""
 "будзе пераключацца паміж вокнамі імгненна, але толькі пасля спынення "
 "паказальніка мышы."
 
-#: data/org.gnome.mutter.gschema.xml.in:79
+#: data/org.gnome.muffin.gschema.xml.in:79
 msgid "Draggable border width"
 msgstr "Шырыня аблямоўкі для перацягвання"
 
-#: data/org.gnome.mutter.gschema.xml.in:80
+#: data/org.gnome.muffin.gschema.xml.in:80
 msgid ""
 "The amount of total draggable borders. If the theme’s visible borders are "
 "not enough, invisible borders will be added to meet this value."
@@ -354,12 +354,12 @@ msgstr ""
 "Памер аблямоўкі для перацягвання. Калі бачнай аблямоўкі матыву недастаткова, "
 "будуць дададзена нябачная рамка, каб задаволіць гэту настройку."
 
-#: data/org.gnome.mutter.gschema.xml.in:89
+#: data/org.gnome.muffin.gschema.xml.in:89
 msgid "Auto maximize nearly monitor sized windows"
 msgstr ""
 "Аўтаматычна максімалізаваць вокны, якія расцягнутыя амаль на ўвесь экран"
 
-#: data/org.gnome.mutter.gschema.xml.in:90
+#: data/org.gnome.muffin.gschema.xml.in:90
 msgid ""
 "If enabled, new windows that are initially the size of the monitor "
 "automatically get maximized."
@@ -367,11 +367,11 @@ msgstr ""
 "Калі ўключана, новыя вокны з памерам, блізкім да памераў манітора, будуць "
 "аўтаматычна максімалізавацца."
 
-#: data/org.gnome.mutter.gschema.xml.in:98
+#: data/org.gnome.muffin.gschema.xml.in:98
 msgid "Place new windows in the center"
 msgstr "Змяшчаць новыя вокны ў цэнтры"
 
-#: data/org.gnome.mutter.gschema.xml.in:99
+#: data/org.gnome.muffin.gschema.xml.in:99
 msgid ""
 "When true, the new windows will always be put in the center of the active "
 "screen of the monitor."
@@ -379,18 +379,18 @@ msgstr ""
 "Калі ўключана, новыя вокны будуць заўсёды з'яўляцца пасярэдзіне дзейнага "
 "манітора."
 
-#: data/org.gnome.mutter.gschema.xml.in:107
+#: data/org.gnome.muffin.gschema.xml.in:107
 msgid "Enable experimental features"
 msgstr "Уключыць эксперыментальныя функцыі"
 
-#: data/org.gnome.mutter.gschema.xml.in:108
+#: data/org.gnome.muffin.gschema.xml.in:108
 msgid ""
 "To enable experimental features, add the feature keyword to the list. "
 "Whether the feature requires restarting the compositor depends on the given "
 "feature. Any experimental feature is not required to still be available, or "
 "configurable. Don’t expect adding anything in this setting to be future "
 "proof. Currently possible keywords: • “scale-monitor-framebuffer” — makes "
-"mutter default to layout logical monitors in a logical pixel coordinate "
+"muffin default to layout logical monitors in a logical pixel coordinate "
 "space, while scaling monitor framebuffers instead of window content, to "
 "manage HiDPI monitors. Does not require a restart."
 msgstr ""
@@ -398,84 +398,84 @@ msgstr ""
 "гэты ліст. Некаторыя функцыі могуць патрабаваць перазапуску кампазітара. "
 "Эксперыментальны функцыі могуць быць недаступныя. Не чакайце, што функцыі, "
 "дададзеныя ў гэты спіс, будуць працаваць і далей. Магчымыя ключавыя словы: • "
-"\"scale-monitor-framebuffer\" - прымушае mutter прадвызначана размяшчаць "
+"\"scale-monitor-framebuffer\" - прымушае muffin прадвызначана размяшчаць "
 "лагічныя маніторы ў лагічнай прасторы каардынат пікселаў, пры гэтым "
 "маштабаваць кадравы буфер, а не змесціва акна, для падтрымкі HiDPI "
 "манітораў. Не патрабуе перазапуску."
 
-#: data/org.gnome.mutter.gschema.xml.in:141
+#: data/org.gnome.muffin.gschema.xml.in:141
 msgid "Select window from tab popup"
 msgstr "Выбраць акно з выплыўнога акенца"
 
-#: data/org.gnome.mutter.gschema.xml.in:146
+#: data/org.gnome.muffin.gschema.xml.in:146
 msgid "Cancel tab popup"
 msgstr "Закрыць выплыўное акенца"
 
-#: data/org.gnome.mutter.gschema.xml.in:151
+#: data/org.gnome.muffin.gschema.xml.in:151
 msgid "Switch monitor configurations"
 msgstr "Пераключыць канфігурацыі манітора"
 
-#: data/org.gnome.mutter.gschema.xml.in:156
+#: data/org.gnome.muffin.gschema.xml.in:156
 msgid "Rotates the built-in monitor configuration"
 msgstr "Паварочвае убудаваны манітор"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:6
+#: data/org.gnome.muffin.wayland.gschema.xml.in:6
 msgid "Switch to VT 1"
 msgstr "Перайсці ў віртуальны тэрмінал 1"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:10
+#: data/org.gnome.muffin.wayland.gschema.xml.in:10
 msgid "Switch to VT 2"
 msgstr "Перайсці ў віртуальны тэрмінал 2"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:14
+#: data/org.gnome.muffin.wayland.gschema.xml.in:14
 msgid "Switch to VT 3"
 msgstr "Перайсці ў віртуальны тэрмінал 3"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:18
+#: data/org.gnome.muffin.wayland.gschema.xml.in:18
 msgid "Switch to VT 4"
 msgstr "Перайсці ў віртуальны тэрмінал 4"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:22
+#: data/org.gnome.muffin.wayland.gschema.xml.in:22
 msgid "Switch to VT 5"
 msgstr "Перайсці ў віртуальны тэрмінал 5"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:26
+#: data/org.gnome.muffin.wayland.gschema.xml.in:26
 msgid "Switch to VT 6"
 msgstr "Перайсці ў віртуальны тэрмінал 6"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:30
+#: data/org.gnome.muffin.wayland.gschema.xml.in:30
 msgid "Switch to VT 7"
 msgstr "Перайсці ў віртуальны тэрмінал 7"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:34
+#: data/org.gnome.muffin.wayland.gschema.xml.in:34
 msgid "Switch to VT 8"
 msgstr "Перайсці ў віртуальны тэрмінал 8"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:38
+#: data/org.gnome.muffin.wayland.gschema.xml.in:38
 msgid "Switch to VT 9"
 msgstr "Перайсці ў віртуальны тэрмінал 9"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:42
+#: data/org.gnome.muffin.wayland.gschema.xml.in:42
 msgid "Switch to VT 10"
 msgstr "Перайсці ў віртуальны тэрмінал 10"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:46
+#: data/org.gnome.muffin.wayland.gschema.xml.in:46
 msgid "Switch to VT 11"
 msgstr "Перайсці ў віртуальны тэрмінал 11"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:50
+#: data/org.gnome.muffin.wayland.gschema.xml.in:50
 msgid "Switch to VT 12"
 msgstr "Перайсці ў віртуальны тэрмінал 12"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:54
+#: data/org.gnome.muffin.wayland.gschema.xml.in:54
 msgid "Re-enable shortcuts"
 msgstr "Уключыць назад клавіятурныя скароты"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:64
+#: data/org.gnome.muffin.wayland.gschema.xml.in:64
 msgid "Allow grabs with Xwayland"
 msgstr "Дазволіць захоп клавіятуры з Xwayland"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:65
+#: data/org.gnome.muffin.wayland.gschema.xml.in:65
 msgid ""
 "Allow keyboard grabs issued by X11 applications running in Xwayland to be "
 "taken into account. For a X11 grab to be taken into account under Wayland, "
@@ -488,11 +488,11 @@ msgstr ""
 "даслаць адпаведнае X11 паведамленне ClientMessage каранёваму акну, ці быць "
 "сярод дазволеных дастасаванняў у \"xwayland-grab-access-rules\"."
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:77
+#: data/org.gnome.muffin.wayland.gschema.xml.in:77
 msgid "Xwayland applications allowed to issue keyboard grabs"
 msgstr "Xwayland дастасаванні, якім дазволена захапляць клавіятуру"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:78
+#: data/org.gnome.muffin.wayland.gschema.xml.in:78
 msgid ""
 "List the resource names or resource class of X11 windows either allowed or "
 "not allowed to issue X11 keyboard grabs under Xwayland. The resource name or "
@@ -636,27 +636,27 @@ msgstr "_Змусіць да выхаду"
 msgid "_Wait"
 msgstr "_Пачакаць"
 
-#: src/core/mutter.c:39
+#: src/core/muffin.c:39
 #, c-format
 msgid ""
-"mutter %s\n"
+"muffin %s\n"
 "Copyright © 2001-%d Havoc Pennington, Red Hat, Inc., and others\n"
 "This is free software; see the source for copying conditions.\n"
 "There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A "
 "PARTICULAR PURPOSE.\n"
 msgstr ""
-"mutter %s\n"
+"muffin %s\n"
 "Аўтарскія правы (C) 2001-%d Havoc Pennington, Red Hat, Inc. і інш.\n"
 "Гэта свабоднае апраграмаванне. Умовы яго капіравання глядзіце ў выточным "
 "кодзе праграмы.\n"
 "Аўтары не даюць ніякіх гарантый, у тым ліку камерцыйнай вартасці праграмы і "
 "наогул яе карысці.\n"
 
-#: src/core/mutter.c:53
+#: src/core/muffin.c:53
 msgid "Print version"
 msgstr "Вывесці нумар версіі праграмы"
 
-#: src/core/mutter.c:59
+#: src/core/muffin.c:59
 msgid "Mutter plugin to use"
 msgstr "Патрэбны плугін Mutter"
 
@@ -808,9 +808,9 @@ msgstr "%s (на %s)"
 #~ msgid "Failed to parse saved session file: %s\n"
 #~ msgstr "Не ўдалося разабраць захаваны файл сеанса: %s\n"
 
-#~ msgid "<mutter_session> attribute seen but we already have the session ID"
+#~ msgid "<muffin_session> attribute seen but we already have the session ID"
 #~ msgstr ""
-#~ "сустрэты атрыбут <mutter_session>, але мы ўжо маем ідэнтыфікатар сеанса"
+#~ "сустрэты атрыбут <muffin_session>, але мы ўжо маем ідэнтыфікатар сеанса"
 
 #~ msgid "Unknown attribute %s on <%s> element"
 #~ msgstr "Элемент <%2$s> мае невядомы атрыбут %1$s"
