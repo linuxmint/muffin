@@ -879,6 +879,18 @@ meta_wayland_keyboard_create_new_resource (MetaWaylandKeyboard *keyboard,
 }
 
 gboolean
+meta_wayland_keyboard_can_grab_surface (MetaWaylandKeyboard *keyboard,
+                                        MetaWaylandSurface  *surface,
+                                        uint32_t             serial)
+{
+  if (keyboard->focus_surface != surface)
+    return FALSE;
+
+  return (keyboard->focus_serial == serial ||
+          meta_wayland_keyboard_can_popup (keyboard, serial));
+}
+
+gboolean
 meta_wayland_keyboard_can_popup (MetaWaylandKeyboard *keyboard,
                                  uint32_t             serial)
 {
