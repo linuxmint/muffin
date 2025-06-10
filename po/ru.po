@@ -15,7 +15,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: metacity ru\n"
 "Report-Msgid-Bugs-To: https://bugzilla.gnome.org/enter_bug.cgi?"
-"product=mutter&keywords=I18N+L10N&component=general\n"
+"product=muffin&keywords=I18N+L10N&component=general\n"
 "POT-Creation-Date: 2017-02-28 06:20+0000\n"
 "PO-Revision-Date: 2017-03-18 10:56+0400\n"
 "Last-Translator: Yuri Myasoedov <ymyasoedov@yandex.ru>\n"
@@ -28,256 +28,256 @@ msgstr ""
 "%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 "X-Generator: Poedit 1.8.7.1\n"
 
-#: data/50-mutter-navigation.xml:6
+#: data/50-muffin-navigation.xml:6
 msgid "Navigation"
 msgstr "Перемещение"
 
-#: data/50-mutter-navigation.xml:9
+#: data/50-muffin-navigation.xml:9
 msgid "Move window to workspace 1"
 msgstr "Переместить окно на рабочее место 1"
 
-#: data/50-mutter-navigation.xml:12
+#: data/50-muffin-navigation.xml:12
 msgid "Move window to workspace 2"
 msgstr "Переместить окно на рабочее место 2"
 
-#: data/50-mutter-navigation.xml:15
+#: data/50-muffin-navigation.xml:15
 msgid "Move window to workspace 3"
 msgstr "Переместить окно на рабочее место 3"
 
-#: data/50-mutter-navigation.xml:18
+#: data/50-muffin-navigation.xml:18
 msgid "Move window to workspace 4"
 msgstr "Переместить окно на рабочее место 4"
 
-#: data/50-mutter-navigation.xml:21
+#: data/50-muffin-navigation.xml:21
 msgid "Move window to last workspace"
 msgstr "Переместить окно на последнее рабочее место"
 
-#: data/50-mutter-navigation.xml:24
+#: data/50-muffin-navigation.xml:24
 msgid "Move window one workspace to the left"
 msgstr "Переместить окно на одно рабочее место влево"
 
-#: data/50-mutter-navigation.xml:27
+#: data/50-muffin-navigation.xml:27
 msgid "Move window one workspace to the right"
 msgstr "Переместить окно на одно рабочее место вправо"
 
-#: data/50-mutter-navigation.xml:30
+#: data/50-muffin-navigation.xml:30
 msgid "Move window one workspace up"
 msgstr "Переместить окно на одно рабочее место вверх"
 
-#: data/50-mutter-navigation.xml:33
+#: data/50-muffin-navigation.xml:33
 msgid "Move window one workspace down"
 msgstr "Переместить окно на одно рабочее место вниз"
 
-#: data/50-mutter-navigation.xml:36
+#: data/50-muffin-navigation.xml:36
 msgid "Move window one monitor to the left"
 msgstr "Переместить окно на один монитор влево"
 
-#: data/50-mutter-navigation.xml:39
+#: data/50-muffin-navigation.xml:39
 msgid "Move window one monitor to the right"
 msgstr "Переместить окно на один монитор вправо"
 
-#: data/50-mutter-navigation.xml:42
+#: data/50-muffin-navigation.xml:42
 msgid "Move window one monitor up"
 msgstr "Переместить окно на один монитор вверх"
 
-#: data/50-mutter-navigation.xml:45
+#: data/50-muffin-navigation.xml:45
 msgid "Move window one monitor down"
 msgstr "Переместить окно на один монитор вниз"
 
-#: data/50-mutter-navigation.xml:49
+#: data/50-muffin-navigation.xml:49
 msgid "Switch applications"
 msgstr "Переключить приложения"
 
-#: data/50-mutter-navigation.xml:54
+#: data/50-muffin-navigation.xml:54
 msgid "Switch to previous application"
 msgstr "Переключить на предыдущее приложение"
 
-#: data/50-mutter-navigation.xml:58
+#: data/50-muffin-navigation.xml:58
 msgid "Switch windows"
 msgstr "Переключить окна"
 
-#: data/50-mutter-navigation.xml:63
+#: data/50-muffin-navigation.xml:63
 msgid "Switch to previous window"
 msgstr "Переключить на предыдущее окно"
 
-#: data/50-mutter-navigation.xml:67
+#: data/50-muffin-navigation.xml:67
 msgid "Switch windows of an application"
 msgstr "Переключить окна приложения"
 
-#: data/50-mutter-navigation.xml:72
+#: data/50-muffin-navigation.xml:72
 msgid "Switch to previous window of an application"
 msgstr "Переключить на окно приложения"
 
-#: data/50-mutter-navigation.xml:76
+#: data/50-muffin-navigation.xml:76
 msgid "Switch system controls"
 msgstr "Переключить элементы управления"
 
-#: data/50-mutter-navigation.xml:81
+#: data/50-muffin-navigation.xml:81
 msgid "Switch to previous system control"
 msgstr "Переключить на предыдущий элемент управления"
 
-#: data/50-mutter-navigation.xml:85
+#: data/50-muffin-navigation.xml:85
 msgid "Switch windows directly"
 msgstr "Немедленно переключить окна"
 
-#: data/50-mutter-navigation.xml:90
+#: data/50-muffin-navigation.xml:90
 msgid "Switch directly to previous window"
 msgstr "Немедленно переключить на предыдущее окно"
 
-#: data/50-mutter-navigation.xml:94
+#: data/50-muffin-navigation.xml:94
 msgid "Switch windows of an app directly"
 msgstr "Немедленно переключить окна приложения"
 
-#: data/50-mutter-navigation.xml:99
+#: data/50-muffin-navigation.xml:99
 msgid "Switch directly to previous window of an app"
 msgstr "Немедленно переключить на предыдущее окно приложения"
 
-#: data/50-mutter-navigation.xml:103
+#: data/50-muffin-navigation.xml:103
 msgid "Switch system controls directly"
 msgstr "Немедленно переключить элементы управления"
 
-#: data/50-mutter-navigation.xml:108
+#: data/50-muffin-navigation.xml:108
 msgid "Switch directly to previous system control"
 msgstr "Немедленно переключить на предыдущий элемент управления"
 
-#: data/50-mutter-navigation.xml:111
+#: data/50-muffin-navigation.xml:111
 msgid "Hide all normal windows"
 msgstr "Скрыть все обычные окна"
 
-#: data/50-mutter-navigation.xml:114
+#: data/50-muffin-navigation.xml:114
 msgid "Switch to workspace 1"
 msgstr "Переключиться на рабочее место 1"
 
-#: data/50-mutter-navigation.xml:117
+#: data/50-muffin-navigation.xml:117
 msgid "Switch to workspace 2"
 msgstr "Переключиться на рабочее место 2"
 
-#: data/50-mutter-navigation.xml:120
+#: data/50-muffin-navigation.xml:120
 msgid "Switch to workspace 3"
 msgstr "Переключиться на рабочее место 3"
 
-#: data/50-mutter-navigation.xml:123
+#: data/50-muffin-navigation.xml:123
 msgid "Switch to workspace 4"
 msgstr "Переключиться на рабочее место 4"
 
-#: data/50-mutter-navigation.xml:126
+#: data/50-muffin-navigation.xml:126
 msgid "Switch to last workspace"
 msgstr "Переключиться на последнее рабочее место"
 
-#: data/50-mutter-navigation.xml:129
+#: data/50-muffin-navigation.xml:129
 msgid "Move to workspace left"
 msgstr "Переместить на рабочее место влево"
 
-#: data/50-mutter-navigation.xml:132
+#: data/50-muffin-navigation.xml:132
 msgid "Move to workspace right"
 msgstr "Переместить на рабочее место вправо"
 
-#: data/50-mutter-navigation.xml:135
+#: data/50-muffin-navigation.xml:135
 msgid "Move to workspace above"
 msgstr "Переместить на рабочее место вверх"
 
-#: data/50-mutter-navigation.xml:138
+#: data/50-muffin-navigation.xml:138
 msgid "Move to workspace below"
 msgstr "Переместить на рабочее место вниз"
 
-#: data/50-mutter-system.xml:6
+#: data/50-muffin-system.xml:6
 msgid "System"
 msgstr "Система"
 
-#: data/50-mutter-system.xml:8
+#: data/50-muffin-system.xml:8
 msgid "Show the run command prompt"
 msgstr "Показать командную строку"
 
-#: data/50-mutter-system.xml:10
+#: data/50-muffin-system.xml:10
 msgid "Show the activities overview"
 msgstr "Открыть обзор"
 
-#: data/50-mutter-windows.xml:6
+#: data/50-muffin-windows.xml:6
 msgid "Windows"
 msgstr "Окна"
 
-#: data/50-mutter-windows.xml:8
+#: data/50-muffin-windows.xml:8
 msgid "Activate the window menu"
 msgstr "Активировать меню окна"
 
-#: data/50-mutter-windows.xml:10
+#: data/50-muffin-windows.xml:10
 msgid "Toggle fullscreen mode"
 msgstr "Переключить полноэкранный режим"
 
-#: data/50-mutter-windows.xml:12
+#: data/50-muffin-windows.xml:12
 msgid "Toggle maximization state"
 msgstr "Переключить состояние развёрнутости на весь экран"
 
-#: data/50-mutter-windows.xml:14
+#: data/50-muffin-windows.xml:14
 msgid "Maximize window"
 msgstr "Развернуть окно на весь экран"
 
-#: data/50-mutter-windows.xml:16
+#: data/50-muffin-windows.xml:16
 msgid "Restore window"
 msgstr "Восстановить окно"
 
-#: data/50-mutter-windows.xml:18
+#: data/50-muffin-windows.xml:18
 msgid "Toggle shaded state"
 msgstr "Переключить затенённое состояние"
 
-#: data/50-mutter-windows.xml:20
+#: data/50-muffin-windows.xml:20
 msgid "Close window"
 msgstr "Закрыть окно"
 
-#: data/50-mutter-windows.xml:22
+#: data/50-muffin-windows.xml:22
 msgid "Hide window"
 msgstr "Скрыть окно"
 
-#: data/50-mutter-windows.xml:24
+#: data/50-muffin-windows.xml:24
 msgid "Move window"
 msgstr "Переместить окно"
 
-#: data/50-mutter-windows.xml:26
+#: data/50-muffin-windows.xml:26
 msgid "Resize window"
 msgstr "Изменить размер окна"
 
-#: data/50-mutter-windows.xml:29
+#: data/50-muffin-windows.xml:29
 msgid "Toggle window on all workspaces or one"
 msgstr "Переключить окно на все рабочие места или на одно"
 
-#: data/50-mutter-windows.xml:31
+#: data/50-muffin-windows.xml:31
 msgid "Raise window if covered, otherwise lower it"
 msgstr "Поднять окно, если оно закрыто другими окнами, иначе — опустить его"
 
-#: data/50-mutter-windows.xml:33
+#: data/50-muffin-windows.xml:33
 msgid "Raise window above other windows"
 msgstr "Поместить окно поверх всех окон"
 
-#: data/50-mutter-windows.xml:35
+#: data/50-muffin-windows.xml:35
 msgid "Lower window below other windows"
 msgstr "Поместить окно под другими окнами"
 
-#: data/50-mutter-windows.xml:37
+#: data/50-muffin-windows.xml:37
 msgid "Maximize window vertically"
 msgstr "Развернуть окно на весь экран вертикально"
 
-#: data/50-mutter-windows.xml:39
+#: data/50-muffin-windows.xml:39
 msgid "Maximize window horizontally"
 msgstr "Развернуть окно на весь экран горизонтально"
 
-#: data/50-mutter-windows.xml:43
+#: data/50-muffin-windows.xml:43
 msgid "View split on left"
 msgstr "Разделитель слева"
 
-#: data/50-mutter-windows.xml:47
+#: data/50-muffin-windows.xml:47
 msgid "View split on right"
 msgstr "Разделитель справа"
 
-#: data/mutter.desktop.in:4
+#: data/muffin.desktop.in:4
 msgid "Mutter"
 msgstr "Mutter"
 
-#: data/org.gnome.mutter.gschema.xml.in:7
+#: data/org.gnome.muffin.gschema.xml.in:7
 msgid "Modifier to use for extended window management operations"
 msgstr ""
 "Модификатор для использования дополнительных действий управления окнами"
 
-#: data/org.gnome.mutter.gschema.xml.in:8
+#: data/org.gnome.muffin.gschema.xml.in:8
 msgid ""
 "This key will initiate the “overlay”, which is a combination window overview "
 "and application launching system. The default is intended to be the “Windows "
@@ -288,11 +288,11 @@ msgstr ""
 "Для обычных ПК используется клавиша «Windows». Ожидается, что значение этой "
 "привязки будет иметь значение по умолчанию или будет пустой строкой."
 
-#: data/org.gnome.mutter.gschema.xml.in:20
+#: data/org.gnome.muffin.gschema.xml.in:20
 msgid "Attach modal dialogs"
 msgstr "Прикреплять модальные диалоговые окна"
 
-#: data/org.gnome.mutter.gschema.xml.in:21
+#: data/org.gnome.muffin.gschema.xml.in:21
 msgid ""
 "When true, instead of having independent titlebars, modal dialogs appear "
 "attached to the titlebar of the parent window and are moved together with "
@@ -302,11 +302,11 @@ msgstr ""
 "окна будут прикрепляться к заголовку родительского окна и перемещаться "
 "вместе с родительским окном."
 
-#: data/org.gnome.mutter.gschema.xml.in:30
+#: data/org.gnome.muffin.gschema.xml.in:30
 msgid "Enable edge tiling when dropping windows on screen edges"
 msgstr "Включить краевые фреймы при перемещении окон к границам экрана"
 
-#: data/org.gnome.mutter.gschema.xml.in:31
+#: data/org.gnome.muffin.gschema.xml.in:31
 msgid ""
 "If enabled, dropping windows on vertical screen edges maximizes them "
 "vertically and resizes them horizontally to cover half of the available "
@@ -317,11 +317,11 @@ msgstr ""
 "покрывая половину доступного места. Перемещение окна к верхней части экрана "
 "полностью разворачивает окно."
 
-#: data/org.gnome.mutter.gschema.xml.in:40
+#: data/org.gnome.muffin.gschema.xml.in:40
 msgid "Workspaces are managed dynamically"
 msgstr "Рабочие места управляются динамически"
 
-#: data/org.gnome.mutter.gschema.xml.in:41
+#: data/org.gnome.muffin.gschema.xml.in:41
 msgid ""
 "Determines whether workspaces are managed dynamically or whether there’s a "
 "static number of workspaces (determined by the num-workspaces key in org."
@@ -331,11 +331,11 @@ msgstr ""
 "мест постоянно (количество задаётся ключом в org.gnome.desktop.wm."
 "preferences)."
 
-#: data/org.gnome.mutter.gschema.xml.in:50
+#: data/org.gnome.muffin.gschema.xml.in:50
 msgid "Workspaces only on primary"
 msgstr "Рабочие места только на главном окне"
 
-#: data/org.gnome.mutter.gschema.xml.in:51
+#: data/org.gnome.muffin.gschema.xml.in:51
 msgid ""
 "Determines whether workspace switching should happen for windows on all "
 "monitors or only for windows on the primary monitor."
@@ -343,11 +343,11 @@ msgstr ""
 "Определяет, должно ли переключение рабочего места происходить для окон на "
 "всех мониторах или только для окон на главном мониторе."
 
-#: data/org.gnome.mutter.gschema.xml.in:59
+#: data/org.gnome.muffin.gschema.xml.in:59
 msgid "No tab popup"
 msgstr "Без всплывающей табуляции"
 
-#: data/org.gnome.mutter.gschema.xml.in:60
+#: data/org.gnome.muffin.gschema.xml.in:60
 msgid ""
 "Determines whether the use of popup and highlight frame should be disabled "
 "for window cycling."
@@ -355,11 +355,11 @@ msgstr ""
 "Определяет, нужно ли отключить использование всплывающей области для "
 "циклического переключения окон."
 
-#: data/org.gnome.mutter.gschema.xml.in:68
+#: data/org.gnome.muffin.gschema.xml.in:68
 msgid "Delay focus changes until the pointer stops moving"
 msgstr "Отложить переключение фокуса до тех пор, пока не остановится указатель"
 
-#: data/org.gnome.mutter.gschema.xml.in:69
+#: data/org.gnome.muffin.gschema.xml.in:69
 msgid ""
 "If set to true, and the focus mode is either “sloppy” or “mouse” then the "
 "focus will not be changed immediately when entering a window, but only after "
@@ -369,11 +369,11 @@ msgstr ""
 "«sloppy» или «mouse», тогда фокус не будет меняться при переходе к другому "
 "окну до тех пор, пока не остановится указатель."
 
-#: data/org.gnome.mutter.gschema.xml.in:79
+#: data/org.gnome.muffin.gschema.xml.in:79
 msgid "Draggable border width"
 msgstr "Ширина рамки перетаскивания"
 
-#: data/org.gnome.mutter.gschema.xml.in:80
+#: data/org.gnome.muffin.gschema.xml.in:80
 msgid ""
 "The amount of total draggable borders. If the theme’s visible borders are "
 "not enough, invisible borders will be added to meet this value."
@@ -381,11 +381,11 @@ msgstr ""
 "Общая ширина рамок для перетаскивания. Если видимых рамок, используемых в "
 "теме, недостаточно, то будут добавлены невидимые рамки до этого значения."
 
-#: data/org.gnome.mutter.gschema.xml.in:89
+#: data/org.gnome.muffin.gschema.xml.in:89
 msgid "Auto maximize nearly monitor sized windows"
 msgstr "Автоматически увеличивать размеры окна до размеров монитора"
 
-#: data/org.gnome.mutter.gschema.xml.in:90
+#: data/org.gnome.muffin.gschema.xml.in:90
 msgid ""
 "If enabled, new windows that are initially the size of the monitor "
 "automatically get maximized."
@@ -393,11 +393,11 @@ msgstr ""
 "Если включено, новые окна будут автоматически увеличены до максимального "
 "размера."
 
-#: data/org.gnome.mutter.gschema.xml.in:98
+#: data/org.gnome.muffin.gschema.xml.in:98
 msgid "Place new windows in the center"
 msgstr "Размещать новые окна в центре"
 
-#: data/org.gnome.mutter.gschema.xml.in:99
+#: data/org.gnome.muffin.gschema.xml.in:99
 msgid ""
 "When true, the new windows will always be put in the center of the active "
 "screen of the monitor."
@@ -405,59 +405,59 @@ msgstr ""
 "Если выбрано, то новые окна всегда будут помещаться в центр активного экрана "
 "монитора."
 
-#: data/org.gnome.mutter.gschema.xml.in:120
+#: data/org.gnome.muffin.gschema.xml.in:120
 msgid "Select window from tab popup"
 msgstr "Выбор окна из всплывающей табуляции"
 
-#: data/org.gnome.mutter.gschema.xml.in:125
+#: data/org.gnome.muffin.gschema.xml.in:125
 msgid "Cancel tab popup"
 msgstr "Отменить всплывающую табуляцию"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:6
+#: data/org.gnome.muffin.wayland.gschema.xml.in:6
 msgid "Switch to VT 1"
 msgstr "Переключиться на виртуальный терминал 1"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:10
+#: data/org.gnome.muffin.wayland.gschema.xml.in:10
 msgid "Switch to VT 2"
 msgstr "Переключиться на виртуальный терминал 2"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:14
+#: data/org.gnome.muffin.wayland.gschema.xml.in:14
 msgid "Switch to VT 3"
 msgstr "Переключиться на виртуальный терминал 3"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:18
+#: data/org.gnome.muffin.wayland.gschema.xml.in:18
 msgid "Switch to VT 4"
 msgstr "Переключиться на виртуальный терминал 4"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:22
+#: data/org.gnome.muffin.wayland.gschema.xml.in:22
 msgid "Switch to VT 5"
 msgstr "Переключиться на виртуальный терминал 5"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:26
+#: data/org.gnome.muffin.wayland.gschema.xml.in:26
 msgid "Switch to VT 6"
 msgstr "Переключиться на виртуальный терминал 6"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:30
+#: data/org.gnome.muffin.wayland.gschema.xml.in:30
 msgid "Switch to VT 7"
 msgstr "Переключиться на виртуальный терминал 7"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:34
+#: data/org.gnome.muffin.wayland.gschema.xml.in:34
 msgid "Switch to VT 8"
 msgstr "Переключиться на виртуальный терминал 8"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:38
+#: data/org.gnome.muffin.wayland.gschema.xml.in:38
 msgid "Switch to VT 9"
 msgstr "Переключиться на виртуальный терминал 9"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:42
+#: data/org.gnome.muffin.wayland.gschema.xml.in:42
 msgid "Switch to VT 10"
 msgstr "Переключиться на виртуальный терминал 10"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:46
+#: data/org.gnome.muffin.wayland.gschema.xml.in:46
 msgid "Switch to VT 11"
 msgstr "Переключиться на виртуальный терминал 11"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:50
+#: data/org.gnome.muffin.wayland.gschema.xml.in:50
 msgid "Switch to VT 12"
 msgstr "Переключиться на виртуальный терминал 12"
 
@@ -577,16 +577,16 @@ msgstr "Запустить в качестве встроенного компо
 msgid "Run as a full display server, rather than nested"
 msgstr "Запустить в качестве полноэкранного сервера вместо встроенного"
 
-#: src/core/mutter.c:39
+#: src/core/muffin.c:39
 #, c-format
 msgid ""
-"mutter %s\n"
+"muffin %s\n"
 "Copyright © 2001-%d Havoc Pennington, Red Hat, Inc., and others\n"
 "This is free software; see the source for copying conditions.\n"
 "There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A "
 "PARTICULAR PURPOSE.\n"
 msgstr ""
-"mutter %s\n"
+"muffin %s\n"
 "Авторское право © 2001—%d Havoc Pennington, Red Hat, Inc. и другие\n"
 "Это — свободное программное обеспечение; условия копирования указаны в "
 "исходном тексте.\n"
@@ -594,13 +594,13 @@ msgstr ""
 "потребительской стоимости и пригодности для выполнения каких бы то ни было "
 "определённых задач.\n"
 
-#: src/core/mutter.c:53
+#: src/core/muffin.c:53
 msgid "Print version"
 msgstr "Вывести версию"
 
-#: src/core/mutter.c:59
+#: src/core/muffin.c:59
 msgid "Mutter plugin to use"
-msgstr "Использовать модуль mutter"
+msgstr "Использовать модуль muffin"
 
 #: src/core/prefs.c:1997
 #, c-format

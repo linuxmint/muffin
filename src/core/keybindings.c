@@ -57,8 +57,8 @@
 #endif
 
 #define SCHEMA_COMMON_KEYBINDINGS "org.cinnamon.desktop.keybindings.wm"
-#define SCHEMA_MUTTER_KEYBINDINGS "org.cinnamon.muffin.keybindings"
-#define SCHEMA_MUTTER_WAYLAND_KEYBINDINGS "org.cinnamon.muffin.wayland.keybindings"
+#define SCHEMA_MUFFIN_KEYBINDINGS "org.cinnamon.muffin.keybindings"
+#define SCHEMA_MUFFIN_WAYLAND_KEYBINDINGS "org.cinnamon.muffin.wayland.keybindings"
 
 #define META_KEY_BINDING_PRIMARY_LAYOUT 0
 #define META_KEY_BINDING_SECONDARY_LAYOUT 1
@@ -229,7 +229,7 @@ key_combo_key (MetaResolvedKeyCombo *resolved_combo,
   /* On X, keycodes are only 8 bits while libxkbcommon supports 32 bit
      keycodes, but since we're using the same XKB keymaps that X uses,
      we won't find keycodes bigger than 8 bits in practice. The bits
-     that mutter cares about in the modifier mask are also all in the
+     that muffin cares about in the modifier mask are also all in the
      lower 8 bits both on X and clutter key events. This means that we
      can use a 32 bit integer to safely concatenate both keycode and
      mask and thus making it easy to use them as an index in a
@@ -387,7 +387,7 @@ get_keycodes_for_keysym (MetaKeyBindingManager  *keys,
 
   keycodes = g_array_new (FALSE, FALSE, sizeof (xkb_keysym_t));
 
-  /* Special-case: Fake mutter keysym */
+  /* Special-case: Fake muffin keysym */
   if (keysym == META_KEY_ABOVE_TAB)
     {
       keycode = KEY_GRAVE + 8;
@@ -4164,8 +4164,8 @@ static void
 init_builtin_key_bindings (MetaDisplay *display)
 {
   GSettings *common_keybindings = g_settings_new (SCHEMA_COMMON_KEYBINDINGS);
-  GSettings *mutter_keybindings = g_settings_new (SCHEMA_MUTTER_KEYBINDINGS);
-  GSettings *mutter_wayland_keybindings = g_settings_new (SCHEMA_MUTTER_WAYLAND_KEYBINDINGS);
+  GSettings *muffin_keybindings = g_settings_new (SCHEMA_MUFFIN_KEYBINDINGS);
+  GSettings *muffin_wayland_keybindings = g_settings_new (SCHEMA_MUFFIN_WAYLAND_KEYBINDINGS);
 
   add_builtin_keybinding (display,
                           "switch-to-workspace-1",
@@ -4445,84 +4445,84 @@ init_builtin_key_bindings (MetaDisplay *display)
     {
       add_builtin_keybinding (display,
                               "switch-to-session-1",
-                              mutter_wayland_keybindings,
+                              muffin_wayland_keybindings,
                               META_KEY_BINDING_NON_MASKABLE,
                               META_KEYBINDING_ACTION_NONE,
                               handle_switch_vt, 1);
 
       add_builtin_keybinding (display,
                               "switch-to-session-2",
-                              mutter_wayland_keybindings,
+                              muffin_wayland_keybindings,
                               META_KEY_BINDING_NON_MASKABLE,
                               META_KEYBINDING_ACTION_NONE,
                               handle_switch_vt, 2);
 
       add_builtin_keybinding (display,
                               "switch-to-session-3",
-                              mutter_wayland_keybindings,
+                              muffin_wayland_keybindings,
                               META_KEY_BINDING_NON_MASKABLE,
                               META_KEYBINDING_ACTION_NONE,
                               handle_switch_vt, 3);
 
       add_builtin_keybinding (display,
                               "switch-to-session-4",
-                              mutter_wayland_keybindings,
+                              muffin_wayland_keybindings,
                               META_KEY_BINDING_NON_MASKABLE,
                               META_KEYBINDING_ACTION_NONE,
                               handle_switch_vt, 4);
 
       add_builtin_keybinding (display,
                               "switch-to-session-5",
-                              mutter_wayland_keybindings,
+                              muffin_wayland_keybindings,
                               META_KEY_BINDING_NON_MASKABLE,
                               META_KEYBINDING_ACTION_NONE,
                               handle_switch_vt, 5);
 
       add_builtin_keybinding (display,
                               "switch-to-session-6",
-                              mutter_wayland_keybindings,
+                              muffin_wayland_keybindings,
                               META_KEY_BINDING_NON_MASKABLE,
                               META_KEYBINDING_ACTION_NONE,
                               handle_switch_vt, 6);
 
       add_builtin_keybinding (display,
                               "switch-to-session-7",
-                              mutter_wayland_keybindings,
+                              muffin_wayland_keybindings,
                               META_KEY_BINDING_NON_MASKABLE,
                               META_KEYBINDING_ACTION_NONE,
                               handle_switch_vt, 7);
 
       add_builtin_keybinding (display,
                               "switch-to-session-8",
-                              mutter_wayland_keybindings,
+                              muffin_wayland_keybindings,
                               META_KEY_BINDING_NON_MASKABLE,
                               META_KEYBINDING_ACTION_NONE,
                               handle_switch_vt, 8);
 
       add_builtin_keybinding (display,
                               "switch-to-session-9",
-                              mutter_wayland_keybindings,
+                              muffin_wayland_keybindings,
                               META_KEY_BINDING_NON_MASKABLE,
                               META_KEYBINDING_ACTION_NONE,
                               handle_switch_vt, 9);
 
       add_builtin_keybinding (display,
                               "switch-to-session-10",
-                              mutter_wayland_keybindings,
+                              muffin_wayland_keybindings,
                               META_KEY_BINDING_NON_MASKABLE,
                               META_KEYBINDING_ACTION_NONE,
                               handle_switch_vt, 10);
 
       add_builtin_keybinding (display,
                               "switch-to-session-11",
-                              mutter_wayland_keybindings,
+                              muffin_wayland_keybindings,
                               META_KEY_BINDING_NON_MASKABLE,
                               META_KEYBINDING_ACTION_NONE,
                               handle_switch_vt, 11);
 
       add_builtin_keybinding (display,
                               "switch-to-session-12",
-                              mutter_wayland_keybindings,
+                              muffin_wayland_keybindings,
                               META_KEY_BINDING_NON_MASKABLE,
                               META_KEYBINDING_ACTION_NONE,
                               handle_switch_vt, 12);
@@ -4531,7 +4531,7 @@ init_builtin_key_bindings (MetaDisplay *display)
 
   add_builtin_keybinding (display,
                           "restore-shortcuts",
-                          mutter_wayland_keybindings,
+                          muffin_wayland_keybindings,
                           META_KEY_BINDING_NON_MASKABLE,
                           META_KEYBINDING_ACTION_NONE,
                           handle_restore_shortcuts, 0);
@@ -4959,8 +4959,8 @@ init_builtin_key_bindings (MetaDisplay *display)
                           handle_opacity, 0);
 
   g_object_unref (common_keybindings);
-  g_object_unref (mutter_keybindings);
-  g_object_unref (mutter_wayland_keybindings);
+  g_object_unref (muffin_keybindings);
+  g_object_unref (muffin_wayland_keybindings);
 }
 
 void

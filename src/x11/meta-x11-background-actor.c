@@ -38,7 +38,7 @@
 #include <X11/Xatom.h>
 
 #include "cogl/cogl.h"
-#include "meta/compositor-mutter.h"
+#include "meta/compositor-muffin.h"
 #include "meta/meta-x11-errors.h"
 #include "meta/meta-x11-display.h"
 #include "meta-x11-background-actor-private.h"

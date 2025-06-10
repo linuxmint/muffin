@@ -1,7 +1,7 @@
 /* -*- mode: C; c-file-style: "gnu"; indent-tabs-mode: nil; -*- */
 
 /**
- * \file mutter-Xatomtype.h  Types for communicating with X about properties
+ * \file muffin-Xatomtype.h  Types for communicating with X about properties
  *
  * This files defines crock C structures for calling XGetWindowProperty and
  * XChangeProperty.  All fields must be longs as the semantics of property

@@ -55,7 +55,7 @@ struct _MetaSettings
   MetaBackend *backend;
 
   GSettings *interface_settings;
-  GSettings *mutter_settings;
+  GSettings *muffin_settings;
   GSettings *wayland_settings;
   GSettings *x11_settings;
 
@@ -314,8 +314,8 @@ void meta_settings_enable_x11_fractional_scaling (MetaSettings *settings,
   g_signal_emit (settings, signals[EXPERIMENTAL_FEATURES_CHANGED], 0,
                    (unsigned int) old_experimental_features);
 
-  /* Add or remove the fractional scaling feature from mutter */
-  existing_features = g_settings_get_strv (settings->mutter_settings,
+  /* Add or remove the fractional scaling feature from muffin */
+  existing_features = g_settings_get_strv (settings->muffin_settings,
                                            "experimental-features");
   builder = g_variant_builder_new (G_VARIANT_TYPE ("as"));
   for (int i = 0; existing_features[i] != NULL; i++)
@@ -333,7 +333,7 @@ void meta_settings_enable_x11_fractional_scaling (MetaSettings *settings,
   if (enable && !have_fractional_scaling)
     g_variant_builder_add (builder, "s", "x11-randr-fractional-scaling");
 
-  g_settings_set_value (settings->mutter_settings, "experimental-features",
+  g_settings_set_value (settings->muffin_settings, "experimental-features",
                         g_variant_builder_end (builder));
 }
 
@@ -406,14 +406,14 @@ experimental_features_handler (GVariant *features_variant,
 static gboolean
 update_experimental_features (MetaSettings *settings)
 {
-  return GPOINTER_TO_INT (g_settings_get_mapped (settings->mutter_settings,
+  return GPOINTER_TO_INT (g_settings_get_mapped (settings->muffin_settings,
                                                  "experimental-features",
                                                  experimental_features_handler,
                                                  settings));
 }
 
 static void
-mutter_settings_changed (GSettings    *mutter_settings,
+muffin_settings_changed (GSettings    *muffin_settings,
                          gchar        *key,
                          MetaSettings *settings)
 {
@@ -563,7 +563,7 @@ meta_settings_dispose (GObject *object)
 {
   MetaSettings *settings = META_SETTINGS (object);
 
-  g_clear_object (&settings->mutter_settings);
+  g_clear_object (&settings->muffin_settings);
   g_clear_object (&settings->interface_settings);
   g_clear_object (&settings->wayland_settings);
   g_clear_object (&settings->x11_settings);
@@ -582,9 +582,9 @@ meta_settings_init (MetaSettings *settings)
   g_signal_connect (settings->interface_settings, "changed",
                     G_CALLBACK (interface_settings_changed),
                     settings);
-  settings->mutter_settings = g_settings_new ("org.cinnamon.muffin");
-  g_signal_connect (settings->mutter_settings, "changed",
-                    G_CALLBACK (mutter_settings_changed),
+  settings->muffin_settings = g_settings_new ("org.cinnamon.muffin");
+  g_signal_connect (settings->muffin_settings, "changed",
+                    G_CALLBACK (muffin_settings_changed),
                     settings);
   settings->wayland_settings = g_settings_new ("org.cinnamon.muffin.wayland");
   g_signal_connect (settings->wayland_settings, "changed",

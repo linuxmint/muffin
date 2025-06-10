@@ -642,7 +642,7 @@
 #include "clutter-interval.h"
 #include "clutter-main.h"
 #include "clutter-marshal.h"
-#include "clutter-mutter.h"
+#include "clutter-muffin.h"
 #include "clutter-paint-context-private.h"
 #include "clutter-paint-nodes.h"
 #include "clutter-paint-node-private.h"

@@ -33,7 +33,7 @@
 #include "backends/x11/meta-seat-x11.h"
 #include "backends/x11/meta-xkb-a11y-x11.h"
 #include "backends/x11/nested/meta-stage-x11-nested.h"
-#include "clutter/clutter-mutter.h"
+#include "clutter/clutter-muffin.h"
 #include "clutter/clutter.h"
 #include "core/bell.h"
 #include "meta/meta-backend.h"

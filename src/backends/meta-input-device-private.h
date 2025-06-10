@@ -25,7 +25,7 @@
 #include <libwacom/libwacom.h>
 #endif
 
-#include "clutter/clutter-mutter.h"
+#include "clutter/clutter-muffin.h"
 
 typedef struct _MetaInputDeviceClass MetaInputDeviceClass;
 typedef struct _MetaInputDevice MetaInputDevice;

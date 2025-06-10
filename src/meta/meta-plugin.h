@@ -26,7 +26,7 @@
 #include <gmodule.h>
 
 #include "clutter/clutter.h"
-#include "meta/compositor-mutter.h"
+#include "meta/compositor-muffin.h"
 #include "meta/compositor.h"
 #include "meta/meta-close-dialog.h"
 #include "meta/meta-inhibit-shortcuts-dialog.h"

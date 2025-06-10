@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: metacity.HEAD\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
-"product=mutter&keywords=I18N+L10N&component=general\n"
+"product=muffin&keywords=I18N+L10N&component=general\n"
 "POT-Creation-Date: 2014-09-02 09:56+0000\n"
 "PO-Revision-Date: 2014-09-22 10:44+0530\n"
 "Last-Translator: Shankar Prasad <svenkate AT redhat Dot com>\n"
@@ -19,267 +19,267 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Lokalize 1.5\n"
 
-#: ../data/50-mutter-navigation.xml.in.h:1
+#: ../data/50-muffin-navigation.xml.in.h:1
 msgid "Navigation"
 msgstr "ನೇವಿಗೇಶನ್"
 
-#: ../data/50-mutter-navigation.xml.in.h:2
+#: ../data/50-muffin-navigation.xml.in.h:2
 msgid "Move window to workspace 1"
 msgstr "ಕಿಟಕಿಯನ್ನು ಕಾರ್ಯಕ್ಷೇತ್ರ 1 ಕ್ಕೆ ಸ್ಥಳಾಂತರಿಸು"
 
-#: ../data/50-mutter-navigation.xml.in.h:3
+#: ../data/50-muffin-navigation.xml.in.h:3
 msgid "Move window to workspace 2"
 msgstr "ಕಿಟಕಿಯನ್ನು ಕಾರ್ಯಕ್ಷೇತ್ರ 2 ಕ್ಕೆ ಸ್ಥಳಾಂತರಿಸು"
 
-#: ../data/50-mutter-navigation.xml.in.h:4
+#: ../data/50-muffin-navigation.xml.in.h:4
 msgid "Move window to workspace 3"
 msgstr "ಕಿಟಕಿಯನ್ನು ಕಾರ್ಯಕ್ಷೇತ್ರ 3 ಕ್ಕೆ ಸ್ಥಳಾಂತರಿಸು"
 
-#: ../data/50-mutter-navigation.xml.in.h:5
+#: ../data/50-muffin-navigation.xml.in.h:5
 msgid "Move window to workspace 4"
 msgstr "ಕಿಟಕಿಯನ್ನು ಕಾರ್ಯಕ್ಷೇತ್ರ 4 ಕ್ಕೆ ಸ್ಥಳಾಂತರಿಸು"
 
-#: ../data/50-mutter-navigation.xml.in.h:6
+#: ../data/50-muffin-navigation.xml.in.h:6
 #| msgid "Move window to workspace 1"
 msgid "Move window to last workspace"
 msgstr "ಕಿಟಕಿಯನ್ನು ಕೊನೆಯ ಕಾರ್ಯಕ್ಷೇತ್ರಕ್ಕೆ ಸ್ಥಳಾಂತರಿಸು"
 
-#: ../data/50-mutter-navigation.xml.in.h:7
+#: ../data/50-muffin-navigation.xml.in.h:7
 msgid "Move window one workspace to the left"
 msgstr "ಕಿಟಕಿಯನ್ನು ಒಂದು ಕಾರ್ಯಕ್ಷೇತ್ರದ ಎಡಕ್ಕೆ ಜರುಗಿಸು"
 
-#: ../data/50-mutter-navigation.xml.in.h:8
+#: ../data/50-muffin-navigation.xml.in.h:8
 msgid "Move window one workspace to the right"
 msgstr "ಕಿಟಕಿಯನ್ನು ಒಂದು ಕಾರ್ಯಕ್ಷೇತ್ರದ ಬಲಕ್ಕೆ ಜರುಗಿಸು"
 
-#: ../data/50-mutter-navigation.xml.in.h:9
+#: ../data/50-muffin-navigation.xml.in.h:9
 msgid "Move window one workspace up"
 msgstr "ಕಿಟಕಿಯನ್ನು ಒಂದು ಕಾರ್ಯಕ್ಷೇತ್ರದ ಮೇಲಕ್ಕೆ ಜರುಗಿಸು"
 
-#: ../data/50-mutter-navigation.xml.in.h:10
+#: ../data/50-muffin-navigation.xml.in.h:10
 msgid "Move window one workspace down"
 msgstr "ಕಿಟಕಿಯನ್ನು ಒಂದು ಕಾರ್ಯಕ್ಷೇತ್ರದ ಕೆಳಗೆ ಜರುಗಿಸು"
 
-#: ../data/50-mutter-navigation.xml.in.h:11
+#: ../data/50-muffin-navigation.xml.in.h:11
 #| msgid "Move window one workspace to the left"
 msgid "Move window one monitor to the left"
 msgstr "ಕಿಟಕಿಯನ್ನು ಒಂದು ಪರದೆ ಎಡಕ್ಕೆ ಜರುಗಿಸು"
 
-#: ../data/50-mutter-navigation.xml.in.h:12
+#: ../data/50-muffin-navigation.xml.in.h:12
 #| msgid "Move window one workspace to the right"
 msgid "Move window one monitor to the right"
 msgstr "ಕಿಟಕಿಯನ್ನು ಒಂದು ಪರದೆ ಬಲಕ್ಕೆ ಜರುಗಿಸು"
 
-#: ../data/50-mutter-navigation.xml.in.h:13
+#: ../data/50-muffin-navigation.xml.in.h:13
 #| msgid "Move window one workspace up"
 msgid "Move window one monitor up"
 msgstr "ಕಿಟಕಿಯನ್ನು ಒಂದು ಪರದೆ ಮೇಲಕ್ಕೆ ಜರುಗಿಸು"
 
-#: ../data/50-mutter-navigation.xml.in.h:14
+#: ../data/50-muffin-navigation.xml.in.h:14
 #| msgid "Move window one workspace down"
 msgid "Move window one monitor down"
 msgstr "ಕಿಟಕಿಯನ್ನು ಒಂದು ಪರದೆ ಕೆಳಕ್ಕೆ ಜರುಗಿಸು"
 
-#: ../data/50-mutter-navigation.xml.in.h:15
+#: ../data/50-muffin-navigation.xml.in.h:15
 msgid "Switch applications"
 msgstr "ಅನ್ವಯಗಳನ್ನು ಬದಲಿಸು"
 
-#: ../data/50-mutter-navigation.xml.in.h:16
+#: ../data/50-muffin-navigation.xml.in.h:16
 #| msgid "Switch applications"
 msgid "Switch to previous application"
 msgstr "ಹಿಂದಿನ ಅನ್ವಯಕ್ಕೆ ಬದಲಿಸು"
 
-#: ../data/50-mutter-navigation.xml.in.h:17
+#: ../data/50-muffin-navigation.xml.in.h:17
 msgid "Switch windows"
 msgstr "ಕಿಟಕಿಗಳನ್ನು ಬದಲಿಸು"
 
-#: ../data/50-mutter-navigation.xml.in.h:18
+#: ../data/50-muffin-navigation.xml.in.h:18
 #| msgid "Switch windows"
 msgid "Switch to previous window"
 msgstr "ಹಿಂದಿನ ಕಿಟಕಿಗೆ ಬದಲಿಸು"
 
-#: ../data/50-mutter-navigation.xml.in.h:19
+#: ../data/50-muffin-navigation.xml.in.h:19
 msgid "Switch windows of an application"
 msgstr "ಒಂದು ಅನ್ವಯದ ಕಿಟಕಿಗಳನ್ನು ಬದಲಾಯಿಸು"
 
-#: ../data/50-mutter-navigation.xml.in.h:20
+#: ../data/50-muffin-navigation.xml.in.h:20
 #| msgid "Switch windows of an application"
 msgid "Switch to previous window of an application"
 msgstr "ಒಂದು ಅನ್ವಯದ ಹಿಂದಿನ ಕಿಟಕಿಗೆ ಬದಲಾಯಿಸು"
 
-#: ../data/50-mutter-navigation.xml.in.h:21
+#: ../data/50-muffin-navigation.xml.in.h:21
 msgid "Switch system controls"
 msgstr "ವ್ಯವಸ್ಥೆಯ ನಿಯಂತ್ರಣಗಳನ್ನು ಬದಲಾಯಿಸು"
 
-#: ../data/50-mutter-navigation.xml.in.h:22
+#: ../data/50-muffin-navigation.xml.in.h:22
 #| msgid "Switch system controls"
 msgid "Switch to previous system control"
 msgstr "ಹಿಂದಿನ ವ್ಯವಸ್ಥೆಯ ನಿಯಂತ್ರಣಗಳಿಗೆ ಬದಲಾಯಿಸು"
 
-#: ../data/50-mutter-navigation.xml.in.h:23
+#: ../data/50-muffin-navigation.xml.in.h:23
 msgid "Switch windows directly"
 msgstr "ಕಿಟಿಕಿಗಳನ್ನು ನೇರವಾಗಿ ಬದಲಾಯಿಸು"
 
-#: ../data/50-mutter-navigation.xml.in.h:24
+#: ../data/50-muffin-navigation.xml.in.h:24
 msgid "Switch directly to previous window"
 msgstr "ಹಿಂದಿನ ಕಿಟಕಿಗೆ ನೇರವಾಗಿ ಬದಲಾಯಿಸು"
 
-#: ../data/50-mutter-navigation.xml.in.h:25
+#: ../data/50-muffin-navigation.xml.in.h:25
 msgid "Switch windows of an app directly"
 msgstr "ಒಂದು ಅನ್ವಯದ ಕಿಟಕಿಗಳನ್ನು ನೇರವಾಗಿ ಬದಲಾಯಿಸು"
 
-#: ../data/50-mutter-navigation.xml.in.h:26
+#: ../data/50-muffin-navigation.xml.in.h:26
 #| msgid "Switch windows of an application"
 msgid "Switch directly to previous window of an app"
 msgstr "ಒಂದು ಅನ್ವಯದ ಹಿಂದಿನ ಕಿಟಕಿಗೆ ನೇರವಾಗಿ ಬದಲಾಯಿಸು"
 
-#: ../data/50-mutter-navigation.xml.in.h:27
+#: ../data/50-muffin-navigation.xml.in.h:27
 msgid "Switch system controls directly"
 msgstr "ವ್ಯವಸ್ಥೆಯ ನಿಯಂತ್ರಣಗಳನ್ನು ನೇರವಾಗಿ ಬದಲಾಯಿಸು"
 
-#: ../data/50-mutter-navigation.xml.in.h:28
+#: ../data/50-muffin-navigation.xml.in.h:28
 #| msgid "Switch system controls"
 msgid "Switch directly to previous system control"
 msgstr "ನೇರವಾಗಿ ಹಿಂದಿನ ವ್ಯವಸ್ಥೆಯ ನಿಯಂತ್ರಣಗಳಿಗೆ ಬದಲಾಯಿಸು"
 
-#: ../data/50-mutter-navigation.xml.in.h:29
+#: ../data/50-muffin-navigation.xml.in.h:29
 msgid "Hide all normal windows"
 msgstr "ಎಲ್ಲಾ ಸಾಮಾನ್ಯ ಕಿಟಕಿಗಳನ್ನು ಅಡಗಿಸು"
 
-#: ../data/50-mutter-navigation.xml.in.h:30
+#: ../data/50-muffin-navigation.xml.in.h:30
 msgid "Switch to workspace 1"
 msgstr "ಕಾರ್ಯಕ್ಷೇತ್ರ 1 ಕ್ಕೆ ಬದಲಾಯಿಸು"
 
-#: ../data/50-mutter-navigation.xml.in.h:31
+#: ../data/50-muffin-navigation.xml.in.h:31
 msgid "Switch to workspace 2"
 msgstr "ಕಾರ್ಯಕ್ಷೇತ್ರ 2 ಕ್ಕೆ ಬದಲಾಯಿಸು"
 
-#: ../data/50-mutter-navigation.xml.in.h:32
+#: ../data/50-muffin-navigation.xml.in.h:32
 msgid "Switch to workspace 3"
 msgstr "ಕಾರ್ಯಕ್ಷೇತ್ರ 3 ಕ್ಕೆ ಬದಲಾಯಿಸು"
 
-#: ../data/50-mutter-navigation.xml.in.h:33
+#: ../data/50-muffin-navigation.xml.in.h:33
 msgid "Switch to workspace 4"
 msgstr "ಕಾರ್ಯಕ್ಷೇತ್ರ 4 ಕ್ಕೆ ಬದಲಾಯಿಸು"
 
-#: ../data/50-mutter-navigation.xml.in.h:34
+#: ../data/50-muffin-navigation.xml.in.h:34
 #| msgid "Switch to workspace 1"
 msgid "Switch to last workspace"
 msgstr "ಕೊನೆಯ ಕಾರ್ಯಕ್ಷೇತ್ರಕ್ಕೆ ಬದಲಾಯಿಸು"
 
-#: ../data/50-mutter-navigation.xml.in.h:35
+#: ../data/50-muffin-navigation.xml.in.h:35
 msgid "Move to workspace left"
 msgstr "ಎಡಭಾಗದ ಕಾರ್ಯಕ್ಷೇತ್ರಕ್ಕೆ ವರ್ಗಾಯಿಸು"
 
-#: ../data/50-mutter-navigation.xml.in.h:36
+#: ../data/50-muffin-navigation.xml.in.h:36
 msgid "Move to workspace right"
 msgstr "ಬಲಭಾಗದ ಕಾರ್ಯಕ್ಷೇತ್ರಕ್ಕೆ ವರ್ಗಾಯಿಸು"
 
-#: ../data/50-mutter-navigation.xml.in.h:37
+#: ../data/50-muffin-navigation.xml.in.h:37
 msgid "Move to workspace above"
 msgstr "ಮೇಲ್ಭಾಗದ ಕಾರ್ಯಕ್ಷೇತ್ರಕ್ಕೆ ವರ್ಗಾಯಿಸು"
 
-#: ../data/50-mutter-navigation.xml.in.h:38
+#: ../data/50-muffin-navigation.xml.in.h:38
 msgid "Move to workspace below"
 msgstr "ಕೆಳಗಿನ ಕಾರ್ಯಕ್ಷೇತ್ರಕ್ಕೆ ವರ್ಗಾಯಿಸು"
 
-#: ../data/50-mutter-system.xml.in.h:1
+#: ../data/50-muffin-system.xml.in.h:1
 msgid "System"
 msgstr "ವ್ಯವಸ್ಥೆ"
 
-#: ../data/50-mutter-system.xml.in.h:2
+#: ../data/50-muffin-system.xml.in.h:2
 msgid "Show the run command prompt"
 msgstr "ಚಲಾಯಿಸುವ ಆದೇಶ ಪ್ರಾಂಪ್ಟನ್ನು ತೋರಿಸು"
 
-#: ../data/50-mutter-system.xml.in.h:3
+#: ../data/50-muffin-system.xml.in.h:3
 msgid "Show the activities overview"
 msgstr "ಚಟುವಟಿಕೆಗಳ ಅವಲೋಕನವನ್ನು ತೋರಿಸು"
 
-#: ../data/50-mutter-windows.xml.in.h:1
+#: ../data/50-muffin-windows.xml.in.h:1
 msgid "Windows"
 msgstr "ಕಿಟಕಿಗಳು"
 
-#: ../data/50-mutter-windows.xml.in.h:2
+#: ../data/50-muffin-windows.xml.in.h:2
 msgid "Activate the window menu"
 msgstr "ಕಿಟಕಿ ಮೆನುವನ್ನು ಸಕ್ರಿಯಗೊಳಿಸು"
 
-#: ../data/50-mutter-windows.xml.in.h:3
+#: ../data/50-muffin-windows.xml.in.h:3
 msgid "Toggle fullscreen mode"
 msgstr "ಪೂರ್ಣತೆರೆಯ ಕ್ರಮಕ್ಕೆ ಟಾಗಲ್ ಮಾಡು"
 
-#: ../data/50-mutter-windows.xml.in.h:4
+#: ../data/50-muffin-windows.xml.in.h:4
 msgid "Toggle maximization state"
 msgstr "ಗರಿಷ್ಟಗೊಳಿಸುವ ಸ್ಥಿತಿಯನ್ನು ಟಾಗಲ್ ಮಾಡು"
 
-#: ../data/50-mutter-windows.xml.in.h:5
+#: ../data/50-muffin-windows.xml.in.h:5
 msgid "Maximize window"
 msgstr "ಕಿಟಕಿಯನ್ನು ಹಿಗ್ಗಿಸು"
 
-#: ../data/50-mutter-windows.xml.in.h:6
+#: ../data/50-muffin-windows.xml.in.h:6
 msgid "Restore window"
 msgstr "ಕಿಟಕಿಯನ್ನು ಮರಳಿ ಸ್ಥಾಪಿಸು"
 
-#: ../data/50-mutter-windows.xml.in.h:7
+#: ../data/50-muffin-windows.xml.in.h:7
 msgid "Toggle shaded state"
 msgstr "ನೆರಳಿನ ಸ್ಥಿತಿಯನ್ನು ಟಾಗಲ್‌ ಮಾಡು"
 
-#: ../data/50-mutter-windows.xml.in.h:8
+#: ../data/50-muffin-windows.xml.in.h:8
 msgid "Close window"
 msgstr "ಕಿಟಕಿಯನ್ನು ಮುಚ್ಚು"
 
-#: ../data/50-mutter-windows.xml.in.h:9
+#: ../data/50-muffin-windows.xml.in.h:9
 msgid "Hide window"
 msgstr "ಕಿಟಕಿಯನ್ನು ಅಡಗಿಸು"
 
-#: ../data/50-mutter-windows.xml.in.h:10
+#: ../data/50-muffin-windows.xml.in.h:10
 msgid "Move window"
 msgstr "ಕಿಟಕಿಯನ್ನು ಜರುಗಿಸು"
 
-#: ../data/50-mutter-windows.xml.in.h:11
+#: ../data/50-muffin-windows.xml.in.h:11
 msgid "Resize window"
 msgstr "ಕಿಟಕಿಯನ್ನು ಮರುಗಾತ್ರಿಸು"
 
-#: ../data/50-mutter-windows.xml.in.h:12
+#: ../data/50-muffin-windows.xml.in.h:12
 msgid "Toggle window on all workspaces or one"
 msgstr "ಎಲ್ಲಾ ಕಾರ್ಯಸ್ಥಳಗಳಲ್ಲಿ ಅಥವ ಒಂದು ಕಿಟಕಿಯಲ್ಲಿ ಹೊರಳಿಸು"
 
-#: ../data/50-mutter-windows.xml.in.h:13
+#: ../data/50-muffin-windows.xml.in.h:13
 msgid "Raise window if covered, otherwise lower it"
 msgstr "ಕಿಟಕಿಯನ್ನು ಆವರಿಸಲಾಗಿದ್ದರೆ ಎತ್ತರಿಸು, ಇಲ್ಲದೆ ಹೋದಲ್ಲಿ ಕೆಳಕ್ಕಿಳಿಸು"
 
-#: ../data/50-mutter-windows.xml.in.h:14
+#: ../data/50-muffin-windows.xml.in.h:14
 msgid "Raise window above other windows"
 msgstr "ಕಿಟಕಿಯನ್ನು ಇತರೆ ಕಿಟಕಿಗಳಿಗಿಂತ ಎತ್ತರಿಸು"
 
-#: ../data/50-mutter-windows.xml.in.h:15
+#: ../data/50-muffin-windows.xml.in.h:15
 msgid "Lower window below other windows"
 msgstr "ಇತರೆ ಕಿಟಕಿಗಳ ಅಡಿಯಲ್ಲಿರುವ ಕಿಟಕಿ"
 
-#: ../data/50-mutter-windows.xml.in.h:16
+#: ../data/50-muffin-windows.xml.in.h:16
 msgid "Maximize window vertically"
 msgstr "ಕಿಟಕಿಯನ್ನು ಲಂಬವಾಗಿ ಹಿಗ್ಗಿಸು"
 
-#: ../data/50-mutter-windows.xml.in.h:17
+#: ../data/50-muffin-windows.xml.in.h:17
 msgid "Maximize window horizontally"
 msgstr "ಕಿಟಕಿಯನ್ನು ಸಮತಲವಾಗಿ ಹಿಗ್ಗಿಸು"
 
-#: ../data/50-mutter-windows.xml.in.h:18
+#: ../data/50-muffin-windows.xml.in.h:18
 msgid "View split on left"
 msgstr "ಎಡಭಾಗದಲ್ಲಿ ಸೀಳನ್ನು ನೋಡು"
 
-#: ../data/50-mutter-windows.xml.in.h:19
+#: ../data/50-muffin-windows.xml.in.h:19
 msgid "View split on right"
 msgstr "ಬಲಭಾಗದಲ್ಲಿ ಸೀಳನ್ನು ನೋಡು"
 
-#: ../data/mutter.desktop.in.h:1
+#: ../data/muffin.desktop.in.h:1
 msgid "Mutter"
 msgstr "Mutter"
 
-#: ../data/org.gnome.mutter.gschema.xml.in.h:1
+#: ../data/org.gnome.muffin.gschema.xml.in.h:1
 msgid "Modifier to use for extended window management operations"
 msgstr "ವಿಸ್ತರಿಸಲಾದ ಕಿಟಕಿ ವ್ಯವಸ್ಥಾಪನಾ ಕಾರ್ಯಗಳಲ್ಲಿ ಬಳಸಬೇಕಿರುವ ಮಾರ್ಪಡಕ"
 
-#: ../data/org.gnome.mutter.gschema.xml.in.h:2
+#: ../data/org.gnome.muffin.gschema.xml.in.h:2
 msgid ""
 "This key will initiate the \"overlay\", which is a combination window "
 "overview and application launching system. The default is intended to be the "
@@ -292,11 +292,11 @@ msgstr ""
 "ಆಗಿರುತ್ತದೆ. ಈ ಬೈಂಡಿಂಗ್ ಒಂದು ಪೂರ್ವನಿಯೋಜಿತವಾಗಿರಬೇಕು ಅಥವ ಖಾಲಿ ವಾಕ್ಯಾಂಶಕ್ಕೆ "
 "ಸೂಚಿತಗೊಂಡಿರಬೇಕು ಎಂದು ನಿರೀಕ್ಷಿಸಲಾಗುತ್ತದೆ."
 
-#: ../data/org.gnome.mutter.gschema.xml.in.h:3
+#: ../data/org.gnome.muffin.gschema.xml.in.h:3
 msgid "Attach modal dialogs"
 msgstr "ಮೋಡಲ್ ಸಂವಾದಗಳನ್ನು ಲಗತ್ತಿಸು"
 
-#: ../data/org.gnome.mutter.gschema.xml.in.h:4
+#: ../data/org.gnome.muffin.gschema.xml.in.h:4
 msgid ""
 "When true, instead of having independent titlebars, modal dialogs appear "
 "attached to the titlebar of the parent window and are moved together with "
@@ -306,11 +306,11 @@ msgstr ""
 "ಶೀರ್ಷಿಕೆಪಟ್ಟಿಗೆ ಲಗತ್ತಿಸಲಾದಂತೆ ಕಾಣಿಸುತ್ತದೆ ಮತ್ತು ಮೂಲ ಕಿಟಕಿಯ ಜೊತೆಗೆ ಅವೂ ಸಹ "
 "ಚಲಿಸುತ್ತವೆ."
 
-#: ../data/org.gnome.mutter.gschema.xml.in.h:5
+#: ../data/org.gnome.muffin.gschema.xml.in.h:5
 msgid "Enable edge tiling when dropping windows on screen edges"
 msgstr "ಕಿಟಕಿಗಳನ್ನು ತೆರೆಯ ಅಂಚಿನಲ್ಲಿ ಬೀಳಿಸುವಾಗ ಅಂಚಿನ ಟೈಲಿಂಗ್ ಅನ್ನು ಸಕ್ರಿಯಗೊಳಿಸು"
 
-#: ../data/org.gnome.mutter.gschema.xml.in.h:6
+#: ../data/org.gnome.muffin.gschema.xml.in.h:6
 msgid ""
 "If enabled, dropping windows on vertical screen edges maximizes them "
 "vertically and resizes them horizontally to cover half of the available "
@@ -322,11 +322,11 @@ msgstr ""
 "ಬದಲಿಸಲಾಗುತ್ತದೆ. ಕಿಟಕಿಗಳನ್ನು ಮೇಲಿನ ತೆರೆಯ ಅಂಚಿನ ಮೇಲೆ ಬೀಳಿಸಿದಾಗ ಅವುಗಳನ್ನು "
 "ಸಂಪೂರ್ಣವಾಗಿ ಹಿಗ್ಗಿಸುವಂತೆ ಮಾಡಲಾಗುತ್ತದೆ."
 
-#: ../data/org.gnome.mutter.gschema.xml.in.h:7
+#: ../data/org.gnome.muffin.gschema.xml.in.h:7
 msgid "Workspaces are managed dynamically"
 msgstr "ಕಾರ್ಯಸ್ಥಳಗಳನ್ನು ಕ್ರಿಯಾತ್ಮಕವಾಗಿ ನಿರ್ವಹಿಸಲಾಗುತ್ತದೆ"
 
-#: ../data/org.gnome.mutter.gschema.xml.in.h:8
+#: ../data/org.gnome.muffin.gschema.xml.in.h:8
 msgid ""
 "Determines whether workspaces are managed dynamically or whether there's a "
 "static number of workspaces (determined by the num-workspaces key in org."
@@ -338,11 +338,11 @@ msgstr ""
 "ನಲ್ಲಿನ "
 "num-workspaces ಕೀಲಿಯಿಂದ ನಿರ್ಧರಿತಗೊಳ್ಳುತ್ತದೆ)."
 
-#: ../data/org.gnome.mutter.gschema.xml.in.h:9
+#: ../data/org.gnome.muffin.gschema.xml.in.h:9
 msgid "Workspaces only on primary"
 msgstr "ಪ್ರಾಥಮಿಕದಲ್ಲಿ ಇರುವ ಕಾರ್ಯಕ್ಷೇತ್ರಗಳು ಮಾತ್ರ"
 
-#: ../data/org.gnome.mutter.gschema.xml.in.h:10
+#: ../data/org.gnome.muffin.gschema.xml.in.h:10
 msgid ""
 "Determines whether workspace switching should happen for windows on all "
 "monitors or only for windows on the primary monitor."
@@ -350,11 +350,11 @@ msgstr ""
 "ಕಾರ್ಯಸ್ಥಳಗಳನ್ನು ಬದಲಾಯಿಸುವಿಕೆಯು ಎಲ್ಲಾ ಪರದೆಗಳಲ್ಲಿನ ಕಿಟಕಿಗಳ ಮೇಲೆ ನಡೆಯಬೇಕೆ ಅಥವ "
 "ಪ್ರಾಥಮಿಕ ಪರದೆಯ ಮೇಲಿನ ಕಿಟಕಿಗಳಲ್ಲಿ ಮಾತ್ರ ನಡೆಯಬೇಕೆ ಎನ್ನುವುದನ್ನು ನಿರ್ಧರಿಸುತ್ತದೆ."
 
-#: ../data/org.gnome.mutter.gschema.xml.in.h:11
+#: ../data/org.gnome.muffin.gschema.xml.in.h:11
 msgid "No tab popup"
 msgstr "ಟ್ಯಾಬ್ ಪುಟಿಕೆ ಇಲ್ಲ"
 
-#: ../data/org.gnome.mutter.gschema.xml.in.h:12
+#: ../data/org.gnome.muffin.gschema.xml.in.h:12
 msgid ""
 "Determines whether the use of popup and highlight frame should be disabled "
 "for window cycling."
@@ -362,11 +362,11 @@ msgstr ""
 "ಕಿಟಕಿಯ ಆವರ್ತನೆಗಾಗಿ ಪುಟಿಕೆ (ಪಾಪಪ್) ಮತ್ತು ಹೈಲೈಟ್ ಚೌಕಟ್ಟನ್ನು ಬಳಸುವುದನ್ನು "
 "ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಬೇಕೆ ಅಥವ ಬೇಡವೆ ಎನ್ನುವುದನ್ನು ನಿರ್ಧರಿಸುತ್ತದೆ."
 
-#: ../data/org.gnome.mutter.gschema.xml.in.h:13
+#: ../data/org.gnome.muffin.gschema.xml.in.h:13
 msgid "Delay focus changes until the pointer stops moving"
 msgstr "ಸೂಚಕವು ಚಲಿಸುವುದನ್ನು ನಿಲ್ಲಿಸುವವರೆಗೂ ಗಮನದ ಬದಲಾವಣೆಯು ವಿಳಂಬಗೊಳ್ಳುತ್ತದೆ"
 
-#: ../data/org.gnome.mutter.gschema.xml.in.h:14
+#: ../data/org.gnome.muffin.gschema.xml.in.h:14
 msgid ""
 "If set to true, and the focus mode is either \"sloppy\" or \"mouse\" then "
 "the focus will not be changed immediately when entering a window, but only "
@@ -376,11 +376,11 @@ msgstr ""
 "ಆಗಿದ್ದಲ್ಲಿ, ಒಂದು ಕಿಟಕಿಗೆ ಪ್ರವೇಶಿಸುವಾಗ ಗಮನವು ಕೂಡಲೆ ಬದಲಾಗುವುದಿಲ್ಲ, ಆದರೆ ಸೂಚಕವು "
 "ಚಲಿಸುವುದನ್ನು ನಿಲ್ಲಿಸಿದ ನಂತರ ಬದಲಾಗುತ್ತದೆ."
 
-#: ../data/org.gnome.mutter.gschema.xml.in.h:15
+#: ../data/org.gnome.muffin.gschema.xml.in.h:15
 msgid "Draggable border width"
 msgstr "ಎಳೆಯಬಹುದಾದ ಅಂಚಿನ ಅಗಲ"
 
-#: ../data/org.gnome.mutter.gschema.xml.in.h:16
+#: ../data/org.gnome.muffin.gschema.xml.in.h:16
 msgid ""
 "The amount of total draggable borders. If the theme's visible borders are "
 "not enough, invisible borders will be added to meet this value."
@@ -388,11 +388,11 @@ msgstr ""
 "ಎಳೆಯಬಹುದಾದ ಅಂಚುಗಳ ಒಟ್ಟು ಮೊತ್ತ. ಸಿದ್ಧವಿನ್ಯಾಸದ ಗೋಚರಿಸುವ ಅಂಚುಗಳು ಸಾಕಷ್ಟು ಇಲ್ಲದೆ "
 "ಇದ್ದಲ್ಲಿ, ಈ ಮೌಲ್ಯಕ್ಕೆ ಹೊಂದಿಕೆಯಾಗುವಂತೆ ಅಗೋಚರವಾದ ಅಂಚುಗಳನ್ನು ಸೇರಿಸಲಾಗುತ್ತದೆ."
 
-#: ../data/org.gnome.mutter.gschema.xml.in.h:17
+#: ../data/org.gnome.muffin.gschema.xml.in.h:17
 msgid "Auto maximize nearly monitor sized windows"
 msgstr "ತೆರೆಯ ಗಾತ್ರದ ಕಿಟಕಿಗಳನ್ನು ಸ್ವಯಂ ಹಿಗ್ಗಿಸು"
 
-#: ../data/org.gnome.mutter.gschema.xml.in.h:18
+#: ../data/org.gnome.muffin.gschema.xml.in.h:18
 msgid ""
 "If enabled, new windows that are initially the size of the monitor "
 "automatically get maximized."
@@ -401,11 +401,11 @@ msgstr ""
 "ಸ್ವಯಂಚಾಲಿತವಾಗಿ "
 "ಹಿಗ್ಗಿಸಲಾಗುತ್ತದೆ."
 
-#: ../data/org.gnome.mutter.gschema.xml.in.h:19
+#: ../data/org.gnome.muffin.gschema.xml.in.h:19
 msgid "Place new windows in the center"
 msgstr "ಹೊಸ ಕಿಟಕಿಗಳನ್ನು ಮಧ್ಯದಲ್ಲಿ ಇರಿಸು"
 
-#: ../data/org.gnome.mutter.gschema.xml.in.h:20
+#: ../data/org.gnome.muffin.gschema.xml.in.h:20
 msgid ""
 "When true, the new windows will always be put in the center of the active "
 "screen of the monitor."
@@ -413,45 +413,45 @@ msgstr ""
 "ಟ್ರೂ ಆಗಿದ್ದಾಗ, ಹೊಸ ಕಿಟಕಿಗಳನ್ನು ಯಾವಾಗಲೂ ಸಹ ಪರದೆಯ ಸಕ್ರಿಯ ತೆರೆಯ ಮೇಲೆ "
 "ಇರಿಸಲಾಗುತ್ತದೆ."
 
-#: ../data/org.gnome.mutter.gschema.xml.in.h:21
+#: ../data/org.gnome.muffin.gschema.xml.in.h:21
 msgid "Select window from tab popup"
 msgstr "ಟ್ಯಾಬ್ ಪುಟಿಕೆಯಿಂದ ಕಿಟಕಿಯನ್ನು ಆರಿಸು"
 
-#: ../data/org.gnome.mutter.gschema.xml.in.h:22
+#: ../data/org.gnome.muffin.gschema.xml.in.h:22
 msgid "Cancel tab popup"
 msgstr "ಟ್ಯಾಬ್ ಪುಟಿಕೆಯನ್ನು ರದ್ದುಗೊಳಿಸು"
 
-#: ../data/org.gnome.mutter.wayland.gschema.xml.in.h:1
+#: ../data/org.gnome.muffin.wayland.gschema.xml.in.h:1
 #| msgid "Switch to workspace 1"
 msgid "Switch to VT 1"
 msgstr "VT 1 ಕ್ಕೆ ಬದಲಾಯಿಸು"
 
-#: ../data/org.gnome.mutter.wayland.gschema.xml.in.h:2
+#: ../data/org.gnome.muffin.wayland.gschema.xml.in.h:2
 #| msgid "Switch to workspace 2"
 msgid "Switch to VT 2"
 msgstr "VT 2 ಕ್ಕೆ ಬದಲಾಯಿಸು"
 
-#: ../data/org.gnome.mutter.wayland.gschema.xml.in.h:3
+#: ../data/org.gnome.muffin.wayland.gschema.xml.in.h:3
 #| msgid "Switch to workspace 3"
 msgid "Switch to VT 3"
 msgstr "VT 3 ಕ್ಕೆ ಬದಲಾಯಿಸು"
 
-#: ../data/org.gnome.mutter.wayland.gschema.xml.in.h:4
+#: ../data/org.gnome.muffin.wayland.gschema.xml.in.h:4
 #| msgid "Switch to workspace 4"
 msgid "Switch to VT 4"
 msgstr "VT 4 ಕ್ಕೆ ಬದಲಾಯಿಸು"
 
-#: ../data/org.gnome.mutter.wayland.gschema.xml.in.h:5
+#: ../data/org.gnome.muffin.wayland.gschema.xml.in.h:5
 #| msgid "Switch to workspace 1"
 msgid "Switch to VT 5"
 msgstr "VT 5 ಕ್ಕೆ ಬದಲಾಯಿಸು"
 
-#: ../data/org.gnome.mutter.wayland.gschema.xml.in.h:6
+#: ../data/org.gnome.muffin.wayland.gschema.xml.in.h:6
 #| msgid "Switch to workspace 1"
 msgid "Switch to VT 6"
 msgstr "VT 6 ಕ್ಕೆ ಬದಲಾಯಿಸು"
 
-#: ../data/org.gnome.mutter.wayland.gschema.xml.in.h:7
+#: ../data/org.gnome.muffin.wayland.gschema.xml.in.h:7
 #| msgid "Switch to workspace 1"
 msgid "Switch to VT 7"
 msgstr "VT 7 ಕ್ಕೆ ಬದಲಾಯಿಸು"
@@ -571,26 +571,26 @@ msgstr ""
 "ಹೊಂದಿದೆ "
 "ಎಂದು ಖಚಿತ ಪಡಿಸಿಕೊಳ್ಳಿ.\n"
 
-#: ../src/core/mutter.c:39
+#: ../src/core/muffin.c:39
 #, c-format
 msgid ""
-"mutter %s\n"
+"muffin %s\n"
 "Copyright (C) 2001-%d Havoc Pennington, Red Hat, Inc., and others\n"
 "This is free software; see the source for copying conditions.\n"
 "There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A "
 "PARTICULAR PURPOSE.\n"
 msgstr ""
-"mutter %s\n"
+"muffin %s\n"
 "Copyright (C) 2001-%d Havoc Pennington, Red Hat, Inc., and others\n"
 "This is free software; see the source for copying conditions.\n"
 "There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A "
 "PARTICULAR PURPOSE.\n"
 
-#: ../src/core/mutter.c:53
+#: ../src/core/muffin.c:53
 msgid "Print version"
 msgstr "ಮುದ್ರಿಸಬಹುದಾದ ಆವೃತ್ತಿ"
 
-#: ../src/core/mutter.c:59
+#: ../src/core/muffin.c:59
 msgid "Mutter plugin to use"
 msgstr "ಬಳಸಬೇಕಿರುವ Mutter ಪ್ಲಗ್ಇನ್"
 
@@ -1422,9 +1422,9 @@ msgstr "%s (%s ನಲ್ಲಿ)"
 #~ msgid "Failed to parse saved session file: %s\n"
 #~ msgstr "ಉಳಿಸಲಾದ ಅಧಿವೇಶನ ಕಡತವನ್ನು ಪಾರ್ಸ್ ಮಾಡುವಲ್ಲಿ ವಿಫಲಗೊಂಡಿದೆ: %s\n"
 
-#~ msgid "<mutter_session> attribute seen but we already have the session ID"
+#~ msgid "<muffin_session> attribute seen but we already have the session ID"
 #~ msgstr ""
-#~ "<mutter_session> ಗುಣ ವಿಶೇಷವು ಕಾಣಿಸಿಕೊಂಡಿದೆ ಆದರೆ ನಾವು ಅಧಿವೇಶನ ID ಅನ್ನು "
+#~ "<muffin_session> ಗುಣ ವಿಶೇಷವು ಕಾಣಿಸಿಕೊಂಡಿದೆ ಆದರೆ ನಾವು ಅಧಿವೇಶನ ID ಅನ್ನು "
 #~ "ಹೊಂದಿದ್ದೇನೆ"
 
 #~ msgid "Unknown attribute %s on <%s> element"

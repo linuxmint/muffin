@@ -25,7 +25,7 @@
 #ifndef META_STAGE_X11_NESTED_H
 #define META_STAGE_X11_NESTED_H
 
-#include "clutter/clutter-mutter.h"
+#include "clutter/clutter-muffin.h"
 #include "backends/x11/meta-stage-x11.h"
 
 #define META_TYPE_STAGE_X11_NESTED (meta_stage_x11_nested_get_type ())
