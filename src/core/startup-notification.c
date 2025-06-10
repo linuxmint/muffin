@@ -62,6 +62,7 @@ enum
 enum
 {
   SEQ_COMPLETE,
+  SEQ_TIMEOUT,
   N_SEQ_SIGNALS
 };
 
@@ -266,6 +267,13 @@ meta_startup_sequence_class_init (MetaStartupSequenceClass *klass)
                   G_SIGNAL_RUN_LAST,
                   G_STRUCT_OFFSET (MetaStartupSequenceClass, complete),
                   NULL, NULL, NULL,
+                  G_TYPE_NONE, 0);
+
+  seq_signals[SEQ_TIMEOUT] =
+    g_signal_new ("timeout",
+                  META_TYPE_STARTUP_SEQUENCE,
+                  G_SIGNAL_RUN_LAST,
+                  0, NULL, NULL, NULL,
                   G_TYPE_NONE, 0);
 
   seq_props[PROP_SEQ_ID] =
@@ -488,7 +496,11 @@ startup_sequence_timeout (void *data)
                   "Timed out sequence %s\n",
                   meta_startup_sequence_get_id (sequence));
 
-      meta_startup_sequence_complete (sequence);
+      if (!meta_startup_sequence_get_completed (sequence))
+      {
+        g_signal_emit (sequence, seq_signals[SEQ_TIMEOUT], 0, sequence);
+        meta_startup_sequence_complete (sequence);
+      }
       meta_startup_notification_remove_sequence (sn, sequence);
     }
 
