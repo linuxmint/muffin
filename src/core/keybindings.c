@@ -3492,6 +3492,67 @@ handle_cycle (MetaDisplay     *display,
 }
 
 static void
+handle_switch_tile_action (MetaDisplay     *display,
+                           MetaWindow      *event_window,
+                           ClutterKeyEvent *event,
+                           MetaKeyBinding  *binding,
+                           MetaDirection   direction)
+{
+  MetaWorkspaceManager *workspace_manager = display->workspace_manager;
+  MetaTabList type = binding->handler->data;
+  MetaWindow *window;
+
+  window = meta_display_get_tab_in_direction (display,
+                                              type,
+                                              workspace_manager->active_workspace,
+                                              NULL,
+                                              direction);
+
+  if (window)
+    meta_window_activate (window, event->time);
+}
+
+static void
+handle_switch_tile_action_right (MetaDisplay     *display,
+                                 MetaWindow      *event_window,
+                                 ClutterKeyEvent *event,
+                                 MetaKeyBinding  *binding,
+                                 gpointer         dummy)
+{
+  handle_switch_tile_action (display, event_window, event, binding, META_DIRECTION_RIGHT);
+}
+
+static void
+handle_switch_tile_action_left (MetaDisplay     *display,
+                                 MetaWindow      *event_window,
+                                 ClutterKeyEvent *event,
+                                 MetaKeyBinding  *binding,
+                                 gpointer         dummy)
+{
+  handle_switch_tile_action (display, event_window, event, binding, META_DIRECTION_LEFT);
+}
+
+static void
+handle_switch_tile_action_up (MetaDisplay     *display,
+                                 MetaWindow      *event_window,
+                                 ClutterKeyEvent *event,
+                                 MetaKeyBinding  *binding,
+                                 gpointer         dummy)
+{
+  handle_switch_tile_action (display, event_window, event, binding, META_DIRECTION_UP);
+}
+
+static void
+handle_switch_tile_action_down (MetaDisplay     *display,
+                                 MetaWindow      *event_window,
+                                 ClutterKeyEvent *event,
+                                 MetaKeyBinding  *binding,
+                                 gpointer         dummy)
+{
+  handle_switch_tile_action (display, event_window, event, binding, META_DIRECTION_DOWN);
+}
+
+static void
 handle_toggle_fullscreen  (MetaDisplay     *display,
                            MetaWindow      *window,
                            ClutterKeyEvent *event,
@@ -4597,6 +4658,34 @@ init_builtin_key_bindings (MetaDisplay *display)
                           META_KEY_BINDING_IGNORE_AUTOREPEAT,
                           META_KEYBINDING_ACTION_PUSH_TILE_DOWN,
                           handle_tile_action, META_TILE_BOTTOM);
+
+  add_builtin_keybinding (display,
+                          "switch-to-tile-left",
+                          common_keybindings,
+                          META_KEY_BINDING_NONE,
+                          META_KEYBINDING_ACTION_SWITCH_TO_TILE_LEFT,
+                          handle_switch_tile_action_left, META_TAB_LIST_NORMAL);
+
+  add_builtin_keybinding (display,
+                          "switch-to-tile-right",
+                          common_keybindings,
+                          META_KEY_BINDING_NONE,
+                          META_KEYBINDING_ACTION_SWITCH_TO_TILE_RIGHT,
+                          handle_switch_tile_action_right, META_TAB_LIST_NORMAL);
+
+  add_builtin_keybinding (display,
+                          "switch-to-tile-up",
+                          common_keybindings,
+                          META_KEY_BINDING_NONE,
+                          META_KEYBINDING_ACTION_SWITCH_TO_TILE_UP,
+                          handle_switch_tile_action_up, META_TAB_LIST_NORMAL);
+
+  add_builtin_keybinding (display,
+                          "switch-to-tile-down",
+                          common_keybindings,
+                          META_KEY_BINDING_NONE,
+                          META_KEYBINDING_ACTION_SWITCH_TO_TILE_DOWN,
+                          handle_switch_tile_action_down, META_TAB_LIST_NORMAL);
 
   add_builtin_keybinding (display,
                           "toggle-above",
