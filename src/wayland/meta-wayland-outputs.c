@@ -68,6 +68,17 @@ output_resource_destroy (struct wl_resource *res)
   wayland_output->resources = g_list_remove (wayland_output->resources, res);
 }
 
+static void
+meta_wl_output_release (struct wl_client   *client,
+                        struct wl_resource *resource)
+{
+  wl_resource_destroy (resource);
+}
+
+static const struct wl_output_interface meta_wl_output_interface = {
+  meta_wl_output_release,
+};
+
 static MetaMonitor *
 pick_main_monitor (MetaLogicalMonitor *logical_monitor)
 {
@@ -293,6 +304,25 @@ send_output_events (struct wl_resource *resource,
         }
     }
 
+  if (need_all_events && version >= WL_OUTPUT_NAME_SINCE_VERSION)
+    {
+      const char *name;
+
+      name = meta_monitor_get_connector (monitor);
+      wl_output_send_name (resource, name);
+      need_done = TRUE;
+    }
+
+  if (need_all_events && version >= WL_OUTPUT_DESCRIPTION_SINCE_VERSION)
+    {
+      const char *description;
+
+      description = meta_monitor_get_display_name (monitor);
+      wl_output_send_description (resource, description);
+      need_done = TRUE;
+    }
+
+
   if (need_all_events && version >= WL_OUTPUT_DONE_SINCE_VERSION)
     {
       wl_output_send_done (resource);
@@ -319,8 +349,10 @@ bind_output (struct wl_client *client,
   resource = wl_resource_create (client, &wl_output_interface, version, id);
   wayland_output->resources = g_list_prepend (wayland_output->resources, resource);
 
-  wl_resource_set_user_data (resource, wayland_output);
-  wl_resource_set_destructor (resource, output_resource_destroy);
+  wl_resource_set_implementation (resource,
+                                  &meta_wl_output_interface,
+                                  wayland_output,
+                                  output_resource_destroy);
 
   if (!logical_monitor)
     return;
