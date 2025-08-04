@@ -5573,6 +5573,13 @@ meta_window_raise (MetaWindow  *window)
 
   g_return_if_fail (!window->override_redirect);
 
+  /* Flush pending visible state now.
+   * It is important that this runs before meta_stack_raise() because
+   * showing a window may overwrite its stacking order based on the
+   * stacking rules for newly shown windows.
+   */
+  meta_window_flush_calc_showing (window);
+
   ancestor = meta_window_find_root_ancestor (window);
 
   meta_topic (META_DEBUG_WINDOW_OPS,
