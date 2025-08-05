@@ -87,6 +87,9 @@ debug_event_cb (ClutterActor *actor,
     case CLUTTER_TOUCHPAD_SWIPE:
       g_print ("[%s] TOUCHPAD SWIPE", source);
       break;
+    case CLUTTER_TOUCHPAD_HOLD:
+      g_print ("[%s] TOUCHPAD HOLD", source);
+      break;
     case CLUTTER_PROXIMITY_IN:
       g_print ("[%s] PROXIMITY IN", source);
       break;
