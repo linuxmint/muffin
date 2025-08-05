@@ -176,7 +176,7 @@ update_inhibition (MetaWaylandIdleInhibitor *inhibitor)
     {
       g_dbus_proxy_call (G_DBUS_PROXY (inhibitor->session_proxy),
                          "Inhibit",
-                         g_variant_new ("(ss)", "mutter", "idle-inhibit"),
+                         g_variant_new ("(ss)", "muffin", "idle-inhibit"),
                          G_DBUS_CALL_FLAGS_NONE,
                          -1,
                          NULL,
