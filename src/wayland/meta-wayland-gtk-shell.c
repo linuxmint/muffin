@@ -83,6 +83,9 @@ gtk_surface_set_dbus_properties (struct wl_client   *client,
   MetaWaylandSurface *surface = gtk_surface->surface;
   MetaWindow *window;
 
+  if (!surface)
+    return;
+
   window = meta_wayland_surface_get_window (surface);
   if (!window)
     return;
@@ -104,6 +107,9 @@ gtk_surface_set_modal (struct wl_client   *client,
   MetaWaylandSurface *surface = gtk_surface->surface;
   MetaWindow *window;
 
+  if (!surface)
+    return;
+
   window = meta_wayland_surface_get_window (surface);
   if (!window)
     return;
@@ -122,6 +128,9 @@ gtk_surface_unset_modal (struct wl_client   *client,
   MetaWaylandGtkSurface *gtk_surface = wl_resource_get_user_data (resource);
   MetaWaylandSurface *surface = gtk_surface->surface;
   MetaWindow *window;
+
+  if (!surface)
+    return;
 
   window = meta_wayland_surface_get_window (surface);
   if (!window)
@@ -143,6 +152,9 @@ gtk_surface_present (struct wl_client   *client,
   MetaWaylandSurface *surface = gtk_surface->surface;
   MetaWindow *window;
 
+  if (!surface)
+    return;
+
   window = meta_wayland_surface_get_window (surface);
   if (!window)
     return;
@@ -161,6 +173,9 @@ gtk_surface_request_focus (struct wl_client   *client,
   MetaDisplay *display = meta_get_display ();
   MetaStartupSequence *sequence = NULL;
   MetaWindow *window;
+
+  if (!surface)
+    return;
 
   window = meta_wayland_surface_get_window (surface);
   if (!window)
@@ -204,8 +219,6 @@ static const struct gtk_surface1_interface meta_wayland_gtk_surface_interface = 
 static void
 gtk_surface_surface_destroyed (MetaWaylandGtkSurface *gtk_surface)
 {
-  wl_resource_set_implementation (gtk_surface->resource,
-                                  NULL, NULL, NULL);
   gtk_surface->surface = NULL;
 }
 
