@@ -218,7 +218,7 @@ gtk_surface_titlebar_gesture (struct wl_client   *client,
   MetaWaylandGtkSurface *gtk_surface = wl_resource_get_user_data (resource);
   MetaWaylandSurface *surface = gtk_surface->surface;
   MetaWaylandSeat *seat = wl_resource_get_user_data (seat_resource);
-  GDesktopTitlebarAction action = G_DESKTOP_TITLEBAR_ACTION_NONE;
+  CDesktopTitlebarAction action = C_DESKTOP_TITLEBAR_ACTION_NONE;
   MetaWindow *window;
   float x, y;
 
@@ -255,32 +255,32 @@ gtk_surface_titlebar_gesture (struct wl_client   *client,
 
   switch (action)
   {
-    case G_DESKTOP_TITLEBAR_ACTION_TOGGLE_MAXIMIZE:
+    case C_DESKTOP_TITLEBAR_ACTION_TOGGLE_MAXIMIZE:
       if (META_WINDOW_MAXIMIZED (window))
         meta_window_unmaximize (window, META_MAXIMIZE_BOTH);
     else
       meta_window_maximize (window, META_MAXIMIZE_BOTH);
     break;
 
-    case G_DESKTOP_TITLEBAR_ACTION_TOGGLE_MAXIMIZE_HORIZONTALLY:
+    case C_DESKTOP_TITLEBAR_ACTION_TOGGLE_MAXIMIZE_HORIZONTALLY:
       if (META_WINDOW_MAXIMIZED_HORIZONTALLY (window))
         meta_window_unmaximize (window, META_MAXIMIZE_HORIZONTAL);
     else
       meta_window_maximize (window, META_MAXIMIZE_HORIZONTAL);
     break;
 
-    case G_DESKTOP_TITLEBAR_ACTION_TOGGLE_MAXIMIZE_VERTICALLY:
+    case C_DESKTOP_TITLEBAR_ACTION_TOGGLE_MAXIMIZE_VERTICALLY:
       if (META_WINDOW_MAXIMIZED_VERTICALLY (window))
         meta_window_unmaximize (window, META_MAXIMIZE_VERTICAL);
     else
       meta_window_maximize (window, META_MAXIMIZE_VERTICAL);
     break;
 
-    case G_DESKTOP_TITLEBAR_ACTION_MINIMIZE:
+    case C_DESKTOP_TITLEBAR_ACTION_MINIMIZE:
       meta_window_minimize (window);
       break;
 
-    case G_DESKTOP_TITLEBAR_ACTION_LOWER:
+    case C_DESKTOP_TITLEBAR_ACTION_LOWER:
     {
       uint32_t timestamp;
 
@@ -289,11 +289,11 @@ gtk_surface_titlebar_gesture (struct wl_client   *client,
     }
     break;
 
-    case G_DESKTOP_TITLEBAR_ACTION_MENU:
+    case C_DESKTOP_TITLEBAR_ACTION_MENU:
       meta_window_show_menu (window, META_WINDOW_MENU_WM, x, y);
       break;
 
-    case G_DESKTOP_TITLEBAR_ACTION_TOGGLE_SHADE:
+    case C_DESKTOP_TITLEBAR_ACTION_TOGGLE_SHADE:
       g_warning ("No shade! The library is closed.");
       G_GNUC_FALLTHROUGH;
     default:
