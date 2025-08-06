@@ -208,12 +208,20 @@ gtk_surface_request_focus (struct wl_client   *client,
     }
 }
 
+static void
+gtk_surface_release (struct wl_client   *client,
+                     struct wl_resource *resource)
+{
+  wl_resource_destroy (resource);
+}
+
 static const struct gtk_surface1_interface meta_wayland_gtk_surface_interface = {
   gtk_surface_set_dbus_properties,
   gtk_surface_set_modal,
   gtk_surface_unset_modal,
   gtk_surface_present,
   gtk_surface_request_focus,
+  gtk_surface_release
 };
 
 static void
