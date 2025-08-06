@@ -43,7 +43,7 @@
 #define META_WL_SEAT_VERSION                5
 #define META_WL_OUTPUT_VERSION              4
 #define META_XSERVER_VERSION                1
-#define META_GTK_SHELL1_VERSION             4
+#define META_GTK_SHELL1_VERSION             5
 #define META_WL_SUBCOMPOSITOR_VERSION       1
 #define META_ZWP_POINTER_GESTURES_V1_VERSION    1
 #define META_ZXDG_EXPORTER_V1_VERSION       1
