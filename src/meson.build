@@ -592,6 +592,8 @@ if have_wayland
     'wayland/meta-wayland-xdg-foreign.h',
     'wayland/meta-wayland-xdg-shell.c',
     'wayland/meta-wayland-xdg-shell.h',
+    'wayland/meta-wayland-xdg-dialog.c',
+    'wayland/meta-wayland-xdg-dialog.h',
     'wayland/meta-window-wayland.c',
     'wayland/meta-window-wayland.h',
     'wayland/meta-window-xwayland.c',
@@ -813,6 +815,7 @@ if have_wayland
     ['tablet', 'unstable', 'v2', ],
     ['text-input', 'unstable', 'v3', ],
     ['viewporter', 'stable', ],
+    ['xdg-dialog', 'staging', 'v1', ],
     ['xdg-foreign', 'unstable', 'v1', ],
     ['xdg-output', 'unstable', 'v1', ],
     ['xdg-shell', 'unstable', 'v6', ],
@@ -840,6 +843,10 @@ if have_wayland
                          '@0@/@1@/@2@.xml'.format(protocol_type,
                          protocol_name,
                          output_base))
+    elif protocol_type == 'staging'
+      protocol_version = p.get(2)
+      output_base = '@0@-@1@'.format(protocol_name, protocol_version)
+      input = protocols_dir / protocol_type / protocol_name / '@0@.xml'.format(output_base)
     elif protocol_type == 'private'
       output_base = protocol_name
       input = 'wayland/protocol/@0@.xml'.format(protocol_name)
