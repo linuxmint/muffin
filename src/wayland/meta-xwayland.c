@@ -650,7 +650,7 @@ meta_xwayland_start_xserver (MetaXWaylandManager *manager,
   args[i++] = "-initfd";
   args[i++] = "7";
 #else
-  args[i++] = XWAYLAND_LISTENFD;
+  args[i++] = "-listen";
   args[i++] = "7";
 #endif
 
