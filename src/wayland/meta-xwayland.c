@@ -580,6 +580,10 @@ meta_xwayland_start_xserver (MetaXWaylandManager *manager,
   GSubprocessFlags flags;
   GError *error = NULL;
   g_autoptr (GTask) task = NULL;
+  MetaBackend *backend;
+  MetaSettings *settings;
+  const char *args[32];
+  int i;
 
   task = g_task_new (NULL, cancellable, callback, user_data);
   g_task_set_source_tag (task, meta_xwayland_start_xserver);
@@ -614,6 +618,9 @@ meta_xwayland_start_xserver (MetaXWaylandManager *manager,
       flags |= G_SUBPROCESS_FLAGS_STDERR_SILENCE;
     }
 
+  backend = meta_get_backend ();
+  settings = meta_backend_get_settings (backend);
+
   launcher = g_subprocess_launcher_new (flags);
 
   g_subprocess_launcher_take_fd (launcher, xwayland_client_fd[1], 3);
@@ -624,29 +631,40 @@ meta_xwayland_start_xserver (MetaXWaylandManager *manager,
 
   g_subprocess_launcher_setenv (launcher, "WAYLAND_SOCKET", "3", TRUE);
 
-  manager->proc = g_subprocess_launcher_spawn (launcher, &error,
-                                               XWAYLAND_PATH,
-                                               manager->public_connection.name,
-                                               "-rootless",
-                                               "-noreset",
-                                               "-accessx",
-                                               "-core",
-                                               "-auth", manager->auth_file,
-                                               "-listen", "4",
-                                               "-listen", "5",
-                                               "-displayfd", "6",
+  i = 0;
+  args[i++] = XWAYLAND_PATH;
+  args[i++] = manager->public_connection.name;
+  args[i++] = "-rootless";
+  args[i++] = "-noreset";
+  args[i++] = "-accessx";
+  args[i++] = "-core";
+  args[i++] = "-auth";
+  args[i++] = manager->auth_file;
+  args[i++] = "-listen";
+  args[i++] = "4";
+  args[i++] = "-listen";
+  args[i++] = "5";
+  args[i++] = "-displayfd";
+  args[i++] = "6";
 #ifdef HAVE_XWAYLAND_INITFD
-                                               "-initfd", "7",
+  args[i++] = "-initfd";
+  args[i++] = "7";
 #else
-                                               "-listen", "7",
+  args[i++] = XWAYLAND_LISTENFD;
+  args[i++] = "7";
 #endif
 
 #ifdef HAVE_XWAYLAND_BYTE_SWAPPED_CLIENTS
-                                               "+byteswappedclients",
-#else
-                                               "-byteswappedclients",
+  if (meta_settings_are_xwayland_byte_swapped_clients_allowed (settings))
+    args[i++] = "+byteswappedclients";
+  else
+    args[i++] = "-byteswappedclients";
 #endif
-                                               NULL);
+
+  /* Terminator */
+  args[i++] = NULL;
+
+  manager->proc = g_subprocess_launcher_spawnv (launcher, args, &error);
 
   if (!manager->proc)
     {
