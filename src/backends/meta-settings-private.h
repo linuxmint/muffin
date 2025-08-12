@@ -79,6 +79,8 @@ void meta_settings_get_xwayland_grab_patterns (MetaSettings  *settings,
 
 gboolean meta_settings_are_xwayland_grabs_allowed (MetaSettings *settings);
 
+gboolean meta_settings_are_xwayland_byte_swapped_clients_allowed (MetaSettings *settings);
+
 MetaX11ScaleMode meta_settings_get_x11_scale_mode (MetaSettings *settings);
 
 void meta_settings_enable_x11_fractional_scaling (MetaSettings *settings,
