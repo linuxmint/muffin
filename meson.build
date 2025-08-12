@@ -376,6 +376,7 @@ if cc.has_header_symbol('sys/prctl.h', 'prctl')
 endif
 
 have_xwayland_initfd = false
+have_xwayland_byte_swapped_clients = false
 if have_wayland
   xwayland_dep = dependency('xwayland', required: false)
 
@@ -415,6 +416,16 @@ if have_wayland
 
   if (have_xwayland_initfd)
     cdata.set('HAVE_XWAYLAND_INITFD', 1)
+  endif
+
+    # For Xwayland +/-byteswappedclients usage
+  if xwayland_dep.found()
+    have_xwayland_byte_swapped_clients = xwayland_dep.get_variable('have_byteswappedclients',
+                                                                   default_value: 'false') == 'true'
+  endif
+
+  if (have_xwayland_byte_swapped_clients)
+    cdata.set('HAVE_XWAYLAND_BYTE_SWAPPED_CLIENTS', 1)
   endif
 endif
 
@@ -465,19 +476,20 @@ output = [
   '',
   '    Options:',
   '',
-  '        Wayland.................. ' + have_wayland.to_string(),
-  '        Wayland EGLStream........ ' + have_wayland_eglstream.to_string(),
-  '        Native Backend........... ' + have_native_backend.to_string(),
-  '        EGL Device............... ' + have_egl_device.to_string(),
-  '        Default driver........... ' + default_driver,
-  '        Remote desktop........... ' + have_remote_desktop.to_string(),
-  '        gudev.................... ' + have_libgudev.to_string(),
-  '        Wacom.................... ' + have_libwacom.to_string(),
-  '        SM....................... ' + have_sm.to_string(),
-  '        Startup notification..... ' + have_startup_notification.to_string(),
-  '        Introspection............ ' + have_introspection.to_string(),
-  '        Profiler................. ' + have_profiler.to_string(),
-  '        Xwayland initfd.......... ' + have_xwayland_initfd.to_string(),
+  '        Wayland.......................... ' + have_wayland.to_string(),
+  '        Wayland EGLStream................ ' + have_wayland_eglstream.to_string(),
+  '        Native Backend................... ' + have_native_backend.to_string(),
+  '        EGL Device....................... ' + have_egl_device.to_string(),
+  '        Default driver................... ' + default_driver,
+  '        Remote desktop................... ' + have_remote_desktop.to_string(),
+  '        gudev............................ ' + have_libgudev.to_string(),
+  '        Wacom............................ ' + have_libwacom.to_string(),
+  '        SM............................... ' + have_sm.to_string(),
+  '        Startup notification............. ' + have_startup_notification.to_string(),
+  '        Introspection.................... ' + have_introspection.to_string(),
+  '        Profiler......................... ' + have_profiler.to_string(),
+  '        Xwayland initfd.................. ' + have_xwayland_initfd.to_string(),
+  '        Xwayland byte-swapped clients.... ' + have_xwayland_byte_swapped_clients.to_string(),
   '',
   '    Tests:',
   '',

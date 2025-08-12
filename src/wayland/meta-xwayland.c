@@ -640,6 +640,12 @@ meta_xwayland_start_xserver (MetaXWaylandManager *manager,
 #else
                                                "-listen", "7",
 #endif
+
+#ifdef HAVE_XWAYLAND_BYTE_SWAPPED_CLIENTS
+                                               "+byteswappedclients",
+#else
+                                               "-byteswappedclients",
+#endif
                                                NULL);
 
   if (!manager->proc)

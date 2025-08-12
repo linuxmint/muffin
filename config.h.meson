@@ -70,3 +70,6 @@
 
 /* Whether Xwayland has -initfd option */
 #mesondefine HAVE_XWAYLAND_INITFD
+
+/* Whether the Xwayland supports +/-byteswappedclients */
+#mesondefine HAVE_XWAYLAND_BYTE_SWAPPED_CLIENTS
