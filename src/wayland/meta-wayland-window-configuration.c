@@ -24,14 +24,30 @@
 
 static uint32_t global_serial_counter = 0;
 
+static gboolean
+is_window_size_fixed (MetaWindow *window)
+{
+  if (meta_window_is_fullscreen (window))
+    return TRUE;
+
+  if (meta_window_get_maximized (window) |
+      (META_MAXIMIZE_VERTICAL | META_MAXIMIZE_VERTICAL))
+    return TRUE;
+
+  if (meta_window_get_tile_mode (window) != META_TILE_NONE)
+    return TRUE;
+
+  return FALSE;
+}
+
 MetaWaylandWindowConfiguration *
-meta_wayland_window_configuration_new (int                 x,
-                                       int                 y,
-                                       int                 width,
-                                       int                 height,
-                                       int                 scale,
-                                       MetaMoveResizeFlags flags,
-                                       MetaGravity         gravity)
+meta_wayland_window_configuration_new (MetaWindow          *window,
+                                       MetaRectangle        rect,
+                                       int                  bounds_width,
+                                       int                  bounds_height,
+                                       int                  scale,
+                                       MetaMoveResizeFlags  flags,
+                                       MetaGravity          gravity)
 {
   MetaWaylandWindowConfiguration *configuration;
 
@@ -39,18 +55,32 @@ meta_wayland_window_configuration_new (int                 x,
   *configuration = (MetaWaylandWindowConfiguration) {
     .serial = ++global_serial_counter,
 
-    .has_position = TRUE,
-    .x = x,
-    .y = y,
-
-    .has_size = TRUE,
-    .width = width,
-    .height = height,
+    .bounds_height = bounds_height,
+    .bounds_width = bounds_width,
 
     .scale = scale,
     .gravity = gravity,
     .flags = flags,
   };
+
+  if (flags & META_MOVE_RESIZE_MOVE_ACTION ||
+      window->rect.x != rect.x ||
+      window->rect.y != rect.y)
+    {
+      configuration->has_position = TRUE;
+      configuration->x = rect.x;
+      configuration->y = rect.y;
+    }
+
+  if (flags & META_MOVE_RESIZE_RESIZE_ACTION ||
+      is_window_size_fixed (window) ||
+      window->rect.width != rect.width ||
+      window->rect.height != rect.height)
+    {
+      configuration->has_size = TRUE;
+      configuration->width = rect.width;
+      configuration->height = rect.height;
+    }
 
   return configuration;
 }
@@ -83,7 +113,8 @@ meta_wayland_window_configuration_new_relative (int rel_x,
 }
 
 MetaWaylandWindowConfiguration *
-meta_wayland_window_configuration_new_empty (void)
+meta_wayland_window_configuration_new_empty (int bounds_width,
+                                             int bounds_height)
 {
   MetaWaylandWindowConfiguration *configuration;
 
@@ -91,6 +122,8 @@ meta_wayland_window_configuration_new_empty (void)
   *configuration = (MetaWaylandWindowConfiguration) {
     .serial = ++global_serial_counter,
     .scale = 1,
+    .bounds_width = bounds_width,
+    .bounds_height = bounds_height,
   };
 
   return configuration;
