@@ -142,7 +142,7 @@ update_inhibition (MetaWaylandIdleInhibitor *inhibitor)
     }
   else
     {
-      if (meta_surface_actor_is_effectively_obscured (inhibitor->actor))
+      if (meta_surface_actor_is_obscured (inhibitor->actor))
         should_inhibit = FALSE;
       else
         should_inhibit = TRUE;
