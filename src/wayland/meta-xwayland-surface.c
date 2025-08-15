@@ -182,7 +182,7 @@ meta_xwayland_surface_pre_apply_state (MetaWaylandSurfaceRole  *surface_role,
   MetaXwaylandSurface *xwayland_surface = META_XWAYLAND_SURFACE (surface_role);
 
   if (pending->newly_attached &&
-      surface->buffer_ref.buffer &&
+      surface->buffer_ref->buffer &&
       xwayland_surface->window)
     meta_window_queue (xwayland_surface->window, META_QUEUE_CALC_SHOWING);
 }

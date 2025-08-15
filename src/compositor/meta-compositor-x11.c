@@ -154,14 +154,38 @@ determine_server_clock_source (MetaCompositorX11 *compositor_x11)
     compositor_x11->xserver_uses_monotonic_clock = FALSE;
 }
 
-static void
-meta_compositor_x11_manage (MetaCompositor *compositor)
+static gboolean
+meta_compositor_x11_manage (MetaCompositor  *compositor,
+                            GError         **error)
 {
   MetaCompositorX11 *compositor_x11 = META_COMPOSITOR_X11 (compositor);
   MetaDisplay *display = meta_compositor_get_display (compositor);
-  Display *xdisplay = meta_x11_display_get_xdisplay (display->x11_display);
+  MetaX11Display *x11_display = display->x11_display;
+  Display *xdisplay = meta_x11_display_get_xdisplay (x11_display);
+  int composite_version;
   MetaBackend *backend = meta_get_backend ();
   Window xwindow;
+
+  if (!META_X11_DISPLAY_HAS_COMPOSITE (x11_display) ||
+      !META_X11_DISPLAY_HAS_DAMAGE (x11_display))
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_FAILED,
+                   "Missing required extension %s",
+                   !META_X11_DISPLAY_HAS_COMPOSITE (x11_display) ?
+                   "composite" : "damage");
+      return FALSE;
+    }
+
+  composite_version = ((x11_display->composite_major_version * 10) +
+                       x11_display->composite_minor_version);
+  if (composite_version < 3)
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_FAILED,
+                   "COMPOSITE extension 3.0 required (found %d.%d)",
+                   x11_display->composite_major_version,
+                   x11_display->composite_minor_version);
+      return FALSE;
+    }
 
   determine_server_clock_source (compositor_x11);
 
@@ -204,6 +228,8 @@ meta_compositor_x11_manage (MetaCompositor *compositor)
   compositor_x11->have_x11_sync_object = meta_sync_ring_init (xdisplay);
 
   meta_compositor_redirect_x11_windows (META_COMPOSITOR (compositor));
+
+  return TRUE;
 }
 
 static void

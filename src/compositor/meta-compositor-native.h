@@ -18,20 +18,15 @@
  *
  */
 
-#ifndef META_COMPOSITOR_SERVER_H
-#define META_COMPOSITOR_SERVER_H
+#ifndef META_COMPOSITOR_NATIVE_H
+#define META_COMPOSITOR_NATIVE_H
 
-#include "compositor/compositor-private.h"
+#include "compositor/meta-compositor-server.h"
 
-#define META_TYPE_COMPOSITOR_SERVER (meta_compositor_server_get_type ())
-G_DECLARE_DERIVABLE_TYPE (MetaCompositorServer, meta_compositor_server,
-                          META, COMPOSITOR_SERVER, MetaCompositor)
+#define META_TYPE_COMPOSITOR_NATIVE (meta_compositor_native_get_type ())
+G_DECLARE_FINAL_TYPE (MetaCompositorNative, meta_compositor_native,
+                      META, COMPOSITOR_NATIVE, MetaCompositor)
 
-struct _MetaCompositorServerClass
-{
-  MetaCompositorClass parent_class;
-};
+MetaCompositorNative * meta_compositor_native_new (MetaDisplay *display);
 
-MetaCompositorServer * meta_compositor_server_new (MetaDisplay *display);
-
-#endif /* META_COMPOSITOR_SERVER_H */
+#endif /* META_COMPOSITOR_NATIVE_H */

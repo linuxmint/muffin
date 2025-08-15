@@ -58,6 +58,11 @@
 #include "meta/util.h"
 #include "wayland/meta-wayland-dma-buf.h"
 
+#ifdef HAVE_NATIVE_BACKEND
+#include "backends/native/meta-drm-buffer-gbm.h"
+#include "backends/native/meta-renderer-native.h"
+#endif
+
 #ifndef DRM_FORMAT_MOD_INVALID
 #define DRM_FORMAT_MOD_INVALID ((1ULL << 56) - 1)
 #endif
@@ -575,6 +580,93 @@ meta_wayland_buffer_process_damage (MetaWaylandBuffer *buffer,
       g_warning ("Failed to process Wayland buffer damage: %s", error->message);
       g_error_free (error);
     }
+}
+
+static CoglScanout *
+try_acquire_egl_image_scanout (MetaWaylandBuffer *buffer,
+                               CoglOnscreen      *onscreen)
+{
+#ifdef HAVE_NATIVE_BACKEND
+  MetaBackend *backend = meta_get_backend ();
+  MetaRenderer *renderer = meta_backend_get_renderer (backend);
+  MetaRendererNative *renderer_native = META_RENDERER_NATIVE (renderer);
+  MetaGpuKms *gpu_kms;
+  struct gbm_device *gbm_device;
+  struct gbm_bo *gbm_bo;
+  uint32_t drm_format;
+  uint64_t drm_modifier;
+  uint32_t stride;
+  MetaDrmBufferGbm *fb;
+  g_autoptr (GError) error = NULL;
+
+  gpu_kms = meta_renderer_native_get_primary_gpu (renderer_native);
+  gbm_device = meta_gbm_device_from_gpu (gpu_kms);
+
+  gbm_bo = gbm_bo_import (gbm_device,
+                          GBM_BO_IMPORT_WL_BUFFER, buffer->resource,
+                          GBM_BO_USE_SCANOUT);
+  if (!gbm_bo)
+    return NULL;
+
+  drm_format = gbm_bo_get_format (gbm_bo);
+  drm_modifier = gbm_bo_get_modifier (gbm_bo);
+  stride = gbm_bo_get_stride (gbm_bo);
+  if (!meta_onscreen_native_is_buffer_scanout_compatible (onscreen,
+                                                          drm_format,
+                                                          drm_modifier,
+                                                          stride))
+    {
+      gbm_bo_destroy (gbm_bo);
+      return NULL;
+    }
+
+  fb = meta_drm_buffer_gbm_new_take (gpu_kms, gbm_bo,
+                                     drm_modifier != DRM_FORMAT_MOD_INVALID,
+                                     &error);
+  if (!fb)
+    {
+      g_debug ("Failed to create scanout buffer: %s", error->message);
+      gbm_bo_destroy (gbm_bo);
+      return NULL;
+    }
+
+  return COGL_SCANOUT (fb);
+#else
+  return NULL;
+#endif
+}
+
+CoglScanout *
+meta_wayland_buffer_try_acquire_scanout (MetaWaylandBuffer *buffer,
+                                         CoglOnscreen      *onscreen)
+{
+  switch (buffer->type)
+    {
+    case META_WAYLAND_BUFFER_TYPE_SHM:
+      return NULL;
+    case META_WAYLAND_BUFFER_TYPE_EGL_IMAGE:
+      return try_acquire_egl_image_scanout (buffer, onscreen);
+#ifdef HAVE_WAYLAND_EGLSTREAM
+    case META_WAYLAND_BUFFER_TYPE_EGL_STREAM:
+      return NULL;
+#endif
+    case META_WAYLAND_BUFFER_TYPE_DMA_BUF:
+      {
+        MetaWaylandDmaBufBuffer *dma_buf;
+
+        dma_buf = meta_wayland_dma_buf_from_buffer (buffer);
+        if (!dma_buf)
+          return NULL;
+
+        return meta_wayland_dma_buf_try_acquire_scanout (dma_buf, onscreen);
+      }
+    case META_WAYLAND_BUFFER_TYPE_UNKNOWN:
+      g_warn_if_reached ();
+      return NULL;
+    }
+
+  g_assert_not_reached ();
+  return NULL;
 }
 
 static void

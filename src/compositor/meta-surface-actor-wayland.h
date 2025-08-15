@@ -52,6 +52,10 @@ void meta_surface_actor_wayland_get_subsurface_rect (MetaSurfaceActorWayland *se
 void meta_surface_actor_wayland_add_frame_callbacks (MetaSurfaceActorWayland *self,
                                                      struct wl_list *frame_callbacks);
 
+
+CoglScanout * meta_surface_actor_wayland_try_acquire_scanout (MetaSurfaceActorWayland *self,
+                                                              CoglOnscreen            *onscreen);
+
 G_END_DECLS
 
 #endif /* __META_SURFACE_ACTOR_WAYLAND_H__ */

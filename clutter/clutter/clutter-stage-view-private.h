@@ -43,4 +43,6 @@ const cairo_region_t * clutter_stage_view_peek_redraw_clip (ClutterStageView *vi
 
 cairo_region_t * clutter_stage_view_take_redraw_clip (ClutterStageView *view);
 
+CoglScanout * clutter_stage_view_take_scanout (ClutterStageView *view);
+
 #endif /* __CLUTTER_STAGE_VIEW_PRIVATE_H__ */

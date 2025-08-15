@@ -76,7 +76,14 @@ CLUTTER_EXPORT
 void clutter_stage_update_resource_scales (ClutterStage *stage);
 
 CLUTTER_EXPORT
+void clutter_stage_view_assign_next_scanout (ClutterStageView *stage_view,
+                                             CoglScanout      *scanout);
+
+CLUTTER_EXPORT
 gboolean clutter_actor_has_damage (ClutterActor *actor);
+
+CLUTTER_EXPORT
+gboolean clutter_actor_has_transitions (ClutterActor *actor);
 
 CLUTTER_EXPORT
 void clutter_stage_get_device_coords (ClutterStage         *stage,

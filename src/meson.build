@@ -290,6 +290,8 @@ muffin_sources = [
   'compositor/meta-background-group.c',
   'compositor/meta-background-image.c',
   'compositor/meta-background-private.h',
+  'compositor/meta-compositor-server.c',
+  'compositor/meta-compositor-server.h',
   'compositor/meta-compositor-x11.c',
   'compositor/meta-compositor-x11.h',
   'compositor/meta-cullable.c',
@@ -299,6 +301,7 @@ muffin_sources = [
   'compositor/meta-dnd.c',
   'compositor/meta-feedback-actor.c',
   'compositor/meta-feedback-actor-private.h',
+  'compositor/meta-later.c',
   'compositor/meta-module.c',
   'compositor/meta-module.h',
   'compositor/meta-plugin.c',
@@ -479,8 +482,6 @@ if have_wayland
     'compositor/meta-surface-actor-wayland.h',
     'compositor/meta-window-actor-wayland.c',
     'compositor/meta-window-actor-wayland.h',
-    'compositor/meta-compositor-server.c',
-    'compositor/meta-compositor-server.h',
     'wayland/meta-cursor-sprite-wayland.c',
     'wayland/meta-cursor-sprite-wayland.h',
     'wayland/meta-pointer-confinement-wayland.c',
@@ -693,6 +694,8 @@ if have_native_backend
     'backends/native/meta-virtual-input-device-native.h',
     'backends/native/meta-xkb-utils.c',
     'backends/native/meta-xkb-utils.h',
+    'compositor/meta-compositor-native.c',
+    'compositor/meta-compositor-native.h',
   ]
 endif
 

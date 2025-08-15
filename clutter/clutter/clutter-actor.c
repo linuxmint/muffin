@@ -20020,6 +20020,24 @@ clutter_actor_get_transition (ClutterActor *self,
 }
 
 /**
+ * clutter_actor_has_transitions: (skip)
+ */
+
+gboolean
+clutter_actor_has_transitions (ClutterActor *self)
+{
+  const ClutterAnimationInfo *info;
+
+  g_return_val_if_fail (CLUTTER_IS_ACTOR (self), FALSE);
+
+  info = _clutter_actor_get_animation_info_or_defaults (self);
+  if (info->transitions == NULL)
+    return FALSE;
+
+  return g_hash_table_size (info->transitions) > 0;
+}
+
+/**
  * clutter_actor_save_easing_state:
  * @self: a #ClutterActor
  *

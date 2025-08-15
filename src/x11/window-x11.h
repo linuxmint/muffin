@@ -25,24 +25,23 @@
 
 #include <X11/Xlib.h>
 
+#include "core/window-private.h"
 #include "meta/compositor.h"
 #include "meta/window.h"
 
 G_BEGIN_DECLS
 
-#define META_TYPE_WINDOW_X11            (meta_window_x11_get_type())
-#define META_WINDOW_X11(obj)            (G_TYPE_CHECK_INSTANCE_CAST ((obj), META_TYPE_WINDOW_X11, MetaWindowX11))
-#define META_WINDOW_X11_CLASS(klass)    (G_TYPE_CHECK_CLASS_CAST ((klass),  META_TYPE_WINDOW_X11, MetaWindowX11Class))
-#define META_IS_WINDOW_X11(obj)         (G_TYPE_CHECK_INSTANCE_TYPE ((obj), META_TYPE_WINDOW_X11))
-#define META_IS_WINDOW_X11_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass),  META_TYPE_WINDOW_X11))
-#define META_WINDOW_X11_GET_CLASS(obj)  (G_TYPE_INSTANCE_GET_CLASS ((obj),  META_TYPE_WINDOW_X11, MetaWindowX11Class))
+#define META_TYPE_WINDOW_X11 (meta_window_x11_get_type())
+G_DECLARE_DERIVABLE_TYPE (MetaWindowX11, meta_window_x11,
+                          META, WINDOW_X11, MetaWindow)
 
-GType meta_window_x11_get_type (void);
-
-typedef struct _MetaWindowX11      MetaWindowX11;
-typedef struct _MetaWindowX11Class MetaWindowX11Class;
-
-G_DEFINE_AUTOPTR_CLEANUP_FUNC (MetaWindowX11, g_object_unref)
+struct _MetaWindowX11Class
+{
+  MetaWindowClass parent_class;
+  void (*freeze_commits) (MetaWindow *window);
+  void (*thaw_commits)   (MetaWindow *window);
+  gboolean (*always_update_shape) (MetaWindow *window);
+};
 
 MetaWindow * meta_window_x11_new           (MetaDisplay        *display,
                                             Window              xwindow,
@@ -95,4 +94,9 @@ void meta_window_x11_surface_rect_to_frame_rect  (MetaWindow    *window,
 void meta_window_x11_surface_rect_to_client_rect (MetaWindow    *window,
                                                   MetaRectangle *surface_rect,
                                                   MetaRectangle *client_rect);
+
+MetaRectangle meta_window_x11_get_client_rect    (MetaWindowX11 *window_x11);
+
+gboolean meta_window_x11_can_unredirect          (MetaWindowX11 *window_x11);
+
 #endif

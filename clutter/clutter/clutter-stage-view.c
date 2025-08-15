@@ -24,6 +24,8 @@
 #include <math.h>
 
 #include "clutter/clutter-private.h"
+#include "clutter/clutter-muffin.h"
+#include "cogl/cogl.h"
 
 enum
 {
@@ -51,6 +53,8 @@ typedef struct _ClutterStageViewPrivate
 
   CoglOffscreen *shadowfb;
   CoglPipeline *shadowfb_pipeline;
+
+  CoglScanout *next_scanout;
 
   gboolean has_redraw_clip;
   cairo_region_t *redraw_clip;
@@ -405,6 +409,25 @@ clutter_stage_default_get_offscreen_transformation_matrix (ClutterStageView *vie
                                                            CoglMatrix       *matrix)
 {
   cogl_matrix_init_identity (matrix);
+}
+
+void
+clutter_stage_view_assign_next_scanout (ClutterStageView *view,
+                                        CoglScanout      *scanout)
+{
+  ClutterStageViewPrivate *priv =
+    clutter_stage_view_get_instance_private (view);
+
+  g_set_object (&priv->next_scanout, scanout);
+}
+
+CoglScanout *
+clutter_stage_view_take_scanout (ClutterStageView *view)
+{
+  ClutterStageViewPrivate *priv =
+    clutter_stage_view_get_instance_private (view);
+
+  return g_steal_pointer (&priv->next_scanout);
 }
 
 static void

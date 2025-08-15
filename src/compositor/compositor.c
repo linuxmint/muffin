@@ -62,6 +62,7 @@
 #include "backends/x11/meta-stage-x11.h"
 #include "clutter/clutter-muffin.h"
 #include "cogl/cogl.h"
+#include "compositor/meta-later-private.h"
 #include "compositor/meta-window-actor-x11.h"
 #include "compositor/meta-window-actor-private.h"
 #include "compositor/meta-window-group-private.h"
@@ -98,6 +99,15 @@ enum
 
 static GParamSpec *obj_props[N_PROPS] = { NULL, };
 
+enum
+{
+  PRE_PAINT,
+
+  N_SIGNALS
+};
+
+static guint signals[N_SIGNALS];
+
 typedef struct _MetaCompositorPrivate
 {
   GObject parent;
@@ -132,6 +142,7 @@ typedef struct _MetaCompositorPrivate
   int switch_workspace_in_progress;
 
   MetaPluginManager *plugin_mgr;
+  MetaLaters *laters;
 } MetaCompositorPrivate;
 
 G_DEFINE_ABSTRACT_TYPE_WITH_PRIVATE (MetaCompositor, meta_compositor,
@@ -567,8 +578,9 @@ meta_compositor_redirect_x11_windows (MetaCompositor *compositor)
     redirect_windows (display->x11_display);
 }
 
-void
-meta_compositor_manage (MetaCompositor *compositor)
+gboolean
+meta_compositor_do_manage (MetaCompositor  *compositor,
+                           GError         **error)
 {
   MetaCompositorPrivate *priv =
     meta_compositor_get_instance_private (compositor);
@@ -618,11 +630,20 @@ meta_compositor_manage (MetaCompositor *compositor)
   clutter_actor_add_child (priv->stage, priv->top_window_group);
   clutter_actor_add_child (priv->stage, priv->feedback_group);
 
-  META_COMPOSITOR_GET_CLASS (compositor)->manage (compositor);
+  if (!META_COMPOSITOR_GET_CLASS (compositor)->manage (compositor, error))
+    return FALSE;
 
   priv->plugin_mgr = meta_plugin_manager_new (compositor);
 
-  clutter_actor_show (priv->stage);
+  return TRUE;
+}
+
+void
+meta_compositor_manage (MetaCompositor *compositor)
+{
+  GError *error = NULL;
+  if (!meta_compositor_do_manage (compositor, &error))
+    g_error ("Compositor failed to manage display: %s", error->message);
 }
 
 void
@@ -809,8 +830,6 @@ meta_compositor_window_shape_changed (MetaCompositor *compositor,
   window_actor = meta_window_actor_from_window (window);
   if (!window_actor)
     return;
-
-  meta_window_actor_x11_update_shape (META_WINDOW_ACTOR_X11 (window_actor));
 }
 
 void
@@ -1261,7 +1280,8 @@ meta_compositor_pre_paint (MetaCompositor *compositor)
 {
   COGL_TRACE_BEGIN_SCOPED (MetaCompositorPrePaint,
                            "Compositor (pre-paint)");
-  META_COMPOSITOR_GET_CLASS (compositor)->pre_paint (compositor);
+
+  g_signal_emit (compositor, signals[PRE_PAINT], 0);
 }
 
 static gboolean
@@ -1388,6 +1408,8 @@ meta_compositor_init (MetaCompositor *compositor)
                                            meta_post_paint_func,
                                            compositor,
                                            NULL);
+
+  priv->laters = meta_laters_new (compositor);
 }
 
 static void
@@ -1396,6 +1418,8 @@ meta_compositor_dispose (GObject *object)
   MetaCompositor *compositor = META_COMPOSITOR (object);
   MetaCompositorPrivate *priv =
     meta_compositor_get_instance_private (compositor);
+
+  g_clear_pointer (&priv->laters, meta_laters_free);
 
   g_clear_signal_handler (&priv->stage_after_paint_id, priv->stage);
   g_clear_signal_handler (&priv->stage_presented_id, priv->stage);
@@ -1441,6 +1465,14 @@ meta_compositor_class_init (MetaCompositorClass *klass)
                          G_PARAM_CONSTRUCT_ONLY |
                          G_PARAM_STATIC_STRINGS);
   g_object_class_install_properties (object_class, N_PROPS, obj_props);
+
+  signals[PRE_PAINT] =
+    g_signal_new ("pre-paint",
+                  G_TYPE_FROM_CLASS (klass),
+                  G_SIGNAL_RUN_LAST,
+                  G_STRUCT_OFFSET (MetaCompositorClass, pre_paint),
+                  NULL, NULL, NULL,
+                  G_TYPE_NONE, 0);
 }
 
 /**
@@ -1730,6 +1762,15 @@ meta_compositor_is_switching_workspace (MetaCompositor *compositor)
     meta_compositor_get_instance_private (compositor);
 
   return priv->switch_workspace_in_progress > 0;
+}
+
+MetaLaters *
+meta_compositor_get_laters (MetaCompositor *compositor)
+{
+  MetaCompositorPrivate *priv =
+    meta_compositor_get_instance_private (compositor);
+
+  return priv->laters;
 }
 
 /**

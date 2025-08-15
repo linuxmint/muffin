@@ -249,7 +249,7 @@ reload_net_wm_window_type (MetaWindow    *window,
 {
   MetaX11Display *x11_display = window->display->x11_display;
   MetaWindowX11 *window_x11 = META_WINDOW_X11 (window);
-  MetaWindowX11Private *priv = window_x11->priv;
+  MetaWindowX11Private *priv = meta_window_x11_get_private (window_x11);
 
   if (value->type != META_PROP_VALUE_INVALID)
     {
@@ -291,7 +291,7 @@ reload_icon (MetaWindow    *window,
              Atom           atom)
 {
   MetaWindowX11 *window_x11 = META_WINDOW_X11 (window);
-  MetaWindowX11Private *priv = window_x11->priv;
+  MetaWindowX11Private *priv = meta_window_x11_get_private (window_x11);
 
   meta_icon_cache_property_changed (&priv->icon_cache,
                                     window->display->x11_display,
@@ -596,7 +596,7 @@ set_window_title (MetaWindow *window,
                   const char *title)
 {
   MetaWindowX11 *window_x11 = META_WINDOW_X11 (window);
-  MetaWindowX11Private *priv = window_x11->priv;
+  MetaWindowX11Private *priv = meta_window_x11_get_private (window_x11);
 
   char *new_title = NULL;
 
@@ -619,7 +619,7 @@ reload_net_wm_name (MetaWindow    *window,
                     gboolean       initial)
 {
   MetaWindowX11 *window_x11 = META_WINDOW_X11 (window);
-  MetaWindowX11Private *priv = window_x11->priv;
+  MetaWindowX11Private *priv = meta_window_x11_get_private (window_x11);
 
   if (value->type != META_PROP_VALUE_INVALID)
     {
@@ -644,7 +644,7 @@ reload_wm_name (MetaWindow    *window,
                 gboolean       initial)
 {
   MetaWindowX11 *window_x11 = META_WINDOW_X11 (window);
-  MetaWindowX11Private *priv = window_x11->priv;
+  MetaWindowX11Private *priv = meta_window_x11_get_private (window_x11);
 
   if (priv->using_net_wm_name)
     {
@@ -784,7 +784,7 @@ reload_net_wm_state (MetaWindow    *window,
 {
   MetaX11Display *x11_display = window->display->x11_display;
   MetaWindowX11 *window_x11 = META_WINDOW_X11 (window);
-  MetaWindowX11Private *priv = window_x11->priv;
+  MetaWindowX11Private *priv = meta_window_x11_get_private (window_x11);
 
   int i;
 
@@ -1656,7 +1656,7 @@ reload_wm_hints (MetaWindow    *window,
                  gboolean       initial)
 {
   MetaWindowX11 *window_x11 = META_WINDOW_X11 (window);
-  MetaWindowX11Private *priv = window_x11->priv;
+  MetaWindowX11Private *priv = meta_window_x11_get_private (window_x11);
   Window old_group_leader;
   gboolean urgent;
 
@@ -1847,23 +1847,28 @@ reload_bypass_compositor (MetaWindow    *window,
                           MetaPropValue *value,
                           gboolean       initial)
 {
-  int requested_value = 0;
-  int current_value = window->bypass_compositor;
+  MetaWindowX11 *window_x11 = META_WINDOW_X11 (window);
+  MetaWindowX11Private *priv = meta_window_x11_get_private (window_x11);
+  MetaBypassCompositorHint requested_value;
+  MetaBypassCompositorHint current_value;
 
   if (value->type != META_PROP_VALUE_INVALID)
-      requested_value = (int) value->v.cardinal;
+    requested_value = (MetaBypassCompositorHint) value->v.cardinal;
+  else
+    requested_value = META_BYPASS_COMPOSITOR_HINT_AUTO;
 
+  current_value = priv->bypass_compositor;
   if (requested_value == current_value)
     return;
 
-  if (requested_value == _NET_WM_BYPASS_COMPOSITOR_HINT_ON)
+  if (requested_value == META_BYPASS_COMPOSITOR_HINT_ON)
     meta_verbose ("Request to bypass compositor for window %s.\n", window->desc);
-  else if (requested_value == _NET_WM_BYPASS_COMPOSITOR_HINT_OFF)
+  else if (requested_value == META_BYPASS_COMPOSITOR_HINT_OFF)
     meta_verbose ("Request to don't bypass compositor for window %s.\n", window->desc);
-  else if (requested_value != _NET_WM_BYPASS_COMPOSITOR_HINT_AUTO)
+  else if (requested_value != META_BYPASS_COMPOSITOR_HINT_AUTO)
     return;
 
-  window->bypass_compositor = requested_value;
+  priv->bypass_compositor = requested_value;
 }
 
 static void

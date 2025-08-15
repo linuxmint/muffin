@@ -51,6 +51,7 @@
 #include "backends/x11/meta-backend-x11.h"
 #include "backends/x11/meta-event-x11.h"
 #include "backends/x11/cm/meta-backend-x11-cm.h"
+#include "backends/x11/nested/meta-backend-x11-nested.h"
 #include "clutter/x11/clutter-x11.h"
 #include "compositor/compositor-private.h"
 #include "compositor/meta-compositor-x11.h"
@@ -81,6 +82,7 @@
 #include "x11/xprops.h"
 
 #ifdef HAVE_WAYLAND
+#include "compositor/meta-compositor-native.h"
 #include "compositor/meta-compositor-server.h"
 #include "wayland/meta-xwayland-private.h"
 #include "wayland/meta-wayland-tablet-seat.h"
@@ -620,44 +622,16 @@ static MetaCompositor *
 create_compositor (MetaDisplay *display)
 {
 #ifdef HAVE_WAYLAND
-  if (meta_is_wayland_compositor ())
+  MetaBackend *backend = meta_get_backend ();
+
+#ifdef HAVE_NATIVE_BACKEND
+  if (META_IS_BACKEND_NATIVE (backend))
+    return META_COMPOSITOR (meta_compositor_native_new (display));
+#endif
+  if (META_IS_BACKEND_X11_NESTED (backend))
     return META_COMPOSITOR (meta_compositor_server_new (display));
-  else
 #endif
     return META_COMPOSITOR (meta_compositor_x11_new (display));
-}
-
-static void
-enable_compositor (MetaDisplay *display)
-{
-  MetaX11Display *x11_display = display->x11_display;
-
-  if (x11_display)
-    {
-      if (!META_X11_DISPLAY_HAS_COMPOSITE (x11_display) ||
-          !META_X11_DISPLAY_HAS_DAMAGE (x11_display))
-        {
-          meta_fatal ("Missing %s extension required for compositing",
-                      !META_X11_DISPLAY_HAS_COMPOSITE (x11_display) ?
-                      "composite" : "damage");
-          return;
-        }
-
-      int version = (x11_display->composite_major_version * 10) +
-                     x11_display->composite_minor_version;
-      if (version < 3)
-        {
-          meta_fatal ("Your version of COMPOSITE (%d.%d) is too old. Version 3.0 or later required.",
-                      x11_display->composite_major_version,
-                      x11_display->composite_minor_version);
-          return;
-        }
-    }
-
-  if (!display->compositor)
-    display->compositor = create_compositor (display);
-
-  meta_compositor_manage (display->compositor);
 }
 
 static void
@@ -933,6 +907,8 @@ meta_display_open (void)
   g_signal_connect (settings, "ui-scaling-factor-changed",
                     G_CALLBACK (on_ui_scaling_factor_changed), display);
 
+  display->compositor = create_compositor (display);
+
   meta_display_set_cursor (display, META_CURSOR_DEFAULT);
 
   display->stack = meta_stack_new (display);
@@ -970,7 +946,6 @@ meta_display_open (void)
 
   display->last_focus_time = timestamp;
   display->last_user_time = timestamp;
-  display->compositor = NULL;
 
   if (!meta_is_wayland_compositor ())
     meta_prop_get_window (display->x11_display,
@@ -978,7 +953,12 @@ meta_display_open (void)
                           display->x11_display->atom__NET_ACTIVE_WINDOW,
                           &old_active_xwindow);
 
-  enable_compositor (display);
+  if (!meta_compositor_do_manage (display->compositor, &error))
+    {
+      g_error ("Compositor failed to manage display: %s",
+               error->message);
+    }
+
 
   if (display->x11_display)
     {
