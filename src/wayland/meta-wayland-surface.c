@@ -124,6 +124,58 @@ meta_wayland_surface_role_is_on_logical_monitor (MetaWaylandSurfaceRole *surface
 static MetaWaylandSurface *
 meta_wayland_surface_role_get_toplevel (MetaWaylandSurfaceRole *surface_role);
 
+static MetaWaylandBufferRef *
+meta_wayland_buffer_ref_new (void)
+{
+  MetaWaylandBufferRef *buffer_ref;
+
+  buffer_ref = g_new0 (MetaWaylandBufferRef, 1);
+  g_ref_count_init (&buffer_ref->ref_count);
+
+  return buffer_ref;
+}
+
+static MetaWaylandBufferRef *
+meta_wayland_buffer_ref_ref (MetaWaylandBufferRef *buffer_ref)
+{
+  g_ref_count_inc (&buffer_ref->ref_count);
+  return buffer_ref;
+}
+
+static void
+meta_wayland_buffer_ref_unref (MetaWaylandBufferRef *buffer_ref)
+{
+  if (g_ref_count_dec (&buffer_ref->ref_count))
+    {
+      g_warn_if_fail (buffer_ref->use_count == 0);
+      g_clear_object (&buffer_ref->buffer);
+      g_free (buffer_ref);
+    }
+}
+
+static void
+meta_wayland_buffer_ref_inc_use_count (MetaWaylandBufferRef *buffer_ref)
+{
+  g_return_if_fail (buffer_ref->buffer);
+  g_warn_if_fail (buffer_ref->buffer->resource);
+
+  buffer_ref->use_count++;
+}
+
+static void
+meta_wayland_buffer_ref_dec_use_count (MetaWaylandBufferRef *buffer_ref)
+{
+  MetaWaylandBuffer *buffer = buffer_ref->buffer;
+
+  g_return_if_fail (buffer_ref->use_count > 0);
+  g_return_if_fail (buffer);
+
+  buffer_ref->use_count--;
+
+  if (buffer_ref->use_count == 0 && buffer->resource)
+    wl_buffer_send_release (buffer->resource);
+}
+
 static void
 role_assignment_valist_to_properties (GType       role_type,
                                       const char *first_property_name,
@@ -359,31 +411,19 @@ surface_process_damage (MetaWaylandSurface *surface,
 MetaWaylandBuffer *
 meta_wayland_surface_get_buffer (MetaWaylandSurface *surface)
 {
-  return surface->buffer_ref.buffer;
+  return surface->buffer_ref->buffer;
 }
 
 void
 meta_wayland_surface_ref_buffer_use_count (MetaWaylandSurface *surface)
 {
-  g_return_if_fail (surface->buffer_ref.buffer);
-  g_warn_if_fail (surface->buffer_ref.buffer->resource);
-
-  surface->buffer_ref.use_count++;
+  meta_wayland_buffer_ref_inc_use_count (surface->buffer_ref);
 }
 
 void
 meta_wayland_surface_unref_buffer_use_count (MetaWaylandSurface *surface)
 {
-  MetaWaylandBuffer *buffer = surface->buffer_ref.buffer;
-
-  g_return_if_fail (surface->buffer_ref.use_count != 0);
-
-  surface->buffer_ref.use_count--;
-
-  g_return_if_fail (buffer);
-
-  if (surface->buffer_ref.use_count == 0 && buffer->resource)
-    wl_buffer_send_release (buffer->resource);
+  meta_wayland_buffer_ref_dec_use_count (surface->buffer_ref);
 }
 
 static void
@@ -645,7 +685,13 @@ meta_wayland_surface_apply_state (MetaWaylandSurface      *surface,
       if (surface->buffer_held)
         meta_wayland_surface_unref_buffer_use_count (surface);
 
-      g_set_object (&surface->buffer_ref.buffer, state->buffer);
+      if (surface->buffer_ref->use_count > 0)
+        {
+          meta_wayland_buffer_ref_unref (surface->buffer_ref);
+          surface->buffer_ref = meta_wayland_buffer_ref_new ();
+        }
+
+      g_set_object (&surface->buffer_ref->buffer, state->buffer);
 
       if (state->buffer)
         meta_wayland_surface_ref_buffer_use_count (surface);
@@ -752,7 +798,8 @@ meta_wayland_surface_apply_state (MetaWaylandSurface      *surface,
            * role the surface is given. That means we need to also keep a use
            * count for wl_buffer's that are used by unassigned wl_surface's.
            */
-          g_set_object (&surface->unassigned.buffer, surface->buffer_ref.buffer);
+          g_set_object (&surface->unassigned.buffer,
+                        surface->buffer_ref->buffer);
           if (surface->unassigned.buffer)
             meta_wayland_surface_ref_buffer_use_count (surface);
         }
@@ -800,7 +847,7 @@ cleanup:
    * be released if no-one else has a use-reference to it.
    */
   if (state->newly_attached &&
-      !surface->buffer_held && surface->buffer_ref.buffer)
+      !surface->buffer_held && surface->buffer_ref->buffer)
     meta_wayland_surface_unref_buffer_use_count (surface);
 
   g_signal_emit (state,
@@ -1331,7 +1378,7 @@ wl_surface_destructor (struct wl_resource *resource)
   if (surface->buffer_held)
     meta_wayland_surface_unref_buffer_use_count (surface);
   g_clear_pointer (&surface->texture, cogl_object_unref);
-  g_clear_object (&surface->buffer_ref.buffer);
+  g_clear_pointer (&surface->buffer_ref, meta_wayland_buffer_ref_unref);
 
   g_clear_object (&surface->cached_state);
   g_clear_object (&surface->pending_state);
@@ -1602,6 +1649,9 @@ static void
 meta_wayland_surface_init (MetaWaylandSurface *surface)
 {
   surface->pending_state = g_object_new (META_TYPE_WAYLAND_SURFACE_STATE, NULL);
+
+  surface->buffer_ref = meta_wayland_buffer_ref_new ();
+  
   surface->subsurface_branch_node = g_node_new (surface);
   surface->subsurface_leaf_node =
     g_node_prepend_data (surface->subsurface_branch_node, surface);
@@ -1874,7 +1924,7 @@ meta_wayland_surface_calculate_input_region (MetaWaylandSurface *surface)
   cairo_region_t *region;
   cairo_rectangle_int_t buffer_rect;
 
-  if (!surface->buffer_ref.buffer)
+  if (!surface->buffer_ref->buffer)
     return NULL;
 
   buffer_rect = (cairo_rectangle_int_t) {
@@ -1982,4 +2032,39 @@ meta_wayland_surface_get_height (MetaWaylandSurface *surface)
 
       return height / surface->scale;
     }
+}
+
+static void
+scanout_destroyed (gpointer  data,
+                   GObject  *where_the_object_was)
+{
+  MetaWaylandBufferRef *buffer_ref = data;
+
+  meta_wayland_buffer_ref_dec_use_count (buffer_ref);
+  meta_wayland_buffer_ref_unref (buffer_ref);
+}
+
+CoglScanout *
+meta_wayland_surface_try_acquire_scanout (MetaWaylandSurface *surface,
+                                          CoglOnscreen       *onscreen)
+{
+  CoglScanout *scanout;
+  MetaWaylandBufferRef *buffer_ref;
+
+  if (!surface->buffer_ref->buffer)
+    return NULL;
+
+  if (surface->buffer_ref->use_count == 0)
+    return NULL;
+
+  scanout = meta_wayland_buffer_try_acquire_scanout (surface->buffer_ref->buffer,
+                                                     onscreen);
+  if (!scanout)
+    return NULL;
+
+  buffer_ref = meta_wayland_buffer_ref_ref (surface->buffer_ref);
+  meta_wayland_buffer_ref_inc_use_count (buffer_ref);
+  g_object_weak_ref (G_OBJECT (scanout), scanout_destroyed, buffer_ref);
+
+  return scanout;
 }

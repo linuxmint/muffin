@@ -51,6 +51,11 @@
 #include "wayland/meta-wayland-private.h"
 #include "wayland/meta-wayland-versions.h"
 
+#ifdef HAVE_NATIVE_BACKEND
+#include "backends/native/meta-drm-buffer-gbm.h"
+#include "backends/native/meta-renderer-native.h"
+#endif
+
 #include "linux-dmabuf-unstable-v1-server-protocol.h"
 
 #ifndef DRM_FORMAT_MOD_INVALID
@@ -178,6 +183,117 @@ meta_wayland_dma_buf_buffer_attach (MetaWaylandBuffer  *buffer,
   return TRUE;
 }
 
+#ifdef HAVE_NATIVE_BACKEND
+static struct gbm_bo *
+create_gbm_bo (MetaWaylandDmaBufBuffer *dma_buf,
+               MetaGpuKms              *gpu_kms,
+               int                      n_planes,
+               gboolean                *use_modifier)
+{
+  struct gbm_device *gbm_device;
+
+  gbm_device = meta_gbm_device_from_gpu (gpu_kms);
+
+  if (dma_buf->drm_modifier != DRM_FORMAT_MOD_INVALID ||
+      n_planes > 1 ||
+      dma_buf->offsets[0] > 0)
+    {
+      struct gbm_import_fd_modifier_data import_with_modifier;
+
+      import_with_modifier = (struct gbm_import_fd_modifier_data) {
+        .width = dma_buf->width,
+        .height = dma_buf->height,
+        .format = dma_buf->drm_format,
+        .num_fds = n_planes,
+        .modifier = dma_buf->drm_modifier,
+      };
+      memcpy (import_with_modifier.fds,
+              dma_buf->fds,
+              sizeof (dma_buf->fds));
+      memcpy (import_with_modifier.strides,
+              dma_buf->strides,
+              sizeof (import_with_modifier.strides));
+      memcpy (import_with_modifier.offsets,
+              dma_buf->offsets,
+              sizeof (import_with_modifier.offsets));
+
+      *use_modifier = TRUE;
+      return gbm_bo_import (gbm_device, GBM_BO_IMPORT_FD_MODIFIER,
+                            &import_with_modifier,
+                            GBM_BO_USE_SCANOUT);
+    }
+  else
+    {
+      struct gbm_import_fd_data import_legacy;
+
+      import_legacy = (struct gbm_import_fd_data) {
+        .width = dma_buf->width,
+        .height = dma_buf->height,
+        .format = dma_buf->drm_format,
+        .stride = dma_buf->strides[0],
+        .fd = dma_buf->fds[0],
+      };
+
+      *use_modifier = FALSE;
+      return gbm_bo_import (gbm_device, GBM_BO_IMPORT_FD,
+                            &import_legacy,
+                            GBM_BO_USE_SCANOUT);
+    }
+}
+#endif
+
+CoglScanout *
+meta_wayland_dma_buf_try_acquire_scanout (MetaWaylandDmaBufBuffer *dma_buf,
+                                          CoglOnscreen            *onscreen)
+{
+#ifdef HAVE_NATIVE_BACKEND
+  MetaBackend *backend = meta_get_backend ();
+  MetaRenderer *renderer = meta_backend_get_renderer (backend);
+  MetaRendererNative *renderer_native = META_RENDERER_NATIVE (renderer);
+  MetaGpuKms *gpu_kms;
+  int n_planes;
+  uint32_t drm_format;
+  uint64_t drm_modifier;
+  uint32_t stride;
+  struct gbm_bo *gbm_bo;
+  gboolean use_modifier;
+  g_autoptr (GError) error = NULL;
+  MetaDrmBufferGbm *fb;
+
+  for (n_planes = 0; n_planes < META_WAYLAND_DMA_BUF_MAX_FDS; n_planes++)
+    {
+      if (dma_buf->fds[n_planes] < 0)
+        break;
+    }
+
+  drm_format = dma_buf->drm_format;
+  drm_modifier = dma_buf->drm_modifier;
+  stride = dma_buf->strides[0];
+  if (!meta_onscreen_native_is_buffer_scanout_compatible (onscreen,
+                                                          drm_format,
+                                                          drm_modifier,
+                                                          stride))
+    return NULL;
+
+  gpu_kms = meta_renderer_native_get_primary_gpu (renderer_native);
+  gbm_bo = create_gbm_bo (dma_buf, gpu_kms, n_planes, &use_modifier);
+
+  fb = meta_drm_buffer_gbm_new_take (gpu_kms, gbm_bo,
+                                     use_modifier,
+                                     &error);
+  if (!fb)
+    {
+      g_debug ("Failed to create scanout buffer: %s", error->message);
+      gbm_bo_destroy (gbm_bo);
+      return NULL;
+    }
+
+  return COGL_SCANOUT (fb);
+#else
+  return NULL;
+#endif
+}
+
 static void
 buffer_params_add (struct wl_client   *client,
                    struct wl_resource *resource,
@@ -282,9 +398,12 @@ static const struct wl_buffer_interface dma_buf_buffer_impl =
 MetaWaylandDmaBufBuffer *
 meta_wayland_dma_buf_from_buffer (MetaWaylandBuffer *buffer)
 {
+  if (!buffer->resource)
+    return NULL;
+
   if (wl_resource_instance_of (buffer->resource, &wl_buffer_interface,
                                &dma_buf_buffer_impl))
-      return wl_resource_get_user_data (buffer->resource);
+    return wl_resource_get_user_data (buffer->resource);
 
   return NULL;
 }
@@ -454,6 +573,15 @@ static const struct zwp_linux_dmabuf_v1_interface dma_buf_implementation =
   dma_buf_handle_create_buffer_params,
 };
 
+static gboolean
+should_send_modifiers (MetaBackend *backend)
+{
+  MetaSettings *settings = meta_backend_get_settings (backend);
+
+  return meta_settings_is_experimental_feature_enabled (
+           settings, META_EXPERIMENTAL_FEATURE_KMS_MODIFIERS);
+}
+
 static void
 send_modifiers (struct wl_resource *resource,
                 uint32_t            format)
@@ -475,6 +603,14 @@ send_modifiers (struct wl_resource *resource,
    * event. */
   if (wl_resource_get_version (resource) < ZWP_LINUX_DMABUF_V1_MODIFIER_SINCE_VERSION)
     return;
+
+  if (!should_send_modifiers (backend))
+    {
+      zwp_linux_dmabuf_v1_send_modifier (resource, format,
+                                         DRM_FORMAT_MOD_INVALID >> 32,
+                                         DRM_FORMAT_MOD_INVALID & 0xffffffff);
+      return;
+    }
 
   /* First query the number of available modifiers, then allocate an array,
    * then fill the array. */

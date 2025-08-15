@@ -67,13 +67,6 @@ typedef enum
 
 typedef enum
 {
-  _NET_WM_BYPASS_COMPOSITOR_HINT_AUTO = 0,
-  _NET_WM_BYPASS_COMPOSITOR_HINT_ON = 1,
-  _NET_WM_BYPASS_COMPOSITOR_HINT_OFF = 2,
-} MetaBypassCompositorHintValue;
-
-typedef enum
-{
   META_MOVE_RESIZE_CONFIGURE_REQUEST = 1 << 0,
   META_MOVE_RESIZE_USER_ACTION = 1 << 1,
   META_MOVE_RESIZE_MOVE_ACTION = 1 << 2,
@@ -547,11 +540,6 @@ struct _MetaWindow
   /* The currently complementary tiled windows, if any. */
   MetaWindow *vtile_match;
   MetaWindow *htile_match;
-
-  // MetaWindow *tile_match;
-
-  /* Bypass compositor hints */
-  guint bypass_compositor;
 
   struct {
     MetaPlacementRule *rule;

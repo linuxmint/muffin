@@ -595,11 +595,11 @@ wl_shell_surface_role_apply_state (MetaWaylandSurfaceRole  *surface_role,
   /* For wl_shell, it's equivalent to an unmap. Semantics
    * are poorly defined, so we can choose some that are
    * convenient for us. */
-  if (surface->buffer_ref.buffer && !window)
+  if (surface->buffer_ref->buffer && !window)
     {
       create_wl_shell_surface_window (surface);
     }
-  else if (!surface->buffer_ref.buffer && window)
+  else if (!surface->buffer_ref->buffer && window)
     {
       if (wl_shell_surface->popup)
         meta_wayland_popup_dismiss (wl_shell_surface->popup);

@@ -254,33 +254,13 @@ meta_surface_actor_x11_is_opaque (MetaSurfaceActor *actor)
 gboolean
 meta_surface_actor_x11_should_unredirect (MetaSurfaceActorX11 *self)
 {
-  MetaWindow *window = self->window;
-
-  if (meta_window_requested_dont_bypass_compositor (window))
-    return FALSE;
-
-  if (window->opacity != 0xFF)
-    return FALSE;
-
-  if (window->shape_region != NULL)
-    return FALSE;
-
-  if (!meta_window_is_monitor_sized (window))
-    return FALSE;
-
-  if (meta_window_requested_bypass_compositor (window))
-    return TRUE;
-
   if (!meta_surface_actor_x11_is_opaque (META_SURFACE_ACTOR (self)))
     return FALSE;
 
-  if (meta_window_is_override_redirect (window))
-    return TRUE;
-
-  if (self->does_full_damage && meta_prefs_get_unredirect_fullscreen_windows ())
-    return TRUE;
-
-  return FALSE;
+  if (!self->does_full_damage &&
+      !meta_window_is_override_redirect (self->window))
+    return FALSE;
+  return TRUE;
 }
 
 static void

@@ -990,6 +990,20 @@ clutter_stage_cogl_redraw_view (ClutterStageWindow *stage_window,
 }
 
 static void
+clutter_stage_cogl_scanout_view (ClutterStageCogl *stage_cogl,
+                                 ClutterStageView *view,
+                                 CoglScanout      *scanout)
+{
+  CoglFramebuffer *framebuffer = clutter_stage_view_get_framebuffer (view);
+  CoglOnscreen *onscreen;
+
+  g_return_if_fail (cogl_is_onscreen (framebuffer));
+
+  onscreen = COGL_ONSCREEN (framebuffer);
+  cogl_onscreen_direct_scanout (onscreen, scanout);
+}
+
+static void
 clutter_stage_cogl_redraw (ClutterStageWindow *stage_window)
 {
   ClutterStageCogl *stage_cogl = CLUTTER_STAGE_COGL (stage_window);
@@ -1016,9 +1030,23 @@ clutter_stage_cogl_redraw (ClutterStageWindow *stage_window)
   for (l = _clutter_stage_window_get_views (stage_window); l; l = l->next)
     {
       ClutterStageView *view = l->data;
+      g_autoptr (CoglScanout) scanout = NULL;
 
       if (!clutter_stage_view_has_redraw_clip (view))
         continue;
+
+      scanout = clutter_stage_view_take_scanout (view);
+      if (scanout)
+        {
+          clutter_stage_cogl_scanout_view (stage_cogl,
+                                           view,
+                                           scanout);
+          swap_event = TRUE;
+        }
+      else
+        {
+          swap_event |= clutter_stage_cogl_redraw_view (stage_window, view);
+        }
 
       swap_event |= clutter_stage_cogl_redraw_view (stage_window, view);
     }
