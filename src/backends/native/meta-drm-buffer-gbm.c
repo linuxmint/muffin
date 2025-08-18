@@ -44,7 +44,12 @@ struct _MetaDrmBufferGbm
   uint32_t fb_id;
 };
 
-G_DEFINE_TYPE (MetaDrmBufferGbm, meta_drm_buffer_gbm, META_TYPE_DRM_BUFFER)
+static void
+cogl_scanout_iface_init (CoglScanoutInterface *iface);
+
+G_DEFINE_TYPE_WITH_CODE (MetaDrmBufferGbm, meta_drm_buffer_gbm, META_TYPE_DRM_BUFFER,
+                         G_IMPLEMENT_INTERFACE (COGL_TYPE_SCANOUT,
+                                                cogl_scanout_iface_init))
 
 struct gbm_bo *
 meta_drm_buffer_gbm_get_bo (MetaDrmBufferGbm *buffer_gbm)
@@ -158,6 +163,11 @@ static uint32_t
 meta_drm_buffer_gbm_get_fb_id (MetaDrmBuffer *buffer)
 {
   return META_DRM_BUFFER_GBM (buffer)->fb_id;
+}
+
+static void
+cogl_scanout_iface_init (CoglScanoutInterface *iface)
+{
 }
 
 static void
