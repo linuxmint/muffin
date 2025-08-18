@@ -142,6 +142,7 @@ struct _MetaWaylandDragDestFuncs
 
 typedef struct _MetaWaylandBufferRef
 {
+  grefcount ref_count;
   MetaWaylandBuffer *buffer;
   unsigned int use_count;
 } MetaWaylandBufferRef;
