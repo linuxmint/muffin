@@ -33,10 +33,16 @@ G_DECLARE_FINAL_TYPE (MetaDrmBufferGbm,
                       META, DRM_BUFFER_GBM,
                       MetaDrmBuffer)
 
-MetaDrmBufferGbm * meta_drm_buffer_gbm_new (MetaGpuKms          *gpu_kms,
-                                            struct gbm_surface  *gbm_surface,
-                                            gboolean             use_modifiers,
-                                            GError             **error);
+MetaDrmBufferGbm * meta_drm_buffer_gbm_new_lock_front (MetaGpuKms          *gpu_kms,
+                                                       struct gbm_surface  *gbm_surface,
+                                                       gboolean             use_modifiers,
+                                                       GError             **error);
+
+
+MetaDrmBufferGbm * meta_drm_buffer_gbm_new_take (MetaGpuKms     *gpu_kms,
+                                                 struct gbm_bo  *gbm_bo,
+                                                 gboolean        use_modifiers,
+                                                 GError        **error);
 
 struct gbm_bo * meta_drm_buffer_gbm_get_bo (MetaDrmBufferGbm *buffer_gbm);
 
