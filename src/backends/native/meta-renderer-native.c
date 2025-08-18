@@ -1621,13 +1621,14 @@ copy_shared_framebuffer_gpu (CoglOnscreen                        *onscreen,
       return;
     }
 
-  buffer_gbm = meta_drm_buffer_gbm_new (secondary_gpu_state->gpu_kms,
+  buffer_gbm =
+    meta_drm_buffer_gbm_new_lock_front (secondary_gpu_state->gpu_kms,
                                         secondary_gpu_state->gbm.surface,
                                         renderer_native->use_modifiers,
                                         &error);
   if (!buffer_gbm)
     {
-      g_warning ("meta_drm_buffer_gbm_new failed: %s",
+      g_warning ("meta_drm_buffer_gbm_new_lock_front failed: %s",
                  error->message);
       g_error_free (error);
       return;
@@ -2113,13 +2114,14 @@ meta_onscreen_native_swap_buffers_with_damage (CoglOnscreen *onscreen,
       g_warn_if_fail (onscreen_native->gbm.next_fb == NULL);
       g_clear_object (&onscreen_native->gbm.next_fb);
 
-      buffer_gbm = meta_drm_buffer_gbm_new (render_gpu,
+      buffer_gbm =
+      meta_drm_buffer_gbm_new_lock_front (render_gpu,
                                             onscreen_native->gbm.surface,
                                             renderer_native->use_modifiers,
                                             &error);
       if (!buffer_gbm)
         {
-          g_warning ("meta_drm_buffer_gbm_new failed: %s",
+          g_warning ("meta_drm_buffer_gbm_new_lock_front failed: %s",
                      error->message);
           return;
         }
