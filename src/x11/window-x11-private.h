@@ -25,26 +25,11 @@
 
 #include "core/window-private.h"
 #include "x11/iconcache.h"
+#include "x11/window-x11.h"
 
 G_BEGIN_DECLS
 
 typedef struct _MetaWindowX11Private MetaWindowX11Private;
-
-struct _MetaWindowX11Class
-{
-  MetaWindowClass parent_class;
-
-  void (*freeze_commits) (MetaWindow *window);
-  void (*thaw_commits)   (MetaWindow *window);
-  gboolean (*always_update_shape) (MetaWindow *window);
-};
-
-struct _MetaWindowX11
-{
-  MetaWindow parent;
-
-  MetaWindowX11Private *priv;
-};
 
 struct _MetaWindowX11Private
 {
@@ -80,6 +65,8 @@ struct _MetaWindowX11Private
   /* Freeze/thaw on resize (for Xwayland) */
   gboolean thaw_after_paint;
 };
+
+MetaWindowX11Private * meta_window_x11_get_private (MetaWindowX11 *window_x11);
 
 G_END_DECLS
 

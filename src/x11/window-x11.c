@@ -73,7 +73,12 @@ meta_window_x11_maybe_focus_delayed (MetaWindow *window,
 static void
 meta_window_x11_init (MetaWindowX11 *window_x11)
 {
-  window_x11->priv = meta_window_x11_get_instance_private (window_x11);
+}
+
+MetaWindowX11Private *
+meta_window_x11_get_private (MetaWindowX11 *window_x11)
+{
+  return meta_window_x11_get_instance_private (window_x11);
 }
 
 static void
@@ -4132,4 +4137,12 @@ meta_window_x11_surface_rect_to_client_rect (MetaWindow    *window,
   client_rect->y += borders.total.top;
   client_rect->width -= borders.total.left + borders.total.right;
   client_rect->height -= borders.total.top + borders.total.bottom;
+}
+
+MetaRectangle
+meta_window_x11_get_client_rect (MetaWindowX11 *window_x11)
+{
+  MetaWindowX11Private *priv = meta_window_x11_get_instance_private (window_x11);
+
+  return priv->client_rect;
 }
