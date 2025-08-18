@@ -289,7 +289,7 @@ cogl_onscreen_swap_buffers_with_damage (CoglOnscreen *onscreen,
 /**
  * cogl_onscreen_direct_scanout: (skip)
  */
-void
+COGL_EXPORT void
 cogl_onscreen_direct_scanout (CoglOnscreen *onscreen,
                               CoglScanout  *scanout);
 
