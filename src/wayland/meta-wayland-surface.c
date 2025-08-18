@@ -146,6 +146,29 @@ meta_wayland_buffer_ref_unref (MetaWaylandBufferRef *buffer_ref)
 }
 
 static void
+meta_wayland_buffer_ref_inc_use_count (MetaWaylandBufferRef *buffer_ref)
+{
+  g_return_if_fail (buffer_ref->buffer);
+  g_warn_if_fail (buffer_ref->buffer->resource);
+
+  buffer_ref->use_count++;
+}
+
+static void
+meta_wayland_buffer_ref_dec_use_count (MetaWaylandBufferRef *buffer_ref)
+{
+  MetaWaylandBuffer *buffer = buffer_ref->buffer;
+
+  g_return_if_fail (buffer_ref->use_count > 0);
+  g_return_if_fail (buffer);
+
+  buffer_ref->use_count--;
+
+  if (buffer_ref->use_count == 0 && buffer->resource)
+    wl_buffer_send_release (buffer->resource);
+}
+
+static void
 role_assignment_valist_to_properties (GType       role_type,
                                       const char *first_property_name,
                                       va_list     var_args,
@@ -386,25 +409,13 @@ meta_wayland_surface_get_buffer (MetaWaylandSurface *surface)
 void
 meta_wayland_surface_ref_buffer_use_count (MetaWaylandSurface *surface)
 {
-  g_return_if_fail (surface->buffer_ref->buffer);
-  g_warn_if_fail (surface->buffer_ref->buffer->resource);
-
-  surface->buffer_ref->use_count++;
+  meta_wayland_buffer_ref_inc_use_count (surface->buffer_ref);
 }
 
 void
 meta_wayland_surface_unref_buffer_use_count (MetaWaylandSurface *surface)
 {
-  MetaWaylandBuffer *buffer = surface->buffer_ref->buffer;
-
-  g_return_if_fail (surface->buffer_ref->use_count != 0);
-
-  surface->buffer_ref->use_count--;
-
-  g_return_if_fail (buffer);
-
-  if (surface->buffer_ref->use_count == 0 && buffer->resource)
-    wl_buffer_send_release (buffer->resource);
+  meta_wayland_buffer_ref_dec_use_count (surface->buffer_ref);
 }
 
 static void
