@@ -1855,23 +1855,28 @@ reload_bypass_compositor (MetaWindow    *window,
                           MetaPropValue *value,
                           gboolean       initial)
 {
-  int requested_value = 0;
-  int current_value = window->bypass_compositor;
+  MetaWindowX11 *window_x11 = META_WINDOW_X11 (window);
+  MetaWindowX11Private *priv = meta_window_x11_get_private (window_x11);
+  MetaBypassCompositorHint requested_value;
+  MetaBypassCompositorHint current_value;
 
   if (value->type != META_PROP_VALUE_INVALID)
-      requested_value = (int) value->v.cardinal;
+    requested_value = (MetaBypassCompositorHint) value->v.cardinal;
+  else
+    requested_value = META_BYPASS_COMPOSITOR_HINT_AUTO;
 
+  current_value = priv->bypass_compositor;
   if (requested_value == current_value)
     return;
 
-  if (requested_value == _NET_WM_BYPASS_COMPOSITOR_HINT_ON)
+  if (requested_value == META_BYPASS_COMPOSITOR_HINT_ON)
     meta_verbose ("Request to bypass compositor for window %s.\n", window->desc);
-  else if (requested_value == _NET_WM_BYPASS_COMPOSITOR_HINT_OFF)
+  else if (requested_value == META_BYPASS_COMPOSITOR_HINT_OFF)
     meta_verbose ("Request to don't bypass compositor for window %s.\n", window->desc);
-  else if (requested_value != _NET_WM_BYPASS_COMPOSITOR_HINT_AUTO)
+  else if (requested_value != META_BYPASS_COMPOSITOR_HINT_AUTO)
     return;
 
-  window->bypass_compositor = requested_value;
+  priv->bypass_compositor = requested_value;
 }
 
 static void
