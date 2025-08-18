@@ -313,6 +313,12 @@ meta_gbm_device_from_gpu (MetaGpuKms *gpu_kms)
   return renderer_gpu_data->gbm.device;
 }
 
+MetaGpuKms *
+meta_renderer_native_get_primary_gpu (MetaRendererNative *renderer_native)
+{
+  return renderer_native->primary_gpu_kms;
+}
+
 static MetaRendererNativeGpuData *
 meta_create_renderer_native_gpu_data (MetaGpuKms *gpu_kms)
 {
