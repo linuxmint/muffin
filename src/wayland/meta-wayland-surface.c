@@ -129,14 +129,20 @@ meta_wayland_buffer_ref_new (void)
   MetaWaylandBufferRef *buffer_ref;
 
   buffer_ref = g_new0 (MetaWaylandBufferRef, 1);
+  g_ref_count_init (&buffer_ref->ref_count);
 
   return buffer_ref;
 }
 
 static void
-meta_wayland_buffer_ref_free (MetaWaylandBufferRef *buffer_ref)
+meta_wayland_buffer_ref_unref (MetaWaylandBufferRef *buffer_ref)
 {
-  g_free (buffer_ref);
+  if (g_ref_count_dec (&buffer_ref->ref_count))
+    {
+      g_warn_if_fail (buffer_ref->use_count == 0);
+      g_clear_object (&buffer_ref->buffer);
+      g_free (buffer_ref);
+    }
 }
 
 static void
@@ -1366,8 +1372,7 @@ wl_surface_destructor (struct wl_resource *resource)
   if (surface->buffer_held)
     meta_wayland_surface_unref_buffer_use_count (surface);
   g_clear_pointer (&surface->texture, cogl_object_unref);
-  g_clear_object (&surface->buffer_ref->buffer);
-  g_clear_pointer (&surface->buffer_ref, meta_wayland_buffer_ref_free);
+  g_clear_pointer (&surface->buffer_ref, meta_wayland_buffer_ref_unref);
 
   g_clear_object (&surface->cached_state);
   g_clear_object (&surface->pending_state);
