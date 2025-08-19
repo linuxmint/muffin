@@ -83,6 +83,9 @@ gtk_surface_set_dbus_properties (struct wl_client   *client,
   MetaWaylandSurface *surface = gtk_surface->surface;
   MetaWindow *window;
 
+  if (!surface)
+    return;
+
   window = meta_wayland_surface_get_window (surface);
   if (!window)
     return;
@@ -104,6 +107,9 @@ gtk_surface_set_modal (struct wl_client   *client,
   MetaWaylandSurface *surface = gtk_surface->surface;
   MetaWindow *window;
 
+  if (!surface)
+    return;
+
   window = meta_wayland_surface_get_window (surface);
   if (!window)
     return;
@@ -122,6 +128,9 @@ gtk_surface_unset_modal (struct wl_client   *client,
   MetaWaylandGtkSurface *gtk_surface = wl_resource_get_user_data (resource);
   MetaWaylandSurface *surface = gtk_surface->surface;
   MetaWindow *window;
+
+  if (!surface)
+    return;
 
   window = meta_wayland_surface_get_window (surface);
   if (!window)
@@ -143,6 +152,9 @@ gtk_surface_present (struct wl_client   *client,
   MetaWaylandSurface *surface = gtk_surface->surface;
   MetaWindow *window;
 
+  if (!surface)
+    return;
+
   window = meta_wayland_surface_get_window (surface);
   if (!window)
     return;
@@ -161,6 +173,9 @@ gtk_surface_request_focus (struct wl_client   *client,
   MetaDisplay *display = meta_get_display ();
   MetaStartupSequence *sequence = NULL;
   MetaWindow *window;
+
+  if (!surface)
+    return;
 
   window = meta_wayland_surface_get_window (surface);
   if (!window)
@@ -193,19 +208,119 @@ gtk_surface_request_focus (struct wl_client   *client,
     }
 }
 
+static void
+gtk_surface_titlebar_gesture (struct wl_client   *client,
+                              struct wl_resource *resource,
+                              uint32_t            serial,
+                              struct wl_resource *seat_resource,
+                              uint32_t            gesture)
+{
+  MetaWaylandGtkSurface *gtk_surface = wl_resource_get_user_data (resource);
+  MetaWaylandSurface *surface = gtk_surface->surface;
+  MetaWaylandSeat *seat = wl_resource_get_user_data (seat_resource);
+  CDesktopTitlebarAction action = C_DESKTOP_TITLEBAR_ACTION_NONE;
+  MetaWindow *window;
+  float x, y;
+
+  if (!surface)
+    return;
+
+  window = meta_wayland_surface_get_window (surface);
+  if (!window)
+    return;
+
+
+
+  if (!meta_wayland_seat_get_grab_info (seat, surface, serial, FALSE, &x, &y))
+    return;
+
+  switch (gesture)
+  {
+    case GTK_SURFACE1_GESTURE_DOUBLE_CLICK:
+      action = meta_prefs_get_action_double_click_titlebar ();
+      break;
+    case GTK_SURFACE1_GESTURE_RIGHT_CLICK:
+      action = meta_prefs_get_action_right_click_titlebar ();
+      break;
+    case GTK_SURFACE1_GESTURE_MIDDLE_CLICK:
+      action = meta_prefs_get_action_middle_click_titlebar ();
+      break;
+    default:
+      wl_resource_post_error (resource,
+                              GTK_SURFACE1_ERROR_INVALID_GESTURE,
+                              "Invalid gesture passed");
+      break;
+
+  }
+
+  switch (action)
+  {
+    case C_DESKTOP_TITLEBAR_ACTION_TOGGLE_MAXIMIZE:
+      if (META_WINDOW_MAXIMIZED (window))
+        meta_window_unmaximize (window, META_MAXIMIZE_BOTH);
+    else
+      meta_window_maximize (window, META_MAXIMIZE_BOTH);
+    break;
+
+    case C_DESKTOP_TITLEBAR_ACTION_TOGGLE_MAXIMIZE_HORIZONTALLY:
+      if (META_WINDOW_MAXIMIZED_HORIZONTALLY (window))
+        meta_window_unmaximize (window, META_MAXIMIZE_HORIZONTAL);
+    else
+      meta_window_maximize (window, META_MAXIMIZE_HORIZONTAL);
+    break;
+
+    case C_DESKTOP_TITLEBAR_ACTION_TOGGLE_MAXIMIZE_VERTICALLY:
+      if (META_WINDOW_MAXIMIZED_VERTICALLY (window))
+        meta_window_unmaximize (window, META_MAXIMIZE_VERTICAL);
+    else
+      meta_window_maximize (window, META_MAXIMIZE_VERTICAL);
+    break;
+
+    case C_DESKTOP_TITLEBAR_ACTION_MINIMIZE:
+      meta_window_minimize (window);
+      break;
+
+    case C_DESKTOP_TITLEBAR_ACTION_LOWER:
+    {
+      uint32_t timestamp;
+
+      timestamp = meta_display_get_current_time_roundtrip (window->display);
+      meta_window_lower_with_transients (window, timestamp);
+    }
+    break;
+
+    case C_DESKTOP_TITLEBAR_ACTION_MENU:
+      meta_window_show_menu (window, META_WINDOW_MENU_WM, x, y);
+      break;
+
+    case C_DESKTOP_TITLEBAR_ACTION_TOGGLE_SHADE:
+      g_warning ("No shade! The library is closed.");
+      G_GNUC_FALLTHROUGH;
+    default:
+      return;
+  }
+}
+
+static void
+gtk_surface_release (struct wl_client   *client,
+                     struct wl_resource *resource)
+{
+  wl_resource_destroy (resource);
+}
+
 static const struct gtk_surface1_interface meta_wayland_gtk_surface_interface = {
   gtk_surface_set_dbus_properties,
   gtk_surface_set_modal,
   gtk_surface_unset_modal,
   gtk_surface_present,
   gtk_surface_request_focus,
+  gtk_surface_release,
+  gtk_surface_titlebar_gesture
 };
 
 static void
 gtk_surface_surface_destroyed (MetaWaylandGtkSurface *gtk_surface)
 {
-  wl_resource_set_implementation (gtk_surface->resource,
-                                  NULL, NULL, NULL);
   gtk_surface->surface = NULL;
 }
 
