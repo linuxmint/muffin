@@ -55,5 +55,6 @@
 #define META_GTK_TEXT_INPUT_VERSION         1
 #define META_ZWP_TEXT_INPUT_V3_VERSION      1
 #define META_WP_VIEWPORTER_VERSION          1
+#define META_WL_FIXES_VERSION 1
 
 #endif
