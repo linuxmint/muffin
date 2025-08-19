@@ -341,6 +341,9 @@ void                meta_wayland_surface_update_outputs_recursively (MetaWayland
 int                 meta_wayland_surface_get_width (MetaWaylandSurface *surface);
 int                 meta_wayland_surface_get_height (MetaWaylandSurface *surface);
 
+CoglScanout *       meta_wayland_surface_try_acquire_scanout (MetaWaylandSurface *surface,
+                                                              CoglOnscreen       *onscreen);
+
 static inline GNode *
 meta_get_next_subsurface_sibling (GNode *n)
 {
