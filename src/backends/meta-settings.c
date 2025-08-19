@@ -72,6 +72,9 @@ struct _MetaSettings
   GPtrArray *xwayland_grab_blacklist_patterns;
 
   MetaX11ScaleMode x11_scale_mode;
+
+  /* Whether Xwayland should allow X11 clients from different endianess */
+  gboolean xwayland_allow_byte_swapped_clients;
 };
 
 G_DEFINE_TYPE (MetaSettings, meta_settings, G_TYPE_OBJECT)
@@ -499,6 +502,15 @@ update_xwayland_allow_grabs (MetaSettings *settings)
 }
 
 static void
+update_xwayland_allow_byte_swapped_clients (MetaSettings *settings)
+{
+
+  settings->xwayland_allow_byte_swapped_clients =
+    g_settings_get_flags (settings->wayland_settings,
+                          "xwayland-allow-byte-swapped-clients");
+}
+
+static void
 wayland_settings_changed (GSettings    *wayland_settings,
                           gchar        *key,
                           MetaSettings *settings)
@@ -511,6 +523,10 @@ wayland_settings_changed (GSettings    *wayland_settings,
   else if (g_str_equal (key, "xwayland-grab-access-rules"))
     {
       update_xwayland_grab_access_rules (settings);
+    }
+  else if (g_str_equal (key, "xwayland-allow-byte-swapped-clients"))
+    {
+      update_xwayland_allow_byte_swapped_clients (settings);
     }
 }
 
@@ -539,6 +555,12 @@ gboolean
 meta_settings_are_xwayland_grabs_allowed (MetaSettings *settings)
 {
   return (settings->xwayland_allow_grabs);
+}
+
+gboolean
+meta_settings_are_xwayland_byte_swapped_clients_allowed (MetaSettings *settings)
+{
+  return settings->xwayland_allow_byte_swapped_clients;
 }
 
 MetaX11ScaleMode
