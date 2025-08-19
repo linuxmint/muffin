@@ -2260,6 +2260,48 @@ meta_renderer_native_create_dma_buf (CoglRenderer  *cogl_renderer,
   return NULL;
 }
 
+gboolean
+meta_onscreen_native_is_buffer_scanout_compatible (CoglOnscreen *onscreen,
+                                                   uint32_t      drm_format,
+                                                   uint64_t      drm_modifier,
+                                                   uint32_t      stride)
+{
+  CoglOnscreenEGL *onscreen_egl = onscreen->winsys;
+  MetaOnscreenNative *onscreen_native = onscreen_egl->platform;
+  MetaDrmBuffer *fb;
+  struct gbm_bo *gbm_bo;
+
+  if (onscreen_native->crtc->config->transform != META_MONITOR_TRANSFORM_NORMAL)
+    return FALSE;
+
+  if (onscreen_native->secondary_gpu_state)
+    return FALSE;
+
+  if (!onscreen_native->gbm.surface)
+    return FALSE;
+
+  fb = onscreen_native->gbm.current_fb ? onscreen_native->gbm.current_fb
+                                       : onscreen_native->gbm.next_fb;
+  if (!fb)
+    return FALSE;
+
+  if (!META_IS_DRM_BUFFER_GBM (fb))
+    return FALSE;
+
+  gbm_bo = meta_drm_buffer_gbm_get_bo (META_DRM_BUFFER_GBM (fb));
+
+  if (gbm_bo_get_format (gbm_bo) != drm_format)
+    return FALSE;
+
+  if (gbm_bo_get_modifier (gbm_bo) != drm_modifier)
+    return FALSE;
+
+  if (gbm_bo_get_stride (gbm_bo) != stride)
+    return FALSE;
+
+  return TRUE;
+}
+
 static void
 meta_onscreen_native_direct_scanout (CoglOnscreen *onscreen,
                                      CoglScanout  *scanout)
