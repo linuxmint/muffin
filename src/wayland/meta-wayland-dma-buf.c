@@ -471,6 +471,15 @@ static const struct zwp_linux_dmabuf_v1_interface dma_buf_implementation =
   dma_buf_handle_create_buffer_params,
 };
 
+static gboolean
+should_send_modifiers (MetaBackend *backend)
+{
+  MetaSettings *settings = meta_backend_get_settings (backend);
+
+  return meta_settings_is_experimental_feature_enabled (
+    settings, META_EXPERIMENTAL_FEATURE_KMS_MODIFIERS);
+}
+
 static void
 send_modifiers (struct wl_resource *resource,
                 uint32_t            format)
@@ -492,6 +501,14 @@ send_modifiers (struct wl_resource *resource,
    * event. */
   if (wl_resource_get_version (resource) < ZWP_LINUX_DMABUF_V1_MODIFIER_SINCE_VERSION)
     return;
+
+  if (!should_send_modifiers (backend))
+    {
+      zwp_linux_dmabuf_v1_send_modifier (resource, format,
+                                         DRM_FORMAT_MOD_INVALID >> 32,
+                                         DRM_FORMAT_MOD_INVALID & 0xffffffff);
+      return;
+    }
 
   /* First query the number of available modifiers, then allocate an array,
    * then fill the array. */
