@@ -299,9 +299,12 @@ static const struct wl_buffer_interface dma_buf_buffer_impl =
 MetaWaylandDmaBufBuffer *
 meta_wayland_dma_buf_from_buffer (MetaWaylandBuffer *buffer)
 {
+  if (!buffer->resource)
+    return NULL;
+
   if (wl_resource_instance_of (buffer->resource, &wl_buffer_interface,
                                &dma_buf_buffer_impl))
-      return wl_resource_get_user_data (buffer->resource);
+    return wl_resource_get_user_data (buffer->resource);
 
   return NULL;
 }
