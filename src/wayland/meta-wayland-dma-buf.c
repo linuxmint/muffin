@@ -107,8 +107,14 @@ meta_wayland_dma_buf_realize_texture (MetaWaylandBuffer  *buffer,
     case DRM_FORMAT_XRGB8888:
       cogl_format = COGL_PIXEL_FORMAT_RGB_888;
       break;
+    case DRM_FORMAT_XBGR8888:
+      cogl_format = COGL_PIXEL_FORMAT_BGR_888;
+      break;
     case DRM_FORMAT_ARGB8888:
       cogl_format = COGL_PIXEL_FORMAT_ARGB_8888_PRE;
+      break;
+    case DRM_FORMAT_ABGR8888:
+      cogl_format = COGL_PIXEL_FORMAT_ABGR_8888_PRE;
       break;
     case DRM_FORMAT_ARGB2101010:
       cogl_format = COGL_PIXEL_FORMAT_ARGB_2101010_PRE;
@@ -527,7 +533,9 @@ dma_buf_bind (struct wl_client *client,
   wl_resource_set_implementation (resource, &dma_buf_implementation,
                                   compositor, NULL);
   send_modifiers (resource, DRM_FORMAT_ARGB8888);
+  send_modifiers (resource, DRM_FORMAT_ABGR8888);
   send_modifiers (resource, DRM_FORMAT_XRGB8888);
+  send_modifiers (resource, DRM_FORMAT_XBGR8888);
   send_modifiers (resource, DRM_FORMAT_ARGB2101010);
   send_modifiers (resource, DRM_FORMAT_RGB565);
 }
