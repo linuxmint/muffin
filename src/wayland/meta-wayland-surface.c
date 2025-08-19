@@ -134,6 +134,13 @@ meta_wayland_buffer_ref_new (void)
   return buffer_ref;
 }
 
+static MetaWaylandBufferRef *
+meta_wayland_buffer_ref_ref (MetaWaylandBufferRef *buffer_ref)
+{
+  g_ref_count_inc (&buffer_ref->ref_count);
+  return buffer_ref;
+}
+
 static void
 meta_wayland_buffer_ref_unref (MetaWaylandBufferRef *buffer_ref)
 {
@@ -677,6 +684,12 @@ meta_wayland_surface_apply_state (MetaWaylandSurface      *surface,
        */
       if (surface->buffer_held)
         meta_wayland_surface_unref_buffer_use_count (surface);
+
+      if (surface->buffer_ref->use_count > 0)
+        {
+          meta_wayland_buffer_ref_unref (surface->buffer_ref);
+          surface->buffer_ref = meta_wayland_buffer_ref_new ();
+        }
 
       g_set_object (&surface->buffer_ref->buffer, state->buffer);
 
@@ -2036,6 +2049,42 @@ meta_wayland_surface_get_height (MetaWaylandSurface *surface)
 
       return height / surface->scale;
     }
+}
+
+static void
+scanout_destroyed (gpointer  data,
+                   GObject  *where_the_object_was)
+{
+  MetaWaylandBufferRef *buffer_ref = data;
+
+  meta_wayland_buffer_ref_dec_use_count (buffer_ref);
+  meta_wayland_buffer_ref_unref (buffer_ref);
+}
+
+CoglScanout *
+meta_wayland_surface_try_acquire_scanout (MetaWaylandSurface *surface,
+                                          CoglOnscreen       *onscreen)
+{
+  CoglScanout *scanout;
+  MetaWaylandBufferRef *buffer_ref;
+
+  if (!surface->buffer_ref->buffer)
+    return NULL;
+
+  if (surface->buffer_ref->use_count == 0)
+    return NULL;
+
+  scanout = meta_wayland_buffer_try_acquire_scanout (surface->buffer_ref->buffer,
+                                                     onscreen);
+  if (!scanout)
+    return NULL;
+
+  buffer_ref = meta_wayland_buffer_ref_ref (surface->buffer_ref);
+  meta_wayland_buffer_ref_inc_use_count (buffer_ref);
+  g_object_weak_ref (G_OBJECT (scanout), scanout_destroyed, buffer_ref);
+
+  return scanout;
+
 }
 
 void
