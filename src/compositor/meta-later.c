@@ -19,8 +19,12 @@
 
 #include "config.h"
 
+#include "compositor/meta-later-private.h"
+
 #include "cogl/cogl.h"
-#include "meta/util.h"
+#include "compositor/compositor-private.h"
+#include "core/display-private.h"
+#include "meta/meta-later.h"
 
 typedef struct _MetaLater
 {
@@ -36,8 +40,6 @@ typedef struct _MetaLater
     gboolean run_once;
 } MetaLater;
 
-typedef struct _MetaLaters MetaLaters;
-
 #define META_LATER_N_TYPES (META_LATER_IDLE + 1)
 
 struct _MetaLaters
@@ -49,8 +51,6 @@ struct _MetaLaters
     ClutterTimeline *timeline;
     guint repaint_func;
 };
-
-static MetaLaters _laters;
 
 static MetaLater *
 meta_later_ref (MetaLater *later)
@@ -292,7 +292,11 @@ meta_later_add (MetaLaterType  when,
                 gpointer       data,
                 GDestroyNotify notify)
 {
-    return meta_laters_add (&_laters, when, func, data, notify);
+    MetaDisplay *display = meta_get_display ();
+    MetaCompositor *compositor = display->compositor;
+
+    return meta_laters_add (meta_compositor_get_laters (compositor),
+                            when, func, data, notify);
 }
 
 static void
@@ -317,5 +321,31 @@ meta_laters_remove (MetaLaters   *laters,
 void
 meta_later_remove (unsigned int later_id)
 {
-    meta_laters_remove (&_laters, later_id);
+    MetaDisplay *display = meta_get_display ();
+    MetaCompositor *compositor = display->compositor;
+
+    if (!compositor)
+      return;
+
+    meta_laters_remove (meta_compositor_get_laters (compositor), later_id);
+}
+
+MetaLaters *
+meta_laters_new (void)
+{
+    return g_new0 (MetaLaters, 1);
+}
+
+void
+meta_laters_free (MetaLaters *laters)
+{
+    unsigned int i;
+
+    for (i = 0; i < G_N_ELEMENTS (laters->laters); i++)
+      g_slist_free_full (laters->laters[i], (GDestroyNotify) meta_later_unref);
+
+    g_clear_object (&laters->timeline);
+    if (laters->repaint_func)
+      clutter_threads_remove_repaint_func (laters->repaint_func);
+    g_free (laters);
 }
