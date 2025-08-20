@@ -99,6 +99,15 @@ enum
 
 static GParamSpec *obj_props[N_PROPS] = { NULL, };
 
+enum
+{
+  PRE_PAINT,
+
+  N_SIGNALS
+};
+
+static guint signals[N_SIGNALS];
+
 typedef struct _MetaCompositorPrivate
 {
   GObject parent;
@@ -1277,7 +1286,8 @@ meta_compositor_pre_paint (MetaCompositor *compositor)
 {
   COGL_TRACE_BEGIN_SCOPED (MetaCompositorPrePaint,
                            "Compositor (pre-paint)");
-  META_COMPOSITOR_GET_CLASS (compositor)->pre_paint (compositor);
+
+  g_signal_emit (compositor, signals[PRE_PAINT], 0);
 }
 
 static gboolean
@@ -1405,7 +1415,7 @@ meta_compositor_init (MetaCompositor *compositor)
                                            compositor,
                                            NULL);
 
-  priv->laters = meta_laters_new ();
+  priv->laters = meta_laters_new (compositor);
 }
 
 static void
@@ -1461,6 +1471,14 @@ meta_compositor_class_init (MetaCompositorClass *klass)
                          G_PARAM_CONSTRUCT_ONLY |
                          G_PARAM_STATIC_STRINGS);
   g_object_class_install_properties (object_class, N_PROPS, obj_props);
+
+  signals[PRE_PAINT] =
+  g_signal_new ("pre-paint",
+                G_TYPE_FROM_CLASS (klass),
+                G_SIGNAL_RUN_LAST,
+                G_STRUCT_OFFSET (MetaCompositorClass, pre_paint),
+                NULL, NULL, NULL,
+                G_TYPE_NONE, 0);
 }
 
 /**
