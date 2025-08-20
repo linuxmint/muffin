@@ -19,8 +19,9 @@
 #define META_LATER_PRIVATE_H
 
 typedef struct _MetaLaters MetaLaters;
+typedef struct _MetaCompositor MetaCompositor;
 
-MetaLaters * meta_laters_new (void);
+MetaLaters * meta_laters_new (MetaCompositor *compositor);
 
 void meta_laters_free (MetaLaters *laters);
 
