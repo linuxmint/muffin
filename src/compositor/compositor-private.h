@@ -18,7 +18,8 @@ struct _MetaCompositorClass
 {
   GObjectClass parent_class;
 
-  void (* manage) (MetaCompositor *compositor);
+  gboolean (* manage) (MetaCompositor  *compositor,
+                       GError         **error);
   void (* unmanage) (MetaCompositor *compositor);
   void (* pre_paint) (MetaCompositor *compositor);
   void (* post_paint) (MetaCompositor *compositor);
@@ -27,6 +28,9 @@ struct _MetaCompositorClass
   int64_t (* monotonic_to_high_res_xserver_time) (MetaCompositor *compositor,
                                                   int64_t         time_us);
 };
+
+gboolean meta_compositor_do_manage (MetaCompositor  *compositor,
+                                    GError         **error);
 
 void meta_compositor_remove_window_actor (MetaCompositor  *compositor,
                                           MetaWindowActor *window_actor);

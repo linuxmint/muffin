@@ -567,8 +567,9 @@ meta_compositor_redirect_x11_windows (MetaCompositor *compositor)
     redirect_windows (display->x11_display);
 }
 
-void
-meta_compositor_manage (MetaCompositor *compositor)
+gboolean
+meta_compositor_do_manage (MetaCompositor  *compositor,
+                           GError         **error)
 {
   MetaCompositorPrivate *priv =
     meta_compositor_get_instance_private (compositor);
@@ -618,11 +619,23 @@ meta_compositor_manage (MetaCompositor *compositor)
   clutter_actor_add_child (priv->stage, priv->top_window_group);
   clutter_actor_add_child (priv->stage, priv->feedback_group);
 
-  META_COMPOSITOR_GET_CLASS (compositor)->manage (compositor);
+  if (!META_COMPOSITOR_GET_CLASS (compositor)->manage (compositor, error))
+    return FALSE;
 
   priv->plugin_mgr = meta_plugin_manager_new (compositor);
 
   clutter_actor_show (priv->stage);
+
+  return TRUE;
+}
+
+void
+meta_compositor_manage (MetaCompositor *compositor)
+{
+  GError *error = NULL;
+
+  if (!meta_compositor_do_manage (compositor, &error))
+    g_error ("Compositor failed to manage display: %s", error->message);
 }
 
 void
