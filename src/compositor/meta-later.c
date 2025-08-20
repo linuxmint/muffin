@@ -44,12 +44,14 @@ typedef struct _MetaLater
 
 struct _MetaLaters
 {
+    MetaCompositor *compositor;
+
     unsigned int last_later_id;
 
     GSList *laters[META_LATER_N_TYPES];
 
     ClutterTimeline *timeline;
-    guint repaint_func;
+    gulong pre_paint_handler_id;
 };
 
 static MetaLater *
@@ -163,10 +165,10 @@ run_repaint_laters (GSList **laters_list)
     }
 }
 
-static gboolean
-run_all_repaint_laters (gpointer data)
+static void
+on_pre_paint (MetaCompositor *compositor,
+              MetaLaters     *laters)
 {
-    MetaLaters *laters = data;
     unsigned int i;
     GSList *l;
     gboolean keep_timeline_running = FALSE;
@@ -187,24 +189,11 @@ run_all_repaint_laters (gpointer data)
 
     if (!keep_timeline_running)
         clutter_timeline_stop (laters->timeline);
-
-    return TRUE;
 }
 
 static void
-ensure_later_repaint_func (MetaLaters *laters)
+ensure_timeline_running (MetaLaters *laters)
 {
-    if (!laters->timeline)
-        laters->timeline = clutter_timeline_new (G_MAXUINT);
-
-    if (laters->repaint_func == 0)
-    {
-        laters->repaint_func =
-        clutter_threads_add_repaint_func (run_all_repaint_laters,
-                                          laters, NULL);
-    }
-
-    /* Make sure the repaint function gets run */
     clutter_timeline_start (laters->timeline);
 }
 
@@ -250,13 +239,13 @@ meta_laters_add (MetaLaters     *laters,
                                                 invoke_later_idle,
                                                 later, NULL);
             g_source_set_name_by_id (later->source_id, "[muffin] invoke_later_idle");
-            ensure_later_repaint_func (laters);
+            ensure_timeline_running (laters);
             break;
         case META_LATER_CALC_SHOWING:
         case META_LATER_CHECK_FULLSCREEN:
         case META_LATER_SYNC_STACK:
         case META_LATER_BEFORE_REDRAW:
-            ensure_later_repaint_func (laters);
+            ensure_timeline_running (laters);
             break;
         case META_LATER_IDLE:
             later->source_id = g_idle_add_full (G_PRIORITY_DEFAULT_IDLE,
@@ -331,9 +320,19 @@ meta_later_remove (unsigned int later_id)
 }
 
 MetaLaters *
-meta_laters_new (void)
+meta_laters_new (MetaCompositor *compositor)
 {
-    return g_new0 (MetaLaters, 1);
+    MetaLaters *laters;
+
+    laters = g_new0 (MetaLaters, 1);
+    laters->compositor = compositor;
+    laters->timeline = clutter_timeline_new (G_MAXUINT);
+
+    laters->pre_paint_handler_id = g_signal_connect (compositor, "pre-paint",
+                                                     G_CALLBACK (on_pre_paint),
+                                                     laters);
+
+    return laters;
 }
 
 void
@@ -345,7 +344,6 @@ meta_laters_free (MetaLaters *laters)
       g_slist_free_full (laters->laters[i], (GDestroyNotify) meta_later_unref);
 
     g_clear_object (&laters->timeline);
-    if (laters->repaint_func)
-      clutter_threads_remove_repaint_func (laters->repaint_func);
+    g_clear_signal_handler (&laters->pre_paint_handler_id, laters->compositor);
     g_free (laters);
 }
