@@ -54,6 +54,7 @@ struct _MetaWindowWayland
   gboolean has_pending_state_change;
 
   MetaRectangle last_sent_rect;
+  gboolean has_last_sent_configuration;
   int last_sent_rel_x;
   int last_sent_rel_y;
   int last_sent_geometry_scale;
@@ -187,6 +188,10 @@ surface_state_changed (MetaWindow *window)
   if (window->unmanaging)
     return;
 
+  g_return_if_fail (wl_window->has_last_sent_configuration);
+  if (!wl_window->has_last_sent_configuration)
+    return;
+  
   if (!meta_window_calculate_bounds (window, &bounds_width, &bounds_height))
     {
       bounds_width = 0;
@@ -384,6 +389,7 @@ meta_window_wayland_move_resize_internal (MetaWindow                *window,
         }
     }
 
+  wl_window->has_last_sent_configuration = TRUE;
   wl_window->last_sent_rect = configured_rect;
   wl_window->last_sent_geometry_scale = geometry_scale;
   wl_window->last_sent_gravity = gravity;
@@ -985,8 +991,8 @@ meta_window_wayland_finish_move_resize (MetaWindow              *window,
         calculate_offset (acked_configuration, &new_geom, &rect);
     }
 
-    rect.x += dx;
-    rect.y += dy;
+  rect.x += dx;
+  rect.y += dy;
 
   if (rect.x != window->rect.x || rect.y != window->rect.y)
     flags |= META_MOVE_RESIZE_MOVE_ACTION;
