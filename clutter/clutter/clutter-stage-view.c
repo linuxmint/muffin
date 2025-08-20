@@ -418,8 +418,7 @@ clutter_stage_view_assign_next_scanout (ClutterStageView *view,
   ClutterStageViewPrivate *priv =
     clutter_stage_view_get_instance_private (view);
 
-  g_clear_object (&priv->next_scanout);
-  priv->next_scanout = scanout;
+  g_set_object (&priv->next_scanout, scanout);
 }
 
 CoglScanout *

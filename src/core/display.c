@@ -51,6 +51,7 @@
 #include "backends/x11/meta-backend-x11.h"
 #include "backends/x11/meta-event-x11.h"
 #include "backends/x11/cm/meta-backend-x11-cm.h"
+#include "backends/x11/nested/meta-backend-x11-nested.h"
 #include "clutter/x11/clutter-x11.h"
 #include "compositor/compositor-private.h"
 #include "compositor/meta-compositor-x11.h"
@@ -81,6 +82,7 @@
 #include "x11/xprops.h"
 
 #ifdef HAVE_WAYLAND
+#include "compositor/meta-compositor-native.h"
 #include "compositor/meta-compositor-server.h"
 #include "wayland/meta-xwayland-private.h"
 #include "wayland/meta-wayland-tablet-seat.h"
@@ -622,11 +624,16 @@ static MetaCompositor *
 create_compositor (MetaDisplay *display)
 {
 #ifdef HAVE_WAYLAND
-  if (meta_is_wayland_compositor ())
-    return META_COMPOSITOR (meta_compositor_server_new (display));
-  else
+  MetaBackend *backend = meta_get_backend ();
+
+#ifdef HAVE_NATIVE_BACKEND
+  if (META_IS_BACKEND_NATIVE (backend))
+    return META_COMPOSITOR (meta_compositor_native_new (display));
 #endif
-    return META_COMPOSITOR (meta_compositor_x11_new (display));
+  if (META_IS_BACKEND_X11_NESTED (backend))
+    return META_COMPOSITOR (meta_compositor_server_new (display));
+#endif
+  return META_COMPOSITOR (meta_compositor_x11_new (display));
 }
 
 static void
