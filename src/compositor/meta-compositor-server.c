@@ -23,11 +23,6 @@
 
 #include "compositor/meta-compositor-server.h"
 
-struct _MetaCompositorServer
-{
-  MetaCompositor parent;
-};
-
 G_DEFINE_TYPE (MetaCompositorServer, meta_compositor_server, META_TYPE_COMPOSITOR)
 
 static gboolean
