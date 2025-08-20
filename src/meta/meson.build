@@ -19,6 +19,7 @@ muffin_public_headers = [
   'meta-idle-monitor.h',
   'meta-inhibit-shortcuts-dialog.h',
   'meta-launch-context.h',
+  'meta-later.h',
   'meta-monitor-manager.h',
   'meta-plugin.h',
   'meta-remote-access-controller.h',
