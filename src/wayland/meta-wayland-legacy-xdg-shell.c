@@ -680,7 +680,7 @@ meta_wayland_zxdg_toplevel_v6_apply_state (MetaWaylandSurfaceRole  *surface_role
     {
       MetaWaylandWindowConfiguration *configuration;
 
-      configuration = meta_wayland_window_configuration_new_empty ();
+      configuration = meta_wayland_window_configuration_new_empty (0, 0);
       meta_wayland_zxdg_toplevel_v6_send_configure (xdg_toplevel,
                                                     configuration);
       meta_wayland_window_configuration_free (configuration);
