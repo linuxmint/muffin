@@ -71,6 +71,21 @@ meta_surface_actor_wayland_is_opaque (MetaSurfaceActor *actor)
   return meta_shaped_texture_is_opaque (stex);
 }
 
+CoglScanout *
+meta_surface_actor_wayland_try_acquire_scanout (MetaSurfaceActorWayland *self,
+                                                CoglOnscreen            *onscreen)
+{
+  MetaWaylandSurface *surface;
+  CoglScanout *scanout;
+
+  surface = meta_surface_actor_wayland_get_surface (self);
+  scanout = meta_wayland_surface_try_acquire_scanout (surface, onscreen);
+  if (!scanout)
+    return NULL;
+
+  return scanout;
+}
+
 static void
 meta_surface_actor_wayland_dispose (GObject *object)
 {
