@@ -31,10 +31,11 @@
 #include "core/util-private.h"
 #include "wayland/meta-wayland-private.h"
 #include "wayland/meta-wayland-versions.h"
+#include "wayland/meta-wayland-xdg-foreign-private.h"
 #include "wayland/meta-wayland-xdg-shell.h"
 #include "wayland/meta-wayland-legacy-xdg-shell.h"
 
-#include "xdg-foreign-unstable-v1-server-protocol.h"
+#include "xdg-foreign-unstable-v2-server-protocol.h"
 
 #define META_XDG_FOREIGN_HANDLE_LENGTH 32
 
@@ -65,15 +66,13 @@ struct _MetaWaylandXdgImported
 {
   MetaWaylandXdgForeign *foreign;
   struct wl_resource *resource;
+  MetaWaylandResourceFunc send_destroyed_func;
 
   MetaWaylandSurface *parent_of;
   gulong parent_of_unmapped_handler_id;
 
   MetaWaylandXdgExported *exported;
 };
-
-static void
-meta_wayland_xdg_imported_destroy (MetaWaylandXdgImported *imported);
 
 static void
 xdg_exporter_destroy (struct wl_client   *client,
@@ -89,11 +88,11 @@ xdg_exported_destroy (struct wl_client   *client,
   wl_resource_destroy (resource);
 }
 
-static const struct zxdg_exported_v1_interface meta_xdg_exported_interface = {
+static const struct zxdg_exported_v2_interface meta_xdg_exported_interface = {
   xdg_exported_destroy,
 };
 
-static void
+void
 meta_wayland_xdg_exported_destroy (MetaWaylandXdgExported *exported)
 {
   MetaWaylandXdgForeign *foreign = exported->foreign;
@@ -102,7 +101,7 @@ meta_wayland_xdg_exported_destroy (MetaWaylandXdgExported *exported)
     {
       MetaWaylandXdgImported *imported = exported->imported->data;
 
-      zxdg_imported_v1_send_destroyed (imported->resource);
+      imported->send_destroyed_func (imported->resource);
       meta_wayland_xdg_imported_destroy (imported);
     }
 
@@ -132,51 +131,42 @@ exported_surface_unmapped (MetaWaylandSurface     *surface,
   meta_wayland_xdg_exported_destroy (exported);
 }
 
-static void
-xdg_exporter_export (struct wl_client   *client,
-                     struct wl_resource *resource,
-                     uint32_t            id,
-                     struct wl_resource *surface_resource)
+gboolean
+meta_wayland_xdg_foreign_is_valid_surface (MetaWaylandSurface *surface,
+                                           struct wl_resource *exporter)
 {
-  MetaWaylandXdgForeign *foreign = wl_resource_get_user_data (resource);
-  MetaWaylandSurface *surface = wl_resource_get_user_data (surface_resource);
-  struct wl_resource *xdg_exported_resource;
-  MetaWaylandXdgExported *exported;
-  char *handle;
-
   if (!surface->role ||
       !meta_wayland_surface_get_window (surface) ||
       !(META_IS_WAYLAND_XDG_SURFACE (surface->role) ||
         META_IS_WAYLAND_ZXDG_SURFACE_V6 (surface->role)))
     {
-      wl_resource_post_error (resource,
+      wl_resource_post_error (exporter,
                               WL_DISPLAY_ERROR_INVALID_OBJECT,
                               "exported surface had an invalid role");
-      return;
+      return FALSE;
     }
+  return TRUE;
+}
 
-  xdg_exported_resource =
-    wl_resource_create (client,
-                        &zxdg_exported_v1_interface,
-                        wl_resource_get_version (resource),
-                        id);
-  if (!xdg_exported_resource)
-    {
-      wl_client_post_no_memory (client);
-      return;
-    }
+MetaWaylandXdgExported *
+meta_wayland_xdg_foreign_export (MetaWaylandXdgForeign *foreign,
+                                 struct wl_resource    *resource,
+                                 MetaWaylandSurface    *surface)
+{
+  MetaWaylandXdgExported *exported;
+  char *handle;
 
   exported = g_new0 (MetaWaylandXdgExported, 1);
   exported->foreign = foreign;
   exported->surface = surface;
-  exported->resource = xdg_exported_resource;
+  exported->resource = resource;
 
   exported->surface_unmapped_handler_id =
     g_signal_connect (surface, "unmapped",
                       G_CALLBACK (exported_surface_unmapped),
                       exported);
 
-  wl_resource_set_implementation (xdg_exported_resource,
+  wl_resource_set_implementation (resource,
                                   &meta_xdg_exported_interface,
                                   exported,
                                   xdg_exported_destructor);
@@ -197,10 +187,50 @@ xdg_exporter_export (struct wl_client   *client,
 
   exported->handle = handle;
 
-  zxdg_exported_v1_send_handle (xdg_exported_resource, handle);
+  return exported;
 }
 
-static const struct zxdg_exporter_v1_interface meta_xdg_exporter_interface = {
+static void
+xdg_exporter_export (struct wl_client   *client,
+                     struct wl_resource *resource,
+                     uint32_t            id,
+                     struct wl_resource *surface_resource)
+{
+  MetaWaylandXdgForeign *foreign = wl_resource_get_user_data (resource);
+  MetaWaylandSurface *surface = wl_resource_get_user_data (surface_resource);
+  struct wl_resource *xdg_exported_resource;
+  MetaWaylandXdgExported *exported;
+  const char *handle;
+
+  if (!meta_wayland_xdg_foreign_is_valid_surface (surface, resource))
+    return;
+
+  xdg_exported_resource =
+    wl_resource_create (client,
+                        &zxdg_exported_v2_interface,
+                        wl_resource_get_version (resource),
+                        id);
+  if (!xdg_exported_resource)
+    {
+      wl_client_post_no_memory (client);
+      return;
+    }
+
+  exported = meta_wayland_xdg_foreign_export (foreign, xdg_exported_resource, surface);
+  if (!exported)
+    return;
+
+  wl_resource_set_implementation (xdg_exported_resource,
+                                  &meta_xdg_exported_interface,
+                                  exported,
+                                  xdg_exported_destructor);
+
+  handle = meta_wayland_xdg_exported_get_handle (exported);
+
+  zxdg_exported_v2_send_handle (xdg_exported_resource, handle);
+}
+
+static const struct zxdg_exporter_v2_interface meta_xdg_exporter_interface = {
   xdg_exporter_destroy,
   xdg_exporter_export,
 };
@@ -215,8 +245,8 @@ bind_xdg_exporter (struct wl_client *client,
   struct wl_resource *resource;
 
   resource = wl_resource_create (client,
-                                 &zxdg_exporter_v1_interface,
-                                 META_ZXDG_EXPORTER_V1_VERSION,
+                                 &zxdg_exporter_v2_interface,
+                                 META_ZXDG_EXPORTER_V2_VERSION,
                                  id);
 
   if (resource == NULL)
@@ -228,6 +258,12 @@ bind_xdg_exporter (struct wl_client *client,
   wl_resource_set_implementation (resource,
                                   &meta_xdg_exporter_interface,
                                   foreign, NULL);
+}
+
+const char *
+meta_wayland_xdg_exported_get_handle (MetaWaylandXdgExported *exported)
+{
+  return exported->handle;
 }
 
 static void
@@ -263,12 +299,10 @@ is_valid_child (MetaWaylandSurface *surface)
   return TRUE;
 }
 
-static void
-xdg_imported_set_parent_of (struct wl_client   *client,
-                            struct wl_resource *resource,
-                            struct wl_resource *surface_resource)
+void
+meta_wayland_xdg_imported_set_parent_of (MetaWaylandXdgImported *imported,
+                                         struct wl_resource     *surface_resource)
 {
-  MetaWaylandXdgImported *imported = wl_resource_get_user_data (resource);
   MetaWaylandSurface *surface;
 
   if (!imported)
@@ -310,7 +344,17 @@ xdg_imported_set_parent_of (struct wl_client   *client,
     }
 }
 
-static const struct zxdg_imported_v1_interface meta_xdg_imported_interface = {
+static void
+xdg_imported_set_parent_of (struct wl_client   *client,
+                            struct wl_resource *resource,
+                            struct wl_resource *surface_resource)
+{
+  MetaWaylandXdgImported *imported = wl_resource_get_user_data (resource);
+
+  meta_wayland_xdg_imported_set_parent_of (imported, surface_resource);
+}
+
+static const struct zxdg_imported_v2_interface meta_xdg_imported_interface = {
   xdg_imported_destroy,
   xdg_imported_set_parent_of,
 };
@@ -322,7 +366,7 @@ xdg_importer_destroy (struct wl_client   *client,
   wl_resource_destroy (resource);
 }
 
-static void
+void
 meta_wayland_xdg_imported_destroy (MetaWaylandXdgImported *imported)
 {
   MetaWaylandXdgExported *exported = imported->exported;
@@ -349,12 +393,38 @@ meta_wayland_xdg_imported_destroy (MetaWaylandXdgImported *imported)
 static void
 xdg_imported_destructor (struct wl_resource *resource)
 {
-  MetaWaylandXdgImported *imported = wl_resource_get_user_data (resource);
+  MetaWaylandXdgImported *imported;
 
+  imported = wl_resource_get_user_data (resource);
   if (!imported)
     return;
 
   meta_wayland_xdg_imported_destroy (imported);
+}
+
+MetaWaylandXdgImported *
+meta_wayland_xdg_foreign_import (MetaWaylandXdgForeign   *foreign,
+                                 struct wl_resource      *resource,
+                                 const char              *handle,
+                                 MetaWaylandResourceFunc  send_destroyed_func)
+{
+  MetaWaylandXdgImported *imported;
+  MetaWaylandXdgExported *exported;
+
+  exported = g_hash_table_lookup (foreign->exported_surfaces, handle);
+  if (!exported ||
+      !META_IS_WAYLAND_XDG_SURFACE (exported->surface->role))
+    return NULL;
+
+  imported = g_new0 (MetaWaylandXdgImported, 1);
+  imported->foreign = foreign;
+  imported->exported = exported;
+  imported->resource = resource;
+  imported->send_destroyed_func = send_destroyed_func;
+
+  exported->imported = g_list_prepend (exported->imported, imported);
+
+  return imported;
 }
 
 static void
@@ -366,11 +436,10 @@ xdg_importer_import (struct wl_client   *client,
   MetaWaylandXdgForeign *foreign = wl_resource_get_user_data (resource);
   struct wl_resource *xdg_imported_resource;
   MetaWaylandXdgImported *imported;
-  MetaWaylandXdgExported *exported;
 
   xdg_imported_resource =
     wl_resource_create (client,
-                        &zxdg_imported_v1_interface,
+                        &zxdg_imported_v2_interface,
                         wl_resource_get_version (resource),
                         id);
   if (!xdg_imported_resource)
@@ -379,31 +448,22 @@ xdg_importer_import (struct wl_client   *client,
       return;
     }
 
-  wl_resource_set_implementation (xdg_imported_resource,
-                                  &meta_xdg_imported_interface,
-                                  NULL,
-                                  xdg_imported_destructor);
-
-  exported = g_hash_table_lookup (foreign->exported_surfaces, handle);
-  if (!exported ||
-      (!META_IS_WAYLAND_XDG_SURFACE (exported->surface->role) &&
-       !META_IS_WAYLAND_ZXDG_SURFACE_V6 (exported->surface->role)))
+  imported = meta_wayland_xdg_foreign_import (foreign, xdg_imported_resource,
+                                              handle,
+                                              zxdg_imported_v2_send_destroyed);
+  if (!imported)
     {
-      zxdg_imported_v1_send_destroyed (xdg_imported_resource);
+      zxdg_imported_v2_send_destroyed (xdg_imported_resource);
       return;
     }
 
-  imported = g_new0 (MetaWaylandXdgImported, 1);
-  imported->foreign = foreign;
-  imported->exported = exported;
-  imported->resource = xdg_imported_resource;
-
-  wl_resource_set_user_data (xdg_imported_resource, imported);
-
-  exported->imported = g_list_prepend (exported->imported, imported);
+    wl_resource_set_implementation (xdg_imported_resource,
+                                    &meta_xdg_imported_interface,
+                                    imported,
+                                    xdg_imported_destructor);
 }
 
-static const struct zxdg_importer_v1_interface meta_xdg_importer_interface = {
+static const struct zxdg_importer_v2_interface meta_xdg_importer_interface = {
   xdg_importer_destroy,
   xdg_importer_import,
 };
@@ -418,8 +478,8 @@ bind_xdg_importer (struct wl_client *client,
   struct wl_resource *resource;
 
   resource = wl_resource_create (client,
-                                 &zxdg_importer_v1_interface,
-                                 META_ZXDG_IMPORTER_V1_VERSION,
+                                 &zxdg_importer_v2_interface,
+                                 META_ZXDG_IMPORTER_V2_VERSION,
                                  id);
 
   if (resource == NULL)
@@ -446,14 +506,16 @@ meta_wayland_xdg_foreign_init (MetaWaylandCompositor *compositor)
   foreign->exported_surfaces = g_hash_table_new ((GHashFunc) g_str_hash,
                                                  (GEqualFunc) g_str_equal);
 
+  compositor->foreign = foreign;
+
   if (wl_global_create (compositor->wayland_display,
-                        &zxdg_exporter_v1_interface, 1,
+                        &zxdg_exporter_v2_interface, 1,
                         foreign,
                         bind_xdg_exporter) == NULL)
     return FALSE;
 
   if (wl_global_create (compositor->wayland_display,
-                        &zxdg_importer_v1_interface, 1,
+                        &zxdg_importer_v2_interface, 1,
                         foreign,
                         bind_xdg_importer) == NULL)
     return FALSE;

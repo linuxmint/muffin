@@ -36,6 +36,7 @@
 #include "wayland/meta-wayland-egl-stream.h"
 #include "wayland/meta-wayland-inhibit-shortcuts-dialog.h"
 #include "wayland/meta-wayland-inhibit-shortcuts.h"
+#include "wayland/meta-wayland-legacy-xdg-foreign.h"
 #include "wayland/meta-wayland-outputs.h"
 #include "wayland/meta-wayland-private.h"
 #include "wayland/meta-wayland-region.h"
@@ -433,6 +434,7 @@ meta_wayland_compositor_setup (MetaWaylandCompositor *wayland_compositor)
   meta_wayland_relative_pointer_init (compositor);
   meta_wayland_pointer_constraints_init (compositor);
   meta_wayland_xdg_foreign_init (compositor);
+  meta_wayland_legacy_xdg_foreign_init (compositor);
   meta_wayland_dma_buf_init (compositor);
   meta_wayland_keyboard_shortcuts_inhibit_init (compositor);
   meta_wayland_surface_inhibit_shortcuts_dialog_init ();
