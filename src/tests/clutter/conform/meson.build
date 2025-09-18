@@ -12,6 +12,7 @@ clutter_conform_tests_actor_tests = [
   'actor-anchors',
   'actor-clone',
   'actor-destroy',
+  'actor-event-hold',
   'actor-graph',
   'actor-invariants',
   'actor-iter',

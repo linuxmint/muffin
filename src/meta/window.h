@@ -318,6 +318,10 @@ META_EXPORT
 void        meta_window_lower              (MetaWindow  *window);
 
 META_EXPORT
+void        meta_window_lower_with_transients (MetaWindow *window,
+                                               uint32_t    timestamp);
+
+META_EXPORT
 const char *meta_window_get_title (MetaWindow *window);
 
 META_EXPORT

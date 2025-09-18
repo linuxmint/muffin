@@ -5624,6 +5624,62 @@ meta_window_lower (MetaWindow  *window)
   meta_stack_lower (window->display->stack, window);
 }
 
+static gboolean
+lower_window_and_transients (MetaWindow *window,
+                             gpointer    user_data)
+{
+  MetaWorkspaceManager *workspace_manager = window->display->workspace_manager;
+
+  meta_window_lower (window);
+
+  meta_window_foreach_transient (window, lower_window_and_transients, NULL);
+
+  if (meta_prefs_get_raise_on_click ())
+  {
+    /* Move window to the back of the focusing workspace's MRU list.
+     * Do extra sanity checks to avoid possible race conditions.
+     * (Borrowed from window.c.)
+     */
+    if (workspace_manager->active_workspace &&
+      meta_window_located_on_workspace (window,
+                                        workspace_manager->active_workspace))
+    {
+      GList *link;
+      link = g_list_find (workspace_manager->active_workspace->mru_list,
+                          window);
+      g_assert (link);
+
+      workspace_manager->active_workspace->mru_list =
+      g_list_remove_link (workspace_manager->active_workspace->mru_list,
+                          link);
+      g_list_free (link);
+
+      workspace_manager->active_workspace->mru_list =
+      g_list_append (workspace_manager->active_workspace->mru_list,
+                     window);
+    }
+  }
+
+  return FALSE;
+}
+
+void
+meta_window_lower_with_transients (MetaWindow *window,
+                                   uint32_t    timestamp)
+{
+  MetaWorkspaceManager *workspace_manager = window->display->workspace_manager;
+
+  lower_window_and_transients (window, NULL);
+
+  /* Rather than try to figure that out whether we just lowered
+   * the focus window, assume that's always the case. (Typically,
+   * this will be invoked via keyboard action or by a mouse action;
+   * in either case the window or a modal child will have been focused.) */
+  meta_workspace_focus_default_window (workspace_manager->active_workspace,
+                                       NULL,
+                                       timestamp);
+}
+
 /*
  * Move window to the requested workspace; append controls whether new WS
  * should be created if one does not exist.

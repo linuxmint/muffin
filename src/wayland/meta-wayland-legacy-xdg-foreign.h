@@ -1,5 +1,7 @@
+/* -*- mode: C; c-file-style: "gnu"; indent-tabs-mode: nil; -*- */
+
 /*
- * Copyright (C) 2013-2015 Red Hat, Inc.
+ * Copyright (C) 2015 Red Hat
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -15,19 +17,18 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
  * 02111-1307, USA.
+ *
+ * Written by:
+ *     Jonas Ådahl <jadahl@gmail.com>
  */
 
-#ifndef META_WAYLAND_WL_SHELL_H
-#define META_WAYLAND_WL_SHELL_H
-
-#include "wayland/meta-wayland-shell-surface.h"
-
-#define META_TYPE_WAYLAND_WL_SHELL_SURFACE (meta_wayland_wl_shell_surface_get_type ())
-G_DECLARE_FINAL_TYPE (MetaWaylandWlShellSurface,
-                      meta_wayland_wl_shell_surface,
-                      META, WAYLAND_WL_SHELL_SURFACE,
-                      MetaWaylandShellSurface);
-
-void meta_wayland_wl_shell_init (MetaWaylandCompositor *compositor);
-
-#endif /* META_WAYLAND_WL_SHELL_H */
+ #ifndef META_WAYLAND_LEGACY_FOREIGN_H
+ #define META_WAYLAND_LEGACY_FOREIGN_H
+ 
+ #include <glib.h>
+ 
+ #include "wayland/meta-wayland-types.h"
+ 
+ gboolean meta_wayland_legacy_xdg_foreign_init (MetaWaylandCompositor *compositor);
+ 
+ #endif /* META_WAYLAND_LEGACY_FOREIGN_H */

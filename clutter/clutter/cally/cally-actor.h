@@ -89,8 +89,6 @@ struct _CallyActor
 /**
  * CallyActorClass:
  * @notify_clutter: Signal handler for notify signal on Clutter actor
- * @focus_clutter: Signal handler for key-focus-in and key-focus-out
- *   signal on Clutter actor. This virtual functions is deprecated.
  * @add_actor: Signal handler for actor-added signal on
  *   ClutterContainer interface
  * @remove_actor: Signal handler for actor-added signal on
@@ -109,9 +107,6 @@ struct _CallyActorClass
   /*< public >*/
   void     (*notify_clutter) (GObject    *object,
                               GParamSpec *pspec);
-
-  gboolean (*focus_clutter)  (ClutterActor *actor,
-                              gpointer      data);
 
   gint     (*add_actor)      (ClutterActor *container,
                               ClutterActor *actor,

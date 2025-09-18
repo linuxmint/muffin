@@ -43,7 +43,6 @@
 #include "wayland/meta-wayland-data-device.h"
 #include "wayland/meta-wayland-gtk-shell.h"
 #include "wayland/meta-wayland-keyboard.h"
-#include "wayland/meta-wayland-legacy-xdg-shell.h"
 #include "wayland/meta-wayland-outputs.h"
 #include "wayland/meta-wayland-pointer.h"
 #include "wayland/meta-wayland-private.h"
@@ -51,7 +50,6 @@
 #include "wayland/meta-wayland-seat.h"
 #include "wayland/meta-wayland-subsurface.h"
 #include "wayland/meta-wayland-viewporter.h"
-#include "wayland/meta-wayland-wl-shell.h"
 #include "wayland/meta-wayland-xdg-shell.h"
 #include "wayland/meta-window-wayland.h"
 #include "wayland/meta-xwayland-private.h"
@@ -470,9 +468,10 @@ meta_wayland_surface_state_merge_into (MetaWaylandSurfaceState *from,
 
       to->newly_attached = TRUE;
       to->buffer = from->buffer;
-      to->dx = from->dx;
-      to->dy = from->dy;
     }
+
+  to->dx = from->dx;
+  to->dy = from->dy;
 
   wl_list_insert_list (&to->frame_callback_list, &from->frame_callback_list);
 
@@ -927,6 +926,16 @@ wl_surface_attach (struct wl_client *client,
                               pending->buffer);
     }
 
+  if (wl_resource_get_version (surface_resource) >=
+    WL_SURFACE_OFFSET_SINCE_VERSION &&
+    (dx != 0 || dy != 0))
+  {
+    wl_resource_post_error (surface_resource,
+                            WL_SURFACE_ERROR_INVALID_OFFSET,
+                            "Attaching with an offset is no longer allowed");
+    return;
+  }
+
   pending->newly_attached = TRUE;
   pending->buffer = buffer;
   pending->dx = dx;
@@ -1155,6 +1164,20 @@ wl_surface_damage_buffer (struct wl_client   *client,
   cairo_region_union_rectangle (pending->buffer_damage, &rectangle);
 }
 
+static void
+wl_surface_offset (struct wl_client   *client,
+                   struct wl_resource *surface_resource,
+                   int32_t             dx,
+                   int32_t             dy)
+{
+  MetaWaylandSurface *surface = wl_resource_get_user_data (surface_resource);
+  MetaWaylandSurfaceState *pending = surface->pending_state;
+
+  pending->dx = dx;
+  pending->dy = dy;
+}
+
+
 static const struct wl_surface_interface meta_wayland_wl_surface_interface = {
   wl_surface_destroy,
   wl_surface_attach,
@@ -1166,6 +1189,7 @@ static const struct wl_surface_interface meta_wayland_wl_surface_interface = {
   wl_surface_set_buffer_transform,
   wl_surface_set_buffer_scale,
   wl_surface_damage_buffer,
+  wl_surface_offset,
 };
 
 static void
@@ -1438,14 +1462,12 @@ meta_wayland_surface_begin_grab_op (MetaWaylandSurface *surface,
  * @compositor: The #MetaWaylandCompositor object
  *
  * Initializes the Wayland interfaces providing features that deal with
- * desktop-specific conundrums, like XDG shell, wl_shell (deprecated), etc.
+ * desktop-specific conundrums, like XDG shell, etc.
  */
 void
 meta_wayland_shell_init (MetaWaylandCompositor *compositor)
 {
   meta_wayland_xdg_shell_init (compositor);
-  meta_wayland_legacy_xdg_shell_init (compositor);
-  meta_wayland_wl_shell_init (compositor);
   meta_wayland_init_gtk_shell (compositor);
   meta_wayland_init_viewporter (compositor);
 }

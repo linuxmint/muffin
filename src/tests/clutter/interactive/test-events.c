@@ -361,6 +361,9 @@ input_cb (ClutterActor *actor,
     case CLUTTER_TOUCHPAD_SWIPE:
       g_print ("[%s] TOUCHPAD SWIPE", clutter_actor_get_name (source_actor));
       break;
+    case CLUTTER_TOUCHPAD_HOLD:
+      g_print ("[%s] TOUCHPAD HOLD", clutter_actor_get_name (source_actor));
+      break;
     case CLUTTER_PROXIMITY_IN:
       g_print ("[%s] PROXIMITY IN", clutter_actor_get_name (source_actor));
       break;
