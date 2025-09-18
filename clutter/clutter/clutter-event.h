@@ -117,6 +117,7 @@ typedef struct _ClutterCrossingEvent    ClutterCrossingEvent;
 typedef struct _ClutterTouchEvent       ClutterTouchEvent;
 typedef struct _ClutterTouchpadPinchEvent ClutterTouchpadPinchEvent;
 typedef struct _ClutterTouchpadSwipeEvent ClutterTouchpadSwipeEvent;
+typedef struct _ClutterTouchpadHoldEvent ClutterTouchpadHoldEvent;
 typedef struct _ClutterProximityEvent   ClutterProximityEvent;
 typedef struct _ClutterPadButtonEvent   ClutterPadButtonEvent;
 typedef struct _ClutterPadStripEvent    ClutterPadStripEvent;
@@ -500,6 +501,43 @@ struct _ClutterTouchpadSwipeEvent
   gfloat dy;
 };
 
+/**
+ * ClutterTouchpadHoldEvent
+ * @type: event type
+ * @time: event time
+ * @flags: event flags
+ * @stage: event source stage
+ * @source: event source actor (unused)
+ * @phase: the current phase of the gesture
+ * @n_fingers: the number of fingers triggering the swipe
+ * @x: the X coordinate of the pointer, relative to the stage
+ * @y: the Y coordinate of the pointer, relative to the stage
+ *
+ * Used for touchpad hold gesture events. The current state of the
+ * gesture will be determined by the @phase field.
+ *
+ * A hold gesture starts when the user places one or many fingers on the
+ * touchpad and ends when all fingers are lifted. It is cancelled when the
+ * finger(s) move past a certain threshold.
+ * Unlike swipe and pinch, @phase can only be
+ * CLUTTER_TOUCHPAD_GESTURE_PHASE_BEGIN, CLUTTER_TOUCHPAD_GESTURE_PHASE_END and
+ * CLUTTER_TOUCHPAD_GESTURE_PHASE_CANCEL.
+ */
+struct _ClutterTouchpadHoldEvent
+{
+  ClutterEventType type;
+  guint32 time;
+  ClutterEventFlags flags;
+  ClutterStage *stage;
+  ClutterActor *source;
+
+  ClutterTouchpadGesturePhase phase;
+  uint32_t n_fingers;
+  float x;
+  float y;
+};
+
+
 struct _ClutterPadButtonEvent
 {
   ClutterEventType type;
@@ -592,6 +630,7 @@ union _ClutterEvent
   ClutterTouchEvent touch;
   ClutterTouchpadPinchEvent touchpad_pinch;
   ClutterTouchpadSwipeEvent touchpad_swipe;
+  ClutterTouchpadHoldEvent touchpad_hold;
   ClutterProximityEvent proximity;
   ClutterPadButtonEvent pad_button;
   ClutterPadStripEvent pad_strip;
