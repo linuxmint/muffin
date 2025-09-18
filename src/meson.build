@@ -530,6 +530,8 @@ if have_wayland
     'wayland/meta-wayland-pointer.c',
     'wayland/meta-wayland-pointer-constraints.c',
     'wayland/meta-wayland-pointer-constraints.h',
+    'wayland/meta-wayland-pointer-gesture-hold.c',
+    'wayland/meta-wayland-pointer-gesture-hold.h',
     'wayland/meta-wayland-pointer-gesture-pinch.c',
     'wayland/meta-wayland-pointer-gesture-pinch.h',
     'wayland/meta-wayland-pointer-gestures.c',

@@ -387,6 +387,7 @@ meta_wayland_seat_handle_event (MetaWaylandSeat *seat,
     case CLUTTER_SCROLL:
     case CLUTTER_TOUCHPAD_SWIPE:
     case CLUTTER_TOUCHPAD_PINCH:
+    case CLUTTER_TOUCHPAD_HOLD:
       if (meta_wayland_seat_has_pointer (seat))
         return meta_wayland_pointer_handle_event (seat->pointer, event);
 
