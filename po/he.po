@@ -10,7 +10,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: metacity.HEAD.he\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
-"product=mutter&keywords=I18N+L10N&component=general\n"
+"product=muffin&keywords=I18N+L10N&component=general\n"
 "POT-Creation-Date: 2017-11-26 17:12+0200\n"
 "PO-Revision-Date: 2017-11-26 17:14+0200\n"
 "Last-Translator: Yosef Or Boczko <yoseforb@gmail.com>\n"
@@ -22,259 +22,259 @@ msgstr ""
 "X-Generator: Gtranslator 2.91.6\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: data/50-mutter-navigation.xml:6
+#: data/50-muffin-navigation.xml:6
 msgid "Navigation"
 msgstr "ניווט"
 
-#: data/50-mutter-navigation.xml:9
+#: data/50-muffin-navigation.xml:9
 msgid "Move window to workspace 1"
 msgstr "העברת החלון למרחב עבודה 1"
 
-#: data/50-mutter-navigation.xml:12
+#: data/50-muffin-navigation.xml:12
 msgid "Move window to workspace 2"
 msgstr "העברת החלון למרחב עבודה 2"
 
-#: data/50-mutter-navigation.xml:15
+#: data/50-muffin-navigation.xml:15
 msgid "Move window to workspace 3"
 msgstr "העברה החלון למרחב עבודה 3"
 
-#: data/50-mutter-navigation.xml:18
+#: data/50-muffin-navigation.xml:18
 msgid "Move window to workspace 4"
 msgstr "העברה החלון למרחב עבודה 4"
 
-#: data/50-mutter-navigation.xml:21
+#: data/50-muffin-navigation.xml:21
 msgid "Move window to last workspace"
 msgstr "העברת החלון למרחב העבודה האחרון"
 
-#: data/50-mutter-navigation.xml:24
+#: data/50-muffin-navigation.xml:24
 msgid "Move window one workspace to the left"
 msgstr "העברת החלון למרחב העבודה שמשמאל"
 
-#: data/50-mutter-navigation.xml:27
+#: data/50-muffin-navigation.xml:27
 msgid "Move window one workspace to the right"
 msgstr "העברת החלון למרחב העבודה שמימין"
 
-#: data/50-mutter-navigation.xml:30
+#: data/50-muffin-navigation.xml:30
 msgid "Move window one workspace up"
 msgstr "העברת החלון למרחב העבודה שמלמעלה"
 
-#: data/50-mutter-navigation.xml:33
+#: data/50-muffin-navigation.xml:33
 msgid "Move window one workspace down"
 msgstr "העברת החלון למרחב העבודה שמלמטה"
 
-#: data/50-mutter-navigation.xml:36
+#: data/50-muffin-navigation.xml:36
 msgid "Move window one monitor to the left"
 msgstr "העברת החלון לצג שמשמאל"
 
-#: data/50-mutter-navigation.xml:39
+#: data/50-muffin-navigation.xml:39
 msgid "Move window one monitor to the right"
 msgstr "העברת החלון לצג שמימין"
 
-#: data/50-mutter-navigation.xml:42
+#: data/50-muffin-navigation.xml:42
 msgid "Move window one monitor up"
 msgstr "העברת החלון לצג שמלמעלה"
 
-#: data/50-mutter-navigation.xml:45
+#: data/50-muffin-navigation.xml:45
 msgid "Move window one monitor down"
 msgstr "העברת החלון לצג שמלמטה"
 
-#: data/50-mutter-navigation.xml:49
+#: data/50-muffin-navigation.xml:49
 msgid "Switch applications"
 msgstr "החלפה בין יישומים"
 
-#: data/50-mutter-navigation.xml:54
+#: data/50-muffin-navigation.xml:54
 msgid "Switch to previous application"
 msgstr "החלפה ליישום הקודם"
 
-#: data/50-mutter-navigation.xml:58
+#: data/50-muffin-navigation.xml:58
 msgid "Switch windows"
 msgstr "החלפת חלונות"
 
-#: data/50-mutter-navigation.xml:63
+#: data/50-muffin-navigation.xml:63
 msgid "Switch to previous window"
 msgstr "החלפה לחלון הקודם"
 
-#: data/50-mutter-navigation.xml:67
+#: data/50-muffin-navigation.xml:67
 msgid "Switch windows of an application"
 msgstr "החלפה בין חלונות של יישום"
 
-#: data/50-mutter-navigation.xml:72
+#: data/50-muffin-navigation.xml:72
 msgid "Switch to previous window of an application"
 msgstr "החלפה לחלון הקודם של היישום"
 
-#: data/50-mutter-navigation.xml:76
+#: data/50-muffin-navigation.xml:76
 msgid "Switch system controls"
 msgstr "החלפה בין פקדי המערכת"
 
-#: data/50-mutter-navigation.xml:81
+#: data/50-muffin-navigation.xml:81
 msgid "Switch to previous system control"
 msgstr "החלפה לפקד המערכת הקודם"
 
-#: data/50-mutter-navigation.xml:85
+#: data/50-muffin-navigation.xml:85
 msgid "Switch windows directly"
 msgstr "החלפת החלונות באופן ישיר"
 
-#: data/50-mutter-navigation.xml:90
+#: data/50-muffin-navigation.xml:90
 msgid "Switch directly to previous window"
 msgstr "החלפה לחלון הקודם באופן ישיר"
 
-#: data/50-mutter-navigation.xml:94
+#: data/50-muffin-navigation.xml:94
 msgid "Switch windows of an app directly"
 msgstr "החלפת חלונות של יישום באופן ישיר"
 
-#: data/50-mutter-navigation.xml:99
+#: data/50-muffin-navigation.xml:99
 msgid "Switch directly to previous window of an app"
 msgstr "החלפה לחלון הקודם של היישום באופן ישיר"
 
-#: data/50-mutter-navigation.xml:103
+#: data/50-muffin-navigation.xml:103
 msgid "Switch system controls directly"
 msgstr "החלפת פקדי המערכת באופן ישיר"
 
-#: data/50-mutter-navigation.xml:108
+#: data/50-muffin-navigation.xml:108
 msgid "Switch directly to previous system control"
 msgstr "החלפה לפקד המערכת הקודם באופן ישיר"
 
-#: data/50-mutter-navigation.xml:111
+#: data/50-muffin-navigation.xml:111
 msgid "Hide all normal windows"
 msgstr "הסתרת כל החלונות הרגילים"
 
-#: data/50-mutter-navigation.xml:114
+#: data/50-muffin-navigation.xml:114
 msgid "Switch to workspace 1"
 msgstr "מעבר למרחב עבודה 1"
 
-#: data/50-mutter-navigation.xml:117
+#: data/50-muffin-navigation.xml:117
 msgid "Switch to workspace 2"
 msgstr "מעבר למרחב עבודה 2"
 
-#: data/50-mutter-navigation.xml:120
+#: data/50-muffin-navigation.xml:120
 msgid "Switch to workspace 3"
 msgstr "מעבר למרחב עבודה 3"
 
-#: data/50-mutter-navigation.xml:123
+#: data/50-muffin-navigation.xml:123
 msgid "Switch to workspace 4"
 msgstr "מעבר למרחב עבודה 4"
 
-#: data/50-mutter-navigation.xml:126
+#: data/50-muffin-navigation.xml:126
 msgid "Switch to last workspace"
 msgstr "מעבר למרחב העבודה האחרון"
 
-#: data/50-mutter-navigation.xml:129
+#: data/50-muffin-navigation.xml:129
 msgid "Move to workspace left"
 msgstr "העברה למרחב העבודה לשמאל"
 
-#: data/50-mutter-navigation.xml:132
+#: data/50-muffin-navigation.xml:132
 msgid "Move to workspace right"
 msgstr "העברה למרחב העבודה לימין"
 
-#: data/50-mutter-navigation.xml:135
+#: data/50-muffin-navigation.xml:135
 msgid "Move to workspace above"
 msgstr "העברה למרחב העבודה שמלמעלה"
 
-#: data/50-mutter-navigation.xml:138
+#: data/50-muffin-navigation.xml:138
 msgid "Move to workspace below"
 msgstr "העברה למרחב העבודה שמלמטה"
 
-#: data/50-mutter-system.xml:6 data/50-mutter-wayland.xml:6
+#: data/50-muffin-system.xml:6 data/50-muffin-wayland.xml:6
 msgid "System"
 msgstr "מערכת"
 
-#: data/50-mutter-system.xml:8
+#: data/50-muffin-system.xml:8
 msgid "Show the run command prompt"
 msgstr "הצגת החלונית להרצת פקודה"
 
-#: data/50-mutter-system.xml:10
+#: data/50-muffin-system.xml:10
 msgid "Show the activities overview"
 msgstr "הצגת סקירת הפעילויות"
 
-#: data/50-mutter-wayland.xml:8
+#: data/50-muffin-wayland.xml:8
 msgid "Restore the keyboard shortcuts"
 msgstr "שחזור צירופי מקשים"
 
-#: data/50-mutter-windows.xml:6
+#: data/50-muffin-windows.xml:6
 msgid "Windows"
 msgstr "חלונות"
 
-#: data/50-mutter-windows.xml:8
+#: data/50-muffin-windows.xml:8
 msgid "Activate the window menu"
 msgstr "הפעלת תפריט החלון"
 
-#: data/50-mutter-windows.xml:10
+#: data/50-muffin-windows.xml:10
 msgid "Toggle fullscreen mode"
 msgstr "הפעלה/כיבוי מצב מסך מלא"
 
-#: data/50-mutter-windows.xml:12
+#: data/50-muffin-windows.xml:12
 msgid "Toggle maximization state"
 msgstr "הפעלה/כיבוי מצב הגדלה"
 
-#: data/50-mutter-windows.xml:14
+#: data/50-muffin-windows.xml:14
 msgid "Maximize window"
 msgstr "הגדלת חלון"
 
-#: data/50-mutter-windows.xml:16
+#: data/50-muffin-windows.xml:16
 msgid "Restore window"
 msgstr "שחזור חלון"
 
-#: data/50-mutter-windows.xml:18
+#: data/50-muffin-windows.xml:18
 msgid "Toggle shaded state"
 msgstr "החלפת מצב ההצללה"
 
-#: data/50-mutter-windows.xml:20
+#: data/50-muffin-windows.xml:20
 msgid "Close window"
 msgstr "סגירת חלון"
 
-#: data/50-mutter-windows.xml:22
+#: data/50-muffin-windows.xml:22
 msgid "Hide window"
 msgstr "הסתרת החלון"
 
-#: data/50-mutter-windows.xml:24
+#: data/50-muffin-windows.xml:24
 msgid "Move window"
 msgstr "הזזת חלון"
 
-#: data/50-mutter-windows.xml:26
+#: data/50-muffin-windows.xml:26
 msgid "Resize window"
 msgstr "שינוי גודל חלון"
 
-#: data/50-mutter-windows.xml:29
+#: data/50-muffin-windows.xml:29
 msgid "Toggle window on all workspaces or one"
 msgstr "החלפת המצב בין האם החלון מופיע במרחב עבודה אחד או בכולם"
 
-#: data/50-mutter-windows.xml:31
+#: data/50-muffin-windows.xml:31
 msgid "Raise window if covered, otherwise lower it"
 msgstr "הגבהת החלון אם הוא מכוסה, אחרת יש להנמיכו"
 
-#: data/50-mutter-windows.xml:33
+#: data/50-muffin-windows.xml:33
 msgid "Raise window above other windows"
 msgstr "הגבהת החלון מעל לחלונות אחרים"
 
-#: data/50-mutter-windows.xml:35
+#: data/50-muffin-windows.xml:35
 msgid "Lower window below other windows"
 msgstr "הנמכת החלון מתחת לחלונות אחרים"
 
-#: data/50-mutter-windows.xml:37
+#: data/50-muffin-windows.xml:37
 msgid "Maximize window vertically"
 msgstr "הגדלת החלון אנכית"
 
-#: data/50-mutter-windows.xml:39
+#: data/50-muffin-windows.xml:39
 msgid "Maximize window horizontally"
 msgstr "הגדלת החלון אופקית"
 
-#: data/50-mutter-windows.xml:43
+#: data/50-muffin-windows.xml:43
 msgid "View split on left"
 msgstr "פיצול הצפייה משמאל"
 
-#: data/50-mutter-windows.xml:47
+#: data/50-muffin-windows.xml:47
 msgid "View split on right"
 msgstr "פיצול הצפייה מימין"
 
-#: data/mutter.desktop.in:4
+#: data/muffin.desktop.in:4
 msgid "Mutter"
 msgstr "Mutter"
 
-#: data/org.gnome.mutter.gschema.xml.in:7
+#: data/org.gnome.muffin.gschema.xml.in:7
 msgid "Modifier to use for extended window management operations"
 msgstr "Modifier to use for extended window management operations"
 
-#: data/org.gnome.mutter.gschema.xml.in:8
+#: data/org.gnome.muffin.gschema.xml.in:8
 msgid ""
 "This key will initiate the “overlay”, which is a combination window overview "
 "and application launching system. The default is intended to be the “Windows "
@@ -286,11 +286,11 @@ msgstr ""
 "key” on PC hardware. It’s expected that this binding either the default or "
 "set to the empty string."
 
-#: data/org.gnome.mutter.gschema.xml.in:20
+#: data/org.gnome.muffin.gschema.xml.in:20
 msgid "Attach modal dialogs"
 msgstr "Attach modal dialogs"
 
-#: data/org.gnome.mutter.gschema.xml.in:21
+#: data/org.gnome.muffin.gschema.xml.in:21
 msgid ""
 "When true, instead of having independent titlebars, modal dialogs appear "
 "attached to the titlebar of the parent window and are moved together with "
@@ -300,11 +300,11 @@ msgstr ""
 "attached to the titlebar of the parent window and are moved together with "
 "the parent window."
 
-#: data/org.gnome.mutter.gschema.xml.in:30
+#: data/org.gnome.muffin.gschema.xml.in:30
 msgid "Enable edge tiling when dropping windows on screen edges"
 msgstr "Enable edge tiling when dropping windows on screen edges"
 
-#: data/org.gnome.mutter.gschema.xml.in:31
+#: data/org.gnome.muffin.gschema.xml.in:31
 msgid ""
 "If enabled, dropping windows on vertical screen edges maximizes them "
 "vertically and resizes them horizontally to cover half of the available "
@@ -314,11 +314,11 @@ msgstr ""
 "vertically and resizes them horizontally to cover half of the available "
 "area. Dropping windows on the top screen edge maximizes them completely."
 
-#: data/org.gnome.mutter.gschema.xml.in:40
+#: data/org.gnome.muffin.gschema.xml.in:40
 msgid "Workspaces are managed dynamically"
 msgstr "Workspaces are managed dynamically"
 
-#: data/org.gnome.mutter.gschema.xml.in:41
+#: data/org.gnome.muffin.gschema.xml.in:41
 msgid ""
 "Determines whether workspaces are managed dynamically or whether there’s a "
 "static number of workspaces (determined by the num-workspaces key in org."
@@ -328,11 +328,11 @@ msgstr ""
 "static number of workspaces (determined by the num-workspaces key in org."
 "gnome.desktop.wm.preferences)."
 
-#: data/org.gnome.mutter.gschema.xml.in:50
+#: data/org.gnome.muffin.gschema.xml.in:50
 msgid "Workspaces only on primary"
 msgstr "Workspaces only on primary"
 
-#: data/org.gnome.mutter.gschema.xml.in:51
+#: data/org.gnome.muffin.gschema.xml.in:51
 msgid ""
 "Determines whether workspace switching should happen for windows on all "
 "monitors or only for windows on the primary monitor."
@@ -340,11 +340,11 @@ msgstr ""
 "Determines whether workspace switching should happen for windows on all "
 "monitors or only for windows on the primary monitor."
 
-#: data/org.gnome.mutter.gschema.xml.in:59
+#: data/org.gnome.muffin.gschema.xml.in:59
 msgid "No tab popup"
 msgstr "No tab popup"
 
-#: data/org.gnome.mutter.gschema.xml.in:60
+#: data/org.gnome.muffin.gschema.xml.in:60
 msgid ""
 "Determines whether the use of popup and highlight frame should be disabled "
 "for window cycling."
@@ -352,11 +352,11 @@ msgstr ""
 "Determines whether the use of popup and highlight frame should be disabled "
 "for window cycling."
 
-#: data/org.gnome.mutter.gschema.xml.in:68
+#: data/org.gnome.muffin.gschema.xml.in:68
 msgid "Delay focus changes until the pointer stops moving"
 msgstr "Delay focus changes until the pointer stops moving"
 
-#: data/org.gnome.mutter.gschema.xml.in:69
+#: data/org.gnome.muffin.gschema.xml.in:69
 msgid ""
 "If set to true, and the focus mode is either “sloppy” or “mouse” then the "
 "focus will not be changed immediately when entering a window, but only after "
@@ -366,11 +366,11 @@ msgstr ""
 "focus will not be changed immediately when entering a window, but only after "
 "the pointer stops moving."
 
-#: data/org.gnome.mutter.gschema.xml.in:79
+#: data/org.gnome.muffin.gschema.xml.in:79
 msgid "Draggable border width"
 msgstr "Draggable border width"
 
-#: data/org.gnome.mutter.gschema.xml.in:80
+#: data/org.gnome.muffin.gschema.xml.in:80
 msgid ""
 "The amount of total draggable borders. If the theme’s visible borders are "
 "not enough, invisible borders will be added to meet this value."
@@ -378,11 +378,11 @@ msgstr ""
 "The amount of total draggable borders. If the theme’s visible borders are "
 "not enough, invisible borders will be added to meet this value."
 
-#: data/org.gnome.mutter.gschema.xml.in:89
+#: data/org.gnome.muffin.gschema.xml.in:89
 msgid "Auto maximize nearly monitor sized windows"
 msgstr "Auto maximize nearly monitor sized windows"
 
-#: data/org.gnome.mutter.gschema.xml.in:90
+#: data/org.gnome.muffin.gschema.xml.in:90
 msgid ""
 "If enabled, new windows that are initially the size of the monitor "
 "automatically get maximized."
@@ -390,11 +390,11 @@ msgstr ""
 "If enabled, new windows that are initially the size of the monitor "
 "automatically get maximized."
 
-#: data/org.gnome.mutter.gschema.xml.in:98
+#: data/org.gnome.muffin.gschema.xml.in:98
 msgid "Place new windows in the center"
 msgstr "Place new windows in the center"
 
-#: data/org.gnome.mutter.gschema.xml.in:99
+#: data/org.gnome.muffin.gschema.xml.in:99
 msgid ""
 "When true, the new windows will always be put in the center of the active "
 "screen of the monitor."
@@ -402,18 +402,18 @@ msgstr ""
 "When true, the new windows will always be put in the center of the active "
 "screen of the monitor."
 
-#: data/org.gnome.mutter.gschema.xml.in:107
+#: data/org.gnome.muffin.gschema.xml.in:107
 msgid "Enable experimental features"
 msgstr "Enable experimental features"
 
-#: data/org.gnome.mutter.gschema.xml.in:108
+#: data/org.gnome.muffin.gschema.xml.in:108
 msgid ""
 "To enable experimental features, add the feature keyword to the list. "
 "Whether the feature requires restarting the compositor depends on the given "
 "feature. Any experimental feature is not required to still be available, or "
 "configurable. Don’t expect adding anything in this setting to be future "
 "proof. Currently possible keywords: • “scale-monitor-framebuffer” — makes "
-"mutter default to layout logical monitors in a logical pixel coordinate "
+"muffin default to layout logical monitors in a logical pixel coordinate "
 "space, while scaling monitor framebuffers instead of window content, to "
 "manage HiDPI monitors. Does not require a restart. • “remote-desktop” — "
 "enables remote desktop support. To support remote desktop with screen "
@@ -425,78 +425,78 @@ msgstr ""
 "feature. Any experimental feature is not required to still be available, or "
 "configurable. Don’t expect adding anything in this setting to be future "
 "proof. Currently possible keywords: • “scale-monitor-framebuffer” — makes "
-"mutter default to layout logical monitors in a logical pixel coordinate "
+"muffin default to layout logical monitors in a logical pixel coordinate "
 "space, while scaling monitor framebuffers instead of window content, to "
 "manage HiDPI monitors. Does not require a restart. • “remote-desktop” — "
 "enables remote desktop support. To support remote desktop with screen "
 "sharing, “screen-cast” must also be enabled. • “screen-cast” — enables "
 "screen cast support."
 
-#: data/org.gnome.mutter.gschema.xml.in:145
+#: data/org.gnome.muffin.gschema.xml.in:145
 msgid "Select window from tab popup"
 msgstr "Select window from tab popup"
 
-#: data/org.gnome.mutter.gschema.xml.in:150
+#: data/org.gnome.muffin.gschema.xml.in:150
 msgid "Cancel tab popup"
 msgstr "Cancel tab popup"
 
-#: data/org.gnome.mutter.gschema.xml.in:155
+#: data/org.gnome.muffin.gschema.xml.in:155
 msgid "Switch monitor configurations"
 msgstr "החלפה בין תצורות צגים"
 
-#: data/org.gnome.mutter.gschema.xml.in:160
+#: data/org.gnome.muffin.gschema.xml.in:160
 msgid "Rotates the built-in monitor configuration"
 msgstr "Rotates the built-in monitor configuration"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:6
+#: data/org.gnome.muffin.wayland.gschema.xml.in:6
 msgid "Switch to VT 1"
 msgstr "מעבר ל־VT ‏1"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:10
+#: data/org.gnome.muffin.wayland.gschema.xml.in:10
 msgid "Switch to VT 2"
 msgstr "מעבר ל־VT ‏2"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:14
+#: data/org.gnome.muffin.wayland.gschema.xml.in:14
 msgid "Switch to VT 3"
 msgstr "מעבר ל־VT ‏3"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:18
+#: data/org.gnome.muffin.wayland.gschema.xml.in:18
 msgid "Switch to VT 4"
 msgstr "מעבר ל־VT ‏4"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:22
+#: data/org.gnome.muffin.wayland.gschema.xml.in:22
 msgid "Switch to VT 5"
 msgstr "מעבר ל־VT ‏5"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:26
+#: data/org.gnome.muffin.wayland.gschema.xml.in:26
 msgid "Switch to VT 6"
 msgstr "מעבר ל־VT ‏6"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:30
+#: data/org.gnome.muffin.wayland.gschema.xml.in:30
 msgid "Switch to VT 7"
 msgstr "מעבר ל־VT ‏7"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:34
+#: data/org.gnome.muffin.wayland.gschema.xml.in:34
 msgid "Switch to VT 8"
 msgstr "מעבר ל־VT ‏8"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:38
+#: data/org.gnome.muffin.wayland.gschema.xml.in:38
 msgid "Switch to VT 9"
 msgstr "מעבר ל־VT ‏9"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:42
+#: data/org.gnome.muffin.wayland.gschema.xml.in:42
 msgid "Switch to VT 10"
 msgstr "מעבר ל־VT ‏10"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:46
+#: data/org.gnome.muffin.wayland.gschema.xml.in:46
 msgid "Switch to VT 11"
 msgstr "מעבר ל־VT ‏11"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:50
+#: data/org.gnome.muffin.wayland.gschema.xml.in:50
 msgid "Switch to VT 12"
 msgstr "מעבר ל־VT ‏12"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:54
+#: data/org.gnome.muffin.wayland.gschema.xml.in:54
 msgid "Re-enable shortcuts"
 msgstr "לאפשר מחדש צירופי מקשים"
 
@@ -617,27 +617,27 @@ msgstr "_אילוץ סגירה"
 msgid "_Wait"
 msgstr "ה_מתנה"
 
-#: src/core/mutter.c:39
+#: src/core/muffin.c:39
 #, c-format
 msgid ""
-"mutter %s\n"
+"muffin %s\n"
 "Copyright © 2001-%d Havoc Pennington, Red Hat, Inc., and others\n"
 "This is free software; see the source for copying conditions.\n"
 "There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A "
 "PARTICULAR PURPOSE.\n"
 msgstr ""
-"mutter %s\n"
+"muffin %s\n"
 "כל הזכויות שמורות (C)‏ %d-2001‏ Havoc Pennington,‏ Red Hat, Inc‎.‎, ואחרים\n"
 "זוהי תכנה חופשית; יש לעיין במקור כדי לקבל מידע אודות תנאי ההעתקה.\n"
 "לא קיימת שום אחריות; אפילו לא עבור סחר או התאמה לצרכים מסוימים.\n"
 
-#: src/core/mutter.c:53
+#: src/core/muffin.c:53
 msgid "Print version"
 msgstr "Print version"
 
-#: src/core/mutter.c:59
+#: src/core/muffin.c:59
 msgid "Mutter plugin to use"
-msgstr "תוסף ה־mutter לשימוש"
+msgstr "תוסף ה־muffin לשימוש"
 
 #: src/core/prefs.c:1997
 #, c-format
@@ -1303,9 +1303,9 @@ msgstr "%s (מעל %s)"
 #~ msgid "Failed to parse saved session file: %s\n"
 #~ msgstr "Failed to parse saved session file: %s\n"
 
-#~ msgid "<mutter_session> attribute seen but we already have the session ID"
+#~ msgid "<muffin_session> attribute seen but we already have the session ID"
 #~ msgstr ""
-#~ "התכונה <mutter_session> מופיעה אך כבר יש בידינו את מספר זיהוי ההפעלה"
+#~ "התכונה <muffin_session> מופיעה אך כבר יש בידינו את מספר זיהוי ההפעלה"
 
 #~ msgid "Unknown attribute %s on <%s> element"
 #~ msgstr "Unknown attribute %s on <%s> element"

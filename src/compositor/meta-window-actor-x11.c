@@ -327,7 +327,7 @@ queue_send_frame_messages_timeout (MetaWindowActorX11 *actor_x11)
                         send_frame_messages_timeout,
                         actor_x11, NULL);
   g_source_set_name_by_id (actor_x11->send_frame_messages_timer,
-                           "[mutter] send_frame_messages_timeout");
+                           "[muffin] send_frame_messages_timeout");
 }
 
 static void
@@ -1106,7 +1106,7 @@ update_opaque_region (MetaWindowActorX11 *actor_x11)
        *
        * If the client gives bad coordinates where it does not
        * fully paint, the behavior is defined by the specification
-       * to be undefined, and considered a client bug. In mutter's
+       * to be undefined, and considered a client bug. In muffin's
        * case, graphical glitches will occur.
        */
       opaque_region = cairo_region_copy (window->opaque_region);

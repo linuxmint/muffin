@@ -39,7 +39,7 @@
 #include "backends/native/meta-input-device-tool-native.h"
 #include "backends/native/meta-keymap-native.h"
 #include "backends/native/meta-virtual-input-device-native.h"
-#include "clutter/clutter-mutter.h"
+#include "clutter/clutter-muffin.h"
 #include "core/bell.h"
 
 /*

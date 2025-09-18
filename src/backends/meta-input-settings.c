@@ -1648,7 +1648,7 @@ check_add_mappable_device (MetaInputSettings  *input_settings,
        device_type == CLUTTER_PEN_DEVICE ||
        device_type == CLUTTER_ERASER_DEVICE ||
        device_type == CLUTTER_PAD_DEVICE) &&
-      g_getenv ("MUTTER_DISABLE_WACOM_CONFIGURATION") != NULL)
+      g_getenv ("MUFFIN_DISABLE_WACOM_CONFIGURATION") != NULL)
     return FALSE;
 
   settings = lookup_device_settings (device);

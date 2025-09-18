@@ -92,7 +92,7 @@ from The Open Group.
 #include "meta/meta-x11-errors.h"
 #include "ui/ui.h"
 #include "x11/meta-x11-display-private.h"
-#include "x11/mutter-Xatomtype.h"
+#include "x11/muffin-Xatomtype.h"
 
 typedef struct
 {

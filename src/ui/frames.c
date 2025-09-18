@@ -1207,7 +1207,7 @@ meta_frame_left_click_event (MetaUIFrame        *frame,
        * that cannot be resized (e. g. it is maximized and the theme
        * currently used has borders for maximized windows), see #751884 */
     case META_FRAME_CONTROL_CLIENT_AREA:
-      /* See https://gitlab.gnome.org/GNOME/mutter/-/issues/1668#note_1046828.
+      /* See https://gitlab.gnome.org/GNOME/muffin/-/issues/1668#note_1046828.
        * This can happen when clicking on the frame of a tiles, unfocused window. */
       return FALSE;
     default:
@@ -1762,7 +1762,7 @@ meta_ui_frame_handle_event (MetaUIFrame *frame,
       ClutterEventSequence *sequence;
       MetaFrames *frames = frame->frames;
 
-      /* In X11, mutter sets up passive touch grabs which basically
+      /* In X11, muffin sets up passive touch grabs which basically
        * means we handle those events twice (once through the passive
        * grab, and then through XISelectEvents).
        *

@@ -27,7 +27,7 @@
 #include "backends/native/meta-input-device-tool-native.h"
 #include "backends/native/meta-input-device-native.h"
 #include "backends/native/meta-seat-native.h"
-#include "clutter/clutter-mutter.h"
+#include "clutter/clutter-muffin.h"
 
 G_DEFINE_TYPE (MetaInputDeviceNative,
                meta_input_device_native,

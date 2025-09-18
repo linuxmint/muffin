@@ -90,7 +90,7 @@ G_BEGIN_DECLS
  * meta-textures.</note>
  */
 
-#if defined(__COGL_H_INSIDE__) && !defined(COGL_ENABLE_MUTTER_API) && \
+#if defined(__COGL_H_INSIDE__) && !defined(COGL_ENABLE_MUFFIN_API) && \
   !defined(COGL_GIR_SCANNING)
 /* For the public C api we typedef interface types as void to avoid needing
  * lots of casting in code and instead we will rely on runtime type checking

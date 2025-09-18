@@ -1,13 +1,13 @@
-# Occitan translation of mutter.
+# Occitan translation of muffin.
 # Copyright (C) 2002-2015 Free Software Foundation, Inc.
 # This file is distributed under the same license as the metacity package.
 # Yannig Marchegay (Kokoyaya) <yannig@marchegay.org>, 2006-2008
 # Cédric Valmary (totenoc.eu) <cvalmary@yahoo.fr>, 2016.
 msgid ""
 msgstr ""
-"Project-Id-Version: mutter master\n"
+"Project-Id-Version: muffin master\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
-"product=mutter&keywords=I18N+L10N&component=general\n"
+"product=muffin&keywords=I18N+L10N&component=general\n"
 "POT-Creation-Date: 2016-05-20 13:48+0000\n"
 "PO-Revision-Date: 2016-05-08 18:48+0200\n"
 "Last-Translator: Cédric Valmary (totenoc.eu) <cvalmary@yahoo.fr>\n"
@@ -20,256 +20,256 @@ msgstr ""
 "X-Generator: Virtaal 0.7.1\n"
 "X-Project-Style: gnome\n"
 
-#: ../data/50-mutter-navigation.xml.in.h:1
+#: ../data/50-muffin-navigation.xml.in.h:1
 msgid "Navigation"
 msgstr "Navigacion"
 
-#: ../data/50-mutter-navigation.xml.in.h:2
+#: ../data/50-muffin-navigation.xml.in.h:2
 msgid "Move window to workspace 1"
 msgstr "Desplaçar la fenèstra cap a l'espaci de trabalh 1"
 
-#: ../data/50-mutter-navigation.xml.in.h:3
+#: ../data/50-muffin-navigation.xml.in.h:3
 msgid "Move window to workspace 2"
 msgstr "Desplaçar la fenèstra cap a l'espaci de trabalh 2"
 
-#: ../data/50-mutter-navigation.xml.in.h:4
+#: ../data/50-muffin-navigation.xml.in.h:4
 msgid "Move window to workspace 3"
 msgstr "Desplaçar la fenèstra cap a l'espaci de trabalh 3"
 
-#: ../data/50-mutter-navigation.xml.in.h:5
+#: ../data/50-muffin-navigation.xml.in.h:5
 msgid "Move window to workspace 4"
 msgstr "Desplaçar la fenèstra cap a l'espaci de trabalh 4"
 
-#: ../data/50-mutter-navigation.xml.in.h:6
+#: ../data/50-muffin-navigation.xml.in.h:6
 msgid "Move window to last workspace"
 msgstr "Desplaçar la fenèstra cap al darrièr espaci de trabalh"
 
-#: ../data/50-mutter-navigation.xml.in.h:7
+#: ../data/50-muffin-navigation.xml.in.h:7
 msgid "Move window one workspace to the left"
 msgstr "Desplaçar la fenèstra d'un espaci de trabalh cap a esquèrra"
 
-#: ../data/50-mutter-navigation.xml.in.h:8
+#: ../data/50-muffin-navigation.xml.in.h:8
 msgid "Move window one workspace to the right"
 msgstr "Desplaçar la fenèstra d'un espaci de trabalh cap a dreita"
 
-#: ../data/50-mutter-navigation.xml.in.h:9
+#: ../data/50-muffin-navigation.xml.in.h:9
 msgid "Move window one workspace up"
 msgstr "Desplaçar la fenèstra d'un espaci de trabalh cap amont"
 
-#: ../data/50-mutter-navigation.xml.in.h:10
+#: ../data/50-muffin-navigation.xml.in.h:10
 msgid "Move window one workspace down"
 msgstr "Desplaçar la fenèstra d'un espaci de trabalh cap aval"
 
-#: ../data/50-mutter-navigation.xml.in.h:11
+#: ../data/50-muffin-navigation.xml.in.h:11
 msgid "Move window one monitor to the left"
 msgstr "Desplaçar la fenèstra d'un ecran cap a esquèrra"
 
-#: ../data/50-mutter-navigation.xml.in.h:12
+#: ../data/50-muffin-navigation.xml.in.h:12
 msgid "Move window one monitor to the right"
 msgstr "Desplaçar la fenèstra d'un ecran cap a dreita"
 
-#: ../data/50-mutter-navigation.xml.in.h:13
+#: ../data/50-muffin-navigation.xml.in.h:13
 msgid "Move window one monitor up"
 msgstr "Desplaçar la fenèstra d'un ecran cap amont"
 
-#: ../data/50-mutter-navigation.xml.in.h:14
+#: ../data/50-muffin-navigation.xml.in.h:14
 msgid "Move window one monitor down"
 msgstr "Desplaçar la fenèstra d'un ecran cap aval"
 
-#: ../data/50-mutter-navigation.xml.in.h:15
+#: ../data/50-muffin-navigation.xml.in.h:15
 msgid "Switch applications"
 msgstr "Cambiar d'aplicacion"
 
-#: ../data/50-mutter-navigation.xml.in.h:16
+#: ../data/50-muffin-navigation.xml.in.h:16
 msgid "Switch to previous application"
 msgstr "Passar a l'aplicacion precedenta"
 
-#: ../data/50-mutter-navigation.xml.in.h:17
+#: ../data/50-muffin-navigation.xml.in.h:17
 msgid "Switch windows"
 msgstr "Cambiar de fenèstra"
 
-#: ../data/50-mutter-navigation.xml.in.h:18
+#: ../data/50-muffin-navigation.xml.in.h:18
 msgid "Switch to previous window"
 msgstr "Passar a la fenèstra precedenta"
 
-#: ../data/50-mutter-navigation.xml.in.h:19
+#: ../data/50-muffin-navigation.xml.in.h:19
 msgid "Switch windows of an application"
 msgstr "Cambiar de fenèstra d'una aplicacion"
 
-#: ../data/50-mutter-navigation.xml.in.h:20
+#: ../data/50-muffin-navigation.xml.in.h:20
 msgid "Switch to previous window of an application"
 msgstr "Passar a la fenèstra precedenta d'una aplicacion"
 
-#: ../data/50-mutter-navigation.xml.in.h:21
+#: ../data/50-muffin-navigation.xml.in.h:21
 msgid "Switch system controls"
 msgstr "Cambiar los contraròtles sistèma"
 
-#: ../data/50-mutter-navigation.xml.in.h:22
+#: ../data/50-muffin-navigation.xml.in.h:22
 msgid "Switch to previous system control"
 msgstr "Passar al contraròtle sistèma precedent"
 
-#: ../data/50-mutter-navigation.xml.in.h:23
+#: ../data/50-muffin-navigation.xml.in.h:23
 msgid "Switch windows directly"
 msgstr "Cambiar de fenèstra dirèctament"
 
-#: ../data/50-mutter-navigation.xml.in.h:24
+#: ../data/50-muffin-navigation.xml.in.h:24
 msgid "Switch directly to previous window"
 msgstr "Passar dirèctament a la fenèstra precedenta"
 
-#: ../data/50-mutter-navigation.xml.in.h:25
+#: ../data/50-muffin-navigation.xml.in.h:25
 msgid "Switch windows of an app directly"
 msgstr "Cambiar de fenèstra d'una aplicacion dirèctament"
 
-#: ../data/50-mutter-navigation.xml.in.h:26
+#: ../data/50-muffin-navigation.xml.in.h:26
 msgid "Switch directly to previous window of an app"
 msgstr "Passar dirèctament a la fenèstra precedenta d'una aplicacion"
 
-#: ../data/50-mutter-navigation.xml.in.h:27
+#: ../data/50-muffin-navigation.xml.in.h:27
 msgid "Switch system controls directly"
 msgstr "Cambiar los contraròtles sistèma dirèctament"
 
-#: ../data/50-mutter-navigation.xml.in.h:28
+#: ../data/50-muffin-navigation.xml.in.h:28
 msgid "Switch directly to previous system control"
 msgstr "Passar dirèctament al contraròtle sistèma precedent"
 
-#: ../data/50-mutter-navigation.xml.in.h:29
+#: ../data/50-muffin-navigation.xml.in.h:29
 msgid "Hide all normal windows"
 msgstr "Amagar totas las fenèstras normalas"
 
-#: ../data/50-mutter-navigation.xml.in.h:30
+#: ../data/50-muffin-navigation.xml.in.h:30
 msgid "Switch to workspace 1"
 msgstr "Passar a l'espaci de trabalh 1"
 
-#: ../data/50-mutter-navigation.xml.in.h:31
+#: ../data/50-muffin-navigation.xml.in.h:31
 msgid "Switch to workspace 2"
 msgstr "Passar a l'espaci de trabalh 2"
 
-#: ../data/50-mutter-navigation.xml.in.h:32
+#: ../data/50-muffin-navigation.xml.in.h:32
 msgid "Switch to workspace 3"
 msgstr "Passar a l'espaci de trabalh 3"
 
-#: ../data/50-mutter-navigation.xml.in.h:33
+#: ../data/50-muffin-navigation.xml.in.h:33
 msgid "Switch to workspace 4"
 msgstr "Passar a l'espaci de trabalh 4"
 
-#: ../data/50-mutter-navigation.xml.in.h:34
+#: ../data/50-muffin-navigation.xml.in.h:34
 msgid "Switch to last workspace"
 msgstr "Passar al darrièr espaci de trabalh"
 
-#: ../data/50-mutter-navigation.xml.in.h:35
+#: ../data/50-muffin-navigation.xml.in.h:35
 msgid "Move to workspace left"
 msgstr "Desplaçar cap a l'espaci de trabalh d'esquèrra"
 
-#: ../data/50-mutter-navigation.xml.in.h:36
+#: ../data/50-muffin-navigation.xml.in.h:36
 msgid "Move to workspace right"
 msgstr "Desplaçar cap a l'espaci de trabalh de dreita"
 
-#: ../data/50-mutter-navigation.xml.in.h:37
+#: ../data/50-muffin-navigation.xml.in.h:37
 msgid "Move to workspace above"
 msgstr "Desplaçar cap a l'espaci de trabalh de dessús"
 
-#: ../data/50-mutter-navigation.xml.in.h:38
+#: ../data/50-muffin-navigation.xml.in.h:38
 msgid "Move to workspace below"
 msgstr "Desplaçar cap a l'espaci de trabalh de dejós"
 
-#: ../data/50-mutter-system.xml.in.h:1
+#: ../data/50-muffin-system.xml.in.h:1
 msgid "System"
 msgstr "Sistèma"
 
-#: ../data/50-mutter-system.xml.in.h:2
+#: ../data/50-muffin-system.xml.in.h:2
 msgid "Show the run command prompt"
 msgstr "Afichar la fenèstra per aviar una comanda"
 
-#: ../data/50-mutter-system.xml.in.h:3
+#: ../data/50-muffin-system.xml.in.h:3
 msgid "Show the activities overview"
 msgstr "Afichar l'apercebut de las activitats"
 
-#: ../data/50-mutter-windows.xml.in.h:1
+#: ../data/50-muffin-windows.xml.in.h:1
 msgid "Windows"
 msgstr "Fenèstras"
 
-#: ../data/50-mutter-windows.xml.in.h:2
+#: ../data/50-muffin-windows.xml.in.h:2
 msgid "Activate the window menu"
 msgstr "Activar lo menú fenèstra"
 
-#: ../data/50-mutter-windows.xml.in.h:3
+#: ../data/50-muffin-windows.xml.in.h:3
 msgid "Toggle fullscreen mode"
 msgstr "Bascular lo mòde ecran complet"
 
-#: ../data/50-mutter-windows.xml.in.h:4
+#: ../data/50-muffin-windows.xml.in.h:4
 msgid "Toggle maximization state"
 msgstr "Bascular l'estat d'agrandiment"
 
-#: ../data/50-mutter-windows.xml.in.h:5
+#: ../data/50-muffin-windows.xml.in.h:5
 msgid "Maximize window"
 msgstr "Maximizar la fenèstra"
 
-#: ../data/50-mutter-windows.xml.in.h:6
+#: ../data/50-muffin-windows.xml.in.h:6
 msgid "Restore window"
 msgstr "Restablir la fenèstra"
 
-#: ../data/50-mutter-windows.xml.in.h:7
+#: ../data/50-muffin-windows.xml.in.h:7
 msgid "Toggle shaded state"
 msgstr "Bascular l'estat de replec"
 
-#: ../data/50-mutter-windows.xml.in.h:8
+#: ../data/50-muffin-windows.xml.in.h:8
 msgid "Close window"
 msgstr "Tampar la fenèstra"
 
-#: ../data/50-mutter-windows.xml.in.h:9
+#: ../data/50-muffin-windows.xml.in.h:9
 msgid "Hide window"
 msgstr "Amagar la fenèstra"
 
-#: ../data/50-mutter-windows.xml.in.h:10
+#: ../data/50-muffin-windows.xml.in.h:10
 msgid "Move window"
 msgstr "Desplaçar la fenèstra"
 
-#: ../data/50-mutter-windows.xml.in.h:11
+#: ../data/50-muffin-windows.xml.in.h:11
 msgid "Resize window"
 msgstr "Redimensionar la fenèstra"
 
-#: ../data/50-mutter-windows.xml.in.h:12
+#: ../data/50-muffin-windows.xml.in.h:12
 msgid "Toggle window on all workspaces or one"
 msgstr "Plaçar la fenèstra sus totes los espacis de trabalh, o sus un sol"
 
-#: ../data/50-mutter-windows.xml.in.h:13
+#: ../data/50-muffin-windows.xml.in.h:13
 msgid "Raise window if covered, otherwise lower it"
 msgstr "Metre la fenèstra al primièr plan se es amagada, siquenon al rèireplan"
 
-#: ../data/50-mutter-windows.xml.in.h:14
+#: ../data/50-muffin-windows.xml.in.h:14
 msgid "Raise window above other windows"
 msgstr "Metre la fenèstra al primièr plan"
 
-#: ../data/50-mutter-windows.xml.in.h:15
+#: ../data/50-muffin-windows.xml.in.h:15
 msgid "Lower window below other windows"
 msgstr "Metre la fenèstra jos las autras fenèstras"
 
-#: ../data/50-mutter-windows.xml.in.h:16
+#: ../data/50-muffin-windows.xml.in.h:16
 msgid "Maximize window vertically"
 msgstr "Maximizar la fenèstra verticalament"
 
-#: ../data/50-mutter-windows.xml.in.h:17
+#: ../data/50-muffin-windows.xml.in.h:17
 msgid "Maximize window horizontally"
 msgstr "Maximizar la fenèstra orizontalament"
 
-#: ../data/50-mutter-windows.xml.in.h:18
+#: ../data/50-muffin-windows.xml.in.h:18
 msgid "View split on left"
 msgstr "Vista devesida a esquèrra"
 
-#: ../data/50-mutter-windows.xml.in.h:19
+#: ../data/50-muffin-windows.xml.in.h:19
 msgid "View split on right"
 msgstr "Vista devesida a dreita"
 
-#: ../data/mutter.desktop.in.h:1
+#: ../data/muffin.desktop.in.h:1
 msgid "Mutter"
 msgstr "Mutter"
 
-#: ../data/org.gnome.mutter.gschema.xml.in.h:1
+#: ../data/org.gnome.muffin.gschema.xml.in.h:1
 msgid "Modifier to use for extended window management operations"
 msgstr ""
 "Tòca d'utilizar per las operacions espandidas de gestion de las fenèstras"
 
-#: ../data/org.gnome.mutter.gschema.xml.in.h:2
+#: ../data/org.gnome.muffin.gschema.xml.in.h:2
 msgid ""
 "This key will initiate the \"overlay\", which is a combination window "
 "overview and application launching system. The default is intended to be the "
@@ -281,11 +281,11 @@ msgstr ""
 "material PC es la tòca Windows. En principi, aqueste acorchi es configurat "
 "sul reglatge per defaut o sus la cadena voida."
 
-#: ../data/org.gnome.mutter.gschema.xml.in.h:3
+#: ../data/org.gnome.muffin.gschema.xml.in.h:3
 msgid "Attach modal dialogs"
 msgstr "Estacar las bóstias de dialòg modal"
 
-#: ../data/org.gnome.mutter.gschema.xml.in.h:4
+#: ../data/org.gnome.muffin.gschema.xml.in.h:4
 msgid ""
 "When true, instead of having independent titlebars, modal dialogs appear "
 "attached to the titlebar of the parent window and are moved together with "
@@ -295,11 +295,11 @@ msgstr ""
 "dialòg apareisson estacadas a la barra de títol de la fenèstra parenta e son "
 "desplaçadas ensembles amb ela."
 
-#: ../data/org.gnome.mutter.gschema.xml.in.h:5
+#: ../data/org.gnome.muffin.gschema.xml.in.h:5
 msgid "Enable edge tiling when dropping windows on screen edges"
 msgstr "Activar l'empilatge de las fenèstras depausadas suls bòrds de l'ecran"
 
-#: ../data/org.gnome.mutter.gschema.xml.in.h:6
+#: ../data/org.gnome.muffin.gschema.xml.in.h:6
 msgid ""
 "If enabled, dropping windows on vertical screen edges maximizes them "
 "vertically and resizes them horizontally to cover half of the available "
@@ -310,11 +310,11 @@ msgstr ""
 "mitat de la zòna disponibla. Lo depaus de las fenèstras sul bòrd superior de "
 "l'ecran las maximiza completament."
 
-#: ../data/org.gnome.mutter.gschema.xml.in.h:7
+#: ../data/org.gnome.muffin.gschema.xml.in.h:7
 msgid "Workspaces are managed dynamically"
 msgstr "Les espacis de trabalh son gerits d'un biais dinamic"
 
-#: ../data/org.gnome.mutter.gschema.xml.in.h:8
+#: ../data/org.gnome.muffin.gschema.xml.in.h:8
 msgid ""
 "Determines whether workspaces are managed dynamically or whether there's a "
 "static number of workspaces (determined by the num-workspaces key in org."
@@ -324,11 +324,11 @@ msgstr ""
 "nombre d'espacis de trabalh es fixe (determinat per la clau num-workspaces "
 "dins org.gnome.desktop.wm.preferences)."
 
-#: ../data/org.gnome.mutter.gschema.xml.in.h:9
+#: ../data/org.gnome.muffin.gschema.xml.in.h:9
 msgid "Workspaces only on primary"
 msgstr "Espacis de trabalh solament sus l'ecran principal"
 
-#: ../data/org.gnome.mutter.gschema.xml.in.h:10
+#: ../data/org.gnome.muffin.gschema.xml.in.h:10
 msgid ""
 "Determines whether workspace switching should happen for windows on all "
 "monitors or only for windows on the primary monitor."
@@ -337,11 +337,11 @@ msgstr ""
 "fenèstras de totes los ecrans o solament per las fenèstras de l'ecran "
 "principal."
 
-#: ../data/org.gnome.mutter.gschema.xml.in.h:11
+#: ../data/org.gnome.muffin.gschema.xml.in.h:11
 msgid "No tab popup"
 msgstr "Pas cap d'aparicion en seguida d'una quichada sus la tòca tab"
 
-#: ../data/org.gnome.mutter.gschema.xml.in.h:12
+#: ../data/org.gnome.muffin.gschema.xml.in.h:12
 msgid ""
 "Determines whether the use of popup and highlight frame should be disabled "
 "for window cycling."
@@ -349,11 +349,11 @@ msgstr ""
 "Determina se l'utilizacion de fenèstras sorgissentas e de mesa en valor deu "
 "èsser desactivada per la consultacion de las fenèstras."
 
-#: ../data/org.gnome.mutter.gschema.xml.in.h:13
+#: ../data/org.gnome.muffin.gschema.xml.in.h:13
 msgid "Delay focus changes until the pointer stops moving"
 msgstr "Espèra l'arrèst del puntador abans lo cambiament de focus"
 
-#: ../data/org.gnome.mutter.gschema.xml.in.h:14
+#: ../data/org.gnome.muffin.gschema.xml.in.h:14
 msgid ""
 "If set to true, and the focus mode is either \"sloppy\" or \"mouse\" then "
 "the focus will not be changed immediately when entering a window, but only "
@@ -363,11 +363,11 @@ msgstr ""
 "alara lo focus serà pas cambiat immediatament en passant sus una fenèstra, "
 "mas solament aprèp que lo puntador s'arrèsta."
 
-#: ../data/org.gnome.mutter.gschema.xml.in.h:15
+#: ../data/org.gnome.muffin.gschema.xml.in.h:15
 msgid "Draggable border width"
 msgstr "Largor de bordadura ajustabla"
 
-#: ../data/org.gnome.mutter.gschema.xml.in.h:16
+#: ../data/org.gnome.muffin.gschema.xml.in.h:16
 msgid ""
 "The amount of total draggable borders. If the theme's visible borders are "
 "not enough, invisible borders will be added to meet this value."
@@ -376,13 +376,13 @@ msgstr ""
 "visiblas del tèma son pas sufisentas, de bordaduras invisiblas son apondudas "
 "per arribar a aquesta valor."
 
-#: ../data/org.gnome.mutter.gschema.xml.in.h:17
+#: ../data/org.gnome.muffin.gschema.xml.in.h:17
 msgid "Auto maximize nearly monitor sized windows"
 msgstr ""
 "Maximizar automaticament las fenèstras que la talha n'es pròcha de la de "
 "l'ecran"
 
-#: ../data/org.gnome.mutter.gschema.xml.in.h:18
+#: ../data/org.gnome.muffin.gschema.xml.in.h:18
 msgid ""
 "If enabled, new windows that are initially the size of the monitor "
 "automatically get maximized."
@@ -390,11 +390,11 @@ msgstr ""
 "Se activat, las novèlas fenèstras qu'an gaireben la talha de l'ecran a la "
 "dobertura seràn maximizadas automaticament."
 
-#: ../data/org.gnome.mutter.gschema.xml.in.h:19
+#: ../data/org.gnome.muffin.gschema.xml.in.h:19
 msgid "Place new windows in the center"
 msgstr "Plaçar las novèlas fenèstras al centre"
 
-#: ../data/org.gnome.mutter.gschema.xml.in.h:20
+#: ../data/org.gnome.muffin.gschema.xml.in.h:20
 msgid ""
 "When true, the new windows will always be put in the center of the active "
 "screen of the monitor."
@@ -402,61 +402,61 @@ msgstr ""
 "Se true (verai), las novèlas fenèstras seràn totjorn plaçadas al centre de "
 "l'ecran actiu del monitor."
 
-#: ../data/org.gnome.mutter.gschema.xml.in.h:21
+#: ../data/org.gnome.muffin.gschema.xml.in.h:21
 msgid "Select window from tab popup"
 msgstr ""
 "Seleccionar la fenèstra dins la vista qu'apareis en seguida d'una quichada "
 "sus la tòca tab"
 
-#: ../data/org.gnome.mutter.gschema.xml.in.h:22
+#: ../data/org.gnome.muffin.gschema.xml.in.h:22
 msgid "Cancel tab popup"
 msgstr "Tampar la vista qu'apareis en seguida d'una quichada sus la tòca tab"
 
-#: ../data/org.gnome.mutter.wayland.gschema.xml.in.h:1
+#: ../data/org.gnome.muffin.wayland.gschema.xml.in.h:1
 msgid "Switch to VT 1"
 msgstr "Passar a l'emulator de terminal 1"
 
-#: ../data/org.gnome.mutter.wayland.gschema.xml.in.h:2
+#: ../data/org.gnome.muffin.wayland.gschema.xml.in.h:2
 msgid "Switch to VT 2"
 msgstr "Passar a l'emulator de terminal 2"
 
-#: ../data/org.gnome.mutter.wayland.gschema.xml.in.h:3
+#: ../data/org.gnome.muffin.wayland.gschema.xml.in.h:3
 msgid "Switch to VT 3"
 msgstr "Passar a l'emulator de terminal 3"
 
-#: ../data/org.gnome.mutter.wayland.gschema.xml.in.h:4
+#: ../data/org.gnome.muffin.wayland.gschema.xml.in.h:4
 msgid "Switch to VT 4"
 msgstr "Passar a l'emulator de terminal 4"
 
-#: ../data/org.gnome.mutter.wayland.gschema.xml.in.h:5
+#: ../data/org.gnome.muffin.wayland.gschema.xml.in.h:5
 msgid "Switch to VT 5"
 msgstr "Passar a l'emulator de terminal 5"
 
-#: ../data/org.gnome.mutter.wayland.gschema.xml.in.h:6
+#: ../data/org.gnome.muffin.wayland.gschema.xml.in.h:6
 msgid "Switch to VT 6"
 msgstr "Passar a l'emulator de terminal 6"
 
-#: ../data/org.gnome.mutter.wayland.gschema.xml.in.h:7
+#: ../data/org.gnome.muffin.wayland.gschema.xml.in.h:7
 msgid "Switch to VT 7"
 msgstr "Passar a l'emulator de terminal 7"
 
-#: ../data/org.gnome.mutter.wayland.gschema.xml.in.h:8
+#: ../data/org.gnome.muffin.wayland.gschema.xml.in.h:8
 msgid "Switch to VT 8"
 msgstr "Passar a l'emulator de terminal 8"
 
-#: ../data/org.gnome.mutter.wayland.gschema.xml.in.h:9
+#: ../data/org.gnome.muffin.wayland.gschema.xml.in.h:9
 msgid "Switch to VT 9"
 msgstr "Passar a l'emulator de terminal 9"
 
-#: ../data/org.gnome.mutter.wayland.gschema.xml.in.h:10
+#: ../data/org.gnome.muffin.wayland.gschema.xml.in.h:10
 msgid "Switch to VT 10"
 msgstr "Passar a l'emulator de terminal 10"
 
-#: ../data/org.gnome.mutter.wayland.gschema.xml.in.h:11
+#: ../data/org.gnome.muffin.wayland.gschema.xml.in.h:11
 msgid "Switch to VT 11"
 msgstr "Passar a l'emulator de terminal 11"
 
-#: ../data/org.gnome.mutter.wayland.gschema.xml.in.h:12
+#: ../data/org.gnome.muffin.wayland.gschema.xml.in.h:12
 msgid "Switch to VT 12"
 msgstr "Passar a l'emulator de terminal 12"
 
@@ -561,27 +561,27 @@ msgstr ""
 msgid "Run as a full display server, rather than nested"
 msgstr "Aviar coma un servidor d'afichatge complet, puslèu qu'imbricat"
 
-#: ../src/core/mutter.c:39
+#: ../src/core/muffin.c:39
 #, c-format
 msgid ""
-"mutter %s\n"
+"muffin %s\n"
 "Copyright (C) 2001-%d Havoc Pennington, Red Hat, Inc., and others\n"
 "This is free software; see the source for copying conditions.\n"
 "There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A "
 "PARTICULAR PURPOSE.\n"
 msgstr ""
-"mutter %s\n"
+"muffin %s\n"
 "Copyright © 2001-%d Havoc Pennington, Red Hat, Inc., e autres.\n"
 "Aquò es un logicial liure ; consultatz lo còdi font per las\n"
 "condicions de còpia.\n"
 "I a PAS CAP DE garantida ; quitament pas de VALOR MERCANDA o\n"
 "d'ADEQÜACION A UN USATGE PARTICULAR.\n"
 
-#: ../src/core/mutter.c:53
+#: ../src/core/muffin.c:53
 msgid "Print version"
 msgstr "Imprimir la version"
 
-#: ../src/core/mutter.c:59
+#: ../src/core/muffin.c:59
 msgid "Mutter plugin to use"
 msgstr "Empeuton de Mutter d'utilizar"
 

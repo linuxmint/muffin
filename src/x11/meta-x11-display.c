@@ -755,7 +755,7 @@ init_leader_window (MetaX11Display *x11_display,
 
   meta_prop_set_utf8_string_hint (x11_display,
                                   x11_display->leader_window,
-                                  x11_display->atom__MUTTER_VERSION,
+                                  x11_display->atom__MUFFIN_VERSION,
                                   VERSION);
 
   data[0] = x11_display->leader_window;
@@ -1731,7 +1731,7 @@ create_guard_window (MetaX11Display *x11_display)
                    &attributes);
 
   /* https://bugzilla.gnome.org/show_bug.cgi?id=710346 */
-  XStoreName (x11_display->xdisplay, guard_window, "mutter guard window");
+  XStoreName (x11_display->xdisplay, guard_window, "muffin guard window");
 
   {
     if (!meta_is_wayland_compositor ())
@@ -1826,7 +1826,7 @@ find_timestamp_predicate (Display  *xdisplay,
   MetaX11Display *x11_display = (MetaX11Display *) arg;
 
   return (ev->type == PropertyNotify &&
-          ev->xproperty.atom == x11_display->atom__MUTTER_TIMESTAMP_PING);
+          ev->xproperty.atom == x11_display->atom__MUFFIN_TIMESTAMP_PING);
 }
 
 /* Get a timestamp, even if it means a roundtrip */
@@ -1842,7 +1842,7 @@ meta_x11_display_get_current_time_roundtrip (MetaX11Display *x11_display)
 
       XChangeProperty (x11_display->xdisplay,
                        x11_display->timestamp_pinging_window,
-                       x11_display->atom__MUTTER_TIMESTAMP_PING,
+                       x11_display->atom__MUFFIN_TIMESTAMP_PING,
                        XA_STRING, 8, PropModeAppend, NULL, 0);
       XIfEvent (x11_display->xdisplay,
                 &property_event,
@@ -1861,7 +1861,7 @@ meta_x11_display_get_current_time_roundtrip (MetaX11Display *x11_display)
  * @x11_display: A #MetaX11Display
  * @xwindow: An X11 window
  *
- * Returns: %TRUE iff window is one of mutter's internal "no focus" windows
+ * Returns: %TRUE iff window is one of muffin's internal "no focus" windows
  * which will have the focus when there is no actual client window focused.
  */
 gboolean
@@ -1930,7 +1930,7 @@ meta_x11_display_set_input_focus_internal (MetaX11Display *x11_display,
 {
   meta_x11_error_trap_push (x11_display);
 
-  /* In order for mutter to know that the focus request succeeded, we track
+  /* In order for muffin to know that the focus request succeeded, we track
    * the serial of the "focus request" we made, but if we take the serial
    * of the XSetInputFocus request, then there's no way to determine the
    * difference between focus events as a result of the SetInputFocus and
@@ -1947,7 +1947,7 @@ meta_x11_display_set_input_focus_internal (MetaX11Display *x11_display,
 
   XChangeProperty (x11_display->xdisplay,
                    x11_display->timestamp_pinging_window,
-                   x11_display->atom__MUTTER_FOCUS_SET,
+                   x11_display->atom__MUFFIN_FOCUS_SET,
                    XA_STRING, 8, PropModeAppend, NULL, 0);
 
   XUngrabServer (x11_display->xdisplay);
@@ -2278,7 +2278,7 @@ meta_x11_display_increment_focus_sentinel (MetaX11Display *x11_display)
 
   XChangeProperty (x11_display->xdisplay,
                    x11_display->xroot,
-                   x11_display->atom__MUTTER_SENTINEL,
+                   x11_display->atom__MUFFIN_SENTINEL,
                    XA_CARDINAL,
                    32, PropModeReplace, (guchar*) data, 1);
 

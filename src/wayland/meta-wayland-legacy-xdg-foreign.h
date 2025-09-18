@@ -1,7 +1,7 @@
 /* -*- mode: C; c-file-style: "gnu"; indent-tabs-mode: nil; -*- */
 
 /*
- * Copyright (C) 2016 Red Hat Inc.
+ * Copyright (C) 2015 Red Hat
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -22,14 +22,13 @@
  *     Jonas Ådahl <jadahl@gmail.com>
  */
 
-#ifndef META_STAGE_X11_NESTED_H
-#define META_STAGE_X11_NESTED_H
-
-#include "clutter/clutter-muffin.h"
-#include "backends/x11/meta-stage-x11.h"
-
-#define META_TYPE_STAGE_X11_NESTED (meta_stage_x11_nested_get_type ())
-G_DECLARE_FINAL_TYPE (MetaStageX11Nested, meta_stage_x11_nested,
-                      META, STAGE_X11_NESTED, MetaStageX11)
-
-#endif /* META_STAGE_X11_NESTED_H */
+ #ifndef META_WAYLAND_LEGACY_FOREIGN_H
+ #define META_WAYLAND_LEGACY_FOREIGN_H
+ 
+ #include <glib.h>
+ 
+ #include "wayland/meta-wayland-types.h"
+ 
+ gboolean meta_wayland_legacy_xdg_foreign_init (MetaWaylandCompositor *compositor);
+ 
+ #endif /* META_WAYLAND_LEGACY_FOREIGN_H */

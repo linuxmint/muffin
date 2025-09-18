@@ -961,7 +961,7 @@ maybe_schedule_cursor_sprite_animation_frame (MetaCursorRendererNative *native,
                        (GSourceFunc) meta_cursor_renderer_native_update_animation,
                        native);
       g_source_set_name_by_id (priv->animation_timeout_id,
-                               "[mutter] meta_cursor_renderer_native_update_animation");
+                               "[muffin] meta_cursor_renderer_native_update_animation");
     }
 }
 

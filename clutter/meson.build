@@ -80,7 +80,7 @@ endif
 clutter_deps = [
   clutter_pkg_deps,
   clutter_pkg_private_deps,
-  libmutter_cogl_dep,
+  libmuffin_cogl_dep,
   m_dep
 ]
 

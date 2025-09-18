@@ -10,8 +10,8 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: mutter\n"
-"Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/mutter/issues\n"
+"Project-Id-Version: muffin\n"
+"Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/muffin/issues\n"
 "POT-Creation-Date: 2020-02-23 17:41+0000\n"
 "PO-Revision-Date: 2020-03-03 11:42+0100\n"
 "Last-Translator: Milo Casagrande <milo@milo.name>\n"
@@ -23,242 +23,242 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n!=1);\n"
 "X-Generator: Poedit 2.2.4\n"
 
-#: data/50-mutter-navigation.xml:6
+#: data/50-muffin-navigation.xml:6
 msgid "Navigation"
 msgstr "Navigazione"
 
-#: data/50-mutter-navigation.xml:9
+#: data/50-muffin-navigation.xml:9
 msgid "Move window to workspace 1"
 msgstr "Sposta la finestra sullo spazio di lavoro 1"
 
-#: data/50-mutter-navigation.xml:12
+#: data/50-muffin-navigation.xml:12
 msgid "Move window to workspace 2"
 msgstr "Sposta la finestra sullo spazio di lavoro 2"
 
-#: data/50-mutter-navigation.xml:15
+#: data/50-muffin-navigation.xml:15
 msgid "Move window to workspace 3"
 msgstr "Sposta la finestra sullo spazio di lavoro 3"
 
-#: data/50-mutter-navigation.xml:18
+#: data/50-muffin-navigation.xml:18
 msgid "Move window to workspace 4"
 msgstr "Sposta la finestra sullo spazio di lavoro 4"
 
-#: data/50-mutter-navigation.xml:21
+#: data/50-muffin-navigation.xml:21
 msgid "Move window to last workspace"
 msgstr "Sposta la finestra sull'ultimo spazio di lavoro"
 
-#: data/50-mutter-navigation.xml:24
+#: data/50-muffin-navigation.xml:24
 msgid "Move window one workspace up"
 msgstr "Sposta la finestra sullo spazio di lavoro in alto"
 
-#: data/50-mutter-navigation.xml:27
+#: data/50-muffin-navigation.xml:27
 msgid "Move window one workspace down"
 msgstr "Sposta la finestra sullo spazio di lavoro in basso"
 
-#: data/50-mutter-navigation.xml:30
+#: data/50-muffin-navigation.xml:30
 msgid "Move window one monitor to the left"
 msgstr "Sposta la finestra un monitor a sinistra"
 
-#: data/50-mutter-navigation.xml:33
+#: data/50-muffin-navigation.xml:33
 msgid "Move window one monitor to the right"
 msgstr "Sposta la finestra un monitor a destra"
 
-#: data/50-mutter-navigation.xml:36
+#: data/50-muffin-navigation.xml:36
 msgid "Move window one monitor up"
 msgstr "Sposta la finestra un monitor in su"
 
-#: data/50-mutter-navigation.xml:39
+#: data/50-muffin-navigation.xml:39
 msgid "Move window one monitor down"
 msgstr "Sposta la finestra un monitor in giù"
 
-#: data/50-mutter-navigation.xml:43
+#: data/50-muffin-navigation.xml:43
 msgid "Switch applications"
 msgstr "Evidenzia le applicazioni"
 
-#: data/50-mutter-navigation.xml:48
+#: data/50-muffin-navigation.xml:48
 msgid "Switch to previous application"
 msgstr "Evidenzia l'applicazione precedente"
 
-#: data/50-mutter-navigation.xml:52
+#: data/50-muffin-navigation.xml:52
 msgid "Switch windows"
 msgstr "Evidenzia le finestre"
 
-#: data/50-mutter-navigation.xml:57
+#: data/50-muffin-navigation.xml:57
 msgid "Switch to previous window"
 msgstr "Evidenzia la finestra precedente"
 
-#: data/50-mutter-navigation.xml:61
+#: data/50-muffin-navigation.xml:61
 msgid "Switch windows of an application"
 msgstr "Evidenzia le finestre di un'applicazione"
 
-#: data/50-mutter-navigation.xml:66
+#: data/50-muffin-navigation.xml:66
 msgid "Switch to previous window of an application"
 msgstr "Evidenzia la finestra precedente di un'applicazione"
 
-#: data/50-mutter-navigation.xml:70
+#: data/50-muffin-navigation.xml:70
 msgid "Switch system controls"
 msgstr "Evidenzia i controlli di sistema"
 
-#: data/50-mutter-navigation.xml:75
+#: data/50-muffin-navigation.xml:75
 msgid "Switch to previous system control"
 msgstr "Evidenzia i controlli di sistema precedenti"
 
-#: data/50-mutter-navigation.xml:79
+#: data/50-muffin-navigation.xml:79
 msgid "Switch windows directly"
 msgstr "Evidenzia direttamente le finestre"
 
-#: data/50-mutter-navigation.xml:84
+#: data/50-muffin-navigation.xml:84
 msgid "Switch directly to previous window"
 msgstr "Evidenzia direttamente la finestra precedente"
 
-#: data/50-mutter-navigation.xml:88
+#: data/50-muffin-navigation.xml:88
 msgid "Switch windows of an app directly"
 msgstr "Evidenzia direttamente le finestre di un'applicazione"
 
-#: data/50-mutter-navigation.xml:93
+#: data/50-muffin-navigation.xml:93
 msgid "Switch directly to previous window of an app"
 msgstr "Evidenzia direttamente la finestra precedente di un'applicazione"
 
-#: data/50-mutter-navigation.xml:97
+#: data/50-muffin-navigation.xml:97
 msgid "Switch system controls directly"
 msgstr "Evidenzia direttamente i controlli di sistema"
 
-#: data/50-mutter-navigation.xml:102
+#: data/50-muffin-navigation.xml:102
 msgid "Switch directly to previous system control"
 msgstr "Evidenzia direttamente i controlli di sistema precedenti"
 
-#: data/50-mutter-navigation.xml:105
+#: data/50-muffin-navigation.xml:105
 msgid "Hide all normal windows"
 msgstr "Nasconde tutte le finestre normali"
 
-#: data/50-mutter-navigation.xml:108
+#: data/50-muffin-navigation.xml:108
 msgid "Switch to workspace 1"
 msgstr "Passa allo spazio di lavoro 1"
 
-#: data/50-mutter-navigation.xml:111
+#: data/50-muffin-navigation.xml:111
 msgid "Switch to workspace 2"
 msgstr "Passa allo spazio di lavoro 2"
 
-#: data/50-mutter-navigation.xml:114
+#: data/50-muffin-navigation.xml:114
 msgid "Switch to workspace 3"
 msgstr "Passa allo spazio di lavoro 3"
 
-#: data/50-mutter-navigation.xml:117
+#: data/50-muffin-navigation.xml:117
 msgid "Switch to workspace 4"
 msgstr "Passa allo spazio di lavoro 4"
 
-#: data/50-mutter-navigation.xml:120
+#: data/50-muffin-navigation.xml:120
 msgid "Switch to last workspace"
 msgstr "Passa all'ultimo spazio di lavoro"
 
-#: data/50-mutter-navigation.xml:123
+#: data/50-muffin-navigation.xml:123
 msgid "Move to workspace above"
 msgstr "Sposta su spazio di lavoro in alto"
 
-#: data/50-mutter-navigation.xml:126
+#: data/50-muffin-navigation.xml:126
 msgid "Move to workspace below"
 msgstr "Sposta su spazio di lavoro in basso"
 
-#: data/50-mutter-system.xml:6 data/50-mutter-wayland.xml:6
+#: data/50-muffin-system.xml:6 data/50-muffin-wayland.xml:6
 msgid "System"
 msgstr "Sistema"
 
-#: data/50-mutter-system.xml:8
+#: data/50-muffin-system.xml:8
 msgid "Show the run command prompt"
 msgstr "Mostra il prompt esegui comando"
 
-#: data/50-mutter-system.xml:10
+#: data/50-muffin-system.xml:10
 msgid "Show the activities overview"
 msgstr "Mostra la panoramica delle attività"
 
-#: data/50-mutter-wayland.xml:8
+#: data/50-muffin-wayland.xml:8
 msgid "Restore the keyboard shortcuts"
 msgstr "Ripristina le scorciatoie da tastiera"
 
-#: data/50-mutter-windows.xml:6
+#: data/50-muffin-windows.xml:6
 msgid "Windows"
 msgstr "Finestre"
 
-#: data/50-mutter-windows.xml:8
+#: data/50-muffin-windows.xml:8
 msgid "Activate the window menu"
 msgstr "Attiva il menù della finestra"
 
-#: data/50-mutter-windows.xml:10
+#: data/50-muffin-windows.xml:10
 msgid "Toggle fullscreen mode"
 msgstr "Attiva/Disattiva la modalità schermo intero"
 
-#: data/50-mutter-windows.xml:12
+#: data/50-muffin-windows.xml:12
 msgid "Toggle maximization state"
 msgstr "Attiva/Disattiva lo stato massimizzazione"
 
-#: data/50-mutter-windows.xml:14
+#: data/50-muffin-windows.xml:14
 msgid "Maximize window"
 msgstr "Massimizza la finestra"
 
-#: data/50-mutter-windows.xml:16
+#: data/50-muffin-windows.xml:16
 msgid "Restore window"
 msgstr "Ripristina la finestra"
 
-#: data/50-mutter-windows.xml:18
+#: data/50-muffin-windows.xml:18
 msgid "Close window"
 msgstr "Chiudi la finestra"
 
-#: data/50-mutter-windows.xml:20
+#: data/50-muffin-windows.xml:20
 msgid "Hide window"
 msgstr "Nascondi la finestra"
 
-#: data/50-mutter-windows.xml:22
+#: data/50-muffin-windows.xml:22
 msgid "Move window"
 msgstr "Muovi la finestra"
 
-#: data/50-mutter-windows.xml:24
+#: data/50-muffin-windows.xml:24
 msgid "Resize window"
 msgstr "Ridimensiona la finestra"
 
-#: data/50-mutter-windows.xml:27
+#: data/50-muffin-windows.xml:27
 msgid "Toggle window on all workspaces or one"
 msgstr "Attiva/Disattiva la finestra su uno o su tutti gli spazi di lavoro"
 
-#: data/50-mutter-windows.xml:29
+#: data/50-muffin-windows.xml:29
 msgid "Raise window if covered, otherwise lower it"
 msgstr "Solleva la finestra se è coperta, in caso contrario l'abbassa"
 
-#: data/50-mutter-windows.xml:31
+#: data/50-muffin-windows.xml:31
 msgid "Raise window above other windows"
 msgstr "Solleva la finestra sopra le altre"
 
-#: data/50-mutter-windows.xml:33
+#: data/50-muffin-windows.xml:33
 msgid "Lower window below other windows"
 msgstr "Abbassa la finestra sotto le altre"
 
-#: data/50-mutter-windows.xml:35
+#: data/50-muffin-windows.xml:35
 msgid "Maximize window vertically"
 msgstr "Massimizza verticalmente la finestra"
 
-#: data/50-mutter-windows.xml:37
+#: data/50-muffin-windows.xml:37
 msgid "Maximize window horizontally"
 msgstr "Massimizza orizzontalmente la finestra"
 
 # scorciatoia per mettere la finestra a mezzo schermo intero sulla sinistra
 #
 # traduzione infedele, ma "frazionamento della vista a sn/ds" mi pare peggio
-#: data/50-mutter-windows.xml:41
+#: data/50-muffin-windows.xml:41
 msgid "View split on left"
 msgstr "Massimizza a sinistra"
 
-#: data/50-mutter-windows.xml:45
+#: data/50-muffin-windows.xml:45
 msgid "View split on right"
 msgstr "Massimizza a destra"
 
-#: data/mutter.desktop.in:4
+#: data/muffin.desktop.in:4
 msgid "Mutter"
 msgstr "Mutter"
 
-#: data/org.gnome.mutter.gschema.xml.in:7
+#: data/org.gnome.muffin.gschema.xml.in:7
 msgid "Modifier to use for extended window management operations"
 msgstr "Modificatore da utilizzare per le azioni di gestione finestre estese"
 
-#: data/org.gnome.mutter.gschema.xml.in:8
+#: data/org.gnome.muffin.gschema.xml.in:8
 msgid ""
 "This key will initiate the “overlay”, which is a combination window overview "
 "and application launching system. The default is intended to be the “Windows "
@@ -271,11 +271,11 @@ msgstr ""
 "questa scorciatoia sia o il valore predefinito oppure che sia impostata alla "
 "stringa vuota."
 
-#: data/org.gnome.mutter.gschema.xml.in:20
+#: data/org.gnome.muffin.gschema.xml.in:20
 msgid "Attach modal dialogs"
 msgstr "Dialoghi modali attaccati"
 
-#: data/org.gnome.mutter.gschema.xml.in:21
+#: data/org.gnome.muffin.gschema.xml.in:21
 msgid ""
 "When true, instead of having independent titlebars, modal dialogs appear "
 "attached to the titlebar of the parent window and are moved together with "
@@ -285,13 +285,13 @@ msgstr ""
 "dialoghi modali appaiono attaccati alla barra del titolo della finestra "
 "genitore, muovendosi assieme ad essa."
 
-#: data/org.gnome.mutter.gschema.xml.in:30
+#: data/org.gnome.muffin.gschema.xml.in:30
 msgid "Enable edge tiling when dropping windows on screen edges"
 msgstr ""
 "Abilita il tiling di bordo quando si trascinano le finestre sui bordi dello "
 "schermo"
 
-#: data/org.gnome.mutter.gschema.xml.in:31
+#: data/org.gnome.muffin.gschema.xml.in:31
 msgid ""
 "If enabled, dropping windows on vertical screen edges maximizes them "
 "vertically and resizes them horizontally to cover half of the available "
@@ -302,11 +302,11 @@ msgstr ""
 "in modo da coprire metà dell'area disponibile. Trascinandole sul bordo "
 "superiore dello schermo le massimizza completamente."
 
-#: data/org.gnome.mutter.gschema.xml.in:40
+#: data/org.gnome.muffin.gschema.xml.in:40
 msgid "Workspaces are managed dynamically"
 msgstr "Spazi di lavoro gestiti dinamicamente"
 
-#: data/org.gnome.mutter.gschema.xml.in:41
+#: data/org.gnome.muffin.gschema.xml.in:41
 msgid ""
 "Determines whether workspaces are managed dynamically or whether there’s a "
 "static number of workspaces (determined by the num-workspaces key in org."
@@ -316,12 +316,12 @@ msgstr ""
 "loro numero è fisso (determinato dalla chiave num-workspaces in org.gnome."
 "desktop.wm.preferences)."
 
-#: data/org.gnome.mutter.gschema.xml.in:50
+#: data/org.gnome.muffin.gschema.xml.in:50
 msgid "Workspaces only on primary"
 msgstr "Spazi di lavoro solo sul primario"
 
 # mica ho capito cosa fa...
-#: data/org.gnome.mutter.gschema.xml.in:51
+#: data/org.gnome.muffin.gschema.xml.in:51
 msgid ""
 "Determines whether workspace switching should happen for windows on all "
 "monitors or only for windows on the primary monitor."
@@ -330,11 +330,11 @@ msgstr ""
 "tutti i monitor oppure solo per le finestre sul monitor primario."
 
 # mah... sarebbe "popup quando si fa alt-tab", credo
-#: data/org.gnome.mutter.gschema.xml.in:59
+#: data/org.gnome.muffin.gschema.xml.in:59
 msgid "No tab popup"
 msgstr "Nessun tab popup"
 
-#: data/org.gnome.mutter.gschema.xml.in:60
+#: data/org.gnome.muffin.gschema.xml.in:60
 msgid ""
 "Determines whether the use of popup and highlight frame should be disabled "
 "for window cycling."
@@ -342,11 +342,11 @@ msgstr ""
 "Determina se disabilitare l'uso di popup e cornici di evidenziatura nel "
 "passare da una finestra all'altra."
 
-#: data/org.gnome.mutter.gschema.xml.in:68
+#: data/org.gnome.muffin.gschema.xml.in:68
 msgid "Delay focus changes until the pointer stops moving"
 msgstr "Ritarda il cambio del focus fino a quando il puntatore si ferma"
 
-#: data/org.gnome.mutter.gschema.xml.in:69
+#: data/org.gnome.muffin.gschema.xml.in:69
 msgid ""
 "If set to true, and the focus mode is either “sloppy” or “mouse” then the "
 "focus will not be changed immediately when entering a window, but only after "
@@ -356,11 +356,11 @@ msgstr ""
 "\"mouse\", il focus non viene spostato immediatamente quando si passa su una "
 "finestra, ma solo quando il puntatore si ferma."
 
-#: data/org.gnome.mutter.gschema.xml.in:79
+#: data/org.gnome.muffin.gschema.xml.in:79
 msgid "Draggable border width"
 msgstr "Larghezza bordo trascinabile"
 
-#: data/org.gnome.mutter.gschema.xml.in:80
+#: data/org.gnome.muffin.gschema.xml.in:80
 msgid ""
 "The amount of total draggable borders. If the theme’s visible borders are "
 "not enough, invisible borders will be added to meet this value."
@@ -369,11 +369,11 @@ msgstr ""
 "del tema non sono sufficienti, vengono aggiunti dei bordi invisibili per "
 "raggiungere questo valore."
 
-#: data/org.gnome.mutter.gschema.xml.in:89
+#: data/org.gnome.muffin.gschema.xml.in:89
 msgid "Auto maximize nearly monitor sized windows"
 msgstr "Massimizza automaticamente finestre grandi quasi quanto lo schermo"
 
-#: data/org.gnome.mutter.gschema.xml.in:90
+#: data/org.gnome.muffin.gschema.xml.in:90
 msgid ""
 "If enabled, new windows that are initially the size of the monitor "
 "automatically get maximized."
@@ -381,11 +381,11 @@ msgstr ""
 "Se abilitato, le nuove finestre che hanno inizialmente la stessa dimensione "
 "del monitor vengono massimizzate automaticamente."
 
-#: data/org.gnome.mutter.gschema.xml.in:98
+#: data/org.gnome.muffin.gschema.xml.in:98
 msgid "Place new windows in the center"
 msgstr "Posiziona le nuove finestre al centro"
 
-#: data/org.gnome.mutter.gschema.xml.in:99
+#: data/org.gnome.muffin.gschema.xml.in:99
 msgid ""
 "When true, the new windows will always be put in the center of the active "
 "screen of the monitor."
@@ -393,21 +393,21 @@ msgstr ""
 "Se impostata a VERO, le nuove finestre verranno sempre posizionate al centro "
 "dello schermo attivo."
 
-#: data/org.gnome.mutter.gschema.xml.in:107
+#: data/org.gnome.muffin.gschema.xml.in:107
 msgid "Enable experimental features"
 msgstr "Abilita funzionalità sperimentali"
 
-#: data/org.gnome.mutter.gschema.xml.in:108
+#: data/org.gnome.muffin.gschema.xml.in:108
 msgid ""
 "To enable experimental features, add the feature keyword to the list. "
 "Whether the feature requires restarting the compositor depends on the given "
 "feature. Any experimental feature is not required to still be available, or "
 "configurable. Don’t expect adding anything in this setting to be future "
 "proof. Currently possible keywords: • “scale-monitor-framebuffer” — makes "
-"mutter default to layout logical monitors in a logical pixel coordinate "
+"muffin default to layout logical monitors in a logical pixel coordinate "
 "space, while scaling monitor framebuffers instead of window content, to "
 "manage HiDPI monitors. Does not require a restart. • “rt-scheduler” — makes "
-"mutter request a low priority real-time scheduling. The executable or user "
+"muffin request a low priority real-time scheduling. The executable or user "
 "must have CAP_SYS_NICE. Requires a restart. • “autostart-xwayland” — "
 "initializes Xwayland lazily if there are X11 clients. Requires restart."
 msgstr ""
@@ -417,7 +417,7 @@ msgstr ""
 "funzionalità sperimentale non è richiesta, ma può essere disponibile e "
 "configurabile. Le funzionalità offerte potrebbero rendere il sistema "
 "instabile. I possibili valori sono: • \"scale-monitor-framebuffer\" — Fa in "
-"modo che mutter disponga gli schermi logici secondo uno spazio logico di "
+"modo che muffin disponga gli schermi logici secondo uno spazio logico di "
 "coordinate pixel, applicando il ridimensionamento ai framebuffer invece che "
 "al contenuto della finestra, per gestire schermi HiDPI (non richiede il "
 "riavvio). • “rt-scheduler” — Richiede uno scheduling real-time a bassa "
@@ -425,19 +425,19 @@ msgstr ""
 "(richiede il riavvio). • “autostart-xwayland” — Avvia Xwayland passivamente "
 "se ci sono client X11 (richiede il riavvio)."
 
-#: data/org.gnome.mutter.gschema.xml.in:134
+#: data/org.gnome.muffin.gschema.xml.in:134
 msgid "Modifier to use to locate the pointer"
 msgstr "Modificatore da usare per trovare il puntatore"
 
-#: data/org.gnome.mutter.gschema.xml.in:135
+#: data/org.gnome.muffin.gschema.xml.in:135
 msgid "This key will initiate the “locate pointer” action."
 msgstr "Questa chiave avvia l'azione di localizzazione del puntatore."
 
-#: data/org.gnome.mutter.gschema.xml.in:142
+#: data/org.gnome.muffin.gschema.xml.in:142
 msgid "Timeout for check-alive ping"
 msgstr "Timeout per il ping di controllo"
 
-#: data/org.gnome.mutter.gschema.xml.in:143
+#: data/org.gnome.muffin.gschema.xml.in:143
 msgid ""
 "Number of milliseconds a client has to respond to a ping request in order to "
 "not be detected as frozen. Using 0 will disable the alive check completely."
@@ -446,80 +446,80 @@ msgstr ""
 "di ping per non essere rilevato come bloccato. Utilizzando 0 si disattiva "
 "completamente il controllo."
 
-#: data/org.gnome.mutter.gschema.xml.in:165
+#: data/org.gnome.muffin.gschema.xml.in:165
 msgid "Select window from tab popup"
 msgstr "Seleziona finestra dal tab popup"
 
-#: data/org.gnome.mutter.gschema.xml.in:170
+#: data/org.gnome.muffin.gschema.xml.in:170
 msgid "Cancel tab popup"
 msgstr "Annulla tab popup"
 
-#: data/org.gnome.mutter.gschema.xml.in:175
+#: data/org.gnome.muffin.gschema.xml.in:175
 msgid "Switch monitor configurations"
 msgstr "Cambia le configurazioni del monitor"
 
-#: data/org.gnome.mutter.gschema.xml.in:180
+#: data/org.gnome.muffin.gschema.xml.in:180
 msgid "Rotates the built-in monitor configuration"
 msgstr "Passa da una configurazione integrata all'altra del monitor"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:6
+#: data/org.gnome.muffin.wayland.gschema.xml.in:6
 msgid "Switch to VT 1"
 msgstr "Passa al VT 1"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:10
+#: data/org.gnome.muffin.wayland.gschema.xml.in:10
 msgid "Switch to VT 2"
 msgstr "Passa al VT 2"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:14
+#: data/org.gnome.muffin.wayland.gschema.xml.in:14
 msgid "Switch to VT 3"
 msgstr "Passa al VT 3"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:18
+#: data/org.gnome.muffin.wayland.gschema.xml.in:18
 msgid "Switch to VT 4"
 msgstr "Passa al VT 4"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:22
+#: data/org.gnome.muffin.wayland.gschema.xml.in:22
 msgid "Switch to VT 5"
 msgstr "Passa al VT 5"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:26
+#: data/org.gnome.muffin.wayland.gschema.xml.in:26
 msgid "Switch to VT 6"
 msgstr "Passa al VT 6"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:30
+#: data/org.gnome.muffin.wayland.gschema.xml.in:30
 msgid "Switch to VT 7"
 msgstr "Passa al VT 7"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:34
+#: data/org.gnome.muffin.wayland.gschema.xml.in:34
 msgid "Switch to VT 8"
 msgstr "Passa al VT 8"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:38
+#: data/org.gnome.muffin.wayland.gschema.xml.in:38
 msgid "Switch to VT 9"
 msgstr "Passa al VT 9"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:42
+#: data/org.gnome.muffin.wayland.gschema.xml.in:42
 msgid "Switch to VT 10"
 msgstr "Passa al VT 10"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:46
+#: data/org.gnome.muffin.wayland.gschema.xml.in:46
 msgid "Switch to VT 11"
 msgstr "Passa al VT 11"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:50
+#: data/org.gnome.muffin.wayland.gschema.xml.in:50
 msgid "Switch to VT 12"
 msgstr "Passa al VT 12"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:54
+#: data/org.gnome.muffin.wayland.gschema.xml.in:54
 msgid "Re-enable shortcuts"
 msgstr "Riabilita scorciatoie"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:64
+#: data/org.gnome.muffin.wayland.gschema.xml.in:64
 msgid "Allow X11 grabs to lock keyboard focus with Xwayland"
 msgstr ""
 "Consente alle catture X11 di bloccare il focus della tastiera con Xwayland"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:65
+#: data/org.gnome.muffin.wayland.gschema.xml.in:65
 msgid ""
 "Allow all keyboard events to be routed to X11 “override redirect” windows "
 "with a grab when running in Xwayland. This option is to support X11 clients "
@@ -543,12 +543,12 @@ msgstr ""
 "ClientMessage X11 alla finestra principale o essere nell'elenco di "
 "applicazioni autorizzate tramite la chiave \"xwayland-grab-access-rules\"."
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:84
+#: data/org.gnome.muffin.wayland.gschema.xml.in:84
 msgid "Xwayland applications allowed to issue keyboard grabs"
 msgstr ""
 "Applicazioni Xwayland autorizzare a inizializzare catture della tastiera"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:85
+#: data/org.gnome.muffin.wayland.gschema.xml.in:85
 msgid ""
 "List the resource names or resource class of X11 windows either allowed or "
 "not allowed to issue X11 keyboard grabs under Xwayland. The resource name or "
@@ -707,26 +707,26 @@ msgstr "_Forza uscita"
 msgid "_Wait"
 msgstr "_Attendi"
 
-#: src/core/mutter.c:38
+#: src/core/muffin.c:38
 #, c-format
 msgid ""
-"mutter %s\n"
+"muffin %s\n"
 "Copyright © 2001-%d Havoc Pennington, Red Hat, Inc., and others\n"
 "This is free software; see the source for copying conditions.\n"
 "There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A "
 "PARTICULAR PURPOSE.\n"
 msgstr ""
-"mutter %s\n"
+"muffin %s\n"
 "Copyright © 2001-%d Havoc Pennington, Red Hat, Inc., e altri\n"
 "Questo è software libero; si vedano i sorgenti per le condizioni di copia.\n"
 "NON è fornita alcuna garanzia; neanche di COMMERCIABILITÀ o\n"
 "APPLICABILITÀ PER UNO SCOPO PARTICOLARE.\n"
 
-#: src/core/mutter.c:52
+#: src/core/muffin.c:52
 msgid "Print version"
 msgstr "Stampa la versione"
 
-#: src/core/mutter.c:58
+#: src/core/muffin.c:58
 msgid "Mutter plugin to use"
 msgstr "Plugin Mutter da usare"
 

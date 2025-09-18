@@ -145,7 +145,7 @@ append_monitor (MetaMonitorManager *manager,
   const char *mode_specs_str;
   GList *l;
 
-  mode_specs_str = getenv ("MUTTER_DEBUG_DUMMY_MODE_SPECS");
+  mode_specs_str = getenv ("MUFFIN_DEBUG_DUMMY_MODE_SPECS");
   if (mode_specs_str && *mode_specs_str != '\0')
     {
       g_auto (GStrv) specs = g_strsplit (mode_specs_str, ":", -1);
@@ -379,7 +379,7 @@ has_tiled_monitors (void)
 {
   const char *tiled_monitors_str;
 
-  tiled_monitors_str = g_getenv ("MUTTER_DEBUG_TILED_DUMMY_MONITORS");
+  tiled_monitors_str = g_getenv ("MUFFIN_DEBUG_TILED_DUMMY_MONITORS");
   return g_strcmp0 (tiled_monitors_str, "1") == 0;
 }
 
@@ -400,23 +400,23 @@ meta_monitor_manager_dummy_read_current (MetaMonitorManager *manager)
   /* To control what monitor configuration is generated, there are two available
    * environmental variables that can be used:
    *
-   * MUTTER_DEBUG_NUM_DUMMY_MONITORS
+   * MUFFIN_DEBUG_NUM_DUMMY_MONITORS
    *
    * Specifies the number of dummy monitors to include in the stage. Every
    * monitor is 1024x786 pixels and they are placed on a horizontal row.
    *
-   * MUTTER_DEBUG_DUMMY_MODE_SPECS
+   * MUFFIN_DEBUG_DUMMY_MODE_SPECS
    *
    * A colon separated list of mode specifications that can be used to
    * configure the monitor via dbus API. Setting this environment variable
    * overrides the default set of modes available.
    * Format should be WWxHH:WWxHH@RR
    *
-   * MUTTER_DEBUG_DUMMY_MONITOR_SCALES
+   * MUFFIN_DEBUG_DUMMY_MONITOR_SCALES
    *
    * A comma separated list that specifies the scales of the dummy monitors.
    *
-   * MUTTER_DEBUG_TILED_DUMMY_MONITORS
+   * MUFFIN_DEBUG_TILED_DUMMY_MONITORS
    *
    * If set to "1" the dummy monitors will emulate being tiled, i.e. each have a
    * unique tile group id, made up of multiple outputs and CRTCs.
@@ -424,11 +424,11 @@ meta_monitor_manager_dummy_read_current (MetaMonitorManager *manager)
    * For example the following configuration results in two monitors, where the
    * first one has the monitor scale 1, and the other the monitor scale 2.
    *
-   * MUTTER_DEBUG_NUM_DUMMY_MONITORS=2
-   * MUTTER_DEBUG_DUMMY_MONITOR_SCALES=1,2
-   * MUTTER_DEBUG_TILED_DUMMY_MONITORS=1
+   * MUFFIN_DEBUG_NUM_DUMMY_MONITORS=2
+   * MUFFIN_DEBUG_DUMMY_MONITOR_SCALES=1,2
+   * MUFFIN_DEBUG_TILED_DUMMY_MONITORS=1
    */
-  num_monitors_str = getenv ("MUTTER_DEBUG_NUM_DUMMY_MONITORS");
+  num_monitors_str = getenv ("MUFFIN_DEBUG_NUM_DUMMY_MONITORS");
   if (num_monitors_str)
     {
       num_monitors = g_ascii_strtoll (num_monitors_str, NULL, 10);
@@ -450,7 +450,7 @@ meta_monitor_manager_dummy_read_current (MetaMonitorManager *manager)
   for (i = 0; i < num_monitors; i++)
     monitor_scales[i] = 1.0;
 
-  monitor_scales_str = getenv ("MUTTER_DEBUG_DUMMY_MONITOR_SCALES");
+  monitor_scales_str = getenv ("MUFFIN_DEBUG_DUMMY_MONITOR_SCALES");
   if (monitor_scales_str)
     {
       gchar **scales_str_list;
@@ -771,7 +771,7 @@ meta_monitor_manager_dummy_constructed (GObject *object)
   parent_object_class->constructed (object);
 
   nested_offscreen_transform =
-    g_getenv ("MUTTER_DEBUG_NESTED_OFFSCREEN_TRANSFORM");
+    g_getenv ("MUFFIN_DEBUG_NESTED_OFFSCREEN_TRANSFORM");
   if (g_strcmp0 (nested_offscreen_transform, "1") == 0)
     manager_dummy->is_transform_handled = FALSE;
   else
