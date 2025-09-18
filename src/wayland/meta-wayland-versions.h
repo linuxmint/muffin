@@ -28,33 +28,33 @@
 /* #define META_WL_REGISTRY_VERSION 1 */
 #define META_WL_CALLBACK_VERSION 1
 
-/* Not handled by mutter-wayland directly */
+/* Not handled by muffin-wayland directly */
 /* #define META_WL_SHM_VERSION        1 */
 /* #define META_WL_SHM_POOL_VERSION   1 */
 /* #define META_WL_DRM_VERSION        1 */
 /* #define META_WL_BUFFER_VERSION     1 */
 
 /* Global/master objects (version exported by wl_registry and negotiated through bind) */
-#define META_WL_COMPOSITOR_VERSION          4
+#define META_WL_COMPOSITOR_VERSION          5
 #define META_WL_DATA_DEVICE_MANAGER_VERSION 3
 #define META_XDG_WM_BASE_VERSION            3
-#define META_ZXDG_SHELL_V6_VERSION          1
-#define META_WL_SHELL_VERSION               1
 #define META_WL_SEAT_VERSION                5
-#define META_WL_OUTPUT_VERSION              2
+#define META_WL_OUTPUT_VERSION              4
 #define META_XSERVER_VERSION                1
-#define META_GTK_SHELL1_VERSION             3
+#define META_GTK_SHELL1_VERSION             6
 #define META_WL_SUBCOMPOSITOR_VERSION       1
-#define META_ZWP_POINTER_GESTURES_V1_VERSION    1
+#define META_ZWP_POINTER_GESTURES_V1_VERSION 3
 #define META_ZXDG_EXPORTER_V1_VERSION       1
 #define META_ZXDG_IMPORTER_V1_VERSION       1
+#define META_ZXDG_EXPORTER_V2_VERSION       1
+#define META_ZXDG_IMPORTER_V2_VERSION       1
 #define META_ZWP_LINUX_DMABUF_V1_VERSION    3
 #define META_ZWP_KEYBOARD_SHORTCUTS_INHIBIT_V1_VERSION 1
 #define META_ZXDG_OUTPUT_V1_VERSION         3
 #define META_ZWP_XWAYLAND_KEYBOARD_GRAB_V1_VERSION 1
-#define META_GTK_TEXT_INPUT_VERSION         1
 #define META_ZWP_TEXT_INPUT_V3_VERSION      1
 #define META_WP_VIEWPORTER_VERSION          1
 #define META_XDG_ACTIVATION_V1_VERSION 1
+#define META_ZWP_PRIMARY_SELECTION_V1_VERSION 1
 
 #endif

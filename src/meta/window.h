@@ -318,6 +318,10 @@ META_EXPORT
 void        meta_window_lower              (MetaWindow  *window);
 
 META_EXPORT
+void        meta_window_lower_with_transients (MetaWindow *window,
+                                               uint32_t    timestamp);
+
+META_EXPORT
 const char *meta_window_get_title (MetaWindow *window);
 
 META_EXPORT
@@ -349,7 +353,7 @@ META_EXPORT
 gboolean    meta_window_is_attached_dialog (MetaWindow *window);
 
 META_EXPORT
-const char *meta_window_get_mutter_hints (MetaWindow *window);
+const char *meta_window_get_muffin_hints (MetaWindow *window);
 
 META_EXPORT
 MetaFrameType meta_window_get_frame_type (MetaWindow *window);

@@ -129,7 +129,7 @@ meta_renderer_native_gles3_blit_shared_bo (MetaEgl        *egl,
       fds[i] = shared_bo_fd;
     }
 
-  /* Workaround for https://gitlab.gnome.org/GNOME/mutter/issues/18 */
+  /* Workaround for https://gitlab.gnome.org/GNOME/muffin/issues/18 */
   if (modifiers[0] == DRM_FORMAT_MOD_LINEAR ||
       modifiers[0] == DRM_FORMAT_MOD_INVALID)
     use_modifiers = FALSE;

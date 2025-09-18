@@ -42,6 +42,7 @@
 
 #define IS_GESTURE_EVENT(e) ((e)->type == CLUTTER_TOUCHPAD_SWIPE || \
                              (e)->type == CLUTTER_TOUCHPAD_PINCH || \
+                             (e)->type == CLUTTER_TOUCHPAD_HOLD || \
                              (e)->type == CLUTTER_TOUCH_BEGIN || \
                              (e)->type == CLUTTER_TOUCH_UPDATE || \
                              (e)->type == CLUTTER_TOUCH_END || \
@@ -427,7 +428,7 @@ meta_display_handle_event (MetaDisplay        *display,
        * immediately underneath in the X11 stack.
        * The following is to make sure we do not forward the button press
        * event to Wayland if it was handled by the frame UI.
-       * See: https://gitlab.gnome.org/GNOME/mutter/issues/88
+       * See: https://gitlab.gnome.org/GNOME/muffin/issues/88
        */
       if (meta_window_handle_ui_frame_event (window, event))
         bypass_wayland = (event->type == CLUTTER_BUTTON_PRESS ||

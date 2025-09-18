@@ -59,7 +59,7 @@ meta_plugin_manager_set_plugin_type (GType gtype)
 void
 meta_plugin_manager_load (const gchar       *plugin_name)
 {
-  const gchar *dpath = MUTTER_PLUGIN_DIR "/";
+  const gchar *dpath = MUFFIN_PLUGIN_DIR "/";
   gchar       *path;
   MetaModule  *module;
 

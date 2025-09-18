@@ -50,12 +50,12 @@ handle_reset_idletime (MetaDBusIdleMonitor   *skeleton,
                        GDBusMethodInvocation *invocation,
                        MetaIdleMonitor       *monitor)
 {
-  if (!g_getenv ("MUTTER_DEBUG_RESET_IDLETIME"))
+  if (!g_getenv ("MUFFIN_DEBUG_RESET_IDLETIME"))
     {
       g_dbus_method_invocation_return_error_literal (invocation,
                                                      G_DBUS_ERROR,
                                                      G_DBUS_ERROR_UNKNOWN_METHOD,
-                                                     "This method is for testing purposes only. MUTTER_DEBUG_RESET_IDLETIME must be set to use it");
+                                                     "This method is for testing purposes only. MUFFIN_DEBUG_RESET_IDLETIME must be set to use it");
       return TRUE;
     }
 

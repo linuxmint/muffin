@@ -12,6 +12,7 @@ clutter_conform_tests_actor_tests = [
   'actor-anchors',
   'actor-clone',
   'actor-destroy',
+  'actor-event-hold',
   'actor-graph',
   'actor-invariants',
   'actor-iter',
@@ -65,9 +66,9 @@ foreach test : clutter_conform_tests
     link_args: clutter_tests_conform_link_args,
     dependencies: [
       clutter_deps,
-      libmutter_clutter_dep,
-      libmutter_cogl_path_dep,
-      libmutter_dep
+      libmuffin_clutter_dep,
+      libmuffin_cogl_path_dep,
+      libmuffin_dep
     ],
     install: false,
   )

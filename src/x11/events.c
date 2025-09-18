@@ -750,7 +750,7 @@ handle_window_focus_event (MetaX11Display *x11_display,
    *
    * My suggestion is to change it so that we clearly separate
    * actual keyboard focus tracking using the xterm algorithm,
-   * and mutter's "pretend" focus window, and go through all
+   * and muffin's "pretend" focus window, and go through all
    * the code and decide which one should be used in each place;
    * a hard bit is deciding on a policy for that.
    *
@@ -1529,7 +1529,7 @@ handle_other_xevent (MetaX11Display *x11_display,
              * sentinel_counter variable declaration in display.h
              */
             if (event->xproperty.atom ==
-                x11_display->atom__MUTTER_SENTINEL)
+                x11_display->atom__MUFFIN_SENTINEL)
               {
                 meta_x11_display_decrement_focus_sentinel (x11_display);
               }

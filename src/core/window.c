@@ -78,7 +78,7 @@
 #include "core/stack.h"
 #include "core/util-private.h"
 #include "core/workspace-private.h"
-#include "meta/compositor-mutter.h"
+#include "meta/compositor-muffin.h"
 #include "meta/group.h"
 #include "meta/meta-cursor-tracker.h"
 #include "meta/meta-enum-types.h"
@@ -203,7 +203,7 @@ enum
   PROP_DEMANDS_ATTENTION,
   PROP_URGENT,
   PROP_SKIP_TASKBAR,
-  PROP_MUTTER_HINTS,
+  PROP_MUFFIN_HINTS,
   PROP_APPEARS_FOCUSED,
   PROP_RESIZEABLE,
   PROP_ABOVE,
@@ -405,8 +405,8 @@ meta_window_get_property(GObject         *object,
     case PROP_SKIP_TASKBAR:
       g_value_set_boolean (value, win->skip_taskbar);
       break;
-    case PROP_MUTTER_HINTS:
-      g_value_set_string (value, win->mutter_hints);
+    case PROP_MUFFIN_HINTS:
+      g_value_set_string (value, win->muffin_hints);
       break;
     case PROP_APPEARS_FOCUSED:
       g_value_set_boolean (value, meta_window_appears_focused (win));
@@ -570,10 +570,10 @@ meta_window_class_init (MetaWindowClass *klass)
                           "Whether the skip-taskbar flag of WM_HINTS is set",
                           FALSE,
                           G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
-  obj_props[PROP_MUTTER_HINTS] =
-    g_param_spec_string ("mutter-hints",
-                         "_MUTTER_HINTS",
-                         "Contents of the _MUTTER_HINTS property of this window",
+  obj_props[PROP_MUFFIN_HINTS] =
+    g_param_spec_string ("muffin-hints",
+                         "_MUFFIN_HINTS",
+                         "Contents of the _MUFFIN_HINTS property of this window",
                          NULL,
                          G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
   obj_props[PROP_APPEARS_FOCUSED] =
@@ -5631,6 +5631,62 @@ meta_window_lower (MetaWindow  *window)
   meta_stack_lower (window->display->stack, window);
 }
 
+static gboolean
+lower_window_and_transients (MetaWindow *window,
+                             gpointer    user_data)
+{
+  MetaWorkspaceManager *workspace_manager = window->display->workspace_manager;
+
+  meta_window_lower (window);
+
+  meta_window_foreach_transient (window, lower_window_and_transients, NULL);
+
+  if (meta_prefs_get_raise_on_click ())
+  {
+    /* Move window to the back of the focusing workspace's MRU list.
+     * Do extra sanity checks to avoid possible race conditions.
+     * (Borrowed from window.c.)
+     */
+    if (workspace_manager->active_workspace &&
+      meta_window_located_on_workspace (window,
+                                        workspace_manager->active_workspace))
+    {
+      GList *link;
+      link = g_list_find (workspace_manager->active_workspace->mru_list,
+                          window);
+      g_assert (link);
+
+      workspace_manager->active_workspace->mru_list =
+      g_list_remove_link (workspace_manager->active_workspace->mru_list,
+                          link);
+      g_list_free (link);
+
+      workspace_manager->active_workspace->mru_list =
+      g_list_append (workspace_manager->active_workspace->mru_list,
+                     window);
+    }
+  }
+
+  return FALSE;
+}
+
+void
+meta_window_lower_with_transients (MetaWindow *window,
+                                   uint32_t    timestamp)
+{
+  MetaWorkspaceManager *workspace_manager = window->display->workspace_manager;
+
+  lower_window_and_transients (window, NULL);
+
+  /* Rather than try to figure that out whether we just lowered
+   * the focus window, assume that's always the case. (Typically,
+   * this will be invoked via keyboard action or by a mouse action;
+   * in either case the window or a modal child will have been focused.) */
+  meta_workspace_focus_default_window (workspace_manager->active_workspace,
+                                       NULL,
+                                       timestamp);
+}
+
 /*
  * Move window to the requested workspace; append controls whether new WS
  * should be created if one does not exist.
@@ -6945,7 +7001,7 @@ update_resize (MetaWindow *window,
 	  window->display->grab_resize_timeout_id =
 	    g_timeout_add ((int)remaining, update_resize_timeout, window);
 	  g_source_set_name_by_id (window->display->grab_resize_timeout_id,
-                                   "[mutter] update_resize_timeout");
+                                   "[muffin] update_resize_timeout");
 	}
 
       return;
@@ -7900,8 +7956,8 @@ meta_window_is_shaded (MetaWindow *window)
  * meta_window_is_override_redirect:
  * @window: A #MetaWindow
  *
- * Returns: %TRUE if this window isn't managed by mutter; it will
- * control its own positioning and mutter won't draw decorations
+ * Returns: %TRUE if this window isn't managed by muffin; it will
+ * control its own positioning and muffin won't draw decorations
  * among other things.  In X terminology this is "override redirect".
  */
 gboolean
@@ -8266,7 +8322,7 @@ meta_window_get_client_machine (MetaWindow *window)
  * @window: a #MetaWindow
  *
  * Returns: %TRUE if this window originates from a host
- * different from the one running mutter.
+ * different from the one running muffin.
  */
 gboolean
 meta_window_is_remote (MetaWindow *window)
@@ -8275,10 +8331,10 @@ meta_window_is_remote (MetaWindow *window)
 }
 
 /**
- * meta_window_get_mutter_hints:
+ * meta_window_get_muffin_hints:
  * @window: a #MetaWindow
  *
- * Gets the current value of the _MUTTER_HINTS property.
+ * Gets the current value of the _MUFFIN_HINTS property.
  *
  * The purpose of the hints is to allow fine-tuning of the Window Manager and
  * Compositor behaviour on per-window basis, and is intended primarily for
@@ -8286,18 +8342,18 @@ meta_window_is_remote (MetaWindow *window)
  *
  * The property is a list of colon-separated key=value pairs. The key names for
  * any plugin-specific hints must be suitably namespaced to allow for shared
- * use; 'mutter-' key prefix is reserved for internal use, and must not be used
+ * use; 'muffin-' key prefix is reserved for internal use, and must not be used
  * by plugins.
  *
- * Return value: (transfer none): the _MUTTER_HINTS string, or %NULL if no hints
+ * Return value: (transfer none): the _MUFFIN_HINTS string, or %NULL if no hints
  * are set.
  */
 const char *
-meta_window_get_mutter_hints (MetaWindow *window)
+meta_window_get_muffin_hints (MetaWindow *window)
 {
   g_return_val_if_fail (META_IS_WINDOW (window), NULL);
 
-  return window->mutter_hints;
+  return window->muffin_hints;
 }
 
 /**
@@ -9049,7 +9105,7 @@ queue_focus_callback (MetaDisplay *display,
                         focus_data,
                         g_free);
   g_source_set_name_by_id (display->focus_timeout_id,
-                           "[mutter] window_focus_on_pointer_rest_callback");
+                           "[muffin] window_focus_on_pointer_rest_callback");
 }
 
 void

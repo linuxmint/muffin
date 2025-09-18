@@ -283,7 +283,9 @@ meta_wayland_data_device_primary_manager_init (MetaWaylandCompositor *compositor
 {
   if (wl_global_create (compositor->wayland_display,
 			&zwp_primary_selection_device_manager_v1_interface,
-			1, NULL, bind_primary_manager) == NULL)
+			META_ZWP_PRIMARY_SELECTION_V1_VERSION,
+			NULL, bind_primary_manager) == NULL)
+
     g_error ("Could not create data_device");
 }
 

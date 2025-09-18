@@ -88,7 +88,7 @@ handle_start (MetaDBusSysprof3Profiler *dbus_profiler,
     {
       cogl_set_tracing_enabled_on_thread (main_context,
                                           group_name,
-                                          "mutter-profile.syscap");
+                                          "muffin-profile.syscap");
     }
 
   profiler->running = TRUE;

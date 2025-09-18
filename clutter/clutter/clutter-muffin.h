@@ -20,8 +20,8 @@
  *
  */
 
-#ifndef __CLUTTER_MUTTER_H__
-#define __CLUTTER_MUTTER_H__
+#ifndef __CLUTTER_MUFFIN_H__
+#define __CLUTTER_MUFFIN_H__
 
 #define __CLUTTER_H_INSIDE__
 
@@ -85,4 +85,4 @@ void clutter_stage_get_device_coords (ClutterStage         *stage,
                                       graphene_point_t     *coords);
 #undef __CLUTTER_H_INSIDE__
 
-#endif /* __CLUTTER_MUTTER_H__ */
+#endif /* __CLUTTER_MUFFIN_H__ */

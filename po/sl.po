@@ -1,6 +1,6 @@
-# Slovenian translations for mutter.
-# Copyright (C) 2009 mutter COPYRIGHT HOLDER
-# This file is distributed under the same license as the mutter package.
+# Slovenian translations for muffin.
+# Copyright (C) 2009 muffin COPYRIGHT HOLDER
+# This file is distributed under the same license as the muffin package.
 #
 # Andraž Tori <andraz.tori1@guest.arnes.si>, 2000.
 # Matjaž Horvat <m@owca.info>, 2006.
@@ -8,8 +8,8 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: mutter master\n"
-"Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/mutter/issues\n"
+"Project-Id-Version: muffin master\n"
+"Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/muffin/issues\n"
 "POT-Creation-Date: 2020-02-29 19:52+0000\n"
 "PO-Revision-Date: 2020-02-29 21:23+0100\n"
 "Last-Translator: Matej Urbančič <mateju@svn.gnome.org>\n"
@@ -23,240 +23,240 @@ msgstr ""
 "X-Poedit-SourceCharset: utf-8\n"
 "X-Generator: Poedit 2.2.4\n"
 
-#: data/50-mutter-navigation.xml:6
+#: data/50-muffin-navigation.xml:6
 msgid "Navigation"
 msgstr "Krmarjenje"
 
-#: data/50-mutter-navigation.xml:9
+#: data/50-muffin-navigation.xml:9
 msgid "Move window to workspace 1"
 msgstr "Premakni okno na delovno površino 1"
 
-#: data/50-mutter-navigation.xml:12
+#: data/50-muffin-navigation.xml:12
 msgid "Move window to workspace 2"
 msgstr "Premakni okno na delovno površino 2"
 
-#: data/50-mutter-navigation.xml:15
+#: data/50-muffin-navigation.xml:15
 msgid "Move window to workspace 3"
 msgstr "Premakni okno na delovno površino 3"
 
-#: data/50-mutter-navigation.xml:18
+#: data/50-muffin-navigation.xml:18
 msgid "Move window to workspace 4"
 msgstr "Premakni okno na delovno površino 4"
 
-#: data/50-mutter-navigation.xml:21
+#: data/50-muffin-navigation.xml:21
 msgid "Move window to last workspace"
 msgstr "Premakni okno na zadnjo delovno površino"
 
-#: data/50-mutter-navigation.xml:24
+#: data/50-muffin-navigation.xml:24
 msgid "Move window one workspace up"
 msgstr "Premakni okno eno delovno površino navzgor"
 
-#: data/50-mutter-navigation.xml:27
+#: data/50-muffin-navigation.xml:27
 msgid "Move window one workspace down"
 msgstr "Prestavi okno eno delovno površino navzdol"
 
-#: data/50-mutter-navigation.xml:30
+#: data/50-muffin-navigation.xml:30
 msgid "Move window one monitor to the left"
 msgstr "Premakni okno en zaslon levo"
 
-#: data/50-mutter-navigation.xml:33
+#: data/50-muffin-navigation.xml:33
 msgid "Move window one monitor to the right"
 msgstr "Premakni okno en zaslon desno"
 
-#: data/50-mutter-navigation.xml:36
+#: data/50-muffin-navigation.xml:36
 msgid "Move window one monitor up"
 msgstr "Premakni okno en zaslon navzgor"
 
-#: data/50-mutter-navigation.xml:39
+#: data/50-muffin-navigation.xml:39
 msgid "Move window one monitor down"
 msgstr "Prestavi okno en zaslon navzdol"
 
-#: data/50-mutter-navigation.xml:43
+#: data/50-muffin-navigation.xml:43
 msgid "Switch applications"
 msgstr "Preklopi programe"
 
-#: data/50-mutter-navigation.xml:48
+#: data/50-muffin-navigation.xml:48
 msgid "Switch to previous application"
 msgstr "Preklopi na prejšnji program"
 
-#: data/50-mutter-navigation.xml:52
+#: data/50-muffin-navigation.xml:52
 msgid "Switch windows"
 msgstr "Preklopi okna"
 
-#: data/50-mutter-navigation.xml:57
+#: data/50-muffin-navigation.xml:57
 msgid "Switch to previous window"
 msgstr "Preklopi na prejšnje okno"
 
-#: data/50-mutter-navigation.xml:61
+#: data/50-muffin-navigation.xml:61
 msgid "Switch windows of an application"
 msgstr "Preklopi okna programa"
 
-#: data/50-mutter-navigation.xml:66
+#: data/50-muffin-navigation.xml:66
 msgid "Switch to previous window of an application"
 msgstr "Preklopi na predhodno okno programa"
 
-#: data/50-mutter-navigation.xml:70
+#: data/50-muffin-navigation.xml:70
 msgid "Switch system controls"
 msgstr "Preklopi tipkovne bližnjice"
 
-#: data/50-mutter-navigation.xml:75
+#: data/50-muffin-navigation.xml:75
 msgid "Switch to previous system control"
 msgstr "Preklopi na predhodno sistemsko okno"
 
-#: data/50-mutter-navigation.xml:79
+#: data/50-muffin-navigation.xml:79
 msgid "Switch windows directly"
 msgstr "Preklopi okna neposredno"
 
-#: data/50-mutter-navigation.xml:84
+#: data/50-muffin-navigation.xml:84
 msgid "Switch directly to previous window"
 msgstr "Preklopi na predhodno okno"
 
-#: data/50-mutter-navigation.xml:88
+#: data/50-muffin-navigation.xml:88
 msgid "Switch windows of an app directly"
 msgstr "Preklopi okna programa neposredno"
 
-#: data/50-mutter-navigation.xml:93
+#: data/50-muffin-navigation.xml:93
 msgid "Switch directly to previous window of an app"
 msgstr "Preklopi na predhodno okno programa"
 
-#: data/50-mutter-navigation.xml:97
+#: data/50-muffin-navigation.xml:97
 msgid "Switch system controls directly"
 msgstr "Preklopi tipkovne bližnjice neposredno"
 
-#: data/50-mutter-navigation.xml:102
+#: data/50-muffin-navigation.xml:102
 msgid "Switch directly to previous system control"
 msgstr "Preklopi na predhodno sistemsko okno"
 
-#: data/50-mutter-navigation.xml:105
+#: data/50-muffin-navigation.xml:105
 msgid "Hide all normal windows"
 msgstr "Skrij vsa običajna okna"
 
-#: data/50-mutter-navigation.xml:108
+#: data/50-muffin-navigation.xml:108
 msgid "Switch to workspace 1"
 msgstr "Preklopi na delovno površino 1"
 
-#: data/50-mutter-navigation.xml:111
+#: data/50-muffin-navigation.xml:111
 msgid "Switch to workspace 2"
 msgstr "Preklopi na delovno površino 2"
 
-#: data/50-mutter-navigation.xml:114
+#: data/50-muffin-navigation.xml:114
 msgid "Switch to workspace 3"
 msgstr "Preklopi na delovno površino 3"
 
-#: data/50-mutter-navigation.xml:117
+#: data/50-muffin-navigation.xml:117
 msgid "Switch to workspace 4"
 msgstr "Preklopi na delovno površino 4"
 
-#: data/50-mutter-navigation.xml:120
+#: data/50-muffin-navigation.xml:120
 msgid "Switch to last workspace"
 msgstr "Preklopi na zadnjo delovno površino"
 
-#: data/50-mutter-navigation.xml:123
+#: data/50-muffin-navigation.xml:123
 msgid "Move to workspace above"
 msgstr "Premakni na zgornjo delovno površino"
 
-#: data/50-mutter-navigation.xml:126
+#: data/50-muffin-navigation.xml:126
 msgid "Move to workspace below"
 msgstr "Premakni na spodnjo delovno površino"
 
-#: data/50-mutter-system.xml:6 data/50-mutter-wayland.xml:6
+#: data/50-muffin-system.xml:6 data/50-muffin-wayland.xml:6
 msgid "System"
 msgstr "Sistem"
 
-#: data/50-mutter-system.xml:8
+#: data/50-muffin-system.xml:8
 msgid "Show the run command prompt"
 msgstr "Pokaži možnost zagona ukazne vrstice"
 
-#: data/50-mutter-system.xml:10
+#: data/50-muffin-system.xml:10
 msgid "Show the activities overview"
 msgstr "Pokaži okno pregleda dejavnosti"
 
-#: data/50-mutter-wayland.xml:8
+#: data/50-muffin-wayland.xml:8
 msgid "Restore the keyboard shortcuts"
 msgstr "Obnovi tipkovne bližnjice"
 
-#: data/50-mutter-windows.xml:6
+#: data/50-muffin-windows.xml:6
 msgid "Windows"
 msgstr "Okna"
 
-#: data/50-mutter-windows.xml:8
+#: data/50-muffin-windows.xml:8
 msgid "Activate the window menu"
 msgstr "Omogoči meni okna"
 
-#: data/50-mutter-windows.xml:10
+#: data/50-muffin-windows.xml:10
 msgid "Toggle fullscreen mode"
 msgstr "Preklopi celozaslonski način"
 
-#: data/50-mutter-windows.xml:12
+#: data/50-muffin-windows.xml:12
 msgid "Toggle maximization state"
 msgstr "Preklopi stanje razpetosti"
 
 # G:1 K:0 O:0
-#: data/50-mutter-windows.xml:14
+#: data/50-muffin-windows.xml:14
 msgid "Maximize window"
 msgstr "Razpni okno"
 
-#: data/50-mutter-windows.xml:16
+#: data/50-muffin-windows.xml:16
 msgid "Restore window"
 msgstr "Obnovi okno"
 
-#: data/50-mutter-windows.xml:18
+#: data/50-muffin-windows.xml:18
 msgid "Close window"
 msgstr "Zapri okno"
 
-#: data/50-mutter-windows.xml:20
+#: data/50-muffin-windows.xml:20
 msgid "Hide window"
 msgstr "Skrij okno"
 
-#: data/50-mutter-windows.xml:22
+#: data/50-muffin-windows.xml:22
 msgid "Move window"
 msgstr "Premakni okno"
 
-#: data/50-mutter-windows.xml:24
+#: data/50-muffin-windows.xml:24
 msgid "Resize window"
 msgstr "Spremeni velikost okna"
 
-#: data/50-mutter-windows.xml:27
+#: data/50-muffin-windows.xml:27
 msgid "Toggle window on all workspaces or one"
 msgstr "Preklopi okno na vse delovne površine oziroma le na eno"
 
-#: data/50-mutter-windows.xml:29
+#: data/50-muffin-windows.xml:29
 msgid "Raise window if covered, otherwise lower it"
 msgstr "Dvigni okno, če ga prekriva drugo okno, sicer ga spusti"
 
-#: data/50-mutter-windows.xml:31
+#: data/50-muffin-windows.xml:31
 msgid "Raise window above other windows"
 msgstr "Dvigni okno nad druga okna"
 
-#: data/50-mutter-windows.xml:33
+#: data/50-muffin-windows.xml:33
 msgid "Lower window below other windows"
 msgstr "Spusti okno pod druga"
 
-#: data/50-mutter-windows.xml:35
+#: data/50-muffin-windows.xml:35
 msgid "Maximize window vertically"
 msgstr "Razpni okno navpično"
 
-#: data/50-mutter-windows.xml:37
+#: data/50-muffin-windows.xml:37
 msgid "Maximize window horizontally"
 msgstr "Razpni okno vodoravno"
 
-#: data/50-mutter-windows.xml:41
+#: data/50-muffin-windows.xml:41
 msgid "View split on left"
 msgstr "Poglej razdelek na levi"
 
-#: data/50-mutter-windows.xml:45
+#: data/50-muffin-windows.xml:45
 msgid "View split on right"
 msgstr "Poglej razdelek na desni"
 
-#: data/mutter.desktop.in:4
+#: data/muffin.desktop.in:4
 msgid "Mutter"
 msgstr "Mutter"
 
-#: data/org.gnome.mutter.gschema.xml.in:7
+#: data/org.gnome.muffin.gschema.xml.in:7
 msgid "Modifier to use for extended window management operations"
 msgstr "Spremenilnik, ki naj se uporabi za upravljanje oken"
 
-#: data/org.gnome.mutter.gschema.xml.in:8
+#: data/org.gnome.muffin.gschema.xml.in:8
 msgid ""
 "This key will initiate the “overlay”, which is a combination window overview "
 "and application launching system. The default is intended to be the “Windows "
@@ -268,11 +268,11 @@ msgstr ""
 "opremi računalnika. Pričakovano je, da je vrednost določena privzeto ali pa "
 "ni določena."
 
-#: data/org.gnome.mutter.gschema.xml.in:20
+#: data/org.gnome.muffin.gschema.xml.in:20
 msgid "Attach modal dialogs"
 msgstr "Pripni modalna pogovorna okna"
 
-#: data/org.gnome.mutter.gschema.xml.in:21
+#: data/org.gnome.muffin.gschema.xml.in:21
 msgid ""
 "When true, instead of having independent titlebars, modal dialogs appear "
 "attached to the titlebar of the parent window and are moved together with "
@@ -281,11 +281,11 @@ msgstr ""
 "Izbrana možnost omogoči, da je namesto samostojnih nazivnih vrstic, na to "
 "mesto pripeto modalno pogovorno okno, ki se premika z nadrejenim oknom."
 
-#: data/org.gnome.mutter.gschema.xml.in:30
+#: data/org.gnome.muffin.gschema.xml.in:30
 msgid "Enable edge tiling when dropping windows on screen edges"
 msgstr "Omogoči prilagajanje velikosti okna ob dotiku robov zaslona"
 
-#: data/org.gnome.mutter.gschema.xml.in:31
+#: data/org.gnome.muffin.gschema.xml.in:31
 msgid ""
 "If enabled, dropping windows on vertical screen edges maximizes them "
 "vertically and resizes them horizontally to cover half of the available "
@@ -295,11 +295,11 @@ msgstr ""
 "razpeta po navpični osi in razširjena na polovično širino. Dotik vrhnjega "
 "roba razpne okno čez cel zaslon."
 
-#: data/org.gnome.mutter.gschema.xml.in:40
+#: data/org.gnome.muffin.gschema.xml.in:40
 msgid "Workspaces are managed dynamically"
 msgstr "Število delovnih površin je spremenljivo"
 
-#: data/org.gnome.mutter.gschema.xml.in:41
+#: data/org.gnome.muffin.gschema.xml.in:41
 msgid ""
 "Determines whether workspaces are managed dynamically or whether there’s a "
 "static number of workspaces (determined by the num-workspaces key in org."
@@ -309,11 +309,11 @@ msgstr ""
 "število stalno (določenih s ključem števila delovnih površin med možnostmi v "
 "org.gnome.desktop.wm.preferences)."
 
-#: data/org.gnome.mutter.gschema.xml.in:50
+#: data/org.gnome.muffin.gschema.xml.in:50
 msgid "Workspaces only on primary"
 msgstr "Delovne površine le na prvem zaslonu"
 
-#: data/org.gnome.mutter.gschema.xml.in:51
+#: data/org.gnome.muffin.gschema.xml.in:51
 msgid ""
 "Determines whether workspace switching should happen for windows on all "
 "monitors or only for windows on the primary monitor."
@@ -321,11 +321,11 @@ msgstr ""
 "Določa ali naj se delovne površine preklapljajo na vseh zaslonih ali le na "
 "prvem, glavnem zaslonu."
 
-#: data/org.gnome.mutter.gschema.xml.in:59
+#: data/org.gnome.muffin.gschema.xml.in:59
 msgid "No tab popup"
 msgstr "Brez pojavnih zavihkov"
 
-#: data/org.gnome.mutter.gschema.xml.in:60
+#: data/org.gnome.muffin.gschema.xml.in:60
 msgid ""
 "Determines whether the use of popup and highlight frame should be disabled "
 "for window cycling."
@@ -333,11 +333,11 @@ msgstr ""
 "Določa ali naj bo uporaba pojavnih zavihkov in poudarjanja onemogočena med "
 "kroženjem oken."
 
-#: data/org.gnome.mutter.gschema.xml.in:68
+#: data/org.gnome.muffin.gschema.xml.in:68
 msgid "Delay focus changes until the pointer stops moving"
 msgstr "Zamakni spremembe žarišča, dokler se kazalnik še premika"
 
-#: data/org.gnome.mutter.gschema.xml.in:69
+#: data/org.gnome.muffin.gschema.xml.in:69
 msgid ""
 "If set to true, and the focus mode is either “sloppy” or “mouse” then the "
 "focus will not be changed immediately when entering a window, but only after "
@@ -347,11 +347,11 @@ msgstr ""
 "ali »miška«, ne spremeni takoj ob izbiri okna. Žarišče se spremeni, ko se "
 "kazalnik preneha premikati."
 
-#: data/org.gnome.mutter.gschema.xml.in:79
+#: data/org.gnome.muffin.gschema.xml.in:79
 msgid "Draggable border width"
 msgstr "Prilagodljiva obroba pravokotnika"
 
-#: data/org.gnome.mutter.gschema.xml.in:80
+#: data/org.gnome.muffin.gschema.xml.in:80
 msgid ""
 "The amount of total draggable borders. If the theme’s visible borders are "
 "not enough, invisible borders will be added to meet this value."
@@ -359,11 +359,11 @@ msgstr ""
 "Delež skupne prilagodljive obrobe. V kolikor vidni robovi teme niso dovolj, "
 "so dodane nevidne obrobe za dodatno prilagajanje."
 
-#: data/org.gnome.mutter.gschema.xml.in:89
+#: data/org.gnome.muffin.gschema.xml.in:89
 msgid "Auto maximize nearly monitor sized windows"
 msgstr "Samodejno razpni okna, ki so skoraj enaka velikosti zaslona"
 
-#: data/org.gnome.mutter.gschema.xml.in:90
+#: data/org.gnome.muffin.gschema.xml.in:90
 msgid ""
 "If enabled, new windows that are initially the size of the monitor "
 "automatically get maximized."
@@ -371,32 +371,32 @@ msgstr ""
 "Izbrana možnost omogoča, da bodo okna, ki so skoraj tako velika, kot je "
 "velik zaslon, med preslikavo samodejno razpeta."
 
-#: data/org.gnome.mutter.gschema.xml.in:98
+#: data/org.gnome.muffin.gschema.xml.in:98
 msgid "Place new windows in the center"
 msgstr "Postavi novo okno v središče"
 
-#: data/org.gnome.mutter.gschema.xml.in:99
+#: data/org.gnome.muffin.gschema.xml.in:99
 msgid ""
 "When true, the new windows will always be put in the center of the active "
 "screen of the monitor."
 msgstr ""
 "Izbrana možnost določa, da bo novo okno vedno v središču dejavnega zaslona."
 
-#: data/org.gnome.mutter.gschema.xml.in:107
+#: data/org.gnome.muffin.gschema.xml.in:107
 msgid "Enable experimental features"
 msgstr "Omogoči preizkusne možnosti"
 
-#: data/org.gnome.mutter.gschema.xml.in:108
+#: data/org.gnome.muffin.gschema.xml.in:108
 msgid ""
 "To enable experimental features, add the feature keyword to the list. "
 "Whether the feature requires restarting the compositor depends on the given "
 "feature. Any experimental feature is not required to still be available, or "
 "configurable. Don’t expect adding anything in this setting to be future "
 "proof. Currently possible keywords: • “scale-monitor-framebuffer” — makes "
-"mutter default to layout logical monitors in a logical pixel coordinate "
+"muffin default to layout logical monitors in a logical pixel coordinate "
 "space, while scaling monitor framebuffers instead of window content, to "
 "manage HiDPI monitors. Does not require a restart. • “rt-scheduler” — makes "
-"mutter request a low priority real-time scheduling. The executable or user "
+"muffin request a low priority real-time scheduling. The executable or user "
 "must have CAP_SYS_NICE. Requires a restart. • “autostart-xwayland” — "
 "initializes Xwayland lazily if there are X11 clients. Requires restart."
 msgstr ""
@@ -404,28 +404,28 @@ msgstr ""
 "ključev. Ali vpisana možnost zahteva ponovni zagon sestavljalnika, je "
 "odvisno od posamezne možnosti. Te možnosti niso zahtevane niti nastavljive, "
 "najverjetneje niti ne bodo. Trenutno so na voljo ključne besede: • »scale-"
-"monitor-framebuffer« – določi privzeto rabo sistema mutter za logične "
+"monitor-framebuffer« – določi privzeto rabo sistema muffin za logične "
 "zaslone v logičnem točkovnem koordinatnem prostoru, pri čemer prilagaja "
 "predpomnilnik in ne vsebine za upravljanje z zasloni HiDPI. Možnost ne "
-"zahteva ponovnega zagona.• “rt-scheduler” — postavi zahteve mutter na nižjo "
+"zahteva ponovnega zagona.• “rt-scheduler” — postavi zahteve muffin na nižjo "
 "prednostno raven. Izvršljivi program oziroma uporabnik mora imeti omogočeno "
 "možnost CAP_SYS_NICE. Ta možnost zahteva ponovni zagon. • »autostart-"
 "xwayland« - lenobno zažne okolje Xwayland, če ima odjemalce X11. Prav tako "
 "zahteva ponoven zagon."
 
-#: data/org.gnome.mutter.gschema.xml.in:134
+#: data/org.gnome.muffin.gschema.xml.in:134
 msgid "Modifier to use to locate the pointer"
 msgstr "Spremenilnik, ki naj se uporabi za določanje mesta kazalnika"
 
-#: data/org.gnome.mutter.gschema.xml.in:135
+#: data/org.gnome.muffin.gschema.xml.in:135
 msgid "This key will initiate the “locate pointer” action."
 msgstr "Ključ začne dejanje »zaznavanja kazalnika«."
 
-#: data/org.gnome.mutter.gschema.xml.in:142
+#: data/org.gnome.muffin.gschema.xml.in:142
 msgid "Timeout for check-alive ping"
 msgstr "Časovni zamik za preverjanje delovanja z ukazom ping"
 
-#: data/org.gnome.mutter.gschema.xml.in:143
+#: data/org.gnome.muffin.gschema.xml.in:143
 msgid ""
 "Number of milliseconds a client has to respond to a ping request in order to "
 "not be detected as frozen. Using 0 will disable the alive check completely."
@@ -434,79 +434,79 @@ msgstr ""
 "preden sistem sporoči napako odziva. Vrednost 0 povsem omogoči preverjanje "
 "stanja povezave."
 
-#: data/org.gnome.mutter.gschema.xml.in:165
+#: data/org.gnome.muffin.gschema.xml.in:165
 msgid "Select window from tab popup"
 msgstr "Izbor okna iz pojavnega zavihka"
 
-#: data/org.gnome.mutter.gschema.xml.in:170
+#: data/org.gnome.muffin.gschema.xml.in:170
 msgid "Cancel tab popup"
 msgstr "Prekliči pojavni zavihek"
 
-#: data/org.gnome.mutter.gschema.xml.in:175
+#: data/org.gnome.muffin.gschema.xml.in:175
 msgid "Switch monitor configurations"
 msgstr "Nastavitve nadzornika preklopa"
 
-#: data/org.gnome.mutter.gschema.xml.in:180
+#: data/org.gnome.muffin.gschema.xml.in:180
 msgid "Rotates the built-in monitor configuration"
 msgstr "Zavrti vgrajene nastavitve zaslona"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:6
+#: data/org.gnome.muffin.wayland.gschema.xml.in:6
 msgid "Switch to VT 1"
 msgstr "Preklopi na VT 1"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:10
+#: data/org.gnome.muffin.wayland.gschema.xml.in:10
 msgid "Switch to VT 2"
 msgstr "Preklopi na VT 2"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:14
+#: data/org.gnome.muffin.wayland.gschema.xml.in:14
 msgid "Switch to VT 3"
 msgstr "Preklopi na VT 3"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:18
+#: data/org.gnome.muffin.wayland.gschema.xml.in:18
 msgid "Switch to VT 4"
 msgstr "Preklopi na VT 4"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:22
+#: data/org.gnome.muffin.wayland.gschema.xml.in:22
 msgid "Switch to VT 5"
 msgstr "Preklopi na VT 5"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:26
+#: data/org.gnome.muffin.wayland.gschema.xml.in:26
 msgid "Switch to VT 6"
 msgstr "Preklopi na VT 6"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:30
+#: data/org.gnome.muffin.wayland.gschema.xml.in:30
 msgid "Switch to VT 7"
 msgstr "Preklopi na VT 7"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:34
+#: data/org.gnome.muffin.wayland.gschema.xml.in:34
 msgid "Switch to VT 8"
 msgstr "Preklopi na VT 8"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:38
+#: data/org.gnome.muffin.wayland.gschema.xml.in:38
 msgid "Switch to VT 9"
 msgstr "Preklopi na VT 9"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:42
+#: data/org.gnome.muffin.wayland.gschema.xml.in:42
 msgid "Switch to VT 10"
 msgstr "Preklopi na VT 10"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:46
+#: data/org.gnome.muffin.wayland.gschema.xml.in:46
 msgid "Switch to VT 11"
 msgstr "Preklopi na VT 11"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:50
+#: data/org.gnome.muffin.wayland.gschema.xml.in:50
 msgid "Switch to VT 12"
 msgstr "Preklopi na VT 12"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:54
+#: data/org.gnome.muffin.wayland.gschema.xml.in:54
 msgid "Re-enable shortcuts"
 msgstr "Ponovno omogoči tipkovne bližnjice"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:64
+#: data/org.gnome.muffin.wayland.gschema.xml.in:64
 msgid "Allow X11 grabs to lock keyboard focus with Xwayland"
 msgstr "Dovoli zajemanje za zaklep žariščenja tipkovnice z XWayland"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:65
+#: data/org.gnome.muffin.wayland.gschema.xml.in:65
 msgid ""
 "Allow all keyboard events to be routed to X11 “override redirect” windows "
 "with a grab when running in Xwayland. This option is to support X11 clients "
@@ -527,11 +527,11 @@ msgstr ""
 "odjemalcu X11 v korensko okno ali pa mora biti med mrogrami na belem seznamu "
 "v ključu \"xwayland-grab-access-rules\"."
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:84
+#: data/org.gnome.muffin.wayland.gschema.xml.in:84
 msgid "Xwayland applications allowed to issue keyboard grabs"
 msgstr "Program XWayland ima dovoljenje za zajemanje s tipkovnico"
 
-#: data/org.gnome.mutter.wayland.gschema.xml.in:85
+#: data/org.gnome.muffin.wayland.gschema.xml.in:85
 msgid ""
 "List the resource names or resource class of X11 windows either allowed or "
 "not allowed to issue X11 keyboard grabs under Xwayland. The resource name or "
@@ -688,25 +688,25 @@ msgstr "_Vsili konec"
 msgid "_Wait"
 msgstr "_Počakaj"
 
-#: src/core/mutter.c:38
+#: src/core/muffin.c:38
 #, c-format
 msgid ""
-"mutter %s\n"
+"muffin %s\n"
 "Copyright © 2001-%d Havoc Pennington, Red Hat, Inc., and others\n"
 "This is free software; see the source for copying conditions.\n"
 "There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A "
 "PARTICULAR PURPOSE.\n"
 msgstr ""
-"mutter %s\n"
+"muffin %s\n"
 "Avtorske pravice pridržane (C) 2001-%d Havoc Pennington, Red Hat in drugi\n"
 "To je prosta programska oprema; za pogoje kopiranja si oglejte dovoljenje.\n"
 "Program je na voljo BREZ KAKRŠNIHKOLI ZAGOTOVIL.\n"
 
-#: src/core/mutter.c:52
+#: src/core/muffin.c:52
 msgid "Print version"
 msgstr "Izpiši različico"
 
-#: src/core/mutter.c:58
+#: src/core/muffin.c:58
 msgid "Mutter plugin to use"
 msgstr "Vstavek Mutter za uporabo"
 

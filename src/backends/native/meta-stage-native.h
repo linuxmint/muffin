@@ -25,7 +25,7 @@
 #ifndef META_STAGE_NATIVE_H
 #define META_STAGE_NATIVE_H
 
-#include "clutter/clutter-mutter.h"
+#include "clutter/clutter-muffin.h"
 
 #define META_TYPE_STAGE_NATIVE (meta_stage_native_get_type ())
 G_DECLARE_FINAL_TYPE (MetaStageNative, meta_stage_native,

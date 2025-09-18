@@ -531,7 +531,7 @@ meta_startup_notification_ensure_timeout (MetaStartupNotification *sn)
                                                         startup_sequence_timeout,
                                                         sn);
   g_source_set_name_by_id (sn->startup_sequence_timeout,
-                           "[mutter] startup_sequence_timeout");
+                           "[muffin] startup_sequence_timeout");
 }
 
 void

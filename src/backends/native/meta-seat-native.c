@@ -39,7 +39,7 @@
 #include "backends/native/meta-input-device-tool-native.h"
 #include "backends/native/meta-keymap-native.h"
 #include "backends/native/meta-virtual-input-device-native.h"
-#include "clutter/clutter-mutter.h"
+#include "clutter/clutter-muffin.h"
 #include "core/bell.h"
 
 /*
@@ -1093,6 +1093,48 @@ notify_swipe_gesture_event (ClutterInputDevice          *input_device,
 
   queue_event (event);
 }
+
+static void
+notify_hold_gesture_event (ClutterInputDevice          *input_device,
+                           ClutterTouchpadGesturePhase  phase,
+                           uint64_t                     time_us,
+                           uint32_t                     n_fingers)
+{
+  MetaInputDeviceNative *device_evdev;
+  MetaSeatNative *seat;
+  ClutterStage *stage;
+  ClutterEvent *event = NULL;
+  graphene_point_t pos;
+
+  /* We can drop the event on the floor if no stage has been
+   * associated with the device yet. */
+  stage = _clutter_input_device_get_stage (input_device);
+  if (stage == NULL)
+    return;
+
+  device_evdev = META_INPUT_DEVICE_NATIVE (input_device);
+  seat = meta_input_device_native_get_seat (device_evdev);
+
+  event = clutter_event_new (CLUTTER_TOUCHPAD_HOLD);
+
+  meta_event_native_set_time_usec (event, time_us);
+  event->touchpad_hold.phase = phase;
+  event->touchpad_hold.time = us2ms (time_us);
+  event->touchpad_hold.stage = CLUTTER_STAGE (stage);
+
+  clutter_input_device_get_coords (seat->core_pointer, NULL, &pos);
+  event->touchpad_hold.x = pos.x;
+  event->touchpad_hold.y = pos.y;
+  event->touchpad_hold.n_fingers = n_fingers;
+
+  meta_xkb_translate_state (event, seat->xkb, seat->button_state);
+
+  clutter_event_set_device (event, seat->core_pointer);
+  clutter_event_set_source_device (event, input_device);
+
+  queue_event (event);
+}
+
 
 static void
 notify_proximity (ClutterInputDevice *input_device,
@@ -2185,6 +2227,28 @@ process_device_event (MetaSeatNative        *seat,
         notify_swipe_gesture_event (device,
                                     CLUTTER_TOUCHPAD_GESTURE_PHASE_UPDATE,
                                     time_us, n_fingers, dx, dy);
+        break;
+      }
+    case LIBINPUT_EVENT_GESTURE_HOLD_BEGIN:
+    case LIBINPUT_EVENT_GESTURE_HOLD_END:
+      {
+        struct libinput_event_gesture *gesture_event =
+         libinput_event_get_gesture_event (event);
+        ClutterTouchpadGesturePhase phase;
+        uint32_t n_fingers;
+        uint64_t time_us;
+
+        device = libinput_device_get_user_data (libinput_device);
+        time_us = libinput_event_gesture_get_time_usec (gesture_event);
+        n_fingers = libinput_event_gesture_get_finger_count (gesture_event);
+
+        if (libinput_event_get_type (event) == LIBINPUT_EVENT_GESTURE_HOLD_BEGIN)
+          phase = CLUTTER_TOUCHPAD_GESTURE_PHASE_BEGIN;
+        else
+          phase = libinput_event_gesture_get_cancelled (gesture_event) ?
+            CLUTTER_TOUCHPAD_GESTURE_PHASE_CANCEL : CLUTTER_TOUCHPAD_GESTURE_PHASE_END;
+
+        notify_hold_gesture_event (device, phase, time_us, n_fingers);
         break;
       }
     case LIBINPUT_EVENT_TABLET_TOOL_AXIS:

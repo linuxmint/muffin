@@ -1,18 +1,18 @@
-mutter_includesubdir = join_paths(pkgname, 'meta')
-mutter_includedir = join_paths(includedir, mutter_includesubdir)
+muffin_includesubdir = join_paths(pkgname, 'meta')
+muffin_includedir = join_paths(includedir, muffin_includesubdir)
 
-mutter_includes = [
+muffin_includes = [
   include_directories('.'),
   top_includepath,
   clutter_includepath,
   cogl_includepath,
 ]
 
-mutter_lib_deps = [
+muffin_lib_deps = [
   m_dep,
 ]
 
-mutter_pkg_deps = [
+muffin_pkg_deps = [
   cairo_dep,
   gio_unix_dep,
   glib_dep,
@@ -21,7 +21,7 @@ mutter_pkg_deps = [
   pango_dep,
 ]
 
-mutter_pkg_private_deps = [
+muffin_pkg_private_deps = [
   gmodule_no_export_dep,
   cinnamon_desktop_dep,
   json_glib_dep,
@@ -30,62 +30,62 @@ mutter_pkg_private_deps = [
 ]
 
 if have_gl
-  mutter_pkg_deps += [
+  muffin_pkg_deps += [
     gl_dep,
   ]
 endif
 
 if have_gles2
-  mutter_pkg_private_deps += [
+  muffin_pkg_private_deps += [
     gles2_dep,
   ]
 endif
 
 if have_egl
-  mutter_pkg_deps += [
+  muffin_pkg_deps += [
     egl_dep,
   ]
 endif
 
 if have_libgudev
-  mutter_pkg_private_deps += [
+  muffin_pkg_private_deps += [
     gudev_dep,
     libudev_dep,
   ]
 endif
 
 if have_startup_notification
-  mutter_pkg_private_deps += [
+  muffin_pkg_private_deps += [
     libstartup_notification_dep,
   ]
 endif
 
 if have_libwacom
-  mutter_pkg_private_deps += [
+  muffin_pkg_private_deps += [
     libwacom_dep,
   ]
 endif
 
 if have_remote_desktop
-  mutter_pkg_private_deps += [
+  muffin_pkg_private_deps += [
     libpipewire_dep,
   ]
 endif
 
 if have_introspection
-  mutter_pkg_private_deps += [
+  muffin_pkg_private_deps += [
     gobject_introspection_dep,
   ]
 endif
 
 if have_x11
-  mutter_pkg_deps += [
+  muffin_pkg_deps += [
     xfixes_dep,
     xi_dep,
     x11_dep,
   ]
 
-  mutter_pkg_private_deps += [
+  muffin_pkg_private_deps += [
     xrandr_dep,
     xinerama_dep,
     xext_dep,
@@ -105,20 +105,20 @@ if have_x11
   ]
 
   if have_sm
-    mutter_pkg_private_deps += [
+    muffin_pkg_private_deps += [
       sm_dep,
     ]
   endif
 endif
 
 if have_wayland
-  mutter_pkg_deps += [
+  muffin_pkg_deps += [
     wayland_server_dep,
   ]
 endif
 
 if have_native_backend
-  mutter_pkg_private_deps += [
+  muffin_pkg_private_deps += [
     libdrm_dep,
     libinput_dep,
     gudev_dep,
@@ -130,40 +130,40 @@ if have_native_backend
 endif
 
 if have_wayland_eglstream
-  mutter_lib_deps += [
+  muffin_lib_deps += [
     dl_dep,
   ]
-  mutter_pkg_private_deps += [
+  muffin_pkg_private_deps += [
     wayland_eglstream_protocols_dep,
   ]
 endif
 
-mutter_deps = [
-  mutter_pkg_deps,
-  mutter_pkg_private_deps,
-  mutter_lib_deps,
+muffin_deps = [
+  muffin_pkg_deps,
+  muffin_pkg_private_deps,
+  muffin_lib_deps,
 ]
 
-mutter_c_args = [
+muffin_c_args = [
   '-DCLUTTER_ENABLE_COMPOSITOR_API',
   '-DCLUTTER_ENABLE_EXPERIMENTAL_API',
   '-DCOGL_ENABLE_EXPERIMENTAL_API',
   '-DCOGL_ENABLE_EXPERIMENTAL_2_0_API',
-  '-DCOGL_ENABLE_MUTTER_API',
+  '-DCOGL_ENABLE_MUFFIN_API',
   '-DCLUTTER_DISABLE_DEPRECATION_WARNINGS',
   '-DCOGL_DISABLE_DEPRECATION_WARNINGS',
-  '-DG_LOG_DOMAIN="mutter"',
+  '-DG_LOG_DOMAIN="muffin"',
   '-DSN_API_NOT_YET_FROZEN=1',
   '-DGETTEXT_PACKAGE="@0@"'.format(meson.project_name()),
 ]
 
 if get_option('verbose')
-  mutter_c_args += [
+  muffin_c_args += [
     '-DWITH_VERBOSE_MODE'
   ]
 endif
 
-mutter_sources = [
+muffin_sources = [
   'backends/edid.h',
   'backends/edid-parse.c',
   'backends/gsm-inhibitor-flag.h',
@@ -418,7 +418,7 @@ mutter_sources = [
   'x11/meta-x11-stack-private.h',
   'x11/meta-x11-window-control.c',
   'x11/meta-x11-window-control.h',
-  'x11/mutter-Xatomtype.h',
+  'x11/muffin-Xatomtype.h',
   'x11/session.c',
   'x11/session.h',
   'x11/window-props.c',
@@ -431,7 +431,7 @@ mutter_sources = [
 ]
 
 if have_egl
-  mutter_sources += [
+  muffin_sources += [
     'backends/meta-egl.c',
     'backends/meta-egl-ext.h',
     'backends/meta-egl.h',
@@ -439,7 +439,7 @@ if have_egl
 endif
 
 if have_gles2
-  mutter_sources += [
+  muffin_sources += [
     'backends/meta-gles3.c',
     'backends/meta-gles3.h',
     'backends/meta-gles3-table.h',
@@ -447,7 +447,7 @@ if have_gles2
 endif
 
 if have_remote_desktop
-  mutter_sources += [
+  muffin_sources += [
     'backends/meta-dbus-session-watcher.c',
     'backends/meta-dbus-session-watcher.h',
     'backends/meta-remote-desktop.c',
@@ -474,7 +474,7 @@ if have_remote_desktop
 endif
 
 if have_wayland
-  mutter_sources += [
+  muffin_sources += [
     'compositor/meta-surface-actor-wayland.c',
     'compositor/meta-surface-actor-wayland.h',
     'compositor/meta-window-actor-wayland.c',
@@ -502,20 +502,14 @@ if have_wayland
     'wayland/meta-wayland-data-device.h',
     'wayland/meta-wayland-data-device-primary.c',
     'wayland/meta-wayland-data-device-primary.h',
-    'wayland/meta-wayland-data-device-primary-legacy.c',
-    'wayland/meta-wayland-data-device-primary-legacy.h',
     'wayland/meta-wayland-data-offer.c',
     'wayland/meta-wayland-data-offer.h',
     'wayland/meta-wayland-data-offer-primary.c',
     'wayland/meta-wayland-data-offer-primary.h',
-    'wayland/meta-wayland-data-offer-primary-legacy.c',
-    'wayland/meta-wayland-data-offer-primary-legacy.h',
     'wayland/meta-wayland-data-source.c',
     'wayland/meta-wayland-data-source.h',
     'wayland/meta-wayland-data-source-primary.c',
     'wayland/meta-wayland-data-source-primary.h',
-    'wayland/meta-wayland-data-source-primary-legacy.c',
-    'wayland/meta-wayland-data-source-primary-legacy.h',
     'wayland/meta-wayland-dma-buf.c',
     'wayland/meta-wayland-dma-buf.h',
     'wayland/meta-wayland-dnd-surface.c',
@@ -531,13 +525,15 @@ if have_wayland
     'wayland/meta-wayland-input-device.h',
     'wayland/meta-wayland-keyboard.c',
     'wayland/meta-wayland-keyboard.h',
-    'wayland/meta-wayland-legacy-xdg-shell.c',
-    'wayland/meta-wayland-legacy-xdg-shell.h',
+    'wayland/meta-wayland-legacy-xdg-foreign.c',
+    'wayland/meta-wayland-legacy-xdg-foreign.h',
     'wayland/meta-wayland-outputs.c',
     'wayland/meta-wayland-outputs.h',
     'wayland/meta-wayland-pointer.c',
     'wayland/meta-wayland-pointer-constraints.c',
     'wayland/meta-wayland-pointer-constraints.h',
+    'wayland/meta-wayland-pointer-gesture-hold.c',
+    'wayland/meta-wayland-pointer-gesture-hold.h',
     'wayland/meta-wayland-pointer-gesture-pinch.c',
     'wayland/meta-wayland-pointer-gesture-pinch.h',
     'wayland/meta-wayland-pointer-gestures.c',
@@ -578,8 +574,6 @@ if have_wayland
     'wayland/meta-wayland-tablet-tool.h',
     'wayland/meta-wayland-text-input.c',
     'wayland/meta-wayland-text-input.h',
-    'wayland/meta-wayland-text-input-legacy.c',
-    'wayland/meta-wayland-text-input-legacy.h',
     'wayland/meta-wayland-touch.c',
     'wayland/meta-wayland-touch.h',
     'wayland/meta-wayland-types.h',
@@ -588,10 +582,9 @@ if have_wayland
     'wayland/meta-wayland-viewporter.h',
     'wayland/meta-wayland-window-configuration.c',
     'wayland/meta-wayland-window-configuration.h',
-    'wayland/meta-wayland-wl-shell.c',
-    'wayland/meta-wayland-wl-shell.h',
     'wayland/meta-wayland-xdg-foreign.c',
     'wayland/meta-wayland-xdg-foreign.h',
+    'wayland/meta-wayland-xdg-foreign-private.h',
     'wayland/meta-wayland-xdg-shell.c',
     'wayland/meta-wayland-xdg-shell.h',
     'wayland/meta-window-wayland.c',
@@ -611,7 +604,7 @@ if have_wayland
 endif
 
 if have_native_backend
-  mutter_sources += [
+  muffin_sources += [
     'backends/native/dbus-utils.c',
     'backends/native/dbus-utils.h',
     'backends/native/meta-backend-native.c',
@@ -699,20 +692,20 @@ if have_native_backend
 endif
 
 if have_wayland_eglstream
-  mutter_sources += [
+  muffin_sources += [
     'wayland/meta-wayland-egl-stream.c',
     'wayland/meta-wayland-egl-stream.h',
   ]
 endif
 
-mutter_built_sources = []
+muffin_built_sources = []
 
 dbus_display_config_built_sources = gnome.gdbus_codegen('meta-dbus-display-config',
     'org.cinnamon.Muffin.DisplayConfig.xml',
     interface_prefix: 'org.cinnamon.Muffin.',
     namespace: 'MetaDBus',
   )
-mutter_built_sources += dbus_display_config_built_sources
+muffin_built_sources += dbus_display_config_built_sources
 
 dbus_idle_monitor_built_sources = gnome.gdbus_codegen('meta-dbus-idle-monitor',
     'org.cinnamon.Muffin.IdleMonitor.xml',
@@ -720,18 +713,18 @@ dbus_idle_monitor_built_sources = gnome.gdbus_codegen('meta-dbus-idle-monitor',
     namespace: 'MetaDBus',
     object_manager: true,
   )
-mutter_built_sources += dbus_idle_monitor_built_sources
+muffin_built_sources += dbus_idle_monitor_built_sources
 
-mutter_marshal = gnome.genmarshal('meta-marshal',
+muffin_marshal = gnome.genmarshal('meta-marshal',
     sources: ['meta-marshal.list'],
     prefix: 'meta_marshal',
     internal: true,
     valist_marshallers: true,
   )
-mutter_built_sources += mutter_marshal
+muffin_built_sources += muffin_marshal
 
 if have_profiler
-  mutter_sources += [
+  muffin_sources += [
     'backends/meta-profiler.c',
     'backends/meta-profiler.h',
   ]
@@ -744,7 +737,7 @@ if have_profiler
       interface_prefix: 'org.gnome.',
       namespace: 'MetaDBus',
     )
-  mutter_built_sources += dbus_sysprof3_profiler_built_sources
+  muffin_built_sources += dbus_sysprof3_profiler_built_sources
 endif
 
 if have_native_backend
@@ -755,7 +748,7 @@ if have_native_backend
     output: 'meta-default-modes.h',
     command: [gen_default_modes, '@OUTPUT@']
   )
-  mutter_built_sources += default_modes_h
+  muffin_built_sources += default_modes_h
 
   gdbus_codegen = find_program('gdbus-codegen')
   dbus_login1_built_sources = custom_target('meta-dbus-login1',
@@ -774,7 +767,7 @@ if have_native_backend
       '@INPUT@',
     ]
   )
-  mutter_built_sources += dbus_login1_built_sources
+  muffin_built_sources += dbus_login1_built_sources
 endif
 
 if have_remote_desktop
@@ -783,14 +776,14 @@ if have_remote_desktop
       interface_prefix: 'org.cinnamon.Muffin.',
       namespace: 'MetaDBus',
     )
-  mutter_built_sources += dbus_remote_desktop_built_sources
+  muffin_built_sources += dbus_remote_desktop_built_sources
 
   dbus_screen_cast_built_sources = gnome.gdbus_codegen('meta-dbus-screen-cast',
       'org.cinnamon.Muffin.ScreenCast.xml',
       interface_prefix: 'org.cinnamon.Muffin.',
       namespace: 'MetaDBus',
     )
-  mutter_built_sources += dbus_screen_cast_built_sources
+  muffin_built_sources += dbus_screen_cast_built_sources
 endif
 
 wayland_protocol_server_headers = []
@@ -803,9 +796,7 @@ if have_wayland
   #  - protocol stability ('private', 'stable' or 'unstable')
   #  - protocol version (if stability is 'unstable')
   wayland_protocols = [
-    ['gtk-primary-selection', 'private', ],
     ['gtk-shell', 'private', ],
-    ['gtk-text-input', 'private', ],
     ['keyboard-shortcuts-inhibit', 'unstable', 'v1', ],
     ['linux-dmabuf', 'unstable', 'v1', ],
     ['pointer-constraints', 'unstable', 'v1', ],
@@ -817,8 +808,8 @@ if have_wayland
     ['viewporter', 'stable', ],
     ['xdg-activation', 'staging', 'v1', ],
     ['xdg-foreign', 'unstable', 'v1', ],
+    ['xdg-foreign', 'unstable', 'v2', ],
     ['xdg-output', 'unstable', 'v1', ],
-    ['xdg-shell', 'unstable', 'v6', ],
     ['xdg-shell', 'stable', ],
     ['xwayland-keyboard-grab', 'unstable', 'v1', ],
   ]
@@ -901,54 +892,54 @@ if have_wayland
   endforeach
 endif
 
-mutter_built_sources += wayland_protocol_server_headers
-mutter_built_sources += wayland_protocol_sources
+muffin_built_sources += wayland_protocol_server_headers
+muffin_built_sources += wayland_protocol_sources
 
 subdir('meta')
 
-mutter_built_sources += mutter_enum_types
-mutter_built_sources += mutter_version
+muffin_built_sources += muffin_enum_types
+muffin_built_sources += muffin_version
 
-libmutter = shared_library(libmutter_name,
+libmuffin = shared_library(libmuffin_name,
   sources: [
-    mutter_sources,
-    mutter_built_sources,
-    libmutter_cogl_path_enum_types_h,
+    muffin_sources,
+    muffin_built_sources,
+    libmuffin_cogl_path_enum_types_h,
   ],
   version: '0.0.0',
   soversion: 0,
   gnu_symbol_visibility: 'hidden',
-  include_directories: mutter_includes,
-  c_args: mutter_c_args,
+  include_directories: muffin_includes,
+  c_args: muffin_c_args,
   dependencies: [
-    libmutter_cogl_dep,
-    libmutter_clutter_dep,
-    mutter_deps,
+    libmuffin_cogl_dep,
+    libmuffin_clutter_dep,
+    muffin_deps,
   ],
   install_rpath: pkglibdir,
   install_dir: libdir,
   install: true,
 )
 
-libmutter_dep = declare_dependency(
-  link_with: libmutter,
-  include_directories: mutter_includes,
-  sources: mutter_built_sources,
+libmuffin_dep = declare_dependency(
+  link_with: libmuffin,
+  include_directories: muffin_includes,
+  sources: muffin_built_sources,
   dependencies: [
-    libmutter_cogl_dep,
-    libmutter_clutter_dep,
-    mutter_deps,
+    libmuffin_cogl_dep,
+    libmuffin_clutter_dep,
+    muffin_deps,
   ],
 )
 
 executable('muffin',
   sources: [
-    files('core/mutter.c'),
-    libmutter_cogl_path_enum_types_h,
+    files('core/muffin.c'),
+    libmuffin_cogl_path_enum_types_h,
   ],
-  include_directories: mutter_includes,
-  c_args: mutter_c_args,
-  dependencies: [libmutter_dep],
+  include_directories: muffin_includes,
+  c_args: muffin_c_args,
+  dependencies: [libmuffin_dep],
   install_dir: bindir,
   install: true,
 )
@@ -960,7 +951,7 @@ executable('muffin-restart-helper',
   include_directories: [
     top_includepath,
   ],
-  c_args: mutter_c_args,
+  c_args: muffin_c_args,
   dependencies: [
     x11_dep,
     xcomposite_dep,
@@ -970,21 +961,21 @@ executable('muffin-restart-helper',
 )
 
 if have_introspection
-  mutter_introspected_sources = []
-  foreach source : mutter_sources
+  muffin_introspected_sources = []
+  foreach source : muffin_sources
     if source.endswith('.c')
-      mutter_introspected_sources += source
+      muffin_introspected_sources += source
     endif
   endforeach
 
-  libmutter_gir = gnome.generate_gir(libmutter,
+  libmuffin_gir = gnome.generate_gir(libmuffin,
     sources: [
-      mutter_version,
-      mutter_enum_types[1],
-      mutter_introspected_sources,
-      mutter_public_header_files
+      muffin_version,
+      muffin_enum_types[1],
+      muffin_introspected_sources,
+      muffin_public_header_files
     ],
-    nsversion: libmutter_api_version,
+    nsversion: libmuffin_api_version,
     namespace: 'Meta',
     symbol_prefix: 'meta',
     includes: [
@@ -994,30 +985,30 @@ if have_introspection
       'Gtk-3.0',
       'xlib-2.0',
       'xfixes-4.0',
-      libmutter_cogl_gir[0],
-      libmutter_cogl_pango_gir[0],
-      libmutter_clutter_gir[0],
+      libmuffin_cogl_gir[0],
+      libmuffin_cogl_pango_gir[0],
+      libmuffin_clutter_gir[0],
     ],
     dependencies: [
-      mutter_deps,
-      libmutter_dep,
+      muffin_deps,
+      libmuffin_dep,
     ],
-    extra_args: mutter_c_args + introspection_args,
+    extra_args: muffin_c_args + introspection_args,
     install_dir_gir: pkglibdir,
     install_dir_typelib: pkglibdir,
     install: true
   )
 endif
 
-pkg.generate(libmutter,
+pkg.generate(libmuffin,
   name: 'Meta',
-  filebase: 'libmuffin-' + libmutter_api_version,
+  filebase: 'libmuffin-' + libmuffin_api_version,
   description: 'Muffin compositor and window manager library',
   subdirs: pkgname,
-  requires: [mutter_pkg_deps, libmutter_clutter_name],
+  requires: [muffin_pkg_deps, libmuffin_clutter_name],
   version: meson.project_version(),
   variables: [
-    'apiversion=' + libmutter_api_version,
+    'apiversion=' + libmuffin_api_version,
     'girdir=${libdir}/muffin',
     'typelibdir=${libdir}/muffin',
   ],

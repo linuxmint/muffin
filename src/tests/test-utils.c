@@ -65,7 +65,7 @@ ensure_test_client_path (int    argc,
   test_client_path = g_test_build_filename (G_TEST_BUILT,
                                             "src",
                                             "tests",
-                                            "mutter-test-client",
+                                            "muffin-test-client",
                                             NULL);
   if (!g_file_test (test_client_path,
                     G_FILE_TEST_EXISTS | G_FILE_TEST_IS_EXECUTABLE))
@@ -77,12 +77,12 @@ ensure_test_client_path (int    argc,
 
       dirname = g_path_get_dirname (argv[0]);
       test_client_path = g_build_filename (dirname,
-                                           "mutter-test-client", NULL);
+                                           "muffin-test-client", NULL);
     }
 
   if (!g_file_test (test_client_path,
                     G_FILE_TEST_EXISTS | G_FILE_TEST_IS_EXECUTABLE))
-    g_error ("mutter-test-client executable not found");
+    g_error ("muffin-test-client executable not found");
 }
 
 void
@@ -94,7 +94,7 @@ test_init (int    *argc,
 
   ensure_test_client_path (*argc, *argv);
 
-  meta_wayland_override_display_name ("mutter-test-display");
+  meta_wayland_override_display_name ("muffin-test-display");
   meta_xwayland_override_display_number (512);
 }
 
@@ -528,7 +528,7 @@ test_get_plugin_name (void)
 {
   const char *name;
 
-  name = g_getenv ("MUTTER_TEST_PLUGIN_PATH");
+  name = g_getenv ("MUFFIN_TEST_PLUGIN_PATH");
   if (name)
     return name;
   else

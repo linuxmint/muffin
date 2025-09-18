@@ -1,6 +1,6 @@
-# Thai translation for mutter.
+# Thai translation for muffin.
 # Copyright (C) 2003-2016 Free Software Foundation, Inc.
-# This file is distributed under the same license as the mutter package.
+# This file is distributed under the same license as the muffin package.
 #
 # Phakhinee Thangnithirat <sc442535@angsila.compsci.buu.ac.th>, 2003
 # Chanchai Junlouchai <taz@opentle.org>, 2003
@@ -10,9 +10,9 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: mutter\n"
+"Project-Id-Version: muffin\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
-"product=mutter&keywords=I18N+L10N&component=general\n"
+"product=muffin&keywords=I18N+L10N&component=general\n"
 "POT-Creation-Date: 2015-07-18 22:50+0000\n"
 "PO-Revision-Date: 2016-10-13 11:22+0700\n"
 "Last-Translator: Theppitak Karoonboonyanan <theppitak@gmail.com>\n"
@@ -24,255 +24,255 @@ msgstr ""
 "Plural-Forms: nplurals=1; plural=0;\n"
 "X-Generator: Gtranslator 2.91.6\n"
 
-#: ../data/50-mutter-navigation.xml.in.h:1
+#: ../data/50-muffin-navigation.xml.in.h:1
 msgid "Navigation"
 msgstr "ท่องย้าย"
 
-#: ../data/50-mutter-navigation.xml.in.h:2
+#: ../data/50-muffin-navigation.xml.in.h:2
 msgid "Move window to workspace 1"
 msgstr "ย้ายหน้าต่างไปพื้นที่ทำงาน 1"
 
-#: ../data/50-mutter-navigation.xml.in.h:3
+#: ../data/50-muffin-navigation.xml.in.h:3
 msgid "Move window to workspace 2"
 msgstr "ย้ายหน้าต่างไปพื้นที่ทำงาน 2"
 
-#: ../data/50-mutter-navigation.xml.in.h:4
+#: ../data/50-muffin-navigation.xml.in.h:4
 msgid "Move window to workspace 3"
 msgstr "ย้ายหน้าต่างไปพื้นที่ทำงาน 3"
 
-#: ../data/50-mutter-navigation.xml.in.h:5
+#: ../data/50-muffin-navigation.xml.in.h:5
 msgid "Move window to workspace 4"
 msgstr "ย้ายหน้าต่างไปพื้นที่ทำงาน 4"
 
-#: ../data/50-mutter-navigation.xml.in.h:6
+#: ../data/50-muffin-navigation.xml.in.h:6
 msgid "Move window to last workspace"
 msgstr "ย้ายหน้าต่างไปพื้นที่ทำงานสุดท้าย"
 
-#: ../data/50-mutter-navigation.xml.in.h:7
+#: ../data/50-muffin-navigation.xml.in.h:7
 msgid "Move window one workspace to the left"
 msgstr "ย้ายหน้าต่างไปพื้นที่ทำงานด้านซ้าย"
 
-#: ../data/50-mutter-navigation.xml.in.h:8
+#: ../data/50-muffin-navigation.xml.in.h:8
 msgid "Move window one workspace to the right"
 msgstr "ย้ายหน้าต่างไปพื้นที่ทำงานด้านขวา"
 
-#: ../data/50-mutter-navigation.xml.in.h:9
+#: ../data/50-muffin-navigation.xml.in.h:9
 msgid "Move window one workspace up"
 msgstr "ย้ายหน้าต่างไปพื้นที่ทำงานด้านบน"
 
-#: ../data/50-mutter-navigation.xml.in.h:10
+#: ../data/50-muffin-navigation.xml.in.h:10
 msgid "Move window one workspace down"
 msgstr "ย้ายหน้าต่างไปพื้นที่ทำงานด้านล่าง"
 
-#: ../data/50-mutter-navigation.xml.in.h:11
+#: ../data/50-muffin-navigation.xml.in.h:11
 msgid "Move window one monitor to the left"
 msgstr "ย้ายหน้าต่างไปจอภาพด้านซ้าย"
 
-#: ../data/50-mutter-navigation.xml.in.h:12
+#: ../data/50-muffin-navigation.xml.in.h:12
 msgid "Move window one monitor to the right"
 msgstr "ย้ายหน้าต่างไปจอภาพด้านขวา"
 
-#: ../data/50-mutter-navigation.xml.in.h:13
+#: ../data/50-muffin-navigation.xml.in.h:13
 msgid "Move window one monitor up"
 msgstr "ย้ายหน้าต่างไปจอภาพด้านบน"
 
-#: ../data/50-mutter-navigation.xml.in.h:14
+#: ../data/50-muffin-navigation.xml.in.h:14
 msgid "Move window one monitor down"
 msgstr "ย้ายหน้าต่างไปจอภาพด้านล่าง"
 
-#: ../data/50-mutter-navigation.xml.in.h:15
+#: ../data/50-muffin-navigation.xml.in.h:15
 msgid "Switch applications"
 msgstr "สลับโปรแกรม"
 
-#: ../data/50-mutter-navigation.xml.in.h:16
+#: ../data/50-muffin-navigation.xml.in.h:16
 msgid "Switch to previous application"
 msgstr "สลับไปโปรแกรมก่อนหน้า"
 
-#: ../data/50-mutter-navigation.xml.in.h:17
+#: ../data/50-muffin-navigation.xml.in.h:17
 msgid "Switch windows"
 msgstr "สลับหน้าต่าง"
 
-#: ../data/50-mutter-navigation.xml.in.h:18
+#: ../data/50-muffin-navigation.xml.in.h:18
 msgid "Switch to previous window"
 msgstr "สลับไปหน้าต่างก่อนหน้า"
 
-#: ../data/50-mutter-navigation.xml.in.h:19
+#: ../data/50-muffin-navigation.xml.in.h:19
 msgid "Switch windows of an application"
 msgstr "สลับหน้าต่างภายในโปรแกรม"
 
-#: ../data/50-mutter-navigation.xml.in.h:20
+#: ../data/50-muffin-navigation.xml.in.h:20
 msgid "Switch to previous window of an application"
 msgstr "สลับไปหน้าต่างก่อนหน้าภายในโปรแกรม"
 
-#: ../data/50-mutter-navigation.xml.in.h:21
+#: ../data/50-muffin-navigation.xml.in.h:21
 msgid "Switch system controls"
 msgstr "สลับส่วนควบคุมระบบ"
 
-#: ../data/50-mutter-navigation.xml.in.h:22
+#: ../data/50-muffin-navigation.xml.in.h:22
 msgid "Switch to previous system control"
 msgstr "สลับไปส่วนควบคุมระบบก่อนหน้า"
 
-#: ../data/50-mutter-navigation.xml.in.h:23
+#: ../data/50-muffin-navigation.xml.in.h:23
 msgid "Switch windows directly"
 msgstr "สลับหน้าต่างโดยตรง"
 
-#: ../data/50-mutter-navigation.xml.in.h:24
+#: ../data/50-muffin-navigation.xml.in.h:24
 msgid "Switch directly to previous window"
 msgstr "สลับโดยตรงไปหน้าต่างก่อนหน้า"
 
-#: ../data/50-mutter-navigation.xml.in.h:25
+#: ../data/50-muffin-navigation.xml.in.h:25
 msgid "Switch windows of an app directly"
 msgstr "สลับหน้าต่างภายในโปรแกรมโดยตรง"
 
-#: ../data/50-mutter-navigation.xml.in.h:26
+#: ../data/50-muffin-navigation.xml.in.h:26
 msgid "Switch directly to previous window of an app"
 msgstr "สลับโดยตรงไปหน้าต่างก่อนหน้าภายในโปรแกรม"
 
-#: ../data/50-mutter-navigation.xml.in.h:27
+#: ../data/50-muffin-navigation.xml.in.h:27
 msgid "Switch system controls directly"
 msgstr "สลับส่วนควบคุมระบบโดยตรง"
 
-#: ../data/50-mutter-navigation.xml.in.h:28
+#: ../data/50-muffin-navigation.xml.in.h:28
 msgid "Switch directly to previous system control"
 msgstr "สลับโดยตรงไปส่วนควบคุมระบบก่อนหน้า"
 
-#: ../data/50-mutter-navigation.xml.in.h:29
+#: ../data/50-muffin-navigation.xml.in.h:29
 msgid "Hide all normal windows"
 msgstr "ซ่อนหน้าต่างทั้งหมด"
 
-#: ../data/50-mutter-navigation.xml.in.h:30
+#: ../data/50-muffin-navigation.xml.in.h:30
 msgid "Switch to workspace 1"
 msgstr "สลับไปพื้นที่ทำงาน 1"
 
-#: ../data/50-mutter-navigation.xml.in.h:31
+#: ../data/50-muffin-navigation.xml.in.h:31
 msgid "Switch to workspace 2"
 msgstr "สลับไปพื้นที่ทำงาน 2"
 
-#: ../data/50-mutter-navigation.xml.in.h:32
+#: ../data/50-muffin-navigation.xml.in.h:32
 msgid "Switch to workspace 3"
 msgstr "สลับไปพื้นที่ทำงาน 3"
 
-#: ../data/50-mutter-navigation.xml.in.h:33
+#: ../data/50-muffin-navigation.xml.in.h:33
 msgid "Switch to workspace 4"
 msgstr "สลับไปพื้นที่ทำงาน 4"
 
-#: ../data/50-mutter-navigation.xml.in.h:34
+#: ../data/50-muffin-navigation.xml.in.h:34
 msgid "Switch to last workspace"
 msgstr "สลับไปพื้นที่ทำงานสุดท้าย"
 
-#: ../data/50-mutter-navigation.xml.in.h:35
+#: ../data/50-muffin-navigation.xml.in.h:35
 msgid "Move to workspace left"
 msgstr "ย้ายไปพื้นที่ทำงานซ้าย"
 
-#: ../data/50-mutter-navigation.xml.in.h:36
+#: ../data/50-muffin-navigation.xml.in.h:36
 msgid "Move to workspace right"
 msgstr "ย้ายไปพื้นที่ทำงานขวา"
 
-#: ../data/50-mutter-navigation.xml.in.h:37
+#: ../data/50-muffin-navigation.xml.in.h:37
 msgid "Move to workspace above"
 msgstr "ย้ายไปพื้นที่ทำงานบน"
 
-#: ../data/50-mutter-navigation.xml.in.h:38
+#: ../data/50-muffin-navigation.xml.in.h:38
 msgid "Move to workspace below"
 msgstr "ย้ายไปพื้นที่ทำงานล่าง"
 
-#: ../data/50-mutter-system.xml.in.h:1
+#: ../data/50-muffin-system.xml.in.h:1
 msgid "System"
 msgstr "ระบบ"
 
-#: ../data/50-mutter-system.xml.in.h:2
+#: ../data/50-muffin-system.xml.in.h:2
 msgid "Show the run command prompt"
 msgstr "แสดงกล่องเรียกคำสั่ง"
 
-#: ../data/50-mutter-system.xml.in.h:3
+#: ../data/50-muffin-system.xml.in.h:3
 msgid "Show the activities overview"
 msgstr "แสดงภาพรวมของกิจกรรมต่างๆ"
 
-#: ../data/50-mutter-windows.xml.in.h:1
+#: ../data/50-muffin-windows.xml.in.h:1
 msgid "Windows"
 msgstr "หน้าต่าง"
 
-#: ../data/50-mutter-windows.xml.in.h:2
+#: ../data/50-muffin-windows.xml.in.h:2
 msgid "Activate the window menu"
 msgstr "เปิดเมนูหน้าต่าง"
 
-#: ../data/50-mutter-windows.xml.in.h:3
+#: ../data/50-muffin-windows.xml.in.h:3
 msgid "Toggle fullscreen mode"
 msgstr "สลับโหมดเต็มหน้าจอ"
 
-#: ../data/50-mutter-windows.xml.in.h:4
+#: ../data/50-muffin-windows.xml.in.h:4
 msgid "Toggle maximization state"
 msgstr "สลับสถานะขยายแผ่"
 
-#: ../data/50-mutter-windows.xml.in.h:5
+#: ../data/50-muffin-windows.xml.in.h:5
 msgid "Maximize window"
 msgstr "ขยายแผ่หน้าต่างเต็มพื้นโต๊ะ"
 
-#: ../data/50-mutter-windows.xml.in.h:6
+#: ../data/50-muffin-windows.xml.in.h:6
 msgid "Restore window"
 msgstr "คืนขนาดหน้าต่าง"
 
-#: ../data/50-mutter-windows.xml.in.h:7
+#: ../data/50-muffin-windows.xml.in.h:7
 msgid "Toggle shaded state"
 msgstr "ม้วน/คลี่หน้าต่าง"
 
-#: ../data/50-mutter-windows.xml.in.h:8
+#: ../data/50-muffin-windows.xml.in.h:8
 msgid "Close window"
 msgstr "ปิดหน้าต่าง"
 
-#: ../data/50-mutter-windows.xml.in.h:9
+#: ../data/50-muffin-windows.xml.in.h:9
 msgid "Hide window"
 msgstr "ซ่อนหน้าต่าง"
 
-#: ../data/50-mutter-windows.xml.in.h:10
+#: ../data/50-muffin-windows.xml.in.h:10
 msgid "Move window"
 msgstr "ย้ายหน้าต่าง"
 
-#: ../data/50-mutter-windows.xml.in.h:11
+#: ../data/50-muffin-windows.xml.in.h:11
 msgid "Resize window"
 msgstr "ปรับขนาดหน้าต่าง"
 
-#: ../data/50-mutter-windows.xml.in.h:12
+#: ../data/50-muffin-windows.xml.in.h:12
 msgid "Toggle window on all workspaces or one"
 msgstr "สลับการแสดงหน้าต่างบนทุกพื้นที่ทำงานกับบนพื้นที่เดียว"
 
-#: ../data/50-mutter-windows.xml.in.h:13
+#: ../data/50-muffin-windows.xml.in.h:13
 msgid "Raise window if covered, otherwise lower it"
 msgstr "ยกหน้าต่างขึ้นถ้าถูกบัง มิฉะนั้นก็เอาลงด้านหลัง"
 
-#: ../data/50-mutter-windows.xml.in.h:14
+#: ../data/50-muffin-windows.xml.in.h:14
 msgid "Raise window above other windows"
 msgstr "ยกหน้าต่างขึ้นมาไว้หน้าหน้าต่างอื่นๆ"
 
-#: ../data/50-mutter-windows.xml.in.h:15
+#: ../data/50-muffin-windows.xml.in.h:15
 msgid "Lower window below other windows"
 msgstr "ถอยหน้าต่างลงไปใว้หลังหน้าต่างอื่น"
 
-#: ../data/50-mutter-windows.xml.in.h:16
+#: ../data/50-muffin-windows.xml.in.h:16
 msgid "Maximize window vertically"
 msgstr "ขยายแผ่หน้าต่างเต็มด้านสูง"
 
-#: ../data/50-mutter-windows.xml.in.h:17
+#: ../data/50-muffin-windows.xml.in.h:17
 msgid "Maximize window horizontally"
 msgstr "ขยายแผ่หน้าต่างเต็มด้านกว้าง"
 
-#: ../data/50-mutter-windows.xml.in.h:18
+#: ../data/50-muffin-windows.xml.in.h:18
 msgid "View split on left"
 msgstr "แบ่งจอแสดงที่ครึ่งซ้าย"
 
-#: ../data/50-mutter-windows.xml.in.h:19
+#: ../data/50-muffin-windows.xml.in.h:19
 msgid "View split on right"
 msgstr "แบ่งจอแสดงที่ครึ่งขวา"
 
-#: ../data/mutter.desktop.in.h:1
+#: ../data/muffin.desktop.in.h:1
 msgid "Mutter"
 msgstr "Mutter"
 
-#: ../data/org.gnome.mutter.gschema.xml.in.h:1
+#: ../data/org.gnome.muffin.gschema.xml.in.h:1
 msgid "Modifier to use for extended window management operations"
 msgstr "ปุ่ม modifier เพื่อใช้เข้าสู่การจัดการหน้าต่างแบบพิเศษ"
 
-#: ../data/org.gnome.mutter.gschema.xml.in.h:2
+#: ../data/org.gnome.muffin.gschema.xml.in.h:2
 msgid ""
 "This key will initiate the \"overlay\", which is a combination window "
 "overview and application launching system. The default is intended to be the "
@@ -283,11 +283,11 @@ msgstr ""
 "ปุ่มปริยายเจตนาให้เป็นปุ่ม \"วินโดวส์\" ในเครื่องพีซีทั่วไป "
 "และคาดหมายว่าค่านี้จะเป็นค่าปริยายดังกล่าว หรือมิฉะนั้นก็เป็นสตริงว่างเปล่า"
 
-#: ../data/org.gnome.mutter.gschema.xml.in.h:3
+#: ../data/org.gnome.muffin.gschema.xml.in.h:3
 msgid "Attach modal dialogs"
 msgstr "แนบกล่องโต้ตอบแบบโมดัล"
 
-#: ../data/org.gnome.mutter.gschema.xml.in.h:4
+#: ../data/org.gnome.muffin.gschema.xml.in.h:4
 msgid ""
 "When true, instead of having independent titlebars, modal dialogs appear "
 "attached to the titlebar of the parent window and are moved together with "
@@ -296,11 +296,11 @@ msgstr ""
 "ถ้ากำหนดเป็นค่าจริง แทนที่กล่องโต้ตอบโมดัลจะมีแถบหัวหน้าต่างเป็นของตัวเอง "
 "ก็จะแนบติดไปกับแถบหัวหน้าต่างของหน้าต่างแม่ และจะเคลื่อนไปพร้อมกับหน้าต่างแม่ด้วย"
 
-#: ../data/org.gnome.mutter.gschema.xml.in.h:5
+#: ../data/org.gnome.muffin.gschema.xml.in.h:5
 msgid "Enable edge tiling when dropping windows on screen edges"
 msgstr "เปิดใช้การปูหน้าต่างชิดขอบเมื่อวางหน้าต่างที่ขอบหน้าจอ"
 
-#: ../data/org.gnome.mutter.gschema.xml.in.h:6
+#: ../data/org.gnome.muffin.gschema.xml.in.h:6
 msgid ""
 "If enabled, dropping windows on vertical screen edges maximizes them "
 "vertically and resizes them horizontally to cover half of the available "
@@ -310,11 +310,11 @@ msgstr ""
 "และปรับขนาดให้วางปิดครึ่งหนึ่งของหน้าจอในแนวนอน "
 "และการวางหน้าต่างที่ขอบหน้าจอด้านบนจะขยายแผ่หน้าต่างเต็มที่"
 
-#: ../data/org.gnome.mutter.gschema.xml.in.h:7
+#: ../data/org.gnome.muffin.gschema.xml.in.h:7
 msgid "Workspaces are managed dynamically"
 msgstr "จัดการพื้นที่ทำงานตามการใช้งานจริง"
 
-#: ../data/org.gnome.mutter.gschema.xml.in.h:8
+#: ../data/org.gnome.muffin.gschema.xml.in.h:8
 msgid ""
 "Determines whether workspaces are managed dynamically or whether there's a "
 "static number of workspaces (determined by the num-workspaces key in org."
@@ -323,11 +323,11 @@ msgstr ""
 "กำหนดว่าจะจัดการพื้นที่ทำงานแบบปรับเปลี่ยนตามการใช้งานจริง หรือจะให้มีจำนวนพื้นที่ทำงานตายตัว "
 "(กำหนดโดยคีย์ num-workspaces ใน org.gnome.desktop.wm.preferences)"
 
-#: ../data/org.gnome.mutter.gschema.xml.in.h:9
+#: ../data/org.gnome.muffin.gschema.xml.in.h:9
 msgid "Workspaces only on primary"
 msgstr "พื้นที่ทำงานอยู่บนจอภาพหลักเท่านั้น"
 
-#: ../data/org.gnome.mutter.gschema.xml.in.h:10
+#: ../data/org.gnome.muffin.gschema.xml.in.h:10
 msgid ""
 "Determines whether workspace switching should happen for windows on all "
 "monitors or only for windows on the primary monitor."
@@ -335,21 +335,21 @@ msgstr ""
 "กำหนดว่าการสลับพื้นที่ทำงานควรเกิดเฉพาะกับหน้าต่างบนจอภาพทั้งหมด "
 "หรือเฉพาะหน้าต่างบนจอภาพหลักเท่านั้น"
 
-#: ../data/org.gnome.mutter.gschema.xml.in.h:11
+#: ../data/org.gnome.muffin.gschema.xml.in.h:11
 msgid "No tab popup"
 msgstr "ไม่ใช้กล่องผุดขึ้นของปุ่มแท็บ"
 
-#: ../data/org.gnome.mutter.gschema.xml.in.h:12
+#: ../data/org.gnome.muffin.gschema.xml.in.h:12
 msgid ""
 "Determines whether the use of popup and highlight frame should be disabled "
 "for window cycling."
 msgstr "กำหนดว่าจะปิดการใช้กล่องผุดขึ้นและการเน้นกรอบหน้าต่างสำหรับการสลับหน้าต่างหรือไม่"
 
-#: ../data/org.gnome.mutter.gschema.xml.in.h:13
+#: ../data/org.gnome.muffin.gschema.xml.in.h:13
 msgid "Delay focus changes until the pointer stops moving"
 msgstr "ชะลอการย้ายโฟกัสจนกว่าเคอร์เซอร์เมาส์จะหยุดเคลื่อน"
 
-#: ../data/org.gnome.mutter.gschema.xml.in.h:14
+#: ../data/org.gnome.muffin.gschema.xml.in.h:14
 msgid ""
 "If set to true, and the focus mode is either \"sloppy\" or \"mouse\" then "
 "the focus will not be changed immediately when entering a window, but only "
@@ -358,11 +358,11 @@ msgstr ""
 "ถ้ามีค่าเป็นจริง และโหมดโฟกัสเป็น \"sloppy\" หรือ \"mouse\" อย่างใดอย่างหนึ่งแล้ว "
 "ก็จะไม่ย้ายโฟกัสหน้าต่างทันทีทันใดเมื่อเข้าสู่หน้าต่าง จนกว่าเคอร์เซอร์เมาส์จะหยุดเคลื่อนที่"
 
-#: ../data/org.gnome.mutter.gschema.xml.in.h:15
+#: ../data/org.gnome.muffin.gschema.xml.in.h:15
 msgid "Draggable border width"
 msgstr "ความกว้างของขอบหน้าต่างส่วนที่ลากได้"
 
-#: ../data/org.gnome.mutter.gschema.xml.in.h:16
+#: ../data/org.gnome.muffin.gschema.xml.in.h:16
 msgid ""
 "The amount of total draggable borders. If the theme's visible borders are "
 "not enough, invisible borders will be added to meet this value."
@@ -370,79 +370,79 @@ msgstr ""
 "ขนาดของขอบหน้าต่างส่วนที่ลากได้ ถ้าขอบหน้าต่างส่วนที่ปรากฏของชุดตกแต่งกว้างไม่พอ "
 "ก็จะเพิ่มขอบส่วนที่มองไม่เห็นเพื่อให้ได้เท่ากับความกว้างนี้"
 
-#: ../data/org.gnome.mutter.gschema.xml.in.h:17
+#: ../data/org.gnome.muffin.gschema.xml.in.h:17
 msgid "Auto maximize nearly monitor sized windows"
 msgstr "ขยายแผ่หน้าต่างที่มีขนาดใกล้เคียงกับจอภาพโดยอัตโนมัติ"
 
-#: ../data/org.gnome.mutter.gschema.xml.in.h:18
+#: ../data/org.gnome.muffin.gschema.xml.in.h:18
 msgid ""
 "If enabled, new windows that are initially the size of the monitor "
 "automatically get maximized."
 msgstr "ถ้าเปิดใช้ หน้าต่างใหม่ที่มีขนาดเริ่มแรกเท่ากับจอภาพจะขยายแผ่โดยอัตโนมัติ"
 
-#: ../data/org.gnome.mutter.gschema.xml.in.h:19
+#: ../data/org.gnome.muffin.gschema.xml.in.h:19
 msgid "Place new windows in the center"
 msgstr "วางหน้าต่างใหม่กลางหน้าจอ"
 
-#: ../data/org.gnome.mutter.gschema.xml.in.h:20
+#: ../data/org.gnome.muffin.gschema.xml.in.h:20
 msgid ""
 "When true, the new windows will always be put in the center of the active "
 "screen of the monitor."
 msgstr "ถ้าเป็นจริง จะวางหน้าต่างใหม่ที่กลางหน้าจอที่จอภาพแสดงอยู่เสมอ"
 
-#: ../data/org.gnome.mutter.gschema.xml.in.h:21
+#: ../data/org.gnome.muffin.gschema.xml.in.h:21
 msgid "Select window from tab popup"
 msgstr "เลือกหน้าต่างจากกล่องผุดขึ้นของปุ่มแท็บ"
 
-#: ../data/org.gnome.mutter.gschema.xml.in.h:22
+#: ../data/org.gnome.muffin.gschema.xml.in.h:22
 msgid "Cancel tab popup"
 msgstr "ยกเลิกกล่องผุดขึ้นของปุ่มแท็บ"
 
-#: ../data/org.gnome.mutter.wayland.gschema.xml.in.h:1
+#: ../data/org.gnome.muffin.wayland.gschema.xml.in.h:1
 msgid "Switch to VT 1"
 msgstr "สลับไป VT 1"
 
-#: ../data/org.gnome.mutter.wayland.gschema.xml.in.h:2
+#: ../data/org.gnome.muffin.wayland.gschema.xml.in.h:2
 msgid "Switch to VT 2"
 msgstr "สลับไป VT 2"
 
-#: ../data/org.gnome.mutter.wayland.gschema.xml.in.h:3
+#: ../data/org.gnome.muffin.wayland.gschema.xml.in.h:3
 msgid "Switch to VT 3"
 msgstr "สลับไป VT 3"
 
-#: ../data/org.gnome.mutter.wayland.gschema.xml.in.h:4
+#: ../data/org.gnome.muffin.wayland.gschema.xml.in.h:4
 msgid "Switch to VT 4"
 msgstr "สลับไป VT 4"
 
-#: ../data/org.gnome.mutter.wayland.gschema.xml.in.h:5
+#: ../data/org.gnome.muffin.wayland.gschema.xml.in.h:5
 msgid "Switch to VT 5"
 msgstr "สลับไป VT 5"
 
-#: ../data/org.gnome.mutter.wayland.gschema.xml.in.h:6
+#: ../data/org.gnome.muffin.wayland.gschema.xml.in.h:6
 msgid "Switch to VT 6"
 msgstr "สลับไป VT 6"
 
-#: ../data/org.gnome.mutter.wayland.gschema.xml.in.h:7
+#: ../data/org.gnome.muffin.wayland.gschema.xml.in.h:7
 msgid "Switch to VT 7"
 msgstr "สลับไป VT 7"
 
-#: ../data/org.gnome.mutter.wayland.gschema.xml.in.h:8
+#: ../data/org.gnome.muffin.wayland.gschema.xml.in.h:8
 msgid "Switch to VT 8"
 msgstr "สลับไป VT 8"
 
-#: ../data/org.gnome.mutter.wayland.gschema.xml.in.h:9
+#: ../data/org.gnome.muffin.wayland.gschema.xml.in.h:9
 msgid "Switch to VT 9"
 msgstr "สลับไป VT 9"
 
-#: ../data/org.gnome.mutter.wayland.gschema.xml.in.h:10
+#: ../data/org.gnome.muffin.wayland.gschema.xml.in.h:10
 msgid "Switch to VT 10"
 msgstr "สลับไป VT 10"
 
-#: ../data/org.gnome.mutter.wayland.gschema.xml.in.h:11
+#: ../data/org.gnome.muffin.wayland.gschema.xml.in.h:11
 msgid "Switch to VT 11"
 msgstr "สลับไป VT 11"
 
-#: ../data/org.gnome.mutter.wayland.gschema.xml.in.h:12
+#: ../data/org.gnome.muffin.wayland.gschema.xml.in.h:12
 msgid "Switch to VT 12"
 msgstr "สลับไป VT 12"
 
@@ -540,28 +540,28 @@ msgid "Run as a full display server, rather than nested"
 msgstr "เรียกทำงานในฐานเซิร์ฟเวอร์แสดงผลเต็มขั้น ไม่ใช่ซ้อนในเซิร์ฟเวอร์อื่น"
 
 # FIXME: Get a lawer to translate the legal clause.
-#: ../src/core/mutter.c:39
+#: ../src/core/muffin.c:39
 #, c-format
 msgid ""
-"mutter %s\n"
+"muffin %s\n"
 "Copyright (C) 2001-%d Havoc Pennington, Red Hat, Inc., and others\n"
 "This is free software; see the source for copying conditions.\n"
 "There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A "
 "PARTICULAR PURPOSE.\n"
 msgstr ""
-"mutter %s\n"
+"muffin %s\n"
 "Copyright (C) 2001-%d Havoc Pennington, Red Hat, Inc., and others\n"
 "นี่เป็นซอฟต์แวร์เสรี อ่านเงื่อนไขลิขสิทธิ์ได้ในโค้ดต้นฉบับ\n"
 "ไม่รับผิดชอบข้อเสียหายใดๆ "
 "ไม่รับประกันความเหมาะสมในเชิงพาณิชย์หรือการใช้งานเฉพาะทางอย่างหนึ่งอย่างใด\n"
 
-#: ../src/core/mutter.c:53
+#: ../src/core/muffin.c:53
 msgid "Print version"
 msgstr "แสดงเลขรุ่น"
 
-#: ../src/core/mutter.c:59
+#: ../src/core/muffin.c:59
 msgid "Mutter plugin to use"
-msgstr "ปลั๊กอินของ mutter ที่จะใช้"
+msgstr "ปลั๊กอินของ muffin ที่จะใช้"
 
 #: ../src/core/prefs.c:2004
 #, c-format
