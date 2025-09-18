@@ -896,6 +896,11 @@ typedef enum /*< flags prefix=CLUTTER_EVENT >*/
  *   determined by its phase field; event added in 1.24
  * @CLUTTER_TOUCHPAD_SWIPE: A swipe gesture event, the current state is
  *   determined by its phase field; event added in 1.24
+ * @CLUTTER_TOUCHPAD_HOLD: A hold gesture event, the current state is
+ *   determined by its phase field. A hold gesture starts when the user places a
+ *   finger on the touchpad and ends when all fingers are lifted. It is
+ *   cancelled when the finger(s) move past a certain threshold.
+ *   Event added in 6.5
  * @CLUTTER_PROXIMITY_IN: A tool entered in proximity to a tablet;
  *   event added in 1.28
  * @CLUTTER_PROXIMITY_OUT: A tool left from the proximity area of a tablet;
@@ -928,6 +933,7 @@ typedef enum /*< prefix=CLUTTER >*/
   CLUTTER_TOUCH_CANCEL,
   CLUTTER_TOUCHPAD_PINCH,
   CLUTTER_TOUCHPAD_SWIPE,
+  CLUTTER_TOUCHPAD_HOLD,
   CLUTTER_PROXIMITY_IN,
   CLUTTER_PROXIMITY_OUT,
   CLUTTER_PAD_BUTTON_PRESS,

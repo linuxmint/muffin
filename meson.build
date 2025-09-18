@@ -37,11 +37,11 @@ udev_req = '>= 228'
 gudev_req = '>= 232'
 
 # wayland version requirements
-wayland_server_req = '>= 1.13.0'
+wayland_server_req = '>= 1.20'
 wayland_protocols_req = '>= 1.36'
 
 # native backend version requirements
-libinput_req = '>= 1.7'
+libinput_req = '>= 1.19.0'
 gbm_req = '>= 10.3'
 
 # screen cast version requirements
