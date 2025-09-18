@@ -24,7 +24,6 @@
 #include "wayland/meta-wayland-seat.h"
 
 #include "wayland/meta-wayland-data-device.h"
-#include "wayland/meta-wayland-data-device-primary-legacy.h"
 #include "wayland/meta-wayland-private.h"
 #include "wayland/meta-wayland-tablet-seat.h"
 #include "wayland/meta-wayland-versions.h"
@@ -237,11 +236,9 @@ meta_wayland_seat_new (MetaWaylandCompositor *compositor,
                               NULL);
 
   seat->text_input = meta_wayland_text_input_new (seat);
-  seat->gtk_text_input = meta_wayland_gtk_text_input_new (seat);
 
   meta_wayland_data_device_init (&seat->data_device);
   meta_wayland_data_device_primary_init (&seat->primary_data_device);
-  meta_wayland_data_device_primary_legacy_init (&seat->primary_legacy_data_device);
 
   clutter_seat = clutter_backend_get_default_seat (clutter_get_default_backend ());
   meta_wayland_seat_update_capabilities (seat, clutter_seat);
@@ -276,7 +273,6 @@ meta_wayland_seat_free (MetaWaylandSeat *seat)
   g_object_unref (seat->pointer);
   g_object_unref (seat->keyboard);
   g_object_unref (seat->touch);
-  meta_wayland_gtk_text_input_destroy (seat->gtk_text_input);
   meta_wayland_text_input_destroy (seat->text_input);
 
   g_free (seat);
@@ -401,10 +397,6 @@ meta_wayland_seat_handle_event (MetaWaylandSeat *seat,
       if (meta_wayland_text_input_handle_event (seat->text_input, event))
         return TRUE;
 
-      if (meta_wayland_gtk_text_input_handle_event (seat->gtk_text_input,
-                                                    event))
-        return TRUE;
-
       if (meta_wayland_seat_has_keyboard (seat))
         return meta_wayland_keyboard_handle_event (seat->keyboard,
                                                    (const ClutterKeyEvent *) event);
@@ -420,9 +412,6 @@ meta_wayland_seat_handle_event (MetaWaylandSeat *seat,
     case CLUTTER_IM_DELETE:
     case CLUTTER_IM_PREEDIT:
       if (meta_wayland_text_input_handle_event (seat->text_input, event))
-        return TRUE;
-      if (meta_wayland_gtk_text_input_handle_event (seat->gtk_text_input,
-                                                    event))
         return TRUE;
 
       break;
@@ -454,14 +443,12 @@ meta_wayland_seat_set_input_focus (MetaWaylandSeat    *seat,
       meta_wayland_keyboard_set_focus (seat->keyboard, surface);
       meta_wayland_data_device_set_keyboard_focus (&seat->data_device);
       meta_wayland_data_device_primary_set_keyboard_focus (&seat->primary_data_device);
-      meta_wayland_data_device_primary_legacy_set_keyboard_focus (&seat->primary_legacy_data_device);
     }
 
   tablet_seat = meta_wayland_tablet_manager_ensure_seat (compositor->tablet_manager, seat);
   meta_wayland_tablet_seat_set_pad_focus (tablet_seat, surface);
 
   meta_wayland_text_input_set_focus (seat->text_input, surface);
-  meta_wayland_gtk_text_input_set_focus (seat->gtk_text_input, surface);
 }
 
 gboolean

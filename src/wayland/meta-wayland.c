@@ -36,6 +36,7 @@
 #include "wayland/meta-wayland-egl-stream.h"
 #include "wayland/meta-wayland-inhibit-shortcuts-dialog.h"
 #include "wayland/meta-wayland-inhibit-shortcuts.h"
+#include "wayland/meta-wayland-legacy-xdg-foreign.h"
 #include "wayland/meta-wayland-outputs.h"
 #include "wayland/meta-wayland-private.h"
 #include "wayland/meta-wayland-region.h"
@@ -424,7 +425,6 @@ meta_wayland_compositor_setup (MetaWaylandCompositor *wayland_compositor)
   meta_wayland_outputs_init (compositor);
   meta_wayland_data_device_manager_init (compositor);
   meta_wayland_data_device_primary_manager_init (compositor);
-  meta_wayland_data_device_primary_legacy_manager_init (compositor);
   meta_wayland_subsurfaces_init (compositor);
   meta_wayland_shell_init (compositor);
   meta_wayland_pointer_gestures_init (compositor);
@@ -433,11 +433,11 @@ meta_wayland_compositor_setup (MetaWaylandCompositor *wayland_compositor)
   meta_wayland_relative_pointer_init (compositor);
   meta_wayland_pointer_constraints_init (compositor);
   meta_wayland_xdg_foreign_init (compositor);
+  meta_wayland_legacy_xdg_foreign_init (compositor);
   meta_wayland_dma_buf_init (compositor);
   meta_wayland_keyboard_shortcuts_inhibit_init (compositor);
   meta_wayland_surface_inhibit_shortcuts_dialog_init ();
   meta_wayland_text_input_init (compositor);
-  meta_wayland_gtk_text_input_init (compositor);
 
   /* Xwayland specific protocol, needs to be filtered out for all other clients */
   if (meta_xwayland_grab_keyboard_init (compositor))
