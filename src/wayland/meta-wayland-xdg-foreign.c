@@ -33,7 +33,6 @@
 #include "wayland/meta-wayland-versions.h"
 #include "wayland/meta-wayland-xdg-foreign-private.h"
 #include "wayland/meta-wayland-xdg-shell.h"
-#include "wayland/meta-wayland-legacy-xdg-shell.h"
 
 #include "xdg-foreign-unstable-v2-server-protocol.h"
 
@@ -136,9 +135,8 @@ meta_wayland_xdg_foreign_is_valid_surface (MetaWaylandSurface *surface,
                                            struct wl_resource *exporter)
 {
   if (!surface->role ||
-      !meta_wayland_surface_get_window (surface) ||
-      !(META_IS_WAYLAND_XDG_SURFACE (surface->role) ||
-        META_IS_WAYLAND_ZXDG_SURFACE_V6 (surface->role)))
+      !meta_wayland_surface_get_window (surface) || 
+      !META_IS_WAYLAND_XDG_SURFACE (surface->role))
     {
       wl_resource_post_error (exporter,
                               WL_DISPLAY_ERROR_INVALID_OBJECT,
@@ -289,8 +287,7 @@ is_valid_child (MetaWaylandSurface *surface)
   if (!surface->role)
     return FALSE;
 
-  if (!META_IS_WAYLAND_XDG_TOPLEVEL (surface->role) &&
-      !META_IS_WAYLAND_ZXDG_TOPLEVEL_V6 (surface->role))
+  if (!META_IS_WAYLAND_XDG_TOPLEVEL (surface->role))
     return FALSE;
 
   if (!meta_wayland_surface_get_window (surface))
