@@ -908,4 +908,8 @@ gboolean meta_window_shortcuts_inhibited (MetaWindow         *window,
                                           ClutterInputDevice *source);
 gboolean meta_window_is_stackable (MetaWindow *window);
 gboolean meta_window_is_focus_async (MetaWindow *window);
+
+gboolean meta_window_calculate_bounds (MetaWindow *window,
+                                       int        *bounds_width,
+                                       int        *bounds_height);
 #endif
