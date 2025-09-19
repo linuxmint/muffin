@@ -1047,6 +1047,7 @@ _meta_window_shared_new (MetaDisplay         *display,
                          MetaCompEffect       effect,
                          XWindowAttributes   *attrs)
 {
+  MetaBackend *backend = meta_get_backend ();
   MetaWorkspaceManager *workspace_manager = display->workspace_manager;
   MetaWindow *window;
 
@@ -1241,7 +1242,11 @@ _meta_window_shared_new (MetaDisplay         *display,
 
   window->compositor_private = NULL;
 
-  window->monitor = meta_window_calculate_main_logical_monitor (window);
+  if (window->rect.width > 0 && window->rect.height > 0)
+    window->monitor = meta_window_calculate_main_logical_monitor (window);
+  else
+    window->monitor = meta_backend_get_current_logical_monitor (backend);
+
   if (window->monitor)
     window->preferred_output_winsys_id = window->monitor->winsys_id;
   else
@@ -9494,4 +9499,30 @@ meta_window_get_icon_name (MetaWindow *window)
     g_return_val_if_fail (META_IS_WINDOW (window), NULL);
 
     return window->theme_icon_name;
+}
+
+gboolean
+meta_window_calculate_bounds (MetaWindow *window,
+                              int        *bounds_width,
+                              int        *bounds_height)
+{
+  MetaLogicalMonitor *main_monitor;
+
+  main_monitor = meta_window_get_main_logical_monitor (window);
+  if (main_monitor)
+    {
+      MetaRectangle work_area;
+
+      meta_window_get_work_area_for_logical_monitor (window,
+                                                     main_monitor,
+                                                     &work_area);
+
+      *bounds_width = work_area.width;
+      *bounds_height = work_area.height;
+      return TRUE;
+    }
+  else
+    {
+      return FALSE;
+    }
 }
