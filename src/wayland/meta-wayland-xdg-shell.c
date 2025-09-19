@@ -1506,6 +1506,15 @@ xdg_surface_set_window_geometry (struct wl_client   *client,
   MetaWaylandSurface *surface = surface_from_xdg_surface_resource (resource);
   MetaWaylandSurfaceState *pending;
 
+  if (width == 0 || height == 0)
+    {
+      g_warning ("Invalid geometry %dx%d+%d+%d set on xdg_surface@%d. Ignoring for "
+      "now, but this will result in client termination in the future.",
+      width, height, x, y,
+      wl_resource_get_id (resource));
+      return;
+    }
+
   pending = meta_wayland_surface_get_pending_state (surface);
   pending->has_new_geometry = TRUE;
   pending->new_geometry.x = x;
@@ -1603,6 +1612,15 @@ meta_wayland_xdg_surface_post_apply_state (MetaWaylandSurfaceRole  *surface_role
       meta_wayland_shell_surface_determine_geometry (shell_surface,
                                                      &pending->new_geometry,
                                                      &priv->geometry);
+      if (priv->geometry.width == 0 || priv->geometry.height == 0)
+        {
+          g_warning ("Invalid window geometry for xdg_surface@%d. Ignoring "
+          "for now, but this will result in client termination "
+          "in the future.",
+          wl_resource_get_id (priv->resource));
+          return;
+        }
+
       priv->has_set_geometry = TRUE;
     }
   else if (priv->has_set_geometry)
