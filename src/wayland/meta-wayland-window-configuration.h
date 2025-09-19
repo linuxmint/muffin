@@ -46,12 +46,15 @@ struct _MetaWaylandWindowConfiguration
   int scale;
   MetaGravity gravity;
   MetaMoveResizeFlags flags;
+
+  int bounds_width;
+  int bounds_height;
 };
 
-MetaWaylandWindowConfiguration * meta_wayland_window_configuration_new (int                 x,
-                                                                        int                 y,
-                                                                        int                 width,
-                                                                        int                 height,
+MetaWaylandWindowConfiguration * meta_wayland_window_configuration_new (MetaWindow          *window,
+                                                                        MetaRectangle        rect,
+                                                                        int                  max_width,
+                                                                        int                  max_height,
                                                                         int                 scale,
                                                                         MetaMoveResizeFlags flags,
                                                                         MetaGravity         gravity);
@@ -62,7 +65,8 @@ MetaWaylandWindowConfiguration * meta_wayland_window_configuration_new_relative 
                                                                                  int height,
                                                                                  int scale);
 
-MetaWaylandWindowConfiguration * meta_wayland_window_configuration_new_empty (void);
+MetaWaylandWindowConfiguration * meta_wayland_window_configuration_new_empty (int bounds_width,
+                                                                              int bounds_height);
 
 void meta_wayland_window_configuration_free (MetaWaylandWindowConfiguration *configuration);
 

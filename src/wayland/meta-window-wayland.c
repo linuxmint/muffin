@@ -53,10 +53,8 @@ struct _MetaWindowWayland
   GList *pending_configurations;
   gboolean has_pending_state_change;
 
-  int last_sent_x;
-  int last_sent_y;
-  int last_sent_width;
-  int last_sent_height;
+  MetaRectangle last_sent_rect;
+  gboolean has_last_sent_configuration;
   int last_sent_rel_x;
   int last_sent_rel_y;
   int last_sent_geometry_scale;
@@ -183,16 +181,27 @@ surface_state_changed (MetaWindow *window)
 {
   MetaWindowWayland *wl_window = META_WINDOW_WAYLAND (window);
   MetaWaylandWindowConfiguration *configuration;
+  int bounds_width;
+  int bounds_height;
 
   /* don't send notify when the window is being unmanaged */
   if (window->unmanaging)
     return;
 
+  g_return_if_fail (wl_window->has_last_sent_configuration);
+  if (!wl_window->has_last_sent_configuration)
+    return;
+
+  if (!meta_window_calculate_bounds (window, &bounds_width, &bounds_height))
+    {
+      bounds_width = 0;
+      bounds_height = 0;
+    }
+
   configuration =
-    meta_wayland_window_configuration_new (wl_window->last_sent_x,
-                                           wl_window->last_sent_y,
-                                           wl_window->last_sent_width,
-                                           wl_window->last_sent_height,
+    meta_wayland_window_configuration_new (window,
+                                           wl_window->last_sent_rect,
+                                           bounds_width, bounds_height,
                                            wl_window->last_sent_geometry_scale,
                                            META_MOVE_RESIZE_STATE_CHANGED,
                                            wl_window->last_sent_gravity);
@@ -233,10 +242,7 @@ meta_window_wayland_move_resize_internal (MetaWindow                *window,
 {
   MetaWindowWayland *wl_window = META_WINDOW_WAYLAND (window);
   gboolean can_move_now = FALSE;
-  int configured_x;
-  int configured_y;
-  int configured_width;
-  int configured_height;
+  MetaRectangle configured_rect;
   int geometry_scale;
   int new_x;
   int new_y;
@@ -249,8 +255,8 @@ meta_window_wayland_move_resize_internal (MetaWindow                *window,
   if (window->unmanaging)
     return;
 
-  configured_x = constrained_rect.x;
-  configured_y = constrained_rect.y;
+  configured_rect.x = constrained_rect.x;
+  configured_rect.y = constrained_rect.y;
 
   /* The scale the window is drawn in might change depending on what monitor it
    * is mainly on. Scale the configured rectangle to be in logical pixel
@@ -258,24 +264,8 @@ meta_window_wayland_move_resize_internal (MetaWindow                *window,
    * to the Wayland surface. */
   geometry_scale = meta_window_wayland_get_geometry_scale (window);
 
-  if (flags & META_MOVE_RESIZE_UNMAXIMIZE &&
-      !meta_window_is_fullscreen (window))
-    {
-      configured_width = 0;
-      configured_height = 0;
-    }
-  else if (flags & META_MOVE_RESIZE_UNFULLSCREEN &&
-           !meta_window_get_maximized (window) &&
-           meta_window_get_tile_mode (window) == META_TILE_NONE)
-    {
-      configured_width = 0;
-      configured_height = 0;
-    }
-  else
-    {
-      configured_width = constrained_rect.width;
-      configured_height = constrained_rect.height;
-    }
+  configured_rect.width = constrained_rect.width;
+  configured_rect.height = constrained_rect.height;
 
   /* For wayland clients, the size is completely determined by the client,
    * and while this allows to avoid some trickery with frames and the resulting
@@ -335,8 +325,8 @@ meta_window_wayland_move_resize_internal (MetaWindow                *window,
                     configuration =
                       meta_wayland_window_configuration_new_relative (rel_x,
                                                                       rel_y,
-                                                                      configured_width,
-                                                                      configured_height,
+                                                                      configured_rect.width,
+                                                                      configured_rect.height,
                                                                       geometry_scale);
                     meta_window_wayland_configure (wl_window, configuration);
 
@@ -366,29 +356,27 @@ meta_window_wayland_move_resize_internal (MetaWindow                *window,
                flags & META_MOVE_RESIZE_STATE_CHANGED)
         {
           MetaWaylandWindowConfiguration *configuration;
+          int bounds_width;
+          int bounds_height;
 
-          /* If the constrained size is 1x1 and the unconstrained size is 0x0
-           * it means that we are trying to resize a window where the client has
-           * not yet committed a buffer. The 1x1 constrained size is a result of
-           * how the constraints code works. Lets avoid trying to have the
-           * client configure itself to draw on a 1x1 surface.
-           *
-           * We cannot guard against only an empty unconstrained_rect here,
-           * because the client may have created a xdg surface without a buffer
-           * attached and asked it to be maximized. In such case we should let
-           * it know about the expected window geometry of a maximized window,
-           * even though there is currently no buffer attached. */
-          if (unconstrained_rect.width == 0 &&
-              unconstrained_rect.height == 0 &&
-              constrained_rect.width == 1 &&
-              constrained_rect.height == 1)
+          if (!meta_wayland_surface_get_buffer (window->surface) &&
+              !META_WINDOW_MAXIMIZED (window) &&
+              window->tile_mode == META_TILE_NONE &&
+              !meta_window_is_fullscreen (window))
             return;
 
+          if (!meta_window_calculate_bounds (window,
+                                             &bounds_width,
+                                             &bounds_height))
+            {
+              bounds_width = 0;
+              bounds_height = 0;
+            }
+
           configuration =
-            meta_wayland_window_configuration_new (configured_x,
-                                                   configured_y,
-                                                   configured_width,
-                                                   configured_height,
+            meta_wayland_window_configuration_new (window,
+                                                   configured_rect,
+                                                   bounds_width, bounds_height,
                                                    geometry_scale,
                                                    flags,
                                                    gravity);
@@ -401,10 +389,8 @@ meta_window_wayland_move_resize_internal (MetaWindow                *window,
         }
     }
 
-  wl_window->last_sent_x = configured_x;
-  wl_window->last_sent_y = configured_y;
-  wl_window->last_sent_width = configured_width;
-  wl_window->last_sent_height = configured_height;
+  wl_window->has_last_sent_configuration = TRUE;
+  wl_window->last_sent_rect = configured_rect;
   wl_window->last_sent_geometry_scale = geometry_scale;
   wl_window->last_sent_gravity = gravity;
 
@@ -503,6 +489,9 @@ meta_window_wayland_update_main_monitor (MetaWindow                   *window,
       window->monitor = toplevel_window->monitor;
       return;
     }
+
+  if (window->rect.width == 0 || window->rect.height == 0)
+    return;
 
   /* Require both the current and the new monitor would be the new main monitor,
    * even given the resulting scale the window would end up having. This is
@@ -971,6 +960,13 @@ meta_window_wayland_finish_move_resize (MetaWindow              *window,
   is_window_being_resized = (meta_grab_op_is_resizing (display->grab_op) &&
                              display->grab_window == window);
 
+  rect = (MetaRectangle) {
+    .x = window->rect.x,
+    .y = window->rect.y,
+    .width = new_geom.width,
+    .height = new_geom.height
+  };
+
   if (!is_window_being_resized)
     {
       if (acked_configuration)
@@ -983,25 +979,20 @@ meta_window_wayland_finish_move_resize (MetaWindow              *window,
               rect.x = parent->rect.x + acked_configuration->rel_x;
               rect.y = parent->rect.y + acked_configuration->rel_y;
             }
-          else
+          else if (acked_configuration->has_position)
             {
               calculate_offset (acked_configuration, &new_geom, &rect);
             }
         }
-      else
-        {
-          rect.x = window->rect.x;
-          rect.y = window->rect.y;
-        }
-
-      rect.x += dx;
-      rect.y += dy;
     }
   else
     {
-      if (acked_configuration)
+      if (acked_configuration && acked_configuration->has_position)
         calculate_offset (acked_configuration, &new_geom, &rect);
     }
+
+    rect.x += dx;
+    rect.y += dy;
 
   if (rect.x != window->rect.x || rect.y != window->rect.y)
     flags |= META_MOVE_RESIZE_MOVE_ACTION;
@@ -1011,9 +1002,6 @@ meta_window_wayland_finish_move_resize (MetaWindow              *window,
       flags |= META_MOVE_RESIZE_WAYLAND_STATE_CHANGED;
       wl_window->has_pending_state_change = FALSE;
     }
-
-  rect.width = new_geom.width;
-  rect.height = new_geom.height;
 
   if (rect.width != window->rect.width || rect.height != window->rect.height)
     flags |= META_MOVE_RESIZE_RESIZE_ACTION;
