@@ -816,7 +816,7 @@ if have_wayland
     ['xdg-foreign', 'unstable', 'v2', ],
     ['xdg-output', 'unstable', 'v1', ],
     ['xdg-shell', 'stable', ],
-    ['xdg-toplevel-tag', 'staging', 'v1', ],
+    ['xdg-toplevel-tag-v1', 'private', ],
     ['xwayland-keyboard-grab', 'unstable', 'v1', ],
   ]
   if have_wayland_eglstream
