@@ -203,6 +203,8 @@ struct _MetaWindow
   char *sm_client_id;
   char *wm_client_machine;
 
+  char *tag;
+
   char *startup_id;
   char *muffin_hints;
   char *sandboxed_app_id;
@@ -912,4 +914,7 @@ gboolean meta_window_is_focus_async (MetaWindow *window);
 gboolean meta_window_calculate_bounds (MetaWindow *window,
                                        int        *bounds_width,
                                        int        *bounds_height);
+
+void meta_window_set_tag (MetaWindow *window,
+                          const char *tag);
 #endif

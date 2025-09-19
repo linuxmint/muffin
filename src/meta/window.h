@@ -469,4 +469,7 @@ void meta_window_set_opacity              (MetaWindow *window,
 META_EXPORT
 guint8 meta_window_get_opacity              (MetaWindow *window);
 
+META_EXPORT
+const char * meta_window_get_tag (MetaWindow *window);
+
 #endif
