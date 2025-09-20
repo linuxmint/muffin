@@ -14,11 +14,14 @@
 /* Wait 2ms after vblank before starting to draw next frame */
 #define META_SYNC_DELAY 2
 
+typedef struct _MetaLaters MetaLaters;
+
 struct _MetaCompositorClass
 {
   GObjectClass parent_class;
 
-  void (* manage) (MetaCompositor *compositor);
+  gboolean (* manage) (MetaCompositor  *compositor,
+                       GError         **error);
   void (* unmanage) (MetaCompositor *compositor);
   void (* pre_paint) (MetaCompositor *compositor);
   void (* post_paint) (MetaCompositor *compositor);
@@ -27,6 +30,9 @@ struct _MetaCompositorClass
   int64_t (* monotonic_to_high_res_xserver_time) (MetaCompositor *compositor,
                                                   int64_t         time_us);
 };
+
+gboolean meta_compositor_do_manage (MetaCompositor  *compositor,
+                                    GError         **error);
 
 void meta_compositor_remove_window_actor (MetaCompositor  *compositor,
                                           MetaWindowActor *window_actor);
@@ -68,6 +74,8 @@ MetaWindowActor * meta_compositor_get_top_window_actor (MetaCompositor *composit
 ClutterStage * meta_compositor_get_stage (MetaCompositor *compositor);
 
 gboolean meta_compositor_is_switching_workspace (MetaCompositor *compositor);
+
+MetaLaters * meta_compositor_get_laters (MetaCompositor *compositor);
 
 void meta_update_desklet_stacking (MetaCompositor *compositor);
 
