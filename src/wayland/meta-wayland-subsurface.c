@@ -147,7 +147,7 @@ meta_wayland_subsurface_union_geometry (MetaWaylandSubsurface *subsurface,
     .height = meta_wayland_surface_get_height (surface),
   };
 
-  if (surface->buffer_ref.buffer)
+  if (surface->buffer_ref->buffer)
     meta_rectangle_union (out_geometry, &geometry, out_geometry);
 
   META_WAYLAND_SURFACE_FOREACH_SUBSURFACE (surface, subsurface_surface)
