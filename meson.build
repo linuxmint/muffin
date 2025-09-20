@@ -376,6 +376,8 @@ if cc.has_header_symbol('sys/prctl.h', 'prctl')
 endif
 
 have_xwayland_initfd = false
+have_xwayland_listenfd = false
+
 have_xwayland_byte_swapped_clients = false
 if have_wayland
   xwayland_dep = dependency('xwayland', required: false)
@@ -416,6 +418,15 @@ if have_wayland
 
   if (have_xwayland_initfd)
     cdata.set('HAVE_XWAYLAND_INITFD', 1)
+  endif
+
+    # For Xwayland -listenfd usage
+  if xwayland_dep.found()
+    have_xwayland_listenfd = xwayland_dep.get_pkgconfig_variable('have_listenfd') == 'true'
+  endif
+
+  if (have_xwayland_listenfd)
+    cdata.set('HAVE_XWAYLAND_LISTENFD', 1)
   endif
 
     # For Xwayland +/-byteswappedclients usage
@@ -489,6 +500,7 @@ output = [
   '        Introspection.................... ' + have_introspection.to_string(),
   '        Profiler......................... ' + have_profiler.to_string(),
   '        Xwayland initfd.................. ' + have_xwayland_initfd.to_string(),
+  '        Xwayland listenfd................ ' + have_xwayland_listenfd.to_string(),
   '        Xwayland byte-swapped clients.... ' + have_xwayland_byte_swapped_clients.to_string(),
   '',
   '    Tests:',
