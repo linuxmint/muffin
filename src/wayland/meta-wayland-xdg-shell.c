@@ -864,7 +864,7 @@ meta_wayland_xdg_toplevel_post_apply_state (MetaWaylandSurfaceRole  *surface_rol
     META_WAYLAND_SURFACE_ROLE_CLASS (meta_wayland_xdg_toplevel_parent_class);
   surface_role_class->post_apply_state (surface_role, pending);
 
-  if (!surface->buffer_ref.buffer)
+  if (!surface->buffer_ref->buffer)
     return;
 
   window_geometry = meta_wayland_xdg_surface_get_window_geometry (xdg_surface);
