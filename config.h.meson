@@ -71,5 +71,8 @@
 /* Whether Xwayland has -initfd option */
 #mesondefine HAVE_XWAYLAND_INITFD
 
+/* Whether Xwayland has -listenfd option */
+#mesondefine HAVE_XWAYLAND_LISTENFD
+
 /* Whether the Xwayland supports +/-byteswappedclients */
 #mesondefine HAVE_XWAYLAND_BYTE_SWAPPED_CLIENTS

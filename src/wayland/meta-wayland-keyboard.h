@@ -130,6 +130,10 @@ void meta_wayland_keyboard_create_new_resource (MetaWaylandKeyboard *keyboard,
                                                 struct wl_resource  *seat_resource,
                                                 uint32_t id);
 
+gboolean meta_wayland_keyboard_can_grab_surface (MetaWaylandKeyboard *keyboard,
+                                                 MetaWaylandSurface  *surface,
+                                                 uint32_t             serial);
+
 gboolean meta_wayland_keyboard_can_popup (MetaWaylandKeyboard *keyboard,
                                           uint32_t             serial);
 
