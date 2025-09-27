@@ -40,7 +40,7 @@ typedef struct
   MetaWaylandSubsurfacePlacement placement;
   MetaWaylandSurface *surface;
   MetaWaylandSurface *sibling;
-  struct wl_listener surface_destroy_listener;
+  struct wl_listener subsurface_destroy_listener;
   struct wl_listener sibling_destroy_listener;
 } MetaWaylandSubsurfacePlacementOp;
 
