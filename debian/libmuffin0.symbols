@@ -1539,6 +1539,7 @@ libmuffin-cogl-0.so.0 libmuffin0 #MINVER#
  cogl_color_set_red_float@Base 5.3.0
  cogl_color_to_hsl@Base 5.3.0
  cogl_color_unpremultiply@Base 5.3.0
+ cogl_context_format_supports_upload@Base 6.4.1
  cogl_context_get_display@Base 5.3.0
  cogl_context_get_gtype@Base 5.3.0
  cogl_context_get_renderer@Base 5.3.0
