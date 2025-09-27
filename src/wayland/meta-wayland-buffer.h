@@ -89,4 +89,6 @@ void                    meta_wayland_buffer_process_damage      (MetaWaylandBuff
                                                                  CoglTexture           *texture,
                                                                  cairo_region_t        *region);
 
+void meta_wayland_init_shm (MetaWaylandCompositor *compositor);
+
 #endif /* META_WAYLAND_BUFFER_H */
