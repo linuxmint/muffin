@@ -31,6 +31,7 @@
 #include "clutter/clutter.h"
 #include "clutter/wayland/clutter-wayland-compositor.h"
 #include "core/main-private.h"
+#include "wayland/meta-wayland-buffer.h"
 #include "wayland/meta-wayland-activation.h"
 #include "wayland/meta-wayland-data-device.h"
 #include "wayland/meta-wayland-dma-buf.h"
@@ -422,7 +423,7 @@ meta_wayland_compositor_setup (MetaWaylandCompositor *wayland_compositor)
 			 compositor, compositor_bind))
     g_error ("Failed to register the global wl_compositor");
 
-  wl_display_init_shm (compositor->wayland_display);
+  meta_wayland_init_shm (compositor);
 
   meta_wayland_outputs_init (compositor);
   meta_wayland_data_device_manager_init (compositor);
