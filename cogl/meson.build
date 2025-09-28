@@ -116,7 +116,6 @@ if have_cogl_tests
   subdir('test-fixtures')
 endif
 subdir('cogl')
-subdir('cogl-path')
 subdir('cogl-pango')
 if have_cogl_tests
   subdir('tests')

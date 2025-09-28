@@ -126,22 +126,6 @@
  * code has been migrated down into Cogl! */
 #include <cogl/deprecated/cogl-clutter.h>
 
-/*
- * Cogl Path api compatability
- *
- * The cogl_path_ api used to be part of the core Cogl api so for
- * compatability we include cogl-path.h via cogl.h
- *
- * Note: we have to make sure not to include cogl-path.h while
- * building core cogl or generating the Cogl .gir data because
- * cogl-path now gets built after cogl and some cogl-path headers are
- * only generated at build time...
- */
-#if !defined (COGL_COMPILATION) && \
-  !defined (COGL_GIR_SCANNING)
-#include <cogl-path/cogl-path.h>
-#endif
-
 /**
  * SECTION:cogl
  * @short_description: General purpose API
