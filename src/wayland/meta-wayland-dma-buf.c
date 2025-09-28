@@ -202,10 +202,10 @@ meta_wayland_dma_buf_buffer_attach (MetaWaylandBuffer  *buffer,
 
 #ifdef HAVE_NATIVE_BACKEND
 static struct gbm_bo *
-create_gbm_bo (MetaWaylandDmaBufBuffer *dma_buf,
-               MetaGpuKms              *gpu_kms,
-               int                      n_planes,
-               gboolean                *use_modifier)
+import_scanout_gbm_bo (MetaWaylandDmaBufBuffer *dma_buf,
+                       MetaGpuKms              *gpu_kms,
+                       int                      n_planes,
+                       gboolean                *use_modifier)
 {
   struct gbm_device *gbm_device;
 
@@ -293,7 +293,12 @@ meta_wayland_dma_buf_try_acquire_scanout (MetaWaylandDmaBufBuffer *dma_buf,
     return NULL;
 
   gpu_kms = meta_renderer_native_get_primary_gpu (renderer_native);
-  gbm_bo = create_gbm_bo (dma_buf, gpu_kms, n_planes, &use_modifier);
+  gbm_bo = import_scanout_gbm_bo (dma_buf, gpu_kms, n_planes, &use_modifier);
+  if (!gbm_bo)
+    {
+      g_debug ("Failed to import scanout gbm_bo: %s", g_strerror (errno));
+      return NULL;
+    }
 
   fb = meta_drm_buffer_gbm_new_take (gpu_kms, gbm_bo,
                                      use_modifier,
