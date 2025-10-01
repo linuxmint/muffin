@@ -1664,7 +1664,7 @@ meta_cursor_for_grab_op (MetaGrabOp op)
       break;
     case META_GRAB_OP_RESIZING_S:
     case META_GRAB_OP_KEYBOARD_RESIZING_S:
-      return META_CURSOR_SOUTH_RESIZE;
+      return META_CURSOR_S_RESIZE;
       break;
     case META_GRAB_OP_RESIZING_SW:
     case META_GRAB_OP_KEYBOARD_RESIZING_SW:
@@ -1672,7 +1672,7 @@ meta_cursor_for_grab_op (MetaGrabOp op)
       break;
     case META_GRAB_OP_RESIZING_N:
     case META_GRAB_OP_KEYBOARD_RESIZING_N:
-      return META_CURSOR_NORTH_RESIZE;
+      return META_CURSOR_N_RESIZE;
       break;
     case META_GRAB_OP_RESIZING_NE:
     case META_GRAB_OP_KEYBOARD_RESIZING_NE:
@@ -1684,16 +1684,16 @@ meta_cursor_for_grab_op (MetaGrabOp op)
       break;
     case META_GRAB_OP_RESIZING_W:
     case META_GRAB_OP_KEYBOARD_RESIZING_W:
-      return META_CURSOR_WEST_RESIZE;
+      return META_CURSOR_W_RESIZE;
       break;
     case META_GRAB_OP_RESIZING_E:
     case META_GRAB_OP_KEYBOARD_RESIZING_E:
-      return META_CURSOR_EAST_RESIZE;
+      return META_CURSOR_E_RESIZE;
       break;
     case META_GRAB_OP_MOVING:
     case META_GRAB_OP_KEYBOARD_MOVING:
     case META_GRAB_OP_KEYBOARD_RESIZING_UNKNOWN:
-      return META_CURSOR_MOVE_OR_RESIZE_WINDOW;
+      return META_CURSOR_MOVE;
       break;
     default:
       break;

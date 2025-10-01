@@ -205,49 +205,85 @@ typedef enum
 
 /**
  * MetaCursor:
+ * @META_CURSOR_INVALID: No cursor
+ * @META_CURSOR_NONE: No cursor
  * @META_CURSOR_DEFAULT: Default cursor
- * @META_CURSOR_NORTH_RESIZE: Resize northern edge cursor
- * @META_CURSOR_SOUTH_RESIZE: Resize southern edge cursor
- * @META_CURSOR_WEST_RESIZE: Resize western edge cursor
- * @META_CURSOR_EAST_RESIZE: Resize eastern edge cursor
- * @META_CURSOR_SE_RESIZE: Resize south-eastern corner cursor
- * @META_CURSOR_SW_RESIZE: Resize south-western corner cursor
+ * @META_CURSOR_CONTEXT_MENU: Context menu cursor
+ * @META_CURSOR_HELP: Help cursor
+ * @META_CURSOR_POINTER: Pointer cursor
+ * @META_CURSOR_PROGRESS: Progress cursor
+ * @META_CURSOR_WAIT: Wait cursor
+ * @META_CURSOR_CELL: Cell cursor
+ * @META_CURSOR_CROSSHAIR: Crosshair cursor
+ * @META_CURSOR_TEXT: Text cursor
+ * @META_CURSOR_VERTICAL_TEXT: Vertical text cursor
+ * @META_CURSOR_ALIAS: DnD alias cursor
+ * @META_CURSOR_COPY: DnD copy cursor
+ * @META_CURSOR_MOVE: DnD move cursor
+ * @META_CURSOR_NO_DROP: DnD no drop cursor
+ * @META_CURSOR_NOT_ALLOWED: DnD not allowed cursor
+ * @META_CURSOR_GRAB: DnD grab cursor
+ * @META_CURSOR_GRABBING: DnD grabbing cursor
+ * @META_CURSOR_E_RESIZE: Resize eastern edge cursor
+ * @META_CURSOR_N_RESIZE: Resize northern edge cursor
  * @META_CURSOR_NE_RESIZE: Resize north-eastern corner cursor
  * @META_CURSOR_NW_RESIZE: Resize north-western corner cursor
- * @META_CURSOR_MOVE_OR_RESIZE_WINDOW: Move or resize cursor
- * @META_CURSOR_BUSY: Busy cursor
- * @META_CURSOR_DND_IN_DRAG: DND in drag cursor
- * @META_CURSOR_DND_MOVE: DND move cursor
- * @META_CURSOR_DND_COPY: DND copy cursor
- * @META_CURSOR_DND_UNSUPPORTED_TARGET: DND unsupported target
- * @META_CURSOR_POINTING_HAND: pointing hand
- * @META_CURSOR_CROSSHAIR: crosshair (action forbidden)
- * @META_CURSOR_IBEAM: I-beam (text input)
- * @META_CURSOR_BLANK: Invisible cursor
+ * @META_CURSOR_S_RESIZE: Resize southern edge cursor
+ * @META_CURSOR_SE_RESIZE: Resize south-eastern corner cursor
+ * @META_CURSOR_SW_RESIZE: Resize south-western corner cursor
+ * @META_CURSOR_W_RESIZE: Resize western edge cursor
+ * @META_CURSOR_EW_RESIZE: Resize eastern and western edges cursor
+ * @META_CURSOR_NS_RESIZE: Resize northern and eastern edges cursor
+ * @META_CURSOR_NESW_RESIZE: Resize north-east and south-west corners cursor
+ * @META_CURSOR_NWSE_RESIZE: Resize north-west and south-east corners cursor
+ * @META_CURSOR_COL_RESIZE: Resize column cursor
+ * @META_CURSOR_ROW_RESIZE: Resize row cursor
+ * @META_CURSOR_ALL_SCROLL: Scroll all directions cursor
+ * @META_CURSOR_ZOOM_IN: Zoom in cursor
+ * @META_CURSOR_ZOOM_OUT: Zoom out cursor
+ * @META_CURSOR_DND_ASK: DnD ask cursor
+ * @META_CURSOR_ALL_RESIZE: Resize all directions
  */
 typedef enum
 {
-  META_CURSOR_NONE = 0,
+  META_CURSOR_INVALID = 0,
+  META_CURSOR_NONE,
   META_CURSOR_DEFAULT,
-  META_CURSOR_NORTH_RESIZE,
-  META_CURSOR_SOUTH_RESIZE,
-  META_CURSOR_WEST_RESIZE,
-  META_CURSOR_EAST_RESIZE,
-  META_CURSOR_SE_RESIZE,
-  META_CURSOR_SW_RESIZE,
+  META_CURSOR_CONTEXT_MENU,
+  META_CURSOR_HELP,
+  META_CURSOR_POINTER,
+  META_CURSOR_PROGRESS,
+  META_CURSOR_WAIT,
+  META_CURSOR_CELL,
+  META_CURSOR_CROSSHAIR,
+  META_CURSOR_TEXT,
+  META_CURSOR_VERTICAL_TEXT,
+  META_CURSOR_ALIAS,
+  META_CURSOR_COPY,
+  META_CURSOR_MOVE,
+  META_CURSOR_NO_DROP,
+  META_CURSOR_NOT_ALLOWED,
+  META_CURSOR_GRAB,
+  META_CURSOR_GRABBING,
+  META_CURSOR_E_RESIZE,
+  META_CURSOR_N_RESIZE,
   META_CURSOR_NE_RESIZE,
   META_CURSOR_NW_RESIZE,
-  META_CURSOR_MOVE_OR_RESIZE_WINDOW,
-  META_CURSOR_BUSY,
-  META_CURSOR_DND_IN_DRAG,
-  META_CURSOR_DND_MOVE,
-  META_CURSOR_DND_COPY,
-  META_CURSOR_DND_UNSUPPORTED_TARGET,
-  META_CURSOR_POINTING_HAND,
-  META_CURSOR_CROSSHAIR,
-  META_CURSOR_IBEAM,
-  META_CURSOR_BLANK,
-  META_CURSOR_LAST
+  META_CURSOR_S_RESIZE,
+  META_CURSOR_SE_RESIZE,
+  META_CURSOR_SW_RESIZE,
+  META_CURSOR_W_RESIZE,
+  META_CURSOR_EW_RESIZE,
+  META_CURSOR_NS_RESIZE,
+  META_CURSOR_NESW_RESIZE,
+  META_CURSOR_NWSE_RESIZE,
+  META_CURSOR_COL_RESIZE,
+  META_CURSOR_ROW_RESIZE,
+  META_CURSOR_ALL_SCROLL,
+  META_CURSOR_ZOOM_IN,
+  META_CURSOR_ZOOM_OUT,
+  META_CURSOR_DND_ASK, /* not css */
+  META_CURSOR_ALL_RESIZE, /* not css */
 } MetaCursor;
 
 /**

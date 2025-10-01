@@ -46,6 +46,8 @@ struct _MetaWaylandTabletTool
   MetaCursorSpriteXcursor *default_sprite;
   gulong prepare_at_signal_id;
 
+  MetaCursor cursor_shape;
+
   MetaWaylandSurface *current;
   guint32 pressed_buttons;
   guint32 button_count;
@@ -87,5 +89,12 @@ gboolean meta_wayland_tablet_tool_can_grab_surface (MetaWaylandTabletTool *tool,
                                                     uint32_t               serial);
 gboolean meta_wayland_tablet_tool_can_popup        (MetaWaylandTabletTool *tool,
                                                     uint32_t               serial);
+
+void meta_wayland_tablet_tool_set_cursor_shape (MetaWaylandTabletTool *tool,
+                                                MetaCursor             shape);
+
+gboolean meta_wayland_tablet_tool_check_focus_serial (MetaWaylandTabletTool *tool,
+                                                      struct wl_client      *client,
+                                                      uint32_t               serial);
 
 #endif /* META_WAYLAND_TABLET_TOOL_H */
