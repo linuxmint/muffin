@@ -223,6 +223,7 @@ typedef enum
  * @META_CURSOR_POINTING_HAND: pointing hand
  * @META_CURSOR_CROSSHAIR: crosshair (action forbidden)
  * @META_CURSOR_IBEAM: I-beam (text input)
+ * @META_CURSOR_BLANK: Invisible cursor
  */
 typedef enum
 {
@@ -245,6 +246,7 @@ typedef enum
   META_CURSOR_POINTING_HAND,
   META_CURSOR_CROSSHAIR,
   META_CURSOR_IBEAM,
+  META_CURSOR_BLANK,
   META_CURSOR_LAST
 } MetaCursor;
 
