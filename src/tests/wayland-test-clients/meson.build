@@ -59,3 +59,19 @@ executable('subsurface-remap-toplevel',
   install: have_installed_tests,
   install_dir: wayland_test_client_installed_tests_libexecdir,
 )
+
+executable('meta-anonymous-file',
+  sources: [
+    'meta-anonymous-file.c',
+    common_sources,
+  ],
+  include_directories: tests_includepath,
+  c_args: tests_c_args,
+  dependencies: [
+    glib_dep,
+    wayland_client_dep,
+    libmuffin_dep,
+  ],
+  install: have_installed_tests,
+  install_dir: wayland_test_client_installed_tests_libexecdir,
+)
