@@ -146,7 +146,7 @@ meta_wayland_keyboard_take_keymap (MetaWaylandKeyboard *keyboard,
       g_warning ("Failed to get string version of keymap");
       return;
     }
-    keymap_size = strlen (keymap_string) + 1;
+  keymap_size = strlen (keymap_string) + 1;
 
   xkb_info->keymap_rofile =
     meta_anonymous_file_new (keymap_size, (const uint8_t *) keymap_string);
@@ -154,10 +154,10 @@ meta_wayland_keyboard_take_keymap (MetaWaylandKeyboard *keyboard,
   free (keymap_string);
 
   if (!xkb_info->keymap_rofile)
-  {
-    g_warning ("Failed to create anonymous file for keymap");
-    return;
-  }
+    {
+      g_warning ("Failed to create anonymous file for keymap");
+      return;
+    }
 
   inform_clients_of_new_keymap (keyboard);
 
