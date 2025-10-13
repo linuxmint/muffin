@@ -3149,7 +3149,7 @@ meta_display_show_tablet_mapping_notification (MetaDisplay        *display,
   if (!pretty_name)
     pretty_name = clutter_input_device_get_device_name (pad);
   meta_display_show_osd (display, lookup_tablet_monitor (display, pad),
-                         "input-tablet-symbolic", pretty_name);
+                         "xapp-input-tablet-symbolic", pretty_name);
 }
 
 void
@@ -3172,7 +3172,7 @@ meta_display_notify_pad_group_switch (MetaDisplay        *display,
     g_string_append (message, (i == n_mode) ? "⚫" : "⚪");
 
   meta_display_show_osd (display, lookup_tablet_monitor (display, pad),
-                         "input-tablet-symbolic", message->str);
+                         "xapp-input-tablet-symbolic", message->str);
 
   g_signal_emit (display, display_signals[PAD_MODE_SWITCH], 0, pad,
                  n_group, n_mode);

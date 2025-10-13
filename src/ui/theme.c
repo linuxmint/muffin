@@ -850,19 +850,19 @@ meta_frame_layout_draw_with_style (MetaFrameLayout         *layout,
           switch (button_type)
             {
             case META_BUTTON_TYPE_CLOSE:
-               icon_name = "window-close-symbolic";
+               icon_name = "xapp-window-close-symbolic";
                break;
             case META_BUTTON_TYPE_MAXIMIZE:
                if (flags & META_FRAME_MAXIMIZED)
-                 icon_name = "window-restore-symbolic";
+                 icon_name = "xapp-window-restore-symbolic";
                else
-                 icon_name = "window-maximize-symbolic";
+                 icon_name = "xapp-window-maximize-symbolic";
                break;
             case META_BUTTON_TYPE_MINIMIZE:
-               icon_name = "window-minimize-symbolic";
+               icon_name = "xapp-window-minimize-symbolic";
                break;
             case META_BUTTON_TYPE_MENU:
-               icon_name = "open-menu-symbolic";
+               icon_name = "xapp-open-menu-symbolic";
                break;
             default:
                icon_name = NULL;
