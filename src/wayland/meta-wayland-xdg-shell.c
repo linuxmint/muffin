@@ -1059,6 +1059,7 @@ finish_popup_setup (MetaWaylandXdgPopup *xdg_popup)
 
   xdg_popup->setup.parent_surface = NULL;
   xdg_popup->setup.grab_seat = NULL;
+  xdg_popup->dismissed_by_client = FALSE;
 
   if (!meta_wayland_surface_get_window (parent_surface))
     {
