@@ -1329,13 +1329,6 @@ meta_wayland_surface_notify_unmapped (MetaWaylandSurface *surface)
 }
 
 static void
-unlink_note (GNode    *node,
-             gpointer  data)
-{
-  g_node_unlink (node);
-}
-
-static void
 wl_surface_destructor (struct wl_resource *resource)
 {
   MetaWaylandSurface *surface = wl_resource_get_user_data (resource);
@@ -1383,14 +1376,7 @@ wl_surface_destructor (struct wl_resource *resource)
   if (surface->wl_subsurface)
     wl_resource_destroy (surface->wl_subsurface);
 
-  if (surface->subsurface_branch_node)
-    {
-      g_node_children_foreach (surface->subsurface_branch_node,
-                               G_TRAVERSE_NON_LEAVES,
-                               unlink_note,
-                               NULL);
-      g_clear_pointer (&surface->subsurface_branch_node, g_node_destroy);
-    }
+  g_clear_pointer (&surface->subsurface_branch_node, g_node_destroy);
 
   g_hash_table_destroy (surface->shortcut_inhibited_seats);
 
