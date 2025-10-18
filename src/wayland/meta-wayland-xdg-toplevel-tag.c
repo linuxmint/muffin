@@ -40,10 +40,6 @@ xdg_toplevel_tag_manager_destroy (struct wl_client   *client,
 static void
 xdg_toplevel_tag_manager_set_toplevel_tag (struct wl_client   *client,
                                            struct wl_resource *resource,
-
-
-
-
                                            struct wl_resource *toplevel_resource,
                                            const char         *tag)
 {
