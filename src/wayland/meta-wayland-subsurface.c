@@ -292,7 +292,8 @@ unparent_actor (MetaWaylandSurface *surface)
     return;
 
   parent_actor = clutter_actor_get_parent (actor);
-  clutter_actor_remove_child (parent_actor, actor);
+  if (parent_actor)
+    clutter_actor_remove_child (parent_actor, actor);
 }
 
 static void
@@ -490,6 +491,7 @@ surface_handle_parent_surface_destroyed (struct wl_listener *listener,
                                                  surface,
                                                  sub.parent_destroy_listener);
 
+  g_node_unlink (surface->subsurface_branch_node);
   surface->sub.parent = NULL;
 }
 
