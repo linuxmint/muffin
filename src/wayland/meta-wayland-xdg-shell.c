@@ -1286,6 +1286,9 @@ meta_wayland_xdg_popup_configure (MetaWaylandShellSurface        *shell_surface,
   int geometry_scale;
   int x, y;
 
+  if (!xdg_popup->resource)
+    return;
+
   /* If the parent surface was destroyed, its window will be destroyed
    * before the popup receives the parent-destroy signal. This means that
    * the popup may potentially get temporary focus until itself is destroyed.
