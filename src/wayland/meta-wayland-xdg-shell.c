@@ -185,6 +185,12 @@ surface_from_xdg_toplevel_resource (struct wl_resource *resource)
   return surface_from_xdg_surface_resource (resource);
 }
 
+static MetaWaylandXdgPopup *
+meta_wayland_xdg_popup_from_surface (MetaWaylandSurface *surface)
+{
+  return META_WAYLAND_XDG_POPUP (surface->role);
+}
+
 static void
 meta_wayland_xdg_surface_reset (MetaWaylandXdgSurface *xdg_surface)
 {
@@ -1130,6 +1136,37 @@ finish_popup_setup (MetaWaylandXdgPopup *xdg_popup)
 }
 
 static void
+dismiss_invalid_popup (MetaWaylandXdgPopup *xdg_popup)
+{
+  if (xdg_popup->popup)
+    {
+      while (TRUE)
+        {
+          MetaWaylandSurface *top_popup_surface;
+          MetaWaylandXdgPopup *top_xdg_popup;
+
+          top_popup_surface =
+            meta_wayland_popup_get_top_popup (xdg_popup->popup);
+          if (!top_popup_surface)
+            break;
+
+          top_xdg_popup = meta_wayland_xdg_popup_from_surface (top_popup_surface);
+
+          xdg_popup_send_popup_done (top_xdg_popup->resource);
+          meta_wayland_popup_destroy (top_xdg_popup->popup);
+
+          if (top_xdg_popup == xdg_popup)
+            break;
+        }
+    }
+  else
+    {
+      xdg_popup_send_popup_done (xdg_popup->resource);
+      meta_wayland_xdg_popup_unmap (xdg_popup);
+    }
+}
+
+static void
 meta_wayland_xdg_popup_apply_state (MetaWaylandSurfaceRole  *surface_role,
                                     MetaWaylandSurfaceState *pending)
 {
@@ -1209,7 +1246,7 @@ meta_wayland_xdg_popup_post_apply_state (MetaWaylandSurfaceRole  *surface_role,
     {
       g_warning ("Buggy client caused popup to be placed outside of "
                  "parent window");
-      dismiss_popup (xdg_popup);
+      dismiss_invalid_popup (xdg_popup);
     }
 }
 
