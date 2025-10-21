@@ -513,6 +513,7 @@ meta_wayland_pointer_enable (MetaWaylandPointer *pointer)
                            (GDestroyNotify) meta_wayland_pointer_client_free);
 
   pointer->cursor_surface = NULL;
+  pointer->cursor_shape = META_CURSOR_INVALID;
 
   clutter_seat = clutter_backend_get_default_seat (clutter_get_default_backend ());
   pointer->device = clutter_seat_get_pointer (clutter_seat);
@@ -566,6 +567,7 @@ meta_wayland_pointer_disable (MetaWaylandPointer *pointer)
 
   g_clear_pointer (&pointer->pointer_clients, g_hash_table_unref);
   pointer->cursor_surface = NULL;
+  pointer->cursor_shape = META_CURSOR_INVALID;
 }
 
 static int
