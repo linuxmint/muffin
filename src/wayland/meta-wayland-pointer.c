@@ -1137,7 +1137,8 @@ meta_wayland_pointer_set_cursor_surface (MetaWaylandPointer *pointer,
 
   prev_cursor_surface = pointer->cursor_surface;
 
-  if (prev_cursor_surface == cursor_surface)
+  if (prev_cursor_surface == cursor_surface &&
+      pointer->cursor_shape == META_CURSOR_INVALID)
     return;
 
   pointer->cursor_surface = cursor_surface;
