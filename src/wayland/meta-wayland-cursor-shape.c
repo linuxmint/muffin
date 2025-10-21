@@ -123,8 +123,6 @@ meta_wayland_cursor_shape_device_new_tool (MetaWaylandTabletTool *tool)
 
     cursor_shape_device->type = META_WAYLAND_CURSOR_SHAPE_DEVICE_TYPE_TOOL;
     cursor_shape_device->tool = tool;
-    g_object_add_weak_pointer (G_OBJECT (tool),
-                               (gpointer *) &cursor_shape_device->tool);
 
     return cursor_shape_device;
 }
@@ -134,8 +132,6 @@ meta_wayland_cursor_shape_device_free (MetaWaylandCursorShapeDevice *cursor_shap
 {
     if (cursor_shape_device->type == META_WAYLAND_CURSOR_SHAPE_DEVICE_TYPE_POINTER)
         g_clear_weak_pointer ((gpointer *) &cursor_shape_device->pointer);
-    if (cursor_shape_device->type == META_WAYLAND_CURSOR_SHAPE_DEVICE_TYPE_TOOL)
-        g_clear_weak_pointer ((gpointer *) &cursor_shape_device->tool);
 
     g_free (cursor_shape_device);
 }
@@ -242,9 +238,9 @@ static void
 cursor_manager_get_tablet_tool_v2 (struct wl_client   *client,
                                    struct wl_resource *resource,
                                    uint32_t            id,
-                                   struct wl_resource *pointer_resource)
+                                   struct wl_resource *tool_resource)
 {
-    MetaWaylandTabletTool *tool = wl_resource_get_user_data (resource);
+    MetaWaylandTabletTool *tool = wl_resource_get_user_data (tool_resource);
     g_autoptr (MetaWaylandCursorShapeDevice) cursor_shape_device = NULL;
     struct wl_resource *shape_device_resource;
 
