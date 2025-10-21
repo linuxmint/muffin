@@ -1166,11 +1166,15 @@ meta_wayland_pointer_set_cursor_shape (MetaWaylandPointer *pointer,
                                        MetaCursor          shape)
 {
   if (pointer->cursor_surface)
-  {
-    meta_wayland_surface_update_outputs (pointer->cursor_surface);
-    g_clear_signal_handler (&pointer->cursor_surface_destroy_id,
-                            pointer->cursor_surface);
-  }
+    {
+      meta_wayland_surface_update_outputs (pointer->cursor_surface);
+      g_clear_signal_handler (&pointer->cursor_surface_destroy_id,
+                              pointer->cursor_surface);
+    }
+  else if (pointer->cursor_shape == shape)
+    {
+      return;
+    }
 
   pointer->cursor_surface = NULL;
   pointer->cursor_shape = shape;
