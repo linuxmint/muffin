@@ -28,7 +28,7 @@
 G_DECLARE_FINAL_TYPE (MetaCursorSpriteXcursor, meta_cursor_sprite_xcursor,
                       META, CURSOR_SPRITE_XCURSOR, MetaCursorSprite)
 
-MetaCursorSpriteXcursor * meta_cursor_sprite_xcursor_new (MetaCursor         cursor);
+MetaCursorSpriteXcursor * meta_cursor_sprite_xcursor_new (MetaCursor cursor);
 
 void meta_cursor_sprite_xcursor_set_theme_scale (MetaCursorSpriteXcursor *sprite_xcursor,
                                                  int                      scale);
@@ -39,5 +39,9 @@ XcursorImage * meta_cursor_sprite_xcursor_get_current_image (MetaCursorSpriteXcu
 
 Cursor meta_create_x_cursor (Display    *xdisplay,
                              MetaCursor  cursor);
+
+const char * meta_cursor_get_name (MetaCursor cursor);
+
+const char * meta_cursor_get_legacy_name (MetaCursor cursor);
 
 #endif /* META_CURSOR_SPRITE_XCURSOR_H */
