@@ -114,7 +114,12 @@ static GCallback
 _cogl_winsys_renderer_get_proc_address (CoglRenderer *renderer,
                                         const char   *name)
 {
-  return eglGetProcAddress (name);
+  GCallback result = eglGetProcAddress (name);
+
+  if (result == NULL)
+    g_module_symbol (renderer->libgl_module, name, (gpointer *)&result);
+
+  return result;
 }
 
 static void
