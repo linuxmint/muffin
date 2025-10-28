@@ -112,20 +112,9 @@ static const CoglFeatureData winsys_feature_data[] =
 
 static GCallback
 _cogl_winsys_renderer_get_proc_address (CoglRenderer *renderer,
-                                        const char *name,
-                                        gboolean in_core)
+                                        const char   *name)
 {
-  void *ptr = NULL;
-
-  if (!in_core)
-    ptr = eglGetProcAddress (name);
-
-  /* eglGetProcAddress doesn't support fetching core API so we need to
-     get that separately with GModule */
-  if (ptr == NULL)
-    g_module_symbol (renderer->libgl_module, name, &ptr);
-
-  return ptr;
+  return eglGetProcAddress (name);
 }
 
 static void
