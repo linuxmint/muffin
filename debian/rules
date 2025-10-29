@@ -26,16 +26,7 @@ CONFFLAGS += \
 	-Dcore_tests=false \
 	-Dlibwacom=false \
 	-Dwayland=false \
-	-Dnative_backend=false \
-	-Ddefault_driver=gl
-endif
-
-ifeq ($(DEB_HOST_ARCH),$(findstring $(DEB_HOST_ARCH),armel armhf))
-CONFFLAGS += \
-	-Ddefault_driver=gles2
-else
-CONFFLAGS += \
-	-Ddefault_driver=gl
+	-Dnative_backend=false
 endif
 
 override_dh_auto_configure:
