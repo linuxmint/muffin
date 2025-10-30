@@ -5,7 +5,7 @@ default_plugin_c_args = [
 ]
 
 default_plugin = shared_module('default',
-  sources: ['default.c', libmuffin_cogl_path_enum_types_h],
+  sources: ['default.c'],
   include_directories: muffin_includes,
   c_args: default_plugin_c_args,
   dependencies: [
