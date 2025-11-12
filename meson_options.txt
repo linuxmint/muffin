@@ -141,12 +141,6 @@ option('verbose',
   description: 'Enable verbose logging ability'
 )
 
-option('default_driver',
-  type: 'combo',
-  choices: ['auto', 'gl', 'gl3', 'gles2', 'nop'],
-  value: 'auto'
-)
-
 option('xwayland_path',
   type: 'string',
   value: '',

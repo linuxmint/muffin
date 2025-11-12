@@ -10,7 +10,4 @@
 /* Enable unit tests */
 #mesondefine ENABLE_UNIT_TESTS
 
-/* Default COGL driver */
-#mesondefine COGL_DEFAULT_DRIVER
-
 #define COGL_CONFIG_H_INCLUDED 1
