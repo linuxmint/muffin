@@ -134,6 +134,13 @@ MetaWindow* meta_display_get_tab_next (MetaDisplay   *display,
                                        gboolean       backward);
 
 META_EXPORT
+MetaWindow* meta_display_get_tab_in_direction (MetaDisplay   *display,
+                                               MetaTabList    type,
+                                               MetaWorkspace *workspace,
+                                               MetaWindow    *window,
+                                               MetaDirection  direction);
+
+META_EXPORT
 MetaWindow* meta_display_get_tab_current (MetaDisplay   *display,
                                           MetaTabList    type,
                                           MetaWorkspace *workspace);
