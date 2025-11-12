@@ -4433,6 +4433,7 @@ meta_window_update_monitor (MetaWindow                   *window,
         meta_window_change_workspace (window, workspace_manager->active_workspace);
 
       meta_window_main_monitor_changed (window, old);
+      meta_display_queue_check_fullscreen (window->display);
 
       /* If we're changing monitors, we need to update the has_maximize_func flag,
        * as the working area has changed. */

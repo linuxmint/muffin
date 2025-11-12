@@ -176,6 +176,8 @@ enum
 
 static guint display_signals [LAST_SIGNAL] = { 0 };
 
+#define MIN_FULLSCREEN_OBSCURING_WINDOW_SIZE 100
+
 /*
  * The display we're managing.  This is a singleton object.  (Historically,
  * this was a list of displays, but there was never any way to add more
@@ -3540,15 +3542,20 @@ check_fullscreen_func (gpointer data)
           if (meta_window_is_monitor_sized (window))
             covers_monitors = TRUE;
         }
-      else if (window->maximized_horizontally &&
-               window->maximized_vertically)
+      else if (window->type == META_WINDOW_NORMAL)
         {
-          MetaLogicalMonitor *logical_monitor;
+          MetaRectangle window_rect;
+          meta_window_get_frame_rect (window, &window_rect);
 
-          logical_monitor = meta_window_get_main_logical_monitor (window);
-          if (!g_slist_find (obscured_monitors, logical_monitor))
-            obscured_monitors = g_slist_prepend (obscured_monitors,
-                                                 logical_monitor);
+          if (window_rect.width > MIN_FULLSCREEN_OBSCURING_WINDOW_SIZE && window_rect.height > MIN_FULLSCREEN_OBSCURING_WINDOW_SIZE)
+            {
+              MetaLogicalMonitor *logical_monitor;
+
+              logical_monitor = meta_window_get_main_logical_monitor (window);
+              if (!g_slist_find (obscured_monitors, logical_monitor))
+                obscured_monitors = g_slist_prepend (obscured_monitors,
+                                                     logical_monitor);
+            }
         }
 
       if (covers_monitors)
