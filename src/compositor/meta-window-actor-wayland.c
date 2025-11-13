@@ -145,9 +145,32 @@ meta_window_actor_wayland_update_regions (MetaWindowActor *actor)
 }
 
 static void
+meta_window_actor_wayland_dispose (GObject *object)
+{
+  MetaWindowActor *window_actor = META_WINDOW_ACTOR (object);
+  MetaSurfaceActor *surface_actor =
+  meta_window_actor_get_surface (window_actor);
+  GList *children;
+  GList *l;
+
+  children = clutter_actor_get_children (CLUTTER_ACTOR (window_actor));
+  for (l = children; l; l = l->next)
+    {
+      ClutterActor *child_actor = l->data;
+
+      if (META_IS_SURFACE_ACTOR_WAYLAND (child_actor) &&
+        child_actor != CLUTTER_ACTOR (surface_actor))
+        clutter_actor_remove_child (CLUTTER_ACTOR (window_actor), child_actor);
+    }
+
+  G_OBJECT_CLASS (meta_window_actor_wayland_parent_class)->dispose (object);
+}
+
+static void
 meta_window_actor_wayland_class_init (MetaWindowActorWaylandClass *klass)
 {
   MetaWindowActorClass *window_actor_class = META_WINDOW_ACTOR_CLASS (klass);
+  GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
   window_actor_class->assign_surface_actor = meta_window_actor_wayland_assign_surface_actor;
   window_actor_class->frame_complete = meta_window_actor_wayland_frame_complete;
@@ -157,6 +180,8 @@ meta_window_actor_wayland_class_init (MetaWindowActorWaylandClass *klass)
   window_actor_class->queue_destroy = meta_window_actor_wayland_queue_destroy;
   window_actor_class->set_frozen = meta_window_actor_wayland_set_frozen;
   window_actor_class->update_regions = meta_window_actor_wayland_update_regions;
+
+  object_class->dispose = meta_window_actor_wayland_dispose;
 }
 
 static void
