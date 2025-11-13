@@ -268,6 +268,8 @@ meta_wayland_actor_surface_real_sync_actor_state (MetaWaylandActorSurface *actor
       meta_surface_actor_reset_viewport_dst_size (surface_actor);
     }
 
+  meta_shaped_texture_ensure_size_valid (stex);
+
   META_WAYLAND_SURFACE_FOREACH_SUBSURFACE (surface, subsurface_surface)
     {
       MetaWaylandActorSurface *actor_surface;

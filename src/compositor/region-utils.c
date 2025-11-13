@@ -428,8 +428,8 @@ meta_region_crop_and_scale (cairo_region_t  *region,
     {
       viewport_region = cairo_region_copy (region);
 
-      if (G_APPROX_VALUE (src_rect->origin.x, 0, FLT_EPSILON) ||
-          G_APPROX_VALUE (src_rect->origin.y, 0, FLT_EPSILON))
+    if (!G_APPROX_VALUE (src_rect->origin.x, 0, FLT_EPSILON) ||
+        !G_APPROX_VALUE (src_rect->origin.y, 0, FLT_EPSILON))
         {
           cairo_region_translate (viewport_region,
                                   (int) src_rect->origin.x,

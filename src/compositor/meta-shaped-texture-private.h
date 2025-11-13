@@ -69,4 +69,6 @@ int meta_shaped_texture_get_height (MetaShapedTexture *stex);
 void meta_shaped_texture_set_clip_region (MetaShapedTexture *stex,
                                           cairo_region_t    *clip_region);
 
+void meta_shaped_texture_ensure_size_valid (MetaShapedTexture *stex);
+
 #endif
