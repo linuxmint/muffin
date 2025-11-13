@@ -33,6 +33,7 @@
 
 #include "cogl-renderer.h"
 #include "cogl-onscreen.h"
+#include "cogl-scanout.h"
 
 #ifdef COGL_HAS_XLIB_SUPPORT
 #include "cogl-texture-pixmap-x11-private.h"
@@ -116,6 +117,10 @@ typedef struct _CoglWinsysVtable
   (*onscreen_swap_buffers_with_damage) (CoglOnscreen *onscreen,
                                         const int *rectangles,
                                         int n_rectangles);
+
+  void
+  (*onscreen_direct_scanout) (CoglOnscreen *onscreen,
+                              CoglScanout  *scanout);
 
   void
   (*onscreen_set_visibility) (CoglOnscreen *onscreen,
