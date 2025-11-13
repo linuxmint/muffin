@@ -396,6 +396,64 @@ _cogl_texture_driver_size_supported (CoglContext *ctx,
   return new_width != 0;
 }
 
+static gboolean
+_cogl_texture_driver_upload_supported (CoglContext *ctx,
+                                       CoglPixelFormat format)
+{
+  switch (format)
+  {
+    case COGL_PIXEL_FORMAT_A_8:
+    case COGL_PIXEL_FORMAT_G_8:
+    case COGL_PIXEL_FORMAT_RG_88:
+    case COGL_PIXEL_FORMAT_BGRA_8888:
+    case COGL_PIXEL_FORMAT_BGRA_8888_PRE:
+    case COGL_PIXEL_FORMAT_RGB_888:
+    case COGL_PIXEL_FORMAT_BGR_888:
+    case COGL_PIXEL_FORMAT_RGBA_1010102:
+    case COGL_PIXEL_FORMAT_RGBA_1010102_PRE:
+    case COGL_PIXEL_FORMAT_BGRA_1010102:
+    case COGL_PIXEL_FORMAT_BGRA_1010102_PRE:
+    case COGL_PIXEL_FORMAT_ABGR_2101010:
+    case COGL_PIXEL_FORMAT_ABGR_2101010_PRE:
+    case COGL_PIXEL_FORMAT_ARGB_2101010:
+    case COGL_PIXEL_FORMAT_ARGB_2101010_PRE:
+    case COGL_PIXEL_FORMAT_RGBA_8888:
+    case COGL_PIXEL_FORMAT_RGBA_8888_PRE:
+    case COGL_PIXEL_FORMAT_ARGB_8888:
+    case COGL_PIXEL_FORMAT_ARGB_8888_PRE:
+    case COGL_PIXEL_FORMAT_ABGR_8888:
+    case COGL_PIXEL_FORMAT_ABGR_8888_PRE:
+    case COGL_PIXEL_FORMAT_RGB_565:
+    case COGL_PIXEL_FORMAT_RGBA_4444:
+    case COGL_PIXEL_FORMAT_RGBA_4444_PRE:
+    case COGL_PIXEL_FORMAT_RGBA_5551:
+    case COGL_PIXEL_FORMAT_RGBA_5551_PRE:
+      return TRUE;
+    case COGL_PIXEL_FORMAT_BGRA_FP_16161616:
+    case COGL_PIXEL_FORMAT_ARGB_FP_16161616:
+    case COGL_PIXEL_FORMAT_ABGR_FP_16161616:
+    case COGL_PIXEL_FORMAT_BGRA_FP_16161616_PRE:
+    case COGL_PIXEL_FORMAT_ARGB_FP_16161616_PRE:
+    case COGL_PIXEL_FORMAT_ABGR_FP_16161616_PRE:
+    case COGL_PIXEL_FORMAT_RGBA_FP_16161616:
+    case COGL_PIXEL_FORMAT_RGBA_FP_16161616_PRE:
+      if (_cogl_has_private_feature
+          (ctx, COGL_PRIVATE_FEATURE_TEXTURE_FORMAT_HALF_FLOAT))
+        return TRUE;
+      else
+        return FALSE;
+    case COGL_PIXEL_FORMAT_DEPTH_16:
+    case COGL_PIXEL_FORMAT_DEPTH_32:
+    case COGL_PIXEL_FORMAT_DEPTH_24_STENCIL_8:
+    case COGL_PIXEL_FORMAT_ANY:
+    case COGL_PIXEL_FORMAT_YUV:
+      return TRUE;
+  }
+
+  g_assert_not_reached ();
+  return FALSE;
+}
+
 static CoglPixelFormat
 _cogl_texture_driver_find_best_gl_get_data_format
                                             (CoglContext *context,
@@ -419,5 +477,6 @@ _cogl_texture_driver_gl =
     _cogl_texture_driver_prep_gl_for_pixels_download,
     _cogl_texture_driver_gl_get_tex_image,
     _cogl_texture_driver_size_supported,
+    _cogl_texture_driver_upload_supported,
     _cogl_texture_driver_find_best_gl_get_data_format
   };

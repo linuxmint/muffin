@@ -128,6 +128,10 @@ struct _CoglTextureDriver
                       int width,
                       int height);
 
+  gboolean
+  (* format_supports_upload) (CoglContext *ctx,
+                              CoglPixelFormat format);
+
   /*
    * The driver may impose constraints on what formats can be used to store
    * texture data read from textures. For example GLES currently only supports
