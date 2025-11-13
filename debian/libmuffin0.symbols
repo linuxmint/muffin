@@ -2637,6 +2637,7 @@ libmuffin.so.0 libmuffin0 #MINVER#
  meta_window_get_sandboxed_app_id@Base 5.3.0
  meta_window_get_stable_sequence@Base 5.3.0
  meta_window_get_startup_id@Base 5.3.0
+ meta_window_get_tag@Base 6.4.1
  meta_window_get_tile_match@Base 5.3.0
  meta_window_get_title@Base 5.3.0
  meta_window_get_transient_for@Base 5.3.0
