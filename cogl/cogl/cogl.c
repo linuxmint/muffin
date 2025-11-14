@@ -58,7 +58,7 @@ cogl_get_proc_address (const char* name)
 {
   _COGL_GET_CONTEXT (ctx, NULL);
 
-  return _cogl_renderer_get_proc_address (ctx->display->renderer, name, FALSE);
+  return _cogl_renderer_get_proc_address (ctx->display->renderer, name);
 }
 
 gboolean
