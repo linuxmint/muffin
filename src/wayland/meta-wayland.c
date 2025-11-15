@@ -32,6 +32,7 @@
 #include "clutter/wayland/clutter-wayland-compositor.h"
 #include "core/main-private.h"
 #include "wayland/meta-wayland-activation.h"
+#include "wayland/meta-wayland-cursor-shape.h"
 #include "wayland/meta-wayland-data-device.h"
 #include "wayland/meta-wayland-dma-buf.h"
 #include "wayland/meta-wayland-egl-stream.h"
@@ -442,6 +443,7 @@ meta_wayland_compositor_setup (MetaWaylandCompositor *wayland_compositor)
   meta_wayland_text_input_init (compositor);
   meta_wayland_activation_init (compositor);
   meta_wayland_init_xdg_wm_dialog (compositor);
+  meta_wayland_init_cursor_shape (compositor);
 
   /* Xwayland specific protocol, needs to be filtered out for all other clients */
   if (meta_xwayland_grab_keyboard_init (compositor))
