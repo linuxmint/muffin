@@ -246,6 +246,62 @@ static const CoglPixelFormatInfo format_info_table[] = {
     .bpp = { 4 },
   },
   {
+    .cogl_format = COGL_PIXEL_FORMAT_RGBA_FP_16161616,
+    .format_str = "RGBA_FP_16161616",
+    .n_planes = 1,
+    .bpp = { 8 },
+    .aligned = 1
+  },
+  {
+    .cogl_format = COGL_PIXEL_FORMAT_BGRA_FP_16161616,
+    .format_str = "BGRA_FP_16161616",
+    .n_planes = 1,
+    .bpp = { 8 },
+    .aligned = 1
+  },
+  {
+    .cogl_format = COGL_PIXEL_FORMAT_ARGB_FP_16161616,
+    .format_str = "ARGB_FP_16161616",
+    .n_planes = 1,
+    .bpp = { 8 },
+    .aligned = 1
+  },
+  {
+    .cogl_format = COGL_PIXEL_FORMAT_ABGR_FP_16161616,
+    .format_str = "ABGR_FP_16161616",
+    .n_planes = 1,
+    .bpp = { 8 },
+    .aligned = 1
+  },
+  {
+    .cogl_format = COGL_PIXEL_FORMAT_RGBA_FP_16161616_PRE,
+    .format_str = "RGBA_FP_16161616_PRE",
+    .n_planes = 1,
+    .bpp = { 8 },
+    .aligned = 1
+  },
+  {
+    .cogl_format = COGL_PIXEL_FORMAT_BGRA_FP_16161616_PRE,
+    .format_str = "BGRA_FP_16161616_PRE",
+    .n_planes = 1,
+    .bpp = { 8 },
+    .aligned = 1
+  },
+  {
+    .cogl_format = COGL_PIXEL_FORMAT_ARGB_FP_16161616_PRE,
+    .format_str = "ARGB_FP_16161616_PRE",
+    .n_planes = 1,
+    .bpp = { 8 },
+    .aligned = 1
+  },
+  {
+    .cogl_format = COGL_PIXEL_FORMAT_ABGR_FP_16161616_PRE,
+    .format_str = "ABGR_FP_16161616_PRE",
+    .n_planes = 1,
+    .bpp = { 8 },
+    .aligned = 1
+  },
+  {
     .cogl_format = COGL_PIXEL_FORMAT_DEPTH_16,
     .format_str = "DEPTH_16",
     .n_planes = 1,

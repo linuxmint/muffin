@@ -55,6 +55,12 @@
 #ifndef GL_RG8
 #define GL_RG8 0x822B
 #endif
+#ifndef GL_UNSIGNED_INT_2_10_10_10_REV_EXT
+#define GL_UNSIGNED_INT_2_10_10_10_REV_EXT 0x8368
+#endif
+#ifndef GL_HALF_FLOAT_OES
+#define GL_HALF_FLOAT_OES 0x8D61
+#endif
 
 static gboolean
 _cogl_driver_pixel_format_from_gl_internal (CoglContext *context,
@@ -137,21 +143,44 @@ _cogl_driver_pixel_format_to_gl (CoglContext     *context,
       required_format = COGL_PIXEL_FORMAT_RGB_888;
       break;
 
-      /* Just one 32-bit ordering supported */
-    case COGL_PIXEL_FORMAT_RGBA_8888:
-    case COGL_PIXEL_FORMAT_RGBA_8888_PRE:
-    case COGL_PIXEL_FORMAT_ARGB_8888:
-    case COGL_PIXEL_FORMAT_ARGB_8888_PRE:
-    case COGL_PIXEL_FORMAT_ABGR_8888:
-    case COGL_PIXEL_FORMAT_ABGR_8888_PRE:
     case COGL_PIXEL_FORMAT_RGBA_1010102:
     case COGL_PIXEL_FORMAT_RGBA_1010102_PRE:
+#if G_BYTE_ORDER == G_LITTLE_ENDIAN
+      if (_cogl_has_private_feature
+          (context,  COGL_PRIVATE_FEATURE_TEXTURE_FORMAT_RGBA1010102))
+        {
+          glintformat = GL_RGBA;
+          glformat = GL_RGBA;
+          gltype = GL_UNSIGNED_INT_2_10_10_10_REV_EXT;
+          break;
+        }
+#endif
     case COGL_PIXEL_FORMAT_BGRA_1010102:
     case COGL_PIXEL_FORMAT_BGRA_1010102_PRE:
     case COGL_PIXEL_FORMAT_ABGR_2101010:
     case COGL_PIXEL_FORMAT_ABGR_2101010_PRE:
     case COGL_PIXEL_FORMAT_ARGB_2101010:
     case COGL_PIXEL_FORMAT_ARGB_2101010_PRE:
+#if G_BYTE_ORDER == G_LITTLE_ENDIAN
+      if (_cogl_has_private_feature
+          (context,  COGL_PRIVATE_FEATURE_TEXTURE_FORMAT_RGBA1010102))
+        {
+          glintformat = GL_RGBA;
+          glformat = GL_RGBA;
+          gltype = GL_UNSIGNED_INT_2_10_10_10_REV_EXT;
+          required_format = COGL_PIXEL_FORMAT_RGBA_1010102;
+          required_format |= (format & COGL_PREMULT_BIT);
+          break;
+        }
+#endif
+
+      G_GNUC_FALLTHROUGH;
+    case COGL_PIXEL_FORMAT_RGBA_8888:
+    case COGL_PIXEL_FORMAT_RGBA_8888_PRE:
+    case COGL_PIXEL_FORMAT_ARGB_8888:
+    case COGL_PIXEL_FORMAT_ARGB_8888_PRE:
+    case COGL_PIXEL_FORMAT_ABGR_8888:
+    case COGL_PIXEL_FORMAT_ABGR_8888_PRE:
       glintformat = GL_RGBA;
       glformat = GL_RGBA;
       gltype = GL_UNSIGNED_BYTE;
@@ -178,6 +207,26 @@ _cogl_driver_pixel_format_to_gl (CoglContext     *context,
       glintformat = GL_RGBA;
       glformat = GL_RGBA;
       gltype = GL_UNSIGNED_SHORT_5_5_5_1;
+      break;
+
+    case COGL_PIXEL_FORMAT_BGRA_FP_16161616:
+    case COGL_PIXEL_FORMAT_ARGB_FP_16161616:
+    case COGL_PIXEL_FORMAT_ABGR_FP_16161616:
+    case COGL_PIXEL_FORMAT_BGRA_FP_16161616_PRE:
+    case COGL_PIXEL_FORMAT_ARGB_FP_16161616_PRE:
+    case COGL_PIXEL_FORMAT_ABGR_FP_16161616_PRE:
+      g_warning ("Unhandled 16 bpc pixel format used");
+
+      G_GNUC_FALLTHROUGH;
+    case COGL_PIXEL_FORMAT_RGBA_FP_16161616:
+    case COGL_PIXEL_FORMAT_RGBA_FP_16161616_PRE:
+      if (!_cogl_has_private_feature
+          (context, COGL_PRIVATE_FEATURE_TEXTURE_FORMAT_HALF_FLOAT))
+        g_warning ("Missing 16 bpc half float extension");
+
+      glintformat = GL_RGBA;
+      glformat = GL_RGBA;
+      gltype = GL_HALF_FLOAT_OES;
       break;
 
     case COGL_PIXEL_FORMAT_DEPTH_16:
@@ -353,6 +402,14 @@ _cogl_driver_update_features (CoglContext *context,
   if (_cogl_check_extension ("GL_EXT_texture_format_BGRA8888", gl_extensions))
     COGL_FLAGS_SET (private_features,
                     COGL_PRIVATE_FEATURE_TEXTURE_FORMAT_BGRA8888, TRUE);
+
+  if (_cogl_check_extension ("GL_EXT_texture_type_2_10_10_10_REV", gl_extensions))
+    COGL_FLAGS_SET (private_features,
+                    COGL_PRIVATE_FEATURE_TEXTURE_FORMAT_RGBA1010102, TRUE);
+
+  if (_cogl_check_extension ("GL_OES_texture_half_float", gl_extensions))
+      COGL_FLAGS_SET (private_features,
+                      COGL_PRIVATE_FEATURE_TEXTURE_FORMAT_HALF_FLOAT, TRUE);
 
   if (_cogl_check_extension ("GL_EXT_unpack_subimage", gl_extensions))
     COGL_FLAGS_SET (private_features,
