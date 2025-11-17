@@ -373,6 +373,20 @@ if cc.has_header_symbol('sys/prctl.h', 'prctl')
   cdata.set('HAVE_SYS_PRCTL', 1)
 endif
 
+optional_functions = [
+  'mkostemp',
+  'posix_fallocate',
+  'memfd_create',
+]
+
+foreach function : optional_functions
+  if cc.has_function(function)
+    cdata.set('HAVE_' + function.to_upper(), 1)
+  else
+    message('Optional function ' + function + ' missing')
+  endif
+endforeach
+
 have_xwayland_initfd = false
 have_xwayland_listenfd = false
 
