@@ -156,14 +156,9 @@ static const CoglFeatureData winsys_feature_data[] =
 
 static GCallback
 _cogl_winsys_renderer_get_proc_address (CoglRenderer *renderer,
-                                        const char *name,
-                                        gboolean in_core)
+                                        const char   *name)
 {
   CoglGLXRenderer *glx_renderer = renderer->winsys;
-
-  /* The GLX_ARB_get_proc_address extension documents that this should
-   * work for core functions too so we don't need to do anything
-   * special with in_core */
 
   return glx_renderer->glXGetProcAddress ((const GLubyte *) name);
 }
