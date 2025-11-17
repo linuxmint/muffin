@@ -1,4 +1,4 @@
-project('muffin', 'c', version : '6.4.1', meson_version : '>=0.56.0', license : 'GPLv2+')
+project('muffin', 'c', version : '6.4.1', meson_version : '>=1.0.0', license : 'GPLv2+')
 
 muffin_plugin_api_version = '3'
 
@@ -385,7 +385,7 @@ if have_wayland
   xwayland_path = get_option('xwayland_path')
   if xwayland_path == ''
     if xwayland_dep.found()
-      xwayland_path = xwayland_dep.get_pkgconfig_variable('xwayland')
+      xwayland_path = xwayland_dep.get_variable('xwayland')
     else
       xwayland_path = find_program('Xwayland').full_path()
     endif
@@ -404,7 +404,7 @@ if have_wayland
   # For Xwayland -initfd usage
   use_initfd = get_option('xwayland_initfd')
   if xwayland_dep.found()
-    xwayland_supports_initfd = xwayland_dep.get_pkgconfig_variable('have_initfd') == 'true'
+    xwayland_supports_initfd = xwayland_dep.get_variable('have_initfd') == 'true'
   else
     xwayland_options = run_command(xwayland_path, '-help')
     xwayland_supports_initfd = xwayland_options.stderr().contains('-initfd')
@@ -422,7 +422,7 @@ if have_wayland
 
     # For Xwayland -listenfd usage
   if xwayland_dep.found()
-    have_xwayland_listenfd = xwayland_dep.get_pkgconfig_variable('have_listenfd') == 'true'
+    have_xwayland_listenfd = xwayland_dep.get_variable('have_listenfd') == 'true'
   endif
 
   if (have_xwayland_listenfd)
