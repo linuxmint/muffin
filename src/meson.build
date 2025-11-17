@@ -517,6 +517,8 @@ if have_wayland
     'wayland/meta-wayland-gtk-shell.c',
     'wayland/meta-wayland-gtk-shell.h',
     'wayland/meta-wayland.h',
+    'wayland/meta-wayland-idle-inhibit.c',
+    'wayland/meta-wayland-idle-inhibit.h',
     'wayland/meta-wayland-inhibit-shortcuts.c',
     'wayland/meta-wayland-inhibit-shortcuts-dialog.c',
     'wayland/meta-wayland-inhibit-shortcuts-dialog.h',
@@ -799,6 +801,7 @@ if have_wayland
   #  - protocol version (if stability is 'unstable')
   wayland_protocols = [
     ['gtk-shell', 'private', ],
+    ['idle-inhibit', 'unstable', 'v1', ],
     ['keyboard-shortcuts-inhibit', 'unstable', 'v1', ],
     ['linux-dmabuf', 'unstable', 'v1', ],
     ['pointer-constraints', 'unstable', 'v1', ],
