@@ -32,37 +32,37 @@ struct _MetaWindowActorWayland
 
 G_DEFINE_TYPE (MetaWindowActorWayland, meta_window_actor_wayland, META_TYPE_WINDOW_ACTOR)
 
+typedef struct _SurfaceTreeTraverseData
+{
+  MetaWindowActor *window_actor;
+  int index;
+} SurfaceTreeTraverseData;
+
 static gboolean
-remove_surface_actor_from_children (GNode    *node,
-                                    gpointer  data)
+set_surface_actor_index (GNode    *node,
+                         gpointer  data)
 {
   MetaWaylandSurface *surface = node->data;
   MetaSurfaceActor *surface_actor = meta_wayland_surface_get_actor (surface);
-  MetaWindowActor *window_actor = data;
-  ClutterActor *parent;
 
-  parent = clutter_actor_get_parent (CLUTTER_ACTOR (surface_actor));
-  if (!parent)
-    return FALSE;
+  SurfaceTreeTraverseData *traverse_data = data;
 
-  g_return_val_if_fail (parent == CLUTTER_ACTOR (window_actor), FALSE);
-
-  clutter_actor_remove_child (CLUTTER_ACTOR (window_actor),
-                              CLUTTER_ACTOR (surface_actor));
-
-  return FALSE;
-}
-
-static gboolean
-add_surface_actor_to_children (GNode    *node,
-                               gpointer  data)
-{
-  MetaWaylandSurface *surface = node->data;
-  MetaSurfaceActor *surface_actor = meta_wayland_surface_get_actor (surface);
-  MetaWindowActor *window_actor = data;
-
-  clutter_actor_add_child (CLUTTER_ACTOR (window_actor),
-                           CLUTTER_ACTOR (surface_actor));
+  if (clutter_actor_contains (CLUTTER_ACTOR (traverse_data->window_actor),
+                              CLUTTER_ACTOR (surface_actor)))
+    {
+      clutter_actor_set_child_at_index (
+        CLUTTER_ACTOR (traverse_data->window_actor),
+        CLUTTER_ACTOR (surface_actor),
+        traverse_data->index);
+    }
+  else
+    {
+      clutter_actor_insert_child_at_index (
+        CLUTTER_ACTOR (traverse_data->window_actor),
+        CLUTTER_ACTOR (surface_actor),
+        traverse_data->index);
+    }
+  traverse_data->index++;
 
   return FALSE;
 }
@@ -75,20 +75,19 @@ meta_window_actor_wayland_rebuild_surface_tree (MetaWindowActor *actor)
   MetaWaylandSurface *surface = meta_surface_actor_wayland_get_surface (
     META_SURFACE_ACTOR_WAYLAND (surface_actor));
   GNode *root_node = surface->subsurface_branch_node;
+  SurfaceTreeTraverseData traverse_data;
+
+  traverse_data = (SurfaceTreeTraverseData) {
+    .window_actor = actor,
+    .index = 0,
+  };
 
   g_node_traverse (root_node,
                    G_IN_ORDER,
                    G_TRAVERSE_LEAVES,
                    -1,
-                   remove_surface_actor_from_children,
-                   actor);
-
-  g_node_traverse (root_node,
-                   G_IN_ORDER,
-                   G_TRAVERSE_LEAVES,
-                   -1,
-                   add_surface_actor_to_children,
-                   actor);
+                   set_surface_actor_index,
+                   &traverse_data);
 }
 
 static void
@@ -145,9 +144,32 @@ meta_window_actor_wayland_update_regions (MetaWindowActor *actor)
 }
 
 static void
+meta_window_actor_wayland_dispose (GObject *object)
+{
+  MetaWindowActor *window_actor = META_WINDOW_ACTOR (object);
+  MetaSurfaceActor *surface_actor =
+  meta_window_actor_get_surface (window_actor);
+  GList *children;
+  GList *l;
+
+  children = clutter_actor_get_children (CLUTTER_ACTOR (window_actor));
+  for (l = children; l; l = l->next)
+    {
+      ClutterActor *child_actor = l->data;
+
+      if (META_IS_SURFACE_ACTOR_WAYLAND (child_actor) &&
+        child_actor != CLUTTER_ACTOR (surface_actor))
+        clutter_actor_remove_child (CLUTTER_ACTOR (window_actor), child_actor);
+    }
+
+  G_OBJECT_CLASS (meta_window_actor_wayland_parent_class)->dispose (object);
+}
+
+static void
 meta_window_actor_wayland_class_init (MetaWindowActorWaylandClass *klass)
 {
   MetaWindowActorClass *window_actor_class = META_WINDOW_ACTOR_CLASS (klass);
+  GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
   window_actor_class->assign_surface_actor = meta_window_actor_wayland_assign_surface_actor;
   window_actor_class->frame_complete = meta_window_actor_wayland_frame_complete;
@@ -157,6 +179,8 @@ meta_window_actor_wayland_class_init (MetaWindowActorWaylandClass *klass)
   window_actor_class->queue_destroy = meta_window_actor_wayland_queue_destroy;
   window_actor_class->set_frozen = meta_window_actor_wayland_set_frozen;
   window_actor_class->update_regions = meta_window_actor_wayland_update_regions;
+
+  object_class->dispose = meta_window_actor_wayland_dispose;
 }
 
 static void

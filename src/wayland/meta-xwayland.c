@@ -649,9 +649,6 @@ meta_xwayland_start_xserver (MetaXWaylandManager *manager,
   args[i++] = XWAYLAND_LISTENFD;
   args[i++] = "4";
   args[i++] = XWAYLAND_LISTENFD;
-  args[i++] = "-listen";
-  args[i++] = "4";
-  args[i++] = "-listen";
   args[i++] = "5";
   args[i++] = "-displayfd";
   args[i++] = "6";

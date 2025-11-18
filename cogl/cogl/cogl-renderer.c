@@ -274,9 +274,6 @@ foreach_driver_description (CoglDriver driver_override,
                             CoglDriverCallback callback,
                             void *user_data)
 {
-#ifdef COGL_DEFAULT_DRIVER
-  const CoglDriverDescription *default_driver = NULL;
-#endif
   int i;
 
   if (driver_override != COGL_DRIVER_ANY)
@@ -294,31 +291,8 @@ foreach_driver_description (CoglDriver driver_override,
       return;
     }
 
-#ifdef COGL_DEFAULT_DRIVER
   for (i = 0; i < G_N_ELEMENTS (_cogl_drivers); i++)
     {
-      const CoglDriverDescription *desc = &_cogl_drivers[i];
-      if (g_ascii_strcasecmp (desc->name, COGL_DEFAULT_DRIVER) == 0)
-        {
-          default_driver = desc;
-          break;
-        }
-    }
-
-  if (default_driver)
-    {
-      if (!callback (default_driver, user_data))
-        return;
-    }
-#endif
-
-  for (i = 0; i < G_N_ELEMENTS (_cogl_drivers); i++)
-    {
-#ifdef COGL_DEFAULT_DRIVER
-      if (&_cogl_drivers[i] == default_driver)
-        continue;
-#endif
-
       if (!callback (&_cogl_drivers[i], user_data))
         return;
     }
@@ -701,12 +675,11 @@ cogl_renderer_get_winsys_id (CoglRenderer *renderer)
 
 void *
 _cogl_renderer_get_proc_address (CoglRenderer *renderer,
-                                 const char *name,
-                                 gboolean in_core)
+                                 const char   *name)
 {
   const CoglWinsysVtable *winsys = _cogl_renderer_get_winsys (renderer);
 
-  return winsys->renderer_get_proc_address (renderer, name, in_core);
+  return winsys->renderer_get_proc_address (renderer, name);
 }
 
 void

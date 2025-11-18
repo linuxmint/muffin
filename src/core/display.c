@@ -176,6 +176,8 @@ enum
 
 static guint display_signals [LAST_SIGNAL] = { 0 };
 
+#define MIN_FULLSCREEN_OBSCURING_WINDOW_SIZE 100
+
 /*
  * The display we're managing.  This is a singleton object.  (Historically,
  * this was a list of displays, but there was never any way to add more
@@ -3149,7 +3151,7 @@ meta_display_show_tablet_mapping_notification (MetaDisplay        *display,
   if (!pretty_name)
     pretty_name = clutter_input_device_get_device_name (pad);
   meta_display_show_osd (display, lookup_tablet_monitor (display, pad),
-                         "input-tablet-symbolic", pretty_name);
+                         "xsi-input-tablet-symbolic", pretty_name);
 }
 
 void
@@ -3172,7 +3174,7 @@ meta_display_notify_pad_group_switch (MetaDisplay        *display,
     g_string_append (message, (i == n_mode) ? "⚫" : "⚪");
 
   meta_display_show_osd (display, lookup_tablet_monitor (display, pad),
-                         "input-tablet-symbolic", message->str);
+                         "xsi-input-tablet-symbolic", message->str);
 
   g_signal_emit (display, display_signals[PAD_MODE_SWITCH], 0, pad,
                  n_group, n_mode);
@@ -3540,15 +3542,20 @@ check_fullscreen_func (gpointer data)
           if (meta_window_is_monitor_sized (window))
             covers_monitors = TRUE;
         }
-      else if (window->maximized_horizontally &&
-               window->maximized_vertically)
+      else if (window->type == META_WINDOW_NORMAL)
         {
-          MetaLogicalMonitor *logical_monitor;
+          MetaRectangle window_rect;
+          meta_window_get_frame_rect (window, &window_rect);
 
-          logical_monitor = meta_window_get_main_logical_monitor (window);
-          if (!g_slist_find (obscured_monitors, logical_monitor))
-            obscured_monitors = g_slist_prepend (obscured_monitors,
-                                                 logical_monitor);
+          if (window_rect.width > MIN_FULLSCREEN_OBSCURING_WINDOW_SIZE && window_rect.height > MIN_FULLSCREEN_OBSCURING_WINDOW_SIZE)
+            {
+              MetaLogicalMonitor *logical_monitor;
+
+              logical_monitor = meta_window_get_main_logical_monitor (window);
+              if (!g_slist_find (obscured_monitors, logical_monitor))
+                obscured_monitors = g_slist_prepend (obscured_monitors,
+                                                     logical_monitor);
+            }
         }
 
       if (covers_monitors)

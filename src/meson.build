@@ -519,6 +519,8 @@ if have_wayland
     'wayland/meta-wayland-gtk-shell.c',
     'wayland/meta-wayland-gtk-shell.h',
     'wayland/meta-wayland.h',
+    'wayland/meta-wayland-idle-inhibit.c',
+    'wayland/meta-wayland-idle-inhibit.h',
     'wayland/meta-wayland-inhibit-shortcuts.c',
     'wayland/meta-wayland-inhibit-shortcuts-dialog.c',
     'wayland/meta-wayland-inhibit-shortcuts-dialog.h',
@@ -591,6 +593,8 @@ if have_wayland
     'wayland/meta-wayland-xdg-shell.h',
     'wayland/meta-wayland-xdg-dialog.c',
     'wayland/meta-wayland-xdg-dialog.h',
+    'wayland/meta-wayland-xdg-toplevel-tag.c',
+    'wayland/meta-wayland-xdg-toplevel-tag.h',
     'wayland/meta-window-wayland.c',
     'wayland/meta-window-wayland.h',
     'wayland/meta-window-xwayland.c',
@@ -801,6 +805,7 @@ if have_wayland
   #  - protocol version (if stability is 'unstable')
   wayland_protocols = [
     ['gtk-shell', 'private', ],
+    ['idle-inhibit', 'unstable', 'v1', ],
     ['keyboard-shortcuts-inhibit', 'unstable', 'v1', ],
     ['linux-dmabuf', 'unstable', 'v1', ],
     ['pointer-constraints', 'unstable', 'v1', ],
@@ -816,6 +821,7 @@ if have_wayland
     ['xdg-foreign', 'unstable', 'v2', ],
     ['xdg-output', 'unstable', 'v1', ],
     ['xdg-shell', 'stable', ],
+    ['xdg-toplevel-tag-v1', 'private', ],
     ['xwayland-keyboard-grab', 'unstable', 'v1', ],
   ]
   if have_wayland_eglstream

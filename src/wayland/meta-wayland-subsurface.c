@@ -292,7 +292,8 @@ unparent_actor (MetaWaylandSurface *surface)
     return;
 
   parent_actor = clutter_actor_get_parent (actor);
-  clutter_actor_remove_child (parent_actor, actor);
+  if (parent_actor)
+    clutter_actor_remove_child (parent_actor, actor);
 }
 
 static void
@@ -344,11 +345,11 @@ is_valid_sibling (MetaWaylandSurface *surface,
 }
 
 static void
-subsurface_handle_pending_surface_destroyed (struct wl_listener *listener,
-                                             void               *data)
+subsurface_handle_pending_subsurface_destroyed (struct wl_listener *listener,
+                                                void               *data)
 {
   MetaWaylandSubsurfacePlacementOp *op =
-    wl_container_of (listener, op, surface_destroy_listener);
+    wl_container_of (listener, op, subsurface_destroy_listener);
 
   op->surface = NULL;
 }
@@ -367,7 +368,7 @@ void
 meta_wayland_subsurface_placement_op_free (MetaWaylandSubsurfacePlacementOp *op)
 {
   if (op->surface)
-    wl_list_remove (&op->surface_destroy_listener.link);
+    wl_list_remove (&op->subsurface_destroy_listener.link);
   if (op->sibling)
     wl_list_remove (&op->sibling_destroy_listener.link);
   g_free (op);
@@ -385,12 +386,12 @@ queue_subsurface_placement (MetaWaylandSurface             *surface,
   op->placement = placement;
   op->surface = surface;
   op->sibling = sibling;
-  op->surface_destroy_listener.notify =
-    subsurface_handle_pending_surface_destroyed;
+  op->subsurface_destroy_listener.notify =
+    subsurface_handle_pending_subsurface_destroyed;
   op->sibling_destroy_listener.notify =
     subsurface_handle_pending_sibling_destroyed;
-  wl_resource_add_destroy_listener (surface->resource,
-                                    &op->surface_destroy_listener);
+  wl_resource_add_destroy_listener (surface->wl_subsurface,
+                                    &op->subsurface_destroy_listener);
   wl_resource_add_destroy_listener (sibling->resource,
                                     &op->sibling_destroy_listener);
 
@@ -490,6 +491,7 @@ surface_handle_parent_surface_destroyed (struct wl_listener *listener,
                                                  surface,
                                                  sub.parent_destroy_listener);
 
+  g_node_unlink (surface->subsurface_branch_node);
   surface->sub.parent = NULL;
 }
 

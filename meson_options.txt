@@ -53,7 +53,7 @@ option('remote_desktop',
 
 option('egl_device',
   type: 'boolean',
-  value: false,
+  value: true,
   description: 'Enable EGLDevice and EGLStream renderer support'
 )
 
@@ -139,12 +139,6 @@ option('verbose',
   type: 'boolean',
   value: true,
   description: 'Enable verbose logging ability'
-)
-
-option('default_driver',
-  type: 'combo',
-  choices: ['auto', 'gl', 'gl3', 'gles2', 'nop'],
-  value: 'auto'
 )
 
 option('xwayland_path',
