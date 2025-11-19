@@ -51,10 +51,17 @@ MetaRendererNative * meta_renderer_native_new (MetaBackendNative  *backend_nativ
 
 struct gbm_device * meta_gbm_device_from_gpu (MetaGpuKms *gpu_kms);
 
+MetaGpuKms * meta_renderer_native_get_primary_gpu (MetaRendererNative *renderer_native);
+
 void meta_renderer_native_finish_frame (MetaRendererNative *renderer_native);
 
 int64_t meta_renderer_native_get_frame_counter (MetaRendererNative *renderer_native);
 
 void meta_renderer_native_reset_modes (MetaRendererNative *renderer_native);
+
+gboolean meta_onscreen_native_is_buffer_scanout_compatible (CoglOnscreen *onscreen,
+                                                            uint32_t      drm_format,
+                                                            uint64_t      drm_modifier,
+                                                            uint32_t      stride);
 
 #endif /* META_RENDERER_NATIVE_H */

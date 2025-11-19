@@ -405,6 +405,27 @@ cogl_onscreen_get_buffer_age (CoglOnscreen *onscreen)
   return winsys->onscreen_get_buffer_age (onscreen);
 }
 
+void
+cogl_onscreen_direct_scanout (CoglOnscreen *onscreen,
+                              CoglScanout  *scanout)
+{
+  CoglFramebuffer *framebuffer = COGL_FRAMEBUFFER (onscreen);
+  const CoglWinsysVtable *winsys;
+  CoglFrameInfo *info;
+
+  g_return_if_fail (framebuffer->type == COGL_FRAMEBUFFER_TYPE_ONSCREEN);
+  g_return_if_fail (_cogl_winsys_has_feature (COGL_WINSYS_FEATURE_SYNC_AND_COMPLETE_EVENT));
+
+  info = _cogl_frame_info_new ();
+  info->frame_counter = onscreen->frame_counter;
+  g_queue_push_tail (&onscreen->pending_frame_infos, info);
+
+  winsys = _cogl_framebuffer_get_winsys (framebuffer);
+  winsys->onscreen_direct_scanout (onscreen, scanout);
+
+  onscreen->frame_counter++;
+}
+
 #ifdef COGL_HAS_X11_SUPPORT
 uint32_t
 cogl_x11_onscreen_get_window_xid (CoglOnscreen *onscreen)
