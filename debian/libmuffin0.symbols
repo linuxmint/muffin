@@ -2023,6 +2023,11 @@ libmuffin.so.0 libmuffin0 #MINVER#
  meta_activate_session@Base 6.0.0
  meta_add_clutter_debug_flags@Base 5.3.0
  meta_add_verbose_topic@Base 5.3.0
+ meta_anonymous_file_close_fd@Base 6.4.1
+ meta_anonymous_file_free@Base 6.4.1
+ meta_anonymous_file_new@Base 6.4.1
+ meta_anonymous_file_open_fd@Base 6.4.1
+ meta_anonymous_file_size@Base 6.4.1
  meta_backend_add_gpu@Base 5.3.0
  meta_backend_get_dnd@Base 5.3.0
  meta_backend_get_gpus@Base 5.3.0

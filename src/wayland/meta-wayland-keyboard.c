@@ -48,15 +48,14 @@
 #include "config.h"
 
 #include <errno.h>
-#include <fcntl.h>
 #include <glib.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/mman.h>
 #include <unistd.h>
 
 #include "backends/meta-backend-private.h"
 #include "core/display-private.h"
+#include "core/meta-anonymous-file.h"
 #include "wayland/meta-wayland-private.h"
 
 #ifdef HAVE_NATIVE_BACKEND
@@ -79,86 +78,35 @@ unbind_resource (struct wl_resource *resource)
   wl_list_remove (wl_resource_get_link (resource));
 }
 
-static int
-create_anonymous_file (off_t    size,
-                       GError **error)
-{
-  static const char template[] = "muffin-shared-XXXXXX";
-  char *path;
-  int fd, flags;
-
-  fd = g_file_open_tmp (template, &path, error);
-
-  if (fd == -1)
-    return -1;
-
-  unlink (path);
-  g_free (path);
-
-  flags = fcntl (fd, F_GETFD);
-  if (flags == -1)
-    goto err;
-
-  if (fcntl (fd, F_SETFD, flags | FD_CLOEXEC) == -1)
-    goto err;
-
-  if (ftruncate (fd, size) < 0)
-    goto err;
-
-  return fd;
-
- err:
-  g_set_error_literal (error,
-                       G_FILE_ERROR,
-                       g_file_error_from_errno (errno),
-                       strerror (errno));
-  close (fd);
-
-  return -1;
-}
-
 static void
 send_keymap (MetaWaylandKeyboard *keyboard,
              struct wl_resource  *resource)
 {
   MetaWaylandXkbInfo *xkb_info = &keyboard->xkb_info;
-  GError *error = NULL;
   int fd;
-  char *keymap_area;
+  size_t size;
+  MetaAnonymousFileMapmode mapmode;
 
-  if (!xkb_info->keymap_string)
-    return;
+  if (wl_resource_get_version (resource) < 7)
+    mapmode = META_ANONYMOUS_FILE_MAPMODE_SHARED;
+  else
+    mapmode = META_ANONYMOUS_FILE_MAPMODE_PRIVATE;
 
-  fd = create_anonymous_file (xkb_info->keymap_size, &error);
-  if (fd < 0)
+  fd = meta_anonymous_file_open_fd (xkb_info->keymap_rofile, mapmode);
+  size = meta_anonymous_file_size (xkb_info->keymap_rofile);
+
+
+  if (fd == -1)
     {
-      g_warning ("Creating a keymap file for %lu bytes failed: %s",
-                 (unsigned long) xkb_info->keymap_size,
-                 error->message);
-      g_clear_error (&error);
+      g_warning ("Creating a keymap file failed: %s", strerror (errno));
       return;
     }
-
-
-  keymap_area = mmap (NULL, xkb_info->keymap_size,
-                      PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
-  if (keymap_area == MAP_FAILED)
-    {
-      g_warning ("Failed to mmap() %lu bytes\n",
-                 (unsigned long) xkb_info->keymap_size);
-      close (fd);
-      return;
-    }
-
-  strcpy (keymap_area, xkb_info->keymap_string);
-
-  munmap (keymap_area, xkb_info->keymap_size);
 
   wl_keyboard_send_keymap (resource,
                            WL_KEYBOARD_KEYMAP_FORMAT_XKB_V1,
-                           fd,
-                           keyboard->xkb_info.keymap_size);
-  close (fd);
+                           fd, size);
+
+  meta_anonymous_file_close_fd (fd);
 }
 
 static void
@@ -177,6 +125,8 @@ meta_wayland_keyboard_take_keymap (MetaWaylandKeyboard *keyboard,
 				   struct xkb_keymap   *keymap)
 {
   MetaWaylandXkbInfo *xkb_info = &keyboard->xkb_info;
+  char *keymap_string;
+  size_t keymap_size;
 
   if (keymap == NULL)
     {
@@ -184,20 +134,30 @@ meta_wayland_keyboard_take_keymap (MetaWaylandKeyboard *keyboard,
       return;
     }
 
-  g_clear_pointer (&xkb_info->keymap_string, g_free);
   xkb_keymap_unref (xkb_info->keymap);
   xkb_info->keymap = xkb_keymap_ref (keymap);
 
   meta_wayland_keyboard_update_xkb_state (keyboard);
 
-  xkb_info->keymap_string =
+  keymap_string =
     xkb_keymap_get_as_string (xkb_info->keymap, XKB_KEYMAP_FORMAT_TEXT_V1);
-  if (!xkb_info->keymap_string)
+  if (!keymap_string)
     {
       g_warning ("Failed to get string version of keymap");
       return;
     }
-  xkb_info->keymap_size = strlen (xkb_info->keymap_string) + 1;
+  keymap_size = strlen (keymap_string) + 1;
+
+  xkb_info->keymap_rofile =
+    meta_anonymous_file_new (keymap_size, (const uint8_t *) keymap_string);
+
+  free (keymap_string);
+
+  if (!xkb_info->keymap_rofile)
+    {
+      g_warning ("Failed to create anonymous file for keymap");
+      return;
+    }
 
   inform_clients_of_new_keymap (keyboard);
 
@@ -590,7 +550,7 @@ meta_wayland_xkb_info_destroy (MetaWaylandXkbInfo *xkb_info)
 {
   g_clear_pointer (&xkb_info->keymap, xkb_keymap_unref);
   g_clear_pointer (&xkb_info->state, xkb_state_unref);
-  g_clear_pointer (&xkb_info->keymap_string, g_free);
+  meta_anonymous_file_free (xkb_info->keymap_rofile);
 }
 
 void
