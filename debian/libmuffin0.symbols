@@ -613,7 +613,6 @@ libmuffin-clutter-0.so.0 libmuffin0 #MINVER#
  clutter_event_has_shift_modifier@Base 5.3.0
  clutter_event_is_pointer_emulated@Base 5.3.0
  clutter_event_new@Base 5.3.0
- clutter_event_peek@Base 5.3.0
  clutter_event_put@Base 5.3.0
  clutter_event_remove_filter@Base 5.3.0
  clutter_event_sequence_get_type@Base 5.3.0
