@@ -91,5 +91,6 @@ void                    meta_wayland_buffer_process_damage      (MetaWaylandBuff
 
 CoglScanout *           meta_wayland_buffer_try_acquire_scanout (MetaWaylandBuffer     *buffer,
                                                                  CoglOnscreen          *onscreen);
+void meta_wayland_init_shm (MetaWaylandCompositor *compositor);
 
 #endif /* META_WAYLAND_BUFFER_H */
