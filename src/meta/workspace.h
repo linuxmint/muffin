@@ -46,6 +46,9 @@ META_EXPORT
 GList* meta_workspace_list_windows (MetaWorkspace *workspace);
 
 META_EXPORT
+GList * meta_workspace_list_unobscured_windows (MetaWorkspace *workspace);
+
+META_EXPORT
 void meta_workspace_get_work_area_for_monitor (MetaWorkspace *workspace,
                                                int            which_monitor,
                                                MetaRectangle *area);
