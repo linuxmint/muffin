@@ -2727,6 +2727,7 @@ libmuffin.so.0 libmuffin0 #MINVER#
  meta_workspace_get_work_area_for_monitor@Base 5.3.0
  meta_workspace_index@Base 5.3.0
  meta_workspace_list_windows@Base 5.3.0
+ meta_workspace_list_unobscured_windows@Base 6.6.0
  meta_workspace_manager_append_new_workspace@Base 5.3.0
  meta_workspace_manager_get_active_workspace@Base 5.3.0
  meta_workspace_manager_get_active_workspace_index@Base 5.3.0

@@ -736,6 +736,75 @@ meta_workspace_list_windows (MetaWorkspace *workspace)
   return workspace_windows;
 }
 
+/**
+ * meta_workspace_list_unobscured_windows:
+ * @workspace: a #MetaWorkspace
+ *
+ * This is the same as meta_workspace_list_windows, except it will
+ * only return windows that are not completely covered by other
+ * windows. Windows are returned in stacking order (bottom to top).
+ *
+ * Return value: (transfer container) (element-type MetaWindow): the
+ * list of visible windows in stacking order.
+ */
+GList*
+meta_workspace_list_unobscured_windows (MetaWorkspace *workspace)
+{
+  GList *stacked_windows;
+  GList *visible_windows;
+  GList *stack_iter;
+  cairo_region_t *visible_region;
+  GHashTable *visible_set;
+
+  stacked_windows = meta_stack_list_windows (workspace->display->stack, workspace);
+  visible_region = cairo_region_create_rectangle (&workspace->work_area_screen);
+  visible_set = g_hash_table_new (g_direct_hash, g_direct_equal);
+
+  // Process windows from top to bottom in stacking order
+  for (stack_iter = g_list_last (stacked_windows);
+       stack_iter != NULL;
+       stack_iter = stack_iter->prev)
+    {
+      MetaWindow *window = stack_iter->data;
+      cairo_region_t *window_region;
+
+      if (!meta_window_located_on_workspace (window, workspace))
+        continue;
+
+      if (window->minimized || !window->mapped)
+        continue;
+
+      // Check what part of this window intersects the visible region
+      window_region = cairo_region_create_rectangle (&window->rect);
+      cairo_region_intersect (window_region, visible_region);
+
+      if (!cairo_region_is_empty (window_region))
+        {
+          g_hash_table_add (visible_set, window);
+          cairo_region_subtract (visible_region, window_region);
+        }
+
+      cairo_region_destroy (window_region);
+    }
+
+  cairo_region_destroy (visible_region);
+
+  // Build result list in stacking order (bottom to top)
+  visible_windows = NULL;
+  for (stack_iter = stacked_windows; stack_iter != NULL; stack_iter = stack_iter->next)
+    {
+      MetaWindow *window = stack_iter->data;
+
+      if (g_hash_table_contains (visible_set, window))
+        visible_windows = g_list_append (visible_windows, window);
+    }
+
+  g_hash_table_destroy (visible_set);
+  g_list_free (stacked_windows);
+
+  return visible_windows;
+}
+
 void
 meta_workspace_invalidate_work_area (MetaWorkspace *workspace)
 {
