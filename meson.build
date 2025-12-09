@@ -1,4 +1,4 @@
-project('muffin', 'c', version : '6.4.1', meson_version : '>=1.0.0', license : 'GPLv2+')
+project('muffin', 'c', version : '6.6.0', meson_version : '>=1.0.0', license : 'GPLv2+')
 
 muffin_plugin_api_version = '3'
 

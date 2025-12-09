@@ -1,3 +1,91 @@
+muffin (6.6.0) zena; urgency=medium
+
+  [ Kevin Langman ]
+  * Add get_pipeline() API (#707)
+
+  [ Michael Webster ]
+  * Update debian/libmuffin0.symbols.
+
+  [ JosephMcc ]
+  * clutter/actor: Allow specifying the layout manager for an actor type (#709)
+
+  [ Eli Schwartz ]
+  * meson: fix some implicit ordering dependencies on generated headers (#716)
+
+  [ Collin Bartlam ]
+  * window.c: update saved_rect to target monitor work area on tiling (#714)
+
+  [ Joseph Wang ]
+  * disable assert for gi scanner (#720)
+  * use non-deprecated g_spawn_check_wait_status (#721)
+
+  [ Aleksey Samoilov ]
+  * Replace any references to mutter with muffin (#726)
+  * Bump wl_output interface to v4 (#727)
+  * Fix Qt apps crash (#739)
+  * [Wayland] Add support for xdg-foreign-v2 (#728)
+  * [Wayland] Remove deprecated and obsolete protocols (#729)
+
+  [ Jami Kettunen ]
+  * wayland/dma-buf: Add support for BGR_8888 formats (#732)
+
+  [ Aleksey Samoilov ]
+  * Bump wl_compositor to version 5 (#734)
+  * [Wayland]: Add support for hold gesture (#735)
+
+  [ Michael Webster ]
+  * debian/control: Update some versions to match build changes.
+
+  [ Aleksey Samoilov ]
+  * [Wayland] Bump gtk-shell-v1 protocol to version 6 (#736)
+  * [Wayland] Add support for xdg-dialog-v1 protocol (#737)
+  * [Xwayland] Add Xwayland byte-swapped clients support (#738)
+  * [Wayland] Add support for xdg_toplevel.configure_bounds() (#740)
+  * [Wayland] Fix crash when empty window geometry set (#741)
+  * [Wayland] Implement xdg-activation-v1 protocol (#725)
+  * [Xwayland] Check for listenfd option (#743)
+
+  [ Michael Webster ]
+  * Revert "x11 backend: Don't let muffin reset the keyboard layout any time" (#719)
+  * meta-xwayland.c: Fix rebase error.
+
+  [ Clement Lefebvre ]
+  * Switch to XApp symbolic icons
+  * Switch to xapp-symbolic-icons (XSI)
+
+  [ Michael Webster ]
+  * display.c: Allow non-maximized windows to affect a monitor's fullscreen state.
+
+  [ Sunderland93 ]
+  * xdg-shell/popup: Reset 'dismissed-by-client' state when remapping
+  * window-actor/wayland: Remove subsurface actors on dispose
+  * wayland/xdg-shell: Send xdg_popup.popup_done when position invalid
+  * wayland/xdg-shell: Bail from popup_configure if resource was destroyed
+
+  [ Aleksey Samoilov ]
+  * [Wayland] Viewport fixes (#747)
+  * [Meson] Fix some deprecations warnings (#750)
+  * [Wayland] add support for idle-inhibit-unstable-v1 protocol (#681)
+  * [Wayland] Add support for xdg-toplevel-tag-v1 protocol (#745)
+
+  [ Leigh Scott ]
+  * Make egl_device default and remove default enabled otions from Debian rules (#757)
+  * cogl/winsys: Remove eglGetProcAddress workaround for EGL < 1.5 (#760)
+  * Remove default_driver build option (#761)
+  * Switch to libglvnd build deps (#758)
+
+  [ Michael Webster ]
+  * theme.c: Revert symbolic name changes for window controls.
+
+  [ Aleksey Samoilov ]
+  * [Wayland] Add wl_shm support for 10 bpc formats and wl_shm/DMA-BUF su… (#748)
+  * [Wayland] Use anonymous file abstraction for wayland-keymap sharing (#753)
+
+  [ Michael Webster ]
+  * workspace.c: Add new method for listing visible window stack. (#766)
+
+ -- Clement Lefebvre <root@linuxmint.com>  Tue, 09 Dec 2025 15:38:33 +0000
+
 muffin (6.4.1) xia; urgency=medium
 
   [ Michael Webster ]
