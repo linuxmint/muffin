@@ -498,6 +498,14 @@ reload_iso_next_group_combos (MetaKeyBindingManager *keys)
     {
       keys->iso_next_group_combo[0].mask = Mod1Mask;
     }
+  else if (g_str_equal (iso_next_group_option, "win_space_toggle"))
+    {
+      keys->iso_next_group_combo[0].mask = keys->super_mask;
+    }
+  else if (g_str_equal (iso_next_group_option, "ctrl_space_toggle"))
+    {
+      keys->iso_next_group_combo[0].mask = ControlMask;
+    }
   else if (g_str_equal (iso_next_group_option, "ctrl_shift_toggle") ||
            g_str_equal (iso_next_group_option, "lctrl_lshift_toggle") ||
            g_str_equal (iso_next_group_option, "rctrl_rshift_toggle"))
