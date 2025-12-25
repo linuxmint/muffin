@@ -682,7 +682,7 @@ meta_backend_x11_get_current_logical_monitor (MetaBackend *backend)
   MetaBackendX11 *x11 = META_BACKEND_X11 (backend);
   MetaBackendX11Private *priv = meta_backend_x11_get_instance_private (x11);
   MetaCursorTracker *cursor_tracker;
-  int x, y;
+  graphene_point_t point;
   MetaMonitorManager *monitor_manager;
   MetaLogicalMonitor *logical_monitor;
 
@@ -690,10 +690,11 @@ meta_backend_x11_get_current_logical_monitor (MetaBackend *backend)
     return priv->cached_current_logical_monitor;
 
   cursor_tracker = meta_backend_get_cursor_tracker (backend);
-  meta_cursor_tracker_get_pointer (cursor_tracker, &x, &y, NULL);
+  meta_cursor_tracker_get_pointer (cursor_tracker, &point, NULL);
   monitor_manager = meta_backend_get_monitor_manager (backend);
   logical_monitor =
-    meta_monitor_manager_get_logical_monitor_at (monitor_manager, x, y);
+    meta_monitor_manager_get_logical_monitor_at (monitor_manager,
+                                                 point.x, point.y);
 
   if (!logical_monitor && monitor_manager->logical_monitors)
     logical_monitor = monitor_manager->logical_monitors->data;
