@@ -2641,7 +2641,7 @@ _clutter_stage_dirty_projection (ClutterStage *stage)
     {
       ClutterStageView *view = l->data;
 
-      clutter_stage_view_set_dirty_projection (view, TRUE);
+      clutter_stage_view_invalidate_projection (view);
     }
 }
 
@@ -2731,7 +2731,7 @@ _clutter_stage_dirty_viewport (ClutterStage *stage)
     {
       ClutterStageView *view = l->data;
 
-      clutter_stage_view_set_dirty_viewport (view, TRUE);
+      clutter_stage_view_invalidate_viewport (view);
     }
 }
 
@@ -3430,7 +3430,6 @@ _clutter_stage_maybe_setup_viewport (ClutterStage     *stage,
                                      ClutterStageView *view)
 {
   ClutterStagePrivate *priv = stage->priv;
-  CoglFramebuffer *fb = clutter_stage_view_get_framebuffer (view);
 
   if (clutter_stage_view_is_dirty_viewport (view))
     {
@@ -3457,19 +3456,13 @@ _clutter_stage_maybe_setup_viewport (ClutterStage     *stage,
       viewport_y = roundf (priv->viewport[1] * fb_scale - viewport_offset_y);
       viewport_width = roundf (priv->viewport[2] * fb_scale);
       viewport_height = roundf (priv->viewport[3] * fb_scale);
-      cogl_framebuffer_set_viewport (fb,
-                                     viewport_x, viewport_y,
-                                     viewport_width, viewport_height);
-
-      clutter_stage_view_set_dirty_viewport (view, FALSE);
+      clutter_stage_view_set_viewport (view,
+                                       viewport_x, viewport_y,
+                                       viewport_width, viewport_height);
     }
 
   if (clutter_stage_view_is_dirty_projection (view))
-    {
-      cogl_framebuffer_set_projection_matrix (fb, &priv->projection);
-
-      clutter_stage_view_set_dirty_projection (view, FALSE);
-    }
+    clutter_stage_view_set_projection (view, &priv->projection);
 }
 
 #undef _DEG_TO_RAD

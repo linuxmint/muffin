@@ -17,6 +17,7 @@ cogl_config_h = configure_file(
 
 cogl_pkg_deps = [
   glib_dep,
+  gio_dep,
   gobject_dep,
   graphene_dep,
 ]

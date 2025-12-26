@@ -1509,7 +1509,7 @@ cogl_is_framebuffer (void *object);
  *
  * This blits a region of the color buffer of the source buffer
  * to the destination buffer. This function should only be
- * called if the COGL_PRIVATE_FEATURE_BLIT_FRAMEBUFFER feature is
+ * called if the COGL_FEATURE_ID_BLIT_FRAMEBUFFER feature is
  * advertised.
  *
  * The source and destination rectangles are defined in offscreen
