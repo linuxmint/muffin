@@ -1167,7 +1167,6 @@ libmuffin-clutter-0.so.0 libmuffin0 #MINVER#
  clutter_stage_view_get_scale@Base 5.3.0
  clutter_stage_view_get_type@Base 5.3.0
  clutter_stage_view_invalidate_offscreen_blit_pipeline@Base 5.3.0
- clutter_stage_view_transform_to_onscreen@Base 5.3.0
  clutter_stage_window_get_type@Base 5.3.0
  clutter_state_get_duration@Base 5.3.0
  clutter_state_get_state@Base 5.3.0
@@ -1565,8 +1564,17 @@ libmuffin-cogl-0.so.0 libmuffin0 #MINVER#
  cogl_display_set_onscreen_template@Base 5.3.0
  cogl_display_setup@Base 5.3.0
  cogl_dma_buf_handle_free@Base 5.3.0
+ cogl_dma_buf_handle_get_bpp@Base 6.6.0
  cogl_dma_buf_handle_get_fd@Base 5.3.0
  cogl_dma_buf_handle_get_framebuffer@Base 5.3.0
+ cogl_dma_buf_handle_get_height@Base 6.6.0
+ cogl_dma_buf_handle_get_offset@Base 6.6.0
+ cogl_dma_buf_handle_get_stride@Base 6.6.0
+ cogl_dma_buf_handle_get_width@Base 6.6.0
+ cogl_dma_buf_handle_mmap@Base 6.6.0
+ cogl_dma_buf_handle_munmap@Base 6.6.0
+ cogl_dma_buf_handle_sync_read_end@Base 6.6.0
+ cogl_dma_buf_handle_sync_read_start@Base 6.6.0
  cogl_dma_buf_handle_new@Base 5.3.0
  cogl_egl_context_get_egl_display@Base 5.3.0
  cogl_egl_texture_2d_new_from_image@Base 5.3.0

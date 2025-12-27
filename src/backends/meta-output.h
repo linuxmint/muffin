@@ -122,6 +122,8 @@ META_EXPORT_TEST G_DECLARE_FINAL_TYPE (MetaOutput, meta_output, META, OUTPUT, GO
 META_EXPORT_TEST
 MetaGpu * meta_output_get_gpu (MetaOutput *output);
 
+const char * meta_output_get_name (MetaOutput *output);
+
 META_EXPORT_TEST
 void meta_output_assign_crtc (MetaOutput *output,
                               MetaCrtc   *crtc);

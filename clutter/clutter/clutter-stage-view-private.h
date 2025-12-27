@@ -20,17 +20,28 @@
 
 #include "clutter/clutter-stage-view.h"
 
-void clutter_stage_view_after_paint (ClutterStageView *view);
+void clutter_stage_view_after_paint (ClutterStageView *view,
+                                     cairo_region_t   *redraw_clip);
+
+void clutter_stage_view_before_swap_buffer (ClutterStageView     *view,
+                                            const cairo_region_t *swap_region);
 
 gboolean clutter_stage_view_is_dirty_viewport (ClutterStageView *view);
 
-void clutter_stage_view_set_dirty_viewport (ClutterStageView *view,
-                                            gboolean          dirty);
+void clutter_stage_view_invalidate_viewport (ClutterStageView *view);
+
+void clutter_stage_view_set_viewport (ClutterStageView *view,
+                                      float             x,
+                                      float             y,
+                                      float             width,
+                                      float             height);
 
 gboolean clutter_stage_view_is_dirty_projection (ClutterStageView *view);
 
-void clutter_stage_view_set_dirty_projection (ClutterStageView *view,
-                                              gboolean          dirty);
+void clutter_stage_view_invalidate_projection (ClutterStageView *view);
+
+void clutter_stage_view_set_projection (ClutterStageView *view,
+                                        const CoglMatrix *matrix);
 
 void clutter_stage_view_add_redraw_clip (ClutterStageView            *view,
                                          const cairo_rectangle_int_t *clip);
@@ -42,5 +53,12 @@ gboolean clutter_stage_view_has_redraw_clip (ClutterStageView *view);
 const cairo_region_t * clutter_stage_view_peek_redraw_clip (ClutterStageView *view);
 
 cairo_region_t * clutter_stage_view_take_redraw_clip (ClutterStageView *view);
+
+
+void clutter_stage_view_transform_rect_to_onscreen (ClutterStageView            *view,
+                                                    const cairo_rectangle_int_t *src_rect,
+                                                    int                          dst_width,
+                                                    int                          dst_height,
+                                                    cairo_rectangle_int_t       *dst_rect);
 
 #endif /* __CLUTTER_STAGE_VIEW_PRIVATE_H__ */

@@ -477,8 +477,8 @@ _cogl_driver_update_features (CoglContext *ctx,
                   TRUE);
 
   if (ctx->glBlitFramebuffer)
-    COGL_FLAGS_SET (private_features,
-                    COGL_PRIVATE_FEATURE_BLIT_FRAMEBUFFER, TRUE);
+    COGL_FLAGS_SET (ctx->features,
+                    COGL_FEATURE_ID_BLIT_FRAMEBUFFER, TRUE);
 
   COGL_FLAGS_SET (private_features, COGL_PRIVATE_FEATURE_PBOS, TRUE);
 
