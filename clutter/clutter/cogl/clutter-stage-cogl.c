@@ -743,7 +743,7 @@ clutter_stage_cogl_redraw_view (ClutterStageWindow *stage_window,
    * artefacts.
    */
   if (use_clipped_redraw)
-    swap_region = cairo_region_copy (fb_clip_region);
+    swap_region = cairo_region_reference (fb_clip_region);
   else
     swap_region = cairo_region_create ();
 
