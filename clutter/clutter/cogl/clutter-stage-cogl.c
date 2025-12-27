@@ -571,7 +571,7 @@ clutter_stage_cogl_redraw_view (ClutterStageWindow *stage_window,
   CoglFramebuffer *onscreen = clutter_stage_view_get_onscreen (view);
   cairo_rectangle_int_t view_rect;
   gboolean is_full_redraw;
-  gboolean use_clipped_redraw;
+  gboolean use_clipped_redraw = TRUE;
   gboolean can_blit_sub_buffer;
   gboolean has_buffer_age;
   gboolean swap_with_damage;
@@ -581,7 +581,7 @@ clutter_stage_cogl_redraw_view (ClutterStageWindow *stage_window,
   cairo_region_t *swap_region;
   float fb_scale;
   int fb_width, fb_height;
-  int buffer_age;
+  int buffer_age = 0;
 
   gboolean res;
 
