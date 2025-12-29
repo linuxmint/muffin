@@ -862,7 +862,10 @@ meta_frame_layout_draw_with_style (MetaFrameLayout         *layout,
                icon_name = "window-minimize-symbolic";
                break;
             case META_BUTTON_TYPE_MENU:
-               icon_name = "open-menu-symbolic";
+               if (mini_icon)
+                 surface = cairo_surface_reference (mini_icon);
+               else
+                 icon_name = "open-menu-symbolic";
                break;
             default:
                icon_name = NULL;
@@ -903,11 +906,21 @@ meta_frame_layout_draw_with_style (MetaFrameLayout         *layout,
 
           if (surface)
             {
-              double x, y;
-              x = button_rect.x + (button_rect.width - layout->icon_size) / 2.0;
-              y = button_rect.y + (button_rect.height - layout->icon_size) / 2.0;
+              float width, height;
+              int x, y;
 
-              gtk_render_icon_surface (style, cr, surface, x, y);
+              width = cairo_image_surface_get_width (surface) / scale;
+              height = cairo_image_surface_get_height (surface) / scale;
+              x = button_rect.x + (button_rect.width - layout->icon_size) / 2;
+              y = button_rect.y + (button_rect.height - layout->icon_size) / 2;
+
+              cairo_translate (cr, x, y);
+              cairo_scale (cr,
+                           layout->icon_size / width,
+                           layout->icon_size / height);
+              cairo_set_source_surface (cr, surface, 0, 0);
+              cairo_paint (cr);
+
               cairo_surface_destroy (surface);
             }
         }
