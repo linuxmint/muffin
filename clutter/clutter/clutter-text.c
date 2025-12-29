@@ -1907,19 +1907,65 @@ clutter_text_foreach_selection_rectangle (ClutterText              *self,
 }
 
 static void
-add_selection_rectangle_to_path (ClutterText           *text,
-                                 const ClutterActorBox *box,
-                                 gpointer               user_data)
-{
-  cogl_path_rectangle (user_data, box->x1, box->y1, box->x2, box->y2);
-}
-
-static void
 clutter_text_foreach_selection_rectangle_prescaled (ClutterText              *self,
                                                     ClutterTextSelectionFunc  func,
                                                     gpointer                  user_data)
 {
   clutter_text_foreach_selection_rectangle (self, 1.0f, func, user_data);
+}
+
+static void
+paint_selection_rectangle (ClutterText           *self,
+                           const ClutterActorBox *box,
+                           gpointer               user_data)
+{
+  CoglFramebuffer *fb = user_data;
+  ClutterTextPrivate *priv = self->priv;
+  ClutterActor *actor = CLUTTER_ACTOR (self);
+  guint8 paint_opacity = clutter_actor_get_paint_opacity (actor);
+  CoglPipeline *color_pipeline = cogl_pipeline_copy (default_color_pipeline);
+  PangoLayout *layout = clutter_text_get_layout (self);
+  CoglColor cogl_color = { 0, };
+  const ClutterColor *color;
+
+  /* Paint selection background */
+  if (priv->selection_color_set)
+    color = &priv->selection_color;
+  else if (priv->cursor_color_set)
+    color = &priv->cursor_color;
+  else
+    color = &priv->text_color;
+
+  cogl_color_init_from_4ub (&cogl_color,
+                            color->red,
+                            color->green,
+                            color->blue,
+                            paint_opacity * color->alpha / 255);
+  cogl_color_premultiply (&cogl_color);
+  cogl_pipeline_set_color (color_pipeline, &cogl_color);
+
+  cogl_framebuffer_push_rectangle_clip (fb,
+                                        box->x1, box->y1,
+                                        box->x2, box->y2);
+  cogl_framebuffer_draw_rectangle (fb, color_pipeline,
+                                   box->x1, box->y1,
+                                   box->x2, box->y2);
+
+  if (priv->selected_text_color_set)
+    color = &priv->selected_text_color;
+  else
+    color = &priv->text_color;
+
+  cogl_color_init_from_4ub (&cogl_color,
+                            color->red,
+                            color->green,
+                            color->blue,
+                            paint_opacity * color->alpha / 255);
+
+  cogl_pango_show_layout (fb, layout, priv->text_x, 0, &cogl_color);
+
+  cogl_framebuffer_pop_clip (fb);
+  cogl_object_unref (color_pipeline);
 }
 
 /* Draws the selected text, its background, and the cursor */
@@ -1964,52 +2010,9 @@ selection_paint (ClutterText     *self,
     }
   else
     {
-      /* Paint selection background first */
-      CoglPipeline *color_pipeline = cogl_pipeline_copy (default_color_pipeline);
-      PangoLayout *layout = clutter_text_get_layout (self);
-      CoglPath *selection_path = cogl_path_new ();
-      CoglColor cogl_color = { 0, };
-
-      /* Paint selection background */
-      if (priv->selection_color_set)
-        color = &priv->selection_color;
-      else if (priv->cursor_color_set)
-        color = &priv->cursor_color;
-      else
-        color = &priv->text_color;
-
-      cogl_color_init_from_4ub (&cogl_color,
-                                color->red,
-                                color->green,
-                                color->blue,
-                                paint_opacity * color->alpha / 255);
-      cogl_color_premultiply (&cogl_color);
-      cogl_pipeline_set_color (color_pipeline, &cogl_color);
-
       clutter_text_foreach_selection_rectangle_prescaled (self,
-                                                          add_selection_rectangle_to_path,
-                                                          selection_path);
-
-      cogl_framebuffer_fill_path (fb, color_pipeline, selection_path);
-
-      /* Paint selected text */
-      cogl_framebuffer_push_path_clip (fb, selection_path);
-      cogl_object_unref (selection_path);
-
-      if (priv->selected_text_color_set)
-        color = &priv->selected_text_color;
-      else
-        color = &priv->text_color;
-
-      cogl_color_init_from_4ub (&cogl_color,
-                                color->red,
-                                color->green,
-                                color->blue,
-                                paint_opacity * color->alpha / 255);
-
-      cogl_pango_show_layout (fb, layout, priv->text_x, 0, &cogl_color);
-
-      cogl_framebuffer_pop_clip (fb);
+                                                          paint_selection_rectangle,
+                                                          fb);
     }
 }
 
