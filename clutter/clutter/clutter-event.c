@@ -645,7 +645,7 @@ clutter_event_set_stage (ClutterEvent *event,
 ClutterEventFlags
 clutter_event_get_flags (const ClutterEvent *event)
 {
-  g_return_val_if_fail (event != NULL, CLUTTER_EVENT_NONE);
+  g_return_val_if_fail (event != NULL, CLUTTER_EVENT_FLAG_NONE);
 
   return event->any.flags;
 }
