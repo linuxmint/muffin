@@ -72,11 +72,14 @@ meta_cursor_renderer_x11_update_cursor (MetaCursorRenderer *renderer,
           Cursor xcursor;
 
           xcursor = meta_create_x_cursor (xdisplay, cursor);
-          XDefineCursor (xdisplay, xwindow, xcursor);
-          XFlush (xdisplay);
-          XFreeCursor (xdisplay, xcursor);
+          if (xcursor)
+            {
+              XDefineCursor (xdisplay, xwindow, xcursor);
+              XFlush (xdisplay);
+              XFreeCursor (xdisplay, xcursor);
 
-          has_server_cursor = TRUE;
+              has_server_cursor = TRUE;
+            }
         }
     }
 
