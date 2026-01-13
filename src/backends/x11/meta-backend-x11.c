@@ -395,6 +395,18 @@ handle_host_xevent (MetaBackend *backend,
         {
           switch (xkb_ev->any.xkb_type)
             {
+            case XkbNewKeyboardNotify:
+              XkbNewKeyboardNotifyEvent *xkb_nkb_ev = (XkbNewKeyboardNotifyEvent *) xkb_ev;
+              // req_minor == 23 is X_kbGetKeyboardByName, triggered by:
+              // - set_keymap() calls
+              // - true keyboard hotplug
+              // req_minor == 9 is X_kbGetDeviceInfo, triggered by device switches
+              // (e.g., alternating between keyboard and volume knob) - ignore these
+              if (xkb_nkb_ev->req_minor == 23)
+                {
+                  keymap_changed (backend);
+                }
+              break;
             case XkbMapNotify:
               keymap_changed (backend);
               break;
