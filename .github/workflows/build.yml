@@ -14,9 +14,12 @@ on:
         description: 'Start an SSH server on failure.'
         required: false
         default: false
+  issue_comment:
+    types: [created]
 
 jobs:
   build:
+    if: github.event_name != 'issue_comment'
     uses: linuxmint/github-actions/.github/workflows/do-builds.yml@master
     with:
       commit_id: master
