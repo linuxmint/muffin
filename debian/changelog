@@ -1,3 +1,12 @@
+muffin (6.6.2) zena; urgency=medium
+
+  [ Michael Webster ]
+  * github: Update workflow file.
+  * github: Fix build.yml
+  * Revert 23aba56e6d (ignore XkbNewKeyboardNotify) - Filter by (#782)
+
+ -- Clement Lefebvre <root@linuxmint.com>  Fri, 16 Jan 2026 11:55:59 +0000
+
 muffin (6.6.1) zena; urgency=medium
 
   [ Michael Webster ]
