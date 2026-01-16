@@ -3698,29 +3698,29 @@ meta_renderer_native_create_renderer_gpu_data (MetaRendererNative  *renderer_nat
   GError *egl_device_error = NULL;
 #endif
 
-#ifdef HAVE_EGL_DEVICE
-  /* Try to initialize the EGLDevice backend first. Whenever we use a
-   * non-NVIDIA GPU, the EGLDevice enumeration function won't find a match, and
-   * we'll fall back to GBM (which will always succeed as it has a software
-   * rendering fallback)
+  /* Try to initialize the GBM backend first. GBM provides better compatibility
+   * across different GPU vendors and has robust fallback mechanisms including
+   * software rendering when needed.
    */
-  renderer_gpu_data = create_renderer_gpu_data_egl_device (renderer_native,
-                                                           gpu_kms,
-                                                           &egl_device_error);
-  if (renderer_gpu_data)
-    return renderer_gpu_data;
-#endif
-
   renderer_gpu_data = create_renderer_gpu_data_gbm (renderer_native,
                                                     gpu_kms,
                                                     &gbm_error);
   if (renderer_gpu_data)
-    {
+    return renderer_gpu_data;
+
 #ifdef HAVE_EGL_DEVICE
-      g_error_free (egl_device_error);
-#endif
+  /* Fall back to EGLDevice backend (primarily for NVIDIA proprietary drivers
+   * where it may provide better performance or features)
+    */
+  renderer_gpu_data = create_renderer_gpu_data_egl_device (renderer_native,
+                                                           gpu_kms,
+                                                           &egl_device_error);
+  if (renderer_gpu_data)
+    {
+      g_error_free (gbm_error);
       return renderer_gpu_data;
     }
+#endif
 
   g_set_error (error, G_IO_ERROR,
                G_IO_ERROR_FAILED,
