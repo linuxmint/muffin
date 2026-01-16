@@ -35,6 +35,12 @@ meta_output_get_gpu (MetaOutput *output)
   return output->gpu;
 }
 
+const char *
+meta_output_get_name (MetaOutput *output)
+{
+  return output->name;
+}
+
 void
 meta_output_assign_crtc (MetaOutput *output,
                          MetaCrtc   *crtc)
