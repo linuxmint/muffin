@@ -401,30 +401,23 @@ get_pointer_position_gdk (int         *x,
 }
 
 static void
-get_pointer_position_clutter (int         *x,
-                              int         *y,
-                              int         *mods)
+get_pointer_position_clutter (graphene_point_t *point,
+                              int              *mods)
 {
   ClutterSeat *seat;
   ClutterInputDevice *cdevice;
-  graphene_point_t point;
 
   seat = clutter_backend_get_default_seat (clutter_get_default_backend ());
   cdevice = clutter_seat_get_pointer (seat);
 
-  clutter_input_device_get_coords (cdevice, NULL, &point);
-  if (x)
-    *x = point.x;
-  if (y)
-    *y = point.y;
+  clutter_input_device_get_coords (cdevice, NULL, point);
   if (mods)
     *mods = clutter_input_device_get_modifier_state (cdevice);
 }
 
 void
 meta_cursor_tracker_get_pointer (MetaCursorTracker   *tracker,
-                                 int                 *x,
-                                 int                 *y,
+                                 graphene_point_t    *coords,
                                  ClutterModifierType *mods)
 {
   /* We can't use the clutter interface when not running as a wayland compositor,
@@ -433,9 +426,17 @@ meta_cursor_tracker_get_pointer (MetaCursorTracker   *tracker,
      we forward to xwayland.
   */
   if (meta_is_wayland_compositor ())
-    get_pointer_position_clutter (x, y, (int*)mods);
+    {
+      get_pointer_position_clutter (coords, (int*)mods);
+    }
   else
-    get_pointer_position_gdk (x, y, (int*)mods);
+    {
+      int x, y;
+
+      get_pointer_position_gdk (&x, &y, (int*)mods);
+      coords->x = x;
+      coords->y = y;
+    }
 }
 
 gboolean

@@ -51,8 +51,7 @@ CoglTexture   *meta_cursor_tracker_get_sprite (MetaCursorTracker *tracker);
 
 META_EXPORT
 void           meta_cursor_tracker_get_pointer (MetaCursorTracker   *tracker,
-                                                int                 *x,
-                                                int                 *y,
+                                                graphene_point_t    *coords,
                                                 ClutterModifierType *mods);
 
 META_EXPORT
