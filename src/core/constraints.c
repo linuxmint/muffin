@@ -853,7 +853,7 @@ constrain_custom_rule (MetaWindow         *window,
     return TRUE;
 
   parent = meta_window_get_transient_for (window);
-  if (window->placement.state == META_PLACEMENT_STATE_CONSTRAINED_FINISHED)
+  if (parent && window->placement.state == META_PLACEMENT_STATE_CONSTRAINED_FINISHED)
     {
       placement_rule->parent_rect.x = parent->rect.x;
       placement_rule->parent_rect.y = parent->rect.y;
@@ -880,8 +880,8 @@ constrain_custom_rule (MetaWindow         *window,
     case META_PLACEMENT_STATE_CONSTRAINED_FINISHED:
     case META_PLACEMENT_STATE_INVALIDATED:
       temporary_rect = (MetaRectangle) {
-        .x = parent->rect.x + window->placement.current.rel_x,
-        .y = parent->rect.y + window->placement.current.rel_y,
+        .x = (parent ? parent->rect.x : parent_x) + window->placement.current.rel_x,
+        .y = (parent ? parent->rect.y : parent_y) + window->placement.current.rel_y,
         .width = info->current.width,
         .height = info->current.height,
       };

@@ -520,6 +520,8 @@ if have_wayland
     'wayland/meta-wayland-dnd-surface.h',
     'wayland/meta-wayland-gtk-shell.c',
     'wayland/meta-wayland-gtk-shell.h',
+    'wayland/meta-wayland-layer-shell.c',
+    'wayland/meta-wayland-layer-shell.h',
     'wayland/meta-wayland.h',
     'wayland/meta-wayland-idle-inhibit.c',
     'wayland/meta-wayland-idle-inhibit.h',
@@ -808,6 +810,7 @@ if have_wayland
   wayland_protocols = [
     ['cursor-shape-v1', 'private', ],
     ['gtk-shell', 'private', ],
+    ['wlr-layer-shell-unstable-v1', 'private', ],
     ['idle-inhibit', 'unstable', 'v1', ],
     ['keyboard-shortcuts-inhibit', 'unstable', 'v1', ],
     ['linux-dmabuf', 'unstable', 'v1', ],

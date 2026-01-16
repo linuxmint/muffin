@@ -62,6 +62,7 @@ struct _MetaWorkspace
   GList  *screen_edges;
   GList  *monitor_edges;
   GSList *builtin_struts;
+  GSList *layer_shell_struts;
   GSList *all_struts;
   guint work_areas_invalid : 1;
 
@@ -87,6 +88,14 @@ void meta_workspace_get_work_area_for_logical_monitor (MetaWorkspace      *works
                                                        MetaRectangle      *area);
 
 void meta_workspace_invalidate_work_area (MetaWorkspace *workspace);
+
+void meta_workspace_set_layer_shell_struts (MetaWorkspace *workspace,
+                                            GSList        *struts);
+
+void meta_workspace_get_work_area_for_logical_monitor_excluding_layer_shell (
+                                                       MetaWorkspace      *workspace,
+                                                       MetaLogicalMonitor *logical_monitor,
+                                                       MetaRectangle      *area);
 
 GList* meta_workspace_get_onscreen_region       (MetaWorkspace *workspace);
 GList * meta_workspace_get_onmonitor_region (MetaWorkspace      *workspace,

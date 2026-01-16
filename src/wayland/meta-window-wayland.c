@@ -483,7 +483,7 @@ meta_window_wayland_update_main_monitor (MetaWindow                   *window,
   /* If the window is not a toplevel window (i.e. it's a popup window) just use
    * the monitor of the toplevel. */
   toplevel_window = meta_wayland_surface_get_toplevel_window (window->surface);
-  if (toplevel_window != window)
+  if (toplevel_window && toplevel_window != window)
     {
       meta_window_update_monitor (toplevel_window, flags);
       window->monitor = toplevel_window->monitor;
@@ -976,8 +976,17 @@ meta_window_wayland_finish_move_resize (MetaWindow              *window,
               MetaWindow *parent;
 
               parent = meta_window_get_transient_for (window);
-              rect.x = parent->rect.x + acked_configuration->rel_x;
-              rect.y = parent->rect.y + acked_configuration->rel_y;
+              if (parent)
+                {
+                  rect.x = parent->rect.x + acked_configuration->rel_x;
+                  rect.y = parent->rect.y + acked_configuration->rel_y;
+                }
+              else
+                {
+                  /* Layer-shell popups have no parent MetaWindow, use placement rule's parent_rect */
+                  rect.x = window->placement.rule->parent_rect.x + acked_configuration->rel_x;
+                  rect.y = window->placement.rule->parent_rect.y + acked_configuration->rel_y;
+                }
             }
           else if (acked_configuration->has_position)
             {
@@ -1059,6 +1068,9 @@ meta_window_place_with_placement_rule (MetaWindow        *window,
                                     META_GRAVITY_NORTH_WEST,
                                     window->unconstrained_rect);
   window->calc_placement = FALSE;
+
+  /* Mark as placed so meta_window_force_placement won't override our position */
+  window->placed = TRUE;
 }
 
 void
