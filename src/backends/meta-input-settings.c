@@ -1437,6 +1437,9 @@ load_pointer_a11y_settings (MetaInputSettings  *input_settings,
   pointer_a11y_settings.dwell_gesture_secondary =
     pointer_a11y_dwell_direction_from_setting (input_settings, "dwell-gesture-secondary");
 
+  pointer_a11y_settings.dwell_click_mode_lock =
+    g_settings_get_boolean (priv->mouse_a11y_settings, "dwell-click-mode-lock");
+
   clutter_seat_set_pointer_a11y_settings (CLUTTER_SEAT (priv->seat),
                                           &pointer_a11y_settings);
 }
