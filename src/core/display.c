@@ -3542,7 +3542,7 @@ check_fullscreen_func (gpointer data)
           if (meta_window_is_monitor_sized (window))
             covers_monitors = TRUE;
         }
-      else if (window->type == META_WINDOW_NORMAL)
+      else if (window->type == META_WINDOW_NORMAL && !window->wm_state_above)
         {
           MetaRectangle window_rect;
           meta_window_get_frame_rect (window, &window_rect);
