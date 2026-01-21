@@ -1006,6 +1006,8 @@ notify_pinch_gesture_event (ClutterInputDevice          *input_device,
                             uint64_t                     time_us,
                             double                       dx,
                             double                       dy,
+                            double                       dx_unaccel,
+                            double                       dy_unaccel,
                             double                       angle_delta,
                             double                       scale,
                             uint32_t                     n_fingers)
@@ -1037,6 +1039,8 @@ notify_pinch_gesture_event (ClutterInputDevice          *input_device,
   event->touchpad_pinch.y = pos.y;
   event->touchpad_pinch.dx = dx;
   event->touchpad_pinch.dy = dy;
+  event->touchpad_pinch.dx_unaccel = dx_unaccel;
+  event->touchpad_pinch.dy_unaccel = dy_unaccel;
   event->touchpad_pinch.angle_delta = angle_delta;
   event->touchpad_pinch.scale = scale;
   event->touchpad_pinch.n_fingers = n_fingers;
@@ -1055,7 +1059,9 @@ notify_swipe_gesture_event (ClutterInputDevice          *input_device,
                             uint64_t                     time_us,
                             uint32_t                     n_fingers,
                             double                       dx,
-                            double                       dy)
+                            double                       dy,
+                            double                       dx_unaccel,
+                            double                       dy_unaccel)
 {
   MetaInputDeviceNative *device_evdev;
   MetaSeatNative *seat;
@@ -1084,6 +1090,8 @@ notify_swipe_gesture_event (ClutterInputDevice          *input_device,
   event->touchpad_swipe.y = pos.y;
   event->touchpad_swipe.dx = dx;
   event->touchpad_swipe.dy = dy;
+  event->touchpad_swipe.dx_unaccel = dx_unaccel;
+  event->touchpad_swipe.dy_unaccel = dy_unaccel;
   event->touchpad_swipe.n_fingers = n_fingers;
 
   meta_xkb_translate_state (event, seat->xkb, seat->button_state);
@@ -2164,14 +2172,14 @@ process_device_event (MetaSeatNative        *seat,
         n_fingers = libinput_event_gesture_get_finger_count (gesture_event);
         device = libinput_device_get_user_data (libinput_device);
         time_us = libinput_event_gesture_get_time_usec (gesture_event);
-        notify_pinch_gesture_event (device, phase, time_us, 0, 0, 0, 0, n_fingers);
+        notify_pinch_gesture_event (device, phase, time_us, 0, 0, 0, 0, 0, 0, n_fingers);
         break;
       }
     case LIBINPUT_EVENT_GESTURE_PINCH_UPDATE:
       {
         struct libinput_event_gesture *gesture_event =
           libinput_event_get_gesture_event (event);
-        gdouble angle_delta, scale, dx, dy;
+        gdouble angle_delta, scale, dx, dy, dx_unaccel, dy_unaccel;
         uint32_t n_fingers;
         uint64_t time_us;
 
@@ -2182,10 +2190,13 @@ process_device_event (MetaSeatNative        *seat,
         scale = libinput_event_gesture_get_scale (gesture_event);
         dx = libinput_event_gesture_get_dx (gesture_event);
         dy = libinput_event_gesture_get_dy (gesture_event);
+        dx_unaccel = libinput_event_gesture_get_dx_unaccelerated (gesture_event);
+        dy_unaccel = libinput_event_gesture_get_dy_unaccelerated (gesture_event);
 
         notify_pinch_gesture_event (device,
                                     CLUTTER_TOUCHPAD_GESTURE_PHASE_UPDATE,
-                                    time_us, dx, dy, angle_delta, scale, n_fingers);
+                                    time_us, dx, dy, dx_unaccel, dy_unaccel,
+                                    angle_delta, scale, n_fingers);
         break;
       }
     case LIBINPUT_EVENT_GESTURE_SWIPE_BEGIN:
@@ -2207,7 +2218,7 @@ process_device_event (MetaSeatNative        *seat,
           phase = libinput_event_gesture_get_cancelled (gesture_event) ?
             CLUTTER_TOUCHPAD_GESTURE_PHASE_CANCEL : CLUTTER_TOUCHPAD_GESTURE_PHASE_END;
 
-        notify_swipe_gesture_event (device, phase, time_us, n_fingers, 0, 0);
+        notify_swipe_gesture_event (device, phase, time_us, n_fingers, 0, 0, 0, 0);
         break;
       }
     case LIBINPUT_EVENT_GESTURE_SWIPE_UPDATE:
@@ -2216,17 +2227,20 @@ process_device_event (MetaSeatNative        *seat,
           libinput_event_get_gesture_event (event);
         uint32_t n_fingers;
         uint64_t time_us;
-        double dx, dy;
+        double dx, dy, dx_unaccel, dy_unaccel;
 
         device = libinput_device_get_user_data (libinput_device);
         time_us = libinput_event_gesture_get_time_usec (gesture_event);
         n_fingers = libinput_event_gesture_get_finger_count (gesture_event);
         dx = libinput_event_gesture_get_dx (gesture_event);
         dy = libinput_event_gesture_get_dy (gesture_event);
+        dx_unaccel = libinput_event_gesture_get_dx_unaccelerated (gesture_event);
+        dy_unaccel = libinput_event_gesture_get_dy_unaccelerated (gesture_event);
 
         notify_swipe_gesture_event (device,
                                     CLUTTER_TOUCHPAD_GESTURE_PHASE_UPDATE,
-                                    time_us, n_fingers, dx, dy);
+                                    time_us, n_fingers, dx, dy,
+                                    dx_unaccel, dy_unaccel);
         break;
       }
     case LIBINPUT_EVENT_GESTURE_HOLD_BEGIN:
