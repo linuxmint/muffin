@@ -36,8 +36,6 @@ cogl-egl-defines.h
 cogl-enum-types.c
 cogl-enum-types.h
 cogl-gl-header.h
-cogl-path-enum-types.c
-cogl-path-enum-types.h
 cogl-config.h
 cogl-config.h.in
 cogl-muffin-config.h
