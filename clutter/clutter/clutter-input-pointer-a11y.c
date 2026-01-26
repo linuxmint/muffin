@@ -305,6 +305,9 @@ update_dwell_click_type (ClutterInputDevice *device)
 
   clutter_seat_get_pointer_a11y_settings (device->seat, &settings);
 
+  if (settings.dwell_click_mode_lock)
+    return;
+
   dwell_click_type = settings.dwell_click_type;
   switch (dwell_click_type)
     {
