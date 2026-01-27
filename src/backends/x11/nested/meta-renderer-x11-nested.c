@@ -163,6 +163,7 @@ meta_renderer_x11_nested_ensure_legacy_view (MetaRendererX11Nested *renderer_x11
     .height = height
   };
   legacy_view = g_object_new (META_TYPE_RENDERER_VIEW,
+                              "name", "legacy nested",
                               "layout", &view_layout,
                               "framebuffer", COGL_FRAMEBUFFER (fake_onscreen),
                               NULL);
@@ -212,6 +213,7 @@ meta_renderer_x11_nested_create_view (MetaRenderer       *renderer,
                                      &view_layout);
 
   view = g_object_new (META_TYPE_RENDERER_VIEW,
+                       "name", meta_output_get_name (output),
                        "layout", &view_layout,
                        "framebuffer", COGL_FRAMEBUFFER (fake_onscreen),
                        "offscreen", COGL_FRAMEBUFFER (offscreen),

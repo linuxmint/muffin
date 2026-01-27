@@ -498,6 +498,14 @@ reload_iso_next_group_combos (MetaKeyBindingManager *keys)
     {
       keys->iso_next_group_combo[0].mask = Mod1Mask;
     }
+  else if (g_str_equal (iso_next_group_option, "win_space_toggle"))
+    {
+      keys->iso_next_group_combo[0].mask = keys->super_mask;
+    }
+  else if (g_str_equal (iso_next_group_option, "ctrl_space_toggle"))
+    {
+      keys->iso_next_group_combo[0].mask = ControlMask;
+    }
   else if (g_str_equal (iso_next_group_option, "ctrl_shift_toggle") ||
            g_str_equal (iso_next_group_option, "lctrl_lshift_toggle") ||
            g_str_equal (iso_next_group_option, "rctrl_rshift_toggle"))
@@ -1945,8 +1953,8 @@ meta_display_unfreeze_keyboard (MetaDisplay *display, guint32 timestamp)
                  XIAsyncDevice, timestamp);
 }
 
-static gboolean
-is_modifier (xkb_keysym_t keysym)
+gboolean
+meta_keybindings_is_modifier (xkb_keysym_t keysym)
 {
   switch (keysym)
     {
@@ -2623,7 +2631,7 @@ process_keyboard_move_grab (MetaDisplay     *display,
     return TRUE;
 
   /* don't end grab on modifier key presses */
-  if (is_modifier (event->keyval))
+  if (meta_keybindings_is_modifier (event->keyval))
     return TRUE;
 
   meta_window_get_frame_rect (window, &frame_rect);
@@ -2877,7 +2885,7 @@ process_keyboard_resize_grab (MetaDisplay     *display,
     return TRUE;
 
   /* don't end grab on modifier key presses */
-  if (is_modifier (event->keyval))
+  if (meta_keybindings_is_modifier (event->keyval))
     return TRUE;
 
   if (event->keyval == CLUTTER_KEY_Escape)

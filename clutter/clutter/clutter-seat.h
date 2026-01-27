@@ -74,6 +74,7 @@ typedef struct _ClutterPointerA11ySettings
   gint secondary_click_delay;
   gint dwell_delay;
   gint dwell_threshold;
+  gboolean dwell_click_mode_lock;
 } ClutterPointerA11ySettings;
 
 /**

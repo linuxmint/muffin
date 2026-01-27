@@ -365,8 +365,8 @@ _cogl_driver_update_features (CoglContext *context,
     COGL_FLAGS_SET (private_features, COGL_PRIVATE_FEATURE_SAMPLER_OBJECTS, TRUE);
 
   if (context->glBlitFramebuffer)
-    COGL_FLAGS_SET (private_features,
-                    COGL_PRIVATE_FEATURE_BLIT_FRAMEBUFFER, TRUE);
+    COGL_FLAGS_SET (context->features,
+                    COGL_FEATURE_ID_BLIT_FRAMEBUFFER, TRUE);
 
   if (_cogl_check_extension ("GL_OES_element_index_uint", gl_extensions))
     {

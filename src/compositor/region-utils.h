@@ -106,7 +106,7 @@ cairo_region_t * meta_make_border_region (cairo_region_t *region,
                                           int             y_amount,
                                           gboolean        flip);
 
-cairo_region_t * meta_region_transform (cairo_region_t       *region,
+cairo_region_t * meta_region_transform (const cairo_region_t *region,
                                         MetaMonitorTransform  transform,
                                         int                   width,
                                         int                   height);
