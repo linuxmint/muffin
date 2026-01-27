@@ -3889,18 +3889,18 @@ meta_display_get_pointer_window (MetaDisplay *display,
   MetaBackend *backend = meta_get_backend ();
   MetaCursorTracker *cursor_tracker = meta_backend_get_cursor_tracker (backend);
   MetaWindow *window;
-  int x, y;
+  graphene_point_t point;
 
   if (not_this_one)
     meta_topic (META_DEBUG_FOCUS,
                 "Focusing mouse window excluding %s\n", not_this_one->desc);
 
-  meta_cursor_tracker_get_pointer (cursor_tracker, &x, &y, NULL);
+  meta_cursor_tracker_get_pointer (cursor_tracker, &point, NULL);
 
   window = meta_stack_get_default_focus_window_at_point (display->stack,
                                                          workspace_manager->active_workspace,
                                                          not_this_one,
-                                                         x, y);
+                                                         point.x, point.y);
 
   return window;
 }

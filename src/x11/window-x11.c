@@ -2810,7 +2810,7 @@ query_pressed_buttons (MetaWindow *window)
   ClutterModifierType mods;
   int button = 0;
 
-  meta_cursor_tracker_get_pointer (tracker, NULL, NULL, &mods);
+  meta_cursor_tracker_get_pointer (tracker, NULL, &mods);
 
   if (mods & CLUTTER_BUTTON1_MASK)
     button |= 1 << 1;
