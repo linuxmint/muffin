@@ -2214,6 +2214,51 @@ clutter_event_get_gesture_motion_delta (const ClutterEvent *event,
 }
 
 /**
+ * clutter_event_get_gesture_motion_delta_unaccelerated:
+ * @event: A clutter touchpad gesture event
+ * @dx: (out) (allow-none): the unaccelerated displacement relative to the pointer
+ *      position in the X axis, or %NULL
+ * @dy: (out) (allow-none): the unaccelerated displacement relative to the pointer
+ *      position in the Y axis, or %NULL
+ *
+ * Returns the unaccelerated gesture motion deltas relative to the current
+ * pointer position. Unlike clutter_event_get_gesture_motion_delta(),
+ * pointer acceleration is ignored.
+ **/
+void
+clutter_event_get_gesture_motion_delta_unaccelerated (const ClutterEvent *event,
+                                                      gdouble            *dx,
+                                                      gdouble            *dy)
+{
+  g_return_if_fail (event != NULL);
+  g_return_if_fail (event->type == CLUTTER_TOUCHPAD_PINCH ||
+                    event->type == CLUTTER_TOUCHPAD_SWIPE ||
+                    event->type == CLUTTER_TOUCHPAD_HOLD);
+
+  if (event->type == CLUTTER_TOUCHPAD_PINCH)
+    {
+      if (dx)
+        *dx = event->touchpad_pinch.dx_unaccel;
+      if (dy)
+        *dy = event->touchpad_pinch.dy_unaccel;
+    }
+  else if (event->type == CLUTTER_TOUCHPAD_SWIPE)
+    {
+      if (dx)
+        *dx = event->touchpad_swipe.dx_unaccel;
+      if (dy)
+        *dy = event->touchpad_swipe.dy_unaccel;
+    }
+  else if (event->type == CLUTTER_TOUCHPAD_HOLD)
+    {
+      if (dx)
+        *dx = 0;
+      if (dy)
+        *dy = 0;
+    }
+}
+
+/**
  * clutter_event_get_scroll_source:
  * @event: an scroll event
  *

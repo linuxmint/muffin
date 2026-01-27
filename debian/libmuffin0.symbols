@@ -587,6 +587,7 @@ libmuffin-clutter-0.so.0 libmuffin0 #MINVER#
  clutter_event_get_event_sequence@Base 5.3.0
  clutter_event_get_flags@Base 5.3.0
  clutter_event_get_gesture_motion_delta@Base 5.3.0
+ clutter_event_get_gesture_motion_delta_unaccelerated@Base 6.7.0
  clutter_event_get_gesture_phase@Base 5.3.0
  clutter_event_get_gesture_pinch_angle_delta@Base 5.3.0
  clutter_event_get_gesture_pinch_scale@Base 5.3.0
