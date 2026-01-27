@@ -513,6 +513,7 @@ meta_wayland_pointer_enable (MetaWaylandPointer *pointer)
                            (GDestroyNotify) meta_wayland_pointer_client_free);
 
   pointer->cursor_surface = NULL;
+  pointer->cursor_shape = META_CURSOR_INVALID;
 
   clutter_seat = clutter_backend_get_default_seat (clutter_get_default_backend ());
   pointer->device = clutter_seat_get_pointer (clutter_seat);
@@ -566,6 +567,7 @@ meta_wayland_pointer_disable (MetaWaylandPointer *pointer)
 
   g_clear_pointer (&pointer->pointer_clients, g_hash_table_unref);
   pointer->cursor_surface = NULL;
+  pointer->cursor_shape = META_CURSOR_INVALID;
 }
 
 static int
@@ -1089,14 +1091,23 @@ meta_wayland_pointer_update_cursor_surface (MetaWaylandPointer *pointer)
 
   if (pointer->current)
     {
-      MetaCursorSprite *cursor_sprite = NULL;
+      g_autoptr (MetaCursorSprite) cursor_sprite = NULL;
 
       if (pointer->cursor_surface)
         {
           MetaWaylandCursorSurface *cursor_surface =
             META_WAYLAND_CURSOR_SURFACE (pointer->cursor_surface->role);
+          MetaCursorSprite *sprite;
 
-          cursor_sprite = meta_wayland_cursor_surface_get_sprite (cursor_surface);
+          sprite = meta_wayland_cursor_surface_get_sprite (cursor_surface);
+          cursor_sprite = g_object_ref (sprite);
+        }
+      else if (pointer->cursor_shape != META_CURSOR_INVALID)
+        {
+          MetaCursorSpriteXcursor *sprite;
+
+          sprite = meta_cursor_sprite_xcursor_new (pointer->cursor_shape);
+          cursor_sprite = META_CURSOR_SPRITE (sprite);
         }
 
       meta_cursor_tracker_set_window_cursor (cursor_tracker, cursor_sprite);
@@ -1126,10 +1137,12 @@ meta_wayland_pointer_set_cursor_surface (MetaWaylandPointer *pointer,
 
   prev_cursor_surface = pointer->cursor_surface;
 
-  if (prev_cursor_surface == cursor_surface)
+  if (prev_cursor_surface == cursor_surface &&
+      pointer->cursor_shape == META_CURSOR_INVALID)
     return;
 
   pointer->cursor_surface = cursor_surface;
+  pointer->cursor_shape = META_CURSOR_INVALID;
 
   if (prev_cursor_surface)
     {
@@ -1149,6 +1162,27 @@ meta_wayland_pointer_set_cursor_surface (MetaWaylandPointer *pointer,
   meta_wayland_pointer_update_cursor_surface (pointer);
 }
 
+void
+meta_wayland_pointer_set_cursor_shape (MetaWaylandPointer *pointer,
+                                       MetaCursor          shape)
+{
+  if (pointer->cursor_surface)
+    {
+      meta_wayland_surface_update_outputs (pointer->cursor_surface);
+      g_clear_signal_handler (&pointer->cursor_surface_destroy_id,
+                              pointer->cursor_surface);
+    }
+  else if (pointer->cursor_shape == shape)
+    {
+      return;
+    }
+
+  pointer->cursor_surface = NULL;
+  pointer->cursor_shape = shape;
+
+  meta_wayland_pointer_update_cursor_surface (pointer);
+}
+
 static void
 pointer_set_cursor (struct wl_client *client,
                     struct wl_resource *resource,
@@ -1159,14 +1193,10 @@ pointer_set_cursor (struct wl_client *client,
   MetaWaylandPointer *pointer = wl_resource_get_user_data (resource);
   MetaWaylandSurface *surface;
 
-  surface = (surface_resource ? wl_resource_get_user_data (surface_resource) : NULL);
+  if (!meta_wayland_pointer_check_focus_serial (pointer, client, serial))
+    return;
 
-  if (pointer->focus_surface == NULL)
-    return;
-  if (wl_resource_get_client (pointer->focus_surface->resource) != client)
-    return;
-  if (pointer->focus_serial - serial > G_MAXUINT32 / 2)
-    return;
+  surface = (surface_resource ? wl_resource_get_user_data (surface_resource) : NULL);
 
   if (surface &&
       !meta_wayland_surface_assign_role (surface,
@@ -1401,4 +1431,19 @@ meta_wayland_pointer_class_init (MetaWaylandPointerClass *klass)
                                                  0,
                                                  NULL, NULL, NULL,
                                                  G_TYPE_NONE, 0);
+}
+
+gboolean
+meta_wayland_pointer_check_focus_serial (MetaWaylandPointer *pointer,
+                                         struct wl_client   *client,
+                                         uint32_t            serial)
+{
+  if (pointer->focus_surface == NULL)
+    return FALSE;
+  if (wl_resource_get_client (pointer->focus_surface->resource) != client)
+    return FALSE;
+  if (pointer->focus_serial - serial > G_MAXUINT32 / 2)
+    return FALSE;
+
+  return TRUE;
 }
