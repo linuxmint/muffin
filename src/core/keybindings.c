@@ -1953,8 +1953,8 @@ meta_display_unfreeze_keyboard (MetaDisplay *display, guint32 timestamp)
                  XIAsyncDevice, timestamp);
 }
 
-static gboolean
-is_modifier (xkb_keysym_t keysym)
+gboolean
+meta_keybindings_is_modifier (xkb_keysym_t keysym)
 {
   switch (keysym)
     {
@@ -2631,7 +2631,7 @@ process_keyboard_move_grab (MetaDisplay     *display,
     return TRUE;
 
   /* don't end grab on modifier key presses */
-  if (is_modifier (event->keyval))
+  if (meta_keybindings_is_modifier (event->keyval))
     return TRUE;
 
   meta_window_get_frame_rect (window, &frame_rect);
@@ -2885,7 +2885,7 @@ process_keyboard_resize_grab (MetaDisplay     *display,
     return TRUE;
 
   /* don't end grab on modifier key presses */
-  if (is_modifier (event->keyval))
+  if (meta_keybindings_is_modifier (event->keyval))
     return TRUE;
 
   if (event->keyval == CLUTTER_KEY_Escape)

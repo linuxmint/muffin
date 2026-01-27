@@ -29,6 +29,7 @@
 #include "backends/x11/meta-backend-x11.h"
 #include "compositor/meta-window-actor-private.h"
 #include "core/display-private.h"
+#include "core/keybindings-private.h"
 #include "core/window-private.h"
 #include "meta/meta-backend.h"
 
@@ -378,12 +379,21 @@ meta_display_handle_event (MetaDisplay        *display,
    * handled (because it's one of our hot-keys, or because we are
    * in a keyboard-grabbed mode like moving a window, we don't
    * want to pass the key event to the compositor or Wayland at all.
+   *
+   * Exception: modifier-only key events should still reach Wayland clients
+   * so they can handle modifier+click combinations (Ctrl+click, etc.).
+   * The keybinding handler just tracks modifier state for overlay key
+   * functionality, which doesn't conflict with clients also receiving
+   * the modifier events.
    */
   if (display->event_route != META_EVENT_ROUTE_COMPOSITOR_GRAB &&
       meta_keybindings_process_event (display, window, event))
     {
       bypass_clutter = TRUE;
-      bypass_wayland = TRUE;
+#ifdef HAVE_WAYLAND
+      if (!(IS_KEY_EVENT (event) && meta_keybindings_is_modifier (event->key.keyval)))
+#endif
+        bypass_wayland = TRUE;
       goto out;
     }
 
