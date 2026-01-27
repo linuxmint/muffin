@@ -51,6 +51,7 @@ meta_renderer_x11_cm_ensure_screen_view (MetaRendererX11Cm *renderer_x11_cm,
     .height = height,
   };
   renderer_x11_cm->screen_view = g_object_new (META_TYPE_RENDERER_VIEW,
+                                               "name", "X11 screen",
                                                "layout", &view_layout,
                                                NULL);
   meta_renderer_add_view (META_RENDERER (renderer_x11_cm),

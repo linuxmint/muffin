@@ -34,6 +34,7 @@
 
 #include "backends/meta-renderer.h"
 #include "clutter/clutter-muffin.h"
+#include "compositor/region-utils.h"
 
 enum
 {
@@ -118,6 +119,25 @@ meta_renderer_view_setup_offscreen_blit_pipeline (ClutterStageView *view,
 }
 
 static void
+meta_renderer_view_transform_rect_to_onscreen (ClutterStageView            *view,
+                                               const cairo_rectangle_int_t *src_rect,
+                                               int                          dst_width,
+                                               int                          dst_height,
+                                               cairo_rectangle_int_t       *dst_rect)
+{
+  MetaRendererView *renderer_view = META_RENDERER_VIEW (view);
+  MetaMonitorTransform inverted_transform;
+
+  inverted_transform =
+  meta_monitor_transform_invert (renderer_view->transform);
+  return meta_rectangle_transform (src_rect,
+                                   inverted_transform,
+                                   dst_width,
+                                   dst_height,
+                                   dst_rect);
+}
+
+static void
 meta_renderer_view_set_transform (MetaRendererView     *view,
                                   MetaMonitorTransform  transform)
 {
@@ -181,6 +201,8 @@ meta_renderer_view_class_init (MetaRendererViewClass *klass)
     meta_renderer_view_setup_offscreen_blit_pipeline;
   view_class->get_offscreen_transformation_matrix =
     meta_renderer_view_get_offscreen_transformation_matrix;
+  view_class->transform_rect_to_onscreen =
+    meta_renderer_view_transform_rect_to_onscreen;
 
   object_class->get_property = meta_renderer_view_get_property;
   object_class->set_property = meta_renderer_view_set_property;

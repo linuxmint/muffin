@@ -193,6 +193,8 @@ cogl_is_context (void *object);
  *    expected to return age values other than 0.
  * @COGL_FEATURE_ID_PRESENTATION_TIME: Whether frame presentation
  *    time stamps will be recorded in #CoglFrameInfo objects.
+ * @COGL_FEATURE_ID_BLIT_FRAMEBUFFER: Whether blitting using
+ *    cogl_blit_framebuffer() is supported.
  *
  * All the capabilities that can vary between different GPUs supported
  * by Cogl. Applications that depend on any of these features should explicitly
@@ -211,6 +213,7 @@ typedef enum _CoglFeatureID
   COGL_FEATURE_ID_TEXTURE_RG,
   COGL_FEATURE_ID_BUFFER_AGE,
   COGL_FEATURE_ID_TEXTURE_EGL_IMAGE_EXTERNAL,
+  COGL_FEATURE_ID_BLIT_FRAMEBUFFER,
 
   /*< private >*/
   _COGL_N_FEATURE_IDS   /*< skip >*/
