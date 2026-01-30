@@ -975,9 +975,9 @@ distribute_natural_allocation (gint           extra_space,
    */
 
   /* Sort descending by gap and position. */
-  g_sort_array (spreading,
-                n_requested_sizes, sizeof (guint),
-                compare_gap, sizes);
+  g_qsort_with_data (spreading,
+                     n_requested_sizes, sizeof (guint),
+                     compare_gap, sizes);
 
   /* Distribute available space.
    * This master piece of a loop was conceived by Behdad Esfahbod.
