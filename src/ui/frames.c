@@ -1408,13 +1408,13 @@ meta_ui_frame_update_prelit_control (MetaUIFrame     *frame,
       cursor = META_CURSOR_SE_RESIZE;
       break;
     case META_FRAME_CONTROL_RESIZE_S:
-      cursor = META_CURSOR_SOUTH_RESIZE;
+      cursor = META_CURSOR_S_RESIZE;
       break;
     case META_FRAME_CONTROL_RESIZE_SW:
       cursor = META_CURSOR_SW_RESIZE;
       break;
     case META_FRAME_CONTROL_RESIZE_N:
-      cursor = META_CURSOR_NORTH_RESIZE;
+      cursor = META_CURSOR_N_RESIZE;
       break;
     case META_FRAME_CONTROL_RESIZE_NE:
       cursor = META_CURSOR_NE_RESIZE;
@@ -1423,10 +1423,10 @@ meta_ui_frame_update_prelit_control (MetaUIFrame     *frame,
       cursor = META_CURSOR_NW_RESIZE;
       break;
     case META_FRAME_CONTROL_RESIZE_W:
-      cursor = META_CURSOR_WEST_RESIZE;
+      cursor = META_CURSOR_W_RESIZE;
       break;
     case META_FRAME_CONTROL_RESIZE_E:
-      cursor = META_CURSOR_EAST_RESIZE;
+      cursor = META_CURSOR_E_RESIZE;
       break;
     }
 

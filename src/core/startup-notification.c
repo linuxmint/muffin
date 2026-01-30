@@ -137,7 +137,7 @@ meta_startup_notification_update_feedback (MetaStartupNotification *sn)
     {
       meta_topic (META_DEBUG_STARTUP,
                   "Setting busy cursor\n");
-      meta_display_set_cursor (display, META_CURSOR_BUSY);
+      meta_display_set_cursor (display, META_CURSOR_WAIT);
     }
   else
     {
