@@ -95,6 +95,8 @@ struct _MetaWaylandKeyboard
   uint32_t key_up_keycode;
   uint32_t key_up_serial;
 
+  struct wl_array pressed_keys;
+
   MetaWaylandXkbInfo xkb_info;
   enum xkb_state_component mods_changed;
   xkb_mod_mask_t kbd_a11y_latched_mods;

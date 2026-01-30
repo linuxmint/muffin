@@ -80,6 +80,7 @@ struct _MetaWaylandPointer
 
   MetaWaylandPointerGrab *grab;
   MetaWaylandPointerGrab default_grab;
+  MetaCursor cursor_shape;
   guint32 grab_button;
   guint32 grab_serial;
   guint32 grab_time;
@@ -158,5 +159,12 @@ MetaWaylandSeat *meta_wayland_pointer_get_seat (MetaWaylandPointer *pointer);
 void meta_wayland_surface_cursor_update (MetaWaylandSurface *cursor_surface);
 
 void meta_wayland_pointer_update_cursor_surface (MetaWaylandPointer *pointer);
+
+void meta_wayland_pointer_set_cursor_shape (MetaWaylandPointer *pointer,
+                                            MetaCursor          shape);
+
+gboolean meta_wayland_pointer_check_focus_serial (MetaWaylandPointer *pointer,
+                                                  struct wl_client   *client,
+                                                  uint32_t            serial);
 
 #endif /* META_WAYLAND_POINTER_H */

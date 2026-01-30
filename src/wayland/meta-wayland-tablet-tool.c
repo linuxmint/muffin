@@ -81,7 +81,7 @@ move_resources_for_client (struct wl_list   *destination,
 static void
 meta_wayland_tablet_tool_update_cursor_surface (MetaWaylandTabletTool *tool)
 {
-  MetaCursorSprite *cursor = NULL;
+  g_autoptr (MetaCursorSprite) cursor_sprite = NULL;
 
   if (tool->cursor_renderer == NULL)
     return;
@@ -93,18 +93,29 @@ meta_wayland_tablet_tool_update_cursor_surface (MetaWaylandTabletTool *tool)
         {
           MetaWaylandCursorSurface *cursor_surface =
             META_WAYLAND_CURSOR_SURFACE (tool->cursor_surface->role);
+          MetaCursorSprite *sprite;
 
-          cursor = meta_wayland_cursor_surface_get_sprite (cursor_surface);
+          sprite = meta_wayland_cursor_surface_get_sprite (cursor_surface);
+          cursor_sprite = g_object_ref (sprite);
         }
-      else
-        cursor = NULL;
+      else if (tool->cursor_shape != META_CURSOR_INVALID)
+        {
+          MetaCursorSpriteXcursor *sprite;
+
+          sprite = meta_cursor_sprite_xcursor_new (tool->cursor_shape);
+          cursor_sprite = META_CURSOR_SPRITE (sprite);
+
+        }
     }
   else if (tool->current_tablet)
-    cursor = META_CURSOR_SPRITE (tool->default_sprite);
-  else
-    cursor = NULL;
+  {
+    MetaCursorSprite *sprite;
 
-  meta_cursor_renderer_set_cursor (tool->cursor_renderer, cursor);
+    sprite = META_CURSOR_SPRITE (tool->default_sprite);
+    cursor_sprite = g_object_ref (sprite);
+  }
+
+  meta_cursor_renderer_set_cursor (tool->cursor_renderer, cursor_sprite);
 }
 
 static void
@@ -126,6 +137,7 @@ meta_wayland_tablet_tool_set_cursor_surface (MetaWaylandTabletTool *tool,
     }
 
   tool->cursor_surface = surface;
+  tool->cursor_shape = META_CURSOR_INVALID;
 
   if (tool->cursor_surface)
     {
@@ -393,6 +405,27 @@ tablet_tool_handle_cursor_surface_destroy (struct wl_listener *listener,
   meta_wayland_tablet_tool_set_cursor_surface (tool, NULL);
 }
 
+void
+meta_wayland_tablet_tool_set_cursor_shape (MetaWaylandTabletTool *tool,
+                                           MetaCursor             shape)
+{
+  if (tool->cursor_surface)
+  {
+    MetaWaylandCursorSurface *cursor_surface;
+
+    cursor_surface = META_WAYLAND_CURSOR_SURFACE (tool->cursor_surface->role);
+    meta_wayland_cursor_surface_set_renderer (cursor_surface, NULL);
+
+    meta_wayland_surface_update_outputs (tool->cursor_surface);
+    wl_list_remove (&tool->cursor_surface_destroy_listener.link);
+  }
+
+  tool->cursor_surface = NULL;
+  tool->cursor_shape = shape;
+
+  meta_wayland_tablet_tool_update_cursor_surface (tool);
+}
+
 static void
 tool_cursor_prepare_at (MetaCursorSpriteXcursor *sprite_xcursor,
                         int                      x,
@@ -483,16 +516,10 @@ tool_set_cursor (struct wl_client   *client,
   MetaWaylandTabletTool *tool = wl_resource_get_user_data (resource);
   MetaWaylandSurface *surface;
 
-  surface = (surface_resource ? wl_resource_get_user_data (surface_resource) : NULL);
+  if (!meta_wayland_tablet_tool_check_focus_serial (tool, client, serial))
+    return;
 
-  if (tool->focus_surface == NULL)
-    return;
-  if (tool->cursor_renderer == NULL)
-    return;
-  if (wl_resource_get_client (tool->focus_surface->resource) != client)
-    return;
-  if (tool->proximity_serial - serial > G_MAXUINT32 / 2)
-    return;
+  surface = (surface_resource ? wl_resource_get_user_data (surface_resource) : NULL);
 
   if (surface &&
       !meta_wayland_surface_assign_role (surface,
@@ -1017,4 +1044,21 @@ meta_wayland_tablet_tool_can_popup (MetaWaylandTabletTool *tool,
                                     uint32_t               serial)
 {
   return tool->down_serial == serial || tool->button_serial == serial;
+}
+
+gboolean
+meta_wayland_tablet_tool_check_focus_serial (MetaWaylandTabletTool *tool,
+                                             struct wl_client      *client,
+                                             uint32_t               serial)
+{
+  if (tool->focus_surface == NULL)
+    return FALSE;
+  if (tool->cursor_renderer == NULL)
+    return FALSE;
+  if (wl_resource_get_client (tool->focus_surface->resource) != client)
+    return FALSE;
+  if (tool->proximity_serial - serial > G_MAXUINT32 / 2)
+    return FALSE;
+
+  return TRUE;
 }

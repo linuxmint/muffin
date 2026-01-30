@@ -461,6 +461,8 @@ struct _ClutterTouchpadPinchEvent
   gfloat y;
   gfloat dx;
   gfloat dy;
+  gfloat dx_unaccel;
+  gfloat dy_unaccel;
   gfloat angle_delta;
   gfloat scale;
   guint n_fingers;
@@ -499,6 +501,8 @@ struct _ClutterTouchpadSwipeEvent
   gfloat y;
   gfloat dx;
   gfloat dy;
+  gfloat dx_unaccel;
+  gfloat dy_unaccel;
 };
 
 /**
@@ -839,6 +843,11 @@ CLUTTER_EXPORT
 void                    clutter_event_get_gesture_motion_delta       (const ClutterEvent     *event,
                                                                       gdouble                *dx,
                                                                       gdouble                *dy);
+
+CLUTTER_EXPORT
+void                    clutter_event_get_gesture_motion_delta_unaccelerated (const ClutterEvent     *event,
+                                                                              gdouble                *dx,
+                                                                              gdouble                *dy);
 
 CLUTTER_EXPORT
 ClutterScrollSource      clutter_event_get_scroll_source             (const ClutterEvent     *event);

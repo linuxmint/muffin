@@ -139,6 +139,7 @@ void     meta_window_ungrab_all_keys        (MetaWindow  *window,
 gboolean meta_keybindings_process_event     (MetaDisplay        *display,
                                              MetaWindow         *window,
                                              const ClutterEvent *event);
+gboolean meta_keybindings_is_modifier       (xkb_keysym_t        keysym);
 int      meta_keybindings_get_mouse_zoom_modifiers (MetaDisplay *display);
 ClutterModifierType meta_display_get_window_grab_modifiers (MetaDisplay *display);
 
