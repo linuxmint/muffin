@@ -694,10 +694,19 @@ fill_states (MetaWaylandXdgToplevel *xdg_toplevel,
 }
 
 static void
+add_wm_capability_value (struct wl_array                   *states,
+                         enum xdg_toplevel_wm_capabilities  wm_capability)
+{
+  *((uint32_t *) wl_array_add (states, sizeof (uint32_t))) = wm_capability;
+}
+
+static void
 meta_wayland_xdg_toplevel_send_configure (MetaWaylandXdgToplevel         *xdg_toplevel,
                                           MetaWaylandWindowConfiguration *configuration)
 {
   MetaWaylandXdgSurface *xdg_surface = META_WAYLAND_XDG_SURFACE (xdg_toplevel);
+  MetaWaylandXdgSurfacePrivate *xdg_surface_priv =
+    meta_wayland_xdg_surface_get_instance_private (xdg_surface);
   struct wl_array states;
 
   wl_array_init (&states);
@@ -713,6 +722,25 @@ meta_wayland_xdg_toplevel_send_configure (MetaWaylandXdgToplevel         *xdg_to
                                            configuration->scale),
                                           (configuration->bounds_height /
                                            configuration->scale));
+    }
+
+  if (!xdg_surface_priv->configure_sent &&
+      wl_resource_get_version (xdg_toplevel->resource) >=
+      XDG_TOPLEVEL_WM_CAPABILITIES_SINCE_VERSION)
+    {
+      struct wl_array wm_capabilities;
+
+      wl_array_init (&wm_capabilities);
+      add_wm_capability_value (&wm_capabilities,
+                               XDG_TOPLEVEL_WM_CAPABILITIES_WINDOW_MENU);
+      add_wm_capability_value (&wm_capabilities,
+                               XDG_TOPLEVEL_WM_CAPABILITIES_MAXIMIZE);
+      add_wm_capability_value (&wm_capabilities,
+                               XDG_TOPLEVEL_WM_CAPABILITIES_FULLSCREEN);
+      add_wm_capability_value (&wm_capabilities,
+                               XDG_TOPLEVEL_WM_CAPABILITIES_MINIMIZE);
+      xdg_toplevel_send_wm_capabilities (xdg_toplevel->resource, &wm_capabilities);
+      wl_array_release (&wm_capabilities);
     }
 
   xdg_toplevel_send_configure (xdg_toplevel->resource,
