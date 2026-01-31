@@ -37,6 +37,7 @@
 #include "wayland/meta-wayland-data-device.h"
 #include "wayland/meta-wayland-dma-buf.h"
 #include "wayland/meta-wayland-egl-stream.h"
+#include "wayland/meta-wayland-fixes.h"
 #include "wayland/meta-wayland-idle-inhibit.h"
 #include "wayland/meta-wayland-inhibit-shortcuts-dialog.h"
 #include "wayland/meta-wayland-inhibit-shortcuts.h"
@@ -444,6 +445,7 @@ meta_wayland_compositor_setup (MetaWaylandCompositor *wayland_compositor)
   meta_wayland_keyboard_shortcuts_inhibit_init (compositor);
   meta_wayland_surface_inhibit_shortcuts_dialog_init ();
   meta_wayland_text_input_init (compositor);
+  meta_wayland_init_fixes (compositor);
   meta_wayland_activation_init (compositor);
   meta_wayland_idle_inhibit_init (compositor);
   meta_wayland_init_xdg_wm_dialog (compositor);
