@@ -42,39 +42,39 @@ void
 test_object (TestUtilsGTestFixture *fixture,
                   void *data)
 {
-  CoglPath *path;
+  CoglPipeline *pipeline;
 
   /* Assuming that COGL_OBJECT_N_PRE_ALLOCATED_USER_DATA_ENTRIES == 2
    * test associating 2 pointers to private data with an object */
-  cogl_path_new ();
-  path = cogl_get_path ();
+  cogl_pipeline_new ();
+  pipeline = cogl_pipeline_path ();
 
-  cogl_object_set_user_data (COGL_OBJECT (path),
+  cogl_object_set_user_data (COGL_OBJECT (pipeline),
                              &private_key0,
                              &user_data0,
                              destroy0_cb);
 
-  cogl_object_set_user_data (COGL_OBJECT (path),
+  cogl_object_set_user_data (COGL_OBJECT (pipeline),
                              &private_key1,
                              &user_data1,
                              destroy1_cb);
 
-  cogl_object_set_user_data (COGL_OBJECT (path),
+  cogl_object_set_user_data (COGL_OBJECT (pipeline),
                              &private_key2,
                              &user_data2,
                              destroy2_cb);
 
-  cogl_object_set_user_data (COGL_OBJECT (path),
+  cogl_object_set_user_data (COGL_OBJECT (pipeline),
                              &private_key1,
                              NULL,
                              destroy1_cb);
 
-  cogl_object_set_user_data (COGL_OBJECT (path),
+  cogl_object_set_user_data (COGL_OBJECT (pipeline),
                              &private_key1,
                              &user_data1,
                              destroy1_cb);
 
-  cogl_object_unref (path);
+  cogl_object_unref (pipeline);
 
   g_assert_cmpint (destroy0_count, ==, 1);
   g_assert_cmpint (destroy1_count, ==, 2);

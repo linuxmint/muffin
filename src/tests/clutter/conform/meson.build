@@ -67,7 +67,6 @@ foreach test : clutter_conform_tests
     dependencies: [
       clutter_deps,
       libmuffin_clutter_dep,
-      libmuffin_cogl_path_dep,
       libmuffin_dep
     ],
     install: false,

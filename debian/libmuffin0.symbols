@@ -909,7 +909,6 @@ libmuffin-clutter-0.so.0 libmuffin0 #MINVER#
  clutter_paint_context_unref@Base 5.3.0
  clutter_paint_node_add_child@Base 5.3.0
  clutter_paint_node_add_multitexture_rectangle@Base 5.3.0
- clutter_paint_node_add_path@Base 5.3.0
  clutter_paint_node_add_primitive@Base 5.3.0
  clutter_paint_node_add_rectangle@Base 5.3.0
  clutter_paint_node_add_texture_rectangle@Base 5.3.0
@@ -2003,30 +2002,6 @@ libmuffin-cogl-pango-0.so.0 libmuffin0 #MINVER#
  cogl_pango_renderer_get_type@Base 5.3.0
  cogl_pango_show_layout@Base 5.3.0
  cogl_pango_show_layout_line@Base 5.3.0
-libmuffin-cogl-path-0.so.0 libmuffin0 #MINVER#
- cogl2_path_arc@Base 5.3.0
- cogl2_path_close@Base 5.3.0
- cogl2_path_curve_to@Base 5.3.0
- cogl2_path_ellipse@Base 5.3.0
- cogl2_path_get_fill_rule@Base 5.3.0
- cogl2_path_line@Base 5.3.0
- cogl2_path_line_to@Base 5.3.0
- cogl2_path_move_to@Base 5.3.0
- cogl2_path_new@Base 5.3.0
- cogl2_path_polygon@Base 5.3.0
- cogl2_path_polyline@Base 5.3.0
- cogl2_path_rectangle@Base 5.3.0
- cogl2_path_rel_curve_to@Base 5.3.0
- cogl2_path_rel_line_to@Base 5.3.0
- cogl2_path_rel_move_to@Base 5.3.0
- cogl2_path_round_rectangle@Base 5.3.0
- cogl2_path_set_fill_rule@Base 5.3.0
- cogl_framebuffer_fill_path@Base 5.3.0
- cogl_framebuffer_push_path_clip@Base 5.3.0
- cogl_framebuffer_stroke_path@Base 5.3.0
- cogl_is_path@Base 5.3.0
- cogl_path_copy@Base 5.3.0
- cogl_path_get_gtype@Base 5.3.0
 libmuffin.so.0 libmuffin0 #MINVER#
  meta_activate_session@Base 6.0.0
  meta_add_clutter_debug_flags@Base 5.3.0
