@@ -53,6 +53,9 @@
 #ifdef COGL_HAS_GLX_SUPPORT
 #include "winsys/cogl-winsys-glx-private.h"
 #endif
+#ifdef COGL_HAS_EGL_PLATFORM_WAYLAND_CLIENT_SUPPORT
+#include "winsys/cogl-winsys-egl-wayland-private.h"
+#endif
 
 #ifdef COGL_HAS_XLIB_SUPPORT
 #include "cogl-xlib-renderer.h"
@@ -134,6 +137,9 @@ static CoglWinsysVtableGetter _cogl_winsys_vtable_getters[] =
 #endif
 #ifdef COGL_HAS_EGL_PLATFORM_XLIB_SUPPORT
   _cogl_winsys_egl_xlib_get_vtable,
+#endif
+#ifdef COGL_HAS_EGL_PLATFORM_WAYLAND_CLIENT_SUPPORT
+  _cogl_winsys_egl_wayland_get_vtable,
 #endif
 };
 
@@ -243,6 +249,28 @@ cogl_xlib_renderer_request_reset_on_video_memory_purge (CoglRenderer *renderer,
   renderer->xlib_want_reset_on_video_memory_purge = enable;
 }
 #endif /* COGL_HAS_XLIB_SUPPORT */
+
+#ifdef COGL_HAS_EGL_PLATFORM_WAYLAND_CLIENT_SUPPORT
+COGL_EXPORT void
+cogl_wayland_renderer_set_foreign_display (CoglRenderer *renderer,
+                                           struct wl_display *display)
+{
+  g_return_if_fail (cogl_is_renderer (renderer));
+
+  /* NB: Renderers are considered immutable once connected */
+  g_return_if_fail (!renderer->connected);
+
+  renderer->foreign_wayland_display = display;
+}
+
+COGL_EXPORT struct wl_display *
+cogl_wayland_renderer_get_display (CoglRenderer *renderer)
+{
+  g_return_val_if_fail (cogl_is_renderer (renderer), NULL);
+
+  return renderer->foreign_wayland_display;
+}
+#endif /* COGL_HAS_EGL_PLATFORM_WAYLAND_CLIENT_SUPPORT */
 
 gboolean
 cogl_renderer_check_onscreen_template (CoglRenderer *renderer,

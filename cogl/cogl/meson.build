@@ -7,6 +7,7 @@ cdata.set('CLUTTER_COGL_HAS_GL', have_gl)
 cdata.set('COGL_HAS_GLX_SUPPORT', have_glx)
 cdata.set('COGL_HAS_WAYLAND_EGL_SERVER_SUPPORT', have_wayland)
 cdata.set('COGL_HAS_EGL_PLATFORM_XLIB_SUPPORT', have_egl_xlib)
+cdata.set('COGL_HAS_EGL_PLATFORM_WAYLAND_CLIENT_SUPPORT', have_wayland_client)
 cdata.set('COGL_HAS_EGL_SUPPORT', have_egl)
 cdata.set('COGL_HAS_X11', have_x11)
 cdata.set('COGL_HAS_X11_SUPPORT', have_x11)
@@ -412,6 +413,17 @@ if have_egl_xlib
   cogl_sources += [
     'winsys/cogl-winsys-egl-x11.c',
     'winsys/cogl-winsys-egl-x11-private.h',
+  ]
+endif
+
+if have_wayland_client
+  cogl_sources += [
+    'winsys/cogl-winsys-egl-wayland.c',
+    'winsys/cogl-winsys-egl-wayland-private.h',
+    'cogl-wayland-client.h',
+  ]
+  cogl_nonintrospected_headers += [
+    'cogl-wayland-client.h',
   ]
 endif
 

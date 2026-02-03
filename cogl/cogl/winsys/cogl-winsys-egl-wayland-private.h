@@ -3,7 +3,7 @@
  *
  * A Low Level GPU Graphics and Utilities API
  *
- * Copyright (C) 2007,2008,2009,2010 Intel Corporation.
+ * Copyright (C) 2024 Linux Mint
  *
  * Permission is hereby granted, free of charge, to any person
  * obtaining a copy of this software and associated documentation
@@ -25,27 +25,16 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  *
+ * Authors:
+ *   Michael Webster <miketwebster@gmail.com>
  */
 
-#include <poll.h>
+#ifndef __COGL_WINSYS_EGL_WAYLAND_PRIVATE_H
+#define __COGL_WINSYS_EGL_WAYLAND_PRIVATE_H
 
-#define COGL_SYSDEF_POLLIN POLLIN
-#define COGL_SYSDEF_POLLPRI POLLPRI
-#define COGL_SYSDEF_POLLOUT POLLOUT
-#define COGL_SYSDEF_POLLERR POLLERR
-#define COGL_SYSDEF_POLLHUP POLLHUP
-#define COGL_SYSDEF_POLLNVAL POLLNVAL
+#include "winsys/cogl-winsys-private.h"
 
-#mesondefine COGL_HAS_GL
-#mesondefine CLUTTER_COGL_HAS_GL
-#mesondefine COGL_HAS_GLX_SUPPORT
-#mesondefine COGL_HAS_WAYLAND_EGL_SERVER_SUPPORT
-#mesondefine COGL_HAS_EGL_PLATFORM_XLIB_SUPPORT
-#mesondefine COGL_HAS_EGL_PLATFORM_WAYLAND_CLIENT_SUPPORT
-#mesondefine COGL_HAS_EGL_SUPPORT
-#mesondefine COGL_HAS_X11
-#mesondefine COGL_HAS_X11_SUPPORT
-#mesondefine COGL_HAS_XLIB
-#mesondefine COGL_HAS_XLIB_SUPPORT
+COGL_EXPORT const CoglWinsysVtable *
+_cogl_winsys_egl_wayland_get_vtable (void);
 
-#mesondefine COGL_HAS_TRACING
+#endif /* __COGL_WINSYS_EGL_WAYLAND_PRIVATE_H */
