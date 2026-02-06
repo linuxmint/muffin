@@ -95,6 +95,7 @@ enum
   SURFACE_SHORTCUTS_RESTORED,
   SURFACE_GEOMETRY_CHANGED,
   SURFACE_PRE_STATE_APPLIED,
+  SURFACE_ACTOR_CHANGED,
   N_SURFACE_SIGNALS
 };
 
@@ -1677,6 +1678,14 @@ meta_wayland_surface_class_init (MetaWaylandSurfaceClass *klass)
                   0, NULL, NULL,
                   g_cclosure_marshal_VOID__VOID,
                   G_TYPE_NONE, 0);
+
+  surface_signals[SURFACE_ACTOR_CHANGED] =
+    g_signal_new ("actor-changed",
+                  G_TYPE_FROM_CLASS (object_class),
+                  G_SIGNAL_RUN_LAST,
+                  0, NULL, NULL,
+                  g_cclosure_marshal_VOID__VOID,
+                  G_TYPE_NONE, 0);
 }
 
 static void
@@ -1990,4 +1999,10 @@ meta_wayland_surface_get_height (MetaWaylandSurface *surface)
 
       return height / surface->scale;
     }
+}
+
+void
+meta_wayland_surface_notify_actor_changed (MetaWaylandSurface *surface)
+{
+  g_signal_emit (surface, surface_signals[SURFACE_ACTOR_CHANGED], 0);
 }
