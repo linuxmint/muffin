@@ -296,6 +296,62 @@ if have_wayland
   clutter_backend_private_headers += clutter_wayland_private_headers
 endif
 
+if have_wayland_client
+  # Generate Wayland client protocols
+  wayland_scanner = find_program('wayland-scanner')
+  wayland_protocols_dir = wayland_protocols_dep.get_variable(pkgconfig: 'pkgdatadir')
+
+  # xdg-shell protocol (required by layer-shell)
+  xdg_shell_xml = join_paths(wayland_protocols_dir, 'stable', 'xdg-shell', 'xdg-shell.xml')
+
+  xdg_shell_client_header = custom_target('xdg-shell-client-protocol.h',
+    input: xdg_shell_xml,
+    output: 'xdg-shell-client-protocol.h',
+    command: [wayland_scanner, 'client-header', '@INPUT@', '@OUTPUT@'],
+  )
+
+  xdg_shell_protocol_code = custom_target('xdg-shell-protocol.c',
+    input: xdg_shell_xml,
+    output: 'xdg-shell-protocol.c',
+    command: [wayland_scanner, 'private-code', '@INPUT@', '@OUTPUT@'],
+  )
+
+  # layer-shell protocol
+  layer_shell_xml = files('wayland-client/wlr-layer-shell-unstable-v1.xml')
+
+  layer_shell_client_header = custom_target('wlr-layer-shell-client-protocol.h',
+    input: layer_shell_xml,
+    output: 'wlr-layer-shell-unstable-v1-client-protocol.h',
+    command: [wayland_scanner, 'client-header', '@INPUT@', '@OUTPUT@'],
+  )
+
+  layer_shell_protocol_code = custom_target('wlr-layer-shell-protocol.c',
+    input: layer_shell_xml,
+    output: 'wlr-layer-shell-unstable-v1-protocol.c',
+    command: [wayland_scanner, 'private-code', '@INPUT@', '@OUTPUT@'],
+  )
+
+  clutter_wayland_client_sources = [
+    'wayland-client/clutter-backend-wayland-client.c',
+    'wayland-client/clutter-stage-wayland-client.c',
+    'wayland-client/clutter-seat-wayland-client.c',
+    'wayland-client/clutter-keymap-wayland-client.c',
+    xdg_shell_protocol_code,
+    layer_shell_protocol_code,
+  ]
+  clutter_backend_sources += clutter_wayland_client_sources
+
+  clutter_wayland_client_private_headers = [
+    'wayland-client/clutter-backend-wayland-client.h',
+    'wayland-client/clutter-stage-wayland-client.h',
+    'wayland-client/clutter-seat-wayland-client.h',
+    'wayland-client/clutter-keymap-wayland-client.h',
+    xdg_shell_client_header,
+    layer_shell_client_header,
+  ]
+  clutter_backend_private_headers += clutter_wayland_client_private_headers
+endif
+
 cally_headers = [
     'cally/cally-actor.h',
     'cally/cally-clone.h',
@@ -334,6 +390,7 @@ cdata = configuration_data()
 cdata.set_quoted('MUFFIN_VERSION', meson.project_version())
 cdata.set('CLUTTER_DRIVERS', '"*"')
 cdata.set('HAVE_EVDEV', have_native_backend)
+cdata.set('HAVE_WAYLAND_CLIENT', have_wayland_client)
 cdata.set('HAVE_LIBWACOM', have_libwacom)
 cdata.set('HAVE_PANGO_FT2', have_pango_ft2)
 
@@ -362,6 +419,11 @@ if have_native_backend
   clutter_config_defines += [
     '#define CLUTTER_WINDOWING_EGL "eglnative"',
     '#define CLUTTER_INPUT_EVDEV "evdev"',
+  ]
+endif
+if have_wayland_client
+  clutter_config_defines += [
+    '#define CLUTTER_WINDOWING_WAYLAND_CLIENT "wayland-client"',
   ]
 endif
 clutter_config_defines += [

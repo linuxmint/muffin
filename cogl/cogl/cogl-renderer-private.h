@@ -69,6 +69,10 @@ struct _CoglRenderer
   gboolean xlib_want_reset_on_video_memory_purge;
 #endif
 
+#ifdef COGL_HAS_EGL_PLATFORM_WAYLAND_CLIENT_SUPPORT
+  struct wl_display *foreign_wayland_display;
+#endif
+
   CoglDriver driver;
   unsigned long private_features
     [COGL_FLAGS_N_LONGS_FOR_SIZE (COGL_N_PRIVATE_FEATURES)];

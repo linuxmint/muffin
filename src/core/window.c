@@ -1820,17 +1820,23 @@ gboolean
 meta_window_should_be_showing (MetaWindow  *window)
 {
   MetaWorkspaceManager *workspace_manager = window->display->workspace_manager;
+  gboolean has_buffer, on_workspace, showing_on_workspace;
 
 #ifdef HAVE_WAYLAND
   if (window->client_type == META_WINDOW_CLIENT_TYPE_WAYLAND &&
       !meta_wayland_surface_get_buffer (window->surface))
     return FALSE;
+  has_buffer = TRUE;
+#else
+  has_buffer = TRUE;
 #endif
+
+  on_workspace = meta_window_located_on_workspace (window, workspace_manager->active_workspace);
+  showing_on_workspace = meta_window_showing_on_its_workspace (window);
 
   /* Windows should be showing if they're located on the
    * active workspace and they're showing on their own workspace. */
-  return (meta_window_located_on_workspace (window, workspace_manager->active_workspace) &&
-          meta_window_showing_on_its_workspace (window));
+  return (on_workspace && showing_on_workspace);
 }
 
 static void
@@ -4542,6 +4548,25 @@ meta_window_move_resize_internal (MetaWindow          *window,
 
   constrained_rect = unconstrained_rect;
   temporary_rect = window->rect;
+
+  /* If the window doesn't have a monitor yet but has a placement rule
+   * (e.g., for popups from layer-shell surfaces), try to determine the
+   * monitor from the placement rule's parent rect so constraints can be applied. */
+  if (!window->monitor && window->placement.rule)
+    {
+      MetaBackend *backend = meta_get_backend ();
+      MetaMonitorManager *monitor_manager =
+        meta_backend_get_monitor_manager (backend);
+      MetaLogicalMonitor *logical_monitor;
+      MetaRectangle *parent_rect = &window->placement.rule->parent_rect;
+
+      logical_monitor =
+        meta_monitor_manager_get_logical_monitor_from_rect (monitor_manager,
+                                                            parent_rect);
+      if (logical_monitor)
+        window->monitor = logical_monitor;
+    }
+
   if (flags & (META_MOVE_RESIZE_MOVE_ACTION | META_MOVE_RESIZE_RESIZE_ACTION) &&
       !(flags & META_MOVE_RESIZE_WAYLAND_FINISH_MOVE_RESIZE) &&
       window->monitor)

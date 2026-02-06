@@ -302,6 +302,22 @@ workspace_free_builtin_struts (MetaWorkspace *workspace)
   workspace->builtin_struts = NULL;
 }
 
+/**
+ * workspace_free_layer_shell_struts:
+ * @workspace: The workspace.
+ *
+ * Frees the struts list set with meta_workspace_set_layer_shell_struts
+ */
+static void
+workspace_free_layer_shell_struts (MetaWorkspace *workspace)
+{
+  if (workspace->layer_shell_struts == NULL)
+    return;
+
+  g_slist_free_full (workspace->layer_shell_struts, g_free);
+  workspace->layer_shell_struts = NULL;
+}
+
 /* Ensure that the workspace is empty by making sure that
  * all of our windows are on-all-workspaces. */
 static void
@@ -333,6 +349,7 @@ meta_workspace_remove (MetaWorkspace *workspace)
   g_list_free (workspace->list_containing_self);
 
   workspace_free_builtin_struts (workspace);
+  workspace_free_layer_shell_struts (workspace);
 
   /* screen.c:update_num_workspaces(), which calls us, removes windows from
    * workspaces first, which can cause the workareas on the workspace to be
@@ -899,6 +916,16 @@ ensure_work_areas_validated (MetaWorkspace *workspace)
 
   workspace->all_struts = copy_strut_list (workspace->builtin_struts);
 
+  /* Add layer-shell struts */
+  {
+    GSList *s_iter;
+    for (s_iter = workspace->layer_shell_struts; s_iter != NULL; s_iter = s_iter->next)
+      {
+        workspace->all_struts = g_slist_prepend (workspace->all_struts,
+                                                 copy_strut (s_iter->data));
+      }
+  }
+
   windows = meta_workspace_list_windows (workspace);
   for (tmp = windows; tmp != NULL; tmp = tmp->next)
     {
@@ -1161,6 +1188,28 @@ meta_workspace_set_builtin_struts (MetaWorkspace *workspace,
   meta_workspace_invalidate_work_area (workspace);
 }
 
+/**
+ * meta_workspace_set_layer_shell_struts:
+ * @workspace: a #MetaWorkspace
+ * @struts: (element-type Meta.Strut) (transfer none): list of #MetaStrut
+ *
+ * Sets a list of struts from layer-shell surfaces that will be used
+ * in addition to the builtin struts and window struts when computing
+ * the work area of the workspace.
+ */
+void
+meta_workspace_set_layer_shell_struts (MetaWorkspace *workspace,
+                                       GSList        *struts)
+{
+  if (strut_lists_equal (struts, workspace->layer_shell_struts))
+    return;
+
+  workspace_free_layer_shell_struts (workspace);
+  workspace->layer_shell_struts = copy_strut_list (struts);
+
+  meta_workspace_invalidate_work_area (workspace);
+}
+
 void
 meta_workspace_get_work_area_for_logical_monitor (MetaWorkspace      *workspace,
                                                   MetaLogicalMonitor *logical_monitor,
@@ -1169,6 +1218,56 @@ meta_workspace_get_work_area_for_logical_monitor (MetaWorkspace      *workspace,
   meta_workspace_get_work_area_for_monitor (workspace,
                                             logical_monitor->number,
                                             area);
+}
+
+/**
+ * meta_workspace_get_work_area_for_logical_monitor_excluding_layer_shell:
+ * @workspace: a #MetaWorkspace
+ * @logical_monitor: a #MetaLogicalMonitor
+ * @area: (out): location to store the work area
+ *
+ * Computes work area for @logical_monitor using only builtin struts,
+ * excluding layer-shell struts. This is used for positioning layer-shell
+ * surfaces so they don't get pushed by their own struts.
+ */
+void
+meta_workspace_get_work_area_for_logical_monitor_excluding_layer_shell (
+                                                       MetaWorkspace      *workspace,
+                                                       MetaLogicalMonitor *logical_monitor,
+                                                       MetaRectangle      *area)
+{
+  GList *tmp;
+  GList *monitor_region;
+  GSList *struts_for_calculation = NULL;
+  GSList *s_iter;
+
+  g_return_if_fail (logical_monitor != NULL);
+  g_return_if_fail (area != NULL);
+
+  /* Start with builtin struts only */
+  for (s_iter = workspace->builtin_struts; s_iter != NULL; s_iter = s_iter->next)
+    {
+      MetaStrut *strut = s_iter->data;
+      MetaStrut *copy = g_new0 (MetaStrut, 1);
+      *copy = *strut;
+      struts_for_calculation = g_slist_prepend (struts_for_calculation, copy);
+    }
+
+  /* Calculate region for this monitor using only builtin struts */
+  monitor_region =
+    meta_rectangle_get_minimal_spanning_set_for_region (&logical_monitor->rect,
+                                                        struts_for_calculation);
+
+  /* Find work area from the region */
+  *area = logical_monitor->rect;
+  for (tmp = monitor_region; tmp != NULL; tmp = tmp->next)
+    {
+      MetaRectangle *rect = tmp->data;
+      meta_rectangle_intersect (area, rect, area);
+    }
+
+  g_list_free_full (monitor_region, g_free);
+  g_slist_free_full (struts_for_calculation, g_free);
 }
 
 /**
