@@ -42,6 +42,7 @@
 #include "wayland/meta-wayland-buffer.h"
 #include "wayland/meta-wayland-data-device.h"
 #include "wayland/meta-wayland-gtk-shell.h"
+#include "wayland/meta-wayland-foreign-toplevel.h"
 #include "wayland/meta-wayland-layer-shell.h"
 #include "wayland/meta-wayland-keyboard.h"
 #include "wayland/meta-wayland-outputs.h"
@@ -1459,6 +1460,7 @@ meta_wayland_shell_init (MetaWaylandCompositor *compositor)
   meta_wayland_xdg_shell_init (compositor);
   meta_wayland_init_gtk_shell (compositor);
   meta_wayland_init_layer_shell (compositor);
+  meta_wayland_init_foreign_toplevel (compositor);
   meta_wayland_init_viewporter (compositor);
 }
 

@@ -518,6 +518,8 @@ if have_wayland
     'wayland/meta-wayland-dma-buf.h',
     'wayland/meta-wayland-dnd-surface.c',
     'wayland/meta-wayland-dnd-surface.h',
+    'wayland/meta-wayland-foreign-toplevel.c',
+    'wayland/meta-wayland-foreign-toplevel.h',
     'wayland/meta-wayland-gtk-shell.c',
     'wayland/meta-wayland-gtk-shell.h',
     'wayland/meta-wayland-layer-shell.c',
@@ -810,6 +812,7 @@ if have_wayland
   wayland_protocols = [
     ['cursor-shape-v1', 'private', ],
     ['gtk-shell', 'private', ],
+    ['wlr-foreign-toplevel-management-unstable-v1', 'private', ],
     ['wlr-layer-shell-unstable-v1', 'private', ],
     ['idle-inhibit', 'unstable', 'v1', ],
     ['keyboard-shortcuts-inhibit', 'unstable', 'v1', ],
