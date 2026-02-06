@@ -2085,6 +2085,8 @@ meta_wayland_surface_try_acquire_scanout (MetaWaylandSurface *surface,
 
   return scanout;
 
+}
+
 void
 meta_wayland_surface_notify_actor_changed (MetaWaylandSurface *surface)
 {
