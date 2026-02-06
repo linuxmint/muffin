@@ -1580,10 +1580,16 @@ void
 meta_x11_display_reload_cursor (MetaX11Display *x11_display)
 {
   Cursor xcursor;
-  MetaCursor cursor = x11_display->display->current_cursor;
 
   /* Set a cursor for X11 applications that don't specify their own */
-  xcursor = meta_x11_display_create_x_cursor (x11_display, cursor);
+  xcursor = XcursorLibraryLoadCursor (x11_display->xdisplay,
+                                      meta_cursor_get_name (META_CURSOR_DEFAULT));
+
+  if (!xcursor)
+    {
+      xcursor = XcursorLibraryLoadCursor (x11_display->xdisplay,
+                                        meta_cursor_get_legacy_name (META_CURSOR_DEFAULT));
+    }
 
   XDefineCursor (x11_display->xdisplay, x11_display->xroot, xcursor);
   XFlush (x11_display->xdisplay);

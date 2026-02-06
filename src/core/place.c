@@ -85,15 +85,15 @@ place_by_pointer(MetaWindow *window,
 {
   MetaBackend *backend = meta_get_backend ();
   MetaCursorTracker *cursor_tracker = meta_backend_get_cursor_tracker (backend);
-  int root_x, root_y;
+  graphene_point_t point;
 
-  meta_cursor_tracker_get_pointer (cursor_tracker, &root_x, &root_y, NULL);
+  meta_cursor_tracker_get_pointer (cursor_tracker, &point, NULL);
 
   MetaRectangle frame_rect;
   meta_window_get_frame_rect (window, &frame_rect);
 
-  *new_x = root_x - frame_rect.width / 2;
-  *new_y = root_y - frame_rect.height / 2;
+  *new_x = (int) point.x - frame_rect.width / 2;
+  *new_y = (int) point.y - frame_rect.height / 2;
 
   if (placement_mode == META_PLACEMENT_MODE_MANUAL)
     window->move_after_placement = TRUE;

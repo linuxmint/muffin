@@ -9043,19 +9043,19 @@ window_focus_on_pointer_rest_callback (gpointer data)
   MetaDisplay *display = window->display;
   MetaBackend *backend = meta_get_backend ();
   MetaCursorTracker *cursor_tracker = meta_backend_get_cursor_tracker (backend);
-  int root_x, root_y;
+  graphene_point_t point;
   guint32 timestamp;
 
   if (meta_prefs_get_focus_mode () == C_DESKTOP_FOCUS_MODE_CLICK)
     goto out;
 
-  meta_cursor_tracker_get_pointer (cursor_tracker, &root_x, &root_y, NULL);
+  meta_cursor_tracker_get_pointer (cursor_tracker, &point, NULL);
 
-  if (root_x != focus_data->pointer_x ||
-      root_y != focus_data->pointer_y)
+  if ((int) point.x != focus_data->pointer_x ||
+    (int) point.y != focus_data->pointer_y)
     {
-      focus_data->pointer_x = root_x;
-      focus_data->pointer_y = root_y;
+      focus_data->pointer_x = point.x;
+      focus_data->pointer_y = point.y;
       return G_SOURCE_CONTINUE;
     }
 

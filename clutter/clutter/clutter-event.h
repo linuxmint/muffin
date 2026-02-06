@@ -672,8 +672,6 @@ gboolean                clutter_events_pending                  (void);
 CLUTTER_EXPORT
 ClutterEvent *          clutter_event_get                       (void);
 CLUTTER_EXPORT
-ClutterEvent *          clutter_event_peek                      (void);
-CLUTTER_EXPORT
 void                    clutter_event_put                       (const ClutterEvent     *event);
 
 CLUTTER_EXPORT

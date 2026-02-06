@@ -126,44 +126,6 @@ clutter_stage_view_get_onscreen (ClutterStageView *view)
   return priv->framebuffer;
 }
 
-static CoglPipeline *
-clutter_stage_view_create_framebuffer_pipeline (CoglFramebuffer *framebuffer)
-{
-  CoglPipeline *pipeline;
-
-  pipeline = cogl_pipeline_new (cogl_framebuffer_get_context (framebuffer));
-
-  cogl_pipeline_set_layer_filters (pipeline, 0,
-                                   COGL_PIPELINE_FILTER_NEAREST,
-                                   COGL_PIPELINE_FILTER_NEAREST);
-  cogl_pipeline_set_layer_texture (pipeline, 0,
-                                   cogl_offscreen_get_texture (framebuffer));
-  cogl_pipeline_set_layer_wrap_mode (pipeline, 0,
-                                     COGL_PIPELINE_WRAP_MODE_CLAMP_TO_EDGE);
-
-  return pipeline;
-}
-
-static void
-clutter_stage_view_ensure_offscreen_blit_pipeline (ClutterStageView *view)
-{
-  ClutterStageViewPrivate *priv =
-    clutter_stage_view_get_instance_private (view);
-  ClutterStageViewClass *view_class =
-    CLUTTER_STAGE_VIEW_GET_CLASS (view);
-
-  g_assert (priv->offscreen != NULL);
-
-  if (priv->offscreen_pipeline)
-    return;
-
-  priv->offscreen_pipeline =
-    clutter_stage_view_create_framebuffer_pipeline (priv->offscreen);
-
-  if (view_class->setup_offscreen_blit_pipeline)
-    view_class->setup_offscreen_blit_pipeline (view, priv->offscreen_pipeline);
-}
-
 void
 clutter_stage_view_invalidate_offscreen_blit_pipeline (ClutterStageView *view)
 {
