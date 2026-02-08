@@ -441,6 +441,7 @@ meta_wayland_compositor_setup (MetaWaylandCompositor *wayland_compositor)
   meta_wayland_xdg_foreign_init (compositor);
   meta_wayland_legacy_xdg_foreign_init (compositor);
   meta_wayland_dma_buf_init (compositor);
+  meta_wayland_init_single_pixel_buffer_manager (compositor);
   meta_wayland_keyboard_shortcuts_inhibit_init (compositor);
   meta_wayland_surface_inhibit_shortcuts_dialog_init ();
   meta_wayland_text_input_init (compositor);
