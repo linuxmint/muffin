@@ -130,9 +130,6 @@ gboolean                _clutter_stage_update_state     (ClutterStage      *stag
 
 void                    _clutter_stage_set_scale_factor (ClutterStage      *stage,
                                                          int                factor);
-gboolean                _clutter_stage_get_max_view_scale_factor_for_rect (ClutterStage    *stage,
-                                                                           graphene_rect_t *rect,
-                                                                           float           *view_scale);
 
 void            _clutter_stage_presented                (ClutterStage      *stage,
                                                          CoglFrameEvent     frame_event,
@@ -142,6 +139,9 @@ GList *         _clutter_stage_peek_stage_views         (ClutterStage *stage);
 
 void            clutter_stage_queue_actor_relayout      (ClutterStage *stage,
                                                          ClutterActor *actor);
+
+GList * clutter_stage_get_views_for_rect (ClutterStage          *stage,
+                                          const graphene_rect_t *rect);
 
 G_END_DECLS
 

@@ -1512,6 +1512,14 @@ _clutter_stage_check_updated_pointers (ClutterStage *stage)
   return updating;
 }
 
+static void
+update_actor_stage_views (ClutterStage *stage)
+{
+  ClutterActor *actor = CLUTTER_ACTOR (stage);
+
+  clutter_actor_update_stage_views (actor);
+}
+
 /**
  * _clutter_stage_do_update:
  * @stage: A #ClutterStage
@@ -1563,6 +1571,10 @@ _clutter_stage_do_update (ClutterStage *stage)
 
   if (stage_was_relayout)
     pointers = _clutter_stage_check_updated_pointers (stage);
+
+  COGL_TRACE_BEGIN (ClutterStageUpdateActorStageViews, "Actor stage-views");
+  update_actor_stage_views (stage);
+  COGL_TRACE_END (ClutterStageUpdateActorStageViews);
 
   COGL_TRACE_BEGIN (ClutterStagePaint, "Paint");
 
@@ -4503,19 +4515,28 @@ clutter_stage_get_capture_final_size (ClutterStage          *stage,
                                       int                   *out_height,
                                       float                 *out_scale)
 {
-  float max_scale;
+  float max_scale = 1.0;
 
   g_return_val_if_fail (CLUTTER_IS_STAGE (stage), FALSE);
 
   if (rect)
     {
       graphene_rect_t capture_rect;
+      g_autoptr (GList) views = NULL;
+      GList *l;
 
       _clutter_util_rect_from_rectangle (rect, &capture_rect);
-      if (!_clutter_stage_get_max_view_scale_factor_for_rect (stage,
-                                                              &capture_rect,
-                                                              &max_scale))
+      views = clutter_stage_get_views_for_rect (stage, &capture_rect);
+
+      if (!views)
         return FALSE;
+
+      for (l = views; l; l = l->next)
+        {
+          ClutterStageView *view = l->data;
+
+          max_scale = MAX (clutter_stage_view_get_scale (view), max_scale);
+        }
 
       if (out_width)
         *out_width = (gint) roundf (rect->width * max_scale);
@@ -4764,18 +4785,17 @@ _clutter_stage_peek_stage_views (ClutterStage *stage)
 }
 
 void
-clutter_stage_update_resource_scales (ClutterStage *stage)
+clutter_stage_clear_stage_views (ClutterStage *stage)
 {
-  _clutter_actor_queue_update_resource_scale_recursive (CLUTTER_ACTOR (stage));
+  clutter_actor_clear_stage_views_recursive (CLUTTER_ACTOR (stage));
 }
 
-gboolean
-_clutter_stage_get_max_view_scale_factor_for_rect (ClutterStage    *stage,
-                                                   graphene_rect_t *rect,
-                                                   float           *view_scale)
+GList *
+clutter_stage_get_views_for_rect (ClutterStage          *stage,
+                                  const graphene_rect_t *rect)
 {
   ClutterStagePrivate *priv = stage->priv;
-  float scale = 0.0f;
+  GList *views_for_rect = NULL;
   GList *l;
 
   for (l = _clutter_stage_window_get_views (priv->impl); l; l = l->next)
@@ -4788,14 +4808,10 @@ _clutter_stage_get_max_view_scale_factor_for_rect (ClutterStage    *stage,
       _clutter_util_rect_from_rectangle (&view_layout, &view_rect);
 
       if (graphene_rect_intersection (&view_rect, rect, NULL))
-        scale = MAX (clutter_stage_view_get_scale (view), scale);
+        views_for_rect = g_list_prepend (views_for_rect, view);
     }
 
-  if (scale == 0.0)
-    return FALSE;
-
-  *view_scale = scale;
-  return TRUE;
+  return views_for_rect;
 }
 
 static void

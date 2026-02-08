@@ -812,6 +812,8 @@ struct _ClutterActorPrivate
   gulong resolution_changed_id;
   gulong font_changed_id;
 
+  GList *stage_views;
+
   /* bitfields: KEEP AT THE END */
 
   /* fixed position and sizes */
@@ -854,6 +856,7 @@ struct _ClutterActorPrivate
   guint had_effects_on_last_paint_volume_update : 1;
   guint needs_compute_resource_scale : 1;
   guint absolute_origin_changed     : 1;
+  guint needs_update_stage_views    : 1;
 };
 
 enum
@@ -1016,6 +1019,7 @@ enum
   TRANSITIONS_COMPLETED,
   TOUCH_EVENT,
   TRANSITION_STOPPED,
+  STAGE_VIEWS_CHANGED,
 
   LAST_SIGNAL
 };
@@ -1637,6 +1641,22 @@ clutter_actor_update_map_state (ClutterActor  *self,
 }
 
 static void
+queue_update_stage_views (ClutterActor *actor)
+{
+  while (actor && !actor->priv->needs_update_stage_views)
+  {
+    actor->priv->needs_update_stage_views = TRUE;
+
+    /* We don't really need to update the stage-views of the actors up the
+     * hierarchy, we set the flag anyway though so we can avoid traversing
+     * the whole scenegraph when looking for actors which need an update
+     * in clutter_actor_update_stage_views().
+     */
+    actor = actor->priv->parent;
+  }
+}
+
+static void
 clutter_actor_real_map (ClutterActor *self)
 {
   ClutterActor *iter;
@@ -1649,6 +1669,18 @@ clutter_actor_real_map (ClutterActor *self)
   CLUTTER_ACTOR_SET_FLAGS (self, CLUTTER_ACTOR_MAPPED);
 
   self->priv->needs_paint_volume_update = TRUE;
+
+  /* We skip unmapped actors when updating the stage-views list, so if
+   * an actors list got invalidated while it was unmapped make sure to
+   * set priv->needs_update_stage_views to TRUE for all actors up the
+   * hierarchy now.
+   */
+  if (self->priv->needs_update_stage_views)
+    {
+      /* Avoid the early return in queue_update_stage_views() */
+      self->priv->needs_update_stage_views = FALSE;
+      queue_update_stage_views (self);
+    }
 
   clutter_actor_ensure_resource_scale (self);
 
@@ -2587,6 +2619,7 @@ static void
 absolute_allocation_changed (ClutterActor *actor)
 {
   actor->priv->needs_compute_resource_scale = TRUE;
+  queue_update_stage_views (actor);
 }
 
 static ClutterActorTraverseVisitFlags
@@ -4403,6 +4436,7 @@ typedef enum
   REMOVE_CHILD_FLUSH_QUEUE        = 1 << 4,
   REMOVE_CHILD_NOTIFY_FIRST_LAST  = 1 << 5,
   REMOVE_CHILD_STOP_TRANSITIONS   = 1 << 6,
+  REMOVE_CHILD_CLEAR_STAGE_VIEWS  = 1 << 7,
 
   /* default flags for public API */
   REMOVE_CHILD_DEFAULT_FLAGS      = REMOVE_CHILD_STOP_TRANSITIONS |
@@ -4411,14 +4445,16 @@ typedef enum
                                     REMOVE_CHILD_EMIT_ACTOR_REMOVED |
                                     REMOVE_CHILD_CHECK_STATE |
                                     REMOVE_CHILD_FLUSH_QUEUE |
-                                    REMOVE_CHILD_NOTIFY_FIRST_LAST,
+                                    REMOVE_CHILD_NOTIFY_FIRST_LAST |
+                                    REMOVE_CHILD_CLEAR_STAGE_VIEWS,
 
   /* flags for legacy/deprecated API */
   REMOVE_CHILD_LEGACY_FLAGS       = REMOVE_CHILD_STOP_TRANSITIONS |
                                     REMOVE_CHILD_CHECK_STATE |
                                     REMOVE_CHILD_FLUSH_QUEUE |
                                     REMOVE_CHILD_EMIT_PARENT_SET |
-                                    REMOVE_CHILD_NOTIFY_FIRST_LAST
+                                    REMOVE_CHILD_NOTIFY_FIRST_LAST |
+                                    REMOVE_CHILD_CLEAR_STAGE_VIEWS
 } ClutterActorRemoveChildFlags;
 
 /*< private >
@@ -4440,6 +4476,7 @@ clutter_actor_remove_child_internal (ClutterActor                 *self,
   gboolean notify_first_last;
   gboolean was_mapped;
   gboolean stop_transitions;
+  gboolean clear_stage_views;
   GObject *obj;
 
   if (self == child)
@@ -4456,6 +4493,7 @@ clutter_actor_remove_child_internal (ClutterActor                 *self,
   flush_queue = (flags & REMOVE_CHILD_FLUSH_QUEUE) != 0;
   notify_first_last = (flags & REMOVE_CHILD_NOTIFY_FIRST_LAST) != 0;
   stop_transitions = (flags & REMOVE_CHILD_STOP_TRANSITIONS) != 0;
+  clear_stage_views = (flags & REMOVE_CHILD_CLEAR_STAGE_VIEWS) != 0;
 
   obj = G_OBJECT (self);
   g_object_freeze_notify (obj);
@@ -4528,6 +4566,13 @@ clutter_actor_remove_child_internal (ClutterActor                 *self,
     {
       clutter_actor_queue_compute_expand (self);
     }
+
+  /* Only actors which are attached to a stage get notified about changes
+   * to the stage views, so make sure all the stage-views lists are
+   * cleared as the child and its children leave the actor tree.
+   */
+  if (clear_stage_views && !CLUTTER_ACTOR_IN_DESTRUCTION (child))
+    clutter_actor_clear_stage_views_recursive (child);
 
   if (emit_parent_set && !CLUTTER_ACTOR_IN_REPARENT (child) &&
       !CLUTTER_ACTOR_IN_DESTRUCTION (child))
@@ -6200,6 +6245,8 @@ clutter_actor_dispose (GObject *object)
       g_hash_table_unref (priv->clones);
       priv->clones = NULL;
     }
+
+  g_clear_pointer (&priv->stage_views, g_list_free);
 
   G_OBJECT_CLASS (clutter_actor_parent_class)->dispose (object);
 }
@@ -8748,6 +8795,26 @@ clutter_actor_class_init (ClutterActorClass *klass)
   g_signal_set_va_marshaller (actor_signals[TOUCH_EVENT],
                               G_TYPE_FROM_CLASS (object_class),
                               _clutter_marshal_BOOLEAN__BOXEDv);
+
+  /**
+   * ClutterActor::stage-views-changed:
+   * @actor: a #ClutterActor
+   *
+   * The ::stage-views-changed signal is emitted when the position or
+   * size an actor is being painted at have changed so that it's visible
+   * on different stage views.
+   *
+   * This signal is also emitted when the actor gets detached from the stage
+   * or when the views of the stage have been invalidated and will be
+   * replaced; it's not emitted when the actor gets hidden.
+   */
+  actor_signals[STAGE_VIEWS_CHANGED] =
+  g_signal_new (I_("stage-views-changed"),
+                G_TYPE_FROM_CLASS (object_class),
+                G_SIGNAL_RUN_LAST,
+                0,
+                NULL, NULL, NULL,
+                G_TYPE_NONE, 0);
 }
 
 static void
@@ -8766,6 +8833,7 @@ clutter_actor_init (ClutterActor *self)
   priv->needs_allocation = TRUE;
   priv->needs_paint_volume_update = TRUE;
   priv->needs_compute_resource_scale = TRUE;
+  priv->needs_update_stage_views = TRUE;
 
   priv->cached_width_age = 1;
   priv->cached_height_age = 1;
@@ -17578,16 +17646,26 @@ _clutter_actor_get_resource_scale_for_rect (ClutterActor    *self,
                                             float           *resource_scale)
 {
   ClutterActor *stage;
+  g_autoptr (GList) views = NULL;
+  GList *l;
   float max_scale = 0;
 
   stage = _clutter_actor_get_stage_internal (self);
   if (!stage)
     return FALSE;
 
-  if (!_clutter_stage_get_max_view_scale_factor_for_rect (CLUTTER_STAGE (stage),
-                                                          bounding_rect,
-                                                          &max_scale))
+  views = clutter_stage_get_views_for_rect (CLUTTER_STAGE (stage),
+                                            bounding_rect);
+
+  if (!views)
     return FALSE;
+
+  for (l = views; l; l = l->next)
+    {
+      ClutterStageView *view = l->data;
+
+      max_scale = MAX (clutter_stage_view_get_scale (view), max_scale);
+    }
 
   *resource_scale = max_scale;
 
@@ -17664,20 +17742,30 @@ _clutter_actor_compute_resource_scale (ClutterActor *self,
 }
 
 static ClutterActorTraverseVisitFlags
-queue_update_resource_scale_cb (ClutterActor *actor,
-                                int           depth,
-                                void         *user_data)
+clear_stage_views_cb (ClutterActor *actor,
+                      int           depth,
+                      gpointer      user_data)
 {
+  g_autoptr (GList) old_stage_views = NULL;
+
+  actor->priv->needs_update_stage_views = TRUE;
+
   actor->priv->needs_compute_resource_scale = TRUE;
+
+  old_stage_views = g_steal_pointer (&actor->priv->stage_views);
+
+  if (old_stage_views)
+    g_signal_emit (actor, actor_signals[STAGE_VIEWS_CHANGED], 0);
+
   return CLUTTER_ACTOR_TRAVERSE_VISIT_CONTINUE;
 }
 
 void
-_clutter_actor_queue_update_resource_scale_recursive (ClutterActor *self)
+clutter_actor_clear_stage_views_recursive (ClutterActor *self)
 {
   _clutter_actor_traverse (self,
                            CLUTTER_ACTOR_TRAVERSE_DEPTH_FIRST,
-                           queue_update_resource_scale_cb,
+                           clear_stage_views_cb,
                            NULL,
                            NULL);
 }
@@ -17767,6 +17855,125 @@ clutter_actor_get_resource_scale (ClutterActor *self,
     }
 
   return FALSE;
+}
+
+static gboolean
+sorted_lists_equal (GList *list_a,
+                    GList *list_b)
+{
+  GList *a, *b;
+
+  if (!list_a && !list_b)
+    return TRUE;
+
+  for (a = list_a, b = list_b;
+       a && b;
+       a = a->next, b = b->next)
+    {
+      if (a->data != b->data)
+        break;
+
+      if (!a->next && !b->next)
+        return TRUE;
+    }
+
+  return FALSE;
+}
+
+static void
+update_stage_views (ClutterActor *self)
+{
+  ClutterActorPrivate *priv = self->priv;
+  g_autoptr (GList) old_stage_views = NULL;
+  ClutterStage *stage;
+  graphene_rect_t bounding_rect;
+
+  old_stage_views = g_steal_pointer (&priv->stage_views);
+
+  if (priv->needs_allocation)
+    {
+      g_warning ("Can't update stage views actor %s is on because it needs an "
+      "allocation.", _clutter_actor_get_debug_name (self));
+      goto out;
+    }
+
+  stage = CLUTTER_STAGE (_clutter_actor_get_stage_internal (self));
+  g_return_if_fail (stage);
+
+  clutter_actor_get_transformed_position (self,
+                                          &bounding_rect.origin.x,
+                                          &bounding_rect.origin.y);
+  clutter_actor_get_transformed_size (self,
+                                      &bounding_rect.size.width,
+                                      &bounding_rect.size.height);
+
+  if (bounding_rect.size.width == 0.0 ||
+      bounding_rect.size.height == 0.0)
+    goto out;
+
+  priv->stage_views = clutter_stage_get_views_for_rect (stage,
+                                                        &bounding_rect);
+
+out:
+  if (g_signal_has_handler_pending (self, actor_signals[STAGE_VIEWS_CHANGED],
+                                    0, TRUE))
+    {
+      if (!sorted_lists_equal (old_stage_views, priv->stage_views))
+        g_signal_emit (self, actor_signals[STAGE_VIEWS_CHANGED], 0);
+    }
+}
+
+void
+clutter_actor_update_stage_views (ClutterActor *self)
+{
+  ClutterActorPrivate *priv = self->priv;
+  ClutterActor *child;
+
+  if (!CLUTTER_ACTOR_IS_MAPPED (self) ||
+      CLUTTER_ACTOR_IN_DESTRUCTION (self))
+    return;
+
+  if (!priv->needs_update_stage_views)
+    return;
+
+  update_stage_views (self);
+
+  priv->needs_update_stage_views = FALSE;
+
+  for (child = priv->first_child; child; child = child->priv->next_sibling)
+    clutter_actor_update_stage_views (child);
+}
+
+/**
+ * clutter_actor_peek_stage_views:
+ * @self: A #ClutterActor
+ *
+ * Retrieves the list of #ClutterStageView<!-- -->s the actor is being
+ * painted on.
+ *
+ * If this function is called during the paint cycle, the list is guaranteed
+ * to be up-to-date, if called outside the paint cycle, the list will
+ * contain the views the actor was painted on last.
+ *
+ * The list returned by this function is not updated when the actors
+ * visibility changes: If an actor gets hidden and is not being painted
+ * anymore, this function will return the list of views the actor was
+ * painted on last.
+ *
+ * If an actor is not attached to a stage (realized), this function will
+ * always return an empty list.
+ *
+ * Returns: (transfer none) (element-type Clutter.StageView): The list of
+ *   #ClutterStageView<!-- -->s the actor is being painted on. The list and
+ *   its contents are owned by the #ClutterActor and the list may not be
+ *   freed or modified.
+ */
+GList *
+clutter_actor_peek_stage_views (ClutterActor *self)
+{
+  g_return_val_if_fail (CLUTTER_IS_ACTOR (self), FALSE);
+
+  return self->priv->stage_views;
 }
 
 /**
