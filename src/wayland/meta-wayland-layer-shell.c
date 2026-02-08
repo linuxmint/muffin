@@ -1124,6 +1124,13 @@ meta_wayland_layer_surface_get_output (MetaWaylandLayerSurface *layer_surface)
   return layer_surface->output;
 }
 
+gboolean
+meta_wayland_layer_surface_wants_keyboard_focus (MetaWaylandLayerSurface *layer_surface)
+{
+  return layer_surface->current.keyboard_interactivity !=
+    ZWLR_LAYER_SURFACE_V1_KEYBOARD_INTERACTIVITY_NONE;
+}
+
 /* Layer shell protocol implementation */
 static void
 layer_shell_get_layer_surface (struct wl_client   *client,

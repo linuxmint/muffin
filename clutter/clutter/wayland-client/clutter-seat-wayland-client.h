@@ -27,6 +27,7 @@
 
 #include <glib-object.h>
 #include <clutter/clutter-seat.h>
+#include <clutter/clutter-backend.h>
 
 G_BEGIN_DECLS
 
@@ -44,7 +45,10 @@ struct _ClutterSeatWaylandClient
 {
     ClutterSeat parent_instance;
 
+    ClutterBackend *backend;
     ClutterKeymap *keymap;
+    ClutterInputDevice *pointer_device;
+    ClutterInputDevice *keyboard_device;
 };
 
 struct _ClutterSeatWaylandClientClass
@@ -54,7 +58,7 @@ struct _ClutterSeatWaylandClientClass
 
 GType clutter_seat_wayland_client_get_type (void) G_GNUC_CONST;
 
-ClutterSeat * clutter_seat_wayland_client_new (void);
+ClutterSeat * clutter_seat_wayland_client_new (ClutterBackend *backend);
 
 G_END_DECLS
 

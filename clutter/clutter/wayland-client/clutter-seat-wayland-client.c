@@ -26,6 +26,7 @@
 
 #include "clutter-seat-wayland-client.h"
 #include "clutter-keymap-wayland-client.h"
+#include "clutter-input-device-private.h"
 
 G_DEFINE_TYPE (ClutterSeatWaylandClient,
                clutter_seat_wayland_client,
@@ -34,22 +35,29 @@ G_DEFINE_TYPE (ClutterSeatWaylandClient,
 static ClutterInputDevice *
 clutter_seat_wayland_client_get_pointer (ClutterSeat *seat)
 {
-    /* No pointer device yet - input handling not implemented */
-    return NULL;
+    ClutterSeatWaylandClient *seat_wl = CLUTTER_SEAT_WAYLAND_CLIENT (seat);
+    return seat_wl->pointer_device;
 }
 
 static ClutterInputDevice *
 clutter_seat_wayland_client_get_keyboard (ClutterSeat *seat)
 {
-    /* No keyboard device yet - input handling not implemented */
-    return NULL;
+    ClutterSeatWaylandClient *seat_wl = CLUTTER_SEAT_WAYLAND_CLIENT (seat);
+    return seat_wl->keyboard_device;
 }
 
 static GList *
 clutter_seat_wayland_client_list_devices (ClutterSeat *seat)
 {
-    /* No devices yet - input handling not implemented */
-    return NULL;
+    ClutterSeatWaylandClient *seat_wl = CLUTTER_SEAT_WAYLAND_CLIENT (seat);
+    GList *devices = NULL;
+
+    if (seat_wl->pointer_device)
+        devices = g_list_prepend (devices, seat_wl->pointer_device);
+    if (seat_wl->keyboard_device)
+        devices = g_list_prepend (devices, seat_wl->keyboard_device);
+
+    return devices;
 }
 
 static void
@@ -133,6 +141,8 @@ clutter_seat_wayland_client_finalize (GObject *object)
 {
     ClutterSeatWaylandClient *seat_wl = CLUTTER_SEAT_WAYLAND_CLIENT (object);
 
+    g_clear_object (&seat_wl->pointer_device);
+    g_clear_object (&seat_wl->keyboard_device);
     g_clear_object (&seat_wl->keymap);
 
     G_OBJECT_CLASS (clutter_seat_wayland_client_parent_class)->finalize (object);
@@ -167,7 +177,35 @@ clutter_seat_wayland_client_init (ClutterSeatWaylandClient *seat)
 }
 
 ClutterSeat *
-clutter_seat_wayland_client_new (void)
+clutter_seat_wayland_client_new (ClutterBackend *backend)
 {
-    return g_object_new (CLUTTER_TYPE_SEAT_WAYLAND_CLIENT, NULL);
+    ClutterSeat *seat;
+    ClutterSeatWaylandClient *seat_wl;
+
+    seat = g_object_new (CLUTTER_TYPE_SEAT_WAYLAND_CLIENT, NULL);
+    seat_wl = CLUTTER_SEAT_WAYLAND_CLIENT (seat);
+
+    seat_wl->backend = backend;
+
+    seat_wl->pointer_device = g_object_new (CLUTTER_TYPE_INPUT_DEVICE,
+                                            "name", "Wayland Pointer",
+                                            "device-type", CLUTTER_POINTER_DEVICE,
+                                            "device-mode", CLUTTER_INPUT_MODE_MASTER,
+                                            "has-cursor", TRUE,
+                                            "seat", seat,
+                                            "backend", backend,
+                                            "enabled", TRUE,
+                                            NULL);
+
+    seat_wl->keyboard_device = g_object_new (CLUTTER_TYPE_INPUT_DEVICE,
+                                             "name", "Wayland Keyboard",
+                                             "device-type", CLUTTER_KEYBOARD_DEVICE,
+                                             "device-mode", CLUTTER_INPUT_MODE_MASTER,
+                                             "has-cursor", FALSE,
+                                             "seat", seat,
+                                             "backend", backend,
+                                             "enabled", TRUE,
+                                             NULL);
+
+    return seat;
 }

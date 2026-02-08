@@ -33,12 +33,26 @@ G_DEFINE_TYPE (ClutterKeymapWaylandClient,
 static gboolean
 clutter_keymap_wayland_client_get_num_lock_state (ClutterKeymap *keymap)
 {
+    ClutterKeymapWaylandClient *keymap_wl = CLUTTER_KEYMAP_WAYLAND_CLIENT (keymap);
+
+    if (keymap_wl->xkb_state)
+        return xkb_state_mod_name_is_active (keymap_wl->xkb_state,
+                                             XKB_MOD_NAME_NUM,
+                                             XKB_STATE_MODS_LOCKED);
+
     return FALSE;
 }
 
 static gboolean
 clutter_keymap_wayland_client_get_caps_lock_state (ClutterKeymap *keymap)
 {
+    ClutterKeymapWaylandClient *keymap_wl = CLUTTER_KEYMAP_WAYLAND_CLIENT (keymap);
+
+    if (keymap_wl->xkb_state)
+        return xkb_state_mod_name_is_active (keymap_wl->xkb_state,
+                                             XKB_MOD_NAME_CAPS,
+                                             XKB_STATE_MODS_LOCKED);
+
     return FALSE;
 }
 
@@ -67,4 +81,13 @@ ClutterKeymap *
 clutter_keymap_wayland_client_new (void)
 {
     return g_object_new (CLUTTER_TYPE_KEYMAP_WAYLAND_CLIENT, NULL);
+}
+
+void
+clutter_keymap_wayland_client_set_xkb_state (ClutterKeymapWaylandClient *keymap,
+                                              struct xkb_state           *xkb_state)
+{
+    g_return_if_fail (CLUTTER_IS_KEYMAP_WAYLAND_CLIENT (keymap));
+
+    keymap->xkb_state = xkb_state;
 }

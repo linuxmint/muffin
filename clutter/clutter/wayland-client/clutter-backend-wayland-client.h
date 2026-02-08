@@ -28,6 +28,7 @@
 #include <glib-object.h>
 #include <gio/gio.h>
 #include <wayland-client.h>
+#include <xkbcommon/xkbcommon.h>
 
 #include <clutter/clutter-backend.h>
 #include "clutter-backend-private.h"
@@ -67,6 +68,26 @@ struct _ClutterBackendWaylandClient
     /* Input seat */
     ClutterSeat *seat;
 
+    /* Wayland input devices */
+    struct wl_pointer *wl_pointer;
+    struct wl_keyboard *wl_keyboard;
+
+    /* Pointer state tracking */
+    struct wl_surface *pointer_focus_surface;
+    double pointer_x;
+    double pointer_y;
+    uint32_t pointer_button_serial;
+    ClutterModifierType modifier_state;
+
+    /* Keyboard state tracking */
+    struct wl_surface *keyboard_focus_surface;
+    struct xkb_context *xkb_context;
+    struct xkb_keymap *xkb_keymap;
+    struct xkb_state *xkb_state;
+
+    /* Surface-to-stage mapping */
+    GHashTable *surface_to_stage;
+
     /* Settings (font options, etc.) */
     GSettings *xsettings;
 };
@@ -85,6 +106,12 @@ struct wl_display *    clutter_backend_wayland_client_get_wl_display    (Clutter
 struct wl_compositor * clutter_backend_wayland_client_get_compositor    (ClutterBackendWaylandClient *backend);
 struct zwlr_layer_shell_v1 * clutter_backend_wayland_client_get_layer_shell (ClutterBackendWaylandClient *backend);
 struct wl_output *     clutter_backend_wayland_client_get_output        (ClutterBackendWaylandClient *backend);
+
+void clutter_backend_wayland_client_register_surface   (ClutterBackendWaylandClient *backend,
+                                                         struct wl_surface           *surface,
+                                                         gpointer                     stage);
+void clutter_backend_wayland_client_unregister_surface (ClutterBackendWaylandClient *backend,
+                                                         struct wl_surface           *surface);
 
 G_END_DECLS
 

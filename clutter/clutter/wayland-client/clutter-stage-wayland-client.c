@@ -225,6 +225,11 @@ clutter_stage_wayland_client_realize (ClutterStageWindow *stage_window)
         return FALSE;
     }
 
+    /* Register surface with backend for input event routing */
+    clutter_backend_wayland_client_register_surface (backend_wl,
+                                                     stage_wl->wl_surface,
+                                                     stage_wl);
+
     /* Create layer surface using the Cogl-created wl_surface */
     stage_wl->layer_surface = zwlr_layer_shell_v1_get_layer_surface (
         layer_shell,
@@ -256,6 +261,11 @@ clutter_stage_wayland_client_realize (ClutterStageWindow *stage_window)
                                       stage_wl->margin_bottom,
                                       stage_wl->margin_left);
 
+    /* Allow keyboard focus on click (needed for text entry etc.) */
+    zwlr_layer_surface_v1_set_keyboard_interactivity (
+        stage_wl->layer_surface,
+        ZWLR_LAYER_SURFACE_V1_KEYBOARD_INTERACTIVITY_ON_DEMAND);
+
     /* Set initial size (0 = let compositor decide based on anchors) */
     zwlr_layer_surface_v1_set_size (stage_wl->layer_surface, 0, 40);
 
@@ -286,6 +296,17 @@ clutter_stage_wayland_client_unrealize (ClutterStageWindow *stage_window)
 
     /* Destroy stage view */
     g_clear_object (&stage_wl->view);
+
+    /* Unregister surface from backend before destroying */
+    if (stage_wl->wl_surface)
+    {
+        ClutterStageCogl *stage_cogl = CLUTTER_STAGE_COGL (stage_wl);
+        ClutterBackendWaylandClient *backend_wl;
+
+        backend_wl = CLUTTER_BACKEND_WAYLAND_CLIENT (stage_cogl->backend);
+        clutter_backend_wayland_client_unregister_surface (backend_wl,
+                                                           stage_wl->wl_surface);
+    }
 
     /* Destroy layer surface before onscreen (which owns wl_surface) */
     if (stage_wl->layer_surface)

@@ -44,6 +44,7 @@ void meta_wayland_init_layer_shell (MetaWaylandCompositor *compositor);
 
 MetaLayerShellLayer meta_wayland_layer_surface_get_layer (MetaWaylandLayerSurface *layer_surface);
 MetaWaylandOutput * meta_wayland_layer_surface_get_output (MetaWaylandLayerSurface *layer_surface);
+gboolean meta_wayland_layer_surface_wants_keyboard_focus (MetaWaylandLayerSurface *layer_surface);
 
 void meta_wayland_layer_shell_update_struts (MetaWaylandCompositor *compositor);
 void meta_wayland_layer_shell_on_workarea_changed (MetaWaylandCompositor *compositor);

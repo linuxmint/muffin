@@ -26,6 +26,7 @@
 #define __CLUTTER_KEYMAP_WAYLAND_CLIENT_H__
 
 #include <glib-object.h>
+#include <xkbcommon/xkbcommon.h>
 #include <clutter/clutter-keymap.h>
 
 G_BEGIN_DECLS
@@ -43,6 +44,8 @@ typedef struct _ClutterKeymapWaylandClientClass  ClutterKeymapWaylandClientClass
 struct _ClutterKeymapWaylandClient
 {
     ClutterKeymap parent_instance;
+
+    struct xkb_state *xkb_state;
 };
 
 struct _ClutterKeymapWaylandClientClass
@@ -53,6 +56,9 @@ struct _ClutterKeymapWaylandClientClass
 GType clutter_keymap_wayland_client_get_type (void) G_GNUC_CONST;
 
 ClutterKeymap * clutter_keymap_wayland_client_new (void);
+
+void clutter_keymap_wayland_client_set_xkb_state (ClutterKeymapWaylandClient *keymap,
+                                                   struct xkb_state           *xkb_state);
 
 G_END_DECLS
 
