@@ -249,6 +249,7 @@ libmuffin-clutter-0.so.0 libmuffin0 #MINVER#
  clutter_actor_node_get_type@Base 5.3.0
  clutter_actor_node_new@Base 5.3.0
  clutter_actor_paint@Base 5.3.0
+ clutter_actor_peek_stage_views@Base 6.6.3
  clutter_actor_pick@Base 5.3.0
  clutter_actor_pick_box@Base 5.3.0
  clutter_actor_queue_redraw@Base 5.3.0
@@ -343,7 +344,6 @@ libmuffin-clutter-0.so.0 libmuffin0 #MINVER#
  clutter_align_constraint_set_align_axis@Base 5.3.0
  clutter_align_constraint_set_factor@Base 5.3.0
  clutter_align_constraint_set_source@Base 5.3.0
- clutter_allocation_flags_get_type@Base 5.3.0
  clutter_alpha_get_alpha@Base 5.3.0
  clutter_alpha_get_mode@Base 5.3.0
  clutter_alpha_get_timeline@Base 5.3.0
@@ -381,6 +381,7 @@ libmuffin-clutter-0.so.0 libmuffin0 #MINVER#
  clutter_backend_get_resolution@Base 5.3.0
  clutter_backend_get_stage_window@Base 5.3.0
  clutter_backend_get_type@Base 5.3.0
+ clutter_backend_set_fallback_resource_scale@Base 6.6.3
  clutter_backend_set_font_options@Base 5.3.0
  clutter_backend_set_input_method@Base 5.3.0
  clutter_backend_x11_get_type@Base 5.3.0
@@ -587,7 +588,7 @@ libmuffin-clutter-0.so.0 libmuffin0 #MINVER#
  clutter_event_get_event_sequence@Base 5.3.0
  clutter_event_get_flags@Base 5.3.0
  clutter_event_get_gesture_motion_delta@Base 5.3.0
- clutter_event_get_gesture_motion_delta_unaccelerated@Base 6.7.0
+ clutter_event_get_gesture_motion_delta_unaccelerated@Base 6.6.3
  clutter_event_get_gesture_phase@Base 5.3.0
  clutter_event_get_gesture_pinch_angle_delta@Base 5.3.0
  clutter_event_get_gesture_pinch_scale@Base 5.3.0
@@ -1109,6 +1110,7 @@ libmuffin-clutter-0.so.0 libmuffin0 #MINVER#
  clutter_snap_edge_get_type@Base 5.3.0
  clutter_stage_capture@Base 5.3.0
  clutter_stage_capture_into@Base 5.3.0
+ clutter_stage_clear_stage_views@Base 6.6.3
  clutter_stage_ensure_current@Base 5.3.0
  clutter_stage_ensure_redraw@Base 5.3.0
  clutter_stage_ensure_viewport@Base 5.3.0
@@ -1158,7 +1160,6 @@ libmuffin-clutter-0.so.0 libmuffin0 #MINVER#
  clutter_stage_skip_sync_delay@Base 5.3.0
  clutter_stage_state_get_type@Base 5.3.0
  clutter_stage_thaw_updates@Base 5.3.0
- clutter_stage_update_resource_scales@Base 5.3.0
  clutter_stage_view_cogl_get_type@Base 5.3.0
  clutter_stage_view_get_framebuffer@Base 5.3.0
  clutter_stage_view_get_layout@Base 5.3.0
