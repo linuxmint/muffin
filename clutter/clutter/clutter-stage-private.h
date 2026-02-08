@@ -135,13 +135,15 @@ void            _clutter_stage_presented                (ClutterStage      *stag
                                                          CoglFrameEvent     frame_event,
                                                          ClutterFrameInfo  *frame_info);
 
-GList *         _clutter_stage_peek_stage_views         (ClutterStage *stage);
+GList *         clutter_stage_peek_stage_views         (ClutterStage *stage);
 
 void            clutter_stage_queue_actor_relayout      (ClutterStage *stage,
                                                          ClutterActor *actor);
 
 GList * clutter_stage_get_views_for_rect (ClutterStage          *stage,
                                           const graphene_rect_t *rect);
+
+void clutter_stage_set_actor_needs_immediate_relayout (ClutterStage *stage);
 
 G_END_DECLS
 

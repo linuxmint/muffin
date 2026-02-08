@@ -187,9 +187,6 @@ struct _ClutterTextPrivate
   ClutterInputContentHintFlags input_hints;
   ClutterInputContentPurpose input_purpose;
 
-  /* Signal handler for when the :resource-scale changes */
-  gulong resource_scale_changed_id;
-
   /* bitfields */
   guint alignment               : 2;
   guint wrap                    : 1;
@@ -598,9 +595,7 @@ ensure_effective_pango_scale_attribute (ClutterText *self)
   float resource_scale;
   ClutterTextPrivate *priv = self->priv;
 
-  if (!clutter_actor_get_resource_scale (CLUTTER_ACTOR (self), &resource_scale) ||
-      resource_scale == 1.0)
-    return;
+  resource_scale = clutter_actor_get_resource_scale (CLUTTER_ACTOR (self));
 
   if (priv->effective_attrs != NULL)
     {
@@ -922,18 +917,6 @@ clutter_text_direction_changed_cb (GObject    *gobject,
   /* no need to queue a relayout: set_text_direction() will do that for us */
 }
 
-static void
-clutter_text_resource_scale_changed_cb (GObject    *gobject,
-                                        GParamSpec *pspec)
-{
-  ClutterText *self = CLUTTER_TEXT (gobject);
-  ClutterTextPrivate *priv = self->priv;
-
-  g_clear_pointer (&priv->effective_attrs, pango_attr_list_unref);
-  clutter_text_dirty_cache (self);
-  clutter_actor_queue_relayout (CLUTTER_ACTOR (gobject));
-}
-
 /*
  * clutter_text_create_layout:
  * @text: a #ClutterText
@@ -1137,8 +1120,7 @@ maybe_create_text_layout_with_resource_scale (ClutterText *text,
 {
   float resource_scale;
 
-  if (!clutter_actor_get_resource_scale (CLUTTER_ACTOR (text), &resource_scale))
-    return NULL;
+  resource_scale = clutter_actor_get_resource_scale (CLUTTER_ACTOR (text));
 
   return create_text_layout_with_scale (text,
                                         allocation_width,
@@ -1170,8 +1152,7 @@ clutter_text_coords_to_position (ClutterText *self,
 
   g_return_val_if_fail (CLUTTER_IS_TEXT (self), 0);
 
-  if (!clutter_actor_get_resource_scale (CLUTTER_ACTOR (self), &resource_scale))
-    return 0;
+  resource_scale = clutter_actor_get_resource_scale (CLUTTER_ACTOR (self));
 
   /* Take any offset due to scrolling into account, and normalize
    * the coordinates to PangoScale units
@@ -1299,8 +1280,7 @@ clutter_text_position_to_coords (ClutterText *self,
 
   g_return_val_if_fail (CLUTTER_IS_TEXT (self), FALSE);
 
-  if (!clutter_actor_get_resource_scale (CLUTTER_ACTOR (self), &resource_scale))
-    return FALSE;
+  resource_scale = clutter_actor_get_resource_scale (CLUTTER_ACTOR (self));
 
   ret = clutter_text_position_to_coords_internal (self, position,
                                                   x, y, line_height);
@@ -1776,7 +1756,6 @@ clutter_text_dispose (GObject *gobject)
   clutter_text_dirty_cache (self);
 
   g_clear_signal_handler (&priv->direction_changed_id, self);
-  g_clear_signal_handler (&priv->resource_scale_changed_id, self);
   g_clear_signal_handler (&priv->settings_changed_id,
                           clutter_get_default_backend ());
 
@@ -2637,8 +2616,7 @@ clutter_text_paint (ClutterActor        *self,
       !clutter_text_should_draw_cursor (text))
     return;
 
-  if (!clutter_actor_get_resource_scale (CLUTTER_ACTOR (self), &resource_scale))
-    return;
+  resource_scale = clutter_actor_get_resource_scale (CLUTTER_ACTOR (self));
 
   clutter_actor_box_scale (&alloc, resource_scale);
   clutter_actor_box_get_size (&alloc, &alloc_width, &alloc_height);
@@ -2870,8 +2848,7 @@ clutter_text_get_paint_volume (ClutterActor       *self,
       if (!clutter_actor_has_allocation (self))
         return FALSE;
 
-      if (!clutter_actor_get_resource_scale (self, &resource_scale))
-        return FALSE;
+      resource_scale = clutter_actor_get_resource_scale (self);
 
       _clutter_paint_volume_init_static (&priv->paint_volume, self);
 
@@ -2928,8 +2905,7 @@ clutter_text_get_preferred_width (ClutterActor *self,
   gfloat layout_width;
   gfloat resource_scale;
 
-  if (!clutter_actor_get_resource_scale (self, &resource_scale))
-    resource_scale = 1;
+  resource_scale = clutter_actor_get_resource_scale (self);
 
   layout = clutter_text_create_layout (text, -1, -1);
   pango_layout_get_extents (layout, NULL, &logical_rect);
@@ -2985,8 +2961,7 @@ clutter_text_get_preferred_height (ClutterActor *self,
       gfloat layout_height;
       gfloat resource_scale;
 
-      if (!clutter_actor_get_resource_scale (self, &resource_scale))
-        resource_scale = 1;
+      resource_scale = clutter_actor_get_resource_scale (self);
 
       if (priv->single_line_mode)
         for_width = -1;
@@ -3060,6 +3035,33 @@ static gboolean
 clutter_text_has_overlaps (ClutterActor *self)
 {
   return clutter_text_should_draw_cursor ((ClutterText *) self);
+}
+
+static float
+clutter_text_calculate_resource_scale (ClutterActor *actor,
+                                       int           phase)
+{
+  ClutterActorClass *parent_class = CLUTTER_ACTOR_CLASS (clutter_text_parent_class);
+  float new_resource_scale;
+
+  new_resource_scale = parent_class->calculate_resource_scale (actor, phase);
+
+  if (phase == 1)
+    return MAX (new_resource_scale, clutter_actor_get_real_resource_scale (actor));
+
+  return new_resource_scale;
+}
+
+static void
+clutter_text_resource_scale_changed (ClutterActor *actor)
+{
+  ClutterText *text = CLUTTER_TEXT (actor);
+  ClutterTextPrivate *priv = text->priv;
+
+  g_clear_pointer (&priv->effective_attrs, pango_attr_list_unref);
+  clutter_text_dirty_cache (text);
+
+  clutter_actor_queue_immediate_relayout (actor);
 }
 
 static gboolean
@@ -3828,6 +3830,8 @@ clutter_text_class_init (ClutterTextClass *klass)
   actor_class->key_focus_in = clutter_text_key_focus_in;
   actor_class->key_focus_out = clutter_text_key_focus_out;
   actor_class->has_overlaps = clutter_text_has_overlaps;
+  actor_class->calculate_resource_scale = clutter_text_calculate_resource_scale;
+  actor_class->resource_scale_changed = clutter_text_resource_scale_changed;
   actor_class->event = clutter_text_event;
 
   /**
@@ -4636,11 +4640,6 @@ clutter_text_init (ClutterText *self)
                       NULL);
 
   priv->input_focus = clutter_text_input_focus_new (self);
-
-  priv->resource_scale_changed_id =
-    g_signal_connect (self, "notify::resource-scale",
-                      G_CALLBACK (clutter_text_resource_scale_changed_cb),
-                      NULL);
 }
 
 /**

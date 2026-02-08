@@ -303,6 +303,10 @@ struct _ClutterActorClass
                                      ClutterTouchEvent    *event);
   gboolean (* has_accessible)       (ClutterActor         *self);
 
+  void     (* resource_scale_changed) (ClutterActor *self);
+  float    (* calculate_resource_scale) (ClutterActor *self,
+                                         int           phase);
+
   /*< private >*/
   /* padding for future expansion */
   GType layout_manager_type;
@@ -599,8 +603,7 @@ gboolean                        clutter_actor_get_paint_box                     
                                                                                  ClutterActorBox            *box);
 
 CLUTTER_EXPORT
-gboolean                        clutter_actor_get_resource_scale                (ClutterActor *self,
-                                                                                 gfloat       *resource_scale);
+float                           clutter_actor_get_resource_scale                (ClutterActor *self);
 
 CLUTTER_EXPORT
 gboolean                        clutter_actor_has_overlaps                      (ClutterActor               *self);

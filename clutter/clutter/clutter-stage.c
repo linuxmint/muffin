@@ -168,6 +168,7 @@ struct _ClutterStagePrivate
   guint motion_events_enabled  : 1;
   guint has_custom_perspective : 1;
   guint stage_was_relayout     : 1;
+  guint actor_needs_immediate_relayout : 1;
 };
 
 enum
@@ -583,7 +584,7 @@ clutter_stage_add_redraw_clip (ClutterStage          *stage,
 {
   GList *l;
 
-  for (l = _clutter_stage_peek_stage_views (stage); l; l = l->next)
+  for (l = clutter_stage_peek_stage_views (stage); l; l = l->next)
     {
       ClutterStageView *view = l->data;
 
@@ -1516,8 +1517,34 @@ static void
 update_actor_stage_views (ClutterStage *stage)
 {
   ClutterActor *actor = CLUTTER_ACTOR (stage);
+  ClutterStagePrivate *priv = stage->priv;
+  int phase;
 
-  clutter_actor_update_stage_views (actor);
+  COGL_TRACE_BEGIN_SCOPED (ClutterStageUpdateActorStageViews,
+                           "Actor stage-views");
+
+  /* If an actor needs an immediate relayout because its resource scale
+   * changed, we give it another chance to allocate correctly before
+   * the paint.
+   *
+   * We're doing the whole thing twice and pass the phase to
+   * clutter_actor_update_stage_views() to allow actors to detect loops:
+   * If the resource scale changes again after the relayout, the new
+   * allocation of an actor probably moved the actor onto another stage
+   * view, so if an actor sees phase == 1, it can choose a "final" scale.
+   */
+  for (phase = 0; phase < 2; phase++)
+    {
+      clutter_actor_update_stage_views (actor, phase);
+
+      if (!priv->actor_needs_immediate_relayout)
+        break;
+
+      priv->actor_needs_immediate_relayout = FALSE;
+      _clutter_stage_maybe_relayout (actor);
+    }
+
+  g_warn_if_fail (!priv->actor_needs_immediate_relayout);
 }
 
 /**
@@ -1572,9 +1599,7 @@ _clutter_stage_do_update (ClutterStage *stage)
   if (stage_was_relayout)
     pointers = _clutter_stage_check_updated_pointers (stage);
 
-  COGL_TRACE_BEGIN (ClutterStageUpdateActorStageViews, "Actor stage-views");
   update_actor_stage_views (stage);
-  COGL_TRACE_END (ClutterStageUpdateActorStageViews);
 
   COGL_TRACE_BEGIN (ClutterStagePaint, "Paint");
 
@@ -1629,7 +1654,7 @@ is_full_stage_redraw_queued (ClutterStage *stage)
 {
   GList *l;
 
-  for (l = _clutter_stage_peek_stage_views (stage); l; l = l->next)
+  for (l = clutter_stage_peek_stage_views (stage); l; l = l->next)
     {
       ClutterStageView *view = l->data;
 
@@ -4551,9 +4576,7 @@ clutter_stage_get_capture_final_size (ClutterStage          *stage,
 
       clutter_actor_get_allocation_box (CLUTTER_ACTOR (stage), &alloc);
       clutter_actor_box_get_size (&alloc, &stage_width, &stage_height);
-      if (!_clutter_actor_get_real_resource_scale (CLUTTER_ACTOR (stage),
-                                                   &max_scale))
-        return FALSE;
+      max_scale = clutter_actor_get_real_resource_scale (CLUTTER_ACTOR (stage));
 
       if (out_width)
         *out_width = (gint) roundf (stage_width * max_scale);
@@ -4777,7 +4800,7 @@ clutter_stage_thaw_updates (ClutterStage *stage)
 }
 
 GList *
-_clutter_stage_peek_stage_views (ClutterStage *stage)
+clutter_stage_peek_stage_views (ClutterStage *stage)
 {
   ClutterStagePrivate *priv = stage->priv;
 
@@ -4878,4 +4901,12 @@ clutter_stage_get_device_coords (ClutterStage         *stage,
 
   if (entry && coords)
     *coords = entry->coords;
+}
+
+void
+clutter_stage_set_actor_needs_immediate_relayout (ClutterStage *stage)
+{
+  ClutterStagePrivate *priv = stage->priv;
+
+  priv->actor_needs_immediate_relayout = TRUE;
 }

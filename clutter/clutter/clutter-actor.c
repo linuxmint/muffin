@@ -854,7 +854,6 @@ struct _ClutterActorPrivate
   guint needs_y_expand              : 1;
   guint needs_paint_volume_update   : 1;
   guint had_effects_on_last_paint_volume_update : 1;
-  guint needs_compute_resource_scale : 1;
   guint absolute_origin_changed     : 1;
   guint needs_update_stage_views    : 1;
 };
@@ -928,7 +927,6 @@ enum
   PROP_SCALE_CENTER_X, /* XXX:2.0 remove */
   PROP_SCALE_CENTER_Y, /* XXX:2.0 remove */
   PROP_SCALE_GRAVITY, /* XXX:2.0 remove */
-  PROP_RESOURCE_SCALE,
 
   PROP_ROTATION_ANGLE_X, /* XXX:2.0 rename to rotation-x */
   PROP_ROTATION_ANGLE_Y, /* XXX:2.0 rename to rotation-y */
@@ -1020,6 +1018,7 @@ enum
   TOUCH_EVENT,
   TRANSITION_STOPPED,
   STAGE_VIEWS_CHANGED,
+  RESOURCE_SCALE_CHANGED,
 
   LAST_SIGNAL
 };
@@ -1107,8 +1106,6 @@ static void clutter_actor_set_child_transform_internal (ClutterActor        *sel
 
 static void     clutter_actor_realize_internal          (ClutterActor *self);
 static void     clutter_actor_unrealize_internal        (ClutterActor *self);
-static gboolean clutter_actor_update_resource_scale     (ClutterActor *self);
-static void     clutter_actor_ensure_resource_scale     (ClutterActor *self);
 
 static void clutter_actor_push_in_cloned_branch (ClutterActor *self,
                                                  gulong        count);
@@ -1681,8 +1678,6 @@ clutter_actor_real_map (ClutterActor *self)
       self->priv->needs_update_stage_views = FALSE;
       queue_update_stage_views (self);
     }
-
-  clutter_actor_ensure_resource_scale (self);
 
   /* notify on parent mapped before potentially mapping
    * children, so apps see a top-down notification.
@@ -2618,7 +2613,6 @@ clutter_actor_notify_if_geometry_changed (ClutterActor          *self,
 static void
 absolute_allocation_changed (ClutterActor *actor)
 {
-  actor->priv->needs_compute_resource_scale = TRUE;
   queue_update_stage_views (actor);
 }
 
@@ -3954,8 +3948,6 @@ clutter_actor_paint (ClutterActor        *self,
   if (!CLUTTER_ACTOR_IS_MAPPED (self))
     return;
 
-  clutter_actor_ensure_resource_scale (self);
-
   actor_node = clutter_actor_node_new (self);
   root_node = clutter_paint_node_ref (actor_node);
 
@@ -4238,8 +4230,6 @@ clutter_actor_pick (ClutterActor       *actor,
    */
   if (!CLUTTER_ACTOR_IS_MAPPED (actor))
     return;
-
-  clutter_actor_ensure_resource_scale (actor);
 
   /* mark that we are in the paint process */
   CLUTTER_SET_PRIVATE_FLAGS (actor, CLUTTER_IN_PICK);
@@ -4576,10 +4566,7 @@ clutter_actor_remove_child_internal (ClutterActor                 *self,
 
   if (emit_parent_set && !CLUTTER_ACTOR_IN_REPARENT (child) &&
       !CLUTTER_ACTOR_IN_DESTRUCTION (child))
-    {
-      child->priv->needs_compute_resource_scale = TRUE;
-      g_signal_emit (child, actor_signals[PARENT_SET], 0, self);
-    }
+    g_signal_emit (child, actor_signals[PARENT_SET], 0, self);
 
   /* if the child was mapped then we need to relayout ourselves to account
    * for the removed child
@@ -5880,16 +5867,6 @@ clutter_actor_get_property (GObject    *object,
       g_value_set_enum (value, clutter_actor_get_scale_gravity (actor));
       break;
 
-    case PROP_RESOURCE_SCALE:
-      if (priv->needs_compute_resource_scale)
-        {
-          if (!clutter_actor_update_resource_scale (actor))
-            g_warning ("Getting invalid resource scale property");
-        }
-
-      g_value_set_float (value, priv->resource_scale);
-      break;
-
     case PROP_REACTIVE:
       g_value_set_boolean (value, clutter_actor_get_reactive (actor));
       break;
@@ -6505,6 +6482,25 @@ clutter_actor_real_has_overlaps (ClutterActor *self)
   return TRUE;
 }
 
+static float
+clutter_actor_real_calculate_resource_scale (ClutterActor *self,
+                                             int           phase)
+{
+  ClutterActorPrivate *priv = self->priv;
+  GList *l;
+  float new_resource_scale = -1.f;
+
+  for (l = priv->stage_views; l; l = l->next)
+    {
+      ClutterStageView *view = l->data;
+
+      new_resource_scale = MAX (clutter_stage_view_get_scale (view),
+                                new_resource_scale);
+    }
+
+  return new_resource_scale;
+}
+
 static void
 clutter_actor_real_destroy (ClutterActor *actor)
 {
@@ -6600,6 +6596,7 @@ clutter_actor_class_init (ClutterActorClass *klass)
   klass->get_accessible = clutter_actor_real_get_accessible;
   klass->get_paint_volume = clutter_actor_real_get_paint_volume;
   klass->has_overlaps = clutter_actor_real_has_overlaps;
+  klass->calculate_resource_scale = clutter_actor_real_calculate_resource_scale;
   klass->paint = clutter_actor_real_paint;
   klass->destroy = clutter_actor_real_destroy;
 
@@ -7353,19 +7350,6 @@ clutter_actor_class_init (ClutterActorClass *klass)
                        G_PARAM_READWRITE |
                        G_PARAM_STATIC_STRINGS |
                        G_PARAM_DEPRECATED);
-
-  /**
-   * ClutterActor:resource-scale:
-   *
-   * The resource-scale of the #ClutterActor if any or -1 if not available
-   */
-  obj_props[PROP_RESOURCE_SCALE] =
-    g_param_spec_float ("resource-scale",
-                        P_("Resource Scale"),
-                        P_("The Scaling factor for resources painting"),
-                        -1.0f, G_MAXFLOAT,
-                        1.0f,
-                        CLUTTER_PARAM_READABLE);
 
   /**
    * ClutterActor:rotation-angle-x:
@@ -8815,6 +8799,24 @@ clutter_actor_class_init (ClutterActorClass *klass)
                 0,
                 NULL, NULL, NULL,
                 G_TYPE_NONE, 0);
+
+  /**
+   * ClutterActor::resource-scale-changed:
+   * @actor: a #ClutterActor
+   *
+   * The ::resource-scale-changed signal is emitted when the resource scale
+   * value returned by clutter_actor_get_resource_scale() changes.
+   *
+   * This signal can be used to get notified about the correct resource scale
+   * when the scale had to be queried outside of the paint cycle.
+   */
+  actor_signals[RESOURCE_SCALE_CHANGED] =
+  g_signal_new (I_("resource-scale-changed"),
+                G_TYPE_FROM_CLASS (object_class),
+                G_SIGNAL_RUN_LAST,
+                G_STRUCT_OFFSET (ClutterActorClass, resource_scale_changed),
+                NULL, NULL, NULL,
+                G_TYPE_NONE, 0);
 }
 
 static void
@@ -8832,7 +8834,6 @@ clutter_actor_init (ClutterActor *self)
   priv->needs_height_request = TRUE;
   priv->needs_allocation = TRUE;
   priv->needs_paint_volume_update = TRUE;
-  priv->needs_compute_resource_scale = TRUE;
   priv->needs_update_stage_views = TRUE;
 
   priv->cached_width_age = 1;
@@ -13111,10 +13112,7 @@ clutter_actor_add_child_internal (ClutterActor              *self,
     }
 
   if (emit_parent_set && !CLUTTER_ACTOR_IN_REPARENT (child))
-    {
-      child->priv->needs_compute_resource_scale = TRUE;
-      g_signal_emit (child, actor_signals[PARENT_SET], 0, NULL);
-    }
+    g_signal_emit (child, actor_signals[PARENT_SET], 0, NULL);
 
   if (check_state)
     {
@@ -17640,107 +17638,6 @@ clutter_actor_get_paint_box (ClutterActor    *self,
   return TRUE;
 }
 
-static gboolean
-_clutter_actor_get_resource_scale_for_rect (ClutterActor    *self,
-                                            graphene_rect_t *bounding_rect,
-                                            float           *resource_scale)
-{
-  ClutterActor *stage;
-  g_autoptr (GList) views = NULL;
-  GList *l;
-  float max_scale = 0;
-
-  stage = _clutter_actor_get_stage_internal (self);
-  if (!stage)
-    return FALSE;
-
-  views = clutter_stage_get_views_for_rect (CLUTTER_STAGE (stage),
-                                            bounding_rect);
-
-  if (!views)
-    return FALSE;
-
-  for (l = views; l; l = l->next)
-    {
-      ClutterStageView *view = l->data;
-
-      max_scale = MAX (clutter_stage_view_get_scale (view), max_scale);
-    }
-
-  *resource_scale = max_scale;
-
-  return TRUE;
-}
-
-static gboolean
-_clutter_actor_compute_resource_scale (ClutterActor *self,
-                                       float        *resource_scale)
-{
-  graphene_rect_t bounding_rect;
-  ClutterActorPrivate *priv = self->priv;
-
-  if (CLUTTER_ACTOR_IN_DESTRUCTION (self) ||
-      CLUTTER_ACTOR_IN_PREF_SIZE (self) ||
-      !clutter_actor_is_mapped (self))
-    {
-      return FALSE;
-    }
-
-  clutter_actor_get_transformed_position (self,
-                                          &bounding_rect.origin.x,
-                                          &bounding_rect.origin.y);
-  clutter_actor_get_transformed_size (self,
-                                      &bounding_rect.size.width,
-                                      &bounding_rect.size.height);
-
-  if (bounding_rect.size.width == 0.0 ||
-      bounding_rect.size.height == 0.0 ||
-      !_clutter_actor_get_resource_scale_for_rect (self,
-                                                   &bounding_rect,
-                                                   resource_scale))
-    {
-      if (priv->parent)
-        {
-          gboolean in_clone_paint;
-          gboolean was_parent_in_clone_paint;
-          gboolean was_parent_unmapped;
-          gboolean was_parent_paint_unmapped;
-          gboolean ret;
-
-          in_clone_paint = clutter_actor_is_in_clone_paint (self);
-          was_parent_unmapped = !clutter_actor_is_mapped (priv->parent);
-          was_parent_in_clone_paint =
-            clutter_actor_is_in_clone_paint (priv->parent);
-          was_parent_paint_unmapped = priv->parent->priv->enable_paint_unmapped;
-
-          if (in_clone_paint && was_parent_unmapped)
-            {
-              _clutter_actor_set_in_clone_paint (priv->parent, TRUE);
-              _clutter_actor_set_enable_paint_unmapped (priv->parent, TRUE);
-            }
-
-          ret = _clutter_actor_compute_resource_scale (priv->parent,
-                                                       resource_scale);
-
-          if (in_clone_paint && was_parent_unmapped)
-            {
-              _clutter_actor_set_in_clone_paint (priv->parent,
-                                                 was_parent_in_clone_paint);
-              _clutter_actor_set_enable_paint_unmapped (priv->parent,
-                                                        was_parent_paint_unmapped);
-            }
-
-          return ret;
-        }
-      else
-        {
-          return FALSE;
-        }
-    }
-
-  return TRUE;
-}
-
 static ClutterActorTraverseVisitFlags
 clear_stage_views_cb (ClutterActor *actor,
                       int           depth,
@@ -17749,8 +17646,6 @@ clear_stage_views_cb (ClutterActor *actor,
   g_autoptr (GList) old_stage_views = NULL;
 
   actor->priv->needs_update_stage_views = TRUE;
-
-  actor->priv->needs_compute_resource_scale = TRUE;
 
   old_stage_views = g_steal_pointer (&actor->priv->stage_views);
 
@@ -17770,66 +17665,63 @@ clutter_actor_clear_stage_views_recursive (ClutterActor *self)
                            NULL);
 }
 
-static gboolean
-clutter_actor_update_resource_scale (ClutterActor *self)
-{
-  ClutterActorPrivate *priv;
-  float resource_scale;
-  float old_resource_scale;
-  priv = self->priv;
-
-  g_return_val_if_fail (priv->needs_compute_resource_scale, FALSE);
-
-  old_resource_scale = priv->resource_scale;
-  priv->resource_scale = -1.0f;
-
-  if (_clutter_actor_compute_resource_scale (self, &resource_scale))
-    {
-      priv->resource_scale = resource_scale;
-      priv->needs_compute_resource_scale = FALSE;
-
-      return fabsf (old_resource_scale - resource_scale) > FLT_EPSILON;
-    }
-
-  return FALSE;
-}
-
-static void
-clutter_actor_ensure_resource_scale (ClutterActor *self)
+float
+clutter_actor_get_real_resource_scale (ClutterActor *self)
 {
   ClutterActorPrivate *priv = self->priv;
+  float guessed_scale;
 
-  if (!priv->needs_compute_resource_scale)
-    return;
+  if (priv->resource_scale != -1.f)
+    return priv->resource_scale;
 
-  if (clutter_actor_update_resource_scale (self))
-    g_object_notify_by_pspec (G_OBJECT (self), obj_props[PROP_RESOURCE_SCALE]);
-}
+  /* If the scale hasn't been computed yet, we return a best guess */
 
-gboolean
-_clutter_actor_get_real_resource_scale (ClutterActor *self,
-                                        gfloat       *resource_scale)
-{
-  ClutterActorPrivate *priv = self->priv;
-
-  clutter_actor_ensure_resource_scale (self);
-
-  if (!priv->needs_compute_resource_scale)
+  if (priv->parent != NULL)
     {
-      *resource_scale = priv->resource_scale;
-      return TRUE;
+      /* If the scale hasn't been calculated yet, assume this actor is located
+       * inside its parents box and go up the hierarchy.
+       */
+      guessed_scale = clutter_actor_get_real_resource_scale (priv->parent);
     }
+  else if (CLUTTER_ACTOR_IS_TOPLEVEL (self))
+    {
+      /* This must be the first allocation cycle and the resource scale of
+       * the stage has not been updated yet, so return it manually.
+       */
+      GList *l;
+      ClutterStage *stage = CLUTTER_STAGE (self);
+      float max_scale = -1.f;
 
-  *resource_scale = -1.0f;
-  return FALSE;
+
+      for (l = clutter_stage_peek_stage_views (stage); l; l = l->next)
+        {
+          ClutterStageView *view = l->data;
+          max_scale = MAX (clutter_stage_view_get_scale (view), max_scale);
+        }
+      guessed_scale = max_scale;
+    }
+  else
+     {
+       ClutterBackend *backend = clutter_get_default_backend ();
+       guessed_scale = clutter_backend_get_fallback_resource_scale (backend);
+     }
+
+  g_assert (guessed_scale >= 1.f);
+
+  /* Always return this value until we compute the correct one later.
+   * If our guess turns out to be wrong, we'll emit "resource-scale-changed"
+   * and correct it before painting.
+   */
+  priv->resource_scale = guessed_scale;
+
+  return priv->resource_scale;
 }
 
 /**
  * clutter_actor_get_resource_scale:
  * @self: A #ClutterActor
- * @resource_scale: (out): return location for the resource scale
  *
- * Retrieves the resource scale for this actor, if available.
+ * Retrieves the resource scale for this actor.
  *
  * The resource scale refers to the scale the actor should use for its resources.
  * For example if an actor draws a a picture of size 100 x 100 in the stage
@@ -17839,22 +17731,32 @@ _clutter_actor_get_real_resource_scale (ClutterActor *self,
  * The resource scale is determined by calculating the highest #ClutterStageView
  * scale the actor will get painted on.
  *
- * Returns: TRUE if resource scale is set for the actor, otherwise FALSE
+ * Note that the scale returned by this function is only guaranteed to be
+ * correct when queried during the paint cycle, in all other cases this
+ * function will only return a best guess. If your implementation really
+ * needs to get a resource scale outside of the paint cycle, make sure to
+ * subscribe to the "resource-scale-changed" signal to get notified about
+ * the new, correct resource scale before painting.
+ *
+ * Also avoid getting the resource scale for actors that are not attached
+ * to a stage. There's no sane way for Clutter to guess which #ClutterStageView
+ * the actor is going to be painted on, so you'll probably end up receiving
+ * the "resource-scale-changed" signal and having to rebuild your resources.
+ *
+ * The best guess this function may return is usually just the last resource
+ * scale the actor got painted with. If this resource scale couldn't be found
+ * because the actor was never painted so far or Clutter was unable to
+ * determine its position and size, this function will return the resource
+ * scale of a parent.
+ *
+ * Returns: The resource scale the actor should use for its textures
  */
-gboolean
-clutter_actor_get_resource_scale (ClutterActor *self,
-                                  gfloat       *resource_scale)
+float
+clutter_actor_get_resource_scale (ClutterActor *self)
 {
-  g_return_val_if_fail (CLUTTER_IS_ACTOR (self), FALSE);
-  g_return_val_if_fail (resource_scale != NULL, FALSE);
+  g_return_val_if_fail (CLUTTER_IS_ACTOR (self), 1.f);
 
-  if (_clutter_actor_get_real_resource_scale (self, resource_scale))
-    {
-      *resource_scale = ceilf (*resource_scale);
-      return TRUE;
-    }
-
-  return FALSE;
+  return ceilf (clutter_actor_get_real_resource_scale (self));
 }
 
 static gboolean
@@ -17923,8 +17825,40 @@ out:
     }
 }
 
+static void
+update_resource_scale (ClutterActor *self,
+                       int           phase)
+{
+  ClutterActorPrivate *priv = self->priv;
+  float new_resource_scale, old_resource_scale;
+
+  new_resource_scale =
+  CLUTTER_ACTOR_GET_CLASS (self)->calculate_resource_scale (self, phase);
+
+  if (priv->resource_scale == new_resource_scale)
+    return;
+
+  /* If the actor moved out of the stage, simply keep the last scale */
+  if (new_resource_scale == -1.f)
+    return;
+
+  old_resource_scale = priv->resource_scale;
+  priv->resource_scale = new_resource_scale;
+
+  /* Never notify the initial change, otherwise, to be consistent,
+   * we'd also have to notify if we guessed correctly in
+   * clutter_actor_get_real_resource_scale().
+   */
+  if (old_resource_scale == -1.f)
+    return;
+
+  if (ceilf (old_resource_scale) != ceilf (priv->resource_scale))
+    g_signal_emit (self, actor_signals[RESOURCE_SCALE_CHANGED], 0);
+}
+
 void
-clutter_actor_update_stage_views (ClutterActor *self)
+clutter_actor_update_stage_views (ClutterActor *self,
+                                  gboolean      use_max_scale)
 {
   ClutterActorPrivate *priv = self->priv;
   ClutterActor *child;
@@ -17937,11 +17871,12 @@ clutter_actor_update_stage_views (ClutterActor *self)
     return;
 
   update_stage_views (self);
+  update_resource_scale (self, use_max_scale);
 
   priv->needs_update_stage_views = FALSE;
 
   for (child = priv->first_child; child; child = child->priv->next_sibling)
-    clutter_actor_update_stage_views (child);
+    clutter_actor_update_stage_views (child, use_max_scale);
 }
 
 /**
@@ -21451,6 +21386,20 @@ clutter_actor_has_accessible (ClutterActor *actor)
     return CLUTTER_ACTOR_GET_CLASS (actor)->has_accessible (actor);
 
   return TRUE;
+}
+
+void
+clutter_actor_queue_immediate_relayout (ClutterActor *self)
+{
+  ClutterStage *stage;
+
+  g_return_if_fail (CLUTTER_IS_ACTOR (self));
+
+  clutter_actor_queue_relayout (self);
+
+  stage = CLUTTER_STAGE (_clutter_actor_get_stage_internal (self));
+  if (stage)
+    clutter_stage_set_actor_needs_immediate_relayout (stage);
 }
 
 /**

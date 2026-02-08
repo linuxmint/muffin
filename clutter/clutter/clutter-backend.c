@@ -1031,3 +1031,16 @@ clutter_backend_get_default_seat (ClutterBackend *backend)
 
   return CLUTTER_BACKEND_GET_CLASS (backend)->get_default_seat (backend);
 }
+
+void
+clutter_backend_set_fallback_resource_scale (ClutterBackend *backend,
+                                             float           fallback_resource_scale)
+{
+  backend->fallback_resource_scale = fallback_resource_scale;
+}
+
+float
+clutter_backend_get_fallback_resource_scale (ClutterBackend *backend)
+{
+  return backend->fallback_resource_scale;
+}

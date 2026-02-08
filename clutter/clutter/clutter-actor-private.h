@@ -315,13 +315,15 @@ void                            _clutter_actor_queue_relayout_on_clones         
 void                            _clutter_actor_queue_only_relayout                      (ClutterActor *actor);
 void                            clutter_actor_clear_stage_views_recursive               (ClutterActor *actor);
 
-gboolean                        _clutter_actor_get_real_resource_scale                  (ClutterActor *actor,
-                                                                                         float        *resource_scale);
+float                           clutter_actor_get_real_resource_scale                   (ClutterActor *actor);
 
 ClutterPaintNode *              clutter_actor_create_texture_paint_node                 (ClutterActor *self,
                                                                                          CoglTexture  *texture);
 
-void clutter_actor_update_stage_views (ClutterActor *self);
+void clutter_actor_update_stage_views (ClutterActor *self,
+                                       int           phase);
+
+void clutter_actor_queue_immediate_relayout (ClutterActor *self);
 
 G_END_DECLS
 
