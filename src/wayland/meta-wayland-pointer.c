@@ -1290,6 +1290,32 @@ meta_wayland_pointer_can_grab_surface (MetaWaylandPointer *pointer,
 }
 
 gboolean
+meta_wayland_pointer_get_grab_info (MetaWaylandPointer    *pointer,
+                                    MetaWaylandSurface    *surface,
+                                    uint32_t               serial,
+                                    gboolean               require_pressed,
+                                    ClutterInputDevice   **device_out,
+                                    float                 *x,
+                                    float                 *y)
+{
+  if ((!require_pressed || pointer->button_count > 0) &&
+      meta_wayland_pointer_can_grab_surface (pointer, surface, serial))
+    {
+      if (device_out)
+        *device_out = pointer->device;
+
+      if (x)
+        *x = pointer->grab_x;
+      if (y)
+        *y = pointer->grab_y;
+
+      return TRUE;
+    }
+
+  return FALSE;
+}
+
+gboolean
 meta_wayland_pointer_can_popup (MetaWaylandPointer *pointer, uint32_t serial)
 {
   return pointer->grab_serial == serial;
