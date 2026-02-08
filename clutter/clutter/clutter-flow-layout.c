@@ -566,8 +566,7 @@ clutter_flow_layout_get_preferred_height (ClutterLayoutManager *manager,
 static void
 clutter_flow_layout_allocate (ClutterLayoutManager   *manager,
                               ClutterContainer       *container,
-                              const ClutterActorBox  *allocation,
-                              ClutterAllocationFlags  flags)
+                              const ClutterActorBox  *allocation)
 {
   ClutterFlowLayoutPrivate *priv = CLUTTER_FLOW_LAYOUT (manager)->priv;
   ClutterActor *actor, *child;
@@ -729,7 +728,7 @@ clutter_flow_layout_allocate (ClutterLayoutManager   *manager,
       child_alloc.y1 = ceil (item_y);
       child_alloc.x2 = ceil (child_alloc.x1 + item_width);
       child_alloc.y2 = ceil (child_alloc.y1 + item_height);
-      clutter_actor_allocate (child, &child_alloc, flags);
+      clutter_actor_allocate (child, &child_alloc);
 
       if (priv->orientation == CLUTTER_FLOW_HORIZONTAL)
         item_x = new_x;

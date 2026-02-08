@@ -698,7 +698,6 @@ struct _ClutterActorPrivate
    * allocation
    */
   ClutterActorBox allocation;
-  ClutterAllocationFlags allocation_flags;
 
   /* clip, in actor coordinates */
   graphene_rect_t clip;
@@ -854,6 +853,7 @@ struct _ClutterActorPrivate
   guint needs_paint_volume_update   : 1;
   guint had_effects_on_last_paint_volume_update : 1;
   guint needs_compute_resource_scale : 1;
+  guint absolute_origin_changed     : 1;
 };
 
 enum
@@ -1013,7 +1013,6 @@ enum
   MOTION_EVENT,
   ENTER_EVENT,
   LEAVE_EVENT,
-  ALLOCATION_CHANGED,
   TRANSITIONS_COMPLETED,
   TOUCH_EVENT,
   TRANSITION_STOPPED,
@@ -2600,19 +2599,14 @@ clutter_actor_notify_if_geometry_changed (ClutterActor          *self,
  * Return value: %TRUE if the allocation of the #ClutterActor has been
  *   changed, and %FALSE otherwise
  */
-static inline gboolean
+static inline void
 clutter_actor_set_allocation_internal (ClutterActor           *self,
-                                       const ClutterActorBox  *box,
-                                       ClutterAllocationFlags  flags)
+                                       const ClutterActorBox  *box)
 {
   ClutterActorPrivate *priv = self->priv;
   GObject *obj;
   gboolean x1_changed, y1_changed, x2_changed, y2_changed;
-  gboolean retval;
   ClutterActorBox old_alloc = { 0, };
-
-  g_return_val_if_fail (!isnan (box->x1) && !isnan (box->x2) &&
-                        !isnan (box->y1) && !isnan (box->y2), FALSE);
 
   obj = G_OBJECT (self);
 
@@ -2626,7 +2620,6 @@ clutter_actor_set_allocation_internal (ClutterActor           *self,
   y2_changed = priv->allocation.y2 != box->y2;
 
   priv->allocation = *box;
-  priv->allocation_flags = flags;
 
   /* allocation is authoritative */
   priv->needs_width_request = FALSE;
@@ -2651,88 +2644,37 @@ clutter_actor_set_allocation_internal (ClutterActor           *self,
           priv->content_box_valid = FALSE;
           g_object_notify_by_pspec (obj, obj_props[PROP_CONTENT_BOX]);
         }
-
-      retval = TRUE;
     }
-  else
-    retval = FALSE;
 
   clutter_actor_notify_if_geometry_changed (self, &old_alloc);
 
   g_object_thaw_notify (obj);
-
-  return retval;
 }
 
-static void clutter_actor_real_allocate (ClutterActor           *self,
-                                         const ClutterActorBox  *box,
-                                         ClutterAllocationFlags  flags);
-
-static inline void
-clutter_actor_maybe_layout_children (ClutterActor           *self,
-                                     const ClutterActorBox  *allocation,
-                                     ClutterAllocationFlags  flags)
+static void
+clutter_actor_real_allocate (ClutterActor           *self,
+                             const ClutterActorBox  *box)
 {
   ClutterActorPrivate *priv = self->priv;
 
-  /* this is going to be a bit hard to follow, so let's put an explanation
-   * here.
-   *
-   * we want ClutterActor to have a default layout manager if the actor was
-   * created using "g_object_new (CLUTTER_TYPE_ACTOR, NULL)".
-   *
-   * we also want any subclass of ClutterActor that does not override the
-   * ::allocate() virtual function to delegate to a layout manager.
-   *
-   * finally, we want to allow people subclassing ClutterActor and overriding
-   * the ::allocate() vfunc to let Clutter delegate to the layout manager.
-   *
-   * on the other hand, we want existing actor subclasses overriding the
-   * ::allocate() virtual function and chaining up to the parent's
-   * implementation to continue working without allocating their children
-   * twice, or without entering an allocation loop.
-   *
-   * for the first two points, we check if the class of the actor is
-   * overridding the ::allocate() virtual function; if it isn't, then we
-   * follow through with checking whether we have children and a layout
-   * manager, and eventually calling clutter_layout_manager_allocate().
-   *
-   * for the third point, we check the CLUTTER_DELEGATE_LAYOUT flag in the
-   * allocation flags that we got passed, and if it is present, we continue
-   * with the check above.
-   *
-   * if neither of these two checks yields a positive result, we just
-   * assume that the ::allocate() virtual function that resulted in this
-   * function being called will also allocate the children of the actor.
-   */
+  g_object_freeze_notify (G_OBJECT (self));
 
-  if (CLUTTER_ACTOR_GET_CLASS (self)->allocate == clutter_actor_real_allocate)
-    goto check_layout;
+  clutter_actor_set_allocation_internal (self, box);
 
-  if ((flags & CLUTTER_DELEGATE_LAYOUT) != 0)
-    goto check_layout;
-
-  return;
-
-check_layout:
+/* we allocate our children before we notify changes in our geometry,
+ * so that people connecting to properties will be able to get valid
+ * data out of the sub-tree of the scene graph that has this actor at
+ * the root.
+ */
   if (priv->n_children != 0 &&
       priv->layout_manager != NULL)
     {
-      ClutterContainer *container = CLUTTER_CONTAINER (self);
-      ClutterAllocationFlags children_flags;
       ClutterActorBox children_box;
 
       /* normalize the box passed to the layout manager */
       children_box.x1 = children_box.y1 = 0.f;
-      children_box.x2 = (allocation->x2 - allocation->x1);
-      children_box.y2 = (allocation->y2 - allocation->y1);
-
-      /* remove the DELEGATE_LAYOUT flag; this won't be passed to
-       * the actor's children, since it refers only to the current
-       * actor's allocation.
-       */
-      children_flags = flags;
-      children_flags &= ~CLUTTER_DELEGATE_LAYOUT;
+      children_box.x2 = box->x2 - box->x1;
+      children_box.y2 = box->y2 - box->y1;
 
       CLUTTER_NOTE (LAYOUT,
                     "Allocating %d children of %s "
@@ -2740,46 +2682,15 @@ check_layout:
                     "using %s",
                     priv->n_children,
                     _clutter_actor_get_debug_name (self),
-                    allocation->x1,
-                    allocation->y1,
-                    (allocation->x2 - allocation->x1),
-                    (allocation->y2 - allocation->y1),
+                    box->x1,
+                    box->y1,
+                    (box->x2 - box->x1),
+                    (box->y2 - box->y1),
                     G_OBJECT_TYPE_NAME (priv->layout_manager));
 
       clutter_layout_manager_allocate (priv->layout_manager,
-                                       container,
-                                       &children_box,
-                                       children_flags);
-    }
-}
-
-static void
-clutter_actor_real_allocate (ClutterActor           *self,
-                             const ClutterActorBox  *box,
-                             ClutterAllocationFlags  flags)
-{
-  ClutterActorPrivate *priv = self->priv;
-  gboolean changed;
-
-  g_object_freeze_notify (G_OBJECT (self));
-
-  changed = clutter_actor_set_allocation_internal (self, box, flags);
-
-  /* we allocate our children before we notify changes in our geometry,
-   * so that people connecting to properties will be able to get valid
-   * data out of the sub-tree of the scene graph that has this actor at
-   * the root.
-   */
-  clutter_actor_maybe_layout_children (self, box, flags);
-
-  if (changed)
-    {
-      ClutterActorBox signal_box = priv->allocation;
-      ClutterAllocationFlags signal_flags = priv->allocation_flags;
-
-      g_signal_emit (self, actor_signals[ALLOCATION_CHANGED], 0,
-                     &signal_box,
-                     signal_flags);
+                                       CLUTTER_CONTAINER (self),
+                                       &children_box);
     }
 
   g_object_thaw_notify (G_OBJECT (self));
@@ -8746,35 +8657,6 @@ clutter_actor_class_init (ClutterActorClass *klass)
                   CLUTTER_TYPE_PICK_CONTEXT);
 
   /**
-   * ClutterActor::allocation-changed:
-   * @actor: the #ClutterActor that emitted the signal
-   * @box: a #ClutterActorBox with the new allocation
-   * @flags: #ClutterAllocationFlags for the allocation
-   *
-   * The ::allocation-changed signal is emitted when the
-   * #ClutterActor:allocation property changes. Usually, application
-   * code should just use the notifications for the :allocation property
-   * but if you want to track the allocation flags as well, for instance
-   * to know whether the absolute origin of @actor changed, then you might
-   * want use this signal instead.
-   *
-   * Since: 1.0
-   */
-  actor_signals[ALLOCATION_CHANGED] =
-    g_signal_new (I_("allocation-changed"),
-                  G_TYPE_FROM_CLASS (object_class),
-                  G_SIGNAL_RUN_LAST,
-                  0,
-                  NULL, NULL,
-                  _clutter_marshal_VOID__BOXED_FLAGS,
-                  G_TYPE_NONE, 2,
-                  CLUTTER_TYPE_ACTOR_BOX | G_SIGNAL_TYPE_STATIC_SCOPE,
-                  CLUTTER_TYPE_ALLOCATION_FLAGS);
-  g_signal_set_va_marshaller (actor_signals[ALLOCATION_CHANGED],
-                              G_TYPE_FROM_CLASS (object_class),
-                              _clutter_marshal_VOID__BOXED_FLAGSv);
-
-  /**
    * ClutterActor::transitions-completed:
    * @actor: a #ClutterActor
    *
@@ -10311,8 +10193,7 @@ clutter_actor_adjust_allocation (ClutterActor    *self,
 
 static void
 clutter_actor_allocate_internal (ClutterActor           *self,
-                                 const ClutterActorBox  *allocation,
-                                 ClutterAllocationFlags  flags)
+                                 const ClutterActorBox  *allocation)
 {
   ClutterActorClass *klass;
 
@@ -10322,7 +10203,7 @@ clutter_actor_allocate_internal (ClutterActor           *self,
                 _clutter_actor_get_debug_name (self));
 
   klass = CLUTTER_ACTOR_GET_CLASS (self);
-  klass->allocate (self, allocation, flags);
+  klass->allocate (self, allocation);
 
   CLUTTER_UNSET_PRIVATE_FLAGS (self, CLUTTER_IN_RELAYOUT);
 
@@ -10335,7 +10216,6 @@ clutter_actor_allocate_internal (ClutterActor           *self,
  * clutter_actor_allocate:
  * @self: A #ClutterActor
  * @box: new allocation of the actor, in parent-relative coordinates
- * @flags: flags that control the allocation
  *
  * Assigns the size of a #ClutterActor from the given @box.
  *
@@ -10361,12 +10241,11 @@ clutter_actor_allocate_internal (ClutterActor           *self,
  * Since: 0.8
  */
 void
-clutter_actor_allocate (ClutterActor           *self,
-                        const ClutterActorBox  *box,
-                        ClutterAllocationFlags  flags)
+clutter_actor_allocate (ClutterActor          *self,
+                        const ClutterActorBox *box)
 {
   ClutterActorBox old_allocation, real_allocation;
-  gboolean origin_changed, child_moved, size_changed;
+  gboolean origin_changed, size_changed;
   gboolean stage_allocation_changed;
   ClutterActorPrivate *priv;
 
@@ -10414,18 +10293,19 @@ clutter_actor_allocate (ClutterActor           *self,
   real_allocation.x2 = MAX (real_allocation.x2, real_allocation.x1);
   real_allocation.y2 = MAX (real_allocation.y2, real_allocation.y1);
 
-  origin_changed = (flags & CLUTTER_ABSOLUTE_ORIGIN_CHANGED);
-
-  child_moved = (real_allocation.x1 != old_allocation.x1 ||
-                 real_allocation.y1 != old_allocation.y1);
+  origin_changed = (real_allocation.x1 != old_allocation.x1 ||
+                    real_allocation.y1 != old_allocation.y1);
 
   size_changed = (real_allocation.x2 != old_allocation.x2 ||
                   real_allocation.y2 != old_allocation.y2);
 
-  if (origin_changed || child_moved || size_changed)
-    stage_allocation_changed = TRUE;
-  else
-    stage_allocation_changed = FALSE;
+  priv->absolute_origin_changed = priv->parent
+                                ? priv->parent->priv->absolute_origin_changed
+                                : FALSE;
+
+  priv->absolute_origin_changed |= origin_changed;
+
+  stage_allocation_changed = priv->absolute_origin_changed || size_changed;
 
   /* If we get an allocation "out of the blue"
    * (we did not queue relayout), then we want to
@@ -10455,23 +10335,9 @@ clutter_actor_allocate (ClutterActor           *self,
     {
       /* If the actor didn't move but needs_allocation is set, we just
        * need to allocate the children */
-      clutter_actor_allocate_internal (self, &real_allocation, flags);
+      clutter_actor_allocate_internal (self, &real_allocation);
       return;
     }
-
-  /* When ABSOLUTE_ORIGIN_CHANGED is passed in to
-   * clutter_actor_allocate(), it indicates whether the parent has its
-   * absolute origin moved; when passed in to ClutterActor::allocate()
-   * virtual method though, it indicates whether the child has its
-   * absolute origin moved.  So we set it when child_moved is TRUE
-   */
-  if (child_moved)
-    flags |= CLUTTER_ABSOLUTE_ORIGIN_CHANGED;
-
-  /* store the flags here, so that they can be propagated by the
-   * transition code
-   */
-  self->priv->allocation_flags = flags;
 
   _clutter_actor_create_transition (self, obj_props[PROP_ALLOCATION],
                                     &priv->allocation,
@@ -10482,20 +10348,14 @@ clutter_actor_allocate (ClutterActor           *self,
  * clutter_actor_set_allocation:
  * @self: a #ClutterActor
  * @box: a #ClutterActorBox
- * @flags: allocation flags
  *
  * Stores the allocation of @self as defined by @box.
  *
  * This function can only be called from within the implementation of
  * the #ClutterActorClass.allocate() virtual function.
  *
- * The allocation should have been adjusted to take into account constraints,
- * alignment, and margin properties. If you are implementing a #ClutterActor
- * subclass that provides its own layout management policy for its children
- * instead of using a #ClutterLayoutManager delegate, you should not call
- * this function on the children of @self; instead, you should call
- * clutter_actor_allocate(), which will adjust the allocation box for
- * you.
+ * The allocation @box should have been adjusted to take into account
+ * constraints, alignment, and margin properties.
  *
  * This function should only be used by subclasses of #ClutterActor
  * that wish to store their allocation but cannot chain up to the
@@ -10503,69 +10363,12 @@ clutter_actor_allocate (ClutterActor           *self,
  * #ClutterActorClass.allocate() virtual function will call this
  * function.
  *
- * It is important to note that, while chaining up was the recommended
- * behaviour for #ClutterActor subclasses prior to the introduction of
- * this function, it is recommended to call clutter_actor_set_allocation()
- * instead.
- *
- * If the #ClutterActor is using a #ClutterLayoutManager delegate object
- * to handle the allocation of its children, this function will call
- * the clutter_layout_manager_allocate() function only if the
- * %CLUTTER_DELEGATE_LAYOUT flag is set on @flags, otherwise it is
- * expected that the subclass will call clutter_layout_manager_allocate()
- * by itself. For instance, the following code:
- *
- * |[<!-- language="C" -->
- * static void
- * my_actor_allocate (ClutterActor *actor,
- *                    const ClutterActorBox *allocation,
- *                    ClutterAllocationFlags flags)
- * {
- *   ClutterActorBox new_alloc;
- *   ClutterAllocationFlags new_flags;
- *
- *   adjust_allocation (allocation, &new_alloc);
- *
- *   new_flags = flags | CLUTTER_DELEGATE_LAYOUT;
- *
- *   // this will use the layout manager set on the actor
- *   clutter_actor_set_allocation (actor, &new_alloc, new_flags);
- * }
- * ]|
- *
- * is equivalent to this:
- *
- * |[<!-- language="C" -->
- * static void
- * my_actor_allocate (ClutterActor *actor,
- *                    const ClutterActorBox *allocation,
- *                    ClutterAllocationFlags flags)
- * {
- *   ClutterLayoutManager *layout;
- *   ClutterActorBox new_alloc;
- *
- *   adjust_allocation (allocation, &new_alloc);
- *
- *   clutter_actor_set_allocation (actor, &new_alloc, flags);
- *
- *   layout = clutter_actor_get_layout_manager (actor);
- *   clutter_layout_manager_allocate (layout,
- *                                    CLUTTER_CONTAINER (actor),
- *                                    &new_alloc,
- *                                    flags);
- * }
- * ]|
- *
  * Since: 1.10
  */
 void
 clutter_actor_set_allocation (ClutterActor           *self,
-                              const ClutterActorBox  *box,
-                              ClutterAllocationFlags  flags)
+                              const ClutterActorBox  *box)
 {
-  ClutterActorPrivate *priv;
-  gboolean changed;
-
   g_return_if_fail (CLUTTER_IS_ACTOR (self));
   g_return_if_fail (box != NULL);
 
@@ -10577,28 +10380,9 @@ clutter_actor_set_allocation (ClutterActor           *self,
       return;
     }
 
-  priv = self->priv;
-
   g_object_freeze_notify (G_OBJECT (self));
 
-  changed = clutter_actor_set_allocation_internal (self, box, flags);
-
-  /* we allocate our children before we notify changes in our geometry,
-   * so that people connecting to properties will be able to get valid
-   * data out of the sub-tree of the scene graph that has this actor at
-   * the root.
-   */
-  clutter_actor_maybe_layout_children (self, box, flags);
-
-  if (changed)
-    {
-      ClutterActorBox signal_box = priv->allocation;
-      ClutterAllocationFlags signal_flags = priv->allocation_flags;
-
-      g_signal_emit (self, actor_signals[ALLOCATION_CHANGED], 0,
-                     &signal_box,
-                     signal_flags);
-    }
+  clutter_actor_set_allocation_internal (self, box);
 
   g_object_thaw_notify (G_OBJECT (self));
 }
@@ -15083,9 +14867,7 @@ clutter_actor_set_animatable_property (ClutterActor *actor,
       break;
 
     case PROP_ALLOCATION:
-      clutter_actor_allocate_internal (actor,
-                                       g_value_get_boxed (value),
-                                       actor->priv->allocation_flags);
+      clutter_actor_allocate_internal (actor, g_value_get_boxed (value));
       clutter_actor_queue_redraw (actor);
       break;
 
@@ -15479,7 +15261,6 @@ clutter_actor_get_stage (ClutterActor *actor)
  *   actor's natural width
  * @available_height: the maximum available height, or -1 to use the
  *   actor's natural height
- * @flags: flags controlling the allocation
  *
  * Allocates @self taking into account the #ClutterActor's
  * preferred size, but limiting it to the maximum available width
@@ -15526,7 +15307,7 @@ clutter_actor_get_stage (ClutterActor *actor)
  *   box.x1 = x; box.y1 = y;
  *   box.x2 = box.x1 + available_width;
  *   box.y2 = box.y1 + available_height;
- *   clutter_actor_allocate (self, &box, flags);
+ *   clutter_actor_allocate (self, &box);
  * ]|
  *
  * This function can be used by fluid layout managers to allocate
@@ -15540,8 +15321,7 @@ clutter_actor_allocate_available_size (ClutterActor           *self,
                                        gfloat                  x,
                                        gfloat                  y,
                                        gfloat                  available_width,
-                                       gfloat                  available_height,
-                                       ClutterAllocationFlags  flags)
+                                       gfloat                  available_height)
 {
   ClutterActorPrivate *priv;
   gfloat width, height;
@@ -15597,13 +15377,12 @@ clutter_actor_allocate_available_size (ClutterActor           *self,
   box.y1 = y;
   box.x2 = box.x1 + width;
   box.y2 = box.y1 + height;
-  clutter_actor_allocate (self, &box, flags);
+  clutter_actor_allocate (self, &box);
 }
 
 /**
  * clutter_actor_allocate_preferred_size:
  * @self: a #ClutterActor
- * @flags: flags controlling the allocation
  *
  * Allocates the natural size of @self.
  *
@@ -15621,8 +15400,7 @@ clutter_actor_allocate_available_size (ClutterActor           *self,
  * Since: 0.8
  */
 void
-clutter_actor_allocate_preferred_size (ClutterActor           *self,
-                                       ClutterAllocationFlags  flags)
+clutter_actor_allocate_preferred_size (ClutterActor *self)
 {
   gfloat actor_x, actor_y;
   gfloat natural_width, natural_height;
@@ -15656,7 +15434,7 @@ clutter_actor_allocate_preferred_size (ClutterActor           *self,
   actor_box.x2 = actor_box.x1 + natural_width;
   actor_box.y2 = actor_box.y1 + natural_height;
 
-  clutter_actor_allocate (self, &actor_box, flags);
+  clutter_actor_allocate (self, &actor_box);
 }
 
 /**
@@ -15667,7 +15445,6 @@ clutter_actor_allocate_preferred_size (ClutterActor           *self,
  * @y_align: the vertical alignment, between 0 and 1
  * @x_fill: whether the actor should fill horizontally
  * @y_fill: whether the actor should fill vertically
- * @flags: allocation flags to be passed to clutter_actor_allocate()
  *
  * Allocates @self by taking into consideration the available allocation
  * area; an alignment factor on either axis; and whether the actor should
@@ -15694,8 +15471,7 @@ clutter_actor_allocate_align_fill (ClutterActor           *self,
                                    gdouble                 x_align,
                                    gdouble                 y_align,
                                    gboolean                x_fill,
-                                   gboolean                y_fill,
-                                   ClutterAllocationFlags  flags)
+                                   gboolean                y_fill)
 {
   ClutterActorPrivate *priv;
   ClutterActorBox allocation = CLUTTER_ACTOR_BOX_INIT_ZERO;
@@ -15811,7 +15587,7 @@ out:
   allocation.x2 = ceilf (allocation.x1 + MAX (child_width, 0));
   allocation.y2 = ceilf (allocation.y1 + MAX (child_height, 0));
 
-  clutter_actor_allocate (self, &allocation, flags);
+  clutter_actor_allocate (self, &allocation);
 }
 
 /**

@@ -641,8 +641,7 @@ stage_is_default (ClutterStage *stage)
 
 static void
 clutter_stage_allocate (ClutterActor           *self,
-                        const ClutterActorBox  *box,
-                        ClutterAllocationFlags  flags)
+                        const ClutterActorBox  *box)
 {
   ClutterStagePrivate *priv = CLUTTER_STAGE (self)->priv;
   ClutterActorBox alloc = CLUTTER_ACTOR_BOX_INIT_ZERO;
@@ -650,6 +649,7 @@ clutter_stage_allocate (ClutterActor           *self,
   float new_width, new_height;
   float width, height;
   cairo_rectangle_int_t window_size;
+  ClutterLayoutManager *layout_manager = clutter_actor_get_layout_manager (self);
 
   if (priv->impl == NULL)
     return;
@@ -671,15 +671,21 @@ clutter_stage_allocate (ClutterActor           *self,
    */
   if (!clutter_feature_available (CLUTTER_FEATURE_STAGE_STATIC))
     {
-      CLUTTER_NOTE (LAYOUT,
-                    "Following allocation to %.2fx%.2f (absolute origin %s)",
-                    width, height,
-                    (flags & CLUTTER_ABSOLUTE_ORIGIN_CHANGED)
-                      ? "changed"
-                      : "not changed");
+      ClutterActorBox children_box;
 
-      clutter_actor_set_allocation (self, box,
-                                    flags | CLUTTER_DELEGATE_LAYOUT);
+      children_box.x1 = children_box.y1 = 0.f;
+      children_box.x2 = box->x2 - box->x1;
+      children_box.y2 = box->y2 - box->y1;
+
+      CLUTTER_NOTE (LAYOUT,
+                    "Following allocation to %.2fx%.2f",
+                    width, height);
+
+      clutter_actor_set_allocation (self, box);
+
+      clutter_layout_manager_allocate (layout_manager,
+                                       CLUTTER_CONTAINER (self),
+                                       &children_box);
 
       /* Ensure the window is sized correctly */
       if (priv->min_size_changed)
@@ -727,16 +733,16 @@ clutter_stage_allocate (ClutterActor           *self,
 
       CLUTTER_NOTE (LAYOUT,
                     "Overriding original allocation of %.2fx%.2f "
-                    "with %.2fx%.2f (absolute origin %s)",
+                    "with %.2fx%.2f",
                     width, height,
-                    override.x2, override.y2,
-                    (flags & CLUTTER_ABSOLUTE_ORIGIN_CHANGED)
-                      ? "changed"
-                      : "not changed");
+                    override.x2, override.y2);
 
       /* and store the overridden allocation */
-      clutter_actor_set_allocation (self, &override,
-                                    flags | CLUTTER_DELEGATE_LAYOUT);
+      clutter_actor_set_allocation (self, &override);
+
+      clutter_layout_manager_allocate (layout_manager,
+                                       CLUTTER_CONTAINER (self),
+                                       &override);
     }
 
   /* reset the viewport if the allocation effectively changed */
@@ -1407,8 +1413,7 @@ _clutter_stage_maybe_relayout (ClutterActor *actor)
       CLUTTER_SET_PRIVATE_FLAGS (queued_actor, CLUTTER_IN_RELAYOUT);
 
       old_version = priv->pending_relayouts_version;
-      clutter_actor_allocate_preferred_size (queued_actor,
-                                             CLUTTER_ALLOCATION_NONE);
+      clutter_actor_allocate_preferred_size (queued_actor);
 
       CLUTTER_UNSET_PRIVATE_FLAGS (queued_actor, CLUTTER_IN_RELAYOUT);
 

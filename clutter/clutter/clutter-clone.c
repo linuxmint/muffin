@@ -240,15 +240,14 @@ clutter_clone_has_overlaps (ClutterActor *actor)
 
 static void
 clutter_clone_allocate (ClutterActor           *self,
-                        const ClutterActorBox  *box,
-                        ClutterAllocationFlags  flags)
+                        const ClutterActorBox  *box)
 {
   ClutterClonePrivate *priv = CLUTTER_CLONE (self)->priv;
   ClutterActorClass *parent_class;
 
   /* chain up */
   parent_class = CLUTTER_ACTOR_CLASS (clutter_clone_parent_class);
-  parent_class->allocate (self, box, flags);
+  parent_class->allocate (self, box);
 
   if (priv->clone_source == NULL)
     return;
@@ -258,7 +257,7 @@ clutter_clone_allocate (ClutterActor           *self,
    */
   if (clutter_actor_get_parent (priv->clone_source) != NULL &&
       !clutter_actor_has_allocation (priv->clone_source))
-    clutter_actor_allocate_preferred_size (priv->clone_source, flags);
+    clutter_actor_allocate_preferred_size (priv->clone_source);
 
 #if 0
   /* XXX - this is wrong: ClutterClone cannot clone unparented
@@ -273,7 +272,7 @@ clutter_clone_allocate (ClutterActor           *self,
    * paint cycle, we can safely give it as much size as it requires
    */
   if (clutter_actor_get_parent (priv->clone_source) == NULL)
-    clutter_actor_allocate_preferred_size (priv->clone_source, flags);
+    clutter_actor_allocate_preferred_size (priv->clone_source);
 #endif
 }
 

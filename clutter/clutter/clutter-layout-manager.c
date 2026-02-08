@@ -255,8 +255,7 @@ layout_manager_real_get_preferred_height (ClutterLayoutManager *manager,
 static void
 layout_manager_real_allocate (ClutterLayoutManager   *manager,
                               ClutterContainer       *container,
-                              const ClutterActorBox  *allocation,
-                              ClutterAllocationFlags  flags)
+                              const ClutterActorBox  *allocation)
 {
   LAYOUT_MANAGER_WARN_NOT_IMPLEMENTED (manager, "allocate");
 }
@@ -523,7 +522,6 @@ clutter_layout_manager_get_preferred_height (ClutterLayoutManager *manager,
  * @container: the #ClutterContainer using @manager
  * @allocation: the #ClutterActorBox containing the allocated area
  *   of @container
- * @flags: the allocation flags
  *
  * Allocates the children of @container given an area
  *
@@ -534,8 +532,7 @@ clutter_layout_manager_get_preferred_height (ClutterLayoutManager *manager,
 void
 clutter_layout_manager_allocate (ClutterLayoutManager   *manager,
                                  ClutterContainer       *container,
-                                 const ClutterActorBox  *allocation,
-                                 ClutterAllocationFlags  flags)
+                                 const ClutterActorBox  *allocation)
 {
   ClutterLayoutManagerClass *klass;
 
@@ -544,7 +541,7 @@ clutter_layout_manager_allocate (ClutterLayoutManager   *manager,
   g_return_if_fail (allocation != NULL);
 
   klass = CLUTTER_LAYOUT_MANAGER_GET_CLASS (manager);
-  klass->allocate (manager, container, allocation, flags);
+  klass->allocate (manager, container, allocation);
 }
 
 /**
