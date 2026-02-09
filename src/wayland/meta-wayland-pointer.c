@@ -954,7 +954,6 @@ meta_wayland_pointer_set_focus (MetaWaylandPointer *pointer,
 
   if (surface != NULL)
     {
-      ClutterStage *stage = CLUTTER_STAGE (meta_backend_get_stage (backend));
       struct wl_client *client = wl_resource_get_client (surface->resource);
       graphene_point_t pos;
       MetaWindow *focus_window;
@@ -966,7 +965,7 @@ meta_wayland_pointer_set_focus (MetaWaylandPointer *pointer,
                                 G_CALLBACK (focus_surface_destroyed),
                                 pointer);
 
-      clutter_stage_get_device_coords (stage, pointer->device, NULL, &pos);
+      clutter_input_device_get_coords (pointer->device, NULL, &pos);
 
       focus_window = meta_wayland_surface_get_window (pointer->focus_surface);
       if (focus_window)
@@ -1071,12 +1070,10 @@ meta_wayland_pointer_get_relative_coordinates (MetaWaylandPointer *pointer,
 					       wl_fixed_t         *sx,
 					       wl_fixed_t         *sy)
 {
-  MetaBackend *backend = meta_get_backend ();
-  ClutterStage *stage = CLUTTER_STAGE (meta_backend_get_stage (backend));
   float xf = 0.0f, yf = 0.0f;
   graphene_point_t pos;
 
-  clutter_stage_get_device_coords (stage, pointer->device, NULL, &pos);
+  clutter_input_device_get_coords (pointer->device, NULL, &pos);
   meta_wayland_surface_get_relative_coordinates (surface, pos.x, pos.y, &xf, &yf);
 
   *sx = wl_fixed_from_double (xf);
