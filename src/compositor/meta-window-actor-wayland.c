@@ -39,28 +39,43 @@ typedef struct _SurfaceTreeTraverseData
 } SurfaceTreeTraverseData;
 
 static gboolean
+get_surface_actor_list (GNode    *node,
+                        gpointer  data)
+{
+  MetaWaylandSurface *surface = node->data;
+  MetaSurfaceActor *surface_actor = meta_wayland_surface_get_actor (surface);
+  GList **surface_actors = data;
+
+  *surface_actors = g_list_prepend (*surface_actors, surface_actor);
+  return FALSE;
+}
+
+static gboolean
 set_surface_actor_index (GNode    *node,
                          gpointer  data)
 {
   MetaWaylandSurface *surface = node->data;
-  MetaSurfaceActor *surface_actor = meta_wayland_surface_get_actor (surface);
-
   SurfaceTreeTraverseData *traverse_data = data;
 
-  if (clutter_actor_contains (CLUTTER_ACTOR (traverse_data->window_actor),
-                              CLUTTER_ACTOR (surface_actor)))
+  ClutterActor *window_actor = CLUTTER_ACTOR (traverse_data->window_actor);
+  ClutterActor *surface_actor =
+    CLUTTER_ACTOR (meta_wayland_surface_get_actor (surface));
+
+  if (clutter_actor_contains (window_actor, surface_actor))
     {
-      clutter_actor_set_child_at_index (
-        CLUTTER_ACTOR (traverse_data->window_actor),
-        CLUTTER_ACTOR (surface_actor),
-        traverse_data->index);
+      if (clutter_actor_get_child_at_index (window_actor, traverse_data->index) !=
+          surface_actor)
+        {
+          clutter_actor_set_child_at_index (window_actor,
+                                            surface_actor,
+                                            traverse_data->index);
+        }
     }
   else
     {
-      clutter_actor_insert_child_at_index (
-        CLUTTER_ACTOR (traverse_data->window_actor),
-        CLUTTER_ACTOR (surface_actor),
-        traverse_data->index);
+      clutter_actor_insert_child_at_index (window_actor,
+                                           surface_actor,
+                                           traverse_data->index);
     }
   traverse_data->index++;
 
@@ -75,7 +90,27 @@ meta_window_actor_wayland_rebuild_surface_tree (MetaWindowActor *actor)
   MetaWaylandSurface *surface = meta_surface_actor_wayland_get_surface (
     META_SURFACE_ACTOR_WAYLAND (surface_actor));
   GNode *root_node = surface->subsurface_branch_node;
+  g_autoptr (GList) surface_actors = NULL;
+  g_autoptr (GList) children = NULL;
+  GList *l;
   SurfaceTreeTraverseData traverse_data;
+
+  g_node_traverse (root_node,
+                   G_IN_ORDER,
+                   G_TRAVERSE_LEAVES,
+                   -1,
+                   get_surface_actor_list,
+                   &surface_actors);
+
+  children = clutter_actor_get_children (CLUTTER_ACTOR (actor));
+  for (l = children; l; l = l->next)
+    {
+      ClutterActor *child_actor = l->data;
+
+      if (META_IS_SURFACE_ACTOR_WAYLAND (child_actor) &&
+          !g_list_find (surface_actors, child_actor))
+        clutter_actor_remove_child (CLUTTER_ACTOR (actor), child_actor);
+    }
 
   traverse_data = (SurfaceTreeTraverseData) {
     .window_actor = actor,
