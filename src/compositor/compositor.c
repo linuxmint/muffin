@@ -1773,6 +1773,31 @@ meta_get_desklet_container_for_display (MetaDisplay *display)
   return priv->desklet_container;
 }
 
+/**
+ * meta_get_stage_xwindow:
+ * @display: a #MetaDisplay
+ *
+ * Returns the X11 window ID of the stage window backing the compositor.
+ *
+ * Returns: The X11 Window ID, or 0 if not available
+ */
+gulong
+meta_get_stage_xwindow (MetaDisplay *display)
+{
+  ClutterStage *stage;
+
+  g_return_val_if_fail (display != NULL, 0);
+
+  if (meta_is_wayland_compositor ())
+    return 0;
+
+  stage = CLUTTER_STAGE (meta_get_stage_for_display (display));
+  if (!stage)
+    return 0;
+
+  return (gulong) meta_x11_get_stage_window (stage);
+}
+
 void
 meta_update_desklet_stacking (MetaCompositor *compositor)
 {

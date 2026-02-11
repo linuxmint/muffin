@@ -2211,6 +2211,7 @@ libmuffin.so.0 libmuffin0 #MINVER#
  meta_get_option_context@Base 5.3.0
  meta_get_replace_current_wm@Base 5.3.0
  meta_get_stage_for_display@Base 5.3.0
+ meta_get_stage_xwindow@Base 6.6.3
  meta_get_top_window_group_for_display@Base 5.3.0
  meta_get_window_actors@Base 5.3.0
  meta_get_window_group_for_display@Base 5.3.0
