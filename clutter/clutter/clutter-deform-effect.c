@@ -128,10 +128,9 @@ clutter_deform_effect_deform_vertex (ClutterDeformEffect *effect,
 }
 
 static void
-vbo_invalidate (ClutterActor           *actor,
-                const ClutterActorBox  *allocation,
-                ClutterAllocationFlags  flags,
-                ClutterDeformEffect    *effect)
+vbo_invalidate (ClutterActor        *actor,
+                GParamSpec          *pspec,
+                ClutterDeformEffect *effect)
 {
   effect->priv->is_dirty = TRUE;
 }
@@ -156,7 +155,7 @@ clutter_deform_effect_set_actor (ClutterActorMeta *meta,
    * changes
    */
   if (actor != NULL)
-    priv->allocation_id = g_signal_connect (actor, "allocation-changed",
+    priv->allocation_id = g_signal_connect (actor, "notify::allocation",
                                             G_CALLBACK (vbo_invalidate),
                                             meta);
 

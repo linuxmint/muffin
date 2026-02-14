@@ -555,32 +555,6 @@ typedef enum /*< prefix=CLUTTER_OFFSCREEN_REDIRECT >*/
 } ClutterOffscreenRedirect;
 
 /**
- * ClutterAllocationFlags:
- * @CLUTTER_ALLOCATION_NONE: No flag set
- * @CLUTTER_ABSOLUTE_ORIGIN_CHANGED: Whether the absolute origin of the
- *   actor has changed; this implies that any ancestor of the actor has
- *   been moved.
- * @CLUTTER_DELEGATE_LAYOUT: Whether the allocation should be delegated
- *   to the #ClutterLayoutManager instance stored inside the
- *   #ClutterActor:layout-manager property of #ClutterActor. This flag
- *   should only be used if you are subclassing #ClutterActor and
- *   overriding the #ClutterActorClass.allocate() virtual function, but
- *   you wish to use the default implementation of the virtual function
- *   inside #ClutterActor. Added in Clutter 1.10.
- *
- * Flags passed to the #ClutterActorClass.allocate() virtual function
- * and to the clutter_actor_allocate() function.
- *
- * Since: 1.0
- */
-typedef enum
-{
-  CLUTTER_ALLOCATION_NONE         = 0,
-  CLUTTER_ABSOLUTE_ORIGIN_CHANGED = 1 << 1,
-  CLUTTER_DELEGATE_LAYOUT         = 1 << 2
-} ClutterAllocationFlags;
-
-/**
  * ClutterAlignAxis:
  * @CLUTTER_ALIGN_X_AXIS: Maintain the alignment on the X axis
  * @CLUTTER_ALIGN_Y_AXIS: Maintain the alignment on the Y axis
