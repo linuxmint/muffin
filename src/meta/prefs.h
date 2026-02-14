@@ -495,6 +495,7 @@ typedef enum _MetaKeyBindingAction
  * @META_KEY_BINDING_BUILTIN: built-in
  * @META_KEY_BINDING_IS_REVERSED: is reversed
  * @META_KEY_BINDING_NON_MASKABLE: always active
+ * @META_KEY_BINDING_IGNORE_AUTOREPEAT: do not repeat if held down
  * @META_KEY_BINDING_NO_AUTO_GRAB: not grabbed automatically
  */
 typedef enum

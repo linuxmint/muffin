@@ -1061,8 +1061,8 @@ meta_display_add_keybinding (MetaDisplay         *display,
  *
  * Use meta_display_remove_custom_keybinding() to remove the binding.
  *
- * Returns: %TRUE if the keybinding was added successfully,
- *          otherwise %FALSE
+ * Returns: the corresponding keybinding action if the keybinding was
+ *          added successfully, otherwise %META_KEYBINDING_ACTION_NONE
  */
 guint
 meta_display_add_custom_keybinding (MetaDisplay         *display,
@@ -1075,6 +1075,42 @@ meta_display_add_custom_keybinding (MetaDisplay         *display,
   guint new_action = next_dynamic_keybinding_action ();
 
   if (!add_keybinding_internal (display, name, NULL, bindings, META_KEY_BINDING_NONE, new_action,
+                                handler, 0, user_data, free_data))
+    return META_KEYBINDING_ACTION_NONE;
+
+  return new_action;
+}
+
+/**
+ * meta_display_add_custom_keybinding_full:
+ * @display: a #MetaDisplay
+ * @name: the binding's unique name
+ * @bindings: (allow-none) (array zero-terminated=1): array of parseable keystrokes
+ * @flags: a #MetaKeyBindingFlags
+ * @callback: function to run when the keybinding is invoked
+ * @user_data: the data to pass to @handler
+ * @free_data: function to free @user_data
+ *
+ * Like meta_display_add_custom_keybinding(), but accepts
+ * #MetaKeyBindingFlags to control the binding behavior.
+ *
+ * Use meta_display_remove_custom_keybinding() to remove the binding.
+ *
+ * Returns: the corresponding keybinding action if the keybinding was
+ *          added successfully, otherwise %META_KEYBINDING_ACTION_NONE
+ */
+guint
+meta_display_add_custom_keybinding_full (MetaDisplay         *display,
+                                         const char          *name,
+                                         const char         **bindings,
+                                         MetaKeyBindingFlags  flags,
+                                         MetaKeyHandlerFunc   handler,
+                                         gpointer             user_data,
+                                         GDestroyNotify       free_data)
+{
+  guint new_action = next_dynamic_keybinding_action ();
+
+  if (!add_keybinding_internal (display, name, NULL, bindings, flags, new_action,
                                 handler, 0, user_data, free_data))
     return META_KEYBINDING_ACTION_NONE;
 

@@ -2129,6 +2129,7 @@ libmuffin.so.0 libmuffin0 #MINVER#
  meta_direction_get_type@Base 5.3.0
  meta_disable_unredirect_for_display@Base 5.3.0
  meta_display_add_custom_keybinding@Base 5.3.0
+ meta_display_add_custom_keybinding_full@Base 6.8.0
  meta_display_add_ignored_crossing_serial@Base 5.3.0
  meta_display_add_keybinding@Base 5.3.0
  meta_display_begin_grab_op@Base 5.3.0
