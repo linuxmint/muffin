@@ -636,7 +636,7 @@ apply_edge_resistance_to_each_side (MetaDisplay         *display,
             }
 
 
-          if (ABS (vertical_point - new_left) < 16)
+          if (ABS (vertical_point - new_top) < 16)
             {
               new_top = vertical_point;
               new_bottom = workarea.y + workarea.height;
