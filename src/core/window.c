@@ -1112,25 +1112,30 @@ _meta_window_shared_new (MetaDisplay         *display,
   /* avoid tons of stack updates */
   meta_stack_freeze (window->display->stack);
 
-  window->rect.x = attrs->x;
-  window->rect.y = attrs->y;
-  window->rect.width = attrs->width;
-  window->rect.height = attrs->height;
+  if (attrs->width != 1 &&
+      attrs->height != 1)
+    {
+      window->rect.x = attrs->x;
+      window->rect.y = attrs->y;
+      window->rect.width = attrs->width;
+      window->rect.height = attrs->height;
 
-  /* size_hints are the "request" */
-  window->size_hints.x = attrs->x;
-  window->size_hints.y = attrs->y;
-  window->size_hints.width = attrs->width;
-  window->size_hints.height = attrs->height;
-  /* initialize the remaining size_hints as if size_hints.flags were zero */
-  meta_set_normal_hints (window, NULL);
+      /* size_hints are the "request" */
+      window->size_hints.x = attrs->x;
+      window->size_hints.y = attrs->y;
+      window->size_hints.width = attrs->width;
+      window->size_hints.height = attrs->height;
 
-  /* And this is our unmaximized size */
-  window->saved_rect = window->rect;
-  window->unconstrained_rect = window->rect;
+      /* initialize the remaining size_hints as if size_hints.flags were zero */
+      meta_set_normal_hints (window, NULL);
 
-  window->depth = attrs->depth;
-  window->xvisual = attrs->visual;
+      /* And this is our unmaximized size */
+      window->saved_rect = window->rect;
+      window->unconstrained_rect = window->rect;
+
+      window->depth = attrs->depth;
+      window->xvisual = attrs->visual;
+    }
 
   window->title = NULL;
   window->icon = NULL;
