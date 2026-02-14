@@ -518,6 +518,8 @@ if have_wayland
     'wayland/meta-wayland-dma-buf.h',
     'wayland/meta-wayland-dnd-surface.c',
     'wayland/meta-wayland-dnd-surface.h',
+    'wayland/meta-wayland-fixes.c',
+    'wayland/meta-wayland-fixes.h',
     'wayland/meta-wayland-gtk-shell.c',
     'wayland/meta-wayland-gtk-shell.h',
     'wayland/meta-wayland.h',
