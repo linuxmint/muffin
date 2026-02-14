@@ -587,7 +587,7 @@ libmuffin-clutter-0.so.0 libmuffin0 #MINVER#
  clutter_event_get_event_sequence@Base 5.3.0
  clutter_event_get_flags@Base 5.3.0
  clutter_event_get_gesture_motion_delta@Base 5.3.0
- clutter_event_get_gesture_motion_delta_unaccelerated@Base 6.7.0
+ clutter_event_get_gesture_motion_delta_unaccelerated@Base 6.6.3
  clutter_event_get_gesture_phase@Base 5.3.0
  clutter_event_get_gesture_pinch_angle_delta@Base 5.3.0
  clutter_event_get_gesture_pinch_scale@Base 5.3.0
@@ -878,7 +878,6 @@ libmuffin-clutter-0.so.0 libmuffin0 #MINVER#
  clutter_matrix_init_identity@Base 5.3.0
  clutter_modifier_type_get_type@Base 5.3.0
  clutter_offscreen_effect_create_texture@Base 5.3.0
- clutter_offscreen_effect_get_pipeline@Base 6.6.0
  clutter_offscreen_effect_get_pipeline@Base 6.4.1
  clutter_offscreen_effect_get_target@Base 5.3.0
  clutter_offscreen_effect_get_target_rect@Base 5.3.0
@@ -1454,6 +1453,7 @@ libmuffin-cogl-0.so.0 libmuffin0 #MINVER#
  _cogl_winsys_egl_get_vtable@Base 5.3.0
  _cogl_winsys_egl_make_current@Base 5.3.0
  _cogl_winsys_egl_renderer_connect_common@Base 5.3.0
+ _cogl_winsys_egl_wayland_get_vtable@Base 6.6.3
  _cogl_winsys_egl_xlib_get_vtable@Base 5.3.0
  _cogl_winsys_error_quark@Base 5.3.0
  _cogl_winsys_glx_get_vtable@Base 5.3.0
@@ -1573,9 +1573,9 @@ libmuffin-cogl-0.so.0 libmuffin0 #MINVER#
  cogl_dma_buf_handle_get_width@Base 6.6.0
  cogl_dma_buf_handle_mmap@Base 6.6.0
  cogl_dma_buf_handle_munmap@Base 6.6.0
+ cogl_dma_buf_handle_new@Base 5.3.0
  cogl_dma_buf_handle_sync_read_end@Base 6.6.0
  cogl_dma_buf_handle_sync_read_start@Base 6.6.0
- cogl_dma_buf_handle_new@Base 5.3.0
  cogl_egl_context_get_egl_display@Base 5.3.0
  cogl_egl_texture_2d_new_from_image@Base 5.3.0
  cogl_fence_closure_get_user_data@Base 5.3.0
@@ -1979,6 +1979,10 @@ libmuffin-cogl-0.so.0 libmuffin0 #MINVER#
  cogl_texture_set_region@Base 5.3.0
  cogl_texture_set_region_from_bitmap@Base 5.3.0
  cogl_wayland_display_set_compositor_display@Base 6.0.0
+ cogl_wayland_onscreen_get_wl_surface@Base 6.6.3
+ cogl_wayland_onscreen_resize@Base 6.6.3
+ cogl_wayland_renderer_get_display@Base 6.6.3
+ cogl_wayland_renderer_set_foreign_display@Base 6.6.3
  cogl_x11_onscreen_get_window_xid@Base 5.3.0
  cogl_xlib_renderer_add_filter@Base 5.3.0
  cogl_xlib_renderer_get_display@Base 5.3.0
@@ -2735,8 +2739,8 @@ libmuffin.so.0 libmuffin0 #MINVER#
  meta_workspace_get_work_area_all_monitors@Base 5.3.0
  meta_workspace_get_work_area_for_monitor@Base 5.3.0
  meta_workspace_index@Base 5.3.0
- meta_workspace_list_windows@Base 5.3.0
  meta_workspace_list_unobscured_windows@Base 6.6.0
+ meta_workspace_list_windows@Base 5.3.0
  meta_workspace_manager_append_new_workspace@Base 5.3.0
  meta_workspace_manager_get_active_workspace@Base 5.3.0
  meta_workspace_manager_get_active_workspace_index@Base 5.3.0

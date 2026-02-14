@@ -64,6 +64,9 @@
 #ifdef CLUTTER_WINDOWING_EGL
 #include "egl/clutter-backend-eglnative.h"
 #endif
+#ifdef CLUTTER_WINDOWING_WAYLAND_CLIENT
+#include "wayland-client/clutter-backend-wayland-client.h"
+#endif
 
 #ifdef CLUTTER_HAS_WAYLAND_COMPOSITOR_SUPPORT
 #include <cogl/cogl-wayland-server.h>
@@ -452,6 +455,9 @@ static const struct {
 #endif
 #ifdef CLUTTER_WINDOWING_EGL
   { CLUTTER_WINDOWING_EGL, clutter_backend_egl_native_new },
+#endif
+#ifdef CLUTTER_WINDOWING_WAYLAND_CLIENT
+  { CLUTTER_WINDOWING_WAYLAND_CLIENT, clutter_backend_wayland_client_new },
 #endif
   { NULL, NULL },
 };

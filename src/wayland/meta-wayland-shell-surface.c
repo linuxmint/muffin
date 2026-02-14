@@ -244,6 +244,7 @@ meta_wayland_shell_surface_surface_pre_apply_state (MetaWaylandSurfaceRole  *sur
   MetaWaylandSurface *surface =
     meta_wayland_surface_role_get_surface (surface_role);
 
+  /* Queue calc_showing when buffer is detached (unmap) */
   if (pending->newly_attached &&
       !surface->buffer_ref.buffer &&
       priv->window)
@@ -285,6 +286,10 @@ meta_wayland_shell_surface_surface_apply_state (MetaWaylandSurfaceRole  *surface
     meta_wayland_surface_get_width (surface) * geometry_scale;
   window->buffer_rect.height =
     meta_wayland_surface_get_height (surface) * geometry_scale;
+
+  /* Queue calc_showing when buffer is newly attached - needed for window to become visible */
+  if (pending->newly_attached)
+    meta_window_queue (window, META_QUEUE_CALC_SHOWING);
 }
 
 static MetaWindow *
@@ -342,9 +347,14 @@ meta_wayland_shell_surface_sync_actor_state (MetaWaylandActorSurface *actor_surf
   MetaWaylandActorSurfaceClass *actor_surface_class =
     META_WAYLAND_ACTOR_SURFACE_CLASS (meta_wayland_shell_surface_parent_class);
   MetaWindow *toplevel_window;
+  MetaWindow *window;
 
   toplevel_window = meta_wayland_surface_get_toplevel_window (surface);
-  if (!toplevel_window)
+  window = meta_wayland_surface_get_window (surface);
+
+  /* For popups parented to layer surfaces, there's no toplevel window,
+   * but the popup itself has a window. Allow sync in that case. */
+  if (!toplevel_window && !window)
     return;
 
   actor_surface_class->sync_actor_state (actor_surface);

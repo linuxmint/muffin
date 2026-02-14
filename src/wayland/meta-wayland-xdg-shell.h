@@ -50,4 +50,7 @@ G_DECLARE_FINAL_TYPE (MetaWaylandXdgPopup,
 
 void meta_wayland_xdg_shell_init (MetaWaylandCompositor *compositor);
 
+void meta_wayland_xdg_popup_set_parent_surface (MetaWaylandXdgPopup *xdg_popup,
+                                                MetaWaylandSurface  *parent_surface);
+
 #endif /* META_WAYLAND_XDG_SHELL_H */
