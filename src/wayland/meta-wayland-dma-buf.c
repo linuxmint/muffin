@@ -600,6 +600,15 @@ should_send_modifiers (MetaBackend *backend)
 {
   MetaSettings *settings = meta_backend_get_settings (backend);
 
+  #ifdef HAVE_NATIVE_BACKEND
+  if (META_IS_BACKEND_NATIVE (backend))
+    {
+      MetaRenderer *renderer = meta_backend_get_renderer (backend);
+      MetaRendererNative *renderer_native = META_RENDERER_NATIVE (renderer);
+      return meta_renderer_native_use_modifiers (renderer_native);
+    }
+  #endif
+
   return meta_settings_is_experimental_feature_enabled (
     settings, META_EXPERIMENTAL_FEATURE_KMS_MODIFIERS);
 }

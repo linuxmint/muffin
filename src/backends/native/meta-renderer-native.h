@@ -55,6 +55,8 @@ MetaGpuKms * meta_renderer_native_get_primary_gpu (MetaRendererNative *renderer_
 
 void meta_renderer_native_finish_frame (MetaRendererNative *renderer_native);
 
+gboolean meta_renderer_native_use_modifiers (MetaRendererNative *renderer_native);
+
 int64_t meta_renderer_native_get_frame_counter (MetaRendererNative *renderer_native);
 
 void meta_renderer_native_reset_modes (MetaRendererNative *renderer_native);

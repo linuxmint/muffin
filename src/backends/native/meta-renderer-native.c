@@ -333,6 +333,12 @@ meta_renderer_native_get_egl (MetaRendererNative *renderer_native)
   return meta_backend_get_egl (meta_renderer_get_backend (renderer));
 }
 
+gboolean
+meta_renderer_native_use_modifiers (MetaRendererNative *renderer_native)
+{
+  return renderer_native->use_modifiers;
+}
+
 static MetaEgl *
 meta_onscreen_native_get_egl (MetaOnscreenNative *onscreen_native)
 {
@@ -4018,6 +4024,9 @@ meta_renderer_native_initable_init (GInitable     *initable,
                                                          error);
   if (!renderer_native->primary_gpu_kms)
     return FALSE;
+
+  if (meta_gpu_kms_requires_modifiers (renderer_native->primary_gpu_kms))
+    renderer_native->use_modifiers = TRUE;
 
   return TRUE;
 }
