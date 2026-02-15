@@ -44,3 +44,9 @@ configure_file(
   install_dir: schemadir
 )
 
+if have_libgudev
+  install_data(['61-muffin.rules'],
+    install_dir: join_paths(udev_dir, 'rules.d'),
+  )
+endif
+

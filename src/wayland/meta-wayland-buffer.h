@@ -90,5 +90,7 @@ void                    meta_wayland_buffer_process_damage      (MetaWaylandBuff
                                                                  cairo_region_t        *region);
 
 void meta_wayland_init_shm (MetaWaylandCompositor *compositor);
+CoglScanout *           meta_wayland_buffer_try_acquire_scanout (MetaWaylandBuffer     *buffer,
+                                                                 CoglOnscreen          *onscreen);
 
 #endif /* META_WAYLAND_BUFFER_H */

@@ -76,6 +76,10 @@ CLUTTER_EXPORT
 void clutter_stage_update_resource_scales (ClutterStage *stage);
 
 CLUTTER_EXPORT
+void clutter_stage_view_assign_next_scanout (ClutterStageView *stage_view,
+                                             CoglScanout      *scanout);
+
+CLUTTER_EXPORT
 gboolean clutter_actor_has_damage (ClutterActor *actor);
 
 CLUTTER_EXPORT
@@ -83,6 +87,10 @@ void clutter_stage_get_device_coords (ClutterStage         *stage,
                                       ClutterInputDevice   *device,
                                       ClutterEventSequence *sequence,
                                       graphene_point_t     *coords);
+
+CLUTTER_EXPORT
+gboolean clutter_actor_has_transitions (ClutterActor *actor);
+
 #undef __CLUTTER_H_INSIDE__
 
 #endif /* __CLUTTER_MUFFIN_H__ */

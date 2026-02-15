@@ -217,6 +217,7 @@ libmuffin-clutter-0.so.0 libmuffin0 #MINVER#
  clutter_actor_has_mapped_clones@Base 5.3.0
  clutter_actor_has_overlaps@Base 5.3.0
  clutter_actor_has_pointer@Base 5.3.0
+ clutter_actor_has_transitions@Base 6.4.1
  clutter_actor_hide@Base 5.3.0
  clutter_actor_inhibit_culling@Base 5.3.0
  clutter_actor_insert_child_above@Base 5.3.0
@@ -1159,6 +1160,7 @@ libmuffin-clutter-0.so.0 libmuffin0 #MINVER#
  clutter_stage_state_get_type@Base 5.3.0
  clutter_stage_thaw_updates@Base 5.3.0
  clutter_stage_update_resource_scales@Base 5.3.0
+ clutter_stage_view_assign_next_scanout@Base 6.4.1
  clutter_stage_view_cogl_get_type@Base 5.3.0
  clutter_stage_view_get_framebuffer@Base 5.3.0
  clutter_stage_view_get_layout@Base 5.3.0
@@ -1780,6 +1782,7 @@ libmuffin-cogl-0.so.0 libmuffin0 #MINVER#
  cogl_onscreen_add_dirty_callback@Base 5.3.0
  cogl_onscreen_add_frame_callback@Base 5.3.0
  cogl_onscreen_add_resize_callback@Base 5.3.0
+ cogl_onscreen_direct_scanout@Base 6.4.1
  cogl_onscreen_dirty_closure_get_gtype@Base 5.3.0
  cogl_onscreen_get_buffer_age@Base 5.3.0
  cogl_onscreen_get_frame_counter@Base 5.3.0
@@ -1914,6 +1917,7 @@ libmuffin-cogl-0.so.0 libmuffin0 #MINVER#
  cogl_renderer_set_custom_winsys@Base 5.3.0
  cogl_renderer_set_driver@Base 5.3.0
  cogl_renderer_set_winsys_id@Base 5.3.0
+ cogl_scanout_get_type@Base 6.4.1
  cogl_set_backface_culling_enabled@Base 5.3.0
  cogl_set_depth_test_enabled@Base 5.3.0
  cogl_set_tracing_disabled_on_thread@Base 5.3.0
@@ -2697,8 +2701,6 @@ libmuffin.so.0 libmuffin0 #MINVER#
  meta_window_move_resize_frame@Base 5.3.0
  meta_window_move_to_monitor@Base 5.3.0
  meta_window_raise@Base 5.3.0
- meta_window_requested_bypass_compositor@Base 5.3.0
- meta_window_requested_dont_bypass_compositor@Base 5.3.0
  meta_window_set_compositor_private@Base 5.3.0
  meta_window_set_demands_attention@Base 5.3.0
  meta_window_set_icon_geometry@Base 5.3.0
