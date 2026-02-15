@@ -1,3 +1,4 @@
 usr/lib/*/libmuffin.so.*
 usr/lib/*/muffin/*.so.*
+usr/lib/udev/rules.d/61-muffin.rules
 usr/libexec/muffin-restart-helper
