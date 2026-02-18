@@ -25,7 +25,7 @@
 
 #define META_TYPE_COMPOSITOR_NATIVE (meta_compositor_native_get_type ())
 G_DECLARE_FINAL_TYPE (MetaCompositorNative, meta_compositor_native,
-                      META, COMPOSITOR_NATIVE, MetaCompositor)
+                      META, COMPOSITOR_NATIVE, MetaCompositorServer)
 
 MetaCompositorNative * meta_compositor_native_new (MetaDisplay *display);
 
