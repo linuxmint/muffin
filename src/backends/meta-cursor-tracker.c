@@ -219,11 +219,19 @@ set_window_cursor (MetaCursorTracker *tracker,
                    gboolean           has_cursor,
                    MetaCursorSprite  *cursor_sprite)
 {
-  g_clear_object (&tracker->window_cursor);
+  g_autoptr (MetaCursorSprite) old_cursor = g_steal_pointer (&tracker->window_cursor);
+
   if (cursor_sprite)
     tracker->window_cursor = g_object_ref (cursor_sprite);
   tracker->has_window_cursor = has_cursor;
   sync_cursor (tracker);
+
+  /* old_cursor is released here, after sync_cursor has realized the new
+   * cursor sprite's GBM bo. This ensures the old GBM bo (and its DRM
+   * handle) stays alive while the new bo is allocated, preventing the
+   * kernel from recycling the same DRM handle and skipping the cursor
+   * plane update.
+   */
 }
 
 gboolean

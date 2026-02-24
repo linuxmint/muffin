@@ -7,6 +7,9 @@
 /* Have evdev support for input handling */
 #mesondefine HAVE_EVDEV
 
+/* Have Wayland client backend support */
+#mesondefine HAVE_WAYLAND_CLIENT
+
 /* Building with libwacom for advanced tablet management */
 #mesondefine HAVE_LIBWACOM
 

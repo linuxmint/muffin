@@ -28,6 +28,7 @@
 #include "backends/x11/meta-backend-x11.h"
 #include "core/bell.h"
 #include "core/keybindings-private.h"
+#include "meta/display.h"
 #include "meta/meta-x11-errors.h"
 #include "x11/meta-x11-display-private.h"
 
@@ -423,6 +424,9 @@ meta_frame_set_screen_cursor (MetaFrame	*frame,
       XFlush (x11_display->xdisplay);
       XFreeCursor (x11_display->xdisplay, xcursor);
     }
+
+  if (meta_is_wayland_compositor ())
+    meta_display_set_cursor (frame->window->display, cursor);
 }
 
 Window

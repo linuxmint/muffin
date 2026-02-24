@@ -77,6 +77,13 @@ if have_libwacom
   ]
 endif
 
+if have_wayland_client
+  clutter_pkg_private_deps += [
+    wayland_client_dep,
+    xkbcommon_dep,
+  ]
+endif
+
 clutter_deps = [
   clutter_pkg_deps,
   clutter_pkg_private_deps,

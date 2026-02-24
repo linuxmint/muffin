@@ -182,6 +182,7 @@ meta_wayland_actor_surface_real_sync_actor_state (MetaWaylandActorSurface *actor
   stex = meta_surface_actor_get_texture (surface_actor);
 
   buffer = surface->buffer_ref.buffer;
+
   if (buffer)
     {
       CoglSnippet *snippet;

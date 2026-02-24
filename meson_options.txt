@@ -39,6 +39,12 @@ option('wayland',
   description: 'Enable Wayland support'
 )
 
+option('wayland_client',
+  type: 'boolean',
+  value: true,
+  description: 'Enable Wayland client backend (for running as a Wayland client)'
+)
+
 option('native_backend',
   type: 'boolean',
   value: true,

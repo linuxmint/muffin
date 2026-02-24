@@ -41,6 +41,13 @@ if have_wayland
   ]
 endif
 
+if have_wayland_client
+  cogl_pkg_deps += [
+    wayland_client_dep,
+    wayland_egl_dep,
+  ]
+endif
+
 if have_egl
   cogl_pkg_deps += [
     egl_dep,

@@ -998,8 +998,13 @@ sync_actor_stacking (MetaCompositor *compositor)
       children = clutter_actor_get_children (priv->bottom_window_group);
       for (tmp = children; tmp != NULL; tmp = tmp->next)
         {
-          MetaWindowActor *child = tmp->data;
-          MetaWindow *mw = meta_window_actor_get_meta_window (child);
+          ClutterActor *child = tmp->data;
+          MetaWindow *mw;
+
+          if (!META_IS_WINDOW_ACTOR (child))
+            continue;
+
+          mw = meta_window_actor_get_meta_window (META_WINDOW_ACTOR (child));
 
           if (mw != NULL)
             {

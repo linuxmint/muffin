@@ -1693,7 +1693,7 @@ meta_cursor_for_grab_op (MetaGrabOp op)
     case META_GRAB_OP_MOVING:
     case META_GRAB_OP_KEYBOARD_MOVING:
     case META_GRAB_OP_KEYBOARD_RESIZING_UNKNOWN:
-      return META_CURSOR_MOVE;
+      return META_CURSOR_ALL_RESIZE;
       break;
     default:
       break;

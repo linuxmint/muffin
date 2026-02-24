@@ -62,6 +62,7 @@
 #include "wayland/meta-wayland-private.h"
 #include "wayland/meta-wayland-seat.h"
 #include "wayland/meta-wayland-surface.h"
+#include "wayland/meta-wayland-layer-shell.h"
 #include "wayland/meta-xwayland.h"
 
 #ifdef HAVE_NATIVE_BACKEND
@@ -485,6 +486,23 @@ default_grab_button (MetaWaylandPointerGrab *grab,
   MetaWaylandPointer *pointer = grab->pointer;
 
   meta_wayland_pointer_send_button (pointer, event);
+
+  if (clutter_event_type (event) == CLUTTER_BUTTON_PRESS &&
+      pointer->focus_surface)
+    {
+      MetaWaylandSurfaceRole *role = pointer->focus_surface->role;
+
+      if (role && META_IS_WAYLAND_LAYER_SURFACE (role) &&
+          meta_wayland_layer_surface_wants_keyboard_focus (
+              META_WAYLAND_LAYER_SURFACE (role)))
+        {
+          MetaWaylandSeat *seat = meta_wayland_pointer_get_seat (pointer);
+
+          if (meta_wayland_seat_has_keyboard (seat))
+            meta_wayland_keyboard_set_focus (seat->keyboard,
+                                             pointer->focus_surface);
+        }
+    }
 }
 
 static const MetaWaylandPointerGrabInterface default_pointer_grab_interface = {

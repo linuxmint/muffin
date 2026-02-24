@@ -171,6 +171,20 @@ if have_wayland
   endif
 endif
 
+have_wayland_client = get_option('wayland_client')
+
+if have_wayland_client
+  if not have_wayland
+    # Need wayland dependencies even if server support is not enabled
+    wayland_client_dep = dependency('wayland-client', version: wayland_server_req)
+    wayland_egl_dep = dependency('wayland-egl')
+  endif
+
+  if not have_egl
+    error('Wayland client support requires EGL to be enabled')
+  endif
+endif
+
 have_libgudev = get_option('udev')
 if have_libgudev
   libudev_dep = dependency('libudev', version: udev_req)
@@ -355,6 +369,7 @@ cdata.set_quoted('PACKAGE_VERSION', meson.project_version())
 
 cdata.set('HAVE_EGL', have_egl)
 cdata.set('HAVE_WAYLAND', have_wayland)
+cdata.set('HAVE_WAYLAND_CLIENT', have_wayland_client)
 cdata.set('HAVE_NATIVE_BACKEND', have_native_backend)
 cdata.set('HAVE_REMOTE_DESKTOP', have_remote_desktop)
 cdata.set('HAVE_EGL_DEVICE', have_egl_device)
@@ -500,6 +515,7 @@ output = [
   '    Options:',
   '',
   '        Wayland.......................... ' + have_wayland.to_string(),
+  '        Wayland Client................... ' + have_wayland_client.to_string(),
   '        Wayland EGLStream................ ' + have_wayland_eglstream.to_string(),
   '        Native Backend................... ' + have_native_backend.to_string(),
   '        EGL Device....................... ' + have_egl_device.to_string(),
