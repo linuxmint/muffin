@@ -73,7 +73,7 @@ CLUTTER_EXPORT
 void clutter_stage_thaw_updates (ClutterStage *stage);
 
 CLUTTER_EXPORT
-void clutter_stage_update_resource_scales (ClutterStage *stage);
+void clutter_stage_clear_stage_views (ClutterStage *stage);
 
 CLUTTER_EXPORT
 gboolean clutter_actor_has_damage (ClutterActor *actor);

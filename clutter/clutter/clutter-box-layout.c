@@ -739,8 +739,7 @@ static void
 allocate_box_child (ClutterBoxLayout       *self,
                     ClutterContainer       *container,
                     ClutterActor           *child,
-                    ClutterActorBox        *child_box,
-                    ClutterAllocationFlags  flags)
+                    ClutterActorBox        *child_box)
 {
   ClutterBoxLayoutPrivate *priv = self->priv;
   ClutterBoxChild *box_child;
@@ -769,14 +768,13 @@ allocate_box_child (ClutterBoxLayout       *self,
    */
   if (clutter_actor_needs_expand (child, CLUTTER_ORIENTATION_HORIZONTAL) ||
       clutter_actor_needs_expand (child, CLUTTER_ORIENTATION_VERTICAL))
-    clutter_actor_allocate (child, child_box, flags);
+    clutter_actor_allocate (child, child_box);
   else
     clutter_actor_allocate_align_fill (child, child_box,
                                        get_box_alignment_factor (box_child->x_align),
                                        get_box_alignment_factor (box_child->y_align),
                                        box_child->x_fill,
-                                       box_child->y_fill,
-                                       flags);
+                                       box_child->y_fill);
 
   if (priv->use_animations)
     clutter_actor_restore_easing_state (child);
@@ -975,8 +973,7 @@ distribute_natural_allocation (float          extra_space,
 static void
 clutter_box_layout_allocate (ClutterLayoutManager   *layout,
                              ClutterContainer       *container,
-                             const ClutterActorBox  *box,
-                             ClutterAllocationFlags  flags)
+                             const ClutterActorBox  *box)
 {
   ClutterBoxLayoutPrivate *priv = CLUTTER_BOX_LAYOUT (layout)->priv;
   ClutterActor *actor, *child;
@@ -1251,8 +1248,7 @@ clutter_box_layout_allocate (ClutterLayoutManager   *layout,
         allocate_box_child (CLUTTER_BOX_LAYOUT (layout),
                             container,
                             child,
-                            &child_allocation,
-                            flags);
+                            &child_allocation);
 
         i += 1;
     }

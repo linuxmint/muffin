@@ -140,7 +140,7 @@ meta_stage_native_rebuild_views (MetaStageNative *stage_native)
   ClutterActor *stage = meta_backend_get_stage (backend);
 
   meta_renderer_rebuild_views (renderer);
-  clutter_stage_update_resource_scales (CLUTTER_STAGE (stage));
+  clutter_stage_clear_stage_views (CLUTTER_STAGE (stage));
   ensure_frame_callbacks (stage_native);
 }
 

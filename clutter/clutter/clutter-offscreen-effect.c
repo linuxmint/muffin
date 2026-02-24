@@ -238,8 +238,8 @@ clutter_offscreen_effect_pre_paint (ClutterEffect       *effect,
   gfloat stage_width, stage_height;
   gfloat target_width = -1, target_height = -1;
   CoglFramebuffer *framebuffer;
-  gfloat resource_scale;
-  gfloat ceiled_resource_scale;
+  float resource_scale;
+  float ceiled_resource_scale;
   graphene_point3d_t local_offset;
   gfloat old_viewport[4];
 
@@ -254,17 +254,11 @@ clutter_offscreen_effect_pre_paint (ClutterEffect       *effect,
   stage = _clutter_actor_get_stage_internal (priv->actor);
   clutter_actor_get_size (stage, &stage_width, &stage_height);
 
-  if (_clutter_actor_get_real_resource_scale (priv->actor, &resource_scale))
-    {
-      ceiled_resource_scale = ceilf (resource_scale);
-      stage_width *= ceiled_resource_scale;
-      stage_height *= ceiled_resource_scale;
-    }
-  else
-    {
-      /* We are sure we have a resource scale set to a good value at paint */
-      g_assert_not_reached ();
-    }
+  resource_scale = clutter_actor_get_real_resource_scale (priv->actor);
+
+  ceiled_resource_scale = ceilf (resource_scale);
+  stage_width *= ceiled_resource_scale;
+  stage_height *= ceiled_resource_scale;
 
   /* Get the minimal bounding box for what we want to paint, relative to the
    * parent of priv->actor. Note that we may actually be painting a clone of
@@ -417,8 +411,9 @@ clutter_offscreen_effect_paint_texture (ClutterOffscreenEffect *effect,
    */
   cogl_framebuffer_get_modelview_matrix (framebuffer, &modelview);
 
-  if (clutter_actor_get_resource_scale (priv->actor, &resource_scale) &&
-      resource_scale != 1.0f)
+  resource_scale = clutter_actor_get_resource_scale (priv->actor);
+
+  if (resource_scale != 1.0f)
     {
       float paint_scale = 1.0f / resource_scale;
       cogl_matrix_scale (&modelview, paint_scale, paint_scale, 1);

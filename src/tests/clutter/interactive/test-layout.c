@@ -276,15 +276,14 @@ my_thing_get_preferred_height (ClutterActor *self,
 
 static void
 my_thing_allocate (ClutterActor           *self,
-                   const ClutterActorBox  *box,
-                   ClutterAllocationFlags  flags)
+                   const ClutterActorBox  *box)
 {
   MyThingPrivate *priv;
   gfloat current_x, current_y, max_row_height;
   ClutterActorIter iter;
   ClutterActor *child;
 
-  clutter_actor_set_allocation (self, box, flags);
+  clutter_actor_set_allocation (self, box);
 
   priv = MY_THING (self)->priv;
 
@@ -322,7 +321,7 @@ my_thing_allocate (ClutterActor           *self,
       child_box.x2 = child_box.x1 + natural_width;
       child_box.y2 = child_box.y1 + natural_height;
 
-      clutter_actor_allocate (child, &child_box, flags);
+      clutter_actor_allocate (child, &child_box);
 
       /* if we take into account the transformation of the children
        * then we first check if it's transformed; then we get the
@@ -338,17 +337,8 @@ my_thing_allocate (ClutterActor           *self,
               graphene_point3d_t v1 = { 0, }, v2 = { 0, };
               ClutterActorBox transformed_box = { 0, };
 
-              /* origin */
-              if (!(flags & CLUTTER_ABSOLUTE_ORIGIN_CHANGED))
-                {
-                  v1.x = 0;
-                  v1.y = 0;
-                }
-              else
-                {
-                  v1.x = box->x1;
-                  v1.y = box->y1;
-                }
+              v1.x = box->x1;
+              v1.y = box->y1;
 
               clutter_actor_apply_transform_to_point (child, &v1, &v2);
               transformed_box.x1 = v2.x;

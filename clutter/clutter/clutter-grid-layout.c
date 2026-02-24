@@ -1391,8 +1391,7 @@ allocate_child (ClutterGridRequest *request,
 static void
 clutter_grid_layout_allocate (ClutterLayoutManager   *layout,
                               ClutterContainer       *container,
-                              const ClutterActorBox  *allocation,
-                              ClutterAllocationFlags  flags)
+                              const ClutterActorBox  *allocation)
 {
   ClutterGridLayout *self = CLUTTER_GRID_LAYOUT (layout);
   ClutterOrientation orientation;
@@ -1453,7 +1452,7 @@ clutter_grid_layout_allocate (ClutterLayoutManager   *layout,
       child_allocation.x2 = child_allocation.x1 + width;
       child_allocation.y2 = child_allocation.y1 + height;
 
-      clutter_actor_allocate (child, &child_allocation, flags);
+      clutter_actor_allocate (child, &child_allocation);
     }
 }
 
