@@ -55,7 +55,7 @@ meta_cursor_get_name (MetaCursor cursor)
     case META_CURSOR_HELP:
       return "question_arrow";
     case META_CURSOR_POINTER:
-      return "hand";
+      return "pointer";
     case META_CURSOR_PROGRESS:
       return "left_ptr_watch";
     case META_CURSOR_WAIT:
@@ -141,7 +141,7 @@ meta_cursor_get_legacy_name (MetaCursor cursor)
     case META_CURSOR_HELP:
       return "question_arrow";
     case META_CURSOR_POINTER:
-      return "hand";
+      return "hand2";
     case META_CURSOR_PROGRESS:
       return "left_ptr_watch";
     case META_CURSOR_WAIT:
