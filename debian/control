@@ -60,6 +60,7 @@ Build-Depends:
         libxt-dev,
         meson (>= 1.0.0),
         pkg-config (>= 0.22),
+        systemd-dev [linux-any],
         udev [linux-any],
         wayland-protocols (>= 1.23) [linux-any],
         xauth <!nocheck>,
