@@ -74,8 +74,7 @@
 #include "meta/compositor-muffin.h"
 #include "meta/main.h"
 #include "meta/meta-backend.h"
-#include "meta/meta-background-actor.h"
-#include "meta/meta-background-group.h"
+#include "meta/meta-monitor-manager.h"
 #include "meta/meta-shadow-factory.h"
 #include "meta/meta-x11-errors.h"
 #include "meta/meta-x11-background-actor.h"
@@ -85,6 +84,9 @@
 
 #ifdef HAVE_WAYLAND
 #include "compositor/meta-window-actor-wayland.h"
+#include "meta/meta-wayland-background-actor.h"
+#include "wayland/meta-wayland-layer-shell.h"
+#include "wayland/meta-wayland-outputs.h"
 #include "wayland/meta-wayland-private.h"
 #endif
 
@@ -127,7 +129,7 @@ typedef struct _MetaCompositorPrivate
   ClutterActor *feedback_group;
   ClutterActor *bottom_window_group;
 
-  ClutterActor *background_actor;
+  GList *background_actors;
   ClutterActor *desklet_container;
 
   GList *windows;
@@ -579,6 +581,123 @@ meta_compositor_redirect_x11_windows (MetaCompositor *compositor)
     redirect_windows (display->x11_display);
 }
 
+static void
+rebuild_x11_background_actors (MetaCompositor *compositor)
+{
+  MetaCompositorPrivate *priv =
+    meta_compositor_get_instance_private (compositor);
+  MetaDisplay *display = priv->display;
+  int i, n;
+
+  g_list_free_full (priv->background_actors, (GDestroyNotify) clutter_actor_destroy);
+  priv->background_actors = NULL;
+
+  n = meta_display_get_n_monitors (display);
+  for (i = 0; i < n; i++)
+    {
+      ClutterActor *actor;
+      MetaRectangle rect;
+
+      actor = meta_x11_background_actor_new_for_monitor (display, i);
+      if (actor == NULL)
+        continue;
+
+      meta_display_get_monitor_geometry (display, i, &rect);
+      clutter_actor_set_position (actor, rect.x, rect.y);
+      clutter_actor_set_size (actor, rect.width, rect.height);
+
+      clutter_actor_add_child (priv->window_group, actor);
+      priv->background_actors = g_list_append (priv->background_actors, actor);
+    }
+}
+
+static void
+on_monitors_changed (MetaMonitorManager *monitor_manager,
+                     MetaCompositor     *compositor)
+{
+  if (!meta_is_wayland_compositor ())
+    rebuild_x11_background_actors (compositor);
+}
+
+#ifdef HAVE_WAYLAND
+static int
+get_monitor_index_for_layer_surface (MetaWaylandLayerSurface *layer_surface)
+{
+  MetaWaylandCompositor *wl_compositor =
+    meta_wayland_compositor_get_default ();
+  MetaWaylandOutput *surface_output =
+    meta_wayland_layer_surface_get_output (layer_surface);
+  MetaDisplay *display = meta_get_display ();
+  int i, n;
+
+  if (!surface_output)
+    return -1;
+
+  n = meta_display_get_n_monitors (display);
+  for (i = 0; i < n; i++)
+    {
+      MetaWaylandOutput *output =
+        meta_wayland_compositor_get_output_for_monitor (wl_compositor, i);
+      if (output == surface_output)
+        return i;
+    }
+
+  return -1;
+}
+
+static void
+on_layer_surface_mapped (MetaWaylandLayerShell   *layer_shell,
+                         MetaWaylandLayerSurface *layer_surface,
+                         MetaCompositor          *compositor)
+{
+  MetaCompositorPrivate *priv =
+    meta_compositor_get_instance_private (compositor);
+  MetaSurfaceActor *surface_actor;
+  int monitor_index;
+
+  if (meta_wayland_layer_surface_get_layer (layer_surface) !=
+      META_LAYER_SHELL_LAYER_BACKGROUND)
+    return;
+
+  surface_actor = meta_wayland_actor_surface_get_actor (
+    META_WAYLAND_ACTOR_SURFACE (layer_surface));
+  if (!surface_actor)
+    return;
+
+  monitor_index = get_monitor_index_for_layer_surface (layer_surface);
+
+  if (monitor_index < 0)
+    {
+      priv->background_actors =
+        g_list_append (priv->background_actors, surface_actor);
+      return;
+    }
+
+  priv->background_actors =
+    g_list_insert (priv->background_actors, surface_actor, monitor_index);
+}
+
+static void
+on_layer_surface_unmapped (MetaWaylandLayerShell   *layer_shell,
+                           MetaWaylandLayerSurface *layer_surface,
+                           MetaCompositor          *compositor)
+{
+  MetaCompositorPrivate *priv =
+    meta_compositor_get_instance_private (compositor);
+  MetaSurfaceActor *surface_actor;
+
+  if (meta_wayland_layer_surface_get_layer (layer_surface) !=
+      META_LAYER_SHELL_LAYER_BACKGROUND)
+    return;
+
+  surface_actor = meta_wayland_actor_surface_get_actor (
+    META_WAYLAND_ACTOR_SURFACE (layer_surface));
+
+  priv->background_actors =
+    g_list_remove (priv->background_actors, surface_actor);
+}
+#endif
+
 gboolean
 meta_compositor_do_manage (MetaCompositor  *compositor,
                            GError         **error)
@@ -615,14 +734,11 @@ meta_compositor_do_manage (MetaCompositor  *compositor,
   priv->feedback_group = meta_window_group_new (display);
 
   if (!meta_is_wayland_compositor ())
-    {
-      priv->background_actor = meta_x11_background_actor_new_for_display (display);
-      clutter_actor_add_child (priv->window_group, priv->background_actor);
-    }
+    rebuild_x11_background_actors (compositor);
 
   clutter_actor_add_child (priv->window_group, priv->bottom_window_group);
 
-  // This needs to remain stacked just above the background actor in the window group.
+  // This needs to remain stacked just above the background actors in the window group.
   // So sync_actor_stacking() has to be able to reference it. The deskletManager
   // will take this and finish setting it up.
   priv->desklet_container = clutter_actor_new ();
@@ -633,6 +749,27 @@ meta_compositor_do_manage (MetaCompositor  *compositor,
 
   if (!META_COMPOSITOR_GET_CLASS (compositor)->manage (compositor, error))
     return FALSE;
+
+  g_signal_connect (meta_monitor_manager_get (), "monitors-changed",
+                    G_CALLBACK (on_monitors_changed), compositor);
+
+#ifdef HAVE_WAYLAND
+  if (meta_is_wayland_compositor ())
+    {
+      MetaWaylandCompositor *wl_compositor =
+        meta_wayland_compositor_get_default ();
+      MetaWaylandLayerShell *layer_shell =
+        meta_wayland_compositor_get_layer_shell (wl_compositor);
+
+      if (layer_shell)
+        {
+          g_signal_connect (layer_shell, "layer-surface-mapped",
+                            G_CALLBACK (on_layer_surface_mapped), compositor);
+          g_signal_connect (layer_shell, "layer-surface-unmapped",
+                            G_CALLBACK (on_layer_surface_unmapped), compositor);
+        }
+    }
+#endif
 
   priv->plugin_mgr = meta_plugin_manager_new (compositor);
 
@@ -963,9 +1100,7 @@ sync_actor_stacking (MetaCompositor *compositor)
     {
       ClutterActor *actor = old->data;
 
-      if (META_IS_BACKGROUND_GROUP (actor) ||
-          META_IS_BACKGROUND_ACTOR (actor) ||
-          META_IS_X11_BACKGROUND_ACTOR (actor))
+      if (META_IS_X11_BACKGROUND_ACTOR (actor))
         {
           backgrounds = g_list_prepend (backgrounds, actor);
 
@@ -1017,31 +1152,6 @@ sync_actor_stacking (MetaCompositor *compositor)
 
   // Then the bottom window group (which META_WINDOW_DESKTOP windows like nemo-desktop's get placed in).
   clutter_actor_set_child_below_sibling (priv->window_group, priv->bottom_window_group, NULL);
-
-  if (meta_is_wayland_compositor ())
-    {
-      children = clutter_actor_get_children (priv->bottom_window_group);
-      for (tmp = children; tmp != NULL; tmp = tmp->next)
-        {
-          MetaWindowActor *child = tmp->data;
-          MetaWindow *mw = meta_window_actor_get_meta_window (child);
-
-          if (mw != NULL)
-            {
-              // CsdBackground manager sets _NET_WM_STATE_BELOW (gtk_window_set_keep_below)
-              // This sets its stack layer to META_LAYER_BOTTOM, so we can keep these below
-              // the nemo-desktop, etc..
-              MetaStackLayer layer = meta_window_get_default_layer (mw);
-
-              if (layer == META_LAYER_BOTTOM)
-                {
-                  clutter_actor_set_child_below_sibling (priv->bottom_window_group, CLUTTER_ACTOR (child), NULL);
-                }
-            }
-        }
-
-        g_list_free (children);
-    }
 
   // and finally backgrounds..
 
@@ -1438,7 +1548,12 @@ meta_compositor_dispose (GObject *object)
   g_clear_signal_handler (&priv->top_window_actor_destroy_id,
                           priv->top_window_actor);
 
-  g_clear_pointer (&priv->background_actor, clutter_actor_destroy);
+  if (!meta_is_wayland_compositor ())
+    {
+      for (GList *l = priv->background_actors; l; l = l->next)
+        clutter_actor_destroy (l->data);
+    }
+  g_clear_pointer (&priv->background_actors, g_list_free);
   g_clear_pointer (&priv->bottom_window_group, clutter_actor_destroy);
   g_clear_pointer (&priv->desklet_container, clutter_actor_destroy);
   g_clear_pointer (&priv->window_group, clutter_actor_destroy);
@@ -1783,11 +1898,10 @@ meta_compositor_get_laters (MetaCompositor *compositor)
  * meta_get_x11_background_actor_for_display:
  * @display: a #MetaDisplay
  *
- * Gets the actor that draws the root window background under the windows.
- * The root window background automatically tracks the image or color set
- * by the environment.
+ * Deprecated. Returns the first per-monitor X11 background actor, or NULL.
+ * Use meta_get_background_actors_for_display() instead.
  *
- * Returns: (transfer none): The background actor corresponding to @display
+ * Returns: (transfer none) (nullable): A background actor, or NULL
  */
 ClutterActor *
 meta_get_x11_background_actor_for_display (MetaDisplay *display)
@@ -1795,12 +1909,10 @@ meta_get_x11_background_actor_for_display (MetaDisplay *display)
   MetaCompositorPrivate *priv =
     meta_compositor_get_instance_private (display->compositor);
 
-  if (meta_is_wayland_compositor ())
-    {
-      return NULL;
-    }
+  if (meta_is_wayland_compositor () || priv->background_actors == NULL)
+    return NULL;
 
-  return priv->background_actor;
+  return priv->background_actors->data;
 }
 
 /**
@@ -1852,4 +1964,51 @@ meta_update_desklet_stacking (MetaCompositor *compositor)
     meta_compositor_get_instance_private (compositor);
 
   meta_stack_tracker_queue_sync_stack (priv->display->stack_tracker);
+}
+
+/**
+ * meta_create_background_for_monitor:
+ * @display: a #MetaDisplay
+ * @monitor: the monitor index
+ *
+ * Creates a new standalone actor that displays the desktop background for the
+ * given monitor. On X11, this returns a per-monitor root pixmap actor. On
+ * Wayland, this returns a monitor-sized clone of the layer-shell background
+ * surface.
+ *
+ * These are independent copies, not the live compositor background actors.
+ * Use meta_get_background_actors_for_display() to get the actual actors
+ * in the scene graph.
+ *
+ * Returns: (transfer full): The background actor for @monitor
+ */
+ClutterActor *
+meta_create_background_for_monitor (MetaDisplay *display,
+                                        int          monitor)
+{
+#ifdef HAVE_WAYLAND
+  if (meta_is_wayland_compositor ())
+    return meta_wayland_background_actor_new_for_monitor (display, monitor);
+#endif
+
+  return g_object_ref_sink (meta_x11_background_actor_new_for_monitor (display, monitor));
+}
+
+/**
+ * meta_get_background_actors_for_display:
+ * @display: a #MetaDisplay
+ *
+ * Returns a list of the live per-monitor background actors in the compositor's
+ * scene graph. These actors can have effects applied to them directly.
+ *
+ * Returns: (transfer none) (element-type Clutter.Actor): The list of
+ *   background actors
+ */
+GList *
+meta_get_background_actors_for_display (MetaDisplay *display)
+{
+  MetaCompositorPrivate *priv =
+    meta_compositor_get_instance_private (display->compositor);
+
+  return priv->background_actors;
 }
