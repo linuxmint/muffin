@@ -32,6 +32,7 @@
 #include "wayland/meta-wayland-types.h"
 #include "wayland/meta-wayland-egl-stream.h"
 #include "wayland/meta-wayland-dma-buf.h"
+#include "wayland/meta-wayland-single-pixel-buffer.h"
 
 typedef enum _MetaWaylandBufferType
 {
@@ -42,6 +43,7 @@ typedef enum _MetaWaylandBufferType
   META_WAYLAND_BUFFER_TYPE_EGL_STREAM,
 #endif
   META_WAYLAND_BUFFER_TYPE_DMA_BUF,
+  META_WAYLAND_BUFFER_TYPE_SINGLE_PIXEL,
 } MetaWaylandBufferType;
 
 struct _MetaWaylandBuffer
@@ -70,6 +72,11 @@ struct _MetaWaylandBuffer
     MetaWaylandDmaBufBuffer *dma_buf;
     CoglTexture *texture;
   } dma_buf;
+
+  struct {
+    MetaWaylandSinglePixelBuffer *single_pixel_buffer;
+    CoglTexture *texture;
+  } single_pixel;
 };
 
 #define META_TYPE_WAYLAND_BUFFER (meta_wayland_buffer_get_type ())

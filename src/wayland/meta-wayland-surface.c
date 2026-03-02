@@ -723,8 +723,10 @@ meta_wayland_surface_apply_state (MetaWaylandSurface      *surface,
        * it until is replaced by a subsequent wl_surface.commit or when the
        * wl_surface is destroyed.
        */
-      surface->buffer_held = (state->buffer &&
-                              !wl_shm_buffer_get (state->buffer->resource));
+      surface->buffer_held =
+        (state->buffer &&
+         (state->buffer->type != META_WAYLAND_BUFFER_TYPE_SHM &&
+          state->buffer->type != META_WAYLAND_BUFFER_TYPE_SINGLE_PIXEL));
     }
 
   if (state->scale > 0)
