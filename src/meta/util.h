@@ -27,6 +27,7 @@
 #include <glib-object.h>
 
 #include <meta/common.h>
+#include <meta/meta-later.h>
 
 META_EXPORT
 gboolean meta_is_verbose  (void);
@@ -185,36 +186,6 @@ GPid meta_show_dialog (const char *type,
 #  endif
 
 #endif /* !WITH_VERBOSE_MODE */
-
-/**
- * MetaLaterType:
- * @META_LATER_RESIZE: call in a resize processing phase that is done
- *   before GTK+ repainting (including window borders) is done.
- * @META_LATER_CALC_SHOWING: used by Mutter to compute which windows should be mapped
- * @META_LATER_CHECK_FULLSCREEN: used by Mutter to see if there's a fullscreen window
- * @META_LATER_SYNC_STACK: used by Mutter to send it's idea of the stacking order to the server
- * @META_LATER_BEFORE_REDRAW: call before the stage is redrawn
- * @META_LATER_IDLE: call at a very low priority (can be blocked
- *    by running animations or redrawing applications)
- **/
-typedef enum
-{
-  META_LATER_RESIZE,
-  META_LATER_CALC_SHOWING,
-  META_LATER_CHECK_FULLSCREEN,
-  META_LATER_SYNC_STACK,
-  META_LATER_BEFORE_REDRAW,
-  META_LATER_IDLE
-} MetaLaterType;
-
-META_EXPORT
-guint meta_later_add    (MetaLaterType  when,
-                         GSourceFunc    func,
-                         gpointer       data,
-                         GDestroyNotify notify);
-
-META_EXPORT
-void  meta_later_remove (guint          later_id);
 
 typedef enum
 {

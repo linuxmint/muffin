@@ -77,6 +77,7 @@ typedef struct
   cairo_region_t *visible_region;
   float dim_factor;
   gboolean transition_running;
+  int monitor_index;
 } MetaX11BackgroundActorPrivate;
 
 struct _MetaX11BackgroundActor
@@ -379,9 +380,19 @@ meta_x11_background_actor_get_preferred_width (ClutterActor *actor,
 {
   MetaX11BackgroundActor *self = META_X11_BACKGROUND_ACTOR (actor);
   MetaX11BackgroundActorPrivate *priv = self->priv;
-  int width, height;
+  int width;
 
-  meta_display_get_size (priv->background->display, &width, &height);
+  if (priv->monitor_index >= 0)
+    {
+      MetaRectangle rect;
+      meta_display_get_monitor_geometry (priv->background->display, priv->monitor_index, &rect);
+      width = rect.width;
+    }
+  else
+    {
+      int height;
+      meta_display_get_size (priv->background->display, &width, &height);
+    }
 
   if (min_width_p)
     *min_width_p = width;
@@ -398,9 +409,19 @@ meta_x11_background_actor_get_preferred_height (ClutterActor *actor,
 {
   MetaX11BackgroundActor *self = META_X11_BACKGROUND_ACTOR (actor);
   MetaX11BackgroundActorPrivate *priv = self->priv;
-  int width, height;
+  int height;
 
-  meta_display_get_size (priv->background->display, &width, &height);
+  if (priv->monitor_index >= 0)
+    {
+      MetaRectangle rect;
+      meta_display_get_monitor_geometry (priv->background->display, priv->monitor_index, &rect);
+      height = rect.height;
+    }
+  else
+    {
+      int width;
+      meta_display_get_size (priv->background->display, &width, &height);
+    }
 
   if (min_height_p)
     *min_height_p = height;
@@ -416,7 +437,17 @@ meta_x11_background_actor_get_paint_volume (ClutterActor       *actor,
   MetaX11BackgroundActorPrivate *priv = self->priv;
   int width, height;
 
-  meta_display_get_size (priv->background->display, &width, &height);
+  if (priv->monitor_index >= 0)
+    {
+      MetaRectangle rect;
+      meta_display_get_monitor_geometry (priv->background->display, priv->monitor_index, &rect);
+      width = rect.width;
+      height = rect.height;
+    }
+  else
+    {
+      meta_display_get_size (priv->background->display, &width, &height);
+    }
 
   clutter_paint_volume_set_width (volume, width);
   clutter_paint_volume_set_height (volume, height);
@@ -516,6 +547,7 @@ meta_x11_background_actor_init (MetaX11BackgroundActor *self)
   self->priv = meta_x11_background_actor_get_instance_private (self);
   self->priv->dim_factor = 1.0;
   self->priv->transition_running = FALSE;
+  self->priv->monitor_index = -1;
 }
 
 /**
@@ -547,6 +579,53 @@ meta_x11_background_actor_new_for_display (MetaDisplay *display)
   clutter_actor_add_child (CLUTTER_ACTOR (self), priv->bottom_actor);
   priv->top_actor = meta_x11_background_new (display);
   clutter_actor_add_child (CLUTTER_ACTOR (self), priv->top_actor);
+
+  set_texture_on_actors (self);
+  update_wrap_mode_of_actor (self);
+
+  return CLUTTER_ACTOR (self);
+}
+
+/**
+ * meta_x11_background_actor_new_for_monitor:
+ * @display: the #MetaDisplay
+ * @monitor: the monitor index
+ *
+ * Creates a new actor to draw the background for the given monitor.
+ * The actor is sized to the monitor geometry and clips the root pixmap
+ * texture so that only the portion corresponding to this monitor is visible.
+ *
+ * Return value: (transfer none): the newly created background actor
+ */
+ClutterActor *
+meta_x11_background_actor_new_for_monitor (MetaDisplay *display,
+                                           int          monitor)
+{
+  MetaX11BackgroundActor *self;
+  MetaX11BackgroundActorPrivate *priv;
+  MetaRectangle rect;
+
+  g_return_val_if_fail (META_IS_DISPLAY (display), NULL);
+
+  if (meta_is_wayland_compositor ())
+    return NULL;
+
+  self = g_object_new (META_TYPE_X11_BACKGROUND_ACTOR, NULL);
+  priv = self->priv;
+
+  priv->monitor_index = monitor;
+  priv->background = meta_display_background_get (display);
+  priv->background->actors = g_slist_prepend (priv->background->actors, self);
+
+  priv->bottom_actor = meta_x11_background_new (display);
+  clutter_actor_add_child (CLUTTER_ACTOR (self), priv->bottom_actor);
+  priv->top_actor = meta_x11_background_new (display);
+  clutter_actor_add_child (CLUTTER_ACTOR (self), priv->top_actor);
+
+  meta_display_get_monitor_geometry (display, monitor, &rect);
+  clutter_actor_set_position (priv->bottom_actor, -rect.x, -rect.y);
+  clutter_actor_set_position (priv->top_actor, -rect.x, -rect.y);
+  clutter_actor_set_clip_to_allocation (CLUTTER_ACTOR (self), TRUE);
 
   set_texture_on_actors (self);
   update_wrap_mode_of_actor (self);

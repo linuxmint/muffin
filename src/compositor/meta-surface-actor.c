@@ -94,7 +94,7 @@ get_scaled_region (MetaSurfaceActor     *surface_actor,
   float x, y;
 
   window_actor = meta_window_actor_from_actor (CLUTTER_ACTOR (surface_actor));
-  geometry_scale = meta_window_actor_get_geometry_scale (window_actor);
+  geometry_scale = window_actor ? meta_window_actor_get_geometry_scale (window_actor) : 1;
 
   clutter_actor_get_position (CLUTTER_ACTOR (surface_actor), &x, &y);
   cairo_region_translate (region, x, y);
@@ -331,7 +331,7 @@ meta_surface_actor_is_untransformed (MetaCullable *cullable)
   clutter_actor_get_abs_allocation_vertices (actor, verts);
 
   window_actor = meta_window_actor_from_actor (actor);
-  geometry_scale = meta_window_actor_get_geometry_scale (window_actor);
+  geometry_scale = window_actor ? meta_window_actor_get_geometry_scale (window_actor) : 1;
 
   return meta_actor_vertices_are_untransformed (verts,
                                                 width * geometry_scale,

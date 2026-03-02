@@ -26,8 +26,11 @@
 #include "wayland/meta-wayland-xdg-shell.h"
 
 #include "backends/meta-logical-monitor.h"
+#include "compositor/meta-surface-actor-wayland.h"
+#include "compositor/meta-window-actor-private.h"
 #include "core/boxes-private.h"
 #include "core/window-private.h"
+#include "wayland/meta-wayland-layer-shell.h"
 #include "wayland/meta-wayland-outputs.h"
 #include "wayland/meta-wayland-popup.h"
 #include "wayland/meta-wayland-private.h"
@@ -135,6 +138,16 @@ struct _MetaWaylandXdgPopup
      * coordinate space, i.e. not scaled given what monitor the popup is on.
      */
     MetaPlacementRule placement_rule;
+
+    /* Stored positioner data for when parent is set later (e.g., layer-shell) */
+    MetaRectangle anchor_rect;
+    int32_t width;
+    int32_t height;
+    uint32_t gravity;
+    uint32_t anchor;
+    uint32_t constraint_adjustment;
+    int32_t offset_x;
+    int32_t offset_y;
 
     MetaWaylandSeat *grab_seat;
     uint32_t grab_serial;
@@ -805,7 +818,7 @@ meta_wayland_xdg_toplevel_apply_state (MetaWaylandSurfaceRole  *surface_role,
       return;
     }
 
-  if (!surface->buffer_ref.buffer && xdg_surface_priv->first_buffer_attached)
+  if (!surface->buffer_ref->buffer && xdg_surface_priv->first_buffer_attached)
     {
       meta_wayland_xdg_surface_reset (xdg_surface);
       meta_wayland_actor_surface_queue_frame_callbacks (actor_surface,
@@ -864,7 +877,7 @@ meta_wayland_xdg_toplevel_post_apply_state (MetaWaylandSurfaceRole  *surface_rol
     META_WAYLAND_SURFACE_ROLE_CLASS (meta_wayland_xdg_toplevel_parent_class);
   surface_role_class->post_apply_state (surface_role, pending);
 
-  if (!surface->buffer_ref.buffer)
+  if (!surface->buffer_ref->buffer)
     return;
 
   window_geometry = meta_wayland_xdg_surface_get_window_geometry (xdg_surface);
@@ -1095,7 +1108,9 @@ finish_popup_setup (MetaWaylandXdgPopup *xdg_popup)
   xdg_popup->setup.grab_seat = NULL;
   xdg_popup->dismissed_by_client = FALSE;
 
-  if (!meta_wayland_surface_get_window (parent_surface))
+  /* Allow both regular window parents and layer surface parents */
+  if (!meta_wayland_surface_get_window (parent_surface) &&
+      !META_IS_WAYLAND_LAYER_SURFACE (parent_surface->role))
     {
       xdg_popup_send_popup_done (xdg_popup->resource);
       return;
@@ -1211,7 +1226,7 @@ meta_wayland_xdg_popup_apply_state (MetaWaylandSurfaceRole  *surface_role,
   if (xdg_popup->setup.parent_surface)
     finish_popup_setup (xdg_popup);
 
-  if (!surface->buffer_ref.buffer && xdg_surface_priv->first_buffer_attached)
+  if (!surface->buffer_ref->buffer && xdg_surface_priv->first_buffer_attached)
     {
       meta_wayland_xdg_surface_reset (xdg_surface);
       meta_wayland_actor_surface_queue_frame_callbacks (actor_surface, pending);
@@ -1222,7 +1237,7 @@ meta_wayland_xdg_popup_apply_state (MetaWaylandSurfaceRole  *surface_role,
     META_WAYLAND_SURFACE_ROLE_CLASS (meta_wayland_xdg_popup_parent_class);
   surface_role_class->apply_state (surface_role, pending);
 
-  if (xdg_popup->dismissed_by_client && surface->buffer_ref.buffer)
+  if (xdg_popup->dismissed_by_client && surface->buffer_ref->buffer)
     {
       wl_resource_post_error (xdg_popup->resource,
                               XDG_WM_BASE_ERROR_INVALID_SURFACE_STATE,
@@ -1253,7 +1268,7 @@ meta_wayland_xdg_popup_post_apply_state (MetaWaylandSurfaceRole  *surface_role,
   if (!pending->newly_attached)
     return;
 
-  if (!surface->buffer_ref.buffer)
+  if (!surface->buffer_ref->buffer)
     return;
 
   surface_role_class->post_apply_state (surface_role, pending);
@@ -1267,14 +1282,19 @@ meta_wayland_xdg_popup_post_apply_state (MetaWaylandSurfaceRole  *surface_role,
     }
 
   parent_window = meta_wayland_surface_get_window (xdg_popup->parent_surface);
-  meta_window_get_buffer_rect (window, &buffer_rect);
-  meta_window_get_buffer_rect (parent_window, &parent_buffer_rect);
-  if (!meta_rectangle_overlap (&buffer_rect, &parent_buffer_rect) &&
-      !meta_rectangle_is_adjacent_to (&buffer_rect, &parent_buffer_rect))
+
+  /* Skip overlap check for layer surface parents (no parent window) */
+  if (parent_window)
     {
-      g_warning ("Buggy client caused popup to be placed outside of "
-                 "parent window");
-      dismiss_invalid_popup (xdg_popup);
+      meta_window_get_buffer_rect (window, &buffer_rect);
+      meta_window_get_buffer_rect (parent_window, &parent_buffer_rect);
+      if (!meta_rectangle_overlap (&buffer_rect, &parent_buffer_rect) &&
+          !meta_rectangle_is_adjacent_to (&buffer_rect, &parent_buffer_rect))
+        {
+          g_warning ("Buggy client caused popup to be placed outside of "
+                     "parent window");
+          dismiss_invalid_popup (xdg_popup);
+        }
     }
 }
 
@@ -1324,11 +1344,18 @@ meta_wayland_xdg_popup_configure (MetaWaylandShellSurface        *shell_surface,
    *
    * FIXME: Could maybe add a signal that is emitted before the window is
    * created so that we can avoid incorrect intermediate foci.
+   *
+   * However, layer-shell surfaces don't have a MetaWindow, so we still need
+   * to send configure for popups parented to layer surfaces.
    */
-  if (!parent_window)
+  if (!parent_window && !META_IS_WAYLAND_LAYER_SURFACE (xdg_popup->parent_surface->role))
     return;
 
-  geometry_scale = meta_window_wayland_get_geometry_scale (parent_window);
+  if (parent_window)
+    geometry_scale = meta_window_wayland_get_geometry_scale (parent_window);
+  else
+    geometry_scale = 1;  /* Layer surfaces use scale 1 */
+
   x = configuration->rel_x / geometry_scale;
   y = configuration->rel_y / geometry_scale;
   if (xdg_popup->pending_repositioned)
@@ -1661,7 +1688,7 @@ meta_wayland_xdg_surface_apply_state (MetaWaylandSurfaceRole  *surface_role,
   if (!window)
     return;
 
-  if (surface->buffer_ref.buffer)
+  if (surface->buffer_ref->buffer)
     priv->first_buffer_attached = TRUE;
 }
 
@@ -1730,7 +1757,7 @@ meta_wayland_xdg_surface_assigned (MetaWaylandSurfaceRole *surface_role)
   priv->configure_sent = FALSE;
   priv->first_buffer_attached = FALSE;
 
-  if (surface->buffer_ref.buffer)
+  if (surface->buffer_ref->buffer)
     {
       wl_resource_post_error (xdg_wm_base_resource,
                               XDG_WM_BASE_ERROR_INVALID_SURFACE_STATE,
@@ -1971,32 +1998,31 @@ xdg_surface_constructor_get_popup (struct wl_client   *client,
   MetaWaylandXdgPopup *xdg_popup;
   MetaWaylandXdgSurface *xdg_surface;
 
-  if (!parent_resource)
+  if (parent_resource)
     {
-      wl_resource_post_error (xdg_wm_base_resource,
-                              XDG_WM_BASE_ERROR_INVALID_POPUP_PARENT,
-                              "Parent surface is null but Mutter does not yet "
-                              "support specifying parent surfaces via other "
-                              "protocols");
-      return;
-    }
+      parent_surface = surface_from_xdg_surface_resource (parent_resource);
+      if (!parent_surface || !META_IS_WAYLAND_XDG_SURFACE (parent_surface->role))
+        {
+          wl_resource_post_error (xdg_wm_base_resource,
+                                  XDG_WM_BASE_ERROR_INVALID_POPUP_PARENT,
+                                  "Invalid popup parent role");
+          return;
+        }
 
-  parent_surface = surface_from_xdg_surface_resource (parent_resource);
-  if (!parent_surface || !META_IS_WAYLAND_XDG_SURFACE (parent_surface->role))
-    {
-      wl_resource_post_error (xdg_wm_base_resource,
-                              XDG_WM_BASE_ERROR_INVALID_POPUP_PARENT,
-                              "Invalid popup parent role");
-      return;
+      parent_window = meta_wayland_surface_get_window (parent_surface);
+      if (!parent_window)
+        {
+          wl_resource_post_error (xdg_wm_base_resource,
+                                  XDG_WM_BASE_ERROR_INVALID_POPUP_PARENT,
+                                  "Invalid popup parent window");
+          return;
+        }
     }
-
-  parent_window = meta_wayland_surface_get_window (parent_surface);
-  if (!parent_window)
+  else
     {
-      wl_resource_post_error (xdg_wm_base_resource,
-                              XDG_WM_BASE_ERROR_INVALID_POPUP_PARENT,
-                              "Invalid popup parent window");
-      return;
+      /* Parent will be set later via another protocol (e.g., wlr-layer-shell) */
+      parent_surface = NULL;
+      parent_window = NULL;
     }
 
   if (!meta_wayland_surface_assign_role (surface,
@@ -2026,8 +2052,23 @@ xdg_surface_constructor_get_popup (struct wl_client   *client,
   meta_wayland_xdg_surface_constructor_finalize (constructor, xdg_surface);
 
   xdg_positioner = wl_resource_get_user_data (positioner_resource);
-  xdg_popup->setup.placement_rule =
-    meta_wayland_xdg_positioner_to_placement (xdg_positioner, parent_window);
+  if (parent_window)
+    {
+      xdg_popup->setup.placement_rule =
+        meta_wayland_xdg_positioner_to_placement (xdg_positioner, parent_window);
+    }
+  else
+    {
+      /* Store positioner data for later use (e.g., with layer-shell parent) */
+      xdg_popup->setup.anchor_rect = xdg_positioner->anchor_rect;
+      xdg_popup->setup.width = xdg_positioner->width;
+      xdg_popup->setup.height = xdg_positioner->height;
+      xdg_popup->setup.gravity = xdg_positioner->gravity;
+      xdg_popup->setup.anchor = xdg_positioner->anchor;
+      xdg_popup->setup.constraint_adjustment = xdg_positioner->constraint_adjustment;
+      xdg_popup->setup.offset_x = xdg_positioner->offset_x;
+      xdg_popup->setup.offset_y = xdg_positioner->offset_y;
+    }
   xdg_popup->setup.parent_surface = parent_surface;
 }
 
@@ -2436,7 +2477,7 @@ xdg_wm_base_get_xdg_surface (struct wl_client   *client,
       return;
     }
 
-  if (surface->buffer_ref.buffer)
+  if (surface->buffer_ref->buffer)
     {
       wl_resource_post_error (resource,
                               XDG_WM_BASE_ERROR_INVALID_SURFACE_STATE,
@@ -2527,6 +2568,51 @@ bind_xdg_wm_base (struct wl_client *client,
   wl_resource_set_implementation (shell_client->resource,
                                   &meta_wayland_xdg_wm_base_interface,
                                   shell_client, xdg_wm_base_destructor);
+}
+
+void
+meta_wayland_xdg_popup_set_parent_surface (MetaWaylandXdgPopup *xdg_popup,
+                                           MetaWaylandSurface  *parent_surface)
+{
+  g_return_if_fail (META_IS_WAYLAND_XDG_POPUP (xdg_popup));
+
+  xdg_popup->setup.parent_surface = parent_surface;
+
+  /* If parent is a layer surface, compute placement rule from stored positioner data */
+  if (META_IS_WAYLAND_LAYER_SURFACE (parent_surface->role))
+    {
+      MetaSurfaceActor *surface_actor;
+      ClutterActor *actor;
+      float parent_x, parent_y;
+      float parent_width, parent_height;
+      MetaPlacementRule *rule = &xdg_popup->setup.placement_rule;
+
+      surface_actor = meta_wayland_surface_get_actor (parent_surface);
+      actor = CLUTTER_ACTOR (surface_actor);
+      clutter_actor_get_position (actor, &parent_x, &parent_y);
+      clutter_actor_get_size (actor, &parent_width, &parent_height);
+
+      /* Build placement rule from stored positioner data (window-local coordinates).
+       * parent_rect provides the global offset - don't add it to anchor_rect too. */
+      rule->anchor_rect.x = xdg_popup->setup.anchor_rect.x;
+      rule->anchor_rect.y = xdg_popup->setup.anchor_rect.y;
+      rule->anchor_rect.width = xdg_popup->setup.anchor_rect.width;
+      rule->anchor_rect.height = xdg_popup->setup.anchor_rect.height;
+      rule->width = xdg_popup->setup.width;
+      rule->height = xdg_popup->setup.height;
+      rule->anchor = positioner_anchor_to_placement_anchor (xdg_popup->setup.anchor);
+      rule->gravity = positioner_gravity_to_placement_gravity (xdg_popup->setup.gravity);
+      rule->constraint_adjustment = xdg_popup->setup.constraint_adjustment;
+      rule->offset_x = xdg_popup->setup.offset_x;
+      rule->offset_y = xdg_popup->setup.offset_y;
+      rule->is_reactive = FALSE;
+
+      /* Set parent_rect to the layer surface bounds */
+      rule->parent_rect.x = (int)parent_x;
+      rule->parent_rect.y = (int)parent_y;
+      rule->parent_rect.width = (int)parent_width;
+      rule->parent_rect.height = (int)parent_height;
+    }
 }
 
 void
