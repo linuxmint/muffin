@@ -9,10 +9,6 @@ muffin_public_headers = [
   'keybindings.h',
   'main.h',
   'meta-backend.h',
-  'meta-background.h',
-  'meta-background-actor.h',
-  'meta-background-group.h',
-  'meta-background-image.h',
   'meta-close-dialog.h',
   'meta-cursor-tracker.h',
   'meta-dnd.h',
@@ -49,6 +45,12 @@ if have_x11
     'meta-x11-background-actor.h',
     'meta-x11-display.h',
     'meta-x11-errors.h'
+  ]
+endif
+
+if have_wayland
+  muffin_public_headers += [
+    'meta-wayland-background-actor.h',
   ]
 endif
 
