@@ -778,3 +778,39 @@ meta_wayland_outputs_init (MetaWaylandCompositor *compositor)
                     NULL,
                     bind_xdg_output_manager);
 }
+
+typedef struct
+{
+  int monitor_index;
+  MetaWaylandOutput *result;
+} FindOutputData;
+
+static void
+find_output_for_monitor (gpointer key,
+                         gpointer value,
+                         gpointer user_data)
+{
+  MetaWaylandOutput *output = value;
+  FindOutputData *data = user_data;
+
+  if (data->result != NULL)
+    return;
+
+  if (output->logical_monitor &&
+      output->logical_monitor->number == data->monitor_index)
+    data->result = output;
+}
+
+MetaWaylandOutput *
+meta_wayland_compositor_get_output_for_monitor (MetaWaylandCompositor *compositor,
+                                                 int                    monitor_index)
+{
+  FindOutputData data = { monitor_index, NULL };
+
+  g_return_val_if_fail (compositor != NULL, NULL);
+  g_return_val_if_fail (compositor->outputs != NULL, NULL);
+
+  g_hash_table_foreach (compositor->outputs, find_output_for_monitor, &data);
+
+  return data.result;
+}

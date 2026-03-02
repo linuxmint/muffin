@@ -46,4 +46,8 @@ G_DECLARE_FINAL_TYPE (MetaX11BackgroundActor,
 META_EXPORT
 ClutterActor *meta_x11_background_actor_new_for_display (MetaDisplay *display);
 
+META_EXPORT
+ClutterActor *meta_x11_background_actor_new_for_monitor (MetaDisplay *display,
+                                                         int          monitor);
+
 #endif /* META_X11_BACKGROUND_ACTOR_H */

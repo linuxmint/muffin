@@ -55,7 +55,7 @@ meta_cursor_get_name (MetaCursor cursor)
     case META_CURSOR_HELP:
       return "question_arrow";
     case META_CURSOR_POINTER:
-      return "hand";
+      return "pointer";
     case META_CURSOR_PROGRESS:
       return "left_ptr_watch";
     case META_CURSOR_WAIT:
@@ -111,7 +111,7 @@ meta_cursor_get_name (MetaCursor cursor)
     case META_CURSOR_ROW_RESIZE:
       return "v_double_arrow";
     case META_CURSOR_ALL_SCROLL:
-      return "left_ptr";
+      return "all-scroll";
     case META_CURSOR_ZOOM_IN:
       return "left_ptr";
     case META_CURSOR_ZOOM_OUT:
@@ -119,7 +119,7 @@ meta_cursor_get_name (MetaCursor cursor)
     case META_CURSOR_DND_ASK:
       return "dnd-copy";
     case META_CURSOR_ALL_RESIZE:
-      return "dnd-move";
+      return "fleur";
     case META_CURSOR_INVALID:
     case META_CURSOR_NONE:
       break;
@@ -141,7 +141,7 @@ meta_cursor_get_legacy_name (MetaCursor cursor)
     case META_CURSOR_HELP:
       return "question_arrow";
     case META_CURSOR_POINTER:
-      return "hand";
+      return "hand2";
     case META_CURSOR_PROGRESS:
       return "left_ptr_watch";
     case META_CURSOR_WAIT:
@@ -197,7 +197,7 @@ meta_cursor_get_legacy_name (MetaCursor cursor)
     case META_CURSOR_ROW_RESIZE:
       return "v_double_arrow";
     case META_CURSOR_ALL_SCROLL:
-      return "left_ptr";
+      return "all-scroll";
     case META_CURSOR_ZOOM_IN:
       return "left_ptr";
     case META_CURSOR_ZOOM_OUT:
@@ -205,7 +205,7 @@ meta_cursor_get_legacy_name (MetaCursor cursor)
     case META_CURSOR_DND_ASK:
       return "dnd-copy";
     case META_CURSOR_ALL_RESIZE:
-      return "dnd-move";
+      return "fleur";
     case META_CURSOR_INVALID:
     case META_CURSOR_NONE:
       break;

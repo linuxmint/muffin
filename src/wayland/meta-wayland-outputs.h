@@ -52,4 +52,7 @@ struct _MetaWaylandOutput
 
 void meta_wayland_outputs_init (MetaWaylandCompositor *compositor);
 
+MetaWaylandOutput * meta_wayland_compositor_get_output_for_monitor (MetaWaylandCompositor *compositor,
+                                                                     int                    monitor_index);
+
 #endif /* META_WAYLAND_OUTPUTS_H */

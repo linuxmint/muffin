@@ -217,6 +217,7 @@ libmuffin-clutter-0.so.0 libmuffin0 #MINVER#
  clutter_actor_has_mapped_clones@Base 5.3.0
  clutter_actor_has_overlaps@Base 5.3.0
  clutter_actor_has_pointer@Base 5.3.0
+ clutter_actor_has_transitions@Base 6.4.1
  clutter_actor_hide@Base 5.3.0
  clutter_actor_inhibit_culling@Base 5.3.0
  clutter_actor_insert_child_above@Base 5.3.0
@@ -1159,6 +1160,7 @@ libmuffin-clutter-0.so.0 libmuffin0 #MINVER#
  clutter_stage_state_get_type@Base 5.3.0
  clutter_stage_thaw_updates@Base 5.3.0
  clutter_stage_update_resource_scales@Base 5.3.0
+ clutter_stage_view_assign_next_scanout@Base 6.4.1
  clutter_stage_view_cogl_get_type@Base 5.3.0
  clutter_stage_view_get_framebuffer@Base 5.3.0
  clutter_stage_view_get_layout@Base 5.3.0
@@ -1780,6 +1782,7 @@ libmuffin-cogl-0.so.0 libmuffin0 #MINVER#
  cogl_onscreen_add_dirty_callback@Base 5.3.0
  cogl_onscreen_add_frame_callback@Base 5.3.0
  cogl_onscreen_add_resize_callback@Base 5.3.0
+ cogl_onscreen_direct_scanout@Base 6.4.1
  cogl_onscreen_dirty_closure_get_gtype@Base 5.3.0
  cogl_onscreen_get_buffer_age@Base 5.3.0
  cogl_onscreen_get_frame_counter@Base 5.3.0
@@ -1914,6 +1917,7 @@ libmuffin-cogl-0.so.0 libmuffin0 #MINVER#
  cogl_renderer_set_custom_winsys@Base 5.3.0
  cogl_renderer_set_driver@Base 5.3.0
  cogl_renderer_set_winsys_id@Base 5.3.0
+ cogl_scanout_get_type@Base 6.4.1
  cogl_set_backface_culling_enabled@Base 5.3.0
  cogl_set_depth_test_enabled@Base 5.3.0
  cogl_set_tracing_disabled_on_thread@Base 5.3.0
@@ -2050,29 +2054,8 @@ libmuffin.so.0 libmuffin0 #MINVER#
  meta_backend_set_keymap@Base 5.3.0
  meta_backend_set_numlock@Base 5.3.0
  meta_backend_x11_nested_get_type@Base 5.3.0
- meta_background_actor_get_type@Base 5.3.0
- meta_background_actor_new@Base 5.3.0
- meta_background_actor_set_background@Base 5.3.0
- meta_background_actor_set_gradient@Base 5.3.0
- meta_background_actor_set_monitor@Base 5.3.0
- meta_background_actor_set_vignette@Base 5.3.0
- meta_background_get_type@Base 5.3.0
- meta_background_group_get_type@Base 5.3.0
- meta_background_group_new@Base 5.3.0
- meta_background_image_cache_get_default@Base 5.3.0
- meta_background_image_cache_get_type@Base 5.3.0
- meta_background_image_cache_load@Base 5.3.0
- meta_background_image_cache_purge@Base 5.3.0
- meta_background_image_get_success@Base 5.3.0
- meta_background_image_get_texture@Base 5.3.0
- meta_background_image_get_type@Base 5.3.0
- meta_background_image_is_loaded@Base 5.3.0
- meta_background_new@Base 5.3.0
- meta_background_refresh_all@Base 5.3.0
- meta_background_set_blend@Base 5.3.0
- meta_background_set_color@Base 5.3.0
- meta_background_set_file@Base 5.3.0
- meta_background_set_gradient@Base 5.3.0
+ meta_create_background_for_monitor@Base 6.6.0
+ meta_get_background_actors_for_display@Base 6.6.0
  meta_barrier_destroy@Base 5.3.0
  meta_barrier_direction_get_type@Base 5.3.0
  meta_barrier_event_get_type@Base 5.3.0
@@ -2211,6 +2194,7 @@ libmuffin.so.0 libmuffin0 #MINVER#
  meta_get_option_context@Base 5.3.0
  meta_get_replace_current_wm@Base 5.3.0
  meta_get_stage_for_display@Base 5.3.0
+ meta_get_stage_xwindow@Base 6.6.3
  meta_get_top_window_group_for_display@Base 5.3.0
  meta_get_window_actors@Base 5.3.0
  meta_get_window_group_for_display@Base 5.3.0
@@ -2588,6 +2572,8 @@ libmuffin.so.0 libmuffin0 #MINVER#
  meta_virtual_modifier_get_type@Base 5.3.0
  meta_warning@Base 5.3.0
  meta_wayland_actor_surface_get_actor@Base 6.0.0
+ meta_wayland_background_actor_get_type@Base 6.6.0
+ meta_wayland_background_actor_new_for_monitor@Base 6.6.0
  meta_wayland_compositor_get_default@Base 6.0.0
  meta_wayland_get_wayland_display_name@Base 6.0.0
  meta_wayland_get_xwayland_display_name@Base 6.0.0
@@ -2697,8 +2683,6 @@ libmuffin.so.0 libmuffin0 #MINVER#
  meta_window_move_resize_frame@Base 5.3.0
  meta_window_move_to_monitor@Base 5.3.0
  meta_window_raise@Base 5.3.0
- meta_window_requested_bypass_compositor@Base 5.3.0
- meta_window_requested_dont_bypass_compositor@Base 5.3.0
  meta_window_set_compositor_private@Base 5.3.0
  meta_window_set_demands_attention@Base 5.3.0
  meta_window_set_icon_geometry@Base 5.3.0
@@ -2753,6 +2737,7 @@ libmuffin.so.0 libmuffin0 #MINVER#
  meta_workspace_set_builtin_struts@Base 5.3.0
  meta_x11_background_actor_get_type@Base 5.3.0
  meta_x11_background_actor_new_for_display@Base 5.3.0
+ meta_x11_background_actor_new_for_monitor@Base 6.6.0
  meta_x11_background_get_type@Base 5.3.0
  meta_x11_background_transition_get_type@Base 5.3.0
  meta_x11_display_clear_stage_input_region@Base 5.3.0

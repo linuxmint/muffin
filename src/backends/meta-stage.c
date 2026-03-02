@@ -126,8 +126,6 @@ meta_overlay_paint (MetaOverlay         *overlay,
   if (!overlay->enabled)
     return;
 
-  g_assert (meta_is_wayland_compositor ());
-
   framebuffer = clutter_paint_context_get_framebuffer (paint_context);
   cogl_framebuffer_draw_rectangle (framebuffer,
                                    overlay->pipeline,
@@ -385,8 +383,6 @@ meta_stage_update_cursor_overlay (MetaStage       *stage,
                                   CoglTexture     *texture,
                                   graphene_rect_t *rect)
 {
-  g_assert (meta_is_wayland_compositor () || texture == NULL);
-
   meta_overlay_set (overlay, texture, rect);
   queue_redraw_for_overlay (stage, overlay);
 }

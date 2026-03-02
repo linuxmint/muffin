@@ -75,6 +75,27 @@ meta_is_udev_device_boot_vga (GUdevDevice *device)
 }
 
 gboolean
+meta_is_udev_device_requires_modifiers (GUdevDevice *device)
+{
+  g_autoptr (GUdevDevice) platform_device = NULL;
+  const char * const * tags;
+
+  platform_device = g_udev_device_get_parent_with_subsystem (device,
+                                                             "platform",
+                                                             NULL);
+
+  if (!platform_device)
+    return FALSE;
+
+  tags = g_udev_device_get_tags (platform_device);
+
+  if (!tags)
+    return FALSE;
+
+  return g_strv_contains (tags, "muffin-device-requires-kms-modifiers");
+}
+
+gboolean
 meta_udev_is_drm_device (MetaUdev    *udev,
                          GUdevDevice *device)
 {
