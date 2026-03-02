@@ -2054,29 +2054,8 @@ libmuffin.so.0 libmuffin0 #MINVER#
  meta_backend_set_keymap@Base 5.3.0
  meta_backend_set_numlock@Base 5.3.0
  meta_backend_x11_nested_get_type@Base 5.3.0
- meta_background_actor_get_type@Base 5.3.0
- meta_background_actor_new@Base 5.3.0
- meta_background_actor_set_background@Base 5.3.0
- meta_background_actor_set_gradient@Base 5.3.0
- meta_background_actor_set_monitor@Base 5.3.0
- meta_background_actor_set_vignette@Base 5.3.0
- meta_background_get_type@Base 5.3.0
- meta_background_group_get_type@Base 5.3.0
- meta_background_group_new@Base 5.3.0
- meta_background_image_cache_get_default@Base 5.3.0
- meta_background_image_cache_get_type@Base 5.3.0
- meta_background_image_cache_load@Base 5.3.0
- meta_background_image_cache_purge@Base 5.3.0
- meta_background_image_get_success@Base 5.3.0
- meta_background_image_get_texture@Base 5.3.0
- meta_background_image_get_type@Base 5.3.0
- meta_background_image_is_loaded@Base 5.3.0
- meta_background_new@Base 5.3.0
- meta_background_refresh_all@Base 5.3.0
- meta_background_set_blend@Base 5.3.0
- meta_background_set_color@Base 5.3.0
- meta_background_set_file@Base 5.3.0
- meta_background_set_gradient@Base 5.3.0
+ meta_create_background_for_monitor@Base 6.6.0
+ meta_get_background_actors_for_display@Base 6.6.0
  meta_barrier_destroy@Base 5.3.0
  meta_barrier_direction_get_type@Base 5.3.0
  meta_barrier_event_get_type@Base 5.3.0
@@ -2593,6 +2572,8 @@ libmuffin.so.0 libmuffin0 #MINVER#
  meta_virtual_modifier_get_type@Base 5.3.0
  meta_warning@Base 5.3.0
  meta_wayland_actor_surface_get_actor@Base 6.0.0
+ meta_wayland_background_actor_get_type@Base 6.6.0
+ meta_wayland_background_actor_new_for_monitor@Base 6.6.0
  meta_wayland_compositor_get_default@Base 6.0.0
  meta_wayland_get_wayland_display_name@Base 6.0.0
  meta_wayland_get_xwayland_display_name@Base 6.0.0
@@ -2756,6 +2737,7 @@ libmuffin.so.0 libmuffin0 #MINVER#
  meta_workspace_set_builtin_struts@Base 5.3.0
  meta_x11_background_actor_get_type@Base 5.3.0
  meta_x11_background_actor_new_for_display@Base 5.3.0
+ meta_x11_background_actor_new_for_monitor@Base 6.6.0
  meta_x11_background_get_type@Base 5.3.0
  meta_x11_background_transition_get_type@Base 5.3.0
  meta_x11_display_clear_stage_input_region@Base 5.3.0

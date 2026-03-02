@@ -69,4 +69,11 @@ ClutterActor *meta_get_desklet_container_for_display (MetaDisplay *display);
 META_EXPORT
 gulong meta_get_stage_xwindow (MetaDisplay *display);
 
+META_EXPORT
+ClutterActor *meta_create_background_for_monitor (MetaDisplay *display,
+                                                   int          monitor);
+
+META_EXPORT
+GList *meta_get_background_actors_for_display (MetaDisplay *display);
+
 #endif
