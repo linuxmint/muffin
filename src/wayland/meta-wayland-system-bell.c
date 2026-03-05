@@ -16,8 +16,8 @@
  *
  */
 
-#include "compositor/compositor-private.h"
 #include "config.h"
+#include "compositor/compositor-private.h"
 
 #include "wayland/meta-wayland-system-bell.h"
 
