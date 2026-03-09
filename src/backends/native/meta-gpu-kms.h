@@ -48,6 +48,7 @@ gboolean meta_gpu_kms_is_crtc_active (MetaGpuKms *gpu_kms,
 gboolean meta_gpu_kms_is_boot_vga (MetaGpuKms *gpu_kms);
 gboolean meta_gpu_kms_is_platform_device (MetaGpuKms *gpu_kms);
 gboolean meta_gpu_kms_requires_modifiers (MetaGpuKms *gpu_kms);
+gboolean meta_gpu_kms_is_preferred_primary (MetaGpuKms *gpu_kms);
 
 gboolean meta_gpu_kms_wait_for_flip (MetaGpuKms *gpu_kms,
                                      GError    **error);
