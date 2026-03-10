@@ -121,7 +121,10 @@ meta_wayland_single_pixel_buffer_attach (MetaWaylandBuffer  *buffer,
   CoglTexture2D *tex_2d;
 
   if (buffer->single_pixel.texture)
-    return TRUE;
+    {
+      *texture = g_object_ref (buffer->single_pixel.texture);
+      return TRUE;
+    }
 
   data[0] = single_pixel_buffer->b / (UINT32_MAX / 0xff);
   data[1] = single_pixel_buffer->g / (UINT32_MAX / 0xff);
