@@ -282,30 +282,15 @@ meta_wayland_subsurface_class_init (MetaWaylandSubsurfaceClass *klass)
 }
 
 static void
-unparent_actor (MetaWaylandSurface *surface)
-{
-  ClutterActor *actor;
-  ClutterActor *parent_actor;
-
-  actor = CLUTTER_ACTOR (meta_wayland_surface_get_actor (surface));
-  if (!actor)
-    return;
-
-  parent_actor = clutter_actor_get_parent (actor);
-  if (parent_actor)
-    clutter_actor_remove_child (parent_actor, actor);
-}
-
-static void
 wl_subsurface_destructor (struct wl_resource *resource)
 {
   MetaWaylandSurface *surface = wl_resource_get_user_data (resource);
 
   g_node_unlink (surface->subsurface_branch_node);
-  unparent_actor (surface);
 
   if (surface->sub.parent)
     {
+      meta_wayland_surface_notify_subsurface_state_changed (surface->sub.parent);
       wl_list_remove (&surface->sub.parent_destroy_listener.link);
       surface->sub.parent = NULL;
     }
