@@ -122,7 +122,8 @@ meta_wayland_single_pixel_buffer_attach (MetaWaylandBuffer  *buffer,
 
   if (buffer->single_pixel.texture)
     {
-      *texture = g_object_ref (buffer->single_pixel.texture);
+      cogl_clear_object (texture);
+      *texture = cogl_object_ref (buffer->single_pixel.texture);
       return TRUE;
     }
 
