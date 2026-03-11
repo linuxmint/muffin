@@ -236,6 +236,7 @@ meta_wayland_seat_new (MetaWaylandCompositor *compositor,
                               NULL);
 
   seat->text_input = meta_wayland_text_input_new (seat);
+  seat->pointer_warp = meta_wayland_pointer_warp_new (seat);
 
   meta_wayland_data_device_init (&seat->data_device);
   meta_wayland_data_device_primary_init (&seat->primary_data_device);
@@ -274,6 +275,7 @@ meta_wayland_seat_free (MetaWaylandSeat *seat)
   g_object_unref (seat->keyboard);
   g_object_unref (seat->touch);
   meta_wayland_text_input_destroy (seat->text_input);
+  meta_wayland_pointer_warp_destroy (seat->pointer_warp);
 
   g_free (seat);
 }
