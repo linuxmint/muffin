@@ -3940,6 +3940,17 @@ choose_primary_gpu_unchecked (MetaBackend        *backend,
    */
   for (allow_sw = 0; allow_sw < 2; allow_sw++)
   {
+    /* Prefer a device tagged as preferred primary via udev */
+    for (l = gpus; l; l = l->next)
+      {
+        MetaGpuKms *gpu_kms = META_GPU_KMS (l->data);
+
+        if (meta_gpu_kms_is_preferred_primary (gpu_kms) &&
+            (allow_sw == 1 ||
+             gpu_kms_is_hardware_rendering (renderer_native, gpu_kms)))
+          return gpu_kms;
+      }
+
     /* Prefer a platform device */
     for (l = gpus; l; l = l->next)
       {

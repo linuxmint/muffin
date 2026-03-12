@@ -283,6 +283,15 @@ meta_gpu_kms_requires_modifiers (MetaGpuKms *gpu_kms)
   return !!(flags & META_KMS_DEVICE_FLAG_REQUIRES_MODIFIERS);
 }
 
+gboolean
+meta_gpu_kms_is_preferred_primary (MetaGpuKms *gpu_kms)
+{
+  MetaKmsDeviceFlag flags;
+
+  flags = meta_kms_device_get_flags (gpu_kms->kms_device);
+  return !!(flags & META_KMS_DEVICE_FLAG_PREFERRED_PRIMARY);
+}
+
 static int
 compare_outputs (gconstpointer one,
                  gconstpointer two)
