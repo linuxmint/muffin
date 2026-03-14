@@ -415,7 +415,7 @@ check_send_frame_event (MetaWaylandTouch   *touch,
     {
       sequence = clutter_event_get_event_sequence (event);
       slot = meta_event_native_sequence_get_slot (sequence);
-      touch->frame_slots &= ~(1 << slot);
+      touch->frame_slots &= ~((guint64) 1 << slot);
 
       if (touch->frame_slots == 0)
         send_frame_event = TRUE;
@@ -532,7 +532,7 @@ evdev_filter_func (struct libinput_event *event,
       /* XXX: Could theoretically overflow, 64 slots should be
        * enough for most hw/usecases though.
        */
-      touch->frame_slots |= (1 << slot);
+      touch->frame_slots |= ((guint64) 1 << slot);
       break;
     }
     case LIBINPUT_EVENT_TOUCH_CANCEL:
