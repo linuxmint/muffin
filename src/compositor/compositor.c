@@ -1189,6 +1189,13 @@ get_top_visible_window_actor (MetaCompositor *compositor)
 
       if (!window->visible_to_compositor)
         continue;
+      if (meta_window_get_client_pid (window) == getpid ())
+        {
+          if (!clutter_actor_get_paint_visibility (CLUTTER_ACTOR (window_actor)))
+            continue;
+          if (clutter_actor_get_paint_opacity (CLUTTER_ACTOR (window_actor)) == 0)
+            continue;
+        }
 
       meta_window_get_buffer_rect (window, &buffer_rect);
       meta_display_get_size (priv->display,

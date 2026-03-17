@@ -162,6 +162,8 @@ meta_window_actor_wayland_dispose (GObject *object)
         clutter_actor_remove_child (CLUTTER_ACTOR (window_actor), child_actor);
     }
 
+  g_list_free (children);
+
   G_OBJECT_CLASS (meta_window_actor_wayland_parent_class)->dispose (object);
 }
 
