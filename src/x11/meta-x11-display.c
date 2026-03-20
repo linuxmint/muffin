@@ -2090,6 +2090,9 @@ meta_x11_display_logical_monitor_to_xinerama_index (MetaX11Display     *x11_disp
 
   logical_monitor_data = get_x11_display_logical_monitor_data (logical_monitor);
 
+  if (logical_monitor_data == NULL)
+    return -1;
+
   return logical_monitor_data->xinerama_index;
 }
 
