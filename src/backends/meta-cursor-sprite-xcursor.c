@@ -79,9 +79,9 @@ meta_cursor_get_name (MetaCursor cursor)
     case META_CURSOR_NOT_ALLOWED:
       return "crossed_circle";
     case META_CURSOR_GRAB:
-      return "hand2";
+      return "grab";
     case META_CURSOR_GRABBING:
-      return "hand2";
+      return "grabbing";
     case META_CURSOR_E_RESIZE:
       return "right_side";
     case META_CURSOR_N_RESIZE:
@@ -165,9 +165,9 @@ meta_cursor_get_legacy_name (MetaCursor cursor)
     case META_CURSOR_NOT_ALLOWED:
       return "crossed_circle";
     case META_CURSOR_GRAB:
-      return "hand2";
+      return "grab";
     case META_CURSOR_GRABBING:
-      return "hand2";
+      return "grabbing";
     case META_CURSOR_E_RESIZE:
       return "right_side";
     case META_CURSOR_N_RESIZE:
