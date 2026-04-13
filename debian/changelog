@@ -1,3 +1,70 @@
+muffin (6.7.0) unstable; urgency=medium
+
+  [ Michael Webster ]
+  * Clutter-A11y: Respect new setting to prevent resetting of the active (#781)
+
+  [ Aleksey Samoilov ]
+  * Fix region clipping issues when using fractional scaling (#777)
+
+  [ Michael Webster ]
+  * keybindings/modifiers (wayland): Remove old workaround for xwayland (#785)
+  * clutter-event.c: Add fields for unaccelerated delta motion to touchpad events. (#786)
+  * clutter-enums.h: Fix introspection definition and prefix. (#771)
+
+  [ Aleksey Samoilov ]
+  * [Wayland] Add support for cursor-shape-v1 protocol (#756)
+  * Small cleanup and fixes (#790)
+  * [Input] Small API cleanups (#765)
+
+  [ Balló György ]
+  * wayland/xdg-shell: Implement support for xdg_toplevel.wm_capabilities (#780)
+
+  [ Aleksey Samoilov ]
+  * Fix use-after free and race conditions in Wayland idle inhibitation (#779)
+
+  [ Michael Webster ]
+  * meta-wayland-pointer.c: Get correct device coordinates from the stage.
+  * keybindings: Add meta_display_add_custom_keybinding_full().
+
+  [ Abraham Binder ]
+  * Fix top position calculating when applying edge resistance. (#798)
+
+  [ Michael Webster ]
+  * compositor: Add meta_get_stage_xwindow().
+
+  [ Clement Lefebvre ]
+  * meta-stage: Remove backend assertions from overlay paint/update paths
+  * cursor-sprite-xcursor: Use standard cursor names
+
+  [ Aleksey Samoilov ]
+  * [Wayland] Direct scanout (#744)
+
+  [ Michael Webster ]
+  * meta-cursor-sprite-xcursor.c: Adjust a few cursor names.
+  * Support wlr-layer-shell-protocol. (#803)
+  * Add stale workflow.
+  * window.c: Fix regression in window positioning when a window is restored from a tiled state.
+
+  [ Aleksey Samoilov ]
+  * [Wayland] Add support for xdg-system-bell-v1 protocol (#787)
+
+  [ Jeffrey Knockel ]
+  * compositor.c: hidden panel windows aren't top (#802)
+
+  [ Rick Calixte ]
+  * keybindings.c and prefs.h: Add separate key bindings for toggle window/workspace (#628)
+
+  [ Aleksey Samoilov ]
+  * [Wayland] Add support for pointer-warp-v1 protocol (#795)
+  * [Wayland] Add support for single-pixel-buffer-v1 protocol (#804)
+
+  [ Michael Webster ]
+  * meta-window-actor-wayland.c: Fix a leak.
+  * meta-wayland-single-pixel-buffer.c: Use correct cogl ref function, fix leak.
+  * meta-cursor-sprite-xcursor.c: Fix grab/grabbing cursor names.
+
+ -- Clement Lefebvre <root@linuxmint.com>  Mon, 13 Apr 2026 08:37:15 +0100
+
 muffin (6.6.3) zena; urgency=medium
 
   [ Michael Webster ]
