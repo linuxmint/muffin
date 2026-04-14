@@ -38,6 +38,7 @@
 #include "wayland/meta-wayland-dma-buf.h"
 #include "wayland/meta-wayland-egl-stream.h"
 #include "wayland/meta-wayland-idle-inhibit.h"
+#include "wayland/meta-wayland-fixes.h"
 #include "wayland/meta-wayland-inhibit-shortcuts-dialog.h"
 #include "wayland/meta-wayland-inhibit-shortcuts.h"
 #include "wayland/meta-wayland-legacy-xdg-foreign.h"
@@ -451,6 +452,7 @@ meta_wayland_compositor_setup (MetaWaylandCompositor *wayland_compositor)
   meta_wayland_init_xdg_wm_dialog (compositor);
   meta_wayland_xdg_toplevel_tag_init (compositor);
   meta_wayland_init_cursor_shape (compositor);
+  meta_wayland_init_fixes (compositor);
   meta_wayland_init_system_bell (compositor);
 
   /* Xwayland specific protocol, needs to be filtered out for all other clients */
