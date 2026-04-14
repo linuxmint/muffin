@@ -526,6 +526,9 @@ create_gpu_from_udev_device (MetaBackendNative  *native,
   if (meta_is_udev_device_requires_modifiers (device))
     flags |= META_KMS_DEVICE_FLAG_REQUIRES_MODIFIERS;
 
+  if (meta_is_udev_device_preferred_primary (device))
+    flags |= META_KMS_DEVICE_FLAG_PREFERRED_PRIMARY;
+
   device_path = g_udev_device_get_device_file (device);
 
   kms_device = meta_kms_create_device (native->kms, device_path, flags,
