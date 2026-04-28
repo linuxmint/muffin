@@ -696,6 +696,39 @@ meta_monitor_manager_ensure_configured (MetaMonitorManager *manager)
   else
     method = META_MONITORS_CONFIG_METHOD_TEMPORARY;
 
+  /* If a configuration has already been applied this session and is still
+   * valid for the detected monitor set, re-apply it. This preserves user
+   * intent across hotplug events that do not actually change the connected
+   * monitors — e.g. spurious link-state pings caused by a monitor's input
+   * auto-scan, or short DP/HDMI re-trains. Without this, the fallbacks
+   * below would compute a fresh "suggested" layout and silently re-enable
+   * a monitor the user has explicitly turned off via xrandr, Super+P, or
+   * the Display GUI. The stored on-disk configuration is consulted only
+   * during initial setup (current_config is NULL until the first apply).
+   */
+  if (!manager->in_init)
+    {
+      MetaMonitorsConfig *current_config =
+        meta_monitor_config_manager_get_current (manager->config_manager);
+
+      if (current_config &&
+          meta_monitor_manager_is_config_complete (manager, current_config))
+        {
+          if (meta_monitor_manager_apply_monitors_config (manager,
+                                                          current_config,
+                                                          method,
+                                                          &error))
+            {
+              config = g_object_ref (current_config);
+              goto done;
+            }
+
+          g_warning ("Failed to re-apply current monitor configuration: %s",
+                     error->message);
+          g_clear_error (&error);
+        }
+    }
+
   if (use_stored_config)
     {
       g_autoptr(MetaMonitorsConfig) new_config = NULL;
