@@ -234,7 +234,8 @@ set_texture_on_actor (MetaX11BackgroundActor *self)
 
   background_transition = meta_prefs_get_background_transition();
 
-  if (background_transition == META_X11_BACKGROUND_TRANSITION_NONE)
+  if (background_transition == META_X11_BACKGROUND_TRANSITION_NONE ||
+      !clutter_actor_is_mapped (priv->top_actor))
   {
     // NO TRANSITION
     clutter_actor_set_opacity (CLUTTER_ACTOR (priv->bottom_actor), 0);
