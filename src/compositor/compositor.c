@@ -726,7 +726,10 @@ meta_compositor_do_manage (MetaCompositor  *compositor,
     g_signal_connect_after (priv->stage, "after-paint",
                             G_CALLBACK (after_stage_paint), compositor);
 
-  clutter_stage_set_sync_delay (CLUTTER_STAGE (priv->stage), META_SYNC_DELAY);
+  if (meta_is_wayland_compositor ())
+    clutter_stage_set_sync_delay (CLUTTER_STAGE (priv->stage), META_SYNC_DELAY_WAYLAND);
+  else
+    clutter_stage_set_sync_delay (CLUTTER_STAGE (priv->stage), META_SYNC_DELAY);
 
   priv->window_group = meta_window_group_new (display);
   priv->top_window_group = meta_window_group_new (display);

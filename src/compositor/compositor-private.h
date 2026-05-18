@@ -14,6 +14,10 @@
 /* Wait 2ms after vblank before starting to draw next frame */
 #define META_SYNC_DELAY 2
 
+/* On Wayland the KMS page-flip event already synchronizes rendering;
+ * a fixed delay consumes too much budget on 120 Hz+. */
+#define META_SYNC_DELAY_WAYLAND 0
+
 typedef struct _MetaLaters MetaLaters;
 
 struct _MetaCompositorClass

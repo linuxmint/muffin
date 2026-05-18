@@ -400,10 +400,13 @@ retry_page_flips (gpointer user_data)
       if (ret == -EBUSY)
         {
           float refresh_rate;
+          gint64 retry_interval;
 
           refresh_rate = get_cached_crtc_refresh_rate (impl_simple, crtc);
-          retry_page_flip_data->retry_time_us +=
-            (uint64_t) (G_USEC_PER_SEC / refresh_rate);
+          /* On high-refresh displays, retry sooner than a full cycle
+           * to recover faster from transient EBUSY. */
+          retry_interval = (gint64) (G_USEC_PER_SEC / refresh_rate) / 2;
+          retry_page_flip_data->retry_time_us += MAX (retry_interval, 500);
           l = l_next;
           continue;
         }
