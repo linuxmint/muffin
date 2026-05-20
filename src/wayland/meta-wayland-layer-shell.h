@@ -59,4 +59,10 @@ MetaWaylandLayerSurface * meta_wayland_layer_shell_find_surface (MetaWaylandLaye
 
 const char * meta_wayland_layer_surface_get_namespace (MetaWaylandLayerSurface *layer_surface);
 
+gboolean meta_wayland_layer_surface_get_geometry (MetaWaylandLayerSurface *layer_surface,
+                                                  int                     *out_x,
+                                                  int                     *out_y,
+                                                  int                     *out_width,
+                                                  int                     *out_height);
+
 #endif /* META_WAYLAND_LAYER_SHELL_H */

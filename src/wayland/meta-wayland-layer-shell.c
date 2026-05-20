@@ -607,7 +607,7 @@ calculate_surface_position (MetaWaylandLayerSurface *layer_surface,
   uint32_t anchor;
 
   surface = meta_wayland_surface_role_get_surface (META_WAYLAND_SURFACE_ROLE (layer_surface));
-  if (!surface || !surface->buffer_ref->buffer)
+  if (!surface)
     {
       *out_x = 0;
       *out_y = 0;
@@ -625,8 +625,21 @@ calculate_surface_position (MetaWaylandLayerSurface *layer_surface,
   else
     bounds = &usable_area;
 
-  width = meta_wayland_surface_get_width (surface);
-  height = meta_wayland_surface_get_height (surface);
+  /* Prefer the attached buffer's dimensions, but fall back to the client's
+   * configured desired size when no buffer has been committed yet. The
+   * fallback matters when a popup is parented to a layer surface whose first
+   * buffer hasn't been drawn — without it we'd treat the surface as 0x0
+   * and place the popup at the bounds origin. */
+  if (surface->buffer_ref->buffer)
+    {
+      width = meta_wayland_surface_get_width (surface);
+      height = meta_wayland_surface_get_height (surface);
+    }
+  else
+    {
+      width = layer_surface->current.desired_width;
+      height = layer_surface->current.desired_height;
+    }
   anchor = layer_surface->current.anchor;
 
   /* Calculate X position */
@@ -673,6 +686,36 @@ calculate_surface_position (MetaWaylandLayerSurface *layer_surface,
 
   *out_x = x;
   *out_y = y;
+}
+
+gboolean
+meta_wayland_layer_surface_get_geometry (MetaWaylandLayerSurface *layer_surface,
+                                         int                     *out_x,
+                                         int                     *out_y,
+                                         int                     *out_width,
+                                         int                     *out_height)
+{
+  MetaWaylandSurface *surface;
+
+  g_return_val_if_fail (META_IS_WAYLAND_LAYER_SURFACE (layer_surface), FALSE);
+
+  surface = meta_wayland_surface_role_get_surface (META_WAYLAND_SURFACE_ROLE (layer_surface));
+  if (!surface)
+    return FALSE;
+
+  if (surface->buffer_ref->buffer)
+    {
+      *out_width = meta_wayland_surface_get_width (surface);
+      *out_height = meta_wayland_surface_get_height (surface);
+    }
+  else
+    {
+      *out_width = layer_surface->current.desired_width;
+      *out_height = layer_surface->current.desired_height;
+    }
+
+  calculate_surface_position (layer_surface, out_x, out_y);
+  return TRUE;
 }
 
 static ClutterActor *
