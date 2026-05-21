@@ -280,17 +280,23 @@ clutter_offscreen_effect_pre_paint (ClutterEffect       *effect,
       _clutter_paint_volume_copy_static (volume, &mutable_volume);
       _clutter_paint_volume_get_bounding_box (&mutable_volume, &raw_box);
       clutter_paint_volume_free (&mutable_volume);
+
+      box = raw_box;
+      _clutter_actor_box_enlarge_for_effects (&box);
+
+      priv->fbo_offset_x = box.x1;
+      priv->fbo_offset_y = box.y1;
     }
   else
     {
       clutter_actor_get_allocation_box (priv->actor, &raw_box);
+
+      box = raw_box;
+      _clutter_actor_box_enlarge_for_effects (&box);
+
+      priv->fbo_offset_x = box.x1 - raw_box.x1;
+      priv->fbo_offset_y = box.y1 - raw_box.y1;
     }
-
-  box = raw_box;
-  _clutter_actor_box_enlarge_for_effects (&box);
-
-  priv->fbo_offset_x = box.x1 - raw_box.x1;
-  priv->fbo_offset_y = box.y1 - raw_box.y1;
 
   clutter_actor_box_scale (&box, ceiled_resource_scale);
   clutter_actor_box_get_size (&box, &target_width, &target_height);
@@ -315,6 +321,10 @@ clutter_offscreen_effect_pre_paint (ClutterEffect       *effect,
    * contents on screen...
    */
   clutter_actor_get_transform (priv->stage, &modelview);
+  cogl_matrix_translate (&modelview,
+                         -priv->fbo_offset_x,
+                         -priv->fbo_offset_y,
+                         0.0f);
   cogl_framebuffer_set_modelview_matrix (priv->offscreen, &modelview);
 
   /* Save the original viewport for calculating priv->position */
@@ -324,12 +334,13 @@ clutter_offscreen_effect_pre_paint (ClutterEffect       *effect,
                                &old_viewport[2],
                                &old_viewport[3]);
 
-  /* Set up the viewport so that it has the same size as the stage (avoid
-   * distortion), but translated to account for the FBO offset...
+  /* Set up the viewport so that it has the same size as the stage,
+   * avoiding distortion. The FBO offset is handled via the modelview
+   * translation above.
    */
   cogl_framebuffer_set_viewport (priv->offscreen,
-                                 -priv->fbo_offset_x,
-                                 -priv->fbo_offset_y,
+                                 0,
+                                 0,
                                  stage_width,
                                  stage_height);
 
