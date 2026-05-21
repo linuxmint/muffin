@@ -1,3 +1,14 @@
+muffin (6.7.1) unstable; urgency=medium
+
+  [ Michael Webster ]
+  * meta-x11-background-actor.c: Fix signal handler accumulation leak.
+  * meta-x11-background-actor.c: Skip a background transition if the actor is not mapped.
+  * events.c: Guard against a mouse zoom modifier value of 0.
+  * layer-shell: Allow indirect popups from layer-shell clients that may have been triggered indirectly (like over dbus).
+  * clutter-offscreen-effect.c: Fix offset for asymmetric paint volumes.
+
+ -- Clement Lefebvre <root@linuxmint.com>  Thu, 21 May 2026 10:39:12 +0100
+
 muffin (6.7.0) unstable; urgency=medium
 
   [ Michael Webster ]
