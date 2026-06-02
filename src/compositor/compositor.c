@@ -607,6 +607,13 @@ rebuild_x11_background_actors (MetaCompositor *compositor)
       clutter_actor_set_size (actor, rect.width, rect.height);
 
       clutter_actor_add_child (priv->window_group, actor);
+
+      /* add_child() stacks the actor at the top of the window group.  On a
+       * monitors-changed rebuild that leaves the new background above the
+       * desktop windows (bottom_window_group) until the next restack.
+       * Sink it to the bottom where backgrounds belong. */
+      clutter_actor_set_child_below_sibling (priv->window_group, actor, NULL);
+
       priv->background_actors = g_list_append (priv->background_actors, actor);
     }
 }
