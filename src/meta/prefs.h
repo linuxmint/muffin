@@ -106,6 +106,7 @@ typedef enum
   META_PREF_CURSOR_SIZE,
   META_PREF_RESIZE_WITH_RIGHT_BUTTON,
   META_PREF_EDGE_TILING,
+  META_PREF_EDGE_RESISTANCE_WINDOW,
   META_PREF_FORCE_FULLSCREEN,
   META_PREF_WORKSPACES_ONLY_ON_PRIMARY,
   META_PREF_DRAGGABLE_BORDER_WIDTH,
@@ -203,6 +204,9 @@ gboolean                    meta_prefs_get_gnome_animations   (void);
 
 META_EXPORT
 gboolean                    meta_prefs_get_edge_tiling        (void);
+
+META_EXPORT
+gboolean                    meta_prefs_get_edge_resistance_window (void);
 
 META_EXPORT
 gboolean                    meta_prefs_get_tile_maximize      (void);
