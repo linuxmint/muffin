@@ -1,3 +1,11 @@
+muffin (6.7.2) alfa; urgency=medium
+
+  [ Michael Webster ]
+  * compositor.c (x11): Sink the background actors to the bottom of the window_group when adding them.
+  * place.c: Override 'automatic' mode with 'center' in Wayland.
+
+ -- Clement Lefebvre <root@linuxmint.com>  Tue, 16 Jun 2026 18:03:41 +0200
+
 muffin (6.7.1) unstable; urgency=medium
 
   [ Michael Webster ]
