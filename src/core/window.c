@@ -220,6 +220,7 @@ enum
   PROP_TILE_MODE,
   PROP_OPACITY,
   PROP_TAG,
+  PROP_ICON_NAME,
   PROP_LAST,
 };
 
@@ -354,6 +355,7 @@ meta_window_finalize (GObject *object)
   g_free (window->gtk_menubar_object_path);
   g_free (window->placement.rule);
   g_free (window->tag);
+  g_free (window->theme_icon_name);
 
   G_OBJECT_CLASS (meta_window_parent_class)->finalize (object);
 }
@@ -457,6 +459,9 @@ meta_window_get_property(GObject         *object,
       break;
     case PROP_TAG:
       g_value_set_string (value, win->tag);
+      break;
+    case PROP_ICON_NAME:
+      g_value_set_string (value, win->theme_icon_name);
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -681,6 +686,14 @@ meta_window_class_init (MetaWindowClass *klass)
 
   obj_props[PROP_TAG] =
     g_param_spec_string ("tag", NULL, NULL,
+                         NULL,
+                         G_PARAM_READABLE | G_PARAM_EXPLICIT_NOTIFY |
+                         G_PARAM_STATIC_STRINGS);
+
+  obj_props[PROP_ICON_NAME] =
+    g_param_spec_string ("icon-name",
+                         "Icon name",
+                         "Themed icon name or icon file path set by the client",
                          NULL,
                          G_PARAM_READABLE | G_PARAM_EXPLICIT_NOTIFY |
                          G_PARAM_STATIC_STRINGS);
@@ -9495,6 +9508,17 @@ meta_window_get_client_type (MetaWindow *window)
   return window->client_type;
 }
 
+void
+meta_window_set_icon_name (MetaWindow *window,
+                           const char *icon_name)
+{
+  if (icon_name != NULL && icon_name[0] == '\0')
+    icon_name = NULL;
+
+  if (g_set_str (&window->theme_icon_name, icon_name))
+    g_object_notify_by_pspec (G_OBJECT (window), obj_props[PROP_ICON_NAME]);
+}
+
 /**
  * meta_window_get_icon_name:
  * @window: a #MetaWindow
@@ -9549,6 +9573,32 @@ meta_window_set_tag (MetaWindow *window,
 {
   if (g_set_str (&window->tag, tag))
     g_object_notify_by_pspec (G_OBJECT (window), obj_props[PROP_TAG]);
+}
+
+void
+meta_window_set_progress (MetaWindow *window,
+                          guint       progress)
+{
+  progress = CLAMP (progress, 0, 100);
+
+  if (window->progress != progress)
+    {
+      window->progress = progress;
+      g_object_notify_by_pspec (G_OBJECT (window), obj_props[PROP_PROGRESS]);
+    }
+}
+
+void
+meta_window_set_progress_pulse (MetaWindow *window,
+                                gboolean    pulse)
+{
+  pulse = !!pulse;
+
+  if (window->progress_pulse != pulse)
+    {
+      window->progress_pulse = pulse;
+      g_object_notify_by_pspec (G_OBJECT (window), obj_props[PROP_PROGRESS_PULSE]);
+    }
 }
 
 /**

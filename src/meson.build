@@ -601,6 +601,10 @@ if have_wayland
     'wayland/meta-wayland-xdg-dialog.h',
     'wayland/meta-wayland-xdg-toplevel-tag.c',
     'wayland/meta-wayland-xdg-toplevel-tag.h',
+    'wayland/meta-wayland-xdg-toplevel-icon.c',
+    'wayland/meta-wayland-xdg-toplevel-icon.h',
+    'wayland/meta-wayland-xapp-shell.c',
+    'wayland/meta-wayland-xapp-shell.h',
     'wayland/meta-window-wayland.c',
     'wayland/meta-window-wayland.h',
     'wayland/meta-window-xwayland.c',
@@ -835,6 +839,8 @@ if have_wayland
     ['xdg-output', 'unstable', 'v1', ],
     ['xdg-shell', 'stable', ],
     ['xdg-toplevel-tag-v1', 'private', ],
+    ['xdg-toplevel-icon-v1', 'private', ],
+    ['xapp-shell', 'private', ],
     ['xwayland-keyboard-grab', 'unstable', 'v1', ],
   ]
   if have_wayland_eglstream

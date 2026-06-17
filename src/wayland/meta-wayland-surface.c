@@ -51,6 +51,7 @@
 #include "wayland/meta-wayland-seat.h"
 #include "wayland/meta-wayland-subsurface.h"
 #include "wayland/meta-wayland-viewporter.h"
+#include "wayland/meta-wayland-xapp-shell.h"
 #include "wayland/meta-wayland-xdg-shell.h"
 #include "wayland/meta-window-wayland.h"
 #include "wayland/meta-xwayland-private.h"
@@ -1550,6 +1551,8 @@ meta_wayland_surface_window_managed (MetaWaylandSurface *surface,
     META_WAYLAND_SHELL_SURFACE (surface->role);
 
   meta_wayland_shell_surface_managed (shell_surface, window);
+
+  meta_wayland_xapp_shell_apply_to_window (surface, window);
 }
 
 void
