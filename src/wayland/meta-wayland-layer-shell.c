@@ -983,6 +983,10 @@ meta_wayland_layer_surface_dispose (GObject *object)
         }
     }
 
+  if (layer_surface->output)
+    g_object_remove_weak_pointer (G_OBJECT (layer_surface->output),
+                                  (gpointer *) &layer_surface->output);
+
   g_clear_pointer (&layer_surface->namespace, g_free);
 
   G_OBJECT_CLASS (meta_wayland_layer_surface_parent_class)->dispose (object);
@@ -1000,6 +1004,9 @@ meta_wayland_layer_surface_set_property (GObject      *object,
     {
     case PROP_OUTPUT:
       layer_surface->output = g_value_get_pointer (value);
+      if (layer_surface->output)
+        g_object_add_weak_pointer (G_OBJECT (layer_surface->output),
+                                   (gpointer *) &layer_surface->output);
       break;
     case PROP_NAMESPACE:
       layer_surface->namespace = g_value_dup_string (value);
