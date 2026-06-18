@@ -603,9 +603,14 @@ should_send_modifiers (MetaBackend *backend)
   #ifdef HAVE_NATIVE_BACKEND
   if (META_IS_BACKEND_NATIVE (backend))
     {
-      MetaRenderer *renderer = meta_backend_get_renderer (backend);
-      MetaRendererNative *renderer_native = META_RENDERER_NATIVE (renderer);
-      return meta_renderer_native_use_modifiers (renderer_native);
+      /* Advertising format modifiers to clients (so they can allocate
+       * buffers we are able to import via EGL) is independent from whether
+       * KMS scanout uses modifiers. The dma-buf global is only created when
+       * EGL_EXT_image_dma_buf_import_modifiers is present, so it is always
+       * safe to query and advertise the importable modifiers here. Some
+       * drivers (notably NVIDIA) refuse imports done with the implicit
+       * DRM_FORMAT_MOD_INVALID modifier, so we must hand out real ones. */
+      return TRUE;
     }
   #endif
 
