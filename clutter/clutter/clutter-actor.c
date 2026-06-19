@@ -10625,7 +10625,7 @@ clutter_actor_set_position (ClutterActor *self,
 
   g_return_if_fail (CLUTTER_IS_ACTOR (self));
 
-  graphene_point_init (&new_position, x, y);
+  graphene_point_init (&new_position, roundf (x), roundf (y));
 
   cur_position.x = clutter_actor_get_x (self);
   cur_position.y = clutter_actor_get_y (self);
@@ -11106,7 +11106,7 @@ clutter_actor_set_size (ClutterActor *self,
 
   g_return_if_fail (CLUTTER_IS_ACTOR (self));
 
-  graphene_size_init (&new_size, width, height);
+  graphene_size_init (&new_size, ceilf (width), ceilf (height));
 
   /* minor optimization: if we don't have a duration then we can
    * skip the get_size() below, to avoid the chance of going through
