@@ -1,3 +1,14 @@
+muffin (6.7.3) alfa; urgency=medium
+
+  [ Clement Lefebvre ]
+  * meta-wayland-layer-shell: Fix segfault on output removal via weak pointer
+  * clutter: Round widget coordinates and dimensions (#830)
+
+  [ Michael Webster ]
+  * wayland: Implement xdg-toplevel-icon and xapp-shell protocols.
+
+ -- Clement Lefebvre <root@linuxmint.com>  Sat, 20 Jun 2026 15:34:49 +0200
+
 muffin (6.7.2) alfa; urgency=medium
 
   [ Michael Webster ]
