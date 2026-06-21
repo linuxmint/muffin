@@ -598,36 +598,10 @@ meta_wayland_gtk_shell_class_init (MetaWaylandGtkShellClass *klass)
 static uint32_t
 calculate_capabilities (void)
 {
-  uint32_t capabilities = 0;
-
-  if (!meta_prefs_get_show_fallback_app_menu ())
-    capabilities = GTK_SHELL1_CAPABILITY_GLOBAL_APP_MENU;
-
-  return capabilities;
-}
-
-static void
-prefs_changed (MetaPreference pref,
-               gpointer       user_data)
-{
-  MetaWaylandGtkShell *gtk_shell = user_data;
-  uint32_t new_capabilities;
-  GList *l;
-
-  if (pref != META_PREF_BUTTON_LAYOUT)
-    return;
-
-  new_capabilities = calculate_capabilities ();
-  if (gtk_shell->capabilities == new_capabilities)
-    return;
-  gtk_shell->capabilities = new_capabilities;
-
-  for (l = gtk_shell->shell_resources; l; l = l->next)
-    {
-      struct wl_resource *resource = l->data;
-
-      gtk_shell1_send_capabilities (resource, gtk_shell->capabilities);
-    }
+  /* The capabilities field is a bitmask that GTK reads as
+   * (capabilities & (1 << (capability - 1))).
+   */
+  return 1 << (GTK_SHELL1_CAPABILITY_DESKTOP_ICONS - 1);
 }
 
 static MetaWaylandGtkShell *
@@ -644,8 +618,6 @@ meta_wayland_gtk_shell_new (MetaWaylandCompositor *compositor)
     g_error ("Failed to register a global gtk-shell object");
 
   gtk_shell->capabilities = calculate_capabilities ();
-
-  meta_prefs_add_listener (prefs_changed, gtk_shell);
 
   return gtk_shell;
 }
