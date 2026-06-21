@@ -61,6 +61,10 @@ struct _MetaWindowWayland
   MetaGravity last_sent_gravity;
 
   gboolean has_been_shown;
+
+  cairo_surface_t *icon;
+  cairo_surface_t *mini_icon;
+  gboolean icon_dirty;
 };
 
 struct _MetaWindowWaylandClass
@@ -729,6 +733,62 @@ meta_window_wayland_unmap (MetaWindow *window)
 {
 }
 
+static gboolean
+meta_window_wayland_update_icon (MetaWindow       *window,
+                                 cairo_surface_t **icon,
+                                 cairo_surface_t **mini_icon)
+{
+  MetaWindowWayland *wl_window = META_WINDOW_WAYLAND (window);
+
+  /* The caller always consumes *icon and *mini_icon when this returns TRUE, and
+   * also when called with force=TRUE regardless of the return value, so both
+   * must be written unconditionally (matching meta_window_real_update_icon and
+   * the X11 implementation). */
+  *icon = NULL;
+  *mini_icon = NULL;
+
+  if (!wl_window->icon_dirty)
+    return FALSE;
+
+  wl_window->icon_dirty = FALSE;
+
+  if (wl_window->icon)
+    *icon = cairo_surface_reference (wl_window->icon);
+  if (wl_window->mini_icon)
+    *mini_icon = cairo_surface_reference (wl_window->mini_icon);
+
+  return TRUE;
+}
+
+/**
+ * meta_window_wayland_set_custom_icon:
+ * @window: a wayland #MetaWindow
+ * @icon: (nullable): the normal-size icon surface, or %NULL to reset
+ * @mini_icon: (nullable): the mini icon surface, or %NULL to reset
+ *
+ * Sets a client-provided icon (from the xdg-toplevel-icon protocol) on the
+ * window. The surfaces are referenced, not adopted. Passing %NULL for both
+ * resets the window to its default icon.
+ */
+void
+meta_window_wayland_set_custom_icon (MetaWindow      *window,
+                                     cairo_surface_t *icon,
+                                     cairo_surface_t *mini_icon)
+{
+  MetaWindowWayland *wl_window = META_WINDOW_WAYLAND (window);
+
+  g_clear_pointer (&wl_window->icon, cairo_surface_destroy);
+  g_clear_pointer (&wl_window->mini_icon, cairo_surface_destroy);
+
+  if (icon)
+    wl_window->icon = cairo_surface_reference (icon);
+  if (mini_icon)
+    wl_window->mini_icon = cairo_surface_reference (mini_icon);
+
+  wl_window->icon_dirty = TRUE;
+  meta_window_queue (window, META_QUEUE_UPDATE_ICON);
+}
+
 static void
 meta_window_wayland_finalize (GObject *object)
 {
@@ -736,6 +796,9 @@ meta_window_wayland_finalize (GObject *object)
 
   g_list_free_full (wl_window->pending_configurations,
                     (GDestroyNotify) meta_wayland_window_configuration_free);
+
+  g_clear_pointer (&wl_window->icon, cairo_surface_destroy);
+  g_clear_pointer (&wl_window->mini_icon, cairo_surface_destroy);
 
   G_OBJECT_CLASS (meta_window_wayland_parent_class)->finalize (object);
 }
@@ -770,6 +833,7 @@ meta_window_wayland_class_init (MetaWindowWaylandClass *klass)
   window_class->map = meta_window_wayland_map;
   window_class->unmap = meta_window_wayland_unmap;
   window_class->is_focus_async = meta_window_wayland_is_focus_async;
+  window_class->update_icon = meta_window_wayland_update_icon;
 }
 
 MetaWindow *

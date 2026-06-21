@@ -1119,8 +1119,18 @@ finish_popup_setup (MetaWaylandXdgPopup *xdg_popup)
   if (seat)
     {
       MetaWaylandSurface *top_popup;
+      gboolean parent_is_layer_shell;
 
-      if (!meta_wayland_seat_can_popup (seat, serial))
+      parent_is_layer_shell = META_IS_WAYLAND_LAYER_SURFACE (parent_surface->role);
+
+      /* xdg_popup.grab() expects a serial from a recent input event on the
+       * popup's own client. For popups parented to a layer-shell surface the
+       * originating input may have been delivered to a different client
+       * (e.g. a panel applet that triggers a tray-icon menu in another
+       * process over IPC), so the popup's client legitimately has no recent
+       * serial of its own. Accept the grab in that case. */
+      if (!parent_is_layer_shell &&
+          !meta_wayland_seat_can_popup (seat, serial))
         {
           xdg_popup_send_popup_done (xdg_popup->resource);
           return;
@@ -2581,16 +2591,22 @@ meta_wayland_xdg_popup_set_parent_surface (MetaWaylandXdgPopup *xdg_popup,
   /* If parent is a layer surface, compute placement rule from stored positioner data */
   if (META_IS_WAYLAND_LAYER_SURFACE (parent_surface->role))
     {
-      MetaSurfaceActor *surface_actor;
-      ClutterActor *actor;
-      float parent_x, parent_y;
-      float parent_width, parent_height;
+      MetaWaylandLayerSurface *layer_surface =
+        META_WAYLAND_LAYER_SURFACE (parent_surface->role);
+      int parent_x = 0, parent_y = 0;
+      int parent_width = 0, parent_height = 0;
       MetaPlacementRule *rule = &xdg_popup->setup.placement_rule;
 
-      surface_actor = meta_wayland_surface_get_actor (parent_surface);
-      actor = CLUTTER_ACTOR (surface_actor);
-      clutter_actor_get_position (actor, &parent_x, &parent_y);
-      clutter_actor_get_size (actor, &parent_width, &parent_height);
+      /* Read the layer surface's intended geometry directly rather than the
+       * clutter actor's position. The actor is only positioned after the
+       * surface's first buffer commit, but popups can be created against a
+       * configured-but-not-yet-drawn layer surface (e.g. gtk-layer-shell
+       * creates the popup before GTK has drawn the parent's first frame).
+       * Using actor coords there leaves parent_rect at (0,0) and the popup
+       * lands at the bounds origin instead of the icon position. */
+      meta_wayland_layer_surface_get_geometry (layer_surface,
+                                               &parent_x, &parent_y,
+                                               &parent_width, &parent_height);
 
       /* Build placement rule from stored positioner data (window-local coordinates).
        * parent_rect provides the global offset - don't add it to anchor_rect too. */
@@ -2607,11 +2623,10 @@ meta_wayland_xdg_popup_set_parent_surface (MetaWaylandXdgPopup *xdg_popup,
       rule->offset_y = xdg_popup->setup.offset_y;
       rule->is_reactive = FALSE;
 
-      /* Set parent_rect to the layer surface bounds */
-      rule->parent_rect.x = (int)parent_x;
-      rule->parent_rect.y = (int)parent_y;
-      rule->parent_rect.width = (int)parent_width;
-      rule->parent_rect.height = (int)parent_height;
+      rule->parent_rect.x = parent_x;
+      rule->parent_rect.y = parent_y;
+      rule->parent_rect.width = parent_width;
+      rule->parent_rect.height = parent_height;
     }
 }
 

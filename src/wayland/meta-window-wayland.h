@@ -77,4 +77,8 @@ void meta_window_wayland_get_max_size (MetaWindow *window,
                                        int        *width,
                                        int        *height);
 
+void meta_window_wayland_set_custom_icon (MetaWindow      *window,
+                                          cairo_surface_t *icon,
+                                          cairo_surface_t *mini_icon);
+
 #endif

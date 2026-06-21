@@ -1898,11 +1898,12 @@ reload_theme_icon_name (MetaWindow    *window,
                         MetaPropValue *value,
                         gboolean       initial)
 {
-  free (window->theme_icon_name);
-  window->theme_icon_name = NULL;
+  const char *icon_name = NULL;
 
   if (value->type != META_PROP_VALUE_INVALID)
-    window->theme_icon_name = g_strdup (value->v.str);
+    icon_name = value->v.str;
+
+  meta_window_set_icon_name (window, icon_name);
 
   meta_verbose ("Window theme icon name or path is \"%s\"\n",
                 window->theme_icon_name ? window->theme_icon_name : "unset");
@@ -1913,30 +1914,16 @@ reload_progress (MetaWindow    *window,
                  MetaPropValue *value,
                  gboolean       initial)
 {
+  guint progress = 0;
+
   if (value->type != META_PROP_VALUE_INVALID)
-    {
-      if (window->progress != value->v.cardinal)
-        {
-          window->progress = value->v.cardinal;
-          g_object_notify ((GObject*) window, "progress");
+    progress = value->v.cardinal;
 
-          meta_topic (META_DEBUG_WINDOW_STATE,
-                      "Read XAppGtkWindow progress prop %u for %s\n",
-                      window->progress, window->desc);
-        }
-    }
-  else
-    {
-      if (window->progress != 0)
-        {
-          window->progress = 0;
-          g_object_notify ((GObject*) window, "progress");
+  meta_window_set_progress (window, progress);
 
-          meta_topic (META_DEBUG_WINDOW_STATE,
-                      "Read XAppGtkWindow progress prop %u for %s\n",
-                      window->progress, window->desc);
-        }
-    }
+  meta_topic (META_DEBUG_WINDOW_STATE,
+              "Read XAppGtkWindow progress prop %u for %s\n",
+              window->progress, window->desc);
 }
 
 static void
@@ -1944,32 +1931,16 @@ reload_progress_pulse (MetaWindow    *window,
                        MetaPropValue *value,
                        gboolean       initial)
 {
+  gboolean pulse = FALSE;
+
   if (value->type != META_PROP_VALUE_INVALID)
-    {
-      gboolean new_val = value->v.cardinal == 1;
+    pulse = value->v.cardinal == 1;
 
-      if (window->progress_pulse != new_val)
-        {
-          window->progress_pulse = new_val;
-          g_object_notify ((GObject*) window, "progress-pulse");
+  meta_window_set_progress_pulse (window, pulse);
 
-          meta_topic (META_DEBUG_WINDOW_STATE,
-                      "Read XAppGtkWindow progress-pulse prop %s for %s\n",
-                      window->progress_pulse ? "TRUE" : "FALSE", window->desc);
-        }
-    }
-  else
-    {
-      if (window->progress_pulse)
-        {
-          window->progress_pulse = FALSE;
-          g_object_notify ((GObject*) window,  "progress-pulse");
-
-          meta_topic (META_DEBUG_WINDOW_STATE,
-                      "Read XAppGtkWindow progress-pulse prop %s for %s\n",
-                      window->progress_pulse ? "TRUE" : "FALSE", window->desc);
-        }
-    }
+  meta_topic (META_DEBUG_WINDOW_STATE,
+              "Read XAppGtkWindow progress-pulse prop %s for %s\n",
+              window->progress_pulse ? "TRUE" : "FALSE", window->desc);
 }
 
 #define RELOAD_STRING(var_name, propname) \

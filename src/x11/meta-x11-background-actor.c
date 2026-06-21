@@ -234,7 +234,8 @@ set_texture_on_actor (MetaX11BackgroundActor *self)
 
   background_transition = meta_prefs_get_background_transition();
 
-  if (background_transition == META_X11_BACKGROUND_TRANSITION_NONE)
+  if (background_transition == META_X11_BACKGROUND_TRANSITION_NONE ||
+      !clutter_actor_is_mapped (priv->top_actor))
   {
     // NO TRANSITION
     clutter_actor_set_opacity (CLUTTER_ACTOR (priv->bottom_actor), 0);
@@ -259,11 +260,6 @@ set_texture_on_actor (MetaX11BackgroundActor *self)
     clutter_actor_set_easing_duration (priv->top_actor, FADE_DURATION);
     clutter_actor_set_opacity (priv->top_actor, 255);
     clutter_actor_restore_easing_state (priv->top_actor);
-
-    g_signal_connect (priv->top_actor,
-                      "transitions-completed",
-                      G_CALLBACK (on_transition_complete),
-                      self);
 
     clutter_actor_queue_redraw (CLUTTER_ACTOR (self));
   }
@@ -550,6 +546,35 @@ meta_x11_background_actor_init (MetaX11BackgroundActor *self)
   self->priv->monitor_index = -1;
 }
 
+static MetaX11BackgroundActor *
+create_actor_for_display (MetaDisplay *display, int monitor_index)
+{
+  MetaX11BackgroundActor *self;
+  MetaX11BackgroundActorPrivate *priv;
+
+  if (meta_is_wayland_compositor ())
+    return NULL;
+
+  self = g_object_new (META_TYPE_X11_BACKGROUND_ACTOR, NULL);
+  priv = self->priv;
+
+  priv->monitor_index = monitor_index;
+  priv->background = meta_display_background_get (display);
+  priv->background->actors = g_slist_prepend (priv->background->actors, self);
+
+  priv->bottom_actor = meta_x11_background_new (display);
+  clutter_actor_add_child (CLUTTER_ACTOR (self), priv->bottom_actor);
+  priv->top_actor = meta_x11_background_new (display);
+  clutter_actor_add_child (CLUTTER_ACTOR (self), priv->top_actor);
+
+  g_signal_connect (priv->top_actor,
+                    "transitions-completed",
+                    G_CALLBACK (on_transition_complete),
+                    self);
+
+  return self;
+}
+
 /**
  * meta_x11_background_actor_new_for_display:
  * @display: the #MetaDisplay
@@ -562,23 +587,12 @@ ClutterActor *
 meta_x11_background_actor_new_for_display (MetaDisplay *display)
 {
   MetaX11BackgroundActor *self;
-  MetaX11BackgroundActorPrivate *priv;
 
   g_return_val_if_fail (META_IS_DISPLAY (display), NULL);
 
-  if (meta_is_wayland_compositor ())
+  self = create_actor_for_display (display, -1);
+  if (!self)
     return NULL;
-
-  self = g_object_new (META_TYPE_X11_BACKGROUND_ACTOR, NULL);
-  priv = self->priv;
-
-  priv->background = meta_display_background_get (display);
-  priv->background->actors = g_slist_prepend (priv->background->actors, self);
-
-  priv->bottom_actor = meta_x11_background_new (display);
-  clutter_actor_add_child (CLUTTER_ACTOR (self), priv->bottom_actor);
-  priv->top_actor = meta_x11_background_new (display);
-  clutter_actor_add_child (CLUTTER_ACTOR (self), priv->top_actor);
 
   set_texture_on_actors (self);
   update_wrap_mode_of_actor (self);
@@ -607,20 +621,10 @@ meta_x11_background_actor_new_for_monitor (MetaDisplay *display,
 
   g_return_val_if_fail (META_IS_DISPLAY (display), NULL);
 
-  if (meta_is_wayland_compositor ())
+  self = create_actor_for_display (display, monitor);
+  if (!self)
     return NULL;
-
-  self = g_object_new (META_TYPE_X11_BACKGROUND_ACTOR, NULL);
   priv = self->priv;
-
-  priv->monitor_index = monitor;
-  priv->background = meta_display_background_get (display);
-  priv->background->actors = g_slist_prepend (priv->background->actors, self);
-
-  priv->bottom_actor = meta_x11_background_new (display);
-  clutter_actor_add_child (CLUTTER_ACTOR (self), priv->bottom_actor);
-  priv->top_actor = meta_x11_background_new (display);
-  clutter_actor_add_child (CLUTTER_ACTOR (self), priv->top_actor);
 
   meta_display_get_monitor_geometry (display, monitor, &rect);
   clutter_actor_set_position (priv->bottom_actor, -rect.x, -rect.y);

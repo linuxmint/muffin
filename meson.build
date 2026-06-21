@@ -1,4 +1,4 @@
-project('muffin', 'c', version : '6.6.3', meson_version : '>=1.0.0', license : 'GPLv2+')
+project('muffin', 'c', version : '6.7.3', meson_version : '>=1.0.0', license : 'GPLv2+')
 
 muffin_plugin_api_version = '3'
 
@@ -11,7 +11,7 @@ libmuffin_api_version = '@0@'.format(api_version)
 
 # generic version requirements
 fribidi_req = '>= 1.0.0'
-glib_req = '>= 2.67.3'
+glib_req = '>= 2.76.0'
 gi_req = '>= 0.9.5'
 graphene_req = '>= 1.9.3'
 gtk3_req = '>= 3.19.8'

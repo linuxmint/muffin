@@ -142,7 +142,7 @@
     </key>
 
     <key name="placement-mode" enum="placement_mode">
-      <default>'automatic'</default>
+      <default>'center'</default>
       <summary>Window placement mode</summary>
       <description>
         The window placement mode indicates how new windows are positioned.

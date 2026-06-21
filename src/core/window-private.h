@@ -907,4 +907,13 @@ gboolean meta_window_calculate_bounds (MetaWindow *window,
 
 void meta_window_set_tag (MetaWindow *window,
                           const char *tag);
+
+void meta_window_set_icon_name (MetaWindow *window,
+                                const char *icon_name);
+
+void meta_window_set_progress (MetaWindow *window,
+                               guint       progress);
+
+void meta_window_set_progress_pulse (MetaWindow *window,
+                                     gboolean    pulse);
 #endif
