@@ -417,6 +417,11 @@ meta_kms_impl_device_new (MetaKmsDevice  *device,
       return NULL;
     }
 
+  ret = drmSetClientCap (fd, DRM_CLIENT_CAP_ATOMIC, 1);
+  if (ret != 0)
+    g_warning ("DRM_CLIENT_CAP_ATOMIC not supported on this kernel/device: %s",
+               g_strerror (-ret));
+
   drm_resources = drmModeGetResources (fd);
   if (!drm_resources)
     {
