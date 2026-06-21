@@ -1527,7 +1527,7 @@ realize_cursor_sprite_from_wl_buffer_for_gpu (MetaCursorRenderer      *renderer,
           return;
         }
 
-      gbm_device = meta_gbm_device_from_gpu (gpu_kms);
+      gbm_device = cursor_renderer_gpu_data->kms_gbm_device;
       bo = gbm_bo_import (gbm_device,
                           GBM_BO_IMPORT_WL_BUFFER,
                           buffer,
@@ -1700,11 +1700,11 @@ init_hw_cursor_support_for_gpu (MetaGpuKms *gpu_kms)
   cursor_renderer_gpu_data->cursor_width = width;
   cursor_renderer_gpu_data->cursor_height = height;
 
-  cursor_renderer_gpu_data->kms_gbm_device =
-    gbm_create_device (meta_gpu_kms_get_fd (gpu_kms));
-  if (!cursor_renderer_gpu_data->kms_gbm_device)
-    g_warning ("Failed to create KMS GBM device for cursor allocation, "
-               "HW cursor may not work");
+  if (gbm_device_get_fd (gbm_device) != meta_gpu_kms_get_fd (gpu_kms))
+    {
+      cursor_renderer_gpu_data->hw_cursor_broken = TRUE;
+      return;
+    }
 }
 
 static void
