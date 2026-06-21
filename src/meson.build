@@ -511,6 +511,8 @@ if have_wayland
     'wayland/meta-wayland-data-source-primary.h',
     'wayland/meta-wayland-dma-buf.c',
     'wayland/meta-wayland-dma-buf.h',
+    'wayland/meta-wayland-drm.c',
+    'wayland/meta-wayland-drm.h',
     'wayland/meta-wayland-dnd-surface.c',
     'wayland/meta-wayland-dnd-surface.h',
     'wayland/meta-wayland-gtk-shell.c',
@@ -842,6 +844,7 @@ if have_wayland
     ['xdg-toplevel-icon-v1', 'private', ],
     ['xapp-shell', 'private', ],
     ['xwayland-keyboard-grab', 'unstable', 'v1', ],
+    ['wayland-drm', 'private', ],
   ]
   if have_wayland_eglstream
     wayland_eglstream_protocols_dir = wayland_eglstream_protocols_dep.get_variable(pkgconfig: 'pkgdatadir')
