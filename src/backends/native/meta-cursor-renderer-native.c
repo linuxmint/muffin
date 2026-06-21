@@ -39,6 +39,7 @@
 #include "backends/meta-monitor-manager-private.h"
 #include "backends/meta-output.h"
 #include "backends/native/meta-crtc-kms.h"
+#include "backends/native/meta-gpu-kms.h"
 #include "backends/native/meta-kms-device.h"
 #include "backends/native/meta-kms-update.h"
 #include "backends/native/meta-kms.h"
@@ -98,6 +99,8 @@ typedef struct _MetaCursorRendererNativeGpuData
 
   uint64_t cursor_width;
   uint64_t cursor_height;
+
+  struct gbm_device *kms_gbm_device;
 } MetaCursorRendererNativeGpuData;
 
 typedef enum _MetaCursorGbmBoState
@@ -159,6 +162,15 @@ meta_cursor_renderer_native_gpu_data_from_gpu (MetaGpuKms *gpu_kms)
                              quark_cursor_renderer_native_gpu_data);
 }
 
+static void
+cursor_renderer_native_gpu_data_free (gpointer data)
+{
+  MetaCursorRendererNativeGpuData *cursor_renderer_gpu_data = data;
+
+  g_clear_pointer (&cursor_renderer_gpu_data->kms_gbm_device, gbm_device_destroy);
+  g_free (cursor_renderer_gpu_data);
+}
+
 static MetaCursorRendererNativeGpuData *
 meta_create_cursor_renderer_native_gpu_data (MetaGpuKms *gpu_kms)
 {
@@ -168,7 +180,7 @@ meta_create_cursor_renderer_native_gpu_data (MetaGpuKms *gpu_kms)
   g_object_set_qdata_full (G_OBJECT (gpu_kms),
                            quark_cursor_renderer_native_gpu_data,
                            cursor_renderer_gpu_data,
-                           g_free);
+                           cursor_renderer_native_gpu_data_free);
 
   return cursor_renderer_gpu_data;
 }
@@ -1189,7 +1201,9 @@ load_cursor_sprite_gbm_buffer_for_gpu (MetaCursorRendererNative *native,
       return;
     }
 
-  gbm_device = meta_gbm_device_from_gpu (gpu_kms);
+  gbm_device = cursor_renderer_gpu_data->kms_gbm_device
+               ? cursor_renderer_gpu_data->kms_gbm_device
+               : meta_gbm_device_from_gpu (gpu_kms);
   if (gbm_device_is_format_supported (gbm_device, gbm_format,
                                       GBM_BO_USE_CURSOR | GBM_BO_USE_WRITE))
     {
@@ -1685,6 +1699,12 @@ init_hw_cursor_support_for_gpu (MetaGpuKms *gpu_kms)
 
   cursor_renderer_gpu_data->cursor_width = width;
   cursor_renderer_gpu_data->cursor_height = height;
+
+  cursor_renderer_gpu_data->kms_gbm_device =
+    gbm_create_device (meta_gpu_kms_get_fd (gpu_kms));
+  if (!cursor_renderer_gpu_data->kms_gbm_device)
+    g_warning ("Failed to create KMS GBM device for cursor allocation, "
+               "HW cursor may not work");
 }
 
 static void
