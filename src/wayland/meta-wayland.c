@@ -444,7 +444,14 @@ meta_wayland_compositor_setup (MetaWaylandCompositor *wayland_compositor)
   meta_wayland_pointer_constraints_init (compositor);
   meta_wayland_xdg_foreign_init (compositor);
   meta_wayland_legacy_xdg_foreign_init (compositor);
-  meta_wayland_dma_buf_init (compositor);
+  {
+    g_autoptr (GError) error = NULL;
+
+    compositor->dma_buf_manager =
+      meta_wayland_dma_buf_manager_new (compositor, &error);
+    if (!compositor->dma_buf_manager)
+      g_warning ("Failed to init Wayland dma-buf support: %s", error->message);
+  }
   meta_wayland_drm_init (compositor);
   meta_wayland_init_single_pixel_buffer_manager (compositor);
   meta_wayland_keyboard_shortcuts_inhibit_init (compositor);

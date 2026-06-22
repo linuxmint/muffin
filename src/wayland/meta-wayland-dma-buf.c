@@ -40,19 +40,24 @@
 #include "wayland/meta-wayland-dma-buf.h"
 
 #include <drm_fourcc.h>
+#include <sys/stat.h>
+#include <sys/sysmacros.h>
 
 #include "backends/meta-backend-private.h"
 #include "backends/meta-egl-ext.h"
 #include "backends/meta-egl.h"
 #include "cogl/cogl-egl.h"
 #include "cogl/cogl.h"
+#include "core/meta-anonymous-file.h"
 #include "meta/meta-backend.h"
 #include "wayland/meta-wayland-buffer.h"
 #include "wayland/meta-wayland-private.h"
 #include "wayland/meta-wayland-versions.h"
 
 #ifdef HAVE_NATIVE_BACKEND
+#include <xf86drm.h>
 #include "backends/native/meta-drm-buffer-gbm.h"
+#include "backends/native/meta-gpu-kms.h"
 #include "backends/native/meta-renderer-native.h"
 #endif
 
@@ -79,6 +84,56 @@ struct _MetaWaylandDmaBufBuffer
 };
 
 G_DEFINE_TYPE (MetaWaylandDmaBufBuffer, meta_wayland_dma_buf_buffer, G_TYPE_OBJECT);
+
+/* Compatible with zwp_linux_dmabuf_feedback_v1.tranche_flags */
+typedef enum _MetaWaylandDmaBufTrancheFlags
+{
+  META_WAYLAND_DMA_BUF_TRANCHE_FLAG_NONE = 0,
+  META_WAYLAND_DMA_BUF_TRANCHE_FLAG_SCANOUT = 1,
+} MetaWaylandDmaBufTrancheFlags;
+
+typedef enum _MetaWaylandDmaBufTranchePriority
+{
+  META_WAYLAND_DMA_BUF_TRANCHE_PRIORITY_HIGH = 0,
+  META_WAYLAND_DMA_BUF_TRANCHE_PRIORITY_DEFAULT = 10,
+} MetaWaylandDmaBufTranchePriority;
+
+typedef struct _MetaWaylandDmaBufFormat
+{
+  uint32_t drm_format;
+  uint64_t drm_modifier;
+  uint16_t table_index;
+} MetaWaylandDmaBufFormat;
+
+typedef struct _MetaWaylandDmaBufTranche
+{
+  MetaWaylandDmaBufTranchePriority priority;
+  dev_t target_device_id;
+  GArray *formats;
+  MetaWaylandDmaBufTrancheFlags flags;
+  uint64_t scanout_crtc_id;
+} MetaWaylandDmaBufTranche;
+
+typedef struct _MetaWaylandDmaBufFeedback
+{
+  dev_t main_device_id;
+  GList *tranches;
+} MetaWaylandDmaBufFeedback;
+
+struct _MetaWaylandDmaBufManager
+{
+  GObject parent;
+
+  MetaWaylandCompositor *compositor;
+  dev_t main_device_id;
+
+  GArray *formats;
+  MetaAnonymousFile *format_table_file;
+  MetaWaylandDmaBufFeedback *default_feedback;
+};
+
+G_DEFINE_TYPE (MetaWaylandDmaBufManager, meta_wayland_dma_buf_manager,
+               G_TYPE_OBJECT)
 
 static gboolean
 meta_wayland_dma_buf_realize_texture (MetaWaylandBuffer  *buffer,
@@ -589,10 +644,215 @@ dma_buf_handle_create_buffer_params (struct wl_client   *client,
                                   buffer_params_destructor);
 }
 
+static gint
+compare_tranches (gconstpointer a,
+                  gconstpointer b)
+{
+  const MetaWaylandDmaBufTranche *tranche_a = a;
+  const MetaWaylandDmaBufTranche *tranche_b = b;
+
+  if (tranche_a->priority > tranche_b->priority)
+    return 1;
+  if (tranche_a->priority < tranche_b->priority)
+    return -1;
+  else
+    return 0;
+}
+
+static MetaWaylandDmaBufTranche *
+meta_wayland_dma_buf_tranche_new (dev_t                             device_id,
+                                  GArray                           *formats,
+                                  MetaWaylandDmaBufTranchePriority  priority,
+                                  MetaWaylandDmaBufTrancheFlags     flags)
+{
+  MetaWaylandDmaBufTranche *tranche;
+
+  tranche = g_new0 (MetaWaylandDmaBufTranche, 1);
+  tranche->target_device_id = device_id;
+  tranche->formats = g_array_copy (formats);
+  tranche->priority = priority;
+  tranche->flags = flags;
+
+  return tranche;
+}
+
+static void
+meta_wayland_dma_buf_tranche_free (MetaWaylandDmaBufTranche *tranche)
+{
+  g_clear_pointer (&tranche->formats, g_array_unref);
+  g_free (tranche);
+}
+
+static void
+meta_wayland_dma_buf_tranche_send (MetaWaylandDmaBufTranche *tranche,
+                                   struct wl_resource       *resource)
+{
+  struct wl_array target_device_buf;
+  dev_t *device_id_ptr;
+  struct wl_array formats_array;
+  unsigned int i;
+
+  wl_array_init (&target_device_buf);
+  device_id_ptr = wl_array_add (&target_device_buf, sizeof (*device_id_ptr));
+  *device_id_ptr = tranche->target_device_id;
+  zwp_linux_dmabuf_feedback_v1_send_tranche_target_device (resource,
+                                                           &target_device_buf);
+  wl_array_release (&target_device_buf);
+  zwp_linux_dmabuf_feedback_v1_send_tranche_flags (resource, tranche->flags);
+
+  wl_array_init (&formats_array);
+  for (i = 0; i < tranche->formats->len; i++)
+    {
+      MetaWaylandDmaBufFormat *format =
+        &g_array_index (tranche->formats, MetaWaylandDmaBufFormat, i);
+      uint16_t *format_index_ptr;
+
+      format_index_ptr = wl_array_add (&formats_array,
+                                       sizeof (*format_index_ptr));
+      *format_index_ptr = format->table_index;
+    }
+  zwp_linux_dmabuf_feedback_v1_send_tranche_formats (resource, &formats_array);
+  wl_array_release (&formats_array);
+
+  zwp_linux_dmabuf_feedback_v1_send_tranche_done (resource);
+}
+
+static void
+meta_wayland_dma_buf_feedback_send_format_table (MetaWaylandDmaBufFeedback *feedback,
+                                                 MetaWaylandDmaBufManager  *dma_buf_manager,
+                                                 struct wl_resource        *resource)
+{
+  size_t size;
+  int fd;
+
+  fd = meta_anonymous_file_open_fd (dma_buf_manager->format_table_file,
+                                    META_ANONYMOUS_FILE_MAPMODE_PRIVATE);
+  size = meta_anonymous_file_size (dma_buf_manager->format_table_file);
+  zwp_linux_dmabuf_feedback_v1_send_format_table (resource, fd, size);
+  meta_anonymous_file_close_fd (fd);
+}
+
+static void
+meta_wayland_dma_buf_feedback_send (MetaWaylandDmaBufFeedback *feedback,
+                                    MetaWaylandDmaBufManager  *dma_buf_manager,
+                                    struct wl_resource        *resource)
+{
+  struct wl_array main_device_buf;
+  dev_t *device_id_ptr;
+
+  wl_array_init (&main_device_buf);
+  device_id_ptr = wl_array_add (&main_device_buf, sizeof (*device_id_ptr));
+  *device_id_ptr = feedback->main_device_id;
+  zwp_linux_dmabuf_feedback_v1_send_main_device (resource, &main_device_buf);
+  wl_array_release (&main_device_buf);
+
+  g_list_foreach (feedback->tranches,
+                  (GFunc) meta_wayland_dma_buf_tranche_send,
+                  resource);
+
+  zwp_linux_dmabuf_feedback_v1_send_done (resource);
+}
+
+static void
+meta_wayland_dma_buf_feedback_add_tranche (MetaWaylandDmaBufFeedback *feedback,
+                                           MetaWaylandDmaBufTranche  *tranche)
+{
+  feedback->tranches = g_list_insert_sorted (feedback->tranches, tranche,
+                                             compare_tranches);
+}
+
+static MetaWaylandDmaBufFeedback *
+meta_wayland_dma_buf_feedback_new (dev_t device_id)
+{
+  MetaWaylandDmaBufFeedback *feedback;
+
+  feedback = g_new0 (MetaWaylandDmaBufFeedback, 1);
+  feedback->main_device_id = device_id;
+
+  return feedback;
+}
+
+static void
+meta_wayland_dma_buf_feedback_free (MetaWaylandDmaBufFeedback *feedback)
+{
+  g_clear_list (&feedback->tranches,
+                (GDestroyNotify) meta_wayland_dma_buf_tranche_free);
+  g_free (feedback);
+}
+
+static void
+feedback_destroy (struct wl_client   *client,
+                  struct wl_resource *resource)
+{
+  wl_resource_destroy (resource);
+}
+
+static const struct zwp_linux_dmabuf_feedback_v1_interface feedback_implementation =
+{
+  feedback_destroy,
+};
+
+static void
+send_default_feedback (MetaWaylandDmaBufManager *dma_buf_manager,
+                       struct wl_client         *client,
+                       struct wl_resource       *dma_buf_resource,
+                       uint32_t                  feedback_id)
+{
+  struct wl_resource *feedback_resource;
+
+  feedback_resource =
+    wl_resource_create (client,
+                        &zwp_linux_dmabuf_feedback_v1_interface,
+                        wl_resource_get_version (dma_buf_resource),
+                        feedback_id);
+  wl_resource_set_implementation (feedback_resource,
+                                  &feedback_implementation,
+                                  NULL, NULL);
+
+  meta_wayland_dma_buf_feedback_send_format_table (dma_buf_manager->default_feedback,
+                                                   dma_buf_manager,
+                                                   feedback_resource);
+  meta_wayland_dma_buf_feedback_send (dma_buf_manager->default_feedback,
+                                      dma_buf_manager,
+                                      feedback_resource);
+}
+
+static void
+dma_buf_handle_get_default_feedback (struct wl_client   *client,
+                                     struct wl_resource *dma_buf_resource,
+                                     uint32_t            feedback_id)
+{
+  MetaWaylandDmaBufManager *dma_buf_manager =
+    wl_resource_get_user_data (dma_buf_resource);
+  pid_t pid = 0;
+
+  wl_client_get_credentials (client, &pid, NULL, NULL);
+  g_warning ("DMABUF: get_default_feedback (pid %d)", (int) pid);
+  send_default_feedback (dma_buf_manager, client, dma_buf_resource, feedback_id);
+}
+
+static void
+dma_buf_handle_get_surface_feedback (struct wl_client   *client,
+                                     struct wl_resource *dma_buf_resource,
+                                     uint32_t            feedback_id,
+                                     struct wl_resource *surface_resource)
+{
+  MetaWaylandDmaBufManager *dma_buf_manager =
+    wl_resource_get_user_data (dma_buf_resource);
+  pid_t pid = 0;
+
+  wl_client_get_credentials (client, &pid, NULL, NULL);
+  g_warning ("DMABUF: get_surface_feedback (pid %d)", (int) pid);
+  /* Phase 1: per-surface feedback is identical to the default feedback. */
+  send_default_feedback (dma_buf_manager, client, dma_buf_resource, feedback_id);
+}
+
 static const struct zwp_linux_dmabuf_v1_interface dma_buf_implementation =
 {
   dma_buf_handle_destroy,
   dma_buf_handle_create_buffer_params,
+  dma_buf_handle_get_default_feedback,
+  dma_buf_handle_get_surface_feedback,
 };
 
 static gboolean
@@ -691,13 +951,20 @@ dma_buf_bind (struct wl_client *client,
               uint32_t          version,
               uint32_t          id)
 {
-  MetaWaylandCompositor *compositor = data;
+  MetaWaylandDmaBufManager *dma_buf_manager = data;
   struct wl_resource *resource;
 
   resource = wl_resource_create (client, &zwp_linux_dmabuf_v1_interface,
                                  version, id);
   wl_resource_set_implementation (resource, &dma_buf_implementation,
-                                  compositor, NULL);
+                                  dma_buf_manager, NULL);
+
+  /* Clients binding at version 4 or later request format/modifier information
+   * through the feedback interface instead; only the legacy format/modifier
+   * events are sent at bind time for older clients. */
+  if (version >= ZWP_LINUX_DMABUF_V1_GET_DEFAULT_FEEDBACK_SINCE_VERSION)
+    return;
+
   send_modifiers (resource, DRM_FORMAT_ARGB8888);
   send_modifiers (resource, DRM_FORMAT_ABGR8888);
   send_modifiers (resource, DRM_FORMAT_XRGB8888);
@@ -711,39 +978,343 @@ dma_buf_bind (struct wl_client *client,
   send_modifiers (resource, DRM_FORMAT_ARGB16161616F);
 }
 
+static void
+add_format (MetaWaylandDmaBufManager *dma_buf_manager,
+            EGLDisplay                egl_display,
+            uint32_t                  drm_format)
+{
+  MetaBackend *backend = meta_get_backend ();
+  MetaEgl *egl = meta_backend_get_egl (backend);
+  EGLint num_modifiers;
+  g_autofree EGLuint64KHR *modifiers = NULL;
+  g_autoptr (GError) error = NULL;
+  int i;
+  int n_real = 0;
+  MetaWaylandDmaBufFormat format;
+
+  if (!should_send_modifiers (backend))
+    goto add_fallback;
+
+  /* First query the number of available modifiers, then allocate an array,
+   * then fill the array. */
+  if (!meta_egl_query_dma_buf_modifiers (egl, egl_display, drm_format, 0, NULL,
+                                         NULL, &num_modifiers, NULL))
+    goto add_fallback;
+
+  if (num_modifiers == 0)
+    goto add_fallback;
+
+  modifiers = g_new0 (uint64_t, num_modifiers);
+  if (!meta_egl_query_dma_buf_modifiers (egl, egl_display, drm_format,
+                                         num_modifiers, modifiers, NULL,
+                                         &num_modifiers, &error))
+    {
+      g_warning ("Failed to query modifiers for format 0x%" PRIu32 ": %s",
+                 drm_format, error->message);
+      goto add_fallback;
+    }
+
+  n_real = num_modifiers;
+  for (i = 0; i < num_modifiers; i++)
+    {
+      format = (MetaWaylandDmaBufFormat) {
+        .drm_format = drm_format,
+        .drm_modifier = modifiers[i],
+        .table_index = dma_buf_manager->formats->len,
+      };
+      g_array_append_val (dma_buf_manager->formats, format);
+    }
+
+add_fallback:
+  format = (MetaWaylandDmaBufFormat) {
+    .drm_format = drm_format,
+    .drm_modifier = DRM_FORMAT_MOD_INVALID,
+    .table_index = dma_buf_manager->formats->len,
+  };
+  g_array_append_val (dma_buf_manager->formats, format);
+
+  g_warning ("DMABUF:   format '%.4s' (0x%08x): %d real modifier(s) + 1 fallback",
+             (const char *) &drm_format, drm_format, n_real);
+}
+
+/*
+ * This is the structure the data is expected to have in the shared memory file
+ * shared with clients, according to the Wayland Linux DMA buffer protocol.
+ * It's structured as 16 bytes (128 bits) per entry, where each entry consists
+ * of the following:
+ *
+ * [ 32 bit format  ][ 32 bit padding ][          64 bit modifier         ]
+ */
+typedef struct _MetaWaylandDmaBufFormatEntry
+{
+  uint32_t drm_format;
+  uint32_t unused_padding;
+  uint64_t drm_modifier;
+} MetaWaylandDmaBufFormatEntry;
+
+G_STATIC_ASSERT (sizeof (MetaWaylandDmaBufFormatEntry) == 16);
+G_STATIC_ASSERT (offsetof (MetaWaylandDmaBufFormatEntry, drm_format) == 0);
+G_STATIC_ASSERT (offsetof (MetaWaylandDmaBufFormatEntry, drm_modifier) == 8);
+
+static void
+init_format_table (MetaWaylandDmaBufManager *dma_buf_manager)
+{
+  g_autofree MetaWaylandDmaBufFormatEntry *format_table = NULL;
+  size_t size;
+  int i;
+
+  size = sizeof (MetaWaylandDmaBufFormatEntry) * dma_buf_manager->formats->len;
+  format_table = g_malloc0 (size);
+
+  for (i = 0; i < dma_buf_manager->formats->len; i++)
+    {
+      MetaWaylandDmaBufFormat *format =
+        &g_array_index (dma_buf_manager->formats, MetaWaylandDmaBufFormat, i);
+
+      format_table[i].drm_format = format->drm_format;
+      format_table[i].drm_modifier = format->drm_modifier;
+    }
+
+  dma_buf_manager->format_table_file =
+    meta_anonymous_file_new (size, (uint8_t *) format_table);
+}
+
+/*
+ * The set of formats the compositor is able to sample from as textures, kept in
+ * sync with meta_wayland_dma_buf_realize_texture(). For each, the importable
+ * modifiers are queried from EGL.
+ */
+static const uint32_t supported_formats[] = {
+  DRM_FORMAT_ARGB8888,
+  DRM_FORMAT_ABGR8888,
+  DRM_FORMAT_XRGB8888,
+  DRM_FORMAT_XBGR8888,
+  DRM_FORMAT_ARGB2101010,
+  DRM_FORMAT_XRGB2101010,
+  DRM_FORMAT_RGB565,
+  DRM_FORMAT_ABGR16161616F,
+  DRM_FORMAT_XBGR16161616F,
+  DRM_FORMAT_XRGB16161616F,
+  DRM_FORMAT_ARGB16161616F,
+};
+
+static gboolean
+init_formats (MetaWaylandDmaBufManager  *dma_buf_manager,
+              EGLDisplay                 egl_display,
+              GError                   **error)
+{
+  size_t i;
+
+  dma_buf_manager->formats = g_array_new (FALSE, FALSE,
+                                          sizeof (MetaWaylandDmaBufFormat));
+
+  g_warning ("DMABUF: building format table (should_send_modifiers=%s)",
+             should_send_modifiers (meta_get_backend ()) ? "yes" : "no");
+
+  for (i = 0; i < G_N_ELEMENTS (supported_formats); i++)
+    add_format (dma_buf_manager, egl_display, supported_formats[i]);
+
+  if (dma_buf_manager->formats->len == 0)
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_FAILED,
+                   "No supported DRM formats detected");
+      return FALSE;
+    }
+
+  g_warning ("DMABUF: format table built: %u formats -> %u total pairs",
+             (unsigned) G_N_ELEMENTS (supported_formats),
+             dma_buf_manager->formats->len);
+
+  init_format_table (dma_buf_manager);
+  return TRUE;
+}
+
+static void
+init_default_feedback (MetaWaylandDmaBufManager *dma_buf_manager)
+{
+  MetaWaylandDmaBufTranche *tranche;
+
+  dma_buf_manager->default_feedback =
+    meta_wayland_dma_buf_feedback_new (dma_buf_manager->main_device_id);
+
+  tranche =
+    meta_wayland_dma_buf_tranche_new (dma_buf_manager->main_device_id,
+                                      dma_buf_manager->formats,
+                                      META_WAYLAND_DMA_BUF_TRANCHE_PRIORITY_DEFAULT,
+                                      META_WAYLAND_DMA_BUF_TRANCHE_FLAG_NONE);
+  meta_wayland_dma_buf_feedback_add_tranche (dma_buf_manager->default_feedback,
+                                             tranche);
+}
+
+static dev_t
+get_main_device_id (void)
+{
+  dev_t device_id = 0;
+
+#ifdef HAVE_NATIVE_BACKEND
+  MetaBackend *backend = meta_get_backend ();
+
+  if (META_IS_BACKEND_NATIVE (backend))
+    {
+      MetaRenderer *renderer = meta_backend_get_renderer (backend);
+      MetaRendererNative *renderer_native = META_RENDERER_NATIVE (renderer);
+      MetaGpuKms *gpu_kms;
+      GList *gpus, *l;
+
+      gpu_kms = meta_renderer_native_get_primary_gpu (renderer_native);
+
+      /* DMABUF-DEBUG: dump GPU topology so we can see the primary selection on
+       * multi-GPU (PRIME) systems. */
+      gpus = meta_backend_get_gpus (backend);
+      g_warning ("DMABUF: native backend, %u GPU(s):", g_list_length (gpus));
+      for (l = gpus; l; l = l->next)
+        {
+          MetaGpuKms *gpu = META_GPU_KMS (l->data);
+
+          g_warning ("DMABUF:   GPU %s%s",
+                     meta_gpu_kms_get_file_path (gpu),
+                     gpu == gpu_kms ? "  [PRIMARY]" : "");
+        }
+
+      if (gpu_kms)
+        {
+          char *render_node;
+          const char *device_path;
+          struct stat device_stat;
+
+          render_node = drmGetRenderDeviceNameFromFd (meta_gpu_kms_get_fd (gpu_kms));
+          device_path = render_node ? render_node
+                                    : meta_gpu_kms_get_file_path (gpu_kms);
+          g_warning ("DMABUF: primary device path = %s (render node %s)",
+                     device_path,
+                     render_node ? "available" : "unavailable, using card node");
+
+          if (device_path && stat (device_path, &device_stat) == 0)
+            {
+              device_id = device_stat.st_rdev;
+              g_warning ("DMABUF: resolved main_device = %u:%u",
+                         major (device_id), minor (device_id));
+            }
+          else if (device_path)
+            {
+              g_warning ("DMABUF: failed to stat main device '%s': %s",
+                         device_path, g_strerror (errno));
+            }
+
+          free (render_node);
+        }
+      else
+        {
+          g_warning ("DMABUF: no primary GPU; main_device unset (v3 fallback)");
+        }
+    }
+  else
+    {
+      g_warning ("DMABUF: non-native backend; main_device unset (v3 fallback)");
+    }
+#else
+  g_warning ("DMABUF: built without native backend; main_device unset (v3 fallback)");
+#endif
+
+  return device_id;
+}
+
 /**
- * meta_wayland_dma_buf_init:
+ * meta_wayland_dma_buf_manager_new:
  * @compositor: The #MetaWaylandCompositor
  *
  * Creates the global Wayland object that exposes the linux-dmabuf protocol.
  *
- * Returns: Whether the initialization was succesfull. If this is %FALSE,
- * clients won't be able to use the linux-dmabuf protocol to pass buffers.
+ * Returns: (transfer full): The #MetaWaylandDmaBufManager instance, or %NULL on
+ * error (in which case clients won't be able to use the linux-dmabuf protocol).
  */
-gboolean
-meta_wayland_dma_buf_init (MetaWaylandCompositor *compositor)
+MetaWaylandDmaBufManager *
+meta_wayland_dma_buf_manager_new (MetaWaylandCompositor  *compositor,
+                                  GError                **error)
 {
   MetaBackend *backend = meta_get_backend ();
   MetaEgl *egl = meta_backend_get_egl (backend);
   ClutterBackend *clutter_backend = meta_backend_get_clutter_backend (backend);
   CoglContext *cogl_context = clutter_backend_get_cogl_context (clutter_backend);
   EGLDisplay egl_display = cogl_egl_context_get_egl_display (cogl_context);
+  int protocol_version;
+  g_autoptr (GError) local_error = NULL;
+  g_autoptr (MetaWaylandDmaBufManager) dma_buf_manager = NULL;
 
   g_assert (backend && egl && clutter_backend && cogl_context && egl_display);
 
   if (!meta_egl_has_extensions (egl, egl_display, NULL,
                                 "EGL_EXT_image_dma_buf_import_modifiers",
                                 NULL))
-    return FALSE;
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_NOT_SUPPORTED,
+                   "Missing 'EGL_EXT_image_dma_buf_import_modifiers'");
+      return NULL;
+    }
+
+  dma_buf_manager = g_object_new (META_TYPE_WAYLAND_DMA_BUF_MANAGER, NULL);
+  dma_buf_manager->compositor = compositor;
+  dma_buf_manager->main_device_id = get_main_device_id ();
+
+  /* Feedback (and thus the main device id) is only meaningful from version 4
+   * onwards; fall back to advertising v3 when we couldn't determine a device. */
+  protocol_version =
+    dma_buf_manager->main_device_id != 0 ? META_ZWP_LINUX_DMABUF_V1_VERSION : 3;
+
+  if (!init_formats (dma_buf_manager, egl_display, &local_error))
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_FAILED,
+                   "No supported formats detected: %s", local_error->message);
+      return NULL;
+    }
 
   if (!wl_global_create (compositor->wayland_display,
                          &zwp_linux_dmabuf_v1_interface,
-                         META_ZWP_LINUX_DMABUF_V1_VERSION,
-                         compositor,
+                         protocol_version,
+                         dma_buf_manager,
                          dma_buf_bind))
-    return FALSE;
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_FAILED,
+                   "Failed to create zwp_linux_dmabuf_v1 global");
+      return NULL;
+    }
 
-  return TRUE;
+  init_default_feedback (dma_buf_manager);
+
+  g_warning ("DMABUF: advertising zwp_linux_dmabuf_v1 version %d "
+             "(main_device %s)",
+             protocol_version,
+             dma_buf_manager->main_device_id != 0 ? "set" : "unset");
+
+  return g_steal_pointer (&dma_buf_manager);
+}
+
+static void
+meta_wayland_dma_buf_manager_finalize (GObject *object)
+{
+  MetaWaylandDmaBufManager *dma_buf_manager =
+    META_WAYLAND_DMA_BUF_MANAGER (object);
+
+  g_clear_pointer (&dma_buf_manager->format_table_file,
+                   meta_anonymous_file_free);
+  g_clear_pointer (&dma_buf_manager->formats, g_array_unref);
+  g_clear_pointer (&dma_buf_manager->default_feedback,
+                   meta_wayland_dma_buf_feedback_free);
+
+  G_OBJECT_CLASS (meta_wayland_dma_buf_manager_parent_class)->finalize (object);
+}
+
+static void
+meta_wayland_dma_buf_manager_class_init (MetaWaylandDmaBufManagerClass *klass)
+{
+  GObjectClass *object_class = G_OBJECT_CLASS (klass);
+
+  object_class->finalize = meta_wayland_dma_buf_manager_finalize;
+}
+
+static void
+meta_wayland_dma_buf_manager_init (MetaWaylandDmaBufManager *dma_buf_manager)
+{
 }
 
 static void
