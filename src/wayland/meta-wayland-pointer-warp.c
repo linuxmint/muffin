@@ -32,6 +32,7 @@
 struct _MetaWaylandPointerWarp
 {
   MetaWaylandSeat *seat;
+  struct wl_global *global;
   struct wl_list resource_list;
 };
 
@@ -121,10 +122,10 @@ meta_wayland_pointer_warp_new (MetaWaylandSeat *seat)
   pointer_warp->seat = seat;
   wl_list_init (&pointer_warp->resource_list);
 
-  wl_global_create (compositor->wayland_display,
-                    &wp_pointer_warp_v1_interface,
-                    META_WP_POINTER_WARP_VERSION,
-                    pointer_warp, bind_pointer_warp);
+  pointer_warp->global = wl_global_create (compositor->wayland_display,
+                                           &wp_pointer_warp_v1_interface,
+                                           META_WP_POINTER_WARP_VERSION,
+                                           pointer_warp, bind_pointer_warp);
 
   return pointer_warp;
 }
@@ -132,6 +133,7 @@ meta_wayland_pointer_warp_new (MetaWaylandSeat *seat)
 void
 meta_wayland_pointer_warp_destroy (MetaWaylandPointerWarp *pointer_warp)
 {
+  g_clear_pointer (&pointer_warp->global, wl_global_destroy);
   wl_list_remove (&pointer_warp->resource_list);
   g_free (pointer_warp);
 }

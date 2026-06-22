@@ -1296,7 +1296,7 @@ meta_x11_display_new (MetaDisplay *display, GError **error)
                                               xroot,
                                               PropertyChangeMask);
 
-  sprintf (buf, "WM_S%d", number);
+  snprintf (buf, sizeof (buf), "WM_S%d", number);
 
   wm_sn_atom = XInternAtom (xdisplay, buf, False);
   new_wm_sn_owner = take_manager_selection (x11_display, xroot, wm_sn_atom, timestamp, replace_current_wm);
