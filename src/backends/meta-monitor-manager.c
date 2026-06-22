@@ -259,6 +259,11 @@ calculate_monitor_scale (MetaMonitorManager *manager,
   MetaMonitorMode *monitor_mode;
 
   monitor_mode = meta_monitor_get_current_mode (monitor);
+  if (!monitor_mode)
+    {
+      g_warning ("Monitor has NULL mode in calculate_monitor_scale, using scale 1.0");
+      return 1.0f;
+    }
   return meta_monitor_manager_calculate_monitor_mode_scale (manager,
                                                             manager->layout_mode,
                                                             monitor,
@@ -281,6 +286,8 @@ meta_monitor_manager_is_scale_supported_by_other_monitors (MetaMonitorManager *m
         continue;
 
       mode = meta_monitor_get_current_mode (monitor);
+      if (!mode)
+        continue;
       if (!meta_monitor_manager_is_scale_supported (manager, manager->layout_mode,
                                                     monitor, mode, scale))
         return FALSE;
@@ -376,6 +383,8 @@ derive_scale_from_crtc (MetaMonitorManager *manager,
   threshold = 0.001f;
 
   monitor_mode = meta_monitor_get_current_mode (monitor);
+  if (!monitor_mode)
+    return FALSE;
   if (meta_monitor_manager_is_scale_supported_with_threshold (manager,
                                                               manager->layout_mode,
                                                               monitor,
