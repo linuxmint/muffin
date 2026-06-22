@@ -67,6 +67,11 @@
 // is 0.00000011920928955078 which is less than the difference of those two scales.
 #define CINNAMON_SCALE_EPSILON 0.000001f
 
+/* Accelerometer auto-rotation: gate it on tablet mode via this setting (see
+ * apply_orientation). The schema is owned by cinnamon-settings-daemon. */
+#define ORIENTATION_SCHEMA "org.cinnamon.settings-daemon.peripherals.touchscreen"
+#define DISABLE_LAPTOP_ROTATION_KEY "disable-rotation-in-laptop-mode"
+
 enum
 {
   PROP_0,
@@ -838,31 +843,64 @@ done:
 }
 
 static void
-orientation_changed (MetaOrientationManager *orientation_manager,
-                     MetaMonitorManager     *manager)
+apply_orientation (MetaMonitorManager *manager)
 {
+  MetaOrientationManager *orientation_manager =
+    meta_backend_get_orientation_manager (manager->backend);
   MetaMonitorTransform transform;
   GError *error = NULL;
   MetaMonitorsConfig *config;
+  gboolean gate_to_landscape = FALSE;
 
-  switch (meta_orientation_manager_get_orientation (orientation_manager))
+  /* The auto-rotation lock is the master switch. MetaOrientationManager only
+   * emits "orientation-changed" while unlocked, but touch_mode_changed() and
+   * disable_laptop_rotation_changed() call us directly, so the lock must be
+   * re-checked here — otherwise a fold/unfold (or toggling the laptop-mode key)
+   * could rotate the screen while the user has rotation locked. */
+  if (meta_orientation_manager_get_orientation_lock (orientation_manager))
+    return;
+
+  /* Evaluate the tablet-mode gate first, so laptop mode forces landscape even
+   * when the accelerometer reading is UNDEFINED (e.g. the panel laid flat, or a
+   * stale reading after the device was set down). ClutterSeat:touch-mode is TRUE
+   * exactly when a touchscreen is present and the device is in tablet mode or
+   * has no tablet-mode switch — i.e. the "should auto-rotate" condition. */
+  if (manager->orientation_settings &&
+      g_settings_get_boolean (manager->orientation_settings,
+                              DISABLE_LAPTOP_ROTATION_KEY))
     {
-    case META_ORIENTATION_NORMAL:
-      transform = META_MONITOR_TRANSFORM_NORMAL;
-      break;
-    case META_ORIENTATION_BOTTOM_UP:
-      transform = META_MONITOR_TRANSFORM_180;
-      break;
-    case META_ORIENTATION_LEFT_UP:
-      transform = META_MONITOR_TRANSFORM_90;
-      break;
-    case META_ORIENTATION_RIGHT_UP:
-      transform = META_MONITOR_TRANSFORM_270;
-      break;
+      ClutterSeat *seat =
+        clutter_backend_get_default_seat (clutter_get_default_backend ());
 
-    case META_ORIENTATION_UNDEFINED:
-    default:
-      return;
+      if (!clutter_seat_get_touch_mode (seat))
+        gate_to_landscape = TRUE;
+    }
+
+  if (gate_to_landscape)
+    {
+      transform = META_MONITOR_TRANSFORM_NORMAL;
+    }
+  else
+    {
+      switch (meta_orientation_manager_get_orientation (orientation_manager))
+        {
+        case META_ORIENTATION_NORMAL:
+          transform = META_MONITOR_TRANSFORM_NORMAL;
+          break;
+        case META_ORIENTATION_BOTTOM_UP:
+          transform = META_MONITOR_TRANSFORM_180;
+          break;
+        case META_ORIENTATION_LEFT_UP:
+          transform = META_MONITOR_TRANSFORM_90;
+          break;
+        case META_ORIENTATION_RIGHT_UP:
+          transform = META_MONITOR_TRANSFORM_270;
+          break;
+
+        case META_ORIENTATION_UNDEFINED:
+        default:
+          return;
+        }
     }
 
   config =
@@ -881,6 +919,67 @@ orientation_changed (MetaOrientationManager *orientation_manager,
       g_error_free (error);
     }
   g_object_unref (config);
+}
+
+static void
+orientation_changed (MetaOrientationManager *orientation_manager,
+                     MetaMonitorManager     *manager)
+{
+  apply_orientation (manager);
+}
+
+static void
+touch_mode_changed (ClutterSeat        *seat,
+                    GParamSpec         *pspec,
+                    MetaMonitorManager *manager)
+{
+  /* Fold/unfold changes tablet mode but not the accelerometer reading, so
+   * re-evaluate the gate to snap to/from landscape. */
+  apply_orientation (manager);
+}
+
+static void
+disable_laptop_rotation_changed (GSettings          *settings,
+                                 const char         *key,
+                                 MetaMonitorManager *manager)
+{
+  apply_orientation (manager);
+}
+
+static void
+setup_orientation_settings (MetaMonitorManager *manager)
+{
+  GSettingsSchemaSource *source;
+  GSettingsSchema *schema;
+  ClutterSeat *seat;
+
+  source = g_settings_schema_source_get_default ();
+  if (!source)
+    return;
+
+  schema = g_settings_schema_source_lookup (source, ORIENTATION_SCHEMA, TRUE);
+  if (!schema)
+    return;
+
+  /* Only gate when the key exists; otherwise keep the historical behaviour of
+   * always following the accelerometer (no tablet-mode gating). Connected here
+   * (from meta_monitor_manager_setup(), i.e. after clutter_init()) so the
+   * ClutterSeat is available. */
+  if (g_settings_schema_has_key (schema, DISABLE_LAPTOP_ROTATION_KEY))
+    {
+      manager->orientation_settings = g_settings_new (ORIENTATION_SCHEMA);
+      g_signal_connect_object (manager->orientation_settings,
+                               "changed::" DISABLE_LAPTOP_ROTATION_KEY,
+                               G_CALLBACK (disable_laptop_rotation_changed),
+                               manager, 0);
+
+      seat = clutter_backend_get_default_seat (clutter_get_default_backend ());
+      g_signal_connect_object (seat, "notify::touch-mode",
+                               G_CALLBACK (touch_mode_changed),
+                               manager, 0);
+    }
+
+  g_settings_schema_unref (schema);
 }
 
 static gboolean
@@ -991,6 +1090,11 @@ meta_monitor_manager_setup (MetaMonitorManager *manager)
 
   manager->config_manager = meta_monitor_config_manager_new (manager);
 
+  /* Connect accelerometer auto-rotation here (not in constructed()): this runs
+   * from meta_backend_real_post_init(), after init_clutter(), so the ClutterSeat
+   * needed for the tablet-mode gate exists, and config_manager is ready. */
+  setup_orientation_settings (manager);
+
   meta_monitor_manager_read_current_state (manager);
 
   meta_monitor_manager_ensure_initial_config (manager);
@@ -1060,6 +1164,7 @@ meta_monitor_manager_dispose (GObject *object)
 
   g_clear_object (&manager->display_config);
   g_clear_object (&manager->config_manager);
+  g_clear_object (&manager->orientation_settings);
 
   G_OBJECT_CLASS (meta_monitor_manager_parent_class)->dispose (object);
 }
