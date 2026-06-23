@@ -2366,6 +2366,8 @@ meta_renderer_native_init_egl_context (CoglContext *cogl_context,
   MetaRendererNativeGpuData *renderer_gpu_data = cogl_renderer_egl->platform;
 #endif
 
+  g_message ("GL renderer: %s", glGetString (GL_RENDERER));
+
   COGL_FLAGS_SET (cogl_context->features,
                   COGL_FEATURE_ID_PRESENTATION_TIME, TRUE);
   COGL_FLAGS_SET (cogl_context->features,
