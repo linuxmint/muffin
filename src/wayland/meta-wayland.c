@@ -39,6 +39,7 @@
 #include "wayland/meta-wayland-drm.h"
 #include "wayland/meta-wayland-egl-stream.h"
 #include "wayland/meta-wayland-idle-inhibit.h"
+#include "wayland/meta-wayland-fixes.h"
 #include "wayland/meta-wayland-inhibit-shortcuts-dialog.h"
 #include "wayland/meta-wayland-inhibit-shortcuts.h"
 #include "wayland/meta-wayland-legacy-xdg-foreign.h"
@@ -464,6 +465,7 @@ meta_wayland_compositor_setup (MetaWaylandCompositor *wayland_compositor)
   meta_wayland_xdg_toplevel_icon_init (compositor);
   meta_wayland_xapp_shell_init (compositor);
   meta_wayland_init_cursor_shape (compositor);
+  meta_wayland_init_fixes (compositor);
   meta_wayland_init_system_bell (compositor);
 
   /* Xwayland specific protocol, needs to be filtered out for all other clients */
