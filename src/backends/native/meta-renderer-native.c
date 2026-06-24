@@ -3803,21 +3803,33 @@ meta_renderer_native_create_renderer_gpu_data (MetaRendererNative  *renderer_nat
                                                MetaGpuKms          *gpu_kms,
                                                GError             **error)
 {
+  MetaRendererNativeGpuData *gbm_renderer_gpu_data;
   MetaRendererNativeGpuData *renderer_gpu_data;
   GError *gbm_error = NULL;
 #ifdef HAVE_EGL_DEVICE
   GError *egl_device_error = NULL;
 #endif
 
-  /* Try to initialize the GBM backend first. GBM provides better compatibility
-   * across different GPU vendors and has robust fallback mechanisms including
-   * software rendering when needed.
+  /* Try the GBM backend first; it works across GPU vendors and is the
+   * preferred path on modern NVIDIA drivers (>= 495, which introduced GBM
+   * support).
+   *
+   * create_renderer_gpu_data_gbm() reports success even when it could only set
+   * up a software (llvmpipe) fallback, signalled by a missing EGL display.
+   * That happens on a driver without GBM support -- e.g. a pre-495 NVIDIA
+   * driver obtained from outside the distribution. In that case prefer the
+   * EGLDevice (EGLStream) backend so those setups keep hardware acceleration,
+   * and fall back to the software GBM data only as a last resort, rather than
+   * silently compositing in software when a hardware path exists.
    */
-  renderer_gpu_data = create_renderer_gpu_data_gbm (renderer_native,
-                                                    gpu_kms,
-                                                    &gbm_error);
-  if (renderer_gpu_data)
-    return renderer_gpu_data;
+  gbm_renderer_gpu_data = create_renderer_gpu_data_gbm (renderer_native,
+                                                        gpu_kms,
+                                                        &gbm_error);
+  if (gbm_renderer_gpu_data &&
+      gbm_renderer_gpu_data->egl_display != EGL_NO_DISPLAY)
+    {
+      return gbm_renderer_gpu_data;
+    }
 
 #ifdef HAVE_EGL_DEVICE
   /* Fall back to EGLDevice backend (primarily for NVIDIA proprietary drivers
@@ -3828,10 +3840,29 @@ meta_renderer_native_create_renderer_gpu_data (MetaRendererNative  *renderer_nat
                                                            &egl_device_error);
   if (renderer_gpu_data)
     {
-      g_error_free (gbm_error);
+      g_clear_error (&gbm_error);
+      g_clear_error (&egl_device_error);
+      g_clear_pointer (&gbm_renderer_gpu_data,
+                       meta_renderer_native_gpu_data_free);
+      g_message ("RENDERER: %s -> EGLDevice/EGLStream (GBM had no hardware EGL display)",
+                 meta_gpu_kms_get_file_path (gpu_kms));
       return renderer_gpu_data;
     }
 #endif
+
+  /* No hardware-accelerated backend was available; use the software GBM data
+   * if we managed to create it. */
+  if (gbm_renderer_gpu_data)
+    {
+      g_clear_error (&gbm_error);
+#ifdef HAVE_EGL_DEVICE
+      g_clear_error (&egl_device_error);
+#endif
+      g_warning ("RENDERER: %s -> GBM (SOFTWARE/llvmpipe) - no hardware "
+                 "backend available",
+                 meta_gpu_kms_get_file_path (gpu_kms));
+      return gbm_renderer_gpu_data;
+    }
 
   g_set_error (error, G_IO_ERROR,
                G_IO_ERROR_FAILED,
