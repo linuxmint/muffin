@@ -987,6 +987,17 @@ meta_wayland_layer_surface_dispose (GObject *object)
     g_object_remove_weak_pointer (G_OBJECT (layer_surface->output),
                                   (gpointer *) &layer_surface->output);
 
+  /* The wl_resource and this role object have independent lifetimes. If the
+   * object is finalized first (e.g. an abrupt client disconnect tears down the
+   * wl_surface, and thus this role, before the layer-surface resource), detach
+   * the resource so layer_surface_resource_destroyed() does not dereference and
+   * free()-twice this now-dead object. */
+  if (layer_surface->resource)
+    {
+      wl_resource_set_user_data (layer_surface->resource, NULL);
+      layer_surface->resource = NULL;
+    }
+
   g_clear_pointer (&layer_surface->namespace, g_free);
 
   G_OBJECT_CLASS (meta_wayland_layer_surface_parent_class)->dispose (object);
