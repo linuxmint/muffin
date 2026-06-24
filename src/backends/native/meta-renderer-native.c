@@ -102,6 +102,7 @@ typedef struct _MetaRendererNativeGpuData
 
   struct {
     struct gbm_device *device;
+    int fd;
   } gbm;
 
 #ifdef HAVE_EGL_DEVICE
@@ -283,6 +284,8 @@ meta_renderer_native_gpu_data_free (MetaRendererNativeGpuData *renderer_gpu_data
     meta_egl_terminate (egl, renderer_gpu_data->egl_display, NULL);
 
   g_clear_pointer (&renderer_gpu_data->gbm.device, gbm_device_destroy);
+  if (renderer_gpu_data->gbm.fd >= 0)
+    close (renderer_gpu_data->gbm.fd);
   g_free (renderer_gpu_data);
 }
 
@@ -322,7 +325,9 @@ meta_renderer_native_get_primary_gpu (MetaRendererNative *renderer_native)
 static MetaRendererNativeGpuData *
 meta_create_renderer_native_gpu_data (MetaGpuKms *gpu_kms)
 {
-  return g_new0 (MetaRendererNativeGpuData, 1);
+  MetaRendererNativeGpuData *data = g_new0 (MetaRendererNativeGpuData, 1);
+  data->gbm.fd = -1;
+  return data;
 }
 
 static MetaEgl *
@@ -3444,6 +3449,7 @@ init_secondary_gpu_data_gpu (MetaRendererNativeGpuData *renderer_gpu_data,
     }
 
   renderer_str = (const char *) glGetString (GL_RENDERER);
+  g_message ("GL renderer: %s", renderer_str);
   if (g_str_has_prefix (renderer_str, "llvmpipe") ||
       g_str_has_prefix (renderer_str, "softpipe") ||
       g_str_has_prefix (renderer_str, "swrast"))
@@ -3571,12 +3577,34 @@ create_renderer_gpu_data_gbm (MetaRendererNative  *renderer_native,
 {
   struct gbm_device *gbm_device;
   int kms_fd;
+  int gbm_fd = -1;
+  char *render_node_path;
   MetaRendererNativeGpuData *renderer_gpu_data;
   g_autoptr (GError) local_error = NULL;
 
   kms_fd = meta_gpu_kms_get_fd (gpu_kms);
 
-  gbm_device = gbm_create_device (kms_fd);
+  /* Open the render node directly so GBM gets a clean fd with no KMS client
+   * caps set on it. This matches how wlroots-based compositors initialize
+   * rendering and avoids hardware-specific issues with reusing the KMS fd. */
+  render_node_path = drmGetRenderDeviceNameFromFd (kms_fd);
+  if (render_node_path)
+    {
+      do
+        gbm_fd = open (render_node_path, O_RDWR | O_CLOEXEC);
+      while (gbm_fd < 0 && errno == EINTR);
+      free (render_node_path);
+    }
+
+  gbm_device = gbm_create_device (gbm_fd >= 0 ? gbm_fd : kms_fd);
+  if (!gbm_device && gbm_fd >= 0)
+    {
+      g_warning ("Failed to create gbm device from render node, retrying with primary fd");
+      close (gbm_fd);
+      gbm_fd = -1;
+      gbm_device = gbm_create_device (kms_fd);
+    }
+
   if (!gbm_device)
     {
       g_set_error (error, G_IO_ERROR,
@@ -3588,6 +3616,7 @@ create_renderer_gpu_data_gbm (MetaRendererNative  *renderer_native,
   renderer_gpu_data = meta_create_renderer_native_gpu_data (gpu_kms);
   renderer_gpu_data->renderer_native = renderer_native;
   renderer_gpu_data->gbm.device = gbm_device;
+  renderer_gpu_data->gbm.fd = gbm_fd;
   renderer_gpu_data->mode = META_RENDERER_NATIVE_MODE_GBM;
 
   renderer_gpu_data->egl_display = init_gbm_egl_display (renderer_native,
@@ -3595,9 +3624,9 @@ create_renderer_gpu_data_gbm (MetaRendererNative  *renderer_native,
                                                          &local_error);
   if (renderer_gpu_data->egl_display == EGL_NO_DISPLAY)
     {
-      g_debug ("GBM EGL init for %s failed: %s",
-               meta_gpu_kms_get_file_path (gpu_kms),
-               local_error->message);
+      g_warning ("GBM EGL init for %s failed: %s",
+                 meta_gpu_kms_get_file_path (gpu_kms),
+                 local_error->message);
 
       init_secondary_gpu_data_cpu (renderer_gpu_data);
       return renderer_gpu_data;

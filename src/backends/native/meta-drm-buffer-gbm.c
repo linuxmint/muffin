@@ -27,6 +27,9 @@
 
 #include <drm_fourcc.h>
 #include <errno.h>
+#include <fcntl.h>
+#include <gbm.h>
+#include <unistd.h>
 #include <xf86drm.h>
 #include <xf86drmMode.h>
 
@@ -57,6 +60,13 @@ meta_drm_buffer_gbm_get_bo (MetaDrmBufferGbm *buffer_gbm)
   return buffer_gbm->bo;
 }
 
+static void
+close_kms_handle (int kms_fd, uint32_t handle)
+{
+  struct drm_gem_close args = { .handle = handle };
+  drmIoctl (kms_fd, DRM_IOCTL_GEM_CLOSE, &args);
+}
+
 static gboolean
 init_fb_id (MetaDrmBufferGbm  *buffer_gbm,
             struct gbm_bo     *bo,
@@ -64,27 +74,79 @@ init_fb_id (MetaDrmBufferGbm  *buffer_gbm,
             GError           **error)
 {
   MetaGpuKmsFBArgs fb_args = { 0, };
+  int gbm_fd = gbm_device_get_fd (gbm_bo_get_device (bo));
+  int kms_fd = meta_gpu_kms_get_fd (buffer_gbm->gpu_kms);
+  gboolean need_prime = (gbm_fd != kms_fd);
+  uint32_t imported_handles[4] = { 0, 0, 0, 0 };
+  int n_imported = 0;
+  int i;
 
   if (gbm_bo_get_handle_for_plane (bo, 0).s32 == -1)
     {
       /* Failed to fetch handle to plane, falling back to old method */
       fb_args.strides[0] = gbm_bo_get_stride (bo);
-      fb_args.handles[0] = gbm_bo_get_handle (bo).u32;
       fb_args.offsets[0] = 0;
       fb_args.modifiers[0] = DRM_FORMAT_MOD_INVALID;
+
+      if (need_prime)
+        {
+          int prime_fd = -1;
+          if (drmPrimeHandleToFD (gbm_fd, gbm_bo_get_handle (bo).u32,
+                                   DRM_CLOEXEC, &prime_fd) != 0 ||
+              drmPrimeFDToHandle (kms_fd, prime_fd, &imported_handles[0]) != 0)
+            {
+              if (prime_fd >= 0)
+                close (prime_fd);
+              g_set_error (error, G_IO_ERROR, g_io_error_from_errno (errno),
+                           "Failed to import GBM buffer via prime: %s",
+                           g_strerror (errno));
+              return FALSE;
+            }
+          close (prime_fd);
+          n_imported = 1;
+          fb_args.handles[0] = imported_handles[0];
+        }
+      else
+        {
+          fb_args.handles[0] = gbm_bo_get_handle (bo).u32;
+        }
     }
   else
     {
-      int i;
+      int n_planes = gbm_bo_get_plane_count (bo);
 
-      for (i = 0; i < gbm_bo_get_plane_count (bo); i++)
+      for (i = 0; i < n_planes; i++)
         {
           fb_args.strides[i] = gbm_bo_get_stride_for_plane (bo, i);
-          fb_args.handles[i] = gbm_bo_get_handle_for_plane (bo, i).u32;
           fb_args.offsets[i] = gbm_bo_get_offset (bo, i);
           fb_args.modifiers[i] = gbm_bo_get_modifier (bo);
+
+          if (need_prime)
+            {
+              int prime_fd = -1;
+              if (drmPrimeHandleToFD (gbm_fd,
+                                       gbm_bo_get_handle_for_plane (bo, i).u32,
+                                       DRM_CLOEXEC, &prime_fd) != 0 ||
+                  drmPrimeFDToHandle (kms_fd, prime_fd,
+                                       &imported_handles[i]) != 0)
+                {
+                  if (prime_fd >= 0)
+                    close (prime_fd);
+                  g_set_error (error, G_IO_ERROR, g_io_error_from_errno (errno),
+                               "Failed to import GBM buffer plane %d via prime: %s",
+                               i, g_strerror (errno));
+                  goto out_close_imported;
+                }
+              close (prime_fd);
+              n_imported = i + 1;
+              fb_args.handles[i] = imported_handles[i];
+            }
+          else
+            {
+              fb_args.handles[i] = gbm_bo_get_handle_for_plane (bo, i).u32;
+            }
         }
-     }
+    }
 
   fb_args.width = gbm_bo_get_width (bo);
   fb_args.height = gbm_bo_get_height (bo);
@@ -94,8 +156,19 @@ init_fb_id (MetaDrmBufferGbm  *buffer_gbm,
                             use_modifiers,
                             &fb_args,
                             &buffer_gbm->fb_id, error))
-    return FALSE;
+    goto out_close_imported;
+
+  /* The kernel now holds a reference to the GEM objects via the FB;
+   * close our local imported handles. */
+  for (i = 0; i < n_imported; i++)
+    close_kms_handle (kms_fd, imported_handles[i]);
+
   return TRUE;
+
+out_close_imported:
+  for (i = 0; i < n_imported; i++)
+    close_kms_handle (kms_fd, imported_handles[i]);
+  return FALSE;
 }
 
 static gboolean
