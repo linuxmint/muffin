@@ -4002,6 +4002,18 @@ meta_display_get_desklets_above (MetaDisplay *display)
     return display->desklets_above;
 }
 
+/**
+ * meta_display_xinerama_index_to_logical_index:
+ * @display: a #MetaDisplay
+ * @x_index: a Xinerama monitor index
+ *
+ * Maps a Xinerama monitor index to a logical monitor index.
+ *
+ * Do not use in new code - the the xinerama and logical index
+ * are the same. (See 3eec6b63d6ba)
+ *
+ * Returns: the corresponding logical monitor index
+ */
 gint
 meta_display_xinerama_index_to_logical_index (MetaDisplay *display,
                                               gint         x_index)
@@ -4018,6 +4030,18 @@ meta_display_xinerama_index_to_logical_index (MetaDisplay *display,
     return monitor->number;
 }
 
+/**
+ * meta_display_logical_index_to_xinerama_index:
+ * @display: a #MetaDisplay
+ * @log_index: a logical monitor index
+ *
+ * Maps a logical monitor index to a Xinerama monitor index.
+ *
+ * Do not use in new code - the the xinerama and logical index
+ * are the same. (See 3eec6b63d6ba)
+ *
+ * Returns: the corresponding Xinerama monitor index
+ */
 gint
 meta_display_logical_index_to_xinerama_index (MetaDisplay *display,
                                               gint         log_index)
