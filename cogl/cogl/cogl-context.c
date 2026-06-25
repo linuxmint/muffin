@@ -309,7 +309,6 @@ cogl_context_new (CoglDisplay *display,
   for (i = 0; i < COGL_BUFFER_BIND_TARGET_COUNT; i++)
     context->current_buffer[i] = NULL;
 
-  context->current_path = NULL;
   context->stencil_pipeline = cogl_pipeline_new (context);
 
   context->quad_buffer_indices_byte = NULL;
@@ -356,9 +355,6 @@ _cogl_context_free (CoglContext *context)
   const CoglDriverVtable *driver = _cogl_context_get_driver (context);
 
   winsys->context_deinit (context);
-
-  if (context->current_path)
-    cogl_object_unref (context->current_path);
 
   if (context->default_gl_texture_2d_tex)
     cogl_object_unref (context->default_gl_texture_2d_tex);
