@@ -363,10 +363,26 @@ surface_process_damage (MetaWaylandSurface *surface,
     }
   else
     {
-      src_rect = (graphene_rect_t) {
-        .size.width = surface_rect.width * surface->scale,
-        .size.height = surface_rect.height * surface->scale,
-      };
+      if (surface->viewport.has_dst_size)
+        {
+          /* When wp_viewport sets a destination without a source rect, the
+           * viewport maps the full buffer to the dst size.  Surface damage
+           * (from wl_surface.damage) is in dst/logical coordinates and
+           * scaled_region is in dst * surface->scale coordinates. Use the
+           * full buffer as the source rectangle so meta_region_crop_and_scale()
+           * maps damage through the viewport transform to buffer coordinates. */
+          src_rect = (graphene_rect_t) {
+            .size.width = buffer_rect.width,
+            .size.height = buffer_rect.height,
+          };
+        }
+      else
+        {
+          src_rect = (graphene_rect_t) {
+            .size.width = surface_rect.width * surface->scale,
+            .size.height = surface_rect.height * surface->scale,
+          };
+        }
     }
   viewport_region = meta_region_crop_and_scale (scaled_region,
                                                 &src_rect,
