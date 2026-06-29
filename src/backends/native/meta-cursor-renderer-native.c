@@ -1374,7 +1374,7 @@ load_scaled_and_transformed_cursor_sprite (MetaCursorRendererNative *native,
                                              cursor_sprite,
                                              cairo_image_surface_get_data (surface),
                                              cairo_image_surface_get_width (surface),
-                                             cairo_image_surface_get_width (surface),
+                                             cairo_image_surface_get_height (surface),
                                              cairo_image_surface_get_stride (surface),
                                              gbm_format);
 
