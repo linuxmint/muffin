@@ -824,10 +824,7 @@ dma_buf_handle_get_default_feedback (struct wl_client   *client,
 {
   MetaWaylandDmaBufManager *dma_buf_manager =
     wl_resource_get_user_data (dma_buf_resource);
-  pid_t pid = 0;
 
-  wl_client_get_credentials (client, &pid, NULL, NULL);
-  g_warning ("DMABUF: get_default_feedback (pid %d)", (int) pid);
   send_default_feedback (dma_buf_manager, client, dma_buf_resource, feedback_id);
 }
 
@@ -839,10 +836,7 @@ dma_buf_handle_get_surface_feedback (struct wl_client   *client,
 {
   MetaWaylandDmaBufManager *dma_buf_manager =
     wl_resource_get_user_data (dma_buf_resource);
-  pid_t pid = 0;
 
-  wl_client_get_credentials (client, &pid, NULL, NULL);
-  g_warning ("DMABUF: get_surface_feedback (pid %d)", (int) pid);
   /* Phase 1: per-surface feedback is identical to the default feedback. */
   send_default_feedback (dma_buf_manager, client, dma_buf_resource, feedback_id);
 }
@@ -989,7 +983,6 @@ add_format (MetaWaylandDmaBufManager *dma_buf_manager,
   g_autofree EGLuint64KHR *modifiers = NULL;
   g_autoptr (GError) error = NULL;
   int i;
-  int n_real = 0;
   MetaWaylandDmaBufFormat format;
 
   if (!should_send_modifiers (backend))
@@ -1014,7 +1007,6 @@ add_format (MetaWaylandDmaBufManager *dma_buf_manager,
       goto add_fallback;
     }
 
-  n_real = num_modifiers;
   for (i = 0; i < num_modifiers; i++)
     {
       format = (MetaWaylandDmaBufFormat) {
@@ -1032,9 +1024,6 @@ add_fallback:
     .table_index = dma_buf_manager->formats->len,
   };
   g_array_append_val (dma_buf_manager->formats, format);
-
-  g_warning ("DMABUF:   format '%.4s' (0x%08x): %d real modifier(s) + 1 fallback",
-             (const char *) &drm_format, drm_format, n_real);
 }
 
 /*
@@ -1108,9 +1097,6 @@ init_formats (MetaWaylandDmaBufManager  *dma_buf_manager,
   dma_buf_manager->formats = g_array_new (FALSE, FALSE,
                                           sizeof (MetaWaylandDmaBufFormat));
 
-  g_warning ("DMABUF: building format table (should_send_modifiers=%s)",
-             should_send_modifiers (meta_get_backend ()) ? "yes" : "no");
-
   for (i = 0; i < G_N_ELEMENTS (supported_formats); i++)
     add_format (dma_buf_manager, egl_display, supported_formats[i]);
 
@@ -1121,9 +1107,11 @@ init_formats (MetaWaylandDmaBufManager  *dma_buf_manager,
       return FALSE;
     }
 
-  g_warning ("DMABUF: format table built: %u formats -> %u total pairs",
+  g_message ("DMABUF: format table built: %u formats -> %u total pairs "
+             "(modifiers=%s)",
              (unsigned) G_N_ELEMENTS (supported_formats),
-             dma_buf_manager->formats->len);
+             dma_buf_manager->formats->len,
+             should_send_modifiers (meta_get_backend ()) ? "yes" : "no");
 
   init_format_table (dma_buf_manager);
   return TRUE;
@@ -1163,15 +1151,15 @@ get_main_device_id (void)
 
       gpu_kms = meta_renderer_native_get_primary_gpu (renderer_native);
 
-      /* DMABUF-DEBUG: dump GPU topology so we can see the primary selection on
+      /* Report GPU topology so the primary selection is visible on
        * multi-GPU (PRIME) systems. */
       gpus = meta_backend_get_gpus (backend);
-      g_warning ("DMABUF: native backend, %u GPU(s):", g_list_length (gpus));
+      g_message ("DMABUF: native backend, %u GPU(s):", g_list_length (gpus));
       for (l = gpus; l; l = l->next)
         {
           MetaGpuKms *gpu = META_GPU_KMS (l->data);
 
-          g_warning ("DMABUF:   GPU %s%s",
+          g_message ("DMABUF:   GPU %s%s",
                      meta_gpu_kms_get_file_path (gpu),
                      gpu == gpu_kms ? "  [PRIMARY]" : "");
         }
@@ -1185,14 +1173,14 @@ get_main_device_id (void)
           render_node = drmGetRenderDeviceNameFromFd (meta_gpu_kms_get_fd (gpu_kms));
           device_path = render_node ? render_node
                                     : meta_gpu_kms_get_file_path (gpu_kms);
-          g_warning ("DMABUF: primary device path = %s (render node %s)",
+          g_message ("DMABUF: primary device path = %s (render node %s)",
                      device_path,
                      render_node ? "available" : "unavailable, using card node");
 
           if (device_path && stat (device_path, &device_stat) == 0)
             {
               device_id = device_stat.st_rdev;
-              g_warning ("DMABUF: resolved main_device = %u:%u",
+              g_message ("DMABUF: resolved main_device = %u:%u",
                          major (device_id), minor (device_id));
             }
           else if (device_path)
@@ -1210,10 +1198,10 @@ get_main_device_id (void)
     }
   else
     {
-      g_warning ("DMABUF: non-native backend; main_device unset (v3 fallback)");
+      g_message ("DMABUF: non-native backend; main_device unset (v3 fallback)");
     }
 #else
-  g_warning ("DMABUF: built without native backend; main_device unset (v3 fallback)");
+  g_message ("DMABUF: built without native backend; main_device unset (v3 fallback)");
 #endif
 
   return device_id;
@@ -1281,7 +1269,7 @@ meta_wayland_dma_buf_manager_new (MetaWaylandCompositor  *compositor,
 
   init_default_feedback (dma_buf_manager);
 
-  g_warning ("DMABUF: advertising zwp_linux_dmabuf_v1 version %d "
+  g_message ("DMABUF: advertising zwp_linux_dmabuf_v1 version %d "
              "(main_device %s)",
              protocol_version,
              dma_buf_manager->main_device_id != 0 ? "set" : "unset");
