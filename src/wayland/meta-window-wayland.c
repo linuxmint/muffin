@@ -1145,8 +1145,15 @@ meta_window_wayland_finish_move_resize (MetaWindow              *window,
 
     if (do_maximize_transition)
       {
+        /* This toggle exists only to emit a state transition; the window is
+         * already maximized and stays maximized, so there is nothing to
+         * animate. Suppress the compositor size-change effects, whose paired
+         * synchronous firing would otherwise corrupt the actor's size-change
+         * accounting before either effect gets a chance to run. */
+        window->compositor_skip_size_change = TRUE;
         meta_window_unmaximize (window, META_MAXIMIZE_BOTH);
         meta_window_maximize (window, META_MAXIMIZE_BOTH);
+        window->compositor_skip_size_change = FALSE;
       }
     else if (needs_reconfigure)
       {

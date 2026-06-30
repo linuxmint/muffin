@@ -326,6 +326,12 @@ struct _MetaWindow
    */
   guint pending_compositor_effect : 4; /* MetaCompEffect */
 
+  /* Suppress compositor size-change effects for a synthetic state
+   * transition (e.g. an immediate unmaximize/maximize toggle) where there
+   * is no visible resize to animate.
+   */
+  guint compositor_skip_size_change : 1;
+
   /* Iconic is the state in WM_STATE; happens for workspaces/shading
    * in addition to minimize
    */
