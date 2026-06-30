@@ -1734,8 +1734,22 @@ meta_wayland_xdg_surface_post_apply_state (MetaWaylandSurfaceRole  *surface_role
       meta_wayland_shell_surface_determine_geometry (shell_surface,
                                                      &pending->new_geometry,
                                                      &priv->geometry);
+
       if (priv->geometry.width == 0 || priv->geometry.height == 0)
         {
+          MetaWaylandSurface *surface =
+            meta_wayland_surface_role_get_surface (surface_role);
+
+          /* A client may commit window geometry before attaching its first
+           * buffer (e.g. answering an initial maximized configure). The
+           * geometry can't be resolved against an empty surface; defer
+           * silently until a buffer arrives rather than warning. */
+          if (!surface->buffer_ref->buffer)
+            {
+              priv->has_set_geometry = TRUE;
+              return;
+            }
+
           g_warning ("Invalid window geometry for xdg_surface@%d. Ignoring "
           "for now, but this will result in client termination "
           "in the future.",
