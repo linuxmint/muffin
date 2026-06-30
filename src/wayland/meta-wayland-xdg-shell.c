@@ -438,6 +438,7 @@ xdg_toplevel_set_maximized (struct wl_client   *client,
 {
   MetaWaylandSurface *surface = surface_from_xdg_toplevel_resource (resource);
   MetaWindow *window;
+  gboolean was_maximized;
 
   window = meta_wayland_surface_get_window (surface);
   if (!window)
@@ -446,8 +447,23 @@ xdg_toplevel_set_maximized (struct wl_client   *client,
   if (!window->has_maximize_func)
     return;
 
+  was_maximized = META_WINDOW_MAXIMIZED (window);
+
   meta_window_force_placement (window, TRUE);
+
+  /* If the window has not yet completed a configure-ack-commit cycle its
+   * renderer is not yet ready. Schedule a NOT_MAXIMIZED -> MAXIMIZED
+   * transition so clients that rely on an explicit transition update their
+   * maximize state. */
+  if (!was_maximized)
+    meta_window_wayland_schedule_maximize_transition (window);
+
   meta_window_maximize (window, META_MAXIMIZE_BOTH);
+
+  /* meta_window_maximize() is a no-op when already maximized, but the client
+   * still expects a configure in reply. */
+  if (was_maximized)
+    meta_window_wayland_maybe_send_configure (window);
 }
 
 static void

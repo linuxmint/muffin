@@ -62,6 +62,15 @@ struct _MetaWindowWayland
 
   gboolean has_been_shown;
 
+  /* Set when a client requests maximization before it has completed a
+   * configure-ack-commit cycle. Cleared and consumed in finish_move_resize to
+   * force a NOT_MAXIMIZED -> MAXIMIZED transition for clients that only update
+   * their maximize state after seeing an explicit state transition. */
+  gboolean needs_maximize_transition;
+
+  /* Becomes TRUE the first time the client acks a tracked configure. */
+  gboolean client_has_acked_configure;
+
   cairo_surface_t *icon;
   cairo_surface_t *mini_icon;
   gboolean icon_dirty;
@@ -995,6 +1004,7 @@ meta_window_wayland_finish_move_resize (MetaWindow              *window,
   MetaMoveResizeFlags flags;
   MetaWaylandWindowConfiguration *acked_configuration;
   gboolean is_window_being_resized;
+  gboolean needs_reconfigure = FALSE;
 
   /* new_geom is in the logical pixel coordinate space, but MetaWindow wants its
    * rects to represent what in turn will end up on the stage, i.e. we need to
@@ -1019,6 +1029,9 @@ meta_window_wayland_finish_move_resize (MetaWindow              *window,
   flags = META_MOVE_RESIZE_WAYLAND_FINISH_MOVE_RESIZE;
 
   acked_configuration = acquire_acked_configuration (wl_window, pending);
+
+  if (acked_configuration)
+    wl_window->client_has_acked_configure = TRUE;
 
   /* x/y are ignored when we're doing interactive resizing */
   is_window_being_resized = (meta_grab_op_is_resizing (display->grab_op) &&
@@ -1067,6 +1080,42 @@ meta_window_wayland_finish_move_resize (MetaWindow              *window,
     rect.x += dx;
     rect.y += dy;
 
+  /* For fixed-size states the compositor controls the size; the client must
+   * use what was configured. If it committed different dimensions (e.g. a
+   * stale saved size from a previous session), override with the expected
+   * size so we don't corrupt last_sent_rect and trigger a wrong configure. */
+  if (META_WINDOW_MAXIMIZED (window) ||
+      meta_window_is_fullscreen (window) ||
+      window->tile_mode != META_TILE_NONE)
+    {
+      int expected_w, expected_h;
+
+      if (acked_configuration && acked_configuration->has_size)
+        {
+          expected_w = acked_configuration->width;
+          expected_h = acked_configuration->height;
+        }
+      else if (wl_window->has_last_sent_configuration)
+        {
+          expected_w = wl_window->last_sent_rect.width;
+          expected_h = wl_window->last_sent_rect.height;
+        }
+      else
+        {
+          expected_w = new_geom.width;
+          expected_h = new_geom.height;
+        }
+
+      if (new_geom.width != expected_w || new_geom.height != expected_h)
+        {
+          rect.x = wl_window->last_sent_rect.x;
+          rect.y = wl_window->last_sent_rect.y;
+          rect.width = expected_w;
+          rect.height = expected_h;
+          needs_reconfigure = TRUE;
+        }
+    }
+
   if (rect.x != window->rect.x || rect.y != window->rect.y)
     flags |= META_MOVE_RESIZE_MOVE_ACTION;
 
@@ -1084,6 +1133,26 @@ meta_window_wayland_finish_move_resize (MetaWindow              *window,
   else
     gravity = META_GRAVITY_STATIC;
   meta_window_move_resize_internal (window, flags, gravity, rect);
+
+  /* Force a NOT_MAXIMIZED -> MAXIMIZED configure transition for clients that
+   * need it to fire their 'maximize' event. Triggered when the client requested
+   * maximization before completing its first configure-ack-commit cycle. */
+  {
+    gboolean do_maximize_transition =
+      META_WINDOW_MAXIMIZED (window) && wl_window->needs_maximize_transition;
+
+    wl_window->needs_maximize_transition = FALSE;
+
+    if (do_maximize_transition)
+      {
+        meta_window_unmaximize (window, META_MAXIMIZE_BOTH);
+        meta_window_maximize (window, META_MAXIMIZE_BOTH);
+      }
+    else if (needs_reconfigure)
+      {
+        surface_state_changed (window);
+      }
+  }
 
   g_clear_pointer (&acked_configuration, meta_wayland_window_configuration_free);
 }
@@ -1278,4 +1347,24 @@ meta_window_wayland_get_max_size (MetaWindow *window,
 
   scale = 1.0 / (float) meta_window_wayland_get_geometry_scale (window);
   scale_size (width, height, scale);
+}
+
+void
+meta_window_wayland_maybe_send_configure (MetaWindow *window)
+{
+  MetaWindowWayland *wl_window = META_WINDOW_WAYLAND (window);
+
+  if (!wl_window->has_last_sent_configuration)
+    return;
+
+  surface_state_changed (window);
+}
+
+void
+meta_window_wayland_schedule_maximize_transition (MetaWindow *window)
+{
+  MetaWindowWayland *wl_window = META_WINDOW_WAYLAND (window);
+
+  if (!wl_window->client_has_acked_configure)
+    wl_window->needs_maximize_transition = TRUE;
 }

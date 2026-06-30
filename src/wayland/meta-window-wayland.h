@@ -81,4 +81,7 @@ void meta_window_wayland_set_custom_icon (MetaWindow      *window,
                                           cairo_surface_t *icon,
                                           cairo_surface_t *mini_icon);
 
+void meta_window_wayland_maybe_send_configure (MetaWindow *window);
+void meta_window_wayland_schedule_maximize_transition (MetaWindow *window);
+
 #endif
