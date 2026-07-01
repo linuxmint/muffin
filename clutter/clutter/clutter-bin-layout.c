@@ -406,8 +406,7 @@ get_actor_align_factor (ClutterActorAlign alignment)
 static void
 clutter_bin_layout_allocate (ClutterLayoutManager   *manager,
                              ClutterContainer       *container,
-                             const ClutterActorBox  *allocation,
-                             ClutterAllocationFlags  flags)
+                             const ClutterActorBox  *allocation)
 {
   gfloat allocation_x, allocation_y;
   gfloat available_w, available_h;
@@ -515,8 +514,7 @@ clutter_bin_layout_allocate (ClutterLayoutManager   *manager,
 
       clutter_actor_allocate_align_fill (child, &child_alloc,
                                          x_align, y_align,
-                                         x_fill, y_fill,
-                                         flags);
+                                         x_fill, y_fill);
     }
 }
 

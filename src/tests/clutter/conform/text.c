@@ -475,8 +475,7 @@ validate_markup_attributes (ClutterText   *text,
           PangoAttrFloat *scale = (PangoAttrFloat*) a;
           float resource_scale;
 
-          if (!clutter_actor_get_resource_scale (CLUTTER_ACTOR (text), &resource_scale))
-            resource_scale = 1.0;
+          resource_scale = clutter_actor_get_resource_scale (CLUTTER_ACTOR (text));
 
           g_assert_cmpfloat (scale->value, ==, resource_scale);
           g_slist_free_full (attributes, (GDestroyNotify) pango_attribute_destroy);

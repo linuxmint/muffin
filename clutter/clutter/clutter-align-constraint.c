@@ -85,8 +85,7 @@ G_DEFINE_TYPE (ClutterAlignConstraint,
 
 static void
 source_position_changed (ClutterActor           *actor,
-                         const ClutterActorBox  *allocation,
-                         ClutterAllocationFlags  flags,
+                         GParamSpec             *pspec,
                          ClutterAlignConstraint *align)
 {
   if (align->actor != NULL)
@@ -410,7 +409,7 @@ clutter_align_constraint_set_source (ClutterAlignConstraint *align,
   align->source = source;
   if (align->source != NULL)
     {
-      g_signal_connect (align->source, "allocation-changed",
+      g_signal_connect (align->source, "notify::allocation",
                         G_CALLBACK (source_position_changed),
                         align);
       g_signal_connect (align->source, "destroy",

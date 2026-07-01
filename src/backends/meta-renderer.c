@@ -153,6 +153,19 @@ meta_renderer_real_rebuild_views (MetaRenderer *renderer)
     {
       MetaLogicalMonitor *logical_monitor = l->data;
 
+      if (meta_logical_monitor_is_primary (logical_monitor))
+        {
+          ClutterBackend *clutter_backend;
+          float scale;
+
+          clutter_backend = meta_backend_get_clutter_backend (backend);
+          scale = meta_is_stage_views_scaled ()
+            ? meta_logical_monitor_get_scale (logical_monitor)
+            : 1.f;
+
+          clutter_backend_set_fallback_resource_scale (clutter_backend, scale);
+      }
+
       meta_logical_monitor_foreach_crtc (logical_monitor,
                                          create_crtc_view,
                                          renderer);

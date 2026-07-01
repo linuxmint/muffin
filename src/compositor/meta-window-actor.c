@@ -1288,8 +1288,7 @@ meta_window_actor_blit_to_framebuffer (MetaScreenCastWindow *screen_cast_window,
   if (width == 0 || height == 0)
     return FALSE;
 
-  if (!clutter_actor_get_resource_scale (actor, &resource_scale))
-    return FALSE;
+  resource_scale = clutter_actor_get_resource_scale (actor);
 
   clutter_actor_inhibit_culling (actor);
 
@@ -1445,8 +1444,7 @@ meta_window_actor_get_image (MetaWindowActor *self,
   if (width == 0 || height == 0)
     goto out;
 
-  if (!clutter_actor_get_resource_scale (actor, &resource_scale))
-    goto out;
+  resource_scale = clutter_actor_get_resource_scale (actor);
 
   width = ceilf (width * resource_scale);
   height = ceilf (height * resource_scale);

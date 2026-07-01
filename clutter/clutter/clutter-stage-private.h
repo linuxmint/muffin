@@ -53,11 +53,7 @@ ClutterStageWindow *_clutter_stage_get_window            (ClutterStage          
 void                _clutter_stage_get_projection_matrix (ClutterStage          *stage,
                                                           CoglMatrix            *projection);
 void                _clutter_stage_dirty_projection      (ClutterStage          *stage);
-void                _clutter_stage_set_viewport          (ClutterStage          *stage,
-                                                          float                  x,
-                                                          float                  y,
-                                                          float                  width,
-                                                          float                  height);
+
 void                _clutter_stage_get_viewport          (ClutterStage          *stage,
                                                           float                 *x,
                                                           float                 *y,
@@ -134,18 +130,20 @@ gboolean                _clutter_stage_update_state     (ClutterStage      *stag
 
 void                    _clutter_stage_set_scale_factor (ClutterStage      *stage,
                                                          int                factor);
-gboolean                _clutter_stage_get_max_view_scale_factor_for_rect (ClutterStage    *stage,
-                                                                           graphene_rect_t *rect,
-                                                                           float           *view_scale);
 
 void            _clutter_stage_presented                (ClutterStage      *stage,
                                                          CoglFrameEvent     frame_event,
                                                          ClutterFrameInfo  *frame_info);
 
-GList *         _clutter_stage_peek_stage_views         (ClutterStage *stage);
+GList *         clutter_stage_peek_stage_views         (ClutterStage *stage);
 
 void            clutter_stage_queue_actor_relayout      (ClutterStage *stage,
                                                          ClutterActor *actor);
+
+GList * clutter_stage_get_views_for_rect (ClutterStage          *stage,
+                                          const graphene_rect_t *rect);
+
+void clutter_stage_set_actor_needs_immediate_relayout (ClutterStage *stage);
 
 G_END_DECLS
 

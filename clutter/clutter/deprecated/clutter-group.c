@@ -333,21 +333,20 @@ clutter_group_real_get_preferred_height (ClutterActor *actor,
 
 static void
 clutter_group_real_allocate (ClutterActor           *actor,
-                             const ClutterActorBox  *allocation,
-                             ClutterAllocationFlags  flags)
+                             const ClutterActorBox  *allocation)
 {
   ClutterGroupPrivate *priv = CLUTTER_GROUP (actor)->priv;
   ClutterActorClass *klass;
 
   klass = CLUTTER_ACTOR_CLASS (clutter_group_parent_class);
-  klass->allocate (actor, allocation, flags);
+  klass->allocate (actor, allocation);
 
   if (priv->children == NULL)
     return;
 
   clutter_layout_manager_allocate (priv->layout,
                                    CLUTTER_CONTAINER (actor),
-                                   allocation, flags);
+                                   allocation);
 }
 
 static void

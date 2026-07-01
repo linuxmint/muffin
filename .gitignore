@@ -10,3 +10,5 @@ debian/muffin-common/
 debian/muffin-dbg/
 debian/muffin/
 debian/tmp/
+
+.cache
