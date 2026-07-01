@@ -10508,7 +10508,7 @@ clutter_actor_set_position (ClutterActor *self,
 
   g_return_if_fail (CLUTTER_IS_ACTOR (self));
 
-  graphene_point_init (&new_position, x, y);
+  graphene_point_init (&new_position, roundf (x), roundf (y));
 
   cur_position.x = clutter_actor_get_x (self);
   cur_position.y = clutter_actor_get_y (self);
@@ -10989,7 +10989,7 @@ clutter_actor_set_size (ClutterActor *self,
 
   g_return_if_fail (CLUTTER_IS_ACTOR (self));
 
-  graphene_size_init (&new_size, width, height);
+  graphene_size_init (&new_size, ceilf (width), ceilf (height));
 
   /* minor optimization: if we don't have a duration then we can
    * skip the get_size() below, to avoid the chance of going through
@@ -19966,6 +19966,23 @@ clutter_actor_get_transition (ClutterActor *self,
     return NULL;
 
   return clos->transition;
+}
+
+/**
+ * clutter_actor_has_transitions: (skip)
+ */
+gboolean
+clutter_actor_has_transitions (ClutterActor *self)
+{
+  const ClutterAnimationInfo *info;
+
+  g_return_val_if_fail (CLUTTER_IS_ACTOR (self), FALSE);
+
+  info = _clutter_actor_get_animation_info_or_defaults (self);
+  if (info->transitions == NULL)
+    return FALSE;
+
+  return g_hash_table_size (info->transitions) > 0;
 }
 
 /**

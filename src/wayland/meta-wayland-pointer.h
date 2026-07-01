@@ -143,6 +143,14 @@ gboolean meta_wayland_pointer_can_grab_surface (MetaWaylandPointer *pointer,
                                                 MetaWaylandSurface *surface,
                                                 uint32_t            serial);
 
+gboolean meta_wayland_pointer_get_grab_info (MetaWaylandPointer    *pointer,
+                                             MetaWaylandSurface    *surface,
+                                             uint32_t               serial,
+                                             gboolean               require_pressed,
+                                             ClutterInputDevice   **device_out,
+                                             float                 *x,
+                                             float                 *y);
+
 gboolean meta_wayland_pointer_can_popup (MetaWaylandPointer *pointer,
                                          uint32_t            serial);
 

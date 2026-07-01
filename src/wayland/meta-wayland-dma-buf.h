@@ -37,9 +37,15 @@
 G_DECLARE_FINAL_TYPE (MetaWaylandDmaBufBuffer, meta_wayland_dma_buf_buffer,
                       META, WAYLAND_DMA_BUF_BUFFER, GObject);
 
+#define META_TYPE_WAYLAND_DMA_BUF_MANAGER (meta_wayland_dma_buf_manager_get_type ())
+G_DECLARE_FINAL_TYPE (MetaWaylandDmaBufManager, meta_wayland_dma_buf_manager,
+                      META, WAYLAND_DMA_BUF_MANAGER, GObject);
+
 typedef struct _MetaWaylandDmaBufBuffer MetaWaylandDmaBufBuffer;
 
-gboolean meta_wayland_dma_buf_init (MetaWaylandCompositor *compositor);
+MetaWaylandDmaBufManager *
+meta_wayland_dma_buf_manager_new (MetaWaylandCompositor  *compositor,
+                                  GError                **error);
 
 gboolean
 meta_wayland_dma_buf_buffer_attach (MetaWaylandBuffer  *buffer,
@@ -48,5 +54,9 @@ meta_wayland_dma_buf_buffer_attach (MetaWaylandBuffer  *buffer,
 
 MetaWaylandDmaBufBuffer *
 meta_wayland_dma_buf_from_buffer (MetaWaylandBuffer *buffer);
+
+CoglScanout *
+meta_wayland_dma_buf_try_acquire_scanout (MetaWaylandDmaBufBuffer *dma_buf,
+                                          CoglOnscreen            *onscreen);
 
 #endif /* META_WAYLAND_DMA_BUF_H */

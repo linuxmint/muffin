@@ -313,6 +313,12 @@ meta_gbm_device_from_gpu (MetaGpuKms *gpu_kms)
   return renderer_gpu_data->gbm.device;
 }
 
+MetaGpuKms *
+meta_renderer_native_get_primary_gpu (MetaRendererNative *renderer_native)
+{
+  return renderer_native->primary_gpu_kms;
+}
+
 static MetaRendererNativeGpuData *
 meta_create_renderer_native_gpu_data (MetaGpuKms *gpu_kms)
 {
@@ -325,6 +331,12 @@ meta_renderer_native_get_egl (MetaRendererNative *renderer_native)
   MetaRenderer *renderer = META_RENDERER (renderer_native);
 
   return meta_backend_get_egl (meta_renderer_get_backend (renderer));
+}
+
+gboolean
+meta_renderer_native_use_modifiers (MetaRendererNative *renderer_native)
+{
+  return renderer_native->use_modifiers;
 }
 
 static MetaEgl *
@@ -1621,13 +1633,14 @@ copy_shared_framebuffer_gpu (CoglOnscreen                        *onscreen,
       return;
     }
 
-  buffer_gbm = meta_drm_buffer_gbm_new (secondary_gpu_state->gpu_kms,
+  buffer_gbm =
+    meta_drm_buffer_gbm_new_lock_front (secondary_gpu_state->gpu_kms,
                                         secondary_gpu_state->gbm.surface,
                                         renderer_native->use_modifiers,
                                         &error);
   if (!buffer_gbm)
     {
-      g_warning ("meta_drm_buffer_gbm_new failed: %s",
+      g_warning ("meta_drm_buffer_gbm_new_lock_front failed: %s",
                  error->message);
       g_error_free (error);
       return;
@@ -2012,6 +2025,35 @@ retry:
     }
 }
 
+static void
+ensure_crtc_modes (CoglOnscreen  *onscreen,
+                   MetaKmsUpdate *kms_update)
+{
+  CoglOnscreenEGL *onscreen_egl = onscreen->winsys;
+  MetaOnscreenNative *onscreen_native = onscreen_egl->platform;
+  CoglContext *cogl_context = COGL_FRAMEBUFFER (onscreen)->context;
+  CoglRenderer *cogl_renderer = cogl_context->display->renderer;
+  CoglRendererEGL *cogl_renderer_egl = cogl_renderer->winsys;
+  MetaRendererNativeGpuData *renderer_gpu_data = cogl_renderer_egl->platform;
+  MetaRendererNative *renderer_native = renderer_gpu_data->renderer_native;
+  MetaRenderer *renderer = META_RENDERER (renderer_native);
+  MetaBackend *backend = meta_renderer_get_backend (renderer);
+  MetaMonitorManager *monitor_manager =
+    meta_backend_get_monitor_manager (backend);
+  MetaPowerSave power_save_mode;
+
+  power_save_mode = meta_monitor_manager_get_power_save_mode (monitor_manager);
+  if (onscreen_native->pending_set_crtc &&
+      power_save_mode == META_POWER_SAVE_ON)
+    {
+      meta_onscreen_native_set_crtc_mode (onscreen,
+                                          renderer_gpu_data,
+                                          kms_update);
+      onscreen_native->pending_set_crtc = FALSE;
+    }
+}
+
+
 static MetaKmsUpdate *
 unset_disabled_crtcs (MetaBackend *backend,
                       MetaKms     *kms)
@@ -2067,8 +2109,6 @@ meta_onscreen_native_swap_buffers_with_damage (CoglOnscreen *onscreen,
   MetaRendererNative *renderer_native = renderer_gpu_data->renderer_native;
   MetaRenderer *renderer = META_RENDERER (renderer_native);
   MetaBackend *backend = meta_renderer_get_backend (renderer);
-  MetaMonitorManager *monitor_manager =
-    meta_backend_get_monitor_manager (backend);
   MetaBackendNative *backend_native = META_BACKEND_NATIVE (backend);
   MetaKms *kms = meta_backend_native_get_kms (backend_native);
   CoglOnscreenEGL *onscreen_egl = onscreen->winsys;
@@ -2077,7 +2117,6 @@ meta_onscreen_native_swap_buffers_with_damage (CoglOnscreen *onscreen,
   CoglFrameInfo *frame_info;
   gboolean egl_context_changed = FALSE;
   MetaKmsUpdate *kms_update;
-  MetaPowerSave power_save_mode;
   g_autoptr (GError) error = NULL;
   MetaDrmBufferGbm *buffer_gbm;
   g_autoptr (MetaKmsFeedback) kms_feedback = NULL;
@@ -2113,13 +2152,14 @@ meta_onscreen_native_swap_buffers_with_damage (CoglOnscreen *onscreen,
       g_warn_if_fail (onscreen_native->gbm.next_fb == NULL);
       g_clear_object (&onscreen_native->gbm.next_fb);
 
-      buffer_gbm = meta_drm_buffer_gbm_new (render_gpu,
+      buffer_gbm =
+      meta_drm_buffer_gbm_new_lock_front (render_gpu,
                                             onscreen_native->gbm.surface,
                                             renderer_native->use_modifiers,
                                             &error);
       if (!buffer_gbm)
         {
-          g_warning ("meta_drm_buffer_gbm_new failed: %s",
+          g_warning ("meta_drm_buffer_gbm_new_lock_front failed: %s",
                      error->message);
           return;
         }
@@ -2135,18 +2175,7 @@ meta_onscreen_native_swap_buffers_with_damage (CoglOnscreen *onscreen,
 
   update_secondary_gpu_state_post_swap_buffers (onscreen, &egl_context_changed);
 
-  /* If this is the first framebuffer to be presented then we now setup the
-   * crtc modes, else we flip from the previous buffer */
-
-  power_save_mode = meta_monitor_manager_get_power_save_mode (monitor_manager);
-  if (onscreen_native->pending_set_crtc &&
-      power_save_mode == META_POWER_SAVE_ON)
-    {
-      meta_onscreen_native_set_crtc_mode (onscreen,
-                                          renderer_gpu_data,
-                                          kms_update);
-      onscreen_native->pending_set_crtc = FALSE;
-    }
+  ensure_crtc_modes (onscreen, kms_update);
 
   onscreen_native->pending_queue_swap_notify_frame_count = renderer_native->frame_counter;
   meta_onscreen_native_flip_crtcs (onscreen, kms_update);
@@ -2241,6 +2270,92 @@ meta_renderer_native_create_dma_buf (CoglRenderer  *cogl_renderer,
   return NULL;
 }
 
+gboolean
+meta_onscreen_native_is_buffer_scanout_compatible (CoglOnscreen *onscreen,
+                                                   uint32_t      drm_format,
+                                                   uint64_t      drm_modifier,
+                                                   uint32_t      stride)
+{
+  CoglOnscreenEGL *onscreen_egl = onscreen->winsys;
+  MetaOnscreenNative *onscreen_native = onscreen_egl->platform;
+  MetaDrmBuffer *fb;
+  struct gbm_bo *gbm_bo;
+
+  if (onscreen_native->crtc->config->transform != META_MONITOR_TRANSFORM_NORMAL)
+    return FALSE;
+
+  if (onscreen_native->secondary_gpu_state)
+    return FALSE;
+
+  if (!onscreen_native->gbm.surface)
+    return FALSE;
+
+  fb = onscreen_native->gbm.current_fb ? onscreen_native->gbm.current_fb
+                                       : onscreen_native->gbm.next_fb;
+  if (!fb)
+    return FALSE;
+
+  if (!META_IS_DRM_BUFFER_GBM (fb))
+    return FALSE;
+
+  gbm_bo = meta_drm_buffer_gbm_get_bo (META_DRM_BUFFER_GBM (fb));
+
+  if (gbm_bo_get_format (gbm_bo) != drm_format)
+    return FALSE;
+
+  if (gbm_bo_get_modifier (gbm_bo) != drm_modifier)
+    return FALSE;
+
+  if (gbm_bo_get_stride (gbm_bo) != stride)
+    return FALSE;
+
+  return TRUE;
+}
+
+static void
+meta_onscreen_native_direct_scanout (CoglOnscreen *onscreen,
+                                     CoglScanout  *scanout)
+{
+  CoglOnscreenEGL *onscreen_egl = onscreen->winsys;
+  MetaOnscreenNative *onscreen_native = onscreen_egl->platform;
+  MetaGpuKms *render_gpu = onscreen_native->render_gpu;
+  CoglContext *cogl_context = COGL_FRAMEBUFFER (onscreen)->context;
+  CoglRenderer *cogl_renderer = cogl_context->display->renderer;
+  CoglRendererEGL *cogl_renderer_egl = cogl_renderer->winsys;
+  MetaRendererNativeGpuData *renderer_gpu_data = cogl_renderer_egl->platform;
+  MetaRendererNative *renderer_native = renderer_gpu_data->renderer_native;
+  MetaRenderer *renderer = META_RENDERER (renderer_native);
+  MetaBackend *backend = meta_renderer_get_backend (renderer);
+  MetaBackendNative *backend_native = META_BACKEND_NATIVE (backend);
+  MetaKms *kms = meta_backend_native_get_kms (backend_native);
+  CoglFrameInfo *frame_info;
+  MetaKmsUpdate *kms_update;
+  g_autoptr (GError) error = NULL;
+
+  kms_update = meta_kms_ensure_pending_update (kms);
+
+  wait_for_pending_flips (onscreen);
+
+  frame_info = g_queue_peek_tail (&onscreen->pending_frame_infos);
+  frame_info->global_frame_counter = renderer_native->frame_counter;
+
+  renderer_gpu_data = meta_renderer_native_get_gpu_data (renderer_native,
+                                                         render_gpu);
+
+  g_return_if_fail (renderer_gpu_data->mode == META_RENDERER_NATIVE_MODE_GBM);
+
+  g_warn_if_fail (!onscreen_native->gbm.next_fb);
+  g_set_object (&onscreen_native->gbm.next_fb, META_DRM_BUFFER (scanout));
+
+  ensure_crtc_modes (onscreen, kms_update);
+
+  onscreen_native->pending_queue_swap_notify_frame_count =
+    renderer_native->frame_counter;
+  meta_onscreen_native_flip_crtcs (onscreen, kms_update);
+
+  meta_kms_post_pending_update_sync (kms);
+}
+
 static gboolean
 meta_renderer_native_init_egl_context (CoglContext *cogl_context,
                                        GError     **error)
@@ -2250,6 +2365,8 @@ meta_renderer_native_init_egl_context (CoglContext *cogl_context,
   CoglRendererEGL *cogl_renderer_egl = cogl_renderer->winsys;
   MetaRendererNativeGpuData *renderer_gpu_data = cogl_renderer_egl->platform;
 #endif
+
+  g_message ("GL renderer: %s", glGetString (GL_RENDERER));
 
   COGL_FLAGS_SET (cogl_context->features,
                   COGL_FEATURE_ID_PRESENTATION_TIME, TRUE);
@@ -2964,6 +3081,7 @@ get_native_cogl_winsys_vtable (CoglRenderer *cogl_renderer)
       vtable.onscreen_swap_region = NULL;
       vtable.onscreen_swap_buffers_with_damage =
         meta_onscreen_native_swap_buffers_with_damage;
+      vtable.onscreen_direct_scanout = meta_onscreen_native_direct_scanout;
 
       vtable.context_get_clock_time = meta_renderer_native_get_clock_time;
 
@@ -3685,34 +3803,65 @@ meta_renderer_native_create_renderer_gpu_data (MetaRendererNative  *renderer_nat
                                                MetaGpuKms          *gpu_kms,
                                                GError             **error)
 {
+  MetaRendererNativeGpuData *gbm_renderer_gpu_data;
   MetaRendererNativeGpuData *renderer_gpu_data;
   GError *gbm_error = NULL;
 #ifdef HAVE_EGL_DEVICE
   GError *egl_device_error = NULL;
 #endif
 
-#ifdef HAVE_EGL_DEVICE
-  /* Try to initialize the EGLDevice backend first. Whenever we use a
-   * non-NVIDIA GPU, the EGLDevice enumeration function won't find a match, and
-   * we'll fall back to GBM (which will always succeed as it has a software
-   * rendering fallback)
+  /* Try the GBM backend first; it works across GPU vendors and is the
+   * preferred path on modern NVIDIA drivers (>= 495, which introduced GBM
+   * support).
+   *
+   * create_renderer_gpu_data_gbm() reports success even when it could only set
+   * up a software (llvmpipe) fallback, signalled by a missing EGL display.
+   * That happens on a driver without GBM support -- e.g. a pre-495 NVIDIA
+   * driver obtained from outside the distribution. In that case prefer the
+   * EGLDevice (EGLStream) backend so those setups keep hardware acceleration,
+   * and fall back to the software GBM data only as a last resort, rather than
+   * silently compositing in software when a hardware path exists.
    */
+  gbm_renderer_gpu_data = create_renderer_gpu_data_gbm (renderer_native,
+                                                        gpu_kms,
+                                                        &gbm_error);
+  if (gbm_renderer_gpu_data &&
+      gbm_renderer_gpu_data->egl_display != EGL_NO_DISPLAY)
+    {
+      return gbm_renderer_gpu_data;
+    }
+
+#ifdef HAVE_EGL_DEVICE
+  /* Fall back to EGLDevice backend (primarily for NVIDIA proprietary drivers
+   * where it may provide better performance or features)
+    */
   renderer_gpu_data = create_renderer_gpu_data_egl_device (renderer_native,
                                                            gpu_kms,
                                                            &egl_device_error);
   if (renderer_gpu_data)
-    return renderer_gpu_data;
+    {
+      g_clear_error (&gbm_error);
+      g_clear_error (&egl_device_error);
+      g_clear_pointer (&gbm_renderer_gpu_data,
+                       meta_renderer_native_gpu_data_free);
+      g_message ("RENDERER: %s -> EGLDevice/EGLStream (GBM had no hardware EGL display)",
+                 meta_gpu_kms_get_file_path (gpu_kms));
+      return renderer_gpu_data;
+    }
 #endif
 
-  renderer_gpu_data = create_renderer_gpu_data_gbm (renderer_native,
-                                                    gpu_kms,
-                                                    &gbm_error);
-  if (renderer_gpu_data)
+  /* No hardware-accelerated backend was available; use the software GBM data
+   * if we managed to create it. */
+  if (gbm_renderer_gpu_data)
     {
+      g_clear_error (&gbm_error);
 #ifdef HAVE_EGL_DEVICE
-      g_error_free (egl_device_error);
+      g_clear_error (&egl_device_error);
 #endif
-      return renderer_gpu_data;
+      g_warning ("RENDERER: %s -> GBM (SOFTWARE/llvmpipe) - no hardware "
+                 "backend available",
+                 meta_gpu_kms_get_file_path (gpu_kms));
+      return gbm_renderer_gpu_data;
     }
 
   g_set_error (error, G_IO_ERROR,
@@ -3824,6 +3973,17 @@ choose_primary_gpu_unchecked (MetaBackend        *backend,
    */
   for (allow_sw = 0; allow_sw < 2; allow_sw++)
   {
+    /* Prefer a device tagged as preferred primary via udev */
+    for (l = gpus; l; l = l->next)
+      {
+        MetaGpuKms *gpu_kms = META_GPU_KMS (l->data);
+
+        if (meta_gpu_kms_is_preferred_primary (gpu_kms) &&
+            (allow_sw == 1 ||
+             gpu_kms_is_hardware_rendering (renderer_native, gpu_kms)))
+          return gpu_kms;
+      }
+
     /* Prefer a platform device */
     for (l = gpus; l; l = l->next)
       {
@@ -3908,6 +4068,9 @@ meta_renderer_native_initable_init (GInitable     *initable,
                                                          error);
   if (!renderer_native->primary_gpu_kms)
     return FALSE;
+
+  if (meta_gpu_kms_requires_modifiers (renderer_native->primary_gpu_kms))
+    renderer_native->use_modifiers = TRUE;
 
   return TRUE;
 }

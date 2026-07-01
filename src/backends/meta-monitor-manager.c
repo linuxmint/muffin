@@ -176,6 +176,44 @@ logical_monitor_from_layout (MetaMonitorManager *manager,
   return NULL;
 }
 
+static const char *
+logical_monitor_get_connector (MetaLogicalMonitor *logical_monitor)
+{
+  GList *monitors = meta_logical_monitor_get_monitors (logical_monitor);
+
+  if (!monitors)
+    return NULL;
+
+  return meta_monitor_get_connector (monitors->data);
+}
+
+static int
+compare_logical_monitors_canonical (gconstpointer a,
+                                    gconstpointer b)
+{
+  MetaLogicalMonitor *la = (MetaLogicalMonitor *) a;
+  MetaLogicalMonitor *lb = (MetaLogicalMonitor *) b;
+
+  if (meta_logical_monitor_is_primary (la) != meta_logical_monitor_is_primary (lb))
+    return meta_logical_monitor_is_primary (la) ? -1 : 1;
+
+  return g_strcmp0 (logical_monitor_get_connector (la),
+                    logical_monitor_get_connector (lb));
+}
+
+static void
+sort_and_renumber_logical_monitors (GList **logical_monitors)
+{
+  GList *l;
+  int number = 0;
+
+  *logical_monitors = g_list_sort (*logical_monitors,
+                                   compare_logical_monitors_canonical);
+
+  for (l = *logical_monitors; l; l = l->next, number++)
+    ((MetaLogicalMonitor *) l->data)->number = number;
+}
+
 static void
 meta_monitor_manager_rebuild_logical_monitors (MetaMonitorManager *manager,
                                                MetaMonitorsConfig *config)
@@ -198,7 +236,10 @@ meta_monitor_manager_rebuild_logical_monitors (MetaMonitorManager *manager,
       monitor_number++;
 
       if (logical_monitor_config->is_primary)
-        primary_logical_monitor = logical_monitor;
+        {
+          primary_logical_monitor = logical_monitor;
+          meta_logical_monitor_make_primary (logical_monitor);
+        }
 
       logical_monitors = g_list_append (logical_monitors, logical_monitor);
     }
@@ -208,9 +249,15 @@ meta_monitor_manager_rebuild_logical_monitors (MetaMonitorManager *manager,
    * logical monitor the primary one.
    */
   if (!primary_logical_monitor && logical_monitors)
-    primary_logical_monitor = g_list_first (logical_monitors)->data;
+    {
+      primary_logical_monitor = g_list_first (logical_monitors)->data;
+      meta_logical_monitor_make_primary (primary_logical_monitor);
+    }
+
+  sort_and_renumber_logical_monitors (&logical_monitors);
 
   manager->logical_monitors = logical_monitors;
+
   meta_monitor_manager_set_primary_logical_monitor (manager,
                                                     primary_logical_monitor);
 }
@@ -459,17 +506,25 @@ meta_monitor_manager_rebuild_logical_monitors_derived (MetaMonitorManager *manag
         }
 
       if (meta_monitor_is_primary (monitor))
-        primary_logical_monitor = logical_monitor;
+        {
+          primary_logical_monitor = logical_monitor;
+          meta_logical_monitor_make_primary (logical_monitor);
+        }
     }
-
-  manager->logical_monitors = logical_monitors;
 
   /*
    * If no monitor was marked as primary, fall back on marking the first
    * logical monitor the primary one.
    */
-  if (!primary_logical_monitor && manager->logical_monitors)
-    primary_logical_monitor = g_list_first (manager->logical_monitors)->data;
+  if (!primary_logical_monitor && logical_monitors)
+    {
+      primary_logical_monitor = g_list_first (logical_monitors)->data;
+      meta_logical_monitor_make_primary (primary_logical_monitor);
+    }
+
+  sort_and_renumber_logical_monitors (&logical_monitors);
+
+  manager->logical_monitors = logical_monitors;
 
   meta_monitor_manager_set_primary_logical_monitor (manager,
                                                     primary_logical_monitor);

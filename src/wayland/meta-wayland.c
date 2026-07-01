@@ -36,6 +36,7 @@
 #include "wayland/meta-wayland-cursor-shape.h"
 #include "wayland/meta-wayland-data-device.h"
 #include "wayland/meta-wayland-dma-buf.h"
+#include "wayland/meta-wayland-drm.h"
 #include "wayland/meta-wayland-egl-stream.h"
 #include "wayland/meta-wayland-idle-inhibit.h"
 #include "wayland/meta-wayland-inhibit-shortcuts-dialog.h"
@@ -46,10 +47,13 @@
 #include "wayland/meta-wayland-region.h"
 #include "wayland/meta-wayland-seat.h"
 #include "wayland/meta-wayland-subsurface.h"
+#include "wayland/meta-wayland-system-bell.h"
 #include "wayland/meta-wayland-tablet-manager.h"
 #include "wayland/meta-wayland-xdg-dialog.h"
 #include "wayland/meta-wayland-xdg-foreign.h"
 #include "wayland/meta-wayland-xdg-toplevel-tag.h"
+#include "wayland/meta-wayland-xdg-toplevel-icon.h"
+#include "wayland/meta-wayland-xapp-shell.h"
 #include "wayland/meta-xwayland-grab-keyboard.h"
 #include "wayland/meta-xwayland-private.h"
 #include "wayland/meta-xwayland.h"
@@ -440,7 +444,16 @@ meta_wayland_compositor_setup (MetaWaylandCompositor *wayland_compositor)
   meta_wayland_pointer_constraints_init (compositor);
   meta_wayland_xdg_foreign_init (compositor);
   meta_wayland_legacy_xdg_foreign_init (compositor);
-  meta_wayland_dma_buf_init (compositor);
+  {
+    g_autoptr (GError) error = NULL;
+
+    compositor->dma_buf_manager =
+      meta_wayland_dma_buf_manager_new (compositor, &error);
+    if (!compositor->dma_buf_manager)
+      g_warning ("Failed to init Wayland dma-buf support: %s", error->message);
+  }
+  meta_wayland_drm_init (compositor);
+  meta_wayland_init_single_pixel_buffer_manager (compositor);
   meta_wayland_keyboard_shortcuts_inhibit_init (compositor);
   meta_wayland_surface_inhibit_shortcuts_dialog_init ();
   meta_wayland_text_input_init (compositor);
@@ -448,7 +461,10 @@ meta_wayland_compositor_setup (MetaWaylandCompositor *wayland_compositor)
   meta_wayland_idle_inhibit_init (compositor);
   meta_wayland_init_xdg_wm_dialog (compositor);
   meta_wayland_xdg_toplevel_tag_init (compositor);
+  meta_wayland_xdg_toplevel_icon_init (compositor);
+  meta_wayland_xapp_shell_init (compositor);
   meta_wayland_init_cursor_shape (compositor);
+  meta_wayland_init_system_bell (compositor);
 
   /* Xwayland specific protocol, needs to be filtered out for all other clients */
   if (meta_xwayland_grab_keyboard_init (compositor))

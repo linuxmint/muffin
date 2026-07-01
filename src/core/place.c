@@ -344,14 +344,24 @@ static gboolean
 window_place_centered (MetaWindow *window)
 {
   MetaWindowType type;
+  MetaPlacementMode mode;
 
   type = window->type;
+  mode = meta_prefs_get_new_window_placement_mode ();
+
+  /* Native Wayland clients can't request an initial position, and the
+   * AUTOMATIC first-fit/cascade tends to look arbitrary for them, so treat
+   * AUTOMATIC as CENTER for Wayland windows.
+   */
+  if (window->client_type == META_WINDOW_CLIENT_TYPE_WAYLAND &&
+      mode == META_PLACEMENT_MODE_AUTOMATIC)
+    mode = META_PLACEMENT_MODE_CENTER;
 
   return (type == META_WINDOW_DIALOG ||
     type == META_WINDOW_MODAL_DIALOG ||
     type == META_WINDOW_SPLASHSCREEN ||
     (type == META_WINDOW_NORMAL &&
-     meta_prefs_get_new_window_placement_mode () == META_PLACEMENT_MODE_CENTER));
+     mode == META_PLACEMENT_MODE_CENTER));
 }
 
 static void
@@ -792,7 +802,9 @@ meta_window_place (MetaWindow        *window,
     }
 
   if (window->type == META_WINDOW_DIALOG ||
-      window->type == META_WINDOW_MODAL_DIALOG)
+      window->type == META_WINDOW_MODAL_DIALOG ||
+      (window->client_type == META_WINDOW_CLIENT_TYPE_WAYLAND &&
+       meta_window_get_transient_for (window) != NULL))
     {
       MetaWindow *parent = meta_window_get_transient_for (window);
 

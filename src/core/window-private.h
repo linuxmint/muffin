@@ -67,13 +67,6 @@ typedef enum
 
 typedef enum
 {
-  _NET_WM_BYPASS_COMPOSITOR_HINT_AUTO = 0,
-  _NET_WM_BYPASS_COMPOSITOR_HINT_ON = 1,
-  _NET_WM_BYPASS_COMPOSITOR_HINT_OFF = 2,
-} MetaBypassCompositorHintValue;
-
-typedef enum
-{
   META_MOVE_RESIZE_CONFIGURE_REQUEST = 1 << 0,
   META_MOVE_RESIZE_USER_ACTION = 1 << 1,
   META_MOVE_RESIZE_MOVE_ACTION = 1 << 2,
@@ -552,9 +545,6 @@ struct _MetaWindow
 
   // MetaWindow *tile_match;
 
-  /* Bypass compositor hints */
-  guint bypass_compositor;
-
   struct {
     MetaPlacementRule *rule;
     MetaPlacementState state;
@@ -917,4 +907,13 @@ gboolean meta_window_calculate_bounds (MetaWindow *window,
 
 void meta_window_set_tag (MetaWindow *window,
                           const char *tag);
+
+void meta_window_set_icon_name (MetaWindow *window,
+                                const char *icon_name);
+
+void meta_window_set_progress (MetaWindow *window,
+                               guint       progress);
+
+void meta_window_set_progress_pulse (MetaWindow *window,
+                                     gboolean    pulse);
 #endif

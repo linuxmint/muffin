@@ -275,8 +275,11 @@ meta_display_handle_event (MetaDisplay        *display,
 
   if (event->type == CLUTTER_SCROLL)
     {
+      unsigned int zoom_mods = meta_keybindings_get_mouse_zoom_modifiers (display);
+
       if (meta_prefs_get_mouse_zoom_enabled () &&
-          ((event->scroll.modifier_state & ~meta_keybindings_get_ignored_modifier_mask (display)) == meta_keybindings_get_mouse_zoom_modifiers (display)))
+          zoom_mods != 0 &&
+          ((event->scroll.modifier_state & ~meta_keybindings_get_ignored_modifier_mask (display)) == zoom_mods))
       {
         if (clutter_event_get_scroll_direction (event) == CLUTTER_SCROLL_UP)
           {

@@ -54,11 +54,12 @@ const cairo_region_t * clutter_stage_view_peek_redraw_clip (ClutterStageView *vi
 
 cairo_region_t * clutter_stage_view_take_redraw_clip (ClutterStageView *view);
 
-
 void clutter_stage_view_transform_rect_to_onscreen (ClutterStageView            *view,
                                                     const cairo_rectangle_int_t *src_rect,
                                                     int                          dst_width,
                                                     int                          dst_height,
                                                     cairo_rectangle_int_t       *dst_rect);
+
+CoglScanout * clutter_stage_view_take_scanout (ClutterStageView *view);
 
 #endif /* __CLUTTER_STAGE_VIEW_PRIVATE_H__ */

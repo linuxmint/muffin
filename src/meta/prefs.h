@@ -380,6 +380,8 @@ gboolean    meta_prefs_get_invert_flip_direction (void);
  * @META_KEYBINDING_ACTION_LOCATE_POINTER_KEY: FILLME
  * @META_KEYBINDING_ACTION_ALWAYS_ON_TOP: FILLME
  * @META_KEYBINDING_ACTION_LAST: FILLME
+ * @META_KEYBINDING_ACTION_TOGGLE_WORKSPACE_SELECTION: FILLME
+ * @META_KEYBINDING_ACTION_TOGGLE_WINDOW_SELECTION: FILLME
  */
 /* XXX FIXME This should be x-macroed, but isn't yet because it would be
  * difficult (or perhaps impossible) to add the suffixes using the current
@@ -484,6 +486,8 @@ typedef enum _MetaKeyBindingAction
   META_KEYBINDING_ACTION_ALWAYS_ON_TOP,
   META_KEYBINDING_ACTION_SWITCH_MONITOR,
   META_KEYBINDING_ACTION_ROTATE_MONITOR,
+  META_KEYBINDING_ACTION_TOGGLE_WORKSPACE_SELECTION,
+  META_KEYBINDING_ACTION_TOGGLE_WINDOW_SELECTION,
 
   META_KEYBINDING_ACTION_LAST
 } MetaKeyBindingAction;
@@ -495,6 +499,7 @@ typedef enum _MetaKeyBindingAction
  * @META_KEY_BINDING_BUILTIN: built-in
  * @META_KEY_BINDING_IS_REVERSED: is reversed
  * @META_KEY_BINDING_NON_MASKABLE: always active
+ * @META_KEY_BINDING_IGNORE_AUTOREPEAT: do not repeat if held down
  * @META_KEY_BINDING_NO_AUTO_GRAB: not grabbed automatically
  */
 typedef enum

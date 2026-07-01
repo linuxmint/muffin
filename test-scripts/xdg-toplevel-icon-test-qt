@@ -1,0 +1,93 @@
+#!/usr/bin/python3
+"""
+Test client for muffin's xdg-toplevel-icon-v1 implementation, using Qt.
+
+Qt's Wayland backend (Qt >= 6.7) implements xdg-toplevel-icon: when you call
+QWidget.setWindowIcon() it rasterizes the QIcon into wl_shm buffers and sends
+them via add_buffer at the sizes the compositor advertises (and may also send
+set_name). This is the protocol path that exercises our shm->cairo conversion,
+pick_best_buffer() selection and the hidpi device-scale handling.
+
+Run under WAYLAND_DEBUG=1 to watch the protocol traffic:
+
+    WAYLAND_DEBUG=1 ./xdg-toplevel-icon-test-qt [initial-icon-name]
+
+Key things to look for:
+  - xdg_toplevel_icon_manager_v1.icon_size events (the sizes we advertise)
+  - create_icon / set_name / add_buffer / set_icon requests
+  - WHEN set_icon is sent relative to the first wl_surface.commit / xdg
+    get_toplevel - the window sets an icon *before* show() on purpose, to
+    exercise the pre-map / pre-first-commit path (the case that bit xapp-shell).
+
+Needs PySide6 or PyQt6 (>= 6.7) with the Wayland platform plugin.
+Force Wayland if necessary:  QT_QPA_PLATFORM=wayland ./xdg-toplevel-icon-test-qt
+"""
+import sys
+import signal
+
+signal.signal(signal.SIGINT, signal.SIG_DFL)
+
+try:
+    from PySide6.QtWidgets import (QApplication, QWidget, QPushButton,
+                                   QVBoxLayout, QLabel, QLineEdit)
+    from PySide6.QtGui import QIcon, QPixmap, QColor
+    BINDING = "PySide6"
+except ImportError:
+    from PyQt6.QtWidgets import (QApplication, QWidget, QPushButton,
+                                 QVBoxLayout, QLabel, QLineEdit)
+    from PyQt6.QtGui import QIcon, QPixmap, QColor
+    BINDING = "PyQt6"
+
+
+def make_pixmap_icon(color_name, size=64):
+    """A solid-colour QIcon, to exercise the add_buffer (pixel data) path."""
+    pixmap = QPixmap(size, size)
+    pixmap.fill(QColor(color_name))
+    return QIcon(pixmap)
+
+
+class TestWindow(QWidget):
+    def __init__(self, initial_icon_name):
+        super().__init__()
+        self.setWindowTitle("xdg-toplevel-icon test (%s)" % BINDING)
+
+        layout = QVBoxLayout(self)
+        layout.addWidget(QLabel("Initial icon set BEFORE show(): '%s'\n"
+                                "Run under WAYLAND_DEBUG=1 to watch the wire."
+                                % initial_icon_name))
+
+        self.entry = QLineEdit("cs-applets")
+        layout.addWidget(self.entry)
+
+        themed = QPushButton("Set themed icon (from entry above)")
+        themed.clicked.connect(self.set_themed_icon)
+        layout.addWidget(themed)
+
+        pixmap = QPushButton("Set custom pixmap icon (solid red)")
+        pixmap.clicked.connect(lambda: self.setWindowIcon(make_pixmap_icon("red")))
+        layout.addWidget(pixmap)
+
+        clear = QPushButton("Clear icon (reset to default)")
+        clear.clicked.connect(lambda: self.setWindowIcon(QIcon()))
+        layout.addWidget(clear)
+
+        # Set the icon while the window is still unmapped - this is the timing
+        # case we care about: the icon is chosen before the toplevel/window
+        # exists on the compositor side.
+        self.setWindowIcon(QIcon.fromTheme(initial_icon_name))
+
+    def set_themed_icon(self):
+        self.setWindowIcon(QIcon.fromTheme(self.entry.text()))
+
+
+def main():
+    app = QApplication(sys.argv)
+    initial = sys.argv[1] if len(sys.argv) > 1 else "cs-applets"
+    window = TestWindow(initial)
+    window.resize(380, 260)
+    window.show()
+    sys.exit(app.exec())
+
+
+if __name__ == "__main__":
+    main()

@@ -1,4 +1,4 @@
-project('muffin', 'c', version : '6.6.3', meson_version : '>=1.0.0', license : 'GPLv2+')
+project('muffin', 'c', version : '6.7.3', meson_version : '>=1.0.0', license : 'GPLv2+')
 
 muffin_plugin_api_version = '3'
 
@@ -11,7 +11,7 @@ libmuffin_api_version = '@0@'.format(api_version)
 
 # generic version requirements
 fribidi_req = '>= 1.0.0'
-glib_req = '>= 2.67.3'
+glib_req = '>= 2.76.0'
 gi_req = '>= 0.9.5'
 graphene_req = '>= 1.9.3'
 gtk3_req = '>= 3.19.8'
@@ -38,7 +38,7 @@ gudev_req = '>= 232'
 
 # wayland version requirements
 wayland_server_req = '>= 1.20'
-wayland_protocols_req = '>= 1.36'
+wayland_protocols_req = '>= 1.38'
 
 # native backend version requirements
 libinput_req = '>= 1.19.0'
@@ -175,6 +175,11 @@ have_libgudev = get_option('udev')
 if have_libgudev
   libudev_dep = dependency('libudev', version: udev_req)
   gudev_dep = dependency('gudev-1.0', version: gudev_req)
+  udev_dep = dependency('udev')
+  udev_dir = get_option('udev_dir')
+  if udev_dir == ''
+    udev_dir = udev_dep.get_variable('udevdir')
+  endif
 endif
 
 have_native_backend = get_option('native_backend')

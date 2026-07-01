@@ -28,9 +28,8 @@
 #include <string.h>
 
 #include "clutter/clutter.h"
+#include "meta/compositor-muffin.h"
 #include "meta/meta-backend.h"
-#include "meta/meta-background-actor.h"
-#include "meta/meta-background-group.h"
 #include "meta/meta-monitor-manager.h"
 #include "meta/meta-plugin.h"
 #include "meta/util.h"
@@ -323,9 +322,7 @@ on_monitors_changed (MetaMonitorManager *monitor_manager,
 {
   MetaDefaultPlugin *self = META_DEFAULT_PLUGIN (plugin);
   MetaDisplay *display = meta_plugin_get_display (plugin);
-
   int i, n;
-  GRand *rand = g_rand_new_with_seed (123456);
 
   clutter_actor_destroy_all_children (self->priv->background_group);
 
@@ -334,40 +331,15 @@ on_monitors_changed (MetaMonitorManager *monitor_manager,
     {
       MetaRectangle rect;
       ClutterActor *background_actor;
-      MetaBackground *background;
-      ClutterColor color;
+
+      background_actor = meta_create_background_for_monitor (display, i);
 
       meta_display_get_monitor_geometry (display, i, &rect);
-
-      background_actor = meta_background_actor_new (display, i);
-
       clutter_actor_set_position (background_actor, rect.x, rect.y);
       clutter_actor_set_size (background_actor, rect.width, rect.height);
 
-      /* Don't use rand() here, mesa calls srand() internally when
-         parsing the driconf XML, but it's nice if the colors are
-         reproducible.
-      */
-      clutter_color_init (&color,
-                          g_rand_int_range (rand, 0, 255),
-                          g_rand_int_range (rand, 0, 255),
-                          g_rand_int_range (rand, 0, 255),
-                          255);
-
-      background = meta_background_new (display);
-      meta_background_set_color (background, &color);
-      meta_background_actor_set_background (META_BACKGROUND_ACTOR (background_actor), background);
-      g_object_unref (background);
-
-      meta_background_actor_set_vignette (META_BACKGROUND_ACTOR (background_actor),
-                                          TRUE,
-                                          0.5,
-                                          0.5);
-
       clutter_actor_add_child (self->priv->background_group, background_actor);
     }
-
-  g_rand_free (rand);
 }
 
 static void
@@ -438,7 +410,7 @@ start (MetaPlugin *plugin)
   MetaDisplay *display = meta_plugin_get_display (plugin);
   MetaMonitorManager *monitor_manager = meta_monitor_manager_get ();
 
-  self->priv->background_group = meta_background_group_new ();
+  self->priv->background_group = clutter_actor_new ();
   clutter_actor_insert_child_below (meta_get_window_group_for_display (display),
                                     self->priv->background_group, NULL);
 

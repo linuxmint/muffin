@@ -74,7 +74,7 @@ sync_actor_subsurface_state (MetaWaylandSurface *surface)
   clutter_actor_set_position (actor, x, y);
   clutter_actor_set_reactive (actor, TRUE);
 
-  if (surface->buffer_ref.buffer)
+  if (surface->buffer_ref->buffer)
     clutter_actor_show (actor);
   else
     clutter_actor_hide (actor);
@@ -147,7 +147,7 @@ meta_wayland_subsurface_union_geometry (MetaWaylandSubsurface *subsurface,
     .height = meta_wayland_surface_get_height (surface),
   };
 
-  if (surface->buffer_ref.buffer)
+  if (surface->buffer_ref->buffer)
     meta_rectangle_union (out_geometry, &geometry, out_geometry);
 
   META_WAYLAND_SURFACE_FOREACH_SUBSURFACE (surface, subsurface_surface)

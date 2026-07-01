@@ -62,6 +62,7 @@
 #include "wayland/meta-wayland-private.h"
 #include "wayland/meta-wayland-seat.h"
 #include "wayland/meta-wayland-surface.h"
+#include "wayland/meta-wayland-layer-shell.h"
 #include "wayland/meta-xwayland.h"
 
 #ifdef HAVE_NATIVE_BACKEND
@@ -424,6 +425,9 @@ meta_wayland_pointer_send_button (MetaWaylandPointer *pointer,
                                   event_type == CLUTTER_BUTTON_PRESS ? 1 : 0);
         }
 
+      if (event_type == CLUTTER_BUTTON_PRESS)
+        pointer->grab_serial = serial;
+
       meta_wayland_pointer_broadcast_frame (pointer);
     }
 
@@ -485,6 +489,30 @@ default_grab_button (MetaWaylandPointerGrab *grab,
   MetaWaylandPointer *pointer = grab->pointer;
 
   meta_wayland_pointer_send_button (pointer, event);
+
+  if (clutter_event_type (event) == CLUTTER_BUTTON_PRESS &&
+      pointer->focus_surface)
+    {
+      MetaWaylandSurfaceRole *role = pointer->focus_surface->role;
+
+      if (role && META_IS_WAYLAND_LAYER_SURFACE (role) &&
+          meta_wayland_layer_surface_wants_keyboard_focus (
+              META_WAYLAND_LAYER_SURFACE (role)))
+        {
+          MetaWaylandSeat *seat = meta_wayland_pointer_get_seat (pointer);
+
+          if (meta_wayland_seat_has_keyboard (seat))
+            {
+              MetaDisplay *display = meta_get_display ();
+
+              if (display->focus_window)
+                meta_display_update_focus_window (display, NULL);
+
+              meta_wayland_keyboard_set_focus (seat->keyboard,
+                                               pointer->focus_surface);
+            }
+        }
+    }
 }
 
 static const MetaWaylandPointerGrabInterface default_pointer_grab_interface = {
@@ -696,13 +724,6 @@ handle_button_event (MetaWaylandPointer *pointer,
     }
 
   pointer->grab->interface->button (pointer->grab, event);
-
-  if (implicit_grab)
-    {
-      MetaWaylandSeat *seat = meta_wayland_pointer_get_seat (pointer);
-
-      pointer->grab_serial = wl_display_get_serial (seat->wl_display);
-    }
 }
 
 static void
@@ -954,7 +975,6 @@ meta_wayland_pointer_set_focus (MetaWaylandPointer *pointer,
 
   if (surface != NULL)
     {
-      ClutterStage *stage = CLUTTER_STAGE (meta_backend_get_stage (backend));
       struct wl_client *client = wl_resource_get_client (surface->resource);
       graphene_point_t pos;
       MetaWindow *focus_window;
@@ -966,7 +986,7 @@ meta_wayland_pointer_set_focus (MetaWaylandPointer *pointer,
                                 G_CALLBACK (focus_surface_destroyed),
                                 pointer);
 
-      clutter_stage_get_device_coords (stage, pointer->device, NULL, &pos);
+      clutter_input_device_get_coords (pointer->device, NULL, &pos);
 
       focus_window = meta_wayland_surface_get_window (pointer->focus_surface);
       if (focus_window)
@@ -1071,12 +1091,10 @@ meta_wayland_pointer_get_relative_coordinates (MetaWaylandPointer *pointer,
 					       wl_fixed_t         *sx,
 					       wl_fixed_t         *sy)
 {
-  MetaBackend *backend = meta_get_backend ();
-  ClutterStage *stage = CLUTTER_STAGE (meta_backend_get_stage (backend));
   float xf = 0.0f, yf = 0.0f;
   graphene_point_t pos;
 
-  clutter_stage_get_device_coords (stage, pointer->device, NULL, &pos);
+  clutter_input_device_get_coords (pointer->device, NULL, &pos);
   meta_wayland_surface_get_relative_coordinates (surface, pos.x, pos.y, &xf, &yf);
 
   *sx = wl_fixed_from_double (xf);
@@ -1290,6 +1308,32 @@ meta_wayland_pointer_can_grab_surface (MetaWaylandPointer *pointer,
 {
   return (pointer->grab_serial == serial &&
           pointer_can_grab_surface (pointer, surface));
+}
+
+gboolean
+meta_wayland_pointer_get_grab_info (MetaWaylandPointer    *pointer,
+                                    MetaWaylandSurface    *surface,
+                                    uint32_t               serial,
+                                    gboolean               require_pressed,
+                                    ClutterInputDevice   **device_out,
+                                    float                 *x,
+                                    float                 *y)
+{
+  if ((!require_pressed || pointer->button_count > 0) &&
+      meta_wayland_pointer_can_grab_surface (pointer, surface, serial))
+    {
+      if (device_out)
+        *device_out = pointer->device;
+
+      if (x)
+        *x = pointer->grab_x;
+      if (y)
+        *y = pointer->grab_y;
+
+      return TRUE;
+    }
+
+  return FALSE;
 }
 
 gboolean

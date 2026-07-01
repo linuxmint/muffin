@@ -29,6 +29,7 @@
 #include "backends/meta-backend-private.h"
 #include "backends/native/meta-renderer-native.h"
 #include "meta/meta-backend.h"
+#include "meta/meta-cursor-tracker.h"
 #include "meta/meta-monitor-manager.h"
 #include "meta/util.h"
 
@@ -206,6 +207,16 @@ meta_stage_native_finish_frame (ClutterStageWindow *stage_window)
 }
 
 static void
+meta_stage_native_set_cursor_visible (ClutterStageWindow *stage_window,
+                                      gboolean            cursor_visible)
+{
+  MetaBackend *backend = meta_get_backend ();
+  MetaCursorTracker *cursor_tracker = meta_backend_get_cursor_tracker (backend);
+
+  meta_cursor_tracker_set_pointer_visible (cursor_tracker, cursor_visible);
+}
+
+static void
 meta_stage_native_init (MetaStageNative *stage_native)
 {
   stage_native->presented_frame_counter_sync = -1;
@@ -227,4 +238,5 @@ clutter_stage_window_iface_init (ClutterStageWindowInterface *iface)
   iface->get_views = meta_stage_native_get_views;
   iface->get_frame_counter = meta_stage_native_get_frame_counter;
   iface->finish_frame = meta_stage_native_finish_frame;
+  iface->set_cursor_visible = meta_stage_native_set_cursor_visible;
 }

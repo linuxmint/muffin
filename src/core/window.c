@@ -220,6 +220,7 @@ enum
   PROP_TILE_MODE,
   PROP_OPACITY,
   PROP_TAG,
+  PROP_ICON_NAME,
   PROP_LAST,
 };
 
@@ -354,6 +355,7 @@ meta_window_finalize (GObject *object)
   g_free (window->gtk_menubar_object_path);
   g_free (window->placement.rule);
   g_free (window->tag);
+  g_free (window->theme_icon_name);
 
   G_OBJECT_CLASS (meta_window_parent_class)->finalize (object);
 }
@@ -457,6 +459,9 @@ meta_window_get_property(GObject         *object,
       break;
     case PROP_TAG:
       g_value_set_string (value, win->tag);
+      break;
+    case PROP_ICON_NAME:
+      g_value_set_string (value, win->theme_icon_name);
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -681,6 +686,14 @@ meta_window_class_init (MetaWindowClass *klass)
 
   obj_props[PROP_TAG] =
     g_param_spec_string ("tag", NULL, NULL,
+                         NULL,
+                         G_PARAM_READABLE | G_PARAM_EXPLICIT_NOTIFY |
+                         G_PARAM_STATIC_STRINGS);
+
+  obj_props[PROP_ICON_NAME] =
+    g_param_spec_string ("icon-name",
+                         "Icon name",
+                         "Themed icon name or icon file path set by the client",
                          NULL,
                          G_PARAM_READABLE | G_PARAM_EXPLICIT_NOTIFY |
                          G_PARAM_STATIC_STRINGS);
@@ -3176,30 +3189,6 @@ meta_window_is_on_primary_monitor (MetaWindow *window)
   return window->monitor->is_primary;
 }
 
-/**
- * meta_window_requested_bypass_compositor:
- * @window: a #MetaWindow
- *
- * Return value: %TRUE if the window requested to bypass the compositor
- */
-gboolean
-meta_window_requested_bypass_compositor (MetaWindow *window)
-{
-  return window->bypass_compositor == _NET_WM_BYPASS_COMPOSITOR_HINT_ON;
-}
-
-/**
- * meta_window_requested_dont_bypass_compositor:
- * @window: a #MetaWindow
- *
- * Return value: %TRUE if the window requested to opt out of unredirecting
- */
-gboolean
-meta_window_requested_dont_bypass_compositor (MetaWindow *window)
-{
-  return window->bypass_compositor == _NET_WM_BYPASS_COMPOSITOR_HINT_OFF;
-}
-
 static void
 get_default_tile_fractions (MetaTileMode for_mode,
                             double *hfraction,
@@ -3556,44 +3545,46 @@ meta_window_tile (MetaWindow   *window,
   else
     directions = META_MAXIMIZE_VERTICAL;
 
+  MetaRectangle *maybe_saved_rect = NULL;
 
-  MetaRectangle existing_rect, work_area, tile_area;
-  meta_window_get_frame_rect(window, &existing_rect);
-  meta_window_get_work_area_for_monitor(window, window->tile_monitor_number, &work_area);
-  tile_area = existing_rect;
-
-  switch (tile_mode)
+  if (window->saved_tile_mode == META_TILE_NONE && window->display->grab_op != META_GRAB_OP_NONE)
     {
-    case META_TILE_LEFT:
-      tile_area.x = work_area.x;
-      tile_area.y = work_area.y;
-      break;
+      maybe_saved_rect = &window->display->grab_initial_window_pos;
+    }
+  else
+  if (window->saved_tile_mode != META_TILE_NONE)
+    {
+      maybe_saved_rect = &window->saved_rect;
+    }
 
-    case META_TILE_RIGHT:
-      tile_area.x = work_area.x + work_area.width - existing_rect.width;
-      tile_area.y = work_area.y;
-      break;
+  // If the saved restore position is not on the target monitor, translate it
+  // it so that fullscreening (which un-tiles) happens on the correct monitor.
+  if (maybe_saved_rect != NULL)
+    {
+      MetaRectangle target_work_area;
+      meta_window_get_work_area_for_monitor (window, window->tile_monitor_number, &target_work_area);
 
-    case META_TILE_TOP:
-      tile_area.x = work_area.x;
-      tile_area.y = work_area.y;
-      break;
+      if (!meta_rectangle_overlap (maybe_saved_rect, &target_work_area))
+        {
+          MetaBackend *backend = meta_get_backend ();
+          MetaMonitorManager *monitor_manager =
+            meta_backend_get_monitor_manager (backend);
+          const MetaLogicalMonitor *old_monitor =
+            meta_monitor_manager_get_logical_monitor_from_rect (monitor_manager,
+                                                                maybe_saved_rect);
 
-    case META_TILE_BOTTOM:
-      tile_area.x = work_area.x;
-      tile_area.y = work_area.y + work_area.height - existing_rect.height;
-      break;
+          if (old_monitor)
+            {
+              MetaRectangle old_work_area;
+              meta_window_get_work_area_for_monitor (window, old_monitor->number, &old_work_area);
 
-    default:
-      tile_area.x = work_area.x + (work_area.width - existing_rect.width) / 2;
-      tile_area.y = work_area.y + (work_area.height - existing_rect.height) / 2;
-      break;
-  }
+              maybe_saved_rect->x += target_work_area.x - old_work_area.x;
+              maybe_saved_rect->y += target_work_area.y - old_work_area.y;
+            }
+        }
+    }
 
-  window->saved_rect = tile_area;
-  window->unconstrained_rect = tile_area;
-
-  meta_window_maximize_internal (window, directions, &window->saved_rect);
+  meta_window_maximize_internal (window, directions, maybe_saved_rect);
   meta_display_update_tile_preview (window->display, FALSE);
 
   if ((!window->htile_match || window->htile_match != window->display->grab_window) &&
@@ -4542,6 +4533,25 @@ meta_window_move_resize_internal (MetaWindow          *window,
 
   constrained_rect = unconstrained_rect;
   temporary_rect = window->rect;
+
+  /* If the window doesn't have a monitor yet but has a placement rule
+   * (e.g., for popups from layer-shell surfaces), try to determine the
+   * monitor from the placement rule's parent rect so constraints can be applied. */
+  if (!window->monitor && window->placement.rule)
+    {
+      MetaBackend *backend = meta_get_backend ();
+      MetaMonitorManager *monitor_manager =
+        meta_backend_get_monitor_manager (backend);
+      MetaLogicalMonitor *logical_monitor;
+      MetaRectangle *parent_rect = &window->placement.rule->parent_rect;
+
+      logical_monitor =
+        meta_monitor_manager_get_logical_monitor_from_rect (monitor_manager,
+                                                            parent_rect);
+      if (logical_monitor)
+        window->monitor = logical_monitor;
+    }
+
   if (flags & (META_MOVE_RESIZE_MOVE_ACTION | META_MOVE_RESIZE_RESIZE_ACTION) &&
       !(flags & META_MOVE_RESIZE_WAYLAND_FINISH_MOVE_RESIZE) &&
       window->monitor)
@@ -9498,6 +9508,17 @@ meta_window_get_client_type (MetaWindow *window)
   return window->client_type;
 }
 
+void
+meta_window_set_icon_name (MetaWindow *window,
+                           const char *icon_name)
+{
+  if (icon_name != NULL && icon_name[0] == '\0')
+    icon_name = NULL;
+
+  if (g_set_str (&window->theme_icon_name, icon_name))
+    g_object_notify_by_pspec (G_OBJECT (window), obj_props[PROP_ICON_NAME]);
+}
+
 /**
  * meta_window_get_icon_name:
  * @window: a #MetaWindow
@@ -9552,6 +9573,32 @@ meta_window_set_tag (MetaWindow *window,
 {
   if (g_set_str (&window->tag, tag))
     g_object_notify_by_pspec (G_OBJECT (window), obj_props[PROP_TAG]);
+}
+
+void
+meta_window_set_progress (MetaWindow *window,
+                          guint       progress)
+{
+  progress = CLAMP (progress, 0, 100);
+
+  if (window->progress != progress)
+    {
+      window->progress = progress;
+      g_object_notify_by_pspec (G_OBJECT (window), obj_props[PROP_PROGRESS]);
+    }
+}
+
+void
+meta_window_set_progress_pulse (MetaWindow *window,
+                                gboolean    pulse)
+{
+  pulse = !!pulse;
+
+  if (window->progress_pulse != pulse)
+    {
+      window->progress_pulse = pulse;
+      g_object_notify_by_pspec (G_OBJECT (window), obj_props[PROP_PROGRESS_PULSE]);
+    }
 }
 
 /**

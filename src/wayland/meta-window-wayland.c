@@ -61,6 +61,10 @@ struct _MetaWindowWayland
   MetaGravity last_sent_gravity;
 
   gboolean has_been_shown;
+
+  cairo_surface_t *icon;
+  cairo_surface_t *mini_icon;
+  gboolean icon_dirty;
 };
 
 struct _MetaWindowWaylandClass
@@ -483,7 +487,7 @@ meta_window_wayland_update_main_monitor (MetaWindow                   *window,
   /* If the window is not a toplevel window (i.e. it's a popup window) just use
    * the monitor of the toplevel. */
   toplevel_window = meta_wayland_surface_get_toplevel_window (window->surface);
-  if (toplevel_window != window)
+  if (toplevel_window && toplevel_window != window)
     {
       meta_window_update_monitor (toplevel_window, flags);
       window->monitor = toplevel_window->monitor;
@@ -729,6 +733,62 @@ meta_window_wayland_unmap (MetaWindow *window)
 {
 }
 
+static gboolean
+meta_window_wayland_update_icon (MetaWindow       *window,
+                                 cairo_surface_t **icon,
+                                 cairo_surface_t **mini_icon)
+{
+  MetaWindowWayland *wl_window = META_WINDOW_WAYLAND (window);
+
+  /* The caller always consumes *icon and *mini_icon when this returns TRUE, and
+   * also when called with force=TRUE regardless of the return value, so both
+   * must be written unconditionally (matching meta_window_real_update_icon and
+   * the X11 implementation). */
+  *icon = NULL;
+  *mini_icon = NULL;
+
+  if (!wl_window->icon_dirty)
+    return FALSE;
+
+  wl_window->icon_dirty = FALSE;
+
+  if (wl_window->icon)
+    *icon = cairo_surface_reference (wl_window->icon);
+  if (wl_window->mini_icon)
+    *mini_icon = cairo_surface_reference (wl_window->mini_icon);
+
+  return TRUE;
+}
+
+/**
+ * meta_window_wayland_set_custom_icon:
+ * @window: a wayland #MetaWindow
+ * @icon: (nullable): the normal-size icon surface, or %NULL to reset
+ * @mini_icon: (nullable): the mini icon surface, or %NULL to reset
+ *
+ * Sets a client-provided icon (from the xdg-toplevel-icon protocol) on the
+ * window. The surfaces are referenced, not adopted. Passing %NULL for both
+ * resets the window to its default icon.
+ */
+void
+meta_window_wayland_set_custom_icon (MetaWindow      *window,
+                                     cairo_surface_t *icon,
+                                     cairo_surface_t *mini_icon)
+{
+  MetaWindowWayland *wl_window = META_WINDOW_WAYLAND (window);
+
+  g_clear_pointer (&wl_window->icon, cairo_surface_destroy);
+  g_clear_pointer (&wl_window->mini_icon, cairo_surface_destroy);
+
+  if (icon)
+    wl_window->icon = cairo_surface_reference (icon);
+  if (mini_icon)
+    wl_window->mini_icon = cairo_surface_reference (mini_icon);
+
+  wl_window->icon_dirty = TRUE;
+  meta_window_queue (window, META_QUEUE_UPDATE_ICON);
+}
+
 static void
 meta_window_wayland_finalize (GObject *object)
 {
@@ -736,6 +796,9 @@ meta_window_wayland_finalize (GObject *object)
 
   g_list_free_full (wl_window->pending_configurations,
                     (GDestroyNotify) meta_wayland_window_configuration_free);
+
+  g_clear_pointer (&wl_window->icon, cairo_surface_destroy);
+  g_clear_pointer (&wl_window->mini_icon, cairo_surface_destroy);
 
   G_OBJECT_CLASS (meta_window_wayland_parent_class)->finalize (object);
 }
@@ -770,6 +833,7 @@ meta_window_wayland_class_init (MetaWindowWaylandClass *klass)
   window_class->map = meta_window_wayland_map;
   window_class->unmap = meta_window_wayland_unmap;
   window_class->is_focus_async = meta_window_wayland_is_focus_async;
+  window_class->update_icon = meta_window_wayland_update_icon;
 }
 
 MetaWindow *
@@ -976,8 +1040,17 @@ meta_window_wayland_finish_move_resize (MetaWindow              *window,
               MetaWindow *parent;
 
               parent = meta_window_get_transient_for (window);
-              rect.x = parent->rect.x + acked_configuration->rel_x;
-              rect.y = parent->rect.y + acked_configuration->rel_y;
+              if (parent)
+                {
+                  rect.x = parent->rect.x + acked_configuration->rel_x;
+                  rect.y = parent->rect.y + acked_configuration->rel_y;
+                }
+              else
+                {
+                  /* Layer-shell popups have no parent MetaWindow, use placement rule's parent_rect */
+                  rect.x = window->placement.rule->parent_rect.x + acked_configuration->rel_x;
+                  rect.y = window->placement.rule->parent_rect.y + acked_configuration->rel_y;
+                }
             }
           else if (acked_configuration->has_position)
             {
@@ -1059,6 +1132,9 @@ meta_window_place_with_placement_rule (MetaWindow        *window,
                                     META_GRAVITY_NORTH_WEST,
                                     window->unconstrained_rect);
   window->calc_placement = FALSE;
+
+  /* Mark as placed so meta_window_force_placement won't override our position */
+  window->placed = TRUE;
 }
 
 void

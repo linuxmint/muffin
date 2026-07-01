@@ -1,0 +1,69 @@
+#!/usr/bin/python3
+"""
+Test client for muffin's xdg-toplevel-icon-v1 implementation, using GTK4.
+
+GTK4 has no per-window icon API (gtk_window_set_icon[_name] were all removed in
+the GTK3 -> GTK4 transition); a window's icon is derived from the application-id
+via its desktop file. So GTK4 does not drive xdg-toplevel-icon with custom pixel
+data the way Qt does - this program exists mainly to confirm *what* GTK4 puts on
+the wire, if anything.
+
+Run under WAYLAND_DEBUG=1 and watch for xdg_toplevel_icon_manager_v1 /
+xdg_toplevel_icon_v1 requests:
+
+    WAYLAND_DEBUG=1 ./xdg-toplevel-icon-test-gtk4 [application-id]
+
+Expected outcome: GTK4 binds the manager (so you'll see the icon_size/done
+events from the compositor) but likely sends no create_icon/set_icon for the
+window, relying instead on xdg_toplevel.set_app_id for the shell to resolve the
+icon from the desktop file. If you see no set_icon traffic, that confirms GTK4
+isn't exercising the protocol for this window.
+
+Pass an application-id that has an installed .desktop file with an icon (e.g.
+org.gnome.TextEditor) to see whether GTK4 forwards that icon over the protocol.
+"""
+import sys
+import signal
+import gi
+
+gi.require_version('Gtk', '4.0')
+from gi.repository import Gtk, Gio  # noqa: E402
+
+signal.signal(signal.SIGINT, signal.SIG_DFL)
+
+DEFAULT_APP_ID = "org.x.ToplevelIconTestGtk4"
+
+
+class TestApp(Gtk.Application):
+    def __init__(self, app_id):
+        super().__init__(application_id=app_id,
+                         flags=Gio.ApplicationFlags.FLAGS_NONE)
+        self.app_id = app_id
+
+    def do_activate(self):
+        win = Gtk.ApplicationWindow(application=self)
+        win.set_title("xdg-toplevel-icon test (GTK4)")
+        win.set_default_size(380, 260)
+
+        box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=8,
+                      margin_top=12, margin_bottom=12,
+                      margin_start=12, margin_end=12)
+        box.append(Gtk.Label(
+            label=("GTK4 has no per-window icon API.\n"
+                   "The toplevel icon comes from the application-id:\n"
+                   "    %s\n\n"
+                   "Run under WAYLAND_DEBUG=1 and watch for\n"
+                   "xdg_toplevel_icon_* requests (likely none)."
+                   % self.app_id)))
+        win.set_child(box)
+        win.present()
+
+
+def main():
+    app_id = sys.argv[1] if len(sys.argv) > 1 else DEFAULT_APP_ID
+    app = TestApp(app_id)
+    return app.run([])
+
+
+if __name__ == "__main__":
+    sys.exit(main())

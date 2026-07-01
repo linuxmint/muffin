@@ -24,8 +24,13 @@
 #include "compositor/compositor-private.h"
 
 #define META_TYPE_COMPOSITOR_SERVER (meta_compositor_server_get_type ())
-G_DECLARE_FINAL_TYPE (MetaCompositorServer, meta_compositor_server,
-                      META, COMPOSITOR_SERVER, MetaCompositor)
+G_DECLARE_DERIVABLE_TYPE (MetaCompositorServer, meta_compositor_server,
+                          META, COMPOSITOR_SERVER, MetaCompositor)
+
+struct _MetaCompositorServerClass
+{
+    MetaCompositorClass parent_class;
+};
 
 MetaCompositorServer * meta_compositor_server_new (MetaDisplay *display);
 

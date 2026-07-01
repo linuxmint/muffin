@@ -122,6 +122,7 @@
 #include <cogl/cogl-fence.h>
 #include <cogl/cogl-glib-source.h>
 #include <cogl/cogl-trace.h>
+#include <cogl/cogl-scanout.h>
 /* XXX: This will definitly go away once all the Clutter winsys
  * code has been migrated down into Cogl! */
 #include <cogl/deprecated/cogl-clutter.h>
