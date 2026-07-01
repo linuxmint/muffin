@@ -44,6 +44,10 @@ get_surface_actor_list (GNode    *node,
 {
   MetaWaylandSurface *surface = node->data;
   MetaSurfaceActor *surface_actor = meta_wayland_surface_get_actor (surface);
+
+  if (!surface_actor)
+    return FALSE;
+
   GList **surface_actors = data;
 
   *surface_actors = g_list_prepend (*surface_actors, surface_actor);
@@ -58,8 +62,13 @@ set_surface_actor_index (GNode    *node,
   SurfaceTreeTraverseData *traverse_data = data;
 
   ClutterActor *window_actor = CLUTTER_ACTOR (traverse_data->window_actor);
-  ClutterActor *surface_actor =
-    CLUTTER_ACTOR (meta_wayland_surface_get_actor (surface));
+  MetaSurfaceActor *meta_surface_actor =
+  meta_wayland_surface_get_actor (surface);
+
+  if (!meta_surface_actor)
+    return FALSE;
+
+  ClutterActor *surface_actor = CLUTTER_ACTOR (meta_surface_actor);
 
   if (clutter_actor_contains (window_actor, surface_actor))
     {
@@ -77,6 +86,7 @@ set_surface_actor_index (GNode    *node,
                                            surface_actor,
                                            traverse_data->index);
     }
+
   traverse_data->index++;
 
   return FALSE;
