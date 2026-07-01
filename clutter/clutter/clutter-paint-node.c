@@ -782,11 +782,6 @@ clutter_paint_operation_clear (ClutterPaintOperation *op)
         g_array_unref (op->multitex_coords);
       break;
 
-    case PAINT_OP_PATH:
-      if (op->op.path != NULL)
-        cogl_object_unref (op->op.path);
-      break;
-
     case PAINT_OP_PRIMITIVE:
       if (op->op.primitive != NULL)
         cogl_object_unref (op->op.primitive);
@@ -834,16 +829,6 @@ clutter_paint_op_init_multitex_rect (ClutterPaintOperation *op,
   op->op.texrect[1] = rect->y1;
   op->op.texrect[2] = rect->x2;
   op->op.texrect[3] = rect->y2;
-}
-
-static inline void
-clutter_paint_op_init_path (ClutterPaintOperation *op,
-                            CoglPath              *path)
-{
-  clutter_paint_operation_clear (op);
-
-  op->opcode = PAINT_OP_PATH;
-  op->op.path = cogl_object_ref (path);
 }
 
 static inline void
@@ -947,34 +932,6 @@ clutter_paint_node_add_multitexture_rectangle (ClutterPaintNode      *node,
   clutter_paint_node_maybe_init_operations (node);
 
   clutter_paint_op_init_multitex_rect (&operation, rect, text_coords, text_coords_len);
-  g_array_append_val (node->operations, operation);
-}
-
-/**
- * clutter_paint_node_add_path: (skip)
- * @node: a #ClutterPaintNode
- * @path: a Cogl path
- *
- * Adds a region described as a path to the @node.
- *
- * This function acquires a reference on the passed @path, so it
- * is safe to call cogl_object_unref() when it returns.
- *
- * Since: 1.10
- * Stability: unstable
- */
-void
-clutter_paint_node_add_path (ClutterPaintNode *node,
-                             CoglPath         *path)
-{
-  ClutterPaintOperation operation = PAINT_OP_INIT;
-
-  g_return_if_fail (CLUTTER_IS_PAINT_NODE (node));
-  g_return_if_fail (cogl_is_path (path));
-
-  clutter_paint_node_maybe_init_operations (node);
-
-  clutter_paint_op_init_path (&operation, path);
   g_array_append_val (node->operations, operation);
 }
 
@@ -1112,11 +1069,6 @@ clutter_paint_node_to_json (ClutterPaintNode *node)
                 }
 
               json_builder_end_array (builder);
-              break;
-
-            case PAINT_OP_PATH:
-              json_builder_set_member_name (builder, "path");
-              json_builder_add_int_value (builder, (intptr_t) op->op.path);
               break;
 
             case PAINT_OP_PRIMITIVE:
