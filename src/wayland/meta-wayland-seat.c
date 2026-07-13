@@ -25,8 +25,10 @@
 
 #include "wayland/meta-wayland-data-device.h"
 #include "wayland/meta-wayland-private.h"
+#include "wayland/meta-wayland-input-method.h"
 #include "wayland/meta-wayland-tablet-seat.h"
 #include "wayland/meta-wayland-versions.h"
+#include "wayland/meta-wayland-virtual-keyboard.h"
 
 #define CAPABILITY_ENABLED(prev, cur, capability) ((cur & (capability)) && !(prev & (capability)))
 #define CAPABILITY_DISABLED(prev, cur, capability) ((prev & (capability)) && !(cur & (capability)))
@@ -236,6 +238,8 @@ meta_wayland_seat_new (MetaWaylandCompositor *compositor,
                               NULL);
 
   seat->text_input = meta_wayland_text_input_new (seat);
+  seat->input_method = meta_wayland_input_method_new (seat);
+  seat->virtual_keyboard_manager = meta_wayland_virtual_keyboard_manager_new (seat);
   seat->pointer_warp = meta_wayland_pointer_warp_new (seat);
 
   meta_wayland_data_device_init (&seat->data_device);
@@ -275,6 +279,8 @@ meta_wayland_seat_free (MetaWaylandSeat *seat)
   g_object_unref (seat->keyboard);
   g_object_unref (seat->touch);
   meta_wayland_text_input_destroy (seat->text_input);
+  meta_wayland_input_method_destroy (seat->input_method);
+  meta_wayland_virtual_keyboard_manager_destroy (seat->virtual_keyboard_manager);
   meta_wayland_pointer_warp_destroy (seat->pointer_warp);
 
   g_free (seat);

@@ -85,6 +85,7 @@ struct _MetaWaylandCompositor
   MetaXWaylandManager xwayland_manager;
 
   MetaWaylandSeat *seat;
+  MetaWaylandImLauncher *im_launcher;
   MetaWaylandTabletManager *tablet_manager;
   MetaWaylandActivation *activation;
   MetaWaylandXdgForeign *foreign;

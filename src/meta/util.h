@@ -42,6 +42,12 @@ META_EXPORT
 gboolean meta_is_wayland_compositor (void);
 
 META_EXPORT
+gboolean meta_im_mode_is_fcitx (void);
+
+META_EXPORT
+gboolean meta_wayland_type_keysym (unsigned int keysym);
+
+META_EXPORT
 void meta_debug_spew_real (const char *format,
                            ...) G_GNUC_PRINTF (1, 2);
 

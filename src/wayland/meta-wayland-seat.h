@@ -49,6 +49,8 @@ struct _MetaWaylandSeat
   MetaWaylandDataDevicePrimary primary_data_device;
 
   MetaWaylandTextInput *text_input;
+  MetaWaylandInputMethod *input_method;
+  MetaWaylandVirtualKeyboardManager *virtual_keyboard_manager;
   MetaWaylandPointerWarp *pointer_warp;
 
   guint capabilities;
