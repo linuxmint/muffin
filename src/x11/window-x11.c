@@ -561,6 +561,23 @@ meta_window_x11_manage (MetaWindow *window)
   priv->client_rect = window->rect;
   window->buffer_rect = window->rect;
 
+  /* If the window was reparented into a frame above, the client now sits
+   * at (child_x, child_y) == (0, 0) inside the frame — not at its
+   * pre-manage root coordinates. client_rect.x/y are compared against
+   * frame-relative coordinates in meta_window_x11_move_resize_internal,
+   * so seed them with the real frame-relative position. Seeding root
+   * coordinates instead skips the initial client move whenever they
+   * happen to equal (borders.total.left, borders.total.top) — e.g. a
+   * window returned to the root by the save-set during a WM restart,
+   * whose frame sat at the screen origin — leaving the client stuck at
+   * (0, 0) covering its own titlebar.
+   */
+  if (window->frame)
+    {
+      priv->client_rect.x = window->frame->child_x;
+      priv->client_rect.y = window->frame->child_y;
+    }
+
   if (!window->override_redirect)
     {
       MetaRectangle rect;
