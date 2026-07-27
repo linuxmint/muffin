@@ -411,18 +411,22 @@ meta_kms_impl_device_new (MetaKmsDevice  *device,
   ret = drmSetClientCap (fd, DRM_CLIENT_CAP_UNIVERSAL_PLANES, 1);
   if (ret != 0)
     {
-      g_set_error (error, G_IO_ERROR, g_io_error_from_errno (-ret),
+      int saved_errno = errno;
+
+      g_set_error (error, G_IO_ERROR, g_io_error_from_errno (saved_errno),
                    "Failed to activate universal planes: %s",
-                   g_strerror (-ret));
+                   g_strerror (saved_errno));
       return NULL;
     }
 
   drm_resources = drmModeGetResources (fd);
   if (!drm_resources)
     {
-      g_set_error (error, G_IO_ERROR, g_io_error_from_errno (errno),
-                   "Failed to activate universal planes: %s",
-                   g_strerror (errno));
+      int saved_errno = errno;
+
+      g_set_error (error, G_IO_ERROR, g_io_error_from_errno (saved_errno),
+                   "Failed to get DRM resources: %s",
+                   g_strerror (saved_errno));
       return NULL;
     }
 

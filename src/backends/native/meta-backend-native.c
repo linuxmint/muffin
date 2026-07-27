@@ -631,7 +631,7 @@ init_gpus (MetaBackendNative  *native,
   if (g_list_length (meta_backend_get_gpus (backend)) == 0)
     {
       g_set_error (error, G_IO_ERROR, G_IO_ERROR_NOT_FOUND,
-                   "No GPUs found");
+                   "No KMS-capable GPUs found");
       return FALSE;
     }
 

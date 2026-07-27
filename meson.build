@@ -185,7 +185,7 @@ endif
 have_native_backend = get_option('native_backend')
 
 if have_native_backend
-  libdrm_dep = dependency('libdrm')
+  libdrm_dep = dependency('libdrm', version: '>= 2.4.105')
   libgbm_dep = dependency('gbm', version: gbm_req)
   libinput_dep = dependency('libinput', version: libinput_req)
 
