@@ -20,6 +20,9 @@
 
 #include "config.h"
 
+#include <xf86drm.h>
+#include <xf86drmMode.h>
+
 #include "backends/native/meta-kms-device-private.h"
 #include "backends/native/meta-kms-device.h"
 
@@ -308,11 +311,58 @@ meta_kms_device_new (MetaKms            *kms,
   MetaLauncher *launcher = meta_backend_native_get_launcher (backend_native);
   MetaKmsDevice *device;
   CreateImplDeviceData data;
+  drmModeRes *resources;
   int fd;
 
   fd = meta_launcher_open_restricted (launcher, path, error);
   if (fd == -1)
     return NULL;
+
+  /* Open-coded rather than drmIsKMS(), which folds "no modesetting" together
+   * with "modesetting but nothing to drive" - a distinction worth reporting,
+   * since the advice for the two differs. */
+  resources = drmModeGetResources (fd);
+
+  if (!resources || resources->count_crtcs == 0 || resources->count_encoders == 0)
+    {
+      g_autofree char *driver_name = NULL;
+      const char *hint = "";
+      drmVersionPtr version;
+
+      version = drmGetVersion (fd);
+      if (version)
+        {
+          driver_name = g_strdup (version->name);
+          drmFreeVersion (version);
+        }
+
+      /* nvidia-drm only defaults to modeset=1 from driver series 560 on. */
+      if (g_strcmp0 (driver_name, "nvidia-drm") == 0)
+        hint = "; on driver series before 560, boot with "
+               "nvidia-drm.modeset=1";
+
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_NOT_SUPPORTED,
+                   "device does not support kernel modesetting "
+                   "(DRM driver '%s')%s",
+                   driver_name ? driver_name : "unknown",
+                   hint);
+
+      g_clear_pointer (&resources, drmModeFreeResources);
+      meta_launcher_close_restricted (launcher, fd);
+      return NULL;
+    }
+
+  if (resources->count_connectors == 0)
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_NOT_SUPPORTED,
+                   "device supports modesetting but has no connectors");
+
+      drmModeFreeResources (resources);
+      meta_launcher_close_restricted (launcher, fd);
+      return NULL;
+    }
+
+  drmModeFreeResources (resources);
 
   device = g_object_new (META_TYPE_KMS_DEVICE, NULL);
   device->kms = kms;
