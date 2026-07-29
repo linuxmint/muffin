@@ -24,7 +24,9 @@
 #include <xf86drm.h>
 
 #include "backends/meta-backend-private.h"
+#include "backends/native/meta-backend-native.h"
 #include "backends/native/meta-gpu-kms.h"
+#include "backends/native/meta-renderer-native.h"
 #include "wayland/meta-wayland-private.h"
 
 #include "wayland-drm-server-protocol.h"
@@ -118,16 +120,23 @@ void
 meta_wayland_drm_init (MetaWaylandCompositor *compositor)
 {
   MetaBackend *backend = meta_get_backend ();
-  GList *gpus;
+  MetaRendererNative *renderer_native;
   MetaGpuKms *gpu_kms;
   int kms_fd;
   char *render_node_path;
 
-  gpus = meta_backend_get_gpus (backend);
-  if (!gpus)
+  if (!META_IS_BACKEND_NATIVE (backend))
     return;
 
-  gpu_kms = META_GPU_KMS (gpus->data);
+  /* Has to be the GPU we actually render on, not just the first one
+   * enumerated: on a PRIME system those differ, and handing clients the
+   * other GPU's node points them at a device we do not composite with. */
+  renderer_native =
+    META_RENDERER_NATIVE (meta_backend_get_renderer (backend));
+  gpu_kms = meta_renderer_native_get_primary_gpu (renderer_native);
+  if (!gpu_kms)
+    return;
+
   kms_fd = meta_gpu_kms_get_fd (gpu_kms);
   render_node_path = drmGetRenderDeviceNameFromFd (kms_fd);
 
