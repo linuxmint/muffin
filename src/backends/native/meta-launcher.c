@@ -28,6 +28,7 @@
 #include <malloc.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <poll.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -52,6 +53,14 @@ struct _MetaLauncher
   char *seat_id;
 
   GHashTable *sysfs_fds;
+
+  /* Tracks the state we last drove the backend into, not the session's own
+   * state - sync_active() reads the latter fresh from session_proxy and only
+   * acts on a change. It therefore has to start TRUE: the backend has not
+   * been paused, and cannot be, since meta_launcher_new() runs before there
+   * is a stage or monitor manager to pause. Initializing it from anything
+   * else makes the next resume unpaired, and clutter_stage_thaw_updates()
+   * asserts on that. */
   gboolean session_active;
 };
 
@@ -223,21 +232,12 @@ find_systemd_session (gchar **session_id,
 }
 
 static Login1Session *
-get_session_proxy (GCancellable *cancellable,
+get_session_proxy (const char   *session_id,
+                   GCancellable *cancellable,
                    GError      **error)
 {
   g_autofree char *proxy_path = NULL;
-  g_autofree char *session_id = NULL;
-  g_autoptr (GError) local_error = NULL;
   Login1Session *session_proxy;
-
-  if (!find_systemd_session (&session_id, &local_error))
-    {
-      g_propagate_prefixed_error (error,
-                                  g_steal_pointer (&local_error),
-                                  "Could not get session ID: ");
-      return NULL;
-    }
 
   proxy_path = get_escaped_dbus_path ("/org/freedesktop/login1/session", session_id);
 
@@ -462,20 +462,11 @@ on_active_changed (Login1Session *session,
 }
 
 static gchar *
-get_seat_id (GError **error)
+get_seat_id (const char  *session_id,
+             GError     **error)
 {
-  g_autoptr (GError) local_error = NULL;
-  g_autofree char *session_id = NULL;
   char *seat_id = NULL;
   int r;
-
-  if (!find_systemd_session (&session_id, &local_error))
-    {
-      g_propagate_prefixed_error (error,
-                                  g_steal_pointer (&local_error),
-                                  "Could not get session ID: ");
-      return NULL;
-    }
 
   r = sd_session_get_seat (session_id, &seat_id);
   if (r < 0)
@@ -490,6 +481,73 @@ get_seat_id (GError **error)
   return seat_id;
 }
 
+/* Generous, because we only ever pay it when something is already wrong -
+ * we sleep in poll() until logind says otherwise, and a session that never
+ * activates costs the user a dead session rather than a slow one. */
+#define SESSION_ACTIVE_TIMEOUT_US (10 * G_USEC_PER_SEC)
+
+/* Only bounds the request itself; the switch it asks for is waited on
+ * separately, so there is no reason to sit here for GDBus's 25s default. */
+#define SESSION_ACTIVATE_TIMEOUT_MS 2000
+
+/* Returns sd_session_is_active() semantics: > 0 active, 0 timed out while
+ * still inactive, < 0 negative errno. */
+static int
+wait_for_session_active (const char *session_id)
+{
+  sd_login_monitor *monitor = NULL;
+  gint64 deadline;
+  int ret;
+  int fd;
+
+  ret = sd_login_monitor_new ("session", &monitor);
+  if (ret < 0)
+    return ret;
+
+  fd = sd_login_monitor_get_fd (monitor);
+  if (fd < 0)
+    {
+      sd_login_monitor_unref (monitor);
+      return fd;
+    }
+
+  deadline = g_get_monotonic_time () + SESSION_ACTIVE_TIMEOUT_US;
+
+  for (;;)
+    {
+      struct pollfd pollfd;
+      gint64 remaining_us;
+
+      /* Check before waiting, not after: logind may have activated us
+       * between creating the monitor and getting here, and that change
+       * would never come back as an event. */
+      ret = sd_session_is_active (session_id);
+      if (ret != 0)
+        break;
+
+      remaining_us = deadline - g_get_monotonic_time ();
+      if (remaining_us <= 0)
+        break;
+
+      pollfd = (struct pollfd) {
+        .fd = fd,
+        .events = sd_login_monitor_get_events (monitor),
+      };
+
+      if (poll (&pollfd, 1, (int) (remaining_us / 1000)) < 0 && errno != EINTR)
+        {
+          ret = -errno;
+          break;
+        }
+
+      sd_login_monitor_flush (monitor);
+    }
+
+  sd_login_monitor_unref (monitor);
+
+  return ret;
+}
+
 MetaLauncher *
 meta_launcher_new (GError **error)
 {
@@ -497,9 +555,24 @@ meta_launcher_new (GError **error)
   g_autoptr (Login1Session) session_proxy = NULL;
   g_autoptr (Login1Seat) seat_proxy = NULL;
   g_autofree char *seat_id = NULL;
+  g_autofree char *session_id = NULL;
+  g_autoptr (GVariant) activate_result = NULL;
+  g_autoptr (GError) activate_error = NULL;
+  g_autoptr (GError) session_error = NULL;
   gboolean have_control = FALSE;
+  int is_active;
 
-  session_proxy = get_session_proxy (NULL, error);
+  /* Resolved once and passed down: every lookup enumerates the user's
+   * sessions, and a second call could disagree with the first. */
+  if (!find_systemd_session (&session_id, &session_error))
+    {
+      g_propagate_prefixed_error (error,
+                                  g_steal_pointer (&session_error),
+                                  "Could not get session ID: ");
+      goto fail;
+    }
+
+  session_proxy = get_session_proxy (session_id, NULL, error);
   if (!session_proxy)
     goto fail;
 
@@ -511,7 +584,66 @@ meta_launcher_new (GError **error)
 
   have_control = TRUE;
 
-  seat_id = get_seat_id (error);
+  /* lightdm spawns the session on a fresh, inactive VT and only activates it
+   * afterwards, so we race that activation. Do it ourselves here, before the
+   * renderer initializes, and wait for it to take effect: logind applies its
+   * seat device ACLs when the session becomes active, and where systemd is
+   * built with GROUP_RENDER_MODE=0660 - Debian and its derivatives, which is
+   * everything we ship on - the render nodes come up root:render 0660 with
+   * the user typically not in the render group, leaving the ACL as the only
+   * way in. Distributions that build them 0666 never depend on this. Our own
+   * card-node opens go through logind TakeDevice and are unaffected, but the
+   * NVIDIA GBM/EGL stack opens /dev/dri/renderD* directly and gets EACCES
+   * until the ACL lands.
+   *
+   * Called through the generic entry point rather than the generated
+   * wrapper so the timeout applies to this call alone - the proxy outlives
+   * meta_launcher_new() and every later TakeDevice goes through it, so its
+   * default must not be touched. GDBus would otherwise allow 25s here, all
+   * of it before we even start waiting. */
+  activate_result = g_dbus_proxy_call_sync (G_DBUS_PROXY (session_proxy),
+                                            "Activate",
+                                            NULL,
+                                            G_DBUS_CALL_FLAGS_NONE,
+                                            SESSION_ACTIVATE_TIMEOUT_MS,
+                                            NULL,
+                                            &activate_error);
+  if (!activate_result)
+    g_warning ("Failed to activate session: %s", activate_error->message);
+
+  /* Activation is asynchronous: logind only marks the session active (and
+   * applies the ACLs) once the VT switch completes, which requires the
+   * greeter's display server to release its VT - the D-Bus reply alone
+   * guarantees nothing, so wait (bounded) until we are actually active.
+   * Wait even when Activate() failed: the display manager may have activated
+   * us by other means, and a failed call is exactly when we are most likely
+   * to still be inactive.
+   *
+   * The wait goes through sd_login_monitor rather than the session proxy's
+   * notify::active: GDBusProxy delivers property changes via a GMainContext,
+   * and there is no main loop here to iterate one - iterating the default
+   * context would run unrelated sources before the backend exists. A bare
+   * sd-bus connection could listen synchronously instead, but the monitor
+   * answers the same question without a bus connection or a match rule. */
+  is_active = wait_for_session_active (session_id);
+  if (is_active < 0)
+    {
+      g_warning ("Failed to wait on session %s: %s",
+                 session_id, g_strerror (-is_active));
+    }
+  else if (is_active == 0)
+    {
+      /* Warn only. The point of the wait is the delay itself - giving logind
+       * time to apply the ACLs before the renderer opens a render node - and
+       * that is spent either way. The verdict has nowhere to go:
+       * session_active tracks the backend's paused state, which is unpaused
+       * regardless of how this turned out, and a renderer that still cannot
+       * open its device fails with its own error. */
+      g_warning ("Timed out waiting for session %s to become active",
+                 session_id);
+    }
+
+  seat_id = get_seat_id (session_id, error);
   if (!seat_id)
     goto fail;
 
