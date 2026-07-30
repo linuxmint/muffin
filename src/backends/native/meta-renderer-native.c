@@ -390,71 +390,15 @@ get_supported_kms_modifiers (MetaCrtc *crtc,
 }
 
 static GArray *
-get_supported_egl_modifiers (CoglOnscreen *onscreen,
-                             MetaCrtc     *crtc,
-                             uint32_t      format)
+get_linear_modifier (void)
 {
-  CoglOnscreenEGL *onscreen_egl = onscreen->winsys;
-  MetaOnscreenNative *onscreen_native = onscreen_egl->platform;
-  MetaRendererNative *renderer_native = onscreen_native->renderer_native;
-  MetaEgl *egl = meta_onscreen_native_get_egl (onscreen_native);
-  MetaGpu *gpu;
-  MetaRendererNativeGpuData *renderer_gpu_data;
-  EGLint num_modifiers;
+  uint64_t linear_modifier = DRM_FORMAT_MOD_LINEAR;
   GArray *modifiers;
-  GError *error = NULL;
-  gboolean ret;
 
-  gpu = meta_crtc_get_gpu (crtc);
-  renderer_gpu_data = meta_renderer_native_get_gpu_data (renderer_native,
-                                                         META_GPU_KMS (gpu));
-
-  if (!meta_egl_has_extensions (egl, renderer_gpu_data->egl_display, NULL,
-                                "EGL_EXT_image_dma_buf_import_modifiers",
-                                NULL))
-    return NULL;
-
-  ret = meta_egl_query_dma_buf_modifiers (egl, renderer_gpu_data->egl_display,
-                                          format, 0, NULL, NULL,
-                                          &num_modifiers, NULL);
-  if (!ret || num_modifiers == 0)
-    return NULL;
-
-  modifiers = g_array_sized_new (FALSE, FALSE, sizeof (uint64_t),
-                                 num_modifiers);
-  ret = meta_egl_query_dma_buf_modifiers (egl, renderer_gpu_data->egl_display,
-                                          format, num_modifiers,
-                                          (EGLuint64KHR *) modifiers->data, NULL,
-                                          &num_modifiers, &error);
-
-  if (!ret)
-    {
-      g_warning ("Failed to query DMABUF modifiers: %s", error->message);
-      g_error_free (error);
-      g_array_free (modifiers, TRUE);
-      return NULL;
-    }
+  modifiers = g_array_sized_new (FALSE, FALSE, sizeof (uint64_t), 1);
+  g_array_append_val (modifiers, linear_modifier);
 
   return modifiers;
-}
-
-static GArray *
-get_supported_modifiers (CoglOnscreen *onscreen,
-                         uint32_t      format)
-{
-  CoglOnscreenEGL *onscreen_egl = onscreen->winsys;
-  MetaOnscreenNative *onscreen_native = onscreen_egl->platform;
-  MetaCrtc *crtc = onscreen_native->crtc;
-  MetaGpu *gpu;
-  g_autoptr (GArray) modifiers = NULL;
-
-  gpu = meta_crtc_get_gpu (crtc);
-  if (gpu == META_GPU (onscreen_native->render_gpu))
-    modifiers = get_supported_kms_modifiers (crtc, format);
-  else
-    modifiers = get_supported_egl_modifiers (onscreen, crtc, format);
-
-  return g_steal_pointer (&modifiers);
 }
 
 static GArray *
@@ -2469,19 +2413,31 @@ meta_renderer_native_create_surface_gbm (CoglOnscreen        *onscreen,
     meta_renderer_native_get_gpu_data (renderer_native,
                                        onscreen_native->render_gpu);
 
-  if (renderer_gpu_data->use_modifiers)
-    modifiers = get_supported_modifiers (onscreen, format);
-  else
-    modifiers = NULL;
-
-  if (renderer_gpu_data->use_modifiers && !modifiers)
+  if (!renderer_gpu_data->use_modifiers)
     {
-      /* The implicit fallback below is exactly what use_modifiers was turned
-       * on to avoid, so say so rather than failing later with a bare
-       * allocation error. */
-      g_warning_once ("No scanout modifiers advertised for format 0x%x; "
-                      "falling back to implicit allocation despite modifiers "
-                      "being enabled", format);
+      modifiers = NULL;
+    }
+  else if (should_surface_be_sharable (onscreen))
+    {
+      /* A secondary GPU has to import this, and LINEAR is the layout we can
+       * rely on it accepting. Same reason the implicit path below adds
+       * GBM_BO_USE_LINEAR. */
+      modifiers = get_linear_modifier ();
+    }
+  else
+    {
+      modifiers = get_supported_kms_modifiers (onscreen_native->crtc, format);
+
+      if (!modifiers)
+        {
+          /* Falling straight through to the implicit path would call the
+           * allocation gpu_kms_supports_modifier_scanout() may have just
+           * proved broken on this GPU. That probe validated LINEAR, so try it
+           * first; the implicit path still catches us if it fails. */
+          g_warning_once ("No scanout modifiers advertised for format 0x%x; "
+                          "trying a linear modifier", format);
+          modifiers = get_linear_modifier ();
+        }
     }
 
   if (modifiers)
