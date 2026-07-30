@@ -343,12 +343,6 @@ meta_renderer_native_get_egl (MetaRendererNative *renderer_native)
   return meta_backend_get_egl (meta_renderer_get_backend (renderer));
 }
 
-gboolean
-meta_renderer_native_use_modifiers (MetaRendererNative *renderer_native)
-{
-  return renderer_native->use_modifiers;
-}
-
 static MetaEgl *
 meta_onscreen_native_get_egl (MetaOnscreenNative *onscreen_native)
 {
