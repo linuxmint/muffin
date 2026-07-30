@@ -2469,19 +2469,34 @@ meta_renderer_native_create_surface_gbm (CoglOnscreen        *onscreen,
     meta_renderer_native_get_gpu_data (renderer_native,
                                        onscreen_native->render_gpu);
 
-  if (renderer_gpu_data->use_modifiers)
-    modifiers = get_supported_modifiers (onscreen, format);
-  else
-    modifiers = NULL;
-
-  if (renderer_gpu_data->use_modifiers && !modifiers)
+  if (!renderer_gpu_data->use_modifiers)
     {
-      /* The implicit fallback below is exactly what use_modifiers was turned
-       * on to avoid, so say so rather than failing later with a bare
-       * allocation error. */
-      g_warning_once ("No scanout modifiers advertised for format 0x%x; "
-                      "falling back to implicit allocation despite modifiers "
-                      "being enabled", format);
+      modifiers = NULL;
+    }
+  else if (should_surface_be_sharable (onscreen))
+    {
+      /* A secondary GPU has to import this, and LINEAR is the only layout we
+       * can rely on it accepting - the plane's IN_FORMATS describes scanout
+       * here, which says nothing about import there. Same reason the implicit
+       * path below adds GBM_BO_USE_LINEAR. */
+      uint64_t linear_modifier = DRM_FORMAT_MOD_LINEAR;
+
+      modifiers = g_array_sized_new (FALSE, FALSE, sizeof (uint64_t), 1);
+      g_array_append_val (modifiers, linear_modifier);
+    }
+  else
+    {
+      modifiers = get_supported_modifiers (onscreen, format);
+
+      if (!modifiers)
+        {
+          /* The implicit fallback below is exactly what use_modifiers was
+           * turned on to avoid, so say so rather than failing later with a
+           * bare allocation error. */
+          g_warning_once ("No scanout modifiers advertised for format 0x%x; "
+                          "falling back to implicit allocation despite "
+                          "modifiers being enabled", format);
+        }
     }
 
   if (modifiers)
