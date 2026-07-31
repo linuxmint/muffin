@@ -594,6 +594,7 @@ meta_wayland_pointer_disable (MetaWaylandPointer *pointer)
   meta_wayland_pointer_set_current (pointer, NULL);
 
   g_clear_pointer (&pointer->pointer_clients, g_hash_table_unref);
+  g_clear_object (&pointer->cursor_shape_sprite);
   pointer->cursor_surface = NULL;
   pointer->cursor_shape = META_CURSOR_INVALID;
 }
@@ -1124,8 +1125,9 @@ meta_wayland_pointer_update_cursor_surface (MetaWaylandPointer *pointer)
         {
           MetaCursorSpriteXcursor *sprite;
 
-          sprite = meta_cursor_sprite_xcursor_new (pointer->cursor_shape);
-          cursor_sprite = META_CURSOR_SPRITE (sprite);
+          sprite = meta_cursor_sprite_xcursor_ensure (&pointer->cursor_shape_sprite,
+                                                      pointer->cursor_shape);
+          cursor_sprite = g_object_ref (META_CURSOR_SPRITE (sprite));
         }
 
       meta_cursor_tracker_set_window_cursor (cursor_tracker, cursor_sprite);

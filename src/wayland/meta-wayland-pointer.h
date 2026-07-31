@@ -23,6 +23,7 @@
 #include <glib.h>
 #include <wayland-server.h>
 
+#include "backends/meta-cursor-sprite-xcursor.h"
 #include "meta/meta-cursor-tracker.h"
 #include "wayland/meta-wayland-pointer-constraints.h"
 #include "wayland/meta-wayland-pointer-gesture-hold.h"
@@ -81,6 +82,7 @@ struct _MetaWaylandPointer
   MetaWaylandPointerGrab *grab;
   MetaWaylandPointerGrab default_grab;
   MetaCursor cursor_shape;
+  MetaCursorSpriteXcursor *cursor_shape_sprite;
   guint32 grab_button;
   guint32 grab_serial;
   guint32 grab_time;

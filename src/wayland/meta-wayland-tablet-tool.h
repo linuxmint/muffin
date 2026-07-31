@@ -47,6 +47,7 @@ struct _MetaWaylandTabletTool
   gulong prepare_at_signal_id;
 
   MetaCursor cursor_shape;
+  MetaCursorSpriteXcursor *cursor_shape_sprite;
 
   MetaWaylandSurface *current;
   guint32 pressed_buttons;
