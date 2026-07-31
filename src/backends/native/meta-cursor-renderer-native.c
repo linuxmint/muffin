@@ -73,6 +73,16 @@
  */
 #define HW_CURSOR_BUFFER_COUNT 3
 
+/* Uploading a cursor buffer should be near-instant. Some drivers instead
+ * service the legacy cursor ioctls as a blocking commit that waits for vblank,
+ * costing a frame of main loop time per cursor image change - enough to stall
+ * the whole compositor while an animated cursor is shown. The hardware cursor
+ * is an optimization, so where it measures slower than compositing one, stop
+ * using it rather than assume it is the cheaper path.
+ */
+#define HW_CURSOR_SLOW_UPDATE_US 4000
+#define HW_CURSOR_MAX_SLOW_UPDATES 5
+
 static GQuark quark_cursor_sprite = 0;
 
 struct _MetaCursorRendererNative
@@ -98,6 +108,9 @@ typedef struct _MetaCursorRendererNativeGpuData
 
   uint64_t cursor_width;
   uint64_t cursor_height;
+
+  gboolean uploaded_in_update;
+  int consecutive_slow_updates;
 } MetaCursorRendererNativeGpuData;
 
 typedef enum _MetaCursorGbmBoState
@@ -321,6 +334,16 @@ set_crtc_cursor (MetaCursorRendererNative *native,
   if (!priv->hw_state_invalidated && bo == crtc->cursor_renderer_private)
     flags |= META_KMS_ASSIGN_PLANE_FLAG_FB_UNCHANGED;
 
+  if (!(flags & META_KMS_ASSIGN_PLANE_FLAG_FB_UNCHANGED))
+    {
+      MetaCursorRendererNativeGpuData *cursor_renderer_gpu_data;
+
+      cursor_renderer_gpu_data =
+        meta_cursor_renderer_native_gpu_data_from_gpu (gpu_kms);
+      if (cursor_renderer_gpu_data)
+        cursor_renderer_gpu_data->uploaded_in_update = TRUE;
+    }
+
   plane_assignment = meta_kms_update_assign_plane (kms_update,
                                                    kms_crtc,
                                                    cursor_plane,
@@ -527,6 +550,52 @@ disable_hw_cursor_for_crtc (MetaKmsCrtc  *kms_crtc,
   cursor_renderer_gpu_data->hw_cursor_broken = TRUE;
 }
 
+static gboolean
+disable_slow_hw_cursors (MetaCursorRendererNative *native,
+                         int64_t                   duration_us)
+{
+  MetaCursorRendererNativePrivate *priv =
+    meta_cursor_renderer_native_get_instance_private (native);
+  gboolean disabled = FALSE;
+  GList *l;
+
+  for (l = meta_backend_get_gpus (priv->backend); l; l = l->next)
+    {
+      MetaCursorRendererNativeGpuData *cursor_renderer_gpu_data;
+
+      cursor_renderer_gpu_data =
+        meta_cursor_renderer_native_gpu_data_from_gpu (META_GPU_KMS (l->data));
+
+      if (!cursor_renderer_gpu_data ||
+          !cursor_renderer_gpu_data->uploaded_in_update)
+        continue;
+
+      cursor_renderer_gpu_data->uploaded_in_update = FALSE;
+
+      if (cursor_renderer_gpu_data->hw_cursor_broken)
+        continue;
+
+      if (duration_us < HW_CURSOR_SLOW_UPDATE_US)
+        {
+          cursor_renderer_gpu_data->consecutive_slow_updates = 0;
+          continue;
+        }
+
+      if (++cursor_renderer_gpu_data->consecutive_slow_updates <
+          HW_CURSOR_MAX_SLOW_UPDATES)
+        continue;
+
+      g_warning ("Hardware cursor updates blocked for %" G_GINT64_FORMAT "ms, "
+                 "%d times in a row, using OpenGL from now on",
+                 duration_us / 1000, HW_CURSOR_MAX_SLOW_UPDATES);
+
+      cursor_renderer_gpu_data->hw_cursor_broken = TRUE;
+      disabled = TRUE;
+    }
+
+  return disabled;
+}
+
 static void
 update_hw_cursor (MetaCursorRendererNative *native,
                   MetaCursorSprite         *cursor_sprite)
@@ -544,6 +613,7 @@ update_hw_cursor (MetaCursorRendererNative *native,
   GList *l;
   graphene_rect_t rect;
   gboolean painted = FALSE;
+  int64_t post_start_us;
   g_autoptr (MetaKmsFeedback) feedback = NULL;
 
   kms_update = meta_kms_ensure_pending_update (kms);
@@ -592,7 +662,12 @@ update_hw_cursor (MetaCursorRendererNative *native,
       painted = painted || data.out_painted;
     }
 
+  post_start_us = g_get_monotonic_time ();
   feedback = meta_kms_post_pending_update_sync (kms);
+
+  if (disable_slow_hw_cursors (native, g_get_monotonic_time () - post_start_us))
+    priv->has_hw_cursor = FALSE;
+
   if (meta_kms_feedback_get_result (feedback) != META_KMS_FEEDBACK_PASSED)
     {
       for (l = meta_kms_feedback_get_failed_planes (feedback); l; l = l->next)
