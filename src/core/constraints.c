@@ -796,49 +796,31 @@ try_flip_window_position (MetaWindow                       *window,
                           MetaPlacementConstraintAdjustment constraint_adjustment,
                           int                               parent_x,
                           int                               parent_y,
-                          MetaRectangle                    *rect,
-                          int                              *rel_x,
-                          int                              *rel_y,
-                          MetaRectangle                    *intersection)
+                          MetaRectangle                    *flipped_rect,
+                          int                              *flipped_rel_x,
+                          int                              *flipped_rel_y,
+                          MetaRectangle                    *flipped_intersection)
 {
-  MetaPlacementRule flipped_rule = *placement_rule;;
-  MetaRectangle flipped_rect;
-  MetaRectangle flipped_intersection;
-  int flipped_rel_x;
-  int flipped_rel_y;
-
   switch (constraint_adjustment)
     {
     case META_PLACEMENT_CONSTRAINT_ADJUSTMENT_FLIP_X:
-      placement_rule_flip_horizontally (&flipped_rule);
+      placement_rule_flip_horizontally (placement_rule);
       break;
     case META_PLACEMENT_CONSTRAINT_ADJUSTMENT_FLIP_Y:
-      placement_rule_flip_vertically (&flipped_rule);
+      placement_rule_flip_vertically (placement_rule);
       break;
 
     default:
       g_assert_not_reached ();
     }
 
-  flipped_rect = info->current;
-  meta_window_process_placement (window, &flipped_rule,
-                                 &flipped_rel_x, &flipped_rel_y);
-  flipped_rect.x = parent_x + flipped_rel_x;
-  flipped_rect.y = parent_y + flipped_rel_y;
-  meta_rectangle_intersect (&flipped_rect, &info->work_area_monitor,
-                            &flipped_intersection);
-
-  if ((constraint_adjustment == META_PLACEMENT_CONSTRAINT_ADJUSTMENT_FLIP_X &&
-       flipped_intersection.width == flipped_rect.width) ||
-      (constraint_adjustment == META_PLACEMENT_CONSTRAINT_ADJUSTMENT_FLIP_Y &&
-       flipped_intersection.height == flipped_rect.height))
-    {
-      *placement_rule = flipped_rule;
-      *rect = flipped_rect;
-      *rel_x = flipped_rel_x;
-      *rel_y = flipped_rel_y;
-      *intersection = flipped_intersection;
-    }
+  *flipped_rect = info->current;
+  meta_window_process_placement (window, placement_rule,
+                                 flipped_rel_x, flipped_rel_y);
+  flipped_rect->x = parent_x + *flipped_rel_x;
+  flipped_rect->y = parent_y + *flipped_rel_y;
+  meta_rectangle_intersect (flipped_rect, &info->work_area_monitor,
+                            flipped_intersection);
 }
 
 static gboolean
@@ -998,27 +980,59 @@ constrain_custom_rule (MetaWindow         *window,
       (current_rule.constraint_adjustment &
        META_PLACEMENT_CONSTRAINT_ADJUSTMENT_FLIP_X))
     {
-      try_flip_window_position (window, info, &current_rule,
+      MetaPlacementRule flipped_rule = current_rule;
+      MetaRectangle flipped_rect, flipped_intersection;
+      int flipped_rel_x, flipped_rel_y;
+
+      try_flip_window_position (window, info, &flipped_rule,
                                 META_PLACEMENT_CONSTRAINT_ADJUSTMENT_FLIP_X,
                                 parent_x,
                                 parent_y,
-                                &info->current,
-                                &info->rel_x,
-                                &info->rel_y,
-                                &intersection);
+                                &flipped_rect,
+                                &flipped_rel_x,
+                                &flipped_rel_y,
+                                &flipped_intersection);
+
+      /* Flip if that makes the window fit entirely, or failing that, if it
+       * leaves more of the window inside the work area than not flipping;
+       * SLIDE and RESIZE then have less to correct for.
+       */
+      if (flipped_intersection.width == flipped_rect.width ||
+          flipped_intersection.width > intersection.width)
+        {
+          current_rule = flipped_rule;
+          info->current = flipped_rect;
+          info->rel_x = flipped_rel_x;
+          info->rel_y = flipped_rel_y;
+          intersection = flipped_intersection;
+        }
     }
   if (info->current.height != intersection.height &&
       (current_rule.constraint_adjustment &
        META_PLACEMENT_CONSTRAINT_ADJUSTMENT_FLIP_Y))
     {
-      try_flip_window_position (window, info, &current_rule,
+      MetaPlacementRule flipped_rule = current_rule;
+      MetaRectangle flipped_rect, flipped_intersection;
+      int flipped_rel_x, flipped_rel_y;
+
+      try_flip_window_position (window, info, &flipped_rule,
                                 META_PLACEMENT_CONSTRAINT_ADJUSTMENT_FLIP_Y,
                                 parent_x,
                                 parent_y,
-                                &info->current,
-                                &info->rel_x,
-                                &info->rel_y,
-                                &intersection);
+                                &flipped_rect,
+                                &flipped_rel_x,
+                                &flipped_rel_y,
+                                &flipped_intersection);
+
+      if (flipped_intersection.height == flipped_rect.height ||
+          flipped_intersection.height > intersection.height)
+        {
+          current_rule = flipped_rule;
+          info->current = flipped_rect;
+          info->rel_x = flipped_rel_x;
+          info->rel_y = flipped_rel_y;
+          intersection = flipped_intersection;
+        }
     }
 
   meta_rectangle_intersect (&info->current, &info->work_area_monitor,
