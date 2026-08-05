@@ -350,6 +350,7 @@ setup_constraint_info (ConstraintInfo      *info,
     meta_backend_get_monitor_manager (backend);
   MetaLogicalMonitor *logical_monitor;
   MetaWorkspace *cur_workspace;
+  MetaPlacementRule *placement_rule;
 
   info->orig    = *orig;
   info->current = *new;
@@ -405,9 +406,41 @@ setup_constraint_info (ConstraintInfo      *info,
   if (!info->is_user_action)
     info->fixed_directions = FIXED_DIRECTION_NONE;
 
-  logical_monitor =
-    meta_monitor_manager_get_logical_monitor_from_rect (monitor_manager,
-                                                        &info->current);
+  placement_rule = meta_window_get_placement_rule (window);
+  if (placement_rule)
+    {
+      MetaRectangle rect;
+      MetaRectangle parent_rect;
+
+      rect = placement_rule->anchor_rect;
+
+      parent_rect = placement_rule->parent_rect;
+      rect.x += parent_rect.x;
+      rect.y += parent_rect.y;
+      logical_monitor =
+        meta_monitor_manager_get_logical_monitor_from_rect (monitor_manager,
+                                                            &rect);
+      if (!logical_monitor)
+        {
+          logical_monitor =
+            meta_monitor_manager_get_logical_monitor_from_rect (monitor_manager,
+                                                                &parent_rect);
+        }
+    }
+  else
+    {
+      logical_monitor =
+        meta_monitor_manager_get_logical_monitor_from_rect (monitor_manager,
+                                                            &info->current);
+    }
+
+  if (!logical_monitor)
+    {
+      g_warning ("No sensible logical monitor could be used for constraining");
+      logical_monitor =
+        meta_monitor_manager_get_primary_logical_monitor (monitor_manager);
+    }
+
   meta_window_get_work_area_for_logical_monitor (window,
                                                  logical_monitor,
                                                  &info->work_area_monitor);
@@ -527,22 +560,22 @@ place_window_if_needed(MetaWindow     *window,
         {
           meta_window_place (window, orig_rect.x, orig_rect.y,
                              &placed_rect.x, &placed_rect.y);
+
+          /* placing the window may have changed the monitor.  Find the
+           * new monitor and update the ConstraintInfo
+           */
+          logical_monitor =
+            meta_monitor_manager_get_logical_monitor_from_rect (monitor_manager,
+                                                                &placed_rect);
+          info->entire_monitor = logical_monitor->rect;
+          meta_window_get_work_area_for_logical_monitor (window,
+                                                         logical_monitor,
+                                                         &info->work_area_monitor);
+          cur_workspace = window->display->workspace_manager->active_workspace;
+          info->usable_monitor_region =
+            meta_workspace_get_onmonitor_region (cur_workspace, logical_monitor);
         }
       did_placement = TRUE;
-
-      /* placing the window may have changed the monitor.  Find the
-       * new monitor and update the ConstraintInfo
-       */
-      logical_monitor =
-        meta_monitor_manager_get_logical_monitor_from_rect (monitor_manager,
-                                                            &placed_rect);
-      info->entire_monitor = logical_monitor->rect;
-      meta_window_get_work_area_for_logical_monitor (window,
-                                                     logical_monitor,
-                                                     &info->work_area_monitor);
-      cur_workspace = window->display->workspace_manager->active_workspace;
-      info->usable_monitor_region =
-        meta_workspace_get_onmonitor_region (cur_workspace, logical_monitor);
 
       info->current.x = placed_rect.x;
       info->current.y = placed_rect.y;
