@@ -1222,7 +1222,7 @@ dismiss_invalid_popup (MetaWaylandXdgPopup *xdg_popup)
           top_xdg_popup = meta_wayland_xdg_popup_from_surface (top_popup_surface);
 
           xdg_popup_send_popup_done (top_xdg_popup->resource);
-          meta_wayland_popup_destroy (top_xdg_popup->popup);
+          meta_wayland_popup_dismiss (top_xdg_popup->popup);
 
           if (top_xdg_popup == xdg_popup)
             break;
