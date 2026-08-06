@@ -441,6 +441,14 @@ meta_backend_native_set_keymap (MetaBackend *backend,
   keymap = xkb_keymap_new_from_names (context, &names, XKB_KEYMAP_COMPILE_NO_FLAGS);
   xkb_context_unref (context);
 
+  if (!keymap)
+    {
+      g_warning ("Failed to compile keymap (layouts: '%s', variants: '%s', "
+                 "options: '%s'), keeping the previous one",
+                 layouts, variants, options);
+      return;
+    }
+
   seat = clutter_backend_get_default_seat (clutter_get_default_backend ());
   meta_seat_native_set_keyboard_map (META_SEAT_NATIVE (seat), keymap);
 
