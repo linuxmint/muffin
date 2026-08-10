@@ -59,6 +59,8 @@ MetaWaylandLayerSurface * meta_wayland_layer_shell_find_surface (MetaWaylandLaye
 
 const char * meta_wayland_layer_surface_get_namespace (MetaWaylandLayerSurface *layer_surface);
 
+MetaWaylandSurface * meta_wayland_layer_shell_get_exclusive_focus_surface (MetaWaylandCompositor *compositor);
+
 gboolean meta_wayland_layer_surface_get_geometry (MetaWaylandLayerSurface *layer_surface,
                                                   int                     *out_x,
                                                   int                     *out_y,

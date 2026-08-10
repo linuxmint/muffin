@@ -24,12 +24,15 @@
 #include "backends/meta-logical-monitor.h"
 #include "compositor/compositor-private.h"
 #include "compositor/meta-surface-actor-wayland.h"
+#include "core/display-private.h"
 #include "core/meta-workspace-manager-private.h"
 #include "core/workspace-private.h"
 #include "meta/boxes.h"
 #include "wayland/meta-wayland-data-device.h"
+#include "wayland/meta-wayland-keyboard.h"
 #include "wayland/meta-wayland-outputs.h"
 #include "wayland/meta-wayland-private.h"
+#include "wayland/meta-wayland-seat.h"
 #include "wayland/meta-wayland-surface.h"
 #include "wayland/meta-wayland-versions.h"
 #include "wayland/meta-wayland-xdg-shell.h"
@@ -62,6 +65,7 @@ typedef struct
 {
   uint32_t anchor;
   int32_t exclusive_zone;
+  uint32_t exclusive_edge;
   struct {
     int32_t top;
     int32_t right;
@@ -90,6 +94,13 @@ struct _MetaWaylandLayerSurface
   uint32_t configure_serial;
   gboolean configured;
   gboolean mapped;
+  gboolean closed;
+
+  uint32_t last_sent_width;
+  uint32_t last_sent_height;
+  gboolean has_sent_configure;
+
+  gulong output_destroyed_handler_id;
 };
 
 G_DEFINE_TYPE (MetaWaylandLayerSurface, meta_wayland_layer_surface,
@@ -107,6 +118,9 @@ enum
 static GParamSpec *layer_surface_props[N_PROPS] = { NULL, };
 
 static void meta_wayland_layer_surface_send_configure (MetaWaylandLayerSurface *layer_surface);
+static void meta_wayland_layer_surface_send_configure_full (MetaWaylandLayerSurface *layer_surface,
+                                                            gboolean                 only_if_changed);
+static void meta_wayland_layer_shell_sync_keyboard_focus (MetaWaylandCompositor *compositor);
 
 static MetaWaylandLayerShell *
 meta_wayland_layer_shell_from_compositor (MetaWaylandCompositor *compositor)
@@ -142,21 +156,44 @@ meta_wayland_layer_shell_ensure_signal_connected (MetaWaylandLayerShell *layer_s
 static MetaSide
 get_strut_side_from_anchor (uint32_t anchor)
 {
-  gboolean anchored_top = (anchor & ZWLR_LAYER_SURFACE_V1_ANCHOR_TOP);
-  gboolean anchored_bottom = (anchor & ZWLR_LAYER_SURFACE_V1_ANCHOR_BOTTOM);
-  gboolean anchored_left = (anchor & ZWLR_LAYER_SURFACE_V1_ANCHOR_LEFT);
-  gboolean anchored_right = (anchor & ZWLR_LAYER_SURFACE_V1_ANCHOR_RIGHT);
+  gboolean anchored_top = !!(anchor & ZWLR_LAYER_SURFACE_V1_ANCHOR_TOP);
+  gboolean anchored_bottom = !!(anchor & ZWLR_LAYER_SURFACE_V1_ANCHOR_BOTTOM);
+  gboolean anchored_left = !!(anchor & ZWLR_LAYER_SURFACE_V1_ANCHOR_LEFT);
+  gboolean anchored_right = !!(anchor & ZWLR_LAYER_SURFACE_V1_ANCHOR_RIGHT);
 
-  if (anchored_top && !anchored_bottom)
-    return META_SIDE_TOP;
-  else if (anchored_bottom && !anchored_top)
-    return META_SIDE_BOTTOM;
-  else if (anchored_left && !anchored_right)
-    return META_SIDE_LEFT;
-  else if (anchored_right && !anchored_left)
-    return META_SIDE_RIGHT;
-  else
-    return -1;
+  gboolean single_horizontal = (anchored_left != anchored_right);
+  gboolean single_vertical = (anchored_top != anchored_bottom);
+
+  /* Per spec, an exclusive zone only takes effect when anchored to exactly
+   * one edge, or one edge plus both perpendicular edges; corner anchors
+   * resolve to no edge (matching wlroots). */
+  if (single_vertical && !single_horizontal)
+    return anchored_top ? META_SIDE_TOP : META_SIDE_BOTTOM;
+
+  if (single_horizontal && !single_vertical)
+    return anchored_left ? META_SIDE_LEFT : META_SIDE_RIGHT;
+
+  return -1;
+}
+
+/* An explicit exclusive edge (v5) overrides the anchor-derived side; it lets
+ * corner- or fully-anchored surfaces disambiguate where their zone applies. */
+static MetaSide
+get_strut_side_for_state (const MetaWaylandLayerSurfaceState *state)
+{
+  switch (state->exclusive_edge)
+    {
+    case ZWLR_LAYER_SURFACE_V1_ANCHOR_TOP:
+      return META_SIDE_TOP;
+    case ZWLR_LAYER_SURFACE_V1_ANCHOR_BOTTOM:
+      return META_SIDE_BOTTOM;
+    case ZWLR_LAYER_SURFACE_V1_ANCHOR_LEFT:
+      return META_SIDE_LEFT;
+    case ZWLR_LAYER_SURFACE_V1_ANCHOR_RIGHT:
+      return META_SIDE_RIGHT;
+    default:
+      return get_strut_side_from_anchor (state->anchor);
+    }
 }
 
 /*
@@ -167,6 +204,20 @@ get_strut_side_from_anchor (uint32_t anchor)
  * surfaces that appear AFTER this one in the list were created earlier
  * and should be positioned closer to the edge.
  */
+static MetaLogicalMonitor *
+get_layer_surface_logical_monitor (MetaWaylandLayerSurface *layer_surface)
+{
+  MetaBackend *backend;
+  MetaMonitorManager *monitor_manager;
+
+  if (layer_surface->output && layer_surface->output->logical_monitor)
+    return layer_surface->output->logical_monitor;
+
+  backend = meta_get_backend ();
+  monitor_manager = meta_backend_get_monitor_manager (backend);
+  return meta_monitor_manager_get_primary_logical_monitor (monitor_manager);
+}
+
 static int
 get_other_layer_surfaces_exclusive_offset (MetaWaylandLayerSurface *layer_surface,
                                            MetaWaylandCompositor   *compositor,
@@ -197,11 +248,16 @@ get_other_layer_surfaces_exclusive_offset (MetaWaylandLayerSurface *layer_surfac
       if (!found_self)
         continue;
 
-      /* Only count mapped surfaces with exclusive_zone > 0 on the same edge */
+      /* Only count mapped surfaces with exclusive_zone > 0 on the same edge
+       * of the same monitor */
       if (!other->mapped || other->current.exclusive_zone <= 0)
         continue;
 
-      MetaSide other_side = get_strut_side_from_anchor (other->current.anchor);
+      if (get_layer_surface_logical_monitor (other) !=
+          get_layer_surface_logical_monitor (layer_surface))
+        continue;
+
+      MetaSide other_side = get_strut_side_for_state (&other->current);
       if (other_side != side)
         continue;
 
@@ -298,7 +354,7 @@ get_layer_surface_bounds (MetaWaylandLayerSurface      *layer_surface,
 
                       /* Also account for other layer surfaces on the same edge
                        * that were created before this one. */
-                      side = get_strut_side_from_anchor (state->anchor);
+                      side = get_strut_side_for_state (state);
                       if (side != (MetaSide) -1 && surface && surface->compositor)
                         {
                           other_surfaces_offset =
@@ -360,7 +416,7 @@ meta_wayland_layer_surface_create_strut (MetaWaylandLayerSurface *layer_surface)
   if (state->exclusive_zone <= 0 || !layer_surface->mapped)
     return NULL;
 
-  side = get_strut_side_from_anchor (state->anchor);
+  side = get_strut_side_for_state (state);
   if (side == (MetaSide) -1)
     return NULL;
 
@@ -563,7 +619,21 @@ layer_surface_set_exclusive_edge (struct wl_client   *client,
                                   struct wl_resource *resource,
                                   uint32_t            edge)
 {
-  /* TODO: Implement exclusive edge */
+  MetaWaylandLayerSurface *layer_surface = wl_resource_get_user_data (resource);
+
+  if (edge != 0 &&
+      edge != ZWLR_LAYER_SURFACE_V1_ANCHOR_TOP &&
+      edge != ZWLR_LAYER_SURFACE_V1_ANCHOR_BOTTOM &&
+      edge != ZWLR_LAYER_SURFACE_V1_ANCHOR_LEFT &&
+      edge != ZWLR_LAYER_SURFACE_V1_ANCHOR_RIGHT)
+    {
+      wl_resource_post_error (resource,
+                              ZWLR_LAYER_SURFACE_V1_ERROR_INVALID_EXCLUSIVE_EDGE,
+                              "Invalid exclusive edge");
+      return;
+    }
+
+  layer_surface->pending.exclusive_edge = edge;
 }
 
 static const struct zwlr_layer_surface_v1_interface layer_surface_interface = {
@@ -646,8 +716,17 @@ calculate_surface_position (MetaWaylandLayerSurface *layer_surface,
   if ((anchor & ZWLR_LAYER_SURFACE_V1_ANCHOR_LEFT) &&
       (anchor & ZWLR_LAYER_SURFACE_V1_ANCHOR_RIGHT))
     {
-      /* Horizontally centered, stretched */
-      x = bounds->x + layer_surface->current.margin.left;
+      if (layer_surface->current.desired_width == 0)
+        {
+          /* Stretched to fill the bounds */
+          x = bounds->x + layer_surface->current.margin.left;
+        }
+      else
+        {
+          /* Explicitly sized between both anchors: centered, margins
+           * ignored (matching wlroots) */
+          x = bounds->x + (bounds->width - width) / 2;
+        }
     }
   else if (anchor & ZWLR_LAYER_SURFACE_V1_ANCHOR_LEFT)
     {
@@ -667,8 +746,17 @@ calculate_surface_position (MetaWaylandLayerSurface *layer_surface,
   if ((anchor & ZWLR_LAYER_SURFACE_V1_ANCHOR_TOP) &&
       (anchor & ZWLR_LAYER_SURFACE_V1_ANCHOR_BOTTOM))
     {
-      /* Vertically centered, stretched */
-      y = bounds->y + layer_surface->current.margin.top;
+      if (layer_surface->current.desired_height == 0)
+        {
+          /* Stretched to fill the bounds */
+          y = bounds->y + layer_surface->current.margin.top;
+        }
+      else
+        {
+          /* Explicitly sized between both anchors: centered, margins
+           * ignored (matching wlroots) */
+          y = bounds->y + (bounds->height - height) / 2;
+        }
     }
   else if (anchor & ZWLR_LAYER_SURFACE_V1_ANCHOR_TOP)
     {
@@ -746,6 +834,189 @@ get_layer_container_for_layer (MetaWaylandLayerSurface *layer_surface)
   return layer_container;
 }
 
+static gboolean
+layer_surface_geometry_state_changed (const MetaWaylandLayerSurfaceState *a,
+                                      const MetaWaylandLayerSurfaceState *b)
+{
+  return a->desired_width != b->desired_width ||
+         a->desired_height != b->desired_height ||
+         a->anchor != b->anchor ||
+         a->exclusive_zone != b->exclusive_zone ||
+         a->margin.top != b->margin.top ||
+         a->margin.right != b->margin.right ||
+         a->margin.bottom != b->margin.bottom ||
+         a->margin.left != b->margin.left;
+}
+
+/* Close the surface per the protocol: unmap it, tell the client it will no
+ * longer be shown, and ignore all further changes (see apply_state). */
+static void
+meta_wayland_layer_surface_close (MetaWaylandLayerSurface *layer_surface)
+{
+  MetaWaylandActorSurface *actor_surface = META_WAYLAND_ACTOR_SURFACE (layer_surface);
+  MetaWaylandSurface *surface;
+  MetaSurfaceActor *surface_actor;
+  gboolean had_struts;
+
+  if (layer_surface->closed)
+    return;
+
+  layer_surface->closed = TRUE;
+
+  had_struts = layer_surface->mapped && layer_surface->current.exclusive_zone > 0;
+
+  surface = meta_wayland_surface_role_get_surface (META_WAYLAND_SURFACE_ROLE (layer_surface));
+
+  if (layer_surface->mapped)
+    {
+      surface_actor = meta_wayland_actor_surface_get_actor (actor_surface);
+      if (surface_actor)
+        {
+          ClutterActor *actor = CLUTTER_ACTOR (surface_actor);
+          ClutterActor *parent = clutter_actor_get_parent (actor);
+
+          clutter_actor_set_reactive (actor, FALSE);
+
+          if (parent)
+            clutter_actor_remove_child (parent, actor);
+        }
+
+      layer_surface->mapped = FALSE;
+
+      if (surface && surface->compositor)
+        {
+          MetaWaylandLayerShell *layer_shell =
+            meta_wayland_layer_shell_from_compositor (surface->compositor);
+
+          if (layer_shell)
+            g_signal_emit (layer_shell,
+                           layer_shell_signals[LAYER_SHELL_SIGNAL_LAYER_SURFACE_UNMAPPED],
+                           0, layer_surface);
+        }
+    }
+
+  if (layer_surface->resource)
+    zwlr_layer_surface_v1_send_closed (layer_surface->resource);
+
+  g_debug ("Layer surface closed: namespace=%s",
+           layer_surface->namespace ? layer_surface->namespace : "(null)");
+
+  if (had_struts && surface && surface->compositor)
+    meta_wayland_layer_shell_update_struts (surface->compositor);
+
+  if (surface && surface->compositor)
+    meta_wayland_layer_shell_sync_keyboard_focus (surface->compositor);
+}
+
+static void
+on_layer_surface_output_destroyed (MetaWaylandOutput       *output,
+                                   MetaWaylandLayerSurface *layer_surface)
+{
+  meta_wayland_layer_surface_close (layer_surface);
+}
+
+/* The mapped surface that should hold exclusive keyboard focus, if any:
+ * per spec, the top-most surface on the top/overlay layers with keyboard
+ * interactivity set to exclusive. The surface list is newest-first, and
+ * within a layer newer surfaces stack higher, so the first hit of the
+ * highest layer wins. */
+MetaWaylandSurface *
+meta_wayland_layer_shell_get_exclusive_focus_surface (MetaWaylandCompositor *compositor)
+{
+  MetaWaylandLayerShell *layer_shell =
+    meta_wayland_layer_shell_from_compositor (compositor);
+  MetaWaylandLayerSurface *best = NULL;
+  GList *l;
+
+  if (!layer_shell)
+    return NULL;
+
+  for (l = layer_shell->layer_surfaces; l; l = l->next)
+    {
+      MetaWaylandLayerSurface *layer_surface = l->data;
+
+      if (!layer_surface->mapped || layer_surface->closed)
+        continue;
+
+      if (layer_surface->current.keyboard_interactivity !=
+          ZWLR_LAYER_SURFACE_V1_KEYBOARD_INTERACTIVITY_EXCLUSIVE)
+        continue;
+
+      if (layer_surface->current.layer < META_LAYER_SHELL_LAYER_TOP)
+        continue;
+
+      if (!best || layer_surface->current.layer > best->current.layer)
+        best = layer_surface;
+    }
+
+  if (!best)
+    return NULL;
+
+  return meta_wayland_surface_role_get_surface (META_WAYLAND_SURFACE_ROLE (best));
+}
+
+/* Reconcile keyboard focus with layer-shell state: grant focus to the
+ * exclusive surface if one exists; otherwise, if focus is stuck on (or was
+ * lost with) a layer surface that no longer wants it, return focus to the
+ * normal focus chain. Called whenever a layer surface maps, unmaps, closes,
+ * is destroyed, or changes keyboard interactivity or layer. */
+static void
+meta_wayland_layer_shell_sync_keyboard_focus (MetaWaylandCompositor *compositor)
+{
+  MetaWaylandSeat *seat = compositor->seat;
+  MetaWaylandSurface *exclusive;
+  MetaWaylandSurface *current;
+  MetaDisplay *display = meta_get_display ();
+  MetaWorkspaceManager *workspace_manager;
+  MetaWorkspace *workspace;
+
+  if (!seat || !meta_wayland_seat_has_keyboard (seat))
+    return;
+
+  exclusive = meta_wayland_layer_shell_get_exclusive_focus_surface (compositor);
+  current = seat->keyboard->focus_surface;
+
+  if (exclusive)
+    {
+      if (current != exclusive)
+        {
+          if (display && display->focus_window)
+            meta_display_update_focus_window (display, NULL);
+
+          meta_wayland_keyboard_set_focus (seat->keyboard, exclusive);
+        }
+      return;
+    }
+
+  if (current)
+    {
+      MetaWaylandLayerSurface *layer_surface;
+
+      if (!META_IS_WAYLAND_LAYER_SURFACE (current->role))
+        return;
+
+      layer_surface = META_WAYLAND_LAYER_SURFACE (current->role);
+      if (layer_surface->mapped && !layer_surface->closed &&
+          meta_wayland_layer_surface_wants_keyboard_focus (layer_surface))
+        return;
+    }
+  else if (!display || display->focus_window != NULL)
+    {
+      return;
+    }
+
+  if (display)
+    {
+      workspace_manager = meta_display_get_workspace_manager (display);
+      workspace = workspace_manager ?
+        meta_workspace_manager_get_active_workspace (workspace_manager) : NULL;
+
+      if (workspace)
+        meta_workspace_focus_default_window (workspace, NULL,
+                                             meta_display_get_current_time_roundtrip (display));
+    }
+}
+
 static void
 meta_wayland_layer_surface_apply_state (MetaWaylandSurfaceRole  *surface_role,
                                         MetaWaylandSurfaceState *pending)
@@ -762,6 +1033,53 @@ meta_wayland_layer_surface_apply_state (MetaWaylandSurfaceRole  *surface_role,
   MetaWaylandLayerSurfaceState old_state;
   int x, y;
 
+  /* Per spec, changes to a closed surface are ignored; still release frame
+   * callbacks so the client doesn't block waiting on them. */
+  if (layer_surface->closed)
+    {
+      meta_wayland_actor_surface_queue_frame_callbacks (actor_surface, pending);
+      return;
+    }
+
+  /* A dimension of 0 means "compositor assigns", which is only meaningful
+   * when the surface is anchored to both of that axis' edges; the spec makes
+   * anything else a protocol error at commit time. */
+  if (layer_surface->resource)
+    {
+      uint32_t anchor = layer_surface->pending.anchor;
+
+      if (layer_surface->pending.desired_width == 0 &&
+          !((anchor & ZWLR_LAYER_SURFACE_V1_ANCHOR_LEFT) &&
+            (anchor & ZWLR_LAYER_SURFACE_V1_ANCHOR_RIGHT)))
+        {
+          wl_resource_post_error (layer_surface->resource,
+                                  ZWLR_LAYER_SURFACE_V1_ERROR_INVALID_SIZE,
+                                  "width 0 requested without anchoring both "
+                                  "left and right edges");
+          return;
+        }
+
+      if (layer_surface->pending.desired_height == 0 &&
+          !((anchor & ZWLR_LAYER_SURFACE_V1_ANCHOR_TOP) &&
+            (anchor & ZWLR_LAYER_SURFACE_V1_ANCHOR_BOTTOM)))
+        {
+          wl_resource_post_error (layer_surface->resource,
+                                  ZWLR_LAYER_SURFACE_V1_ERROR_INVALID_SIZE,
+                                  "height 0 requested without anchoring both "
+                                  "top and bottom edges");
+          return;
+        }
+
+      if (layer_surface->pending.exclusive_edge != 0 &&
+          !(anchor & layer_surface->pending.exclusive_edge))
+        {
+          wl_resource_post_error (layer_surface->resource,
+                                  ZWLR_LAYER_SURFACE_V1_ERROR_INVALID_EXCLUSIVE_EDGE,
+                                  "Exclusive edge is not an anchored edge");
+          return;
+        }
+    }
+
   had_buffer = layer_surface->mapped;
   has_buffer = surface->buffer_ref->buffer != NULL;
 
@@ -774,11 +1092,15 @@ meta_wayland_layer_surface_apply_state (MetaWaylandSurfaceRole  *surface_role,
   /* Chain up to handle frame callbacks */
   meta_wayland_actor_surface_queue_frame_callbacks (actor_surface, pending);
 
-  /* If client committed without a buffer and hasn't been properly configured,
-   * send a configure with the calculated size based on their anchors. */
-  if (!has_buffer && !layer_surface->configured)
+  /* The initial commit (no buffer, not yet configured) must always be answered
+   * with a configure reflecting the state the client just committed. Further
+   * buffer-less commits that change size-affecting state also warrant one. */
+  if (!has_buffer)
     {
-      meta_wayland_layer_surface_send_configure (layer_surface);
+      if (!layer_surface->configured)
+        meta_wayland_layer_surface_send_configure (layer_surface);
+      else if (layer_surface_geometry_state_changed (&layer_surface->current, &old_state))
+        meta_wayland_layer_surface_send_configure_full (layer_surface, TRUE);
     }
 
   surface_actor = meta_wayland_actor_surface_get_actor (actor_surface);
@@ -825,6 +1147,7 @@ meta_wayland_layer_surface_apply_state (MetaWaylandSurfaceRole  *surface_role,
         {
           /* Check if strut-affecting properties changed while mapped */
           if (layer_surface->current.exclusive_zone != old_state.exclusive_zone ||
+              layer_surface->current.exclusive_edge != old_state.exclusive_edge ||
               layer_surface->current.anchor != old_state.anchor ||
               layer_surface->current.margin.top != old_state.margin.top ||
               layer_surface->current.margin.bottom != old_state.margin.bottom ||
@@ -834,6 +1157,36 @@ meta_wayland_layer_surface_apply_state (MetaWaylandSurfaceRole  *surface_role,
               if (layer_surface->current.exclusive_zone > 0 ||
                   old_state.exclusive_zone > 0)
                 struts_changed = TRUE;
+            }
+
+          /* Committed changes to size-affecting state need a new configure
+           * (clients like gtk-layer-shell wait for one after set_size), but
+           * only if the resulting size actually differs — margin-only moves
+           * of an unstretched surface must not trigger a configure storm. */
+          if (layer_surface_geometry_state_changed (&layer_surface->current, &old_state))
+            meta_wayland_layer_surface_send_configure_full (layer_surface, TRUE);
+
+          if (layer_surface->current.layer != old_state.layer)
+            {
+              ClutterActor *actor = CLUTTER_ACTOR (surface_actor);
+              ClutterActor *old_parent = clutter_actor_get_parent (actor);
+
+              if (old_parent)
+                {
+                  g_object_ref (actor);
+                  clutter_actor_remove_child (old_parent, actor);
+
+                  if (layer_surface->current.layer == META_LAYER_SHELL_LAYER_BACKGROUND)
+                    clutter_actor_insert_child_at_index (layer_container, actor, 0);
+                  else
+                    clutter_actor_add_child (layer_container, actor);
+
+                  g_object_unref (actor);
+                }
+
+              g_debug ("Layer surface moved to layer %d: namespace=%s",
+                       layer_surface->current.layer,
+                       layer_surface->namespace ? layer_surface->namespace : "(null)");
             }
         }
 
@@ -848,13 +1201,19 @@ meta_wayland_layer_surface_apply_state (MetaWaylandSurfaceRole  *surface_role,
     {
       /* Surface is being unmapped */
       ClutterActor *actor = CLUTTER_ACTOR (surface_actor);
+      ClutterActor *parent = clutter_actor_get_parent (actor);
 
       clutter_actor_set_reactive (actor, FALSE);
 
-      if (clutter_actor_get_parent (actor))
-        clutter_actor_remove_child (layer_container, actor);
+      if (parent)
+        clutter_actor_remove_child (parent, actor);
 
       layer_surface->mapped = FALSE;
+
+      /* Per spec, an unmapped surface returns to the unconfigured state and
+       * must repeat the initial commit sequence before mapping again. */
+      layer_surface->configured = FALSE;
+      layer_surface->has_sent_configure = FALSE;
 
       /* Unmapping may affect struts */
       if (old_state.exclusive_zone > 0)
@@ -876,10 +1235,16 @@ meta_wayland_layer_surface_apply_state (MetaWaylandSurfaceRole  *surface_role,
   /* Update workspace struts if needed */
   if (struts_changed)
     meta_wayland_layer_shell_update_struts (surface->compositor);
+
+  if (had_buffer != has_buffer ||
+      layer_surface->current.keyboard_interactivity != old_state.keyboard_interactivity ||
+      layer_surface->current.layer != old_state.layer)
+    meta_wayland_layer_shell_sync_keyboard_focus (surface->compositor);
 }
 
 static void
-meta_wayland_layer_surface_send_configure (MetaWaylandLayerSurface *layer_surface)
+meta_wayland_layer_surface_send_configure_full (MetaWaylandLayerSurface *layer_surface,
+                                                gboolean                 only_if_changed)
 {
   MetaWaylandSurface *surface =
     meta_wayland_surface_role_get_surface (META_WAYLAND_SURFACE_ROLE (layer_surface));
@@ -924,10 +1289,26 @@ meta_wayland_layer_surface_send_configure (MetaWaylandLayerSurface *layer_surfac
   else
     height = 0;
 
+  if (only_if_changed &&
+      layer_surface->has_sent_configure &&
+      width == layer_surface->last_sent_width &&
+      height == layer_surface->last_sent_height)
+    return;
+
   serial = wl_display_next_serial (surface->compositor->wayland_display);
   zwlr_layer_surface_v1_send_configure (layer_surface->resource, serial, width, height);
 
+  layer_surface->last_sent_width = width;
+  layer_surface->last_sent_height = height;
+  layer_surface->has_sent_configure = TRUE;
+
   g_debug ("Layer surface configured: serial=%u size=%ux%u", serial, width, height);
+}
+
+static void
+meta_wayland_layer_surface_send_configure (MetaWaylandLayerSurface *layer_surface)
+{
+  meta_wayland_layer_surface_send_configure_full (layer_surface, FALSE);
 }
 
 static void
@@ -980,12 +1361,20 @@ meta_wayland_layer_surface_dispose (GObject *object)
                                                        layer_surface);
           if (had_struts)
             meta_wayland_layer_shell_update_struts (surface->compositor);
+
+          meta_wayland_layer_shell_sync_keyboard_focus (surface->compositor);
         }
     }
 
   if (layer_surface->output)
-    g_object_remove_weak_pointer (G_OBJECT (layer_surface->output),
-                                  (gpointer *) &layer_surface->output);
+    {
+      if (layer_surface->output_destroyed_handler_id != 0)
+        g_signal_handler_disconnect (layer_surface->output,
+                                     layer_surface->output_destroyed_handler_id);
+      g_object_remove_weak_pointer (G_OBJECT (layer_surface->output),
+                                    (gpointer *) &layer_surface->output);
+    }
+  layer_surface->output_destroyed_handler_id = 0;
 
   /* The wl_resource and this role object have independent lifetimes. If the
    * object is finalized first (e.g. an abrupt client disconnect tears down the
@@ -1016,8 +1405,14 @@ meta_wayland_layer_surface_set_property (GObject      *object,
     case PROP_OUTPUT:
       layer_surface->output = g_value_get_pointer (value);
       if (layer_surface->output)
-        g_object_add_weak_pointer (G_OBJECT (layer_surface->output),
-                                   (gpointer *) &layer_surface->output);
+        {
+          g_object_add_weak_pointer (G_OBJECT (layer_surface->output),
+                                     (gpointer *) &layer_surface->output);
+          layer_surface->output_destroyed_handler_id =
+            g_signal_connect (layer_surface->output, "output-destroyed",
+                              G_CALLBACK (on_layer_surface_output_destroyed),
+                              layer_surface);
+        }
       break;
     case PROP_NAMESPACE:
       layer_surface->namespace = g_value_dup_string (value);
@@ -1227,8 +1622,9 @@ layer_shell_get_layer_surface (struct wl_client   *client,
   g_debug ("Layer surface created: namespace=%s layer=%d output=%p",
            namespace ? namespace : "(null)", layer, output);
 
-  /* Send initial configure now that resource is ready */
-  meta_wayland_layer_surface_send_configure (layer_surface);
+  /* The initial configure is sent in response to the client's initial commit
+   * (see apply_state) — sending one here would reflect default state and its
+   * ack could suppress the real configure. */
 }
 
 static void
@@ -1399,6 +1795,15 @@ meta_wayland_layer_shell_on_workarea_changed (MetaWaylandCompositor *compositor)
   for (l = layer_shell->layer_surfaces; l; l = l->next)
     {
       MetaWaylandLayerSurface *surface = l->data;
+
+      /* A bound output whose monitor was unplugged is made inert immediately
+       * but only destroyed after a delay — close the surface now rather than
+       * leaving it misplaced on the fallback monitor until then. */
+      if (surface->output && !surface->output->logical_monitor)
+        {
+          meta_wayland_layer_surface_close (surface);
+          continue;
+        }
 
       /* Surfaces with exclusive_zone != -1 use workarea bounds and need
        * repositioning when workarea changes. Surfaces with exclusive_zone == -1

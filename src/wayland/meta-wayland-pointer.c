@@ -500,8 +500,14 @@ default_grab_button (MetaWaylandPointerGrab *grab,
               META_WAYLAND_LAYER_SURFACE (role)))
         {
           MetaWaylandSeat *seat = meta_wayland_pointer_get_seat (pointer);
+          MetaWaylandSurface *exclusive =
+            meta_wayland_layer_shell_get_exclusive_focus_surface (
+              meta_wayland_compositor_get_default ());
 
-          if (meta_wayland_seat_has_keyboard (seat))
+          /* An exclusive layer surface holds keyboard focus; a click on
+           * another surface must not steal it. */
+          if (meta_wayland_seat_has_keyboard (seat) &&
+              (!exclusive || exclusive == pointer->focus_surface))
             {
               MetaDisplay *display = meta_get_display ();
 

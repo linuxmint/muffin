@@ -41,6 +41,7 @@
 #include "wayland/meta-wayland-idle-inhibit.h"
 #include "wayland/meta-wayland-inhibit-shortcuts-dialog.h"
 #include "wayland/meta-wayland-inhibit-shortcuts.h"
+#include "wayland/meta-wayland-layer-shell.h"
 #include "wayland/meta-wayland-legacy-xdg-foreign.h"
 #include "wayland/meta-wayland-outputs.h"
 #include "wayland/meta-wayland-private.h"
@@ -142,6 +143,14 @@ meta_wayland_compositor_set_input_focus (MetaWaylandCompositor *compositor,
                                          MetaWindow            *window)
 {
   MetaWaylandSurface *surface = window ? window->surface : NULL;
+  MetaWaylandSurface *exclusive;
+
+  /* Per layer-shell spec, a mapped top/overlay layer surface with exclusive
+   * keyboard interactivity always holds keyboard focus, even as the focus
+   * window changes underneath it. */
+  exclusive = meta_wayland_layer_shell_get_exclusive_focus_surface (compositor);
+  if (exclusive)
+    surface = exclusive;
 
   meta_wayland_seat_set_input_focus (compositor->seat, surface);
 }
