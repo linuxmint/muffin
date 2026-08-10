@@ -406,7 +406,7 @@ calculate_cursor_crtc_sprite_scale (MetaCursorSprite   *cursor_sprite,
     }
   else
     {
-      return 1.0;
+      return meta_cursor_sprite_get_texture_scale (cursor_sprite);
     }
 }
 

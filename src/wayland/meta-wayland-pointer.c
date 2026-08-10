@@ -48,8 +48,10 @@
 
 #include "backends/meta-backend-private.h"
 #include "backends/meta-cursor-renderer.h"
+#include "backends/meta-cursor-sprite-xcursor.h"
 #include "backends/meta-cursor-tracker-private.h"
 #include "backends/meta-cursor.h"
+#include "backends/meta-logical-monitor.h"
 #include "clutter/clutter.h"
 #include "cogl/cogl-wayland-server.h"
 #include "cogl/cogl.h"
@@ -1108,6 +1110,39 @@ meta_wayland_pointer_get_relative_coordinates (MetaWaylandPointer *pointer,
   *sy = wl_fixed_from_double (yf);
 }
 
+/* Keep a shape (theme) cursor sized for the monitor it is on, mirroring the
+ * root cursor (see root_cursor_prepare_at) and the tablet tool. Without this
+ * the sprite stays at theme_scale 1 and renders half-size on a HiDPI monitor.
+ * A cursor surface backed by a client buffer scales via the cursor-surface
+ * role instead, so this only applies to the wp_cursor_shape_v1 path. */
+static void
+pointer_cursor_shape_prepare_at (MetaCursorSpriteXcursor *sprite_xcursor,
+                                 int                      x,
+                                 int                      y,
+                                 MetaWaylandPointer      *pointer)
+{
+  MetaBackend *backend = meta_get_backend ();
+  MetaMonitorManager *monitor_manager =
+    meta_backend_get_monitor_manager (backend);
+  MetaLogicalMonitor *logical_monitor;
+
+  logical_monitor =
+    meta_monitor_manager_get_logical_monitor_at (monitor_manager, x, y);
+  if (logical_monitor)
+    {
+      MetaCursorSprite *cursor_sprite = META_CURSOR_SPRITE (sprite_xcursor);
+      int ceiled_scale = (int) ceilf (logical_monitor->scale);
+
+      meta_cursor_sprite_xcursor_set_theme_scale (sprite_xcursor, ceiled_scale);
+
+      if (meta_is_stage_views_scaled ())
+        meta_cursor_sprite_set_texture_scale (cursor_sprite,
+                                              1.0 / ceiled_scale);
+      else
+        meta_cursor_sprite_set_texture_scale (cursor_sprite, 1.0);
+    }
+}
+
 void
 meta_wayland_pointer_update_cursor_surface (MetaWaylandPointer *pointer)
 {
@@ -1130,9 +1165,18 @@ meta_wayland_pointer_update_cursor_surface (MetaWaylandPointer *pointer)
       else if (pointer->cursor_shape != META_CURSOR_INVALID)
         {
           MetaCursorSpriteXcursor *sprite;
+          MetaCursorSpriteXcursor *previous = pointer->cursor_shape_sprite;
 
           sprite = meta_cursor_sprite_xcursor_ensure (&pointer->cursor_shape_sprite,
                                                       pointer->cursor_shape);
+
+          /* Connect the scale handler once, when a new sprite is created
+           * (ensure reuses the cached sprite when the shape is unchanged). */
+          if (sprite != previous)
+            g_signal_connect (sprite, "prepare-at",
+                              G_CALLBACK (pointer_cursor_shape_prepare_at),
+                              pointer);
+
           cursor_sprite = g_object_ref (META_CURSOR_SPRITE (sprite));
         }
 
