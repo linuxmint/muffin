@@ -21,6 +21,7 @@
 
 #include "wayland/meta-wayland-layer-shell.h"
 
+#include "backends/meta-backend-private.h"
 #include "backends/meta-logical-monitor.h"
 #include "compositor/compositor-private.h"
 #include "compositor/meta-surface-actor-wayland.h"
@@ -218,6 +219,33 @@ get_layer_surface_logical_monitor (MetaWaylandLayerSurface *layer_surface)
   return meta_monitor_manager_get_primary_logical_monitor (monitor_manager);
 }
 
+/* Like windows (get_window_geometry_scale_for_logical_monitor): when stage
+ * views are not scaled, the stage is in physical pixels and logical-unit
+ * client geometry must be scaled by the monitor scale. */
+static double
+meta_wayland_layer_surface_get_geometry_scale (MetaWaylandActorSurface *actor_surface)
+{
+  MetaWaylandLayerSurface *layer_surface =
+    META_WAYLAND_LAYER_SURFACE (actor_surface);
+  MetaLogicalMonitor *logical_monitor;
+
+  if (meta_is_stage_views_scaled ())
+    return 1;
+
+  logical_monitor = get_layer_surface_logical_monitor (layer_surface);
+  if (!logical_monitor)
+    return 1;
+
+  return (int) meta_logical_monitor_get_scale (logical_monitor);
+}
+
+static int
+get_layer_surface_scale (MetaWaylandLayerSurface *layer_surface)
+{
+  return (int) meta_wayland_layer_surface_get_geometry_scale (
+    META_WAYLAND_ACTOR_SURFACE (layer_surface));
+}
+
 static int
 get_other_layer_surfaces_exclusive_offset (MetaWaylandLayerSurface *layer_surface,
                                            MetaWaylandCompositor   *compositor,
@@ -261,20 +289,23 @@ get_other_layer_surfaces_exclusive_offset (MetaWaylandLayerSurface *layer_surfac
       if (other_side != side)
         continue;
 
-      /* Add this surface's exclusive zone (plus its margin on this edge) */
+      /* Add this surface's exclusive zone (plus its margin on this edge),
+       * scaled from the client's logical units to stage units */
+      int other_scale = get_layer_surface_scale (other);
+
       switch (side)
         {
         case META_SIDE_TOP:
-          offset += other->current.exclusive_zone + other->current.margin.top;
+          offset += (other->current.exclusive_zone + other->current.margin.top) * other_scale;
           break;
         case META_SIDE_BOTTOM:
-          offset += other->current.exclusive_zone + other->current.margin.bottom;
+          offset += (other->current.exclusive_zone + other->current.margin.bottom) * other_scale;
           break;
         case META_SIDE_LEFT:
-          offset += other->current.exclusive_zone + other->current.margin.left;
+          offset += (other->current.exclusive_zone + other->current.margin.left) * other_scale;
           break;
         case META_SIDE_RIGHT:
-          offset += other->current.exclusive_zone + other->current.margin.right;
+          offset += (other->current.exclusive_zone + other->current.margin.right) * other_scale;
           break;
         default:
           break;
@@ -434,6 +465,8 @@ meta_wayland_layer_surface_create_strut (MetaWaylandLayerSurface *layer_surface)
   strut = g_new0 (MetaStrut, 1);
   strut->side = side;
 
+  int scale = get_layer_surface_scale (layer_surface);
+
   /* Create strut from OUTPUT edge, extending to cover both the existing
    * workarea offset (Cinnamon panels) AND this surface's exclusive zone.
    * This matches how builtin_struts are processed. */
@@ -443,23 +476,23 @@ meta_wayland_layer_surface_create_strut (MetaWaylandLayerSurface *layer_surface)
       strut->rect.x = output_rect.x;
       strut->rect.y = output_rect.y;
       strut->rect.width = output_rect.width;
-      strut->rect.height = offset_top + state->exclusive_zone + state->margin.top;
+      strut->rect.height = offset_top + (state->exclusive_zone + state->margin.top) * scale;
       break;
     case META_SIDE_BOTTOM:
       strut->rect.x = output_rect.x;
-      strut->rect.height = offset_bottom + state->exclusive_zone + state->margin.bottom;
+      strut->rect.height = offset_bottom + (state->exclusive_zone + state->margin.bottom) * scale;
       strut->rect.y = output_rect.y + output_rect.height - strut->rect.height;
       strut->rect.width = output_rect.width;
       break;
     case META_SIDE_LEFT:
       strut->rect.x = output_rect.x;
       strut->rect.y = output_rect.y;
-      strut->rect.width = offset_left + state->exclusive_zone + state->margin.left;
+      strut->rect.width = offset_left + (state->exclusive_zone + state->margin.left) * scale;
       strut->rect.height = output_rect.height;
       break;
     case META_SIDE_RIGHT:
       strut->rect.y = output_rect.y;
-      strut->rect.width = offset_right + state->exclusive_zone + state->margin.right;
+      strut->rect.width = offset_right + (state->exclusive_zone + state->margin.right) * scale;
       strut->rect.x = output_rect.x + output_rect.width - strut->rect.width;
       strut->rect.height = output_rect.height;
       break;
@@ -712,6 +745,12 @@ calculate_surface_position (MetaWaylandLayerSurface *layer_surface,
     }
   anchor = layer_surface->current.anchor;
 
+  /* Client geometry and margins are in logical units; bounds are in stage
+   * units (physical pixels when stage views are not scaled) */
+  int scale = get_layer_surface_scale (layer_surface);
+  width *= scale;
+  height *= scale;
+
   /* Calculate X position */
   if ((anchor & ZWLR_LAYER_SURFACE_V1_ANCHOR_LEFT) &&
       (anchor & ZWLR_LAYER_SURFACE_V1_ANCHOR_RIGHT))
@@ -719,7 +758,7 @@ calculate_surface_position (MetaWaylandLayerSurface *layer_surface,
       if (layer_surface->current.desired_width == 0)
         {
           /* Stretched to fill the bounds */
-          x = bounds->x + layer_surface->current.margin.left;
+          x = bounds->x + layer_surface->current.margin.left * scale;
         }
       else
         {
@@ -730,11 +769,11 @@ calculate_surface_position (MetaWaylandLayerSurface *layer_surface,
     }
   else if (anchor & ZWLR_LAYER_SURFACE_V1_ANCHOR_LEFT)
     {
-      x = bounds->x + layer_surface->current.margin.left;
+      x = bounds->x + layer_surface->current.margin.left * scale;
     }
   else if (anchor & ZWLR_LAYER_SURFACE_V1_ANCHOR_RIGHT)
     {
-      x = bounds->x + bounds->width - width - layer_surface->current.margin.right;
+      x = bounds->x + bounds->width - width - layer_surface->current.margin.right * scale;
     }
   else
     {
@@ -749,7 +788,7 @@ calculate_surface_position (MetaWaylandLayerSurface *layer_surface,
       if (layer_surface->current.desired_height == 0)
         {
           /* Stretched to fill the bounds */
-          y = bounds->y + layer_surface->current.margin.top;
+          y = bounds->y + layer_surface->current.margin.top * scale;
         }
       else
         {
@@ -760,11 +799,11 @@ calculate_surface_position (MetaWaylandLayerSurface *layer_surface,
     }
   else if (anchor & ZWLR_LAYER_SURFACE_V1_ANCHOR_TOP)
     {
-      y = bounds->y + layer_surface->current.margin.top;
+      y = bounds->y + layer_surface->current.margin.top * scale;
     }
   else if (anchor & ZWLR_LAYER_SURFACE_V1_ANCHOR_BOTTOM)
     {
-      y = bounds->y + bounds->height - height - layer_surface->current.margin.bottom;
+      y = bounds->y + bounds->height - height - layer_surface->current.margin.bottom * scale;
     }
   else
     {
@@ -791,18 +830,24 @@ meta_wayland_layer_surface_get_geometry (MetaWaylandLayerSurface *layer_surface,
   if (!surface)
     return FALSE;
 
+  /* Consumers use this as a popup placement parent_rect, which is in stage
+   * units: scale_placement_rule converts the client's logical positioner
+   * fields but leaves parent_rect untouched. */
+  int scale = get_layer_surface_scale (layer_surface);
+
   if (surface->buffer_ref->buffer)
     {
-      *out_width = meta_wayland_surface_get_width (surface);
-      *out_height = meta_wayland_surface_get_height (surface);
+      *out_width = meta_wayland_surface_get_width (surface) * scale;
+      *out_height = meta_wayland_surface_get_height (surface) * scale;
     }
   else
     {
-      *out_width = layer_surface->current.desired_width;
-      *out_height = layer_surface->current.desired_height;
+      *out_width = layer_surface->current.desired_width * scale;
+      *out_height = layer_surface->current.desired_height * scale;
     }
 
   calculate_surface_position (layer_surface, out_x, out_y);
+
   return TRUE;
 }
 
@@ -1195,7 +1240,14 @@ meta_wayland_layer_surface_apply_state (MetaWaylandSurfaceRole  *surface_role,
       /* Sync actor state */
       meta_wayland_actor_surface_sync_actor_state (actor_surface);
 
-      /* Update position */
+      /* Update scale and position. The buffer-scale correction makes the
+       * texture logical-sized; on an unscaled-stage-views (physical pixel)
+       * stage the actor must be scaled up like window actors are. */
+      int geometry_scale = get_layer_surface_scale (layer_surface);
+
+      clutter_actor_set_scale (CLUTTER_ACTOR (surface_actor),
+                               geometry_scale, geometry_scale);
+
       calculate_surface_position (layer_surface, &x, &y);
       clutter_actor_set_position (CLUTTER_ACTOR (surface_actor), x, y);
     }
@@ -1270,12 +1322,15 @@ meta_wayland_layer_surface_send_configure_full (MetaWaylandLayerSurface *layer_s
   else
     bounds = &usable_area;
 
-  /* Calculate configure size based on anchors and desired size */
+  /* Calculate configure size based on anchors and desired size. Configure
+   * sizes are in the client's logical units; bounds are in stage units. */
+  int scale = get_layer_surface_scale (layer_surface);
+
   if (state->desired_width != 0)
     width = state->desired_width;
   else if ((state->anchor & ZWLR_LAYER_SURFACE_V1_ANCHOR_LEFT) &&
            (state->anchor & ZWLR_LAYER_SURFACE_V1_ANCHOR_RIGHT))
-    width = bounds->width -
+    width = bounds->width / scale -
             state->margin.left -
             state->margin.right;
   else
@@ -1285,7 +1340,7 @@ meta_wayland_layer_surface_send_configure_full (MetaWaylandLayerSurface *layer_s
     height = state->desired_height;
   else if ((state->anchor & ZWLR_LAYER_SURFACE_V1_ANCHOR_TOP) &&
            (state->anchor & ZWLR_LAYER_SURFACE_V1_ANCHOR_BOTTOM))
-    height = bounds->height -
+    height = bounds->height / scale -
              state->margin.top -
              state->margin.bottom;
   else
@@ -1558,6 +1613,8 @@ meta_wayland_layer_surface_class_init (MetaWaylandLayerSurfaceClass *klass)
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
   MetaWaylandSurfaceRoleClass *surface_role_class =
     META_WAYLAND_SURFACE_ROLE_CLASS (klass);
+  MetaWaylandActorSurfaceClass *actor_surface_class =
+    META_WAYLAND_ACTOR_SURFACE_CLASS (klass);
 
   object_class->constructed = meta_wayland_layer_surface_constructed;
   object_class->dispose = meta_wayland_layer_surface_dispose;
@@ -1569,6 +1626,9 @@ meta_wayland_layer_surface_class_init (MetaWaylandLayerSurfaceClass *klass)
   surface_role_class->get_toplevel = meta_wayland_layer_surface_get_toplevel;
   surface_role_class->notify_subsurface_state_changed =
     meta_wayland_layer_surface_notify_subsurface_state_changed;
+
+  actor_surface_class->get_geometry_scale =
+    meta_wayland_layer_surface_get_geometry_scale;
 
   layer_surface_props[PROP_OUTPUT] =
     g_param_spec_pointer ("output", NULL, NULL,
