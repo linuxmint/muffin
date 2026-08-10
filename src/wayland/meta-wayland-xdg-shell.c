@@ -167,6 +167,10 @@ static MetaPlacementRule
 meta_wayland_xdg_positioner_to_placement (MetaWaylandXdgPositioner *xdg_positioner,
                                           MetaWindow               *parent_window);
 
+static MetaPlacementRule
+meta_wayland_xdg_positioner_to_placement_for_layer_surface (MetaWaylandXdgPositioner *xdg_positioner,
+                                                            MetaWaylandLayerSurface  *layer_surface);
+
 static struct wl_resource *
 meta_wayland_xdg_surface_get_wm_base_resource (MetaWaylandXdgSurface *xdg_surface);
 
@@ -644,8 +648,24 @@ xdg_popup_reposition (struct wl_client   *client,
   parent_window = meta_wayland_surface_get_window (xdg_popup->parent_surface);
 
   xdg_positioner = wl_resource_get_user_data (positioner_resource);
-  placement_rule = meta_wayland_xdg_positioner_to_placement (xdg_positioner,
-                                                             parent_window);
+  if (parent_window)
+    {
+      placement_rule = meta_wayland_xdg_positioner_to_placement (xdg_positioner,
+                                                                 parent_window);
+    }
+  else if (META_IS_WAYLAND_LAYER_SURFACE (xdg_popup->parent_surface->role))
+    {
+      MetaWaylandLayerSurface *layer_surface =
+        META_WAYLAND_LAYER_SURFACE (xdg_popup->parent_surface->role);
+
+      placement_rule =
+        meta_wayland_xdg_positioner_to_placement_for_layer_surface (xdg_positioner,
+                                                                    layer_surface);
+    }
+  else
+    {
+      return;
+    }
 
   xdg_popup->pending_reposition_token = token;
   xdg_popup->pending_repositioned = TRUE;
@@ -2284,6 +2304,44 @@ meta_wayland_xdg_positioner_to_placement (MetaWaylandXdgPositioner *xdg_position
   };
 }
 
+/* Layer surfaces have no MetaWindow; take the parent rect from the layer
+ * surface's computed geometry instead (see also
+ * meta_wayland_xdg_popup_set_parent_surface). */
+static MetaPlacementRule
+meta_wayland_xdg_positioner_to_placement_for_layer_surface (MetaWaylandXdgPositioner *xdg_positioner,
+                                                            MetaWaylandLayerSurface  *layer_surface)
+{
+  MetaRectangle parent_rect = { 0, 0, 0, 0 };
+
+  meta_wayland_layer_surface_get_geometry (layer_surface,
+                                           &parent_rect.x, &parent_rect.y,
+                                           &parent_rect.width, &parent_rect.height);
+
+  if (xdg_positioner->has_parent_size)
+    {
+      meta_rectangle_resize_with_gravity (&parent_rect,
+                                          &parent_rect,
+                                          META_GRAVITY_SOUTH_EAST,
+                                          xdg_positioner->parent_width,
+                                          xdg_positioner->parent_height);
+    }
+
+  return (MetaPlacementRule) {
+    .anchor_rect = xdg_positioner->anchor_rect,
+    .gravity = positioner_gravity_to_placement_gravity (xdg_positioner->gravity),
+    .anchor = positioner_anchor_to_placement_anchor (xdg_positioner->anchor),
+    .constraint_adjustment = xdg_positioner->constraint_adjustment,
+    .offset_x = xdg_positioner->offset_x,
+    .offset_y = xdg_positioner->offset_y,
+    .width = xdg_positioner->width,
+    .height = xdg_positioner->height,
+
+    .is_reactive = xdg_positioner->is_reactive,
+
+    .parent_rect = parent_rect,
+  };
+}
+
 static void
 xdg_positioner_destroy (struct wl_client   *client,
                         struct wl_resource *resource)
@@ -2658,6 +2716,23 @@ meta_wayland_xdg_popup_set_parent_surface (MetaWaylandXdgPopup *xdg_popup,
       rule->parent_rect.width = parent_width;
       rule->parent_rect.height = parent_height;
     }
+}
+
+/* Whether the surface is an xdg_popup whose (possibly nested) parent chain
+ * ends at a layer surface. Such popups must be stacked above the layer
+ * containers rather than among normal windows. */
+gboolean
+meta_wayland_surface_is_layer_shell_popup (MetaWaylandSurface *surface)
+{
+  while (surface != NULL && META_IS_WAYLAND_XDG_POPUP (surface->role))
+    {
+      MetaWaylandXdgPopup *xdg_popup = META_WAYLAND_XDG_POPUP (surface->role);
+
+      surface = xdg_popup->parent_surface;
+    }
+
+  return surface != NULL &&
+         META_IS_WAYLAND_LAYER_SURFACE (surface->role);
 }
 
 void

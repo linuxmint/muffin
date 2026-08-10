@@ -88,6 +88,7 @@
 #include "wayland/meta-wayland-layer-shell.h"
 #include "wayland/meta-wayland-outputs.h"
 #include "wayland/meta-wayland-private.h"
+#include "wayland/meta-wayland-xdg-shell.h"
 #endif
 
 enum
@@ -909,6 +910,20 @@ meta_compositor_add_window (MetaCompositor    *compositor,
 
       window_group = priv->top_window_group;
     }
+
+#ifdef HAVE_WAYLAND
+  else if (window->client_type == META_WINDOW_CLIENT_TYPE_WAYLAND &&
+           window->surface != NULL &&
+           meta_wayland_surface_is_layer_shell_popup (window->surface))
+    {
+      /* Popups of layer surfaces must draw above the layer containers
+       * (their parent may be in top_window_group, above all normal
+       * windows). feedback_group is the topmost group, and
+       * sync_actor_stacking () only restacks actors within their current
+       * parent, so they keep their elevation across restacks. */
+      window_group = priv->feedback_group;
+    }
+#endif
 
   else if (window->type == META_WINDOW_DESKTOP)
     window_group = priv->bottom_window_group;
