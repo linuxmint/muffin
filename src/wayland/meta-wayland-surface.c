@@ -1950,6 +1950,24 @@ meta_wayland_surface_notify_subsurface_state_changed (MetaWaylandSurface *surfac
     meta_wayland_surface_role_notify_subsurface_state_changed (surface->role);
 }
 
+/* Whether the surface's role manages actors for a tree of subsurfaces -
+ * true for the roles that implement notify_subsurface_state_changed (shell
+ * surfaces via their window actor, layer surfaces via their own actor).
+ * Subsurfaces only get their actors synced when their tree root passes
+ * this. */
+gboolean
+meta_wayland_surface_is_subsurface_host (MetaWaylandSurface *surface)
+{
+  MetaWaylandSurfaceRoleClass *klass;
+
+  if (!surface || !surface->role)
+    return FALSE;
+
+  klass = META_WAYLAND_SURFACE_ROLE_GET_CLASS (surface->role);
+
+  return klass->notify_subsurface_state_changed != NULL;
+}
+
 MetaWaylandSurface *
 meta_wayland_surface_role_get_surface (MetaWaylandSurfaceRole *role)
 {

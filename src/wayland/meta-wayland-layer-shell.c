@@ -1000,21 +1000,23 @@ meta_wayland_layer_shell_sync_keyboard_focus (MetaWaylandCompositor *compositor)
           meta_wayland_layer_surface_wants_keyboard_focus (layer_surface))
         return;
     }
-  else if (!display || display->focus_window != NULL)
+
+  if (!display)
+    return;
+
+  if (display->focus_window)
     {
+      meta_wayland_compositor_set_input_focus (compositor, display->focus_window);
       return;
     }
 
-  if (display)
-    {
-      workspace_manager = meta_display_get_workspace_manager (display);
-      workspace = workspace_manager ?
-        meta_workspace_manager_get_active_workspace (workspace_manager) : NULL;
+  workspace_manager = meta_display_get_workspace_manager (display);
+  workspace = workspace_manager ?
+    meta_workspace_manager_get_active_workspace (workspace_manager) : NULL;
 
-      if (workspace)
-        meta_workspace_focus_default_window (workspace, NULL,
-                                             meta_display_get_current_time_roundtrip (display));
-    }
+  if (workspace)
+    meta_workspace_focus_default_window (workspace, NULL,
+                                         meta_display_get_current_time_roundtrip (display));
 }
 
 static void
@@ -1472,6 +1474,70 @@ meta_wayland_layer_surface_init (MetaWaylandLayerSurface *layer_surface)
   layer_surface->mapped = FALSE;
 }
 
+static MetaWaylandSurface *
+meta_wayland_layer_surface_get_toplevel (MetaWaylandSurfaceRole *surface_role)
+{
+  return meta_wayland_surface_role_get_surface (surface_role);
+}
+
+static gboolean
+raise_layer_subsurface_actor (GNode    *node,
+                              gpointer  data)
+{
+  MetaWaylandSurface *root = ((gpointer *) data)[0];
+  ClutterActor *parent_actor = ((gpointer *) data)[1];
+  MetaWaylandSurface *surface = node->data;
+  MetaSurfaceActor *surface_actor;
+  ClutterActor *actor;
+
+  if (surface == root)
+    return FALSE;
+
+  surface_actor = meta_wayland_surface_get_actor (surface);
+  if (!surface_actor)
+    return FALSE;
+
+  actor = CLUTTER_ACTOR (surface_actor);
+
+  /* Visit surfaces in paint order and raise each to the top, so subsurfaces
+   * end up stacked above the parent's content in the right relative order. */
+  if (clutter_actor_contains (parent_actor, actor))
+    clutter_actor_set_child_above_sibling (parent_actor, actor, NULL);
+  else
+    clutter_actor_add_child (parent_actor, actor);
+
+  return FALSE;
+}
+
+/* Layer surfaces have no window actor to host their subsurface actors the
+ * way toplevel windows do (meta_window_actor_wayland_rebuild_surface_tree);
+ * parent them under the layer surface's own actor instead. Subsurface
+ * positions accumulate up to the tree root, so child actors land in the
+ * right place. */
+static void
+meta_wayland_layer_surface_notify_subsurface_state_changed (MetaWaylandSurfaceRole *surface_role)
+{
+  MetaWaylandLayerSurface *layer_surface = META_WAYLAND_LAYER_SURFACE (surface_role);
+  MetaWaylandSurface *surface =
+    meta_wayland_surface_role_get_surface (surface_role);
+  MetaSurfaceActor *surface_actor =
+    meta_wayland_actor_surface_get_actor (META_WAYLAND_ACTOR_SURFACE (layer_surface));
+  gpointer traverse_data[2];
+
+  if (!surface || !surface_actor)
+    return;
+
+  traverse_data[0] = surface;
+  traverse_data[1] = CLUTTER_ACTOR (surface_actor);
+
+  g_node_traverse (surface->subsurface_branch_node,
+                   G_IN_ORDER,
+                   G_TRAVERSE_LEAVES,
+                   -1,
+                   raise_layer_subsurface_actor,
+                   traverse_data);
+}
+
 static void
 meta_wayland_layer_surface_assigned (MetaWaylandSurfaceRole *surface_role)
 {
@@ -1500,6 +1566,9 @@ meta_wayland_layer_surface_class_init (MetaWaylandLayerSurfaceClass *klass)
 
   surface_role_class->assigned = meta_wayland_layer_surface_assigned;
   surface_role_class->apply_state = meta_wayland_layer_surface_apply_state;
+  surface_role_class->get_toplevel = meta_wayland_layer_surface_get_toplevel;
+  surface_role_class->notify_subsurface_state_changed =
+    meta_wayland_layer_surface_notify_subsurface_state_changed;
 
   layer_surface_props[PROP_OUTPUT] =
     g_param_spec_pointer ("output", NULL, NULL,
