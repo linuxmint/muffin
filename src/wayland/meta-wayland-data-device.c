@@ -41,6 +41,7 @@
 #include "wayland/meta-wayland-pointer.h"
 #include "wayland/meta-wayland-private.h"
 #include "wayland/meta-wayland-seat.h"
+#include "wayland/meta-xwayland-dnd-private.h"
 
 #define ROOTWINDOW_DROP_MIME "application/x-rootwindow-drop"
 
@@ -193,20 +194,81 @@ on_drag_focus_destroyed (MetaWaylandSurface  *surface,
 }
 
 static void
+meta_wayland_drag_grab_set_cursor (MetaWaylandDragGrab *drag_grab,
+                                   MetaCursor           cursor)
+{
+  /* X11 DnD lets the drag source client drive pointer cursor updates. */
+  if (META_IS_WAYLAND_DATA_SOURCE_XWAYLAND (drag_grab->drag_data_source))
+    return;
+
+  meta_wayland_pointer_set_cursor_shape (drag_grab->seat->pointer, cursor);
+}
+
+static void
+meta_wayland_drag_grab_update_cursor (MetaWaylandDragGrab *drag_grab)
+{
+  enum wl_data_device_manager_dnd_action action;
+  MetaCursor cursor = META_CURSOR_DEFAULT;
+
+  if (!drag_grab->drag_data_source)
+    return;
+
+  action = meta_wayland_data_source_get_current_action (drag_grab->drag_data_source);
+
+  switch (action)
+    {
+    case WL_DATA_DEVICE_MANAGER_DND_ACTION_NONE:
+      cursor = META_CURSOR_NO_DROP;
+      break;
+    case WL_DATA_DEVICE_MANAGER_DND_ACTION_MOVE:
+      cursor = META_CURSOR_MOVE;
+      break;
+    case WL_DATA_DEVICE_MANAGER_DND_ACTION_COPY:
+      cursor = META_CURSOR_COPY;
+      break;
+    case WL_DATA_DEVICE_MANAGER_DND_ACTION_ASK:
+      cursor = META_CURSOR_DND_ASK;
+      break;
+    default:
+      break;
+    }
+
+  meta_wayland_drag_grab_set_cursor (drag_grab, cursor);
+}
+
+static void
+on_data_source_action_changed (MetaWaylandDataSource *source,
+                               guint                  action,
+                               MetaWaylandDragGrab   *drag_grab)
+{
+  meta_wayland_drag_grab_update_cursor (drag_grab);
+}
+
+static void
 meta_wayland_drag_grab_set_source (MetaWaylandDragGrab   *drag_grab,
                                    MetaWaylandDataSource *source)
 {
   if (drag_grab->drag_data_source)
-    g_object_weak_unref (G_OBJECT (drag_grab->drag_data_source),
-                         drag_grab_data_source_destroyed,
-                         drag_grab);
+    {
+      g_signal_handlers_disconnect_by_func (drag_grab->drag_data_source,
+                                            on_data_source_action_changed,
+                                            drag_grab);
+      g_object_weak_unref (G_OBJECT (drag_grab->drag_data_source),
+                           drag_grab_data_source_destroyed,
+                           drag_grab);
+    }
 
   drag_grab->drag_data_source = source;
 
   if (source)
-    g_object_weak_ref (G_OBJECT (source),
-                       drag_grab_data_source_destroyed,
-                       drag_grab);
+    {
+      g_object_weak_ref (G_OBJECT (source),
+                         drag_grab_data_source_destroyed,
+                         drag_grab);
+      g_signal_connect (source, "action-changed",
+                        G_CALLBACK (on_data_source_action_changed),
+                        drag_grab);
+    }
 }
 
 static void
@@ -352,6 +414,9 @@ drag_grab_motion (MetaWaylandPointerGrab *grab,
 static void
 data_device_end_drag_grab (MetaWaylandDragGrab *drag_grab)
 {
+  /* Before clearing the source, so the XWayland check still applies. */
+  meta_wayland_drag_grab_set_cursor (drag_grab, META_CURSOR_DEFAULT);
+
   meta_wayland_drag_grab_set_source (drag_grab, NULL);
   meta_wayland_drag_grab_set_focus (drag_grab, NULL);
 

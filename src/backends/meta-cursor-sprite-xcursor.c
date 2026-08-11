@@ -117,7 +117,7 @@ meta_cursor_get_name (MetaCursor cursor)
     case META_CURSOR_ZOOM_OUT:
       return "left_ptr";
     case META_CURSOR_DND_ASK:
-      return "dnd-copy";
+      return "dnd-ask";
     case META_CURSOR_ALL_RESIZE:
       return "fleur";
     case META_CURSOR_INVALID:
@@ -291,6 +291,15 @@ load_cursor_on_client (MetaCursor cursor,
 
   xcursor_images =
     XcursorLibraryLoadImages (meta_cursor_get_name (cursor),
+                              meta_prefs_get_cursor_theme (),
+                              meta_prefs_get_cursor_size () * scale);
+  if (xcursor_images)
+    return xcursor_images;
+
+  /* Not every theme carries every modern name - fall back to the legacy one
+   * before giving up, as meta_create_x_cursor() does. */
+  xcursor_images =
+    XcursorLibraryLoadImages (meta_cursor_get_legacy_name (cursor),
                               meta_prefs_get_cursor_theme (),
                               meta_prefs_get_cursor_size () * scale);
   if (xcursor_images)
