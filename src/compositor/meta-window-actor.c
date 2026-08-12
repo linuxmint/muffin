@@ -416,8 +416,11 @@ meta_window_actor_dispose (GObject *object)
 
   if (priv->surface)
     {
-      clutter_actor_remove_child (CLUTTER_ACTOR (self),
-                                  CLUTTER_ACTOR (priv->surface));
+      ClutterActor *surface_actor = CLUTTER_ACTOR (priv->surface);
+
+      if (clutter_actor_get_parent (surface_actor) == CLUTTER_ACTOR (self))
+        clutter_actor_remove_child (CLUTTER_ACTOR (self), surface_actor);
+
       g_clear_object (&priv->surface);
     }
 

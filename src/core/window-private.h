@@ -138,6 +138,11 @@ typedef struct _MetaPlacementRule
 
   gboolean is_reactive;
 
+  /* Place within the whole monitor rather than its work area. Popups of a
+   * layer surface must be able to cover the zone that surface reserved -
+   * otherwise a panel's own menu gets pushed out of the panel. */
+  gboolean constrain_to_entire_monitor;
+
   MetaRectangle parent_rect;
 } MetaPlacementRule;
 
@@ -905,6 +910,8 @@ void meta_window_force_restore_shortcuts (MetaWindow         *window,
 gboolean meta_window_shortcuts_inhibited (MetaWindow         *window,
                                           ClutterInputDevice *source);
 gboolean meta_window_is_stackable (MetaWindow *window);
+gboolean meta_window_is_layer_shell (MetaWindow *window);
+gboolean meta_window_is_overlay_layer_shell (MetaWindow *window);
 gboolean meta_window_is_focus_async (MetaWindow *window);
 
 gboolean meta_window_calculate_bounds (MetaWindow *window,
