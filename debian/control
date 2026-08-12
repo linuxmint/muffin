@@ -181,6 +181,7 @@ Depends: gir1.2-meta-muffin-0.0 (= ${binary:Version}),
          libxi-dev,
          libxrandr-dev,
          ${misc:Depends}
+Provides: ${gir:Provides}
 Description: window and compositing manager (development files)
  Muffin is a window manager performing compositing as well based on
  GTK+ and Clutter and used in Cinnamon desktop environment.
