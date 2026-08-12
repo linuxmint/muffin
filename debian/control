@@ -59,7 +59,7 @@ Build-Depends:
         libxrender-dev,
         libxt-dev,
         meson (>= 1.0.0),
-        pkg-config (>= 0.22),
+        pkgconf,
         systemd-dev [linux-any],
         udev [linux-any],
         wayland-protocols (>= 1.38) [linux-any],
