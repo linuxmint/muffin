@@ -8,7 +8,7 @@ Build-Depends:
         at-spi2-core <!nocheck>,
         adwaita-icon-theme <!nocheck>,
         cinnamon-desktop-data (>= 5.3.0),
-        dbus <!nocheck>,
+        dbus-daemon <!nocheck>,
         dmz-cursor-theme <!nocheck>,
         gnome-pkg-tools (>= 0.10),
         cinnamon-settings-daemon <!nocheck>,
