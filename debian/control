@@ -72,6 +72,7 @@ Build-Depends:
         zenity
 Rules-Requires-Root: no
 Standards-Version: 4.5.0
+Homepage: https://github.com/linuxmint/muffin
 
 Package: gir1.2-meta-muffin-0.0
 Section: introspection
