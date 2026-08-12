@@ -93,6 +93,7 @@
 #ifdef HAVE_WAYLAND
 #include "wayland/meta-wayland-private.h"
 #include "wayland/meta-wayland-surface.h"
+#include "wayland/meta-wayland-xdg-shell.h"
 #include "wayland/meta-window-wayland.h"
 #include "wayland/meta-window-xwayland.h"
 #endif
@@ -812,14 +813,33 @@ meta_window_init (MetaWindow *self)
 }
 
 static gboolean
+window_is_desktop_component (MetaWindow *window)
+{
+  if (window->type == META_WINDOW_DESKTOP ||
+      window->type == META_WINDOW_DOCK)
+    return TRUE;
+
+#ifdef HAVE_WAYLAND
+  /* Layer-shell surfaces (the Wayland desktop, for one) have no MetaWindow, so
+   * popups parented to them come out with no transient_for, leaving the
+   * ancestor walk in our callers nothing to find.
+   */
+  if (window->client_type == META_WINDOW_CLIENT_TYPE_WAYLAND &&
+      window->surface != NULL &&
+      meta_wayland_surface_is_layer_shell_popup (window->surface))
+    return TRUE;
+#endif
+
+  return FALSE;
+}
+
+static gboolean
 is_desktop_or_dock_foreach (MetaWindow *window,
                             void       *data)
 {
   gboolean *result = data;
 
-  *result =
-    window->type == META_WINDOW_DESKTOP ||
-    window->type == META_WINDOW_DOCK;
+  *result = window_is_desktop_component (window);
   if (*result)
     return FALSE; /* stop as soon as we find one */
   else

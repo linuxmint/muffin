@@ -1000,6 +1000,82 @@ meta_wayland_layer_shell_get_exclusive_focus_surface (MetaWaylandCompositor *com
   return meta_wayland_surface_role_get_surface (META_WAYLAND_SURFACE_ROLE (best));
 }
 
+/* The Wayland counterpart of the X11 META_WINDOW_DESKTOP window: the top-most
+ * mapped background/bottom-layer surface that accepts keyboard focus. Same
+ * list ordering rules as meta_wayland_layer_shell_get_exclusive_focus_surface().
+ */
+static MetaWaylandLayerSurface *
+meta_wayland_layer_shell_get_desktop_surface (MetaWaylandCompositor *compositor)
+{
+  MetaWaylandLayerShell *layer_shell =
+    meta_wayland_layer_shell_from_compositor (compositor);
+  MetaWaylandLayerSurface *best = NULL;
+  GList *l;
+
+  if (!layer_shell)
+    return NULL;
+
+  for (l = layer_shell->layer_surfaces; l; l = l->next)
+    {
+      MetaWaylandLayerSurface *layer_surface = l->data;
+
+      if (!layer_surface->mapped || layer_surface->closed)
+        continue;
+
+      if (layer_surface->current.layer > META_LAYER_SHELL_LAYER_BOTTOM)
+        continue;
+
+      if (!meta_wayland_layer_surface_wants_keyboard_focus (layer_surface))
+        continue;
+
+      if (!best || layer_surface->current.layer > best->current.layer)
+        best = layer_surface;
+    }
+
+  return best;
+}
+
+/* Entering show-desktop hands the keyboard to the desktop so it stays usable
+ * while every window is hidden. On X11 that is the MRU META_WINDOW_DESKTOP
+ * window; on Wayland the desktop is a layer surface with no MetaWindow at all.
+ * Returns TRUE if a desktop surface took the keyboard.
+ */
+gboolean
+meta_wayland_layer_shell_focus_desktop_surface (MetaWaylandCompositor *compositor)
+{
+  MetaWaylandSeat *seat = compositor->seat;
+  MetaWaylandLayerSurface *layer_surface;
+  MetaWaylandSurface *surface;
+  MetaDisplay *display;
+
+  if (!seat || !meta_wayland_seat_has_keyboard (seat))
+    return FALSE;
+
+  /* Never take the keyboard away from an exclusive surface. */
+  if (meta_wayland_layer_shell_get_exclusive_focus_surface (compositor))
+    return FALSE;
+
+  layer_surface = meta_wayland_layer_shell_get_desktop_surface (compositor);
+  if (!layer_surface)
+    return FALSE;
+
+  surface =
+    meta_wayland_surface_role_get_surface (META_WAYLAND_SURFACE_ROLE (layer_surface));
+  if (!surface)
+    return FALSE;
+
+  /* Clear the focus window first, or the next input focus sync pulls the
+   * keyboard straight back to the window we are hiding.
+   */
+  display = meta_get_display ();
+  if (display && display->focus_window)
+    meta_display_update_focus_window (display, NULL);
+
+  meta_wayland_keyboard_set_focus (seat->keyboard, surface);
+
+  return TRUE;
+}
+
 /* Reconcile keyboard focus with layer-shell state: grant focus to the
  * exclusive surface if one exists; otherwise, if focus is stuck on (or was
  * lost with) a layer surface that no longer wants it, return focus to the
