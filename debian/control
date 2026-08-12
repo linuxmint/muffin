@@ -62,7 +62,7 @@ Build-Depends:
         pkg-config (>= 0.22),
         systemd-dev [linux-any],
         udev [linux-any],
-        wayland-protocols (>= 1.23) [linux-any],
+        wayland-protocols (>= 1.38) [linux-any],
         xauth <!nocheck>,
         xcvt [linux-any],
         xkb-data,
