@@ -61,7 +61,7 @@
 #include "backends/native/meta-renderer-native.h"
 #endif
 
-#include "linux-dmabuf-unstable-v1-server-protocol.h"
+#include "linux-dmabuf-v1-server-protocol.h"
 
 #ifndef DRM_FORMAT_MOD_INVALID
 #define DRM_FORMAT_MOD_INVALID ((1ULL << 56) - 1)
@@ -418,7 +418,7 @@ buffer_params_add (struct wl_client   *client,
       dma_buf->drm_modifier != drm_modifier)
     {
       wl_resource_post_error (resource,
-                              ZWP_LINUX_BUFFER_PARAMS_V1_ERROR_INVALID_WL_BUFFER,
+                              ZWP_LINUX_BUFFER_PARAMS_V1_ERROR_INVALID_FORMAT,
                               "mismatching modifier between planes");
       return;
     }
