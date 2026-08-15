@@ -68,6 +68,12 @@ void                    meta_wayland_compositor_add_frame_callback_surface (Meta
 void                    meta_wayland_compositor_remove_frame_callback_surface (MetaWaylandCompositor *compositor,
                                                                                MetaWaylandSurface    *surface);
 
+void                    meta_wayland_compositor_add_presentation_feedback_surface (MetaWaylandCompositor *compositor,
+                                                                                   MetaWaylandSurface    *surface);
+
+void                    meta_wayland_compositor_remove_presentation_feedback_surface (MetaWaylandCompositor *compositor,
+                                                                                      MetaWaylandSurface    *surface);
+
 META_EXPORT_TEST
 const char             *meta_wayland_get_wayland_display_name   (MetaWaylandCompositor *compositor);
 

@@ -316,6 +316,25 @@ meta_wayland_compositor_remove_frame_callback_surface (MetaWaylandCompositor *co
     g_list_remove (compositor->frame_callback_surfaces, surface);
 }
 
+void
+meta_wayland_compositor_add_presentation_feedback_surface (MetaWaylandCompositor *compositor,
+                                                          MetaWaylandSurface    *surface)
+{
+  if (g_list_find (compositor->presentation_time.feedback_surfaces, surface))
+    return;
+
+  compositor->presentation_time.feedback_surfaces =
+    g_list_prepend (compositor->presentation_time.feedback_surfaces, surface);
+}
+
+void
+meta_wayland_compositor_remove_presentation_feedback_surface (MetaWaylandCompositor *compositor,
+                                                             MetaWaylandSurface    *surface)
+{
+  compositor->presentation_time.feedback_surfaces =
+    g_list_remove (compositor->presentation_time.feedback_surfaces, surface);
+}
+
 static void
 set_gnome_env (const char *name,
 	       const char *value)
@@ -494,6 +513,7 @@ meta_wayland_compositor_setup (MetaWaylandCompositor *wayland_compositor)
   meta_wayland_xapp_shell_init (compositor);
   meta_wayland_init_cursor_shape (compositor);
   meta_wayland_init_system_bell (compositor);
+  meta_wayland_init_presentation_time (compositor);
 
   /* The global filter restricts the Xwayland-grab protocol to Xwayland and the
    * input-method / virtual-keyboard protocols to the launched fcitx, so it is
@@ -569,6 +589,7 @@ meta_wayland_finalize (void)
 
   compositor = meta_wayland_compositor_get_default ();
 
+  meta_wayland_presentation_time_finalize (compositor);
   meta_xwayland_shutdown (&compositor->xwayland_manager);
   meta_wayland_im_launcher_destroy (compositor->im_launcher);
   compositor->im_launcher = NULL;

@@ -99,6 +99,9 @@ struct _MetaWaylandSurfaceState
   /* wl_surface.frame */
   struct wl_list frame_callback_list;
 
+  /* wp_presentation_time feedbacks */
+  struct wl_list presentation_feedback_list;
+
   MetaRectangle new_geometry;
   gboolean has_new_geometry;
 
@@ -224,6 +227,12 @@ struct _MetaWaylandSurface
     int dst_width;
     int dst_height;
   } viewport;
+
+  /* wp_presentation_time */
+  struct {
+    struct wl_list feedback_list;
+    uint64_t sequence;
+  } presentation_time;
 
   /* table of seats for which shortcuts are inhibited */
   GHashTable *shortcut_inhibited_seats;

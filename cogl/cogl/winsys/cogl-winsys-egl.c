@@ -52,6 +52,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <time.h>
 
 
 #ifndef EGL_KHR_create_context
@@ -842,6 +843,15 @@ _cogl_winsys_fence_destroy (CoglContext *context, void *fence)
 }
 #endif
 
+static int64_t
+_cogl_winsys_get_clock_time (CoglContext *context)
+{
+  struct timespec ts;
+
+  clock_gettime (CLOCK_MONOTONIC, &ts);
+  return ts.tv_sec * G_GINT64_CONSTANT (1000000000) + ts.tv_nsec;
+}
+
 static CoglWinsysVtable _cogl_winsys_vtable =
   {
     .constraints = COGL_RENDERER_CONSTRAINT_USES_EGL,
@@ -863,6 +873,7 @@ static CoglWinsysVtable _cogl_winsys_vtable =
       _cogl_winsys_onscreen_swap_buffers_with_damage,
     .onscreen_swap_region = _cogl_winsys_onscreen_swap_region,
     .onscreen_get_buffer_age = _cogl_winsys_onscreen_get_buffer_age,
+    .context_get_clock_time = _cogl_winsys_get_clock_time,
 
 #if defined(EGL_KHR_fence_sync) || defined(EGL_KHR_reusable_sync)
     .fence_add = _cogl_winsys_fence_add,

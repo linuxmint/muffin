@@ -554,6 +554,8 @@ if have_wayland
     'wayland/meta-wayland-pointer.h',
     'wayland/meta-wayland-popup.c',
     'wayland/meta-wayland-popup.h',
+    'wayland/meta-wayland-presentation-time.c',
+    'wayland/meta-wayland-presentation-time-private.h',
     'wayland/meta-wayland-private.h',
     'wayland/meta-wayland-region.c',
     'wayland/meta-wayland-region.h',
@@ -858,6 +860,7 @@ if have_wayland
     ['xapp-shell', 'private', ],
     ['xwayland-keyboard-grab', 'unstable', 'v1', ],
     ['wayland-drm', 'private', ],
+    ['presentation-time', 'stable', ],
   ]
   if have_wayland_eglstream
     wayland_eglstream_protocols_dir = wayland_eglstream_protocols_dep.get_variable(pkgconfig: 'pkgdatadir')

@@ -28,6 +28,7 @@
 #include "meta/meta-cursor-tracker.h"
 #include "wayland/meta-wayland-dma-buf.h"
 #include "wayland/meta-wayland-pointer-gestures.h"
+#include "wayland/meta-wayland-presentation-time-private.h"
 #include "wayland/meta-wayland-seat.h"
 #include "wayland/meta-wayland-surface.h"
 #include "wayland/meta-wayland-tablet-manager.h"
@@ -92,6 +93,8 @@ struct _MetaWaylandCompositor
   MetaWaylandDmaBufManager *dma_buf_manager;
 
   GHashTable *scheduled_surface_associations;
+
+  MetaWaylandPresentationTime presentation_time;
 };
 
 #define META_TYPE_WAYLAND_COMPOSITOR (meta_wayland_compositor_get_type ())

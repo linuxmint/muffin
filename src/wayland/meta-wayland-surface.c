@@ -469,6 +469,7 @@ meta_wayland_surface_state_set_default (MetaWaylandSurfaceState *state)
   state->surface_damage = cairo_region_create ();
   state->buffer_damage = cairo_region_create ();
   wl_list_init (&state->frame_callback_list);
+  wl_list_init (&state->presentation_feedback_list);
 
   state->has_new_geometry = FALSE;
   state->has_acked_configure_serial = FALSE;
@@ -497,6 +498,8 @@ meta_wayland_surface_state_clear (MetaWaylandSurfaceState *state)
 
   wl_list_for_each_safe (cb, next, &state->frame_callback_list, link)
     wl_resource_destroy (cb->resource);
+
+  meta_wayland_surface_state_discard_presentation_feedback (state);
 
   if (state->subsurface_placement_ops)
     {
@@ -533,6 +536,13 @@ meta_wayland_surface_state_merge_into (MetaWaylandSurfaceState *from,
   to->dy = from->dy;
 
   wl_list_insert_list (&to->frame_callback_list, &from->frame_callback_list);
+
+  /* A new commit indicates a new content update, so any previous
+   * content update did not go on screen and needs to be discarded.
+   */
+  meta_wayland_surface_state_discard_presentation_feedback (to);
+  wl_list_insert_list (&to->presentation_feedback_list,
+                       &from->presentation_feedback_list);
 
   cairo_region_union (to->surface_damage, from->surface_damage);
   cairo_region_union (to->buffer_damage, from->buffer_damage);
@@ -823,6 +833,21 @@ meta_wayland_surface_apply_state (MetaWaylandSurface      *surface,
           if (surface->unassigned.buffer)
             meta_wayland_surface_ref_buffer_use_count (surface);
         }
+    }
+
+  /* Move presentation feedbacks from state to surface.
+   * Discard any old surface feedbacks first since the new commit
+   * supersedes them.
+   */
+  meta_wayland_surface_discard_presentation_feedback (surface);
+  if (!wl_list_empty (&state->presentation_feedback_list))
+    {
+      wl_list_insert_list (&surface->presentation_time.feedback_list,
+                           &state->presentation_feedback_list);
+      wl_list_init (&state->presentation_feedback_list);
+
+      meta_wayland_compositor_add_presentation_feedback_surface (surface->compositor,
+                                                                 surface);
     }
 
   if (state->subsurface_placement_ops)
@@ -1429,6 +1454,9 @@ wl_surface_destructor (struct wl_resource *resource)
 
   meta_wayland_compositor_remove_frame_callback_surface (compositor, surface);
 
+  /* Clean up presentation-time feedbacks */
+  meta_wayland_surface_discard_presentation_feedback (surface);
+
   g_hash_table_foreach (surface->outputs_to_destroy_notify_id,
                         surface_output_disconnect_signal,
                         surface);
@@ -1477,6 +1505,8 @@ meta_wayland_surface_create (MetaWaylandCompositor *compositor,
                                   wl_surface_destructor);
 
   wl_list_init (&surface->unassigned.pending_frame_callback_list);
+  wl_list_init (&surface->presentation_time.feedback_list);
+  surface->presentation_time.sequence = 0;
 
   surface->outputs_to_destroy_notify_id = g_hash_table_new (NULL, NULL);
   surface->shortcut_inhibited_seats = g_hash_table_new (NULL, NULL);
