@@ -835,7 +835,7 @@ meta_wayland_layer_surface_get_geometry (MetaWaylandLayerSurface *layer_surface,
    * fields but leaves parent_rect untouched. */
   int scale = get_layer_surface_scale (layer_surface);
 
-  if (surface->buffer_ref->buffer)
+  if (surface->buffer)
     {
       *out_width = meta_wayland_surface_get_width (surface) * scale;
       *out_height = meta_wayland_surface_get_height (surface) * scale;
@@ -1661,7 +1661,7 @@ meta_wayland_layer_surface_notify_subsurface_state_changed (MetaWaylandSurfaceRo
   traverse_data[0] = surface;
   traverse_data[1] = CLUTTER_ACTOR (surface_actor);
 
-  g_node_traverse (surface->subsurface_branch_node,
+  g_node_traverse (surface->output_state.subsurface_branch_node,
                    G_IN_ORDER,
                    G_TRAVERSE_LEAVES,
                    -1,
