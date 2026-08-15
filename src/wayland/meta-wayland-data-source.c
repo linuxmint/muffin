@@ -47,6 +47,14 @@ typedef struct _MetaWaylandDataSourcePrivate
   guint drop_performed : 1;
 } MetaWaylandDataSourcePrivate;
 
+enum
+{
+  ACTION_CHANGED,
+  N_SIGNALS
+};
+
+static guint signals[N_SIGNALS];
+
 G_DEFINE_TYPE_WITH_PRIVATE (MetaWaylandDataSource, meta_wayland_data_source,
                             G_TYPE_OBJECT);
 
@@ -167,6 +175,13 @@ meta_wayland_data_source_class_init (MetaWaylandDataSourceClass *klass)
   klass->action = meta_wayland_data_source_real_action;
   klass->drop_performed = meta_wayland_data_source_real_drop_performed;
   klass->drag_finished = meta_wayland_data_source_real_drag_finished;
+
+  signals[ACTION_CHANGED] =
+    g_signal_new ("action-changed",
+                  G_TYPE_FROM_CLASS (klass),
+                  G_SIGNAL_RUN_LAST,
+                  0, NULL, NULL, NULL,
+                  G_TYPE_NONE, 1, G_TYPE_UINT);
 }
 
 
@@ -434,6 +449,8 @@ meta_wayland_data_source_set_current_action (MetaWaylandDataSource              
 
   if (!meta_wayland_data_source_get_in_ask (source))
     META_WAYLAND_DATA_SOURCE_GET_CLASS (source)->action (source, action);
+
+  g_signal_emit (source, signals[ACTION_CHANGED], 0, (guint) action);
 }
 
 void

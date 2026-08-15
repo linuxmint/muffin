@@ -34,6 +34,10 @@
 #include "meta/prefs.h"
 #include "meta/util.h"
 
+#ifdef HAVE_WAYLAND
+#include "wayland/meta-wayland-layer-shell.h"
+#endif
+
 G_DEFINE_TYPE (MetaWorkspaceManager, meta_workspace_manager, G_TYPE_OBJECT)
 
 enum
@@ -951,6 +955,7 @@ meta_workspace_manager_show_desktop (MetaWorkspaceManager *workspace_manager,
                                      guint32               timestamp)
 {
   GList *l;
+  gboolean focused_desktop = FALSE;
 
   if (workspace_manager->active_workspace->showing_desktop)
     return;
@@ -969,9 +974,18 @@ meta_workspace_manager_show_desktop (MetaWorkspaceManager *workspace_manager,
       if (w->type == META_WINDOW_DESKTOP)
         {
           meta_window_focus (w, timestamp);
+          focused_desktop = TRUE;
           break;
         }
     }
+
+#ifdef HAVE_WAYLAND
+  /* A Wayland desktop is a layer-shell surface rather than a
+   * META_WINDOW_DESKTOP window, so hand it the keyboard directly.
+   */
+  if (!focused_desktop && meta_is_wayland_compositor ())
+    meta_wayland_layer_shell_focus_desktop_surface (meta_wayland_compositor_get_default ());
+#endif
 
   g_signal_emit (workspace_manager,
                  workspace_manager_signals[SHOWING_DESKTOP_CHANGED],

@@ -838,7 +838,7 @@ if have_wayland
     ['virtual-keyboard-unstable-v1', 'private', ],
     ['idle-inhibit', 'unstable', 'v1', ],
     ['keyboard-shortcuts-inhibit', 'unstable', 'v1', ],
-    ['linux-dmabuf', 'unstable', 'v1', ],
+    ['linux-dmabuf', 'stable', 'v1', ],
     ['pointer-constraints', 'unstable', 'v1', ],
     ['pointer-gestures', 'unstable', 'v1', ],
     ['pointer-warp-v1', 'private',],
@@ -877,7 +877,12 @@ if have_wayland
     protocol_type = p.get(1)
 
     if protocol_type == 'stable'
-      output_base = protocol_name
+      if p.length() == 3
+        protocol_version = p.get(2)
+        output_base = '@0@-@1@'.format(protocol_name, protocol_version)
+      else
+        output_base = protocol_name
+      endif
       input = join_paths(protocols_dir,
                          '@0@/@1@/@2@.xml'.format(protocol_type,
                          protocol_name,

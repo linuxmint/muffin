@@ -59,14 +59,12 @@ static void
 sync_actor_subsurface_state (MetaWaylandSurface *surface)
 {
   ClutterActor *actor = CLUTTER_ACTOR (meta_wayland_surface_get_actor (surface));
-  MetaWindow *toplevel_window;
   int x, y;
 
-  toplevel_window = meta_wayland_surface_get_toplevel_window (surface);
-  if (!toplevel_window)
-    return;
-
-  if (toplevel_window->client_type == META_WINDOW_CLIENT_TYPE_X11)
+  /* Covers X11-rooted trees too: the xwayland role manages no subsurface
+   * actors. */
+  if (!meta_wayland_surface_is_subsurface_host (
+        meta_wayland_surface_get_toplevel (surface)))
     return;
 
   x = y = 0;
@@ -220,7 +218,7 @@ meta_wayland_subsurface_sync_actor_state (MetaWaylandActorSurface *actor_surface
   MetaWaylandSurface *toplevel_surface;
 
   toplevel_surface = meta_wayland_surface_get_toplevel (surface);
-  if (toplevel_surface && meta_wayland_surface_get_window (toplevel_surface))
+  if (meta_wayland_surface_is_subsurface_host (toplevel_surface))
     actor_surface_class->sync_actor_state (actor_surface);
 
   sync_actor_subsurface_state (surface);

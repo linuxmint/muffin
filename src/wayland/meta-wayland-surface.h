@@ -348,6 +348,8 @@ void                meta_wayland_surface_notify_geometry_changed (MetaWaylandSur
 
 void                meta_wayland_surface_notify_subsurface_state_changed (MetaWaylandSurface *surface);
 
+gboolean            meta_wayland_surface_is_subsurface_host (MetaWaylandSurface *surface);
+
 void                meta_wayland_surface_notify_unmapped (MetaWaylandSurface *surface);
 
 void                meta_wayland_surface_update_outputs_recursively (MetaWaylandSurface *surface);
