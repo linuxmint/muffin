@@ -28,8 +28,10 @@
 
 #include "wayland/meta-wayland-input-popup-surface.h"
 
+#include "backends/meta-backend-private.h"
+#include "backends/meta-logical-monitor.h"
+#include "backends/meta-monitor-manager-private.h"
 #include "compositor/meta-feedback-actor-private.h"
-#include "core/display-private.h"
 #include "wayland/meta-wayland-actor-surface.h"
 
 struct _MetaWaylandInputPopupSurface
@@ -49,18 +51,42 @@ static void
 sync_position (MetaWaylandInputPopupSurface *popup)
 {
   MetaSurfaceActor *surface_actor;
-  MetaDisplay *display;
+  MetaMonitorManager *monitor_manager;
+  MetaLogicalMonitor *logical_monitor;
+  MetaRectangle caret;
   float popup_width = 0.0f, popup_height = 0.0f;
   float x, y;
+  int scale = 1;
 
   if (!popup->feedback_actor)
     return;
 
+  caret.x = (int) popup->text_input_rect.origin.x;
+  caret.y = (int) popup->text_input_rect.origin.y;
+  caret.width = (int) popup->text_input_rect.size.width;
+  caret.height = (int) popup->text_input_rect.size.height;
+
+  /* The candidate window is a bare actor with no window geometry, so - like a
+   * layer surface - it must be scaled by its monitor's scale by hand whenever
+   * the compositor is not scaling stage views itself. */
+  monitor_manager = meta_backend_get_monitor_manager (meta_get_backend ());
+  logical_monitor =
+    meta_monitor_manager_get_logical_monitor_from_rect (monitor_manager, &caret);
+  if (!meta_is_stage_views_scaled () && logical_monitor)
+    scale = (int) meta_logical_monitor_get_scale (logical_monitor);
+
+  meta_feedback_actor_set_geometry_scale (META_FEEDBACK_ACTOR (popup->feedback_actor),
+                                          scale);
+
   surface_actor =
     meta_wayland_actor_surface_get_actor (META_WAYLAND_ACTOR_SURFACE (popup));
   if (surface_actor)
-    clutter_actor_get_size (CLUTTER_ACTOR (surface_actor),
-                            &popup_width, &popup_height);
+    {
+      clutter_actor_get_size (CLUTTER_ACTOR (surface_actor),
+                              &popup_width, &popup_height);
+      popup_width *= scale;
+      popup_height *= scale;
+    }
 
   /* Default placement: directly below the caret. */
   x = popup->text_input_rect.origin.x;
@@ -70,19 +96,9 @@ sync_position (MetaWaylandInputPopupSurface *popup)
    * when it would overflow the bottom edge, and slide horizontally to stay
    * within the side edges - the same flip/slide an xdg_positioner would request,
    * focused to this popup. */
-  display = meta_get_display ();
-  if (display)
+  if (logical_monitor)
     {
-      MetaRectangle caret, monitor;
-      int monitor_index;
-
-      caret.x = (int) popup->text_input_rect.origin.x;
-      caret.y = (int) popup->text_input_rect.origin.y;
-      caret.width = (int) popup->text_input_rect.size.width;
-      caret.height = (int) popup->text_input_rect.size.height;
-
-      monitor_index = meta_display_get_monitor_index_for_rect (display, &caret);
-      meta_display_get_monitor_geometry (display, monitor_index, &monitor);
+      MetaRectangle monitor = meta_logical_monitor_get_layout (logical_monitor);
 
       if (y + popup_height > monitor.y + monitor.height)
         {
