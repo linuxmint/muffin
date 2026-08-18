@@ -140,6 +140,12 @@ struct _MetaMonitorManager
   gulong experimental_features_changed_handler_id;
 
   MetaMonitorSwitchConfigType current_switch_config;
+
+  /* org.cinnamon.settings-daemon.peripherals.touchscreen, used to gate
+   * accelerometer auto-rotation on tablet mode. NULL when the
+   * disable-rotation-in-laptop-mode key is not present (older
+   * cinnamon-settings-daemon), in which case rotation is never gated. */
+  GSettings *orientation_settings;
 };
 
 /**
