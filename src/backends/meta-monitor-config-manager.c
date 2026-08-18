@@ -1447,6 +1447,9 @@ void
 meta_monitor_config_manager_set_current (MetaMonitorConfigManager *config_manager,
                                          MetaMonitorsConfig       *config)
 {
+  if (config_manager->current_config == config)
+    return;
+
   if (config_manager->current_config)
     {
       g_queue_push_head (&config_manager->config_history,
