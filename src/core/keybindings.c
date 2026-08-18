@@ -2474,6 +2474,7 @@ meta_keybindings_process_event (MetaDisplay        *display,
     case CLUTTER_BUTTON_RELEASE:
     case CLUTTER_TOUCH_BEGIN:
     case CLUTTER_TOUCH_END:
+    case CLUTTER_SCROLL:
       modifier_key_only_pressed = FALSE;
       return FALSE;
 
@@ -4205,6 +4206,12 @@ meta_keybindings_get_ignored_modifier_mask (MetaDisplay *display)
     MetaKeyBindingManager *keys = &display->key_binding_manager;
 
     return keys->ignored_modifier_mask;
+}
+
+void
+meta_keybindings_cancel_modifier_only (MetaDisplay *display)
+{
+  modifier_key_only_pressed = FALSE;
 }
 
 static void

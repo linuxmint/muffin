@@ -144,6 +144,7 @@ int      meta_keybindings_get_mouse_zoom_modifiers (MetaDisplay *display);
 ClutterModifierType meta_display_get_window_grab_modifiers (MetaDisplay *display);
 
 uint     meta_keybindings_get_ignored_modifier_mask (MetaDisplay *display);
+void     meta_keybindings_cancel_modifier_only (MetaDisplay *display);
 
 gboolean meta_prefs_add_keybinding          (const char           *name,
                                              GSettings            *settings,

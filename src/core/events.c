@@ -291,6 +291,10 @@ meta_display_handle_event (MetaDisplay        *display,
             meta_display_a11y_zoom (display, FALSE);
           }
 
+        /* Don't let the zoom modifier's release trigger a
+         * modifier-only keybinding (e.g. Super opening the menu) */
+        meta_keybindings_cancel_modifier_only (display);
+
         bypass_wayland = bypass_clutter = TRUE;
         goto out;
       }
