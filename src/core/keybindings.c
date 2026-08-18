@@ -1503,6 +1503,12 @@ meta_display_shutdown_keys (MetaDisplay *display)
   g_hash_table_destroy (keys->key_bindings_index);
   g_hash_table_destroy (keys->key_bindings);
 
+  if (keys->zoom_grab_timeout_id != 0)
+    {
+      g_source_remove (keys->zoom_grab_timeout_id);
+      keys->zoom_grab_timeout_id = 0;
+    }
+
   clear_active_keyboard_layouts (keys);
 }
 
@@ -4213,6 +4219,104 @@ meta_keybindings_cancel_modifier_only (MetaDisplay *display)
 {
   modifier_key_only_pressed = FALSE;
 }
+
+#define ZOOM_SCROLL_GRAB_TIMEOUT_MS 1000
+
+/* While zoom scrolling is in progress on X11 we hold an active grab on
+ * the pointer.  The passive button 4/5 grabs only intercept the emulated
+ * legacy scroll button events; XInput2-aware clients scroll with the
+ * smooth-scroll XI_Motion events, which are delivered before any passive
+ * button grab can activate.  Only an active device grab keeps them from
+ * reaching the client under the pointer.
+ *
+ * The grab is only held for the duration of a scroll burst (released on
+ * a short idle timeout, on a button press, or when the zoom modifier is
+ * released) so that modifier+click interactions keep working.  A click
+ * swallowed by the grab cannot be re-injected: the physical press has
+ * already registered in the master device's button state, so a synthetic
+ * press is discarded as a duplicate.
+ */
+
+void
+meta_display_zoom_grab_break (MetaDisplay *display,
+                              guint32      timestamp)
+{
+  MetaKeyBindingManager *keys = &display->key_binding_manager;
+
+  if (keys->zoom_grab_timeout_id != 0)
+    {
+      g_source_remove (keys->zoom_grab_timeout_id);
+      keys->zoom_grab_timeout_id = 0;
+    }
+
+  if (!keys->zoom_pointer_grabbed)
+    return;
+
+  /* If a compositor or window grab took over in the meantime, our
+   * grab was already replaced; ungrabbing would break theirs. */
+  if (display->event_route == META_EVENT_ROUTE_NORMAL)
+    meta_backend_ungrab_device (keys->backend,
+                                META_VIRTUAL_CORE_POINTER_ID,
+                                timestamp);
+  keys->zoom_pointer_grabbed = FALSE;
+}
+
+static gboolean
+zoom_scroll_grab_timeout (gpointer data)
+{
+  MetaDisplay *display = data;
+  MetaKeyBindingManager *keys = &display->key_binding_manager;
+
+  keys->zoom_grab_timeout_id = 0;
+  meta_display_zoom_grab_break (display, META_CURRENT_TIME);
+  return G_SOURCE_REMOVE;
+}
+
+void
+meta_display_zoom_scroll_grab_notify (MetaDisplay *display,
+                                      guint32      timestamp)
+{
+  MetaKeyBindingManager *keys = &display->key_binding_manager;
+
+  if (meta_is_wayland_compositor ())
+    return;
+
+  if (!keys->zoom_pointer_grabbed &&
+      display->event_route == META_EVENT_ROUTE_NORMAL &&
+      display->grab_op == META_GRAB_OP_NONE)
+    {
+      keys->zoom_pointer_grabbed =
+        meta_backend_grab_device (keys->backend,
+                                  META_VIRTUAL_CORE_POINTER_ID,
+                                  timestamp);
+    }
+
+  if (keys->zoom_pointer_grabbed)
+    {
+      if (keys->zoom_grab_timeout_id != 0)
+        g_source_remove (keys->zoom_grab_timeout_id);
+      keys->zoom_grab_timeout_id = g_timeout_add (ZOOM_SCROLL_GRAB_TIMEOUT_MS,
+                                                  zoom_scroll_grab_timeout,
+                                                  display);
+    }
+}
+
+/* Called on XkbStateNotify: release the scroll grab as soon as the zoom
+ * modifier is no longer held. */
+void
+meta_display_process_zoom_modifier_state (MetaDisplay *display,
+                                          unsigned int mods,
+                                          guint32      timestamp)
+{
+  MetaKeyBindingManager *keys = &display->key_binding_manager;
+
+  if (!keys->zoom_pointer_grabbed)
+    return;
+
+  if ((mods & ~keys->ignored_modifier_mask) != keys->mouse_zoom_modifiers)
+    meta_display_zoom_grab_break (display, timestamp);
+}
+
 
 static void
 init_builtin_key_bindings (MetaDisplay *display)

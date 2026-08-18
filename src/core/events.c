@@ -295,10 +295,19 @@ meta_display_handle_event (MetaDisplay        *display,
          * modifier-only keybinding (e.g. Super opening the menu) */
         meta_keybindings_cancel_modifier_only (display);
 
+        /* On X11, hold the pointer for the duration of the scroll burst
+         * so smooth-scroll events can't leak to the client under the
+         * pointer. */
+        meta_display_zoom_scroll_grab_notify (display,
+                                              clutter_event_get_time (event));
+
         bypass_wayland = bypass_clutter = TRUE;
         goto out;
       }
     }
+
+  if (event->type == CLUTTER_BUTTON_PRESS)
+    meta_display_zoom_grab_break (display, clutter_event_get_time (event));
 
   if (event->type != CLUTTER_DEVICE_ADDED &&
       event->type != CLUTTER_DEVICE_REMOVED)

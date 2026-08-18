@@ -53,6 +53,7 @@
 #include "clutter/x11/clutter-x11.h"
 #include "compositor/compositor-private.h"
 #include "core/display-private.h"
+#include "core/keybindings-private.h"
 #include "meta/meta-cursor-tracker.h"
 #include "meta/util.h"
 
@@ -425,6 +426,12 @@ handle_host_xevent (MetaBackend *backend,
                     meta_backend_notify_keymap_layout_group_changed (backend,
                                                                      layout_group);
                 }
+              if (display &&
+                  (xkb_ev->state.changed & (XkbModifierStateMask |
+                                            XkbModifierBaseMask)))
+                meta_display_process_zoom_modifier_state (display,
+                                                          xkb_ev->state.mods,
+                                                          xkb_ev->state.time);
               break;
             default:
               break;
@@ -579,6 +586,14 @@ meta_backend_x11_post_init (MetaBackend *backend)
                                     &priv->xkb_error_base))
     meta_fatal ("X server doesn't have the XKB extension, version %d.%d or newer\n",
                 XKB_X11_MIN_MAJOR_XKB_VERSION, XKB_X11_MIN_MINOR_XKB_VERSION);
+
+  /* Make sure modifier state changes are among the selected
+   * XkbStateNotify details; the zoom modifier pointer grab depends on
+   * them (see meta_display_process_zoom_modifier_state).  Only the
+   * listed detail bits are affected, existing selections remain. */
+  XkbSelectEventDetails (priv->xdisplay, XkbUseCoreKbd, XkbStateNotify,
+                         XkbModifierStateMask | XkbModifierBaseMask,
+                         XkbModifierStateMask | XkbModifierBaseMask);
 
   META_BACKEND_CLASS (meta_backend_x11_parent_class)->post_init (backend);
 
