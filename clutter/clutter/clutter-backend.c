@@ -601,6 +601,8 @@ clutter_backend_init (ClutterBackend *self)
   self->units_serial = 1;
 
   self->dummy_onscreen = NULL;
+
+  self->fallback_resource_scale = 1.f;
 }
 
 void
