@@ -17810,17 +17810,18 @@ update_stage_views (ClutterActor *self)
   ClutterStage *stage;
   graphene_rect_t bounding_rect;
 
+  stage = CLUTTER_STAGE (_clutter_actor_get_stage_internal (self));
+  g_return_if_fail (stage);
+
   old_stage_views = g_steal_pointer (&priv->stage_views);
 
   if (priv->needs_allocation)
     {
       g_warning ("Can't update stage views actor %s is on because it needs an "
-      "allocation.", _clutter_actor_get_debug_name (self));
+                 "allocation.", _clutter_actor_get_debug_name (self));
+      priv->stage_views = g_list_copy (clutter_stage_peek_stage_views (stage));
       goto out;
     }
-
-  stage = CLUTTER_STAGE (_clutter_actor_get_stage_internal (self));
-  g_return_if_fail (stage);
 
   clutter_actor_get_transformed_position (self,
                                           &bounding_rect.origin.x,
