@@ -601,8 +601,20 @@ clutter_text_get_display_text (ClutterText *self)
     }
 }
 
+static gboolean
+apply_resource_scale_to_scale_attributes_func (PangoAttribute *attr,
+                                               gpointer        user_data)
+{
+  float *resource_scale = user_data;
+
+  if (attr->klass->type == PANGO_ATTR_SCALE)
+    ((PangoAttrFloat *) attr)->value *= *resource_scale;
+
+  return FALSE;
+}
+
 static void
-ensure_effective_pango_scale_attribute (ClutterText *self)
+ensure_effective_pango_scale_attributes (ClutterText *self)
 {
   float resource_scale;
   ClutterTextPrivate *priv = self->priv;
@@ -611,27 +623,24 @@ ensure_effective_pango_scale_attribute (ClutterText *self)
 
   if (priv->effective_attrs != NULL)
     {
-      PangoAttrIterator *iter;
-      PangoAttribute *scale_attrib;
-      PangoAttrList *old_attributes;
+      PangoAttrList *tmp_attrs;
 
-      old_attributes = priv->effective_attrs;
-      priv->effective_attrs = pango_attr_list_copy (priv->effective_attrs);
-      pango_attr_list_unref (old_attributes);
+      tmp_attrs = priv->effective_attrs;
+      priv->effective_attrs = pango_attr_list_copy (tmp_attrs);
+      pango_attr_list_unref (tmp_attrs);
 
-      iter = pango_attr_list_get_iterator (priv->effective_attrs);
-      scale_attrib = pango_attr_iterator_get (iter, PANGO_ATTR_SCALE);
+      tmp_attrs = pango_attr_list_filter (priv->effective_attrs,
+                                          apply_resource_scale_to_scale_attributes_func,
+                                          &resource_scale);
 
-      if (scale_attrib != NULL)
-        resource_scale *= ((PangoAttrFloat *) scale_attrib)->value;
-
-      pango_attr_iterator_destroy (iter);
+      /* We don't actually filter out any attributes. */
+      g_assert (tmp_attrs == NULL);
     }
   else
     priv->effective_attrs = pango_attr_list_new ();
 
-  pango_attr_list_change (priv->effective_attrs,
-                          pango_attr_scale_new (resource_scale));
+  pango_attr_list_insert_before (priv->effective_attrs,
+                                 pango_attr_scale_new (resource_scale));
 }
 
 static void
@@ -653,7 +662,7 @@ set_effective_pango_attributes (ClutterText   *self,
       g_clear_pointer (&priv->effective_attrs, pango_attr_list_unref);
     }
 
-  ensure_effective_pango_scale_attribute (self);
+  ensure_effective_pango_scale_attributes (self);
 }
 
 static inline void
