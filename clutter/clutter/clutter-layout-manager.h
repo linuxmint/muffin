@@ -115,8 +115,7 @@ struct _ClutterLayoutManagerClass
                                                  gfloat                 *nat_height_p);
   void               (* allocate)               (ClutterLayoutManager   *manager,
                                                  ClutterContainer       *container,
-                                                 const ClutterActorBox  *allocation,
-                                                 ClutterAllocationFlags  flags);
+                                                 const ClutterActorBox  *allocation);
 
   void               (* set_container)          (ClutterLayoutManager   *manager,
                                                  ClutterContainer       *container);
@@ -167,8 +166,7 @@ void               clutter_layout_manager_get_preferred_height  (ClutterLayoutMa
 CLUTTER_EXPORT
 void               clutter_layout_manager_allocate              (ClutterLayoutManager   *manager,
                                                                  ClutterContainer       *container,
-                                                                 const ClutterActorBox  *allocation,
-                                                                 ClutterAllocationFlags  flags);
+                                                                 const ClutterActorBox  *allocation);
 
 CLUTTER_EXPORT
 void               clutter_layout_manager_set_container         (ClutterLayoutManager   *manager,
