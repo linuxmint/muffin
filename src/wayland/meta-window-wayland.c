@@ -648,6 +648,22 @@ meta_window_wayland_main_monitor_changed (MetaWindow               *window,
   scale_size (&window->size_hints.min_width, &window->size_hints.min_height, scale_factor);
   scale_size (&window->size_hints.max_width, &window->size_hints.max_height, scale_factor);
 
+  /* If the window is being drag-moved, scale the grab anchor around the grab
+   * point as well, so the pointer keeps the same relative position in the
+   * window instead of the window rescaling against its top-left corner. */
+  if (window->display->grab_window == window &&
+      meta_grab_op_is_moving (window->display->grab_op))
+    {
+      MetaDisplay *display = window->display;
+      MetaRectangle *anchor_pos = &display->grab_anchor_window_pos;
+
+      anchor_pos->x = display->grab_anchor_root_x -
+        (int) roundf (scale_factor * (display->grab_anchor_root_x - anchor_pos->x));
+      anchor_pos->y = display->grab_anchor_root_y -
+        (int) roundf (scale_factor * (display->grab_anchor_root_y - anchor_pos->y));
+      scale_rect_size (anchor_pos, scale_factor);
+    }
+
   /* Window geometry offset (XXX: Need a better place, see
    * meta_window_wayland_finish_move_resize). */
   window->custom_frame_extents.left =
