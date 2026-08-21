@@ -53,6 +53,7 @@
 #include "wayland/meta-wayland-im-launcher.h"
 #include "wayland/meta-wayland-input-method.h"
 #include "wayland/meta-wayland-tablet-manager.h"
+#include "wayland/meta-wayland-transaction.h"
 #include "input-method-unstable-v2-server-protocol.h"
 #include "virtual-keyboard-unstable-v1-server-protocol.h"
 #include "wayland/meta-wayland-virtual-keyboard.h"
@@ -316,6 +317,12 @@ meta_wayland_compositor_remove_frame_callback_surface (MetaWaylandCompositor *co
     g_list_remove (compositor->frame_callback_surfaces, surface);
 }
 
+GQueue *
+meta_wayland_compositor_get_committed_transactions (MetaWaylandCompositor *compositor)
+{
+  return &compositor->committed_transactions;
+}
+
 static void
 set_gnome_env (const char *name,
 	       const char *value)
@@ -487,6 +494,7 @@ meta_wayland_compositor_setup (MetaWaylandCompositor *wayland_compositor)
   meta_wayland_input_method_manager_init (compositor);
   meta_wayland_virtual_keyboard_manager_init (compositor);
   meta_wayland_activation_init (compositor);
+  meta_wayland_transaction_init (compositor);
   meta_wayland_idle_inhibit_init (compositor);
   meta_wayland_init_xdg_wm_dialog (compositor);
   meta_wayland_xdg_toplevel_tag_init (compositor);

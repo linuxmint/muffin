@@ -157,7 +157,11 @@ static void
 meta_window_wayland_kill (MetaWindow *window)
 {
   MetaWaylandSurface *surface = window->surface;
-  struct wl_resource *resource = surface->resource;
+  struct wl_resource *resource;
+
+  resource = surface->resource;
+  if (!resource)
+    return;
 
   /* Send the client an unrecoverable error to kill the client. */
   wl_resource_post_error (resource,
@@ -699,8 +703,12 @@ static uint32_t
 meta_window_wayland_get_client_pid (MetaWindow *window)
 {
   MetaWaylandSurface *surface = window->surface;
-  struct wl_resource *resource = surface->resource;
+  struct wl_resource *resource;
   pid_t pid;
+
+  resource = surface->resource;
+  if (!resource)
+    return 0;
 
   wl_client_get_credentials (wl_resource_get_client (resource), &pid, NULL, NULL);
   return (uint32_t)pid;

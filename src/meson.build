@@ -599,6 +599,8 @@ if have_wayland
     'wayland/meta-wayland-virtual-keyboard.h',
     'wayland/meta-wayland-touch.c',
     'wayland/meta-wayland-touch.h',
+    'wayland/meta-wayland-transaction.c',
+    'wayland/meta-wayland-transaction.h',
     'wayland/meta-wayland-types.h',
     'wayland/meta-wayland-versions.h',
     'wayland/meta-wayland-viewporter.c',

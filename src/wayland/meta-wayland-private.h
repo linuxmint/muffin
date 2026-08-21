@@ -91,6 +91,12 @@ struct _MetaWaylandCompositor
   MetaWaylandXdgForeign *foreign;
   MetaWaylandDmaBufManager *dma_buf_manager;
 
+  /*
+   * Queue of transactions which have been committed but not applied yet, in the
+   * order they were committed.
+   */
+  GQueue committed_transactions;
+
   GHashTable *scheduled_surface_associations;
 };
 

@@ -173,7 +173,8 @@ meta_wayland_buffer_realize (MetaWaylandBuffer *buffer)
                                      EGL_TEXTURE_FORMAT, &format,
                                      NULL))
     {
-      buffer->type = META_WAYLAND_BUFFER_TYPE_EGL_IMAGE;
+      buffer->dma_buf.dma_buf =
+        meta_wayland_dma_buf_fds_for_wayland_buffer (buffer);
       return TRUE;
     }
 
@@ -506,7 +507,6 @@ meta_wayland_buffer_attach (MetaWaylandBuffer  *buffer,
                             CoglTexture       **texture,
                             GError            **error)
 {
-  g_return_val_if_fail (buffer->resource, FALSE);
 
   if (!meta_wayland_buffer_is_realized (buffer))
     {
@@ -564,6 +564,25 @@ meta_wayland_buffer_create_snippet (MetaWaylandBuffer *buffer)
 #else
   return NULL;
 #endif /* HAVE_WAYLAND_EGLSTREAM */
+}
+
+void
+meta_wayland_buffer_inc_use_count (MetaWaylandBuffer *buffer)
+{
+  g_warn_if_fail (buffer->resource);
+
+  buffer->use_count++;
+}
+
+void
+meta_wayland_buffer_dec_use_count (MetaWaylandBuffer *buffer)
+{
+  g_return_if_fail (buffer->use_count > 0);
+
+  buffer->use_count--;
+
+  if (buffer->use_count == 0 && buffer->resource)
+    wl_buffer_send_release (buffer->resource);
 }
 
 gboolean
@@ -751,6 +770,8 @@ static void
 meta_wayland_buffer_finalize (GObject *object)
 {
   MetaWaylandBuffer *buffer = META_WAYLAND_BUFFER (object);
+
+  g_warn_if_fail (buffer->use_count == 0);
 
   g_clear_pointer (&buffer->egl_image.texture, cogl_object_unref);
 #ifdef HAVE_WAYLAND_EGLSTREAM
