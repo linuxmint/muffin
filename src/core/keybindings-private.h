@@ -126,6 +126,12 @@ typedef struct
   /* Alt+click button grabs */
   ClutterModifierType window_grab_modifiers;
   ClutterModifierType mouse_zoom_modifiers;
+
+  /* Active pointer grab held during a11y mouse-wheel zoom, so that
+   * scroll-valuator motion events are not delivered to client windows
+   * (passive button-4/5 grabs cannot intercept XI_Motion scroll events). */
+  gboolean zoom_pointer_grab_active;
+  guint    zoom_pointer_grab_timeout_id;
 } MetaKeyBindingManager;
 
 void     meta_display_init_keys             (MetaDisplay *display);
