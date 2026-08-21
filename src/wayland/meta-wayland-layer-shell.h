@@ -22,6 +22,7 @@
 
 #include "wayland/meta-wayland.h"
 #include "wayland/meta-wayland-actor-surface.h"
+#include "wayland/meta-wayland-shell-surface.h"
 
 
 /* Layer shell layer values - matches protocol enum */
@@ -39,29 +40,30 @@ G_DECLARE_FINAL_TYPE (MetaWaylandLayerShell, meta_wayland_layer_shell,
 
 #define META_TYPE_WAYLAND_LAYER_SURFACE (meta_wayland_layer_surface_get_type ())
 G_DECLARE_FINAL_TYPE (MetaWaylandLayerSurface, meta_wayland_layer_surface,
-                      META, WAYLAND_LAYER_SURFACE, MetaWaylandActorSurface)
+                      META, WAYLAND_LAYER_SURFACE, MetaWaylandShellSurface)
 
 void meta_wayland_init_layer_shell (MetaWaylandCompositor *compositor);
 
 MetaLayerShellLayer meta_wayland_layer_surface_get_layer (MetaWaylandLayerSurface *layer_surface);
+MetaWaylandLayerSurface * meta_wayland_layer_surface_from_window (MetaWindow *window);
 MetaWaylandOutput * meta_wayland_layer_surface_get_output (MetaWaylandLayerSurface *layer_surface);
+MetaLogicalMonitor * meta_wayland_layer_surface_get_logical_monitor (MetaWaylandLayerSurface *layer_surface);
+gboolean meta_wayland_layer_surface_is_overlay (MetaWaylandLayerSurface *layer_surface);
 gboolean meta_wayland_layer_surface_wants_keyboard_focus (MetaWaylandLayerSurface *layer_surface);
+gboolean meta_wayland_layer_surface_reserves_space (MetaWaylandLayerSurface *layer_surface);
 
 void meta_wayland_layer_shell_update_struts (MetaWaylandCompositor *compositor);
 void meta_wayland_layer_shell_on_workarea_changed (MetaWaylandCompositor *compositor);
 
 MetaWaylandLayerShell * meta_wayland_compositor_get_layer_shell (MetaWaylandCompositor *compositor);
 
-MetaWaylandLayerSurface * meta_wayland_layer_shell_find_surface (MetaWaylandLayerShell  *layer_shell,
-                                                                  MetaLayerShellLayer     layer,
-                                                                  const char             *namespace_str,
-                                                                  MetaWaylandOutput      *output);
+GList * meta_wayland_layer_shell_find_surfaces (MetaWaylandLayerShell  *layer_shell,
+                                                MetaLayerShellLayer     layer,
+                                                MetaLogicalMonitor     *logical_monitor);
 
 const char * meta_wayland_layer_surface_get_namespace (MetaWaylandLayerSurface *layer_surface);
 
 MetaWaylandSurface * meta_wayland_layer_shell_get_exclusive_focus_surface (MetaWaylandCompositor *compositor);
-
-gboolean meta_wayland_layer_shell_focus_desktop_surface (MetaWaylandCompositor *compositor);
 
 gboolean meta_wayland_layer_surface_get_geometry (MetaWaylandLayerSurface *layer_surface,
                                                   int                     *out_x,

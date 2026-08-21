@@ -416,8 +416,11 @@ meta_window_actor_dispose (GObject *object)
 
   if (priv->surface)
     {
-      clutter_actor_remove_child (CLUTTER_ACTOR (self),
-                                  CLUTTER_ACTOR (priv->surface));
+      ClutterActor *surface_actor = CLUTTER_ACTOR (priv->surface);
+
+      if (clutter_actor_get_parent (surface_actor) == CLUTTER_ACTOR (self))
+        clutter_actor_remove_child (CLUTTER_ACTOR (self), surface_actor);
+
       g_clear_object (&priv->surface);
     }
 
@@ -1288,8 +1291,7 @@ meta_window_actor_blit_to_framebuffer (MetaScreenCastWindow *screen_cast_window,
   if (width == 0 || height == 0)
     return FALSE;
 
-  if (!clutter_actor_get_resource_scale (actor, &resource_scale))
-    return FALSE;
+  resource_scale = clutter_actor_get_resource_scale (actor);
 
   clutter_actor_inhibit_culling (actor);
 
@@ -1445,8 +1447,7 @@ meta_window_actor_get_image (MetaWindowActor *self,
   if (width == 0 || height == 0)
     goto out;
 
-  if (!clutter_actor_get_resource_scale (actor, &resource_scale))
-    goto out;
+  resource_scale = clutter_actor_get_resource_scale (actor);
 
   width = ceilf (width * resource_scale);
   height = ceilf (height * resource_scale);

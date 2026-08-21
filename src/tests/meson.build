@@ -123,6 +123,27 @@ headless_start_test = executable('muffin-headless-start-test',
   install_dir: muffin_installed_tests_libexecdir,
 )
 
+stage_view_tests = executable('muffin-stage-view-tests',
+  sources: [
+    'meta-backend-test.c',
+    'meta-backend-test.h',
+    'meta-gpu-test.c',
+    'meta-gpu-test.h',
+    'meta-monitor-manager-test.c',
+    'meta-monitor-manager-test.h',
+    'monitor-test-utils.c',
+    'monitor-test-utils.h',
+    'stage-view-tests.c',
+    'test-utils.c',
+    'test-utils.h',
+  ],
+  include_directories: tests_includepath,
+  c_args: tests_c_args,
+  dependencies: [tests_deps],
+  install: have_installed_tests,
+  install_dir: muffin_installed_tests_libexecdir,
+)
+
 stacking_tests = [
   'basic-x11',
   'basic-wayland',
@@ -167,6 +188,13 @@ test('normal', unit_tests,
 )
 
 test('headless-start', headless_start_test,
+  suite: ['core', 'muffin/unit'],
+  env: test_env,
+  is_parallel: false,
+  timeout: 60,
+)
+
+test('stage-view', stage_view_tests,
   suite: ['core', 'muffin/unit'],
   env: test_env,
   is_parallel: false,

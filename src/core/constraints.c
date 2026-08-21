@@ -465,6 +465,13 @@ setup_constraint_info (ConstraintInfo      *info,
         meta_window_adjust_fullscreen_monitor_rect (window, &info->entire_monitor);
     }
 
+  /* Widen the placement bound to the whole monitor. Of the constraints that
+   * read work_area_monitor, only constrain_custom_rule () applies to a window
+   * with a placement rule, so this does not reach ordinary window
+   * constraints. */
+  if (placement_rule && placement_rule->constrain_to_entire_monitor)
+    info->work_area_monitor = info->entire_monitor;
+
   cur_workspace = window->display->workspace_manager->active_workspace;
   info->usable_screen_region   =
     meta_workspace_get_onscreen_region (cur_workspace);

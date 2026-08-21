@@ -28,6 +28,7 @@
 #include "compositor/meta-window-actor-wayland.h"
 #include "wayland/meta-wayland-actor-surface.h"
 #include "wayland/meta-wayland-buffer.h"
+#include "wayland/meta-wayland-layer-shell.h"
 #include "wayland/meta-wayland-subsurface.h"
 #include "wayland/meta-wayland-surface.h"
 #include "wayland/meta-window-wayland.h"
@@ -221,6 +222,24 @@ meta_wayland_shell_surface_managed (MetaWaylandShellSurface *shell_surface,
   shell_surface_class->managed (shell_surface, window);
 }
 
+static gboolean
+meta_wayland_shell_surface_real_tracks_configurations (MetaWaylandShellSurface *shell_surface)
+{
+  return TRUE;
+}
+
+/* Whether the role completes the configure-ack cycle. A configuration stays in
+ * the window's pending list until the client acks its serial; a role that never
+ * acks would accumulate them for the window's lifetime, so it has to say so. */
+gboolean
+meta_wayland_shell_surface_tracks_configurations (MetaWaylandShellSurface *shell_surface)
+{
+  MetaWaylandShellSurfaceClass *shell_surface_class =
+    META_WAYLAND_SHELL_SURFACE_GET_CLASS (shell_surface);
+
+  return shell_surface_class->tracks_configurations (shell_surface);
+}
+
 static void
 meta_wayland_shell_surface_assigned (MetaWaylandSurfaceRole *surface_role)
 {
@@ -353,9 +372,13 @@ meta_wayland_shell_surface_sync_actor_state (MetaWaylandActorSurface *actor_surf
   toplevel_window = meta_wayland_surface_get_toplevel_window (surface);
   window = meta_wayland_surface_get_window (surface);
 
-  /* For popups parented to layer surfaces, there's no toplevel window,
-   * but the popup itself has a window. Allow sync in that case. */
-  if (!toplevel_window && !window)
+  /* Popups keep working through the !window test - they always have a window
+   * of their own. The layer-surface test is deliberately for any layer, not
+   * just BACKGROUND: a BACKGROUND surface never gets a window at all, and every
+   * other layer is window-less too between its creation and its first buffer
+   * commit. Narrowing it to BACKGROUND would break that first commit. */
+  if (!toplevel_window && !window &&
+      !META_IS_WAYLAND_LAYER_SURFACE (actor_surface))
     return;
 
   actor_surface_class->sync_actor_state (actor_surface);
@@ -405,6 +428,9 @@ meta_wayland_shell_surface_class_init (MetaWaylandShellSurfaceClass *klass)
     META_WAYLAND_ACTOR_SURFACE_CLASS (klass);
 
   object_class->finalize = meta_wayland_shell_surface_finalize;
+
+  klass->tracks_configurations =
+    meta_wayland_shell_surface_real_tracks_configurations;
 
   surface_role_class->assigned = meta_wayland_shell_surface_assigned;
   surface_role_class->pre_apply_state =

@@ -79,8 +79,12 @@
  * the whole compositor while an animated cursor is shown. The hardware cursor
  * is an optimization, so where it measures slower than compositing one, stop
  * using it rather than assume it is the cheaper path.
+ *
+ * The threshold is well above a vblank on purpose: NVIDIA 580 reports ~11ms per
+ * update on hardware whose cursor is in fact fine, which latched this fallback
+ * on in every session. Only give up on a cursor that is pathologically slow.
  */
-#define HW_CURSOR_SLOW_UPDATE_US 4000
+#define HW_CURSOR_SLOW_UPDATE_US 25000
 #define HW_CURSOR_MAX_SLOW_UPDATES 5
 
 static GQuark quark_cursor_sprite = 0;

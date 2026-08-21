@@ -507,17 +507,38 @@ default_grab_button (MetaWaylandPointerGrab *grab,
               meta_wayland_compositor_get_default ());
 
           /* An exclusive layer surface holds keyboard focus; a click on
-           * another surface must not steal it. */
+           * another surface must not steal it. Skip entirely when this surface
+           * already holds the keyboard: there is no focus change to make, and
+           * re-running meta_window_focus () on every click would re-stamp the
+           * MRU entry and churn appears-focused for nothing. */
           if (meta_wayland_seat_has_keyboard (seat) &&
-              (!exclusive || exclusive == pointer->focus_surface))
+              (!exclusive || exclusive == pointer->focus_surface) &&
+              seat->keyboard->focus_surface != pointer->focus_surface)
             {
               MetaDisplay *display = meta_get_display ();
+              MetaWindow *window =
+                meta_wayland_surface_get_window (pointer->focus_surface);
 
-              if (display->focus_window)
-                meta_display_update_focus_window (display, NULL);
+              /* Focus it as a window where there is one: that sets
+               * focus_window, has_focus and the MRU entry, and hands over the
+               * Wayland keyboard in the same transition (see
+               * meta_display_update_focus_window ()). Granting the seat focus
+               * on its own would leave muffin believing nothing is focused, so
+               * the next focus_default_window () would pass the keyboard to an
+               * unrelated window without ever telling this surface. Only
+               * BACKGROUND has no window to focus. */
+              if (window)
+                {
+                  meta_window_focus (window,
+                                     meta_display_get_current_time_roundtrip (display));
+                }
+              else
+                {
+                  if (display->focus_window)
+                    meta_display_update_focus_window (display, NULL);
 
-              meta_wayland_keyboard_set_focus (seat->keyboard,
-                                               pointer->focus_surface);
+                  meta_wayland_seat_set_input_focus (seat, pointer->focus_surface);
+                }
             }
         }
     }

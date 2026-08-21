@@ -123,6 +123,7 @@ struct _MetaWaylandXdgPopup
 
   MetaWaylandSurface *parent_surface;
   gulong parent_surface_unmapped_handler_id;
+  gboolean parent_is_layer_shell;
 
   uint32_t pending_reposition_token;
   gboolean pending_repositioned;
@@ -181,6 +182,9 @@ meta_wayland_xdg_surface_send_configure (MetaWaylandXdgSurface          *xdg_sur
 static void
 scale_placement_rule (MetaPlacementRule  *placement_rule,
                       MetaWaylandSurface *surface);
+
+static void
+dismiss_invalid_popup (MetaWaylandXdgPopup *xdg_popup);
 
 static MetaWaylandSurface *
 surface_from_xdg_surface_resource (struct wl_resource *resource)
@@ -583,6 +587,7 @@ meta_wayland_xdg_popup_unmap (MetaWaylandXdgPopup *xdg_popup)
       g_clear_signal_handler (&xdg_popup->parent_surface_unmapped_handler_id,
                               xdg_popup->parent_surface);
       xdg_popup->parent_surface = NULL;
+      xdg_popup->parent_is_layer_shell = FALSE;
     }
 
   meta_wayland_shell_surface_destroy_window (shell_surface);
@@ -679,6 +684,22 @@ on_parent_surface_unmapped (MetaWaylandSurface  *parent_surface,
     meta_wayland_xdg_surface_get_wm_base_resource (xdg_surface);
   MetaWaylandShellSurface *shell_surface =
     META_WAYLAND_SHELL_SURFACE (xdg_popup);
+
+  /* A layer surface unmaps for reasons that are the compositor's doing - its
+   * output went away, or it was closed - so the client committed no violation
+   * and must not be disconnected over it. Dismiss the popup instead; going
+   * through dismiss_invalid_popup () unwinds the grab chain from the top down,
+   * so no popup is dismissed out of order.
+   *
+   * Uses the flag cached at setup rather than parent_surface->role: when the
+   * client destroys the parent's wl_surface, the role is already NULL by the
+   * time this runs (see finish_popup_setup) and the test would fall through to
+   * the protocol error below. */
+  if (xdg_popup->parent_is_layer_shell)
+    {
+      dismiss_invalid_popup (xdg_popup);
+      return;
+    }
 
   wl_resource_post_error (xdg_wm_base_resource,
                           XDG_WM_BASE_ERROR_NOT_THE_TOPMOST_POPUP,
@@ -1138,9 +1159,16 @@ finish_popup_setup (MetaWaylandXdgPopup *xdg_popup)
   xdg_popup->setup.grab_seat = NULL;
   xdg_popup->dismissed_by_client = FALSE;
 
-  /* Allow both regular window parents and layer surface parents */
+  /* Answered once, while the role is still attached: on client teardown
+   * wl_surface_destructor () nulls surface->role before the role's dispose
+   * runs, and on_parent_surface_unmapped () fires from inside that dispose -
+   * too late to ask the surface what it was. */
+  parent_is_layer_shell = META_IS_WAYLAND_LAYER_SURFACE (parent_surface->role);
+
+  /* A windowed layer surface satisfies the first test like any other parent;
+   * the role check is there for BACKGROUND, which has no MetaWindow. */
   if (!meta_wayland_surface_get_window (parent_surface) &&
-      !META_IS_WAYLAND_LAYER_SURFACE (parent_surface->role))
+      !parent_is_layer_shell)
     {
       xdg_popup_send_popup_done (xdg_popup->resource);
       return;
@@ -1149,9 +1177,6 @@ finish_popup_setup (MetaWaylandXdgPopup *xdg_popup)
   if (seat)
     {
       MetaWaylandSurface *top_popup;
-      gboolean parent_is_layer_shell;
-
-      parent_is_layer_shell = META_IS_WAYLAND_LAYER_SURFACE (parent_surface->role);
 
       /* xdg_popup.grab() expects a serial from a recent input event on the
        * popup's own client. For popups parented to a layer-shell surface the
@@ -1177,6 +1202,7 @@ finish_popup_setup (MetaWaylandXdgPopup *xdg_popup)
     }
 
   xdg_popup->parent_surface = parent_surface;
+  xdg_popup->parent_is_layer_shell = parent_is_layer_shell;
   xdg_popup->parent_surface_unmapped_handler_id =
     g_signal_connect (parent_surface, "unmapped",
                       G_CALLBACK (on_parent_surface_unmapped),
@@ -1360,8 +1386,25 @@ meta_wayland_xdg_popup_post_apply_state (MetaWaylandSurfaceRole  *surface_role,
 
   parent_window = meta_wayland_surface_get_window (xdg_popup->parent_surface);
 
-  /* Skip overlap check for layer surface parents (no parent window) */
-  if (parent_window)
+  /* meta_wayland_xdg_popup_managed () sets transient_for once, when the popup
+   * window is created, and a layer surface has no window until its own first
+   * buffer commit - which a client is free to do after creating the popup (see
+   * meta_wayland_xdg_popup_set_parent_surface). Reconcile it here, or the popup
+   * keeps a NULL transient_for for good: the stack only constrains a window
+   * above its parent when one is set (ensure_above (), stack.c), so the popup
+   * would sit at META_LAYER_NORMAL and draw below its own panel. */
+  if (parent_window && window->transient_for != parent_window)
+    meta_window_set_transient_for (window, parent_window);
+
+  /* Layer surfaces are exempt. This tests the popup against its parent
+   * window's buffer rect, but a layer surface's popups are placed against the
+   * rect meta_wayland_layer_surface_get_geometry () computes - which is derived
+   * separately, and which constrain_to_entire_monitor may let the popup escape
+   * on purpose. Non-overlap there is not evidence of a buggy client, and acting
+   * on it would dismiss a valid popup and log a warning naming the wrong
+   * culprit. Before layer surfaces had windows this was skipped by the
+   * parent_window test alone. */
+  if (parent_window && !meta_window_is_layer_shell (parent_window))
     {
       meta_window_get_buffer_rect (window, &buffer_rect);
       meta_window_get_buffer_rect (parent_window, &parent_buffer_rect);
@@ -1422,8 +1465,10 @@ meta_wayland_xdg_popup_configure (MetaWaylandShellSurface        *shell_surface,
    * FIXME: Could maybe add a signal that is emitted before the window is
    * created so that we can avoid incorrect intermediate foci.
    *
-   * However, layer-shell surfaces don't have a MetaWindow, so we still need
-   * to send configure for popups parented to layer surfaces.
+   * A windowed layer surface has a MetaWindow and satisfies the first half of
+   * the test below. The layer-surface check keeps the BACKGROUND layer
+   * working, which has none, and covers the gap between a layer surface's
+   * creation and its first buffer commit, while it has no window either.
    */
   if (!parent_window && !META_IS_WAYLAND_LAYER_SURFACE (xdg_popup->parent_surface->role))
     return;
@@ -1431,7 +1476,9 @@ meta_wayland_xdg_popup_configure (MetaWaylandShellSurface        *shell_surface,
   if (parent_window)
     geometry_scale = meta_window_wayland_get_geometry_scale (parent_window);
   else
-    geometry_scale = 1;  /* Layer surfaces use scale 1 */
+    geometry_scale = (int)
+      meta_wayland_actor_surface_get_geometry_scale (
+        META_WAYLAND_ACTOR_SURFACE (xdg_popup->parent_surface->role));
 
   x = configuration->rel_x / geometry_scale;
   y = configuration->rel_y / geometry_scale;
@@ -2353,9 +2400,14 @@ meta_wayland_xdg_positioner_to_placement (MetaWaylandXdgPositioner *xdg_position
   };
 }
 
-/* Layer surfaces have no MetaWindow; take the parent rect from the layer
- * surface's computed geometry instead (see also
- * meta_wayland_xdg_popup_set_parent_surface). */
+/* Compute the parent rect from the layer surface's own geometry rather than a
+ * backing window's frame rect, because there may be no window to ask: a
+ * BACKGROUND surface never gets one, and every other layer is window-less until
+ * its first buffer commit, which a client may not have reached when it creates
+ * the popup (see meta_wayland_xdg_popup_set_parent_surface). Once a window does
+ * exist the two agree - both sizes come from the surface, both positions from
+ * calculate_surface_position () - so this stays correct rather than merely
+ * being the only option. */
 static MetaPlacementRule
 meta_wayland_xdg_positioner_to_placement_for_layer_surface (MetaWaylandXdgPositioner *xdg_positioner,
                                                             MetaWaylandLayerSurface  *layer_surface)
@@ -2368,11 +2420,20 @@ meta_wayland_xdg_positioner_to_placement_for_layer_surface (MetaWaylandXdgPositi
 
   if (xdg_positioner->has_parent_size)
     {
+      int scale = (int)
+        meta_wayland_actor_surface_get_geometry_scale (
+          META_WAYLAND_ACTOR_SURFACE (layer_surface));
+
+      /* parent_rect is in stage coordinates, the client's parent size is in
+       * logical ones. Scale before resizing, or on a HiDPI monitor the rect
+       * shrinks to logical size and - with SOUTH_EAST gravity holding the
+       * bottom-right corner - drags the origin right and down by the
+       * difference, taking every popup with it. */
       meta_rectangle_resize_with_gravity (&parent_rect,
                                           &parent_rect,
                                           META_GRAVITY_SOUTH_EAST,
-                                          xdg_positioner->parent_width,
-                                          xdg_positioner->parent_height);
+                                          xdg_positioner->parent_width * scale,
+                                          xdg_positioner->parent_height * scale);
     }
 
   return (MetaPlacementRule) {
@@ -2386,6 +2447,14 @@ meta_wayland_xdg_positioner_to_placement_for_layer_surface (MetaWaylandXdgPositi
     .height = xdg_positioner->height,
 
     .is_reactive = xdg_positioner->is_reactive,
+
+    /* Only when the parent actually reserved an exclusive zone: its own popups
+     * have to be able to draw over the space it took. A layer surface that
+     * reserved nothing - the desktop, say - has no such claim, and lifting the
+     * work-area bound for it just lets its menus be placed under a panel
+     * instead of being flipped clear of one. */
+    .constrain_to_entire_monitor =
+      meta_wayland_layer_surface_reserves_space (layer_surface),
 
     .parent_rect = parent_rect,
   };
@@ -2766,19 +2835,24 @@ meta_wayland_xdg_popup_set_parent_surface (MetaWaylandXdgPopup *xdg_popup,
 }
 
 /* Whether the surface is an xdg_popup whose (possibly nested) parent chain
- * ends at a layer surface. Such popups must be stacked above the layer
- * containers rather than among normal windows. */
+ * ends at a layer surface. Callers use it to treat such a popup as desktop
+ * chrome (window_is_desktop_component ()) and to give it the same elevation as
+ * the layer surface it belongs to (get_window_group_for_window ()). */
 gboolean
 meta_wayland_surface_is_layer_shell_popup (MetaWaylandSurface *surface)
 {
+  gboolean is_popup = FALSE;
+
   while (surface != NULL && META_IS_WAYLAND_XDG_POPUP (surface->role))
     {
       MetaWaylandXdgPopup *xdg_popup = META_WAYLAND_XDG_POPUP (surface->role);
 
+      is_popup = TRUE;
       surface = xdg_popup->parent_surface;
     }
 
-  return surface != NULL &&
+  return is_popup &&
+         surface != NULL &&
          META_IS_WAYLAND_LAYER_SURFACE (surface->role);
 }
 

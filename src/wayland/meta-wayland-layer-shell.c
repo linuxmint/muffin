@@ -29,7 +29,6 @@
 #include "core/meta-workspace-manager-private.h"
 #include "core/workspace-private.h"
 #include "meta/boxes.h"
-#include "wayland/meta-wayland-data-device.h"
 #include "wayland/meta-wayland-keyboard.h"
 #include "wayland/meta-wayland-outputs.h"
 #include "wayland/meta-wayland-private.h"
@@ -37,6 +36,7 @@
 #include "wayland/meta-wayland-surface.h"
 #include "wayland/meta-wayland-versions.h"
 #include "wayland/meta-wayland-xdg-shell.h"
+#include "wayland/meta-window-wayland.h"
 
 #include "wlr-layer-shell-unstable-v1-server-protocol.h"
 
@@ -82,7 +82,7 @@ typedef struct
 /* Layer surface */
 struct _MetaWaylandLayerSurface
 {
-  MetaWaylandActorSurface parent;
+  MetaWaylandShellSurface parent;
 
   struct wl_resource *resource;
   MetaWaylandOutput *output;
@@ -105,7 +105,7 @@ struct _MetaWaylandLayerSurface
 };
 
 G_DEFINE_TYPE (MetaWaylandLayerSurface, meta_wayland_layer_surface,
-               META_TYPE_WAYLAND_ACTOR_SURFACE)
+               META_TYPE_WAYLAND_SHELL_SURFACE)
 
 enum
 {
@@ -122,11 +122,32 @@ static void meta_wayland_layer_surface_send_configure (MetaWaylandLayerSurface *
 static void meta_wayland_layer_surface_send_configure_full (MetaWaylandLayerSurface *layer_surface,
                                                             gboolean                 only_if_changed);
 static void meta_wayland_layer_shell_sync_keyboard_focus (MetaWaylandCompositor *compositor);
+static gboolean layer_wants_window (MetaLayerShellLayer layer);
+static void apply_window_type_for_layer (MetaWaylandLayerSurface *layer_surface,
+                                         MetaWindow              *window);
 
 static MetaWaylandLayerShell *
 meta_wayland_layer_shell_from_compositor (MetaWaylandCompositor *compositor)
 {
   return g_object_get_data (G_OBJECT (compositor), "-meta-wayland-layer-shell");
+}
+
+/* Also emitted when a mapped surface enters or leaves the wallpaper tier by
+ * changing layer (handle_layer_change ()), not only on a real map or unmap:
+ * what the handlers track is which surface is currently the wallpaper. */
+static void
+emit_layer_surface_signal (MetaWaylandLayerSurface *layer_surface,
+                           MetaWaylandSurface      *surface,
+                           guint                    signal)
+{
+  MetaWaylandLayerShell *layer_shell;
+
+  if (!surface || !surface->compositor)
+    return;
+
+  layer_shell = meta_wayland_layer_shell_from_compositor (surface->compositor);
+  if (layer_shell)
+    g_signal_emit (layer_shell, layer_shell_signals[signal], 0, layer_surface);
 }
 
 static void
@@ -197,14 +218,8 @@ get_strut_side_for_state (const MetaWaylandLayerSurfaceState *state)
     }
 }
 
-/*
- * Calculate the total exclusive zone offset from OTHER layer surfaces
- * on the same edge that were created before this surface.
- *
- * Surfaces are stored in reverse creation order (newest first), so
- * surfaces that appear AFTER this one in the list were created earlier
- * and should be positioned closer to the edge.
- */
+/* The monitor this surface is placed on: its bound output's, or the primary
+ * monitor when it bound none - binding an output is optional. */
 static MetaLogicalMonitor *
 get_layer_surface_logical_monitor (MetaWaylandLayerSurface *layer_surface)
 {
@@ -217,6 +232,22 @@ get_layer_surface_logical_monitor (MetaWaylandLayerSurface *layer_surface)
   backend = meta_get_backend ();
   monitor_manager = meta_backend_get_monitor_manager (backend);
   return meta_monitor_manager_get_primary_logical_monitor (monitor_manager);
+}
+
+/* A layer surface belongs to exactly one output - its bound output, or the
+ * one the compositor placed it on. Report it as being on that monitor only,
+ * rather than every monitor its actor geometrically overlaps: a client reads
+ * wl_output.scale from the outputs it enters, so overlapping a neighbouring
+ * monitor (e.g. a full-width panel that briefly renders oversized) makes it
+ * pick up that monitor's scale and draw at the wrong size. */
+static gboolean
+meta_wayland_layer_surface_is_on_logical_monitor (MetaWaylandSurfaceRole *surface_role,
+                                                  MetaLogicalMonitor     *logical_monitor)
+{
+  MetaWaylandLayerSurface *layer_surface =
+    META_WAYLAND_LAYER_SURFACE (surface_role);
+
+  return get_layer_surface_logical_monitor (layer_surface) == logical_monitor;
 }
 
 /* Like windows (get_window_geometry_scale_for_logical_monitor): when stage
@@ -246,6 +277,11 @@ get_layer_surface_scale (MetaWaylandLayerSurface *layer_surface)
     META_WAYLAND_ACTOR_SURFACE (layer_surface));
 }
 
+/* Total exclusive-zone offset from the OTHER layer surfaces on the same edge
+ * that were created before this one. layer_surfaces is kept in reverse creation
+ * order (newest first, see layer_shell_get_layer_surface ()), so the surfaces
+ * appearing AFTER this one in the list are the older ones, and they sit closer
+ * to the edge. */
 static int
 get_other_layer_surfaces_exclusive_offset (MetaWaylandLayerSurface *layer_surface,
                                            MetaWaylandCompositor   *compositor,
@@ -851,32 +887,45 @@ meta_wayland_layer_surface_get_geometry (MetaWaylandLayerSurface *layer_surface,
   return TRUE;
 }
 
-static ClutterActor *
-get_layer_container_for_layer (MetaWaylandLayerSurface *layer_surface)
+/* Position comes from the anchors, margins and exclusive zone, so it is
+ * decided compositor-side rather than by a client-acked configure. FORCE_MOVE
+ * applies it directly instead of configuring the client and waiting for an
+ * ack. Windowed layers are moved as windows - the window actor owns the surface
+ * actor's placement. */
+static void
+reposition_layer_window (MetaWaylandLayerSurface *layer_surface,
+                         MetaWindow              *window)
 {
-  MetaDisplay *display;
-  ClutterActor *layer_container = NULL;
+  MetaRectangle rect;
+  int x, y;
 
-  display = meta_get_display ();
+  calculate_surface_position (layer_surface, &x, &y);
 
-  switch (layer_surface->current.layer)
-    {
-    case META_LAYER_SHELL_LAYER_BACKGROUND:
-    case META_LAYER_SHELL_LAYER_BOTTOM:
-      /* Use bottom_window_group for background and bottom layers */
-      layer_container = meta_get_bottom_window_group_for_display (display);
-      break;
-    case META_LAYER_SHELL_LAYER_TOP:
-      /* Use top_window_group for top layer */
-      layer_container = meta_get_top_window_group_for_display (display);
-      break;
-    case META_LAYER_SHELL_LAYER_OVERLAY:
-      /* Use feedback_group for overlay (topmost) */
-      layer_container = meta_get_feedback_group_for_display (display);
-      break;
-    }
+  /* This runs on every buffer commit, and the position rarely changes - a
+   * clock applet would otherwise pay for a full constraint solve plus a
+   * whole-stack walk at frame rate. The size is never ours to change here: it
+   * is passed through from window->rect below.
+   *
+   * FORCE_MOVE does not skip the constraint chain - only
+   * META_MOVE_RESIZE_WAYLAND_FINISH_MOVE_RESIZE does (see
+   * meta_window_move_resize_internal ()) - and the final position comes from
+   * the constrained rect. The position asked for here survives because every
+   * constraint that would move it bails on META_WINDOW_DESKTOP and
+   * META_WINDOW_DOCK, which is what apply_window_type_for_layer () assigns. */
+  if (x == window->rect.x && y == window->rect.y)
+    return;
 
-  return layer_container;
+  rect = (MetaRectangle) {
+    .x = x,
+    .y = y,
+    .width = window->rect.width,
+    .height = window->rect.height,
+  };
+  meta_window_move_resize_internal (window,
+                                    META_MOVE_RESIZE_FORCE_MOVE |
+                                    META_MOVE_RESIZE_MOVE_ACTION,
+                                    META_GRAVITY_NORTH_WEST,
+                                    rect);
 }
 
 static gboolean
@@ -891,6 +940,31 @@ layer_surface_geometry_state_changed (const MetaWaylandLayerSurfaceState *a,
          a->margin.right != b->margin.right ||
          a->margin.bottom != b->margin.bottom ||
          a->margin.left != b->margin.left;
+}
+
+/* NULL for the wallpaper, which is not managed as a window */
+static MetaWindow *
+layer_surface_get_window (MetaWaylandLayerSurface *layer_surface)
+{
+  MetaWaylandSurface *surface =
+    meta_wayland_surface_role_get_surface (META_WAYLAND_SURFACE_ROLE (layer_surface));
+
+  return surface ? meta_wayland_surface_get_window (surface) : NULL;
+}
+
+static void
+detach_surface_actor (MetaSurfaceActor *surface_actor)
+{
+  ClutterActor *actor;
+  ClutterActor *parent;
+
+  if (!surface_actor)
+    return;
+
+  actor = CLUTTER_ACTOR (surface_actor);
+  parent = clutter_actor_get_parent (actor);
+  if (parent)
+    clutter_actor_remove_child (parent, actor);
 }
 
 /* Close the surface per the protocol: unmap it, tell the client it will no
@@ -914,30 +988,26 @@ meta_wayland_layer_surface_close (MetaWaylandLayerSurface *layer_surface)
 
   if (layer_surface->mapped)
     {
-      surface_actor = meta_wayland_actor_surface_get_actor (actor_surface);
-      if (surface_actor)
+      /* Tear down whichever representation the surface actually has rather
+       * than the one its committed layer implies, as in apply_state's unmap
+       * path. */
+      if (surface && meta_wayland_surface_get_window (surface))
         {
-          ClutterActor *actor = CLUTTER_ACTOR (surface_actor);
-          ClutterActor *parent = clutter_actor_get_parent (actor);
-
-          clutter_actor_set_reactive (actor, FALSE);
-
-          if (parent)
-            clutter_actor_remove_child (parent, actor);
+          meta_wayland_shell_surface_destroy_window (
+            META_WAYLAND_SHELL_SURFACE (layer_surface));
+        }
+      else
+        {
+          surface_actor = meta_wayland_actor_surface_get_actor (actor_surface);
+          if (surface_actor)
+            clutter_actor_set_reactive (CLUTTER_ACTOR (surface_actor), FALSE);
+          detach_surface_actor (surface_actor);
         }
 
       layer_surface->mapped = FALSE;
 
-      if (surface && surface->compositor)
-        {
-          MetaWaylandLayerShell *layer_shell =
-            meta_wayland_layer_shell_from_compositor (surface->compositor);
-
-          if (layer_shell)
-            g_signal_emit (layer_shell,
-                           layer_shell_signals[LAYER_SHELL_SIGNAL_LAYER_SURFACE_UNMAPPED],
-                           0, layer_surface);
-        }
+      emit_layer_surface_signal (layer_surface, surface,
+                                 LAYER_SHELL_SIGNAL_LAYER_SURFACE_UNMAPPED);
     }
 
   if (layer_surface->resource)
@@ -1000,82 +1070,6 @@ meta_wayland_layer_shell_get_exclusive_focus_surface (MetaWaylandCompositor *com
   return meta_wayland_surface_role_get_surface (META_WAYLAND_SURFACE_ROLE (best));
 }
 
-/* The Wayland counterpart of the X11 META_WINDOW_DESKTOP window: the top-most
- * mapped background/bottom-layer surface that accepts keyboard focus. Same
- * list ordering rules as meta_wayland_layer_shell_get_exclusive_focus_surface().
- */
-static MetaWaylandLayerSurface *
-meta_wayland_layer_shell_get_desktop_surface (MetaWaylandCompositor *compositor)
-{
-  MetaWaylandLayerShell *layer_shell =
-    meta_wayland_layer_shell_from_compositor (compositor);
-  MetaWaylandLayerSurface *best = NULL;
-  GList *l;
-
-  if (!layer_shell)
-    return NULL;
-
-  for (l = layer_shell->layer_surfaces; l; l = l->next)
-    {
-      MetaWaylandLayerSurface *layer_surface = l->data;
-
-      if (!layer_surface->mapped || layer_surface->closed)
-        continue;
-
-      if (layer_surface->current.layer > META_LAYER_SHELL_LAYER_BOTTOM)
-        continue;
-
-      if (!meta_wayland_layer_surface_wants_keyboard_focus (layer_surface))
-        continue;
-
-      if (!best || layer_surface->current.layer > best->current.layer)
-        best = layer_surface;
-    }
-
-  return best;
-}
-
-/* Entering show-desktop hands the keyboard to the desktop so it stays usable
- * while every window is hidden. On X11 that is the MRU META_WINDOW_DESKTOP
- * window; on Wayland the desktop is a layer surface with no MetaWindow at all.
- * Returns TRUE if a desktop surface took the keyboard.
- */
-gboolean
-meta_wayland_layer_shell_focus_desktop_surface (MetaWaylandCompositor *compositor)
-{
-  MetaWaylandSeat *seat = compositor->seat;
-  MetaWaylandLayerSurface *layer_surface;
-  MetaWaylandSurface *surface;
-  MetaDisplay *display;
-
-  if (!seat || !meta_wayland_seat_has_keyboard (seat))
-    return FALSE;
-
-  /* Never take the keyboard away from an exclusive surface. */
-  if (meta_wayland_layer_shell_get_exclusive_focus_surface (compositor))
-    return FALSE;
-
-  layer_surface = meta_wayland_layer_shell_get_desktop_surface (compositor);
-  if (!layer_surface)
-    return FALSE;
-
-  surface =
-    meta_wayland_surface_role_get_surface (META_WAYLAND_SURFACE_ROLE (layer_surface));
-  if (!surface)
-    return FALSE;
-
-  /* Clear the focus window first, or the next input focus sync pulls the
-   * keyboard straight back to the window we are hiding.
-   */
-  display = meta_get_display ();
-  if (display && display->focus_window)
-    meta_display_update_focus_window (display, NULL);
-
-  meta_wayland_keyboard_set_focus (seat->keyboard, surface);
-
-  return TRUE;
-}
-
 /* Reconcile keyboard focus with layer-shell state: grant focus to the
  * exclusive surface if one exists; otherwise, if focus is stuck on (or was
  * lost with) a layer surface that no longer wants it, return focus to the
@@ -1101,10 +1095,28 @@ meta_wayland_layer_shell_sync_keyboard_focus (MetaWaylandCompositor *compositor)
     {
       if (current != exclusive)
         {
-          if (display && display->focus_window)
-            meta_display_update_focus_window (display, NULL);
+          MetaWindow *window = meta_wayland_surface_get_window (exclusive);
 
-          meta_wayland_keyboard_set_focus (seat->keyboard, exclusive);
+          /* Focus it as a window where there is one, for the same reason as in
+           * default_grab_button () (meta-wayland-pointer.c): granting the seat
+           * focus on its own leaves focus_window NULL, so muffin reports that
+           * nothing is focused for as long as this surface holds the keyboard -
+           * losing has_focus, appears-focused and the MRU entry with it. The
+           * else branch is for a mapped surface whose window has gone away: an
+           * exclusive surface is never BACKGROUND, which
+           * get_exclusive_focus_surface () skips along with BOTTOM. */
+          if (window && display)
+            {
+              meta_window_focus (window,
+                                 meta_display_get_current_time_roundtrip (display));
+            }
+          else
+            {
+              if (display && display->focus_window)
+                meta_display_update_focus_window (display, NULL);
+
+              meta_wayland_seat_set_input_focus (seat, exclusive);
+            }
         }
       return;
     }
@@ -1140,6 +1152,111 @@ meta_wayland_layer_shell_sync_keyboard_focus (MetaWaylandCompositor *compositor)
                                          meta_display_get_current_time_roundtrip (display));
 }
 
+/* Hand the surface actor over to a MetaWindowActor, which from then on owns its
+ * placement. The wallpaper path positions and scales the actor itself, in
+ * absolute stage coordinates, so clear both here. */
+static void
+ensure_layer_window (MetaWaylandLayerSurface *layer_surface,
+                     MetaWaylandSurface      *surface)
+{
+  MetaSurfaceActor *surface_actor =
+    meta_wayland_actor_surface_get_actor (META_WAYLAND_ACTOR_SURFACE (layer_surface));
+  MetaWindow *window;
+
+  if (meta_wayland_surface_get_window (surface))
+    return;
+
+  detach_surface_actor (surface_actor);
+
+  if (surface_actor)
+    {
+      clutter_actor_set_position (CLUTTER_ACTOR (surface_actor), 0, 0);
+      clutter_actor_set_scale (CLUTTER_ACTOR (surface_actor), 1.0, 1.0);
+    }
+
+  window = meta_window_wayland_new (meta_get_display (), surface);
+  meta_wayland_shell_surface_set_window (META_WAYLAND_SHELL_SURFACE (layer_surface),
+                                         window);
+}
+
+static void
+handle_layer_change (MetaWaylandLayerSurface *layer_surface,
+                     MetaWaylandSurface      *surface,
+                     MetaLayerShellLayer      old_layer)
+{
+  MetaWaylandShellSurface *shell_surface =
+    META_WAYLAND_SHELL_SURFACE (layer_surface);
+  MetaSurfaceActor *surface_actor =
+    meta_wayland_actor_surface_get_actor (META_WAYLAND_ACTOR_SURFACE (layer_surface));
+  gboolean wanted_window = layer_wants_window (old_layer);
+  gboolean wants_window = layer_wants_window (layer_surface->current.layer);
+  MetaWindow *window;
+
+  g_debug ("Layer surface changing layer %d -> %d (window: %d -> %d)",
+           old_layer, layer_surface->current.layer, wanted_window, wants_window);
+
+  if (wanted_window && !wants_window)
+    {
+      /* Becoming the wallpaper: drop the window and take the actor back.
+       * Detach before reparenting: unmanaging only queues the window actor's
+       * destruction, so while a destroy effect runs the actor is still its
+       * child and insert_child_at_index () would refuse it. */
+      meta_wayland_shell_surface_destroy_window (shell_surface);
+      detach_surface_actor (surface_actor);
+
+      if (surface_actor)
+        {
+          ClutterActor *actor = CLUTTER_ACTOR (surface_actor);
+          ClutterActor *layer_container =
+            meta_get_background_window_group_for_display (meta_get_display ());
+
+          clutter_actor_set_reactive (actor, TRUE);
+          if (layer_container)
+            clutter_actor_insert_child_at_index (layer_container, actor, 0);
+        }
+
+      /* The actor only joins the wallpaper tier now, so announce it now. The
+       * map path never did: it ran while this was still a windowed layer. */
+      emit_layer_surface_signal (layer_surface, surface,
+                                 LAYER_SHELL_SIGNAL_LAYER_SURFACE_MAPPED);
+      return;
+    }
+
+  if (!wanted_window && wants_window)
+    {
+      /* Leaving the wallpaper tier for a window, so announce that it is no
+       * longer the wallpaper - otherwise it stays in the compositor's
+       * background-actor list as a panel until it finally unmaps.
+       *
+       * apply_state already ran ensure_layer_window () for this commit, before
+       * chaining up, so the window exists and the actor has been reparented by
+       * the time we get here - the call below is the no-op that keeps this
+       * branch correct if that ever stops being true. */
+      emit_layer_surface_signal (layer_surface, surface,
+                                 LAYER_SHELL_SIGNAL_LAYER_SURFACE_UNMAPPED);
+      ensure_layer_window (layer_surface, surface);
+      return;
+    }
+
+  if (!wants_window)
+    return;
+
+  /* Windowed both before and after: the type and/or stage group may change. */
+  window = meta_wayland_surface_get_window (surface);
+  if (!window)
+    return;
+
+  apply_window_type_for_layer (layer_surface, window);
+  meta_compositor_sync_window_group (window->display->compositor, window);
+
+  /* TOP and OVERLAY are both docks, so meta_window_set_type () above returns
+   * without recalculating anything, and sync_window_group () only restacks
+   * actors within their groups. Relayer by hand, or a surface leaving OVERLAY
+   * keeps META_LAYER_DOCK and goes on painting over a fullscreen window that
+   * meta_window_wayland_calculate_layer () would have demoted it below. */
+  meta_window_update_layer (window);
+}
+
 static void
 meta_wayland_layer_surface_apply_state (MetaWaylandSurfaceRole  *surface_role,
                                         MetaWaylandSurfaceState *pending)
@@ -1148,8 +1265,9 @@ meta_wayland_layer_surface_apply_state (MetaWaylandSurfaceRole  *surface_role,
   MetaWaylandSurface *surface =
     meta_wayland_surface_role_get_surface (surface_role);
   MetaWaylandActorSurface *actor_surface = META_WAYLAND_ACTOR_SURFACE (surface_role);
+  MetaWaylandShellSurface *shell_surface = META_WAYLAND_SHELL_SURFACE (surface_role);
   MetaSurfaceActor *surface_actor;
-  ClutterActor *layer_container;
+  gboolean wants_window;
   gboolean had_buffer;
   gboolean has_buffer;
   gboolean struts_changed = FALSE;
@@ -1212,8 +1330,25 @@ meta_wayland_layer_surface_apply_state (MetaWaylandSurfaceRole  *surface_role,
   /* Copy pending state to current */
   layer_surface->current = layer_surface->pending;
 
-  /* Chain up to handle frame callbacks */
-  meta_wayland_actor_surface_queue_frame_callbacks (actor_surface, pending);
+  wants_window = layer_wants_window (layer_surface->current.layer);
+
+  /* Fetched up front: the tail of this function bails without it, and creating
+   * a window we would then abandon leaves it mapped == FALSE, which is the one
+   * state neither close () nor the unmap path can reap. */
+  surface_actor = meta_wayland_actor_surface_get_actor (actor_surface);
+
+  /* Create the window before chaining up, so that the shell-surface state
+   * application below sees it on this very first commit and can size
+   * buffer_rect and queue calc-showing. apply_window_type_for_layer() runs
+   * from our managed() vfunc, which meta_window_wayland_new() reaches during
+   * construction - it reads current.layer, which we just committed above. */
+  if (has_buffer && wants_window && surface_actor)
+    ensure_layer_window (layer_surface, surface);
+
+  /* Chain up: frame callbacks, actor state sync, and - once a window exists -
+   * buffer_rect sizing and calc-showing. */
+  META_WAYLAND_SURFACE_ROLE_CLASS (meta_wayland_layer_surface_parent_class)
+    ->apply_state (surface_role, pending);
 
   /* The initial commit (no buffer, not yet configured) must always be answered
    * with a configure reflecting the state the client just committed. Further
@@ -1226,27 +1361,31 @@ meta_wayland_layer_surface_apply_state (MetaWaylandSurfaceRole  *surface_role,
         meta_wayland_layer_surface_send_configure_full (layer_surface, TRUE);
     }
 
-  surface_actor = meta_wayland_actor_surface_get_actor (actor_surface);
   if (!surface_actor)
-    return;
-
-  layer_container = get_layer_container_for_layer (layer_surface);
-  if (!layer_container)
     return;
 
   if (has_buffer)
     {
       if (!had_buffer)
         {
-          /* Surface is being mapped */
-          ClutterActor *actor = CLUTTER_ACTOR (surface_actor);
+          /* Surface is being mapped. Only the window-less BACKGROUND layer
+           * parents its actor by hand and has to make it reactive itself. A
+           * windowed layer had its actor parented into the MetaWindowActor by
+           * rebuild_surface_tree () during meta_window_wayland_new (), and made
+           * reactive by meta_wayland_shell_surface_set_window (). */
+          if (!wants_window)
+            {
+              ClutterActor *actor = CLUTTER_ACTOR (surface_actor);
+              ClutterActor *layer_container =
+                meta_get_background_window_group_for_display (meta_get_display ());
 
-          clutter_actor_set_reactive (actor, TRUE);
+              if (!layer_container)
+                return;
 
-          if (layer_surface->current.layer == META_LAYER_SHELL_LAYER_BACKGROUND)
-            clutter_actor_insert_child_at_index (layer_container, actor, 0);
-          else
-            clutter_actor_add_child (layer_container, actor);
+              clutter_actor_set_reactive (actor, TRUE);
+              clutter_actor_insert_child_at_index (layer_container, actor, 0);
+            }
+
           layer_surface->mapped = TRUE;
 
           /* Mapping may affect struts */
@@ -1257,14 +1396,8 @@ meta_wayland_layer_surface_apply_state (MetaWaylandSurfaceRole  *surface_role,
                    layer_surface->namespace ? layer_surface->namespace : "(null)",
                    layer_surface->current.layer);
 
-          {
-            MetaWaylandLayerShell *layer_shell =
-              meta_wayland_layer_shell_from_compositor (surface->compositor);
-            if (layer_shell)
-              g_signal_emit (layer_shell,
-                             layer_shell_signals[LAYER_SHELL_SIGNAL_LAYER_SURFACE_MAPPED],
-                             0, layer_surface);
-          }
+          emit_layer_surface_signal (layer_surface, surface,
+                                     LAYER_SHELL_SIGNAL_LAYER_SURFACE_MAPPED);
         }
       else
         {
@@ -1291,21 +1424,7 @@ meta_wayland_layer_surface_apply_state (MetaWaylandSurfaceRole  *surface_role,
 
           if (layer_surface->current.layer != old_state.layer)
             {
-              ClutterActor *actor = CLUTTER_ACTOR (surface_actor);
-              ClutterActor *old_parent = clutter_actor_get_parent (actor);
-
-              if (old_parent)
-                {
-                  g_object_ref (actor);
-                  clutter_actor_remove_child (old_parent, actor);
-
-                  if (layer_surface->current.layer == META_LAYER_SHELL_LAYER_BACKGROUND)
-                    clutter_actor_insert_child_at_index (layer_container, actor, 0);
-                  else
-                    clutter_actor_add_child (layer_container, actor);
-
-                  g_object_unref (actor);
-                }
+              handle_layer_change (layer_surface, surface, old_state.layer);
 
               g_debug ("Layer surface moved to layer %d: namespace=%s",
                        layer_surface->current.layer,
@@ -1313,30 +1432,60 @@ meta_wayland_layer_surface_apply_state (MetaWaylandSurfaceRole  *surface_role,
             }
         }
 
-      /* Sync actor state */
-      meta_wayland_actor_surface_sync_actor_state (actor_surface);
+      if (wants_window)
+        {
+          MetaWindow *window = meta_wayland_surface_get_window (surface);
 
-      /* Update scale and position. The buffer-scale correction makes the
-       * texture logical-sized; on an unscaled-stage-views (physical pixel)
-       * stage the actor must be scaled up like window actors are. */
-      int geometry_scale = get_layer_surface_scale (layer_surface);
+          if (window)
+            {
+              MetaRectangle geom;
 
-      clutter_actor_set_scale (CLUTTER_ACTOR (surface_actor),
-                               geometry_scale, geometry_scale);
+              /* Size follows the committed buffer, the same way xdg_toplevel
+               * does it. finish_move_resize takes logical pixels and applies
+               * the geometry scale itself. */
+              geom = (MetaRectangle) {
+                .width = meta_wayland_surface_get_width (surface),
+                .height = meta_wayland_surface_get_height (surface),
+              };
+              meta_window_wayland_finish_move_resize (window, geom, pending);
 
-      calculate_surface_position (layer_surface, &x, &y);
-      clutter_actor_set_position (CLUTTER_ACTOR (surface_actor), x, y);
+              reposition_layer_window (layer_surface, window);
+            }
+        }
+      else
+        {
+          /* No sync_actor_state () call here - the chain-up above already
+           * reached MetaWaylandActorSurface's apply_state, which does it (and
+           * recurses into every subsurface). */
+
+          /* Update scale and position. The buffer-scale correction makes the
+           * texture logical-sized; on an unscaled-stage-views (physical pixel)
+           * stage the actor must be scaled up like window actors are. */
+          int geometry_scale = get_layer_surface_scale (layer_surface);
+
+          clutter_actor_set_scale (CLUTTER_ACTOR (surface_actor),
+                                   geometry_scale, geometry_scale);
+
+          calculate_surface_position (layer_surface, &x, &y);
+          clutter_actor_set_position (CLUTTER_ACTOR (surface_actor), x, y);
+        }
     }
   else if (had_buffer && !has_buffer)
     {
-      /* Surface is being unmapped */
-      ClutterActor *actor = CLUTTER_ACTOR (surface_actor);
-      ClutterActor *parent = clutter_actor_get_parent (actor);
-
-      clutter_actor_set_reactive (actor, FALSE);
-
-      if (parent)
-        clutter_actor_remove_child (parent, actor);
+      /* Surface is being unmapped. Tear down whichever representation it
+       * actually has, rather than the one the committed layer implies - the
+       * same commit may have changed layer, and then wants_window describes
+       * what this surface is becoming, not what has to be torn down. For
+       * windowed layers unmanaging the window tears the actor down. Only the
+       * wallpaper path unparents by hand. */
+      if (meta_wayland_surface_get_window (surface))
+        {
+          meta_wayland_shell_surface_destroy_window (shell_surface);
+        }
+      else
+        {
+          detach_surface_actor (surface_actor);
+        }
 
       layer_surface->mapped = FALSE;
 
@@ -1352,14 +1501,8 @@ meta_wayland_layer_surface_apply_state (MetaWaylandSurfaceRole  *surface_role,
       g_debug ("Layer surface unmapped: namespace=%s",
                layer_surface->namespace ? layer_surface->namespace : "(null)");
 
-      {
-        MetaWaylandLayerShell *layer_shell =
-          meta_wayland_layer_shell_from_compositor (surface->compositor);
-        if (layer_shell)
-          g_signal_emit (layer_shell,
-                         layer_shell_signals[LAYER_SHELL_SIGNAL_LAYER_SURFACE_UNMAPPED],
-                         0, layer_surface);
-      }
+      emit_layer_surface_signal (layer_surface, surface,
+                                 LAYER_SHELL_SIGNAL_LAYER_SURFACE_UNMAPPED);
     }
 
   /* Update workspace struts if needed */
@@ -1450,39 +1593,43 @@ meta_wayland_layer_surface_dispose (GObject *object)
   MetaWaylandLayerSurface *layer_surface = META_WAYLAND_LAYER_SURFACE (object);
   MetaWaylandActorSurface *actor_surface = META_WAYLAND_ACTOR_SURFACE (object);
   MetaWaylandSurface *surface;
-  MetaSurfaceActor *surface_actor;
   gboolean had_struts;
+  gboolean had_window;
 
   had_struts = layer_surface->mapped && layer_surface->current.exclusive_zone > 0;
 
   if (layer_surface->mapped)
     {
       surface = meta_wayland_surface_role_get_surface (META_WAYLAND_SURFACE_ROLE (layer_surface));
-      if (surface && surface->compositor)
-        {
-          MetaWaylandLayerShell *layer_shell =
-            meta_wayland_layer_shell_from_compositor (surface->compositor);
-          if (layer_shell)
-            g_signal_emit (layer_shell,
-                           layer_shell_signals[LAYER_SHELL_SIGNAL_LAYER_SURFACE_UNMAPPED],
-                           0, layer_surface);
-        }
+
       layer_surface->mapped = FALSE;
+      emit_layer_surface_signal (layer_surface, surface,
+                                 LAYER_SHELL_SIGNAL_LAYER_SURFACE_UNMAPPED);
     }
 
-  /* Remove from layer container */
-  surface_actor = meta_wayland_actor_surface_get_actor (actor_surface);
-  if (surface_actor)
-    {
-      ClutterActor *actor = CLUTTER_ACTOR (surface_actor);
-      ClutterActor *parent = clutter_actor_get_parent (actor);
+  surface = meta_wayland_surface_role_get_surface (META_WAYLAND_SURFACE_ROLE (layer_surface));
+  had_window = surface && meta_wayland_surface_get_window (surface) != NULL;
 
-      if (parent)
-        clutter_actor_remove_child (parent, actor);
-    }
+  /* A windowed layer's surface actor is parented to the MetaWindowActor, which
+   * owns it, so tear the window down here rather than leaving it to
+   * MetaWaylandShellSurface's finalize - otherwise the window actor is disposed
+   * later holding a surface actor we already pulled out from under it. It also
+   * gets the window out of the display list before the keyboard-focus sync
+   * below. A no-op for the wallpaper, which parents by hand and so detaches by
+   * hand. */
+  meta_wayland_shell_surface_destroy_window (META_WAYLAND_SHELL_SURFACE (layer_surface));
+  detach_surface_actor (meta_wayland_actor_surface_get_actor (actor_surface));
+
+  /* Only a window reaches clear_window (), which is what emits "unmapped". The
+   * wallpaper has none, so without this a popup parented to it keeps both a
+   * pointer to this surface and a live handler on it, and dereferences them
+   * once the surface is freed. Emitted from dispose () alone: close () and the
+   * unmap path leave the surface alive, so a stale pointer there is only an
+   * undismissed popup, not a crash. */
+  if (!had_window && surface)
+    meta_wayland_surface_notify_unmapped (surface);
 
   /* Remove from tracking list and update struts */
-  surface = meta_wayland_surface_role_get_surface (META_WAYLAND_SURFACE_ROLE (layer_surface));
   if (surface && surface->compositor)
     {
       MetaWaylandLayerShell *layer_shell =
@@ -1499,13 +1646,15 @@ meta_wayland_layer_surface_dispose (GObject *object)
         }
     }
 
+  /* Cleared, not just disconnected: dispose may run more than once, and a
+   * second pass would otherwise remove a weak ref that is already gone.
+   * Dropping that weak ref also stops output being nulled for us when it
+   * finalizes, so a pointer left behind here could be dereferenced later. */
   if (layer_surface->output)
     {
-      if (layer_surface->output_destroyed_handler_id != 0)
-        g_signal_handler_disconnect (layer_surface->output,
-                                     layer_surface->output_destroyed_handler_id);
-      g_object_remove_weak_pointer (G_OBJECT (layer_surface->output),
-                                    (gpointer *) &layer_surface->output);
+      g_clear_signal_handler (&layer_surface->output_destroyed_handler_id,
+                              layer_surface->output);
+      g_clear_weak_pointer (&layer_surface->output);
     }
   layer_surface->output_destroyed_handler_id = 0;
 
@@ -1589,8 +1738,10 @@ meta_wayland_layer_surface_constructed (GObject *object)
 
   G_OBJECT_CLASS (meta_wayland_layer_surface_parent_class)->constructed (object);
 
-  /* Apply the initial layer from construction property */
+  /* Apply the initial layer and give a sane default to current_layer from
+   * construction property. */
   layer_surface->pending.layer = layer_surface->initial_layer;
+  layer_surface->current.layer = layer_surface->initial_layer;
 }
 
 static void
@@ -1640,11 +1791,13 @@ raise_layer_subsurface_actor (GNode    *node,
   return FALSE;
 }
 
-/* Layer surfaces have no window actor to host their subsurface actors the
- * way toplevel windows do (meta_window_actor_wayland_rebuild_surface_tree);
- * parent them under the layer surface's own actor instead. Subsurface
- * positions accumulate up to the tree root, so child actors land in the
- * right place. */
+/* Later subsurface changes are handled here rather than by
+ * meta_window_actor_wayland_rebuild_surface_tree (), the way a toplevel's are:
+ * a layer surface keeps its own surface actor as the subsurface host, on the
+ * windowed layers too. Only the initial tree comes from rebuild_surface_tree (),
+ * which runs once when assign_surface_actor () hands the actor over to a newly
+ * created window actor. Subsurface positions accumulate up to the tree root, so
+ * child actors land in the right place. */
 static void
 meta_wayland_layer_surface_notify_subsurface_state_changed (MetaWaylandSurfaceRole *surface_role)
 {
@@ -1669,18 +1822,72 @@ meta_wayland_layer_surface_notify_subsurface_state_changed (MetaWaylandSurfaceRo
                    traverse_data);
 }
 
-static void
-meta_wayland_layer_surface_assigned (MetaWaylandSurfaceRole *surface_role)
+/* BACKGROUND surfaces are the wallpaper. They are not managed as MetaWindows. */
+static gboolean
+layer_wants_window (MetaLayerShellLayer layer)
 {
-  MetaWaylandSurfaceRoleClass *surface_role_class =
-    META_WAYLAND_SURFACE_ROLE_CLASS (meta_wayland_layer_surface_parent_class);
-  MetaWaylandSurface *surface =
-    meta_wayland_surface_role_get_surface (surface_role);
+  return layer != META_LAYER_SHELL_LAYER_BACKGROUND;
+}
 
-  surface->dnd.funcs = meta_wayland_data_device_get_drag_dest_funcs ();
+static void
+apply_window_type_for_layer (MetaWaylandLayerSurface *layer_surface,
+                             MetaWindow              *window)
+{
+  switch (layer_surface->current.layer)
+    {
+    case META_LAYER_SHELL_LAYER_BACKGROUND:
+      g_warn_if_reached (); /* no window is created for this layer */
+      break;
+    case META_LAYER_SHELL_LAYER_BOTTOM:
+      meta_window_set_type (window, META_WINDOW_DESKTOP);
+      break;
+    case META_LAYER_SHELL_LAYER_TOP:
+    case META_LAYER_SHELL_LAYER_OVERLAY:
+      /* Both are docks; they are told apart by their stage group, chosen by
+       * get_window_group_for_window () for both the initial placement and any
+       * later re-evaluation. */
+      meta_window_set_type (window, META_WINDOW_DOCK);
+      break;
+    }
+}
 
-  if (surface_role_class->assigned)
-    surface_role_class->assigned (surface_role);
+static void
+meta_wayland_layer_surface_managed (MetaWaylandShellSurface *shell_surface,
+                                    MetaWindow              *window)
+{
+  apply_window_type_for_layer (META_WAYLAND_LAYER_SURFACE (shell_surface),
+                               window);
+}
+
+static void
+meta_wayland_layer_surface_configure (MetaWaylandShellSurface        *shell_surface,
+                                      MetaWaylandWindowConfiguration *configuration)
+{
+  /* Deliberately does nothing. A layer surface's size comes from its anchors,
+   * margins and exclusive zone, and the client learns it through
+   * zwlr_layer_surface_v1.configure, sent from apply_state. */
+}
+
+/* wlr-layer-shell has no counterpart to xdg_surface.ack_configure, so nothing
+ * would ever retire a configuration queued for one of these windows. */
+static gboolean
+meta_wayland_layer_surface_tracks_configurations (MetaWaylandShellSurface *shell_surface)
+{
+  return FALSE;
+}
+
+static void
+meta_wayland_layer_surface_shell_close (MetaWaylandShellSurface *shell_surface)
+{
+  meta_wayland_layer_surface_close (META_WAYLAND_LAYER_SURFACE (shell_surface));
+}
+
+static void
+meta_wayland_layer_surface_ping (MetaWaylandShellSurface *shell_surface,
+                                 uint32_t                 serial)
+{
+  /* wlr-layer-shell has no ping request. */
+  meta_display_pong_for_serial (meta_get_display (), serial);
 }
 
 static void
@@ -1691,20 +1898,30 @@ meta_wayland_layer_surface_class_init (MetaWaylandLayerSurfaceClass *klass)
     META_WAYLAND_SURFACE_ROLE_CLASS (klass);
   MetaWaylandActorSurfaceClass *actor_surface_class =
     META_WAYLAND_ACTOR_SURFACE_CLASS (klass);
+  MetaWaylandShellSurfaceClass *shell_surface_class =
+    META_WAYLAND_SHELL_SURFACE_CLASS (klass);
 
   object_class->constructed = meta_wayland_layer_surface_constructed;
   object_class->dispose = meta_wayland_layer_surface_dispose;
   object_class->set_property = meta_wayland_layer_surface_set_property;
   object_class->get_property = meta_wayland_layer_surface_get_property;
 
-  surface_role_class->assigned = meta_wayland_layer_surface_assigned;
   surface_role_class->apply_state = meta_wayland_layer_surface_apply_state;
   surface_role_class->get_toplevel = meta_wayland_layer_surface_get_toplevel;
+  surface_role_class->is_on_logical_monitor =
+    meta_wayland_layer_surface_is_on_logical_monitor;
   surface_role_class->notify_subsurface_state_changed =
     meta_wayland_layer_surface_notify_subsurface_state_changed;
 
   actor_surface_class->get_geometry_scale =
     meta_wayland_layer_surface_get_geometry_scale;
+
+  shell_surface_class->configure = meta_wayland_layer_surface_configure;
+  shell_surface_class->managed = meta_wayland_layer_surface_managed;
+  shell_surface_class->close = meta_wayland_layer_surface_shell_close;
+  shell_surface_class->ping = meta_wayland_layer_surface_ping;
+  shell_surface_class->tracks_configurations =
+    meta_wayland_layer_surface_tracks_configurations;
 
   layer_surface_props[PROP_OUTPUT] =
     g_param_spec_pointer ("output", NULL, NULL,
@@ -1729,10 +1946,44 @@ meta_wayland_layer_surface_get_layer (MetaWaylandLayerSurface *layer_surface)
   return layer_surface->current.layer;
 }
 
+/**
+ * meta_wayland_layer_surface_from_window:
+ * @window: a #MetaWindow
+ *
+ * Returns: (nullable) (transfer none): the layer surface backing @window, or
+ *   %NULL if @window is not layer-shell chrome.
+ */
+MetaWaylandLayerSurface *
+meta_wayland_layer_surface_from_window (MetaWindow *window)
+{
+  if (window->client_type != META_WINDOW_CLIENT_TYPE_WAYLAND)
+    return NULL;
+
+  if (!window->surface || !window->surface->role)
+    return NULL;
+
+  if (!META_IS_WAYLAND_LAYER_SURFACE (window->surface->role))
+    return NULL;
+
+  return META_WAYLAND_LAYER_SURFACE (window->surface->role);
+}
+
 MetaWaylandOutput *
 meta_wayland_layer_surface_get_output (MetaWaylandLayerSurface *layer_surface)
 {
   return layer_surface->output;
+}
+
+MetaLogicalMonitor *
+meta_wayland_layer_surface_get_logical_monitor (MetaWaylandLayerSurface *layer_surface)
+{
+  return get_layer_surface_logical_monitor (layer_surface);
+}
+
+gboolean
+meta_wayland_layer_surface_is_overlay (MetaWaylandLayerSurface *layer_surface)
+{
+  return layer_surface->current.layer == META_LAYER_SHELL_LAYER_OVERLAY;
 }
 
 gboolean
@@ -1740,6 +1991,24 @@ meta_wayland_layer_surface_wants_keyboard_focus (MetaWaylandLayerSurface *layer_
 {
   return layer_surface->current.keyboard_interactivity !=
     ZWLR_LAYER_SURFACE_V1_KEYBOARD_INTERACTIVITY_NONE;
+}
+
+/* Whether this surface took space out of the work area for itself. A zone of 0
+ * reserves nothing, and -1 asks to ignore other surfaces' zones rather than to
+ * claim one. Only a surface that reserved space has popups that need to be
+ * allowed to cover it - see MetaPlacementRule.constrain_to_entire_monitor.
+ *
+ * The edge test mirrors meta_wayland_layer_surface_create_strut (): a zone that
+ * resolves to no edge - a corner anchor without an explicit exclusive edge -
+ * produces no strut, so such a surface reserved nothing however large its zone.
+ * create_strut () also requires the surface to be mapped; this deliberately
+ * does not, so a popup placed against a layer surface that has not drawn its
+ * first buffer yet still gets the allowance its zone will claim. */
+gboolean
+meta_wayland_layer_surface_reserves_space (MetaWaylandLayerSurface *layer_surface)
+{
+  return layer_surface->current.exclusive_zone > 0 &&
+         get_strut_side_for_state (&layer_surface->current) != (MetaSide) -1;
 }
 
 /* Layer shell protocol implementation */
@@ -1999,34 +2268,45 @@ meta_wayland_layer_shell_on_workarea_changed (MetaWaylandCompositor *compositor)
 
   for (l = layer_shell->layer_surfaces; l; l = l->next)
     {
-      MetaWaylandLayerSurface *surface = l->data;
+      MetaWaylandLayerSurface *layer_surface = l->data;
 
       /* A bound output whose monitor was unplugged is made inert immediately
        * but only destroyed after a delay — close the surface now rather than
        * leaving it misplaced on the fallback monitor until then. */
-      if (surface->output && !surface->output->logical_monitor)
+      if (layer_surface->output && !layer_surface->output->logical_monitor)
         {
-          meta_wayland_layer_surface_close (surface);
+          meta_wayland_layer_surface_close (layer_surface);
           continue;
         }
 
       /* Surfaces with exclusive_zone != -1 use workarea bounds and need
        * repositioning when workarea changes. Surfaces with exclusive_zone == -1
        * use full output and aren't affected. */
-      if (surface->current.exclusive_zone != -1 && surface->mapped)
+      if (layer_surface->current.exclusive_zone != -1 && layer_surface->mapped)
         {
-          MetaWaylandActorSurface *actor_surface = META_WAYLAND_ACTOR_SURFACE (surface);
-          MetaSurfaceActor *surface_actor = meta_wayland_actor_surface_get_actor (actor_surface);
+          MetaWindow *window = layer_surface_get_window (layer_surface);
 
-          if (surface_actor)
+          if (window)
             {
-              int x, y;
-              calculate_surface_position (surface, &x, &y);
-              clutter_actor_set_position (CLUTTER_ACTOR (surface_actor), x, y);
+              reposition_layer_window (layer_surface, window);
+            }
+          else
+            {
+              MetaSurfaceActor *surface_actor =
+                meta_wayland_actor_surface_get_actor (
+                  META_WAYLAND_ACTOR_SURFACE (layer_surface));
+
+              if (surface_actor)
+                {
+                  int x, y;
+
+                  calculate_surface_position (layer_surface, &x, &y);
+                  clutter_actor_set_position (CLUTTER_ACTOR (surface_actor), x, y);
+                }
             }
 
           /* Also send configure in case size changed */
-          meta_wayland_layer_surface_send_configure (surface);
+          meta_wayland_layer_surface_send_configure (layer_surface);
         }
     }
 
@@ -2040,12 +2320,28 @@ meta_wayland_compositor_get_layer_shell (MetaWaylandCompositor *compositor)
   return meta_wayland_layer_shell_from_compositor (compositor);
 }
 
-MetaWaylandLayerSurface *
-meta_wayland_layer_shell_find_surface (MetaWaylandLayerShell  *layer_shell,
-                                       MetaLayerShellLayer     layer,
-                                       const char             *namespace_str,
-                                       MetaWaylandOutput      *output)
+/**
+ * meta_wayland_layer_shell_find_surfaces:
+ * @layer_shell: a #MetaWaylandLayerShell
+ * @layer: the layer to match
+ * @logical_monitor: (nullable): restrict to surfaces shown on this monitor
+ *
+ * Returns every mapped surface in @layer - the protocol allows any number of
+ * them to share one.
+ *
+ * Matches on the monitor a surface is actually placed on, not on the output it
+ * bound: binding one is optional, and a surface without one still gets placed
+ * (on the primary monitor). Filtering by bound output would silently drop it.
+ *
+ * Returns: (transfer container) (element-type MetaWaylandLayerSurface): the
+ *   matching surfaces newest-first, or %NULL.
+ */
+GList *
+meta_wayland_layer_shell_find_surfaces (MetaWaylandLayerShell  *layer_shell,
+                                        MetaLayerShellLayer     layer,
+                                        MetaLogicalMonitor     *logical_monitor)
 {
+  GList *matches = NULL;
   GList *l;
 
   g_return_val_if_fail (layer_shell != NULL, NULL);
@@ -2060,17 +2356,14 @@ meta_wayland_layer_shell_find_surface (MetaWaylandLayerShell  *layer_shell,
       if (surface->current.layer != layer)
         continue;
 
-      if (namespace_str != NULL &&
-          g_strcmp0 (surface->namespace, namespace_str) != 0)
+      if (logical_monitor != NULL &&
+          get_layer_surface_logical_monitor (surface) != logical_monitor)
         continue;
 
-      if (output != NULL && surface->output != output)
-        continue;
-
-      return surface;
+      matches = g_list_prepend (matches, surface);
     }
 
-  return NULL;
+  return g_list_reverse (matches);
 }
 
 const char *

@@ -53,6 +53,8 @@ struct _ClutterBackend
   gfloat units_per_em;
   gint32 units_serial;
 
+  float fallback_resource_scale;
+
   ClutterStageWindow *stage_window;
 
   ClutterInputMethod *input_method;
@@ -133,6 +135,12 @@ void                    clutter_set_allowed_drivers                     (const c
 
 CLUTTER_EXPORT
 ClutterStageWindow *    clutter_backend_get_stage_window                (ClutterBackend         *backend);
+
+CLUTTER_EXPORT
+void clutter_backend_set_fallback_resource_scale (ClutterBackend *backend,
+                                                  float           fallback_resource_scale);
+
+float clutter_backend_get_fallback_resource_scale (ClutterBackend *backend);
 
 G_END_DECLS
 

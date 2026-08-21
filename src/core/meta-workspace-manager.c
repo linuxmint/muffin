@@ -955,10 +955,20 @@ meta_workspace_manager_show_desktop (MetaWorkspaceManager *workspace_manager,
                                      guint32               timestamp)
 {
   GList *l;
-  gboolean focused_desktop = FALSE;
 
   if (workspace_manager->active_workspace->showing_desktop)
     return;
+
+#ifdef HAVE_WAYLAND
+  /* A layer surface asking for EXCLUSIVE keyboard interactivity has claimed
+   * the session - a lock or authentication surface, say. Do nothing at all
+   * rather than hide every window beneath it.
+   */
+  if (meta_is_wayland_compositor () &&
+      meta_wayland_layer_shell_get_exclusive_focus_surface (
+        meta_wayland_compositor_get_default ()))
+    return;
+#endif
 
   workspace_manager->active_workspace->showing_desktop = TRUE;
 
@@ -973,19 +983,17 @@ meta_workspace_manager_show_desktop (MetaWorkspaceManager *workspace_manager,
 
       if (w->type == META_WINDOW_DESKTOP)
         {
+          /* On Wayland the desktop is a layer surface, which may have declined
+           * the keyboard. meta_window_focus () does not check this itself, so
+           * skip it here rather than granting focus it asked not to have, and
+           * keep looking - another monitor's desktop may accept it. */
+          if (w->unmanaging || !meta_window_is_focusable (w))
+            continue;
+
           meta_window_focus (w, timestamp);
-          focused_desktop = TRUE;
           break;
         }
     }
-
-#ifdef HAVE_WAYLAND
-  /* A Wayland desktop is a layer-shell surface rather than a
-   * META_WINDOW_DESKTOP window, so hand it the keyboard directly.
-   */
-  if (!focused_desktop && meta_is_wayland_compositor ())
-    meta_wayland_layer_shell_focus_desktop_surface (meta_wayland_compositor_get_default ());
-#endif
 
   g_signal_emit (workspace_manager,
                  workspace_manager_signals[SHOWING_DESKTOP_CHANGED],

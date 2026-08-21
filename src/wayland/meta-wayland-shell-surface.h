@@ -40,6 +40,7 @@ struct _MetaWaylandShellSurfaceClass
   void (*ping) (MetaWaylandShellSurface *shell_surface,
                 uint32_t                 serial);
   void (*close) (MetaWaylandShellSurface *shell_surface);
+  gboolean (*tracks_configurations) (MetaWaylandShellSurface *shell_surface);
 };
 
 void meta_wayland_shell_surface_configure (MetaWaylandShellSurface        *shell_surface,
@@ -52,6 +53,8 @@ void meta_wayland_shell_surface_close (MetaWaylandShellSurface *shell_surface);
 
 void meta_wayland_shell_surface_managed (MetaWaylandShellSurface *shell_surface,
                                          MetaWindow              *window);
+
+gboolean meta_wayland_shell_surface_tracks_configurations (MetaWaylandShellSurface *shell_surface);
 
 void meta_wayland_shell_surface_calculate_geometry (MetaWaylandShellSurface *shell_surface,
                                                     MetaRectangle           *out_geometry);
