@@ -1148,6 +1148,7 @@ finish_popup_setup (MetaWaylandXdgPopup *xdg_popup)
   uint32_t serial;
   MetaDisplay *display = meta_get_display ();
   MetaWindow *window;
+  gboolean parent_is_layer_shell;
   MetaWindow *parent_window;
   MetaPlacementRule placement_rule;
 
@@ -1212,9 +1213,25 @@ finish_popup_setup (MetaWaylandXdgPopup *xdg_popup)
   meta_wayland_shell_surface_set_window (shell_surface, window);
 
   parent_window = meta_wayland_surface_get_window (parent_surface);
-  placement_rule =
-    meta_wayland_xdg_positioner_to_placement (&xdg_popup->setup.xdg_positioner,
-                                              parent_window);
+
+  /* Layer surfaces are tested first, before the parent_window branch: a
+   * windowed layer surface satisfies both, and the generic path would place
+   * the popup against the window frame rect instead of the layer surface's
+   * configured geometry, losing the geometry-scale correction and
+   * constrain_to_entire_monitor with it. */
+  if (parent_is_layer_shell)
+    {
+      placement_rule =
+        meta_wayland_xdg_positioner_to_placement_for_layer_surface (
+          &xdg_popup->setup.xdg_positioner,
+          META_WAYLAND_LAYER_SURFACE (parent_surface->role));
+    }
+  else
+    {
+      placement_rule =
+        meta_wayland_xdg_positioner_to_placement (&xdg_popup->setup.xdg_positioner,
+                                                  parent_window);
+    }
   meta_wayland_xdg_popup_place (xdg_popup, &placement_rule);
 
   if (seat)
@@ -1316,9 +1333,20 @@ meta_wayland_xdg_popup_apply_state (MetaWaylandSurfaceRole  *surface_role,
       MetaPlacementRule placement_rule;
 
       parent_window = meta_wayland_surface_get_window (xdg_popup->parent_surface);
-      placement_rule =
-      meta_wayland_xdg_positioner_to_placement (pending->xdg_positioner,
-                                                parent_window);
+
+      if (META_IS_WAYLAND_LAYER_SURFACE (xdg_popup->parent_surface->role))
+        {
+          placement_rule =
+            meta_wayland_xdg_positioner_to_placement_for_layer_surface (
+              pending->xdg_positioner,
+              META_WAYLAND_LAYER_SURFACE (xdg_popup->parent_surface->role));
+        }
+      else
+        {
+          placement_rule =
+            meta_wayland_xdg_positioner_to_placement (pending->xdg_positioner,
+                                                      parent_window);
+        }
 
       xdg_popup->pending_reposition_token = pending->xdg_popup_reposition_token;
       xdg_popup->pending_repositioned = TRUE;
@@ -2224,6 +2252,12 @@ xdg_surface_constructor_get_popup (struct wl_client   *client,
       xdg_popup->setup.constraint_adjustment = xdg_positioner->constraint_adjustment;
       xdg_popup->setup.offset_x = xdg_positioner->offset_x;
       xdg_popup->setup.offset_y = xdg_positioner->offset_y;
+
+      /* The placement rule is computed when the popup's first commit is
+       * applied (finish_popup_setup), from the whole positioner - for a
+       * layer-shell parent via
+       * meta_wayland_xdg_positioner_to_placement_for_layer_surface (). */
+      xdg_popup->setup.xdg_positioner = *xdg_positioner;
     }
   xdg_popup->setup.parent_surface = parent_surface;
 }
