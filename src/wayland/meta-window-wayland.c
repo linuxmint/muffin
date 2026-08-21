@@ -1475,3 +1475,11 @@ meta_window_wayland_schedule_maximize_transition (MetaWindow *window)
   if (!wl_window->client_has_acked_configure)
     wl_window->needs_maximize_transition = TRUE;
 }
+
+gboolean
+meta_window_wayland_has_been_shown (MetaWindow *window)
+{
+  MetaWindowWayland *wl_window = META_WINDOW_WAYLAND (window);
+
+  return wl_window->has_been_shown;
+}
