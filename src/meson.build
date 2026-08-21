@@ -524,6 +524,8 @@ if have_wayland
     'wayland/meta-wayland-layer-shell.c',
     'wayland/meta-wayland-layer-shell.h',
     'wayland/meta-wayland.h',
+    'wayland/meta-wayland-idle-notify.h',
+    'wayland/meta-wayland-idle-notify.c',
     'wayland/meta-wayland-idle-inhibit.c',
     'wayland/meta-wayland-idle-inhibit.h',
     'wayland/meta-wayland-inhibit-shortcuts.c',
@@ -858,6 +860,7 @@ if have_wayland
     ['xapp-shell', 'private', ],
     ['xwayland-keyboard-grab', 'unstable', 'v1', ],
     ['wayland-drm', 'private', ],
+    ['ext-idle-notify', 'staging', 'v1', ],
   ]
   if have_wayland_eglstream
     wayland_eglstream_protocols_dir = wayland_eglstream_protocols_dep.get_variable(pkgconfig: 'pkgdatadir')
