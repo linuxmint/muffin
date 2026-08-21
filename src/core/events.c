@@ -265,6 +265,7 @@ meta_display_handle_event (MetaDisplay        *display,
       handle_pad_event = !display->current_pad_osd || is_mode_switch;
 
       if (handle_pad_event &&
+          meta_backend_get_input_settings (backend) &&
           meta_input_settings_handle_pad_event (meta_backend_get_input_settings (backend),
                                                 event))
         {

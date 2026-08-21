@@ -1000,7 +1000,8 @@ meta_display_open (void)
 
   display->sound_player = g_object_new (META_TYPE_SOUND_PLAYER, NULL);
 
-  meta_input_settings_refresh (meta_backend_get_input_settings (backend));
+  if (meta_backend_get_input_settings (backend))
+    meta_input_settings_refresh (meta_backend_get_input_settings (backend));
 
   /* Done opening new display */
   display->display_opening = FALSE;
@@ -3061,7 +3062,8 @@ meta_display_get_pad_action_label (MetaDisplay        *display,
 
   /* First, lookup the action, as imposed by settings */
   settings = meta_backend_get_input_settings (meta_get_backend ());
-  label = meta_input_settings_get_pad_action_label (settings, pad, action_type, action_number);
+  if (settings)
+    label = meta_input_settings_get_pad_action_label (settings, pad, action_type, action_number);
   if (label)
     return label;
 
