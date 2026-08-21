@@ -504,6 +504,8 @@ if have_wayland
     'wayland/meta-wayland-data-device.h',
     'wayland/meta-wayland-data-device-primary.c',
     'wayland/meta-wayland-data-device-primary.h',
+    'wayland/meta-wayland-data-control.c',
+    'wayland/meta-wayland-data-control.h',
     'wayland/meta-wayland-data-offer.c',
     'wayland/meta-wayland-data-offer.h',
     'wayland/meta-wayland-data-offer-primary.c',
@@ -858,6 +860,7 @@ if have_wayland
     ['xapp-shell', 'private', ],
     ['xwayland-keyboard-grab', 'unstable', 'v1', ],
     ['wayland-drm', 'private', ],
+    ['ext-data-control', 'staging', 'v1', ],
   ]
   if have_wayland_eglstream
     wayland_eglstream_protocols_dir = wayland_eglstream_protocols_dep.get_variable(pkgconfig: 'pkgdatadir')
