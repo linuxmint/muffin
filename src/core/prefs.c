@@ -141,6 +141,7 @@ static char *iso_next_group_option = NULL;
 static MetaX11BackgroundTransition background_transition = META_X11_BACKGROUND_TRANSITION_BLEND;
 static gboolean unredirect_fullscreen_windows = FALSE;
 static gboolean tile_maximize = FALSE;
+static int tile_edge_zone_width = 25;
 static gboolean invert_workspace_flip = FALSE;
 static char *gtk_theme = NULL;
 static char *bell_sound = NULL;
@@ -609,6 +610,13 @@ static MetaIntPreference preferences_int[] =
         META_PREF_DRAGGABLE_BORDER_WIDTH,
       },
       &draggable_border_width
+    },
+    {
+      { "tile-edge-zone-width",
+        SCHEMA_MUFFIN,
+        META_PREF_TILE_EDGE_ZONE_WIDTH,
+      },
+      &tile_edge_zone_width
     },
     {
       { "drag-threshold",
@@ -2421,6 +2429,12 @@ gboolean
 meta_prefs_get_tile_maximize (void)
 {
     return tile_maximize;
+}
+
+int
+meta_prefs_get_tile_edge_zone_width (void)
+{
+    return tile_edge_zone_width;
 }
 
 gboolean
