@@ -8,8 +8,10 @@ Build-Depends:
         at-spi2-core <!nocheck>,
         adwaita-icon-theme <!nocheck>,
         cinnamon-desktop-data (>= 5.3.0),
-        dbus <!nocheck>,
+        dbus-daemon <!nocheck>,
         dmz-cursor-theme <!nocheck>,
+        gir1.2-freedesktop-dev,
+        gir1.2-glib-2.0-dev,
         gnome-pkg-tools (>= 0.10),
         cinnamon-settings-daemon <!nocheck>,
         gobject-introspection (>= 1.41.3),
@@ -19,7 +21,7 @@ Build-Depends:
         libdrm-dev (>= 2.4.83) [linux-any],
         libegl1-mesa-dev (>= 17) [linux-any],
         libfribidi-dev (>= 1.0.0),
-        libgirepository1.0-dev (>= 0.9.12),
+        libgirepository-1.0-dev,
         libglib2.0-dev (>= 2.76.0),
         libglvnd-dev,
         libcinnamon-desktop-dev,
@@ -59,10 +61,10 @@ Build-Depends:
         libxrender-dev,
         libxt-dev,
         meson (>= 1.0.0),
-        pkg-config (>= 0.22),
+        pkgconf,
         systemd-dev [linux-any],
         udev [linux-any],
-        wayland-protocols (>= 1.23) [linux-any],
+        wayland-protocols (>= 1.38) [linux-any],
         xauth <!nocheck>,
         xcvt [linux-any],
         xkb-data,
@@ -72,6 +74,7 @@ Build-Depends:
         zenity
 Rules-Requires-Root: no
 Standards-Version: 4.5.0
+Homepage: https://github.com/linuxmint/muffin
 
 Package: gir1.2-meta-muffin-0.0
 Section: introspection
@@ -180,6 +183,7 @@ Depends: gir1.2-meta-muffin-0.0 (= ${binary:Version}),
          libxi-dev,
          libxrandr-dev,
          ${misc:Depends}
+Provides: ${gir:Provides}
 Description: window and compositing manager (development files)
  Muffin is a window manager performing compositing as well based on
  GTK+ and Clutter and used in Cinnamon desktop environment.
