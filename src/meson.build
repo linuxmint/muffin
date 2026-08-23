@@ -952,7 +952,6 @@ libmuffin = shared_library(libmuffin_name,
   sources: [
     muffin_sources,
     muffin_built_sources,
-    libmuffin_cogl_path_enum_types_h,
   ],
   version: '0.0.0',
   soversion: 0,
@@ -983,7 +982,6 @@ libmuffin_dep = declare_dependency(
 executable('muffin',
   sources: [
     files('core/muffin.c'),
-    libmuffin_cogl_path_enum_types_h,
   ],
   include_directories: muffin_includes,
   c_args: muffin_c_args,
