@@ -188,6 +188,16 @@ meta_gpu_xrandr_read_current (MetaGpu  *gpu,
   monitor_manager->screen_width = WidthOfScreen (screen);
   monitor_manager->screen_height = HeightOfScreen (screen);
 
+  if (monitor_manager->screen_width < 64 || monitor_manager->screen_height < 64)
+    {
+      g_warning ("Rejecting invalid screen size %dx%d from X server",
+                 monitor_manager->screen_width, monitor_manager->screen_height);
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_FAILED,
+                   "Screen size %dx%d below minimum threshold",
+                   monitor_manager->screen_width, monitor_manager->screen_height);
+      return FALSE;
+    }
+
   resources = XRRGetScreenResourcesCurrent (xdisplay,
                                             DefaultRootWindow (xdisplay));
   if (!resources)
