@@ -804,6 +804,8 @@ struct _ClutterActorPrivate
    */
   gulong in_cloned_branch;
 
+  guint unmapped_paint_branch_counter;
+
   GListModel *child_model;
   ClutterActorCreateChildFunc create_child_func;
   gpointer create_child_data;
@@ -854,7 +856,6 @@ struct _ClutterActorPrivate
   guint needs_y_expand              : 1;
   guint needs_paint_volume_update   : 1;
   guint had_effects_on_last_paint_volume_update : 1;
-  guint absolute_origin_changed     : 1;
   guint needs_update_stage_views    : 1;
   guint clear_stage_views_needs_stage_views_changed : 1;
 };
@@ -1112,6 +1113,11 @@ static void clutter_actor_push_in_cloned_branch (ClutterActor *self,
                                                  gulong        count);
 static void clutter_actor_pop_in_cloned_branch (ClutterActor *self,
                                                 gulong        count);
+
+static void push_in_paint_unmapped_branch (ClutterActor *self,
+                                           guint         count);
+static void pop_in_paint_unmapped_branch (ClutterActor *self,
+                                          guint         count);
 
 /* Helper macro which translates by the anchor coord, applies the
    given transformation and then translates back */
@@ -1657,6 +1663,7 @@ queue_update_stage_views (ClutterActor *actor)
 static void
 clutter_actor_real_map (ClutterActor *self)
 {
+  ClutterActorPrivate *priv = self->priv;
   ClutterActor *iter;
 
   g_assert (!CLUTTER_ACTOR_IS_MAPPED (self));
@@ -1666,18 +1673,28 @@ clutter_actor_real_map (ClutterActor *self)
 
   CLUTTER_ACTOR_SET_FLAGS (self, CLUTTER_ACTOR_MAPPED);
 
-  self->priv->needs_paint_volume_update = TRUE;
-
-  /* We skip unmapped actors when updating the stage-views list, so if
-   * an actors list got invalidated while it was unmapped make sure to
-   * set priv->needs_update_stage_views to TRUE for all actors up the
-   * hierarchy now.
-   */
-  if (self->priv->needs_update_stage_views)
+  if (priv->unmapped_paint_branch_counter == 0)
     {
-      /* Avoid the early return in queue_update_stage_views() */
-      self->priv->needs_update_stage_views = FALSE;
-      queue_update_stage_views (self);
+      priv->needs_paint_volume_update = TRUE;
+
+      /* We skip unmapped actors when updating the stage-views list, so if
+       * an actors list got invalidated while it was unmapped make sure to
+       * set priv->needs_update_stage_views to TRUE for all actors up the
+       * hierarchy now.
+       */
+      if (priv->needs_update_stage_views)
+        {
+          /* Avoid the early return in queue_update_stage_views() */
+          priv->needs_update_stage_views = FALSE;
+          queue_update_stage_views (self);
+        }
+
+      /* Avoid the early return in clutter_actor_queue_relayout() */
+      priv->needs_width_request = FALSE;
+      priv->needs_height_request = FALSE;
+      priv->needs_allocation = FALSE;
+
+      clutter_actor_queue_relayout (self);
     }
 
   /* notify on parent mapped before potentially mapping
@@ -1685,7 +1702,7 @@ clutter_actor_real_map (ClutterActor *self)
    */
   g_object_notify_by_pspec (G_OBJECT (self), obj_props[PROP_MAPPED]);
 
-  for (iter = self->priv->first_child;
+  for (iter = priv->first_child;
        iter != NULL;
        iter = iter->priv->next_sibling)
     {
@@ -1769,7 +1786,7 @@ clutter_actor_real_unmap (ClutterActor *self)
   CLUTTER_NOTE (ACTOR, "Unmapping actor '%s'",
                 _clutter_actor_get_debug_name (self));
 
-  for (iter = self->priv->first_child;
+  for (iter = priv->first_child;
        iter != NULL;
        iter = iter->priv->next_sibling)
     {
@@ -1778,11 +1795,22 @@ clutter_actor_real_unmap (ClutterActor *self)
 
   CLUTTER_ACTOR_UNSET_FLAGS (self, CLUTTER_ACTOR_MAPPED);
 
-  /* clear the contents of the last paint volume, so that hiding + moving +
-   * showing will not result in the wrong area being repainted
-   */
-  _clutter_paint_volume_init_static (&priv->last_paint_volume, NULL);
-  priv->last_paint_volume_valid = TRUE;
+  if (priv->unmapped_paint_branch_counter == 0)
+    {
+      /* clear the contents of the last paint volume, so that hiding + moving +
+       * showing will not result in the wrong area being repainted
+       */
+     _clutter_paint_volume_init_static (&priv->last_paint_volume, NULL);
+      priv->last_paint_volume_valid = TRUE;
+
+      if (priv->parent && !CLUTTER_ACTOR_IN_DESTRUCTION (priv->parent))
+        {
+          if (G_UNLIKELY (priv->parent->flags & CLUTTER_ACTOR_NO_LAYOUT))
+            clutter_actor_queue_redraw (priv->parent);
+          else
+            clutter_actor_queue_relayout (priv->parent);
+        }
+    }
 
   /* notify on parent mapped after potentially unmapping
    * children, so apps see a bottom-up notification.
@@ -1839,8 +1867,6 @@ clutter_actor_queue_shallow_relayout (ClutterActor *self)
 static void
 clutter_actor_real_show (ClutterActor *self)
 {
-  ClutterActorPrivate *priv = self->priv;
-
   if (CLUTTER_ACTOR_IS_VISIBLE (self))
     return;
 
@@ -1852,27 +1878,16 @@ clutter_actor_real_show (ClutterActor *self)
    */
   clutter_actor_update_map_state (self, MAP_STATE_CHECK);
 
-  /* we queue a relayout unless the actor is inside a
-   * container that explicitly told us not to
-   */
-  if (priv->parent != NULL &&
-      (!(priv->parent->flags & CLUTTER_ACTOR_NO_LAYOUT)))
+  if (clutter_actor_has_mapped_clones (self))
     {
-      /* While an actor is hidden the parent may not have
-       * allocated/requested so we need to start from scratch
-       * and avoid the short-circuiting in
-       * clutter_actor_queue_relayout().
-       */
-      priv->needs_width_request  = FALSE;
+      ClutterActorPrivate *priv = self->priv;
+
+      /* Avoid the early return in clutter_actor_queue_relayout() */
+      priv->needs_width_request = FALSE;
       priv->needs_height_request = FALSE;
-      priv->needs_allocation     = FALSE;
+      priv->needs_allocation = FALSE;
 
       clutter_actor_queue_relayout (self);
-    }
-  else  /* but still don't leave the actor un-allocated before showing it */
-    {
-      clutter_actor_queue_shallow_relayout (self);
-      clutter_actor_queue_redraw (self);
     }
 }
 
@@ -2016,8 +2031,6 @@ clutter_actor_show_all (ClutterActor *self)
 static void
 clutter_actor_real_hide (ClutterActor *self)
 {
-  ClutterActorPrivate *priv = self->priv;
-
   if (!CLUTTER_ACTOR_IS_VISIBLE (self))
     return;
 
@@ -2028,13 +2041,6 @@ clutter_actor_real_hide (ClutterActor *self)
    * and the branch of the scene graph is in a stable state
    */
   clutter_actor_update_map_state (self, MAP_STATE_CHECK);
-
-  /* we queue a relayout unless the actor is inside a
-   * container that explicitly told us not to
-   */
-  if (priv->parent != NULL &&
-      (!(priv->parent->flags & CLUTTER_ACTOR_NO_LAYOUT)))
-    clutter_actor_queue_relayout (priv->parent);
 }
 
 /**
@@ -2287,11 +2293,23 @@ unrealize_actor_after_children_cb (ClutterActor *self,
                                    int depth,
                                    void *user_data)
 {
+  ClutterActorPrivate *priv = self->priv;
+  ClutterActor *stage = _clutter_actor_get_stage_internal (self);
+
   /* We want to unset the realized flag only _after_
    * child actors are unrealized, to maintain invariants.
    */
   CLUTTER_ACTOR_UNSET_FLAGS (self, CLUTTER_ACTOR_REALIZED);
   g_object_notify_by_pspec (G_OBJECT (self), obj_props[PROP_REALIZED]);
+
+  if (stage != NULL &&
+      priv->parent != NULL &&
+      priv->parent->flags & CLUTTER_ACTOR_NO_LAYOUT)
+    clutter_stage_dequeue_actor_relayout (CLUTTER_STAGE (stage), self);
+
+  if (priv->unmapped_paint_branch_counter == 0)
+    priv->allocation = (ClutterActorBox) CLUTTER_ACTOR_BOX_UNINITIALIZED;
+
   return CLUTTER_ACTOR_TRAVERSE_VISIT_CONTINUE;
 }
 
@@ -2612,19 +2630,31 @@ clutter_actor_notify_if_geometry_changed (ClutterActor          *self,
 }
 
 static void
-absolute_allocation_changed (ClutterActor *actor)
+absolute_geometry_changed (ClutterActor *actor)
 {
   queue_update_stage_views (actor);
 }
 
 static ClutterActorTraverseVisitFlags
-absolute_allocation_changed_cb (ClutterActor *actor,
-                                int           depth,
-                                gpointer      user_data)
+absolute_geometry_changed_cb (ClutterActor *actor,
+                              int           depth,
+                              gpointer      user_data)
 {
-  absolute_allocation_changed (actor);
+  absolute_geometry_changed (actor);
 
   return CLUTTER_ACTOR_TRAVERSE_VISIT_CONTINUE;
+}
+
+static void
+transform_changed (ClutterActor *actor)
+{
+  actor->priv->transform_valid = FALSE;
+
+  _clutter_actor_traverse (actor,
+                           CLUTTER_ACTOR_TRAVERSE_DEPTH_FIRST,
+                           absolute_geometry_changed_cb,
+                           NULL,
+                           NULL);
 }
 
 /*< private >
@@ -2670,11 +2700,6 @@ clutter_actor_set_allocation_internal (ClutterActor           *self,
   priv->needs_height_request = FALSE;
   priv->needs_allocation = FALSE;
 
-  priv->absolute_origin_changed |= x1_changed || y1_changed;
-
-  if (priv->absolute_origin_changed || x2_changed || y2_changed)
-    absolute_allocation_changed (self);
-
   if (x1_changed ||
       y1_changed ||
       x2_changed ||
@@ -2683,7 +2708,8 @@ clutter_actor_set_allocation_internal (ClutterActor           *self,
       CLUTTER_NOTE (LAYOUT, "Allocation for '%s' changed",
                     _clutter_actor_get_debug_name (self));
 
-      priv->transform_valid = FALSE;
+      /* This will also call absolute_geometry_changed() on the subtree */
+      transform_changed (self);
 
       g_object_notify_by_pspec (obj, obj_props[PROP_ALLOCATION]);
 
@@ -4465,7 +4491,6 @@ clutter_actor_remove_child_internal (ClutterActor                 *self,
   gboolean destroy_meta, emit_parent_set, emit_actor_removed, check_state;
   gboolean flush_queue;
   gboolean notify_first_last;
-  gboolean was_mapped;
   gboolean stop_transitions;
   gboolean clear_stage_views;
   GObject *obj;
@@ -4497,8 +4522,6 @@ clutter_actor_remove_child_internal (ClutterActor                 *self,
 
   if (check_state)
     {
-      was_mapped = CLUTTER_ACTOR_IS_MAPPED (child);
-
       /* we need to unrealize *before* we set parent_actor to NULL,
        * because in an unrealize method actors are dissociating from the
        * stage, which means they need to be able to
@@ -4508,8 +4531,6 @@ clutter_actor_remove_child_internal (ClutterActor                 *self,
        */
       clutter_actor_update_map_state (child, MAP_STATE_MAKE_UNREALIZED);
     }
-  else
-    was_mapped = FALSE;
 
   if (flush_queue)
     {
@@ -4545,6 +4566,9 @@ clutter_actor_remove_child_internal (ClutterActor                 *self,
   if (self->priv->in_cloned_branch)
     clutter_actor_pop_in_cloned_branch (child, self->priv->in_cloned_branch);
 
+  if (self->priv->unmapped_paint_branch_counter)
+    pop_in_paint_unmapped_branch (child, self->priv->unmapped_paint_branch_counter);
+
   /* if the child that got removed was visible and set to
    * expand then we want to reset the parent's state in
    * case the child was the only thing that was making it
@@ -4568,12 +4592,6 @@ clutter_actor_remove_child_internal (ClutterActor                 *self,
   if (emit_parent_set && !CLUTTER_ACTOR_IN_REPARENT (child) &&
       !CLUTTER_ACTOR_IN_DESTRUCTION (child))
     g_signal_emit (child, actor_signals[PARENT_SET], 0, self);
-
-  /* if the child was mapped then we need to relayout ourselves to account
-   * for the removed child
-   */
-  if (was_mapped)
-    clutter_actor_queue_relayout (self);
 
   /* we need to emit the signal before dropping the reference */
   if (emit_actor_removed)
@@ -4694,7 +4712,7 @@ clutter_actor_set_pivot_point_internal (ClutterActor           *self,
   info = _clutter_actor_get_transform_info (self);
   info->pivot = *pivot;
 
-  self->priv->transform_valid = FALSE;
+  transform_changed (self);
 
   g_object_notify_by_pspec (G_OBJECT (self), obj_props[PROP_PIVOT_POINT]);
 
@@ -4710,7 +4728,7 @@ clutter_actor_set_pivot_point_z_internal (ClutterActor *self,
   info = _clutter_actor_get_transform_info (self);
   info->pivot_z = pivot_z;
 
-  self->priv->transform_valid = FALSE;
+  transform_changed (self);
 
   g_object_notify_by_pspec (G_OBJECT (self), obj_props[PROP_PIVOT_POINT_Z]);
 
@@ -4744,7 +4762,8 @@ clutter_actor_set_translation_internal (ClutterActor *self,
   else
     g_assert_not_reached ();
 
-  self->priv->transform_valid = FALSE;
+  transform_changed (self);
+
   clutter_actor_queue_redraw (self);
   g_object_notify_by_pspec (obj, pspec);
 }
@@ -4876,7 +4895,7 @@ clutter_actor_set_rotation_angle_internal (ClutterActor *self,
   else
     g_assert_not_reached ();
 
-  self->priv->transform_valid = FALSE;
+  transform_changed (self);
 
   clutter_actor_queue_redraw (self);
 
@@ -5032,7 +5051,7 @@ clutter_actor_set_rotation_center_internal (ClutterActor             *self,
       break;
     }
 
-  self->priv->transform_valid = FALSE;
+  transform_changed (self);
 
   g_object_thaw_notify (obj);
 
@@ -5058,7 +5077,8 @@ clutter_actor_set_scale_factor_internal (ClutterActor *self,
   else
     g_assert_not_reached ();
 
-  self->priv->transform_valid = FALSE;
+  transform_changed (self);
+
   clutter_actor_queue_redraw (self);
   g_object_notify_by_pspec (obj, pspec);
 }
@@ -5140,7 +5160,7 @@ clutter_actor_set_scale_center (ClutterActor      *self,
       g_assert_not_reached ();
     }
 
-  self->priv->transform_valid = FALSE;
+  transform_changed (self);
 
   clutter_actor_queue_redraw (self);
 
@@ -5162,7 +5182,7 @@ clutter_actor_set_scale_gravity (ClutterActor   *self,
   else
     clutter_anchor_coord_set_gravity (&info->scale_center, gravity);
 
-  self->priv->transform_valid = FALSE;
+  transform_changed (self);
 
   g_object_notify_by_pspec (obj, obj_props[PROP_SCALE_CENTER_X]);
   g_object_notify_by_pspec (obj, obj_props[PROP_SCALE_CENTER_Y]);
@@ -5215,7 +5235,7 @@ clutter_actor_set_anchor_coord (ClutterActor      *self,
       g_assert_not_reached ();
     }
 
-  self->priv->transform_valid = FALSE;
+  transform_changed (self);
 
   clutter_actor_queue_redraw (self);
 
@@ -8827,6 +8847,8 @@ clutter_actor_init (ClutterActor *self)
 
   self->priv = priv = clutter_actor_get_instance_private (self);
 
+  priv->allocation = (ClutterActorBox) CLUTTER_ACTOR_BOX_UNINITIALIZED;
+
   priv->opacity = 0xff;
   priv->show_on_set_parent = TRUE;
   priv->resource_scale = -1.0f;
@@ -9086,25 +9108,21 @@ _clutter_actor_queue_redraw_full (ClutterActor             *self,
   if (CLUTTER_ACTOR_IN_DESTRUCTION (self))
     return;
 
-  /* we can ignore unmapped actors, unless they have at least one
-   * mapped clone or they are inside a cloned branch of the scene
-   * graph, as unmapped actors will simply be left unpainted.
+  /* we can ignore unmapped actors, unless they are inside a cloned branch
+   * of the scene graph, as unmapped actors will simply be left unpainted.
    *
    * this allows us to ignore redraws queued on leaf nodes when one
    * of their parents has been hidden
    */
   if (!CLUTTER_ACTOR_IS_MAPPED (self) &&
-      self->priv->in_cloned_branch == 0 &&
       !clutter_actor_has_mapped_clones (self))
     {
       CLUTTER_NOTE (PAINT,
                     "Skipping queue_redraw('%s'): mapped=%s, "
-                    "mapped_clones=%s, "
-                    "in_cloned_branch=%s",
+                    "has_mapped_clones=%s",
                     _clutter_actor_get_debug_name (self),
                     CLUTTER_ACTOR_IS_MAPPED (self) ? "yes" : "no",
-                    clutter_actor_has_mapped_clones (self) ? "yes" : "no",
-                    self->priv->in_cloned_branch != 0 ? "yes" : "no");
+                    clutter_actor_has_mapped_clones (self) ? "yes" : "no");
       return;
     }
 
@@ -10350,22 +10368,10 @@ clutter_actor_allocate (ClutterActor          *self,
 
   priv = self->priv;
 
-  priv->absolute_origin_changed = priv->parent
-                                ? priv->parent->priv->absolute_origin_changed
-                                : FALSE;
-
-  if (!CLUTTER_ACTOR_IS_VISIBLE (self))
-    {
-      if (priv->absolute_origin_changed)
-        {
-          _clutter_actor_traverse (self,
-                                   CLUTTER_ACTOR_TRAVERSE_DEPTH_FIRST,
-                                   absolute_allocation_changed_cb,
-                                   NULL,
-                                   NULL);
-        }
-      goto out;
-    }
+  if (!CLUTTER_ACTOR_IS_TOPLEVEL (self) &&
+      !CLUTTER_ACTOR_IS_MAPPED (self) &&
+      !clutter_actor_has_mapped_clones (self))
+    return;
 
   old_allocation = priv->allocation;
   real_allocation = *box;
@@ -10408,22 +10414,12 @@ clutter_actor_allocate (ClutterActor          *self,
    * queue_relayout() and needs a new allocation.
    *
    * In case needs_allocation isn't set and we didn't move nor resize, we
-   * can safely stop allocating, but we need to notify the sub-tree in case
-   * our absolute origin changed.
+   * can safely stop allocating.
    */
   if (!priv->needs_allocation && !origin_changed && !size_changed)
     {
-      if (priv->absolute_origin_changed)
-        {
-          _clutter_actor_traverse (self,
-                                   CLUTTER_ACTOR_TRAVERSE_DEPTH_FIRST,
-                                   absolute_allocation_changed_cb,
-                                   NULL,
-                                   NULL);
-        }
-
       CLUTTER_NOTE (LAYOUT, "No allocation needed");
-      goto out;
+      return;
     }
 
   if (CLUTTER_ACTOR_IS_MAPPED (self))
@@ -10434,14 +10430,13 @@ clutter_actor_allocate (ClutterActor          *self,
       /* If the actor didn't move but needs_allocation is set, we just
        * need to allocate the children (see comment above) */
       clutter_actor_allocate_internal (self, &real_allocation);
-      goto out;
+      return;
     }
 
-  _clutter_actor_create_transition (self, obj_props[PROP_ALLOCATION],
-                                    &priv->allocation,
-                                    &real_allocation);
-out:
-  priv->absolute_origin_changed = FALSE;
+  if (_clutter_actor_create_transition (self, obj_props[PROP_ALLOCATION],
+                                        &priv->allocation,
+                                        &real_allocation))
+    clutter_actor_allocate_internal (self, &priv->allocation);
 }
 
 /**
@@ -12138,7 +12133,7 @@ clutter_actor_set_depth_internal (ClutterActor *self,
       /* Sets Z value - XXX 2.0: should we invert? */
       info->z_position = depth;
 
-      self->priv->transform_valid = FALSE;
+      transform_changed (self);
 
       /* FIXME - remove this crap; sadly, there are still containers
        * in Clutter that depend on this utter brain damage
@@ -12163,7 +12158,7 @@ clutter_actor_set_z_position_internal (ClutterActor *self,
     {
       info->z_position = z_position;
 
-      self->priv->transform_valid = FALSE;
+      transform_changed (self);
 
       clutter_actor_queue_redraw (self);
 
@@ -13095,6 +13090,9 @@ clutter_actor_add_child_internal (ClutterActor              *self,
   if (self->priv->in_cloned_branch)
     clutter_actor_push_in_cloned_branch (child, self->priv->in_cloned_branch);
 
+  if (self->priv->unmapped_paint_branch_counter)
+    push_in_paint_unmapped_branch (child, self->priv->unmapped_paint_branch_counter);
+
   /* children may cause their parent to expand, if they are set
    * to expand; if a child is not expanded then it cannot change
    * its parent's state. any further change later on will queue
@@ -13143,27 +13141,16 @@ clutter_actor_add_child_internal (ClutterActor              *self,
   if (CLUTTER_ACTOR_IS_MAPPED (child))
     clutter_actor_queue_redraw (child);
 
-  /* maintain the invariant that if an actor needs layout,
-   * its parents do as well
-   */
-  if (clutter_actor_needs_relayout (child))
+  if (clutter_actor_has_mapped_clones (self))
     {
-      /* we work around the short-circuiting we do
-       * in clutter_actor_queue_relayout() since we
-       * want to force a relayout
-       */
-      child->priv->needs_width_request = TRUE;
-      child->priv->needs_height_request = TRUE;
-      child->priv->needs_allocation = TRUE;
+      ClutterActorPrivate *priv = self->priv;
 
-      if (CLUTTER_ACTOR_IS_MAPPED (child))
-        child->priv->needs_paint_volume_update = TRUE;
+      /* Avoid the early return in clutter_actor_queue_relayout() */
+      priv->needs_width_request = FALSE;
+      priv->needs_height_request = FALSE;
+      priv->needs_allocation = FALSE;
 
-      /* we only queue a relayout here, because any possible
-       * redraw has already been queued either by show() or
-       * by our call to queue_redraw() above
-       */
-      _clutter_actor_queue_only_relayout (child->priv->parent);
+      clutter_actor_queue_relayout (self);
     }
 
   if (emit_actor_added)
@@ -13707,7 +13694,7 @@ clutter_actor_set_child_above_sibling (ClutterActor *self,
                                     sibling);
   g_object_unref(child);
 
-  clutter_actor_queue_redraw_on_parent (child);
+  clutter_actor_queue_relayout (self);
 }
 
 /**
@@ -13754,7 +13741,7 @@ clutter_actor_set_child_below_sibling (ClutterActor *self,
                                     sibling);
   g_object_unref(child);
 
-  clutter_actor_queue_redraw_on_parent (child);
+  clutter_actor_queue_relayout (self);
 }
 
 /**
@@ -14033,7 +14020,6 @@ clutter_actor_set_anchor_point (ClutterActor *self,
                                 gfloat        anchor_y)
 {
   ClutterTransformInfo *info;
-  ClutterActorPrivate *priv;
   gboolean changed = FALSE;
   gfloat old_anchor_x, old_anchor_y;
   GObject *obj;
@@ -14041,7 +14027,6 @@ clutter_actor_set_anchor_point (ClutterActor *self,
   g_return_if_fail (CLUTTER_IS_ACTOR (self));
 
   obj = G_OBJECT (self);
-  priv = self->priv;
   info = _clutter_actor_get_transform_info (self);
 
   g_object_freeze_notify (obj);
@@ -14070,7 +14055,7 @@ clutter_actor_set_anchor_point (ClutterActor *self,
 
   if (changed)
     {
-      priv->transform_valid = FALSE;
+      transform_changed (self);
       clutter_actor_queue_redraw (self);
     }
 
@@ -14240,7 +14225,7 @@ clutter_actor_set_anchor_point_from_gravity (ClutterActor   *self,
       g_object_notify_by_pspec (obj, obj_props[PROP_ANCHOR_X]);
       g_object_notify_by_pspec (obj, obj_props[PROP_ANCHOR_Y]);
 
-      self->priv->transform_valid = FALSE;
+      transform_changed (self);
 
       clutter_actor_queue_redraw (self);
 
@@ -15997,10 +15982,15 @@ _clutter_actor_set_enable_paint_unmapped (ClutterActor *self,
 
   priv = self->priv;
 
+  if (priv->enable_paint_unmapped == enable)
+    return;
+
   priv->enable_paint_unmapped = enable;
 
-  if (priv->enable_paint_unmapped)
+  if (enable)
     {
+      push_in_paint_unmapped_branch (self, 1);
+
       /* Make sure that the parents of the widget are realized first;
        * otherwise checks in clutter_actor_update_map_state() will
        * fail.
@@ -16016,6 +16006,7 @@ _clutter_actor_set_enable_paint_unmapped (ClutterActor *self,
   else
     {
       clutter_actor_update_map_state (self, MAP_STATE_CHECK);
+      pop_in_paint_unmapped_branch (self, 1);
     }
 }
 
@@ -16337,7 +16328,7 @@ clutter_actor_set_transform_internal (ClutterActor        *self,
   info->transform = *transform;
   info->transform_set = !cogl_matrix_is_identity (&info->transform);
 
-  self->priv->transform_valid = FALSE;
+  transform_changed (self);
 
   clutter_actor_queue_redraw (self);
 
@@ -16453,6 +16444,14 @@ clutter_actor_is_in_clone_paint (ClutterActor *self)
     }
 
   return FALSE;
+}
+
+gboolean
+clutter_actor_is_painting_unmapped (ClutterActor *self)
+{
+  g_return_val_if_fail (CLUTTER_IS_ACTOR (self), FALSE);
+
+  return self->priv->unmapped_paint_branch_counter > 0;
 }
 
 gboolean
@@ -19446,7 +19445,8 @@ should_skip_implicit_transition (ClutterActor *self,
    * skip all transitions on the :allocation, to avoid actors "flying in"
    * into their new position and size
    */
-  if (pspec == obj_props[PROP_ALLOCATION] && priv->needs_allocation)
+  if (pspec == obj_props[PROP_ALLOCATION] &&
+      !clutter_actor_box_is_initialized (&priv->allocation))
     return TRUE;
 
   /* if the actor is not mapped and is not part of a branch of the scene
@@ -19455,7 +19455,6 @@ should_skip_implicit_transition (ClutterActor *self,
    * when those transitions happen
    */
   if (!CLUTTER_ACTOR_IS_MAPPED (self) &&
-      priv->in_cloned_branch == 0 &&
       !clutter_actor_has_mapped_clones (self))
     return TRUE;
 
@@ -20899,7 +20898,7 @@ clutter_actor_set_child_transform_internal (ClutterActor        *self,
   /* we need to reset the transform_valid flag on each child */
   clutter_actor_iter_init (&iter, self);
   while (clutter_actor_iter_next (&iter, &child))
-    child->priv->transform_valid = FALSE;
+    transform_changed (child);
 
   clutter_actor_queue_redraw (self);
 
@@ -21075,34 +21074,72 @@ _clutter_actor_queue_relayout_on_clones (ClutterActor *self)
  * clutter_actor_has_mapped_clones:
  * @self: a #ClutterActor
  *
- * Returns whether a #ClutterActor has any mapped clones.
+ * Returns whether a #ClutterActor or any parent actors have mapped clones
+ * that are clone-painting @self.
  *
- * Return: %TRUE if the actor has mapped clones, and %FALSE otherwise
- *
- * Since: 1.16
+ * Returns: %TRUE if the actor has mapped clones, %FALSE otherwise
  */
 gboolean
 clutter_actor_has_mapped_clones (ClutterActor *self)
 {
-  ClutterActorPrivate *priv;
+  ClutterActor *actor;
   GHashTableIter iter;
   gpointer key;
 
   g_return_val_if_fail (CLUTTER_IS_ACTOR (self), FALSE);
 
-  priv = self->priv;
-
-  if (priv->clones == NULL)
+  if (self->priv->in_cloned_branch == 0)
     return FALSE;
 
-  g_hash_table_iter_init (&iter, priv->clones);
-  while (g_hash_table_iter_next (&iter, &key, NULL))
+  for (actor = self; actor; actor = actor->priv->parent)
     {
-      if (CLUTTER_ACTOR_IS_MAPPED (key))
-        return TRUE;
+      if (actor->priv->clones)
+        {
+          g_hash_table_iter_init (&iter, actor->priv->clones);
+          while (g_hash_table_iter_next (&iter, &key, NULL))
+            {
+              if (CLUTTER_ACTOR_IS_MAPPED (key))
+                return TRUE;
+            }
+        }
+
+      /* Clones will force-show their own source actor but not children of
+       * it, so if we're hidden and an actor up the hierarchy has a clone,
+       * we won't be visisble.
+       */
+      if (!CLUTTER_ACTOR_IS_VISIBLE (actor))
+        return FALSE;
     }
 
   return FALSE;
+}
+
+static void
+push_in_paint_unmapped_branch (ClutterActor *self,
+                               guint         count)
+{
+  ClutterActor *iter;
+
+  for (iter = self->priv->first_child;
+       iter != NULL;
+       iter = iter->priv->next_sibling)
+    push_in_paint_unmapped_branch (iter, count);
+
+  self->priv->unmapped_paint_branch_counter += count;
+}
+
+static void
+pop_in_paint_unmapped_branch (ClutterActor *self,
+                              guint         count)
+{
+  ClutterActor *iter;
+
+  self->priv->unmapped_paint_branch_counter -= count;
+
+  for (iter = self->priv->first_child;
+       iter != NULL;
+       iter = iter->priv->next_sibling)
+    pop_in_paint_unmapped_branch (iter, count);
 }
 
 static void
