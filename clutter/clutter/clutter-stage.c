@@ -1482,7 +1482,6 @@ _clutter_stage_check_updated_pointers (ClutterStage *stage)
     {
       ClutterInputDevice *dev = l->data;
       ClutterStageView *view;
-      const cairo_region_t *clip;
 
       if (clutter_input_device_get_device_mode (dev) !=
           CLUTTER_INPUT_MODE_MASTER)
@@ -1502,9 +1501,7 @@ _clutter_stage_check_updated_pointers (ClutterStage *stage)
           if (!view)
             continue;
 
-          clip = clutter_stage_view_peek_redraw_clip (view);
-          if (!clip || cairo_region_contains_point (clip, point.x, point.y))
-            updating = g_slist_prepend (updating, dev);
+          updating = g_slist_prepend (updating, dev);
           break;
         default:
           /* Any other devices don't need checking, either because they
