@@ -127,10 +127,12 @@ meta_compositor_native_pre_paint (MetaCompositor *compositor)
 }
 
 MetaCompositorNative *
-meta_compositor_native_new (MetaDisplay *display)
+meta_compositor_native_new (MetaDisplay *display,
+                            MetaBackend *backend)
 {
     return g_object_new (META_TYPE_COMPOSITOR_NATIVE,
                          "display", display,
+                         "backend", backend,
                          NULL);
 }
 
