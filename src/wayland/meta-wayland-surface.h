@@ -170,8 +170,21 @@ struct _MetaWaylandSurface
 
   MetaCrtc *scanout_candidate;
 
-  /* Last wl_surface.preferred_buffer_scale sent, 0 if none. */
-  int preferred_scale;
+  /*
+   * Not to be confused with ->scale above, which is the buffer scale the
+   * client set. These two are what the compositor last told the client, and
+   * only ever move in that direction.
+   */
+  /* Last wl_surface.preferred_buffer_scale sent; ceiled integer, 0 if none. */
+  int sent_preferred_buffer_scale;
+
+  /* wp_fractional_scale_v1 */
+  struct {
+    struct wl_resource *resource;
+    gulong destroy_handler_id;
+    /* Last preferred_scale sent; exact, 0.0 if none or if the object died. */
+    double sent_scale;
+  } fractional_scale;
 
   /* Buffer renderer state. */
   gboolean buffer_held;
@@ -356,6 +369,8 @@ gboolean            meta_wayland_surface_can_scanout_untransformed (MetaWaylandS
 
 CoglScanout *       meta_wayland_surface_try_acquire_scanout (MetaWaylandSurface *surface,
                                                               CoglOnscreen       *onscreen);
+
+MetaLogicalMonitor * meta_wayland_surface_get_preferred_scale_monitor (MetaWaylandSurface *surface);
 
 MetaCrtc *          meta_wayland_surface_get_scanout_candidate (MetaWaylandSurface *surface);
 

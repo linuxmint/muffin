@@ -42,6 +42,7 @@
 #include "wayland/meta-wayland-actor-surface.h"
 #include "wayland/meta-wayland-buffer.h"
 #include "wayland/meta-wayland-data-device.h"
+#include "wayland/meta-wayland-fractional-scale.h"
 #include "wayland/meta-wayland-gtk-shell.h"
 #include "wayland/meta-wayland-layer-shell.h"
 #include "wayland/meta-wayland-keyboard.h"
@@ -1388,8 +1389,8 @@ surface_output_disconnect_signal (gpointer key, gpointer value, gpointer user_da
  * Windowless surfaces (cursors, drag icons) follow the highest scale among
  * the outputs they are on.
  */
-static MetaLogicalMonitor *
-get_preferred_scale_monitor (MetaWaylandSurface *surface)
+MetaLogicalMonitor *
+meta_wayland_surface_get_preferred_scale_monitor (MetaWaylandSurface *surface)
 {
   MetaWindow *window;
   MetaLogicalMonitor *logical_monitor = NULL;
@@ -1418,19 +1419,25 @@ get_preferred_scale_monitor (MetaWaylandSurface *surface)
 }
 
 static void
-maybe_send_preferred_buffer_scale (MetaWaylandSurface *surface)
+maybe_send_preferred_scale (MetaWaylandSurface *surface)
 {
   MetaLogicalMonitor *logical_monitor;
+  float monitor_scale;
   int scale;
 
-  if (!surface->resource ||
-      wl_resource_get_version (surface->resource) <
-      WL_SURFACE_PREFERRED_BUFFER_SCALE_SINCE_VERSION)
+  if (!surface->resource)
     return;
 
-  logical_monitor = get_preferred_scale_monitor (surface);
+  logical_monitor = meta_wayland_surface_get_preferred_scale_monitor (surface);
   if (!logical_monitor)
     return;
+
+  monitor_scale = meta_logical_monitor_get_scale (logical_monitor);
+
+  /* Clients supporting wp_fractional_scale_v1 get the exact scale and render
+   * at it, so nothing needs scaling afterwards. */
+  meta_wayland_fractional_scale_maybe_send_preferred_scale (surface,
+                                                            monitor_scale);
 
   /* Same value wl_output advertises for the monitor: clients render at this
    * scale and the compositor scales the result down where the monitor scale
@@ -1439,12 +1446,16 @@ maybe_send_preferred_buffer_scale (MetaWaylandSurface *surface)
    * No preferred_buffer_transform is sent along with it. Muffin transforms
    * client buffers itself, so asking clients to pre-rotate would change
    * behaviour for no gain; normal is the protocol default. */
-  scale = (int) ceilf (meta_logical_monitor_get_scale (logical_monitor));
-  if (scale <= 0 || scale == surface->preferred_scale)
+  if (wl_resource_get_version (surface->resource) <
+      WL_SURFACE_PREFERRED_BUFFER_SCALE_SINCE_VERSION)
+    return;
+
+  scale = (int) ceilf (monitor_scale);
+  if (scale <= 0 || scale == surface->sent_preferred_buffer_scale)
     return;
 
   wl_surface_send_preferred_buffer_scale (surface->resource, scale);
-  surface->preferred_scale = scale;
+  surface->sent_preferred_buffer_scale = scale;
 }
 
 void
@@ -1457,7 +1468,7 @@ meta_wayland_surface_update_outputs (MetaWaylandSurface *surface)
                         update_surface_output_state,
                         surface);
 
-  maybe_send_preferred_buffer_scale (surface);
+  maybe_send_preferred_scale (surface);
 }
 
 void
@@ -2217,10 +2228,13 @@ scanout_destroyed (gpointer  data,
 /*
  * Scanning out shows the buffer as-is, so any mapping the compositor would
  * normally apply must be an identity: no buffer transform, no viewport
- * cropping, and buffer pixels matching the mode exactly (fractional and
- * mixed-DPI clients render for the ceiled integer scale, not the mode). A
- * destination-only viewport is fine, since fullscreen candidacy pins the
- * destination to the view size.
+ * cropping, and buffer pixels matching the mode exactly.
+ *
+ * A destination-only viewport is fine, and is what lets fractional scales
+ * scan out at all: a wp_fractional_scale_v1 client renders a mode-sized buffer
+ * and sets the destination to the logical size, so the buffer already is what
+ * the mode wants. A client that only knows wl_output.scale renders for the
+ * ceiled integer scale instead, and the size check below rejects it.
  */
 gboolean
 meta_wayland_surface_can_scanout_untransformed (MetaWaylandSurface *surface,
