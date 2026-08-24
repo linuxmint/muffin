@@ -170,6 +170,9 @@ struct _MetaWaylandSurface
 
   MetaCrtc *scanout_candidate;
 
+  /* Last wl_surface.preferred_buffer_scale sent, 0 if none. */
+  int preferred_scale;
+
   /* Buffer renderer state. */
   gboolean buffer_held;
 

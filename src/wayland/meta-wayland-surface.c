@@ -25,6 +25,7 @@
 #include "wayland/meta-wayland-surface.h"
 
 #include <gobject/gvaluecollector.h>
+#include <math.h>
 #include <wayland-server.h>
 
 #include "backends/meta-cursor-tracker-private.h"
@@ -1380,6 +1381,72 @@ surface_output_disconnect_signal (gpointer key, gpointer value, gpointer user_da
   g_signal_handler_disconnect (key, (gulong) GPOINTER_TO_SIZE (value));
 }
 
+/*
+ * The monitor whose scale the client should render for: the window's main
+ * monitor, so a surface is told the scale of the monitor it is actually on
+ * rather than having to guess from the set of outputs it overlaps.
+ * Windowless surfaces (cursors, drag icons) follow the highest scale among
+ * the outputs they are on.
+ */
+static MetaLogicalMonitor *
+get_preferred_scale_monitor (MetaWaylandSurface *surface)
+{
+  MetaWindow *window;
+  MetaLogicalMonitor *logical_monitor = NULL;
+  GHashTableIter iter;
+  gpointer key;
+
+  window = meta_wayland_surface_get_toplevel_window (surface);
+  if (window && window->monitor)
+    return window->monitor;
+
+  g_hash_table_iter_init (&iter, surface->outputs_to_destroy_notify_id);
+  while (g_hash_table_iter_next (&iter, &key, NULL))
+    {
+      MetaWaylandOutput *wayland_output = key;
+
+      if (!wayland_output->logical_monitor)
+        continue;
+
+      if (!logical_monitor ||
+          meta_logical_monitor_get_scale (wayland_output->logical_monitor) >
+          meta_logical_monitor_get_scale (logical_monitor))
+        logical_monitor = wayland_output->logical_monitor;
+    }
+
+  return logical_monitor;
+}
+
+static void
+maybe_send_preferred_buffer_scale (MetaWaylandSurface *surface)
+{
+  MetaLogicalMonitor *logical_monitor;
+  int scale;
+
+  if (!surface->resource ||
+      wl_resource_get_version (surface->resource) <
+      WL_SURFACE_PREFERRED_BUFFER_SCALE_SINCE_VERSION)
+    return;
+
+  logical_monitor = get_preferred_scale_monitor (surface);
+  if (!logical_monitor)
+    return;
+
+  /* Same value wl_output advertises for the monitor: clients render at this
+   * scale and the compositor scales the result down where the monitor scale
+   * is fractional.
+   *
+   * No preferred_buffer_transform is sent along with it. Muffin transforms
+   * client buffers itself, so asking clients to pre-rotate would change
+   * behaviour for no gain; normal is the protocol default. */
+  scale = (int) ceilf (meta_logical_monitor_get_scale (logical_monitor));
+  if (scale <= 0 || scale == surface->preferred_scale)
+    return;
+
+  wl_surface_send_preferred_buffer_scale (surface->resource, scale);
+  surface->preferred_scale = scale;
+}
+
 void
 meta_wayland_surface_update_outputs (MetaWaylandSurface *surface)
 {
@@ -1389,6 +1456,8 @@ meta_wayland_surface_update_outputs (MetaWaylandSurface *surface)
   g_hash_table_foreach (surface->compositor->outputs,
                         update_surface_output_state,
                         surface);
+
+  maybe_send_preferred_buffer_scale (surface);
 }
 
 void
