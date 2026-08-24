@@ -1222,6 +1222,12 @@ meta_window_wayland_finish_move_resize (MetaWindow              *window,
           expected_h = new_geom.height;
         }
 
+      if (expected_w <= 1 || expected_h <= 1)
+        {
+          expected_w = new_geom.width;
+          expected_h = new_geom.height;
+        }
+
       if (new_geom.width != expected_w || new_geom.height != expected_h)
         {
           rect.x = wl_window->last_sent_rect.x;
@@ -1258,6 +1264,16 @@ meta_window_wayland_finish_move_resize (MetaWindow              *window,
       META_WINDOW_MAXIMIZED (window) && wl_window->needs_maximize_transition;
 
     wl_window->needs_maximize_transition = FALSE;
+
+    if (do_maximize_transition &&
+        (window->saved_rect.width <= 1 || window->saved_rect.height <= 1) &&
+        new_geom.width > 1 && new_geom.height > 1)
+      {
+        window->saved_rect.x = window->rect.x;
+        window->saved_rect.y = window->rect.y;
+        window->saved_rect.width = new_geom.width;
+        window->saved_rect.height = new_geom.height;
+      }
 
     if (do_maximize_transition)
       {
