@@ -31,8 +31,9 @@
 #include "backends/meta-output.h"
 #include "core/boxes-private.h"
 
-#define SCALE_FACTORS_PER_INTEGER 4
-#define SCALE_FACTORS_STEPS (1.0 / (float) SCALE_FACTORS_PER_INTEGER)
+/* Denominators must divide 120, so every scale is exactly representable in
+ * the 1/120 units wp_fractional_scale_v1 uses. */
+#define MAX_DENOMINATOR 5
 #define MINIMUM_SCALE_FACTOR 0.74f
 #define MAXIMUM_SCALE_FACTOR 4.0f
 #define MINIMUM_LOGICAL_AREA (800 * 480)
@@ -1675,7 +1676,8 @@ is_scale_valid_for_size (float width,
 {
   return scale >= MINIMUM_SCALE_FACTOR &&
          scale <= MAXIMUM_SCALE_FACTOR &&
-         is_logical_size_large_enough (floorf (width/scale), floorf (width/scale));
+         is_logical_size_large_enough (floorf (width / scale),
+                                       floorf (height / scale));
 }
 
 gboolean
@@ -1694,63 +1696,140 @@ meta_monitor_mode_should_be_advertised (MetaMonitorMode *monitor_mode)
                                        monitor_mode->spec.height);
 }
 
-static float
-get_closest_scale_factor_for_resolution (float width,
-                                         float height,
-                                         float scale)
+static unsigned int
+highest_common_factor (unsigned int x,
+                       unsigned int y)
 {
-  unsigned int i, j;
-  float scaled_h;
-  float scaled_w;
-  float best_scale;
-  int base_scaled_w;
-  gboolean found_one;
+  unsigned int a = x;
+  unsigned int b = y;
 
-  best_scale = 0;
-
-  if (!is_scale_valid_for_size (width, height, scale))
-    goto out;
-
-  if (fmodf (width, scale) == 0.0 && fmodf (height, scale) == 0.0)
-    return scale;
-
-  i = 0;
-  found_one = FALSE;
-  base_scaled_w = floorf (width / scale);
-  do
+  while (a > 0 && b > 0)
     {
-      for (j = 0; j < 2; j++)
+      if (b > a)
+        b %= a;
+      else
+        a %= b;
+    }
+
+  return MAX (a, b);
+}
+
+typedef void (* ForEachScaleFunc) (float  scale,
+                                   void  *arg1,
+                                   void  *arg2);
+
+static void
+for_each_scale (unsigned int      width,
+                unsigned int      height,
+                unsigned int      max_denominator,
+                ForEachScaleFunc  func,
+                void             *arg1,
+                void             *arg2)
+{
+  unsigned int denominator;
+
+  for (denominator = 1; denominator <= max_denominator; denominator++)
+    {
+      unsigned int numerator;
+      unsigned int first;
+
+      /* Muffin allows scales below 1.0, so the numerator may start below
+         the denominator where MINIMUM_SCALE_FACTOR permits. */
+      first = (unsigned int) ceilf (MINIMUM_SCALE_FACTOR * denominator);
+      if (first < 1)
+        first = 1;
+
+      for (numerator = first;
+           numerator <= (unsigned int) (MAXIMUM_SCALE_FACTOR * denominator);
+           numerator++)
         {
-          float current_scale;
-          int offset = i * (j ? 1 : -1);
+          float scale;
 
-          scaled_w = base_scaled_w + offset;
-          current_scale = width / scaled_w;
-          scaled_h = height / current_scale;
+          /* Accept only scales that divide perfectly into the screen */
+          if (((width * denominator) % numerator) != 0 ||
+              ((height * denominator) % numerator) != 0)
+            continue;
 
-          if (current_scale >= scale + SCALE_FACTORS_STEPS ||
-              current_scale <= scale - SCALE_FACTORS_STEPS ||
-              current_scale < MINIMUM_SCALE_FACTOR ||
-              current_scale > MAXIMUM_SCALE_FACTOR)
-            {
-              goto out;
-            }
+          /* Eliminate equivalent fractions (duplicate scales) */
+          if (highest_common_factor (numerator, denominator) > 1)
+            continue;
 
-          if (floorf (scaled_h) == scaled_h)
-            {
-              found_one = TRUE;
+          scale = (float) numerator / denominator;
 
-              if (fabsf (current_scale - scale) < fabsf (best_scale - scale))
-                best_scale = current_scale;
-            }
+          if (!is_scale_valid_for_size (width, height, scale))
+            continue;
+
+          func (scale, arg1, arg2);
+        }
+    }
+}
+
+static void
+append_scale (float  scale,
+              void  *arg1,
+              void  *arg2)
+{
+  GArray *array = arg1;
+
+  g_array_append_val (array, scale);
+}
+
+static gint
+compare_floats (gconstpointer a,
+                gconstpointer b)
+{
+  float x = *(float *) a;
+  float y = *(float *) b;
+
+  return (x > y) ? 1 : (x < y) ? -1 : 0;
+}
+
+/*
+ * Exact quotients are dense - keep the one nearest each familiar quarter
+ * step, so recognisable values survive wherever the mode allows them, and
+ * drop neighbours too close together to tell apart.
+ */
+static void
+thin_supported_scales (GArray *scales)
+{
+  g_autoptr (GArray) thinned = NULL;
+  float step;
+
+  if (scales->len <= 1)
+    return;
+
+  thinned = g_array_new (FALSE, FALSE, sizeof (float));
+
+  for (step = ceilf (MINIMUM_SCALE_FACTOR * 4.0f) / 4.0f;
+       step <= MAXIMUM_SCALE_FACTOR;
+       step += 0.25f)
+    {
+      float best = 0.0f;
+      unsigned int i;
+
+      for (i = 0; i < scales->len; i++)
+        {
+          float scale = g_array_index (scales, float, i);
+
+          if (best == 0.0f || fabsf (scale - step) < fabsf (best - step))
+            best = scale;
         }
 
-      i++;
-    }
-  while (!found_one);
+      if (best == 0.0f)
+        continue;
 
-out:
-  return best_scale;
+      if (thinned->len > 0 &&
+          best <= g_array_index (thinned, float, thinned->len - 1) * 1.05f)
+        continue;
+
+      g_array_append_val (thinned, best);
+    }
+
+  if (thinned->len == 0)
+    return;
+
+  g_array_set_size (scales, 0);
+  g_array_append_vals (scales, thinned->data, thinned->len);
 }
 
 float *
@@ -1759,7 +1838,7 @@ meta_monitor_calculate_supported_scales (MetaMonitor                 *monitor,
                                          MetaMonitorScalesConstraint  constraints,
                                          int                         *n_supported_scales)
 {
-  unsigned int i, j;
+  unsigned int max_denominator;
   int width, height;
   GArray *supported_scales;
 
@@ -1767,37 +1846,14 @@ meta_monitor_calculate_supported_scales (MetaMonitor                 *monitor,
 
   meta_monitor_mode_get_resolution (monitor_mode, &width, &height);
 
-  for (i = floorf (MINIMUM_SCALE_FACTOR);
-       i <= ceilf (MAXIMUM_SCALE_FACTOR);
-       i++)
-    {
-      for (j = 0; j < SCALE_FACTORS_PER_INTEGER; j++)
-        {
-          float scale;
-          float scale_value = i + j * SCALE_FACTORS_STEPS;
+  max_denominator =
+    (constraints & META_MONITOR_SCALES_CONSTRAINT_NO_FRAC) ? 1 : MAX_DENOMINATOR;
 
-          if (constraints & META_MONITOR_SCALES_CONSTRAINT_NO_FRAC)
-            {
-              if (fmodf (scale_value, 1.0) != 0.0)
-                continue;
-            }
+  for_each_scale (width, height, max_denominator,
+                  append_scale, supported_scales, NULL);
 
-          if ((constraints & META_MONITOR_SCALES_CONSTRAINT_NO_FRAC) ||
-              (constraints & META_MONITOR_SCALES_CONSTRAINT_NO_LOGICAL))
-            {
-              if (!is_scale_valid_for_size (width, height, scale_value))
-                continue;
-
-              scale = scale_value;
-            }
-          else
-            scale = get_closest_scale_factor_for_resolution (width,
-                                                             height,
-                                                             scale_value);
-          if (scale > 0.0f)
-            g_array_append_val (supported_scales, scale);
-        }
-    }
+  g_array_sort (supported_scales, compare_floats);
+  thin_supported_scales (supported_scales);
 
   if (supported_scales->len == 0)
     {

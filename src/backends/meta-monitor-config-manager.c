@@ -213,11 +213,27 @@ assign_monitor_crtc (MetaMonitor         *monitor,
                                                 data->config->layout_mode,
                                                 monitor, mode, scale))
     {
-      scale = roundf (scale);
-      if (!meta_monitor_manager_is_scale_supported (data->monitor_manager,
-                                                    data->config->layout_mode,
-                                                    monitor, mode, scale))
-        scale = 1.0f;
+      g_autofree float *supported = NULL;
+      int n_supported;
+      float best = 0.0f;
+      int i;
+
+      /* A configuration saved before scales became exact quotients holds a
+       * value that is no longer offered. Snap to the nearest scale that is
+       * actually advertised, rather than letting rounding jump the user a
+       * whole step. */
+      supported =
+        meta_monitor_manager_calculate_supported_scales (data->monitor_manager,
+                                                         data->config->layout_mode,
+                                                         monitor, mode,
+                                                         &n_supported);
+      for (i = 0; i < n_supported; i++)
+        {
+          if (best == 0.0f || fabsf (supported[i] - scale) < fabsf (best - scale))
+            best = supported[i];
+        }
+
+      scale = best > 0.0f ? best : 1.0f;
     }
 
   meta_monitor_calculate_crtc_pos (monitor, mode, output, crtc_transform,
