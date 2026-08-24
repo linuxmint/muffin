@@ -689,6 +689,8 @@ try_acquire_egl_image_scanout (MetaWaylandBuffer *buffer,
   drm_modifier = gbm_bo_get_modifier (gbm_bo);
   stride = gbm_bo_get_stride (gbm_bo);
   if (!meta_onscreen_native_is_buffer_scanout_compatible (onscreen,
+                                                          gbm_bo_get_width (gbm_bo),
+                                                          gbm_bo_get_height (gbm_bo),
                                                           drm_format,
                                                           drm_modifier,
                                                           stride))

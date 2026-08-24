@@ -78,6 +78,17 @@ typedef struct _MetaWaylandSurfaceRolePrivate
   MetaWaylandSurface *surface;
 } MetaWaylandSurfaceRolePrivate;
 
+enum
+{
+  PROP_0,
+
+  PROP_SCANOUT_CANDIDATE,
+
+  N_PROPS
+};
+
+static GParamSpec *obj_props[N_PROPS];
+
 G_DEFINE_TYPE (MetaWaylandSurface, meta_wayland_surface, G_TYPE_OBJECT);
 
 G_DEFINE_ABSTRACT_TYPE_WITH_PRIVATE (MetaWaylandSurfaceRole,
@@ -1406,6 +1417,7 @@ wl_surface_destructor (struct wl_resource *resource)
 
   g_signal_emit (surface, surface_signals[SURFACE_DESTROY], 0);
 
+  g_clear_object (&surface->scanout_candidate);
   g_clear_object (&surface->role);
 
   if (surface->unassigned.buffer)
@@ -1695,9 +1707,39 @@ meta_wayland_surface_init (MetaWaylandSurface *surface)
 }
 
 static void
+meta_wayland_surface_get_property (GObject    *object,
+                                   guint       prop_id,
+                                   GValue     *value,
+                                   GParamSpec *pspec)
+{
+  MetaWaylandSurface *surface = META_WAYLAND_SURFACE (object);
+
+  switch (prop_id)
+    {
+    case PROP_SCANOUT_CANDIDATE:
+      g_value_set_object (value, surface->scanout_candidate);
+      break;
+    default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+      break;
+    }
+}
+
+static void
 meta_wayland_surface_class_init (MetaWaylandSurfaceClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
+
+  object_class->get_property = meta_wayland_surface_get_property;
+
+  obj_props[PROP_SCANOUT_CANDIDATE] =
+    g_param_spec_object ("scanout-candidate",
+                         "scanout-candidate",
+                         "Scanout candidate for given CRTC",
+                         META_TYPE_CRTC,
+                         G_PARAM_READABLE |
+                         G_PARAM_STATIC_STRINGS);
+  g_object_class_install_properties (object_class, N_PROPS, obj_props);
 
   surface_signals[SURFACE_DESTROY] =
     g_signal_new ("destroy",
@@ -2103,6 +2145,56 @@ scanout_destroyed (gpointer  data,
   meta_wayland_buffer_ref_unref (buffer_ref);
 }
 
+/*
+ * Scanning out shows the buffer as-is, so any mapping the compositor would
+ * normally apply must be an identity: no buffer transform, no viewport
+ * cropping, and buffer pixels matching the mode exactly (fractional and
+ * mixed-DPI clients render for the ceiled integer scale, not the mode). A
+ * destination-only viewport is fine, since fullscreen candidacy pins the
+ * destination to the view size.
+ */
+gboolean
+meta_wayland_surface_can_scanout_untransformed (MetaWaylandSurface *surface,
+                                                int                 mode_width,
+                                                int                 mode_height)
+{
+  if (surface->buffer_transform != META_MONITOR_TRANSFORM_NORMAL)
+    return FALSE;
+
+  if (surface->viewport.has_src_rect)
+    return FALSE;
+
+  if (get_buffer_width (surface) != mode_width ||
+      get_buffer_height (surface) != mode_height)
+    {
+      static int last_buffer_width;
+      static int last_buffer_height;
+      static int last_mode_width;
+      static int last_mode_height;
+
+      if (get_buffer_width (surface) != last_buffer_width ||
+          get_buffer_height (surface) != last_buffer_height ||
+          mode_width != last_mode_width ||
+          mode_height != last_mode_height)
+        {
+          g_message ("DMABUF: fullscreen surface not scanout-capable: "
+                     "buffer %dx%d vs mode %dx%d",
+                     get_buffer_width (surface),
+                     get_buffer_height (surface),
+                     mode_width, mode_height);
+
+          last_buffer_width = get_buffer_width (surface);
+          last_buffer_height = get_buffer_height (surface);
+          last_mode_width = mode_width;
+          last_mode_height = mode_height;
+        }
+
+      return FALSE;
+    }
+
+  return TRUE;
+}
+
 CoglScanout *
 meta_wayland_surface_try_acquire_scanout (MetaWaylandSurface *surface,
                                           CoglOnscreen       *onscreen)
@@ -2127,6 +2219,24 @@ meta_wayland_surface_try_acquire_scanout (MetaWaylandSurface *surface,
 
   return scanout;
 
+}
+
+MetaCrtc *
+meta_wayland_surface_get_scanout_candidate (MetaWaylandSurface *surface)
+{
+  return surface->scanout_candidate;
+}
+
+void
+meta_wayland_surface_set_scanout_candidate (MetaWaylandSurface *surface,
+                                            MetaCrtc           *crtc)
+{
+  if (surface->scanout_candidate == crtc)
+    return;
+
+  g_set_object (&surface->scanout_candidate, crtc);
+  g_object_notify_by_pspec (G_OBJECT (surface),
+                            obj_props[PROP_SCANOUT_CANDIDATE]);
 }
 
 void

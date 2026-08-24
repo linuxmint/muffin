@@ -2236,8 +2236,30 @@ meta_renderer_native_create_dma_buf (CoglRenderer  *cogl_renderer,
   return NULL;
 }
 
+/*
+ * Every onscreen framebuffer is allocated with this format, and a page flip may
+ * not change the framebuffer format, so it is also the only format a client
+ * buffer can be handed to KMS as.
+ */
+uint32_t
+meta_renderer_native_get_onscreen_drm_format (void)
+{
+  return GBM_FORMAT_XRGB8888;
+}
+
+MetaCrtc *
+meta_onscreen_native_get_crtc (CoglOnscreen *onscreen)
+{
+  CoglOnscreenEGL *onscreen_egl = onscreen->winsys;
+  MetaOnscreenNative *onscreen_native = onscreen_egl->platform;
+
+  return onscreen_native->crtc;
+}
+
 gboolean
 meta_onscreen_native_is_buffer_scanout_compatible (CoglOnscreen *onscreen,
+                                                   int           width,
+                                                   int           height,
                                                    uint32_t      drm_format,
                                                    uint64_t      drm_modifier,
                                                    uint32_t      stride)
@@ -2266,16 +2288,64 @@ meta_onscreen_native_is_buffer_scanout_compatible (CoglOnscreen *onscreen,
 
   gbm_bo = meta_drm_buffer_gbm_get_bo (META_DRM_BUFFER_GBM (fb));
 
-  if (gbm_bo_get_format (gbm_bo) != drm_format)
-    return FALSE;
+  /* The buffer must exactly match the onscreen fb — an oversized one scans out
+   * cropped to its top-left corner. A legacy page flip may also never change
+   * the framebuffer format. */
+  if ((int) gbm_bo_get_width (gbm_bo) == width &&
+      (int) gbm_bo_get_height (gbm_bo) == height &&
+      gbm_bo_get_format (gbm_bo) == drm_format)
+    {
+      if (gbm_bo_get_modifier (gbm_bo) == drm_modifier &&
+          gbm_bo_get_stride (gbm_bo) == stride)
+        return TRUE;
 
-  if (gbm_bo_get_modifier (gbm_bo) != drm_modifier)
-    return FALSE;
+      /* A layout differing from the composited fb is fine as long as the
+       * primary plane advertises the modifier: any driver exposing
+       * IN_FORMATS validates flips against the plane state, not against
+       * the previous framebuffer. Implicit-modifier buffers stay on the
+       * strict path above, since drivers without modifier support may not
+       * validate a pitch change on flip. */
+      if (drm_modifier != DRM_FORMAT_MOD_INVALID &&
+          meta_crtc_kms_supports_modifier (onscreen_native->crtc,
+                                           drm_format,
+                                           drm_modifier))
+        return TRUE;
+    }
 
-  if (gbm_bo_get_stride (gbm_bo) != stride)
-    return FALSE;
+  {
+    static int last_width;
+    static int last_height;
+    static uint32_t last_format;
+    static uint64_t last_modifier;
+    static uint32_t last_stride;
 
-  return TRUE;
+    if (width != last_width ||
+        height != last_height ||
+        drm_format != last_format ||
+        drm_modifier != last_modifier ||
+        stride != last_stride)
+      {
+        uint32_t fb_format = gbm_bo_get_format (gbm_bo);
+        uint64_t fb_modifier = gbm_bo_get_modifier (gbm_bo);
+
+        g_message ("DMABUF: scanout rejected: client buffer "
+                   "%dx%d %.4s/0x%" G_GINT64_MODIFIER "x/stride %u "
+                   "vs onscreen %ux%u %.4s/0x%" G_GINT64_MODIFIER "x/stride %u",
+                   width, height,
+                   (char *) &drm_format, drm_modifier, stride,
+                   gbm_bo_get_width (gbm_bo), gbm_bo_get_height (gbm_bo),
+                   (char *) &fb_format, fb_modifier,
+                   gbm_bo_get_stride (gbm_bo));
+
+        last_width = width;
+        last_height = height;
+        last_format = drm_format;
+        last_modifier = drm_modifier;
+        last_stride = stride;
+      }
+  }
+
+  return FALSE;
 }
 
 static void
