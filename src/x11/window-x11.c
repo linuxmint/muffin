@@ -4180,12 +4180,6 @@ meta_window_x11_can_unredirect (MetaWindowX11 *window_x11)
   if (!window->monitor)
     return FALSE;
 
-  if (window->fullscreen)
-    return TRUE;
-
-  if (meta_window_is_screen_sized (window))
-    return TRUE;
-
   if (has_requested_bypass_compositor (window_x11))
     return TRUE;
 
@@ -4202,6 +4196,18 @@ meta_window_x11_can_unredirect (MetaWindowX11 *window_x11)
       if (meta_rectangle_equal (&window_rect, &logical_monitor_layout))
         return TRUE;
     }
+
+  /* Automatic unredirection of fullscreen windows is opt-in. Windows that
+   * explicitly request bypassing the compositor, and monitor-sized override
+   * redirect windows, are honored above regardless of the pref. */
+  if (!meta_prefs_get_unredirect_fullscreen_windows ())
+    return FALSE;
+
+  if (window->fullscreen)
+    return TRUE;
+
+  if (meta_window_is_screen_sized (window))
+    return TRUE;
 
   return FALSE;
 }
