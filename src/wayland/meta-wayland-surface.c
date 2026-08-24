@@ -39,6 +39,7 @@
 #include "compositor/region-utils.h"
 #include "core/display-private.h"
 #include "core/window-private.h"
+#include "meta/util.h"
 #include "wayland/meta-wayland-actor-surface.h"
 #include "wayland/meta-wayland-buffer.h"
 #include "wayland/meta-wayland-data-device.h"
@@ -2250,27 +2251,12 @@ meta_wayland_surface_can_scanout_untransformed (MetaWaylandSurface *surface,
   if (get_buffer_width (surface) != mode_width ||
       get_buffer_height (surface) != mode_height)
     {
-      static int last_buffer_width;
-      static int last_buffer_height;
-      static int last_mode_width;
-      static int last_mode_height;
-
-      if (get_buffer_width (surface) != last_buffer_width ||
-          get_buffer_height (surface) != last_buffer_height ||
-          mode_width != last_mode_width ||
-          mode_height != last_mode_height)
-        {
-          g_message ("DMABUF: fullscreen surface not scanout-capable: "
-                     "buffer %dx%d vs mode %dx%d",
-                     get_buffer_width (surface),
-                     get_buffer_height (surface),
-                     mode_width, mode_height);
-
-          last_buffer_width = get_buffer_width (surface);
-          last_buffer_height = get_buffer_height (surface);
-          last_mode_width = mode_width;
-          last_mode_height = mode_height;
-        }
+      meta_topic (META_DEBUG_SCANOUT,
+                  "fullscreen surface not scanout-capable: "
+                  "buffer %dx%d vs mode %dx%d\n",
+                  get_buffer_width (surface),
+                  get_buffer_height (surface),
+                  mode_width, mode_height);
 
       return FALSE;
     }

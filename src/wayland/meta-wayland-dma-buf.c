@@ -51,6 +51,7 @@
 #include "cogl/cogl.h"
 #include "core/meta-anonymous-file.h"
 #include "meta/meta-backend.h"
+#include "meta/util.h"
 #include "wayland/meta-wayland-buffer.h"
 #include "wayland/meta-wayland-private.h"
 #include "wayland/meta-wayland-surface.h"
@@ -1083,13 +1084,14 @@ log_scanout_capabilities (MetaWaylandDmaBufManager *dma_buf_manager)
                 n_explicit++;
             }
 
-          g_message ("DMABUF: CRTC %ld (%s%s): scanout tranche would offer "
-                     "%u/%u modifier pairs, %u/%u implicit formats",
-                     crtc->crtc_id,
-                     meta_gpu_kms_get_file_path (META_GPU_KMS (gpu)),
-                     crtc->config ? "" : ", inactive",
-                     n_explicit, n_explicit_total,
-                     n_implicit, n_implicit_total);
+          meta_topic (META_DEBUG_SCANOUT,
+                      "CRTC %ld (%s%s): scanout tranche would offer "
+                      "%u/%u modifier pairs, %u/%u implicit formats\n",
+                      crtc->crtc_id,
+                      meta_gpu_kms_get_file_path (META_GPU_KMS (gpu)),
+                      crtc->config ? "" : ", inactive",
+                      n_explicit, n_explicit_total,
+                      n_implicit, n_implicit_total);
         }
     }
 
@@ -1116,12 +1118,13 @@ log_scanout_capabilities (MetaWaylandDmaBufManager *dma_buf_manager)
         monitors = meta_logical_monitor_get_monitors (logical_monitor);
         monitor = monitors ? monitors->data : NULL;
 
-        g_message ("DMABUF: monitor %s has fractional scale %.2f — direct "
-                   "scanout there needs a wp_fractional_scale_v1 client "
-                   "(others render for scale %d and get downscaled)",
-                   monitor ? meta_monitor_get_connector (monitor) : "(unknown)",
-                   scale,
-                   (int) ceilf (scale));
+        meta_topic (META_DEBUG_SCANOUT,
+                    "monitor %s has fractional scale %.2f — direct scanout "
+                    "there needs a wp_fractional_scale_v1 client (others "
+                    "render for scale %d and get downscaled)\n",
+                    monitor ? meta_monitor_get_connector (monitor) : "(unknown)",
+                    scale,
+                    (int) ceilf (scale));
       }
   }
 }

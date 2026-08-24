@@ -72,6 +72,7 @@
 //#include "cogl/cogl-framebuffer.h"
 #include "cogl/cogl.h"
 #include "core/boxes-private.h"
+#include "meta/util.h"
 
 #ifndef EGL_DRM_MASTER_FD_EXT
 #define EGL_DRM_MASTER_FD_EXT 0x333C
@@ -2266,84 +2267,91 @@ meta_onscreen_native_is_buffer_scanout_compatible (CoglOnscreen *onscreen,
 {
   CoglOnscreenEGL *onscreen_egl = onscreen->winsys;
   MetaOnscreenNative *onscreen_native = onscreen_egl->platform;
+  glong crtc_id = onscreen_native->crtc->crtc_id;
   MetaDrmBuffer *fb;
   struct gbm_bo *gbm_bo;
 
   if (onscreen_native->crtc->config->transform != META_MONITOR_TRANSFORM_NORMAL)
-    return FALSE;
+    {
+      meta_topic (META_DEBUG_SCANOUT, "crtc %ld: monitor is transformed\n",
+                  crtc_id);
+      return FALSE;
+    }
 
   if (onscreen_native->secondary_gpu_state)
-    return FALSE;
+    {
+      meta_topic (META_DEBUG_SCANOUT, "crtc %ld: driven by a secondary GPU\n",
+                  crtc_id);
+      return FALSE;
+    }
 
   if (!onscreen_native->gbm.surface)
-    return FALSE;
+    {
+      meta_topic (META_DEBUG_SCANOUT, "crtc %ld: no gbm surface\n", crtc_id);
+      return FALSE;
+    }
 
   fb = onscreen_native->gbm.current_fb ? onscreen_native->gbm.current_fb
                                        : onscreen_native->gbm.next_fb;
-  if (!fb)
-    return FALSE;
-
-  if (!META_IS_DRM_BUFFER_GBM (fb))
-    return FALSE;
+  if (!fb || !META_IS_DRM_BUFFER_GBM (fb))
+    {
+      meta_topic (META_DEBUG_SCANOUT, "crtc %ld: no gbm framebuffer to match\n",
+                  crtc_id);
+      return FALSE;
+    }
 
   gbm_bo = meta_drm_buffer_gbm_get_bo (META_DRM_BUFFER_GBM (fb));
 
   /* The buffer must exactly match the onscreen fb — an oversized one scans out
    * cropped to its top-left corner. A legacy page flip may also never change
    * the framebuffer format. */
-  if ((int) gbm_bo_get_width (gbm_bo) == width &&
-      (int) gbm_bo_get_height (gbm_bo) == height &&
-      gbm_bo_get_format (gbm_bo) == drm_format)
+  if ((int) gbm_bo_get_width (gbm_bo) != width ||
+      (int) gbm_bo_get_height (gbm_bo) != height)
     {
-      if (gbm_bo_get_modifier (gbm_bo) == drm_modifier &&
-          gbm_bo_get_stride (gbm_bo) == stride)
-        return TRUE;
-
-      /* A layout differing from the composited fb is fine as long as the
-       * primary plane advertises the modifier: any driver exposing
-       * IN_FORMATS validates flips against the plane state, not against
-       * the previous framebuffer. Implicit-modifier buffers stay on the
-       * strict path above, since drivers without modifier support may not
-       * validate a pitch change on flip. */
-      if (drm_modifier != DRM_FORMAT_MOD_INVALID &&
-          meta_crtc_kms_supports_modifier (onscreen_native->crtc,
-                                           drm_format,
-                                           drm_modifier))
-        return TRUE;
+      meta_topic (META_DEBUG_SCANOUT,
+                  "crtc %ld: buffer %dx%d != onscreen %ux%u\n",
+                  crtc_id, width, height,
+                  gbm_bo_get_width (gbm_bo), gbm_bo_get_height (gbm_bo));
+      return FALSE;
     }
 
-  {
-    static int last_width;
-    static int last_height;
-    static uint32_t last_format;
-    static uint64_t last_modifier;
-    static uint32_t last_stride;
+  if (gbm_bo_get_format (gbm_bo) != drm_format)
+    {
+      uint32_t fb_format = gbm_bo_get_format (gbm_bo);
 
-    if (width != last_width ||
-        height != last_height ||
-        drm_format != last_format ||
-        drm_modifier != last_modifier ||
-        stride != last_stride)
-      {
-        uint32_t fb_format = gbm_bo_get_format (gbm_bo);
-        uint64_t fb_modifier = gbm_bo_get_modifier (gbm_bo);
+      meta_topic (META_DEBUG_SCANOUT,
+                  "crtc %ld: format %.4s != onscreen %.4s\n",
+                  crtc_id, (char *) &drm_format, (char *) &fb_format);
+      return FALSE;
+    }
 
-        g_message ("DMABUF: scanout rejected: client buffer "
-                   "%dx%d %.4s/0x%" G_GINT64_MODIFIER "x/stride %u "
-                   "vs onscreen %ux%u %.4s/0x%" G_GINT64_MODIFIER "x/stride %u",
-                   width, height,
-                   (char *) &drm_format, drm_modifier, stride,
-                   gbm_bo_get_width (gbm_bo), gbm_bo_get_height (gbm_bo),
-                   (char *) &fb_format, fb_modifier,
-                   gbm_bo_get_stride (gbm_bo));
+  if (gbm_bo_get_modifier (gbm_bo) == drm_modifier &&
+      gbm_bo_get_stride (gbm_bo) == stride)
+    return TRUE;
 
-        last_width = width;
-        last_height = height;
-        last_format = drm_format;
-        last_modifier = drm_modifier;
-        last_stride = stride;
-      }
-  }
+  /* A layout differing from the composited fb is fine as long as the primary
+   * plane advertises the modifier: any driver exposing IN_FORMATS validates
+   * flips against the plane state, not against the previous framebuffer.
+   * Implicit-modifier buffers stay on the strict path above, since drivers
+   * without modifier support may not validate a pitch change on flip. */
+  if (drm_modifier == DRM_FORMAT_MOD_INVALID)
+    {
+      meta_topic (META_DEBUG_SCANOUT,
+                  "crtc %ld: implicit modifier needs an exact match, "
+                  "stride %u != onscreen %u\n",
+                  crtc_id, stride, gbm_bo_get_stride (gbm_bo));
+      return FALSE;
+    }
+
+  if (meta_crtc_kms_supports_modifier (onscreen_native->crtc, drm_format,
+                                       drm_modifier))
+    return TRUE;
+
+  meta_topic (META_DEBUG_SCANOUT,
+              "crtc %ld: primary plane does not advertise modifier "
+              "0x%" G_GINT64_MODIFIER "x (onscreen uses 0x%"
+              G_GINT64_MODIFIER "x)\n",
+              crtc_id, drm_modifier, gbm_bo_get_modifier (gbm_bo));
 
   return FALSE;
 }

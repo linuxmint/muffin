@@ -28,6 +28,7 @@
 #include "backends/meta-logical-monitor.h"
 #include "backends/native/meta-renderer-native.h"
 #include "compositor/meta-surface-actor-wayland.h"
+#include "meta/util.h"
 #include "wayland/meta-wayland-surface.h"
 
 struct _MetaCompositorNative
@@ -144,6 +145,7 @@ maybe_assign_primary_plane (MetaCompositor *compositor)
     gboolean gated;
     unsigned int n_engaged = 0;
     const char *engaged_title = NULL;
+    const char *blocked_reason = NULL;
     GList *l;
     g_autoptr (GHashTable) claimed_surfaces = g_hash_table_new (NULL, NULL);
     static int disable_direct_scanout = -1;
@@ -179,49 +181,74 @@ maybe_assign_primary_plane (MetaCompositor *compositor)
           MetaSurfaceActor *surface_actor;
           MetaSurfaceActorWayland *surface_actor_wayland;
           MetaWaylandSurface *surface;
+          const char *reason = NULL;
           g_autoptr (CoglScanout) scanout = NULL;
 
+          reason = "disabled";
           if (gated)
             goto reconcile;
 
           clutter_stage_view_get_layout (stage_view, &view_layout);
 
+          reason = "no window on view";
           window_actor = find_top_window_actor_on_view (window_actors,
                                                         &view_layout);
           if (!window_actor)
             goto reconcile;
 
+          reason = "actor has extra children";
           if (clutter_actor_get_n_children (CLUTTER_ACTOR (window_actor)) != 1)
             goto reconcile;
 
+          reason = "no window";
           window = meta_window_actor_get_meta_window (window_actor);
           if (!window)
             goto reconcile;
 
+          reason = "window does not cover view";
           if (!meta_rectangle_equal (&window->buffer_rect, &view_layout))
-            goto reconcile;
+            {
+                /* Only interesting where a candidate is being lost; ordinary
+                 * non-fullscreen windows fail this every frame. */
+                if (old_candidate)
+                  meta_topic (META_DEBUG_SCANOUT,
+                              "candidate lost: window %d,%d %dx%d != "
+                              "view %d,%d %dx%d\n",
+                              window->buffer_rect.x, window->buffer_rect.y,
+                              window->buffer_rect.width,
+                              window->buffer_rect.height,
+                              view_layout.x, view_layout.y,
+                              view_layout.width, view_layout.height);
+                goto reconcile;
+            }
 
+          reason = "view has no onscreen framebuffer";
           framebuffer = clutter_stage_view_get_framebuffer (stage_view);
           if (!cogl_is_onscreen (framebuffer))
             goto reconcile;
           onscreen = COGL_ONSCREEN (framebuffer);
 
+          reason = "not a KMS CRTC";
           crtc = meta_onscreen_native_get_crtc (onscreen);
           if (!crtc || !META_IS_GPU_KMS (crtc->gpu))
             goto reconcile;
 
+          reason = "not a wayland surface";
           surface_actor = meta_window_actor_get_surface (window_actor);
           if (!META_IS_SURFACE_ACTOR_WAYLAND (surface_actor))
             goto reconcile;
 
+          reason = "surface obscured";
           if (meta_surface_actor_is_obscured (surface_actor))
             goto reconcile;
 
           /* Scanout substitutes opaque formats, so translucent content must
            * keep compositing or it would render opaque on the plane. */
+          reason = "surface not opaque";
           if (!meta_surface_actor_is_opaque (surface_actor))
             goto reconcile;
 
+          reason = "no wayland surface";
           surface_actor_wayland = META_SURFACE_ACTOR_WAYLAND (surface_actor);
           surface = meta_surface_actor_wayland_get_surface (surface_actor_wayland);
           if (!surface)
@@ -230,6 +257,7 @@ maybe_assign_primary_plane (MetaCompositor *compositor)
           /* Checked before candidacy so that surfaces which can never scan out
            * are not steered into scanout-capable buffer allocations for
            * nothing. */
+          reason = "surface not scanout-capable";
           if (!crtc->config || !crtc->config->mode ||
               !meta_wayland_surface_can_scanout_untransformed (surface,
                                                                crtc->config->mode->width,
@@ -249,20 +277,25 @@ maybe_assign_primary_plane (MetaCompositor *compositor)
            * through an animation, it just cannot be flipped during one.
            * Dropping candidacy would clear the client's scanout tranche and
            * cost it a full buffer renegotiation once the effect ends. */
+          reason = "effect in progress";
           if (meta_window_actor_effect_in_progress (window_actor))
             goto reconcile;
 
+          reason = "actor has transitions";
           if (clutter_actor_has_transitions (CLUTTER_ACTOR (window_actor)))
             goto reconcile;
 
+          reason = "software cursor over view";
           if (software_cursor_overlaps_view (&view_layout))
             goto reconcile;
 
+          reason = "buffer not scanout-compatible";
           scanout = meta_surface_actor_wayland_try_acquire_scanout (surface_actor_wayland,
                                                                     onscreen);
           if (!scanout)
             goto reconcile;
 
+          reason = NULL;
           clutter_stage_view_assign_next_scanout (stage_view, scanout);
 
           n_engaged++;
@@ -270,6 +303,9 @@ maybe_assign_primary_plane (MetaCompositor *compositor)
             engaged_title = meta_window_get_title (window);
 
 reconcile:
+          if (reason)
+            blocked_reason = reason;
+
           /* A view only consumes its assignment if it goes on to redraw, so an
            * assignment left from an earlier frame would be flipped once this
            * view finally repaints — showing a stale buffer instead of the
@@ -286,8 +322,9 @@ reconcile:
           if (new_candidate)
             {
                 if (new_candidate != old_candidate)
-                  g_message ("DMABUF: scanout candidate set (crtc %ld), sending scanout tranche",
-                             crtc->crtc_id);
+                  meta_topic (META_DEBUG_SCANOUT,
+                              "scanout candidate set (crtc %ld)\n",
+                              crtc->crtc_id);
 
                 meta_wayland_surface_set_scanout_candidate (new_candidate, crtc);
                 g_set_weak_pointer (&view_candidate->surface, new_candidate);
@@ -297,11 +334,13 @@ reconcile:
     if (n_engaged != compositor_native->n_scanout_views)
       {
           if (n_engaged > 0)
-            g_message ("DMABUF: direct scanout engaged on %u view(s) ('%s')",
-                       n_engaged,
-                       engaged_title ? engaged_title : "(untitled)");
+            meta_topic (META_DEBUG_SCANOUT,
+                        "direct scanout engaged on %u view(s) ('%s')\n",
+                        n_engaged,
+                        engaged_title ? engaged_title : "(untitled)");
           else
-            g_message ("DMABUF: direct scanout disengaged");
+            meta_topic (META_DEBUG_SCANOUT, "direct scanout disengaged: %s\n",
+                        blocked_reason ? blocked_reason : "no reason recorded");
 
           compositor_native->n_scanout_views = n_engaged;
       }

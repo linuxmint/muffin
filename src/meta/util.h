@@ -92,6 +92,9 @@ void meta_fatal      (const char *format,
  * @META_DEBUG_SHAPES: shapes
  * @META_DEBUG_COMPOSITOR: compositor
  * @META_DEBUG_EDGE_RESISTANCE: edge resistance
+ * @META_DEBUG_DBUS: dbus
+ * @META_DEBUG_INPUT: input
+ * @META_DEBUG_SCANOUT: direct scanout and dma-buf feedback
  */
 typedef enum
 {
@@ -119,7 +122,8 @@ typedef enum
   META_DEBUG_COMPOSITOR      = 1 << 20,
   META_DEBUG_EDGE_RESISTANCE = 1 << 21,
   META_DEBUG_DBUS            = 1 << 22,
-  META_DEBUG_INPUT           = 1 << 23
+  META_DEBUG_INPUT           = 1 << 23,
+  META_DEBUG_SCANOUT         = 1 << 24
 } MetaDebugTopic;
 
 META_EXPORT

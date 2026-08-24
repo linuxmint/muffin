@@ -334,6 +334,8 @@ topic_name (MetaDebugTopic topic)
       return "DBUS";
     case META_DEBUG_INPUT:
       return "INPUT";
+    case META_DEBUG_SCANOUT:
+      return "SCANOUT";
     case META_DEBUG_VERBOSE:
       return "VERBOSE";
     }
