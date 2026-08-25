@@ -68,17 +68,11 @@ effective_unobscured_region (MetaSurfaceActor *surface_actor)
 {
   MetaSurfaceActorPrivate *priv =
     meta_surface_actor_get_instance_private (surface_actor);
-  ClutterActor *actor;
+  ClutterActor *actor = CLUTTER_ACTOR (surface_actor);
 
   /* Fail if we have any mapped clones. */
-  actor = CLUTTER_ACTOR (surface_actor);
-  do
-    {
-      if (clutter_actor_has_mapped_clones (actor))
-        return NULL;
-      actor = clutter_actor_get_parent (actor);
-    }
-  while (actor != NULL);
+  if (clutter_actor_has_mapped_clones (actor))
+    return NULL;
 
   return priv->unobscured_region;
 }
@@ -233,7 +227,31 @@ static gboolean
 meta_surface_actor_get_paint_volume (ClutterActor       *actor,
                                      ClutterPaintVolume *volume)
 {
-  return clutter_paint_volume_set_from_allocation (volume, actor);
+  ClutterActorIter iter;
+  ClutterActor *child;
+
+  if (!clutter_paint_volume_set_from_allocation (volume, actor))
+    return FALSE;
+
+  /* Nested subsurface actors (layer surfaces host theirs as children) can
+   * extend beyond our own allocation; without them in the volume, clipped
+   * redraws inside their area cull this whole subtree and they never paint. */
+  clutter_actor_iter_init (&iter, actor);
+  while (clutter_actor_iter_next (&iter, &child))
+    {
+      const ClutterPaintVolume *child_volume;
+
+      if (!CLUTTER_ACTOR_IS_MAPPED (child))
+        continue;
+
+      child_volume = clutter_actor_get_transformed_paint_volume (child, actor);
+      if (!child_volume)
+        return FALSE;
+
+      clutter_paint_volume_union (volume, child_volume);
+    }
+
+  return TRUE;
 }
 
 static void
@@ -292,6 +310,11 @@ meta_surface_actor_cull_out (MetaCullable   *cullable,
     meta_surface_actor_get_instance_private (surface_actor);
   uint8_t opacity = clutter_actor_get_opacity (CLUTTER_ACTOR (cullable));
 
+  /* Subsurface actors of layer surfaces are nested as children rather than
+   * flattened into a window actor; they paint above our own content, so
+   * cull them first. A no-op for surface actors without cullable children. */
+  meta_cullable_cull_out_children (cullable, unobscured_region, clip_region);
+
   set_unobscured_region (surface_actor, unobscured_region);
   set_clip_region (surface_actor, clip_region);
 
@@ -343,6 +366,8 @@ static void
 meta_surface_actor_reset_culling (MetaCullable *cullable)
 {
   MetaSurfaceActor *surface_actor = META_SURFACE_ACTOR (cullable);
+
+  meta_cullable_reset_culling_children (cullable);
 
   set_clip_region (surface_actor, NULL);
 }

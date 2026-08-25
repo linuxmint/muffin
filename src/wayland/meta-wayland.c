@@ -34,6 +34,7 @@
 #include "wayland/meta-wayland-buffer.h"
 #include "wayland/meta-wayland-activation.h"
 #include "wayland/meta-wayland-cursor-shape.h"
+#include "wayland/meta-wayland-fractional-scale.h"
 #include "wayland/meta-wayland-data-device.h"
 #include "wayland/meta-wayland-dma-buf.h"
 #include "wayland/meta-wayland-drm.h"
@@ -41,6 +42,7 @@
 #include "wayland/meta-wayland-idle-inhibit.h"
 #include "wayland/meta-wayland-inhibit-shortcuts-dialog.h"
 #include "wayland/meta-wayland-inhibit-shortcuts.h"
+#include "wayland/meta-wayland-layer-shell.h"
 #include "wayland/meta-wayland-legacy-xdg-foreign.h"
 #include "wayland/meta-wayland-outputs.h"
 #include "wayland/meta-wayland-private.h"
@@ -142,6 +144,14 @@ meta_wayland_compositor_set_input_focus (MetaWaylandCompositor *compositor,
                                          MetaWindow            *window)
 {
   MetaWaylandSurface *surface = window ? window->surface : NULL;
+  MetaWaylandSurface *exclusive;
+
+  /* Per layer-shell spec, a mapped top/overlay layer surface with exclusive
+   * keyboard interactivity always holds keyboard focus, even as the focus
+   * window changes underneath it. */
+  exclusive = meta_wayland_layer_shell_get_exclusive_focus_surface (compositor);
+  if (exclusive)
+    surface = exclusive;
 
   meta_wayland_seat_set_input_focus (compositor->seat, surface);
 }
@@ -472,6 +482,7 @@ meta_wayland_compositor_setup (MetaWaylandCompositor *wayland_compositor)
   }
   meta_wayland_drm_init (compositor);
   meta_wayland_init_single_pixel_buffer_manager (compositor);
+  meta_wayland_init_fractional_scale (compositor);
   meta_wayland_keyboard_shortcuts_inhibit_init (compositor);
   meta_wayland_surface_inhibit_shortcuts_dialog_init ();
   meta_wayland_text_input_init (compositor);

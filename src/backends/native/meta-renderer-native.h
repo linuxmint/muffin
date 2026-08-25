@@ -55,15 +55,19 @@ MetaGpuKms * meta_renderer_native_get_primary_gpu (MetaRendererNative *renderer_
 
 void meta_renderer_native_finish_frame (MetaRendererNative *renderer_native);
 
-gboolean meta_renderer_native_use_modifiers (MetaRendererNative *renderer_native);
-
 int64_t meta_renderer_native_get_frame_counter (MetaRendererNative *renderer_native);
 
 void meta_renderer_native_reset_modes (MetaRendererNative *renderer_native);
 
 gboolean meta_onscreen_native_is_buffer_scanout_compatible (CoglOnscreen *onscreen,
+                                                            int           width,
+                                                            int           height,
                                                             uint32_t      drm_format,
                                                             uint64_t      drm_modifier,
                                                             uint32_t      stride);
+
+MetaCrtc * meta_onscreen_native_get_crtc (CoglOnscreen *onscreen);
+
+uint32_t meta_renderer_native_get_onscreen_drm_format (void);
 
 #endif /* META_RENDERER_NATIVE_H */

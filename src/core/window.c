@@ -91,8 +91,10 @@
 #include "x11/xprops.h"
 
 #ifdef HAVE_WAYLAND
+#include "wayland/meta-wayland-layer-shell.h"
 #include "wayland/meta-wayland-private.h"
 #include "wayland/meta-wayland-surface.h"
+#include "wayland/meta-wayland-xdg-shell.h"
 #include "wayland/meta-window-wayland.h"
 #include "wayland/meta-window-xwayland.h"
 #endif
@@ -812,14 +814,35 @@ meta_window_init (MetaWindow *self)
 }
 
 static gboolean
+window_is_desktop_component (MetaWindow *window)
+{
+  if (window->type == META_WINDOW_DESKTOP ||
+      window->type == META_WINDOW_DOCK)
+    return TRUE;
+
+#ifdef HAVE_WAYLAND
+  /* Popups of a windowed layer surface need nothing here: they carry a
+   * transient_for, so the ancestor walk in our callers reaches a DESKTOP- or
+   * DOCK-typed parent and the type test above answers for them. This is for
+   * the BACKGROUND case, whose parent has no MetaWindow - the popup gets no
+   * transient_for and the walk finds nothing to test.
+   */
+  if (window->client_type == META_WINDOW_CLIENT_TYPE_WAYLAND &&
+      window->surface != NULL &&
+      meta_wayland_surface_is_layer_shell_popup (window->surface))
+    return TRUE;
+#endif
+
+  return FALSE;
+}
+
+static gboolean
 is_desktop_or_dock_foreach (MetaWindow *window,
                             void       *data)
 {
   gboolean *result = data;
 
-  *result =
-    window->type == META_WINDOW_DESKTOP ||
-    window->type == META_WINDOW_DOCK;
+  *result = window_is_desktop_component (window);
   if (*result)
     return FALSE; /* stop as soon as we find one */
   else
@@ -9467,6 +9490,35 @@ gboolean
 meta_window_is_stackable (MetaWindow *window)
 {
   return META_WINDOW_GET_CLASS (window)->is_stackable (window);
+}
+
+gboolean
+meta_window_is_layer_shell (MetaWindow *window)
+{
+#ifdef HAVE_WAYLAND
+  return meta_wayland_layer_surface_from_window (window) != NULL;
+#else
+  return FALSE;
+#endif
+}
+
+/* Whether it is one on the OVERLAY layer, the one that stays above everything.
+ *
+ * The NULL is not hypothetical even where the window's type says it has to be a
+ * layer surface: wl_surface_destructor () clears surface->role before the role's
+ * dispose runs, and that dispose unmanages the window, which resorts the stack
+ * and recalculates every layer while this one is still in it. */
+gboolean
+meta_window_is_overlay_layer_shell (MetaWindow *window)
+{
+#ifdef HAVE_WAYLAND
+  MetaWaylandLayerSurface *layer_surface =
+    meta_wayland_layer_surface_from_window (window);
+
+  return layer_surface && meta_wayland_layer_surface_is_overlay (layer_surface);
+#else
+  return FALSE;
+#endif
 }
 
 gboolean

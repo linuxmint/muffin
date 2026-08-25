@@ -48,8 +48,10 @@
 
 #include "backends/meta-backend-private.h"
 #include "backends/meta-cursor-renderer.h"
+#include "backends/meta-cursor-sprite-xcursor.h"
 #include "backends/meta-cursor-tracker-private.h"
 #include "backends/meta-cursor.h"
+#include "backends/meta-logical-monitor.h"
 #include "clutter/clutter.h"
 #include "cogl/cogl-wayland-server.h"
 #include "cogl/cogl.h"
@@ -500,16 +502,43 @@ default_grab_button (MetaWaylandPointerGrab *grab,
               META_WAYLAND_LAYER_SURFACE (role)))
         {
           MetaWaylandSeat *seat = meta_wayland_pointer_get_seat (pointer);
+          MetaWaylandSurface *exclusive =
+            meta_wayland_layer_shell_get_exclusive_focus_surface (
+              meta_wayland_compositor_get_default ());
 
-          if (meta_wayland_seat_has_keyboard (seat))
+          /* An exclusive layer surface holds keyboard focus; a click on
+           * another surface must not steal it. Skip entirely when this surface
+           * already holds the keyboard: there is no focus change to make, and
+           * re-running meta_window_focus () on every click would re-stamp the
+           * MRU entry and churn appears-focused for nothing. */
+          if (meta_wayland_seat_has_keyboard (seat) &&
+              (!exclusive || exclusive == pointer->focus_surface) &&
+              seat->keyboard->focus_surface != pointer->focus_surface)
             {
               MetaDisplay *display = meta_get_display ();
+              MetaWindow *window =
+                meta_wayland_surface_get_window (pointer->focus_surface);
 
-              if (display->focus_window)
-                meta_display_update_focus_window (display, NULL);
+              /* Focus it as a window where there is one: that sets
+               * focus_window, has_focus and the MRU entry, and hands over the
+               * Wayland keyboard in the same transition (see
+               * meta_display_update_focus_window ()). Granting the seat focus
+               * on its own would leave muffin believing nothing is focused, so
+               * the next focus_default_window () would pass the keyboard to an
+               * unrelated window without ever telling this surface. Only
+               * BACKGROUND has no window to focus. */
+              if (window)
+                {
+                  meta_window_focus (window,
+                                     meta_display_get_current_time_roundtrip (display));
+                }
+              else
+                {
+                  if (display->focus_window)
+                    meta_display_update_focus_window (display, NULL);
 
-              meta_wayland_keyboard_set_focus (seat->keyboard,
-                                               pointer->focus_surface);
+                  meta_wayland_seat_set_input_focus (seat, pointer->focus_surface);
+                }
             }
         }
     }
@@ -594,6 +623,7 @@ meta_wayland_pointer_disable (MetaWaylandPointer *pointer)
   meta_wayland_pointer_set_current (pointer, NULL);
 
   g_clear_pointer (&pointer->pointer_clients, g_hash_table_unref);
+  g_clear_object (&pointer->cursor_shape_sprite);
   pointer->cursor_surface = NULL;
   pointer->cursor_shape = META_CURSOR_INVALID;
 }
@@ -1101,6 +1131,39 @@ meta_wayland_pointer_get_relative_coordinates (MetaWaylandPointer *pointer,
   *sy = wl_fixed_from_double (yf);
 }
 
+/* Keep a shape (theme) cursor sized for the monitor it is on, mirroring the
+ * root cursor (see root_cursor_prepare_at) and the tablet tool. Without this
+ * the sprite stays at theme_scale 1 and renders half-size on a HiDPI monitor.
+ * A cursor surface backed by a client buffer scales via the cursor-surface
+ * role instead, so this only applies to the wp_cursor_shape_v1 path. */
+static void
+pointer_cursor_shape_prepare_at (MetaCursorSpriteXcursor *sprite_xcursor,
+                                 int                      x,
+                                 int                      y,
+                                 MetaWaylandPointer      *pointer)
+{
+  MetaBackend *backend = meta_get_backend ();
+  MetaMonitorManager *monitor_manager =
+    meta_backend_get_monitor_manager (backend);
+  MetaLogicalMonitor *logical_monitor;
+
+  logical_monitor =
+    meta_monitor_manager_get_logical_monitor_at (monitor_manager, x, y);
+  if (logical_monitor)
+    {
+      MetaCursorSprite *cursor_sprite = META_CURSOR_SPRITE (sprite_xcursor);
+      int ceiled_scale = (int) ceilf (logical_monitor->scale);
+
+      meta_cursor_sprite_xcursor_set_theme_scale (sprite_xcursor, ceiled_scale);
+
+      if (meta_is_stage_views_scaled ())
+        meta_cursor_sprite_set_texture_scale (cursor_sprite,
+                                              1.0 / ceiled_scale);
+      else
+        meta_cursor_sprite_set_texture_scale (cursor_sprite, 1.0);
+    }
+}
+
 void
 meta_wayland_pointer_update_cursor_surface (MetaWaylandPointer *pointer)
 {
@@ -1123,9 +1186,19 @@ meta_wayland_pointer_update_cursor_surface (MetaWaylandPointer *pointer)
       else if (pointer->cursor_shape != META_CURSOR_INVALID)
         {
           MetaCursorSpriteXcursor *sprite;
+          MetaCursorSpriteXcursor *previous = pointer->cursor_shape_sprite;
 
-          sprite = meta_cursor_sprite_xcursor_new (pointer->cursor_shape);
-          cursor_sprite = META_CURSOR_SPRITE (sprite);
+          sprite = meta_cursor_sprite_xcursor_ensure (&pointer->cursor_shape_sprite,
+                                                      pointer->cursor_shape);
+
+          /* Connect the scale handler once, when a new sprite is created
+           * (ensure reuses the cached sprite when the shape is unchanged). */
+          if (sprite != previous)
+            g_signal_connect (sprite, "prepare-at",
+                              G_CALLBACK (pointer_cursor_shape_prepare_at),
+                              pointer);
+
+          cursor_sprite = g_object_ref (META_CURSOR_SPRITE (sprite));
         }
 
       meta_cursor_tracker_set_window_cursor (cursor_tracker, cursor_sprite);

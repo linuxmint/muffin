@@ -2333,11 +2333,18 @@ process_iso_next_group (MetaDisplay *display,
 {
   MetaKeyBindingManager *keys = &display->key_binding_manager;
   gboolean activate;
-  xkb_keycode_t keycode = (xkb_keycode_t) event->hardware_keycode;
   xkb_mod_mask_t mask;
-  int i, j;
+  int i;
 
   if (event->type == CLUTTER_KEY_RELEASE)
+    return FALSE;
+
+  /* Match on the keysym the event actually carries rather than a precomputed
+   * list of keycodes. Under Wayland xkbcommon translates the combo (e.g.
+   * Alt+Shift) straight to the ISO_Next_Group keysym, which the keycode-list
+   * lookup misses - so the accelerator never fired and the shell was never
+   * notified of grp: layout switches. */
+  if (event->keyval != XKB_KEY_ISO_Next_Group)
     return FALSE;
 
   activate = FALSE;
@@ -2345,19 +2352,15 @@ process_iso_next_group (MetaDisplay *display,
 
   for (i = 0; i < keys->n_iso_next_group_combos; ++i)
     {
-      for (j = 0; j <  keys->iso_next_group_combo[i].len; ++j)
+      if (mask == keys->iso_next_group_combo[i].mask)
         {
-          if (keycode == keys->iso_next_group_combo[i].keycodes[j] &&
-              mask == keys->iso_next_group_combo[i].mask)
-            {
-              /* If the signal handler returns TRUE the keyboard will
-                 remain frozen. It's the signal handler's responsibility
-                 to unfreeze it. */
-              if (!meta_display_modifiers_accelerator_activate (display))
-                meta_display_unfreeze_keyboard (display, event->time);
-              activate = TRUE;
-              break;
-            }
+          /* If the signal handler returns TRUE the keyboard will
+             remain frozen. It's the signal handler's responsibility
+             to unfreeze it. */
+          if (!meta_display_modifiers_accelerator_activate (display))
+            meta_display_unfreeze_keyboard (display, event->time);
+          activate = TRUE;
+          break;
         }
     }
 

@@ -333,6 +333,14 @@ meta_cursor_renderer_get_cursor (MetaCursorRenderer *renderer)
   return priv->displayed_cursor;
 }
 
+gboolean
+meta_cursor_renderer_needs_overlay (MetaCursorRenderer *renderer)
+{
+  MetaCursorRendererPrivate *priv = meta_cursor_renderer_get_instance_private (renderer);
+
+  return !priv->handled_by_backend;
+}
+
 void
 meta_cursor_renderer_add_hw_cursor_inhibitor (MetaCursorRenderer    *renderer,
                                               MetaHwCursorInhibitor *inhibitor)

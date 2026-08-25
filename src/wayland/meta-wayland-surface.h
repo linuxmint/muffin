@@ -168,6 +168,24 @@ struct _MetaWaylandSurface
 
   MetaWaylandBufferRef *buffer_ref;
 
+  MetaCrtc *scanout_candidate;
+
+  /*
+   * Not to be confused with ->scale above, which is the buffer scale the
+   * client set. These two are what the compositor last told the client, and
+   * only ever move in that direction.
+   */
+  /* Last wl_surface.preferred_buffer_scale sent; ceiled integer, 0 if none. */
+  int sent_preferred_buffer_scale;
+
+  /* wp_fractional_scale_v1 */
+  struct {
+    struct wl_resource *resource;
+    gulong destroy_handler_id;
+    /* Last preferred_scale sent; exact, 0.0 if none or if the object died. */
+    double sent_scale;
+  } fractional_scale;
+
   /* Buffer renderer state. */
   gboolean buffer_held;
 
@@ -334,6 +352,8 @@ void                meta_wayland_surface_notify_geometry_changed (MetaWaylandSur
 
 void                meta_wayland_surface_notify_subsurface_state_changed (MetaWaylandSurface *surface);
 
+gboolean            meta_wayland_surface_is_subsurface_host (MetaWaylandSurface *surface);
+
 void                meta_wayland_surface_notify_unmapped (MetaWaylandSurface *surface);
 
 void                meta_wayland_surface_update_outputs_recursively (MetaWaylandSurface *surface);
@@ -343,8 +363,19 @@ void                meta_wayland_surface_notify_actor_changed (MetaWaylandSurfac
 int                 meta_wayland_surface_get_width (MetaWaylandSurface *surface);
 int                 meta_wayland_surface_get_height (MetaWaylandSurface *surface);
 
+gboolean            meta_wayland_surface_can_scanout_untransformed (MetaWaylandSurface *surface,
+                                                                    int                 mode_width,
+                                                                    int                 mode_height);
+
 CoglScanout *       meta_wayland_surface_try_acquire_scanout (MetaWaylandSurface *surface,
                                                               CoglOnscreen       *onscreen);
+
+MetaLogicalMonitor * meta_wayland_surface_get_preferred_scale_monitor (MetaWaylandSurface *surface);
+
+MetaCrtc *          meta_wayland_surface_get_scanout_candidate (MetaWaylandSurface *surface);
+
+void                meta_wayland_surface_set_scanout_candidate (MetaWaylandSurface *surface,
+                                                                MetaCrtc           *crtc);
 
 static inline GNode *
 meta_get_next_subsurface_sibling (GNode *n)

@@ -500,6 +500,18 @@ make_output_inert (gpointer key,
 {
   MetaWaylandOutput *wayland_output = value;
 
+  /* Announce the output's removal now. The global itself is kept alive until
+   * delayed_destroy_outputs () so an in-flight wl_registry.bind cannot be
+   * cancelled. (ref https://gitlab.gnome.org/GNOME/mutter/-/commit/c0bc821f62)
+   *
+   * Layer-shell clients already learn of the change by another route: clearing
+   * logical_monitor below feeds the workarea path, which closes a surface bound
+   * to this output and reconfigures the survivors. Toolkits do not - they build
+   * their monitor list from these globals, so an app relying on Gdk to notice a
+   * monitor change saw nothing until the destroy delay expired.
+   */
+  wl_global_remove (wayland_output->global);
+
   wayland_output->logical_monitor = NULL;
   make_output_resources_inert (wayland_output);
 }

@@ -1,4 +1,4 @@
-project('muffin', 'c', version : '6.7.4', meson_version : '>=1.0.0', license : 'GPLv2+')
+project('muffin', 'c', version : '6.7.5', meson_version : '>=1.0.0', license : 'GPLv2+')
 
 muffin_plugin_api_version = '3'
 
@@ -37,7 +37,7 @@ udev_req = '>= 228'
 gudev_req = '>= 232'
 
 # wayland version requirements
-wayland_server_req = '>= 1.20'
+wayland_server_req = '>= 1.22'
 wayland_protocols_req = '>= 1.38'
 
 # native backend version requirements

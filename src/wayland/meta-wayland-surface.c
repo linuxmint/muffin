@@ -25,6 +25,7 @@
 #include "wayland/meta-wayland-surface.h"
 
 #include <gobject/gvaluecollector.h>
+#include <math.h>
 #include <wayland-server.h>
 
 #include "backends/meta-cursor-tracker-private.h"
@@ -38,9 +39,11 @@
 #include "compositor/region-utils.h"
 #include "core/display-private.h"
 #include "core/window-private.h"
+#include "meta/util.h"
 #include "wayland/meta-wayland-actor-surface.h"
 #include "wayland/meta-wayland-buffer.h"
 #include "wayland/meta-wayland-data-device.h"
+#include "wayland/meta-wayland-fractional-scale.h"
 #include "wayland/meta-wayland-gtk-shell.h"
 #include "wayland/meta-wayland-layer-shell.h"
 #include "wayland/meta-wayland-keyboard.h"
@@ -77,6 +80,17 @@ typedef struct _MetaWaylandSurfaceRolePrivate
 {
   MetaWaylandSurface *surface;
 } MetaWaylandSurfaceRolePrivate;
+
+enum
+{
+  PROP_0,
+
+  PROP_SCANOUT_CANDIDATE,
+
+  N_PROPS
+};
+
+static GParamSpec *obj_props[N_PROPS];
 
 G_DEFINE_TYPE (MetaWaylandSurface, meta_wayland_surface, G_TYPE_OBJECT);
 
@@ -1369,6 +1383,82 @@ surface_output_disconnect_signal (gpointer key, gpointer value, gpointer user_da
   g_signal_handler_disconnect (key, (gulong) GPOINTER_TO_SIZE (value));
 }
 
+/*
+ * The monitor whose scale the client should render for: the window's main
+ * monitor, so a surface is told the scale of the monitor it is actually on
+ * rather than having to guess from the set of outputs it overlaps.
+ * Windowless surfaces (cursors, drag icons) follow the highest scale among
+ * the outputs they are on.
+ */
+MetaLogicalMonitor *
+meta_wayland_surface_get_preferred_scale_monitor (MetaWaylandSurface *surface)
+{
+  MetaWindow *window;
+  MetaLogicalMonitor *logical_monitor = NULL;
+  GHashTableIter iter;
+  gpointer key;
+
+  window = meta_wayland_surface_get_toplevel_window (surface);
+  if (window && window->monitor)
+    return window->monitor;
+
+  g_hash_table_iter_init (&iter, surface->outputs_to_destroy_notify_id);
+  while (g_hash_table_iter_next (&iter, &key, NULL))
+    {
+      MetaWaylandOutput *wayland_output = key;
+
+      if (!wayland_output->logical_monitor)
+        continue;
+
+      if (!logical_monitor ||
+          meta_logical_monitor_get_scale (wayland_output->logical_monitor) >
+          meta_logical_monitor_get_scale (logical_monitor))
+        logical_monitor = wayland_output->logical_monitor;
+    }
+
+  return logical_monitor;
+}
+
+static void
+maybe_send_preferred_scale (MetaWaylandSurface *surface)
+{
+  MetaLogicalMonitor *logical_monitor;
+  float monitor_scale;
+  int scale;
+
+  if (!surface->resource)
+    return;
+
+  logical_monitor = meta_wayland_surface_get_preferred_scale_monitor (surface);
+  if (!logical_monitor)
+    return;
+
+  monitor_scale = meta_logical_monitor_get_scale (logical_monitor);
+
+  /* Clients supporting wp_fractional_scale_v1 get the exact scale and render
+   * at it, so nothing needs scaling afterwards. */
+  meta_wayland_fractional_scale_maybe_send_preferred_scale (surface,
+                                                            monitor_scale);
+
+  /* Same value wl_output advertises for the monitor: clients render at this
+   * scale and the compositor scales the result down where the monitor scale
+   * is fractional.
+   *
+   * No preferred_buffer_transform is sent along with it. Muffin transforms
+   * client buffers itself, so asking clients to pre-rotate would change
+   * behaviour for no gain; normal is the protocol default. */
+  if (wl_resource_get_version (surface->resource) <
+      WL_SURFACE_PREFERRED_BUFFER_SCALE_SINCE_VERSION)
+    return;
+
+  scale = (int) ceilf (monitor_scale);
+  if (scale <= 0 || scale == surface->sent_preferred_buffer_scale)
+    return;
+
+  wl_surface_send_preferred_buffer_scale (surface->resource, scale);
+  surface->sent_preferred_buffer_scale = scale;
+}
+
 void
 meta_wayland_surface_update_outputs (MetaWaylandSurface *surface)
 {
@@ -1378,6 +1468,8 @@ meta_wayland_surface_update_outputs (MetaWaylandSurface *surface)
   g_hash_table_foreach (surface->compositor->outputs,
                         update_surface_output_state,
                         surface);
+
+  maybe_send_preferred_scale (surface);
 }
 
 void
@@ -1406,6 +1498,7 @@ wl_surface_destructor (struct wl_resource *resource)
 
   g_signal_emit (surface, surface_signals[SURFACE_DESTROY], 0);
 
+  g_clear_object (&surface->scanout_candidate);
   g_clear_object (&surface->role);
 
   if (surface->unassigned.buffer)
@@ -1695,9 +1788,39 @@ meta_wayland_surface_init (MetaWaylandSurface *surface)
 }
 
 static void
+meta_wayland_surface_get_property (GObject    *object,
+                                   guint       prop_id,
+                                   GValue     *value,
+                                   GParamSpec *pspec)
+{
+  MetaWaylandSurface *surface = META_WAYLAND_SURFACE (object);
+
+  switch (prop_id)
+    {
+    case PROP_SCANOUT_CANDIDATE:
+      g_value_set_object (value, surface->scanout_candidate);
+      break;
+    default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+      break;
+    }
+}
+
+static void
 meta_wayland_surface_class_init (MetaWaylandSurfaceClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
+
+  object_class->get_property = meta_wayland_surface_get_property;
+
+  obj_props[PROP_SCANOUT_CANDIDATE] =
+    g_param_spec_object ("scanout-candidate",
+                         "scanout-candidate",
+                         "Scanout candidate for given CRTC",
+                         META_TYPE_CRTC,
+                         G_PARAM_READABLE |
+                         G_PARAM_STATIC_STRINGS);
+  g_object_class_install_properties (object_class, N_PROPS, obj_props);
 
   surface_signals[SURFACE_DESTROY] =
     g_signal_new ("destroy",
@@ -1950,6 +2073,24 @@ meta_wayland_surface_notify_subsurface_state_changed (MetaWaylandSurface *surfac
     meta_wayland_surface_role_notify_subsurface_state_changed (surface->role);
 }
 
+/* Whether the surface's role manages actors for a tree of subsurfaces -
+ * true for the roles that implement notify_subsurface_state_changed (shell
+ * surfaces via their window actor, layer surfaces via their own actor).
+ * Subsurfaces only get their actors synced when their tree root passes
+ * this. */
+gboolean
+meta_wayland_surface_is_subsurface_host (MetaWaylandSurface *surface)
+{
+  MetaWaylandSurfaceRoleClass *klass;
+
+  if (!surface || !surface->role)
+    return FALSE;
+
+  klass = META_WAYLAND_SURFACE_ROLE_GET_CLASS (surface->role);
+
+  return klass->notify_subsurface_state_changed != NULL;
+}
+
 MetaWaylandSurface *
 meta_wayland_surface_role_get_surface (MetaWaylandSurfaceRole *role)
 {
@@ -2085,6 +2226,44 @@ scanout_destroyed (gpointer  data,
   meta_wayland_buffer_ref_unref (buffer_ref);
 }
 
+/*
+ * Scanning out shows the buffer as-is, so any mapping the compositor would
+ * normally apply must be an identity: no buffer transform, no viewport
+ * cropping, and buffer pixels matching the mode exactly.
+ *
+ * A destination-only viewport is fine, and is what lets fractional scales
+ * scan out at all: a wp_fractional_scale_v1 client renders a mode-sized buffer
+ * and sets the destination to the logical size, so the buffer already is what
+ * the mode wants. A client that only knows wl_output.scale renders for the
+ * ceiled integer scale instead, and the size check below rejects it.
+ */
+gboolean
+meta_wayland_surface_can_scanout_untransformed (MetaWaylandSurface *surface,
+                                                int                 mode_width,
+                                                int                 mode_height)
+{
+  if (surface->buffer_transform != META_MONITOR_TRANSFORM_NORMAL)
+    return FALSE;
+
+  if (surface->viewport.has_src_rect)
+    return FALSE;
+
+  if (get_buffer_width (surface) != mode_width ||
+      get_buffer_height (surface) != mode_height)
+    {
+      meta_topic (META_DEBUG_SCANOUT,
+                  "fullscreen surface not scanout-capable: "
+                  "buffer %dx%d vs mode %dx%d\n",
+                  get_buffer_width (surface),
+                  get_buffer_height (surface),
+                  mode_width, mode_height);
+
+      return FALSE;
+    }
+
+  return TRUE;
+}
+
 CoglScanout *
 meta_wayland_surface_try_acquire_scanout (MetaWaylandSurface *surface,
                                           CoglOnscreen       *onscreen)
@@ -2109,6 +2288,24 @@ meta_wayland_surface_try_acquire_scanout (MetaWaylandSurface *surface,
 
   return scanout;
 
+}
+
+MetaCrtc *
+meta_wayland_surface_get_scanout_candidate (MetaWaylandSurface *surface)
+{
+  return surface->scanout_candidate;
+}
+
+void
+meta_wayland_surface_set_scanout_candidate (MetaWaylandSurface *surface,
+                                            MetaCrtc           *crtc)
+{
+  if (surface->scanout_candidate == crtc)
+    return;
+
+  g_set_object (&surface->scanout_candidate, crtc);
+  g_object_notify_by_pspec (G_OBJECT (surface),
+                            obj_props[PROP_SCANOUT_CANDIDATE]);
 }
 
 void

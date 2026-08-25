@@ -1,3 +1,50 @@
+muffin (6.7.5) alfa; urgency=medium
+
+  [ Clement Lefebvre ]
+  * wayland: Allow activation tokens without surfaces
+  * wayland: Make focus stealing prevention optional
+  * debian: update symbols
+  * debug: Add /usr/bin/cinnamon-list-windows CLI
+
+  [ Michael Webster ]
+  * wayland: Use event time (not "now") when self-activating via gtk-shell.
+  * stack: Don't raise windows that aren't in the stack.
+  * cursor/native: Round HW cursor buffers up to a driver-legal size.
+  * meta-feedback-actor.c: Read anchor position as float, not int.
+  * clutter/clutter-text.c: Fix surrounding-text offsets and pre-edit rendering for input methods.
+  * meta-wayland-text-input: Backport text-input-v3 fixes, reset the IM on click and touch,
+  * meta-wayland-keyboard.c: Free the previous keymap read-only file on keymap change.
+  * meta-wayland-keyboard: Add off-layout keysym typing and reusable key/modifier helpers.
+  * clutter-input-method: Make clutter_input_method_get_focus public.
+  * wayland: Add input-method-v2 and virtual-keyboard-v1 support for fcitx.
+  * keybindings: Match the iso_next_group accelerator on keysym, not keycode.
+  * wayland: Fix HW cursor never hiding on wl_pointer.set_cursor(nil)
+  * kms: Fail cleanly when a device cannot modeset
+  * native: Wait for an active logind session before backend init
+  * renderer/native: Probe gbm scanout support instead of assuming it
+  * wayland: Advertise the render node of the GPU we composite on
+  * renderer/native: Allocate cross-GPU surfaces linear
+  * renderer/native: Drop unused meta_renderer_native_use_modifiers()
+  * cursor: Reuse the cursor sprite when the shape is unchanged
+  * cursor/native: Stop using the hardware cursor where it is slower.
+  * constraints.c: Place popups on the same monitor as their anchor rect.
+  * constraints.c: Flip popups even when they won't fully fit afterwards
+  * meta-wayland-xdg-shell.c: Dismiss instead of destroy invalid popup
+  * meta-backend-native.c: Handle NULL from xkb_keymap_new_from_names.
+  * layer-shell: Protocol conformance fixes, v5, and exclusive keyboard focus.
+  * layer-shell: Fix crash and stacking of popups parented to layer surfaces.
+  * layer-shell: Support subsurfaces on layer surfaces.
+  * layer-shell: Scale surfaces on HiDPI monitors.
+  * cursor: Scale shape cursors and honor texture scale on HiDPI.
+  * meta-wayland-data-offer.c: Ignore the "ask" user_action once the user has selected a real action.
+  * wayland: Let the compositor update the DnD cursor, so in-flight drag operations can show appropriate pointers for move/copy/ask.
+  * meta-workspace-manager.c: Adapt show-desktop to work with layer- shell surfaces.
+
+  [ Aleksey Samoilov ]
+  * [Wayland] Switch to stable linux-dmabuf (#840)
+
+ -- Clement Lefebvre <root@linuxmint.com>  Sat, 15 Aug 2026 12:41:28 +0200
+
 muffin (6.7.4) alfa; urgency=medium
 
   [ Michael Webster ]

@@ -34,6 +34,10 @@
 #include "meta/prefs.h"
 #include "meta/util.h"
 
+#ifdef HAVE_WAYLAND
+#include "wayland/meta-wayland-layer-shell.h"
+#endif
+
 G_DEFINE_TYPE (MetaWorkspaceManager, meta_workspace_manager, G_TYPE_OBJECT)
 
 enum
@@ -955,6 +959,17 @@ meta_workspace_manager_show_desktop (MetaWorkspaceManager *workspace_manager,
   if (workspace_manager->active_workspace->showing_desktop)
     return;
 
+#ifdef HAVE_WAYLAND
+  /* A layer surface asking for EXCLUSIVE keyboard interactivity has claimed
+   * the session - a lock or authentication surface, say. Do nothing at all
+   * rather than hide every window beneath it.
+   */
+  if (meta_is_wayland_compositor () &&
+      meta_wayland_layer_shell_get_exclusive_focus_surface (
+        meta_wayland_compositor_get_default ()))
+    return;
+#endif
+
   workspace_manager->active_workspace->showing_desktop = TRUE;
 
   queue_windows_showing (workspace_manager);
@@ -968,6 +983,13 @@ meta_workspace_manager_show_desktop (MetaWorkspaceManager *workspace_manager,
 
       if (w->type == META_WINDOW_DESKTOP)
         {
+          /* On Wayland the desktop is a layer surface, which may have declined
+           * the keyboard. meta_window_focus () does not check this itself, so
+           * skip it here rather than granting focus it asked not to have, and
+           * keep looking - another monitor's desktop may accept it. */
+          if (w->unmanaging || !meta_window_is_focusable (w))
+            continue;
+
           meta_window_focus (w, timestamp);
           break;
         }
