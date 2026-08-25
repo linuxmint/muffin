@@ -296,6 +296,9 @@ void                meta_wayland_surface_drag_dest_update    (MetaWaylandSurface
 
 void                meta_wayland_surface_update_outputs (MetaWaylandSurface *surface);
 
+void                meta_wayland_surface_send_preferred_scale (MetaWaylandSurface *surface,
+                                                               float               monitor_scale);
+
 MetaWaylandSurface *meta_wayland_surface_get_toplevel (MetaWaylandSurface *surface);
 
 MetaWindow *        meta_wayland_surface_get_window (MetaWaylandSurface *surface);

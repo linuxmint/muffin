@@ -1419,21 +1419,17 @@ meta_wayland_surface_get_preferred_scale_monitor (MetaWaylandSurface *surface)
   return logical_monitor;
 }
 
-static void
-maybe_send_preferred_scale (MetaWaylandSurface *surface)
+/* Tell @surface it is being shown at @monitor_scale. Split out so roles that
+ * know their monitor up front (layer-shell) can advertise the scale without
+ * waiting until the client has committed a buffer. */
+void
+meta_wayland_surface_send_preferred_scale (MetaWaylandSurface *surface,
+                                           float               monitor_scale)
 {
-  MetaLogicalMonitor *logical_monitor;
-  float monitor_scale;
   int scale;
 
   if (!surface->resource)
     return;
-
-  logical_monitor = meta_wayland_surface_get_preferred_scale_monitor (surface);
-  if (!logical_monitor)
-    return;
-
-  monitor_scale = meta_logical_monitor_get_scale (logical_monitor);
 
   /* Clients supporting wp_fractional_scale_v1 get the exact scale and render
    * at it, so nothing needs scaling afterwards. */
@@ -1457,6 +1453,22 @@ maybe_send_preferred_scale (MetaWaylandSurface *surface)
 
   wl_surface_send_preferred_buffer_scale (surface->resource, scale);
   surface->sent_preferred_buffer_scale = scale;
+}
+
+static void
+maybe_send_preferred_scale (MetaWaylandSurface *surface)
+{
+  MetaLogicalMonitor *logical_monitor;
+
+  if (!surface->resource)
+    return;
+
+  logical_monitor = meta_wayland_surface_get_preferred_scale_monitor (surface);
+  if (!logical_monitor)
+    return;
+
+  meta_wayland_surface_send_preferred_scale (
+    surface, meta_logical_monitor_get_scale (logical_monitor));
 }
 
 void

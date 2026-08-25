@@ -55,6 +55,10 @@ gboolean meta_wayland_layer_surface_reserves_space (MetaWaylandLayerSurface *lay
 void meta_wayland_layer_shell_update_struts (MetaWaylandCompositor *compositor);
 void meta_wayland_layer_shell_on_workarea_changed (MetaWaylandCompositor *compositor);
 
+/* An output changed size (monitor rescale or mode change): every layer surface
+   on it needs a new configure, full-output ones included. */
+void meta_wayland_layer_shell_on_monitors_changed (MetaWaylandCompositor *compositor);
+
 MetaWaylandLayerShell * meta_wayland_compositor_get_layer_shell (MetaWaylandCompositor *compositor);
 
 GList * meta_wayland_layer_shell_find_surfaces (MetaWaylandLayerShell  *layer_shell,

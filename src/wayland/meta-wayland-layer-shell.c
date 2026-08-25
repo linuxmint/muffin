@@ -2251,6 +2251,19 @@ layer_shell_get_layer_surface (struct wl_client   *client,
               layer,
               layer_surface_output_name (output));
 
+  /* Now that the surface's output is known, advertise its scale -- before the
+   * initial configure, so the client renders at the right scale from its very
+   * first frame. A layer surface names its output up front and needs no
+   * inference. (see sway/desktop/layer_shell.c). */
+  {
+    MetaLogicalMonitor *logical_monitor =
+      get_layer_surface_logical_monitor (layer_surface);
+
+    if (logical_monitor)
+      meta_wayland_surface_send_preferred_scale (
+        surface, meta_logical_monitor_get_scale (logical_monitor));
+  }
+
   /* The initial configure is sent in response to the client's initial commit
    * (see apply_state) — sending one here would reflect default state and its
    * ack could suppress the real configure. */
