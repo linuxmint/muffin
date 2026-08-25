@@ -73,9 +73,9 @@ void meta_fatal      (const char *format,
  * @META_DEBUG_FOCUS: focus
  * @META_DEBUG_WORKAREA: workarea
  * @META_DEBUG_STACK: stack
- * @META_DEBUG_THEMES: themes
+ * @META_DEBUG_THEMES: themes (deprecated: no call sites remain)
  * @META_DEBUG_SM: session management
- * @META_DEBUG_EVENTS: events
+ * @META_DEBUG_EVENTS: events (deprecated: no call sites remain)
  * @META_DEBUG_WINDOW_STATE: window state
  * @META_DEBUG_WINDOW_OPS: window operations
  * @META_DEBUG_GEOMETRY: geometry
@@ -84,17 +84,18 @@ void meta_fatal      (const char *format,
  * @META_DEBUG_XINERAMA: Xinerama
  * @META_DEBUG_KEYBINDINGS: keybindings
  * @META_DEBUG_SYNC: sync
- * @META_DEBUG_ERRORS: errors
+ * @META_DEBUG_ERRORS: errors (deprecated: no call sites remain)
  * @META_DEBUG_STARTUP: startup
  * @META_DEBUG_PREFS: preferences
  * @META_DEBUG_GROUPS: groups
  * @META_DEBUG_RESIZING: resizing
  * @META_DEBUG_SHAPES: shapes
- * @META_DEBUG_COMPOSITOR: compositor
+ * @META_DEBUG_COMPOSITOR: compositor (deprecated: no call sites remain)
  * @META_DEBUG_EDGE_RESISTANCE: edge resistance
  * @META_DEBUG_DBUS: dbus
  * @META_DEBUG_INPUT: input
  * @META_DEBUG_SCANOUT: direct scanout and dma-buf feedback
+ * @META_DEBUG_LAYER_SHELL: wlr-layer-shell surfaces
  */
 typedef enum
 {
@@ -102,9 +103,9 @@ typedef enum
   META_DEBUG_FOCUS           = 1 << 0,
   META_DEBUG_WORKAREA        = 1 << 1,
   META_DEBUG_STACK           = 1 << 2,
-  META_DEBUG_THEMES          = 1 << 3,
+  META_DEBUG_THEMES          = 1 << 3,   /* deprecated, unused */
   META_DEBUG_SM              = 1 << 4,
-  META_DEBUG_EVENTS          = 1 << 5,
+  META_DEBUG_EVENTS          = 1 << 5,   /* deprecated, unused */
   META_DEBUG_WINDOW_STATE    = 1 << 6,
   META_DEBUG_WINDOW_OPS      = 1 << 7,
   META_DEBUG_GEOMETRY        = 1 << 8,
@@ -113,17 +114,18 @@ typedef enum
   META_DEBUG_XINERAMA        = 1 << 11,
   META_DEBUG_KEYBINDINGS     = 1 << 12,
   META_DEBUG_SYNC            = 1 << 13,
-  META_DEBUG_ERRORS          = 1 << 14,
+  META_DEBUG_ERRORS          = 1 << 14,  /* deprecated, unused */
   META_DEBUG_STARTUP         = 1 << 15,
   META_DEBUG_PREFS           = 1 << 16,
   META_DEBUG_GROUPS          = 1 << 17,
   META_DEBUG_RESIZING        = 1 << 18,
   META_DEBUG_SHAPES          = 1 << 19,
-  META_DEBUG_COMPOSITOR      = 1 << 20,
+  META_DEBUG_COMPOSITOR      = 1 << 20,  /* deprecated, unused */
   META_DEBUG_EDGE_RESISTANCE = 1 << 21,
   META_DEBUG_DBUS            = 1 << 22,
   META_DEBUG_INPUT           = 1 << 23,
-  META_DEBUG_SCANOUT         = 1 << 24
+  META_DEBUG_SCANOUT         = 1 << 24,
+  META_DEBUG_LAYER_SHELL     = 1 << 25
 } MetaDebugTopic;
 
 META_EXPORT

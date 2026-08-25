@@ -23,12 +23,14 @@
 
 #include "backends/meta-backend-private.h"
 #include "backends/meta-logical-monitor.h"
+#include "backends/meta-monitor.h"
 #include "compositor/compositor-private.h"
 #include "compositor/meta-surface-actor-wayland.h"
 #include "core/display-private.h"
 #include "core/meta-workspace-manager-private.h"
 #include "core/workspace-private.h"
 #include "meta/boxes.h"
+#include "meta/util.h"
 #include "wayland/meta-wayland-keyboard.h"
 #include "wayland/meta-wayland-outputs.h"
 #include "wayland/meta-wayland-private.h"
@@ -131,6 +133,100 @@ meta_wayland_layer_shell_from_compositor (MetaWaylandCompositor *compositor)
 {
   return g_object_get_data (G_OBJECT (compositor), "-meta-wayland-layer-shell");
 }
+
+static const char *
+layer_surface_name (MetaWaylandLayerSurface *layer_surface)
+{
+  if (!layer_surface || !layer_surface->namespace)
+    return "(null)";
+
+  return layer_surface->namespace;
+}
+
+static const char *
+layer_surface_output_name (MetaWaylandOutput *output)
+{
+  GList *monitors;
+
+  if (!output || !output->logical_monitor)
+    return "(none - primary)";
+
+  monitors = meta_logical_monitor_get_monitors (output->logical_monitor);
+  if (!monitors)
+    return "(unknown)";
+
+  return meta_monitor_get_connector (monitors->data);
+}
+
+static const char *
+side_to_string (MetaSide side)
+{
+  switch (side)
+    {
+    case META_SIDE_TOP:
+      return "top";
+    case META_SIDE_BOTTOM:
+      return "bottom";
+    case META_SIDE_LEFT:
+      return "left";
+    case META_SIDE_RIGHT:
+      return "right";
+    }
+
+  return "?";
+}
+
+#ifdef WITH_VERBOSE_MODE
+static void
+log_state_change (MetaWaylandLayerSurface            *layer_surface,
+                  const MetaWaylandLayerSurfaceState *old_state,
+                  const MetaWaylandLayerSurfaceState *state)
+{
+  g_autoptr (GString) changes = NULL;
+
+  if (!meta_is_verbose ())
+    return;
+
+  changes = g_string_new (NULL);
+
+  if (state->anchor != old_state->anchor)
+    g_string_append_printf (changes, " anchor %u->%u",
+                            old_state->anchor, state->anchor);
+  if (state->exclusive_zone != old_state->exclusive_zone)
+    g_string_append_printf (changes, " exclusive_zone %d->%d",
+                            old_state->exclusive_zone, state->exclusive_zone);
+  if (state->exclusive_edge != old_state->exclusive_edge)
+    g_string_append_printf (changes, " exclusive_edge %u->%u",
+                            old_state->exclusive_edge, state->exclusive_edge);
+  if (state->desired_width != old_state->desired_width ||
+      state->desired_height != old_state->desired_height)
+    g_string_append_printf (changes, " size %ux%u->%ux%u",
+                            old_state->desired_width, old_state->desired_height,
+                            state->desired_width, state->desired_height);
+  if (state->margin.top != old_state->margin.top ||
+      state->margin.right != old_state->margin.right ||
+      state->margin.bottom != old_state->margin.bottom ||
+      state->margin.left != old_state->margin.left)
+    g_string_append_printf (changes, " margin %d,%d,%d,%d->%d,%d,%d,%d",
+                            old_state->margin.top, old_state->margin.right,
+                            old_state->margin.bottom, old_state->margin.left,
+                            state->margin.top, state->margin.right,
+                            state->margin.bottom, state->margin.left);
+  if (state->keyboard_interactivity != old_state->keyboard_interactivity)
+    g_string_append_printf (changes, " keyboard_interactivity %u->%u",
+                            old_state->keyboard_interactivity,
+                            state->keyboard_interactivity);
+
+  /* Layer changes have their own message from handle_layer_change (). */
+  if (changes->len == 0)
+    return;
+
+  meta_topic (META_DEBUG_LAYER_SHELL,
+              "Layer surface %s committed:%s\n",
+              layer_surface_name (layer_surface),
+              changes->str);
+}
+#endif /* WITH_VERBOSE_MODE */
 
 /* Also emitted when a mapped surface enters or leaves the wallpaper tier by
  * changing layer (handle_layer_change ()), not only on a real map or unmap:
@@ -485,7 +581,15 @@ meta_wayland_layer_surface_create_strut (MetaWaylandLayerSurface *layer_surface)
 
   side = get_strut_side_for_state (state);
   if (side == (MetaSide) -1)
-    return NULL;
+    {
+      meta_topic (META_DEBUG_LAYER_SHELL,
+                  "Layer surface %s reserves %d but its anchors (%u) pick out no "
+                  "single edge, so it gets no strut\n",
+                  layer_surface_name (layer_surface),
+                  state->exclusive_zone,
+                  state->anchor);
+      return NULL;
+    }
 
   get_layer_surface_bounds (layer_surface, state, &output_rect, &usable_area);
 
@@ -536,6 +640,15 @@ meta_wayland_layer_surface_create_strut (MetaWaylandLayerSurface *layer_surface)
       g_free (strut);
       return NULL;
     }
+
+  meta_topic (META_DEBUG_LAYER_SHELL,
+              "Layer surface %s struts %s: %d,%d %dx%d (zone %d, scale %d)\n",
+              layer_surface_name (layer_surface),
+              side_to_string (side),
+              strut->rect.x, strut->rect.y,
+              strut->rect.width, strut->rect.height,
+              state->exclusive_zone,
+              scale);
 
   return strut;
 }
@@ -1013,8 +1126,9 @@ meta_wayland_layer_surface_close (MetaWaylandLayerSurface *layer_surface)
   if (layer_surface->resource)
     zwlr_layer_surface_v1_send_closed (layer_surface->resource);
 
-  g_debug ("Layer surface closed: namespace=%s",
-           layer_surface->namespace ? layer_surface->namespace : "(null)");
+  meta_topic (META_DEBUG_LAYER_SHELL,
+              "Layer surface closed: namespace=%s\n",
+              layer_surface_name (layer_surface));
 
   if (had_struts && surface && surface->compositor)
     meta_wayland_layer_shell_update_struts (surface->compositor);
@@ -1107,11 +1221,20 @@ meta_wayland_layer_shell_sync_keyboard_focus (MetaWaylandCompositor *compositor)
            * get_exclusive_focus_surface () skips along with BOTTOM. */
           if (window && display)
             {
+              meta_topic (META_DEBUG_LAYER_SHELL,
+                          "Keyboard focus -> exclusive surface %s, via its window\n",
+                          layer_surface_name (META_WAYLAND_LAYER_SURFACE (exclusive->role)));
+
               meta_window_focus (window,
                                  meta_display_get_current_time_roundtrip (display));
             }
           else
             {
+              meta_topic (META_DEBUG_LAYER_SHELL,
+                          "Keyboard focus -> exclusive surface %s, via the seat "
+                          "alone (no window)\n",
+                          layer_surface_name (META_WAYLAND_LAYER_SURFACE (exclusive->role)));
+
               if (display && display->focus_window)
                 meta_display_update_focus_window (display, NULL);
 
@@ -1131,7 +1254,12 @@ meta_wayland_layer_shell_sync_keyboard_focus (MetaWaylandCompositor *compositor)
       layer_surface = META_WAYLAND_LAYER_SURFACE (current->role);
       if (layer_surface->mapped && !layer_surface->closed &&
           meta_wayland_layer_surface_wants_keyboard_focus (layer_surface))
-        return;
+        {
+          meta_topic (META_DEBUG_LAYER_SHELL,
+                      "Keyboard focus stays on %s, it still wants it\n",
+                      layer_surface_name (layer_surface));
+          return;
+        }
     }
 
   if (!display)
@@ -1139,6 +1267,10 @@ meta_wayland_layer_shell_sync_keyboard_focus (MetaWaylandCompositor *compositor)
 
   if (display->focus_window)
     {
+      meta_topic (META_DEBUG_LAYER_SHELL,
+                  "Keyboard focus -> window \"%s\", no layer surface wants it\n",
+                  display->focus_window->desc);
+
       meta_wayland_compositor_set_input_focus (compositor, display->focus_window);
       return;
     }
@@ -1148,8 +1280,13 @@ meta_wayland_layer_shell_sync_keyboard_focus (MetaWaylandCompositor *compositor)
     meta_workspace_manager_get_active_workspace (workspace_manager) : NULL;
 
   if (workspace)
-    meta_workspace_focus_default_window (workspace, NULL,
-                                         meta_display_get_current_time_roundtrip (display));
+    {
+      meta_topic (META_DEBUG_LAYER_SHELL,
+                  "Keyboard focus -> workspace default, nothing else wants it\n");
+
+      meta_workspace_focus_default_window (workspace, NULL,
+                                           meta_display_get_current_time_roundtrip (display));
+    }
 }
 
 /* Hand the surface actor over to a MetaWindowActor, which from then on owns its
@@ -1192,8 +1329,12 @@ handle_layer_change (MetaWaylandLayerSurface *layer_surface,
   gboolean wants_window = layer_wants_window (layer_surface->current.layer);
   MetaWindow *window;
 
-  g_debug ("Layer surface changing layer %d -> %d (window: %d -> %d)",
-           old_layer, layer_surface->current.layer, wanted_window, wants_window);
+  meta_topic (META_DEBUG_LAYER_SHELL,
+              "Layer surface changing layer %d -> %d (window: %d -> %d)\n",
+              old_layer,
+              layer_surface->current.layer,
+              wanted_window,
+              wants_window);
 
   if (wanted_window && !wants_window)
     {
@@ -1330,6 +1471,10 @@ meta_wayland_layer_surface_apply_state (MetaWaylandSurfaceRole  *surface_role,
   /* Copy pending state to current */
   layer_surface->current = layer_surface->pending;
 
+#ifdef WITH_VERBOSE_MODE
+  log_state_change (layer_surface, &old_state, &layer_surface->current);
+#endif
+
   wants_window = layer_wants_window (layer_surface->current.layer);
 
   /* Fetched up front: the tail of this function bails without it, and creating
@@ -1392,9 +1537,10 @@ meta_wayland_layer_surface_apply_state (MetaWaylandSurfaceRole  *surface_role,
           if (layer_surface->current.exclusive_zone > 0)
             struts_changed = TRUE;
 
-          g_debug ("Layer surface mapped: namespace=%s layer=%d",
-                   layer_surface->namespace ? layer_surface->namespace : "(null)",
-                   layer_surface->current.layer);
+          meta_topic (META_DEBUG_LAYER_SHELL,
+                      "Layer surface mapped: namespace=%s layer=%d\n",
+                      layer_surface_name (layer_surface),
+                      layer_surface->current.layer);
 
           emit_layer_surface_signal (layer_surface, surface,
                                      LAYER_SHELL_SIGNAL_LAYER_SURFACE_MAPPED);
@@ -1426,9 +1572,10 @@ meta_wayland_layer_surface_apply_state (MetaWaylandSurfaceRole  *surface_role,
             {
               handle_layer_change (layer_surface, surface, old_state.layer);
 
-              g_debug ("Layer surface moved to layer %d: namespace=%s",
-                       layer_surface->current.layer,
-                       layer_surface->namespace ? layer_surface->namespace : "(null)");
+              meta_topic (META_DEBUG_LAYER_SHELL,
+                          "Layer surface moved to layer %d: namespace=%s\n",
+                          layer_surface->current.layer,
+                          layer_surface_name (layer_surface));
             }
         }
 
@@ -1498,8 +1645,9 @@ meta_wayland_layer_surface_apply_state (MetaWaylandSurfaceRole  *surface_role,
       if (old_state.exclusive_zone > 0)
         struts_changed = TRUE;
 
-      g_debug ("Layer surface unmapped: namespace=%s",
-               layer_surface->namespace ? layer_surface->namespace : "(null)");
+      meta_topic (META_DEBUG_LAYER_SHELL,
+                  "Layer surface unmapped: namespace=%s\n",
+                  layer_surface_name (layer_surface));
 
       emit_layer_surface_signal (layer_surface, surface,
                                  LAYER_SHELL_SIGNAL_LAYER_SURFACE_UNMAPPED);
@@ -1578,7 +1726,11 @@ meta_wayland_layer_surface_send_configure_full (MetaWaylandLayerSurface *layer_s
   layer_surface->last_sent_height = height;
   layer_surface->has_sent_configure = TRUE;
 
-  g_debug ("Layer surface configured: serial=%u size=%ux%u", serial, width, height);
+  meta_topic (META_DEBUG_LAYER_SHELL,
+              "Layer surface configured: serial=%u size=%ux%u\n",
+              serial,
+              width,
+              height);
 }
 
 static void
@@ -2093,8 +2245,11 @@ layer_shell_get_layer_surface (struct wl_client   *client,
     meta_wayland_layer_shell_ensure_signal_connected (layer_shell);
   }
 
-  g_debug ("Layer surface created: namespace=%s layer=%d output=%p",
-           namespace ? namespace : "(null)", layer, output);
+  meta_topic (META_DEBUG_LAYER_SHELL,
+              "Layer surface created: namespace=%s layer=%d output=%s\n",
+              namespace ? namespace : "(null)",
+              layer,
+              layer_surface_output_name (output));
 
   /* The initial configure is sent in response to the client's initial commit
    * (see apply_state) — sending one here would reflect default state and its
@@ -2210,7 +2365,9 @@ meta_wayland_layer_shell_new (MetaWaylandCompositor *compositor)
       return NULL;
     }
 
-  g_debug ("Layer shell protocol initialized (version %d)", META_ZWLR_LAYER_SHELL_V1_VERSION);
+  meta_topic (META_DEBUG_LAYER_SHELL,
+              "Layer shell protocol initialized (version %d)\n",
+              META_ZWLR_LAYER_SHELL_V1_VERSION);
 
   return layer_shell;
 }

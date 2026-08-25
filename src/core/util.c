@@ -336,6 +336,8 @@ topic_name (MetaDebugTopic topic)
       return "INPUT";
     case META_DEBUG_SCANOUT:
       return "SCANOUT";
+    case META_DEBUG_LAYER_SHELL:
+      return "LAYER_SHELL";
     case META_DEBUG_VERBOSE:
       return "VERBOSE";
     }
