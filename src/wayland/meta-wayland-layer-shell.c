@@ -50,6 +50,7 @@ struct _MetaWaylandLayerShell
   GList *layer_surfaces;
   MetaWaylandCompositor *compositor;
   gulong workareas_changed_handler_id;
+  gulong monitors_changed_handler_id;
 };
 
 enum
@@ -254,6 +255,13 @@ on_workareas_changed (MetaDisplay           *display,
 }
 
 static void
+on_monitors_changed (MetaMonitorManager    *monitor_manager,
+                     MetaWaylandLayerShell *layer_shell)
+{
+  meta_wayland_layer_shell_on_monitors_changed (layer_shell->compositor);
+}
+
+static void
 meta_wayland_layer_shell_ensure_signal_connected (MetaWaylandLayerShell *layer_shell)
 {
   MetaDisplay *display;
@@ -268,6 +276,14 @@ meta_wayland_layer_shell_ensure_signal_connected (MetaWaylandLayerShell *layer_s
   layer_shell->workareas_changed_handler_id =
     g_signal_connect (display, "workareas-changed",
                       G_CALLBACK (on_workareas_changed),
+                      layer_shell);
+
+  /* "monitors-changed", not "monitors-changed-internal": the latter is where
+   * the Wayland outputs refresh their logical monitors, and we must read those
+   * after that has happened. */
+  layer_shell->monitors_changed_handler_id =
+    g_signal_connect (meta_monitor_manager_get (), "monitors-changed",
+                      G_CALLBACK (on_monitors_changed),
                       layer_shell);
 }
 
@@ -2325,6 +2341,15 @@ meta_wayland_layer_shell_dispose (GObject *object)
       layer_shell->workareas_changed_handler_id = 0;
     }
 
+  if (layer_shell->monitors_changed_handler_id != 0)
+    {
+      MetaMonitorManager *monitor_manager = meta_monitor_manager_get ();
+      if (monitor_manager)
+        g_signal_handler_disconnect (monitor_manager,
+                                     layer_shell->monitors_changed_handler_id);
+      layer_shell->monitors_changed_handler_id = 0;
+    }
+
   g_clear_pointer (&layer_shell->layer_surfaces, g_list_free);
   g_clear_pointer (&layer_shell->shell_resources, g_list_free);
 
@@ -2426,8 +2451,15 @@ meta_wayland_layer_shell_update_struts (MetaWaylandCompositor *compositor)
   g_slist_free_full (struts, g_free);
 }
 
-void
-meta_wayland_layer_shell_on_workarea_changed (MetaWaylandCompositor *compositor)
+/* @output_resized distinguishes the two reasons a layer surface's bounds can
+ * move: a workarea change (a panel's exclusive zone appearing or going away),
+ * or the output itself changing size (a monitor rescale or mode change). A
+ * full-output surface - exclusive_zone == -1 (like wallpaper) - is unaffected
+ * by the former but must be reconfigured for the latter, or it keeps its old
+ * logical size and the compositor shows only part of it. */
+static void
+reconfigure_layer_surfaces (MetaWaylandCompositor *compositor,
+                            gboolean               output_resized)
 {
   MetaWaylandLayerShell *layer_shell;
   GList *l;
@@ -2449,10 +2481,8 @@ meta_wayland_layer_shell_on_workarea_changed (MetaWaylandCompositor *compositor)
           continue;
         }
 
-      /* Surfaces with exclusive_zone != -1 use workarea bounds and need
-       * repositioning when workarea changes. Surfaces with exclusive_zone == -1
-       * use full output and aren't affected. */
-      if (layer_surface->current.exclusive_zone != -1 && layer_surface->mapped)
+      if (layer_surface->mapped &&
+          (output_resized || layer_surface->current.exclusive_zone != -1))
         {
           MetaWindow *window = layer_surface_get_window (layer_surface);
 
@@ -2482,6 +2512,18 @@ meta_wayland_layer_shell_on_workarea_changed (MetaWaylandCompositor *compositor)
 
   /* Recalculate layer-shell struts since surface positions changed */
   meta_wayland_layer_shell_update_struts (compositor);
+}
+
+void
+meta_wayland_layer_shell_on_workarea_changed (MetaWaylandCompositor *compositor)
+{
+  reconfigure_layer_surfaces (compositor, FALSE);
+}
+
+void
+meta_wayland_layer_shell_on_monitors_changed (MetaWaylandCompositor *compositor)
+{
+  reconfigure_layer_surfaces (compositor, TRUE);
 }
 
 MetaWaylandLayerShell *
