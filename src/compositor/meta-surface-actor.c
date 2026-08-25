@@ -68,17 +68,11 @@ effective_unobscured_region (MetaSurfaceActor *surface_actor)
 {
   MetaSurfaceActorPrivate *priv =
     meta_surface_actor_get_instance_private (surface_actor);
-  ClutterActor *actor;
+  ClutterActor *actor = CLUTTER_ACTOR (surface_actor);
 
   /* Fail if we have any mapped clones. */
-  actor = CLUTTER_ACTOR (surface_actor);
-  do
-    {
-      if (clutter_actor_has_mapped_clones (actor))
-        return NULL;
-      actor = clutter_actor_get_parent (actor);
-    }
-  while (actor != NULL);
+  if (clutter_actor_has_mapped_clones (actor))
+    return NULL;
 
   return priv->unobscured_region;
 }

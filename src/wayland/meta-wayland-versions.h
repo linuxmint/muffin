@@ -35,7 +35,7 @@
 /* #define META_WL_BUFFER_VERSION     1 */
 
 /* Global/master objects (version exported by wl_registry and negotiated through bind) */
-#define META_WL_COMPOSITOR_VERSION          5
+#define META_WL_COMPOSITOR_VERSION          6
 #define META_WL_DATA_DEVICE_MANAGER_VERSION 3
 #define META_XDG_WM_BASE_VERSION            5
 #define META_WL_SEAT_VERSION                5
@@ -57,6 +57,7 @@
 #define META_ZWP_INPUT_METHOD_MANAGER_V2_VERSION 1
 #define META_ZWP_VIRTUAL_KEYBOARD_MANAGER_V1_VERSION 1
 #define META_WP_VIEWPORTER_VERSION          1
+#define META_WP_FRACTIONAL_SCALE_V1_VERSION  1
 #define META_XDG_ACTIVATION_V1_VERSION 1
 #define META_XDG_DIALOG_VERSION             1
 #define META_ZWP_PRIMARY_SELECTION_V1_VERSION 1

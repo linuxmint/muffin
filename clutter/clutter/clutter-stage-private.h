@@ -140,6 +140,9 @@ GList *         clutter_stage_peek_stage_views         (ClutterStage *stage);
 void            clutter_stage_queue_actor_relayout      (ClutterStage *stage,
                                                          ClutterActor *actor);
 
+void clutter_stage_dequeue_actor_relayout (ClutterStage *stage,
+                                           ClutterActor *actor);
+
 GList * clutter_stage_get_views_for_rect (ClutterStage          *stage,
                                           const graphene_rect_t *rect);
 

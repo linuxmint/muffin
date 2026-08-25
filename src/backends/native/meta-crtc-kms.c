@@ -215,6 +215,9 @@ meta_crtc_kms_get_modifiers (MetaCrtc *crtc,
 {
   MetaCrtcKms *crtc_kms = crtc->driver_private;
 
+  if (!crtc_kms->primary_plane)
+    return NULL;
+
   return meta_kms_plane_get_modifiers_for_format (crtc_kms->primary_plane,
                                                   format);
 }
@@ -248,8 +251,42 @@ meta_crtc_kms_supports_format (MetaCrtc *crtc,
 {
   MetaCrtcKms *crtc_kms = crtc->driver_private;
 
+  if (!crtc_kms->primary_plane)
+    return FALSE;
+
   return meta_kms_plane_is_format_supported (crtc_kms->primary_plane,
                                              drm_format);
+}
+
+/**
+ * meta_crtc_kms_supports_modifier:
+ * @crtc: a #MetaCrtc object that has to be a #MetaCrtcKms
+ * @drm_format: a DRM pixel format
+ * @drm_modifier: a DRM format modifier
+ *
+ * Returns true if the CRTC's primary plane advertises the format and modifier
+ * pairing. Always false for a plane without an IN_FORMATS property, since the
+ * modifiers it accepts are then unknown.
+ */
+gboolean
+meta_crtc_kms_supports_modifier (MetaCrtc *crtc,
+                                 uint32_t  drm_format,
+                                 uint64_t  drm_modifier)
+{
+  GArray *modifiers;
+  unsigned int i;
+
+  modifiers = meta_crtc_kms_get_modifiers (crtc, drm_format);
+  if (!modifiers)
+    return FALSE;
+
+  for (i = 0; i < modifiers->len; i++)
+    {
+      if (g_array_index (modifiers, uint64_t, i) == drm_modifier)
+        return TRUE;
+    }
+
+  return FALSE;
 }
 
 MetaCrtc *

@@ -87,6 +87,12 @@ void
 meta_window_delete (MetaWindow  *window,
                     guint32      timestamp)
 {
+  if (window->unmanaging)
+    {
+      g_warning ("Trying to delete unmanaged window '%s'", window->desc);
+      return;
+    }
+
   META_WINDOW_GET_CLASS (window)->delete (window, timestamp);
 
   meta_window_check_alive (window, timestamp);
@@ -95,7 +101,15 @@ meta_window_delete (MetaWindow  *window,
 void
 meta_window_kill (MetaWindow *window)
 {
-  pid_t pid = meta_window_get_client_pid (window);
+  pid_t pid;
+
+  if (window->unmanaging)
+    {
+      g_warning ("Trying to kill unmanaged window '%s'", window->desc);
+      return;
+    }
+
+  pid = meta_window_get_client_pid (window);
 
   if (pid > 0)
     {
