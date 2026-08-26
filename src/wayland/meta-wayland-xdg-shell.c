@@ -123,7 +123,7 @@ struct _MetaWaylandXdgPopup
 
   MetaWaylandSurface *parent_surface;
   gulong parent_surface_unmapped_handler_id;
-  gboolean parent_is_layer_shell;
+  gboolean rooted_at_layer_shell;
 
   uint32_t pending_reposition_token;
   gboolean pending_repositioned;
@@ -587,7 +587,7 @@ meta_wayland_xdg_popup_unmap (MetaWaylandXdgPopup *xdg_popup)
       g_clear_signal_handler (&xdg_popup->parent_surface_unmapped_handler_id,
                               xdg_popup->parent_surface);
       xdg_popup->parent_surface = NULL;
-      xdg_popup->parent_is_layer_shell = FALSE;
+      xdg_popup->rooted_at_layer_shell = FALSE;
     }
 
   meta_wayland_shell_surface_destroy_window (shell_surface);
@@ -691,11 +691,17 @@ on_parent_surface_unmapped (MetaWaylandSurface  *parent_surface,
    * through dismiss_invalid_popup () unwinds the grab chain from the top down,
    * so no popup is dismissed out of order.
    *
+   * Tests the whole chain, not just the direct parent: a non-grabbing popup
+   * never joins the grab chain, so that unwind doesn't reach it and its parent
+   * can still unmap out from under it. A chain rooted at an xdg_toplevel is
+   * unaffected - only the client can cause that ordering, so it stays an
+   * error.
+   *
    * Uses the flag cached at setup rather than parent_surface->role: when the
    * client destroys the parent's wl_surface, the role is already NULL by the
    * time this runs (see finish_popup_setup) and the test would fall through to
    * the protocol error below. */
-  if (xdg_popup->parent_is_layer_shell)
+  if (xdg_popup->rooted_at_layer_shell)
     {
       dismiss_invalid_popup (xdg_popup);
       return;
@@ -1132,6 +1138,23 @@ meta_wayland_xdg_popup_place (MetaWaylandXdgPopup *xdg_popup,
   meta_window_place_with_placement_rule (window, &scaled_placement_rule);
 }
 
+/* Whether the popup's chain of parents ends at a layer-shell surface. A
+ * submenu's parent is the menu's own popup rather than the layer surface, but
+ * the input that opened the menu still went to another client, so no level of
+ * the chain has a serial of its own. Each popup caches the answer, so this
+ * only ever has to look one level up. */
+static gboolean
+popup_is_rooted_at_layer_shell (MetaWaylandSurface *parent_surface)
+{
+  if (META_IS_WAYLAND_LAYER_SURFACE (parent_surface->role))
+    return TRUE;
+
+  if (META_IS_WAYLAND_XDG_POPUP (parent_surface->role))
+    return META_WAYLAND_XDG_POPUP (parent_surface->role)->rooted_at_layer_shell;
+
+  return FALSE;
+}
+
 static void
 finish_popup_setup (MetaWaylandXdgPopup *xdg_popup)
 {
@@ -1151,6 +1174,7 @@ finish_popup_setup (MetaWaylandXdgPopup *xdg_popup)
   gboolean parent_is_layer_shell;
   MetaWindow *parent_window;
   MetaPlacementRule placement_rule;
+  gboolean rooted_at_layer_shell;
 
   parent_surface = xdg_popup->setup.parent_surface;
   seat = xdg_popup->setup.grab_seat;
@@ -1165,6 +1189,7 @@ finish_popup_setup (MetaWaylandXdgPopup *xdg_popup)
    * runs, and on_parent_surface_unmapped () fires from inside that dispose -
    * too late to ask the surface what it was. */
   parent_is_layer_shell = META_IS_WAYLAND_LAYER_SURFACE (parent_surface->role);
+  rooted_at_layer_shell = popup_is_rooted_at_layer_shell (parent_surface);
 
   /* A windowed layer surface satisfies the first test like any other parent;
    * the role check is there for BACKGROUND, which has no MetaWindow. */
@@ -1180,12 +1205,14 @@ finish_popup_setup (MetaWaylandXdgPopup *xdg_popup)
       MetaWaylandSurface *top_popup;
 
       /* xdg_popup.grab() expects a serial from a recent input event on the
-       * popup's own client. For popups parented to a layer-shell surface the
+       * popup's own client. For popups rooted at a layer-shell surface the
        * originating input may have been delivered to a different client
        * (e.g. a panel applet that triggers a tray-icon menu in another
        * process over IPC), so the popup's client legitimately has no recent
-       * serial of its own. Accept the grab in that case. */
-      if (!parent_is_layer_shell &&
+       * serial of its own. Accept the grab in that case. This has to test the
+       * whole parent chain: a submenu of such a menu is parented to the menu's
+       * popup, and has no serial of its own either. */
+      if (!rooted_at_layer_shell &&
           !meta_wayland_seat_can_popup (seat, serial))
         {
           xdg_popup_send_popup_done (xdg_popup->resource);
@@ -1203,7 +1230,7 @@ finish_popup_setup (MetaWaylandXdgPopup *xdg_popup)
     }
 
   xdg_popup->parent_surface = parent_surface;
-  xdg_popup->parent_is_layer_shell = parent_is_layer_shell;
+  xdg_popup->rooted_at_layer_shell = rooted_at_layer_shell;
   xdg_popup->parent_surface_unmapped_handler_id =
     g_signal_connect (parent_surface, "unmapped",
                       G_CALLBACK (on_parent_surface_unmapped),
