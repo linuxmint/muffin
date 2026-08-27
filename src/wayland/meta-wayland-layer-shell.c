@@ -855,8 +855,6 @@ layer_surface_resource_destroyed (struct wl_resource *resource)
   if (layer_surface)
     {
       layer_surface->resource = NULL;
-      g_free (layer_surface->namespace);
-      layer_surface->namespace = NULL;
     }
 }
 
