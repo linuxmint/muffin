@@ -374,8 +374,6 @@ meta_cursor_tracker_update_position (MetaCursorTracker *tracker,
   MetaCursorRenderer *cursor_renderer =
     meta_backend_get_cursor_renderer (backend);
 
-  g_assert (meta_is_wayland_compositor ());
-
   meta_cursor_renderer_set_position (cursor_renderer, new_x, new_y);
 
   g_signal_emit (tracker, signals[CURSOR_MOVED], 0, new_x, new_y);

@@ -307,8 +307,6 @@ meta_cursor_renderer_set_position (MetaCursorRenderer *renderer,
 {
   MetaCursorRendererPrivate *priv = meta_cursor_renderer_get_instance_private (renderer);
 
-  g_assert (meta_is_wayland_compositor ());
-
   priv->current_x = x;
   priv->current_y = y;
 

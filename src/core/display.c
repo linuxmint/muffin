@@ -3063,7 +3063,8 @@ meta_display_get_pad_action_label (MetaDisplay        *display,
 
   /* First, lookup the action, as imposed by settings */
   settings = meta_backend_get_input_settings (meta_get_backend ());
-  label = meta_input_settings_get_pad_action_label (settings, pad, action_type, action_number);
+  if (settings)
+    label = meta_input_settings_get_pad_action_label (settings, pad, action_type, action_number);
   if (label)
     return label;
 
