@@ -31,6 +31,7 @@
 #include "core/display-private.h"
 #include "core/keybindings-private.h"
 #include "core/window-private.h"
+#include "core/zoom-grab.h"
 #include "meta/meta-backend.h"
 
 #ifdef HAVE_NATIVE_BACKEND
@@ -290,6 +291,10 @@ meta_display_handle_event (MetaDisplay        *display,
           {
             meta_display_a11y_zoom (display, FALSE);
           }
+
+        /* Hold an active pointer grab so subsequent scroll-valuator motion
+         * events in this gesture are captured and not delivered to clients. */
+        meta_zoom_pointer_grab_ensure (display, clutter_event_get_time (event));
 
         bypass_wayland = bypass_clutter = TRUE;
         goto out;
