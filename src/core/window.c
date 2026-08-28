@@ -6600,8 +6600,8 @@ enum {
 #define BOX_CENTER_X(box)  ((box).x + (box).width / 2)  /* Center in X */
 #define BOX_CENTER_Y(box)  ((box).y + (box).height / 2)  /* Center in Y */
 
-#define ORIGIN_CONSTANT 1
-#define EXTREME_CONSTANT 2
+#define ORIGIN_CONSTANT meta_prefs_get_tile_edge_zone_width ()
+#define EXTREME_CONSTANT meta_prefs_get_tile_edge_zone_width ()
 #define COMMON_EDGE_PADDING 5
 
 static void

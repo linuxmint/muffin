@@ -121,6 +121,7 @@ typedef enum
   META_PREF_MIN_WIN_OPACITY,
   META_PREF_MOUSE_ZOOM_ENABLED,
   META_PREF_TILE_MAXIMIZE,
+  META_PREF_TILE_EDGE_ZONE_WIDTH,
   META_PREF_GTK_THEME,
   META_PREF_BELL_SOUND,
   META_PREF_BRING_WINDOWS_TO_CURRENT_WORKSPACE,
@@ -211,6 +212,9 @@ gboolean                    meta_prefs_get_edge_tiling        (void);
 
 META_EXPORT
 gboolean                    meta_prefs_get_tile_maximize      (void);
+
+META_EXPORT
+int                         meta_prefs_get_tile_edge_zone_width (void);
 
 META_EXPORT
 gboolean                    meta_prefs_get_auto_maximize      (void);

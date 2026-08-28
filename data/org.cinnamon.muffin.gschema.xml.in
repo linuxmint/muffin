@@ -51,6 +51,19 @@
       </description>
     </key>
 
+    <key name="tile-edge-zone-width" type="i">
+      <default>25</default>
+      <range min="2" max="100"/>
+      <summary>Width of the edge zone that triggers window tiling</summary>
+      <description>
+        The width in pixels of the screen edge zone where dragging a window
+        triggers tiling. For corner tiling (quarter screen), the cursor must
+        enter both the horizontal and vertical edge zones simultaneously.
+        Larger values make it easier to tile windows by dragging, especially
+        for corner tiling on multi-monitor setups.
+      </description>
+    </key>
+
     <key name="invert-workspace-flip-direction" type="b">
       <default>false</default>
       <summary>Inverts the direction the left and right arrows take you when
