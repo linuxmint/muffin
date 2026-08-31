@@ -6604,6 +6604,66 @@ enum {
 #define EXTREME_CONSTANT 2
 #define COMMON_EDGE_PADDING 5
 
+/* How far past a shared monitor edge the pointer may travel before the tile
+ * zones switch to the neighbouring monitor.
+ */
+#define TILE_MONITOR_HOLD_DISTANCE 64
+
+static int
+distance_outside_rect (const MetaRectangle *rect,
+                       int                  x,
+                       int                  y)
+{
+  int dx = MAX (0, MAX (rect->x - x, x - (rect->x + rect->width - 1)));
+  int dy = MAX (0, MAX (rect->y - y, y - (rect->y + rect->height - 1)));
+
+  return MAX (dx, dy);
+}
+
+/*
+ * Hold the drag inside the monitor it is tiling against while the pointer is
+ * only just past a shared edge, and report the held position. Both the window
+ * and the tile zones are driven from this, so they stay together: the window
+ * sits still against the edge, the zones stay reachable, and once the pointer
+ * is far enough past, the two cross to the neighbour at the same moment.
+ */
+static void
+hold_drag_to_tile_monitor (MetaWindow *window,
+                           int        *x,
+                           int        *y)
+{
+  MetaBackend *backend = meta_get_backend ();
+  MetaMonitorManager *monitor_manager =
+    meta_backend_get_monitor_manager (backend);
+  MetaDisplay *display = window->display;
+  MetaLogicalMonitor *logical_monitor;
+
+  logical_monitor =
+    meta_monitor_manager_get_logical_monitor_at (monitor_manager, *x, *y);
+  if (!logical_monitor)
+    return;
+
+  if (display->grab_tile_target_monitor >= 0 &&
+      display->grab_tile_target_monitor != logical_monitor->number)
+    {
+      MetaLogicalMonitor *held;
+
+      held =
+        meta_monitor_manager_get_logical_monitor_from_number (monitor_manager,
+                                                              display->grab_tile_target_monitor);
+      if (held &&
+          distance_outside_rect (&held->rect, *x, *y) <= TILE_MONITOR_HOLD_DISTANCE)
+        logical_monitor = held;
+    }
+
+  display->grab_tile_target_monitor = logical_monitor->number;
+
+  *x = CLAMP (*x, logical_monitor->rect.x,
+              logical_monitor->rect.x + logical_monitor->rect.width - 1);
+  *y = CLAMP (*y, logical_monitor->rect.y,
+              logical_monitor->rect.y + logical_monitor->rect.height - 1);
+}
+
 static void
 get_extra_padding_for_common_monitor_edges (MetaWindow        *window,
                                                   gint         monitor_num,
@@ -6767,6 +6827,13 @@ update_move (MetaWindow  *window,
   MetaRectangle old;
   int shake_threshold;
   MetaDisplay *display = window->display;
+
+  if (!snap &&
+      meta_prefs_get_edge_tiling () &&
+      meta_window_can_tile_maximized (window) &&
+      !META_WINDOW_MAXIMIZED (window) &&
+      !META_WINDOW_TILED (window))
+    hold_drag_to_tile_monitor (window, &x, &y);
 
   display->grab_latest_motion_x = x;
   display->grab_latest_motion_y = y;
