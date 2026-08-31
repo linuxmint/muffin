@@ -43,6 +43,16 @@ buffer_destroy (struct wl_client   *client,
   wl_resource_destroy (resource);
 }
 
+static void
+single_pixel_buffer_resource_destroy (struct wl_resource *resource)
+{
+  /* Free the MetaWaylandSinglePixelBuffer if no MetaWaylandBuffer GObject
+   * has taken ownership of it yet (i.e. the buffer was never committed to a
+   * surface).  When realize does take ownership it sets the user data to NULL
+   * so that g_free(NULL) here becomes a safe no-op. */
+  g_free (wl_resource_get_user_data (resource));
+}
+
 static const struct wl_buffer_interface single_pixel_buffer_implementation =
 {
   buffer_destroy,
@@ -77,7 +87,8 @@ single_pixel_buffer_manager_create_1px_rgba32_buffer (struct wl_client   *client
     wl_resource_create (client, &wl_buffer_interface, 1, buffer_id);
   wl_resource_set_implementation (buffer_resource,
                                   &single_pixel_buffer_implementation,
-                                  single_pixel_buffer, NULL);
+                                  single_pixel_buffer,
+                                  single_pixel_buffer_resource_destroy);
   meta_wayland_buffer_from_resource (buffer_resource);
 }
 
@@ -115,7 +126,7 @@ meta_wayland_single_pixel_buffer_attach (MetaWaylandBuffer  *buffer,
   CoglContext *cogl_context =
     clutter_backend_get_cogl_context (clutter_backend);
   MetaWaylandSinglePixelBuffer *single_pixel_buffer =
-    wl_resource_get_user_data (buffer->resource);
+    buffer->single_pixel.single_pixel_buffer;
   uint8_t data[4];
   CoglPixelFormat pixel_format;
   CoglTexture2D *tex_2d;
@@ -140,7 +151,8 @@ meta_wayland_single_pixel_buffer_attach (MetaWaylandBuffer  *buffer,
   tex_2d = cogl_texture_2d_new_from_data (cogl_context,
                                           1, 1,
                                           pixel_format,
-                                          4, data,
+                                          pixel_format == COGL_PIXEL_FORMAT_BGR_888 ? 3 : 4,
+                                          data,
                                           error);
   if (!tex_2d)
     return FALSE;
