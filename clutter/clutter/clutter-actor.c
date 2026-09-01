@@ -17873,7 +17873,20 @@ update_resource_scale (ClutterActor *self,
     return;
 
   if (ceilf (old_resource_scale) != ceilf (priv->resource_scale))
-    g_signal_emit (self, actor_signals[RESOURCE_SCALE_CHANGED], 0);
+    {
+      ClutterActor *stage = _clutter_actor_get_stage_internal (self);
+
+      if (stage != NULL)
+        clutter_stage_queue_resource_scale_change (CLUTTER_STAGE (stage), self);
+      else
+        clutter_actor_emit_resource_scale_changed (self);
+    }
+}
+
+void
+clutter_actor_emit_resource_scale_changed (ClutterActor *self)
+{
+  g_signal_emit (self, actor_signals[RESOURCE_SCALE_CHANGED], 0);
 }
 
 void

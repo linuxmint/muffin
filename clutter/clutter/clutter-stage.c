@@ -129,6 +129,7 @@ struct _ClutterStagePrivate
   ClutterPlane current_clip_planes[4];
 
   GSList *pending_relayouts;
+  GPtrArray *pending_resource_scale_changes;
   GList *pending_queue_redraws;
 
   gint sync_delay;
@@ -1383,6 +1384,47 @@ clutter_stage_dequeue_actor_relayout (ClutterStage *stage,
 }
 
 void
+clutter_stage_queue_resource_scale_change (ClutterStage *stage,
+                                           ClutterActor *actor)
+{
+  ClutterStagePrivate *priv = stage->priv;
+
+  g_ptr_array_add (priv->pending_resource_scale_changes, g_object_ref (actor));
+}
+
+/* Resource scales are resolved while walking the actor tree, but handlers of
+ * ::resource-scale-changed routinely rebuild content and add children, which
+ * must not happen from inside that walk. Emit once the walk has finished.
+ */
+static void
+flush_resource_scale_changes (ClutterStage *stage)
+{
+  ClutterStagePrivate *priv = stage->priv;
+  g_autoptr (GPtrArray) changes = NULL;
+  unsigned int i;
+
+  if (priv->pending_resource_scale_changes->len == 0)
+    return;
+
+  changes = g_steal_pointer (&priv->pending_resource_scale_changes);
+  priv->pending_resource_scale_changes =
+    g_ptr_array_new_with_free_func (g_object_unref);
+
+  for (i = 0; i < changes->len; i++)
+    {
+      ClutterActor *actor = g_ptr_array_index (changes, i);
+
+      if (CLUTTER_ACTOR_IN_DESTRUCTION (actor))
+        continue;
+
+      if (clutter_actor_get_stage (actor) != CLUTTER_ACTOR (stage))
+        continue;
+
+      clutter_actor_emit_resource_scale_changed (actor);
+    }
+}
+
+void
 _clutter_stage_maybe_relayout (ClutterActor *actor)
 {
   ClutterStage *stage = CLUTTER_STAGE (actor);
@@ -1551,6 +1593,7 @@ update_actor_stage_views (ClutterStage *stage)
   for (phase = 0; phase < 2; phase++)
     {
       clutter_actor_update_stage_views (actor, phase);
+      flush_resource_scale_changes (stage);
 
       if (!priv->actor_needs_immediate_relayout)
         break;
@@ -2048,6 +2091,8 @@ clutter_stage_dispose (GObject *object)
                      (GDestroyNotify) g_object_unref);
   priv->pending_relayouts = NULL;
 
+  g_clear_pointer (&priv->pending_resource_scale_changes, g_ptr_array_unref);
+
   /* this will release the reference on the stage */
   stage_manager = clutter_stage_manager_get_default ();
   _clutter_stage_manager_remove_stage (stage_manager, stage);
@@ -2453,6 +2498,9 @@ clutter_stage_init (ClutterStage *self)
 
   clutter_actor_set_background_color (CLUTTER_ACTOR (self),
                                       &default_stage_color);
+
+  priv->pending_resource_scale_changes =
+    g_ptr_array_new_with_free_func (g_object_unref);
 
   clutter_stage_queue_actor_relayout (self, CLUTTER_ACTOR (self));
 
