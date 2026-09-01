@@ -17717,6 +17717,11 @@ clutter_actor_get_real_resource_scale (ClutterActor *self)
           ClutterStageView *view = l->data;
           max_scale = MAX (clutter_stage_view_get_scale (view), max_scale);
         }
+
+      /* Running headlessly there are no views to guess from. */
+      if (max_scale < 0.f)
+        max_scale = 1.f;
+
       guessed_scale = max_scale;
     }
   else
