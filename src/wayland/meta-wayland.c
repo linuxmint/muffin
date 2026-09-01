@@ -463,6 +463,7 @@ meta_wayland_compositor_setup (MetaWaylandCompositor *wayland_compositor)
   meta_wayland_outputs_init (compositor);
   meta_wayland_data_device_manager_init (compositor);
   meta_wayland_data_device_primary_manager_init (compositor);
+  meta_wayland_data_control_manager_init (compositor);
   meta_wayland_subsurfaces_init (compositor);
   meta_wayland_shell_init (compositor);
   meta_wayland_pointer_gestures_init (compositor);
