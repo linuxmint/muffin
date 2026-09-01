@@ -1359,20 +1359,26 @@ clutter_stage_dequeue_actor_relayout (ClutterStage *stage,
                                       ClutterActor *actor)
 {
   ClutterStagePrivate *priv = stage->priv;
-  GSList *l;
+  GSList *l = priv->pending_relayouts;
 
-  for (l = priv->pending_relayouts; l; l = l->next)
+  /* An actor can hold more than one entry: queue_actor_relayout() doesn't
+   * check for duplicates, and a size request between a queued relayout and
+   * the allocation that would consume it re-opens the short-circuit in
+   * _clutter_actor_queue_only_relayout().
+   */
+  while (l != NULL)
     {
       ClutterActor *relayout_actor = l->data;
+      GSList *next = l->next;
 
       if (relayout_actor == actor)
         {
           g_object_unref (relayout_actor);
           priv->pending_relayouts =
             g_slist_delete_link (priv->pending_relayouts, l);
-
-          return;
         }
+
+      l = next;
     }
 }
 
@@ -1397,6 +1403,10 @@ _clutter_stage_maybe_relayout (ClutterActor *actor)
       g_autoptr (ClutterActor) queued_actor = l->data;
 
       if (CLUTTER_ACTOR_IN_RELAYOUT (queued_actor))  /* avoid reentrancy */
+        continue;
+
+      /* An actor may have been destroyed or hidden between queuing and now */
+      if (clutter_actor_get_stage (queued_actor) != actor)
         continue;
 
       if (queued_actor == actor)
