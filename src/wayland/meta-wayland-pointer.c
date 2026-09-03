@@ -1365,7 +1365,8 @@ pointer_can_grab_surface (MetaWaylandPointer *pointer,
   if (pointer->focus_surface == surface)
     return TRUE;
 
-  META_WAYLAND_SURFACE_FOREACH_SUBSURFACE (surface, subsurface)
+  META_WAYLAND_SURFACE_FOREACH_SUBSURFACE (&surface->output_state,
+                                           subsurface)
     {
       if (pointer_can_grab_surface (pointer, subsurface))
         return TRUE;

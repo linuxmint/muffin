@@ -54,6 +54,9 @@ struct _MetaWaylandSurfaceRoleClass
   GObjectClass parent_class;
 
   void (*assigned) (MetaWaylandSurfaceRole *surface_role);
+  void (*commit_state) (MetaWaylandSurfaceRole  *surface_role,
+                        MetaWaylandTransaction  *transaction,
+                        MetaWaylandSurfaceState *pending);
   void (*pre_apply_state) (MetaWaylandSurfaceRole  *surface_role,
                            MetaWaylandSurfaceState *pending);
   void (*apply_state) (MetaWaylandSurfaceRole  *surface_role,
@@ -63,7 +66,7 @@ struct _MetaWaylandSurfaceRoleClass
   gboolean (*is_on_logical_monitor) (MetaWaylandSurfaceRole *surface_role,
                                      MetaLogicalMonitor     *logical_monitor);
   MetaWaylandSurface * (*get_toplevel) (MetaWaylandSurfaceRole *surface_role);
-  gboolean (*should_cache_state) (MetaWaylandSurfaceRole *surface_role);
+  gboolean (*is_synchronized) (MetaWaylandSurfaceRole *surface_role);
   void (*notify_subsurface_state_changed) (MetaWaylandSurfaceRole *surface_role);
   void (*get_relative_coordinates) (MetaWaylandSurfaceRole *surface_role,
                                     float                   abs_x,
@@ -80,6 +83,7 @@ struct _MetaWaylandSurfaceState
   /* wl_surface.attach */
   gboolean newly_attached;
   MetaWaylandBuffer *buffer;
+  CoglTexture *texture;
   gulong buffer_destroy_handler_id;
   int32_t dx;
   int32_t dy;
@@ -122,6 +126,10 @@ struct _MetaWaylandSurfaceState
   int viewport_dst_height;
 
   GSList *subsurface_placement_ops;
+
+  /* xdg_popup */
+  MetaWaylandXdgPositioner *xdg_positioner;
+  uint32_t xdg_popup_reposition_token;
 };
 
 struct _MetaWaylandDragDestFuncs
@@ -140,13 +148,6 @@ struct _MetaWaylandDragDestFuncs
                       MetaWaylandSurface    *surface);
 };
 
-typedef struct _MetaWaylandBufferRef
-{
-  grefcount ref_count;
-  MetaWaylandBuffer *buffer;
-  unsigned int use_count;
-} MetaWaylandBufferRef;
-
 struct _MetaWaylandSurface
 {
   GObject parent;
@@ -159,14 +160,10 @@ struct _MetaWaylandSurface
   cairo_region_t *opaque_region;
   int scale;
   int32_t offset_x, offset_y;
-  GNode *subsurface_branch_node;
-  GNode *subsurface_leaf_node;
   GHashTable *outputs_to_destroy_notify_id;
   MetaMonitorTransform buffer_transform;
 
-  CoglTexture *texture;
-
-  MetaWaylandBufferRef *buffer_ref;
+  MetaWaylandBuffer *buffer;
 
   MetaCrtc *scanout_candidate;
 
@@ -201,16 +198,19 @@ struct _MetaWaylandSurface
 
   /* All the pending state that wl_surface.commit will apply. */
   MetaWaylandSurfaceState *pending_state;
-  /* State cached due to inter-surface synchronization such. */
-  MetaWaylandSurfaceState *cached_state;
+
+  struct MetaWaylandSurfaceSubState {
+    MetaWaylandSurface *parent;
+    GNode *subsurface_branch_node;
+    GNode *subsurface_leaf_node;
+    CoglTexture *texture;
+  } output_state, protocol_state;
 
   /* Extension resources. */
   struct wl_resource *wl_subsurface;
 
   /* wl_subsurface stuff. */
   struct {
-    MetaWaylandSurface *parent;
-    struct wl_listener parent_destroy_listener;
 
     int x;
     int y;
@@ -225,9 +225,10 @@ struct _MetaWaylandSurface
      */
     gboolean synchronous;
 
-    int32_t pending_x;
-    int32_t pending_y;
-    gboolean pending_pos;
+    /* Transaction which contains all synchronized state for this sub-surface.
+     * This can include state for nested sub-surfaces.
+     */
+    MetaWaylandTransaction *transaction;
   } sub;
 
   /* wp_viewport */
@@ -243,6 +244,13 @@ struct _MetaWaylandSurface
     int dst_height;
   } viewport;
 
+  /* Transactions */
+  struct {
+    /* First & last committed transaction which has an entry for this surface */
+    MetaWaylandTransaction *first_committed;
+    MetaWaylandTransaction *last_committed;
+  } transaction;
+
   /* table of seats for which shortcuts are inhibited */
   GHashTable *shortcut_inhibited_seats;
 };
@@ -254,15 +262,25 @@ MetaWaylandSurface *meta_wayland_surface_create (MetaWaylandCompositor *composit
                                                  struct wl_resource    *compositor_resource,
                                                  guint32                id);
 
+void                meta_wayland_surface_state_reset (MetaWaylandSurfaceState *state);
+
+void                meta_wayland_surface_state_merge_into (MetaWaylandSurfaceState *from,
+                                                           MetaWaylandSurfaceState *to);
+
+void                meta_wayland_surface_apply_placement_ops (MetaWaylandSurface      *surface,
+                                                              MetaWaylandSurfaceState *state);
+
+void                meta_wayland_surface_apply_state (MetaWaylandSurface      *surface,
+                                                      MetaWaylandSurfaceState *state);
+
 MetaWaylandSurfaceState *
                     meta_wayland_surface_get_pending_state (MetaWaylandSurface *surface);
 
 MetaWaylandSurfaceState *
                     meta_wayland_surface_ensure_cached_state (MetaWaylandSurface *surface);
 
-void                meta_wayland_surface_apply_cached_state (MetaWaylandSurface *surface);
-
-gboolean            meta_wayland_surface_is_effectively_synchronized (MetaWaylandSurface *surface);
+MetaWaylandTransaction *
+                    meta_wayland_surface_ensure_transaction (MetaWaylandSurface *surface);
 
 gboolean            meta_wayland_surface_assign_role (MetaWaylandSurface *surface,
                                                       GType               role_type,
@@ -270,10 +288,6 @@ gboolean            meta_wayland_surface_assign_role (MetaWaylandSurface *surfac
                                                       ...);
 
 MetaWaylandBuffer  *meta_wayland_surface_get_buffer (MetaWaylandSurface *surface);
-
-void                meta_wayland_surface_ref_buffer_use_count (MetaWaylandSurface *surface);
-
-void                meta_wayland_surface_unref_buffer_use_count (MetaWaylandSurface *surface);
 
 void                meta_wayland_surface_set_window (MetaWaylandSurface *surface,
                                                      MetaWindow         *window);
@@ -303,7 +317,7 @@ MetaWaylandSurface *meta_wayland_surface_get_toplevel (MetaWaylandSurface *surfa
 
 MetaWindow *        meta_wayland_surface_get_window (MetaWaylandSurface *surface);
 
-gboolean            meta_wayland_surface_should_cache_state (MetaWaylandSurface *surface);
+gboolean            meta_wayland_surface_is_synchronized (MetaWaylandSurface *surface);
 
 MetaWindow *        meta_wayland_surface_get_toplevel_window (MetaWaylandSurface *surface);
 
@@ -373,6 +387,12 @@ gboolean            meta_wayland_surface_can_scanout_untransformed (MetaWaylandS
 CoglScanout *       meta_wayland_surface_try_acquire_scanout (MetaWaylandSurface *surface,
                                                               CoglOnscreen       *onscreen);
 
+static inline MetaWaylandSurfaceState *
+meta_wayland_surface_state_new (void)
+{
+  return g_object_new (META_TYPE_WAYLAND_SURFACE_STATE, NULL);
+}
+
 MetaLogicalMonitor * meta_wayland_surface_get_preferred_scale_monitor (MetaWaylandSurface *surface);
 
 MetaCrtc *          meta_wayland_surface_get_scanout_candidate (MetaWaylandSurface *surface);
@@ -398,20 +418,22 @@ meta_get_next_subsurface_sibling (GNode *n)
 }
 
 static inline GNode *
-meta_get_first_subsurface_node (MetaWaylandSurface *surface)
+meta_get_first_subsurface_node (struct MetaWaylandSurfaceSubState *sub)
 {
   GNode *n;
 
-  n = g_node_first_child (surface->subsurface_branch_node);
+  n = g_node_first_child (sub->subsurface_branch_node);
   if (!G_NODE_IS_LEAF (n))
     return n;
   else
     return meta_get_next_subsurface_sibling (n);
 }
 
-#define META_WAYLAND_SURFACE_FOREACH_SUBSURFACE(surface, subsurface) \
-  for (GNode *G_PASTE(__n, __LINE__) = meta_get_first_subsurface_node ((surface)); \
-       (subsurface = (G_PASTE (__n, __LINE__) ? G_PASTE (__n, __LINE__)->data : NULL)); \
-       G_PASTE (__n, __LINE__) = meta_get_next_subsurface_sibling (G_PASTE (__n, __LINE__)))
+#define META_WAYLAND_SURFACE_FOREACH_SUBSURFACE(state, subsurface) \
+for (GNode *G_PASTE(__n, __LINE__) = meta_get_first_subsurface_node (state), \
+  *G_PASTE(__next, __LINE__) = meta_get_next_subsurface_sibling (G_PASTE (__n, __LINE__)); \
+  (subsurface = (G_PASTE (__n, __LINE__) ? G_PASTE (__n, __LINE__)->data : NULL)); \
+  G_PASTE (__n, __LINE__) = G_PASTE (__next, __LINE__), \
+  G_PASTE (__next, __LINE__) = meta_get_next_subsurface_sibling (G_PASTE (__n, __LINE__)))
 
 #endif

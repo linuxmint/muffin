@@ -74,7 +74,7 @@ meta_window_actor_wayland_rebuild_surface_tree (MetaWindowActor *actor)
     meta_window_actor_get_surface (actor);
   MetaWaylandSurface *surface = meta_surface_actor_wayland_get_surface (
     META_SURFACE_ACTOR_WAYLAND (surface_actor));
-  GNode *root_node = surface->subsurface_branch_node;
+  GNode *root_node = surface->output_state.subsurface_branch_node;
   SurfaceTreeTraverseData traverse_data;
 
   traverse_data = (SurfaceTreeTraverseData) {

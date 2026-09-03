@@ -58,6 +58,9 @@ typedef struct _MetaWaylandRegion MetaWaylandRegion;
 typedef struct _MetaWaylandSurface MetaWaylandSurface;
 typedef struct _MetaWaylandSurfaceState MetaWaylandSurfaceState;
 
+typedef struct _MetaWaylandTransaction MetaWaylandTransaction;
+typedef struct _MetaWaylandTransactionEntry MetaWaylandTransactionEntry;
+
 typedef struct _MetaWaylandOutput MetaWaylandOutput;
 
 typedef struct _MetaWaylandWindowConfiguration MetaWaylandWindowConfiguration;
@@ -67,5 +70,7 @@ typedef struct _MetaWaylandPointerClient MetaWaylandPointerClient;
 typedef struct _MetaWaylandActivation MetaWaylandActivation;
 
 typedef struct _MetaWaylandXdgForeign MetaWaylandXdgForeign;
+
+typedef struct _MetaWaylandXdgPositioner MetaWaylandXdgPositioner;
 
 #endif

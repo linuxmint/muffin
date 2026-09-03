@@ -896,7 +896,7 @@ calculate_surface_position (MetaWaylandLayerSurface *layer_surface,
    * fallback matters when a popup is parented to a layer surface whose first
    * buffer hasn't been drawn — without it we'd treat the surface as 0x0
    * and place the popup at the bounds origin. */
-  if (surface->buffer_ref->buffer)
+  if (surface->buffer)
     {
       width = meta_wayland_surface_get_width (surface);
       height = meta_wayland_surface_get_height (surface);
@@ -998,7 +998,7 @@ meta_wayland_layer_surface_get_geometry (MetaWaylandLayerSurface *layer_surface,
    * fields but leaves parent_rect untouched. */
   int scale = get_layer_surface_scale (layer_surface);
 
-  if (surface->buffer_ref->buffer)
+  if (surface->buffer)
     {
       *out_width = meta_wayland_surface_get_width (surface) * scale;
       *out_height = meta_wayland_surface_get_height (surface) * scale;
@@ -1477,7 +1477,7 @@ meta_wayland_layer_surface_apply_state (MetaWaylandSurfaceRole  *surface_role,
     }
 
   had_buffer = layer_surface->mapped;
-  has_buffer = surface->buffer_ref->buffer != NULL;
+  has_buffer = surface->buffer != NULL;
 
   /* Save old state for strut change detection */
   old_state = layer_surface->current;
@@ -1980,7 +1980,7 @@ meta_wayland_layer_surface_notify_subsurface_state_changed (MetaWaylandSurfaceRo
   traverse_data[0] = surface;
   traverse_data[1] = CLUTTER_ACTOR (surface_actor);
 
-  g_node_traverse (surface->subsurface_branch_node,
+  g_node_traverse (surface->output_state.subsurface_branch_node,
                    G_IN_ORDER,
                    G_TRAVERSE_LEAVES,
                    -1,
@@ -2210,7 +2210,7 @@ layer_shell_get_layer_surface (struct wl_client   *client,
     }
 
   /* Check if surface already has a buffer */
-  if (surface->buffer_ref->buffer)
+  if (surface->buffer)
     {
       wl_resource_post_error (resource,
                               ZWLR_LAYER_SHELL_V1_ERROR_ALREADY_CONSTRUCTED,
