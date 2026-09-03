@@ -1867,8 +1867,9 @@ meta_cursor_renderer_native_new (MetaBackend *backend)
   MetaCursorRendererNative *cursor_renderer_native;
   MetaCursorRendererNativePrivate *priv;
 
-  cursor_renderer_native =
-    g_object_new (META_TYPE_CURSOR_RENDERER_NATIVE, NULL);
+  cursor_renderer_native = g_object_new (META_TYPE_CURSOR_RENDERER_NATIVE,
+                                         "backend", backend,
+                                         NULL);
   priv =
     meta_cursor_renderer_native_get_instance_private (cursor_renderer_native);
 

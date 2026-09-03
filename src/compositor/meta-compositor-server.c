@@ -45,10 +45,12 @@ meta_compositor_server_monotonic_to_high_res_xserver_time (MetaCompositor *compo
 }
 
 MetaCompositorServer *
-meta_compositor_server_new (MetaDisplay *display)
+meta_compositor_server_new (MetaDisplay *display,
+                            MetaBackend *backend)
 {
   return g_object_new (META_TYPE_COMPOSITOR_SERVER,
                        "display", display,
+                       "backend", backend,
                        NULL);
 }
 

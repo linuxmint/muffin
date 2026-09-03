@@ -117,7 +117,9 @@ meta_backend_x11_cm_create_monitor_manager (MetaBackend *backend,
 static MetaCursorRenderer *
 meta_backend_x11_cm_create_cursor_renderer (MetaBackend *backend)
 {
-  return g_object_new (META_TYPE_CURSOR_RENDERER_X11, NULL);
+  return g_object_new (META_TYPE_CURSOR_RENDERER_X11,
+                       "backend", backend,
+                       NULL);
 }
 
 static MetaInputSettings *

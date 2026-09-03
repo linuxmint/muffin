@@ -562,12 +562,6 @@ meta_backend_real_post_init (MetaBackend *backend)
     }
 }
 
-static MetaCursorRenderer *
-meta_backend_real_create_cursor_renderer (MetaBackend *backend)
-{
-  return meta_cursor_renderer_new ();
-}
-
 static gboolean
 meta_backend_real_grab_device (MetaBackend *backend,
                                int          device_id,
@@ -749,7 +743,6 @@ meta_backend_class_init (MetaBackendClass *klass)
   object_class->constructed = meta_backend_constructed;
 
   klass->post_init = meta_backend_real_post_init;
-  klass->create_cursor_renderer = meta_backend_real_create_cursor_renderer;
   klass->grab_device = meta_backend_real_grab_device;
   klass->ungrab_device = meta_backend_real_ungrab_device;
   klass->select_stage_events = meta_backend_real_select_stage_events;
@@ -1263,24 +1256,6 @@ meta_backend_get_stage (MetaBackend *backend)
 {
   MetaBackendPrivate *priv = meta_backend_get_instance_private (backend);
   return priv->stage;
-}
-
-void
-meta_backend_freeze_updates (MetaBackend *backend)
-{
-  ClutterStage *stage;
-
-  stage = CLUTTER_STAGE (meta_backend_get_stage (backend));
-  clutter_stage_freeze_updates (stage);
-}
-
-void
-meta_backend_thaw_updates (MetaBackend *backend)
-{
-  ClutterStage *stage;
-
-  stage = CLUTTER_STAGE (meta_backend_get_stage (backend));
-  clutter_stage_thaw_updates (stage);
 }
 
 static gboolean

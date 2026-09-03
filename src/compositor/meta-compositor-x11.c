@@ -472,10 +472,12 @@ meta_compositor_x11_get_output_xwindow (MetaCompositorX11 *compositor_x11)
 }
 
 MetaCompositorX11 *
-meta_compositor_x11_new (MetaDisplay *display)
+meta_compositor_x11_new (MetaDisplay *display,
+                         MetaBackend *backend)
 {
   return g_object_new (META_TYPE_COMPOSITOR_X11,
                        "display", display,
+                       "backend", backend,
                        NULL);
 }
 
