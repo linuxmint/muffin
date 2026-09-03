@@ -11346,8 +11346,11 @@ clutter_actor_set_width (ClutterActor *self,
                          gfloat        width)
 {
   float cur_size;
+  float new_size;
 
   g_return_if_fail (CLUTTER_IS_ACTOR (self));
+
+  new_size = ceilf (width);
 
   /* minor optimization: if we don't have a duration
    * then we can skip the get_width() below, to avoid
@@ -11358,7 +11361,7 @@ clutter_actor_set_width (ClutterActor *self,
     {
       g_object_freeze_notify (G_OBJECT (self));
 
-      clutter_actor_set_width_internal (self, width);
+      clutter_actor_set_width_internal (self, new_size);
 
       g_object_thaw_notify (G_OBJECT (self));
 
@@ -11370,7 +11373,7 @@ clutter_actor_set_width (ClutterActor *self,
   _clutter_actor_create_transition (self,
                                     obj_props[PROP_WIDTH],
                                     cur_size,
-                                    width);
+                                    new_size);
 }
 
 /**
@@ -11393,15 +11396,18 @@ clutter_actor_set_height (ClutterActor *self,
                           gfloat        height)
 {
   float cur_size;
+  float new_size;
 
   g_return_if_fail (CLUTTER_IS_ACTOR (self));
+
+  new_size = ceilf (height);
 
   /* see the comment in clutter_actor_set_width() above */
   if (clutter_actor_get_easing_duration (self) == 0)
     {
       g_object_freeze_notify (G_OBJECT (self));
 
-      clutter_actor_set_height_internal (self, height);
+      clutter_actor_set_height_internal (self, new_size);
 
       g_object_thaw_notify (G_OBJECT (self));
 
@@ -11413,7 +11419,7 @@ clutter_actor_set_height (ClutterActor *self,
   _clutter_actor_create_transition (self,
                                     obj_props[PROP_HEIGHT],
                                     cur_size,
-                                    height);
+                                    new_size);
 }
 
 static inline void
@@ -11515,7 +11521,7 @@ clutter_actor_set_x (ClutterActor *self,
 
   _clutter_actor_create_transition (self, obj_props[PROP_X],
                                     cur_position,
-                                    x);
+                                    roundf (x));
 }
 
 /**
@@ -11542,7 +11548,7 @@ clutter_actor_set_y (ClutterActor *self,
 
   _clutter_actor_create_transition (self, obj_props[PROP_Y],
                                     cur_position,
-                                    y);
+                                    roundf (y));
 }
 
 /**
@@ -15513,8 +15519,8 @@ clutter_actor_allocate_preferred_size (ClutterActor *self)
 
   actor_box.x1 = actor_x;
   actor_box.y1 = actor_y;
-  actor_box.x2 = actor_box.x1 + natural_width;
-  actor_box.y2 = actor_box.y1 + natural_height;
+  actor_box.x2 = actor_box.x1 + ceilf (natural_width);
+  actor_box.y2 = actor_box.y1 + ceilf (natural_height);
 
   clutter_actor_allocate (self, &actor_box);
 }
