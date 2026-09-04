@@ -40,6 +40,7 @@
 #include "wayland/meta-wayland-drm.h"
 #include "wayland/meta-wayland-egl-stream.h"
 #include "wayland/meta-wayland-idle-inhibit.h"
+#include "wayland/meta-wayland-idle-notify.h"
 #include "wayland/meta-wayland-inhibit-shortcuts-dialog.h"
 #include "wayland/meta-wayland-inhibit-shortcuts.h"
 #include "wayland/meta-wayland-layer-shell.h"
@@ -489,6 +490,7 @@ meta_wayland_compositor_setup (MetaWaylandCompositor *wayland_compositor)
   meta_wayland_input_method_manager_init (compositor);
   meta_wayland_virtual_keyboard_manager_init (compositor);
   meta_wayland_activation_init (compositor);
+  meta_wayland_idle_notify_init (compositor);
   meta_wayland_idle_inhibit_init (compositor);
   meta_wayland_init_xdg_wm_dialog (compositor);
   meta_wayland_xdg_toplevel_tag_init (compositor);
