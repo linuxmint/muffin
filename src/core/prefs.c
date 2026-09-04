@@ -124,6 +124,7 @@ static int   draggable_border_width = 10;
 static int   drag_threshold;
 static gboolean resize_with_right_button = FALSE;
 static gboolean edge_tiling = FALSE;
+static gboolean edge_resistance_window = TRUE;
 static gboolean force_fullscreen = TRUE;
 static gboolean auto_maximize = TRUE;
 static gboolean show_fallback_app_menu = TRUE;
@@ -422,6 +423,13 @@ static MetaBoolPreference preferences_bool[] =
         META_PREF_EDGE_TILING,
       },
       &edge_tiling,
+    },
+    {
+      { "edge-resistance-window",
+        SCHEMA_MUFFIN,
+        META_PREF_EDGE_RESISTANCE_WINDOW,
+      },
+      &edge_resistance_window,
     },
     {
       { "workspaces-only-on-primary",
@@ -1933,6 +1941,9 @@ meta_preference_to_string (MetaPreference pref)
     case META_PREF_EDGE_TILING:
       return "EDGE_TILING";
 
+    case META_PREF_EDGE_RESISTANCE_WINDOW:
+      return "EDGE_RESISTANCE_WINDOW";
+
     case META_PREF_FORCE_FULLSCREEN:
       return "FORCE_FULLSCREEN";
 
@@ -2415,6 +2426,12 @@ gboolean
 meta_prefs_get_edge_tiling (void)
 {
   return edge_tiling;
+}
+
+gboolean
+meta_prefs_get_edge_resistance_window (void)
+{
+  return edge_resistance_window;
 }
 
 gboolean
