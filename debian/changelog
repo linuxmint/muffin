@@ -1,3 +1,47 @@
+muffin (6.7.6) alfa; urgency=medium
+
+  [ Aleksey Samoilov ]
+  * Cleanup and refactor resource scale API (#793)
+
+  [ Michael Webster ]
+  * wayland: represent layer-shell surfaces as MetaWindows
+  * meta-wayland-outputs.c: Send global_remove immediately when a monitor is removed.
+  * meta-wayland-layer-shell.c: Fix MetaFeedbackActor scaling with hidpi.
+  * clutter-actor.c: Clear all stage views before emitting stage-views-changed.
+  * clutter-text.c: multiply existing pango scale attributes by the resource scale instead of replacing them, so per-segment markup sizes survive.
+  * clutter-actor.c: Show on all stage views when an actor has no allocation.
+  * meta-cursor-renderer-native.c: Raise fallback cursor threshold.
+  * wayland: Base output enter/leave on the window rect, not actor geometry.
+  * meta-window-wayland.c: Scale the move-grab anchor when crossing monitor scales.
+  * delete.c: Guard delete/kill against unmanaging windows.
+  * clutter: Backport some relayout and allocation lifecycle fixes.
+  * clutter: Don't gate pointer repicks on the redraw clip.
+  * window-x11.c: Restore unredirect-fullscreen pref check removed in 120ade844586.
+  * wayland: Implement scanout surface dmabuf feedback.
+  * Wayland: bump wl_compositor to v6 for preferred_scale.
+  * wayland: Implement wp_fractional_scale_v1.
+  * wayland: Fix maximize transition broken by wp_fractional_scale_v1
+  * logging: Add topic for Wayland scanout.
+  * monitor: Calculate fractional scales as exact quotients
+  * display.c: Fix a warning when using the nested backend.
+  * build: Fix some dependency versions.
+  * clutter-actor.c: Soften the check for guessed resource scale.
+  * util: Add layer-shell debug topic, mark unused topics.
+  * meta-wayland-xdg-shell.c: Allow serial-less nested popups from layer-shell surfaces.
+  * meta-wayland-surface.c: Advertise a surface's scale when its output is known.
+  * meta-wayland-layer-shell.c: Reconfigure full-output surfaces when the output resizes.
+  * meta-wayland-layer-shell.c: Don't free the namespace early, so it can be used for logging.
+  * clutter-input-method.c: Ensure a stage for events.
+  * meta-window.c: Apply edge resistance on shared monitor edges during window drags.
+  * meta-barrier-native.c: Match X11 pointer barrier behavior.
+  * clutter-stage.c: Don't allocate relayout entries for detached actors.
+  * clutter: Emit ::resource-scale-changed outside the stage-views walk.
+  * clutter-actor.c: Guess a resource scale of 1 when there are no views.
+  * meta-x11-background-actor.c: Don't override the bottom actor's opacity when it's not mapped or there's no transition.
+  * clutter-actor.c: Follow-up to 61eece4d2, additional rounding changes.
+
+ -- Clement Lefebvre <root@linuxmint.com>  Sat, 05 Sep 2026 15:13:56 +0100
+
 muffin (6.7.5) alfa; urgency=medium
 
   [ Clement Lefebvre ]
