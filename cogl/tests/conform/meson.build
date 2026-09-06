@@ -40,8 +40,6 @@ cogl_test_conformance_sources = [
   'test-pipeline-shader-state.c',
   'test-texture-rg.c',
   'test-fence.c',
-  'test-path.c',
-  'test-path-clip.c',
 ]
 
 #unported = [
@@ -84,7 +82,6 @@ libmuffin_cogl_test_conformance = executable('test-conformance',
   include_directories: cogl_test_conformance_includes,
   dependencies: [
     libmuffin_cogl_dep,
-    libmuffin_cogl_path_dep,
     libmuffin_cogl_test_fixtures_dep,
   ],
   install: have_installed_tests,
