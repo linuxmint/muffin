@@ -190,6 +190,9 @@ meta_wayland_buffer_realize (MetaWaylandBuffer *buffer)
     {
       buffer->single_pixel.single_pixel_buffer = single_pixel_buffer;
       buffer->type = META_WAYLAND_BUFFER_TYPE_SINGLE_PIXEL;
+      /* Ownership is transferred to the buffer GObject. Clear the wl_resource
+       * user data so that the resource destructor doesn't double-free it. */
+      wl_resource_set_user_data (buffer->resource, NULL);
       return TRUE;
     }
 
