@@ -6297,6 +6297,84 @@ meta_test_monitor_migrated_wiggle (void)
     g_error ("Failed to remove test data output file: %s", error->message);
 }
 
+/*
+ * Regression test for issue #819: a hotplug event on an unchanged
+ * connected-monitor set must not discard a user-applied configuration.
+ * Concretely, a monitor that the user has explicitly disabled (e.g.
+ * via Super+P, xrandr --off, or the Display GUI) must remain disabled
+ * after the kernel emits a DRM hotplug — most often caused by the
+ * monitor itself performing an auto input-scan and re-toggling its
+ * link state.
+ *
+ * Without the fix, ensure_configured() walked past current_config and
+ * fell through to create_suggested(), which silently re-enabled every
+ * detected output.
+ */
+static void
+meta_test_monitor_hotplug_preserves_user_disabled_monitor (void)
+{
+  MetaBackend *backend = meta_get_backend ();
+  MetaMonitorManager *monitor_manager =
+    meta_backend_get_monitor_manager (backend);
+  MetaMonitorConfigManager *config_manager = monitor_manager->config_manager;
+  MonitorTestCase test_case = initial_test_case;
+  MetaMonitorTestSetup *test_setup;
+  MetaMonitorsConfig *linear;
+  MetaMonitorsConfig *disabled_config;
+  MetaMonitorsConfig *post_hotplug_config;
+  MetaLogicalMonitorLayoutMode layout_mode;
+  GList *first_link;
+
+  /* Initial hotplug: both monitors detected, both enabled. */
+  test_setup = create_monitor_test_setup (&test_case,
+                                          MONITOR_TEST_FLAG_NO_STORED);
+  emulate_hotplug (test_setup);
+
+  /* Build a "second monitor disabled" config by stealing the first
+   * logical_monitor_config out of a freshly-created linear config and
+   * handing it to meta_monitors_config_new(), which auto-populates
+   * disabled_monitor_specs from the remaining detected monitors. The
+   * remaining list elements are released when the linear config is
+   * dropped. */
+  linear = meta_monitor_config_manager_create_linear (config_manager);
+  layout_mode = linear->layout_mode;
+  first_link = linear->logical_monitor_configs;
+  linear->logical_monitor_configs = first_link->next;
+  if (first_link->next)
+    first_link->next->prev = NULL;
+  first_link->next = NULL;
+  g_object_unref (linear);
+
+  disabled_config = meta_monitors_config_new (monitor_manager,
+                                              first_link,
+                                              layout_mode,
+                                              META_MONITORS_CONFIG_FLAG_NONE);
+  g_assert_cmpuint (g_list_length (disabled_config->logical_monitor_configs),
+                    ==, 1);
+  g_assert_cmpuint (g_list_length (disabled_config->disabled_monitor_specs),
+                    ==, 1);
+
+  /* Mark it as current — this is what apply_monitors_config() does on
+   * a successful TEMPORARY apply (the path taken by xrandr --off and
+   * Super+P, neither of which writes to the on-disk config store). */
+  meta_monitor_config_manager_set_current (config_manager, disabled_config);
+  g_object_unref (disabled_config);
+
+  /* Hotplug with the same monitor topology — simulates a monitor's
+   * auto input-scan triggering a DRM link-state ping. */
+  test_setup = create_monitor_test_setup (&test_case,
+                                          MONITOR_TEST_FLAG_NO_STORED);
+  emulate_hotplug (test_setup);
+
+  post_hotplug_config =
+    meta_monitor_config_manager_get_current (config_manager);
+  g_assert_nonnull (post_hotplug_config);
+  g_assert_cmpuint (g_list_length (post_hotplug_config->logical_monitor_configs),
+                    ==, 1);
+  g_assert_cmpuint (g_list_length (post_hotplug_config->disabled_monitor_specs),
+                    ==, 1);
+}
+
 static void
 test_case_setup (void       **fixture,
                  const void   *data)
@@ -6418,6 +6496,9 @@ init_monitor_tests (void)
 
   add_monitor_test ("/backends/monitor/wm/tiling",
                     meta_test_monitor_wm_tiling);
+
+  add_monitor_test ("/backends/monitor/hotplug-preserves-user-disabled-monitor",
+                    meta_test_monitor_hotplug_preserves_user_disabled_monitor);
 }
 
 void
