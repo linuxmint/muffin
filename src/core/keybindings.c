@@ -37,6 +37,7 @@
 #include "core/edge-resistance.h"
 #include "core/frame.h"
 #include "core/keybindings-private.h"
+#include "core/zoom-grab.h"
 #include "core/meta-accel-parse.h"
 #include "core/meta-workspace-manager-private.h"
 #include "core/workspace-private.h"
@@ -1499,6 +1500,8 @@ meta_display_shutdown_keys (MetaDisplay *display)
   MetaKeyBindingManager *keys = &display->key_binding_manager;
 
   meta_prefs_remove_listener (prefs_changed_callback, display);
+
+  meta_zoom_pointer_grab_release_all (display);
 
   g_hash_table_destroy (keys->key_bindings_index);
   g_hash_table_destroy (keys->key_bindings);
