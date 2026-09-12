@@ -1635,6 +1635,19 @@ add_edges (GList               *cur_edges,
 /* Remove any part of old_edge that intersects remove and add any resulting
  * edges to cur_list.  Return cur_list when finished.
  */
+static GList *
+keep_unsplit_edge (GList          *cur_list,
+                   const MetaEdge *old_edge)
+{
+  MetaEdge *copy;
+
+  g_warning_once ("split_edge: edge and removal rectangle do not overlap, keeping the edge unsplit");
+
+  copy = g_new (MetaEdge, 1);
+  *copy = *old_edge;
+  return g_list_prepend (cur_list, copy);
+}
+
 static GList*
 split_edge (GList *cur_list,
             const MetaEdge *old_edge,
@@ -1645,7 +1658,8 @@ split_edge (GList *cur_list,
     {
     case META_SIDE_LEFT:
     case META_SIDE_RIGHT:
-      g_assert (meta_rectangle_vert_overlap (&old_edge->rect, &remove->rect));
+      if (!meta_rectangle_vert_overlap (&old_edge->rect, &remove->rect))
+        return keep_unsplit_edge (cur_list, old_edge);
       if (BOX_TOP (old_edge->rect)  < BOX_TOP (remove->rect))
         {
           temp_edge = g_new (MetaEdge, 1);
@@ -1666,7 +1680,8 @@ split_edge (GList *cur_list,
       break;
     case META_SIDE_TOP:
     case META_SIDE_BOTTOM:
-      g_assert (meta_rectangle_horiz_overlap (&old_edge->rect, &remove->rect));
+      if (!meta_rectangle_horiz_overlap (&old_edge->rect, &remove->rect))
+        return keep_unsplit_edge (cur_list, old_edge);
       if (BOX_LEFT (old_edge->rect)  < BOX_LEFT (remove->rect))
         {
           temp_edge = g_new (MetaEdge, 1);

@@ -28,15 +28,28 @@
 #include "core/meta-workspace-manager-private.h"
 #include "core/workspace-private.h"
 
+static gboolean
+frame_rect_in_sane_range (MetaWindow *window)
+{
+  MetaRectangle rect;
+
+  meta_window_get_frame_rect (window, &rect);
+
+  return rect.width >= 0 && rect.height >= 0 &&
+         ABS ((gint64) rect.x) + rect.width <= G_MAXINT / 2 &&
+         ABS ((gint64) rect.y) + rect.height <= G_MAXINT / 2;
+}
+
 /* A simple macro for whether a given window's edges are potentially
  * relevant for resistance/snapping during a move/resize operation
  */
-#define WINDOW_EDGES_RELEVANT(window, display) \
-  meta_window_should_be_showing (window) &&    \
-  window         != display->grab_window &&    \
-  window->type   != META_WINDOW_DESKTOP &&     \
-  window->type   != META_WINDOW_MENU    &&     \
-  window->type   != META_WINDOW_SPLASHSCREEN
+#define WINDOW_EDGES_RELEVANT(window, display)  \
+  meta_window_should_be_showing (window) &&     \
+  window         != display->grab_window &&     \
+  window->type   != META_WINDOW_DESKTOP &&      \
+  window->type   != META_WINDOW_MENU    &&      \
+  window->type   != META_WINDOW_SPLASHSCREEN && \
+  frame_rect_in_sane_range (window)
 
 struct ResistanceDataForAnEdge
 {
