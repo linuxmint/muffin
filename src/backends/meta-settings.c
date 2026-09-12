@@ -374,7 +374,7 @@ experimental_features_handler (GVariant *features_variant,
       MetaExperimentalFeature feature = META_EXPERIMENTAL_FEATURE_NONE;
 
       if (g_str_equal (feature_str, "scale-monitor-framebuffer"))
-        feature = META_EXPERIMENTAL_FEATURE_SCALE_MONITOR_FRAMEBUFFER;
+        continue;
       else if (g_str_equal (feature_str, "kms-modifiers"))
         feature = META_EXPERIMENTAL_FEATURE_KMS_MODIFIERS;
       else if (g_str_equal (feature_str, "rt-scheduler"))

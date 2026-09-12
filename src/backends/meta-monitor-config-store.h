@@ -46,6 +46,10 @@ void meta_monitor_config_store_remove (MetaMonitorConfigStore *config_store,
                                        MetaMonitorsConfig     *config);
 
 META_EXPORT_TEST
+gboolean meta_monitor_config_store_reset (MetaMonitorConfigStore  *config_store,
+                                          GError                 **error);
+
+META_EXPORT_TEST
 gboolean meta_monitor_config_store_set_custom (MetaMonitorConfigStore *config_store,
                                                const char             *read_path,
                                                const char             *write_path,

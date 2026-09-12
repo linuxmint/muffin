@@ -2289,6 +2289,7 @@ libmuffin.so.0 libmuffin0 #MINVER#
  meta_monitor_config_store_lookup@Base 5.3.0
  meta_monitor_config_store_new@Base 5.3.0
  meta_monitor_config_store_remove@Base 5.3.0
+ meta_monitor_config_store_reset@Base 6.7.6
  meta_monitor_config_store_set_custom@Base 5.3.0
  meta_monitor_crtc_to_logical_transform@Base 5.3.0
  meta_monitor_derive_current_mode@Base 5.3.0

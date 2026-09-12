@@ -45,10 +45,6 @@ run_tests (gpointer data)
 
   meta_settings_override_experimental_features (settings);
 
-  meta_settings_enable_experimental_feature (
-    settings,
-    META_EXPERIMENTAL_FEATURE_SCALE_MONITOR_FRAMEBUFFER);
-
   ret = g_test_run ();
 
   meta_quit (ret != 0);

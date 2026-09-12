@@ -225,10 +225,6 @@ run_tests (gpointer data)
 
   meta_settings_override_experimental_features (settings);
 
-  meta_settings_enable_experimental_feature (
-    settings,
-    META_EXPERIMENTAL_FEATURE_SCALE_MONITOR_FRAMEBUFFER);
-
   pre_run_monitor_tests ();
   pre_run_wayland_tests ();
 

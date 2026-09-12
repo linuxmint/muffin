@@ -184,6 +184,7 @@ struct _MetaMonitorManager
  * @get_capabilities: vfunc for meta_monitor_manager_get_capabilities().
  * @get_max_screen_size: vfunc for meta_monitor_manager_get_max_screen_size().
  * @get_default_layout_mode: vfunc for meta_monitor_manager_get_default_layout_mode().
+ * @get_config_file_basename: vfunc for meta_monitor_manager_get_config_file_basename().
  *
  * The base class for a #MetaMonitorManager.
  */
@@ -254,6 +255,8 @@ struct _MetaMonitorManagerClass
                                    int                *);
 
   MetaLogicalMonitorLayoutMode (*get_default_layout_mode) (MetaMonitorManager *);
+
+  const char * (*get_config_file_basename) (MetaMonitorManager *);
 };
 
 META_EXPORT_TEST
@@ -386,6 +389,8 @@ gboolean           meta_monitor_manager_get_max_screen_size (MetaMonitorManager 
 
 MetaLogicalMonitorLayoutMode
                    meta_monitor_manager_get_default_layout_mode (MetaMonitorManager *manager);
+
+const char *       meta_monitor_manager_get_config_file_basename (MetaMonitorManager *manager);
 
 MetaMonitorConfigManager *
                    meta_monitor_manager_get_config_manager (MetaMonitorManager *manager);

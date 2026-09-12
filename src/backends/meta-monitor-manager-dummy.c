@@ -704,32 +704,14 @@ meta_monitor_manager_dummy_calculate_supported_scales (MetaMonitorManager       
                                                   n_supported_scales);
 }
 
-static gboolean
-is_monitor_framebuffers_scaled (void)
-{
-  MetaBackend *backend = meta_get_backend ();
-  MetaSettings *settings = meta_backend_get_settings (backend);
-
-  return meta_settings_is_experimental_feature_enabled (
-    settings,
-    META_EXPERIMENTAL_FEATURE_SCALE_MONITOR_FRAMEBUFFER);
-}
-
 static MetaMonitorManagerCapability
 meta_monitor_manager_dummy_get_capabilities (MetaMonitorManager *manager)
 {
-  MetaBackend *backend = meta_get_backend ();
-  MetaSettings *settings = meta_backend_get_settings (backend);
   MetaMonitorManagerCapability capabilities =
-    META_MONITOR_MANAGER_CAPABILITY_NONE;
+    META_MONITOR_MANAGER_CAPABILITY_LAYOUT_MODE;
 
   if (has_tiled_monitors ())
     capabilities |= META_MONITOR_MANAGER_CAPABILITY_TILING;
-
-  if (meta_settings_is_experimental_feature_enabled (
-        settings,
-        META_EXPERIMENTAL_FEATURE_SCALE_MONITOR_FRAMEBUFFER))
-    capabilities |= META_MONITOR_MANAGER_CAPABILITY_LAYOUT_MODE;
 
   return capabilities;
 }
@@ -754,10 +736,7 @@ meta_monitor_manager_dummy_get_default_layout_mode (MetaMonitorManager *manager)
   if (!meta_is_stage_views_enabled ())
     return META_LOGICAL_MONITOR_LAYOUT_MODE_PHYSICAL;
 
-  if (is_monitor_framebuffers_scaled ())
-    return META_LOGICAL_MONITOR_LAYOUT_MODE_LOGICAL;
-  else
-    return META_LOGICAL_MONITOR_LAYOUT_MODE_PHYSICAL;
+  return META_LOGICAL_MONITOR_LAYOUT_MODE_LOGICAL;
 }
 
 static void
