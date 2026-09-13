@@ -102,6 +102,7 @@ enum
   PROP_0,
 
   PROP_DISPLAY,
+  PROP_BACKEND,
 
   N_PROPS
 };
@@ -122,6 +123,7 @@ typedef struct _MetaCompositorPrivate
   GObject parent;
 
   MetaDisplay *display;
+  MetaBackend *backend;
 
   guint pre_paint_func_id;
   guint post_paint_func_id;
@@ -242,7 +244,7 @@ meta_get_stage_for_display (MetaDisplay *display)
   g_return_val_if_fail (compositor, NULL);
   priv = meta_compositor_get_instance_private (compositor);
 
-  return priv->stage;
+  return meta_backend_get_stage (priv->backend);
 }
 
 /**
@@ -739,12 +741,11 @@ meta_compositor_do_manage (MetaCompositor  *compositor,
   MetaCompositorPrivate *priv =
     meta_compositor_get_instance_private (compositor);
   MetaDisplay *display = priv->display;
-  MetaBackend *backend = meta_get_backend ();
-
-  priv->stage = meta_backend_get_stage (backend);
+  MetaBackend *backend = priv->backend;
+  ClutterActor *stage = meta_backend_get_stage (backend);
 
   priv->stage_presented_id =
-    g_signal_connect (priv->stage, "presented",
+    g_signal_connect (stage, "presented",
                       G_CALLBACK (on_presented),
                       compositor);
 
@@ -757,10 +758,10 @@ meta_compositor_do_manage (MetaCompositor  *compositor,
    * matter.
    */
   priv->stage_after_paint_id =
-    g_signal_connect_after (priv->stage, "after-paint",
+    g_signal_connect_after (stage, "after-paint",
                             G_CALLBACK (after_stage_paint), compositor);
 
-  clutter_stage_set_sync_delay (CLUTTER_STAGE (priv->stage), META_SYNC_DELAY);
+  clutter_stage_set_sync_delay (CLUTTER_STAGE (stage), META_SYNC_DELAY);
 
   priv->window_group = meta_window_group_new (display);
   priv->top_window_group = meta_window_group_new (display);
@@ -783,9 +784,9 @@ meta_compositor_do_manage (MetaCompositor  *compositor,
   // will take this and finish setting it up.
   priv->desklet_container = clutter_actor_new ();
   clutter_actor_add_child (priv->window_group, priv->desklet_container);
-  clutter_actor_add_child (priv->stage, priv->window_group);
-  clutter_actor_add_child (priv->stage, priv->top_window_group);
-  clutter_actor_add_child (priv->stage, priv->feedback_group);
+  clutter_actor_add_child (stage, priv->window_group);
+  clutter_actor_add_child (stage, priv->top_window_group);
+  clutter_actor_add_child (stage, priv->feedback_group);
 
   if (!META_COMPOSITOR_GET_CLASS (compositor)->manage (compositor, error))
     return FALSE;
@@ -1561,7 +1562,7 @@ meta_compositor_real_post_paint (MetaCompositor *compositor)
 
     case COGL_GRAPHICS_RESET_STATUS_PURGED_CONTEXT_RESET:
       g_signal_emit_by_name (priv->display, "gl-video-memory-purged");
-      clutter_actor_queue_redraw (CLUTTER_ACTOR (priv->stage));
+      clutter_actor_queue_redraw (meta_backend_get_stage (priv->backend));
       break;
 
     default:
@@ -1610,6 +1611,9 @@ meta_compositor_set_property (GObject      *object,
     case PROP_DISPLAY:
       priv->display = g_value_get_object (value);
       break;
+    case PROP_BACKEND:
+      priv->backend = g_value_get_object (value);
+      break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
     }
@@ -1629,6 +1633,9 @@ meta_compositor_get_property (GObject    *object,
     {
     case PROP_DISPLAY:
       g_value_set_object (value, priv->display);
+      break;
+    case PROP_BACKEND:
+      g_value_set_object (value, priv->backend);
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -1665,11 +1672,12 @@ meta_compositor_dispose (GObject *object)
   MetaCompositor *compositor = META_COMPOSITOR (object);
   MetaCompositorPrivate *priv =
     meta_compositor_get_instance_private (compositor);
+  ClutterActor *stage = meta_backend_get_stage (priv->backend);
 
   g_clear_pointer (&priv->laters, meta_laters_free);
 
-  g_clear_signal_handler (&priv->stage_after_paint_id, priv->stage);
-  g_clear_signal_handler (&priv->stage_presented_id, priv->stage);
+  g_clear_signal_handler (&priv->stage_after_paint_id, stage);
+  g_clear_signal_handler (&priv->stage_presented_id, stage);
 
   g_clear_handle_id (&priv->pre_paint_func_id,
                      clutter_threads_remove_repaint_func);
@@ -1714,6 +1722,14 @@ meta_compositor_class_init (MetaCompositorClass *klass)
                          "display",
                          "MetaDisplay",
                          META_TYPE_DISPLAY,
+                         G_PARAM_READWRITE |
+                         G_PARAM_CONSTRUCT_ONLY |
+                         G_PARAM_STATIC_STRINGS);
+  obj_props[PROP_BACKEND] =
+    g_param_spec_object ("backend",
+                         "backend",
+                         "MetaBackend",
+                         META_TYPE_BACKEND,
                          G_PARAM_READWRITE |
                          G_PARAM_CONSTRUCT_ONLY |
                          G_PARAM_STATIC_STRINGS);
@@ -1996,7 +2012,7 @@ meta_compositor_get_stage (MetaCompositor *compositor)
   MetaCompositorPrivate *priv =
     meta_compositor_get_instance_private (compositor);
 
-  return CLUTTER_STAGE (priv->stage);
+  return CLUTTER_STAGE (meta_backend_get_stage (priv->backend));
 }
 
 MetaWindowActor *

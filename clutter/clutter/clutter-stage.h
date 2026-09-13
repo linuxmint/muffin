@@ -208,8 +208,6 @@ guchar *        clutter_stage_read_pixels                       (ClutterStage   
 
 CLUTTER_EXPORT
 void            clutter_stage_ensure_viewport                   (ClutterStage          *stage);
-CLUTTER_EXPORT
-void            clutter_stage_ensure_redraw                     (ClutterStage          *stage);
 
 CLUTTER_EXPORT
 gboolean        clutter_stage_is_redraw_queued                  (ClutterStage          *stage);

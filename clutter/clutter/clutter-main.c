@@ -2407,8 +2407,7 @@ clutter_threads_add_repaint_func_full (ClutterRepaintFlags flags,
 
   repaint_func->id = context->last_repaint_id++;
 
-  /* mask out QUEUE_REDRAW_ON_ADD, since we're going to consume it */
-  repaint_func->flags = flags & ~CLUTTER_REPAINT_FLAGS_QUEUE_REDRAW_ON_ADD;
+  repaint_func->flags = flags;
   repaint_func->func = func;
   repaint_func->data = data;
   repaint_func->notify = notify;
@@ -2417,13 +2416,6 @@ clutter_threads_add_repaint_func_full (ClutterRepaintFlags flags,
                                            repaint_func);
 
   _clutter_context_unlock ();
-
-  if ((flags & CLUTTER_REPAINT_FLAGS_QUEUE_REDRAW_ON_ADD) != 0)
-    {
-      ClutterMasterClock *master_clock = _clutter_master_clock_get_default ();
-
-      _clutter_master_clock_ensure_next_iteration (master_clock);
-    }
 
   return repaint_func->id;
 }

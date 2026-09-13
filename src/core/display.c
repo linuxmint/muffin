@@ -624,17 +624,17 @@ meta_display_remove_pending_pings_for_window (MetaDisplay *display,
 static MetaCompositor *
 create_compositor (MetaDisplay *display)
 {
-#ifdef HAVE_WAYLAND
   MetaBackend *backend = meta_get_backend ();
 
+#ifdef HAVE_WAYLAND
 #ifdef HAVE_NATIVE_BACKEND
   if (META_IS_BACKEND_NATIVE (backend))
-    return META_COMPOSITOR (meta_compositor_native_new (display));
+    return META_COMPOSITOR (meta_compositor_native_new (display, backend));
 #endif
   if (META_IS_BACKEND_X11_NESTED (backend))
-    return META_COMPOSITOR (meta_compositor_server_new (display));
+    return META_COMPOSITOR (meta_compositor_server_new (display, backend));
 #endif
-  return META_COMPOSITOR (meta_compositor_x11_new (display));
+  return META_COMPOSITOR (meta_compositor_x11_new (display, backend));
 }
 
 static void

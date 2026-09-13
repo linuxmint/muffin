@@ -54,7 +54,7 @@ struct _MetaCursorRendererClass
                               MetaCursorSprite   *cursor_sprite);
 };
 
-MetaCursorRenderer * meta_cursor_renderer_new (void);
+MetaCursorRenderer * meta_cursor_renderer_new (MetaBackend *backend);
 
 void meta_cursor_renderer_set_cursor (MetaCursorRenderer *renderer,
                                       MetaCursorSprite   *cursor_sprite);
