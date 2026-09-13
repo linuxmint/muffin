@@ -366,6 +366,10 @@ void                meta_wayland_surface_notify_actor_changed (MetaWaylandSurfac
 int                 meta_wayland_surface_get_width (MetaWaylandSurface *surface);
 int                 meta_wayland_surface_get_height (MetaWaylandSurface *surface);
 
+void                meta_wayland_surface_get_buffer_size (MetaWaylandSurface *surface,
+                                                          int                *width,
+                                                          int                *height);
+
 gboolean            meta_wayland_surface_can_scanout_untransformed (MetaWaylandSurface *surface,
                                                                     int                 mode_width,
                                                                     int                 mode_height);

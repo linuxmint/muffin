@@ -2228,6 +2228,15 @@ meta_wayland_surface_get_height (MetaWaylandSurface *surface)
     }
 }
 
+void
+meta_wayland_surface_get_buffer_size (MetaWaylandSurface *surface,
+                                      int                *width,
+                                      int                *height)
+{
+  *width = get_buffer_width (surface);
+  *height = get_buffer_height (surface);
+}
+
 static void
 scanout_destroyed (gpointer  data,
                    GObject  *where_the_object_was)
@@ -2262,16 +2271,7 @@ meta_wayland_surface_can_scanout_untransformed (MetaWaylandSurface *surface,
 
   if (get_buffer_width (surface) != mode_width ||
       get_buffer_height (surface) != mode_height)
-    {
-      meta_topic (META_DEBUG_SCANOUT,
-                  "fullscreen surface not scanout-capable: "
-                  "buffer %dx%d vs mode %dx%d\n",
-                  get_buffer_width (surface),
-                  get_buffer_height (surface),
-                  mode_width, mode_height);
-
-      return FALSE;
-    }
+    return FALSE;
 
   return TRUE;
 }

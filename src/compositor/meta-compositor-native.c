@@ -46,6 +46,7 @@ static GQuark quark_view_scanout_candidate;
 typedef struct _ViewScanoutCandidate
 {
     MetaWaylandSurface *surface;
+    const char *blocked_reason;
 } ViewScanoutCandidate;
 
 static void
@@ -182,6 +183,7 @@ maybe_assign_primary_plane (MetaCompositor *compositor)
           MetaSurfaceActorWayland *surface_actor_wayland;
           MetaWaylandSurface *surface;
           const char *reason = NULL;
+          char detail[64] = "";
           g_autoptr (CoglScanout) scanout = NULL;
 
           reason = "disabled";
@@ -258,11 +260,25 @@ maybe_assign_primary_plane (MetaCompositor *compositor)
            * are not steered into scanout-capable buffer allocations for
            * nothing. */
           reason = "surface not scanout-capable";
-          if (!crtc->config || !crtc->config->mode ||
-              !meta_wayland_surface_can_scanout_untransformed (surface,
+          if (!crtc->config || !crtc->config->mode)
+            goto reconcile;
+
+          if (!meta_wayland_surface_can_scanout_untransformed (surface,
                                                                crtc->config->mode->width,
                                                                crtc->config->mode->height))
-            goto reconcile;
+            {
+                int buffer_width, buffer_height;
+
+                meta_wayland_surface_get_buffer_size (surface,
+                                                      &buffer_width,
+                                                      &buffer_height);
+                g_snprintf (detail, sizeof (detail),
+                            " (buffer %dx%d vs mode %dx%d)",
+                            buffer_width, buffer_height,
+                            crtc->config->mode->width,
+                            crtc->config->mode->height);
+                goto reconcile;
+            }
 
           /* Mirrored monitors hand several views the same layout and the same
            * surface, but a surface tracks a single candidate CRTC. Letting
@@ -305,6 +321,17 @@ maybe_assign_primary_plane (MetaCompositor *compositor)
 reconcile:
           if (reason)
             blocked_reason = reason;
+
+          /* Every reason above is a static literal, so a pointer compare is
+           * enough to tell a new block from the same one repeating. Without
+           * this a view that can never scan out logs once per frame. */
+          if (reason != view_candidate->blocked_reason)
+            {
+                if (reason)
+                  meta_topic (META_DEBUG_SCANOUT, "scanout blocked: %s%s\n",
+                              reason, detail);
+                view_candidate->blocked_reason = reason;
+            }
 
           /* A view only consumes its assignment if it goes on to redraw, so an
            * assignment left from an earlier frame would be flipped once this
