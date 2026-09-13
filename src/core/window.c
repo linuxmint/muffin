@@ -1148,16 +1148,20 @@ _meta_window_shared_new (MetaDisplay         *display,
   /* avoid tons of stack updates */
   meta_stack_freeze (window->display->stack);
 
-  window->rect.x = attrs->x;
-  window->rect.y = attrs->y;
-  window->rect.width = attrs->width;
-  window->rect.height = attrs->height;
+  meta_window_protocol_to_stage_point (window,
+                                       attrs->x, attrs->y,
+                                       &window->rect.x, &window->rect.y,
+                                       META_ROUNDING_STRATEGY_ROUND);
+  meta_window_protocol_to_stage_size (window,
+                                      attrs->width, attrs->height,
+                                      &window->rect.width,
+                                      &window->rect.height);
 
   /* size_hints are the "request" */
-  window->size_hints.x = attrs->x;
-  window->size_hints.y = attrs->y;
-  window->size_hints.width = attrs->width;
-  window->size_hints.height = attrs->height;
+  window->size_hints.x = window->rect.x;
+  window->size_hints.y = window->rect.y;
+  window->size_hints.width = window->rect.width;
+  window->size_hints.height = window->rect.height;
   /* initialize the remaining size_hints as if size_hints.flags were zero */
   meta_set_normal_hints (window, NULL);
 
@@ -5140,6 +5144,98 @@ meta_window_frame_rect_to_client_rect (MetaWindow    *window,
       client_rect->width += extents->left + extents->right;
       client_rect->height += extents->top + extents->bottom;
     }
+}
+
+void
+meta_window_stage_to_protocol_point (MetaWindow           *window,
+                                     int                   stage_x,
+                                     int                   stage_y,
+                                     int                  *protocol_x,
+                                     int                  *protocol_y,
+                                     MetaRoundingStrategy  rounding_strategy)
+{
+  MetaWindowClass *klass = META_WINDOW_GET_CLASS (window);
+
+  if (klass->stage_to_protocol_point)
+    {
+      klass->stage_to_protocol_point (window, stage_x, stage_y,
+                                      protocol_x, protocol_y,
+                                      rounding_strategy);
+      return;
+    }
+
+  if (protocol_x)
+    *protocol_x = stage_x;
+  if (protocol_y)
+    *protocol_y = stage_y;
+}
+
+void
+meta_window_stage_to_protocol_size (MetaWindow *window,
+                                    int         stage_w,
+                                    int         stage_h,
+                                    int        *protocol_w,
+                                    int        *protocol_h)
+{
+  MetaWindowClass *klass = META_WINDOW_GET_CLASS (window);
+
+  if (klass->stage_to_protocol_size)
+    {
+      klass->stage_to_protocol_size (window, stage_w, stage_h,
+                                     protocol_w, protocol_h);
+      return;
+    }
+
+  if (protocol_w)
+    *protocol_w = stage_w;
+  if (protocol_h)
+    *protocol_h = stage_h;
+}
+
+void
+meta_window_protocol_to_stage_point (MetaWindow           *window,
+                                     int                   protocol_x,
+                                     int                   protocol_y,
+                                     int                  *stage_x,
+                                     int                  *stage_y,
+                                     MetaRoundingStrategy  rounding_strategy)
+{
+  MetaWindowClass *klass = META_WINDOW_GET_CLASS (window);
+
+  if (klass->protocol_to_stage_point)
+    {
+      klass->protocol_to_stage_point (window, protocol_x, protocol_y,
+                                      stage_x, stage_y,
+                                      rounding_strategy);
+      return;
+    }
+
+  if (stage_x)
+    *stage_x = protocol_x;
+  if (stage_y)
+    *stage_y = protocol_y;
+}
+
+void
+meta_window_protocol_to_stage_size (MetaWindow *window,
+                                    int         protocol_w,
+                                    int         protocol_h,
+                                    int        *stage_w,
+                                    int        *stage_h)
+{
+  MetaWindowClass *klass = META_WINDOW_GET_CLASS (window);
+
+  if (klass->protocol_to_stage_size)
+    {
+      klass->protocol_to_stage_size (window, protocol_w, protocol_h,
+                                     stage_w, stage_h);
+      return;
+    }
+
+  if (stage_w)
+    *stage_w = protocol_w;
+  if (stage_h)
+    *stage_h = protocol_h;
 }
 
 /**

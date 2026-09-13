@@ -88,7 +88,10 @@ cursor_sprite_prepare_at (MetaCursorSprite         *cursor_sprite,
   MetaWaylandSurfaceRole *role = META_WAYLAND_SURFACE_ROLE (cursor_surface);
   MetaWaylandSurface *surface = meta_wayland_surface_role_get_surface (role);
 
-  if (!meta_xwayland_is_xwayland_surface (surface))
+  /* Xwayland cursor buffers come from Xcursor at cursor-size * scale, so they
+   * need the same unscaling as a native client's. */
+  if (!meta_xwayland_is_xwayland_surface (surface) ||
+      meta_is_stage_views_scaled ())
     {
       MetaBackend *backend = meta_get_backend ();
       MetaMonitorManager *monitor_manager =

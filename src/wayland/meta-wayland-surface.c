@@ -57,7 +57,7 @@
 #include "wayland/meta-wayland-xapp-shell.h"
 #include "wayland/meta-wayland-xdg-shell.h"
 #include "wayland/meta-window-wayland.h"
-#include "wayland/meta-xwayland-private.h"
+#include "wayland/meta-xwayland.h"
 #include "wayland/meta-xwayland-private.h"
 
 enum
@@ -763,6 +763,12 @@ meta_wayland_surface_apply_state (MetaWaylandSurface      *surface,
 
   if (state->scale > 0)
     surface->scale = state->scale;
+
+  /* Xwayland renders into a screen sized in physical pixels and sets no buffer
+   * scale of its own; the compositor supplies it. Must come after the client's
+   * own value so it overrides. */
+  if (meta_xwayland_is_xwayland_surface (surface))
+    surface->scale = meta_xwayland_get_effective_scale ();
 
   if (state->has_new_buffer_transform)
     surface->buffer_transform = state->buffer_transform;
@@ -1769,13 +1775,28 @@ meta_wayland_surface_get_absolute_coordinates (MetaWaylandSurface *surface,
                                                float               *x,
                                                float               *y)
 {
-  ClutterActor *actor =
-    CLUTTER_ACTOR (meta_wayland_surface_get_actor (surface));
+  ClutterActor *actor;
   graphene_point3d_t sv = {
     .x = sx,
     .y = sy,
   };
   graphene_point3d_t v = { 0 };
+
+  if (surface != NULL && surface->role)
+    {
+      MetaWaylandSurfaceRoleClass *surface_role_class =
+        META_WAYLAND_SURFACE_ROLE_GET_CLASS (surface->role);
+
+      if (surface_role_class->get_absolute_coordinates)
+        {
+          surface_role_class->get_absolute_coordinates (surface->role,
+                                                        sx, sy,
+                                                        x, y);
+          return;
+        }
+    }
+
+  actor = CLUTTER_ACTOR (meta_wayland_surface_get_actor (surface));
 
   clutter_actor_apply_relative_transform_to_point (actor, NULL, &sv, &v);
 
@@ -2117,13 +2138,27 @@ meta_wayland_surface_calculate_input_region (MetaWaylandSurface *surface)
 {
   cairo_region_t *region;
   cairo_rectangle_int_t buffer_rect;
+  int width, height;
 
   if (!surface->buffer_ref->buffer)
     return NULL;
 
+  width = meta_wayland_surface_get_width (surface);
+  height = meta_wayland_surface_get_height (surface);
+
+  /* input_region is whatever the client set, and Xwayland sets it in X
+   * protocol pixels, so the bounds have to match it rather than the stage. */
+  if (meta_xwayland_is_xwayland_surface (surface))
+    {
+      int scale = meta_xwayland_get_effective_scale ();
+
+      width *= scale;
+      height *= scale;
+    }
+
   buffer_rect = (cairo_rectangle_int_t) {
-    .width = meta_wayland_surface_get_width (surface),
-    .height = meta_wayland_surface_get_height (surface),
+    .width = width,
+    .height = height,
   };
   region = cairo_region_create_rectangle (&buffer_rect);
 

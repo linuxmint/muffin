@@ -54,6 +54,7 @@
 #include "backends/meta-settings-private.h"
 #include "backends/x11/meta-backend-x11.h"
 #include "backends/x11/meta-stage-x11.h"
+#include "core/boxes-private.h"
 #include "core/frame.h"
 #include "core/meta-workspace-manager-private.h"
 #include "core/util-private.h"
@@ -68,6 +69,7 @@
 #include "x11/xprops.h"
 
 #ifdef HAVE_WAYLAND
+#include "wayland/meta-xwayland.h"
 #include "wayland/meta-xwayland-private.h"
 #endif
 
@@ -515,6 +517,17 @@ shutdown_x11_bell (MetaX11Display *x11_display)
                             XkbAudibleBellMask);
 }
 
+static int
+get_x11_scale (void)
+{
+#ifdef HAVE_WAYLAND
+  if (meta_is_wayland_compositor ())
+    return meta_xwayland_get_x11_ui_scaling_factor ();
+#endif
+
+  return 1;
+}
+
 static void
 set_desktop_geometry_hint (MetaX11Display *x11_display)
 {
@@ -525,6 +538,16 @@ set_desktop_geometry_hint (MetaX11Display *x11_display)
     return;
 
   meta_display_get_size (x11_display->display, &monitor_width, &monitor_height);
+
+#ifdef HAVE_WAYLAND
+  if (meta_is_wayland_compositor ())
+    {
+      int scale = meta_xwayland_get_effective_scale ();
+
+      monitor_width *= scale;
+      monitor_height *= scale;
+    }
+#endif
 
   data[0] = monitor_width;
   data[1] = monitor_height;
@@ -921,6 +944,7 @@ set_workspace_work_area_hint (MetaWorkspace  *workspace,
   MetaMonitorManager *monitor_manager;
   GList *logical_monitors;
   GList *l;
+  int scale;
   int num_monitors;
   unsigned long *data;
   unsigned long *tmp;
@@ -933,12 +957,15 @@ set_workspace_work_area_hint (MetaWorkspace  *workspace,
 
   data = g_new (unsigned long, num_monitors * 4);
   tmp = data;
+  scale = get_x11_scale ();
 
   for (l = logical_monitors; l; l = l->next)
     {
       MetaRectangle area;
 
       meta_workspace_get_work_area_for_logical_monitor (workspace, l->data, &area);
+      meta_rectangle_scale_double (&area, scale, META_ROUNDING_STRATEGY_SHRINK,
+                                   &area);
 
       tmp[0] = area.x;
       tmp[1] = area.y;
@@ -973,10 +1000,12 @@ set_work_area_hint (MetaDisplay    *display,
   GList *l;
   unsigned long *data, *tmp;
   MetaRectangle area;
+  int scale;
 
   num_workspaces = meta_workspace_manager_get_n_workspaces (workspace_manager);
   data = g_new (unsigned long, num_workspaces * 4);
   tmp = data;
+  scale = get_x11_scale ();
 
   for (l = workspace_manager->workspaces; l; l = l->next)
     {
@@ -984,6 +1013,9 @@ set_work_area_hint (MetaDisplay    *display,
 
       meta_workspace_get_work_area_all_monitors (workspace, &area);
       set_workspace_work_area_hint (workspace, x11_display);
+
+      meta_rectangle_scale_double (&area, scale, META_ROUNDING_STRATEGY_SHRINK,
+                                   &area);
 
       tmp[0] = area.x;
       tmp[1] = area.y;
@@ -1601,11 +1633,19 @@ meta_x11_display_reload_cursor (MetaX11Display *x11_display)
 static void
 set_cursor_theme (Display *xdisplay)
 {
-  MetaBackend *backend = meta_get_backend ();
-  MetaSettings *settings = meta_backend_get_settings (backend);
   int scale;
 
-  scale = meta_settings_get_ui_scaling_factor (settings);
+#ifdef HAVE_WAYLAND
+  scale = meta_xwayland_get_x11_ui_scaling_factor ();
+#else
+  {
+    MetaBackend *backend = meta_get_backend ();
+    MetaSettings *settings = meta_backend_get_settings (backend);
+
+    scale = meta_settings_get_ui_scaling_factor (settings);
+  }
+#endif
+
   XcursorSetTheme (xdisplay, meta_prefs_get_cursor_theme ());
   XcursorSetDefaultSize (xdisplay, meta_prefs_get_cursor_size () * scale);
 }
@@ -1799,6 +1839,16 @@ on_monitors_changed_internal (MetaMonitorManager *monitor_manager,
       changes.y = 0;
       changes.width = display_width;
       changes.height = display_height;
+
+#ifdef HAVE_WAYLAND
+      if (meta_is_wayland_compositor ())
+        {
+          int scale = meta_xwayland_get_effective_scale ();
+
+          changes.width *= scale;
+          changes.height *= scale;
+        }
+#endif
 
       XConfigureWindow (x11_display->xdisplay,
                         x11_display->guard_window,

@@ -313,6 +313,13 @@ xdnd_send_position (MetaXWaylandDnd *dnd,
   Display *xdisplay = x11_display->xdisplay;
   uint32_t action = 0, user_action, actions;
   XEvent xev = { 0 };
+  int scale;
+
+  /* XdndPosition carries root-window X coordinates, but the callers hand us
+   * stage coordinates. */
+  scale = meta_xwayland_get_effective_scale ();
+  x *= scale;
+  y *= scale;
 
   user_action = meta_wayland_data_source_get_user_action (source);
   meta_wayland_data_source_get_actions (source, &actions);
@@ -765,16 +772,21 @@ repick_drop_surface (MetaWaylandCompositor *compositor,
       focus_window->client_type == META_WINDOW_CLIENT_TYPE_WAYLAND)
     {
       Window dnd_window;
+      int scale;
 
       hide_dnd_window (dnd, xdisplay, dnd->current_dnd_window);
       dnd_window = next_dnd_window (dnd);
 
+      /* The proxy covers a Wayland window, so its rect is in stage
+       * coordinates, but this is one of our own X windows. */
+      scale = meta_xwayland_get_x11_ui_scaling_factor ();
+
       XMapRaised (xdisplay, dnd_window);
       XMoveResizeWindow (xdisplay, dnd_window,
-                         focus_window->rect.x,
-                         focus_window->rect.y,
-                         focus_window->rect.width,
-                         focus_window->rect.height);
+                         focus_window->rect.x * scale,
+                         focus_window->rect.y * scale,
+                         focus_window->rect.width * scale,
+                         focus_window->rect.height * scale);
     }
   else
     {

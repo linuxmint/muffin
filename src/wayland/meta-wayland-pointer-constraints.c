@@ -627,11 +627,23 @@ meta_wayland_pointer_constraint_calculate_effective_region (MetaWaylandPointerCo
                                                     frame->bottom_height);
       if (actual_width > 0 && actual_height > 0)
         {
+          int x, y, width, height;
+
+          /* The frame geometry is in stage coordinates, but the region is in
+           * X protocol pixels, like the points tested against it. */
+          meta_window_stage_to_protocol_point (window,
+                                               frame->child_x, frame->child_y,
+                                               &x, &y,
+                                               META_ROUNDING_STRATEGY_ROUND);
+          meta_window_stage_to_protocol_size (window,
+                                              actual_width, actual_height,
+                                              &width, &height);
+
           cairo_region_intersect_rectangle (region, &(cairo_rectangle_int_t) {
-                                              .x = frame->child_x,
-                                              .y = frame->child_y,
-                                              .width = actual_width,
-                                              .height = actual_height
+                                              .x = x,
+                                              .y = y,
+                                              .width = width,
+                                              .height = height
                                             });
         }
     }

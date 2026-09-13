@@ -41,6 +41,7 @@ struct _MetaWaylandOutput
   guint                     mode_flags;
   float                     refresh_rate;
   gint                      scale;
+  gint                      xwayland_scale;
   int                       mode_width;
   int                       mode_height;
 

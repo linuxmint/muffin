@@ -70,6 +70,11 @@ struct _MetaWaylandSurfaceRoleClass
                                     float                   abs_y,
                                     float                  *out_sx,
                                     float                  *out_sy);
+  void (*get_absolute_coordinates) (MetaWaylandSurfaceRole *surface_role,
+                                    float                   sx,
+                                    float                   sy,
+                                    float                  *out_x,
+                                    float                  *out_y);
   MetaWindow * (*get_window) (MetaWaylandSurfaceRole *surface_role);
 };
 

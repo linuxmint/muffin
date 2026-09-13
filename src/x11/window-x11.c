@@ -38,6 +38,7 @@
 #include "core/boxes-private.h"
 #include "core/frame.h"
 #include "core/meta-workspace-manager-private.h"
+#include "compositor/region-utils.h"
 #include "core/window-private.h"
 #include "core/workspace-private.h"
 #include "meta/common.h"
@@ -48,6 +49,10 @@
 #include "x11/session.h"
 #include "x11/window-props.h"
 #include "x11/xprops.h"
+
+#ifdef HAVE_WAYLAND
+#include "wayland/meta-xwayland.h"
+#endif
 
 #define TAKE_FOCUS_FALLBACK_DELAY_MS 150
 
@@ -246,6 +251,17 @@ send_configure_notify (MetaWindow *window)
     }
   event.xconfigure.width = priv->client_rect.width;
   event.xconfigure.height = priv->client_rect.height;
+
+  meta_window_stage_to_protocol_point (window,
+                                       event.xconfigure.x, event.xconfigure.y,
+                                       &event.xconfigure.x, &event.xconfigure.y,
+                                       META_ROUNDING_STRATEGY_ROUND);
+  meta_window_stage_to_protocol_size (window,
+                                      event.xconfigure.width,
+                                      event.xconfigure.height,
+                                      &event.xconfigure.width,
+                                      &event.xconfigure.height);
+
   event.xconfigure.border_width = priv->border_width; /* requested not actual */
   event.xconfigure.above = None; /* FIXME */
   event.xconfigure.override_redirect = False;
@@ -1090,15 +1106,23 @@ update_net_frame_extents (MetaWindow *window)
   unsigned long data[4];
   MetaFrameBorders borders;
 
+  int left, right, top, bottom;
+
   meta_frame_calc_borders (window->frame, &borders);
-  /* Left */
-  data[0] = borders.visible.left;
-  /* Right */
-  data[1] = borders.visible.right;
-  /* Top */
-  data[2] = borders.visible.top;
-  /* Bottom */
-  data[3] = borders.visible.bottom;
+
+  meta_window_stage_to_protocol_size (window,
+                                      borders.visible.left,
+                                      borders.visible.right,
+                                      &left, &right);
+  meta_window_stage_to_protocol_size (window,
+                                      borders.visible.top,
+                                      borders.visible.bottom,
+                                      &top, &bottom);
+
+  data[0] = left;
+  data[1] = right;
+  data[2] = top;
+  data[3] = bottom;
 
   meta_topic (META_DEBUG_GEOMETRY,
               "Setting _NET_FRAME_EXTENTS on managed window 0x%lx "
@@ -1523,10 +1547,13 @@ meta_window_x11_move_resize_internal (MetaWindow                *window,
     frame_shape_changed = meta_frame_sync_to_window (window->frame, need_resize_frame);
 
   values.border_width = 0;
-  values.x = client_rect.x;
-  values.y = client_rect.y;
-  values.width = client_rect.width;
-  values.height = client_rect.height;
+  meta_window_stage_to_protocol_point (window,
+                                       client_rect.x, client_rect.y,
+                                       &values.x, &values.y,
+                                       META_ROUNDING_STRATEGY_ROUND);
+  meta_window_stage_to_protocol_size (window,
+                                      client_rect.width, client_rect.height,
+                                      &values.width, &values.height);
 
   mask = 0;
   if (is_configure_request && priv->border_width != 0)
@@ -1625,6 +1652,13 @@ meta_window_x11_update_struts (MetaWindow *window)
               strut_begin = struts[4+(i*2)];
               strut_end   = struts[4+(i*2)+1];
 
+              meta_window_protocol_to_stage_size (window, thickness, 0,
+                                                  &thickness, NULL);
+              meta_window_protocol_to_stage_point (window,
+                                                   strut_begin, strut_end,
+                                                   &strut_begin, &strut_end,
+                                                   META_ROUNDING_STRATEGY_ROUND);
+
               temp = g_new0 (MetaStrut, 1);
               temp->side = 1 << i; /* See MetaSide def.  Matches nicely, eh? */
               meta_display_get_size (window->display,
@@ -1688,6 +1722,9 @@ meta_window_x11_update_struts (MetaWindow *window)
               thickness = struts[i];
               if (thickness == 0)
                 continue;
+
+              meta_window_protocol_to_stage_size (window, thickness, 0,
+                                                  &thickness, NULL);
 
               temp = g_new0 (MetaStrut, 1);
               temp->side = 1 << i;
@@ -2237,6 +2274,29 @@ region_create_from_x_rectangles (const XRectangle *rects,
   return cairo_region_create_rectangles (cairo_rects, n_rects);
 }
 
+static cairo_region_t *
+scale_region_to_stage (cairo_region_t *region)
+{
+#ifdef HAVE_WAYLAND
+  if (meta_is_wayland_compositor ())
+    {
+      int scale = meta_xwayland_get_effective_scale ();
+
+      if (scale != 1)
+        {
+          cairo_region_t *scaled;
+
+          scaled = meta_region_scale_double (region, 1.0 / scale,
+                                             META_ROUNDING_STRATEGY_GROW);
+          cairo_region_destroy (region);
+          return scaled;
+        }
+    }
+#endif
+
+  return region;
+}
+
 static void
 meta_window_set_input_region (MetaWindow     *window,
                               cairo_region_t *region)
@@ -2298,6 +2358,12 @@ meta_window_x11_update_input_region (MetaWindow *window)
        * get from the X server to a cairo_region. */
       XRectangle *rects = NULL;
       int n_rects = -1, ordering;
+      int protocol_width, protocol_height;
+
+      meta_window_stage_to_protocol_size (window,
+                                          priv->client_rect.width,
+                                          priv->client_rect.height,
+                                          &protocol_width, &protocol_height);
 
       meta_x11_error_trap_push (x11_display);
       rects = XShapeGetRectangles (x11_display->xdisplay,
@@ -2333,8 +2399,8 @@ meta_window_x11_update_input_region (MetaWindow *window)
       else if (n_rects == 1 &&
                (rects[0].x == 0 &&
                 rects[0].y == 0 &&
-                rects[0].width == priv->client_rect.width &&
-                rects[0].height == priv->client_rect.height))
+                rects[0].width == protocol_width &&
+                rects[0].height == protocol_height))
         {
           /* This is the bounding region case. Keep the
            * region as NULL. */
@@ -2344,6 +2410,7 @@ meta_window_x11_update_input_region (MetaWindow *window)
         {
           /* Window has a custom shape. */
           region = region_create_from_x_rectangles (rects, n_rects);
+          region = scale_region_to_stage (region);
         }
 
       meta_XFree (rects);
@@ -2427,6 +2494,10 @@ meta_window_x11_update_shape_region (MetaWindow *window)
         {
           region = region_create_from_x_rectangles (rects, n_rects);
           XFree (rects);
+
+          /* The rectangles are X protocol pixels; everything that consumes
+           * the shape region works in stage coordinates. */
+          region = scale_region_to_stage (region);
         }
     }
 
@@ -2679,6 +2750,8 @@ meta_window_x11_configure_request (MetaWindow *window,
 {
   MetaWindowX11 *window_x11 = META_WINDOW_X11 (window);
   MetaWindowX11Private *priv = meta_window_x11_get_instance_private (window_x11);
+  int stage_x, stage_y;
+  int stage_width, stage_height;
 
   /* Note that x, y is the corner of the window border,
    * and width, height is the size of the window inside
@@ -2689,13 +2762,21 @@ meta_window_x11_configure_request (MetaWindow *window,
   if (event->xconfigurerequest.value_mask & CWBorderWidth)
     priv->border_width = event->xconfigurerequest.border_width;
 
+  meta_window_protocol_to_stage_point (window,
+                                       event->xconfigurerequest.x,
+                                       event->xconfigurerequest.y,
+                                       &stage_x, &stage_y,
+                                       META_ROUNDING_STRATEGY_ROUND);
+  meta_window_protocol_to_stage_size (window,
+                                      event->xconfigurerequest.width,
+                                      event->xconfigurerequest.height,
+                                      &stage_width, &stage_height);
+
   meta_window_move_resize_request(window,
                                   event->xconfigurerequest.value_mask,
                                   window->size_hints.win_gravity,
-                                  event->xconfigurerequest.x,
-                                  event->xconfigurerequest.y,
-                                  event->xconfigurerequest.width,
-                                  event->xconfigurerequest.height);
+                                  stage_x, stage_y,
+                                  stage_width, stage_height);
 
   /* Handle stacking. We only handle raises/lowers, mostly because
    * stack.c really can't deal with anything else.  I guess we'll fix
@@ -3130,6 +3211,12 @@ meta_window_x11_client_message (MetaWindow *window,
       action = event->xclient.data.l[2];
       button = event->xclient.data.l[3];
 
+      /* The message carries root window coordinates, but they become the grab
+       * anchor, which is compared against stage coordinates during motion. */
+      meta_window_protocol_to_stage_point (window, x_root, y_root,
+                                           &x_root, &y_root,
+                                           META_ROUNDING_STRATEGY_ROUND);
+
       /* FIXME: What a braindead protocol; no timestamp?!? */
       timestamp = meta_display_get_current_time_roundtrip (display);
       meta_topic (META_DEBUG_WINDOW_OPS,
@@ -3257,6 +3344,8 @@ meta_window_x11_client_message (MetaWindow *window,
     {
       MetaGravity gravity;
       guint value_mask;
+      int stage_x, stage_y;
+      int stage_width, stage_height;
 
       gravity = (MetaGravity) (event->xclient.data.l[0] & 0xff);
       value_mask = (event->xclient.data.l[0] & 0xf00) >> 8;
@@ -3265,13 +3354,21 @@ meta_window_x11_client_message (MetaWindow *window,
       if (gravity == 0)
         gravity = window->size_hints.win_gravity;
 
+      meta_window_protocol_to_stage_point (window,
+                                           event->xclient.data.l[1],
+                                           event->xclient.data.l[2],
+                                           &stage_x, &stage_y,
+                                           META_ROUNDING_STRATEGY_ROUND);
+      meta_window_protocol_to_stage_size (window,
+                                          event->xclient.data.l[3],
+                                          event->xclient.data.l[4],
+                                          &stage_width, &stage_height);
+
       meta_window_move_resize_request(window,
                                       value_mask,
                                       gravity,
-                                      event->xclient.data.l[1],  /* x */
-                                      event->xclient.data.l[2],  /* y */
-                                      event->xclient.data.l[3],  /* width */
-                                      event->xclient.data.l[4]); /* height */
+                                      stage_x, stage_y,
+                                      stage_width, stage_height);
     }
   else if (event->xclient.message_type ==
            x11_display->atom__NET_ACTIVE_WINDOW)
@@ -3822,10 +3919,13 @@ meta_window_x11_configure_notify (MetaWindow      *window,
   g_assert (window->override_redirect);
   g_assert (window->frame == NULL);
 
-  window->rect.x = event->x;
-  window->rect.y = event->y;
-  window->rect.width = event->width;
-  window->rect.height = event->height;
+  /* Override-redirect windows are configured by the client directly, so this
+   * carries X protocol coordinates. */
+  meta_window_protocol_to_stage_point (window, event->x, event->y,
+                                       &window->rect.x, &window->rect.y,
+                                       META_ROUNDING_STRATEGY_ROUND);
+  meta_window_protocol_to_stage_size (window, event->width, event->height,
+                                      &window->rect.width, &window->rect.height);
 
   priv->client_rect = window->rect;
   window->buffer_rect = window->rect;

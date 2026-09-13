@@ -29,6 +29,7 @@
 #include <errno.h>
 #include <glib-unix.h>
 #include <glib.h>
+#include <math.h>
 #include <sys/socket.h>
 #include <sys/un.h>
 #if defined(HAVE_SYS_RANDOM)
@@ -39,8 +40,13 @@
 #include <unistd.h>
 #include <X11/Xauth.h>
 
+#include "backends/meta-backend-private.h"
+#include "backends/meta-logical-monitor.h"
+#include "backends/meta-monitor-manager-private.h"
+#include "backends/meta-settings-private.h"
 #include "core/main-private.h"
 #include "meta/main.h"
+#include "meta/meta-monitor-manager.h"
 #include "wayland/meta-xwayland-surface.h"
 #include "x11/meta-x11-display-private.h"
 
@@ -121,6 +127,54 @@ meta_xwayland_is_xwayland_surface (MetaWaylandSurface *surface)
   MetaXWaylandManager *manager = &compositor->xwayland_manager;
 
   return wl_resource_get_client (surface->resource) == manager->client;
+}
+
+int
+meta_xwayland_get_effective_scale (void)
+{
+  static int disabled = -1;
+  MetaMonitorManager *monitor_manager;
+  float highest = 1.0f;
+  GList *l;
+
+  if (disabled == -1)
+    {
+      disabled = g_getenv ("MUFFIN_DEBUG_DISABLE_XWAYLAND_SCALING") != NULL;
+
+      if (disabled)
+        g_message ("XWayland scaling disabled by "
+                   "MUFFIN_DEBUG_DISABLE_XWAYLAND_SCALING");
+    }
+
+  if (disabled || !meta_is_stage_views_scaled ())
+    return 1;
+
+  monitor_manager = meta_monitor_manager_get ();
+  if (!monitor_manager)
+    return 1;
+
+  for (l = meta_monitor_manager_get_logical_monitors (monitor_manager);
+       l;
+       l = l->next)
+    {
+      MetaLogicalMonitor *logical_monitor = l->data;
+
+      highest = MAX (highest, meta_logical_monitor_get_scale (logical_monitor));
+    }
+
+  return (int) ceilf (highest);
+}
+
+int
+meta_xwayland_get_x11_ui_scaling_factor (void)
+{
+  MetaBackend *backend = meta_get_backend ();
+  MetaSettings *settings = meta_backend_get_settings (backend);
+
+  if (meta_is_stage_views_scaled ())
+    return meta_xwayland_get_effective_scale ();
+
+  return meta_settings_get_ui_scaling_factor (settings);
 }
 
 static gboolean

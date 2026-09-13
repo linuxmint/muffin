@@ -61,6 +61,10 @@
 #include "meta/main.h"
 #include "meta/meta-x11-errors.h"
 
+#ifdef HAVE_WAYLAND
+#include "wayland/meta-xwayland.h"
+#endif
+
 #define DEFAULT_DISPLAY_CONFIGURATION_TIMEOUT 20
 
 // Fractional scales in cinnamon-monitors.xml are only stored to 6 digits,
@@ -1804,7 +1808,15 @@ meta_monitor_manager_handle_get_current_state (MetaDBusDisplayConfig *skeleton,
                              g_variant_new_boolean (TRUE));
     }
 
-  ui_scaling_factor = meta_settings_get_ui_scaling_factor (settings);
+#ifdef HAVE_WAYLAND
+  /* X11 clients render into Xwayland's screen, which is sized in physical
+   * pixels; they must be told to draw at the same scale the compositor divides
+   * their buffers by. */
+  if (meta_is_wayland_compositor ())
+    ui_scaling_factor = meta_xwayland_get_x11_ui_scaling_factor ();
+  else
+#endif
+    ui_scaling_factor = meta_settings_get_ui_scaling_factor (settings);
   g_variant_builder_add (&properties_builder, "{sv}",
                          "legacy-ui-scaling-factor",
                          g_variant_new_int32 (ui_scaling_factor));
