@@ -5627,8 +5627,11 @@ meta_window_raise (MetaWindow  *window)
    * It is important that this runs before meta_stack_raise() because
    * showing a window may overwrite its stacking order based on the
    * stacking rules for newly shown windows.
+   * Skip X11: flushing here can prevent newly mapped windows from
+   * receiving focus.
    */
-  meta_window_flush_calc_showing (window);
+  if (window->client_type != META_WINDOW_CLIENT_TYPE_X11)
+    meta_window_flush_calc_showing (window);
 
   ancestor = meta_window_find_root_ancestor (window);
 
