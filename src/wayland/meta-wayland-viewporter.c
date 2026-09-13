@@ -46,10 +46,13 @@ wp_viewport_destructor (struct wl_resource *resource)
   g_clear_signal_handler (&surface->viewport.destroy_handler_id, surface);
 
   pending = meta_wayland_surface_get_pending_state (surface);
-  pending->viewport_src_rect.size.width = -1;
-  pending->viewport_dst_width = -1;
-  pending->has_new_viewport_src_rect = TRUE;
-  pending->has_new_viewport_dst_size = TRUE;
+  if (pending)
+    {
+      pending->viewport_src_rect.size.width = -1;
+      pending->viewport_dst_width = -1;
+      pending->has_new_viewport_src_rect = TRUE;
+      pending->has_new_viewport_dst_size = TRUE;
+    }
 
   surface->viewport.resource = NULL;
 }
@@ -103,6 +106,15 @@ wp_viewport_set_source (struct wl_client   *client,
       MetaWaylandSurfaceState *pending;
 
       pending = meta_wayland_surface_get_pending_state (surface);
+
+      if (!pending)
+        {
+          wl_resource_post_error (resource,
+                                  WP_VIEWPORT_ERROR_NO_SURFACE,
+                                  "wl_surface for this viewport no longer exists");
+          return;
+        }
+
       pending->viewport_src_rect.origin.x = new_x;
       pending->viewport_src_rect.origin.y = new_y;
       pending->viewport_src_rect.size.width = new_width;
@@ -142,6 +154,15 @@ wp_viewport_set_destination (struct wl_client   *client,
       MetaWaylandSurfaceState *pending;
 
       pending = meta_wayland_surface_get_pending_state (surface);
+
+      if (!pending)
+        {
+          wl_resource_post_error (resource,
+                                  WP_VIEWPORT_ERROR_NO_SURFACE,
+                                  "wl_surface for this viewport no longer exists");
+          return;
+        }
+
       pending->viewport_dst_width = dst_width;
       pending->viewport_dst_height = dst_height;
       pending->has_new_viewport_dst_size = TRUE;
