@@ -92,7 +92,7 @@ find_top_window_actor_on_view (GList               *window_actors,
           MetaWindow *window =
             meta_window_actor_get_meta_window (window_actor);
 
-          if (!window || !window->visible_to_compositor)
+          if (!meta_compositor_window_can_occlude (window))
             continue;
 
           if (meta_rectangle_overlap (&window->buffer_rect, view_layout))

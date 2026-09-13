@@ -48,6 +48,7 @@ struct _MetaCompositorX11
   gboolean have_x11_sync_object;
 
   MetaWindow *unredirected_window;
+  const char *unredirect_blocked_reason;
 
   gboolean xserver_uses_monotonic_clock;
   int64_t xserver_time_query_time_us;
@@ -330,6 +331,25 @@ set_unredirected_window (MetaCompositorX11 *compositor_x11,
     }
 }
 
+/*
+ * window->desc is only useful for Wayland windows, where it is a "W<n>" stamp;
+ * for X11 windows it is the bare xwindow id, which says nothing about what the
+ * window actually is.
+ */
+static const char *
+describe_window (MetaWindow *window,
+                 char       *buf,
+                 gsize       buf_len)
+{
+  const char *wm_class = meta_window_get_wm_class (window);
+
+  g_snprintf (buf, buf_len, "%s: %s",
+              wm_class ? wm_class : window->desc,
+              window->title ? window->title : "untitled");
+
+  return buf;
+}
+
 static void
 maybe_unredirect_top_window (MetaCompositorX11 *compositor_x11)
 {
@@ -337,21 +357,47 @@ maybe_unredirect_top_window (MetaCompositorX11 *compositor_x11)
   MetaWindow *window_to_unredirect = NULL;
   MetaWindowActor *window_actor;
   MetaWindowActorX11 *window_actor_x11;
+  const char *reason;
+  char detail[160] = "";
+  char who[128];
 
+  reason = "unredirect inhibited";
   if (meta_compositor_is_unredirect_inhibited (compositor))
     goto out;
 
+  reason = "no top window actor";
   window_actor = meta_compositor_get_top_window_actor (compositor);
   if (!window_actor)
     goto out;
 
+  reason = "top window can't unredirect";
   window_actor_x11 = META_WINDOW_ACTOR_X11 (window_actor);
   if (!meta_window_actor_x11_should_unredirect (window_actor_x11))
-    goto out;
+    {
+      MetaWindow *top = meta_window_actor_get_meta_window (window_actor);
 
+      if (top)
+        g_snprintf (detail, sizeof (detail), " (top is %s)",
+                    describe_window (top, who, sizeof (who)));
+      goto out;
+    }
+
+  reason = NULL;
   window_to_unredirect = meta_window_actor_get_meta_window (window_actor);
 
 out:
+  if (reason != compositor_x11->unredirect_blocked_reason)
+    {
+      if (reason)
+        meta_topic (META_DEBUG_SCANOUT, "unredirect blocked: %s%s\n",
+                    reason, detail);
+      else
+        meta_topic (META_DEBUG_SCANOUT, "unredirect engaged (%s)\n",
+                    describe_window (window_to_unredirect, who, sizeof (who)));
+
+      compositor_x11->unredirect_blocked_reason = reason;
+    }
+
   set_unredirected_window (compositor_x11, window_to_unredirect);
 }
 

@@ -70,6 +70,8 @@ void meta_compositor_redirect_x11_windows (MetaCompositor *compositor);
 
 gboolean meta_compositor_is_unredirect_inhibited (MetaCompositor *compositor);
 
+gboolean meta_compositor_window_can_occlude (MetaWindow *window);
+
 MetaDisplay * meta_compositor_get_display (MetaCompositor *compositor);
 
 MetaWindowActor * meta_compositor_get_top_window_actor (MetaCompositor *compositor);

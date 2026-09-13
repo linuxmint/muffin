@@ -1293,6 +1293,43 @@ sync_actor_stacking (MetaCompositor *compositor)
 }
 
 /*
+ * A window with zero opacity paints nothing, so it cannot occlude what is below
+ * it and must not be picked as the top window for unredirect or direct scanout.
+ * OpenGL games running through Wine/Proton, and native games running inside the
+ * Steam container, map exactly such a window - 1x1 at the origin - over their
+ * fullscreen window.
+ */
+gboolean
+meta_compositor_window_can_occlude (MetaWindow *window)
+{
+  if (!window || !window->visible_to_compositor)
+    return FALSE;
+
+  if (window->opacity == 0)
+    return FALSE;
+
+  /* Our own windows - panel and systray icons - are hidden by animating the
+   * actor rather than the window, so window->opacity says nothing about
+   * whether they are actually painting (ba50900d).
+   */
+  if (meta_window_get_client_pid (window) == getpid ())
+    {
+      MetaWindowActor *window_actor = meta_window_actor_from_window (window);
+
+      if (!window_actor)
+        return FALSE;
+
+      if (!clutter_actor_get_paint_visibility (CLUTTER_ACTOR (window_actor)))
+        return FALSE;
+
+      if (clutter_actor_get_paint_opacity (CLUTTER_ACTOR (window_actor)) == 0)
+        return FALSE;
+    }
+
+  return TRUE;
+}
+
+/*
  * Find the top most window that is visible on the screen. The intention of
  * this is to avoid offscreen windows that isn't actually part of the visible
  * desktop (such as the UI frames override redirect window).
@@ -1311,15 +1348,8 @@ get_top_visible_window_actor (MetaCompositor *compositor)
       MetaRectangle buffer_rect;
       MetaRectangle display_rect = { 0 };
 
-      if (!window->visible_to_compositor)
+      if (!meta_compositor_window_can_occlude (window))
         continue;
-      if (meta_window_get_client_pid (window) == getpid ())
-        {
-          if (!clutter_actor_get_paint_visibility (CLUTTER_ACTOR (window_actor)))
-            continue;
-          if (clutter_actor_get_paint_opacity (CLUTTER_ACTOR (window_actor)) == 0)
-            continue;
-        }
 
       meta_window_get_buffer_rect (window, &buffer_rect);
       meta_display_get_size (priv->display,
