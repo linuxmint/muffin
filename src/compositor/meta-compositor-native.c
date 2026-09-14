@@ -125,7 +125,8 @@ maybe_assign_primary_plane (MetaCompositor *compositor)
     const char *engaged_title = NULL;
     const char *blocked_reason = NULL;
     GList *l;
-    g_autoptr (GHashTable) claimed_surfaces = g_hash_table_new (NULL, NULL);
+    MetaWaylandSurface *claimed_surfaces[16];
+    unsigned int n_claimed_surfaces = 0;
 
     /* Opt-in, like X11 unredirection: handing a client's buffer straight to the
      * plane constrains it to scanout-capable memory, which on a small-VRAM GPU
@@ -262,8 +263,29 @@ maybe_assign_primary_plane (MetaCompositor *compositor)
            * every view claim it would rewrite it — and re-send the client's
            * feedback — twice a frame, forever. The first view owns candidacy;
            * the others can still scan out. */
-          if (g_hash_table_add (claimed_surfaces, surface))
-            new_candidate = surface;
+          {
+            gboolean already_claimed = FALSE;
+            unsigned int i;
+
+            for (i = 0; i < n_claimed_surfaces; i++)
+              {
+                if (claimed_surfaces[i] == surface)
+                  {
+                    already_claimed = TRUE;
+                    break;
+                  }
+              }
+
+            if (!already_claimed)
+              {
+                /* Past the array's capacity a surface can be claimed by more
+                 * than one view, as it was before this dedupe existed. */
+                if (n_claimed_surfaces < G_N_ELEMENTS (claimed_surfaces))
+                  claimed_surfaces[n_claimed_surfaces++] = surface;
+
+                new_candidate = surface;
+              }
+          }
 
           /* Transient, unlike the checks above, so they are tested only after
            * candidacy is claimed: the surface stays a scanout candidate
