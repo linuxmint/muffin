@@ -28,6 +28,7 @@
 #include "backends/meta-logical-monitor.h"
 #include "backends/native/meta-renderer-native.h"
 #include "compositor/meta-surface-actor-wayland.h"
+#include "meta/prefs.h"
 #include "meta/util.h"
 #include "wayland/meta-wayland-surface.h"
 
@@ -119,27 +120,24 @@ maybe_assign_primary_plane (MetaCompositor *compositor)
     MetaCompositorNative *compositor_native = META_COMPOSITOR_NATIVE (compositor);
     MetaBackend *backend = meta_get_backend ();
     MetaRenderer *renderer = meta_backend_get_renderer (backend);
-    gboolean gated;
+    const char *gated_reason;
     unsigned int n_engaged = 0;
     const char *engaged_title = NULL;
     const char *blocked_reason = NULL;
     GList *l;
     g_autoptr (GHashTable) claimed_surfaces = g_hash_table_new (NULL, NULL);
-    static int disable_direct_scanout = -1;
 
-    if (disable_direct_scanout == -1)
-      {
-          disable_direct_scanout =
-            g_getenv ("MUFFIN_DEBUG_DISABLE_DIRECT_SCANOUT") != NULL;
-
-          if (disable_direct_scanout)
-            g_message ("DMABUF: direct scanout disabled by "
-                       "MUFFIN_DEBUG_DISABLE_DIRECT_SCANOUT");
-      }
-
-    gated = disable_direct_scanout ||
-            meta_compositor_is_unredirect_inhibited (compositor);
-
+    /* Opt-in, like X11 unredirection: handing a client's buffer straight to the
+     * plane constrains it to scanout-capable memory, which on a small-VRAM GPU
+     * can turn a working fullscreen game into an out-of-memory crash. A latency
+     * win is not worth that by default.
+     */
+    if (!meta_prefs_get_unredirect_fullscreen_windows ())
+      gated_reason = "unredirect-fullscreen-windows is off";
+    else if (meta_compositor_is_unredirect_inhibited (compositor))
+      gated_reason = "unredirect inhibited";
+    else
+      gated_reason = NULL;
 
     for (l = meta_renderer_get_views (renderer); l; l = l->next)
       {
@@ -161,9 +159,11 @@ maybe_assign_primary_plane (MetaCompositor *compositor)
           char detail[64] = "";
           g_autoptr (CoglScanout) scanout = NULL;
 
-          reason = "disabled";
-          if (gated)
-            goto reconcile;
+          if (gated_reason)
+            {
+              reason = gated_reason;
+              goto reconcile;
+            }
 
           clutter_stage_view_get_layout (stage_view, &view_layout);
 

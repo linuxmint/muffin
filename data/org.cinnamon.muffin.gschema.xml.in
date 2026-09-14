@@ -84,7 +84,7 @@
       <default>false</default>
       <summary>Fullscreen windows are unredirected (i.e. they bypass compositing)</summary>
       <description>
-        Determines whether fullscreen windows bypass compositing. False is better for vsync/screen-tearing, True gives games and apps i
+        Determines whether fullscreen windows bypass compositing - by unredirecting them on X11, and by scanning their buffer out directly on Wayland. False is better for vsync/screen-tearing, True gives games and apps improved performance and latency. Note that direct scanout (wayland) also requires the client to allocate in display memory, which can matter on a GPU with little video memory.
       </description>
     </key>
 
