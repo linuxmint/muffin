@@ -144,8 +144,7 @@ typedef struct _MetaCompositorPrivate
 
   CoglContext *context;
 
-  MetaWindowActor *top_window_actor;
-  gulong top_window_actor_destroy_id;
+  gboolean needs_top_window_update;
 
   int disable_unredirect_count;
 
@@ -159,15 +158,22 @@ typedef struct _MetaCompositorPrivate
 G_DEFINE_ABSTRACT_TYPE_WITH_PRIVATE (MetaCompositor, meta_compositor,
                                      G_TYPE_OBJECT)
 
+static GQuark quark_top_window_actor = 0;
+
+static void
+top_window_actor_free (gpointer data)
+{
+  MetaWindowActor **cached = data;
+
+  g_clear_weak_pointer (cached);
+  g_free (cached);
+}
+
 static void
 on_presented (ClutterStage     *stage,
               CoglFrameEvent    event,
               ClutterFrameInfo *frame_info,
               MetaCompositor   *compositor);
-
-static void
-on_top_window_actor_destroyed (MetaWindowActor *window_actor,
-                               MetaCompositor  *compositor);
 
 static gboolean
 is_modal (MetaDisplay *display)
@@ -1142,6 +1148,7 @@ meta_compositor_window_opacity_changed (MetaCompositor *compositor,
     return;
 
   meta_window_actor_update_opacity (window_actor);
+  meta_compositor_invalidate_top_window (compositor);
 }
 
 gboolean
@@ -1162,6 +1169,7 @@ meta_compositor_show_window (MetaCompositor *compositor,
   MetaWindowActor *window_actor = meta_window_actor_from_window (window);
 
   meta_window_actor_show (window_actor, effect);
+  meta_compositor_invalidate_top_window (compositor);
 }
 
 void
@@ -1174,6 +1182,7 @@ meta_compositor_hide_window (MetaCompositor *compositor,
   MetaWindowActor *window_actor = meta_window_actor_from_window (window);
 
   meta_window_actor_hide (window_actor, effect);
+  meta_compositor_invalidate_top_window (compositor);
   meta_stack_tracker_queue_sync_stack (priv->display->stack_tracker);
 }
 
@@ -1293,6 +1302,19 @@ sync_actor_stacking (MetaCompositor *compositor)
 }
 
 /*
+ * Marks every view's top window actor as needing recomputation. Cheap enough to
+ * call liberally - the work is deferred to the next reader.
+ */
+void
+meta_compositor_invalidate_top_window (MetaCompositor *compositor)
+{
+  MetaCompositorPrivate *priv =
+    meta_compositor_get_instance_private (compositor);
+
+  priv->needs_top_window_update = TRUE;
+}
+
+/*
  * A window with zero opacity paints nothing, so it cannot occlude what is below
  * it and must not be picked as the top window for unredirect or direct scanout.
  * OpenGL games running through Wine/Proton, and native games running inside the
@@ -1330,12 +1352,16 @@ meta_compositor_window_can_occlude (MetaWindow *window)
 }
 
 /*
- * Find the top most window that is visible on the screen. The intention of
- * this is to avoid offscreen windows that isn't actually part of the visible
- * desktop (such as the UI frames override redirect window).
+ * Find the top most window that is visible on a view. The intention of this is
+ * to avoid offscreen windows that aren't actually part of the visible desktop
+ * (such as the UI frames override redirect window).
+ *
+ * X11 has a single screen-sized view, so this answers the whole-display
+ * question there; Wayland has one view per monitor.
  */
 static MetaWindowActor *
-get_top_visible_window_actor (MetaCompositor *compositor)
+find_top_window_actor_on_view (MetaCompositor      *compositor,
+                               const MetaRectangle *view_layout)
 {
   MetaCompositorPrivate *priv =
     meta_compositor_get_instance_private (compositor);
@@ -1345,17 +1371,11 @@ get_top_visible_window_actor (MetaCompositor *compositor)
     {
       MetaWindowActor *window_actor = l->data;
       MetaWindow *window = meta_window_actor_get_meta_window (window_actor);
-      MetaRectangle buffer_rect;
-      MetaRectangle display_rect = { 0 };
 
       if (!meta_compositor_window_can_occlude (window))
         continue;
 
-      meta_window_get_buffer_rect (window, &buffer_rect);
-      meta_display_get_size (priv->display,
-                             &display_rect.width, &display_rect.height);
-
-      if (meta_rectangle_overlap (&display_rect, &buffer_rect))
+      if (meta_rectangle_overlap (&window->buffer_rect, view_layout))
         return window_actor;
     }
 
@@ -1363,17 +1383,58 @@ get_top_visible_window_actor (MetaCompositor *compositor)
 }
 
 static void
-on_top_window_actor_destroyed (MetaWindowActor *window_actor,
-                               MetaCompositor  *compositor)
+maybe_update_top_window_actors (MetaCompositor *compositor)
 {
   MetaCompositorPrivate *priv =
     meta_compositor_get_instance_private (compositor);
+  MetaBackend *backend = meta_get_backend ();
+  MetaRenderer *renderer = meta_backend_get_renderer (backend);
+  GList *l;
 
-  priv->top_window_actor = NULL;
-  priv->top_window_actor_destroy_id = 0;
-  priv->windows = g_list_remove (priv->windows, window_actor);
+  if (!priv->needs_top_window_update)
+    return;
 
-  meta_stack_tracker_queue_sync_stack (priv->display->stack_tracker);
+  priv->needs_top_window_update = FALSE;
+
+  for (l = meta_renderer_get_views (renderer); l; l = l->next)
+    {
+      ClutterStageView *stage_view = l->data;
+      MetaRectangle view_layout;
+      MetaWindowActor **cached;
+
+      clutter_stage_view_get_layout (stage_view, &view_layout);
+
+      cached = g_object_get_qdata (G_OBJECT (stage_view),
+                                   quark_top_window_actor);
+      if (!cached)
+        {
+          cached = g_new0 (MetaWindowActor *, 1);
+          g_object_set_qdata_full (G_OBJECT (stage_view),
+                                   quark_top_window_actor,
+                                   cached, top_window_actor_free);
+        }
+
+      g_set_weak_pointer (cached,
+                          find_top_window_actor_on_view (compositor,
+                                                         &view_layout));
+    }
+}
+
+/*
+ * The topmost window actor overlapping @stage_view, or NULL. Recomputed only
+ * when something that could change the answer has happened since the last call.
+ */
+MetaWindowActor *
+meta_compositor_get_top_window_actor_for_view (MetaCompositor   *compositor,
+                                               ClutterStageView *stage_view)
+{
+  MetaWindowActor **cached;
+
+  maybe_update_top_window_actors (compositor);
+
+  cached = g_object_get_qdata (G_OBJECT (stage_view), quark_top_window_actor);
+
+  return cached ? *cached : NULL;
 }
 
 void
@@ -1382,7 +1443,6 @@ meta_compositor_sync_stack (MetaCompositor  *compositor,
 {
   MetaCompositorPrivate *priv =
     meta_compositor_get_instance_private (compositor);
-  MetaWindowActor *top_window_actor;
   GList *old_stack;
 
   /* This is painful because hidden windows that we are in the process
@@ -1465,22 +1525,7 @@ meta_compositor_sync_stack (MetaCompositor  *compositor,
     }
 
   sync_actor_stacking (compositor);
-
-  top_window_actor = get_top_visible_window_actor (compositor);
-
-  if (priv->top_window_actor == top_window_actor)
-    return;
-
-  g_clear_signal_handler (&priv->top_window_actor_destroy_id,
-                          priv->top_window_actor);
-
-  priv->top_window_actor = top_window_actor;
-
-  if (priv->top_window_actor)
-    priv->top_window_actor_destroy_id =
-      g_signal_connect (priv->top_window_actor, "destroy",
-                        G_CALLBACK (on_top_window_actor_destroyed),
-                        compositor);
+  meta_compositor_invalidate_top_window (compositor);
 }
 
 void
@@ -1675,6 +1720,11 @@ meta_compositor_init (MetaCompositor *compositor)
 
   priv->context = clutter_backend->cogl_context;
 
+  if (quark_top_window_actor == 0)
+    quark_top_window_actor = g_quark_from_static_string ("-meta-top-window-actor");
+
+  meta_compositor_invalidate_top_window (compositor);
+
   priv->pre_paint_func_id =
     clutter_threads_add_repaint_func_full (CLUTTER_REPAINT_FLAGS_PRE_PAINT,
                                            meta_pre_paint_func,
@@ -1705,9 +1755,6 @@ meta_compositor_dispose (GObject *object)
                      clutter_threads_remove_repaint_func);
   g_clear_handle_id (&priv->post_paint_func_id,
                      clutter_threads_remove_repaint_func);
-
-  g_clear_signal_handler (&priv->top_window_actor_destroy_id,
-                          priv->top_window_actor);
 
   if (!meta_is_wayland_compositor ())
     {
@@ -2029,14 +2076,6 @@ meta_compositor_get_stage (MetaCompositor *compositor)
   return CLUTTER_STAGE (priv->stage);
 }
 
-MetaWindowActor *
-meta_compositor_get_top_window_actor (MetaCompositor *compositor)
-{
-  MetaCompositorPrivate *priv =
-    meta_compositor_get_instance_private (compositor);
-
-  return priv->top_window_actor;
-}
 
 gboolean
 meta_compositor_is_switching_workspace (MetaCompositor *compositor)

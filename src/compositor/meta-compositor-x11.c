@@ -360,13 +360,20 @@ maybe_unredirect_top_window (MetaCompositorX11 *compositor_x11)
   const char *reason;
   char detail[160] = "";
   char who[128];
+  GList *views;
 
   reason = "unredirect inhibited";
   if (meta_compositor_is_unredirect_inhibited (compositor))
     goto out;
 
+  /* X11 has a single screen-sized view, so its top window actor is the
+   * whole-display answer.
+   */
   reason = "no top window actor";
-  window_actor = meta_compositor_get_top_window_actor (compositor);
+  views = meta_renderer_get_views (meta_backend_get_renderer (meta_get_backend ()));
+  window_actor = views ?
+    meta_compositor_get_top_window_actor_for_view (compositor, views->data) :
+    NULL;
   if (!window_actor)
     goto out;
 

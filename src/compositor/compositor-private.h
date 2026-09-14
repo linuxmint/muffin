@@ -72,9 +72,13 @@ gboolean meta_compositor_is_unredirect_inhibited (MetaCompositor *compositor);
 
 gboolean meta_compositor_window_can_occlude (MetaWindow *window);
 
+void meta_compositor_invalidate_top_window (MetaCompositor *compositor);
+
+MetaWindowActor * meta_compositor_get_top_window_actor_for_view (MetaCompositor   *compositor,
+                                                                 ClutterStageView *stage_view);
+
 MetaDisplay * meta_compositor_get_display (MetaCompositor *compositor);
 
-MetaWindowActor * meta_compositor_get_top_window_actor (MetaCompositor *compositor);
 
 ClutterStage * meta_compositor_get_stage (MetaCompositor *compositor);
 

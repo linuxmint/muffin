@@ -70,6 +70,8 @@ typedef struct _MetaWindowActorPrivate
 
   guint             freeze_count;
 
+  gulong            stage_views_changed_id;
+
   guint		    visible                : 1;
   guint		    disposed               : 1;
 
@@ -368,6 +370,16 @@ init_surface_actor (MetaWindowActor *self)
 }
 
 static void
+on_stage_views_changed (MetaWindowActor *self)
+{
+  MetaWindowActorPrivate *priv =
+    meta_window_actor_get_instance_private (self);
+
+  if (priv->compositor)
+    meta_compositor_invalidate_top_window (priv->compositor);
+}
+
+static void
 meta_window_actor_constructed (GObject *object)
 {
   MetaWindowActor *self = META_WINDOW_ACTOR (object);
@@ -376,6 +388,11 @@ meta_window_actor_constructed (GObject *object)
   MetaWindow *window = priv->window;
 
   priv->compositor = window->display->compositor;
+
+  /* Moving between views changes which window is topmost on each of them. */
+  priv->stage_views_changed_id =
+    g_signal_connect (self, "stage-views-changed",
+                      G_CALLBACK (on_stage_views_changed), NULL);
 
   /* Hang our compositor window state off the MetaWindow for fast retrieval */
   meta_window_set_compositor_private (window, object);
@@ -409,6 +426,8 @@ meta_window_actor_dispose (GObject *object)
     }
 
   priv->disposed = TRUE;
+
+  g_clear_signal_handler (&priv->stage_views_changed_id, self);
 
   meta_compositor_remove_window_actor (compositor, self);
 
@@ -650,6 +669,11 @@ meta_window_actor_after_effects (MetaWindowActor *self)
   g_signal_emit (self, signals[EFFECTS_COMPLETED], 0);
   meta_window_actor_sync_visibility (self);
   meta_window_actor_sync_actor_geometry (self, FALSE);
+
+  /* Effects animate actor opacity, which meta_compositor_window_can_occlude()
+   * reads and no other invalidation covers.
+   */
+  meta_compositor_invalidate_top_window (priv->compositor);
 }
 
 void

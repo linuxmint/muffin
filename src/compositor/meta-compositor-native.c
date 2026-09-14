@@ -80,28 +80,6 @@ ensure_view_scanout_candidate (ClutterStageView *stage_view)
     return view_candidate;
 }
 
-static MetaWindowActor *
-find_top_window_actor_on_view (GList               *window_actors,
-                               const MetaRectangle *view_layout)
-{
-    GList *l;
-
-    for (l = g_list_last (window_actors); l; l = l->prev)
-      {
-          MetaWindowActor *window_actor = l->data;
-          MetaWindow *window =
-            meta_window_actor_get_meta_window (window_actor);
-
-          if (!meta_compositor_window_can_occlude (window))
-            continue;
-
-          if (meta_rectangle_overlap (&window->buffer_rect, view_layout))
-            return window_actor;
-      }
-
-    return NULL;
-}
-
 /*
  * A cursor the backend can't put on a hardware plane is painted into the stage
  * framebuffer, which scanning out bypasses entirely — the pointer would vanish
@@ -141,8 +119,6 @@ maybe_assign_primary_plane (MetaCompositor *compositor)
     MetaCompositorNative *compositor_native = META_COMPOSITOR_NATIVE (compositor);
     MetaBackend *backend = meta_get_backend ();
     MetaRenderer *renderer = meta_backend_get_renderer (backend);
-    MetaDisplay *display = meta_compositor_get_display (compositor);
-    GList *window_actors;
     gboolean gated;
     unsigned int n_engaged = 0;
     const char *engaged_title = NULL;
@@ -164,7 +140,6 @@ maybe_assign_primary_plane (MetaCompositor *compositor)
     gated = disable_direct_scanout ||
             meta_compositor_is_unredirect_inhibited (compositor);
 
-    window_actors = meta_get_window_actors (display);
 
     for (l = meta_renderer_get_views (renderer); l; l = l->next)
       {
@@ -193,8 +168,9 @@ maybe_assign_primary_plane (MetaCompositor *compositor)
           clutter_stage_view_get_layout (stage_view, &view_layout);
 
           reason = "no window on view";
-          window_actor = find_top_window_actor_on_view (window_actors,
-                                                        &view_layout);
+          window_actor =
+            meta_compositor_get_top_window_actor_for_view (compositor,
+                                                           stage_view);
           if (!window_actor)
             goto reconcile;
 
