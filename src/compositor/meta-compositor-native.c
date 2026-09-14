@@ -174,8 +174,10 @@ maybe_assign_primary_plane (MetaCompositor *compositor)
           if (!window_actor)
             goto reconcile;
 
-          reason = "actor has extra children";
-          if (clutter_actor_get_n_children (CLUTTER_ACTOR (window_actor)) != 1)
+          reason = "no scanout candidate";
+          surface_actor = meta_window_actor_get_scanout_candidate (window_actor,
+                                                                   &reason);
+          if (!surface_actor)
             goto reconcile;
 
           reason = "no window";
@@ -212,7 +214,6 @@ maybe_assign_primary_plane (MetaCompositor *compositor)
             goto reconcile;
 
           reason = "not a wayland surface";
-          surface_actor = meta_window_actor_get_surface (window_actor);
           if (!META_IS_SURFACE_ACTOR_WAYLAND (surface_actor))
             goto reconcile;
 

@@ -1584,6 +1584,35 @@ meta_window_actor_x11_finalize (GObject *object)
   G_OBJECT_CLASS (meta_window_actor_x11_parent_class)->finalize (object);
 }
 
+static MetaSurfaceActor *
+meta_window_actor_x11_get_scanout_candidate (MetaWindowActor  *actor,
+                                             const char      **reason)
+{
+  MetaSurfaceActor *surface_actor;
+
+  surface_actor = meta_window_actor_get_surface (actor);
+  if (!surface_actor)
+    {
+      *reason = "no surface actor";
+      return NULL;
+    }
+
+  if (CLUTTER_ACTOR (surface_actor) !=
+      clutter_actor_get_last_child (CLUTTER_ACTOR (actor)))
+    {
+      *reason = "surface is not the top child";
+      return NULL;
+    }
+
+  if (!meta_window_actor_is_opaque (actor))
+    {
+      *reason = "window actor not opaque";
+      return NULL;
+    }
+
+  return surface_actor;
+}
+
 static void
 meta_window_actor_x11_class_init (MetaWindowActorX11Class *klass)
 {
@@ -1600,6 +1629,7 @@ meta_window_actor_x11_class_init (MetaWindowActorX11Class *klass)
   window_actor_class->queue_destroy = meta_window_actor_x11_queue_destroy;
   window_actor_class->set_frozen = meta_window_actor_x11_set_frozen;
   window_actor_class->update_regions = meta_window_actor_x11_update_regions;
+  window_actor_class->get_scanout_candidate = meta_window_actor_x11_get_scanout_candidate;
 
   actor_class->paint = meta_window_actor_x11_paint;
   actor_class->get_paint_volume = meta_window_actor_x11_get_paint_volume;

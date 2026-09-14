@@ -20,9 +20,13 @@
  *     Georges Basile Stavracas Neto <gbsneto@gnome.org>
  */
 
+#include <float.h>
+
 #include "compositor/meta-surface-actor-wayland.h"
 #include "compositor/meta-window-actor-wayland.h"
 #include "meta/meta-window-actor.h"
+#include "wayland/meta-wayland-buffer.h"
+#include "wayland/meta-wayland-single-pixel-buffer.h"
 #include "wayland/meta-wayland-surface.h"
 
 struct _MetaWindowActorWayland
@@ -167,6 +171,98 @@ meta_window_actor_wayland_dispose (GObject *object)
   G_OBJECT_CLASS (meta_window_actor_wayland_parent_class)->dispose (object);
 }
 
+static MetaSurfaceActor *
+meta_window_actor_wayland_get_scanout_candidate (MetaWindowActor  *actor,
+                                                 const char      **reason)
+{
+  ClutterActor *self = CLUTTER_ACTOR (actor);
+  ClutterActorIter iter;
+  ClutterActor *child;
+  MetaSurfaceActor *topmost = NULL;
+  MetaSurfaceActor *bottommost = NULL;
+  int n_visible = 0;
+  MetaWindow *window;
+  ClutterActorBox surface_box;
+  float window_width, window_height;
+
+  if (clutter_actor_get_n_children (self) == 1)
+    return meta_window_actor_get_surface (actor);
+
+  clutter_actor_iter_init (&iter, self);
+  while (clutter_actor_iter_next (&iter, &child))
+    {
+      MetaSurfaceActor *surface_actor = META_SURFACE_ACTOR (child);
+
+      if (!clutter_actor_is_mapped (child))
+        continue;
+
+      if (meta_surface_actor_is_obscured (surface_actor))
+        continue;
+
+      if (!bottommost)
+        bottommost = surface_actor;
+
+      topmost = surface_actor;
+      n_visible++;
+    }
+
+  if (!topmost)
+    {
+      *reason = "no visible surface";
+      return NULL;
+    }
+
+  window = meta_window_actor_get_meta_window (actor);
+
+  if (meta_window_is_fullscreen (window) && n_visible == 1)
+    return topmost;
+
+  if (meta_window_is_fullscreen (window) && n_visible == 2)
+    {
+      MetaWaylandSurface *bg_surface;
+      MetaWaylandBuffer *buffer;
+      MetaWaylandSinglePixelBuffer *sp_buffer;
+
+      bg_surface =
+        meta_surface_actor_wayland_get_surface (META_SURFACE_ACTOR_WAYLAND (bottommost));
+      buffer = bg_surface ? meta_wayland_surface_get_buffer (bg_surface) : NULL;
+      sp_buffer = buffer ? buffer->single_pixel.single_pixel_buffer : NULL;
+
+      if (sp_buffer &&
+          meta_wayland_single_pixel_buffer_is_opaque_black (sp_buffer))
+        return topmost;
+    }
+
+  if (!meta_surface_actor_is_opaque (topmost))
+    {
+      if (!meta_surface_actor_get_texture (topmost))
+        *reason = "top surface has no texture";
+      else if (!meta_surface_actor_get_opaque_region (topmost))
+        *reason = "top surface has alpha, no opaque region declared";
+      else
+        *reason = "top surface opaque region does not cover it";
+
+      return NULL;
+    }
+
+  /* Allocation boxes are parent-relative, so the surface's box is already in
+   * window-actor coordinates and compares against the window actor's size with
+   * the origin at zero. */
+  clutter_actor_get_size (self, &window_width, &window_height);
+  clutter_actor_get_allocation_box (CLUTTER_ACTOR (topmost), &surface_box);
+
+  if (!G_APPROX_VALUE (surface_box.x1, 0.0f, FLT_EPSILON) ||
+      !G_APPROX_VALUE (surface_box.y1, 0.0f, FLT_EPSILON) ||
+      !G_APPROX_VALUE (surface_box.x2 - surface_box.x1, window_width, FLT_EPSILON) ||
+      !G_APPROX_VALUE (surface_box.y2 - surface_box.y1, window_height, FLT_EPSILON))
+    {
+      *reason = "top surface does not cover window";
+      return NULL;
+    }
+
+  return topmost;
+}
+
 static void
 meta_window_actor_wayland_class_init (MetaWindowActorWaylandClass *klass)
 {
@@ -181,6 +277,7 @@ meta_window_actor_wayland_class_init (MetaWindowActorWaylandClass *klass)
   window_actor_class->queue_destroy = meta_window_actor_wayland_queue_destroy;
   window_actor_class->set_frozen = meta_window_actor_wayland_set_frozen;
   window_actor_class->update_regions = meta_window_actor_wayland_update_regions;
+  window_actor_class->get_scanout_candidate = meta_window_actor_wayland_get_scanout_candidate;
 
   object_class->dispose = meta_window_actor_wayland_dispose;
 }
