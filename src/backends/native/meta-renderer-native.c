@@ -217,6 +217,8 @@ typedef struct _MetaOnscreenNative
 
   MetaRendererView *view;
   int total_pending_flips;
+
+  uint64_t logged_scanout_modifier;
   gboolean warned_scanout_flip_failed;
 } MetaOnscreenNative;
 
@@ -2346,7 +2348,19 @@ meta_onscreen_native_is_buffer_scanout_compatible (CoglOnscreen *onscreen,
 
   if (meta_crtc_kms_supports_modifier (onscreen_native->crtc, drm_format,
                                        drm_modifier))
-    return TRUE;
+    {
+      /* Logged on change only - this is the steady state while scanning out. */
+      if (onscreen_native->logged_scanout_modifier != drm_modifier)
+        {
+          onscreen_native->logged_scanout_modifier = drm_modifier;
+          meta_topic (META_DEBUG_SCANOUT,
+                      "crtc %ld: scanning out modifier 0x%" G_GINT64_MODIFIER
+                      "x, differing from onscreen 0x%" G_GINT64_MODIFIER "x\n",
+                      crtc_id, drm_modifier, gbm_bo_get_modifier (gbm_bo));
+        }
+
+      return TRUE;
+    }
 
   meta_topic (META_DEBUG_SCANOUT,
               "crtc %ld: primary plane does not advertise modifier "
@@ -2840,6 +2854,7 @@ meta_renderer_native_init_onscreen (CoglOnscreen *onscreen,
   onscreen_egl = onscreen->winsys;
 
   onscreen_native = g_slice_new0 (MetaOnscreenNative);
+  onscreen_native->logged_scanout_modifier = DRM_FORMAT_MOD_INVALID;
   onscreen_egl->platform = onscreen_native;
 
   /*
