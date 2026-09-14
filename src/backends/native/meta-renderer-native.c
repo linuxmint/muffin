@@ -217,6 +217,7 @@ typedef struct _MetaOnscreenNative
 
   MetaRendererView *view;
   int total_pending_flips;
+  gboolean warned_scanout_flip_failed;
 } MetaOnscreenNative;
 
 struct _MetaRendererNative
@@ -2374,7 +2375,7 @@ meta_onscreen_native_direct_scanout (CoglOnscreen *onscreen,
   MetaKms *kms = meta_backend_native_get_kms (backend_native);
   CoglFrameInfo *frame_info;
   MetaKmsUpdate *kms_update;
-  g_autoptr (GError) error = NULL;
+  g_autoptr (MetaKmsFeedback) kms_feedback = NULL;
 
   kms_update = meta_kms_ensure_pending_update (kms);
 
@@ -2397,7 +2398,24 @@ meta_onscreen_native_direct_scanout (CoglOnscreen *onscreen,
     renderer_native->frame_counter;
   meta_onscreen_native_flip_crtcs (onscreen, kms_update);
 
-  meta_kms_post_pending_update_sync (kms);
+  kms_feedback = meta_kms_post_pending_update_sync (kms);
+  if (meta_kms_feedback_get_result (kms_feedback) != META_KMS_FEEDBACK_PASSED)
+    {
+      const GError *error = meta_kms_feedback_get_error (kms_feedback);
+
+      /* Warned once per failing episode: a flip that fails keeps failing every
+       * frame, and the client has no idea it is no longer reaching the plane. */
+      if (!g_error_matches (error, G_IO_ERROR, G_IO_ERROR_PERMISSION_DENIED) &&
+          !onscreen_native->warned_scanout_flip_failed)
+        {
+          onscreen_native->warned_scanout_flip_failed = TRUE;
+          g_warning ("Direct scanout page flip failed: %s", error->message);
+        }
+    }
+  else
+    {
+      onscreen_native->warned_scanout_flip_failed = FALSE;
+    }
 }
 
 static gboolean
