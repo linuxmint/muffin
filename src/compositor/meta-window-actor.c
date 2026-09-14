@@ -1548,6 +1548,14 @@ meta_window_actor_get_image (MetaWindowActor *self,
       };
     }
 
+  /* A clip that misses the actor entirely intersects to nothing, and reading
+   * back a zero-sized region aborts in cogl. */
+  if (scaled_clip.width == 0 || scaled_clip.height == 0)
+    {
+      cogl_object_unref (framebuffer);
+      goto out;
+    }
+
   surface = cairo_image_surface_create (CAIRO_FORMAT_ARGB32,
                                         scaled_clip.width, scaled_clip.height);
   cogl_framebuffer_read_pixels (framebuffer,
