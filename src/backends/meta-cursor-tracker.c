@@ -52,6 +52,7 @@ enum
   CURSOR_CHANGED,
   CURSOR_MOVED,
   VISIBILITY_CHANGED,
+  POINTER_BUTTON,
   LAST_SIGNAL
 };
 
@@ -193,6 +194,19 @@ meta_cursor_tracker_class_init (MetaCursorTrackerClass *klass)
                                               G_SIGNAL_RUN_LAST,
                                               0, NULL, NULL, NULL,
                                               G_TYPE_NONE, 0);
+
+  /**
+   * MetaCursorTracker::pointer-button:
+   * @tracker: The #MetaCursorTracker
+   * @button: The button number that changed state
+   * @pressed: %TRUE if the button was pressed, %FALSE if released
+   */
+  signals[POINTER_BUTTON] = g_signal_new ("pointer-button",
+                                          G_TYPE_FROM_CLASS (klass),
+                                          G_SIGNAL_RUN_LAST,
+                                          0, NULL, NULL, NULL,
+                                          G_TYPE_NONE, 2,
+                                          G_TYPE_UINT, G_TYPE_BOOLEAN);
 }
 
 /**
@@ -379,6 +393,16 @@ meta_cursor_tracker_update_position (MetaCursorTracker *tracker,
   meta_cursor_renderer_set_position (cursor_renderer, new_x, new_y);
 
   g_signal_emit (tracker, signals[CURSOR_MOVED], 0, new_x, new_y);
+}
+
+void
+meta_cursor_tracker_update_button (MetaCursorTracker *tracker,
+                                   guint              button,
+                                   gboolean           pressed)
+{
+  g_assert (meta_is_wayland_compositor ());
+
+  g_signal_emit (tracker, signals[POINTER_BUTTON], 0, button, pressed);
 }
 
 static void
