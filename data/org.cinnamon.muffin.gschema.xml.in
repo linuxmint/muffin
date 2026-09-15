@@ -84,7 +84,15 @@
       <default>false</default>
       <summary>Fullscreen windows are unredirected (i.e. they bypass compositing)</summary>
       <description>
-        Determines whether fullscreen windows bypass compositing - by unredirecting them on X11, and by scanning their buffer out directly on Wayland. False is better for vsync/screen-tearing, True gives games and apps improved performance and latency. Note that direct scanout (wayland) also requires the client to allocate in display memory, which can matter on a GPU with little video memory.
+        X11 sessions only. Determines whether fullscreen windows bypass compositing by unredirecting them. False is better for vsync/screen-tearing, True gives games and apps improved performance and latency. Wayland sessions use scanout-fullscreen-windows instead.
+      </description>
+    </key>
+
+    <key name="scanout-fullscreen-windows" type="b">
+      <default>false</default>
+      <summary>Fullscreen windows are scanned out directly (i.e. they bypass compositing)</summary>
+      <description>
+        Wayland sessions only. Determines whether a fullscreen window's buffer is handed to the display controller directly instead of being composited. False is better for vsync/screen-tearing, True gives games and apps improved performance and latency. Note that direct scanout also requires the client to allocate in display memory, which can matter on a GPU with little video memory - a demanding game may exhaust it and stop rendering. X11 sessions use unredirect-fullscreen-windows instead.
       </description>
     </key>
 

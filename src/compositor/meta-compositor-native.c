@@ -133,8 +133,8 @@ maybe_assign_primary_plane (MetaCompositor *compositor)
      * can turn a working fullscreen game into an out-of-memory crash. A latency
      * win is not worth that by default.
      */
-    if (!meta_prefs_get_unredirect_fullscreen_windows ())
-      gated_reason = "unredirect-fullscreen-windows is off";
+    if (!meta_prefs_get_scanout_fullscreen_windows ())
+      gated_reason = "scanout-fullscreen-windows is off";
     else if (meta_compositor_is_unredirect_inhibited (compositor))
       gated_reason = "unredirect inhibited";
     else

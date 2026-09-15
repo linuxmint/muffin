@@ -125,7 +125,8 @@ typedef enum
   META_PREF_BELL_SOUND,
   META_PREF_BRING_WINDOWS_TO_CURRENT_WORKSPACE,
   META_PREF_INVERT_WORKSPACE_FLIP_DIRECTION,
-  META_PREF_PREVENT_FOCUS_STEALING
+  META_PREF_PREVENT_FOCUS_STEALING,
+  META_PREF_SCANOUT_FULLSCREEN_WINDOWS
 } MetaPreference;
 
 typedef void (* MetaPrefsChangedFunc) (MetaPreference pref,
@@ -276,6 +277,8 @@ int      meta_prefs_get_drag_threshold (void);
 
 META_EXPORT
 gboolean    meta_prefs_get_unredirect_fullscreen_windows (void);
+
+gboolean    meta_prefs_get_scanout_fullscreen_windows (void);
 
 META_EXPORT
 gboolean    meta_prefs_get_workspace_cycle (void);

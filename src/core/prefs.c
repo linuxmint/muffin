@@ -140,6 +140,7 @@ static char *iso_next_group_option = NULL;
 
 static MetaX11BackgroundTransition background_transition = META_X11_BACKGROUND_TRANSITION_BLEND;
 static gboolean unredirect_fullscreen_windows = FALSE;
+static gboolean scanout_fullscreen_windows = FALSE;
 static gboolean tile_maximize = FALSE;
 static gboolean invert_workspace_flip = FALSE;
 static char *gtk_theme = NULL;
@@ -457,6 +458,13 @@ static MetaBoolPreference preferences_bool[] =
         META_PREF_UNREDIRECT_FULLSCREEN_WINDOWS,
       },
       &unredirect_fullscreen_windows,
+    },
+    {
+      { "scanout-fullscreen-windows",
+        SCHEMA_MUFFIN,
+        META_PREF_SCANOUT_FULLSCREEN_WINDOWS,
+      },
+      &scanout_fullscreen_windows,
     },
     {
       { "workspace-cycle",
@@ -1834,6 +1842,12 @@ meta_prefs_get_unredirect_fullscreen_windows (void)
 }
 
 gboolean
+meta_prefs_get_scanout_fullscreen_windows (void)
+{
+  return scanout_fullscreen_windows;
+}
+
+gboolean
 meta_prefs_get_workspace_cycle (void)
 {
   return workspace_cycle;
@@ -1959,6 +1973,9 @@ meta_preference_to_string (MetaPreference pref)
 
     case META_PREF_UNREDIRECT_FULLSCREEN_WINDOWS:
       return "UNREDIRECT_FULLSCREEN_WINDOWS";
+
+    case META_PREF_SCANOUT_FULLSCREEN_WINDOWS:
+      return "SCANOUT_FULLSCREEN_WINDOWS";
 
     case META_PREF_WORKSPACE_CYCLE:
       return "WORKSPACE_CYCLE";
