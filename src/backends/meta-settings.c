@@ -151,8 +151,6 @@ meta_settings_update_ui_scaling_factor (MetaSettings *settings)
 int
 meta_settings_get_ui_scaling_factor (MetaSettings *settings)
 {
-  g_assert (settings->ui_scaling_factor != 0);
-
   return settings->ui_scaling_factor;
 }
 
@@ -617,6 +615,8 @@ meta_settings_dispose (GObject *object)
 static void
 meta_settings_init (MetaSettings *settings)
 {
+  settings->ui_scaling_factor = 1;
+
   settings->interface_settings = g_settings_new ("org.cinnamon.desktop.interface");
   g_signal_connect (settings->interface_settings, "changed",
                     G_CALLBACK (interface_settings_changed),
@@ -659,7 +659,7 @@ meta_settings_post_init (MetaSettings *settings)
   MetaMonitorManager *monitor_manager =
     meta_backend_get_monitor_manager (settings->backend);
 
-  update_ui_scaling_factor (settings);
+  meta_settings_update_ui_scaling_factor (settings);
   update_font_dpi (settings);
 
   g_signal_connect_object (monitor_manager, "monitors-changed-internal",

@@ -216,6 +216,83 @@ meta_input_settings_x11_set_matrix (MetaInputSettings  *settings,
                    32, &full_matrix, 9);
 }
 
+static gboolean
+device_has_relative_motion (ClutterInputDevice *device)
+{
+  MetaBackend *backend = meta_get_backend ();
+  Display *xdisplay = meta_backend_x11_get_xdisplay (META_BACKEND_X11 (backend));
+  XIDeviceInfo *info;
+  Atom rel_x;
+  gboolean relative = FALSE;
+  int n_devices, i;
+
+  info = XIQueryDevice (xdisplay, clutter_input_device_get_device_id (device),
+                        &n_devices);
+  if (n_devices <= 0 || !info)
+    return FALSE;
+
+  rel_x = XInternAtom (xdisplay, "Rel X", True);
+
+  for (i = 0; i < info->num_classes; i++)
+    {
+      XIValuatorClassInfo *valuator = (XIValuatorClassInfo *) info->classes[i];
+
+      if (valuator->type == XIValuatorClass &&
+          valuator->label == rel_x &&
+          valuator->mode == XIModeRelative)
+        {
+          relative = TRUE;
+          break;
+        }
+    }
+
+  XIFreeDeviceInfo (info);
+  return relative;
+}
+
+static void
+update_relative_motion_scale (MetaInputSettings  *settings,
+                              ClutterInputDevice *device)
+{
+  MetaSettings *meta_settings = meta_backend_get_settings (meta_get_backend ());
+  ClutterInputDeviceType type = clutter_input_device_get_device_type (device);
+  gfloat matrix[6] = { 1, 0, 0, 0, 1, 0 };
+
+  if (clutter_input_device_get_device_mode (device) == CLUTTER_INPUT_MODE_MASTER)
+    return;
+
+  if (type != CLUTTER_POINTER_DEVICE && type != CLUTTER_TOUCHPAD_DEVICE)
+    return;
+
+  if (!device_has_relative_motion (device))
+    return;
+
+  matrix[0] = meta_settings_get_ui_scaling_factor (meta_settings);
+  matrix[4] = matrix[0];
+  meta_input_settings_x11_set_matrix (settings, device, matrix);
+}
+
+static void
+update_all_relative_motion_scales (MetaSettings      *meta_settings,
+                                   MetaInputSettings *settings)
+{
+  ClutterSeat *seat = clutter_backend_get_default_seat (clutter_get_default_backend ());
+  GList *devices, *l;
+
+  devices = clutter_seat_list_devices (seat);
+  for (l = devices; l; l = l->next)
+    update_relative_motion_scale (settings, l->data);
+  g_list_free (devices);
+}
+
+static void
+on_device_added (ClutterSeat        *seat,
+                 ClutterInputDevice *device,
+                 MetaInputSettings  *settings)
+{
+  update_relative_motion_scale (settings, device);
+}
+
 static void
 meta_input_settings_x11_set_speed (MetaInputSettings  *settings,
                                    ClutterInputDevice *device,
@@ -871,6 +948,22 @@ meta_input_settings_x11_set_tablet_keep_aspect (MetaInputSettings  *settings,
 }
 
 static void
+meta_input_settings_x11_constructed (GObject *object)
+{
+  MetaInputSettings *settings = META_INPUT_SETTINGS (object);
+  ClutterSeat *seat = clutter_backend_get_default_seat (clutter_get_default_backend ());
+  MetaSettings *meta_settings = meta_backend_get_settings (meta_get_backend ());
+
+  G_OBJECT_CLASS (meta_input_settings_x11_parent_class)->constructed (object);
+
+  g_signal_connect_object (seat, "device-added",
+                           G_CALLBACK (on_device_added), settings, 0);
+  g_signal_connect_object (meta_settings, "ui-scaling-factor-changed",
+                           G_CALLBACK (update_all_relative_motion_scales),
+                           settings, 0);
+}
+
+static void
 meta_input_settings_x11_dispose (GObject *object)
 {
 #ifdef HAVE_LIBGUDEV
@@ -1008,6 +1101,7 @@ meta_input_settings_x11_class_init (MetaInputSettingsX11Class *klass)
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
   MetaInputSettingsClass *input_settings_class = META_INPUT_SETTINGS_CLASS (klass);
 
+  object_class->constructed = meta_input_settings_x11_constructed;
   object_class->dispose = meta_input_settings_x11_dispose;
 
   input_settings_class->set_send_events = meta_input_settings_x11_set_send_events;
