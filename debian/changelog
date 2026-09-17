@@ -1,3 +1,34 @@
+muffin (6.7.7) adrien; urgency=medium
+
+  [ Michael Webster ]
+  * meta-xwayland-dnd.c: Use two X11 DnD peer windows.
+  * monitor config: Use a different filename for wayland sessions, remove scale-monitor-framebuffer experimental option.
+  * clutter-offscreen-effect.c: Apply fbo offset before unscaling.
+  * meta-wayland-surface.c: Only log scanout failure reason once, not once per frame.
+  * xwayland: Fix hidpi support, scanout matching.
+  * compositor: Don't let fully transparent windows block unredirect/scanout
+  * compositor.c: Merge x11 and wayland top-window implementations for unredirect/scanout.
+  * meta-compositor-native.c: Make direct scanout opt-in.
+  * meta-renderer-native.c: Report direct scanout page flip failures.
+  * meta-renderer-native.c: Log when a scanout buffer's modifier differs from the onscreen framebuffer's.
+  * compositor: Let a fullscreen window scan out from a subsurface.
+  * meta-compositor-native.c: Don't allocate a hash table every paint.
+  * meta-window-actor.c: Don't read back a zero-sized region.
+  * meta-renderer-native.c: Log a scanout rejection once, not every frame.
+  * prefs: Add scanout-fullscreen-windows setting.
+  * clutter: Backport additional pointer repick triggers.
+  * cursor: Post the hardware cursor position from the input dispatch.
+  * settings: Allow experimental-features entries as plain named flags.
+  * wayland: Require the locking window to appear focused for Xwayland too.
+  * x11: Scale relative pointer motion by the UI scaling factor.
+
+  [ Clement Lefebvre ]
+  * x11: Don't let GTK load the accessibility bridge
+  * ui: Remove redundant gtk_init_check()
+  * x11: Only block the ATK bridge if Cinnamon didn't load it
+
+ -- Clement Lefebvre <root@linuxmint.com>  Thu, 17 Sep 2026 16:12:05 +0100
+
 muffin (6.7.6) alfa; urgency=medium
 
   [ Aleksey Samoilov ]
