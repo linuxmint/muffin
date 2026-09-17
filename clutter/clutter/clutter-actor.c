@@ -1119,6 +1119,8 @@ static void push_in_paint_unmapped_branch (ClutterActor *self,
 static void pop_in_paint_unmapped_branch (ClutterActor *self,
                                           guint         count);
 
+static void clutter_actor_update_devices (ClutterActor *self);
+
 /* Helper macro which translates by the anchor coord, applies the
    given transformation and then translates back */
 #define TRANSFORM_ABOUT_ANCHOR_COORD(a,m,c,_transform)  G_STMT_START { \
@@ -1816,6 +1818,14 @@ clutter_actor_real_unmap (ClutterActor *self)
    * children, so apps see a bottom-up notification.
    */
   g_object_notify_by_pspec (G_OBJECT (self), obj_props[PROP_MAPPED]);
+
+  if (priv->has_pointer)
+    {
+      ClutterActor *stage = _clutter_actor_get_stage_internal (self);
+
+      if (stage)
+        clutter_stage_invalidate_focus (CLUTTER_STAGE (stage), self);
+    }
 
   /* relinquish keyboard focus if we were unmapped while owning it */
   if (!CLUTTER_ACTOR_IS_TOPLEVEL (self))
@@ -2655,6 +2665,23 @@ transform_changed (ClutterActor *actor)
                            absolute_geometry_changed_cb,
                            NULL,
                            NULL);
+}
+
+static void
+clutter_actor_update_devices (ClutterActor *self)
+{
+  ClutterActor *stage = _clutter_actor_get_stage_internal (self);
+
+  if (stage)
+    clutter_stage_invalidate_devices (CLUTTER_STAGE (stage));
+}
+
+static void
+update_pointer_if_not_animated (ClutterActor *actor)
+{
+  if (!clutter_actor_has_transitions (actor) &&
+      !CLUTTER_ACTOR_IN_RELAYOUT (actor))
+    clutter_actor_update_devices (actor);
 }
 
 /*< private >
@@ -4713,6 +4740,7 @@ clutter_actor_set_pivot_point_internal (ClutterActor           *self,
   info->pivot = *pivot;
 
   transform_changed (self);
+  update_pointer_if_not_animated (self);
 
   g_object_notify_by_pspec (G_OBJECT (self), obj_props[PROP_PIVOT_POINT]);
 
@@ -4729,6 +4757,7 @@ clutter_actor_set_pivot_point_z_internal (ClutterActor *self,
   info->pivot_z = pivot_z;
 
   transform_changed (self);
+  update_pointer_if_not_animated (self);
 
   g_object_notify_by_pspec (G_OBJECT (self), obj_props[PROP_PIVOT_POINT_Z]);
 
@@ -4763,6 +4792,7 @@ clutter_actor_set_translation_internal (ClutterActor *self,
     g_assert_not_reached ();
 
   transform_changed (self);
+  update_pointer_if_not_animated (self);
 
   clutter_actor_queue_redraw (self);
   g_object_notify_by_pspec (obj, pspec);
@@ -4896,6 +4926,7 @@ clutter_actor_set_rotation_angle_internal (ClutterActor *self,
     g_assert_not_reached ();
 
   transform_changed (self);
+  update_pointer_if_not_animated (self);
 
   clutter_actor_queue_redraw (self);
 
@@ -5078,6 +5109,7 @@ clutter_actor_set_scale_factor_internal (ClutterActor *self,
     g_assert_not_reached ();
 
   transform_changed (self);
+  update_pointer_if_not_animated (self);
 
   clutter_actor_queue_redraw (self);
   g_object_notify_by_pspec (obj, pspec);
@@ -12165,6 +12197,7 @@ clutter_actor_set_z_position_internal (ClutterActor *self,
       info->z_position = z_position;
 
       transform_changed (self);
+      update_pointer_if_not_animated (self);
 
       clutter_actor_queue_redraw (self);
 
@@ -13974,7 +14007,11 @@ void
 clutter_actor_set_reactive (ClutterActor *actor,
                             gboolean      reactive)
 {
+  ClutterActorPrivate *priv;
+
   g_return_if_fail (CLUTTER_IS_ACTOR (actor));
+
+  priv = actor->priv;
 
   if (reactive == CLUTTER_ACTOR_IS_REACTIVE (actor))
     return;
@@ -13983,6 +14020,43 @@ clutter_actor_set_reactive (ClutterActor *actor,
     CLUTTER_ACTOR_SET_FLAGS (actor, CLUTTER_ACTOR_REACTIVE);
   else
     CLUTTER_ACTOR_UNSET_FLAGS (actor, CLUTTER_ACTOR_REACTIVE);
+
+  /* Repick before notifying: ClutterInputDevice watches notify::reactive and
+   * unassociates the actor without emitting a leave, which would leave nothing
+   * for clutter_stage_invalidate_focus() to find.
+   */
+  if (!CLUTTER_ACTOR_IS_REACTIVE (actor) && priv->has_pointer)
+    {
+      ClutterActor *stage = _clutter_actor_get_stage_internal (actor);
+
+      if (stage)
+        clutter_stage_invalidate_focus (CLUTTER_STAGE (stage), actor);
+    }
+  else if (CLUTTER_ACTOR_IS_REACTIVE (actor))
+    {
+      ClutterActor *parent;
+
+      /* Check whether the closest parent has pointer focus,
+       * and whether it should move to this actor.
+       */
+      parent = priv->parent;
+
+      while (parent)
+        {
+          if (CLUTTER_ACTOR_IS_REACTIVE (parent))
+            break;
+
+          parent = parent->priv->parent;
+        }
+
+      if (parent && parent->priv->has_pointer)
+        {
+          ClutterActor *stage = _clutter_actor_get_stage_internal (actor);
+
+          if (stage)
+            clutter_stage_invalidate_focus (CLUTTER_STAGE (stage), parent);
+        }
+    }
 
   g_object_notify_by_pspec (G_OBJECT (actor), obj_props[PROP_REACTIVE]);
 }
@@ -16335,6 +16409,7 @@ clutter_actor_set_transform_internal (ClutterActor        *self,
   info->transform_set = !cogl_matrix_is_identity (&info->transform);
 
   transform_changed (self);
+  update_pointer_if_not_animated (self);
 
   clutter_actor_queue_redraw (self);
 
@@ -19396,6 +19471,7 @@ on_transition_stopped (ClutterTransition *transition,
                     _clutter_actor_get_debug_name (actor));
 
       g_signal_emit (actor, actor_signals[TRANSITIONS_COMPLETED], 0);
+      clutter_actor_update_devices (actor);
     }
 }
 

@@ -167,7 +167,7 @@ struct _ClutterStagePrivate
   guint accept_focus           : 1;
   guint motion_events_enabled  : 1;
   guint has_custom_perspective : 1;
-  guint stage_was_relayout     : 1;
+  guint needs_update_devices   : 1;
   guint actor_needs_immediate_relayout : 1;
 };
 
@@ -1470,7 +1470,7 @@ _clutter_stage_maybe_relayout (ClutterActor *actor)
   CLUTTER_NOTE (ACTOR, "<<< Completed recomputing layout of %d subtrees", count);
 
   if (count)
-    priv->stage_was_relayout = TRUE;
+    priv->needs_update_devices = TRUE;
 }
 
 static void
@@ -1605,6 +1605,24 @@ update_actor_stage_views (ClutterStage *stage)
   g_warn_if_fail (!priv->actor_needs_immediate_relayout);
 }
 
+static void
+clutter_stage_update_devices (ClutterStage *stage)
+{
+  GSList *pointers;
+
+  COGL_TRACE_BEGIN (ClutterStagePick, "Pick");
+
+  pointers = _clutter_stage_check_updated_pointers (stage);
+
+  while (pointers)
+    {
+      clutter_input_device_update (pointers->data, NULL, TRUE);
+      pointers = g_slist_delete_link (pointers, pointers);
+    }
+
+  COGL_TRACE_END (ClutterStagePick);
+}
+
 /**
  * _clutter_stage_do_update:
  * @stage: A #ClutterStage
@@ -1617,10 +1635,6 @@ gboolean
 _clutter_stage_do_update (ClutterStage *stage)
 {
   ClutterStagePrivate *priv = stage->priv;
-  gboolean stage_was_relayout = priv->stage_was_relayout;
-  GSList *pointers = NULL;
-
-  priv->stage_was_relayout = FALSE;
 
   priv->needs_update = FALSE;
 
@@ -1648,14 +1662,21 @@ _clutter_stage_do_update (ClutterStage *stage)
 
   COGL_TRACE_END (ClutterStageRelayout);
 
+  /* A stale pointer actor has to be corrected whether or not anything is
+   * being painted - gating the repick on the redraw is what left crossings
+   * undelivered until the next frame that happened to draw something.
+   */
   if (!priv->redraw_pending)
     {
+      if (priv->needs_update_devices)
+        {
+          priv->needs_update_devices = FALSE;
+          clutter_stage_update_devices (stage);
+        }
+
       clutter_stage_emit_after_update (stage);
       return FALSE;
     }
-
-  if (stage_was_relayout)
-    pointers = _clutter_stage_check_updated_pointers (stage);
 
   update_actor_stage_views (stage);
 
@@ -1679,15 +1700,11 @@ _clutter_stage_do_update (ClutterStage *stage)
     }
 #endif /* CLUTTER_ENABLE_DEBUG */
 
-  COGL_TRACE_BEGIN (ClutterStagePick, "Pick");
-
-  while (pointers)
+  if (priv->needs_update_devices)
     {
-      clutter_input_device_update (pointers->data, NULL, TRUE);
-      pointers = g_slist_delete_link (pointers, pointers);
+      priv->needs_update_devices = FALSE;
+      clutter_stage_update_devices (stage);
     }
-
-  COGL_TRACE_END (ClutterStagePick);
 
   clutter_stage_emit_after_update (stage);
 
@@ -4962,6 +4979,42 @@ clutter_stage_get_device_coords (ClutterStage         *stage,
 
   if (entry && coords)
     *coords = entry->coords;
+}
+
+void
+clutter_stage_invalidate_devices (ClutterStage *stage)
+{
+  if (CLUTTER_ACTOR_IN_DESTRUCTION (stage))
+    return;
+
+  stage->priv->needs_update_devices = TRUE;
+  clutter_stage_schedule_update (stage);
+}
+
+void
+clutter_stage_invalidate_focus (ClutterStage *stage,
+                                ClutterActor *actor)
+{
+  ClutterSeat *seat;
+  GList *l, *devices;
+
+  if (CLUTTER_ACTOR_IN_DESTRUCTION (stage))
+    return;
+
+  seat = clutter_backend_get_default_seat (clutter_get_default_backend ());
+  devices = clutter_seat_list_devices (seat);
+
+  for (l = devices; l; l = l->next)
+    {
+      ClutterInputDevice *device = l->data;
+
+      if (device->cursor_actor != actor)
+        continue;
+
+      clutter_input_device_update (device, NULL, TRUE);
+    }
+
+  g_list_free (devices);
 }
 
 void
