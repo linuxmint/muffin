@@ -59,6 +59,9 @@ gboolean meta_settings_get_global_scaling_factor (MetaSettings *settings,
 
 double meta_settings_get_font_scaling_factor (MetaSettings *settings);
 
+gboolean meta_settings_is_experimental_feature_string_enabled (MetaSettings *settings,
+                                                               const char   *feature);
+
 META_EXPORT_TEST
 gboolean meta_settings_is_experimental_feature_enabled (MetaSettings           *settings,
                                                         MetaExperimentalFeature feature);

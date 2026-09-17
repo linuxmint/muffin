@@ -66,6 +66,7 @@ struct _MetaSettings
 
   MetaExperimentalFeature experimental_features;
   gboolean experimental_features_overridden;
+  GStrv experimental_feature_strings;
 
   gboolean xwayland_allow_grabs;
   GPtrArray *xwayland_grab_whitelist_patterns;
@@ -263,6 +264,17 @@ meta_settings_is_experimental_feature_enabled (MetaSettings           *settings,
   return !!(settings->experimental_features & feature);
 }
 
+gboolean
+meta_settings_is_experimental_feature_string_enabled (MetaSettings *settings,
+                                                      const char   *feature)
+{
+  if (!settings->experimental_feature_strings)
+    return FALSE;
+
+  return g_strv_contains ((const char * const *) settings->experimental_feature_strings,
+                          feature);
+}
+
 void
 meta_settings_override_experimental_features (MetaSettings *settings)
 {
@@ -368,6 +380,10 @@ experimental_features_handler (GVariant *features_variant,
       return TRUE;
     }
 
+  g_clear_pointer (&settings->experimental_feature_strings, g_strfreev);
+  settings->experimental_feature_strings = g_variant_dup_strv (features_variant,
+                                                               NULL);
+
   g_variant_iter_init (&features_iter, features_variant);
   while (g_variant_iter_loop (&features_iter, "s", &feature_str))
     {
@@ -387,7 +403,7 @@ experimental_features_handler (GVariant *features_variant,
       if (feature)
         g_message ("Enabling experimental feature '%s'", feature_str);
       else
-        g_warning ("Unknown experimental feature '%s'", feature_str);
+        g_message ("Enabling experimental flag '%s'", feature_str);
 
       features |= feature;
     }
@@ -593,6 +609,7 @@ meta_settings_dispose (GObject *object)
                    g_ptr_array_unref);
   g_clear_pointer (&settings->xwayland_grab_blacklist_patterns,
                    g_ptr_array_unref);
+  g_clear_pointer (&settings->experimental_feature_strings, g_strfreev);
 
   G_OBJECT_CLASS (meta_settings_parent_class)->dispose (object);
 }
