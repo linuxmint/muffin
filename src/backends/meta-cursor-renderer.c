@@ -315,6 +315,43 @@ meta_cursor_renderer_set_position (MetaCursorRenderer *renderer,
   meta_cursor_renderer_update_cursor (renderer, priv->displayed_cursor);
 }
 
+/*
+ * Post a new cursor position without redoing any of the sprite work. This is
+ * called straight from the input dispatch rather than at frame time, so that
+ * the cursor isn't pinned to the compositor's redraw cadence. It only applies
+ * where the backend is already scanning the cursor out on its own plane;
+ * otherwise the cursor is part of the scene and has to wait for the frame.
+ */
+gboolean
+meta_cursor_renderer_update_position (MetaCursorRenderer *renderer,
+                                      float               x,
+                                      float               y)
+{
+  MetaCursorRendererPrivate *priv = meta_cursor_renderer_get_instance_private (renderer);
+  MetaCursorRendererClass *klass = META_CURSOR_RENDERER_GET_CLASS (renderer);
+  float prev_x, prev_y;
+  gboolean handled;
+
+  if (!klass->update_position || !priv->displayed_cursor)
+    return FALSE;
+
+  prev_x = priv->current_x;
+  prev_y = priv->current_y;
+
+  priv->current_x = x;
+  priv->current_y = y;
+
+  handled = klass->update_position (renderer, priv->displayed_cursor);
+
+  if (!handled)
+    {
+      priv->current_x = prev_x;
+      priv->current_y = prev_y;
+    }
+
+  return handled;
+}
+
 graphene_point_t
 meta_cursor_renderer_get_position (MetaCursorRenderer *renderer)
 {
