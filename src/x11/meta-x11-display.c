@@ -1093,6 +1093,7 @@ meta_x11_init_gdk_display (GError **error)
   const char *gdk_gl_env = NULL;
   g_autofree gchar *no_gail = NULL;
   g_autofree gchar *no_at_bridge = NULL;
+  gboolean block_at_bridge;
   gboolean gtk_parsed;
   Display *xdisplay;
 
@@ -1115,6 +1116,11 @@ meta_x11_init_gdk_display (GError **error)
    * So we init GTK/GDK without A11Y here, and let Cinnamon handle checking
    * the bus and loading A11Y.
    *
+   * Cinnamon sets CINNAMON_NO_AT_BRIDGE when it didn't load the ATK bridge
+   * (see cinnamon_a11y_init() in cinnamon/src/main.c). In that case we stop GTK
+   * from loading it. Otherwise the bridge is already loaded, GTK skips it
+   * anyway, and setting NO_AT_BRIDGE would only make atk-bridge warn.
+   *
    * GTK/GDK loads A11Y when the display gets opened, so both calls below
    * need to be covered.
    */
@@ -1126,18 +1132,21 @@ meta_x11_init_gdk_display (GError **error)
   no_at_bridge = g_strdup (g_getenv ("NO_AT_BRIDGE"));
 
   /* Initialize GTK/GDK without A11Y */
+  block_at_bridge = g_getenv ("CINNAMON_NO_AT_BRIDGE") != NULL;
   g_setenv ("NO_GAIL", "1", TRUE);
-  g_setenv ("NO_AT_BRIDGE", "1", TRUE);
+  if (block_at_bridge)
+    g_setenv ("NO_AT_BRIDGE", "1", TRUE);
   gdk_parse_args (NULL, NULL);
   gtk_parsed = gtk_parse_args (NULL, NULL);
   gdk_display = gtk_parsed ? gdk_display_open (xdisplay_name) : NULL;
   g_unsetenv ("NO_GAIL");
-  g_unsetenv ("NO_AT_BRIDGE");
+  if (block_at_bridge)
+    g_unsetenv ("NO_AT_BRIDGE");
 
   /* Restore env variables if needed */
   if (no_gail != NULL)
     g_setenv ("NO_GAIL", no_gail, TRUE);
-  if (no_at_bridge != NULL)
+  if (block_at_bridge && no_at_bridge != NULL)
     g_setenv ("NO_AT_BRIDGE", no_at_bridge, TRUE);
 
   if (!gtk_parsed)
