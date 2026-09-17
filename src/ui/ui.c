@@ -51,9 +51,6 @@ meta_ui_new (MetaX11Display *x11_display)
 {
   MetaUI *ui;
 
-  if (!gtk_init_check (NULL, NULL))
-    meta_fatal ("Unable to initialize GTK");
-
   g_assert (x11_display->gdk_display == gdk_display_get_default ());
 
   ui = g_new0 (MetaUI, 1);
