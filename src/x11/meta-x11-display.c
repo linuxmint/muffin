@@ -1091,6 +1091,9 @@ meta_x11_init_gdk_display (GError **error)
   const char *xdisplay_name;
   GdkDisplay *gdk_display;
   const char *gdk_gl_env = NULL;
+  g_autofree gchar *no_gail = NULL;
+  g_autofree gchar *no_at_bridge = NULL;
+  gboolean gtk_parsed;
   Display *xdisplay;
 
   xdisplay_name = meta_x11_get_display_name ();
@@ -1106,15 +1109,43 @@ meta_x11_init_gdk_display (GError **error)
   gdk_gl_env = g_getenv ("GDK_GL");
   g_setenv ("GDK_GL", "disable", TRUE);
 
+  /* Muffin only uses GTK/GDK to draw frames (note: SSD windows and in X11 only)
+   * so accessibility is not needed.
+   * The entire DE can crash if we load A11Y without checking its bus.
+   * So we init GTK/GDK without A11Y here, and let Cinnamon handle checking
+   * the bus and loading A11Y.
+   *
+   * GTK/GDK loads A11Y when the display gets opened, so both calls below
+   * need to be covered.
+   */
+
+  /* Save the env variables in case they're already set,
+   * so we can restore them after opening the display.
+   */
+  no_gail = g_strdup (g_getenv ("NO_GAIL"));
+  no_at_bridge = g_strdup (g_getenv ("NO_AT_BRIDGE"));
+
+  /* Initialize GTK/GDK without A11Y */
+  g_setenv ("NO_GAIL", "1", TRUE);
+  g_setenv ("NO_AT_BRIDGE", "1", TRUE);
   gdk_parse_args (NULL, NULL);
-  if (!gtk_parse_args (NULL, NULL))
+  gtk_parsed = gtk_parse_args (NULL, NULL);
+  gdk_display = gtk_parsed ? gdk_display_open (xdisplay_name) : NULL;
+  g_unsetenv ("NO_GAIL");
+  g_unsetenv ("NO_AT_BRIDGE");
+
+  /* Restore env variables if needed */
+  if (no_gail != NULL)
+    g_setenv ("NO_GAIL", no_gail, TRUE);
+  if (no_at_bridge != NULL)
+    g_setenv ("NO_AT_BRIDGE", no_at_bridge, TRUE);
+
+  if (!gtk_parsed)
     {
       g_set_error (error, G_IO_ERROR, G_IO_ERROR_FAILED,
                    "Failed to initialize gtk");
       return FALSE;
     }
-
-  gdk_display = gdk_display_open (xdisplay_name);
 
   if (!gdk_display)
     {
