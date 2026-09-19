@@ -331,6 +331,18 @@ meta_display_handle_event (MetaDisplay        *display,
 
       display->monitor_cache_invalidated = TRUE;
     }
+
+  if (meta_is_wayland_compositor () &&
+      (event->type == CLUTTER_BUTTON_PRESS ||
+       event->type == CLUTTER_BUTTON_RELEASE))
+    {
+      MetaCursorTracker *cursor_tracker =
+        meta_backend_get_cursor_tracker (backend);
+
+      meta_cursor_tracker_update_button (cursor_tracker,
+                                         clutter_event_get_button (event),
+                                         event->type == CLUTTER_BUTTON_PRESS);
+    }
 #endif
 
   window = get_window_for_event (display, event);
