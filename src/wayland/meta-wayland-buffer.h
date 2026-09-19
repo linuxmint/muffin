@@ -53,6 +53,8 @@ struct _MetaWaylandBuffer
   struct wl_resource *resource;
   struct wl_listener destroy_listener;
 
+  unsigned int use_count;
+
   gboolean is_y_inverted;
 
   MetaWaylandBufferType type;
@@ -91,6 +93,8 @@ gboolean                meta_wayland_buffer_attach              (MetaWaylandBuff
                                                                  CoglTexture          **texture,
                                                                  GError               **error);
 CoglSnippet *           meta_wayland_buffer_create_snippet      (MetaWaylandBuffer     *buffer);
+void                    meta_wayland_buffer_inc_use_count       (MetaWaylandBuffer     *buffer);
+void                    meta_wayland_buffer_dec_use_count       (MetaWaylandBuffer     *buffer);
 gboolean                meta_wayland_buffer_is_y_inverted       (MetaWaylandBuffer     *buffer);
 void                    meta_wayland_buffer_process_damage      (MetaWaylandBuffer     *buffer,
                                                                  CoglTexture           *texture,
