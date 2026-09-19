@@ -43,6 +43,17 @@
       </description>
     </key>
 
+    <key name="edge-resistance-window" type="b">
+      <default>true</default>
+      <summary>Enable edge resistance between windows</summary>
+      <description>
+        If enabled, windows resist movement when their edges approach the
+        edges of other windows. Disabling this allows windows to be dragged
+        freely past one another without any sticky edge effect. Resistance
+        against monitor and screen boundaries is not affected by this setting.
+      </description>
+    </key>
+
     <key name="tile-maximize" type="b">
       <default>false</default>
       <summary>Sets maximize as the tile action for the top edge of the screen</summary>
