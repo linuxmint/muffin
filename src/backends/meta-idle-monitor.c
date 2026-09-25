@@ -181,7 +181,7 @@ update_inhibited_watch (gpointer key,
   if (!watch->timeout_source)
     return;
 
-  if (monitor->inhibited)
+  if (monitor->inhibited && !watch->ignore_inhibitors)
     {
       g_source_set_ready_time (watch->timeout_source, -1);
     }
@@ -337,6 +337,7 @@ make_watch (MetaIdleMonitor           *monitor,
   watch->user_data = user_data;
   watch->notify = notify;
   watch->timeout_msec = timeout_msec;
+  watch->ignore_inhibitors = FALSE;
 
   if (timeout_msec != 0)
     {
@@ -498,7 +499,7 @@ meta_idle_monitor_reset_idletime (MetaIdleMonitor *monitor)
         }
       else
         {
-          if (monitor->inhibited)
+          if (monitor->inhibited && !watch->ignore_inhibitors)
             {
               g_source_set_ready_time (watch->timeout_source, -1);
             }
@@ -512,4 +513,34 @@ meta_idle_monitor_reset_idletime (MetaIdleMonitor *monitor)
     }
 
   g_list_free (watch_ids);
+}
+
+guint
+meta_idle_monitor_add_idle_watch_full (MetaIdleMonitor          *monitor,
+                                       guint64                   interval_msec,
+                                       gboolean                  ignore_inhibitors,
+                                       MetaIdleMonitorWatchFunc  callback,
+                                       gpointer                  user_data,
+                                       GDestroyNotify            notify)
+{
+  MetaIdleMonitorWatch *watch;
+
+  g_return_val_if_fail (META_IS_IDLE_MONITOR (monitor), 0);
+  g_return_val_if_fail (interval_msec > 0, 0);
+
+  watch = make_watch (monitor,
+                      interval_msec,
+                      callback,
+                      user_data,
+                      notify);
+
+  watch->ignore_inhibitors = ignore_inhibitors;
+
+  if (monitor->inhibited && ignore_inhibitors && watch->timeout_source)
+    {
+      g_source_set_ready_time (watch->timeout_source,
+                               monitor->last_event_time +
+                               watch->timeout_msec * 1000);
+    }
+  return watch->id;
 }

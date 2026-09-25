@@ -36,6 +36,7 @@ typedef struct
   guint64                   timeout_msec;
   int                       idle_source_id;
   GSource                  *timeout_source;
+  gboolean                ignore_inhibitors;
 } MetaIdleMonitorWatch;
 
 struct _MetaIdleMonitor
@@ -55,5 +56,12 @@ struct _MetaIdleMonitorClass
 };
 
 void meta_idle_monitor_reset_idletime (MetaIdleMonitor *monitor);
+
+guint meta_idle_monitor_add_idle_watch_full (MetaIdleMonitor          *monitor,
+                                             guint64                   interval_msec,
+                                             gboolean                  ignore_inhibitors,
+                                             MetaIdleMonitorWatchFunc  callback,
+                                             gpointer                  user_data,
+                                             GDestroyNotify            notify);
 
 #endif /* META_IDLE_MONITOR_PRIVATE_H */
