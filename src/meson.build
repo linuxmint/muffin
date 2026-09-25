@@ -343,6 +343,8 @@ muffin_sources = [
   'core/meta-accel-parse.c',
   'core/meta-accel-parse.h',
   'core/meta-anonymous-file.c',
+  'core/zoom-grab.c',
+  'core/zoom-grab.h',
   'core/meta-anonymous-file.h',
   'core/meta-border.c',
   'core/meta-border.h',
