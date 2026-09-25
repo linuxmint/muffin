@@ -173,7 +173,6 @@ enum
 {
   PROP_0,
 
-  PROP_LOOP,
   PROP_DELAY,
   PROP_DURATION,
   PROP_DIRECTION,
@@ -289,23 +288,6 @@ clutter_timeline_add_marker_internal (ClutterTimeline *timeline,
     }
 
   g_hash_table_insert (priv->markers_by_name, marker->name, marker);
-}
-
-static inline void
-clutter_timeline_set_loop_internal (ClutterTimeline *timeline,
-                                    gboolean         loop)
-{
-  gint old_repeat_count;
-
-  old_repeat_count = timeline->priv->repeat_count;
-
-  if (loop)
-    clutter_timeline_set_repeat_count (timeline, -1);
-  else
-    clutter_timeline_set_repeat_count (timeline, 0);
-
-  if (old_repeat_count != timeline->priv->repeat_count)
-    g_object_notify_by_pspec (G_OBJECT (timeline), obj_props[PROP_LOOP]);
 }
 
 /* Scriptable */
@@ -449,10 +431,6 @@ clutter_timeline_set_property (GObject      *object,
 
   switch (prop_id)
     {
-    case PROP_LOOP:
-      clutter_timeline_set_loop_internal (timeline, g_value_get_boolean (value));
-      break;
-
     case PROP_DELAY:
       clutter_timeline_set_delay (timeline, g_value_get_uint (value));
       break;
@@ -494,10 +472,6 @@ clutter_timeline_get_property (GObject    *object,
 
   switch (prop_id)
     {
-    case PROP_LOOP:
-      g_value_set_boolean (value, priv->repeat_count != 0);
-      break;
-
     case PROP_DELAY:
       g_value_set_uint (value, priv->delay);
       break;
@@ -572,25 +546,6 @@ static void
 clutter_timeline_class_init (ClutterTimelineClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
-
-  /**
-   * ClutterTimeline:loop:
-   *
-   * Whether the timeline should automatically rewind and restart.
-   *
-   * As a side effect, setting this property to %TRUE will set the
-   * #ClutterTimeline:repeat-count property to -1, while setting this
-   * property to %FALSE will set the #ClutterTimeline:repeat-count
-   * property to 0.
-   *
-   * Deprecated: 1.10: Use the #ClutterTimeline:repeat-count property instead.
-   */
-  obj_props[PROP_LOOP] =
-    g_param_spec_boolean ("loop",
-                          P_("Loop"),
-                          P_("Should the timeline automatically restart"),
-                          FALSE,
-                          CLUTTER_PARAM_READWRITE | G_PARAM_DEPRECATED);
 
   /**
    * ClutterTimeline:delay:
@@ -1253,45 +1208,6 @@ clutter_timeline_stop (ClutterTimeline *timeline)
 }
 
 /**
- * clutter_timeline_set_loop:
- * @timeline: a #ClutterTimeline
- * @loop: %TRUE for enable looping
- *
- * Sets whether @timeline should loop.
- *
- * This function is equivalent to calling clutter_timeline_set_repeat_count()
- * with -1 if @loop is %TRUE, and with 0 if @loop is %FALSE.
- *
- * Deprecated: 1.10: Use clutter_timeline_set_repeat_count() instead.
- */
-void
-clutter_timeline_set_loop (ClutterTimeline *timeline,
-			   gboolean         loop)
-{
-  g_return_if_fail (CLUTTER_IS_TIMELINE (timeline));
-
-  clutter_timeline_set_loop_internal (timeline, loop);
-}
-
-/**
- * clutter_timeline_get_loop:
- * @timeline: a #ClutterTimeline
- *
- * Gets whether @timeline is looping
- *
- * Return value: %TRUE if the timeline is looping
- *
- * Deprecated: 1.10: Use clutter_timeline_get_repeat_count() instead.
- */
-gboolean
-clutter_timeline_get_loop (ClutterTimeline *timeline)
-{
-  g_return_val_if_fail (CLUTTER_IS_TIMELINE (timeline), FALSE);
-
-  return timeline->priv->repeat_count != 0;
-}
-
-/**
  * clutter_timeline_rewind:
  * @timeline: A #ClutterTimeline
  *
@@ -1407,48 +1323,10 @@ clutter_timeline_is_playing (ClutterTimeline *timeline)
 }
 
 /**
- * clutter_timeline_clone:
- * @timeline: #ClutterTimeline to duplicate.
- *
- * Create a new #ClutterTimeline instance which has property values
- * matching that of supplied timeline. The cloned timeline will not
- * be started and will not be positioned to the current position of
- * the original @timeline: you will have to start it with
- * clutter_timeline_start().
- *
- * The only cloned properties are:
- *
- *  - #ClutterTimeline:duration
- *  - #ClutterTimeline:loop
- *  - #ClutterTimeline:delay
- *  - #ClutterTimeline:direction
- *
- * Return value: (transfer full): a new #ClutterTimeline, cloned
- *   from @timeline
- *
- * Since: 0.4
- *
- * Deprecated: 1.10: Use clutter_timeline_new() or g_object_new()
- *   instead
- */
-ClutterTimeline *
-clutter_timeline_clone (ClutterTimeline *timeline)
-{
-  g_return_val_if_fail (CLUTTER_IS_TIMELINE (timeline), NULL);
-
-  return g_object_new (CLUTTER_TYPE_TIMELINE,
-                       "duration", timeline->priv->duration,
-                       "loop", timeline->priv->repeat_count != 0,
-                       "delay", timeline->priv->delay,
-                       "direction", timeline->priv->direction,
-                       NULL);
-}
-
-/**
  * clutter_timeline_new:
- * @msecs: Duration of the timeline in milliseconds
+ * @duration_ms: Duration of the timeline in milliseconds
  *
- * Creates a new #ClutterTimeline with a duration of @msecs.
+ * Creates a new #ClutterTimeline with a duration of @duration_ms milli seconds.
  *
  * Return value: the newly created #ClutterTimeline instance. Use
  *   g_object_unref() when done using it
@@ -1456,10 +1334,10 @@ clutter_timeline_clone (ClutterTimeline *timeline)
  * Since: 0.6
  */
 ClutterTimeline *
-clutter_timeline_new (guint msecs)
+clutter_timeline_new (guint duration_ms)
 {
   return g_object_new (CLUTTER_TYPE_TIMELINE,
-                       "duration", msecs,
+                       "duration", duration_ms,
                        NULL);
 }
 

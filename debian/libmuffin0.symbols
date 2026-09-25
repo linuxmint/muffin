@@ -1114,7 +1114,6 @@ libmuffin-clutter-0.so.0 libmuffin0 #MINVER#
  clutter_stage_capture_into@Base 5.3.0
  clutter_stage_clear_stage_views@Base 6.6.3
  clutter_stage_ensure_current@Base 5.3.0
- clutter_stage_ensure_redraw@Base 5.3.0
  clutter_stage_ensure_viewport@Base 5.3.0
  clutter_stage_event@Base 5.3.0
  clutter_stage_freeze_updates@Base 5.3.0
@@ -1301,7 +1300,6 @@ libmuffin-clutter-0.so.0 libmuffin0 #MINVER#
  clutter_timeline_add_marker_at_time@Base 5.3.0
  clutter_timeline_advance@Base 5.3.0
  clutter_timeline_advance_to_marker@Base 5.3.0
- clutter_timeline_clone@Base 5.3.0
  clutter_timeline_direction_get_type@Base 5.3.0
  clutter_timeline_get_auto_reverse@Base 5.3.0
  clutter_timeline_get_cubic_bezier_progress@Base 5.3.0
@@ -1312,7 +1310,6 @@ libmuffin-clutter-0.so.0 libmuffin0 #MINVER#
  clutter_timeline_get_duration@Base 5.3.0
  clutter_timeline_get_duration_hint@Base 5.3.0
  clutter_timeline_get_elapsed_time@Base 5.3.0
- clutter_timeline_get_loop@Base 5.3.0
  clutter_timeline_get_progress@Base 5.3.0
  clutter_timeline_get_progress_mode@Base 5.3.0
  clutter_timeline_get_repeat_count@Base 5.3.0
@@ -1330,7 +1327,6 @@ libmuffin-clutter-0.so.0 libmuffin0 #MINVER#
  clutter_timeline_set_delay@Base 5.3.0
  clutter_timeline_set_direction@Base 5.3.0
  clutter_timeline_set_duration@Base 5.3.0
- clutter_timeline_set_loop@Base 5.3.0
  clutter_timeline_set_progress_func@Base 5.3.0
  clutter_timeline_set_progress_mode@Base 5.3.0
  clutter_timeline_set_repeat_count@Base 5.3.0
@@ -1589,7 +1585,6 @@ libmuffin-cogl-0.so.0 libmuffin0 #MINVER#
  cogl_frame_info_get_frame_counter@Base 5.3.0
  cogl_frame_info_get_global_frame_counter@Base 5.3.0
  cogl_frame_info_get_gtype@Base 5.3.0
- cogl_frame_info_get_output@Base 5.3.0
  cogl_frame_info_get_presentation_time@Base 5.3.0
  cogl_frame_info_get_refresh_rate@Base 5.3.0
  cogl_framebuffer_add_fence_callback@Base 5.3.0
