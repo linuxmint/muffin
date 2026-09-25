@@ -889,6 +889,10 @@ Window
 meta_backend_x11_get_xwindow (MetaBackendX11 *x11)
 {
   ClutterActor *stage = meta_backend_get_stage (META_BACKEND (x11));
+
+  if (!stage || !CLUTTER_IS_STAGE (stage))
+    return None;
+
   return meta_x11_get_stage_window (CLUTTER_STAGE (stage));
 }
 
