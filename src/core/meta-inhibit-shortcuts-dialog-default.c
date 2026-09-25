@@ -50,8 +50,6 @@ G_DEFINE_TYPE_WITH_CODE (MetaInhibitShortcutsDialogDefault, meta_inhibit_shortcu
 static void
 meta_inhibit_shortcuts_dialog_default_show (MetaInhibitShortcutsDialog *dialog)
 {
-  /* Default to allow shortcuts inhibitor, but complain that no dialog is implemented */
-  g_warning ("No MetaInhibitShortcutDialog implementation, falling back on allowing");
   meta_inhibit_shortcuts_dialog_response (dialog, META_INHIBIT_SHORTCUTS_DIALOG_RESPONSE_ALLOW);
 }
 
