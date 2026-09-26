@@ -9859,6 +9859,8 @@ clutter_actor_get_preferred_width (ClutterActor *self,
       if (natural_width_p != NULL)
         *natural_width_p = content_width;
 
+      priv->needs_width_request = FALSE;
+
       return;
     }
 
@@ -10023,6 +10025,8 @@ clutter_actor_get_preferred_height (ClutterActor *self,
 
       if (natural_height_p != NULL)
         *natural_height_p = content_height;
+
+      priv->needs_height_request = FALSE;
 
       return;
     }
