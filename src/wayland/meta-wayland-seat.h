@@ -25,6 +25,7 @@
 #include <wayland-server.h>
 
 #include "clutter/clutter.h"
+#include "wayland/meta-wayland-data-control.h"
 #include "wayland/meta-wayland-data-device.h"
 #include "wayland/meta-wayland-data-device-primary.h"
 #include "wayland/meta-wayland-input-device.h"
@@ -47,6 +48,7 @@ struct _MetaWaylandSeat
 
   MetaWaylandDataDevice data_device;
   MetaWaylandDataDevicePrimary primary_data_device;
+  MetaWaylandDataControlDevice data_control_device;
 
   MetaWaylandTextInput *text_input;
   MetaWaylandInputMethod *input_method;
