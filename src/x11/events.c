@@ -35,6 +35,7 @@
 #include "cogl/cogl.h"
 #include "core/bell.h"
 #include "core/display-private.h"
+#include "core/keybindings-private.h"
 #include "core/meta-workspace-manager-private.h"
 #include "core/window-private.h"
 #include "core/workspace-private.h"
@@ -1700,6 +1701,15 @@ handle_other_xevent (MetaX11Display *x11_display,
                 {
                   notify_bell (x11_display, xkb_ev);
                 }
+              break;
+            case XkbStateNotify:
+              {
+                XkbStateNotifyEvent *state_ev = (XkbStateNotifyEvent *) event;
+
+                meta_keybindings_update_zoom_grab (x11_display->display,
+                                                   state_ev->mods,
+                                                   state_ev->time);
+              }
               break;
             default:
               break;

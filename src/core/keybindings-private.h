@@ -126,6 +126,7 @@ typedef struct
   /* Alt+click button grabs */
   ClutterModifierType window_grab_modifiers;
   ClutterModifierType mouse_zoom_modifiers;
+  gboolean zoom_grab_active;
 } MetaKeyBindingManager;
 
 void     meta_display_init_keys             (MetaDisplay *display);
@@ -141,6 +142,9 @@ gboolean meta_keybindings_process_event     (MetaDisplay        *display,
                                              const ClutterEvent *event);
 gboolean meta_keybindings_is_modifier       (xkb_keysym_t        keysym);
 int      meta_keybindings_get_mouse_zoom_modifiers (MetaDisplay *display);
+void     meta_keybindings_update_zoom_grab  (MetaDisplay *display,
+                                             unsigned int modifier_state,
+                                             guint32      timestamp);
 ClutterModifierType meta_display_get_window_grab_modifiers (MetaDisplay *display);
 
 uint     meta_keybindings_get_ignored_modifier_mask (MetaDisplay *display);
