@@ -1443,6 +1443,7 @@ meta_window_actor_get_image (MetaWindowActor *self,
   ClutterBackend *clutter_backend = meta_backend_get_clutter_backend (backend);
   CoglContext *cogl_context =
     clutter_backend_get_cogl_context (clutter_backend);
+  MetaShapedTexture *stex;
   float resource_scale;
   float width, height;
   CoglTexture2D *texture;
@@ -1460,9 +1461,10 @@ meta_window_actor_get_image (MetaWindowActor *self,
 
   clutter_actor_inhibit_culling (actor);
 
-  if (clutter_actor_get_n_children (actor) == 1)
+  stex = meta_surface_actor_get_texture (priv->surface);
+  if (clutter_actor_get_n_children (actor) == 1 &&
+      !meta_shaped_texture_should_get_via_offscreen (stex))
     {
-      MetaShapedTexture *stex;
       MetaRectangle *surface_clip = NULL;
 
       if (clip)
@@ -1480,7 +1482,6 @@ meta_window_actor_get_image (MetaWindowActor *self,
           surface_clip->height = clip->height / geometry_scale;
         }
 
-      stex = meta_surface_actor_get_texture (priv->surface);
       surface = meta_shaped_texture_get_image (stex, surface_clip);
       goto out;
     }

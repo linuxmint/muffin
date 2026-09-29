@@ -2105,6 +2105,7 @@ libmuffin.so.0 libmuffin0 #MINVER#
  meta_cursor_tracker_get_hot@Base 5.3.0
  meta_cursor_tracker_get_pointer@Base 5.3.0
  meta_cursor_tracker_get_pointer_visible@Base 5.3.0
+ meta_cursor_tracker_get_scale@Base 6.7.8
  meta_cursor_tracker_get_sprite@Base 5.3.0
  meta_cursor_tracker_get_type@Base 5.3.0
  meta_cursor_tracker_set_pointer_visible@Base 5.3.0

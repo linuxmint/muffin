@@ -297,6 +297,36 @@ meta_cursor_tracker_get_sprite (MetaCursorTracker *tracker)
 }
 
 /**
+ * meta_cursor_tracker_get_scale:
+ * @tracker: a #MetaCursorTracker
+ *
+ * Returns: the factor that maps the sprite texture's pixels to stage
+ * coordinates (e.g. 0.5 for a sprite loaded at 2x), or 1.0 without a sprite.
+ */
+float
+meta_cursor_tracker_get_scale (MetaCursorTracker *tracker)
+{
+  MetaCursorSprite *cursor_sprite;
+
+  g_return_val_if_fail (META_IS_CURSOR_TRACKER (tracker), 1.0);
+
+  if (meta_is_wayland_compositor ())
+    {
+      cursor_sprite = tracker->displayed_cursor;
+    }
+  else
+    {
+      ensure_xfixes_cursor (tracker);
+      cursor_sprite = META_CURSOR_SPRITE (tracker->xfixes_cursor);
+    }
+
+  if (!cursor_sprite)
+    return 1.0;
+
+  return meta_cursor_sprite_get_texture_scale (cursor_sprite);
+}
+
+/**
  * meta_cursor_tracker_get_hot:
  * @tracker:
  * @x: (out):
