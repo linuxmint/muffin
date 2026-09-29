@@ -76,11 +76,40 @@ get_window_for_event (MetaDisplay        *display,
     case META_EVENT_ROUTE_NORMAL:
       {
         ClutterActor *source;
+        ClutterInputDevice *device;
         MetaWindowActor *window_actor;
 
         /* Always use the key focused window for key events. */
         if (IS_KEY_EVENT (event))
             return stage_has_key_focus () ? display->focus_window : NULL;
+
+        /* A Clutter device or sequence grab owns the pointer, even over a
+         * window actor. Only pointer-class events carry a device that can
+         * hold one; device-added/removed and pad events carry devices that
+         * clutter_input_device_get_grabbed_actor() rejects. */
+        switch (event->type)
+          {
+          case CLUTTER_TOUCH_BEGIN:
+          case CLUTTER_TOUCH_UPDATE:
+          case CLUTTER_TOUCH_END:
+          case CLUTTER_TOUCH_CANCEL:
+            device = clutter_event_get_device (event);
+            if (device &&
+                clutter_input_device_sequence_get_grabbed_actor (device,
+                                                                 clutter_event_get_event_sequence (event)))
+              return NULL;
+            G_GNUC_FALLTHROUGH;
+          case CLUTTER_BUTTON_PRESS:
+          case CLUTTER_BUTTON_RELEASE:
+          case CLUTTER_MOTION:
+          case CLUTTER_SCROLL:
+            device = clutter_event_get_device (event);
+            if (device && clutter_input_device_get_grabbed_actor (device))
+              return NULL;
+            break;
+          default:
+            break;
+          }
 
         source = clutter_event_get_source (event);
         window_actor = meta_window_actor_from_actor (source);
