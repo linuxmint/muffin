@@ -84,9 +84,7 @@ void                   clutter_paint_node_add_multitexture_rectangle   (ClutterP
                                                                         unsigned int            text_coords_len);
 
 CLUTTER_EXPORT
-void                    clutter_paint_node_add_path                     (ClutterPaintNode      *node,
-                                                                         CoglPath              *path);
-CLUTTER_EXPORT
+
 void                    clutter_paint_node_add_primitive                (ClutterPaintNode      *node,
                                                                          CoglPrimitive         *primitive);
 

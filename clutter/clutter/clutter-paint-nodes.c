@@ -477,10 +477,6 @@ clutter_pipeline_node_draw (ClutterPaintNode    *node,
                                                          op->multitex_coords->len);
           break;
 
-        case PAINT_OP_PATH:
-          cogl_framebuffer_fill_path (fb, pnode->pipeline, op->op.path);
-          break;
-
         case PAINT_OP_PRIMITIVE:
           cogl_framebuffer_draw_primitive (fb,
                                            pnode->pipeline,
@@ -876,7 +872,6 @@ clutter_text_node_draw (ClutterPaintNode    *node,
           break;
 
         case PAINT_OP_MULTITEX_RECT:
-        case PAINT_OP_PATH:
         case PAINT_OP_PRIMITIVE:
         case PAINT_OP_INVALID:
           break;
@@ -1037,11 +1032,6 @@ clutter_clip_node_pre_draw (ClutterPaintNode    *node,
           retval = TRUE;
           break;
 
-        case PAINT_OP_PATH:
-          cogl_framebuffer_push_path_clip (fb, op->op.path);
-          retval = TRUE;
-          break;
-
         case PAINT_OP_MULTITEX_RECT:
         case PAINT_OP_PRIMITIVE:
         case PAINT_OP_INVALID:
@@ -1072,7 +1062,6 @@ clutter_clip_node_post_draw (ClutterPaintNode    *node,
 
       switch (op->opcode)
         {
-        case PAINT_OP_PATH:
         case PAINT_OP_TEX_RECT:
           cogl_framebuffer_pop_clip (fb);
           break;
@@ -1354,10 +1343,6 @@ clutter_layer_node_post_draw (ClutterPaintNode    *node,
                                                          op->op.texrect[3],
                                                          (float*) op->multitex_coords->data,
                                                          op->multitex_coords->len);
-          break;
-
-        case PAINT_OP_PATH:
-          cogl_framebuffer_fill_path (fb, lnode->state, op->op.path);
           break;
 
         case PAINT_OP_PRIMITIVE:

@@ -83,7 +83,6 @@ typedef enum
   PAINT_OP_INVALID = 0,
   PAINT_OP_TEX_RECT,
   PAINT_OP_MULTITEX_RECT,
-  PAINT_OP_PATH,
   PAINT_OP_PRIMITIVE
 } PaintOpCode;
 
@@ -95,8 +94,6 @@ struct _ClutterPaintOperation
 
   union {
     float texrect[8];
-
-    CoglPath *path;
 
     CoglPrimitive *primitive;
   } op;

@@ -17,7 +17,6 @@ libmuffin_cogl_test_unit = executable('test-unit',
   include_directories: cogl_test_unit_includes,
   dependencies: [
     libmuffin_cogl_dep,
-    libmuffin_cogl_path_dep,
     libmuffin_cogl_test_fixtures_dep,
   ],
   install: false,

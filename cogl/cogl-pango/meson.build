@@ -25,7 +25,7 @@ libmuffin_cogl_pango = shared_library('muffin-cogl-pango-' + libmuffin_api_versi
   version: '0.0.0',
   soversion: 0,
   c_args: cogl_c_args,
-  include_directories: [cogl_includepath, cogl_path_includepath],
+  include_directories: [cogl_includepath],
   gnu_symbol_visibility: 'hidden',
   dependencies: [cogl_pango_deps],
   install_rpath: pkglibdir,

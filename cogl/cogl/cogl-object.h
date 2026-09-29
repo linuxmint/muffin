@@ -112,12 +112,12 @@ cogl_object_unref (void *object);
  * }
  *
  * static void
- * my_path_set_data (CoglPath *path, void *data)
+ * my_path_set_data (CoglPipeline *pipeline, void *data)
  * {
- *   cogl_object_set_user_data (COGL_OBJECT (path),
+ *   cogl_object_set_user_data (COGL_OBJECT (pipeline),
  *                              &private_key,
  *                              data,
- *                              destroy_path_private_cb);
+ *                              destroy_pipeline_private_cb);
  * }
  * ]|
  *
