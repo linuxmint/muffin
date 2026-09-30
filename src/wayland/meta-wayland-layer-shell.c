@@ -1928,17 +1928,24 @@ meta_wayland_layer_surface_get_toplevel (MetaWaylandSurfaceRole *surface_role)
   return meta_wayland_surface_role_get_surface (surface_role);
 }
 
+typedef struct
+{
+  MetaWaylandSurface *root;
+  ClutterActor *parent_actor;
+  GHashTable *tree_actors;
+} LayerSubsurfaceTraverseData;
+
 static gboolean
 raise_layer_subsurface_actor (GNode    *node,
                               gpointer  data)
 {
-  MetaWaylandSurface *root = ((gpointer *) data)[0];
-  ClutterActor *parent_actor = ((gpointer *) data)[1];
+  LayerSubsurfaceTraverseData *traverse_data = data;
+  ClutterActor *parent_actor = traverse_data->parent_actor;
   MetaWaylandSurface *surface = node->data;
   MetaSurfaceActor *surface_actor;
   ClutterActor *actor;
 
-  if (surface == root)
+  if (surface == traverse_data->root)
     return FALSE;
 
   surface_actor = meta_wayland_surface_get_actor (surface);
@@ -1946,6 +1953,7 @@ raise_layer_subsurface_actor (GNode    *node,
     return FALSE;
 
   actor = CLUTTER_ACTOR (surface_actor);
+  g_hash_table_add (traverse_data->tree_actors, actor);
 
   /* Visit surfaces in paint order and raise each to the top, so subsurfaces
    * end up stacked above the parent's content in the right relative order. */
@@ -1963,7 +1971,8 @@ raise_layer_subsurface_actor (GNode    *node,
  * windowed layers too. Only the initial tree comes from rebuild_surface_tree (),
  * which runs once when assign_surface_actor () hands the actor over to a newly
  * created window actor. Subsurface positions accumulate up to the tree root, so
- * child actors land in the right place. */
+ * child actors land in the right place. Actors of subsurfaces that have left
+ * the tree are removed here too. */
 static void
 meta_wayland_layer_surface_notify_subsurface_state_changed (MetaWaylandSurfaceRole *surface_role)
 {
@@ -1972,20 +1981,40 @@ meta_wayland_layer_surface_notify_subsurface_state_changed (MetaWaylandSurfaceRo
     meta_wayland_surface_role_get_surface (surface_role);
   MetaSurfaceActor *surface_actor =
     meta_wayland_actor_surface_get_actor (META_WAYLAND_ACTOR_SURFACE (layer_surface));
-  gpointer traverse_data[2];
+  g_autoptr (GHashTable) tree_actors = NULL;
+  g_autoptr (GList) children = NULL;
+  LayerSubsurfaceTraverseData traverse_data;
+  ClutterActor *parent_actor;
+  GList *l;
 
   if (!surface || !surface_actor)
     return;
 
-  traverse_data[0] = surface;
-  traverse_data[1] = CLUTTER_ACTOR (surface_actor);
+  parent_actor = CLUTTER_ACTOR (surface_actor);
+  tree_actors = g_hash_table_new (NULL, NULL);
+
+  traverse_data = (LayerSubsurfaceTraverseData) {
+    .root = surface,
+    .parent_actor = parent_actor,
+    .tree_actors = tree_actors,
+  };
 
   g_node_traverse (surface->subsurface_branch_node,
                    G_IN_ORDER,
                    G_TRAVERSE_LEAVES,
                    -1,
                    raise_layer_subsurface_actor,
-                   traverse_data);
+                   &traverse_data);
+
+  children = clutter_actor_get_children (parent_actor);
+  for (l = children; l; l = l->next)
+    {
+      ClutterActor *child_actor = l->data;
+
+      if (META_IS_SURFACE_ACTOR_WAYLAND (child_actor) &&
+          !g_hash_table_contains (tree_actors, child_actor))
+        clutter_actor_remove_child (parent_actor, child_actor);
+    }
 }
 
 /* BACKGROUND surfaces are the wallpaper. They are not managed as MetaWindows. */
