@@ -1828,58 +1828,56 @@ meta_wayland_xdg_surface_post_apply_state (MetaWaylandSurfaceRole  *surface_role
     meta_wayland_xdg_surface_get_instance_private (xdg_surface);
   MetaWaylandShellSurface *shell_surface =
     META_WAYLAND_SHELL_SURFACE (surface_role);
+  MetaRectangle new_geometry = { 0 };
 
   if (pending->has_new_geometry)
     {
       priv->unconstrained_geometry = pending->new_geometry;
-      meta_wayland_shell_surface_determine_geometry (shell_surface,
-                                                     &pending->new_geometry,
-                                                     &priv->geometry);
+      priv->has_set_geometry = TRUE;
+    }
 
-      if (priv->geometry.width == 0 || priv->geometry.height == 0)
+  if (priv->has_set_geometry)
+    {
+      meta_wayland_shell_surface_determine_geometry (shell_surface,
+                                                     &priv->unconstrained_geometry,
+                                                     &new_geometry);
+
+      if (new_geometry.width == 0 || new_geometry.height == 0)
         {
           MetaWaylandSurface *surface =
             meta_wayland_surface_role_get_surface (surface_role);
 
           /* A client may commit window geometry before attaching its first
-           * buffer (e.g. answering an initial maximized configure). The
-           * geometry can't be resolved against an empty surface; defer
-           * silently until a buffer arrives rather than warning. */
-          if (!surface->buffer_ref->buffer)
+           * buffer (e.g. answering an initial maximized configure). That
+           * can't be resolved against an empty surface, so don't warn. */
+          if (pending->has_new_geometry && surface->buffer_ref->buffer)
             {
-              priv->has_set_geometry = TRUE;
-              return;
+              MetaWindow *window = meta_wayland_surface_get_window (surface);
+
+              g_warning ("Client provided invalid window geometry for "
+                         "xdg_surface#%d (%s - %s). Working around.",
+                         wl_resource_get_id (priv->resource),
+                         window ? window->res_class : "N\\A",
+                         window ? window->desc : "N\\A");
             }
 
-          g_warning ("Invalid window geometry for xdg_surface@%d. Ignoring "
-          "for now, but this will result in client termination "
-          "in the future.",
-          wl_resource_get_id (priv->resource));
-          return;
+          meta_wayland_shell_surface_calculate_geometry (shell_surface,
+                                                         &new_geometry);
         }
-
-      priv->has_set_geometry = TRUE;
-    }
-  else if (priv->has_set_geometry)
-    {
-      meta_wayland_shell_surface_determine_geometry (shell_surface,
-                                                     &priv->unconstrained_geometry,
-                                                     &priv->geometry);
     }
   else
     {
-      MetaRectangle new_geometry = { 0 };
-
       /* If the surface has never set any geometry, calculate
        * a default one unioning the surface and all subsurfaces together. */
 
       meta_wayland_shell_surface_calculate_geometry (shell_surface,
                                                      &new_geometry);
-      if (!meta_rectangle_equal (&new_geometry, &priv->geometry))
-        {
-          pending->has_new_geometry = TRUE;
-          priv->geometry = new_geometry;
-        }
+    }
+
+  if (!meta_rectangle_equal (&new_geometry, &priv->geometry))
+    {
+      pending->has_new_geometry = TRUE;
+      priv->geometry = new_geometry;
     }
 }
 
