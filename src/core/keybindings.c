@@ -2451,6 +2451,7 @@ meta_keybindings_process_event (MetaDisplay        *display,
     case CLUTTER_BUTTON_RELEASE:
     case CLUTTER_TOUCH_BEGIN:
     case CLUTTER_TOUCH_END:
+    case CLUTTER_SCROLL:
       modifier_key_only_pressed = FALSE;
       return FALSE;
 
@@ -4218,6 +4219,12 @@ meta_keybindings_update_zoom_grab (MetaDisplay *display,
       meta_backend_ungrab_device (keys->backend, META_VIRTUAL_CORE_POINTER_ID, timestamp);
       keys->zoom_grab_active = FALSE;
     }
+}
+
+void
+meta_keybindings_cancel_modifier_only (MetaDisplay *display)
+{
+  modifier_key_only_pressed = FALSE;
 }
 
 static void
