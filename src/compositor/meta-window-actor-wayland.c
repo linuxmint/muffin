@@ -64,17 +64,22 @@ set_surface_actor_index (GNode    *node,
 {
   MetaWaylandSurface *surface = node->data;
   SurfaceTreeTraverseData *traverse_data = data;
-
   ClutterActor *window_actor = CLUTTER_ACTOR (traverse_data->window_actor);
-  MetaSurfaceActor *meta_surface_actor =
-  meta_wayland_surface_get_actor (surface);
+  MetaSurfaceActor *meta_surface_actor = meta_wayland_surface_get_actor (surface);
+  ClutterActor *surface_actor;
+  ClutterActor *parent;
 
   if (!meta_surface_actor)
     return FALSE;
 
-  ClutterActor *surface_actor = CLUTTER_ACTOR (meta_surface_actor);
+  surface_actor = CLUTTER_ACTOR (meta_surface_actor);
+  parent = clutter_actor_get_parent (surface_actor);
 
-  if (clutter_actor_contains (window_actor, surface_actor))
+  /* A layer surface nests its subsurface actors under its own actor. */
+  if (parent && parent != window_actor)
+    return FALSE;
+
+  if (parent)
     {
       if (clutter_actor_get_child_at_index (window_actor, traverse_data->index) !=
           surface_actor)
