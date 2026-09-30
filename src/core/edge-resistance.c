@@ -27,6 +27,7 @@
 #include "core/display-private.h"
 #include "core/meta-workspace-manager-private.h"
 #include "core/workspace-private.h"
+#include "meta/prefs.h"
 
 static gboolean
 frame_rect_in_sane_range (MetaWindow *window)
@@ -354,7 +355,8 @@ apply_edge_resistance (MetaWindow                *window,
   gboolean increasing = new_pos > old_pos;
   int      increment = increasing ? 1 : -1;
 
-  const int PIXEL_DISTANCE_THRESHOLD_TOWARDS_WINDOW    = 16;
+  const gboolean resist = meta_prefs_get_edge_resistance_window ();
+  const int PIXEL_DISTANCE_THRESHOLD_TOWARDS_WINDOW    = resist ? 16 :  0;
   const int PIXEL_DISTANCE_THRESHOLD_AWAYFROM_WINDOW   =  0;
   const int PIXEL_DISTANCE_THRESHOLD_TOWARDS_MONITOR   = 32;
   const int PIXEL_DISTANCE_THRESHOLD_AWAYFROM_MONITOR  =  0;
