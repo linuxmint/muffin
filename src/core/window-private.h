@@ -38,6 +38,7 @@
 
 #include "backends/meta-logical-monitor.h"
 #include "clutter/clutter.h"
+#include "core/boxes-private.h"
 #include "core/stack.h"
 #include "meta/compositor.h"
 #include "meta/meta-close-dialog.h"
@@ -617,6 +618,31 @@ struct _MetaWindowClass
                                   const MetaLogicalMonitor *old);
   void (*adjust_fullscreen_monitor_rect) (MetaWindow    *window,
                                           MetaRectangle *monitor_rect);
+
+  /* Stage coordinates are logical; X protocol coordinates are not, once
+   * Xwayland is scaled. Identity for every window type but Xwayland. */
+  void (*stage_to_protocol_point) (MetaWindow           *window,
+                                   int                   stage_x,
+                                   int                   stage_y,
+                                   int                  *protocol_x,
+                                   int                  *protocol_y,
+                                   MetaRoundingStrategy  rounding_strategy);
+  void (*stage_to_protocol_size)  (MetaWindow *window,
+                                   int         stage_w,
+                                   int         stage_h,
+                                   int        *protocol_w,
+                                   int        *protocol_h);
+  void (*protocol_to_stage_point) (MetaWindow           *window,
+                                   int                   protocol_x,
+                                   int                   protocol_y,
+                                   int                  *stage_x,
+                                   int                  *stage_y,
+                                   MetaRoundingStrategy  rounding_strategy);
+  void (*protocol_to_stage_size)  (MetaWindow *window,
+                                   int         protocol_w,
+                                   int         protocol_h,
+                                   int        *stage_w,
+                                   int        *stage_h);
   void (*force_restore_shortcuts) (MetaWindow         *window,
                                    ClutterInputDevice *source);
   gboolean (*shortcuts_inhibited) (MetaWindow         *window,
@@ -929,4 +955,30 @@ void meta_window_set_progress (MetaWindow *window,
 
 void meta_window_set_progress_pulse (MetaWindow *window,
                                      gboolean    pulse);
+
+void meta_window_stage_to_protocol_point (MetaWindow           *window,
+                                          int                   stage_x,
+                                          int                   stage_y,
+                                          int                  *protocol_x,
+                                          int                  *protocol_y,
+                                          MetaRoundingStrategy  rounding_strategy);
+
+void meta_window_stage_to_protocol_size (MetaWindow *window,
+                                         int         stage_w,
+                                         int         stage_h,
+                                         int        *protocol_w,
+                                         int        *protocol_h);
+
+void meta_window_protocol_to_stage_point (MetaWindow           *window,
+                                          int                   protocol_x,
+                                          int                   protocol_y,
+                                          int                  *stage_x,
+                                          int                  *stage_y,
+                                          MetaRoundingStrategy  rounding_strategy);
+
+void meta_window_protocol_to_stage_size (MetaWindow *window,
+                                         int         protocol_w,
+                                         int         protocol_h,
+                                         int        *stage_w,
+                                         int        *stage_h);
 #endif

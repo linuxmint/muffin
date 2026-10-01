@@ -171,6 +171,15 @@ meta_wayland_single_pixel_buffer_free (MetaWaylandSinglePixelBuffer *single_pixe
   g_free (single_pixel_buffer);
 }
 
+gboolean
+meta_wayland_single_pixel_buffer_is_opaque_black (MetaWaylandSinglePixelBuffer *single_pixel_buffer)
+{
+  return (single_pixel_buffer->a == UINT32_MAX &&
+          single_pixel_buffer->r == 0x0 &&
+          single_pixel_buffer->g == 0x0 &&
+          single_pixel_buffer->b == 0x0);
+}
+
 void
 meta_wayland_init_single_pixel_buffer_manager (MetaWaylandCompositor *compositor)
 {

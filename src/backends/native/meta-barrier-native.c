@@ -259,6 +259,34 @@ update_closest_barrier (gpointer key,
   if (!is_barrier_blocking_directions (barrier, data->in.directions))
     return;
 
+  /* Ignore if the motion starts on the side the barrier does not protect. A
+   * pointer already at or past the line has legitimately crossed it, and must
+   * not be dragged back. Without this, two barriers facing each other on the
+   * same line strand the pointer between them.
+   */
+  if (is_barrier_horizontal (barrier))
+    {
+      float line_y = barrier->priv->border.line.a.y;
+
+      if ((data->in.directions & META_BARRIER_DIRECTION_POSITIVE_Y) &&
+          data->in.motion.a.y >= line_y)
+        return;
+      if ((data->in.directions & META_BARRIER_DIRECTION_NEGATIVE_Y) &&
+          data->in.motion.a.y < line_y)
+        return;
+    }
+  else
+    {
+      float line_x = barrier->priv->border.line.a.x;
+
+      if ((data->in.directions & META_BARRIER_DIRECTION_POSITIVE_X) &&
+          data->in.motion.a.x >= line_x)
+        return;
+      if ((data->in.directions & META_BARRIER_DIRECTION_NEGATIVE_X) &&
+          data->in.motion.a.x < line_x)
+        return;
+    }
+
   /* Ignore if the barrier released the pointer. */
   if (self->state == META_BARRIER_STATE_RELEASE)
     return;
@@ -435,8 +463,11 @@ clamp_to_barrier (MetaBarrierImplNative *self,
 
   if (is_barrier_horizontal (barrier))
     {
+      /* Blocking the positive direction must leave the pointer before the
+       * line, not on it, or it ends up past its own barrier.
+       */
       if (*motion_dir & META_BARRIER_DIRECTION_POSITIVE_Y)
-        *y = barrier->priv->border.line.a.y;
+        *y = barrier->priv->border.line.a.y - 1;
       else if (*motion_dir & META_BARRIER_DIRECTION_NEGATIVE_Y)
         *y = barrier->priv->border.line.a.y;
 
@@ -448,7 +479,7 @@ clamp_to_barrier (MetaBarrierImplNative *self,
   else
     {
       if (*motion_dir & META_BARRIER_DIRECTION_POSITIVE_X)
-        *x = barrier->priv->border.line.a.x;
+        *x = barrier->priv->border.line.a.x - 1;
       else if (*motion_dir & META_BARRIER_DIRECTION_NEGATIVE_X)
         *x = barrier->priv->border.line.a.x;
 

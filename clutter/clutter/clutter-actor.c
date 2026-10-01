@@ -1119,6 +1119,8 @@ static void push_in_paint_unmapped_branch (ClutterActor *self,
 static void pop_in_paint_unmapped_branch (ClutterActor *self,
                                           guint         count);
 
+static void clutter_actor_update_devices (ClutterActor *self);
+
 /* Helper macro which translates by the anchor coord, applies the
    given transformation and then translates back */
 #define TRANSFORM_ABOUT_ANCHOR_COORD(a,m,c,_transform)  G_STMT_START { \
@@ -1816,6 +1818,14 @@ clutter_actor_real_unmap (ClutterActor *self)
    * children, so apps see a bottom-up notification.
    */
   g_object_notify_by_pspec (G_OBJECT (self), obj_props[PROP_MAPPED]);
+
+  if (priv->has_pointer)
+    {
+      ClutterActor *stage = _clutter_actor_get_stage_internal (self);
+
+      if (stage)
+        clutter_stage_invalidate_focus (CLUTTER_STAGE (stage), self);
+    }
 
   /* relinquish keyboard focus if we were unmapped while owning it */
   if (!CLUTTER_ACTOR_IS_TOPLEVEL (self))
@@ -2655,6 +2665,23 @@ transform_changed (ClutterActor *actor)
                            absolute_geometry_changed_cb,
                            NULL,
                            NULL);
+}
+
+static void
+clutter_actor_update_devices (ClutterActor *self)
+{
+  ClutterActor *stage = _clutter_actor_get_stage_internal (self);
+
+  if (stage)
+    clutter_stage_invalidate_devices (CLUTTER_STAGE (stage));
+}
+
+static void
+update_pointer_if_not_animated (ClutterActor *actor)
+{
+  if (!clutter_actor_has_transitions (actor) &&
+      !CLUTTER_ACTOR_IN_RELAYOUT (actor))
+    clutter_actor_update_devices (actor);
 }
 
 /*< private >
@@ -4713,6 +4740,7 @@ clutter_actor_set_pivot_point_internal (ClutterActor           *self,
   info->pivot = *pivot;
 
   transform_changed (self);
+  update_pointer_if_not_animated (self);
 
   g_object_notify_by_pspec (G_OBJECT (self), obj_props[PROP_PIVOT_POINT]);
 
@@ -4729,6 +4757,7 @@ clutter_actor_set_pivot_point_z_internal (ClutterActor *self,
   info->pivot_z = pivot_z;
 
   transform_changed (self);
+  update_pointer_if_not_animated (self);
 
   g_object_notify_by_pspec (G_OBJECT (self), obj_props[PROP_PIVOT_POINT_Z]);
 
@@ -4763,6 +4792,7 @@ clutter_actor_set_translation_internal (ClutterActor *self,
     g_assert_not_reached ();
 
   transform_changed (self);
+  update_pointer_if_not_animated (self);
 
   clutter_actor_queue_redraw (self);
   g_object_notify_by_pspec (obj, pspec);
@@ -4896,6 +4926,7 @@ clutter_actor_set_rotation_angle_internal (ClutterActor *self,
     g_assert_not_reached ();
 
   transform_changed (self);
+  update_pointer_if_not_animated (self);
 
   clutter_actor_queue_redraw (self);
 
@@ -5078,6 +5109,7 @@ clutter_actor_set_scale_factor_internal (ClutterActor *self,
     g_assert_not_reached ();
 
   transform_changed (self);
+  update_pointer_if_not_animated (self);
 
   clutter_actor_queue_redraw (self);
   g_object_notify_by_pspec (obj, pspec);
@@ -9827,6 +9859,8 @@ clutter_actor_get_preferred_width (ClutterActor *self,
       if (natural_width_p != NULL)
         *natural_width_p = content_width;
 
+      priv->needs_width_request = FALSE;
+
       return;
     }
 
@@ -9991,6 +10025,8 @@ clutter_actor_get_preferred_height (ClutterActor *self,
 
       if (natural_height_p != NULL)
         *natural_height_p = content_height;
+
+      priv->needs_height_request = FALSE;
 
       return;
     }
@@ -11346,8 +11382,11 @@ clutter_actor_set_width (ClutterActor *self,
                          gfloat        width)
 {
   float cur_size;
+  float new_size;
 
   g_return_if_fail (CLUTTER_IS_ACTOR (self));
+
+  new_size = ceilf (width);
 
   /* minor optimization: if we don't have a duration
    * then we can skip the get_width() below, to avoid
@@ -11358,7 +11397,7 @@ clutter_actor_set_width (ClutterActor *self,
     {
       g_object_freeze_notify (G_OBJECT (self));
 
-      clutter_actor_set_width_internal (self, width);
+      clutter_actor_set_width_internal (self, new_size);
 
       g_object_thaw_notify (G_OBJECT (self));
 
@@ -11370,7 +11409,7 @@ clutter_actor_set_width (ClutterActor *self,
   _clutter_actor_create_transition (self,
                                     obj_props[PROP_WIDTH],
                                     cur_size,
-                                    width);
+                                    new_size);
 }
 
 /**
@@ -11393,15 +11432,18 @@ clutter_actor_set_height (ClutterActor *self,
                           gfloat        height)
 {
   float cur_size;
+  float new_size;
 
   g_return_if_fail (CLUTTER_IS_ACTOR (self));
+
+  new_size = ceilf (height);
 
   /* see the comment in clutter_actor_set_width() above */
   if (clutter_actor_get_easing_duration (self) == 0)
     {
       g_object_freeze_notify (G_OBJECT (self));
 
-      clutter_actor_set_height_internal (self, height);
+      clutter_actor_set_height_internal (self, new_size);
 
       g_object_thaw_notify (G_OBJECT (self));
 
@@ -11413,7 +11455,7 @@ clutter_actor_set_height (ClutterActor *self,
   _clutter_actor_create_transition (self,
                                     obj_props[PROP_HEIGHT],
                                     cur_size,
-                                    height);
+                                    new_size);
 }
 
 static inline void
@@ -11515,7 +11557,7 @@ clutter_actor_set_x (ClutterActor *self,
 
   _clutter_actor_create_transition (self, obj_props[PROP_X],
                                     cur_position,
-                                    x);
+                                    roundf (x));
 }
 
 /**
@@ -11542,7 +11584,7 @@ clutter_actor_set_y (ClutterActor *self,
 
   _clutter_actor_create_transition (self, obj_props[PROP_Y],
                                     cur_position,
-                                    y);
+                                    roundf (y));
 }
 
 /**
@@ -12159,6 +12201,7 @@ clutter_actor_set_z_position_internal (ClutterActor *self,
       info->z_position = z_position;
 
       transform_changed (self);
+      update_pointer_if_not_animated (self);
 
       clutter_actor_queue_redraw (self);
 
@@ -13968,7 +14011,11 @@ void
 clutter_actor_set_reactive (ClutterActor *actor,
                             gboolean      reactive)
 {
+  ClutterActorPrivate *priv;
+
   g_return_if_fail (CLUTTER_IS_ACTOR (actor));
+
+  priv = actor->priv;
 
   if (reactive == CLUTTER_ACTOR_IS_REACTIVE (actor))
     return;
@@ -13977,6 +14024,43 @@ clutter_actor_set_reactive (ClutterActor *actor,
     CLUTTER_ACTOR_SET_FLAGS (actor, CLUTTER_ACTOR_REACTIVE);
   else
     CLUTTER_ACTOR_UNSET_FLAGS (actor, CLUTTER_ACTOR_REACTIVE);
+
+  /* Repick before notifying: ClutterInputDevice watches notify::reactive and
+   * unassociates the actor without emitting a leave, which would leave nothing
+   * for clutter_stage_invalidate_focus() to find.
+   */
+  if (!CLUTTER_ACTOR_IS_REACTIVE (actor) && priv->has_pointer)
+    {
+      ClutterActor *stage = _clutter_actor_get_stage_internal (actor);
+
+      if (stage)
+        clutter_stage_invalidate_focus (CLUTTER_STAGE (stage), actor);
+    }
+  else if (CLUTTER_ACTOR_IS_REACTIVE (actor))
+    {
+      ClutterActor *parent;
+
+      /* Check whether the closest parent has pointer focus,
+       * and whether it should move to this actor.
+       */
+      parent = priv->parent;
+
+      while (parent)
+        {
+          if (CLUTTER_ACTOR_IS_REACTIVE (parent))
+            break;
+
+          parent = parent->priv->parent;
+        }
+
+      if (parent && parent->priv->has_pointer)
+        {
+          ClutterActor *stage = _clutter_actor_get_stage_internal (actor);
+
+          if (stage)
+            clutter_stage_invalidate_focus (CLUTTER_STAGE (stage), parent);
+        }
+    }
 
   g_object_notify_by_pspec (G_OBJECT (actor), obj_props[PROP_REACTIVE]);
 }
@@ -15513,8 +15597,8 @@ clutter_actor_allocate_preferred_size (ClutterActor *self)
 
   actor_box.x1 = actor_x;
   actor_box.y1 = actor_y;
-  actor_box.x2 = actor_box.x1 + natural_width;
-  actor_box.y2 = actor_box.y1 + natural_height;
+  actor_box.x2 = actor_box.x1 + ceilf (natural_width);
+  actor_box.y2 = actor_box.y1 + ceilf (natural_height);
 
   clutter_actor_allocate (self, &actor_box);
 }
@@ -16329,6 +16413,7 @@ clutter_actor_set_transform_internal (ClutterActor        *self,
   info->transform_set = !cogl_matrix_is_identity (&info->transform);
 
   transform_changed (self);
+  update_pointer_if_not_animated (self);
 
   clutter_actor_queue_redraw (self);
 
@@ -17717,6 +17802,11 @@ clutter_actor_get_real_resource_scale (ClutterActor *self)
           ClutterStageView *view = l->data;
           max_scale = MAX (clutter_stage_view_get_scale (view), max_scale);
         }
+
+      /* Running headlessly there are no views to guess from. */
+      if (max_scale < 0.f)
+        max_scale = 1.f;
+
       guessed_scale = max_scale;
     }
   else
@@ -17873,7 +17963,20 @@ update_resource_scale (ClutterActor *self,
     return;
 
   if (ceilf (old_resource_scale) != ceilf (priv->resource_scale))
-    g_signal_emit (self, actor_signals[RESOURCE_SCALE_CHANGED], 0);
+    {
+      ClutterActor *stage = _clutter_actor_get_stage_internal (self);
+
+      if (stage != NULL)
+        clutter_stage_queue_resource_scale_change (CLUTTER_STAGE (stage), self);
+      else
+        clutter_actor_emit_resource_scale_changed (self);
+    }
+}
+
+void
+clutter_actor_emit_resource_scale_changed (ClutterActor *self)
+{
+  g_signal_emit (self, actor_signals[RESOURCE_SCALE_CHANGED], 0);
 }
 
 void
@@ -19372,6 +19475,7 @@ on_transition_stopped (ClutterTransition *transition,
                     _clutter_actor_get_debug_name (actor));
 
       g_signal_emit (actor, actor_signals[TRANSITIONS_COMPLETED], 0);
+      clutter_actor_update_devices (actor);
     }
 }
 

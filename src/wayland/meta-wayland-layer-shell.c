@@ -50,6 +50,7 @@ struct _MetaWaylandLayerShell
   GList *layer_surfaces;
   MetaWaylandCompositor *compositor;
   gulong workareas_changed_handler_id;
+  gulong monitors_changed_handler_id;
 };
 
 enum
@@ -254,6 +255,13 @@ on_workareas_changed (MetaDisplay           *display,
 }
 
 static void
+on_monitors_changed (MetaMonitorManager    *monitor_manager,
+                     MetaWaylandLayerShell *layer_shell)
+{
+  meta_wayland_layer_shell_on_monitors_changed (layer_shell->compositor);
+}
+
+static void
 meta_wayland_layer_shell_ensure_signal_connected (MetaWaylandLayerShell *layer_shell)
 {
   MetaDisplay *display;
@@ -268,6 +276,14 @@ meta_wayland_layer_shell_ensure_signal_connected (MetaWaylandLayerShell *layer_s
   layer_shell->workareas_changed_handler_id =
     g_signal_connect (display, "workareas-changed",
                       G_CALLBACK (on_workareas_changed),
+                      layer_shell);
+
+  /* "monitors-changed", not "monitors-changed-internal": the latter is where
+   * the Wayland outputs refresh their logical monitors, and we must read those
+   * after that has happened. */
+  layer_shell->monitors_changed_handler_id =
+    g_signal_connect (meta_monitor_manager_get (), "monitors-changed",
+                      G_CALLBACK (on_monitors_changed),
                       layer_shell);
 }
 
@@ -839,8 +855,6 @@ layer_surface_resource_destroyed (struct wl_resource *resource)
   if (layer_surface)
     {
       layer_surface->resource = NULL;
-      g_free (layer_surface->namespace);
-      layer_surface->namespace = NULL;
     }
 }
 
@@ -1914,17 +1928,24 @@ meta_wayland_layer_surface_get_toplevel (MetaWaylandSurfaceRole *surface_role)
   return meta_wayland_surface_role_get_surface (surface_role);
 }
 
+typedef struct
+{
+  MetaWaylandSurface *root;
+  ClutterActor *parent_actor;
+  GHashTable *tree_actors;
+} LayerSubsurfaceTraverseData;
+
 static gboolean
 raise_layer_subsurface_actor (GNode    *node,
                               gpointer  data)
 {
-  MetaWaylandSurface *root = ((gpointer *) data)[0];
-  ClutterActor *parent_actor = ((gpointer *) data)[1];
+  LayerSubsurfaceTraverseData *traverse_data = data;
+  ClutterActor *parent_actor = traverse_data->parent_actor;
   MetaWaylandSurface *surface = node->data;
   MetaSurfaceActor *surface_actor;
   ClutterActor *actor;
 
-  if (surface == root)
+  if (surface == traverse_data->root)
     return FALSE;
 
   surface_actor = meta_wayland_surface_get_actor (surface);
@@ -1932,6 +1953,7 @@ raise_layer_subsurface_actor (GNode    *node,
     return FALSE;
 
   actor = CLUTTER_ACTOR (surface_actor);
+  g_hash_table_add (traverse_data->tree_actors, actor);
 
   /* Visit surfaces in paint order and raise each to the top, so subsurfaces
    * end up stacked above the parent's content in the right relative order. */
@@ -1949,7 +1971,8 @@ raise_layer_subsurface_actor (GNode    *node,
  * windowed layers too. Only the initial tree comes from rebuild_surface_tree (),
  * which runs once when assign_surface_actor () hands the actor over to a newly
  * created window actor. Subsurface positions accumulate up to the tree root, so
- * child actors land in the right place. */
+ * child actors land in the right place. Actors of subsurfaces that have left
+ * the tree are removed here too. */
 static void
 meta_wayland_layer_surface_notify_subsurface_state_changed (MetaWaylandSurfaceRole *surface_role)
 {
@@ -1958,20 +1981,40 @@ meta_wayland_layer_surface_notify_subsurface_state_changed (MetaWaylandSurfaceRo
     meta_wayland_surface_role_get_surface (surface_role);
   MetaSurfaceActor *surface_actor =
     meta_wayland_actor_surface_get_actor (META_WAYLAND_ACTOR_SURFACE (layer_surface));
-  gpointer traverse_data[2];
+  g_autoptr (GHashTable) tree_actors = NULL;
+  g_autoptr (GList) children = NULL;
+  LayerSubsurfaceTraverseData traverse_data;
+  ClutterActor *parent_actor;
+  GList *l;
 
   if (!surface || !surface_actor)
     return;
 
-  traverse_data[0] = surface;
-  traverse_data[1] = CLUTTER_ACTOR (surface_actor);
+  parent_actor = CLUTTER_ACTOR (surface_actor);
+  tree_actors = g_hash_table_new (NULL, NULL);
+
+  traverse_data = (LayerSubsurfaceTraverseData) {
+    .root = surface,
+    .parent_actor = parent_actor,
+    .tree_actors = tree_actors,
+  };
 
   g_node_traverse (surface->output_state.subsurface_branch_node,
                    G_IN_ORDER,
                    G_TRAVERSE_LEAVES,
                    -1,
                    raise_layer_subsurface_actor,
-                   traverse_data);
+                   &traverse_data);
+
+  children = clutter_actor_get_children (parent_actor);
+  for (l = children; l; l = l->next)
+    {
+      ClutterActor *child_actor = l->data;
+
+      if (META_IS_SURFACE_ACTOR_WAYLAND (child_actor) &&
+          !g_hash_table_contains (tree_actors, child_actor))
+        clutter_actor_remove_child (parent_actor, child_actor);
+    }
 }
 
 /* BACKGROUND surfaces are the wallpaper. They are not managed as MetaWindows. */
@@ -2251,6 +2294,19 @@ layer_shell_get_layer_surface (struct wl_client   *client,
               layer,
               layer_surface_output_name (output));
 
+  /* Now that the surface's output is known, advertise its scale -- before the
+   * initial configure, so the client renders at the right scale from its very
+   * first frame. A layer surface names its output up front and needs no
+   * inference. (see sway/desktop/layer_shell.c). */
+  {
+    MetaLogicalMonitor *logical_monitor =
+      get_layer_surface_logical_monitor (layer_surface);
+
+    if (logical_monitor)
+      meta_wayland_surface_send_preferred_scale (
+        surface, meta_logical_monitor_get_scale (logical_monitor));
+  }
+
   /* The initial configure is sent in response to the client's initial commit
    * (see apply_state) — sending one here would reflect default state and its
    * ack could suppress the real configure. */
@@ -2310,6 +2366,15 @@ meta_wayland_layer_shell_dispose (GObject *object)
       if (display)
         g_signal_handler_disconnect (display, layer_shell->workareas_changed_handler_id);
       layer_shell->workareas_changed_handler_id = 0;
+    }
+
+  if (layer_shell->monitors_changed_handler_id != 0)
+    {
+      MetaMonitorManager *monitor_manager = meta_monitor_manager_get ();
+      if (monitor_manager)
+        g_signal_handler_disconnect (monitor_manager,
+                                     layer_shell->monitors_changed_handler_id);
+      layer_shell->monitors_changed_handler_id = 0;
     }
 
   g_clear_pointer (&layer_shell->layer_surfaces, g_list_free);
@@ -2413,8 +2478,15 @@ meta_wayland_layer_shell_update_struts (MetaWaylandCompositor *compositor)
   g_slist_free_full (struts, g_free);
 }
 
-void
-meta_wayland_layer_shell_on_workarea_changed (MetaWaylandCompositor *compositor)
+/* @output_resized distinguishes the two reasons a layer surface's bounds can
+ * move: a workarea change (a panel's exclusive zone appearing or going away),
+ * or the output itself changing size (a monitor rescale or mode change). A
+ * full-output surface - exclusive_zone == -1 (like wallpaper) - is unaffected
+ * by the former but must be reconfigured for the latter, or it keeps its old
+ * logical size and the compositor shows only part of it. */
+static void
+reconfigure_layer_surfaces (MetaWaylandCompositor *compositor,
+                            gboolean               output_resized)
 {
   MetaWaylandLayerShell *layer_shell;
   GList *l;
@@ -2436,10 +2508,8 @@ meta_wayland_layer_shell_on_workarea_changed (MetaWaylandCompositor *compositor)
           continue;
         }
 
-      /* Surfaces with exclusive_zone != -1 use workarea bounds and need
-       * repositioning when workarea changes. Surfaces with exclusive_zone == -1
-       * use full output and aren't affected. */
-      if (layer_surface->current.exclusive_zone != -1 && layer_surface->mapped)
+      if (layer_surface->mapped &&
+          (output_resized || layer_surface->current.exclusive_zone != -1))
         {
           MetaWindow *window = layer_surface_get_window (layer_surface);
 
@@ -2469,6 +2539,18 @@ meta_wayland_layer_shell_on_workarea_changed (MetaWaylandCompositor *compositor)
 
   /* Recalculate layer-shell struts since surface positions changed */
   meta_wayland_layer_shell_update_struts (compositor);
+}
+
+void
+meta_wayland_layer_shell_on_workarea_changed (MetaWaylandCompositor *compositor)
+{
+  reconfigure_layer_surfaces (compositor, FALSE);
+}
+
+void
+meta_wayland_layer_shell_on_monitors_changed (MetaWaylandCompositor *compositor)
+{
+  reconfigure_layer_surfaces (compositor, TRUE);
 }
 
 MetaWaylandLayerShell *

@@ -32,6 +32,8 @@
 #include <linux/input.h>
 #include <math.h>
 
+#include "backends/meta-backend-private.h"
+#include "backends/meta-cursor-renderer.h"
 #include "backends/meta-cursor-tracker-private.h"
 #include "backends/native/meta-seat-native.h"
 #include "backends/native/meta-event-native.h"
@@ -224,11 +226,34 @@ meta_seat_native_clear_repeat_timer (MetaSeatNative *seat)
     }
 }
 
+/*
+ * Motion events are compressed and only processed when the master clock ticks,
+ * which pins the cursor to the frame cadence even though the hardware plane can
+ * be moved at any time. Post the position here instead, once per libinput
+ * batch, and leave the event itself to take the normal route for hover, focus
+ * and client delivery.
+ */
+static void
+flush_pointer_position (MetaSeatNative *seat)
+{
+  MetaBackend *backend = meta_get_backend ();
+
+  if (!seat->pointer_position_dirty)
+    return;
+
+  seat->pointer_position_dirty = FALSE;
+
+  meta_cursor_renderer_update_position (meta_backend_get_cursor_renderer (backend),
+                                        seat->pointer_x,
+                                        seat->pointer_y);
+}
+
 static void
 dispatch_libinput (MetaSeatNative *seat)
 {
   libinput_dispatch (seat->libinput);
   process_events (seat);
+  flush_pointer_position (seat);
 }
 
 static gboolean
@@ -450,6 +475,7 @@ new_absolute_motion_event (MetaSeatNative     *seat,
     {
       seat->pointer_x = x;
       seat->pointer_y = y;
+      seat->pointer_position_dirty = TRUE;
     }
 
   return event;

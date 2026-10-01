@@ -18,13 +18,19 @@
 
 #include "config.h"
 
+#include <limits.h>
+#include <math.h>
+
 #include "core/frame.h"
+#include "core/window-private.h"
 #include "meta/meta-x11-errors.h"
 #include "x11/window-x11.h"
 #include "x11/window-x11-private.h"
 #include "x11/xprops.h"
 #include "wayland/meta-window-xwayland.h"
 #include "wayland/meta-wayland.h"
+#include "wayland/meta-wayland-surface.h"
+#include "wayland/meta-xwayland.h"
 
 enum
 {
@@ -55,6 +61,151 @@ G_DEFINE_TYPE (MetaWindowXwayland, meta_window_xwayland, META_TYPE_WINDOW_X11)
 static void
 meta_window_xwayland_init (MetaWindowXwayland *window_xwayland)
 {
+}
+
+static int
+scale_and_handle_overflow (int                  input,
+                           float                scale,
+                           MetaRoundingStrategy rounding_strategy)
+{
+  float value;
+
+  switch (rounding_strategy)
+    {
+    case META_ROUNDING_STRATEGY_SHRINK:
+      value = floorf (input * scale);
+      break;
+    case META_ROUNDING_STRATEGY_GROW:
+      value = ceilf (input * scale);
+      break;
+    case META_ROUNDING_STRATEGY_ROUND:
+      value = roundf (input * scale);
+      break;
+    default:
+      g_return_val_if_reached (0);
+    }
+
+  if (value >= (float) INT_MAX)
+    return INT_MAX;
+  else if (value <= (float) INT_MIN)
+    return INT_MIN;
+
+  return (int) value;
+}
+
+/*
+ * Xwayland's randr resolution emulation gives the surface a destination
+ * viewport, so its buffer no longer maps to the window one-to-one and the
+ * emulated ratio has to come back out of the scale.
+ */
+static float
+get_viewport_scale_x (MetaWaylandSurface *surface)
+{
+  int buffer_width, buffer_height;
+
+  meta_wayland_surface_get_buffer_size (surface, &buffer_width, &buffer_height);
+
+  if (buffer_width <= 0 || surface->viewport.dst_width <= 0)
+    return 1.0f;
+
+  return (float) buffer_width / surface->viewport.dst_width;
+}
+
+static float
+get_viewport_scale_y (MetaWaylandSurface *surface)
+{
+  int buffer_width, buffer_height;
+
+  meta_wayland_surface_get_buffer_size (surface, &buffer_width, &buffer_height);
+
+  if (buffer_height <= 0 || surface->viewport.dst_height <= 0)
+    return 1.0f;
+
+  return (float) buffer_height / surface->viewport.dst_height;
+}
+
+static void
+meta_window_xwayland_stage_to_protocol_point (MetaWindow           *window,
+                                              int                   stage_x,
+                                              int                   stage_y,
+                                              int                  *protocol_x,
+                                              int                  *protocol_y,
+                                              MetaRoundingStrategy  rounding_strategy)
+{
+  float scale = meta_xwayland_get_effective_scale ();
+
+  if (protocol_x)
+    *protocol_x = scale_and_handle_overflow (stage_x, scale, rounding_strategy);
+  if (protocol_y)
+    *protocol_y = scale_and_handle_overflow (stage_y, scale, rounding_strategy);
+}
+
+static void
+meta_window_xwayland_stage_to_protocol_size (MetaWindow *window,
+                                             int         stage_w,
+                                             int         stage_h,
+                                             int        *protocol_w,
+                                             int        *protocol_h)
+{
+  MetaWaylandSurface *surface = window->surface;
+  float scale_w, scale_h;
+
+  scale_w = scale_h = meta_xwayland_get_effective_scale ();
+
+  if (surface && surface->viewport.has_dst_size)
+    {
+      scale_w /= get_viewport_scale_x (surface);
+      scale_h /= get_viewport_scale_y (surface);
+    }
+
+  if (protocol_w)
+    *protocol_w = scale_and_handle_overflow (stage_w, scale_w,
+                                             META_ROUNDING_STRATEGY_GROW);
+  if (protocol_h)
+    *protocol_h = scale_and_handle_overflow (stage_h, scale_h,
+                                             META_ROUNDING_STRATEGY_GROW);
+}
+
+static void
+meta_window_xwayland_protocol_to_stage_point (MetaWindow           *window,
+                                              int                   protocol_x,
+                                              int                   protocol_y,
+                                              int                  *stage_x,
+                                              int                  *stage_y,
+                                              MetaRoundingStrategy  rounding_strategy)
+{
+  float scale = 1.0f / meta_xwayland_get_effective_scale ();
+
+  if (stage_x)
+    *stage_x = scale_and_handle_overflow (protocol_x, scale, rounding_strategy);
+  if (stage_y)
+    *stage_y = scale_and_handle_overflow (protocol_y, scale, rounding_strategy);
+}
+
+static void
+meta_window_xwayland_protocol_to_stage_size (MetaWindow *window,
+                                             int         protocol_w,
+                                             int         protocol_h,
+                                             int        *stage_w,
+                                             int        *stage_h)
+{
+  MetaWaylandSurface *surface = window->surface;
+  float scale_w, scale_h;
+
+  scale_w = scale_h = 1.0f / meta_xwayland_get_effective_scale ();
+
+  if (surface && surface->viewport.has_dst_size)
+    {
+      scale_w *= get_viewport_scale_x (surface);
+      scale_h *= get_viewport_scale_y (surface);
+    }
+
+  if (stage_w)
+    *stage_w = scale_and_handle_overflow (protocol_w, scale_w,
+                                          META_ROUNDING_STRATEGY_GROW);
+  if (stage_h)
+    *stage_h = scale_and_handle_overflow (protocol_h, scale_h,
+                                          META_ROUNDING_STRATEGY_GROW);
 }
 
 /**
@@ -280,6 +431,10 @@ meta_window_xwayland_class_init (MetaWindowXwaylandClass *klass)
   GObjectClass *gobject_class = G_OBJECT_CLASS (klass);
 
   window_class->adjust_fullscreen_monitor_rect = meta_window_xwayland_adjust_fullscreen_monitor_rect;
+  window_class->stage_to_protocol_point = meta_window_xwayland_stage_to_protocol_point;
+  window_class->stage_to_protocol_size = meta_window_xwayland_stage_to_protocol_size;
+  window_class->protocol_to_stage_point = meta_window_xwayland_protocol_to_stage_point;
+  window_class->protocol_to_stage_size = meta_window_xwayland_protocol_to_stage_size;
   window_class->force_restore_shortcuts = meta_window_xwayland_force_restore_shortcuts;
   window_class->shortcuts_inhibited = meta_window_xwayland_shortcuts_inhibited;
 

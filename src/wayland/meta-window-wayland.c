@@ -1130,6 +1130,8 @@ meta_window_wayland_finish_move_resize (MetaWindow              *window,
   gboolean is_window_being_resized;
   gboolean needs_reconfigure = FALSE;
 
+  g_return_if_fail (new_geom.width > 0 && new_geom.height > 0);
+
   /* new_geom is in the logical pixel coordinate space, but MetaWindow wants its
    * rects to represent what in turn will end up on the stage, i.e. we need to
    * scale new_geom to physical pixels given what buffer scale and texture scale

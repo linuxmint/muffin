@@ -26,6 +26,7 @@
 #include "compositor/meta-surface-actor-wayland.h"
 #include "compositor/meta-window-actor-private.h"
 #include "wayland/meta-wayland-actor-surface.h"
+#include "wayland/meta-xwayland.h"
 #include "wayland/meta-xwayland-private.h"
 
 enum
@@ -196,12 +197,33 @@ meta_xwayland_surface_get_relative_coordinates (MetaWaylandSurfaceRole *surface_
 {
   MetaXwaylandSurface *xwayland_surface = META_XWAYLAND_SURFACE (surface_role);
   MetaRectangle window_rect = { 0 };
+  int scale = meta_xwayland_get_effective_scale ();
 
   if (xwayland_surface->window)
     meta_window_get_buffer_rect (xwayland_surface->window, &window_rect);
 
-  *out_sx = abs_x - window_rect.x;
-  *out_sy = abs_y - window_rect.y;
+  /* Xwayland never set the buffer scale the compositor forces on it, so it
+   * reads surface-local coordinates as X protocol pixels. */
+  *out_sx = (abs_x - window_rect.x) * scale;
+  *out_sy = (abs_y - window_rect.y) * scale;
+}
+
+static void
+meta_xwayland_surface_get_absolute_coordinates (MetaWaylandSurfaceRole *surface_role,
+                                                float                   sx,
+                                                float                   sy,
+                                                float                  *out_x,
+                                                float                  *out_y)
+{
+  MetaXwaylandSurface *xwayland_surface = META_XWAYLAND_SURFACE (surface_role);
+  MetaRectangle window_rect = { 0 };
+  int scale = meta_xwayland_get_effective_scale ();
+
+  if (xwayland_surface->window)
+    meta_window_get_buffer_rect (xwayland_surface->window, &window_rect);
+
+  *out_x = window_rect.x + (sx / scale);
+  *out_y = window_rect.y + (sy / scale);
 }
 
 static MetaWaylandSurface *
@@ -273,6 +295,8 @@ meta_xwayland_surface_class_init (MetaXwaylandSurfaceClass *klass)
   surface_role_class->pre_apply_state = meta_xwayland_surface_pre_apply_state;
   surface_role_class->get_relative_coordinates =
     meta_xwayland_surface_get_relative_coordinates;
+  surface_role_class->get_absolute_coordinates =
+    meta_xwayland_surface_get_absolute_coordinates;
   surface_role_class->get_toplevel = meta_xwayland_surface_get_toplevel;
   surface_role_class->get_window = meta_xwayland_surface_get_window;
 

@@ -1148,16 +1148,20 @@ _meta_window_shared_new (MetaDisplay         *display,
   /* avoid tons of stack updates */
   meta_stack_freeze (window->display->stack);
 
-  window->rect.x = attrs->x;
-  window->rect.y = attrs->y;
-  window->rect.width = attrs->width;
-  window->rect.height = attrs->height;
+  meta_window_protocol_to_stage_point (window,
+                                       attrs->x, attrs->y,
+                                       &window->rect.x, &window->rect.y,
+                                       META_ROUNDING_STRATEGY_ROUND);
+  meta_window_protocol_to_stage_size (window,
+                                      attrs->width, attrs->height,
+                                      &window->rect.width,
+                                      &window->rect.height);
 
   /* size_hints are the "request" */
-  window->size_hints.x = attrs->x;
-  window->size_hints.y = attrs->y;
-  window->size_hints.width = attrs->width;
-  window->size_hints.height = attrs->height;
+  window->size_hints.x = window->rect.x;
+  window->size_hints.y = window->rect.y;
+  window->size_hints.width = window->rect.width;
+  window->size_hints.height = window->rect.height;
   /* initialize the remaining size_hints as if size_hints.flags were zero */
   meta_set_normal_hints (window, NULL);
 
@@ -5142,6 +5146,98 @@ meta_window_frame_rect_to_client_rect (MetaWindow    *window,
     }
 }
 
+void
+meta_window_stage_to_protocol_point (MetaWindow           *window,
+                                     int                   stage_x,
+                                     int                   stage_y,
+                                     int                  *protocol_x,
+                                     int                  *protocol_y,
+                                     MetaRoundingStrategy  rounding_strategy)
+{
+  MetaWindowClass *klass = META_WINDOW_GET_CLASS (window);
+
+  if (klass->stage_to_protocol_point)
+    {
+      klass->stage_to_protocol_point (window, stage_x, stage_y,
+                                      protocol_x, protocol_y,
+                                      rounding_strategy);
+      return;
+    }
+
+  if (protocol_x)
+    *protocol_x = stage_x;
+  if (protocol_y)
+    *protocol_y = stage_y;
+}
+
+void
+meta_window_stage_to_protocol_size (MetaWindow *window,
+                                    int         stage_w,
+                                    int         stage_h,
+                                    int        *protocol_w,
+                                    int        *protocol_h)
+{
+  MetaWindowClass *klass = META_WINDOW_GET_CLASS (window);
+
+  if (klass->stage_to_protocol_size)
+    {
+      klass->stage_to_protocol_size (window, stage_w, stage_h,
+                                     protocol_w, protocol_h);
+      return;
+    }
+
+  if (protocol_w)
+    *protocol_w = stage_w;
+  if (protocol_h)
+    *protocol_h = stage_h;
+}
+
+void
+meta_window_protocol_to_stage_point (MetaWindow           *window,
+                                     int                   protocol_x,
+                                     int                   protocol_y,
+                                     int                  *stage_x,
+                                     int                  *stage_y,
+                                     MetaRoundingStrategy  rounding_strategy)
+{
+  MetaWindowClass *klass = META_WINDOW_GET_CLASS (window);
+
+  if (klass->protocol_to_stage_point)
+    {
+      klass->protocol_to_stage_point (window, protocol_x, protocol_y,
+                                      stage_x, stage_y,
+                                      rounding_strategy);
+      return;
+    }
+
+  if (stage_x)
+    *stage_x = protocol_x;
+  if (stage_y)
+    *stage_y = protocol_y;
+}
+
+void
+meta_window_protocol_to_stage_size (MetaWindow *window,
+                                    int         protocol_w,
+                                    int         protocol_h,
+                                    int        *stage_w,
+                                    int        *stage_h)
+{
+  MetaWindowClass *klass = META_WINDOW_GET_CLASS (window);
+
+  if (klass->protocol_to_stage_size)
+    {
+      klass->protocol_to_stage_size (window, protocol_w, protocol_h,
+                                     stage_w, stage_h);
+      return;
+    }
+
+  if (stage_w)
+    *stage_w = protocol_w;
+  if (stage_h)
+    *stage_h = protocol_h;
+}
+
 /**
  * meta_window_get_frame_rect:
  * @window: a #MetaWindow
@@ -6604,6 +6700,66 @@ enum {
 #define EXTREME_CONSTANT 2
 #define COMMON_EDGE_PADDING 5
 
+/* How far past a shared monitor edge the pointer may travel before the tile
+ * zones switch to the neighbouring monitor.
+ */
+#define TILE_MONITOR_HOLD_DISTANCE 64
+
+static int
+distance_outside_rect (const MetaRectangle *rect,
+                       int                  x,
+                       int                  y)
+{
+  int dx = MAX (0, MAX (rect->x - x, x - (rect->x + rect->width - 1)));
+  int dy = MAX (0, MAX (rect->y - y, y - (rect->y + rect->height - 1)));
+
+  return MAX (dx, dy);
+}
+
+/*
+ * Hold the drag inside the monitor it is tiling against while the pointer is
+ * only just past a shared edge, and report the held position. Both the window
+ * and the tile zones are driven from this, so they stay together: the window
+ * sits still against the edge, the zones stay reachable, and once the pointer
+ * is far enough past, the two cross to the neighbour at the same moment.
+ */
+static void
+hold_drag_to_tile_monitor (MetaWindow *window,
+                           int        *x,
+                           int        *y)
+{
+  MetaBackend *backend = meta_get_backend ();
+  MetaMonitorManager *monitor_manager =
+    meta_backend_get_monitor_manager (backend);
+  MetaDisplay *display = window->display;
+  MetaLogicalMonitor *logical_monitor;
+
+  logical_monitor =
+    meta_monitor_manager_get_logical_monitor_at (monitor_manager, *x, *y);
+  if (!logical_monitor)
+    return;
+
+  if (display->grab_tile_target_monitor >= 0 &&
+      display->grab_tile_target_monitor != logical_monitor->number)
+    {
+      MetaLogicalMonitor *held;
+
+      held =
+        meta_monitor_manager_get_logical_monitor_from_number (monitor_manager,
+                                                              display->grab_tile_target_monitor);
+      if (held &&
+          distance_outside_rect (&held->rect, *x, *y) <= TILE_MONITOR_HOLD_DISTANCE)
+        logical_monitor = held;
+    }
+
+  display->grab_tile_target_monitor = logical_monitor->number;
+
+  *x = CLAMP (*x, logical_monitor->rect.x,
+              logical_monitor->rect.x + logical_monitor->rect.width - 1);
+  *y = CLAMP (*y, logical_monitor->rect.y,
+              logical_monitor->rect.y + logical_monitor->rect.height - 1);
+}
+
 static void
 get_extra_padding_for_common_monitor_edges (MetaWindow        *window,
                                                   gint         monitor_num,
@@ -6767,6 +6923,13 @@ update_move (MetaWindow  *window,
   MetaRectangle old;
   int shake_threshold;
   MetaDisplay *display = window->display;
+
+  if (!snap &&
+      meta_prefs_get_edge_tiling () &&
+      meta_window_can_tile_maximized (window) &&
+      !META_WINDOW_MAXIMIZED (window) &&
+      !META_WINDOW_TILED (window))
+    hold_drag_to_tile_monitor (window, &x, &y);
 
   display->grab_latest_motion_x = x;
   display->grab_latest_motion_y = y;

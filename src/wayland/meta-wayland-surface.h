@@ -73,6 +73,11 @@ struct _MetaWaylandSurfaceRoleClass
                                     float                   abs_y,
                                     float                  *out_sx,
                                     float                  *out_sy);
+  void (*get_absolute_coordinates) (MetaWaylandSurfaceRole *surface_role,
+                                    float                   sx,
+                                    float                   sy,
+                                    float                  *out_x,
+                                    float                  *out_y);
   MetaWindow * (*get_window) (MetaWaylandSurfaceRole *surface_role);
 };
 
@@ -310,6 +315,9 @@ void                meta_wayland_surface_drag_dest_update    (MetaWaylandSurface
 
 void                meta_wayland_surface_update_outputs (MetaWaylandSurface *surface);
 
+void                meta_wayland_surface_send_preferred_scale (MetaWaylandSurface *surface,
+                                                               float               monitor_scale);
+
 MetaWaylandSurface *meta_wayland_surface_get_toplevel (MetaWaylandSurface *surface);
 
 MetaWindow *        meta_wayland_surface_get_window (MetaWaylandSurface *surface);
@@ -376,6 +384,10 @@ void                meta_wayland_surface_notify_actor_changed (MetaWaylandSurfac
 
 int                 meta_wayland_surface_get_width (MetaWaylandSurface *surface);
 int                 meta_wayland_surface_get_height (MetaWaylandSurface *surface);
+
+void                meta_wayland_surface_get_buffer_size (MetaWaylandSurface *surface,
+                                                          int                *width,
+                                                          int                *height);
 
 gboolean            meta_wayland_surface_can_scanout_untransformed (MetaWaylandSurface *surface,
                                                                     int                 mode_width,

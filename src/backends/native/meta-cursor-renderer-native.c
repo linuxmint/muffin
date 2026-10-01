@@ -1135,6 +1135,57 @@ meta_cursor_renderer_native_update_cursor (MetaCursorRenderer *renderer,
           !meta_cursor_sprite_get_cogl_texture (cursor_sprite));
 }
 
+static gboolean
+cursor_sprite_has_pending_bo (MetaCursorRendererNative *native,
+                              MetaCursorSprite         *cursor_sprite)
+{
+  MetaCursorRendererNativePrivate *priv =
+    meta_cursor_renderer_native_get_instance_private (native);
+  MetaCursorNativePrivate *cursor_priv = get_cursor_priv (cursor_sprite);
+  GList *l;
+
+  if (!cursor_priv)
+    return FALSE;
+
+  for (l = meta_backend_get_gpus (priv->backend); l; l = l->next)
+    {
+      MetaCursorNativeGpuState *cursor_gpu_state =
+        get_cursor_gpu_state (cursor_priv, META_GPU_KMS (l->data));
+
+      if (cursor_gpu_state &&
+          cursor_gpu_state->pending_bo_state == META_CURSOR_GBM_BO_STATE_SET)
+        return TRUE;
+    }
+
+  return FALSE;
+}
+
+static gboolean
+meta_cursor_renderer_native_update_position (MetaCursorRenderer *renderer,
+                                             MetaCursorSprite   *cursor_sprite)
+{
+  MetaCursorRendererNative *native = META_CURSOR_RENDERER_NATIVE (renderer);
+  MetaCursorRendererNativePrivate *priv =
+    meta_cursor_renderer_native_get_instance_private (native);
+
+  if (!priv->has_hw_cursor)
+    return FALSE;
+
+  /*
+   * Only a move belongs on the input path. An upload needs drmModeSetCursor2,
+   * which blocks for a whole refresh cycle on some drivers, and consuming the
+   * pending buffer here would take it away from the frame that was going to
+   * post it. Leave both to the frame path.
+   */
+  if (priv->hw_state_invalidated ||
+      cursor_sprite_has_pending_bo (native, cursor_sprite))
+    return FALSE;
+
+  update_hw_cursor (native, cursor_sprite);
+
+  return priv->has_hw_cursor;
+}
+
 static void
 unset_crtc_cursor_renderer_privates (MetaGpu       *gpu,
                                      struct gbm_bo *bo)
@@ -1786,6 +1837,7 @@ meta_cursor_renderer_native_class_init (MetaCursorRendererNativeClass *klass)
 
   object_class->finalize = meta_cursor_renderer_native_finalize;
   renderer_class->update_cursor = meta_cursor_renderer_native_update_cursor;
+  renderer_class->update_position = meta_cursor_renderer_native_update_position;
 
   quark_cursor_sprite = g_quark_from_static_string ("-meta-cursor-native");
   quark_cursor_renderer_native_gpu_data =

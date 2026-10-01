@@ -316,6 +316,7 @@ void                            _clutter_actor_queue_only_relayout              
 void                            clutter_actor_clear_stage_views_recursive               (ClutterActor *actor);
 
 float                           clutter_actor_get_real_resource_scale                   (ClutterActor *actor);
+void                            clutter_actor_emit_resource_scale_changed               (ClutterActor *actor);
 
 ClutterPaintNode *              clutter_actor_create_texture_paint_node                 (ClutterActor *self,
                                                                                          CoglTexture  *texture);

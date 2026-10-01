@@ -70,6 +70,8 @@ typedef struct _MetaWindowActorPrivate
 
   guint             freeze_count;
 
+  gulong            stage_views_changed_id;
+
   guint		    visible                : 1;
   guint		    disposed               : 1;
 
@@ -107,6 +109,9 @@ static void meta_window_actor_get_property (GObject      *object,
                                             GValue       *value,
                                             GParamSpec   *pspec);
 
+static MetaSurfaceActor * meta_window_actor_real_get_scanout_candidate (MetaWindowActor  *self,
+                                                                        const char      **reason);
+
 static void meta_window_actor_real_assign_surface_actor (MetaWindowActor  *self,
                                                          MetaSurfaceActor *surface_actor);
 
@@ -131,6 +136,7 @@ meta_window_actor_class_init (MetaWindowActorClass *klass)
   object_class->constructed  = meta_window_actor_constructed;
 
   klass->assign_surface_actor = meta_window_actor_real_assign_surface_actor;
+  klass->get_scanout_candidate = meta_window_actor_real_get_scanout_candidate;
 
   /**
    * MetaWindowActor::first-frame:
@@ -368,6 +374,16 @@ init_surface_actor (MetaWindowActor *self)
 }
 
 static void
+on_stage_views_changed (MetaWindowActor *self)
+{
+  MetaWindowActorPrivate *priv =
+    meta_window_actor_get_instance_private (self);
+
+  if (priv->compositor)
+    meta_compositor_invalidate_top_window (priv->compositor);
+}
+
+static void
 meta_window_actor_constructed (GObject *object)
 {
   MetaWindowActor *self = META_WINDOW_ACTOR (object);
@@ -376,6 +392,11 @@ meta_window_actor_constructed (GObject *object)
   MetaWindow *window = priv->window;
 
   priv->compositor = window->display->compositor;
+
+  /* Moving between views changes which window is topmost on each of them. */
+  priv->stage_views_changed_id =
+    g_signal_connect (self, "stage-views-changed",
+                      G_CALLBACK (on_stage_views_changed), NULL);
 
   /* Hang our compositor window state off the MetaWindow for fast retrieval */
   meta_window_set_compositor_private (window, object);
@@ -409,6 +430,8 @@ meta_window_actor_dispose (GObject *object)
     }
 
   priv->disposed = TRUE;
+
+  g_clear_signal_handler (&priv->stage_views_changed_id, self);
 
   meta_compositor_remove_window_actor (compositor, self);
 
@@ -525,6 +548,21 @@ meta_window_actor_get_surface (MetaWindowActor *self)
     meta_window_actor_get_instance_private (self);
 
   return priv->surface;
+}
+
+static MetaSurfaceActor *
+meta_window_actor_real_get_scanout_candidate (MetaWindowActor  *self,
+                                              const char      **reason)
+{
+  *reason = "actor type cannot scan out";
+  return NULL;
+}
+
+MetaSurfaceActor *
+meta_window_actor_get_scanout_candidate (MetaWindowActor  *self,
+                                         const char      **reason)
+{
+  return META_WINDOW_ACTOR_GET_CLASS (self)->get_scanout_candidate (self, reason);
 }
 
 /**
@@ -650,6 +688,11 @@ meta_window_actor_after_effects (MetaWindowActor *self)
   g_signal_emit (self, signals[EFFECTS_COMPLETED], 0);
   meta_window_actor_sync_visibility (self);
   meta_window_actor_sync_actor_geometry (self, FALSE);
+
+  /* Effects animate actor opacity, which meta_compositor_window_can_occlude()
+   * reads and no other invalidation covers.
+   */
+  meta_compositor_invalidate_top_window (priv->compositor);
 }
 
 void
@@ -1400,6 +1443,7 @@ meta_window_actor_get_image (MetaWindowActor *self,
   ClutterBackend *clutter_backend = meta_backend_get_clutter_backend (backend);
   CoglContext *cogl_context =
     clutter_backend_get_cogl_context (clutter_backend);
+  MetaShapedTexture *stex;
   float resource_scale;
   float width, height;
   CoglTexture2D *texture;
@@ -1417,9 +1461,10 @@ meta_window_actor_get_image (MetaWindowActor *self,
 
   clutter_actor_inhibit_culling (actor);
 
-  if (clutter_actor_get_n_children (actor) == 1)
+  stex = meta_surface_actor_get_texture (priv->surface);
+  if (clutter_actor_get_n_children (actor) == 1 &&
+      !meta_shaped_texture_should_get_via_offscreen (stex))
     {
-      MetaShapedTexture *stex;
       MetaRectangle *surface_clip = NULL;
 
       if (clip)
@@ -1437,7 +1482,6 @@ meta_window_actor_get_image (MetaWindowActor *self,
           surface_clip->height = clip->height / geometry_scale;
         }
 
-      stex = meta_surface_actor_get_texture (priv->surface);
       surface = meta_shaped_texture_get_image (stex, surface_clip);
       goto out;
     }
@@ -1503,6 +1547,14 @@ meta_window_actor_get_image (MetaWindowActor *self,
         .width = width,
         .height = height,
       };
+    }
+
+  /* A clip that misses the actor entirely intersects to nothing, and reading
+   * back a zero-sized region aborts in cogl. */
+  if (scaled_clip.width == 0 || scaled_clip.height == 0)
+    {
+      cogl_object_unref (framebuffer);
+      goto out;
     }
 
   surface = cairo_image_surface_create (CAIRO_FORMAT_ARGB32,

@@ -217,6 +217,10 @@ typedef struct _MetaOnscreenNative
 
   MetaRendererView *view;
   int total_pending_flips;
+
+  uint64_t logged_scanout_modifier;
+  gboolean logged_scanout_reject;
+  gboolean warned_scanout_flip_failed;
 } MetaOnscreenNative;
 
 struct _MetaRendererNative
@@ -2257,6 +2261,17 @@ meta_onscreen_native_get_crtc (CoglOnscreen *onscreen)
   return onscreen_native->crtc;
 }
 
+#define LOG_SCANOUT_REJECT(onscreen_native, ...)                          \
+  G_STMT_START                                                            \
+    {                                                                     \
+      if (!(onscreen_native)->logged_scanout_reject)                      \
+        {                                                                 \
+          (onscreen_native)->logged_scanout_reject = TRUE;                \
+          meta_topic (META_DEBUG_SCANOUT, __VA_ARGS__);                   \
+        }                                                                 \
+    }                                                                     \
+  G_STMT_END
+
 gboolean
 meta_onscreen_native_is_buffer_scanout_compatible (CoglOnscreen *onscreen,
                                                    int           width,
@@ -2273,21 +2288,21 @@ meta_onscreen_native_is_buffer_scanout_compatible (CoglOnscreen *onscreen,
 
   if (onscreen_native->crtc->config->transform != META_MONITOR_TRANSFORM_NORMAL)
     {
-      meta_topic (META_DEBUG_SCANOUT, "crtc %ld: monitor is transformed\n",
-                  crtc_id);
+      LOG_SCANOUT_REJECT (onscreen_native, "crtc %ld: monitor is transformed\n",
+                          crtc_id);
       return FALSE;
     }
 
   if (onscreen_native->secondary_gpu_state)
     {
-      meta_topic (META_DEBUG_SCANOUT, "crtc %ld: driven by a secondary GPU\n",
-                  crtc_id);
+      LOG_SCANOUT_REJECT (onscreen_native, "crtc %ld: driven by a secondary GPU\n",
+                          crtc_id);
       return FALSE;
     }
 
   if (!onscreen_native->gbm.surface)
     {
-      meta_topic (META_DEBUG_SCANOUT, "crtc %ld: no gbm surface\n", crtc_id);
+      LOG_SCANOUT_REJECT (onscreen_native, "crtc %ld: no gbm surface\n", crtc_id);
       return FALSE;
     }
 
@@ -2295,8 +2310,8 @@ meta_onscreen_native_is_buffer_scanout_compatible (CoglOnscreen *onscreen,
                                        : onscreen_native->gbm.next_fb;
   if (!fb || !META_IS_DRM_BUFFER_GBM (fb))
     {
-      meta_topic (META_DEBUG_SCANOUT, "crtc %ld: no gbm framebuffer to match\n",
-                  crtc_id);
+      LOG_SCANOUT_REJECT (onscreen_native, "crtc %ld: no gbm framebuffer to match\n",
+                          crtc_id);
       return FALSE;
     }
 
@@ -2308,10 +2323,10 @@ meta_onscreen_native_is_buffer_scanout_compatible (CoglOnscreen *onscreen,
   if ((int) gbm_bo_get_width (gbm_bo) != width ||
       (int) gbm_bo_get_height (gbm_bo) != height)
     {
-      meta_topic (META_DEBUG_SCANOUT,
-                  "crtc %ld: buffer %dx%d != onscreen %ux%u\n",
-                  crtc_id, width, height,
-                  gbm_bo_get_width (gbm_bo), gbm_bo_get_height (gbm_bo));
+      LOG_SCANOUT_REJECT (onscreen_native,
+                          "crtc %ld: buffer %dx%d != onscreen %ux%u\n",
+                          crtc_id, width, height,
+                          gbm_bo_get_width (gbm_bo), gbm_bo_get_height (gbm_bo));
       return FALSE;
     }
 
@@ -2319,15 +2334,18 @@ meta_onscreen_native_is_buffer_scanout_compatible (CoglOnscreen *onscreen,
     {
       uint32_t fb_format = gbm_bo_get_format (gbm_bo);
 
-      meta_topic (META_DEBUG_SCANOUT,
-                  "crtc %ld: format %.4s != onscreen %.4s\n",
-                  crtc_id, (char *) &drm_format, (char *) &fb_format);
+      LOG_SCANOUT_REJECT (onscreen_native,
+                          "crtc %ld: format %.4s != onscreen %.4s\n",
+                          crtc_id, (char *) &drm_format, (char *) &fb_format);
       return FALSE;
     }
 
   if (gbm_bo_get_modifier (gbm_bo) == drm_modifier &&
       gbm_bo_get_stride (gbm_bo) == stride)
-    return TRUE;
+    {
+      onscreen_native->logged_scanout_reject = FALSE;
+      return TRUE;
+    }
 
   /* A layout differing from the composited fb is fine as long as the primary
    * plane advertises the modifier: any driver exposing IN_FORMATS validates
@@ -2336,22 +2354,35 @@ meta_onscreen_native_is_buffer_scanout_compatible (CoglOnscreen *onscreen,
    * without modifier support may not validate a pitch change on flip. */
   if (drm_modifier == DRM_FORMAT_MOD_INVALID)
     {
-      meta_topic (META_DEBUG_SCANOUT,
-                  "crtc %ld: implicit modifier needs an exact match, "
-                  "stride %u != onscreen %u\n",
-                  crtc_id, stride, gbm_bo_get_stride (gbm_bo));
+      LOG_SCANOUT_REJECT (onscreen_native,
+                          "crtc %ld: implicit modifier needs an exact match, "
+                          "stride %u != onscreen %u\n",
+                          crtc_id, stride, gbm_bo_get_stride (gbm_bo));
       return FALSE;
     }
 
   if (meta_crtc_kms_supports_modifier (onscreen_native->crtc, drm_format,
                                        drm_modifier))
-    return TRUE;
+    {
+      /* Logged on change only - this is the steady state while scanning out. */
+      if (onscreen_native->logged_scanout_modifier != drm_modifier)
+        {
+          onscreen_native->logged_scanout_modifier = drm_modifier;
+          meta_topic (META_DEBUG_SCANOUT,
+                      "crtc %ld: scanning out modifier 0x%" G_GINT64_MODIFIER
+                      "x, differing from onscreen 0x%" G_GINT64_MODIFIER "x\n",
+                      crtc_id, drm_modifier, gbm_bo_get_modifier (gbm_bo));
+        }
 
-  meta_topic (META_DEBUG_SCANOUT,
-              "crtc %ld: primary plane does not advertise modifier "
-              "0x%" G_GINT64_MODIFIER "x (onscreen uses 0x%"
-              G_GINT64_MODIFIER "x)\n",
-              crtc_id, drm_modifier, gbm_bo_get_modifier (gbm_bo));
+      onscreen_native->logged_scanout_reject = FALSE;
+      return TRUE;
+    }
+
+  LOG_SCANOUT_REJECT (onscreen_native,
+                      "crtc %ld: primary plane does not advertise modifier "
+                      "0x%" G_GINT64_MODIFIER "x (onscreen uses 0x%"
+                      G_GINT64_MODIFIER "x)\n",
+                      crtc_id, drm_modifier, gbm_bo_get_modifier (gbm_bo));
 
   return FALSE;
 }
@@ -2374,7 +2405,7 @@ meta_onscreen_native_direct_scanout (CoglOnscreen *onscreen,
   MetaKms *kms = meta_backend_native_get_kms (backend_native);
   CoglFrameInfo *frame_info;
   MetaKmsUpdate *kms_update;
-  g_autoptr (GError) error = NULL;
+  g_autoptr (MetaKmsFeedback) kms_feedback = NULL;
 
   kms_update = meta_kms_ensure_pending_update (kms);
 
@@ -2397,7 +2428,24 @@ meta_onscreen_native_direct_scanout (CoglOnscreen *onscreen,
     renderer_native->frame_counter;
   meta_onscreen_native_flip_crtcs (onscreen, kms_update);
 
-  meta_kms_post_pending_update_sync (kms);
+  kms_feedback = meta_kms_post_pending_update_sync (kms);
+  if (meta_kms_feedback_get_result (kms_feedback) != META_KMS_FEEDBACK_PASSED)
+    {
+      const GError *error = meta_kms_feedback_get_error (kms_feedback);
+
+      /* Warned once per failing episode: a flip that fails keeps failing every
+       * frame, and the client has no idea it is no longer reaching the plane. */
+      if (!g_error_matches (error, G_IO_ERROR, G_IO_ERROR_PERMISSION_DENIED) &&
+          !onscreen_native->warned_scanout_flip_failed)
+        {
+          onscreen_native->warned_scanout_flip_failed = TRUE;
+          g_warning ("Direct scanout page flip failed: %s", error->message);
+        }
+    }
+  else
+    {
+      onscreen_native->warned_scanout_flip_failed = FALSE;
+    }
 }
 
 static gboolean
@@ -2822,6 +2870,7 @@ meta_renderer_native_init_onscreen (CoglOnscreen *onscreen,
   onscreen_egl = onscreen->winsys;
 
   onscreen_native = g_slice_new0 (MetaOnscreenNative);
+  onscreen_native->logged_scanout_modifier = DRM_FORMAT_MOD_INVALID;
   onscreen_egl->platform = onscreen_native;
 
   /*

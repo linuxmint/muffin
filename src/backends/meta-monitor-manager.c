@@ -51,6 +51,7 @@
 #include "backends/meta-logical-monitor.h"
 #include "backends/meta-monitor.h"
 #include "backends/meta-monitor-config-manager.h"
+#include "backends/meta-monitor-config-store.h"
 #include "backends/meta-orientation-manager.h"
 #include "backends/meta-output.h"
 #include "backends/x11/meta-monitor-manager-xrandr.h"
@@ -59,6 +60,10 @@
 #include "core/util-private.h"
 #include "meta/main.h"
 #include "meta/meta-x11-errors.h"
+
+#ifdef HAVE_WAYLAND
+#include "wayland/meta-xwayland.h"
+#endif
 
 #define DEFAULT_DISPLAY_CONFIGURATION_TIMEOUT 20
 
@@ -674,6 +679,15 @@ meta_monitor_manager_get_default_layout_mode (MetaMonitorManager *manager)
   return manager_class->get_default_layout_mode (manager);
 }
 
+const char *
+meta_monitor_manager_get_config_file_basename (MetaMonitorManager *manager)
+{
+  MetaMonitorManagerClass *manager_class =
+    META_MONITOR_MANAGER_GET_CLASS (manager);
+
+  return manager_class->get_config_file_basename (manager);
+}
+
 static void
 meta_monitor_manager_ensure_initial_config (MetaMonitorManager *manager)
 {
@@ -1003,19 +1017,9 @@ experimental_features_changed (MetaSettings           *settings,
                                MetaExperimentalFeature old_experimental_features,
                                MetaMonitorManager     *manager)
 {
-  gboolean was_stage_views_scaled;
-  gboolean is_stage_views_scaled;
   gboolean was_x11_scaling;
   gboolean x11_scaling;
-  gboolean should_reconfigure = FALSE;
 
-  was_stage_views_scaled =
-    !!(old_experimental_features &
-       META_EXPERIMENTAL_FEATURE_SCALE_MONITOR_FRAMEBUFFER);
-  is_stage_views_scaled =
-    meta_settings_is_experimental_feature_enabled (
-      settings,
-      META_EXPERIMENTAL_FEATURE_SCALE_MONITOR_FRAMEBUFFER);
   was_x11_scaling =
     !!(old_experimental_features &
        META_EXPERIMENTAL_FEATURE_X11_RANDR_FRACTIONAL_SCALING);
@@ -1024,16 +1028,8 @@ experimental_features_changed (MetaSettings           *settings,
       settings,
       META_EXPERIMENTAL_FEATURE_X11_RANDR_FRACTIONAL_SCALING);
 
-  if (is_stage_views_scaled != was_stage_views_scaled)
-    should_reconfigure = TRUE;
-
-  if (was_x11_scaling != x11_scaling)
-    {
-      if (!apply_x11_fractional_scaling_config (manager))
-        should_reconfigure = TRUE;
-    }
-
-  if (should_reconfigure)
+  if (was_x11_scaling != x11_scaling &&
+      !apply_x11_fractional_scaling_config (manager))
     meta_monitor_manager_on_hotplug (manager);
 
   meta_settings_update_ui_scaling_factor (settings);
@@ -1162,6 +1158,12 @@ meta_monitor_manager_get_property (GObject    *object,
     }
 }
 
+static const char *
+meta_monitor_manager_real_get_config_file_basename (MetaMonitorManager *manager)
+{
+  return "cinnamon-monitors.xml";
+}
+
 static void
 meta_monitor_manager_class_init (MetaMonitorManagerClass *klass)
 {
@@ -1175,6 +1177,7 @@ meta_monitor_manager_class_init (MetaMonitorManagerClass *klass)
 
   klass->read_edid = meta_monitor_manager_real_read_edid;
   klass->read_current_state = meta_monitor_manager_real_read_current_state;
+  klass->get_config_file_basename = meta_monitor_manager_real_get_config_file_basename;
 
   signals[MONITORS_CHANGED] =
     g_signal_new ("monitors-changed",
@@ -1805,7 +1808,15 @@ meta_monitor_manager_handle_get_current_state (MetaDBusDisplayConfig *skeleton,
                              g_variant_new_boolean (TRUE));
     }
 
-  ui_scaling_factor = meta_settings_get_ui_scaling_factor (settings);
+#ifdef HAVE_WAYLAND
+  /* X11 clients render into Xwayland's screen, which is sized in physical
+   * pixels; they must be told to draw at the same scale the compositor divides
+   * their buffers by. */
+  if (meta_is_wayland_compositor ())
+    ui_scaling_factor = meta_xwayland_get_x11_ui_scaling_factor ();
+  else
+#endif
+    ui_scaling_factor = meta_settings_get_ui_scaling_factor (settings);
   g_variant_builder_add (&properties_builder, "{sv}",
                          "legacy-ui-scaling-factor",
                          g_variant_new_int32 (ui_scaling_factor));
@@ -2713,6 +2724,36 @@ meta_monitor_manager_handle_set_crtc_gamma  (MetaDBusDisplayConfig *skeleton,
   return TRUE;
 }
 
+static gboolean
+meta_monitor_manager_handle_reset_monitors_config (MetaDBusDisplayConfig *skeleton,
+                                                   GDBusMethodInvocation *invocation,
+                                                   MetaMonitorManager    *manager)
+{
+  MetaMonitorConfigStore *config_store =
+    meta_monitor_config_manager_get_store (manager->config_manager);
+  g_autoptr (GError) error = NULL;
+
+  if (!meta_monitor_config_store_reset (config_store, &error))
+    {
+      g_dbus_method_invocation_return_error (invocation,
+                                             G_DBUS_ERROR,
+                                             G_DBUS_ERROR_FAILED,
+                                             "Failed to remove the monitor configuration: %s",
+                                             error->message);
+      return TRUE;
+    }
+
+  if (manager->persistent_timeout_id)
+    cancel_persistent_confirmation (manager);
+
+  meta_monitor_config_manager_clear_history (manager->config_manager);
+  meta_monitor_manager_ensure_configured (manager);
+
+  meta_dbus_display_config_complete_reset_monitors_config (skeleton, invocation);
+
+  return TRUE;
+}
+
 static void
 monitor_manager_setup_dbus_config_handlers (MetaMonitorManager *manager)
 {
@@ -2733,6 +2774,9 @@ monitor_manager_setup_dbus_config_handlers (MetaMonitorManager *manager)
                            manager, 0);
   g_signal_connect_object (manager->display_config, "handle-apply-monitors-config",
                            G_CALLBACK (meta_monitor_manager_handle_apply_monitors_config),
+                           manager, 0);
+  g_signal_connect_object (manager->display_config, "handle-reset-monitors-config",
+                           G_CALLBACK (meta_monitor_manager_handle_reset_monitors_config),
                            manager, 0);
 }
 

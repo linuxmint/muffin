@@ -424,16 +424,17 @@ clutter_offscreen_effect_paint_texture (ClutterOffscreenEffect *effect,
 
   resource_scale = clutter_actor_get_resource_scale (priv->actor);
 
+  cogl_matrix_translate (&modelview,
+                         priv->fbo_offset_x,
+                         priv->fbo_offset_y,
+                         0.0f);
+
   if (resource_scale != 1.0f)
     {
       float paint_scale = 1.0f / resource_scale;
       cogl_matrix_scale (&modelview, paint_scale, paint_scale, 1);
     }
 
-  cogl_matrix_translate (&modelview,
-                         priv->fbo_offset_x,
-                         priv->fbo_offset_y,
-                         0.0f);
   cogl_framebuffer_set_modelview_matrix (framebuffer, &modelview);
 
   /* paint the target material; this is virtualized for

@@ -54,6 +54,7 @@
 #include "backends/meta-settings-private.h"
 #include "backends/x11/meta-backend-x11.h"
 #include "backends/x11/meta-stage-x11.h"
+#include "core/boxes-private.h"
 #include "core/frame.h"
 #include "core/meta-workspace-manager-private.h"
 #include "core/util-private.h"
@@ -68,6 +69,7 @@
 #include "x11/xprops.h"
 
 #ifdef HAVE_WAYLAND
+#include "wayland/meta-xwayland.h"
 #include "wayland/meta-xwayland-private.h"
 #endif
 
@@ -515,6 +517,17 @@ shutdown_x11_bell (MetaX11Display *x11_display)
                             XkbAudibleBellMask);
 }
 
+static int
+get_x11_scale (void)
+{
+#ifdef HAVE_WAYLAND
+  if (meta_is_wayland_compositor ())
+    return meta_xwayland_get_x11_ui_scaling_factor ();
+#endif
+
+  return 1;
+}
+
 static void
 set_desktop_geometry_hint (MetaX11Display *x11_display)
 {
@@ -525,6 +538,16 @@ set_desktop_geometry_hint (MetaX11Display *x11_display)
     return;
 
   meta_display_get_size (x11_display->display, &monitor_width, &monitor_height);
+
+#ifdef HAVE_WAYLAND
+  if (meta_is_wayland_compositor ())
+    {
+      int scale = meta_xwayland_get_effective_scale ();
+
+      monitor_width *= scale;
+      monitor_height *= scale;
+    }
+#endif
 
   data[0] = monitor_width;
   data[1] = monitor_height;
@@ -921,6 +944,7 @@ set_workspace_work_area_hint (MetaWorkspace  *workspace,
   MetaMonitorManager *monitor_manager;
   GList *logical_monitors;
   GList *l;
+  int scale;
   int num_monitors;
   unsigned long *data;
   unsigned long *tmp;
@@ -933,12 +957,15 @@ set_workspace_work_area_hint (MetaWorkspace  *workspace,
 
   data = g_new (unsigned long, num_monitors * 4);
   tmp = data;
+  scale = get_x11_scale ();
 
   for (l = logical_monitors; l; l = l->next)
     {
       MetaRectangle area;
 
       meta_workspace_get_work_area_for_logical_monitor (workspace, l->data, &area);
+      meta_rectangle_scale_double (&area, scale, META_ROUNDING_STRATEGY_SHRINK,
+                                   &area);
 
       tmp[0] = area.x;
       tmp[1] = area.y;
@@ -973,10 +1000,12 @@ set_work_area_hint (MetaDisplay    *display,
   GList *l;
   unsigned long *data, *tmp;
   MetaRectangle area;
+  int scale;
 
   num_workspaces = meta_workspace_manager_get_n_workspaces (workspace_manager);
   data = g_new (unsigned long, num_workspaces * 4);
   tmp = data;
+  scale = get_x11_scale ();
 
   for (l = workspace_manager->workspaces; l; l = l->next)
     {
@@ -984,6 +1013,9 @@ set_work_area_hint (MetaDisplay    *display,
 
       meta_workspace_get_work_area_all_monitors (workspace, &area);
       set_workspace_work_area_hint (workspace, x11_display);
+
+      meta_rectangle_scale_double (&area, scale, META_ROUNDING_STRATEGY_SHRINK,
+                                   &area);
 
       tmp[0] = area.x;
       tmp[1] = area.y;
@@ -1059,6 +1091,10 @@ meta_x11_init_gdk_display (GError **error)
   const char *xdisplay_name;
   GdkDisplay *gdk_display;
   const char *gdk_gl_env = NULL;
+  g_autofree gchar *no_gail = NULL;
+  g_autofree gchar *no_at_bridge = NULL;
+  gboolean block_at_bridge;
+  gboolean gtk_parsed;
   Display *xdisplay;
 
   xdisplay_name = meta_x11_get_display_name ();
@@ -1074,15 +1110,51 @@ meta_x11_init_gdk_display (GError **error)
   gdk_gl_env = g_getenv ("GDK_GL");
   g_setenv ("GDK_GL", "disable", TRUE);
 
+  /* Muffin only uses GTK/GDK to draw frames (note: SSD windows and in X11 only)
+   * so accessibility is not needed.
+   * The entire DE can crash if we load A11Y without checking its bus.
+   * So we init GTK/GDK without A11Y here, and let Cinnamon handle checking
+   * the bus and loading A11Y.
+   *
+   * Cinnamon sets CINNAMON_NO_AT_BRIDGE when it didn't load the ATK bridge
+   * (see cinnamon_a11y_init() in cinnamon/src/main.c). In that case we stop GTK
+   * from loading it. Otherwise the bridge is already loaded, GTK skips it
+   * anyway, and setting NO_AT_BRIDGE would only make atk-bridge warn.
+   *
+   * GTK/GDK loads A11Y when the display gets opened, so both calls below
+   * need to be covered.
+   */
+
+  /* Save the env variables in case they're already set,
+   * so we can restore them after opening the display.
+   */
+  no_gail = g_strdup (g_getenv ("NO_GAIL"));
+  no_at_bridge = g_strdup (g_getenv ("NO_AT_BRIDGE"));
+
+  /* Initialize GTK/GDK without A11Y */
+  block_at_bridge = g_getenv ("CINNAMON_NO_AT_BRIDGE") != NULL;
+  g_setenv ("NO_GAIL", "1", TRUE);
+  if (block_at_bridge)
+    g_setenv ("NO_AT_BRIDGE", "1", TRUE);
   gdk_parse_args (NULL, NULL);
-  if (!gtk_parse_args (NULL, NULL))
+  gtk_parsed = gtk_parse_args (NULL, NULL);
+  gdk_display = gtk_parsed ? gdk_display_open (xdisplay_name) : NULL;
+  g_unsetenv ("NO_GAIL");
+  if (block_at_bridge)
+    g_unsetenv ("NO_AT_BRIDGE");
+
+  /* Restore env variables if needed */
+  if (no_gail != NULL)
+    g_setenv ("NO_GAIL", no_gail, TRUE);
+  if (block_at_bridge && no_at_bridge != NULL)
+    g_setenv ("NO_AT_BRIDGE", no_at_bridge, TRUE);
+
+  if (!gtk_parsed)
     {
       g_set_error (error, G_IO_ERROR, G_IO_ERROR_FAILED,
                    "Failed to initialize gtk");
       return FALSE;
     }
-
-  gdk_display = gdk_display_open (xdisplay_name);
 
   if (!gdk_display)
     {
@@ -1601,11 +1673,19 @@ meta_x11_display_reload_cursor (MetaX11Display *x11_display)
 static void
 set_cursor_theme (Display *xdisplay)
 {
-  MetaBackend *backend = meta_get_backend ();
-  MetaSettings *settings = meta_backend_get_settings (backend);
   int scale;
 
-  scale = meta_settings_get_ui_scaling_factor (settings);
+#ifdef HAVE_WAYLAND
+  scale = meta_xwayland_get_x11_ui_scaling_factor ();
+#else
+  {
+    MetaBackend *backend = meta_get_backend ();
+    MetaSettings *settings = meta_backend_get_settings (backend);
+
+    scale = meta_settings_get_ui_scaling_factor (settings);
+  }
+#endif
+
   XcursorSetTheme (xdisplay, meta_prefs_get_cursor_theme ());
   XcursorSetDefaultSize (xdisplay, meta_prefs_get_cursor_size () * scale);
 }
@@ -1799,6 +1879,16 @@ on_monitors_changed_internal (MetaMonitorManager *monitor_manager,
       changes.y = 0;
       changes.width = display_width;
       changes.height = display_height;
+
+#ifdef HAVE_WAYLAND
+      if (meta_is_wayland_compositor ())
+        {
+          int scale = meta_xwayland_get_effective_scale ();
+
+          changes.width *= scale;
+          changes.height *= scale;
+        }
+#endif
 
       XConfigureWindow (x11_display->xdisplay,
                         x11_display->guard_window,

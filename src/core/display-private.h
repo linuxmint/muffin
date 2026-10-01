@@ -168,6 +168,12 @@ struct _MetaDisplay
   MetaRectangle grab_anchor_window_pos;
   MetaTileMode  grab_tile_mode;
   int           grab_tile_monitor_number;
+
+  /* Monitor the tile zones are evaluated against during a drag. Held while
+   * the pointer is only just past a shared edge, so the tile target does not
+   * flip to the neighbour while the window is still resisted at that edge.
+   */
+  int           grab_tile_target_monitor;
   int         grab_latest_motion_x;
   int         grab_latest_motion_y;
   guint       grab_have_pointer : 1;

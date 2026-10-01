@@ -52,6 +52,8 @@ struct _MetaCursorRendererClass
 
   gboolean (* update_cursor) (MetaCursorRenderer *renderer,
                               MetaCursorSprite   *cursor_sprite);
+  gboolean (* update_position) (MetaCursorRenderer *renderer,
+                                MetaCursorSprite   *cursor_sprite);
 };
 
 MetaCursorRenderer * meta_cursor_renderer_new (void);
@@ -62,6 +64,9 @@ void meta_cursor_renderer_set_cursor (MetaCursorRenderer *renderer,
 void meta_cursor_renderer_set_position (MetaCursorRenderer *renderer,
                                         float               x,
                                         float               y);
+gboolean meta_cursor_renderer_update_position (MetaCursorRenderer *renderer,
+                                               float               x,
+                                               float               y);
 graphene_point_t meta_cursor_renderer_get_position (MetaCursorRenderer *renderer);
 void meta_cursor_renderer_force_update (MetaCursorRenderer *renderer);
 

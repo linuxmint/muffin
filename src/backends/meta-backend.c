@@ -827,12 +827,17 @@ prepare_for_sleep_cb (GDBusConnection *connection,
                       GVariant        *parameters,
                       gpointer         user_data)
 {
+  MetaBackend *backend = META_BACKEND (user_data);
+  MetaBackendPrivate *priv = meta_backend_get_instance_private (backend);
   gboolean suspending;
 
   g_variant_get (parameters, "(b)", &suspending);
   if (suspending)
     return;
   meta_idle_monitor_reset_idletime (meta_idle_monitor_get_core ());
+
+  if (priv->input_settings)
+    meta_input_settings_maybe_restore_numlock_state (priv->input_settings);
 }
 
 static void
@@ -840,6 +845,7 @@ system_bus_gotten_cb (GObject      *object,
                       GAsyncResult *res,
                       gpointer      user_data)
 {
+  MetaBackend *backend = META_BACKEND (user_data);
   MetaBackendPrivate *priv;
   GDBusConnection *bus;
 
@@ -847,7 +853,7 @@ system_bus_gotten_cb (GObject      *object,
   if (!bus)
     return;
 
-  priv = meta_backend_get_instance_private (user_data);
+  priv = meta_backend_get_instance_private (backend);
   priv->system_bus = bus;
   priv->sleep_signal_id =
     g_dbus_connection_signal_subscribe (priv->system_bus,
@@ -858,7 +864,7 @@ system_bus_gotten_cb (GObject      *object,
                                         NULL,
                                         G_DBUS_SIGNAL_FLAGS_NONE,
                                         prepare_for_sleep_cb,
-                                        NULL,
+                                        backend,
                                         NULL);
 }
 

@@ -1,3 +1,85 @@
+muffin (6.7.8) adrien; urgency=medium
+
+  [ Michael Webster ]
+  * meta-backend.c: Restore numlock state on resume for X11 sessions.
+
+ -- Clement Lefebvre <root@linuxmint.com>  Tue, 22 Sep 2026 10:13:04 +0100
+
+muffin (6.7.7) adrien; urgency=medium
+
+  [ Michael Webster ]
+  * meta-xwayland-dnd.c: Use two X11 DnD peer windows.
+  * monitor config: Use a different filename for wayland sessions, remove scale-monitor-framebuffer experimental option.
+  * clutter-offscreen-effect.c: Apply fbo offset before unscaling.
+  * meta-wayland-surface.c: Only log scanout failure reason once, not once per frame.
+  * xwayland: Fix hidpi support, scanout matching.
+  * compositor: Don't let fully transparent windows block unredirect/scanout
+  * compositor.c: Merge x11 and wayland top-window implementations for unredirect/scanout.
+  * meta-compositor-native.c: Make direct scanout opt-in.
+  * meta-renderer-native.c: Report direct scanout page flip failures.
+  * meta-renderer-native.c: Log when a scanout buffer's modifier differs from the onscreen framebuffer's.
+  * compositor: Let a fullscreen window scan out from a subsurface.
+  * meta-compositor-native.c: Don't allocate a hash table every paint.
+  * meta-window-actor.c: Don't read back a zero-sized region.
+  * meta-renderer-native.c: Log a scanout rejection once, not every frame.
+  * prefs: Add scanout-fullscreen-windows setting.
+  * clutter: Backport additional pointer repick triggers.
+  * cursor: Post the hardware cursor position from the input dispatch.
+  * settings: Allow experimental-features entries as plain named flags.
+  * wayland: Require the locking window to appear focused for Xwayland too.
+  * x11: Scale relative pointer motion by the UI scaling factor.
+
+  [ Clement Lefebvre ]
+  * x11: Don't let GTK load the accessibility bridge
+  * ui: Remove redundant gtk_init_check()
+  * x11: Only block the ATK bridge if Cinnamon didn't load it
+
+ -- Clement Lefebvre <root@linuxmint.com>  Thu, 17 Sep 2026 16:12:05 +0100
+
+muffin (6.7.6) alfa; urgency=medium
+
+  [ Aleksey Samoilov ]
+  * Cleanup and refactor resource scale API (#793)
+
+  [ Michael Webster ]
+  * wayland: represent layer-shell surfaces as MetaWindows
+  * meta-wayland-outputs.c: Send global_remove immediately when a monitor is removed.
+  * meta-wayland-layer-shell.c: Fix MetaFeedbackActor scaling with hidpi.
+  * clutter-actor.c: Clear all stage views before emitting stage-views-changed.
+  * clutter-text.c: multiply existing pango scale attributes by the resource scale instead of replacing them, so per-segment markup sizes survive.
+  * clutter-actor.c: Show on all stage views when an actor has no allocation.
+  * meta-cursor-renderer-native.c: Raise fallback cursor threshold.
+  * wayland: Base output enter/leave on the window rect, not actor geometry.
+  * meta-window-wayland.c: Scale the move-grab anchor when crossing monitor scales.
+  * delete.c: Guard delete/kill against unmanaging windows.
+  * clutter: Backport some relayout and allocation lifecycle fixes.
+  * clutter: Don't gate pointer repicks on the redraw clip.
+  * window-x11.c: Restore unredirect-fullscreen pref check removed in 120ade844586.
+  * wayland: Implement scanout surface dmabuf feedback.
+  * Wayland: bump wl_compositor to v6 for preferred_scale.
+  * wayland: Implement wp_fractional_scale_v1.
+  * wayland: Fix maximize transition broken by wp_fractional_scale_v1
+  * logging: Add topic for Wayland scanout.
+  * monitor: Calculate fractional scales as exact quotients
+  * display.c: Fix a warning when using the nested backend.
+  * build: Fix some dependency versions.
+  * clutter-actor.c: Soften the check for guessed resource scale.
+  * util: Add layer-shell debug topic, mark unused topics.
+  * meta-wayland-xdg-shell.c: Allow serial-less nested popups from layer-shell surfaces.
+  * meta-wayland-surface.c: Advertise a surface's scale when its output is known.
+  * meta-wayland-layer-shell.c: Reconfigure full-output surfaces when the output resizes.
+  * meta-wayland-layer-shell.c: Don't free the namespace early, so it can be used for logging.
+  * clutter-input-method.c: Ensure a stage for events.
+  * meta-window.c: Apply edge resistance on shared monitor edges during window drags.
+  * meta-barrier-native.c: Match X11 pointer barrier behavior.
+  * clutter-stage.c: Don't allocate relayout entries for detached actors.
+  * clutter: Emit ::resource-scale-changed outside the stage-views walk.
+  * clutter-actor.c: Guess a resource scale of 1 when there are no views.
+  * meta-x11-background-actor.c: Don't override the bottom actor's opacity when it's not mapped or there's no transition.
+  * clutter-actor.c: Follow-up to 61eece4d2, additional rounding changes.
+
+ -- Clement Lefebvre <root@linuxmint.com>  Sat, 05 Sep 2026 15:13:56 +0100
+
 muffin (6.7.5) alfa; urgency=medium
 
   [ Clement Lefebvre ]

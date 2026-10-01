@@ -57,9 +57,10 @@ struct _MetaXWaylandDnd
   Time client_message_timestamp;
   MetaWaylandDataSource *source; /* owned by MetaWaylandDataDevice */
   MetaWaylandSurface *focus_surface;
-  Window dnd_window; /* Mutter-internal window, acts as peer on wayland drop sites */
+  Window dnd_window[2]; /* Muffin-internal windows, act as peers on wayland drop sites */
   Window dnd_dest; /* X11 drag dest window */
   guint32 last_motion_time;
+  int current_dnd_window;
 };
 
 enum
@@ -131,6 +132,90 @@ atom_to_action (Atom atom)
     return WL_DATA_DEVICE_MANAGER_DND_ACTION_ASK;
   else
     return WL_DATA_DEVICE_MANAGER_DND_ACTION_NONE;
+}
+
+static Window
+current_dnd_window (MetaXWaylandDnd *dnd)
+{
+  return dnd->dnd_window[dnd->current_dnd_window];
+}
+
+/* X11 drag sources only emit XdndLeave/XdndEnter when the target window
+ * changes, so moving between two wayland windows has to hand the source a
+ * different peer window or it never learns the drop site changed.
+ */
+static Window
+next_dnd_window (MetaXWaylandDnd *dnd)
+{
+  dnd->current_dnd_window =
+    (dnd->current_dnd_window + 1) % G_N_ELEMENTS (dnd->dnd_window);
+
+  return current_dnd_window (dnd);
+}
+
+static void
+create_dnd_windows (MetaXWaylandDnd *dnd,
+                    Display         *xdisplay)
+{
+  XSetWindowAttributes attributes;
+  guint32 version = XDND_VERSION;
+  guint i;
+
+  attributes.event_mask = PropertyChangeMask | SubstructureNotifyMask;
+  attributes.override_redirect = True;
+
+  for (i = 0; i < G_N_ELEMENTS (dnd->dnd_window); i++)
+    {
+      dnd->dnd_window[i] =
+        XCreateWindow (xdisplay,
+                       gdk_x11_window_get_xid (gdk_get_default_root_window ()),
+                       -1, -1, 1, 1,
+                       0, /* border width */
+                       0, /* depth */
+                       InputOnly, /* class */
+                       CopyFromParent, /* visual */
+                       CWEventMask | CWOverrideRedirect,
+                       &attributes);
+
+      XChangeProperty (xdisplay, dnd->dnd_window[i],
+                       xdnd_atoms[ATOM_DND_AWARE],
+                       XA_ATOM, 32, PropModeReplace,
+                       (guchar*) &version, 1);
+    }
+}
+
+static void
+destroy_dnd_windows (MetaXWaylandDnd *dnd,
+                     Display         *xdisplay)
+{
+  guint i;
+
+  for (i = 0; i < G_N_ELEMENTS (dnd->dnd_window); i++)
+    {
+      XDestroyWindow (xdisplay, dnd->dnd_window[i]);
+      dnd->dnd_window[i] = None;
+    }
+}
+
+static void
+hide_dnd_window (MetaXWaylandDnd *dnd,
+                 Display         *xdisplay,
+                 int              index)
+{
+  g_assert (index < (int) G_N_ELEMENTS (dnd->dnd_window));
+
+  XMoveResizeWindow (xdisplay, dnd->dnd_window[index], -1, -1, 1, 1);
+  XUnmapWindow (xdisplay, dnd->dnd_window[index]);
+}
+
+static void
+hide_all_dnd_windows (MetaXWaylandDnd *dnd,
+                      Display         *xdisplay)
+{
+  guint i;
+
+  for (i = 0; i < G_N_ELEMENTS (dnd->dnd_window); i++)
+    hide_dnd_window (dnd, xdisplay, i);
 }
 
 static void
@@ -228,6 +313,13 @@ xdnd_send_position (MetaXWaylandDnd *dnd,
   Display *xdisplay = x11_display->xdisplay;
   uint32_t action = 0, user_action, actions;
   XEvent xev = { 0 };
+  int scale;
+
+  /* XdndPosition carries root-window X coordinates, but the callers hand us
+   * stage coordinates. */
+  scale = meta_xwayland_get_effective_scale ();
+  x *= scale;
+  y *= scale;
 
   user_action = meta_wayland_data_source_get_user_action (source);
   meta_wayland_data_source_get_actions (source, &actions);
@@ -295,7 +387,7 @@ xdnd_send_finished (MetaXWaylandDnd *dnd,
   xev.xclient.format = 32;
   xev.xclient.window = dest;
 
-  xev.xclient.data.l[0] = dnd->dnd_window;
+  xev.xclient.data.l[0] = current_dnd_window (dnd);
 
   if (accepted)
     {
@@ -325,7 +417,7 @@ xdnd_send_status (MetaXWaylandDnd *dnd,
   xev.xclient.format = 32;
   xev.xclient.window = dest;
 
-  xev.xclient.data.l[0] = dnd->dnd_window;
+  xev.xclient.data.l[0] = current_dnd_window (dnd);
   xev.xclient.data.l[1] = 1 << 1; /* Bit 2: dest wants XdndPosition messages */
   xev.xclient.data.l[4] = action_to_atom (action);
 
@@ -357,8 +449,7 @@ meta_xwayland_end_dnd_grab (MetaWaylandDataDevice *data_device,
       meta_wayland_data_device_end_drag (data_device);
     }
 
-  XMoveResizeWindow (xdisplay, dnd->dnd_window, -1, -1, 1, 1);
-  XUnmapWindow (xdisplay, dnd->dnd_window);
+  hide_all_dnd_windows (dnd, xdisplay);
 }
 
 static void
@@ -581,6 +672,7 @@ meta_xwayland_data_source_fetch_mimetype_list (MetaWaylandDataSource *source,
 {
   MetaWaylandDataSourceXWayland *source_xwayland =
     META_WAYLAND_DATA_SOURCE_XWAYLAND (source);
+  MetaX11Display *x11_display = meta_get_display ()->x11_display;
   Display *xdisplay = GDK_DISPLAY_XDISPLAY (gdk_display_get_default ());
   gulong nitems_ret, bytes_after_ret, i;
   Atom *atoms, type_ret, utf8_string;
@@ -591,17 +683,28 @@ meta_xwayland_data_source_fetch_mimetype_list (MetaWaylandDataSource *source,
   if (source_mime_types->size != 0)
     return TRUE;
 
+  /* The drag source can be gone by the time we get here, and an untrapped
+   * BadWindow is fatal to the compositor. */
+  meta_x11_error_trap_push (x11_display);
+
   utf8_string = gdk_x11_get_xatom_by_name ("UTF8_STRING");
-  XGetWindowProperty (xdisplay, window, prop,
-                      0, /* offset */
-                      0x1fffffff, /* length */
-                      False, /* delete */
-                      AnyPropertyType,
-                      &type_ret,
-                      &format_ret,
-                      &nitems_ret,
-                      &bytes_after_ret,
-                      (guchar **) &atoms);
+  if (XGetWindowProperty (xdisplay, window, prop,
+                          0, /* offset */
+                          0x1fffffff, /* length */
+                          False, /* delete */
+                          AnyPropertyType,
+                          &type_ret,
+                          &format_ret,
+                          &nitems_ret,
+                          &bytes_after_ret,
+                          (guchar **) &atoms) != Success)
+    {
+      meta_x11_error_trap_pop (x11_display);
+      return FALSE;
+    }
+
+  if (meta_x11_error_trap_pop_with_return (x11_display) != Success)
+    return FALSE;
 
   if (nitems_ret == 0 || type_ret != XA_ATOM)
     {
@@ -668,17 +771,26 @@ repick_drop_surface (MetaWaylandCompositor *compositor,
   if (focus_window &&
       focus_window->client_type == META_WINDOW_CLIENT_TYPE_WAYLAND)
     {
-      XMapRaised (xdisplay, dnd->dnd_window);
-      XMoveResizeWindow (xdisplay, dnd->dnd_window,
-                         focus_window->rect.x,
-                         focus_window->rect.y,
-                         focus_window->rect.width,
-                         focus_window->rect.height);
+      Window dnd_window;
+      int scale;
+
+      hide_dnd_window (dnd, xdisplay, dnd->current_dnd_window);
+      dnd_window = next_dnd_window (dnd);
+
+      /* The proxy covers a Wayland window, so its rect is in stage
+       * coordinates, but this is one of our own X windows. */
+      scale = meta_xwayland_get_x11_ui_scaling_factor ();
+
+      XMapRaised (xdisplay, dnd_window);
+      XMoveResizeWindow (xdisplay, dnd_window,
+                         focus_window->rect.x * scale,
+                         focus_window->rect.y * scale,
+                         focus_window->rect.width * scale,
+                         focus_window->rect.height * scale);
     }
   else
     {
-      XMoveResizeWindow (xdisplay, dnd->dnd_window, -1, -1, 1, 1);
-      XUnmapWindow (xdisplay, dnd->dnd_window);
+      hide_all_dnd_windows (dnd, xdisplay);
     }
 }
 
@@ -945,8 +1057,7 @@ meta_xwayland_init_dnd (Display *xdisplay)
   MetaWaylandCompositor *compositor = meta_wayland_compositor_get_default ();
   MetaXWaylandManager *manager = &compositor->xwayland_manager;
   MetaXWaylandDnd *dnd = manager->dnd;
-  XSetWindowAttributes attributes;
-  guint32 i, version = XDND_VERSION;
+  guint32 i;
 
   g_assert (manager->dnd == NULL);
 
@@ -955,22 +1066,7 @@ meta_xwayland_init_dnd (Display *xdisplay)
   for (i = 0; i < N_DND_ATOMS; i++)
     xdnd_atoms[i] = gdk_x11_get_xatom_by_name (atom_names[i]);
 
-  attributes.event_mask = PropertyChangeMask | SubstructureNotifyMask;
-  attributes.override_redirect = True;
-
-  dnd->dnd_window = XCreateWindow (xdisplay,
-                                   gdk_x11_window_get_xid (gdk_get_default_root_window ()),
-                                   -1, -1, 1, 1,
-                                   0, /* border width */
-                                   0, /* depth */
-                                   InputOnly, /* class */
-                                   CopyFromParent, /* visual */
-                                   CWEventMask | CWOverrideRedirect,
-                                   &attributes);
-  XChangeProperty (xdisplay, dnd->dnd_window,
-                   xdnd_atoms[ATOM_DND_AWARE],
-                   XA_ATOM, 32, PropModeReplace,
-                   (guchar*) &version, 1);
+  create_dnd_windows (dnd, xdisplay);
 }
 
 void
@@ -982,8 +1078,7 @@ meta_xwayland_shutdown_dnd (Display *xdisplay)
 
   g_assert (dnd != NULL);
 
-  XDestroyWindow (xdisplay, dnd->dnd_window);
-  dnd->dnd_window = None;
+  destroy_dnd_windows (dnd, xdisplay);
 
   g_slice_free (MetaXWaylandDnd, dnd);
   manager->dnd = NULL;

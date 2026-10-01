@@ -31,7 +31,10 @@
 #include "backends/meta-logical-monitor.h"
 #include "backends/meta-monitor.h"
 #include "backends/meta-monitor-manager-private.h"
+#include "core/window-private.h"
+#include "wayland/meta-wayland-actor-surface.h"
 #include "wayland/meta-wayland-private.h"
+#include "wayland/meta-xwayland.h"
 
 #include "xdg-output-unstable-v1-server-protocol.h"
 
@@ -55,6 +58,46 @@ send_xdg_output_events (struct wl_resource *resource,
                         MetaLogicalMonitor *logical_monitor,
                         gboolean            need_all_events,
                         gboolean           *pending_done_event);
+
+static gboolean
+is_xwayland_resource (struct wl_resource *resource)
+{
+  MetaWaylandCompositor *compositor = meta_wayland_compositor_get_default ();
+
+  return wl_resource_get_client (resource) ==
+         compositor->xwayland_manager.client;
+}
+
+/*
+ * Xwayland has no scale of its own: it sizes its X screen from the outputs it
+ * is told about. Handing it logical geometry makes every X client render at 1x
+ * and get upscaled, so it is told scaled geometry instead and the compositor
+ * divides back via surface->scale.
+ */
+static gboolean
+xwayland_scale_changed (MetaWaylandOutput  *wayland_output,
+                        struct wl_resource *resource)
+{
+  if (!is_xwayland_resource (resource))
+    return FALSE;
+
+  return wayland_output->xwayland_scale != meta_xwayland_get_effective_scale ();
+}
+
+static void
+maybe_scale_for_xwayland (struct wl_resource *resource,
+                          int                *a,
+                          int                *b)
+{
+  int scale;
+
+  if (!is_xwayland_resource (resource))
+    return;
+
+  scale = meta_xwayland_get_effective_scale ();
+  *a *= scale;
+  *b *= scale;
+}
 
 static void
 output_resource_destroy (struct wl_resource *res)
@@ -228,8 +271,11 @@ send_output_events (struct wl_resource *resource,
   if (need_all_events ||
       old_logical_monitor->rect.x != logical_monitor->rect.x ||
       old_logical_monitor->rect.y != logical_monitor->rect.y ||
-      is_different_rotation (old_logical_monitor, logical_monitor))
+      is_different_rotation (old_logical_monitor, logical_monitor) ||
+      xwayland_scale_changed (wayland_output, resource))
     {
+      int geometry_x = logical_monitor->rect.x;
+      int geometry_y = logical_monitor->rect.y;
       int width_mm, height_mm;
       const char *vendor;
       const char *product;
@@ -257,9 +303,11 @@ send_output_events (struct wl_resource *resource,
        */
       transform = WL_OUTPUT_TRANSFORM_NORMAL;
 
+      maybe_scale_for_xwayland (resource, &geometry_x, &geometry_y);
+
       wl_output_send_geometry (resource,
-                               logical_monitor->rect.x,
-                               logical_monitor->rect.y,
+                               geometry_x,
+                               geometry_y,
                                width_mm,
                                height_mm,
                                subpixel_order,
@@ -399,6 +447,7 @@ meta_wayland_output_set_logical_monitor (MetaWaylandOutput  *wayland_output,
   if (current_mode == preferred_mode)
     wayland_output->mode_flags |= WL_OUTPUT_MODE_PREFERRED;
   wayland_output->scale = calculate_wayland_output_scale (logical_monitor);
+  wayland_output->xwayland_scale = meta_xwayland_get_effective_scale ();
   wayland_output->refresh_rate = meta_monitor_mode_get_refresh_rate (current_mode);
 
   wayland_output->winsys_id = logical_monitor->winsys_id;
@@ -572,7 +621,33 @@ static void
 on_monitors_changed (MetaMonitorManager    *monitors,
                      MetaWaylandCompositor *compositor)
 {
+  int xwayland_scale;
+  GList *l;
+
   compositor->outputs = meta_wayland_compositor_update_outputs (compositor, monitors);
+
+  /* A window that is not actively committing would otherwise keep the scale it
+   * was mapped with until its next commit. */
+  xwayland_scale = meta_xwayland_get_effective_scale ();
+
+  for (l = compositor->xwayland_manager.x11_windows; l; l = l->next)
+    {
+      MetaWindow *window = l->data;
+      MetaWaylandSurface *surface = window->surface;
+
+      if (!surface || surface->scale == xwayland_scale)
+        continue;
+
+      surface->scale = xwayland_scale;
+
+      if (META_IS_WAYLAND_ACTOR_SURFACE (surface->role))
+        {
+          MetaWaylandActorSurface *actor_surface =
+            META_WAYLAND_ACTOR_SURFACE (surface->role);
+
+          meta_wayland_actor_surface_sync_actor_state (actor_surface);
+        }
+    }
 }
 
 static void
@@ -656,21 +731,27 @@ send_xdg_output_events (struct wl_resource *resource,
 
   if (need_all_events ||
       old_layout.x != new_layout.x ||
-      old_layout.y != new_layout.y)
+      old_layout.y != new_layout.y ||
+      xwayland_scale_changed (wayland_output, resource))
     {
-      zxdg_output_v1_send_logical_position (resource,
-                                            new_layout.x,
-                                            new_layout.y);
+      int x = new_layout.x;
+      int y = new_layout.y;
+
+      maybe_scale_for_xwayland (resource, &x, &y);
+      zxdg_output_v1_send_logical_position (resource, x, y);
       need_done = TRUE;
     }
 
   if (need_all_events ||
       old_layout.width != new_layout.width ||
-      old_layout.height != new_layout.height)
+      old_layout.height != new_layout.height ||
+      xwayland_scale_changed (wayland_output, resource))
     {
-      zxdg_output_v1_send_logical_size (resource,
-                                        new_layout.width,
-                                        new_layout.height);
+      int width = new_layout.width;
+      int height = new_layout.height;
+
+      maybe_scale_for_xwayland (resource, &width, &height);
+      zxdg_output_v1_send_logical_size (resource, width, height);
       need_done = TRUE;
     }
 

@@ -1225,9 +1225,12 @@ meta_shaped_texture_reset_viewport_dst_size (MetaShapedTexture *stex)
   invalidate_size (stex);
 }
 
-static gboolean
-should_get_via_offscreen (MetaShapedTexture *stex)
+gboolean
+meta_shaped_texture_should_get_via_offscreen (MetaShapedTexture *stex)
 {
+  if (!stex->texture)
+    return FALSE;
+
   if (!cogl_texture_is_get_data_supported (stex->texture))
     return TRUE;
 
@@ -1403,7 +1406,7 @@ meta_shaped_texture_get_image (MetaShapedTexture     *stex,
       };
     }
 
-  if (should_get_via_offscreen (stex))
+  if (meta_shaped_texture_should_get_via_offscreen (stex))
     {
       int image_width;
       int image_height;

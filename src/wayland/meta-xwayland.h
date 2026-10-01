@@ -42,6 +42,12 @@ meta_xwayland_handle_wl_surface_id (MetaWindow *window,
 gboolean
 meta_xwayland_is_xwayland_surface (MetaWaylandSurface *surface);
 
+int
+meta_xwayland_get_effective_scale (void);
+
+int
+meta_xwayland_get_x11_ui_scaling_factor (void);
+
 void
 meta_xwayland_handle_xwayland_grab (MetaWindow *window,
                                     gboolean    allow);

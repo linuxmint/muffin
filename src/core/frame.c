@@ -26,6 +26,7 @@
 #include "core/frame.h"
 
 #include "backends/x11/meta-backend-x11.h"
+#include "compositor/region-utils.h"
 #include "core/bell.h"
 #include "core/keybindings-private.h"
 #include "meta/meta-x11-errors.h"
@@ -336,6 +337,28 @@ meta_frame_borders_clear (MetaFrameBorders *self)
   self->visible.right  = self->invisible.right  = self->total.right  = 0;
 }
 
+/*
+ * The theme sizes borders with the X server's scaling factor
+ * (meta_theme_get_window_scaling_factor), so they arrive in protocol pixels,
+ * while the window manager works in stage coordinates.
+ */
+static void
+scale_border_to_stage (MetaWindow *window,
+                       GtkBorder  *border)
+{
+  int left, right, top, bottom;
+
+  meta_window_protocol_to_stage_size (window, border->left, border->right,
+                                      &left, &right);
+  meta_window_protocol_to_stage_size (window, border->top, border->bottom,
+                                      &top, &bottom);
+
+  border->left = left;
+  border->right = right;
+  border->top = top;
+  border->bottom = bottom;
+}
+
 void
 meta_frame_calc_borders (MetaFrame        *frame,
                          MetaFrameBorders *borders)
@@ -353,6 +376,16 @@ meta_frame_calc_borders (MetaFrame        *frame,
         }
 
       *borders = frame->cached_borders;
+
+      scale_border_to_stage (frame->window, &borders->visible);
+      scale_border_to_stage (frame->window, &borders->invisible);
+
+      /* Recomputed rather than scaled, so the documented invariant that total
+       * is the sum of the other two survives rounding. */
+      borders->total.left = borders->visible.left + borders->invisible.left;
+      borders->total.right = borders->visible.right + borders->invisible.right;
+      borders->total.top = borders->visible.top + borders->invisible.top;
+      borders->total.bottom = borders->visible.bottom + borders->invisible.bottom;
     }
 }
 
@@ -366,6 +399,9 @@ gboolean
 meta_frame_sync_to_window (MetaFrame *frame,
                            gboolean   need_resize)
 {
+  int protocol_x, protocol_y;
+  int protocol_width, protocol_height;
+
   meta_topic (META_DEBUG_GEOMETRY,
               "Syncing frame geometry %d,%d %dx%d (SE: %d,%d)\n",
               frame->rect.x, frame->rect.y,
@@ -373,11 +409,19 @@ meta_frame_sync_to_window (MetaFrame *frame,
               frame->rect.x + frame->rect.width,
               frame->rect.y + frame->rect.height);
 
+  meta_window_stage_to_protocol_point (frame->window,
+                                       frame->rect.x, frame->rect.y,
+                                       &protocol_x, &protocol_y,
+                                       META_ROUNDING_STRATEGY_ROUND);
+  meta_window_stage_to_protocol_size (frame->window,
+                                      frame->rect.width, frame->rect.height,
+                                      &protocol_width, &protocol_height);
+
   meta_ui_frame_move_resize (frame->ui_frame,
-			     frame->rect.x,
-			     frame->rect.y,
-			     frame->rect.width,
-			     frame->rect.height);
+                             protocol_x,
+                             protocol_y,
+                             protocol_width,
+                             protocol_height);
 
   return need_resize;
 }
@@ -385,7 +429,29 @@ meta_frame_sync_to_window (MetaFrame *frame,
 cairo_region_t *
 meta_frame_get_frame_bounds (MetaFrame *frame)
 {
-  return meta_ui_frame_get_bounds (frame->ui_frame);
+  cairo_region_t *bounds;
+  int stage_width, protocol_width;
+
+  bounds = meta_ui_frame_get_bounds (frame->ui_frame);
+
+  /* The frame UI works in protocol pixels; the only consumer of this is the
+   * compositor, which clips the shadow in stage coordinates. */
+  stage_width = 1 << 16;
+  meta_window_stage_to_protocol_size (frame->window, stage_width, 0,
+                                      &protocol_width, NULL);
+
+  if (protocol_width != stage_width)
+    {
+      cairo_region_t *scaled;
+
+      scaled = meta_region_scale_double (bounds,
+                                         (double) stage_width / protocol_width,
+                                         META_ROUNDING_STRATEGY_GROW);
+      cairo_region_destroy (bounds);
+      bounds = scaled;
+    }
+
+  return bounds;
 }
 
 void

@@ -454,5 +454,15 @@
       <arg name="logical_monitors" direction="in" type="a(iiduba(ssa{sv}))" />
       <arg name="properties" direction="in" type="a{sv}" />
     </method>
+
+    <!--
+	ResetMonitorsConfig:
+
+	Remove the user's saved monitor configurations for the running backend
+	and apply the default layout, as if no configuration file existed.
+	Nothing is written back; the next ApplyMonitorsConfig with the
+	persistent method recreates the file.
+    -->
+    <method name="ResetMonitorsConfig"/>
   </interface>
 </node>

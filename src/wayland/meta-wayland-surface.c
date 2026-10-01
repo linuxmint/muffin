@@ -58,7 +58,7 @@
 #include "wayland/meta-wayland-xapp-shell.h"
 #include "wayland/meta-wayland-xdg-shell.h"
 #include "wayland/meta-window-wayland.h"
-#include "wayland/meta-xwayland-private.h"
+#include "wayland/meta-xwayland.h"
 #include "wayland/meta-xwayland-private.h"
 
 enum
@@ -734,6 +734,12 @@ meta_wayland_surface_apply_state (MetaWaylandSurface      *surface,
   if (state->scale > 0)
     surface->scale = state->scale;
 
+  /* Xwayland renders into a screen sized in physical pixels and sets no buffer
+   * scale of its own; the compositor supplies it. Must come after the client's
+   * own value so it overrides. */
+  if (meta_xwayland_is_xwayland_surface (surface))
+    surface->scale = meta_xwayland_get_effective_scale ();
+
   if (state->has_new_buffer_transform)
     surface->buffer_transform = state->buffer_transform;
 
@@ -1384,21 +1390,17 @@ meta_wayland_surface_get_preferred_scale_monitor (MetaWaylandSurface *surface)
   return logical_monitor;
 }
 
-static void
-maybe_send_preferred_scale (MetaWaylandSurface *surface)
+/* Tell @surface it is being shown at @monitor_scale. Split out so roles that
+ * know their monitor up front (layer-shell) can advertise the scale without
+ * waiting until the client has committed a buffer. */
+void
+meta_wayland_surface_send_preferred_scale (MetaWaylandSurface *surface,
+                                           float               monitor_scale)
 {
-  MetaLogicalMonitor *logical_monitor;
-  float monitor_scale;
   int scale;
 
   if (!surface->resource)
     return;
-
-  logical_monitor = meta_wayland_surface_get_preferred_scale_monitor (surface);
-  if (!logical_monitor)
-    return;
-
-  monitor_scale = meta_logical_monitor_get_scale (logical_monitor);
 
   /* Clients supporting wp_fractional_scale_v1 get the exact scale and render
    * at it, so nothing needs scaling afterwards. */
@@ -1422,6 +1424,22 @@ maybe_send_preferred_scale (MetaWaylandSurface *surface)
 
   wl_surface_send_preferred_buffer_scale (surface->resource, scale);
   surface->sent_preferred_buffer_scale = scale;
+}
+
+static void
+maybe_send_preferred_scale (MetaWaylandSurface *surface)
+{
+  MetaLogicalMonitor *logical_monitor;
+
+  if (!surface->resource)
+    return;
+
+  logical_monitor = meta_wayland_surface_get_preferred_scale_monitor (surface);
+  if (!logical_monitor)
+    return;
+
+  meta_wayland_surface_send_preferred_scale (
+    surface, meta_logical_monitor_get_scale (logical_monitor));
 }
 
 void
@@ -1744,13 +1762,28 @@ meta_wayland_surface_get_absolute_coordinates (MetaWaylandSurface *surface,
                                                float               *x,
                                                float               *y)
 {
-  ClutterActor *actor =
-    CLUTTER_ACTOR (meta_wayland_surface_get_actor (surface));
+  ClutterActor *actor;
   graphene_point3d_t sv = {
     .x = sx,
     .y = sy,
   };
   graphene_point3d_t v = { 0 };
+
+  if (surface != NULL && surface->role)
+    {
+      MetaWaylandSurfaceRoleClass *surface_role_class =
+        META_WAYLAND_SURFACE_ROLE_GET_CLASS (surface->role);
+
+      if (surface_role_class->get_absolute_coordinates)
+        {
+          surface_role_class->get_absolute_coordinates (surface->role,
+                                                        sx, sy,
+                                                        x, y);
+          return;
+        }
+    }
+
+  actor = CLUTTER_ACTOR (meta_wayland_surface_get_actor (surface));
 
   clutter_actor_apply_relative_transform_to_point (actor, NULL, &sv, &v);
 
@@ -2107,13 +2140,27 @@ meta_wayland_surface_calculate_input_region (MetaWaylandSurface *surface)
 {
   cairo_region_t *region;
   cairo_rectangle_int_t buffer_rect;
+  int width, height;
 
   if (!surface->buffer)
     return NULL;
 
+  width = meta_wayland_surface_get_width (surface);
+  height = meta_wayland_surface_get_height (surface);
+
+  /* input_region is whatever the client set, and Xwayland sets it in X
+   * protocol pixels, so the bounds have to match it rather than the stage. */
+  if (meta_xwayland_is_xwayland_surface (surface))
+    {
+      int scale = meta_xwayland_get_effective_scale ();
+
+      width *= scale;
+      height *= scale;
+    }
+
   buffer_rect = (cairo_rectangle_int_t) {
-    .width = meta_wayland_surface_get_width (surface),
-    .height = meta_wayland_surface_get_height (surface),
+    .width = width,
+    .height = height,
   };
   region = cairo_region_create_rectangle (&buffer_rect);
 
@@ -2218,6 +2265,15 @@ meta_wayland_surface_get_height (MetaWaylandSurface *surface)
     }
 }
 
+void
+meta_wayland_surface_get_buffer_size (MetaWaylandSurface *surface,
+                                      int                *width,
+                                      int                *height)
+{
+  *width = get_buffer_width (surface);
+  *height = get_buffer_height (surface);
+}
+
 static void
 scanout_destroyed (gpointer  data,
                    GObject  *where_the_object_was)
@@ -2252,16 +2308,7 @@ meta_wayland_surface_can_scanout_untransformed (MetaWaylandSurface *surface,
 
   if (get_buffer_width (surface) != mode_width ||
       get_buffer_height (surface) != mode_height)
-    {
-      meta_topic (META_DEBUG_SCANOUT,
-                  "fullscreen surface not scanout-capable: "
-                  "buffer %dx%d vs mode %dx%d\n",
-                  get_buffer_width (surface),
-                  get_buffer_height (surface),
-                  mode_width, mode_height);
-
-      return FALSE;
-    }
+    return FALSE;
 
   return TRUE;
 }

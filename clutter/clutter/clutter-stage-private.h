@@ -143,10 +143,18 @@ void            clutter_stage_queue_actor_relayout      (ClutterStage *stage,
 void clutter_stage_dequeue_actor_relayout (ClutterStage *stage,
                                            ClutterActor *actor);
 
+void clutter_stage_queue_resource_scale_change (ClutterStage *stage,
+                                                ClutterActor *actor);
+
 GList * clutter_stage_get_views_for_rect (ClutterStage          *stage,
                                           const graphene_rect_t *rect);
 
 void clutter_stage_set_actor_needs_immediate_relayout (ClutterStage *stage);
+
+void clutter_stage_invalidate_devices (ClutterStage *stage);
+
+void clutter_stage_invalidate_focus (ClutterStage *stage,
+                                     ClutterActor *actor);
 
 G_END_DECLS
 
