@@ -3429,6 +3429,30 @@ meta_output_is_laptop (MetaOutput *output)
 void
 meta_monitor_manager_on_hotplug (MetaMonitorManager *manager)
 {
+  MetaMonitorsConfig *current_config =
+    meta_monitor_config_manager_get_current (manager->config_manager);
+
+  /* Keep a switch config (Super+P) across hotplugs that leave the set of
+   * connected monitors unchanged, instead of falling back to the stored or
+   * suggested configuration. */
+  if (current_config &&
+      meta_monitors_config_get_switch_config (current_config) !=
+        META_MONITOR_SWITCH_CONFIG_UNKNOWN &&
+      !meta_monitor_manager_has_hotplug_mode_update (manager) &&
+      meta_monitor_manager_is_config_complete (manager, current_config))
+    {
+      g_autoptr (GError) error = NULL;
+
+      if (meta_monitor_manager_apply_monitors_config (manager,
+                                                      current_config,
+                                                      META_MONITORS_CONFIG_METHOD_TEMPORARY,
+                                                      &error))
+        return;
+
+      g_warning ("Failed to re-apply switch configuration: %s",
+                 error->message);
+    }
+
   meta_monitor_manager_ensure_configured (manager);
 }
 
