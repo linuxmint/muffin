@@ -32,7 +32,6 @@ Build-Depends:
         libinput-dev (>= 1.19.0) [linux-any],
         libjson-glib-dev (>= 0.13.2-1~),
         libnvidia-egl-wayland-dev [linux-any],
-        libpam0g-dev,
         libpango1.0-dev (>= 1.2.0),
         libpipewire-0.3-dev [linux-any] | libpipewire-0.2-dev [linux-any],
         libsm-dev,
