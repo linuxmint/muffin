@@ -21,6 +21,8 @@
 #ifndef META_BACKEND_TYPE_H
 #define META_BACKEND_TYPE_H
 
+typedef struct _MetaBackend MetaBackend;
+
 typedef struct _MetaMonitorManager MetaMonitorManager;
 
 typedef struct _MetaMonitorConfigManager MetaMonitorConfigManager;

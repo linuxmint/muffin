@@ -959,7 +959,7 @@ meta_wayland_tablet_tool_update (MetaWaylandTabletTool *tool,
       break;
     case CLUTTER_PROXIMITY_IN:
       if (!tool->cursor_renderer)
-        tool->cursor_renderer = meta_cursor_renderer_new ();
+        tool->cursor_renderer = meta_cursor_renderer_new (meta_get_backend ());
       tool->current_tablet =
         meta_wayland_tablet_seat_lookup_tablet (tool->seat,
                                                 clutter_event_get_source_device (event));

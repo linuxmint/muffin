@@ -136,7 +136,8 @@ enum
 
 static guint pan_signals[LAST_SIGNAL] = { 0, };
 
-G_DEFINE_TYPE_WITH_PRIVATE (ClutterPanAction, clutter_pan_action, CLUTTER_TYPE_GESTURE_ACTION)
+G_DEFINE_TYPE_WITH_PRIVATE (ClutterPanAction, clutter_pan_action,
+                            CLUTTER_TYPE_GESTURE_ACTION)
 
 static void
 emit_pan (ClutterPanAction *self,
@@ -156,14 +157,18 @@ emit_pan (ClutterPanAction *self,
           gfloat scroll_threshold = G_PI_4/2;
           gfloat drag_angle;
 
-          clutter_gesture_action_get_motion_delta (CLUTTER_GESTURE_ACTION (self), 0, &delta_x, &delta_y);
+          clutter_gesture_action_get_motion_delta (CLUTTER_GESTURE_ACTION (self),
+                                                   0,
+                                                   &delta_x,
+                                                   &delta_y);
 
           if (delta_x != 0.0f)
             drag_angle = atanf (delta_y / delta_x);
           else
             drag_angle = G_PI_2;
 
-          if ((drag_angle > -scroll_threshold) && (drag_angle < scroll_threshold))
+          if ((drag_angle > -scroll_threshold) &&
+              (drag_angle < scroll_threshold))
             priv->pin_state = SCROLL_PINNED_HORIZONTAL;
           else if ((drag_angle > (G_PI_2 - scroll_threshold)) ||
                     (drag_angle < -(G_PI_2 - scroll_threshold)))
@@ -282,7 +287,10 @@ gesture_end (ClutterGestureAction *gesture,
   gfloat tau;
   gint duration;
 
-  clutter_gesture_action_get_release_coords (CLUTTER_GESTURE_ACTION (self), 0, &priv->release_x, &priv->release_y);
+  clutter_gesture_action_get_release_coords (CLUTTER_GESTURE_ACTION (self),
+                                             0,
+                                             &priv->release_x,
+                                             &priv->release_y);
 
   if (!priv->should_interpolate)
     {
@@ -293,7 +301,9 @@ gesture_end (ClutterGestureAction *gesture,
   priv->state = PAN_STATE_INTERPOLATING;
 
   clutter_gesture_action_get_motion_delta (gesture, 0, &delta_x, &delta_y);
-  velocity = clutter_gesture_action_get_velocity (gesture, 0, &velocity_x, &velocity_y);
+  velocity = clutter_gesture_action_get_velocity (gesture, 0,
+                                                  &velocity_x,
+                                                  &velocity_y);
 
   /* Exponential timing constant v(t) = v(0) * exp(-t/tau)
    * tau = 1000ms / (frame_per_second * - ln(decay_per_frame))
@@ -304,17 +314,22 @@ gesture_end (ClutterGestureAction *gesture,
   /* See where the decreasing velocity reaches $min_velocity px/ms
    * v(t) = v(0) * exp(-t/tau) = min_velocity
    * t = - tau * ln( min_velocity / |v(0)|) */
-  duration = - tau * logf (min_velocity / (ABS (velocity) * priv->acceleration_factor));
+  duration = - tau * logf (min_velocity / (ABS (velocity) *
+                                           priv->acceleration_factor));
 
   /* Target point: x(t) = v(0) * tau * [1 - exp(-t/tau)] */
-  priv->target_x = velocity_x * priv->acceleration_factor * tau * (1 - exp ((float)-duration / tau));
-  priv->target_y = velocity_y * priv->acceleration_factor * tau * (1 - exp ((float)-duration / tau));
+  priv->target_x = (velocity_x * priv->acceleration_factor * tau *
+                    (1 - exp ((float)-duration / tau)));
+  priv->target_y = (velocity_y * priv->acceleration_factor * tau *
+                    (1 - exp ((float)-duration / tau)));
 
-  if (ABS (velocity) * priv->acceleration_factor > min_velocity && duration > FLOAT_EPSILON)
+  if (ABS (velocity) * priv->acceleration_factor > min_velocity &&
+      duration > FLOAT_EPSILON)
     {
       priv->interpolated_x = priv->interpolated_y = 0.0f;
       priv->deceleration_timeline = clutter_timeline_new (duration);
-      clutter_timeline_set_progress_mode (priv->deceleration_timeline, CLUTTER_EASE_OUT_EXPO);
+      clutter_timeline_set_progress_mode (priv->deceleration_timeline,
+                                          CLUTTER_EASE_OUT_EXPO);
 
       g_signal_connect (priv->deceleration_timeline, "new_frame",
                         G_CALLBACK (on_deceleration_new_frame), self);
@@ -367,7 +382,8 @@ clutter_pan_action_set_property (GObject      *gobject,
       break;
 
     case PROP_ACCELERATION_FACTOR :
-      clutter_pan_action_set_acceleration_factor (self, g_value_get_double (value));
+      clutter_pan_action_set_acceleration_factor (self,
+                                                  g_value_get_double (value));
       break;
 
     default:
@@ -411,9 +427,11 @@ static void
 clutter_pan_action_constructed (GObject *gobject)
 {
   ClutterGestureAction *gesture;
+  ClutterGestureTriggerEdge edge;
 
   gesture = CLUTTER_GESTURE_ACTION (gobject);
-  clutter_gesture_action_set_threshold_trigger_edge (gesture, CLUTTER_GESTURE_TRIGGER_EDGE_AFTER);
+  edge = CLUTTER_GESTURE_TRIGGER_EDGE_AFTER;
+  clutter_gesture_action_set_threshold_trigger_edge (gesture, edge);
 }
 
 static void
@@ -442,7 +460,8 @@ clutter_pan_action_set_actor (ClutterActorMeta *meta,
         g_clear_object (&priv->deceleration_timeline);
     }
 
-  CLUTTER_ACTOR_META_CLASS (clutter_pan_action_parent_class)->set_actor (meta, actor);
+  CLUTTER_ACTOR_META_CLASS (clutter_pan_action_parent_class)->set_actor (meta,
+                                                                           actor);
 }
 
 
@@ -880,7 +899,9 @@ clutter_pan_action_get_constrained_motion_delta (ClutterPanAction *self,
 
   priv = self->priv;
 
-  distance = clutter_pan_action_get_motion_delta (self, point, &delta_x, &delta_y);
+  distance = clutter_pan_action_get_motion_delta (self, point,
+                                                  &delta_x,
+                                                  &delta_y);
 
   switch (priv->pan_axis)
     {
