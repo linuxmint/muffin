@@ -14,7 +14,6 @@ Build-Depends:
         gir1.2-glib-2.0-dev,
         cinnamon-settings-daemon <!nocheck>,
         gobject-introspection (>= 1.41.3),
-        gtk-doc-tools (>= 1.15),
         libcairo2-dev (>= 1.10.0),
         libcanberra-gtk3-dev,
         libdrm-dev (>= 2.4.83) [linux-any],
