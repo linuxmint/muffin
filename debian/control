@@ -56,7 +56,7 @@ Build-Depends:
         libxkbfile-dev,
         libxrandr-dev,
         libxrender-dev,
-        libxt-dev,
+        libxtst-dev,
         meson (>= 1.0.0),
         pkgconf,
         systemd-dev [linux-any],
