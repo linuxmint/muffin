@@ -5,9 +5,8 @@ Source: https://github.com/linuxmint/muffin
 
 Files:
  *
- debian/*
 Copyright:
-   2002-2020  the mutter authors
+   2002-2024  the mutter authors
    1991-2000  Silicon Graphics Inc
    1999-2005  Brian Paul
    1999-2000  Erik Walthinsen
@@ -69,7 +68,7 @@ Copyright:
    2011       Robert Bosch Car Multimedia GmbH
    2007-2018  Ask Hjorth Larsen
    2002       Simos Xenitellis
-   2001-2020  Red Hat Inc
+   2001-2024  Red Hat Inc
    2016       Hyungwon Hwang
    2001-2008  Havoc Pennington
    2009       Sander Dijkhuis
@@ -82,9 +81,15 @@ Copyright:
    2014       Jonas Ådahl
    2014       Rico Tzschichholz
    2018-2020  DisplayLink (UK) Ltd.
-   2018-2019  Robert Mader
+   2018-2021  Robert Mader
    2005-2018  Canonical Ltd.
+   2018-2020  Endless, Inc.
    2018-2020  Simon McVittie
+   2020       Jonas Dreßler
+   2020       Sebastian Wick
+   2021       SUSE Software Solutions Germany GmbH
+   2016       Linux Mint
+   2010       Giovanni Campagna
 License: GPL-2+ and LGPL-2+ and LGPL-2.1+ and Expat and NTP-BSD-variant and SGI-B-2.0
 
 Files:
@@ -95,7 +100,7 @@ Copyright:
 License: WRF-BSD-variant
 
 Files:
- src/x11/mutter-Xatomtype.h
+ src/x11/muffin-Xatomtype.h
 Copyright:
  1987-1998 The Open Group
  1987 Digital Equipment Corporation
