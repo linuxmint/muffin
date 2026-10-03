@@ -68,6 +68,8 @@ void                    meta_wayland_compositor_add_frame_callback_surface (Meta
 void                    meta_wayland_compositor_remove_frame_callback_surface (MetaWaylandCompositor *compositor,
                                                                                MetaWaylandSurface    *surface);
 
+GQueue                 *meta_wayland_compositor_get_committed_transactions (MetaWaylandCompositor *compositor);
+
 META_EXPORT_TEST
 const char             *meta_wayland_get_wayland_display_name   (MetaWaylandCompositor *compositor);
 
