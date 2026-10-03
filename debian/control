@@ -61,7 +61,6 @@ Build-Depends:
         meson (>= 1.0.0),
         pkgconf,
         systemd-dev [linux-any],
-        udev [linux-any],
         wayland-protocols (>= 1.38) [linux-any],
         xauth <!nocheck>,
         xcvt [linux-any],
