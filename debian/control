@@ -98,7 +98,6 @@ Depends: adwaita-icon-theme,
          ${misc:Depends},
          ${shlibs:Depends}
 Replaces: muffin-doc
-Breaks: apparmor (<< 2.13.3-5~)
 Description: window and compositing manager (shared library)
  Muffin is a window manager performing compositing as well based on
  GTK+ and Clutter and used in Cinnamon desktop environment.
