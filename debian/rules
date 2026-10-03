@@ -9,9 +9,6 @@ export DPKG_GENSYMBOLS_CHECK_LEVEL = 2
 %:
 	dh $@
 
-override_dh_autoreconf:
-	dh_autoreconf --as-needed
-
 CONFFLAGS = \
 	-Dprofiler=false \
 	-Dremote_desktop=false
