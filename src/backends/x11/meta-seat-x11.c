@@ -32,6 +32,15 @@
 #include "core/bell.h"
 #include "meta-seat-x11.h"
 
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/ioctl.h>
+#include <linux/input.h>
+#include <glib-unix.h>
+#ifdef HAVE_LIBGUDEV
+#include <gudev/gudev.h>
+#endif
+
 enum
 {
   PROP_0,
@@ -59,6 +68,20 @@ struct _MetaSeatX11
   int opcode;
   guint has_touchscreens : 1;
   guint touch_mode : 1;
+
+  /* Tablet-mode switch (SW_TABLET_MODE) tracking, so touch-mode reflects
+   * laptop vs tablet posture on X11 too. The native/Wayland backend gets
+   * this from libinput; under X11 we read the evdev switch directly (a
+   * uaccess udev rule grants the active session read access). */
+  guint has_tablet_switch : 1;          /* sticky: a convertible is never a slate */
+  guint tablet_mode_switch_state : 1;   /* OR of SW_TABLET_MODE across switches */
+  GPtrArray *tablet_switches;           /* MetaTabletSwitch* */
+  guint tablet_rescan_source;           /* debounce timer for re-enumeration */
+  guint tablet_acl_source;              /* retry while switch unreadable (ACL race) */
+  guint tablet_acl_retries;
+#ifdef HAVE_LIBGUDEV
+  GUdevClient *tablet_udev;
+#endif
 };
 
 static GParamSpec *props[N_PROPS] = { 0 };
@@ -623,13 +646,344 @@ update_touch_mode (MetaSeatX11 *seat_x11)
 {
   gboolean touch_mode;
 
-  touch_mode = seat_x11->has_touchscreens;
+  /* No touch mode without a touchscreen. */
+  if (!seat_x11->has_touchscreens)
+    touch_mode = FALSE;
+  /* A tablet-mode switch that is off means laptop posture. */
+  else if (seat_x11->has_tablet_switch && !seat_x11->tablet_mode_switch_state)
+    touch_mode = FALSE;
+  /* Tablet mode, or no switch at all (e.g. a slate). */
+  else
+    touch_mode = TRUE;
 
   if (seat_x11->touch_mode == touch_mode)
     return;
 
   seat_x11->touch_mode = touch_mode;
   g_object_notify (G_OBJECT (seat_x11), "touch-mode");
+}
+
+/* ---- tablet-mode switch tracking (SW_TABLET_MODE via evdev) ----------------
+ *
+ * The native (Wayland) backend learns laptop-vs-tablet from libinput; the X11
+ * backend has no such source, so we read the SW_TABLET_MODE evdev switch
+ * directly and fold it into touch-mode. A uaccess udev rule must grant the
+ * active session read access to the switch device. Ported from the
+ * cinnamon-autorotate reference (handles the switch hot-plugging at a new
+ * eventN on fold, input re-enumeration on resume, and the login ACL race). */
+
+#define NLONGS(bits) (((bits) + (sizeof (long) * 8) - 1) / (sizeof (long) * 8))
+#define TABLET_ACL_RETRY_MS    3000
+#define TABLET_ACL_MAX_RETRIES 10
+
+static inline gboolean
+tablet_test_bit (const unsigned long *arr, int bit)
+{
+  return (arr[bit / (sizeof (long) * 8)] >> (bit % (sizeof (long) * 8))) & 1UL;
+}
+
+typedef struct
+{
+  int    fd;
+  guint  source;
+  gchar *path;
+} MetaTabletSwitch;
+
+static void scan_tablet_switches (MetaSeatX11 *seat_x11);
+static gboolean tablet_acl_retry_cb (gpointer user_data);
+
+static void
+tablet_switch_free (gpointer data)
+{
+  MetaTabletSwitch *s = data;
+
+  if (s->source)
+    g_source_remove (s->source);
+  if (s->fd >= 0)
+    close (s->fd);
+  g_free (s->path);
+  g_free (s);
+}
+
+/* tablet_mode_switch_state = OR of EVIOCGSW across all watched switches, read
+ * authoritatively rather than from raw events. */
+static void
+recompute_tablet_mode (MetaSeatX11 *seat_x11)
+{
+  gboolean active = FALSE;
+  guint i;
+
+  for (i = 0; i < seat_x11->tablet_switches->len; i++)
+    {
+      MetaTabletSwitch *s = g_ptr_array_index (seat_x11->tablet_switches, i);
+      unsigned long state[NLONGS (SW_CNT)] = { 0 };
+
+      if (ioctl (s->fd, EVIOCGSW (sizeof state), state) < 0)
+        continue;
+      if (tablet_test_bit (state, SW_TABLET_MODE))
+        active = TRUE;
+    }
+
+  seat_x11->tablet_mode_switch_state = active;
+}
+
+/* Remove one switch (by fd) on HUP. We return G_SOURCE_REMOVE ourselves, so
+ * clear ->source first to avoid a double-remove. */
+static void
+drop_tablet_switch_fd (MetaSeatX11 *seat_x11, int fd)
+{
+  guint i;
+
+  for (i = 0; i < seat_x11->tablet_switches->len; i++)
+    {
+      MetaTabletSwitch *s = g_ptr_array_index (seat_x11->tablet_switches, i);
+      if (s->fd == fd)
+        {
+          s->source = 0;
+          g_ptr_array_remove_index (seat_x11->tablet_switches, i);
+          return;
+        }
+    }
+}
+
+static gboolean
+do_tablet_rescan (gpointer user_data)
+{
+  MetaSeatX11 *seat_x11 = user_data;
+
+  seat_x11->tablet_rescan_source = 0;
+  scan_tablet_switches (seat_x11);
+  recompute_tablet_mode (seat_x11);
+  update_touch_mode (seat_x11);
+  return G_SOURCE_REMOVE;
+}
+
+/* Debounce: a fold/resume fires a storm of input uevents; coalesce them. */
+static void
+schedule_tablet_rescan (MetaSeatX11 *seat_x11)
+{
+  if (seat_x11->tablet_rescan_source != 0)
+    return;
+  seat_x11->tablet_rescan_source =
+    g_timeout_add (700, do_tablet_rescan, seat_x11);
+}
+
+static gboolean
+on_tablet_switch_io (gint fd, GIOCondition condition, gpointer user_data)
+{
+  MetaSeatX11 *seat_x11 = user_data;
+  guint8 buf[256];
+
+  if (condition & (G_IO_HUP | G_IO_ERR))
+    {
+      drop_tablet_switch_fd (seat_x11, fd);
+      schedule_tablet_rescan (seat_x11);
+      return G_SOURCE_REMOVE;
+    }
+
+  while (read (fd, buf, sizeof buf) > 0)
+    ; /* drain; state is read authoritatively below */
+
+  recompute_tablet_mode (seat_x11);
+  update_touch_mode (seat_x11);
+  return G_SOURCE_CONTINUE;
+}
+
+static gboolean
+tablet_switch_is_watched (MetaSeatX11 *seat_x11, const char *path)
+{
+  guint i;
+
+  for (i = 0; i < seat_x11->tablet_switches->len; i++)
+    {
+      MetaTabletSwitch *s = g_ptr_array_index (seat_x11->tablet_switches, i);
+      if (g_strcmp0 (s->path, path) == 0)
+        return TRUE;
+    }
+  return FALSE;
+}
+
+/* SW_TABLET_MODE capability via sysfs (world-readable), so we recognise a
+ * convertible even before /dev/input/eventN is readable (uaccess ACL race). */
+static gboolean
+sysfs_has_tablet_switch (const char *evname)
+{
+  gchar *cap = g_strdup_printf ("/sys/class/input/%s/device/capabilities/sw", evname);
+  gchar *contents = NULL;
+  gboolean has = FALSE;
+
+  if (g_file_get_contents (cap, &contents, NULL, NULL))
+    {
+      gchar **words = g_strsplit_set (g_strstrip (contents), " \t\n", -1);
+      guint n = g_strv_length (words);
+
+      if (n > 0)
+        {
+          unsigned long m = g_ascii_strtoull (words[n - 1], NULL, 16);
+          has = (m & (1UL << SW_TABLET_MODE)) != 0;
+        }
+      g_strfreev (words);
+    }
+  g_free (contents);
+  g_free (cap);
+  return has;
+}
+
+static void
+scan_tablet_switches (MetaSeatX11 *seat_x11)
+{
+  GPtrArray *found = g_ptr_array_new_with_free_func (g_free);  /* readable paths */
+  gboolean any_capable = FALSE;
+  GDir *dir;
+  const char *name;
+  guint i;
+
+  dir = g_dir_open ("/dev/input", 0, NULL);
+  if (dir != NULL)
+    {
+      while ((name = g_dir_read_name (dir)) != NULL)
+        {
+          gchar *path;
+
+          if (!g_str_has_prefix (name, "event"))
+            continue;
+          if (!sysfs_has_tablet_switch (name))
+            continue;
+          any_capable = TRUE;
+          seat_x11->has_tablet_switch = TRUE;   /* sticky */
+          path = g_build_filename ("/dev/input", name, NULL);
+          if (access (path, R_OK) == 0)
+            g_ptr_array_add (found, path);
+          else
+            g_free (path);
+        }
+      g_dir_close (dir);
+    }
+
+  /* Same readable set already watched -> keep watches (no fd churn). */
+  if (found->len == seat_x11->tablet_switches->len)
+    {
+      gboolean same = TRUE;
+
+      for (i = 0; i < found->len; i++)
+        if (!tablet_switch_is_watched (seat_x11, g_ptr_array_index (found, i)))
+          {
+            same = FALSE;
+            break;
+          }
+      if (same)
+        {
+          g_ptr_array_unref (found);
+          return;
+        }
+    }
+
+  g_ptr_array_set_size (seat_x11->tablet_switches, 0);   /* frees elements */
+  for (i = 0; i < found->len; i++)
+    {
+      const char *path = g_ptr_array_index (found, i);
+      int fd = open (path, O_RDONLY | O_NONBLOCK | O_CLOEXEC);
+      MetaTabletSwitch *s;
+
+      if (fd < 0)
+        continue;
+      s = g_new0 (MetaTabletSwitch, 1);
+      s->fd = fd;
+      s->path = g_strdup (path);
+      s->source = g_unix_fd_add (fd, G_IO_IN | G_IO_HUP | G_IO_ERR,
+                                 on_tablet_switch_io, seat_x11);
+      g_ptr_array_add (seat_x11->tablet_switches, s);
+      g_debug ("MetaSeatX11: watching tablet-mode switch %s", path);
+    }
+  g_ptr_array_unref (found);
+
+  /* A successful open resets the ACL-race budget, so a later revoke/regrant
+   * (e.g. across suspend/resume) gets a fresh set of retries rather than
+   * exhausting a per-process budget. */
+  if (seat_x11->tablet_switches->len > 0)
+    seat_x11->tablet_acl_retries = 0;
+
+  /* uaccess ACL race: a switch exists but isn't readable yet. Retry a few
+   * times (the GUdev watch also covers later hot-plugs). */
+  if (any_capable && seat_x11->tablet_switches->len == 0 &&
+      seat_x11->tablet_acl_source == 0 &&
+      seat_x11->tablet_acl_retries < TABLET_ACL_MAX_RETRIES)
+    {
+      seat_x11->tablet_acl_retries++;
+      seat_x11->tablet_acl_source =
+        g_timeout_add (TABLET_ACL_RETRY_MS, tablet_acl_retry_cb, seat_x11);
+    }
+}
+
+static gboolean
+tablet_acl_retry_cb (gpointer user_data)
+{
+  MetaSeatX11 *seat_x11 = user_data;
+
+  seat_x11->tablet_acl_source = 0;
+  scan_tablet_switches (seat_x11);
+  recompute_tablet_mode (seat_x11);
+  update_touch_mode (seat_x11);
+  return G_SOURCE_REMOVE;
+}
+
+#ifdef HAVE_LIBGUDEV
+static void
+on_tablet_uevent (GUdevClient *client,
+                  const char  *action,
+                  GUdevDevice *device,
+                  gpointer     user_data)
+{
+  MetaSeatX11 *seat_x11 = user_data;
+  const char *name = g_udev_device_get_name (device);
+
+  if (name == NULL || !g_str_has_prefix (name, "event"))
+    return;
+  if (g_strcmp0 (action, "add") == 0 ||
+      g_strcmp0 (action, "remove") == 0 ||
+      g_strcmp0 (action, "change") == 0)
+    schedule_tablet_rescan (seat_x11);
+}
+#endif
+
+static void
+meta_seat_x11_init_tablet_switches (MetaSeatX11 *seat_x11)
+{
+  seat_x11->tablet_switches =
+    g_ptr_array_new_with_free_func (tablet_switch_free);
+
+#ifdef HAVE_LIBGUDEV
+  {
+    const char * const subsystems[] = { "input", NULL };
+
+    seat_x11->tablet_udev = g_udev_client_new (subsystems);
+    g_signal_connect (seat_x11->tablet_udev, "uevent",
+                      G_CALLBACK (on_tablet_uevent), seat_x11);
+  }
+#endif
+
+  scan_tablet_switches (seat_x11);
+  recompute_tablet_mode (seat_x11);
+  update_touch_mode (seat_x11);
+}
+
+static void
+meta_seat_x11_teardown_tablet_switches (MetaSeatX11 *seat_x11)
+{
+  if (seat_x11->tablet_rescan_source != 0)
+    {
+      g_source_remove (seat_x11->tablet_rescan_source);
+      seat_x11->tablet_rescan_source = 0;
+    }
+  if (seat_x11->tablet_acl_source != 0)
+    {
+      g_source_remove (seat_x11->tablet_acl_source);
+      seat_x11->tablet_acl_source = 0;
+    }
+#ifdef HAVE_LIBGUDEV
+  g_clear_object (&seat_x11->tablet_udev);
+#endif
+  g_clear_pointer (&seat_x11->tablet_switches, g_ptr_array_unref);
 }
 
 static ClutterInputDevice *
@@ -1497,6 +1851,8 @@ meta_seat_x11_constructed (GObject *object)
 
   meta_seat_x11_a11y_init (CLUTTER_SEAT (seat_x11));
 
+  meta_seat_x11_init_tablet_switches (seat_x11);
+
   if (G_OBJECT_CLASS (meta_seat_x11_parent_class)->constructed)
     G_OBJECT_CLASS (meta_seat_x11_parent_class)->constructed (object);
 }
@@ -1505,6 +1861,8 @@ static void
 meta_seat_x11_finalize (GObject *object)
 {
   MetaSeatX11 *seat_x11 = META_SEAT_X11 (object);
+
+  meta_seat_x11_teardown_tablet_switches (seat_x11);
 
   g_hash_table_unref (seat_x11->devices_by_id);
   g_hash_table_unref (seat_x11->tools_by_serial);
