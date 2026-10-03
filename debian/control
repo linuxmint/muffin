@@ -12,7 +12,6 @@ Build-Depends:
         dmz-cursor-theme <!nocheck>,
         gir1.2-freedesktop-dev,
         gir1.2-glib-2.0-dev,
-        gnome-pkg-tools (>= 0.10),
         cinnamon-settings-daemon <!nocheck>,
         gobject-introspection (>= 1.41.3),
         gtk-doc-tools (>= 1.15),
