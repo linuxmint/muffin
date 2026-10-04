@@ -1277,7 +1277,7 @@ _meta_window_shared_new (MetaDisplay         *display,
   window->is_remote = FALSE;
   window->startup_id = NULL;
 
-  window->net_wm_pid = -1;
+  window->client_pid = 0;
 
   window->xtransient_for = None;
   window->xclient_leader = None;
@@ -8484,32 +8484,44 @@ meta_window_get_transient_for (MetaWindow *window)
  * meta_window_get_client_pid:
  * @window: a #MetaWindow
  *
- * Returns the pid of the process that created this window, if available
- * to the windowing system.
+ * Returns the pid of the process that created this window, as reported by
+ * the windowing system (X-Resource on X11, socket credentials on Wayland).
+ * The pid cannot change for the lifetime of the window, so it is cached
+ * once known.
  *
  * Return value: the pid, or 0 if not known.
  */
 uint32_t
 meta_window_get_client_pid (MetaWindow *window)
 {
-  return META_WINDOW_GET_CLASS (window)->get_client_pid (window);
+  g_return_val_if_fail (META_IS_WINDOW (window), 0);
+
+  if (window->client_pid == 0)
+    window->client_pid = META_WINDOW_GET_CLASS (window)->get_client_pid (window);
+
+  return window->client_pid;
 }
 
 /**
  * meta_window_get_pid:
  * @window: a #MetaWindow
  *
- * Returns pid of the process that created this window, if known (obtained from
- * the _NET_WM_PID property).
+ * Returns the pid of the process that created this window, if known.
+ * Same as meta_window_get_client_pid() but with the historical -1 sentinel
+ * for callers that predate it.
  *
  * Return value: the pid, or -1 if not known.
  */
 int
 meta_window_get_pid (MetaWindow *window)
 {
+  uint32_t pid;
+
   g_return_val_if_fail (META_IS_WINDOW (window), -1);
 
-  return window->net_wm_pid;
+  pid = meta_window_get_client_pid (window);
+
+  return pid > 0 ? (int) pid : -1;
 }
 
 /**

@@ -699,10 +699,12 @@ static uint32_t
 meta_window_wayland_get_client_pid (MetaWindow *window)
 {
   MetaWaylandSurface *surface = window->surface;
-  struct wl_resource *resource = surface->resource;
   pid_t pid;
 
-  wl_client_get_credentials (wl_resource_get_client (resource), &pid, NULL, NULL);
+  if (!surface || !surface->resource)
+    return 0;
+
+  wl_client_get_credentials (wl_resource_get_client (surface->resource), &pid, NULL, NULL);
   return (uint32_t)pid;
 }
 
