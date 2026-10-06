@@ -861,6 +861,9 @@ maybe_leave_show_desktop_mode (MetaWindow *window)
   if (!workspace_manager->active_workspace->showing_desktop)
     return;
 
+  if (window->override_redirect)
+    return;
+
   /* If the window is a transient for the dock or desktop, don't
    * leave show desktop mode when the window opens. That's
    * so you can e.g. hide all windows, manipulate a file on
