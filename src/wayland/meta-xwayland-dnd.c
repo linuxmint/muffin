@@ -34,6 +34,7 @@
 #include <X11/Xatom.h>
 #include <X11/extensions/Xfixes.h>
 
+#include "backends/meta-dnd-private.h"
 #include "meta/meta-x11-errors.h"
 #include "wayland/meta-wayland-data-device.h"
 #include "wayland/meta-xwayland-private.h"
@@ -816,6 +817,7 @@ drag_xgrab_motion (MetaWaylandPointerGrab *grab,
   repick_drop_surface (compositor,
                        (MetaWaylandDragGrab *) grab,
                        event);
+  meta_dnd_wayland_handle_drag_motion (event);
 
   dnd->last_motion_time = clutter_event_get_time (event);
   meta_wayland_pointer_send_motion (seat->pointer, event);
