@@ -34,6 +34,7 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "backends/meta-dnd-private.h"
 #include "compositor/meta-dnd-actor-private.h"
 #include "meta/meta-selection-source-memory.h"
 #include "wayland/meta-selection-source-wayland-private.h"
@@ -409,6 +410,8 @@ drag_grab_motion (MetaWaylandPointerGrab *grab,
   if (drag_grab->drag_surface)
     meta_feedback_actor_update (META_FEEDBACK_ACTOR (drag_grab->feedback_actor),
                                 event);
+
+  meta_dnd_wayland_handle_drag_motion (event);
 }
 
 static void
@@ -439,6 +442,8 @@ data_device_end_drag_grab (MetaWaylandDragGrab *drag_grab)
     }
 
   drag_grab->seat->data_device.current_grab = NULL;
+
+  meta_dnd_wayland_handle_drag_end ();
 
   /* There might be other grabs created in result to DnD actions like popups
    * on "ask" actions, we must not reset those, only our own.

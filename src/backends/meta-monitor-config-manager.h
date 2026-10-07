@@ -163,6 +163,9 @@ META_EXPORT_TEST
 gboolean meta_monitors_config_key_equal (gconstpointer config_key_a,
                                          gconstpointer config_key_b);
 
+gboolean meta_monitors_config_layouts_equal (MetaMonitorsConfig *config_a,
+                                             MetaMonitorsConfig *config_b);
+
 META_EXPORT_TEST
 void meta_monitors_config_key_free (MetaMonitorsConfigKey *config_key);
 

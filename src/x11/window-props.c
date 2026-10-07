@@ -452,27 +452,6 @@ reload_wm_window_role (MetaWindow    *window,
 }
 
 static void
-reload_net_wm_pid (MetaWindow    *window,
-                   MetaPropValue *value,
-                   gboolean       initial)
-{
-  if (value->type != META_PROP_VALUE_INVALID)
-    {
-      uint32_t cardinal = (int) value->v.cardinal;
-
-      if (cardinal <= 0)
-        meta_warning ("Application set a bogus _NET_WM_PID %u\n",
-                      cardinal);
-      else
-        {
-          window->net_wm_pid = cardinal;
-          meta_verbose ("Window has _NET_WM_PID %d\n",
-                        window->net_wm_pid);
-        }
-    }
-}
-
-static void
 reload_net_wm_user_time (MetaWindow    *window,
                          MetaPropValue *value,
                          gboolean       initial)
@@ -2063,7 +2042,6 @@ meta_x11_display_init_window_prop_hooks (MetaX11Display *x11_display)
     { x11_display->atom_WM_CLIENT_MACHINE, META_PROP_VALUE_STRING,   reload_wm_client_machine, LOAD_INIT | INCLUDE_OR },
     { x11_display->atom__NET_WM_NAME,      META_PROP_VALUE_UTF8,     reload_net_wm_name,       LOAD_INIT | INCLUDE_OR },
     { XA_WM_CLASS,                         META_PROP_VALUE_CLASS_HINT, reload_wm_class,        LOAD_INIT | INCLUDE_OR },
-    { x11_display->atom__NET_WM_PID,       META_PROP_VALUE_CARDINAL, reload_net_wm_pid,        LOAD_INIT | INCLUDE_OR },
     { XA_WM_NAME,                          META_PROP_VALUE_TEXT_PROPERTY, reload_wm_name,      LOAD_INIT | INCLUDE_OR },
     { x11_display->atom__MUFFIN_HINTS,     META_PROP_VALUE_TEXT_PROPERTY, reload_muffin_hints, LOAD_INIT | INCLUDE_OR },
     { x11_display->atom__NET_WM_OPAQUE_REGION, META_PROP_VALUE_CARDINAL_LIST, reload_opaque_region, LOAD_INIT | INCLUDE_OR },

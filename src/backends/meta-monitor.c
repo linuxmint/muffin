@@ -1461,7 +1461,7 @@ meta_monitor_get_mode_from_id (MetaMonitor *monitor,
   return g_hash_table_lookup (priv->mode_ids, monitor_mode_id);
 }
 
-static gboolean
+gboolean
 meta_monitor_mode_spec_equals (MetaMonitorModeSpec *monitor_mode_spec,
                                MetaMonitorModeSpec *other_monitor_mode_spec)
 {

@@ -215,7 +215,7 @@ struct _MetaWindow
   char *gtk_app_menu_object_path;
   char *gtk_menubar_object_path;
 
-  int net_wm_pid;
+  pid_t client_pid;
 
   Window xtransient_for;
   Window xgroup_leader;
