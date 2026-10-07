@@ -331,6 +331,8 @@ void               meta_monitor_manager_read_current_state (MetaMonitorManager *
 META_EXPORT_TEST
 void               meta_monitor_manager_on_hotplug (MetaMonitorManager *manager);
 
+void               meta_monitor_manager_switch_to_next_config (MetaMonitorManager *manager);
+
 gboolean           meta_monitor_manager_get_monitor_matrix (MetaMonitorManager *manager,
                                                             MetaMonitor        *monitor,
                                                             MetaLogicalMonitor *logical_monitor,

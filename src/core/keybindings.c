@@ -4073,14 +4073,8 @@ handle_switch_monitor (MetaDisplay    *display,
   MetaBackend *backend = meta_get_backend ();
   MetaMonitorManager *monitor_manager =
     meta_backend_get_monitor_manager (backend);
-  MetaMonitorSwitchConfigType config_type =
-    meta_monitor_manager_get_switch_config (monitor_manager);
 
-  if (!meta_monitor_manager_can_switch_config (monitor_manager))
-    return;
-
-  config_type = (config_type + 1) % (META_MONITOR_SWITCH_CONFIG_UNKNOWN);
-  meta_monitor_manager_switch_config (monitor_manager, config_type);
+  meta_monitor_manager_switch_to_next_config (monitor_manager);
 }
 
 static void

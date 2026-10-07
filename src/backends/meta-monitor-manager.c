@@ -3579,12 +3579,31 @@ meta_monitor_manager_rotate_monitor (MetaMonitorManager *manager)
   g_object_unref (config);
 }
 
+static void
+apply_switch_config (MetaMonitorManager          *manager,
+                     MetaMonitorsConfig          *config,
+                     MetaMonitorSwitchConfigType  config_type)
+{
+  g_autoptr (GError) error = NULL;
+
+  if (!meta_monitor_manager_apply_monitors_config (manager,
+                                                   config,
+                                                   META_MONITORS_CONFIG_METHOD_TEMPORARY,
+                                                   &error))
+    {
+      g_warning ("Failed to use switch monitor configuration: %s",
+                 error->message);
+      return;
+    }
+
+  manager->current_switch_config = config_type;
+}
+
 void
 meta_monitor_manager_switch_config (MetaMonitorManager          *manager,
                                     MetaMonitorSwitchConfigType  config_type)
 {
-  GError *error = NULL;
-  MetaMonitorsConfig *config;
+  g_autoptr (MetaMonitorsConfig) config = NULL;
 
   g_return_if_fail (config_type != META_MONITOR_SWITCH_CONFIG_UNKNOWN);
 
@@ -3594,20 +3613,44 @@ meta_monitor_manager_switch_config (MetaMonitorManager          *manager,
   if (!config)
     return;
 
-  if (!meta_monitor_manager_apply_monitors_config (manager,
-                                                   config,
-                                                   META_MONITORS_CONFIG_METHOD_TEMPORARY,
-                                                   &error))
+  apply_switch_config (manager, config, config_type);
+}
+
+/*
+ * Cycles the configured layout -> external only -> built-in only -> mirror,
+ * skipping any that can't be created or wouldn't change anything. A layout
+ * that didn't come from switching counts as the configured one.
+ */
+void
+meta_monitor_manager_switch_to_next_config (MetaMonitorManager *manager)
+{
+  MetaMonitorsConfig *current_config =
+    meta_monitor_config_manager_get_current (manager->config_manager);
+  MetaMonitorSwitchConfigType config_type = manager->current_switch_config;
+  int i;
+
+  if (!meta_monitor_manager_can_switch_config (manager))
+    return;
+
+  if (config_type == META_MONITOR_SWITCH_CONFIG_UNKNOWN)
+    config_type = META_MONITOR_SWITCH_CONFIG_ALL_LINEAR;
+
+  for (i = 0; i < META_MONITOR_SWITCH_CONFIG_UNKNOWN; i++)
     {
-      g_warning ("Failed to use switch monitor configuration: %s",
-                 error->message);
-      g_error_free (error);
+      g_autoptr (MetaMonitorsConfig) config = NULL;
+
+      config_type = (config_type + 1) % META_MONITOR_SWITCH_CONFIG_UNKNOWN;
+      config =
+        meta_monitor_config_manager_create_for_switch_config (manager->config_manager,
+                                                              config_type);
+      if (!config ||
+          (current_config &&
+           meta_monitors_config_layouts_equal (config, current_config)))
+        continue;
+
+      apply_switch_config (manager, config, config_type);
+      return;
     }
-  else
-    {
-      manager->current_switch_config = config_type;
-    }
-  g_object_unref (config);
 }
 
 gboolean
