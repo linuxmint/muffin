@@ -53,7 +53,18 @@ meta_wayland_dma_buf_buffer_attach (MetaWaylandBuffer  *buffer,
                                     GError            **error);
 
 MetaWaylandDmaBufBuffer *
+meta_wayland_dma_buf_fds_for_wayland_buffer (MetaWaylandBuffer *buffer);
+
+MetaWaylandDmaBufBuffer *
 meta_wayland_dma_buf_from_buffer (MetaWaylandBuffer *buffer);
+
+typedef void (*MetaWaylandDmaBufSourceDispatch) (MetaWaylandBuffer *buffer,
+                                                 gpointer           user_data);
+
+GSource *
+meta_wayland_dma_buf_create_source (MetaWaylandBuffer               *buffer,
+                                    MetaWaylandDmaBufSourceDispatch  dispatch,
+                                    gpointer                         user_data);
 
 CoglScanout *
 meta_wayland_dma_buf_try_acquire_scanout (MetaWaylandDmaBufBuffer *dma_buf,

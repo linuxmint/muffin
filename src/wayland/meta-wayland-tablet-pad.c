@@ -514,7 +514,7 @@ meta_wayland_tablet_pad_set_focus (MetaWaylandTabletPad *pad,
   tablet = meta_wayland_tablet_seat_lookup_paired_tablet (pad->tablet_seat,
                                                           pad);
 
-  if (tablet != NULL && surface != NULL)
+  if (tablet != NULL && surface != NULL && surface->resource != NULL)
     {
       struct wl_client *client;
 
