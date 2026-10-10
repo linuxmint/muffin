@@ -1,14 +1,13 @@
 #!/usr/bin/make -f
 
+include /usr/share/dpkg/architecture.mk
+
 export DEB_BUILD_MAINT_OPTIONS = hardening=+all
-export DEB_LDFLAGS_MAINT_APPEND = -Wl,-O1 -Wl,--as-needed
+export DEB_LDFLAGS_MAINT_APPEND = -Wl,-O1
 export DPKG_GENSYMBOLS_CHECK_LEVEL = 2
 
 %:
 	dh $@
-
-override_dh_autoreconf:
-	dh_autoreconf --as-needed
 
 CONFFLAGS = \
 	-Dprofiler=false \
