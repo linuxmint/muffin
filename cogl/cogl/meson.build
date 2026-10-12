@@ -120,7 +120,6 @@ cogl_nonintrospected_headers = [
   'cogl-macros.h',
   'cogl-fence.h',
   'cogl-version.h',
-  'cogl-gtype-private.h',
   'cogl-glib-source.h',
   'cogl-scanout.h',
 ]
