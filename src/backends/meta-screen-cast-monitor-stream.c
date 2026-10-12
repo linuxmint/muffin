@@ -193,12 +193,18 @@ meta_screen_cast_monitor_stream_transform_position (MetaScreenCastStream *stream
   MetaScreenCastMonitorStream *monitor_stream =
     META_SCREEN_CAST_MONITOR_STREAM (stream);
   MetaRectangle logical_monitor_layout;
+  double scale;
 
   logical_monitor_layout =
     meta_logical_monitor_get_layout (monitor_stream->logical_monitor);
 
-  *x = logical_monitor_layout.x + stream_x;
-  *y = logical_monitor_layout.y + stream_y;
+  if (meta_is_stage_views_scaled ())
+    scale = meta_logical_monitor_get_scale (monitor_stream->logical_monitor);
+  else
+    scale = 1.0;
+
+  *x = logical_monitor_layout.x + stream_x / scale;
+  *y = logical_monitor_layout.y + stream_y / scale;
 }
 
 static void
