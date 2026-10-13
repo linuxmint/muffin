@@ -66,6 +66,7 @@ meta_window_release_saved_state (const MetaWindowSessionInfo *info)
 #include <X11/ICE/ICElib.h>
 #include <X11/SM/SMlib.h>
 
+#include "compositor/meta-compositor-x11.h"
 #include "core/display-private.h"
 #include "meta/main.h"
 #include "meta/util.h"
@@ -524,6 +525,8 @@ save_yourself_callback (SmcConn   smc_conn,
 static void
 die_callback (SmcConn smc_conn, SmPointer client_data)
 {
+  MetaDisplay *display = meta_get_display ();
+
   meta_topic (META_DEBUG_SM, "Disconnecting from session manager");
   disconnect ();
   /* We don't actually exit here - we will simply go away with the X
@@ -539,7 +542,16 @@ die_callback (SmcConn smc_conn, SmPointer client_data)
    * case the X server won't go down until we do, so we must die first.
    */
   if (meta_is_wayland_compositor ())
-    meta_quit (0);
+    {
+      meta_quit (0);
+      return;
+    }
+
+  /* Waiting on an X fence the dying server will never trigger can block
+   * forever inside the GL driver, so stop using X sync objects now and
+   * fall back to plain XSync round trips, which fail once the server goes.
+   */
+  meta_compositor_x11_disable_sync_object (META_COMPOSITOR_X11 (display->compositor));
 }
 
 static void

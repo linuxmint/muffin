@@ -532,6 +532,16 @@ meta_compositor_x11_new (MetaDisplay *display)
                        NULL);
 }
 
+void
+meta_compositor_x11_disable_sync_object (MetaCompositorX11 *compositor_x11)
+{
+  if (!compositor_x11->have_x11_sync_object)
+    return;
+
+  meta_sync_ring_destroy ();
+  compositor_x11->have_x11_sync_object = FALSE;
+}
+
 static void
 meta_compositor_x11_dispose (GObject *object)
 {
@@ -539,11 +549,7 @@ meta_compositor_x11_dispose (GObject *object)
   MetaCompositor *compositor = META_COMPOSITOR (compositor_x11);
   ClutterStage *stage = meta_compositor_get_stage (compositor);
 
-  if (compositor_x11->have_x11_sync_object)
-    {
-      meta_sync_ring_destroy ();
-      compositor_x11->have_x11_sync_object = FALSE;
-    }
+  meta_compositor_x11_disable_sync_object (compositor_x11);
 
   g_clear_signal_handler (&compositor_x11->before_update_handler_id, stage);
   g_clear_signal_handler (&compositor_x11->after_update_handler_id, stage);
