@@ -1,3 +1,45 @@
+muffin (6.7.9) adrien; urgency=medium
+
+  [ Michael Webster ]
+  * inhibit-shortcuts-dialog: Fix use-after-free
+  * clutter-actor: Clear the size-request flags when a CONTENT_SIZE actor is measured.
+  * keybindings (x11): Hold a pointer grab while the magnifier zoom modifier is down.
+  * compositor: Paint viewport-scaled and Xwayland windows at resource scale for get_image().
+  * events.c: Don't route pointer events to a window while a Clutter grab is held.
+  * layer-shell: Remove actors of destroyed subsurfaces.
+  * meta-window-actor-wayland.c:  Skip surface actors hosted by a layer surface.
+  * wayland/xdg-shell: Ensure applied window geometry is always non-empty
+  * window.c: Resolve meta_window_get_pid() from the client pid
+  * window: Don't leave show-desktop mode for override-redirect windows
+  * dnd: Report Wayland drags over Cinnamon's UI like Xdnd
+  * monitor-manager: Keep switch configs across hotplugs
+  * monitor-manager: Make Super+P cycle back to the configured layout
+  * wayland/xdg-foreign: Don't abort when importing an unknown handle
+  * screen-cast: Fix absolute pointer motion on scaled monitors
+
+  [ Zhiyi Zhang ]
+  * x11: Do not unminimize windows with initial IconicState (#826)
+
+  [ Alex Burger ]
+  * keybindings: Don't trigger modifier-only bindings after zoom scrolling (#866)
+
+  [ Steve Midgley ]
+  * x11: Seed client_rect with frame-relative coords for framed windows (#841)
+
+  [ Aleksey Samoilov ]
+  * wayland/subsurface: Move actor unparenting back to rebuild_surface_tr… (#796)
+
+  [ Arkadiusz Miszczyszyn ]
+  * core: Do not abort on overflowing window positions in edge resistance (#861)
+
+  [ marcelmushik ]
+  * Restore edge-resistance-window setting (#828)
+
+  [ Fabio Fantoni ]
+  * build: Drop the unused dbus-1 dependency (#868)
+
+ -- Clement Lefebvre <root@linuxmint.com>  Tue, 13 Oct 2026 13:28:24 +0100
+
 muffin (6.7.8) adrien; urgency=medium
 
   [ Michael Webster ]
