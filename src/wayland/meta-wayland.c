@@ -66,6 +66,10 @@
 #include "wayland/meta-xwayland-private.h"
 #include "wayland/meta-xwayland.h"
 
+#ifdef HAVE_NATIVE_BACKEND
+#include "backends/native/meta-renderer-native.h"
+#endif
+
 static char *_display_name_override;
 
 G_DEFINE_TYPE (MetaWaylandCompositor, meta_wayland_compositor, G_TYPE_OBJECT)
@@ -506,7 +510,27 @@ meta_wayland_compositor_setup (MetaWaylandCompositor *wayland_compositor)
                                 compositor);
 
 #ifdef HAVE_WAYLAND_EGLSTREAM
-  meta_wayland_eglstream_controller_init (compositor);
+  /* With gbm on the NVIDIA driver, EGL/Vulkan clients and Xwayland must take
+   * the dma-buf path too, so only expose the EGLStream controller when the
+   * renderer itself is EGLStream based. */
+    {
+      gboolean should_enable_eglstream_controller = TRUE;
+#if defined(HAVE_EGL_DEVICE) && defined(HAVE_NATIVE_BACKEND)
+      MetaRenderer *renderer = meta_backend_get_renderer (meta_get_backend ());
+
+      if (META_IS_RENDERER_NATIVE (renderer))
+        {
+          MetaRendererNative *renderer_native = META_RENDERER_NATIVE (renderer);
+
+          if (meta_renderer_native_get_mode (renderer_native) ==
+              META_RENDERER_NATIVE_MODE_GBM)
+            should_enable_eglstream_controller = FALSE;
+        }
+#endif
+
+      if (should_enable_eglstream_controller)
+        meta_wayland_eglstream_controller_init (compositor);
+    }
 #endif
 
   if (meta_get_x11_display_policy () != META_DISPLAY_POLICY_DISABLED)
