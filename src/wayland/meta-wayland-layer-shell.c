@@ -2250,9 +2250,9 @@ layer_shell_get_layer_surface (struct wl_client   *client,
   if (output_resource)
     output = wl_resource_get_user_data (output_resource);
 
-  /* Create layer surface role via meta_wayland_surface_assign_role.
-   * This ensures the surface is associated with the role during construction,
-   * which is required by MetaWaylandActorSurface's constructed() handler. */
+  /* Create layer surface role via meta_wayland_surface_assign_role, which
+   * also runs the role's assigned() hooks, including the surface actor
+   * creation in MetaWaylandActorSurface. */
   if (!meta_wayland_surface_assign_role (surface,
                                          META_TYPE_WAYLAND_LAYER_SURFACE,
                                          "output", output,

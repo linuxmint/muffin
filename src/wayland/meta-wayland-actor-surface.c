@@ -49,14 +49,6 @@ G_DEFINE_ABSTRACT_TYPE_WITH_PRIVATE (MetaWaylandActorSurface,
                                      META_TYPE_WAYLAND_SURFACE_ROLE)
 
 static void
-meta_wayland_actor_surface_constructed (GObject *object)
-{
-  G_OBJECT_CLASS (meta_wayland_actor_surface_parent_class)->constructed (object);
-
-  meta_wayland_actor_surface_reset_actor (META_WAYLAND_ACTOR_SURFACE (object));
-}
-
-static void
 clear_surface_actor (MetaWaylandActorSurface *actor_surface)
 {
   MetaWaylandActorSurfacePrivate *priv =
@@ -103,6 +95,8 @@ meta_wayland_actor_surface_assigned (MetaWaylandSurfaceRole *surface_role)
     meta_wayland_actor_surface_get_instance_private (META_WAYLAND_ACTOR_SURFACE (surface_role));
   MetaWaylandSurface *surface =
     meta_wayland_surface_role_get_surface (surface_role);
+
+  meta_wayland_actor_surface_reset_actor (META_WAYLAND_ACTOR_SURFACE (surface_role));
 
   if (wl_list_empty (&surface->unassigned.pending_frame_callback_list))
     return;
@@ -419,7 +413,6 @@ meta_wayland_actor_surface_class_init (MetaWaylandActorSurfaceClass *klass)
     META_WAYLAND_SURFACE_ROLE_CLASS (klass);
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
-  object_class->constructed = meta_wayland_actor_surface_constructed;
   object_class->dispose = meta_wayland_actor_surface_dispose;
 
   surface_role_class->assigned = meta_wayland_actor_surface_assigned;
