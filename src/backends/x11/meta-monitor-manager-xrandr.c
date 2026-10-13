@@ -1419,7 +1419,10 @@ meta_monitor_manager_xrandr_handle_xevent (MetaMonitorManagerXrandr *manager_xra
 
   XRRUpdateConfiguration (event);
 
+  g_debug ("Processing RRScreenChangeNotify event");
   meta_monitor_manager_read_current_state (manager);
+  g_debug ("RRScreenChangeNotify processed, screen: %dx%d",
+           manager->screen_width, manager->screen_height);
 
   gpu_xrandr = META_GPU_XRANDR (gpu);
   resources = meta_gpu_xrandr_get_resources (gpu_xrandr);

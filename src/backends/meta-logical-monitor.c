@@ -266,6 +266,11 @@ meta_logical_monitor_foreach_crtc (MetaLogicalMonitor        *logical_monitor,
       };
 
       mode = meta_monitor_get_current_mode (monitor);
+      if (!mode)
+        {
+          g_warning ("Monitor has NULL current_mode during foreach_crtc, skipping");
+          continue;
+        }
       meta_monitor_mode_foreach_crtc (monitor, mode, foreach_crtc, &data, NULL);
     }
 }
