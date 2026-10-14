@@ -41,12 +41,16 @@ dnd_surface_assigned (MetaWaylandSurfaceRole *surface_role)
 {
   MetaWaylandSurface *surface =
     meta_wayland_surface_role_get_surface (surface_role);
+  MetaWaylandSurfaceRoleClass *surface_role_class =
+    META_WAYLAND_SURFACE_ROLE_CLASS (meta_wayland_surface_role_dnd_parent_class);
 
-  if (wl_list_empty (&surface->unassigned.pending_frame_callback_list))
-    return;
+  if (!wl_list_empty (&surface->unassigned.pending_frame_callback_list))
+    {
+      meta_wayland_compositor_add_frame_callback_surface (surface->compositor,
+                                                          surface);
+    }
 
-  meta_wayland_compositor_add_frame_callback_surface (surface->compositor,
-                                                      surface);
+  surface_role_class->assigned (surface_role);
 }
 
 static void
@@ -106,8 +110,9 @@ dnd_subsurface_sync_actor_state (MetaWaylandActorSurface *actor_surface)
 {
   MetaSurfaceActor *surface_actor =
     meta_wayland_actor_surface_get_actor (actor_surface);
-  MetaFeedbackActor *feedback_actor =
-    META_FEEDBACK_ACTOR (clutter_actor_get_parent (CLUTTER_ACTOR (surface_actor)));
+  ClutterActor *parent =
+    clutter_actor_get_parent (CLUTTER_ACTOR (surface_actor));
+  MetaFeedbackActor *feedback_actor = META_FEEDBACK_ACTOR (parent);
   MetaWaylandSurfaceRole *surface_role =
     META_WAYLAND_SURFACE_ROLE (actor_surface);
   MetaWaylandSurfaceRoleDND *surface_role_dnd =
@@ -117,6 +122,10 @@ dnd_subsurface_sync_actor_state (MetaWaylandActorSurface *actor_surface)
   int geometry_scale;
   float anchor_x;
   float anchor_y;
+
+  /* The drag ended but the client hasn't unmapped its icon yet. */
+  if (!parent)
+    return;
 
   g_return_if_fail (META_IS_FEEDBACK_ACTOR (feedback_actor));
 

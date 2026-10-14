@@ -1015,19 +1015,24 @@ wl_surface_attach (struct wl_client *client,
     }
 
   if (wl_resource_get_version (surface_resource) >=
-    WL_SURFACE_OFFSET_SINCE_VERSION &&
-    (dx != 0 || dy != 0))
-  {
-    wl_resource_post_error (surface_resource,
-                            WL_SURFACE_ERROR_INVALID_OFFSET,
-                            "Attaching with an offset is no longer allowed");
-    return;
-  }
+      WL_SURFACE_OFFSET_SINCE_VERSION)
+    {
+      if (dx != 0 || dy != 0)
+        {
+          wl_resource_post_error (surface_resource,
+                                  WL_SURFACE_ERROR_INVALID_OFFSET,
+                                  "Attaching with an offset is no longer allowed");
+          return;
+        }
+    }
+  else
+    {
+      pending->dx = dx;
+      pending->dy = dy;
+    }
 
   pending->newly_attached = TRUE;
   pending->buffer = buffer;
-  pending->dx = dx;
-  pending->dy = dy;
 
   if (buffer)
     {
