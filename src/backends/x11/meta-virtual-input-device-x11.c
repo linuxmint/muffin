@@ -30,17 +30,44 @@
 
 #define DISCRETE_SCROLL_STEP 10.0
 
+#define KEY_PRESSED (1 << 0)
+#define KEYVAL_PRESSED (1 << 1)
+#define KEYVAL_LEVEL_SHIFT 2
+
 struct _MetaVirtualInputDeviceX11
 {
   ClutterVirtualInputDevice parent;
 
   double accum_scroll_dx;
   double accum_scroll_dy;
+
+  uint8_t key_state[256];
+  uint8_t button_state[256];
 };
 
 G_DEFINE_TYPE (MetaVirtualInputDeviceX11,
                meta_virtual_input_device_x11,
                CLUTTER_TYPE_VIRTUAL_INPUT_DEVICE)
+
+static void
+fake_key_event (ClutterVirtualInputDevice *virtual_device,
+                unsigned int              keycode,
+                gboolean                  pressed)
+{
+  MetaVirtualInputDeviceX11 *virtual_x11 =
+    META_VIRTUAL_INPUT_DEVICE_X11 (virtual_device);
+
+  if (keycode < 8 || keycode >= G_N_ELEMENTS (virtual_x11->key_state))
+    return;
+
+  XTestFakeKeyEvent (clutter_x11_get_default_display (),
+                     keycode, pressed, 0);
+
+  if (pressed)
+    virtual_x11->key_state[keycode] |= KEY_PRESSED;
+  else
+    virtual_x11->key_state[keycode] &= ~KEY_PRESSED;
+}
 
 static void
 meta_virtual_input_device_x11_notify_relative_motion (ClutterVirtualInputDevice *virtual_device,
@@ -73,8 +100,17 @@ meta_virtual_input_device_x11_notify_button (ClutterVirtualInputDevice *virtual_
                                              uint32_t                   button,
                                              ClutterButtonState         button_state)
 {
+  MetaVirtualInputDeviceX11 *virtual_x11 =
+    META_VIRTUAL_INPUT_DEVICE_X11 (virtual_device);
+
+  if (button == 0 || button >= G_N_ELEMENTS (virtual_x11->button_state))
+    return;
+
   XTestFakeButtonEvent (clutter_x11_get_default_display (),
                         button, button_state == CLUTTER_BUTTON_STATE_PRESSED, 0);
+
+  virtual_x11->button_state[button] =
+    button_state == CLUTTER_BUTTON_STATE_PRESSED;
 }
 
 static void
@@ -158,8 +194,9 @@ meta_virtual_input_device_x11_notify_key (ClutterVirtualInputDevice *virtual_dev
                                           uint32_t                   key,
                                           ClutterKeyState            key_state)
 {
-  XTestFakeKeyEvent (clutter_x11_get_default_display (),
-                     key + 8, key_state == CLUTTER_KEY_STATE_PRESSED, 0);
+  /* evdev keycodes are offset by 8 in X11 */
+  fake_key_event (virtual_device,
+                  key + 8, key_state == CLUTTER_KEY_STATE_PRESSED);
 }
 
 static void
@@ -168,6 +205,8 @@ meta_virtual_input_device_x11_notify_keyval (ClutterVirtualInputDevice *virtual_
                                              uint32_t                   keyval,
                                              ClutterKeyState            key_state)
 {
+  MetaVirtualInputDeviceX11 *virtual_x11 =
+    META_VIRTUAL_INPUT_DEVICE_X11 (virtual_device);
   ClutterBackend *backend = clutter_get_default_backend ();
   ClutterSeat *seat = clutter_backend_get_default_seat (backend);
   MetaKeymapX11 *keymap = META_KEYMAP_X11 (clutter_seat_get_keymap (seat));
@@ -188,9 +227,13 @@ meta_virtual_input_device_x11_notify_keyval (ClutterVirtualInputDevice *virtual_
       key_state == CLUTTER_KEY_STATE_PRESSED)
     meta_keymap_x11_latch_modifiers (keymap, level, TRUE);
 
-  XTestFakeKeyEvent (clutter_x11_get_default_display (),
-                     (KeyCode) keycode,
-                     key_state == CLUTTER_KEY_STATE_PRESSED, 0);
+  fake_key_event (virtual_device, (KeyCode) keycode,
+                  key_state == CLUTTER_KEY_STATE_PRESSED);
+
+  if (keycode < G_N_ELEMENTS (virtual_x11->key_state) &&
+      key_state == CLUTTER_KEY_STATE_PRESSED)
+    virtual_x11->key_state[keycode] =
+      KEY_PRESSED | KEYVAL_PRESSED | (MIN (level, 3) << KEYVAL_LEVEL_SHIFT);
 
 
   if (key_state == CLUTTER_KEY_STATE_RELEASED)
@@ -198,6 +241,8 @@ meta_virtual_input_device_x11_notify_keyval (ClutterVirtualInputDevice *virtual_
       if (!meta_keymap_x11_get_is_modifier (keymap, keycode))
         meta_keymap_x11_latch_modifiers (keymap, level, FALSE);
       meta_keymap_x11_release_keycode_if_needed (keymap, keycode);
+      if (keycode < G_N_ELEMENTS (virtual_x11->key_state))
+        virtual_x11->key_state[keycode] = 0;
     }
 }
 
@@ -230,6 +275,57 @@ meta_virtual_input_device_x11_notify_touch_up (ClutterVirtualInputDevice *virtua
 }
 
 static void
+meta_virtual_input_device_x11_dispose (GObject *object)
+{
+  MetaVirtualInputDeviceX11 *virtual_x11 =
+    META_VIRTUAL_INPUT_DEVICE_X11 (object);
+  MetaKeymapX11 *keymap = NULL;
+  Display *display = clutter_x11_get_default_display ();
+  unsigned int code;
+
+  for (code = 1; code < G_N_ELEMENTS (virtual_x11->button_state); code++)
+    {
+      if (!virtual_x11->button_state[code])
+        continue;
+
+      XTestFakeButtonEvent (display, code, False, 0);
+      virtual_x11->button_state[code] = 0;
+    }
+
+  for (code = 8; code < G_N_ELEMENTS (virtual_x11->key_state); code++)
+    {
+      uint8_t state = virtual_x11->key_state[code];
+
+      if (!state)
+        continue;
+
+      if (state & KEY_PRESSED)
+        XTestFakeKeyEvent (display, code, False, 0);
+
+      if (state & KEYVAL_PRESSED)
+        {
+          if (!keymap)
+            {
+              ClutterBackend *backend = clutter_get_default_backend ();
+              ClutterSeat *seat = clutter_backend_get_default_seat (backend);
+
+              keymap = META_KEYMAP_X11 (clutter_seat_get_keymap (seat));
+            }
+
+          if (!meta_keymap_x11_get_is_modifier (keymap, code))
+            meta_keymap_x11_latch_modifiers (keymap,
+                                             state >> KEYVAL_LEVEL_SHIFT,
+                                             FALSE);
+          meta_keymap_x11_release_keycode_if_needed (keymap, code);
+        }
+
+      virtual_x11->key_state[code] = 0;
+    }
+
+  G_OBJECT_CLASS (meta_virtual_input_device_x11_parent_class)->dispose (object);
+}
+
+static void
 meta_virtual_input_device_x11_init (MetaVirtualInputDeviceX11 *virtual_device_x11)
 {
 }
@@ -237,8 +333,11 @@ meta_virtual_input_device_x11_init (MetaVirtualInputDeviceX11 *virtual_device_x1
 static void
 meta_virtual_input_device_x11_class_init (MetaVirtualInputDeviceX11Class *klass)
 {
+  GObjectClass *object_class = G_OBJECT_CLASS (klass);
   ClutterVirtualInputDeviceClass *virtual_input_device_class =
     CLUTTER_VIRTUAL_INPUT_DEVICE_CLASS (klass);
+
+  object_class->dispose = meta_virtual_input_device_x11_dispose;
 
   virtual_input_device_class->notify_relative_motion = meta_virtual_input_device_x11_notify_relative_motion;
   virtual_input_device_class->notify_absolute_motion = meta_virtual_input_device_x11_notify_absolute_motion;
