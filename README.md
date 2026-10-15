@@ -1,5 +1,9 @@
 Muffin is a fork of Mutter, specifically adapted to work as the window manager for the Cinnamon desktop environment.
 
+Virtual keyboard events use evdev keycodes on both backends. The X11 backend
+adds the X server's keycode offset when forwarding these events through XTest,
+so the same evdev key represents the same physical key as on the native backend.
+
 # Mutter
 
 Mutter is a Wayland display server and X11 window manager and compositor library.
