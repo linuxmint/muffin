@@ -1,5 +1,9 @@
 Muffin is a fork of Mutter, specifically adapted to work as the window manager for the Cinnamon desktop environment.
 
+X11 virtual devices release their tracked key and button presses when destroyed,
+including when a remote desktop client disappears unexpectedly. Keysym mappings
+reserved for held keys are returned to the keymap at the same time.
+
 # Mutter
 
 Mutter is a Wayland display server and X11 window manager and compositor library.
