@@ -1,5 +1,9 @@
 Muffin is a fork of Mutter, specifically adapted to work as the window manager for the Cinnamon desktop environment.
 
+On X11, smooth virtual-pointer scrolling accumulates deltas into discrete wheel
+events. Each ten units produces one wheel step; fractional remainders carry
+over to later events instead of being discarded.
+
 # Mutter
 
 Mutter is a Wayland display server and X11 window manager and compositor library.
