@@ -1657,8 +1657,6 @@ set_frame_info_output (CoglOnscreen *onscreen,
 {
   CoglFrameInfo *info = g_queue_peek_tail (&onscreen->pending_frame_infos);
 
-  info->output = output;
-
   if (output)
     {
       float refresh_rate = cogl_output_get_refresh_rate (output);
