@@ -64,12 +64,12 @@ Build-Depends:
         udev [linux-any],
         wayland-protocols (>= 1.38) [linux-any],
         xauth <!nocheck>,
+        xenity,
         xcvt [linux-any],
         xkb-data,
         xserver-xorg-core [linux-any],
         xvfb <!nocheck>,
         xwayland [linux-any],
-        zenity
 Rules-Requires-Root: no
 Standards-Version: 4.5.0
 
@@ -113,7 +113,7 @@ Pre-Depends: ${misc:Pre-Depends}
 Depends: adwaita-icon-theme,
          muffin-common (>= ${source:Version}),
          python3-gi,
-         zenity,
+         xenity,
          ${misc:Depends},
          ${shlibs:Depends}
 Provides: x-window-manager

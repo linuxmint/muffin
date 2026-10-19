@@ -623,7 +623,7 @@ meta_show_dialog (const char *type,
 
   args = g_ptr_array_new ();
 
-  append_argument (args, "zenity");
+  append_argument (args, "xenity");
   append_argument (args, type);
 
   if (display)
