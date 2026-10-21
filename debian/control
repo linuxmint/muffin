@@ -64,7 +64,6 @@ Build-Depends:
         udev [linux-any],
         wayland-protocols (>= 1.38) [linux-any],
         xauth <!nocheck>,
-        xenity,
         xcvt [linux-any],
         xkb-data,
         xserver-xorg-core [linux-any],
