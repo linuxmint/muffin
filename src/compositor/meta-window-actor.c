@@ -1445,6 +1445,7 @@ meta_window_actor_get_image (MetaWindowActor *self,
     clutter_backend_get_cogl_context (clutter_backend);
   MetaShapedTexture *stex;
   float resource_scale;
+  float viewport_scale;
   float width, height;
   CoglTexture2D *texture;
   g_autoptr (GError) error = NULL;
@@ -1493,8 +1494,18 @@ meta_window_actor_get_image (MetaWindowActor *self,
 
   resource_scale = clutter_actor_get_resource_scale (actor);
 
-  width = ceilf (width * resource_scale);
-  height = ceilf (height * resource_scale);
+  /* A fractional-scale client rendered its buffer at the monitor's real
+   * scale, which is below the ceiled resource scale on a fractional monitor.
+   * Paint at the buffer's own scale so the capture reproduces it instead of
+   * resampling it. Viewports that stretch or shrink content, and windows
+   * with subsurfaces, keep the resource scale. */
+  if (clutter_actor_get_n_children (actor) == 1 &&
+      meta_shaped_texture_get_viewport_scale (stex, &viewport_scale) &&
+      viewport_scale >= 1.0f && viewport_scale < resource_scale)
+    resource_scale = viewport_scale;
+
+  width = roundf (width * resource_scale);
+  height = roundf (height * resource_scale);
 
   texture = cogl_texture_2d_new_with_size (cogl_context, width, height);
   if (!texture)
