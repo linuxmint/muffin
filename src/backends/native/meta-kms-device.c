@@ -42,6 +42,7 @@ struct _MetaKmsDevice
 
   MetaKmsDeviceFlag flags;
   char *path;
+  gboolean has_slow_cursor_updates;
 
   GList *crtcs;
   GList *connectors;
@@ -303,6 +304,51 @@ create_impl_device_in_impl (MetaKmsImpl  *impl,
   return GINT_TO_POINTER (TRUE);
 }
 
+gboolean
+meta_kms_device_has_slow_cursor_updates (MetaKmsDevice *device)
+{
+  return device->has_slow_cursor_updates;
+}
+
+static char *
+get_driver_name (int fd)
+{
+  drmVersionPtr version;
+  char *driver_name;
+
+  version = drmGetVersion (fd);
+  if (!version)
+    return NULL;
+
+  driver_name = g_strdup (version->name);
+  drmFreeVersion (version);
+
+  return driver_name;
+}
+
+/* Observed on my hardware from nvidia 590 on, nvidia-drm services the legacy
+ * cursor ioctls as a blocking commit - a full frame of main loop time per
+ * cursor image change, which stalls the compositor for as long as a cursor
+ * animates. drmGetVersion() reports 0.0.0 for nvidia-drm, so the series has
+ * to come from the module. */
+#define NVIDIA_SLOW_CURSOR_SERIES 590
+
+static gboolean
+driver_has_slow_cursor_updates (const char *driver_name)
+{
+  g_autofree char *module_version = NULL;
+
+  if (g_strcmp0 (driver_name, "nvidia-drm") != 0)
+    return FALSE;
+
+  if (!g_file_get_contents ("/sys/module/nvidia_drm/version",
+                            &module_version, NULL, NULL))
+    return FALSE;
+
+  return (g_ascii_strtoll (module_version, NULL, 10) >=
+          NVIDIA_SLOW_CURSOR_SERIES);
+}
+
 MetaKmsDevice *
 meta_kms_device_new (MetaKms            *kms,
                      const char         *path,
@@ -315,11 +361,14 @@ meta_kms_device_new (MetaKms            *kms,
   MetaKmsDevice *device;
   CreateImplDeviceData data;
   drmModeRes *resources;
+  g_autofree char *driver_name = NULL;
   int fd;
 
   fd = meta_launcher_open_restricted (launcher, path, error);
   if (fd == -1)
     return NULL;
+
+  driver_name = get_driver_name (fd);
 
   /* Open-coded rather than drmIsKMS(), which folds "no modesetting" together
    * with "modesetting but nothing to drive" - a distinction worth reporting,
@@ -328,16 +377,7 @@ meta_kms_device_new (MetaKms            *kms,
 
   if (!resources || resources->count_crtcs == 0 || resources->count_encoders == 0)
     {
-      g_autofree char *driver_name = NULL;
       const char *hint = "";
-      drmVersionPtr version;
-
-      version = drmGetVersion (fd);
-      if (version)
-        {
-          driver_name = g_strdup (version->name);
-          drmFreeVersion (version);
-        }
 
       /* nvidia-drm only defaults to modeset=1 from driver series 560 on. */
       if (g_strcmp0 (driver_name, "nvidia-drm") == 0)
@@ -385,6 +425,8 @@ meta_kms_device_new (MetaKms            *kms,
   device->impl_device = data.out_impl_device;
   device->flags = flags;
   device->path = g_strdup (path);
+  device->has_slow_cursor_updates =
+    driver_has_slow_cursor_updates (driver_name);
   device->crtcs = data.out_crtcs;
   device->connectors = data.out_connectors;
   device->planes = data.out_planes;
