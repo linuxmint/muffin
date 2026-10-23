@@ -3432,12 +3432,11 @@ meta_monitor_manager_on_hotplug (MetaMonitorManager *manager)
   MetaMonitorsConfig *current_config =
     meta_monitor_config_manager_get_current (manager->config_manager);
 
-  /* Keep a switch config (Super+P) across hotplugs that leave the set of
-   * connected monitors unchanged, instead of falling back to the stored or
-   * suggested configuration. */
+  /* Keep the current config across hotplugs that leave the set of connected
+   * monitors unchanged, instead of falling back to the stored or suggested
+   * configuration. This covers Super+P configs and a config applied from
+   * the display settings but not yet confirmed. */
   if (current_config &&
-      meta_monitors_config_get_switch_config (current_config) !=
-        META_MONITOR_SWITCH_CONFIG_UNKNOWN &&
       !meta_monitor_manager_has_hotplug_mode_update (manager) &&
       meta_monitor_manager_is_config_complete (manager, current_config))
     {
@@ -3449,7 +3448,7 @@ meta_monitor_manager_on_hotplug (MetaMonitorManager *manager)
                                                       &error))
         return;
 
-      g_warning ("Failed to re-apply switch configuration: %s",
+      g_warning ("Failed to re-apply current configuration: %s",
                  error->message);
     }
 

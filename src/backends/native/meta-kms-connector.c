@@ -24,6 +24,7 @@
 
 #include <errno.h>
 
+#include "backends/native/meta-gpu-kms.h"
 #include "backends/native/meta-kms-crtc.h"
 #include "backends/native/meta-kms-device-private.h"
 #include "backends/native/meta-kms-impl-device.h"
@@ -40,6 +41,7 @@ struct _MetaKmsConnector
   uint32_t type_id;
   char *name;
 
+  drmModeConnection connection;
   MetaKmsConnectorState *current_state;
 
   uint32_t dpms_prop_id;
@@ -453,18 +455,81 @@ meta_kms_connector_state_free (MetaKmsConnectorState *state)
   g_free (state);
 }
 
-static void
+G_DEFINE_AUTOPTR_CLEANUP_FUNC (MetaKmsConnectorState,
+                               meta_kms_connector_state_free);
+
+static gboolean
+edid_equal (GBytes *edid,
+            GBytes *other_edid)
+{
+  if (!edid || !other_edid)
+    return edid == other_edid;
+
+  return g_bytes_equal (edid, other_edid);
+}
+
+static gboolean
+modes_equal (MetaKmsConnectorState *state,
+             MetaKmsConnectorState *other_state)
+{
+  int i;
+
+  if (state->n_modes != other_state->n_modes)
+    return FALSE;
+
+  for (i = 0; i < state->n_modes; i++)
+    {
+      if (!meta_drm_mode_equal (&state->modes[i], &other_state->modes[i]))
+        return FALSE;
+    }
+
+  return TRUE;
+}
+
+/* The CRTC assignment is deliberately left out: it only changes through our
+ * own mode sets, and a mismatch between the predicted and the read back
+ * assignment must not turn the uevent our mode set triggers into a hotplug. */
+static gboolean
+monitor_state_equal (MetaKmsConnectorState *state,
+                     MetaKmsConnectorState *other_state)
+{
+  return (state->common_possible_crtcs == other_state->common_possible_crtcs &&
+          state->common_possible_clones == other_state->common_possible_clones &&
+          state->encoder_device_idxs == other_state->encoder_device_idxs &&
+          state->width_mm == other_state->width_mm &&
+          state->height_mm == other_state->height_mm &&
+          state->has_scaling == other_state->has_scaling &&
+          state->subpixel_order == other_state->subpixel_order &&
+          state->suggested_x == other_state->suggested_x &&
+          state->suggested_y == other_state->suggested_y &&
+          state->hotplug_mode_update == other_state->hotplug_mode_update &&
+          state->panel_orientation_transform ==
+            other_state->panel_orientation_transform &&
+          meta_tile_info_equal (&state->tile_info, &other_state->tile_info) &&
+          edid_equal (state->edid_data, other_state->edid_data) &&
+          modes_equal (state, other_state));
+}
+
+static MetaKmsResourceChanges
 meta_kms_connector_read_state (MetaKmsConnector  *connector,
                                MetaKmsImplDevice *impl_device,
                                drmModeConnector  *drm_connector,
                                drmModeRes        *drm_resources)
 {
-  MetaKmsConnectorState *state;
+  g_autoptr (MetaKmsConnectorState) state = NULL;
+  g_autoptr (MetaKmsConnectorState) current_state = NULL;
+  MetaKmsResourceChanges changes = META_KMS_RESOURCE_CHANGE_NONE;
 
-  g_clear_pointer (&connector->current_state, meta_kms_connector_state_free);
+  current_state = g_steal_pointer (&connector->current_state);
 
-  if (!drm_connector || drm_connector->connection != DRM_MODE_CONNECTED)
-    return;
+  if (drm_connector->connection != connector->connection)
+    {
+      connector->connection = drm_connector->connection;
+      changes = META_KMS_RESOURCE_CHANGE_FULL;
+    }
+
+  if (drm_connector->connection != DRM_MODE_CONNECTED)
+    return changes;
 
   state = meta_kms_connector_state_new ();
 
@@ -481,24 +546,39 @@ meta_kms_connector_read_state (MetaKmsConnector  *connector,
 
   state_set_crtc_state (state, drm_connector, impl_device, drm_resources);
 
-  connector->current_state = state;
+  if (!current_state || !monitor_state_equal (current_state, state))
+    changes = META_KMS_RESOURCE_CHANGE_FULL;
+
+  connector->current_state = g_steal_pointer (&state);
+
+  return changes;
 }
 
-void
+MetaKmsResourceChanges
 meta_kms_connector_update_state (MetaKmsConnector *connector,
                                  drmModeRes       *drm_resources)
 {
   MetaKmsImplDevice *impl_device;
   drmModeConnector *drm_connector;
+  MetaKmsResourceChanges changes;
 
   impl_device = meta_kms_device_get_impl_device (connector->device);
   drm_connector = drmModeGetConnector (meta_kms_impl_device_get_fd (impl_device),
                                        connector->id);
-  meta_kms_connector_read_state (connector, impl_device,
-                                 drm_connector,
-                                 drm_resources);
-  if (drm_connector)
-    drmModeFreeConnector (drm_connector);
+  if (!drm_connector)
+    {
+      g_clear_pointer (&connector->current_state,
+                       meta_kms_connector_state_free);
+      connector->connection = DRM_MODE_UNKNOWNCONNECTION;
+      return META_KMS_RESOURCE_CHANGE_FULL;
+    }
+
+  changes = meta_kms_connector_read_state (connector, impl_device,
+                                           drm_connector,
+                                           drm_resources);
+  drmModeFreeConnector (drm_connector);
+
+  return changes;
 }
 
 void

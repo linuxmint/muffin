@@ -465,17 +465,21 @@ meta_kms_is_waiting_for_impl_task (MetaKms *kms)
   return kms->waiting_for_impl_task;
 }
 
-static void
+static MetaKmsResourceChanges
 meta_kms_update_states_in_impl (MetaKms *kms)
 {
+  MetaKmsResourceChanges changes = META_KMS_RESOURCE_CHANGE_NONE;
+  GList *l;
+
   COGL_TRACE_BEGIN_SCOPED (MetaKmsUpdateStates,
                            "KMS (update states)");
 
   meta_assert_in_kms_impl (kms);
 
-  g_list_foreach (kms->devices,
-                  (GFunc) meta_kms_device_update_states_in_impl,
-                  NULL);
+  for (l = kms->devices; l; l = l->next)
+    changes |= meta_kms_device_update_states_in_impl (l->data);
+
+  return changes;
 }
 
 static gpointer
@@ -483,30 +487,28 @@ update_states_in_impl (MetaKmsImpl  *impl,
                        gpointer      user_data,
                        GError      **error)
 {
-  MetaKms *kms = meta_kms_impl_get_kms (impl);;
+  MetaKms *kms = meta_kms_impl_get_kms (impl);
 
-  meta_kms_update_states_in_impl (kms);
-
-  return GINT_TO_POINTER (TRUE);
+  return GINT_TO_POINTER (meta_kms_update_states_in_impl (kms));
 }
 
-static gboolean
-meta_kms_update_states_sync (MetaKms  *kms,
-                             GError  **error)
+static MetaKmsResourceChanges
+meta_kms_update_states_sync (MetaKms *kms)
 {
   gpointer ret;
 
-  ret = meta_kms_run_impl_task_sync (kms, update_states_in_impl, NULL, error);
+  ret = meta_kms_run_impl_task_sync (kms, update_states_in_impl, NULL, NULL);
   return GPOINTER_TO_INT (ret);
 }
 
 static void
 handle_hotplug_event (MetaKms *kms)
 {
-  g_autoptr (GError) error = NULL;
-
-  if (!meta_kms_update_states_sync (kms, &error))
-    g_warning ("Updating KMS state failed: %s", error->message);
+  if (meta_kms_update_states_sync (kms) == META_KMS_RESOURCE_CHANGE_NONE)
+    {
+      meta_topic (META_DEBUG_KMS, "Ignoring hotplug event: no resource changes\n");
+      return;
+    }
 
   g_signal_emit (kms, signals[RESOURCES_CHANGED], 0);
 }

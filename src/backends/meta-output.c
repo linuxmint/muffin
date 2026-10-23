@@ -134,3 +134,17 @@ meta_output_class_init (MetaOutputClass *klass)
   object_class->dispose = meta_output_dispose;
   object_class->finalize = meta_output_finalize;
 }
+
+gboolean
+meta_tile_info_equal (const MetaTileInfo *a,
+                      const MetaTileInfo *b)
+{
+  return (a->group_id == b->group_id &&
+          a->flags == b->flags &&
+          a->max_h_tiles == b->max_h_tiles &&
+          a->max_v_tiles == b->max_v_tiles &&
+          a->loc_h_tile == b->loc_h_tile &&
+          a->loc_v_tile == b->loc_v_tile &&
+          a->tile_w == b->tile_w &&
+          a->tile_h == b->tile_h);
+}
