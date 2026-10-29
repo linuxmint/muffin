@@ -1260,6 +1260,12 @@ meta_window_wayland_finish_move_resize (MetaWindow              *window,
     gravity = META_GRAVITY_STATIC;
   meta_window_move_resize_internal (window, flags, gravity, rect);
 
+  if (is_window_being_resized &&
+      meta_grab_op_is_keyboard (window->display->grab_op))
+    {
+      meta_window_update_keyboard_resize (window, FALSE);
+    }
+
   /* Force a NOT_MAXIMIZED -> MAXIMIZED configure transition for clients that
    * need it to fire their 'maximize' event. Triggered when the client requested
    * maximization before completing its first configure-ack-commit cycle. */

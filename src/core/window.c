@@ -7381,16 +7381,19 @@ meta_window_handle_mouse_grab_op_event  (MetaWindow         *window,
       meta_display_check_threshold_reached (window->display, x, y);
       if (meta_grab_op_is_moving (window->display->grab_op))
         {
-          update_move (window,
-                       modifier_state & CLUTTER_SHIFT_MASK,
-                       x, y);
+          if (meta_grab_op_is_mouse (window->display->grab_op))
+            update_move (window,
+                         modifier_state & CLUTTER_SHIFT_MASK,
+                         x, y);
         }
       else if (meta_grab_op_is_resizing (window->display->grab_op))
         {
-          update_resize (window,
-                         modifier_state & CLUTTER_SHIFT_MASK || (window->htile_match != NULL || window->vtile_match != NULL),
-                         x, y,
-                         FALSE);
+          if (meta_grab_op_is_mouse (window->display->grab_op) ||
+              window->display->grab_op == META_GRAB_OP_KEYBOARD_RESIZING_UNKNOWN)
+            update_resize (window,
+                           modifier_state & CLUTTER_SHIFT_MASK || (window->htile_match != NULL || window->vtile_match != NULL),
+                           x, y,
+                           FALSE);
         }
       return TRUE;
 
@@ -7761,7 +7764,8 @@ warp_grab_pointer (MetaWindow          *window,
   *x = CLAMP (*x, 0, display_rect.width - 1);
   *y = CLAMP (*y, 0, display_rect.height - 1);
 
-  meta_x11_error_trap_push (display->x11_display);
+  if (display->x11_display)
+    meta_x11_error_trap_push (display->x11_display);
 
   meta_topic (META_DEBUG_WINDOW_OPS,
               "Warping pointer to %d,%d with window at %d,%d\n",
@@ -7785,7 +7789,8 @@ warp_grab_pointer (MetaWindow          *window,
     clutter_seat_warp_pointer (seat, *x, *y);
   }
 
-  if (meta_x11_error_trap_pop_with_return (display->x11_display) != Success)
+  if (display->x11_display &&
+      meta_x11_error_trap_pop_with_return (display->x11_display) != Success)
     {
       meta_verbose ("Failed to warp pointer for window %s\n",
                     window->desc);
