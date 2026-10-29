@@ -278,3 +278,9 @@ meta_orientation_manager_get_orientation (MetaOrientationManager *self)
 {
   return self->curr_orientation;
 }
+
+gboolean
+meta_orientation_manager_get_orientation_lock (MetaOrientationManager *self)
+{
+  return g_settings_get_boolean (self->settings, ORIENTATION_LOCK_KEY);
+}
