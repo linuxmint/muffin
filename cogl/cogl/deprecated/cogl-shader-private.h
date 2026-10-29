@@ -42,7 +42,7 @@ struct _CoglShader
 {
   CoglHandleObject _parent;
   GLuint gl_handle;
-  CoglPipeline *compilation_pipeline;
+  GArray *compiled_layers; /* layer indices, not the pipeline: it owns us */
   CoglShaderType type;
   char *source;
 };

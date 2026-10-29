@@ -62,6 +62,8 @@ _cogl_shader_free (CoglShader *shader)
     if (shader->gl_handle)
       GE (ctx, glDeleteShader (shader->gl_handle));
 
+  g_clear_pointer (&shader->compiled_layers, g_array_unref);
+  g_free (shader->source);
   g_slice_free (CoglShader, shader);
 }
 
@@ -85,7 +87,8 @@ cogl_create_shader (CoglShaderType type)
 
   shader = g_slice_new (CoglShader);
   shader->gl_handle = 0;
-  shader->compilation_pipeline = NULL;
+  shader->compiled_layers = NULL;
+  shader->source = NULL;
   shader->type = type;
 
   return _cogl_shader_handle_new (shader);
@@ -101,11 +104,7 @@ delete_shader (CoglShader *shader)
 
   shader->gl_handle = 0;
 
-  if (shader->compilation_pipeline)
-    {
-      cogl_object_unref (shader->compilation_pipeline);
-      shader->compilation_pipeline = NULL;
-    }
+  g_clear_pointer (&shader->compiled_layers, g_array_unref);
 }
 
 void
@@ -124,6 +123,15 @@ cogl_shader_source (CoglHandle   handle,
   shader->source = g_strdup (source);
 }
 
+static gboolean
+append_layer_index_cb (CoglPipeline *pipeline,
+                       int           layer_index,
+                       void         *user_data)
+{
+  g_array_append_val ((GArray *) user_data, layer_index);
+  return TRUE;
+}
+
 void
 _cogl_shader_compile_real (CoglHandle handle,
                            CoglPipeline *pipeline)
@@ -131,20 +139,28 @@ _cogl_shader_compile_real (CoglHandle handle,
   CoglShader *shader = handle;
   GLenum gl_type;
   GLint status;
+  GArray *layers;
 
   _COGL_GET_CONTEXT (ctx, NO_RETVAL);
 
+  layers = g_array_new (TRUE, FALSE, sizeof (int));
+  cogl_pipeline_foreach_layer (pipeline, append_layer_index_cb, layers);
+
   if (shader->gl_handle)
     {
-      CoglPipeline *prev = shader->compilation_pipeline;
+      GArray *prev = shader->compiled_layers;
 
       /* XXX: currently the only things that will affect the
        * boilerplate for user shaders, apart from driver features,
        * are the pipeline layer-indices and texture-unit-indices
+       * (units follow layer order, so the indices cover both)
        */
-      if (pipeline == prev ||
-          _cogl_pipeline_layer_and_unit_numbers_equal (prev, pipeline))
-        return;
+      if (layers->len == prev->len &&
+          memcmp (layers->data, prev->data, layers->len * sizeof (int)) == 0)
+        {
+          g_array_unref (layers);
+          return;
+        }
     }
 
   if (shader->gl_handle)
@@ -176,7 +192,7 @@ _cogl_shader_compile_real (CoglHandle handle,
 
   GE (ctx, glCompileShader (shader->gl_handle));
 
-  shader->compilation_pipeline = cogl_object_ref (pipeline);
+  shader->compiled_layers = layers;
 
   GE (ctx, glGetShaderiv (shader->gl_handle, GL_COMPILE_STATUS, &status));
   if (!status)
