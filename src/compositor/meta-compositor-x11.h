@@ -27,7 +27,8 @@
 G_DECLARE_FINAL_TYPE (MetaCompositorX11, meta_compositor_x11,
                       META, COMPOSITOR_X11, MetaCompositor)
 
-MetaCompositorX11 * meta_compositor_x11_new (MetaDisplay *display);
+MetaCompositorX11 * meta_compositor_x11_new (MetaDisplay *display,
+                                             MetaBackend *backend);
 
 void meta_compositor_x11_process_xevent (MetaCompositorX11 *compositor_x11,
                                          XEvent            *xevent,
