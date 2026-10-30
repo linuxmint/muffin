@@ -38,6 +38,7 @@ typedef struct _MetaWaylandDragDestFuncs MetaWaylandDragDestFuncs;
 typedef struct _MetaWaylandDataOffer MetaWaylandDataOffer;
 typedef struct _MetaWaylandDataDevice MetaWaylandDataDevice;
 typedef struct _MetaWaylandDataDevicePrimary MetaWaylandDataDevicePrimary;
+typedef struct _MetaWaylandDataControlDevice MetaWaylandDataControlDevice;
 
 typedef struct _MetaWaylandInputMethod MetaWaylandInputMethod;
 typedef struct _MetaWaylandVirtualKeyboardManager MetaWaylandVirtualKeyboardManager;
