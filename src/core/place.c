@@ -842,8 +842,8 @@ meta_window_place (MetaWindow        *window,
 
   if (window_place_centered (window))
     {
-      /* Center on current monitor */
-      int w, h;
+      /* Center in the work area of the current monitor */
+      MetaRectangle work_area;
       MetaRectangle frame_rect;
 
       meta_window_get_frame_rect (window, &frame_rect);
@@ -851,14 +851,12 @@ meta_window_place (MetaWindow        *window,
       /* Warning, this function is a round trip! */
       logical_monitor = meta_backend_get_current_logical_monitor (backend);
 
-      w = logical_monitor->rect.width;
-      h = logical_monitor->rect.height;
+      meta_window_get_work_area_for_logical_monitor (window,
+                                                     logical_monitor,
+                                                     &work_area);
 
-      x = (w - frame_rect.width) / 2;
-      y = (h - frame_rect.height) / 2;
-
-      x += logical_monitor->rect.x;
-      y += logical_monitor->rect.y;
+      x = work_area.x + (work_area.width - frame_rect.width) / 2;
+      y = work_area.y + (work_area.height - frame_rect.height) / 2;
 
       meta_topic (META_DEBUG_PLACEMENT, "Centered window %s on monitor %d\n",
                   window->desc, logical_monitor->number);
