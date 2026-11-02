@@ -82,7 +82,7 @@ compare_outputs (const void *one,
 {
   const MetaOutput *o_one = one, *o_two = two;
 
-  return strcmp (o_one->name, o_two->name);
+  return strverscmp (o_one->name, o_two->name);
 }
 
 static char *

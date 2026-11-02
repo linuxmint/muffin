@@ -199,11 +199,17 @@ compare_logical_monitors_canonical (gconstpointer a,
   MetaLogicalMonitor *la = (MetaLogicalMonitor *) a;
   MetaLogicalMonitor *lb = (MetaLogicalMonitor *) b;
 
+  const char *connector_a = logical_monitor_get_connector (la);
+  const char *connector_b = logical_monitor_get_connector (lb);
+
   if (meta_logical_monitor_is_primary (la) != meta_logical_monitor_is_primary (lb))
     return meta_logical_monitor_is_primary (la) ? -1 : 1;
 
-  return g_strcmp0 (logical_monitor_get_connector (la),
-                    logical_monitor_get_connector (lb));
+  if (!connector_a || !connector_b)
+    return g_strcmp0 (connector_a, connector_b);
+
+  /* Natural order so DP-10 sorts after DP-9 */
+  return strverscmp (connector_a, connector_b);
 }
 
 static void
