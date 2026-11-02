@@ -1,3 +1,58 @@
+muffin (6.8.0) adrien; urgency=medium
+
+  [ Michael Webster ]
+  * wayland: Give a surface a new actor on every role assignment
+  * session.c (x11): Stop using X sync objects on Die instead of waiting
+  * wayland: Only expose the EGLStream controller when not rendering via gbm
+  * wayland dnd: Fix regression from 4d9962ec6 - chain up in assigned, other dnd fixes.
+  * cogl/glx: Don't miss swap events stranded by zink's WSI threads
+  * debian/control: Remove xenity as build-depends
+  * meta-window-actor.c: Have get_image() return an exact-sized buffer for fractional-scale clients.
+  * kms: Only treat a hotplug event as such when connector state changed
+  * meta-cursor-renderer-native.c: Disable hw cursor for newer nvidia drivers
+  * input-mapper: Skip udev size lookup for devices without a node
+  * stack-tracker: Don't sync the stack for window create/destroy events
+
+  [ Clement Lefebvre ]
+  * Replace zenity (libadwaita) with xenity (GTK3)
+  * x11: Don't reject small screen sizes in meta_gpu_xrandr_read_current()
+  * debian: Restore the alternative priority and drop an empty Provides
+
+  [ anthonytheinventor ]
+  * cogl/shader: Don't keep the compilation pipeline alive (#877)
+
+  [ Fabio Fantoni ]
+  * cogl: Don't install cogl-gtype-private.h (#869)
+  * Debian packaging improvements (#851)
+
+  [ Rad Kawar ]
+  * backends/x11: Interpret keycode correctly (#874)
+  * backends/x11: Emit discrete scroll events for accumulated smooth events (#875)
+
+  [ radkawar ]
+  * backends/x11: Release held virtual input when the device is destroyed (#876)
+
+  [ Abraham Binder ]
+  * Don't flush calc_showing on X11 raise so newly mapped windows still get focus (#772). (#859)
+
+  [ Jenna Nelson ]
+  * backends: Guard against NULL monitor mode during XRandR transitions (#805)
+
+  [ Dan ]
+  * window: Fix keyboard resize increments and avoid crash under Wayland (#873)
+  * keybindings: Reject accelerators without keysym and fail invalid custom keybindings (#872)
+
+  [ Anaxímeno Brito ]
+  * meta-cursor-tracker: Add pointer button update event (#860)
+
+  [ Aleksey Samoilov ]
+  * Wayland: Implement ext-idle-notify-v1 protocol (#842)
+
+  [ KAMI ]
+  * Fix memory leaks, undefined behaviour, and resource lifecycle bugs (#814)
+
+ -- Clement Lefebvre <root@linuxmint.com>  Mon, 02 Nov 2026 12:59:56 +0000
+
 muffin (6.7.9) adrien; urgency=medium
 
   [ Michael Webster ]
