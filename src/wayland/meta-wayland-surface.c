@@ -1286,6 +1286,25 @@ static const struct wl_surface_interface meta_wayland_wl_surface_interface = {
 };
 
 static void
+handle_output_bound (MetaWaylandOutput  *wayland_output,
+                     struct wl_resource *output_resource,
+                     MetaWaylandSurface *surface)
+{
+  if (wl_resource_get_client (output_resource) ==
+      wl_resource_get_client (surface->resource))
+    wl_surface_send_enter (surface->resource, output_resource);
+}
+
+static void
+disconnect_output_signals (MetaWaylandSurface *surface,
+                           MetaWaylandOutput  *wayland_output)
+{
+  g_signal_handlers_disconnect_by_func (wayland_output,
+                                        G_CALLBACK (handle_output_bound),
+                                        surface);
+}
+
+static void
 surface_entered_output (MetaWaylandSurface *surface,
                         MetaWaylandOutput *wayland_output)
 {
@@ -1302,6 +1321,10 @@ surface_entered_output (MetaWaylandSurface *surface,
 
       wl_surface_send_enter (surface->resource, resource);
     }
+
+  g_signal_connect (wayland_output, "output-bound",
+                    G_CALLBACK (handle_output_bound),
+                    surface);
 }
 
 static void
@@ -1310,6 +1333,8 @@ surface_left_output (MetaWaylandSurface *surface,
 {
   GList *iter;
   struct wl_resource *resource;
+
+  disconnect_output_signals (surface, wayland_output);
 
   for (iter = wayland_output->resources; iter != NULL; iter = iter->next)
     {
@@ -1389,9 +1414,16 @@ update_surface_output_state (gpointer key, gpointer value, gpointer user_data)
 }
 
 static void
-surface_output_disconnect_signal (gpointer key, gpointer value, gpointer user_data)
+surface_output_disconnect_signals (gpointer key,
+                                   gpointer value,
+                                   gpointer user_data)
 {
-  g_signal_handler_disconnect (key, (gulong) GPOINTER_TO_SIZE (value));
+  MetaWaylandOutput *wayland_output = key;
+  MetaWaylandSurface *surface = user_data;
+
+  g_signal_handler_disconnect (wayland_output,
+                               (gulong) GPOINTER_TO_SIZE (value));
+  disconnect_output_signals (surface, wayland_output);
 }
 
 /*
@@ -1546,7 +1578,7 @@ wl_surface_destructor (struct wl_resource *resource)
   meta_wayland_compositor_remove_frame_callback_surface (compositor, surface);
 
   g_hash_table_foreach (surface->outputs_to_destroy_notify_id,
-                        surface_output_disconnect_signal,
+                        surface_output_disconnect_signals,
                         surface);
   g_hash_table_unref (surface->outputs_to_destroy_notify_id);
 

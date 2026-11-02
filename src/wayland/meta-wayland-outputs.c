@@ -44,6 +44,7 @@
 enum
 {
   OUTPUT_DESTROYED,
+  OUTPUT_BOUND,
 
   LAST_SIGNAL
 };
@@ -418,6 +419,8 @@ bind_output (struct wl_client *client,
 #endif
 
   send_output_events (resource, wayland_output, logical_monitor, TRUE, NULL);
+
+  g_signal_emit (wayland_output, signals[OUTPUT_BOUND], 0, resource);
 }
 
 static void
@@ -683,6 +686,14 @@ meta_wayland_output_class_init (MetaWaylandOutputClass *klass)
                                             0,
                                             NULL, NULL, NULL,
                                             G_TYPE_NONE, 0);
+
+  signals[OUTPUT_BOUND] = g_signal_new ("output-bound",
+                                        G_TYPE_FROM_CLASS (object_class),
+                                        G_SIGNAL_RUN_LAST,
+                                        0,
+                                        NULL, NULL, NULL,
+                                        G_TYPE_NONE, 1,
+                                        G_TYPE_POINTER);
 }
 
 static void
