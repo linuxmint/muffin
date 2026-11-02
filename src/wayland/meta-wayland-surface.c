@@ -1286,6 +1286,11 @@ static const struct wl_surface_interface meta_wayland_wl_surface_interface = {
 };
 
 static void
+set_surface_is_on_output (MetaWaylandSurface *surface,
+                          MetaWaylandOutput *wayland_output,
+                          gboolean is_on_output);
+
+static void
 handle_output_bound (MetaWaylandOutput  *wayland_output,
                      struct wl_resource *output_resource,
                      MetaWaylandSurface *surface)
@@ -1295,12 +1300,40 @@ handle_output_bound (MetaWaylandOutput  *wayland_output,
     wl_surface_send_enter (surface->resource, output_resource);
 }
 
+static gboolean
+update_outputs_idle (gpointer user_data)
+{
+  MetaWaylandSurface *surface = user_data;
+
+  surface->update_outputs_idle_id = 0;
+  meta_wayland_surface_update_outputs (surface);
+
+  return G_SOURCE_REMOVE;
+}
+
+static void
+handle_output_retired (MetaWaylandOutput  *wayland_output,
+                       MetaWaylandSurface *surface)
+{
+  set_surface_is_on_output (surface, wayland_output, FALSE);
+
+  /* Re-check once the new outputs and window monitors are in place, or a
+   * surface that doesn't move never enters the output's replacement. Default
+   * priority, so redraws can't starve it. */
+  if (!surface->update_outputs_idle_id)
+    surface->update_outputs_idle_id =
+      g_idle_add_full (G_PRIORITY_DEFAULT, update_outputs_idle, surface, NULL);
+}
+
 static void
 disconnect_output_signals (MetaWaylandSurface *surface,
                            MetaWaylandOutput  *wayland_output)
 {
   g_signal_handlers_disconnect_by_func (wayland_output,
                                         G_CALLBACK (handle_output_bound),
+                                        surface);
+  g_signal_handlers_disconnect_by_func (wayland_output,
+                                        G_CALLBACK (handle_output_retired),
                                         surface);
 }
 
@@ -1325,6 +1358,9 @@ surface_entered_output (MetaWaylandSurface *surface,
   g_signal_connect (wayland_output, "output-bound",
                     G_CALLBACK (handle_output_bound),
                     surface);
+  g_signal_connect (wayland_output, "output-retired",
+                    G_CALLBACK (handle_output_retired),
+                    surface);
 }
 
 static void
@@ -1347,11 +1383,6 @@ surface_left_output (MetaWaylandSurface *surface,
       wl_surface_send_leave (surface->resource, resource);
     }
 }
-
-static void
-set_surface_is_on_output (MetaWaylandSurface *surface,
-                          MetaWaylandOutput *wayland_output,
-                          gboolean is_on_output);
 
 static void
 surface_handle_output_destroy (MetaWaylandOutput *wayland_output,
@@ -1577,6 +1608,7 @@ wl_surface_destructor (struct wl_resource *resource)
 
   meta_wayland_compositor_remove_frame_callback_surface (compositor, surface);
 
+  g_clear_handle_id (&surface->update_outputs_idle_id, g_source_remove);
   g_hash_table_foreach (surface->outputs_to_destroy_notify_id,
                         surface_output_disconnect_signals,
                         surface);

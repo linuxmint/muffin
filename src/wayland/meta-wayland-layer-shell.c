@@ -2499,9 +2499,10 @@ reconfigure_layer_surfaces (MetaWaylandCompositor *compositor,
     {
       MetaWaylandLayerSurface *layer_surface = l->data;
 
-      /* A bound output whose monitor was unplugged is made inert immediately
-       * but only destroyed after a delay — close the surface now rather than
-       * leaving it misplaced on the fallback monitor until then. */
+      /* A bound output whose monitor was unplugged, or whose global was
+       * re-created to keep monitor order, is made inert immediately but only
+       * destroyed after a delay — close the surface now rather than leaving it
+       * misplaced on the fallback monitor until then. */
       if (layer_surface->output && !layer_surface->output->logical_monitor)
         {
           meta_wayland_layer_surface_close (layer_surface);
