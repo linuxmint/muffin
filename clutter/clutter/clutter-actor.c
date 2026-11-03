@@ -651,6 +651,7 @@
 #include "clutter-property-transition.h"
 #include "clutter-scriptable.h"
 #include "clutter-script-private.h"
+#include "clutter-pick-context-private.h"
 #include "clutter-stage-private.h"
 #include "clutter-timeline.h"
 #include "clutter-transition.h"
@@ -1309,52 +1310,6 @@ clutter_actor_verify_map_state (ClutterActor *self)
 
 #endif /* CLUTTER_ENABLE_DEBUG */
 
-static gboolean
-_clutter_actor_transform_local_box_to_stage (ClutterActor          *self,
-                                             ClutterStage          *stage,
-                                             ClutterPickContext    *pick_context,
-                                             const ClutterActorBox *box,
-                                             graphene_point_t       vertices[4])
-{
-  CoglFramebuffer *fb =
-   clutter_pick_context_get_framebuffer (pick_context);
-  CoglMatrix stage_transform, inv_stage_transform;
-  CoglMatrix modelview, transform_to_stage;
-  int v;
-
-  clutter_actor_get_transform (CLUTTER_ACTOR (stage), &stage_transform);
-  if (!cogl_matrix_get_inverse (&stage_transform, &inv_stage_transform))
-    return FALSE;
-  cogl_framebuffer_get_modelview_matrix (fb, &modelview);
-  cogl_matrix_multiply (&transform_to_stage, &inv_stage_transform, &modelview);
-
-  vertices[0].x = box->x1;
-  vertices[0].y = box->y1;
-
-  vertices[1].x = box->x2;
-  vertices[1].y = box->y1;
-
-  vertices[2].x = box->x2;
-  vertices[2].y = box->y2;
-
-  vertices[3].x = box->x1;
-  vertices[3].y = box->y2;
-
-  for (v = 0; v < 4; v++)
-    {
-      float z = 0.f;
-      float w = 1.f;
-
-      cogl_matrix_transform_point (&transform_to_stage,
-                                   &vertices[v].x,
-                                   &vertices[v].y,
-                                   &z,
-                                   &w);
-    }
-
-  return TRUE;
-}
-
 /**
  * clutter_actor_pick_box:
  * @self: The #ClutterActor being "pick" painted.
@@ -1383,36 +1338,8 @@ clutter_actor_pick_box (ClutterActor          *self,
 
   stage = CLUTTER_STAGE (_clutter_actor_get_stage_internal (self));
 
-  if (_clutter_actor_transform_local_box_to_stage (self, stage, pick_context,
-                                                   box, vertices))
+  if (clutter_pick_context_transform_box_to_stage (pick_context, box, vertices))
     clutter_stage_log_pick (stage, vertices, self);
-}
-
-static gboolean
-_clutter_actor_push_pick_clip (ClutterActor          *self,
-                               ClutterPickContext    *pick_context,
-                               const ClutterActorBox *clip)
-{
-  ClutterStage *stage;
-  graphene_point_t vertices[4];
-
-  stage = CLUTTER_STAGE (_clutter_actor_get_stage_internal (self));
-
-  if (!_clutter_actor_transform_local_box_to_stage (self, stage, pick_context,
-                                                    clip, vertices))
-    return FALSE;
-
-  clutter_stage_push_pick_clip (stage, vertices);
-  return TRUE;
-}
-
-static void
-_clutter_actor_pop_pick_clip (ClutterActor *self)
-{
-  ClutterActor *stage;
-
-  stage = _clutter_actor_get_stage_internal (self);
-  clutter_stage_pop_pick_clip (CLUTTER_STAGE (stage));
 }
 
 static void
@@ -4318,7 +4245,7 @@ clutter_actor_pick (ClutterActor       *actor,
     }
 
   if (clip_set)
-    clip_set = _clutter_actor_push_pick_clip (actor, pick_context, &clip);
+    clutter_pick_context_push_clip (pick_context, &clip);
 
   priv->next_effect_to_paint = NULL;
   if (priv->effects)
@@ -4330,7 +4257,7 @@ clutter_actor_pick (ClutterActor       *actor,
   clutter_actor_continue_pick (actor, pick_context);
 
   if (clip_set)
-    _clutter_actor_pop_pick_clip (actor);
+    clutter_pick_context_pop_clip (pick_context);
 
   cogl_framebuffer_pop_matrix (framebuffer);
 
@@ -9421,6 +9348,50 @@ clutter_actor_queue_relayout (ClutterActor *self)
 
   _clutter_actor_queue_only_relayout (self);
   clutter_actor_queue_redraw (self);
+}
+
+/**
+ * clutter_actor_invalidate_transform:
+ * @self: A #ClutterActor
+ *
+ * Invalidates the cached transformation matrix of @self and its children.
+ * This is needed for implementations overriding the
+ * #ClutterActorClass.apply_transform() virtual function and has to be
+ * called whenever the transformation returned by that function would change.
+ */
+void
+clutter_actor_invalidate_transform (ClutterActor *self)
+{
+  g_return_if_fail (CLUTTER_IS_ACTOR (self));
+
+  transform_changed (self);
+}
+
+static void
+queue_update_paint_volume (ClutterActor *actor)
+{
+  while (actor)
+    {
+      actor->priv->needs_paint_volume_update = TRUE;
+      actor = actor->priv->parent;
+    }
+}
+
+/**
+ * clutter_actor_invalidate_paint_volume:
+ * @self: A #ClutterActor
+ *
+ * Invalidates the cached paint volume of @self and its ancestors. This is
+ * needed for implementations overriding the
+ * #ClutterActorClass.get_paint_volume() virtual function and has to be
+ * called whenever the paint volume returned by that function would change.
+ */
+void
+clutter_actor_invalidate_paint_volume (ClutterActor *self)
+{
+  g_return_if_fail (CLUTTER_IS_ACTOR (self));
+
+  queue_update_paint_volume (self);
 }
 
 /**

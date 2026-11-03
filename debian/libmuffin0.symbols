@@ -224,6 +224,8 @@ libmuffin-clutter-0.so.0 libmuffin0 #MINVER#
  clutter_actor_insert_child_above@Base 5.3.0
  clutter_actor_insert_child_at_index@Base 5.3.0
  clutter_actor_insert_child_below@Base 5.3.0
+ clutter_actor_invalidate_paint_volume@Base 6.8.0
+ clutter_actor_invalidate_transform@Base 6.8.0
  clutter_actor_is_in_clone_paint@Base 5.3.0
  clutter_actor_is_mapped@Base 5.3.0
  clutter_actor_is_realized@Base 5.3.0
@@ -998,6 +1000,8 @@ libmuffin-clutter-0.so.0 libmuffin0 #MINVER#
  clutter_pick_context_destroy@Base 5.3.0
  clutter_pick_context_get_framebuffer@Base 5.3.0
  clutter_pick_context_get_type@Base 5.3.0
+ clutter_pick_context_pop_clip@Base 6.8.0
+ clutter_pick_context_push_clip@Base 6.8.0
  clutter_pick_context_ref@Base 5.3.0
  clutter_pick_context_unref@Base 5.3.0
  clutter_pick_debug_flag_get_type@Base 5.3.0

@@ -381,6 +381,10 @@ void                            clutter_actor_queue_redraw_with_clip            
 CLUTTER_EXPORT
 void                            clutter_actor_queue_relayout                    (ClutterActor                *self);
 CLUTTER_EXPORT
+void                            clutter_actor_invalidate_transform              (ClutterActor                *self);
+CLUTTER_EXPORT
+void                            clutter_actor_invalidate_paint_volume           (ClutterActor                *self);
+CLUTTER_EXPORT
 void                            clutter_actor_destroy                           (ClutterActor                *self);
 CLUTTER_EXPORT
 void                            clutter_actor_set_name                          (ClutterActor                *self,
