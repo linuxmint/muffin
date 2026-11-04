@@ -140,6 +140,10 @@ struct _MetaMonitorManager
   gulong experimental_features_changed_handler_id;
 
   MetaMonitorSwitchConfigType current_switch_config;
+
+  /* auto-rotate is "tablet-mode" and the device is in laptop posture, so the
+   * built-in panel is held in its normal orientation. */
+  gboolean rotation_held;
 };
 
 /**
