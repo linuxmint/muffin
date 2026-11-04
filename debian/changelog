@@ -1,3 +1,19 @@
+muffin (6.8.1) adrien; urgency=medium
+
+  [ Michael Webster ]
+  * wayland/surface: Send enter event when a client binds to wl_output late
+  * wayland: Re-announce wl_output globals when monitor order changes
+  * meta-window-wayland: Always update the monitor of an unmapped window
+  * meta-monitor-manager.c: Use strverscmp to compare connector ids
+  * wayland: Refuse a popup grab cleanly when a grab op is already in effect
+  * clutter: Add missing pick clip and cache invalidation api.
+  * constraints.c: Run constrain_to_single_monitor() on client decorated windows.
+
+  [ gossardla ]
+  * place.c: Center windows in the work area, not on the whole monitor (#884)
+
+ -- Clement Lefebvre <root@linuxmint.com>  Wed, 04 Nov 2026 14:42:42 +0100
+
 muffin (6.8.0) adrien; urgency=medium
 
   [ Michael Webster ]
