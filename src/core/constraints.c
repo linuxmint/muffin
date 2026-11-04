@@ -1718,13 +1718,14 @@ constrain_to_single_monitor (MetaWindow         *window,
   /* Exit early if we know the constraint won't apply--note that this constraint
    * is only meant for normal windows (e.g. we don't want docks to be shoved
    * "onscreen" by their own strut) and we can't apply it to frameless windows
-   * or else users will be unable to move windows such as XMMS across monitors.
+   * that move themselves, or else users will be unable to move windows such as
+   * XMMS across monitors. Client-decorated windows leave moves to us.
    */
   if (window->type == META_WINDOW_DESKTOP ||
       window->type == META_WINDOW_DOCK ||
       meta_monitor_manager_get_num_logical_monitors (monitor_manager) == 1 ||
       !window->require_on_single_monitor ||
-      !window->frame ||
+      (!window->frame && !meta_window_is_client_decorated (window)) ||
       info->is_user_action ||
       meta_window_get_placement_rule (window))
     return TRUE;
