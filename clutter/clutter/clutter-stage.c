@@ -1833,7 +1833,7 @@ _clutter_stage_do_pick_on_view (ClutterStage     *stage,
 
       _clutter_stage_clear_pick_stack (stage);
 
-      pick_context = clutter_pick_context_new_for_view (view);
+      pick_context = clutter_pick_context_new_for_view (stage, view);
 
       context->pick_mode = mode;
       setup_view_for_pick_or_paint (stage, view, NULL);

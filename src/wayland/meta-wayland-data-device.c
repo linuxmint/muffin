@@ -499,6 +499,28 @@ meta_wayland_data_source_fake_read (MetaWaylandDataSource *source,
   g_io_add_watch (channel, G_IO_HUP, on_fake_read_hup, source);
 }
 
+static gboolean
+drag_source_accepted (MetaWaylandDataSource *source)
+{
+  return meta_wayland_data_source_has_target (source) &&
+         meta_wayland_data_source_get_current_action (source);
+}
+
+/* XDND treats a destination that refuses the drop (or has no data device)
+ * the same as the root window, and GTK relies on that to tell a drop onto
+ * "nothing" apart from a rejected one, e.g. to detach a tab into a new
+ * window. Match it when the focused surface never accepted anything.
+ */
+static gboolean
+rootwindow_drop_accepted (MetaWaylandDragGrab   *drag_grab,
+                          MetaWaylandDataSource *source)
+{
+  if (drag_grab->drag_focus && !drag_source_accepted (source))
+    meta_wayland_drag_source_fake_acceptance (source, ROOTWINDOW_DROP_MIME);
+
+  return drag_source_accepted (source);
+}
+
 static void
 drag_grab_button (MetaWaylandPointerGrab *grab,
                   const ClutterEvent     *event)
@@ -514,8 +536,7 @@ drag_grab_button (MetaWaylandPointerGrab *grab,
       gboolean success;
 
       if (drag_grab->drag_focus && source &&
-          meta_wayland_data_source_has_target (source) &&
-          meta_wayland_data_source_get_current_action (source))
+          drag_source_accepted (source))
         {
           meta_wayland_surface_drag_dest_drop (drag_grab->drag_focus);
           meta_wayland_data_source_notify_drop_performed (source);
@@ -523,10 +544,9 @@ drag_grab_button (MetaWaylandPointerGrab *grab,
           meta_wayland_data_source_update_in_ask (source);
           success = TRUE;
         }
-      else if (!drag_grab->drag_focus && source &&
-               meta_wayland_data_source_has_target (source) &&
-               meta_wayland_data_source_get_current_action (source) &&
-               meta_wayland_data_source_has_mime_type (source, ROOTWINDOW_DROP_MIME))
+      else if (source &&
+               meta_wayland_data_source_has_mime_type (source, ROOTWINDOW_DROP_MIME) &&
+               rootwindow_drop_accepted (drag_grab, source))
         {
           /* Perform a fake read, that will lead to notify_finish() being called */
           meta_wayland_data_source_fake_read (source, ROOTWINDOW_DROP_MIME);

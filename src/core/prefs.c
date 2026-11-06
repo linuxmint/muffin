@@ -2079,7 +2079,7 @@ update_binding (MetaKeyPref *binding,
         {
           meta_topic (META_DEBUG_KEYBINDINGS,
                       "Failed to parse new GSettings value\n");
-          meta_warning ("\"%s\" found in configuration database is not a valid value for keybinding \"%s\"\n",
+          meta_warning ("\"%s\" is not a valid value for keybinding \"%s\"\n",
                         strokes[i], binding->name);
 
           g_free (combo);
@@ -2299,12 +2299,22 @@ meta_prefs_add_keybinding (const char           *name,
         {
           strokes = g_strdupv((gchar **)bindings);
         }
-
-      queue_changed (META_PREF_KEYBINDINGS);
     }
 
   update_binding (pref, strokes);
   g_strfreev (strokes);
+
+  /* If this is a dynamic custom keybinding without GSettings and none of the
+   * provided bindings could be parsed, fail so the caller knows the binding
+   * was not added. */
+  if (pref->settings == NULL && bindings != NULL && bindings[0] != NULL && pref->combos == NULL)
+    {
+      meta_key_pref_free (pref);
+      return FALSE;
+    }
+
+  if (!pref->builtin)
+    queue_changed (META_PREF_KEYBINDINGS);
 
   g_hash_table_insert (key_bindings, g_strdup (name), pref);
 

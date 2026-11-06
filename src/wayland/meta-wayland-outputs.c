@@ -44,6 +44,8 @@
 enum
 {
   OUTPUT_DESTROYED,
+  OUTPUT_BOUND,
+  OUTPUT_RETIRED,
 
   LAST_SIGNAL
 };
@@ -418,6 +420,8 @@ bind_output (struct wl_client *client,
 #endif
 
   send_output_events (resource, wayland_output, logical_monitor, TRUE, NULL);
+
+  g_signal_emit (wayland_output, signals[OUTPUT_BOUND], 0, resource);
 }
 
 static void
@@ -505,9 +509,11 @@ meta_wayland_output_new (MetaWaylandCompositor *compositor,
 {
   MetaWaylandCompositor *wayland_compositor =
     meta_wayland_compositor_get_default ();
+  static guint next_creation_serial = 1;
   MetaWaylandOutput *wayland_output;
 
   wayland_output = g_object_new (META_TYPE_WAYLAND_OUTPUT, NULL);
+  wayland_output->creation_serial = next_creation_serial++;
   wayland_output->global = wl_global_create (compositor->wayland_display,
                                              &wl_output_interface,
                                              META_WL_OUTPUT_VERSION,
@@ -549,15 +555,21 @@ make_output_inert (gpointer key,
 {
   MetaWaylandOutput *wayland_output = value;
 
+  /* Already retired by the reorder path */
+  if (!wayland_output->logical_monitor)
+    return;
+
+  /* Make surfaces send wl_surface.leave while the resources are still live,
+   * or GTK3 keeps the dead output in its window's list and drops to scale 1. */
+  g_signal_emit (wayland_output, signals[OUTPUT_RETIRED], 0);
+
   /* Announce the output's removal now. The global itself is kept alive until
    * delayed_destroy_outputs () so an in-flight wl_registry.bind cannot be
    * cancelled. (ref https://gitlab.gnome.org/GNOME/mutter/-/commit/c0bc821f62)
    *
-   * Layer-shell clients already learn of the change by another route: clearing
-   * logical_monitor below feeds the workarea path, which closes a surface bound
-   * to this output and reconfigures the survivors. Toolkits do not - they build
-   * their monitor list from these globals, so an app relying on Gdk to notice a
-   * monitor change saw nothing until the destroy delay expired.
+   * Layer-shell reads the cleared logical_monitor on monitors-changed and
+   * closes any surface bound to this output, but toolkits build their monitor
+   * list from these globals, so they only see the change once it is removed.
    */
   wl_global_remove (wayland_output->global);
 
@@ -578,6 +590,8 @@ meta_wayland_compositor_update_outputs (MetaWaylandCompositor *compositor,
 {
   GHashTable *new_table;
   GList *logical_monitors, *l;
+  guint last_creation_serial = 0;
+  gboolean reannounce = FALSE;
 
   logical_monitors =
     meta_monitor_manager_get_logical_monitors (monitor_manager);
@@ -595,6 +609,21 @@ meta_wayland_compositor_update_outputs (MetaWaylandCompositor *compositor,
       wayland_output = g_hash_table_lookup (compositor->outputs,
                                             &logical_monitor->winsys_id);
 
+      /* Clients see globals in creation order, so once an output's global
+       * predates the previous one, re-create it and every later one to match
+       * the logical monitor order. Retire before re-creating, so a monitor
+       * never has two live globals. */
+      if (wayland_output && wayland_output->creation_serial < last_creation_serial)
+        reannounce = TRUE;
+
+      if (wayland_output && reannounce)
+        {
+          meta_verbose ("Re-creating wl_output for %s to keep outputs in monitor order\n",
+                        meta_monitor_get_connector (pick_main_monitor (logical_monitor)));
+          make_output_inert (NULL, wayland_output, NULL);
+          wayland_output = NULL;
+        }
+
       if (wayland_output)
         {
           g_hash_table_steal (compositor->outputs,
@@ -604,6 +633,8 @@ meta_wayland_compositor_update_outputs (MetaWaylandCompositor *compositor,
         {
           wayland_output = meta_wayland_output_new (compositor, logical_monitor);
         }
+
+      last_creation_serial = wayland_output->creation_serial;
 
       wayland_output_update_for_output (wayland_output, logical_monitor);
       g_hash_table_insert (new_table,
@@ -683,6 +714,21 @@ meta_wayland_output_class_init (MetaWaylandOutputClass *klass)
                                             0,
                                             NULL, NULL, NULL,
                                             G_TYPE_NONE, 0);
+
+  signals[OUTPUT_BOUND] = g_signal_new ("output-bound",
+                                        G_TYPE_FROM_CLASS (object_class),
+                                        G_SIGNAL_RUN_LAST,
+                                        0,
+                                        NULL, NULL, NULL,
+                                        G_TYPE_NONE, 1,
+                                        G_TYPE_POINTER);
+
+  signals[OUTPUT_RETIRED] = g_signal_new ("output-retired",
+                                          G_TYPE_FROM_CLASS (object_class),
+                                          G_SIGNAL_RUN_LAST,
+                                          0,
+                                          NULL, NULL, NULL,
+                                          G_TYPE_NONE, 0);
 }
 
 static void

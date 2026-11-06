@@ -38,6 +38,9 @@ struct _MetaTileInfo
   guint32 tile_h;
 };
 
+gboolean meta_tile_info_equal (const MetaTileInfo *a,
+                               const MetaTileInfo *b);
+
 /* This matches the values in drm_mode.h */
 typedef enum
 {

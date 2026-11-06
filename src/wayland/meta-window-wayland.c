@@ -535,9 +535,8 @@ meta_window_wayland_update_main_monitor (MetaWindow                   *window,
 
   /* A popup whose chain ends at a BACKGROUND layer surface has no toplevel
    * window to inherit from - that surface is the wallpaper and is not managed
-   * as a window. Take its monitor directly, or the popup falls through to the
-   * rect-based path below with an empty rect, keeps a NULL monitor, and so
-   * places itself at geometry scale 1 on a scaled monitor. */
+   * as a window. Take its monitor directly; the paths below would not resolve
+   * to the wallpaper's monitor. */
   {
     MetaWaylandSurface *toplevel_surface =
       meta_wayland_surface_get_toplevel (window->surface);
@@ -559,7 +558,10 @@ meta_window_wayland_update_main_monitor (MetaWindow                   *window,
   }
 
   if (window->rect.width == 0 || window->rect.height == 0)
-    return;
+    {
+      window->monitor = meta_window_find_monitor_from_id (window);
+      return;
+    }
 
   from = window->monitor;
 
@@ -1263,6 +1265,12 @@ meta_window_wayland_finish_move_resize (MetaWindow              *window,
   else
     gravity = META_GRAVITY_STATIC;
   meta_window_move_resize_internal (window, flags, gravity, rect);
+
+  if (is_window_being_resized &&
+      meta_grab_op_is_keyboard (window->display->grab_op))
+    {
+      meta_window_update_keyboard_resize (window, FALSE);
+    }
 
   /* Force a NOT_MAXIMIZED -> MAXIMIZED configure transition for clients that
    * need it to fire their 'maximize' event. Triggered when the client requested

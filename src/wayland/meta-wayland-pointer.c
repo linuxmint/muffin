@@ -1101,9 +1101,15 @@ meta_wayland_pointer_start_popup_grab (MetaWaylandPointer      *pointer,
     return NULL;
 
   if (pointer->grab == &pointer->default_grab)
-    grab = meta_wayland_popup_grab_create (pointer, popup_surface);
+    {
+      grab = meta_wayland_popup_grab_create (pointer, popup_surface);
+      if (grab == NULL)
+        return NULL;
+    }
   else
-    grab = (MetaWaylandPopupGrab*)pointer->grab;
+    {
+      grab = (MetaWaylandPopupGrab*)pointer->grab;
+    }
 
   return meta_wayland_popup_create (popup_surface, grab);
 }

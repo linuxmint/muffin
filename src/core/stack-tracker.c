@@ -687,10 +687,15 @@ meta_stack_tracker_record_lower_below (MetaStackTracker *tracker,
   stack_tracker_apply_prediction (tracker, op);
 }
 
+/* @visible_change: whether the event alone can change the stack the compositor
+ * sees. Our own predictions settled by the event always sync.
+ */
 static void
 stack_tracker_event_received (MetaStackTracker *tracker,
-			      MetaStackOp      *op)
+			      MetaStackOp      *op,
+                              gboolean          visible_change)
 {
+  gboolean stack_changed = FALSE;
   gboolean need_sync = FALSE;
 
   /* If the event is older than our initial query, then it's
@@ -727,7 +732,11 @@ stack_tracker_event_received (MetaStackTracker *tracker,
    */
   if (meta_stack_op_apply (tracker, op, tracker->verified_stack,
                            IGNORE_NOOP_X_RESTACK))
-    need_sync = TRUE;
+    {
+      stack_changed = TRUE;
+      if (visible_change)
+        need_sync = TRUE;
+    }
 
   /* What is left to process is the prediction corresponding to the event
    * (if any), and then any subsequent Wayland-only events we can just
@@ -748,16 +757,15 @@ stack_tracker_event_received (MetaStackTracker *tracker,
       need_sync = TRUE;
     }
 
-  if (need_sync)
+  /* predicted_stack is derived from verified_stack, so drop it on any change */
+  if ((stack_changed || need_sync) && tracker->predicted_stack)
     {
-      if (tracker->predicted_stack)
-        {
-          g_array_free (tracker->predicted_stack, TRUE);
-          tracker->predicted_stack = NULL;
-        }
-
-      meta_stack_tracker_queue_sync_stack (tracker);
+      g_array_free (tracker->predicted_stack, TRUE);
+      tracker->predicted_stack = NULL;
     }
+
+  if (need_sync)
+    meta_stack_tracker_queue_sync_stack (tracker);
 
   meta_stack_tracker_dump (tracker);
 }
@@ -772,7 +780,10 @@ meta_stack_tracker_create_event (MetaStackTracker    *tracker,
   op.any.serial = event->serial;
   op.add.window = event->window;
 
-  stack_tracker_event_received (tracker, &op);
+  /* A new window is unmapped; it reaches the compositor when it is managed,
+   * which queues its own sync.
+   */
+  stack_tracker_event_received (tracker, &op, FALSE);
 }
 
 void
@@ -785,7 +796,8 @@ meta_stack_tracker_destroy_event (MetaStackTracker    *tracker,
   op.any.serial = event->serial;
   op.remove.window = event->window;
 
-  stack_tracker_event_received (tracker, &op);
+  /* Destroying a mapped window unmaps it first, and unmanaging syncs. */
+  stack_tracker_event_received (tracker, &op, FALSE);
 }
 
 void
@@ -800,7 +812,7 @@ meta_stack_tracker_reparent_event (MetaStackTracker    *tracker,
       op.any.serial = event->serial;
       op.add.window = event->window;
 
-      stack_tracker_event_received (tracker, &op);
+      stack_tracker_event_received (tracker, &op, TRUE);
     }
   else
     {
@@ -810,7 +822,7 @@ meta_stack_tracker_reparent_event (MetaStackTracker    *tracker,
       op.any.serial = event->serial;
       op.remove.window = event->window;
 
-      stack_tracker_event_received (tracker, &op);
+      stack_tracker_event_received (tracker, &op, TRUE);
     }
 }
 
@@ -825,7 +837,7 @@ meta_stack_tracker_configure_event (MetaStackTracker    *tracker,
   op.raise_above.window = event->window;
   op.raise_above.sibling = event->above;
 
-  stack_tracker_event_received (tracker, &op);
+  stack_tracker_event_received (tracker, &op, TRUE);
 }
 
 static gboolean

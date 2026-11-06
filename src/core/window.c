@@ -4369,6 +4369,29 @@ find_monitor_by_winsys_id (MetaWindow *window,
   return NULL;
 }
 
+MetaLogicalMonitor *
+meta_window_find_monitor_from_id (MetaWindow *window)
+{
+  MetaBackend *backend = meta_get_backend ();
+  MetaMonitorManager *monitor_manager =
+    meta_backend_get_monitor_manager (backend);
+  MetaLogicalMonitor *old = window->monitor;
+  MetaLogicalMonitor *new;
+
+  /* Try the preferred output first */
+  new = find_monitor_by_winsys_id (window, window->preferred_output_winsys_id);
+
+  /* Otherwise, try to find the old output on a new monitor */
+  if (old && !new)
+    new = find_monitor_by_winsys_id (window, old->winsys_id);
+
+  /* Fall back to primary if everything else failed */
+  if (!new)
+    new = meta_monitor_manager_get_primary_logical_monitor (monitor_manager);
+
+  return new;
+}
+
 /* This is called when the monitor setup has changed. The window->monitor
  * reference is still "valid", but refer to the previous monitor setup */
 void
@@ -4390,17 +4413,7 @@ meta_window_update_for_monitors_changed (MetaWindow *window)
     }
 
   old = window->monitor;
-
-  /* Try the preferred output first */
-  new = find_monitor_by_winsys_id (window, window->preferred_output_winsys_id);
-
-  /* Otherwise, try to find the old output on a new monitor */
-  if (old && !new)
-    new = find_monitor_by_winsys_id (window, old->winsys_id);
-
-  /* Fall back to primary if everything else failed */
-  if (!new)
-    new = meta_monitor_manager_get_primary_logical_monitor (monitor_manager);
+  new = meta_window_find_monitor_from_id (window);
 
   if (window->tile_mode != META_TILE_NONE)
     {
@@ -5726,8 +5739,11 @@ meta_window_raise (MetaWindow  *window)
    * It is important that this runs before meta_stack_raise() because
    * showing a window may overwrite its stacking order based on the
    * stacking rules for newly shown windows.
+   * Skip X11: flushing here can prevent newly mapped windows from
+   * receiving focus.
    */
-  meta_window_flush_calc_showing (window);
+  if (window->client_type != META_WINDOW_CLIENT_TYPE_X11)
+    meta_window_flush_calc_showing (window);
 
   ancestor = meta_window_find_root_ancestor (window);
 
@@ -7378,16 +7394,19 @@ meta_window_handle_mouse_grab_op_event  (MetaWindow         *window,
       meta_display_check_threshold_reached (window->display, x, y);
       if (meta_grab_op_is_moving (window->display->grab_op))
         {
-          update_move (window,
-                       modifier_state & CLUTTER_SHIFT_MASK,
-                       x, y);
+          if (meta_grab_op_is_mouse (window->display->grab_op))
+            update_move (window,
+                         modifier_state & CLUTTER_SHIFT_MASK,
+                         x, y);
         }
       else if (meta_grab_op_is_resizing (window->display->grab_op))
         {
-          update_resize (window,
-                         modifier_state & CLUTTER_SHIFT_MASK || (window->htile_match != NULL || window->vtile_match != NULL),
-                         x, y,
-                         FALSE);
+          if (meta_grab_op_is_mouse (window->display->grab_op) ||
+              window->display->grab_op == META_GRAB_OP_KEYBOARD_RESIZING_UNKNOWN)
+            update_resize (window,
+                           modifier_state & CLUTTER_SHIFT_MASK || (window->htile_match != NULL || window->vtile_match != NULL),
+                           x, y,
+                           FALSE);
         }
       return TRUE;
 
@@ -7758,7 +7777,8 @@ warp_grab_pointer (MetaWindow          *window,
   *x = CLAMP (*x, 0, display_rect.width - 1);
   *y = CLAMP (*y, 0, display_rect.height - 1);
 
-  meta_x11_error_trap_push (display->x11_display);
+  if (display->x11_display)
+    meta_x11_error_trap_push (display->x11_display);
 
   meta_topic (META_DEBUG_WINDOW_OPS,
               "Warping pointer to %d,%d with window at %d,%d\n",
@@ -7782,7 +7802,8 @@ warp_grab_pointer (MetaWindow          *window,
     clutter_seat_warp_pointer (seat, *x, *y);
   }
 
-  if (meta_x11_error_trap_pop_with_return (display->x11_display) != Success)
+  if (display->x11_display &&
+      meta_x11_error_trap_pop_with_return (display->x11_display) != Success)
     {
       meta_verbose ("Failed to warp pointer for window %s\n",
                     window->desc);

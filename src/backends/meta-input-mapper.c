@@ -288,6 +288,9 @@ input_device_get_physical_size (MetaInputMapper    *mapper,
   const char *node;
 
   node = clutter_input_device_get_device_node (device);
+  if (!node)
+    return FALSE;
+
   udev_device = g_udev_client_query_by_device_file (mapper->udev_client, node);
 
   if (udev_device &&

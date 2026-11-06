@@ -1236,6 +1236,8 @@ finish_popup_setup (MetaWaylandXdgPopup *xdg_popup)
                       G_CALLBACK (on_parent_surface_unmapped),
                       xdg_popup);
 
+  meta_wayland_shell_surface_destroy_window (shell_surface);
+  meta_wayland_actor_surface_reset_actor (META_WAYLAND_ACTOR_SURFACE (surface_role));
   window = meta_window_wayland_new (display, surface);
   meta_wayland_shell_surface_set_window (shell_surface, window);
 
@@ -1979,6 +1981,8 @@ meta_wayland_xdg_surface_assigned (MetaWaylandSurfaceRole *surface_role)
   surface_role_class =
     META_WAYLAND_SURFACE_ROLE_CLASS (meta_wayland_xdg_surface_parent_class);
   surface_role_class->assigned (surface_role);
+
+  meta_wayland_xdg_surface_reset (xdg_surface);
 }
 
 static void
@@ -2156,8 +2160,6 @@ xdg_surface_constructor_get_toplevel (struct wl_client   *client,
   MetaWaylandSurface *surface = constructor->surface;
   MetaWaylandXdgToplevel *xdg_toplevel;
   MetaWaylandXdgSurface *xdg_surface;
-  MetaWaylandShellSurface *shell_surface;
-  MetaWindow *window;
 
   if (!meta_wayland_surface_assign_role (surface,
                                          META_TYPE_WAYLAND_XDG_TOPLEVEL,
@@ -2183,10 +2185,6 @@ xdg_surface_constructor_get_toplevel (struct wl_client   *client,
 
   xdg_surface = META_WAYLAND_XDG_SURFACE (xdg_toplevel);
   meta_wayland_xdg_surface_constructor_finalize (constructor, xdg_surface);
-
-  window = meta_window_wayland_new (meta_get_display (), surface);
-  shell_surface = META_WAYLAND_SHELL_SURFACE (xdg_surface);
-  meta_wayland_shell_surface_set_window (shell_surface, window);
 }
 
 static void

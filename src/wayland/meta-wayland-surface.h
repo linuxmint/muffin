@@ -166,6 +166,7 @@ struct _MetaWaylandSurface
   int scale;
   int32_t offset_x, offset_y;
   GHashTable *outputs_to_destroy_notify_id;
+  guint update_outputs_idle_id;
   MetaMonitorTransform buffer_transform;
 
   MetaWaylandBuffer *buffer;

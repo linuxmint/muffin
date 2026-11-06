@@ -1368,7 +1368,7 @@ meta_x11_display_new (MetaDisplay *display, GError **error)
                                               xroot,
                                               PropertyChangeMask);
 
-  sprintf (buf, "WM_S%d", number);
+  snprintf (buf, sizeof (buf), "WM_S%d", number);
 
   wm_sn_atom = XInternAtom (xdisplay, buf, False);
   new_wm_sn_owner = take_manager_selection (x11_display, xroot, wm_sn_atom, timestamp, replace_current_wm);
@@ -2179,6 +2179,13 @@ meta_x11_display_logical_monitor_to_xinerama_index (MetaX11Display     *x11_disp
   meta_x11_display_ensure_xinerama_indices (x11_display);
 
   logical_monitor_data = get_x11_display_logical_monitor_data (logical_monitor);
+
+  if (!logical_monitor_data)
+    {
+      g_warning ("Logical monitor has no X11 display data during xinerama "
+                 "index lookup, returning -1");
+      return -1;
+    }
 
   return logical_monitor_data->xinerama_index;
 }

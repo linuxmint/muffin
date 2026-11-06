@@ -199,11 +199,17 @@ compare_logical_monitors_canonical (gconstpointer a,
   MetaLogicalMonitor *la = (MetaLogicalMonitor *) a;
   MetaLogicalMonitor *lb = (MetaLogicalMonitor *) b;
 
+  const char *connector_a = logical_monitor_get_connector (la);
+  const char *connector_b = logical_monitor_get_connector (lb);
+
   if (meta_logical_monitor_is_primary (la) != meta_logical_monitor_is_primary (lb))
     return meta_logical_monitor_is_primary (la) ? -1 : 1;
 
-  return g_strcmp0 (logical_monitor_get_connector (la),
-                    logical_monitor_get_connector (lb));
+  if (!connector_a || !connector_b)
+    return g_strcmp0 (connector_a, connector_b);
+
+  /* Natural order so DP-10 sorts after DP-9 */
+  return strverscmp (connector_a, connector_b);
 }
 
 static void
@@ -311,6 +317,11 @@ calculate_monitor_scale (MetaMonitorManager *manager,
   MetaMonitorMode *monitor_mode;
 
   monitor_mode = meta_monitor_get_current_mode (monitor);
+  if (!monitor_mode)
+    {
+      g_warning ("Monitor has NULL mode in calculate_monitor_scale, using scale 1.0");
+      return 1.0f;
+    }
   return meta_monitor_manager_calculate_monitor_mode_scale (manager,
                                                             manager->layout_mode,
                                                             monitor,
@@ -333,6 +344,8 @@ meta_monitor_manager_is_scale_supported_by_other_monitors (MetaMonitorManager *m
         continue;
 
       mode = meta_monitor_get_current_mode (monitor);
+      if (!mode)
+        continue;
       if (!meta_monitor_manager_is_scale_supported (manager, manager->layout_mode,
                                                     monitor, mode, scale))
         return FALSE;
@@ -428,6 +441,8 @@ derive_scale_from_crtc (MetaMonitorManager *manager,
   threshold = 0.001f;
 
   monitor_mode = meta_monitor_get_current_mode (monitor);
+  if (!monitor_mode)
+    return FALSE;
   if (meta_monitor_manager_is_scale_supported_with_threshold (manager,
                                                               manager->layout_mode,
                                                               monitor,
@@ -3432,12 +3447,11 @@ meta_monitor_manager_on_hotplug (MetaMonitorManager *manager)
   MetaMonitorsConfig *current_config =
     meta_monitor_config_manager_get_current (manager->config_manager);
 
-  /* Keep a switch config (Super+P) across hotplugs that leave the set of
-   * connected monitors unchanged, instead of falling back to the stored or
-   * suggested configuration. */
+  /* Keep the current config across hotplugs that leave the set of connected
+   * monitors unchanged, instead of falling back to the stored or suggested
+   * configuration. This covers Super+P configs and a config applied from
+   * the display settings but not yet confirmed. */
   if (current_config &&
-      meta_monitors_config_get_switch_config (current_config) !=
-        META_MONITOR_SWITCH_CONFIG_UNKNOWN &&
       !meta_monitor_manager_has_hotplug_mode_update (manager) &&
       meta_monitor_manager_is_config_complete (manager, current_config))
     {
@@ -3449,7 +3463,7 @@ meta_monitor_manager_on_hotplug (MetaMonitorManager *manager)
                                                       &error))
         return;
 
-      g_warning ("Failed to re-apply switch configuration: %s",
+      g_warning ("Failed to re-apply current configuration: %s",
                  error->message);
     }
 

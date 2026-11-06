@@ -96,6 +96,7 @@ void meta_fatal      (const char *format,
  * @META_DEBUG_INPUT: input
  * @META_DEBUG_SCANOUT: direct scanout and dma-buf feedback
  * @META_DEBUG_LAYER_SHELL: wlr-layer-shell surfaces
+ * @META_DEBUG_KMS: kernel mode setting
  */
 typedef enum
 {
@@ -125,7 +126,8 @@ typedef enum
   META_DEBUG_DBUS            = 1 << 22,
   META_DEBUG_INPUT           = 1 << 23,
   META_DEBUG_SCANOUT         = 1 << 24,
-  META_DEBUG_LAYER_SHELL     = 1 << 25
+  META_DEBUG_LAYER_SHELL     = 1 << 25,
+  META_DEBUG_KMS             = 1 << 26
 } MetaDebugTopic;
 
 META_EXPORT

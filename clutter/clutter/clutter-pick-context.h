@@ -26,6 +26,7 @@
 
 #include "clutter-macros.h"
 #include "clutter-stage-view.h"
+#include "clutter-types.h"
 
 typedef struct _ClutterPickContext ClutterPickContext;
 
@@ -45,5 +46,12 @@ void clutter_pick_context_destroy (ClutterPickContext *pick_context);
 
 CLUTTER_EXPORT
 CoglFramebuffer * clutter_pick_context_get_framebuffer (ClutterPickContext *pick_context);
+
+CLUTTER_EXPORT
+void clutter_pick_context_push_clip (ClutterPickContext    *pick_context,
+                                     const ClutterActorBox *box);
+
+CLUTTER_EXPORT
+void clutter_pick_context_pop_clip (ClutterPickContext *pick_context);
 
 #endif /* CLUTTER_PICK_CONTEXT_H */
