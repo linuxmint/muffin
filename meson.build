@@ -1,4 +1,4 @@
-project('muffin', 'c', version : '6.7.4', meson_version : '>=1.0.0', license : 'GPLv2+')
+project('muffin', 'c', version : '6.8.1', meson_version : '>=1.0.0', license : 'GPLv2+')
 
 muffin_plugin_api_version = '3'
 
@@ -37,7 +37,7 @@ udev_req = '>= 228'
 gudev_req = '>= 232'
 
 # wayland version requirements
-wayland_server_req = '>= 1.20'
+wayland_server_req = '>= 1.22'
 wayland_protocols_req = '>= 1.38'
 
 # native backend version requirements
@@ -122,7 +122,6 @@ xau_dep = dependency('xau')
 ice_dep = dependency('ice')
 atk_dep = dependency('atk', version: atk_req)
 libcanberra_dep = dependency('libcanberra', version: libcanberra_req)
-dbus_dep = dependency('dbus-1')
 
 # For now always require X11 support
 have_x11 = true

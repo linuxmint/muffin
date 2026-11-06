@@ -38,11 +38,10 @@ struct _MetaWaylandBackgroundActor
     int monitor_index;
     float dim_factor;
 
-    ClutterActor *clone;
-    MetaWaylandLayerSurface *tracked_surface;
     MetaWaylandLayerShell *layer_shell;
     gulong mapped_handler_id;
     gulong unmapped_handler_id;
+    gulong monitors_changed_handler_id;
 };
 
 enum
@@ -56,26 +55,19 @@ static GParamSpec *obj_props[PROP_LAST];
 
 G_DEFINE_TYPE (MetaWaylandBackgroundActor, meta_wayland_background_actor, CLUTTER_TYPE_ACTOR)
 
-static void
-meta_wayland_background_actor_remove_clone (MetaWaylandBackgroundActor *self)
-{
-    if (self->clone)
-    {
-        clutter_actor_remove_child (CLUTTER_ACTOR (self), self->clone);
-        self->clone = NULL;
-    }
-
-    self->tracked_surface = NULL;
-}
+static gboolean get_monitor_rect (MetaWaylandBackgroundActor *self,
+                                  MetaRectangle              *rect);
+static MetaLogicalMonitor * get_logical_monitor (MetaWaylandBackgroundActor *self);
 
 static void
-meta_wayland_background_actor_attach_surface (MetaWaylandBackgroundActor *self,
-                                               MetaWaylandLayerSurface    *layer_surface)
+meta_wayland_background_actor_add_clone (MetaWaylandBackgroundActor *self,
+                                          MetaWaylandLayerSurface    *layer_surface,
+                                          MetaRectangle              *rect)
 {
     MetaWaylandActorSurface *actor_surface;
     MetaSurfaceActor *surface_actor;
-
-    meta_wayland_background_actor_remove_clone (self);
+    ClutterActor *clone;
+    double scale_x, scale_y;
 
     actor_surface = META_WAYLAND_ACTOR_SURFACE (layer_surface);
     surface_actor = meta_wayland_actor_surface_get_actor (actor_surface);
@@ -83,19 +75,47 @@ meta_wayland_background_actor_attach_surface (MetaWaylandBackgroundActor *self,
     if (!surface_actor)
         return;
 
-    self->tracked_surface = layer_surface;
-    self->clone = clutter_clone_new (CLUTTER_ACTOR (surface_actor));
-    clutter_actor_add_child (CLUTTER_ACTOR (self), self->clone);
+    /* Clones all keep the default z_position, so each add_child () lands its
+     * child last - see meta_wayland_layer_shell_find_surfaces (). */
+    clone = clutter_clone_new (CLUTTER_ACTOR (surface_actor));
+    clutter_actor_add_child (CLUTTER_ACTOR (self), clone);
+
+    /* A clone paints the source's contents at its own allocation and does not
+     * inherit the source's scale transform, so the geometry scale the layer
+     * surface applied to itself has to be copied across by hand. */
+    clutter_actor_get_scale (CLUTTER_ACTOR (surface_actor), &scale_x, &scale_y);
+    clutter_actor_set_scale (clone, scale_x, scale_y);
+
+    /* The source sits at absolute stage coordinates; this actor is anchored at
+     * the monitor origin, so the offset cancels the monitor's own position and
+     * leaves the clone local to it. */
+    clutter_actor_add_constraint (clone,
+        clutter_bind_constraint_new (CLUTTER_ACTOR (surface_actor),
+                                     CLUTTER_BIND_X, -rect->x));
+    clutter_actor_add_constraint (clone,
+        clutter_bind_constraint_new (CLUTTER_ACTOR (surface_actor),
+                                     CLUTTER_BIND_Y, -rect->y));
 }
 
-static MetaWaylandOutput *
-get_output_for_monitor (MetaWaylandBackgroundActor *self)
+static void
+meta_wayland_background_actor_sync_clones (MetaWaylandBackgroundActor *self)
 {
-    MetaWaylandCompositor *compositor;
+    GList *surfaces, *l;
+    MetaRectangle rect;
 
-    compositor = meta_wayland_compositor_get_default ();
-    return meta_wayland_compositor_get_output_for_monitor (compositor,
-                                                            self->monitor_index);
+    clutter_actor_destroy_all_children (CLUTTER_ACTOR (self));
+
+    if (!self->layer_shell || !get_monitor_rect (self, &rect))
+        return;
+
+    surfaces = meta_wayland_layer_shell_find_surfaces (self->layer_shell,
+                                                        META_LAYER_SHELL_LAYER_BACKGROUND,
+                                                        get_logical_monitor (self));
+
+    for (l = surfaces; l; l = l->next)
+        meta_wayland_background_actor_add_clone (self, l->data, &rect);
+
+    g_list_free (surfaces);
 }
 
 static void
@@ -104,20 +124,12 @@ on_layer_surface_mapped (MetaWaylandLayerShell   *layer_shell,
                          gpointer                 user_data)
 {
     MetaWaylandBackgroundActor *self = user_data;
-    MetaWaylandOutput *output;
-
-    if (self->tracked_surface != NULL)
-        return;
 
     if (meta_wayland_layer_surface_get_layer (layer_surface) !=
         META_LAYER_SHELL_LAYER_BACKGROUND)
         return;
 
-    output = get_output_for_monitor (self);
-    if (output && meta_wayland_layer_surface_get_output (layer_surface) != output)
-        return;
-
-    meta_wayland_background_actor_attach_surface (self, layer_surface);
+    meta_wayland_background_actor_sync_clones (self);
 }
 
 static void
@@ -127,15 +139,28 @@ on_layer_surface_unmapped (MetaWaylandLayerShell   *layer_shell,
 {
     MetaWaylandBackgroundActor *self = user_data;
 
-    if (self->tracked_surface != layer_surface)
+    if (meta_wayland_layer_surface_get_layer (layer_surface) !=
+        META_LAYER_SHELL_LAYER_BACKGROUND)
         return;
 
-    meta_wayland_background_actor_remove_clone (self);
+    meta_wayland_background_actor_sync_clones (self);
+}
+
+static void
+on_monitors_changed (MetaMonitorManager         *monitor_manager,
+                     MetaWaylandBackgroundActor *self)
+{
+    meta_wayland_background_actor_sync_clones (self);
 }
 
 static void
 meta_wayland_background_actor_disconnect_signals (MetaWaylandBackgroundActor *self)
 {
+    MetaMonitorManager *monitor_manager =
+        meta_backend_get_monitor_manager (meta_get_backend ());
+
+    g_clear_signal_handler (&self->monitors_changed_handler_id, monitor_manager);
+
     if (self->layer_shell)
     {
         if (self->mapped_handler_id != 0)
@@ -160,21 +185,26 @@ meta_wayland_background_actor_dispose (GObject *object)
     MetaWaylandBackgroundActor *self = META_WAYLAND_BACKGROUND_ACTOR (object);
 
     meta_wayland_background_actor_disconnect_signals (self);
-    meta_wayland_background_actor_remove_clone (self);
+    clutter_actor_destroy_all_children (CLUTTER_ACTOR (self));
 
     G_OBJECT_CLASS (meta_wayland_background_actor_parent_class)->dispose (object);
+}
+
+static MetaLogicalMonitor *
+get_logical_monitor (MetaWaylandBackgroundActor *self)
+{
+    MetaBackend *backend = meta_get_backend ();
+    MetaMonitorManager *monitor_manager = meta_backend_get_monitor_manager (backend);
+
+    return meta_monitor_manager_get_logical_monitor_from_number (
+        monitor_manager, self->monitor_index);
 }
 
 static gboolean
 get_monitor_rect (MetaWaylandBackgroundActor *self,
                   MetaRectangle              *rect)
 {
-    MetaBackend *backend = meta_get_backend ();
-    MetaMonitorManager *monitor_manager = meta_backend_get_monitor_manager (backend);
-    MetaLogicalMonitor *logical_monitor;
-
-    logical_monitor = meta_monitor_manager_get_logical_monitor_from_number (
-        monitor_manager, self->monitor_index);
+    MetaLogicalMonitor *logical_monitor = get_logical_monitor (self);
 
     if (!logical_monitor)
         return FALSE;
@@ -311,7 +341,19 @@ meta_wayland_background_actor_class_init (MetaWaylandBackgroundActorClass *klass
 static void
 meta_wayland_background_actor_init (MetaWaylandBackgroundActor *self)
 {
+    ClutterColor color = { 0x00, 0x00, 0x00, 0xff };
+
     self->dim_factor = 1.0;
+
+    /* This actor paints nothing itself - it only hosts clones of whatever
+     * surfaces are mapped in the BACKGROUND layer on its monitor. With no
+     * wallpaper client running there are no clones and the actor is fully
+     * transparent, so keep an opaque fill underneath. It also covers the
+     * remainder when a background surface is smaller than its monitor.
+     *
+     * Black to match the stage backdrop Cinnamon paints behind its uiGroup
+     * (js/ui/main.js), so a missing wallpaper looks the same either way. */
+    clutter_actor_set_background_color (CLUTTER_ACTOR (self), &color);
 }
 
 /**
@@ -332,8 +374,6 @@ meta_wayland_background_actor_new_for_monitor (MetaDisplay *display,
     MetaWaylandBackgroundActor *self;
     MetaWaylandCompositor *compositor;
     MetaWaylandLayerShell *layer_shell;
-    MetaWaylandOutput *output;
-    MetaWaylandLayerSurface *surface;
 
     g_return_val_if_fail (META_IS_DISPLAY (display), NULL);
     g_return_val_if_fail (meta_is_wayland_compositor (), NULL);
@@ -341,6 +381,11 @@ meta_wayland_background_actor_new_for_monitor (MetaDisplay *display,
     self = g_object_ref_sink (g_object_new (META_TYPE_WAYLAND_BACKGROUND_ACTOR, NULL));
     self->display = display;
     self->monitor_index = monitor;
+
+    self->monitors_changed_handler_id =
+        g_signal_connect (meta_backend_get_monitor_manager (meta_get_backend ()),
+                          "monitors-changed-internal",
+                          G_CALLBACK (on_monitors_changed), self);
 
     compositor = meta_wayland_compositor_get_default ();
     layer_shell = meta_wayland_compositor_get_layer_shell (compositor);
@@ -350,15 +395,7 @@ meta_wayland_background_actor_new_for_monitor (MetaDisplay *display,
 
     self->layer_shell = layer_shell;
 
-    output = meta_wayland_compositor_get_output_for_monitor (compositor, monitor);
-
-    surface = meta_wayland_layer_shell_find_surface (layer_shell,
-                                                      META_LAYER_SHELL_LAYER_BACKGROUND,
-                                                      NULL,
-                                                      output);
-
-    if (surface)
-        meta_wayland_background_actor_attach_surface (self, surface);
+    meta_wayland_background_actor_sync_clones (self);
 
     self->mapped_handler_id =
         g_signal_connect (layer_shell, "layer-surface-mapped",

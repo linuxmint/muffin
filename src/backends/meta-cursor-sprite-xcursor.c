@@ -117,7 +117,7 @@ meta_cursor_get_name (MetaCursor cursor)
     case META_CURSOR_ZOOM_OUT:
       return "left_ptr";
     case META_CURSOR_DND_ASK:
-      return "dnd-copy";
+      return "dnd-ask";
     case META_CURSOR_ALL_RESIZE:
       return "fleur";
     case META_CURSOR_INVALID:
@@ -296,6 +296,15 @@ load_cursor_on_client (MetaCursor cursor,
   if (xcursor_images)
     return xcursor_images;
 
+  /* Not every theme carries every modern name - fall back to the legacy one
+   * before giving up, as meta_create_x_cursor() does. */
+  xcursor_images =
+    XcursorLibraryLoadImages (meta_cursor_get_legacy_name (cursor),
+                              meta_prefs_get_cursor_theme (),
+                              meta_prefs_get_cursor_size () * scale);
+  if (xcursor_images)
+    return xcursor_images;
+
   g_warning ("No cursor theme available, please install a cursor theme");
 
   fallback_size = 24 * scale;
@@ -464,10 +473,40 @@ meta_cursor_sprite_xcursor_new (MetaCursor cursor)
   return sprite_xcursor;
 }
 
+/* Replaces the cached sprite only if it doesn't already represent this cursor.
+ * A fresh sprite has no realized texture or GPU state, so discarding one
+ * needlessly forces a cursor buffer re-upload.
+ */
+MetaCursorSpriteXcursor *
+meta_cursor_sprite_xcursor_ensure (MetaCursorSpriteXcursor **sprite_xcursor,
+                                   MetaCursor                cursor)
+{
+  if (*sprite_xcursor &&
+      meta_cursor_sprite_xcursor_get_cursor (*sprite_xcursor) == cursor)
+    return *sprite_xcursor;
+
+  g_clear_object (sprite_xcursor);
+  *sprite_xcursor = meta_cursor_sprite_xcursor_new (cursor);
+
+  return *sprite_xcursor;
+}
+
+static void
+prefs_changed (MetaPreference pref,
+               gpointer       user_data)
+{
+  MetaCursorSpriteXcursor *sprite_xcursor = user_data;
+
+  if (pref == META_PREF_CURSOR_THEME || pref == META_PREF_CURSOR_SIZE)
+    sprite_xcursor->theme_dirty = TRUE;
+}
+
 static void
 meta_cursor_sprite_xcursor_finalize (GObject *object)
 {
   MetaCursorSpriteXcursor *sprite_xcursor = META_CURSOR_SPRITE_XCURSOR (object);
+
+  meta_prefs_remove_listener (prefs_changed, sprite_xcursor);
 
   g_clear_pointer (&sprite_xcursor->xcursor_images,
                    XcursorImagesDestroy);
@@ -480,6 +519,8 @@ meta_cursor_sprite_xcursor_init (MetaCursorSpriteXcursor *sprite_xcursor)
 {
   sprite_xcursor->theme_scale = 1;
   sprite_xcursor->theme_dirty = TRUE;
+
+  meta_prefs_add_listener (prefs_changed, sprite_xcursor);
 }
 
 static void

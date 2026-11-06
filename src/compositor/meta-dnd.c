@@ -39,6 +39,7 @@ struct _MetaDndClass
 #ifdef HAVE_WAYLAND
 #include "wayland/meta-wayland-private.h"
 #include "wayland/meta-wayland-data-device.h"
+#include "wayland/meta-wayland-pointer.h"
 #endif
 
 typedef struct _MetaDndPrivate MetaDndPrivate;
@@ -47,6 +48,7 @@ struct _MetaDndPrivate
 {
 #ifdef HAVE_WAYLAND
   gulong handler_id[3];
+  gboolean entered;
 
   MetaCompositor *compositor;
   MetaWaylandCompositor *wl_compositor;
@@ -229,6 +231,76 @@ meta_dnd_handle_xdnd_event (MetaBackend       *backend,
 }
 
 #ifdef HAVE_WAYLAND
+/* The modal path and the drag grab path both report enter/leave, so keep
+ * them balanced.
+ */
+static void
+meta_dnd_wayland_set_entered (MetaDnd  *dnd,
+                              gboolean  entered)
+{
+  MetaDndPrivate *priv = meta_dnd_get_instance_private (dnd);
+
+  if (priv->entered == entered)
+    return;
+
+  priv->entered = entered;
+
+  if (entered)
+    meta_dnd_notify_dnd_enter (dnd);
+  else
+    meta_dnd_notify_dnd_leave (dnd);
+}
+
+static gboolean
+is_over_client_surface (void)
+{
+  MetaWaylandCompositor *wl_compositor = meta_wayland_compositor_get_default ();
+  MetaWaylandSurface *surface = wl_compositor->seat->pointer->current;
+  MetaWindow *window;
+
+  if (!surface)
+    return FALSE;
+
+  /* An Xwayland drag icon follows the pointer and can end up under it. */
+  window = meta_wayland_surface_get_window (surface);
+  return !window || window->type != META_WINDOW_DND;
+}
+
+/*
+ * Mirror Xdnd for Wayland drags: while no client surface is under the
+ * pointer, the drag is over Cinnamon's own UI, which is what the X11
+ * overlay window's input shape gets XdndEnter/Position/Leave for.
+ */
+void
+meta_dnd_wayland_handle_drag_motion (const ClutterEvent *event)
+{
+  MetaDnd *dnd = meta_backend_get_dnd (meta_get_backend ());
+  MetaDndPrivate *priv = meta_dnd_get_instance_private (dnd);
+  gfloat event_x, event_y;
+
+  /* While modal, the stage motion handler reports positions. */
+  if (priv->compositor)
+    return;
+
+  if (is_over_client_surface ())
+    {
+      meta_dnd_wayland_set_entered (dnd, FALSE);
+      return;
+    }
+
+  meta_dnd_wayland_set_entered (dnd, TRUE);
+
+  clutter_event_get_coords (event, &event_x, &event_y);
+  meta_dnd_notify_dnd_position_change (dnd, (int) event_x, (int) event_y);
+}
+
+void
+meta_dnd_wayland_handle_drag_end (void)
+{
+  meta_dnd_wayland_set_entered (meta_backend_get_dnd (meta_get_backend ()),
+                                FALSE);
+}
+
 static void
 meta_dnd_wayland_on_motion_event (ClutterActor *actor,
                                   ClutterEvent *event,
@@ -310,7 +382,7 @@ meta_dnd_wayland_handle_begin_modal (MetaCompositor *compositor)
                                               G_CALLBACK (meta_dnd_wayland_on_key_pressed),
                                               dnd);
 
-      meta_dnd_notify_dnd_enter (dnd);
+      meta_dnd_wayland_set_entered (dnd, TRUE);
     }
 }
 
@@ -331,6 +403,6 @@ meta_dnd_wayland_handle_end_modal (MetaCompositor *compositor)
   priv->compositor = NULL;
   priv->wl_compositor = NULL;
 
-  meta_dnd_notify_dnd_leave (dnd);
+  meta_dnd_wayland_set_entered (dnd, FALSE);
 }
 #endif

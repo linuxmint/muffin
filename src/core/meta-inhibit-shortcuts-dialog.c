@@ -99,5 +99,4 @@ meta_inhibit_shortcuts_dialog_response (MetaInhibitShortcutsDialog         *dial
                                         MetaInhibitShortcutsDialogResponse  response)
 {
   g_signal_emit (dialog, inhibit_dialog_signals[RESPONSE], 0, response);
-  meta_inhibit_shortcuts_dialog_hide (dialog);
 }

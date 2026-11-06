@@ -128,8 +128,8 @@ struct _ClutterStagePrivate
 
   ClutterPlane current_clip_planes[4];
 
-  GHashTable *pending_relayouts;
-  unsigned int pending_relayouts_version;
+  GSList *pending_relayouts;
+  GPtrArray *pending_resource_scale_changes;
   GList *pending_queue_redraws;
 
   gint sync_delay;
@@ -167,7 +167,8 @@ struct _ClutterStagePrivate
   guint accept_focus           : 1;
   guint motion_events_enabled  : 1;
   guint has_custom_perspective : 1;
-  guint stage_was_relayout     : 1;
+  guint needs_update_devices   : 1;
+  guint actor_needs_immediate_relayout : 1;
 };
 
 enum
@@ -215,6 +216,9 @@ static void capture_view_into (ClutterStage          *stage,
                                uint8_t               *data,
                                int                    stride);
 static void clutter_stage_update_view_perspective (ClutterStage *stage);
+static void clutter_stage_set_viewport (ClutterStage *stage,
+                                        float         width,
+                                        float         height);
 
 static void clutter_container_iface_init (ClutterContainerIface *iface);
 
@@ -580,7 +584,7 @@ clutter_stage_add_redraw_clip (ClutterStage          *stage,
 {
   GList *l;
 
-  for (l = _clutter_stage_peek_stage_views (stage); l; l = l->next)
+  for (l = clutter_stage_peek_stage_views (stage); l; l = l->next)
     {
       ClutterStageView *view = l->data;
 
@@ -641,22 +645,17 @@ stage_is_default (ClutterStage *stage)
 
 static void
 clutter_stage_allocate (ClutterActor           *self,
-                        const ClutterActorBox  *box,
-                        ClutterAllocationFlags  flags)
+                        const ClutterActorBox  *box)
 {
   ClutterStagePrivate *priv = CLUTTER_STAGE (self)->priv;
   ClutterActorBox alloc = CLUTTER_ACTOR_BOX_INIT_ZERO;
-  float old_width, old_height;
   float new_width, new_height;
   float width, height;
   cairo_rectangle_int_t window_size;
+  ClutterLayoutManager *layout_manager = clutter_actor_get_layout_manager (self);
 
   if (priv->impl == NULL)
     return;
-
-  /* our old allocation */
-  clutter_actor_get_allocation_box (self, &alloc);
-  clutter_actor_box_get_size (&alloc, &old_width, &old_height);
 
   /* the current allocation */
   clutter_actor_box_get_size (box, &width, &height);
@@ -671,15 +670,21 @@ clutter_stage_allocate (ClutterActor           *self,
    */
   if (!clutter_feature_available (CLUTTER_FEATURE_STAGE_STATIC))
     {
-      CLUTTER_NOTE (LAYOUT,
-                    "Following allocation to %.2fx%.2f (absolute origin %s)",
-                    width, height,
-                    (flags & CLUTTER_ABSOLUTE_ORIGIN_CHANGED)
-                      ? "changed"
-                      : "not changed");
+      ClutterActorBox children_box;
 
-      clutter_actor_set_allocation (self, box,
-                                    flags | CLUTTER_DELEGATE_LAYOUT);
+      children_box.x1 = children_box.y1 = 0.f;
+      children_box.x2 = box->x2 - box->x1;
+      children_box.y2 = box->y2 - box->y1;
+
+      CLUTTER_NOTE (LAYOUT,
+                    "Following allocation to %.2fx%.2f",
+                    width, height);
+
+      clutter_actor_set_allocation (self, box);
+
+      clutter_layout_manager_allocate (layout_manager,
+                                       CLUTTER_CONTAINER (self),
+                                       &children_box);
 
       /* Ensure the window is sized correctly */
       if (priv->min_size_changed)
@@ -727,39 +732,23 @@ clutter_stage_allocate (ClutterActor           *self,
 
       CLUTTER_NOTE (LAYOUT,
                     "Overriding original allocation of %.2fx%.2f "
-                    "with %.2fx%.2f (absolute origin %s)",
+                    "with %.2fx%.2f",
                     width, height,
-                    override.x2, override.y2,
-                    (flags & CLUTTER_ABSOLUTE_ORIGIN_CHANGED)
-                      ? "changed"
-                      : "not changed");
+                    override.x2, override.y2);
 
       /* and store the overridden allocation */
-      clutter_actor_set_allocation (self, &override,
-                                    flags | CLUTTER_DELEGATE_LAYOUT);
+      clutter_actor_set_allocation (self, &override);
+
+      clutter_layout_manager_allocate (layout_manager,
+                                       CLUTTER_CONTAINER (self),
+                                       &override);
     }
 
-  /* reset the viewport if the allocation effectively changed */
+  /* set the viewport to the new allocation */
   clutter_actor_get_allocation_box (self, &alloc);
   clutter_actor_box_get_size (&alloc, &new_width, &new_height);
 
-  if (CLUTTER_NEARBYINT (old_width) != CLUTTER_NEARBYINT (new_width) ||
-      CLUTTER_NEARBYINT (old_height) != CLUTTER_NEARBYINT (new_height))
-    {
-      int real_width = CLUTTER_NEARBYINT (new_width);
-      int real_height = CLUTTER_NEARBYINT (new_height);
-
-      _clutter_stage_set_viewport (CLUTTER_STAGE (self),
-                                   0, 0,
-                                   real_width,
-                                   real_height);
-
-      /* Note: we don't assume that set_viewport will queue a full redraw
-       * since it may bail-out early if something preemptively set the
-       * viewport before the stage was really allocated its new size.
-       */
-      queue_full_redraw (CLUTTER_STAGE (self));
-    }
+  clutter_stage_set_viewport (CLUTTER_STAGE (self), new_width, new_height);
 }
 
 typedef struct _Vector4
@@ -1350,7 +1339,7 @@ _clutter_stage_needs_update (ClutterStage *stage)
 
   return (priv->redraw_pending ||
           priv->needs_update ||
-          g_hash_table_size (priv->pending_relayouts) > 0);
+          priv->pending_relayouts != NULL);
 }
 
 void
@@ -1359,11 +1348,80 @@ clutter_stage_queue_actor_relayout (ClutterStage *stage,
 {
   ClutterStagePrivate *priv = stage->priv;
 
-  if (g_hash_table_size (priv->pending_relayouts) == 0)
+  if (priv->pending_relayouts == NULL)
     clutter_stage_schedule_update (stage);
 
-  g_hash_table_add (priv->pending_relayouts, g_object_ref (actor));
-  priv->pending_relayouts_version++;
+  priv->pending_relayouts = g_slist_prepend (priv->pending_relayouts,
+                                             g_object_ref (actor));
+}
+
+void
+clutter_stage_dequeue_actor_relayout (ClutterStage *stage,
+                                      ClutterActor *actor)
+{
+  ClutterStagePrivate *priv = stage->priv;
+  GSList *l = priv->pending_relayouts;
+
+  /* An actor can hold more than one entry: queue_actor_relayout() doesn't
+   * check for duplicates, and a size request between a queued relayout and
+   * the allocation that would consume it re-opens the short-circuit in
+   * _clutter_actor_queue_only_relayout().
+   */
+  while (l != NULL)
+    {
+      ClutterActor *relayout_actor = l->data;
+      GSList *next = l->next;
+
+      if (relayout_actor == actor)
+        {
+          g_object_unref (relayout_actor);
+          priv->pending_relayouts =
+            g_slist_delete_link (priv->pending_relayouts, l);
+        }
+
+      l = next;
+    }
+}
+
+void
+clutter_stage_queue_resource_scale_change (ClutterStage *stage,
+                                           ClutterActor *actor)
+{
+  ClutterStagePrivate *priv = stage->priv;
+
+  g_ptr_array_add (priv->pending_resource_scale_changes, g_object_ref (actor));
+}
+
+/* Resource scales are resolved while walking the actor tree, but handlers of
+ * ::resource-scale-changed routinely rebuild content and add children, which
+ * must not happen from inside that walk. Emit once the walk has finished.
+ */
+static void
+flush_resource_scale_changes (ClutterStage *stage)
+{
+  ClutterStagePrivate *priv = stage->priv;
+  g_autoptr (GPtrArray) changes = NULL;
+  unsigned int i;
+
+  if (priv->pending_resource_scale_changes->len == 0)
+    return;
+
+  changes = g_steal_pointer (&priv->pending_resource_scale_changes);
+  priv->pending_resource_scale_changes =
+    g_ptr_array_new_with_free_func (g_object_unref);
+
+  for (i = 0; i < changes->len; i++)
+    {
+      ClutterActor *actor = g_ptr_array_index (changes, i);
+
+      if (CLUTTER_ACTOR_IN_DESTRUCTION (actor))
+        continue;
+
+      if (clutter_actor_get_stage (actor) != CLUTTER_ACTOR (stage))
+        continue;
+
+      clutter_actor_emit_resource_scale_changed (actor);
+    }
 }
 
 void
@@ -1371,24 +1429,20 @@ _clutter_stage_maybe_relayout (ClutterActor *actor)
 {
   ClutterStage *stage = CLUTTER_STAGE (actor);
   ClutterStagePrivate *priv = stage->priv;
-  GHashTableIter iter;
-  gpointer key;
+  g_autoptr (GSList) stolen_list = NULL;
+  GSList *l;
   int count = 0;
 
   /* No work to do? Avoid the extraneous debug log messages too. */
-  if (g_hash_table_size (priv->pending_relayouts) == 0)
+  if (priv->pending_relayouts == NULL)
     return;
 
   CLUTTER_NOTE (ACTOR, ">>> Recomputing layout");
 
-  g_hash_table_iter_init (&iter, priv->pending_relayouts);
-  while (g_hash_table_iter_next (&iter, &key, NULL))
+  stolen_list = g_steal_pointer (&priv->pending_relayouts);
+  for (l = stolen_list; l; l = l->next)
     {
-      g_autoptr (ClutterActor) queued_actor = key;
-      unsigned int old_version;
-
-      g_hash_table_iter_steal (&iter);
-      priv->pending_relayouts_version++;
+      g_autoptr (ClutterActor) queued_actor = l->data;
 
       if (CLUTTER_ACTOR_IN_RELAYOUT (queued_actor))  /* avoid reentrancy */
         continue;
@@ -1406,23 +1460,17 @@ _clutter_stage_maybe_relayout (ClutterActor *actor)
 
       CLUTTER_SET_PRIVATE_FLAGS (queued_actor, CLUTTER_IN_RELAYOUT);
 
-      old_version = priv->pending_relayouts_version;
-      clutter_actor_allocate_preferred_size (queued_actor,
-                                             CLUTTER_ALLOCATION_NONE);
+      clutter_actor_allocate_preferred_size (queued_actor);
 
       CLUTTER_UNSET_PRIVATE_FLAGS (queued_actor, CLUTTER_IN_RELAYOUT);
 
       count++;
-
-      /* Prevent using an iterator that's been invalidated */
-      if (old_version != priv->pending_relayouts_version)
-        g_hash_table_iter_init (&iter, priv->pending_relayouts);
     }
 
   CLUTTER_NOTE (ACTOR, "<<< Completed recomputing layout of %d subtrees", count);
 
   if (count)
-    priv->stage_was_relayout = TRUE;
+    priv->needs_update_devices = TRUE;
 }
 
 static void
@@ -1486,7 +1534,6 @@ _clutter_stage_check_updated_pointers (ClutterStage *stage)
     {
       ClutterInputDevice *dev = l->data;
       ClutterStageView *view;
-      const cairo_region_t *clip;
 
       if (clutter_input_device_get_device_mode (dev) !=
           CLUTTER_INPUT_MODE_MASTER)
@@ -1506,9 +1553,7 @@ _clutter_stage_check_updated_pointers (ClutterStage *stage)
           if (!view)
             continue;
 
-          clip = clutter_stage_view_peek_redraw_clip (view);
-          if (!clip || cairo_region_contains_point (clip, point.x, point.y))
-            updating = g_slist_prepend (updating, dev);
+          updating = g_slist_prepend (updating, dev);
           break;
         default:
           /* Any other devices don't need checking, either because they
@@ -1525,6 +1570,59 @@ _clutter_stage_check_updated_pointers (ClutterStage *stage)
   return updating;
 }
 
+static void
+update_actor_stage_views (ClutterStage *stage)
+{
+  ClutterActor *actor = CLUTTER_ACTOR (stage);
+  ClutterStagePrivate *priv = stage->priv;
+  int phase;
+
+  COGL_TRACE_BEGIN_SCOPED (ClutterStageUpdateActorStageViews,
+                           "Actor stage-views");
+
+  /* If an actor needs an immediate relayout because its resource scale
+   * changed, we give it another chance to allocate correctly before
+   * the paint.
+   *
+   * We're doing the whole thing twice and pass the phase to
+   * clutter_actor_update_stage_views() to allow actors to detect loops:
+   * If the resource scale changes again after the relayout, the new
+   * allocation of an actor probably moved the actor onto another stage
+   * view, so if an actor sees phase == 1, it can choose a "final" scale.
+   */
+  for (phase = 0; phase < 2; phase++)
+    {
+      clutter_actor_update_stage_views (actor, phase);
+      flush_resource_scale_changes (stage);
+
+      if (!priv->actor_needs_immediate_relayout)
+        break;
+
+      priv->actor_needs_immediate_relayout = FALSE;
+      _clutter_stage_maybe_relayout (actor);
+    }
+
+  g_warn_if_fail (!priv->actor_needs_immediate_relayout);
+}
+
+static void
+clutter_stage_update_devices (ClutterStage *stage)
+{
+  GSList *pointers;
+
+  COGL_TRACE_BEGIN (ClutterStagePick, "Pick");
+
+  pointers = _clutter_stage_check_updated_pointers (stage);
+
+  while (pointers)
+    {
+      clutter_input_device_update (pointers->data, NULL, TRUE);
+      pointers = g_slist_delete_link (pointers, pointers);
+    }
+
+  COGL_TRACE_END (ClutterStagePick);
+}
+
 /**
  * _clutter_stage_do_update:
  * @stage: A #ClutterStage
@@ -1537,10 +1635,6 @@ gboolean
 _clutter_stage_do_update (ClutterStage *stage)
 {
   ClutterStagePrivate *priv = stage->priv;
-  gboolean stage_was_relayout = priv->stage_was_relayout;
-  GSList *pointers = NULL;
-
-  priv->stage_was_relayout = FALSE;
 
   priv->needs_update = FALSE;
 
@@ -1568,14 +1662,23 @@ _clutter_stage_do_update (ClutterStage *stage)
 
   COGL_TRACE_END (ClutterStageRelayout);
 
+  /* A stale pointer actor has to be corrected whether or not anything is
+   * being painted - gating the repick on the redraw is what left crossings
+   * undelivered until the next frame that happened to draw something.
+   */
   if (!priv->redraw_pending)
     {
+      if (priv->needs_update_devices)
+        {
+          priv->needs_update_devices = FALSE;
+          clutter_stage_update_devices (stage);
+        }
+
       clutter_stage_emit_after_update (stage);
       return FALSE;
     }
 
-  if (stage_was_relayout)
-    pointers = _clutter_stage_check_updated_pointers (stage);
+  update_actor_stage_views (stage);
 
   COGL_TRACE_BEGIN (ClutterStagePaint, "Paint");
 
@@ -1597,15 +1700,11 @@ _clutter_stage_do_update (ClutterStage *stage)
     }
 #endif /* CLUTTER_ENABLE_DEBUG */
 
-  COGL_TRACE_BEGIN (ClutterStagePick, "Pick");
-
-  while (pointers)
+  if (priv->needs_update_devices)
     {
-      clutter_input_device_update (pointers->data, NULL, TRUE);
-      pointers = g_slist_delete_link (pointers, pointers);
+      priv->needs_update_devices = FALSE;
+      clutter_stage_update_devices (stage);
     }
-
-  COGL_TRACE_END (ClutterStagePick);
 
   clutter_stage_emit_after_update (stage);
 
@@ -1630,7 +1729,7 @@ is_full_stage_redraw_queued (ClutterStage *stage)
 {
   GList *l;
 
-  for (l = _clutter_stage_peek_stage_views (stage); l; l = l->next)
+  for (l = clutter_stage_peek_stage_views (stage); l; l = l->next)
     {
       ClutterStageView *view = l->data;
 
@@ -1734,7 +1833,7 @@ _clutter_stage_do_pick_on_view (ClutterStage     *stage,
 
       _clutter_stage_clear_pick_stack (stage);
 
-      pick_context = clutter_pick_context_new_for_view (view);
+      pick_context = clutter_pick_context_new_for_view (stage, view);
 
       context->pick_mode = mode;
       setup_view_for_pick_or_paint (stage, view, NULL);
@@ -2005,7 +2104,11 @@ clutter_stage_dispose (GObject *object)
                     (GDestroyNotify) free_queue_redraw_entry);
   priv->pending_queue_redraws = NULL;
 
-  g_clear_pointer (&priv->pending_relayouts, g_hash_table_destroy);
+  g_slist_free_full (priv->pending_relayouts,
+                     (GDestroyNotify) g_object_unref);
+  priv->pending_relayouts = NULL;
+
+  g_clear_pointer (&priv->pending_resource_scale_changes, g_ptr_array_unref);
 
   /* this will release the reference on the stage */
   stage_manager = clutter_stage_manager_get_default ();
@@ -2413,10 +2516,9 @@ clutter_stage_init (ClutterStage *self)
   clutter_actor_set_background_color (CLUTTER_ACTOR (self),
                                       &default_stage_color);
 
-  priv->pending_relayouts = g_hash_table_new_full (NULL,
-                                                   NULL,
-                                                   g_object_unref,
-                                                   NULL);
+  priv->pending_resource_scale_changes =
+    g_ptr_array_new_with_free_func (g_object_unref);
+
   clutter_stage_queue_actor_relayout (self, CLUTTER_ACTOR (self));
 
   clutter_actor_set_reactive (CLUTTER_ACTOR (self), TRUE);
@@ -2428,10 +2530,7 @@ clutter_stage_init (ClutterStage *self)
   g_signal_connect (self, "notify::min-height",
                     G_CALLBACK (clutter_stage_notify_min_size), NULL);
 
-  _clutter_stage_set_viewport (self,
-                               0, 0,
-                               geom.width,
-                               geom.height);
+  clutter_stage_set_viewport (self, geom.width, geom.height);
 
   priv->paint_volume_stack =
     g_array_new (FALSE, FALSE, sizeof (ClutterPaintVolume));
@@ -2648,8 +2747,6 @@ _clutter_stage_dirty_projection (ClutterStage *stage)
 /*
  * clutter_stage_set_viewport:
  * @stage: A #ClutterStage
- * @x: The X postition to render the stage at, in window coordinates
- * @y: The Y position to render the stage at, in window coordinates
  * @width: The width to render the stage at, in window coordinates
  * @height: The height to render the stage at, in window coordinates
  *
@@ -2682,19 +2779,22 @@ _clutter_stage_dirty_projection (ClutterStage *stage)
  *
  * Since: 1.6
  */
-void
-_clutter_stage_set_viewport (ClutterStage *stage,
-                             float         x,
-                             float         y,
-                             float         width,
-                             float         height)
+static void
+clutter_stage_set_viewport (ClutterStage *stage,
+                            float         width,
+                            float         height)
 {
   ClutterStagePrivate *priv;
+  float x, y;
 
   g_return_if_fail (CLUTTER_IS_STAGE (stage));
 
   priv = stage->priv;
 
+  x = 0.f;
+  y = 0.f;
+  width = roundf (width);
+  height = roundf (height);
 
   if (x == priv->viewport[0] &&
       y == priv->viewport[1] &&
@@ -4518,19 +4618,28 @@ clutter_stage_get_capture_final_size (ClutterStage          *stage,
                                       int                   *out_height,
                                       float                 *out_scale)
 {
-  float max_scale;
+  float max_scale = 1.0;
 
   g_return_val_if_fail (CLUTTER_IS_STAGE (stage), FALSE);
 
   if (rect)
     {
       graphene_rect_t capture_rect;
+      g_autoptr (GList) views = NULL;
+      GList *l;
 
       _clutter_util_rect_from_rectangle (rect, &capture_rect);
-      if (!_clutter_stage_get_max_view_scale_factor_for_rect (stage,
-                                                              &capture_rect,
-                                                              &max_scale))
+      views = clutter_stage_get_views_for_rect (stage, &capture_rect);
+
+      if (!views)
         return FALSE;
+
+      for (l = views; l; l = l->next)
+        {
+          ClutterStageView *view = l->data;
+
+          max_scale = MAX (clutter_stage_view_get_scale (view), max_scale);
+        }
 
       if (out_width)
         *out_width = (gint) roundf (rect->width * max_scale);
@@ -4545,9 +4654,7 @@ clutter_stage_get_capture_final_size (ClutterStage          *stage,
 
       clutter_actor_get_allocation_box (CLUTTER_ACTOR (stage), &alloc);
       clutter_actor_box_get_size (&alloc, &stage_width, &stage_height);
-      if (!_clutter_actor_get_real_resource_scale (CLUTTER_ACTOR (stage),
-                                                   &max_scale))
-        return FALSE;
+      max_scale = clutter_actor_get_real_resource_scale (CLUTTER_ACTOR (stage));
 
       if (out_width)
         *out_width = (gint) roundf (stage_width * max_scale);
@@ -4771,7 +4878,7 @@ clutter_stage_thaw_updates (ClutterStage *stage)
 }
 
 GList *
-_clutter_stage_peek_stage_views (ClutterStage *stage)
+clutter_stage_peek_stage_views (ClutterStage *stage)
 {
   ClutterStagePrivate *priv = stage->priv;
 
@@ -4779,18 +4886,17 @@ _clutter_stage_peek_stage_views (ClutterStage *stage)
 }
 
 void
-clutter_stage_update_resource_scales (ClutterStage *stage)
+clutter_stage_clear_stage_views (ClutterStage *stage)
 {
-  _clutter_actor_queue_update_resource_scale_recursive (CLUTTER_ACTOR (stage));
+  clutter_actor_clear_stage_views_recursive (CLUTTER_ACTOR (stage));
 }
 
-gboolean
-_clutter_stage_get_max_view_scale_factor_for_rect (ClutterStage    *stage,
-                                                   graphene_rect_t *rect,
-                                                   float           *view_scale)
+GList *
+clutter_stage_get_views_for_rect (ClutterStage          *stage,
+                                  const graphene_rect_t *rect)
 {
   ClutterStagePrivate *priv = stage->priv;
-  float scale = 0.0f;
+  GList *views_for_rect = NULL;
   GList *l;
 
   for (l = _clutter_stage_window_get_views (priv->impl); l; l = l->next)
@@ -4803,14 +4909,10 @@ _clutter_stage_get_max_view_scale_factor_for_rect (ClutterStage    *stage,
       _clutter_util_rect_from_rectangle (&view_layout, &view_rect);
 
       if (graphene_rect_intersection (&view_rect, rect, NULL))
-        scale = MAX (clutter_stage_view_get_scale (view), scale);
+        views_for_rect = g_list_prepend (views_for_rect, view);
     }
 
-  if (scale == 0.0)
-    return FALSE;
-
-  *view_scale = scale;
-  return TRUE;
+  return views_for_rect;
 }
 
 static void
@@ -4877,4 +4979,48 @@ clutter_stage_get_device_coords (ClutterStage         *stage,
 
   if (entry && coords)
     *coords = entry->coords;
+}
+
+void
+clutter_stage_invalidate_devices (ClutterStage *stage)
+{
+  if (CLUTTER_ACTOR_IN_DESTRUCTION (stage))
+    return;
+
+  stage->priv->needs_update_devices = TRUE;
+  clutter_stage_schedule_update (stage);
+}
+
+void
+clutter_stage_invalidate_focus (ClutterStage *stage,
+                                ClutterActor *actor)
+{
+  ClutterSeat *seat;
+  GList *l, *devices;
+
+  if (CLUTTER_ACTOR_IN_DESTRUCTION (stage))
+    return;
+
+  seat = clutter_backend_get_default_seat (clutter_get_default_backend ());
+  devices = clutter_seat_list_devices (seat);
+
+  for (l = devices; l; l = l->next)
+    {
+      ClutterInputDevice *device = l->data;
+
+      if (device->cursor_actor != actor)
+        continue;
+
+      clutter_input_device_update (device, NULL, TRUE);
+    }
+
+  g_list_free (devices);
+}
+
+void
+clutter_stage_set_actor_needs_immediate_relayout (ClutterStage *stage)
+{
+  ClutterStagePrivate *priv = stage->priv;
+
+  priv->actor_needs_immediate_relayout = TRUE;
 }

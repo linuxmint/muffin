@@ -135,6 +135,7 @@ struct _MetaSeatNative
 
   float pointer_x;
   float pointer_y;
+  gboolean pointer_position_dirty;
 
   /* Emulation of discrete scroll events out of smooth ones */
   float accum_scroll_dx;

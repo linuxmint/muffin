@@ -1,3 +1,245 @@
+muffin (6.8.1) adrien; urgency=medium
+
+  [ Michael Webster ]
+  * wayland/surface: Send enter event when a client binds to wl_output late
+  * wayland: Re-announce wl_output globals when monitor order changes
+  * meta-window-wayland: Always update the monitor of an unmapped window
+  * meta-monitor-manager.c: Use strverscmp to compare connector ids
+  * wayland: Refuse a popup grab cleanly when a grab op is already in effect
+  * clutter: Add missing pick clip and cache invalidation api.
+  * constraints.c: Run constrain_to_single_monitor() on client decorated windows.
+
+  [ gossardla ]
+  * place.c: Center windows in the work area, not on the whole monitor (#884)
+
+ -- Clement Lefebvre <root@linuxmint.com>  Wed, 04 Nov 2026 14:42:42 +0100
+
+muffin (6.8.0) adrien; urgency=medium
+
+  [ Michael Webster ]
+  * wayland: Give a surface a new actor on every role assignment
+  * session.c (x11): Stop using X sync objects on Die instead of waiting
+  * wayland: Only expose the EGLStream controller when not rendering via gbm
+  * wayland dnd: Fix regression from 4d9962ec6 - chain up in assigned, other dnd fixes.
+  * cogl/glx: Don't miss swap events stranded by zink's WSI threads
+  * debian/control: Remove xenity as build-depends
+  * meta-window-actor.c: Have get_image() return an exact-sized buffer for fractional-scale clients.
+  * kms: Only treat a hotplug event as such when connector state changed
+  * meta-cursor-renderer-native.c: Disable hw cursor for newer nvidia drivers
+  * input-mapper: Skip udev size lookup for devices without a node
+  * stack-tracker: Don't sync the stack for window create/destroy events
+
+  [ Clement Lefebvre ]
+  * Replace zenity (libadwaita) with xenity (GTK3)
+  * x11: Don't reject small screen sizes in meta_gpu_xrandr_read_current()
+  * debian: Restore the alternative priority and drop an empty Provides
+
+  [ anthonytheinventor ]
+  * cogl/shader: Don't keep the compilation pipeline alive (#877)
+
+  [ Fabio Fantoni ]
+  * cogl: Don't install cogl-gtype-private.h (#869)
+  * Debian packaging improvements (#851)
+
+  [ Rad Kawar ]
+  * backends/x11: Interpret keycode correctly (#874)
+  * backends/x11: Emit discrete scroll events for accumulated smooth events (#875)
+
+  [ radkawar ]
+  * backends/x11: Release held virtual input when the device is destroyed (#876)
+
+  [ Abraham Binder ]
+  * Don't flush calc_showing on X11 raise so newly mapped windows still get focus (#772). (#859)
+
+  [ Jenna Nelson ]
+  * backends: Guard against NULL monitor mode during XRandR transitions (#805)
+
+  [ Dan ]
+  * window: Fix keyboard resize increments and avoid crash under Wayland (#873)
+  * keybindings: Reject accelerators without keysym and fail invalid custom keybindings (#872)
+
+  [ Anaxímeno Brito ]
+  * meta-cursor-tracker: Add pointer button update event (#860)
+
+  [ Aleksey Samoilov ]
+  * Wayland: Implement ext-idle-notify-v1 protocol (#842)
+
+  [ KAMI ]
+  * Fix memory leaks, undefined behaviour, and resource lifecycle bugs (#814)
+
+ -- Clement Lefebvre <root@linuxmint.com>  Mon, 02 Nov 2026 12:59:56 +0000
+
+muffin (6.7.9) adrien; urgency=medium
+
+  [ Michael Webster ]
+  * inhibit-shortcuts-dialog: Fix use-after-free
+  * clutter-actor: Clear the size-request flags when a CONTENT_SIZE actor is measured.
+  * keybindings (x11): Hold a pointer grab while the magnifier zoom modifier is down.
+  * compositor: Paint viewport-scaled and Xwayland windows at resource scale for get_image().
+  * events.c: Don't route pointer events to a window while a Clutter grab is held.
+  * layer-shell: Remove actors of destroyed subsurfaces.
+  * meta-window-actor-wayland.c:  Skip surface actors hosted by a layer surface.
+  * wayland/xdg-shell: Ensure applied window geometry is always non-empty
+  * window.c: Resolve meta_window_get_pid() from the client pid
+  * window: Don't leave show-desktop mode for override-redirect windows
+  * dnd: Report Wayland drags over Cinnamon's UI like Xdnd
+  * monitor-manager: Keep switch configs across hotplugs
+  * monitor-manager: Make Super+P cycle back to the configured layout
+  * wayland/xdg-foreign: Don't abort when importing an unknown handle
+  * screen-cast: Fix absolute pointer motion on scaled monitors
+
+  [ Zhiyi Zhang ]
+  * x11: Do not unminimize windows with initial IconicState (#826)
+
+  [ Alex Burger ]
+  * keybindings: Don't trigger modifier-only bindings after zoom scrolling (#866)
+
+  [ Steve Midgley ]
+  * x11: Seed client_rect with frame-relative coords for framed windows (#841)
+
+  [ Aleksey Samoilov ]
+  * wayland/subsurface: Move actor unparenting back to rebuild_surface_tr… (#796)
+
+  [ Arkadiusz Miszczyszyn ]
+  * core: Do not abort on overflowing window positions in edge resistance (#861)
+
+  [ marcelmushik ]
+  * Restore edge-resistance-window setting (#828)
+
+  [ Fabio Fantoni ]
+  * build: Drop the unused dbus-1 dependency (#868)
+
+ -- Clement Lefebvre <root@linuxmint.com>  Tue, 13 Oct 2026 13:28:24 +0100
+
+muffin (6.7.8) adrien; urgency=medium
+
+  [ Michael Webster ]
+  * meta-backend.c: Restore numlock state on resume for X11 sessions.
+
+ -- Clement Lefebvre <root@linuxmint.com>  Tue, 22 Sep 2026 10:13:04 +0100
+
+muffin (6.7.7) adrien; urgency=medium
+
+  [ Michael Webster ]
+  * meta-xwayland-dnd.c: Use two X11 DnD peer windows.
+  * monitor config: Use a different filename for wayland sessions, remove scale-monitor-framebuffer experimental option.
+  * clutter-offscreen-effect.c: Apply fbo offset before unscaling.
+  * meta-wayland-surface.c: Only log scanout failure reason once, not once per frame.
+  * xwayland: Fix hidpi support, scanout matching.
+  * compositor: Don't let fully transparent windows block unredirect/scanout
+  * compositor.c: Merge x11 and wayland top-window implementations for unredirect/scanout.
+  * meta-compositor-native.c: Make direct scanout opt-in.
+  * meta-renderer-native.c: Report direct scanout page flip failures.
+  * meta-renderer-native.c: Log when a scanout buffer's modifier differs from the onscreen framebuffer's.
+  * compositor: Let a fullscreen window scan out from a subsurface.
+  * meta-compositor-native.c: Don't allocate a hash table every paint.
+  * meta-window-actor.c: Don't read back a zero-sized region.
+  * meta-renderer-native.c: Log a scanout rejection once, not every frame.
+  * prefs: Add scanout-fullscreen-windows setting.
+  * clutter: Backport additional pointer repick triggers.
+  * cursor: Post the hardware cursor position from the input dispatch.
+  * settings: Allow experimental-features entries as plain named flags.
+  * wayland: Require the locking window to appear focused for Xwayland too.
+  * x11: Scale relative pointer motion by the UI scaling factor.
+
+  [ Clement Lefebvre ]
+  * x11: Don't let GTK load the accessibility bridge
+  * ui: Remove redundant gtk_init_check()
+  * x11: Only block the ATK bridge if Cinnamon didn't load it
+
+ -- Clement Lefebvre <root@linuxmint.com>  Thu, 17 Sep 2026 16:12:05 +0100
+
+muffin (6.7.6) alfa; urgency=medium
+
+  [ Aleksey Samoilov ]
+  * Cleanup and refactor resource scale API (#793)
+
+  [ Michael Webster ]
+  * wayland: represent layer-shell surfaces as MetaWindows
+  * meta-wayland-outputs.c: Send global_remove immediately when a monitor is removed.
+  * meta-wayland-layer-shell.c: Fix MetaFeedbackActor scaling with hidpi.
+  * clutter-actor.c: Clear all stage views before emitting stage-views-changed.
+  * clutter-text.c: multiply existing pango scale attributes by the resource scale instead of replacing them, so per-segment markup sizes survive.
+  * clutter-actor.c: Show on all stage views when an actor has no allocation.
+  * meta-cursor-renderer-native.c: Raise fallback cursor threshold.
+  * wayland: Base output enter/leave on the window rect, not actor geometry.
+  * meta-window-wayland.c: Scale the move-grab anchor when crossing monitor scales.
+  * delete.c: Guard delete/kill against unmanaging windows.
+  * clutter: Backport some relayout and allocation lifecycle fixes.
+  * clutter: Don't gate pointer repicks on the redraw clip.
+  * window-x11.c: Restore unredirect-fullscreen pref check removed in 120ade844586.
+  * wayland: Implement scanout surface dmabuf feedback.
+  * Wayland: bump wl_compositor to v6 for preferred_scale.
+  * wayland: Implement wp_fractional_scale_v1.
+  * wayland: Fix maximize transition broken by wp_fractional_scale_v1
+  * logging: Add topic for Wayland scanout.
+  * monitor: Calculate fractional scales as exact quotients
+  * display.c: Fix a warning when using the nested backend.
+  * build: Fix some dependency versions.
+  * clutter-actor.c: Soften the check for guessed resource scale.
+  * util: Add layer-shell debug topic, mark unused topics.
+  * meta-wayland-xdg-shell.c: Allow serial-less nested popups from layer-shell surfaces.
+  * meta-wayland-surface.c: Advertise a surface's scale when its output is known.
+  * meta-wayland-layer-shell.c: Reconfigure full-output surfaces when the output resizes.
+  * meta-wayland-layer-shell.c: Don't free the namespace early, so it can be used for logging.
+  * clutter-input-method.c: Ensure a stage for events.
+  * meta-window.c: Apply edge resistance on shared monitor edges during window drags.
+  * meta-barrier-native.c: Match X11 pointer barrier behavior.
+  * clutter-stage.c: Don't allocate relayout entries for detached actors.
+  * clutter: Emit ::resource-scale-changed outside the stage-views walk.
+  * clutter-actor.c: Guess a resource scale of 1 when there are no views.
+  * meta-x11-background-actor.c: Don't override the bottom actor's opacity when it's not mapped or there's no transition.
+  * clutter-actor.c: Follow-up to 61eece4d2, additional rounding changes.
+
+ -- Clement Lefebvre <root@linuxmint.com>  Sat, 05 Sep 2026 15:13:56 +0100
+
+muffin (6.7.5) alfa; urgency=medium
+
+  [ Clement Lefebvre ]
+  * wayland: Allow activation tokens without surfaces
+  * wayland: Make focus stealing prevention optional
+  * debian: update symbols
+  * debug: Add /usr/bin/cinnamon-list-windows CLI
+
+  [ Michael Webster ]
+  * wayland: Use event time (not "now") when self-activating via gtk-shell.
+  * stack: Don't raise windows that aren't in the stack.
+  * cursor/native: Round HW cursor buffers up to a driver-legal size.
+  * meta-feedback-actor.c: Read anchor position as float, not int.
+  * clutter/clutter-text.c: Fix surrounding-text offsets and pre-edit rendering for input methods.
+  * meta-wayland-text-input: Backport text-input-v3 fixes, reset the IM on click and touch,
+  * meta-wayland-keyboard.c: Free the previous keymap read-only file on keymap change.
+  * meta-wayland-keyboard: Add off-layout keysym typing and reusable key/modifier helpers.
+  * clutter-input-method: Make clutter_input_method_get_focus public.
+  * wayland: Add input-method-v2 and virtual-keyboard-v1 support for fcitx.
+  * keybindings: Match the iso_next_group accelerator on keysym, not keycode.
+  * wayland: Fix HW cursor never hiding on wl_pointer.set_cursor(nil)
+  * kms: Fail cleanly when a device cannot modeset
+  * native: Wait for an active logind session before backend init
+  * renderer/native: Probe gbm scanout support instead of assuming it
+  * wayland: Advertise the render node of the GPU we composite on
+  * renderer/native: Allocate cross-GPU surfaces linear
+  * renderer/native: Drop unused meta_renderer_native_use_modifiers()
+  * cursor: Reuse the cursor sprite when the shape is unchanged
+  * cursor/native: Stop using the hardware cursor where it is slower.
+  * constraints.c: Place popups on the same monitor as their anchor rect.
+  * constraints.c: Flip popups even when they won't fully fit afterwards
+  * meta-wayland-xdg-shell.c: Dismiss instead of destroy invalid popup
+  * meta-backend-native.c: Handle NULL from xkb_keymap_new_from_names.
+  * layer-shell: Protocol conformance fixes, v5, and exclusive keyboard focus.
+  * layer-shell: Fix crash and stacking of popups parented to layer surfaces.
+  * layer-shell: Support subsurfaces on layer surfaces.
+  * layer-shell: Scale surfaces on HiDPI monitors.
+  * cursor: Scale shape cursors and honor texture scale on HiDPI.
+  * meta-wayland-data-offer.c: Ignore the "ask" user_action once the user has selected a real action.
+  * wayland: Let the compositor update the DnD cursor, so in-flight drag operations can show appropriate pointers for move/copy/ask.
+  * meta-workspace-manager.c: Adapt show-desktop to work with layer- shell surfaces.
+
+  [ Aleksey Samoilov ]
+  * [Wayland] Switch to stable linux-dmabuf (#840)
+
+ -- Clement Lefebvre <root@linuxmint.com>  Sat, 15 Aug 2026 12:41:28 +0200
+
 muffin (6.7.4) alfa; urgency=medium
 
   [ Michael Webster ]

@@ -1225,9 +1225,12 @@ meta_shaped_texture_reset_viewport_dst_size (MetaShapedTexture *stex)
   invalidate_size (stex);
 }
 
-static gboolean
-should_get_via_offscreen (MetaShapedTexture *stex)
+gboolean
+meta_shaped_texture_should_get_via_offscreen (MetaShapedTexture *stex)
 {
+  if (!stex->texture)
+    return FALSE;
+
   if (!cogl_texture_is_get_data_supported (stex->texture))
     return TRUE;
 
@@ -1249,6 +1252,43 @@ should_get_via_offscreen (MetaShapedTexture *stex)
     }
 
   return FALSE;
+}
+
+/**
+ * meta_shaped_texture_get_viewport_scale:
+ * @stex: a #MetaShapedTexture
+ * @scale: (out): the scale the buffer was rendered at
+ *
+ * A viewport-scaled surface (a wp_fractional_scale_v1 client) carries a
+ * buffer rendered at the monitor's real scale rather than at an integer
+ * buffer scale. Reports that scale relative to the surface's logical size.
+ *
+ * Returns: %TRUE if @stex is an untransformed, viewport-scaled surface
+ */
+gboolean
+meta_shaped_texture_get_viewport_scale (MetaShapedTexture *stex,
+                                        float             *scale)
+{
+  float sample_width;
+
+  if (!stex->texture ||
+      stex->transform != META_MONITOR_TRANSFORM_NORMAL ||
+      (!stex->has_viewport_src_rect && !stex->has_viewport_dst_size))
+    return FALSE;
+
+  meta_shaped_texture_ensure_size_valid (stex);
+
+  if (stex->dst_width <= 0)
+    return FALSE;
+
+  if (stex->has_viewport_src_rect)
+    sample_width = stex->viewport_src_rect.size.width * stex->buffer_scale;
+  else
+    sample_width = cogl_texture_get_width (stex->texture);
+
+  *scale = sample_width / stex->dst_width;
+
+  return TRUE;
 }
 
 static cairo_surface_t *
@@ -1403,7 +1443,7 @@ meta_shaped_texture_get_image (MetaShapedTexture     *stex,
       };
     }
 
-  if (should_get_via_offscreen (stex))
+  if (meta_shaped_texture_should_get_via_offscreen (stex))
     {
       int image_width;
       int image_height;

@@ -34,13 +34,16 @@
 #include "wayland/meta-wayland-buffer.h"
 #include "wayland/meta-wayland-activation.h"
 #include "wayland/meta-wayland-cursor-shape.h"
+#include "wayland/meta-wayland-fractional-scale.h"
 #include "wayland/meta-wayland-data-device.h"
 #include "wayland/meta-wayland-dma-buf.h"
 #include "wayland/meta-wayland-drm.h"
 #include "wayland/meta-wayland-egl-stream.h"
 #include "wayland/meta-wayland-idle-inhibit.h"
+#include "wayland/meta-wayland-idle-notify.h"
 #include "wayland/meta-wayland-inhibit-shortcuts-dialog.h"
 #include "wayland/meta-wayland-inhibit-shortcuts.h"
+#include "wayland/meta-wayland-layer-shell.h"
 #include "wayland/meta-wayland-legacy-xdg-foreign.h"
 #include "wayland/meta-wayland-outputs.h"
 #include "wayland/meta-wayland-private.h"
@@ -63,6 +66,10 @@
 #include "wayland/meta-xwayland-grab-keyboard.h"
 #include "wayland/meta-xwayland-private.h"
 #include "wayland/meta-xwayland.h"
+
+#ifdef HAVE_NATIVE_BACKEND
+#include "backends/native/meta-renderer-native.h"
+#endif
 
 static char *_display_name_override;
 
@@ -142,6 +149,14 @@ meta_wayland_compositor_set_input_focus (MetaWaylandCompositor *compositor,
                                          MetaWindow            *window)
 {
   MetaWaylandSurface *surface = window ? window->surface : NULL;
+  MetaWaylandSurface *exclusive;
+
+  /* Per layer-shell spec, a mapped top/overlay layer surface with exclusive
+   * keyboard interactivity always holds keyboard focus, even as the focus
+   * window changes underneath it. */
+  exclusive = meta_wayland_layer_shell_get_exclusive_focus_surface (compositor);
+  if (exclusive)
+    surface = exclusive;
 
   meta_wayland_seat_set_input_focus (compositor->seat, surface);
 }
@@ -473,12 +488,14 @@ meta_wayland_compositor_setup (MetaWaylandCompositor *wayland_compositor)
   }
   meta_wayland_drm_init (compositor);
   meta_wayland_init_single_pixel_buffer_manager (compositor);
+  meta_wayland_init_fractional_scale (compositor);
   meta_wayland_keyboard_shortcuts_inhibit_init (compositor);
   meta_wayland_surface_inhibit_shortcuts_dialog_init ();
   meta_wayland_text_input_init (compositor);
   meta_wayland_input_method_manager_init (compositor);
   meta_wayland_virtual_keyboard_manager_init (compositor);
   meta_wayland_activation_init (compositor);
+  meta_wayland_idle_notify_init (compositor);
   meta_wayland_idle_inhibit_init (compositor);
   meta_wayland_init_xdg_wm_dialog (compositor);
   meta_wayland_xdg_toplevel_tag_init (compositor);
@@ -496,7 +513,27 @@ meta_wayland_compositor_setup (MetaWaylandCompositor *wayland_compositor)
                                 compositor);
 
 #ifdef HAVE_WAYLAND_EGLSTREAM
-  meta_wayland_eglstream_controller_init (compositor);
+  /* With gbm on the NVIDIA driver, EGL/Vulkan clients and Xwayland must take
+   * the dma-buf path too, so only expose the EGLStream controller when the
+   * renderer itself is EGLStream based. */
+    {
+      gboolean should_enable_eglstream_controller = TRUE;
+#if defined(HAVE_EGL_DEVICE) && defined(HAVE_NATIVE_BACKEND)
+      MetaRenderer *renderer = meta_backend_get_renderer (meta_get_backend ());
+
+      if (META_IS_RENDERER_NATIVE (renderer))
+        {
+          MetaRendererNative *renderer_native = META_RENDERER_NATIVE (renderer);
+
+          if (meta_renderer_native_get_mode (renderer_native) ==
+              META_RENDERER_NATIVE_MODE_GBM)
+            should_enable_eglstream_controller = FALSE;
+        }
+#endif
+
+      if (should_enable_eglstream_controller)
+        meta_wayland_eglstream_controller_init (compositor);
+    }
 #endif
 
   if (meta_get_x11_display_policy () != META_DISPLAY_POLICY_DISABLED)

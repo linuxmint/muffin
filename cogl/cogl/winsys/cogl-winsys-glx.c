@@ -79,9 +79,13 @@
 #define COGL_ONSCREEN_X11_EVENT_MASK (StructureNotifyMask | ExposureMask)
 #define MAX_GLX_CONFIG_ATTRIBS 30
 
+/* How often to wake up while a swap event is outstanding with zink */
+#define SWAP_EVENT_POLL_INTERVAL_US 2000
+
 typedef struct _CoglContextGLX
 {
   GLXDrawable current_drawable;
+  CoglPollSource *swap_event_poll;
 } CoglContextGLX;
 
 typedef struct _CoglOnscreenXlib
@@ -426,6 +430,44 @@ set_complete_pending (CoglOnscreen *onscreen)
   glx_onscreen->pending_complete_notify++;
 }
 
+static gboolean
+onscreen_awaits_swap_event (CoglOnscreen *onscreen)
+{
+  CoglOnscreenGLX *glx_onscreen = onscreen->winsys;
+
+  return g_queue_get_length (&onscreen->pending_frame_infos) >
+         glx_onscreen->pending_complete_notify;
+}
+
+/* With zink, GLX swaps go through Vulkan WSI threads that also read the X
+ * connection, so a swap event can end up queued without waking the main
+ * loop. While one is outstanding, wake up regularly so the X event source's
+ * XPending () check picks it up. */
+static int64_t
+swap_event_poll_prepare (void *user_data)
+{
+  CoglContext *context = user_data;
+  GList *l;
+
+  for (l = context->framebuffers; l; l = l->next)
+    {
+      CoglFramebuffer *framebuffer = l->data;
+
+      if (framebuffer->type == COGL_FRAMEBUFFER_TYPE_ONSCREEN &&
+          COGL_ONSCREEN (framebuffer)->winsys &&
+          onscreen_awaits_swap_event (COGL_ONSCREEN (framebuffer)))
+        return SWAP_EVENT_POLL_INTERVAL_US;
+    }
+
+  return -1;
+}
+
+static void
+swap_event_poll_dispatch (void *user_data,
+                          int   revents)
+{
+}
+
 static void
 notify_swap_buffers (CoglContext *context, GLXBufferSwapComplete *swap_event)
 {
@@ -435,6 +477,16 @@ notify_swap_buffers (CoglContext *context, GLXBufferSwapComplete *swap_event)
   if (!onscreen)
     return;
   glx_onscreen = onscreen->winsys;
+
+  /* Ignore events that have no frame left to complete, such as the ones
+   * zink sends for front buffer presents like swap_region's blit */
+  if (!onscreen_awaits_swap_event (onscreen))
+    {
+      COGL_NOTE (WINSYS, "Ignoring swap event with no pending frame "
+                 "(type 0x%x, sbc %" G_GINT64_FORMAT ")",
+                 swap_event->event_type, swap_event->sbc);
+      return;
+    }
 
   /* We only want to notify that the swap is complete when the
      application calls cogl_context_dispatch so instead of immediately
@@ -1250,17 +1302,44 @@ error:
 static gboolean
 _cogl_winsys_context_init (CoglContext *context, GError **error)
 {
-  context->winsys = g_new0 (CoglContextGLX, 1);
+  CoglContextGLX *glx_context;
+  const char *renderer;
+
+  glx_context = g_new0 (CoglContextGLX, 1);
+  context->winsys = glx_context;
 
   cogl_xlib_renderer_add_filter (context->display->renderer,
                                  glx_event_filter_cb,
                                  context);
-  return update_winsys_features (context, error);
+
+  if (!update_winsys_features (context, error))
+    return FALSE;
+
+  renderer = (const char *) context->glGetString (GL_RENDERER);
+
+  if (COGL_FLAGS_GET (context->winsys_features,
+                      COGL_WINSYS_FEATURE_SYNC_AND_COMPLETE_EVENT) &&
+      renderer && g_strstr_len (renderer, -1, "zink"))
+    {
+      glx_context->swap_event_poll =
+        _cogl_poll_renderer_add_source (context->display->renderer,
+                                        swap_event_poll_prepare,
+                                        swap_event_poll_dispatch,
+                                        context);
+    }
+
+  return TRUE;
 }
 
 static void
 _cogl_winsys_context_deinit (CoglContext *context)
 {
+  CoglContextGLX *glx_context = context->winsys;
+
+  if (glx_context->swap_event_poll)
+    _cogl_poll_renderer_remove_source (context->display->renderer,
+                                       glx_context->swap_event_poll);
+
   cogl_xlib_renderer_remove_filter (context->display->renderer,
                                     glx_event_filter_cb,
                                     context);
@@ -1862,9 +1941,10 @@ _cogl_winsys_onscreen_swap_region (CoglOnscreen *onscreen,
   }
 
   /* XXX: we don't get SwapComplete events based on how we implement
-   * the _swap_region() API but if cogl-onscreen.c knows we are
-   * handling _SYNC and _COMPLETE events in the winsys then we need to
-   * send fake events in this case.
+   * the _swap_region() API (except with zink, whose front buffer flush
+   * sends one that notify_swap_buffers() ignores) but if cogl-onscreen.c
+   * knows we are handling _SYNC and _COMPLETE events in the winsys then
+   * we need to send fake events in this case.
    */
   if (_cogl_winsys_has_feature (COGL_WINSYS_FEATURE_SYNC_AND_COMPLETE_EVENT))
     {

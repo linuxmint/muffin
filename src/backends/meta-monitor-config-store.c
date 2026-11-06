@@ -1493,6 +1493,39 @@ meta_monitor_config_store_remove (MetaMonitorConfigStore *config_store,
     maybe_save_configs (config_store);
 }
 
+static gboolean
+remove_user_config (gpointer key,
+                    gpointer value,
+                    gpointer user_data)
+{
+  return !is_system_config (value);
+}
+
+gboolean
+meta_monitor_config_store_reset (MetaMonitorConfigStore  *config_store,
+                                 GError                 **error)
+{
+  g_autoptr (GError) local_error = NULL;
+
+  if (config_store->save_cancellable)
+    {
+      g_cancellable_cancel (config_store->save_cancellable);
+      g_clear_object (&config_store->save_cancellable);
+    }
+
+  if (!config_store->custom_read_file &&
+      !g_file_delete (config_store->user_file, NULL, &local_error) &&
+      !g_error_matches (local_error, G_IO_ERROR, G_IO_ERROR_NOT_FOUND))
+    {
+      g_propagate_error (error, g_steal_pointer (&local_error));
+      return FALSE;
+    }
+
+  g_hash_table_foreach_remove (config_store->configs, remove_user_config, NULL);
+
+  return TRUE;
+}
+
 gboolean
 meta_monitor_config_store_set_custom (MetaMonitorConfigStore *config_store,
                                       const char             *read_path,
@@ -1573,9 +1606,10 @@ meta_monitor_config_store_constructed (GObject *object)
         }
     }
 
-  user_file_path = g_build_filename (g_get_user_config_dir (),
-                                     "cinnamon-monitors.xml",
-                                     NULL);
+  user_file_path =
+    g_build_filename (g_get_user_config_dir (),
+                      meta_monitor_manager_get_config_file_basename (config_store->monitor_manager),
+                      NULL);
 
   config_store->user_file = g_file_new_for_path (user_file_path);
 

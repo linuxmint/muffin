@@ -888,6 +888,7 @@ meta_display_open (void)
   display->grab_window = NULL;
   display->grab_tile_mode = META_TILE_NONE;
   display->grab_tile_monitor_number = -1;
+  display->grab_tile_target_monitor = -1;
 
   meta_display_cleanup_edges (display);
 
@@ -1000,7 +1001,9 @@ meta_display_open (void)
 
   display->sound_player = g_object_new (META_TYPE_SOUND_PLAYER, NULL);
 
-  meta_input_settings_refresh (meta_backend_get_input_settings (backend));
+  // The nested backend has no input settings by design.
+  if (meta_backend_get_input_settings (backend))
+    meta_input_settings_refresh (meta_backend_get_input_settings (backend));
 
   /* Done opening new display */
   display->display_opening = FALSE;
@@ -1954,6 +1957,7 @@ meta_display_begin_grab_op (MetaDisplay *display,
   display->grab_button = button;
   display->grab_tile_mode = grab_window->tile_mode;
   display->grab_tile_monitor_number = grab_window->tile_monitor_number;
+  display->grab_tile_target_monitor = -1;
   display->grab_anchor_root_x = root_x;
   display->grab_anchor_root_y = root_y;
   display->grab_latest_motion_x = root_x;
@@ -2045,6 +2049,7 @@ meta_display_end_grab_op (MetaDisplay *display,
   display->grab_window = NULL;
   display->grab_tile_mode = META_TILE_NONE;
   display->grab_tile_monitor_number = -1;
+  display->grab_tile_target_monitor = -1;
   memset(&display->grab_initial_window_pos, 0, sizeof(MetaRectangle));
 
   meta_display_update_cursor (display);

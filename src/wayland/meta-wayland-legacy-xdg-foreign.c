@@ -146,6 +146,9 @@
  {
    MetaWaylandXdgImported *imported = wl_resource_get_user_data (resource);
  
+   if (!imported)
+     return;
+
    meta_wayland_xdg_imported_set_parent_of (imported, surface_resource);
  }
  
@@ -197,16 +200,14 @@
    imported = meta_wayland_xdg_foreign_import (foreign, xdg_imported_resource,
                                                handle,
                                                zxdg_imported_v1_send_destroyed);
-   if (!imported)
-     {
-       zxdg_imported_v1_send_destroyed (xdg_imported_resource);
-       return;
-     }
  
    wl_resource_set_implementation (xdg_imported_resource,
                                    &meta_xdg_imported_v1_interface,
                                    imported,
                                    xdg_imported_v1_destructor);
+
+   if (!imported)
+     zxdg_imported_v1_send_destroyed (xdg_imported_resource);
  }
  
  static const struct zxdg_importer_v1_interface meta_xdg_importer_v1_interface = {

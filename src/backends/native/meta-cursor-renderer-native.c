@@ -38,6 +38,7 @@
 #include "backends/meta-monitor.h"
 #include "backends/meta-monitor-manager-private.h"
 #include "backends/meta-output.h"
+#include "backends/meta-settings-private.h"
 #include "backends/native/meta-crtc-kms.h"
 #include "backends/native/meta-kms-device.h"
 #include "backends/native/meta-kms-update.h"
@@ -73,6 +74,10 @@
  */
 #define HW_CURSOR_BUFFER_COUNT 3
 
+/* Overrides the slow-cursor-update driver gate, for testing the hardware
+ * cursor on a driver known to block on cursor image changes. */
+#define FORCE_HW_CURSOR_FEATURE "force-hw-cursor"
+
 static GQuark quark_cursor_sprite = 0;
 
 struct _MetaCursorRendererNative
@@ -95,6 +100,7 @@ typedef struct _MetaCursorRendererNativePrivate MetaCursorRendererNativePrivate;
 typedef struct _MetaCursorRendererNativeGpuData
 {
   gboolean hw_cursor_broken;
+  gboolean has_slow_cursor_updates;
 
   uint64_t cursor_width;
   uint64_t cursor_height;
@@ -173,6 +179,22 @@ meta_create_cursor_renderer_native_gpu_data (MetaGpuKms *gpu_kms)
                            g_free);
 
   return cursor_renderer_gpu_data;
+}
+
+static gboolean
+is_hw_cursor_usable (MetaCursorRendererNativeGpuData *cursor_renderer_gpu_data)
+{
+  MetaSettings *settings = meta_backend_get_settings (meta_get_backend ());
+
+  if (cursor_renderer_gpu_data->hw_cursor_broken)
+    return FALSE;
+
+  if (cursor_renderer_gpu_data->has_slow_cursor_updates &&
+      !meta_settings_is_experimental_feature_string_enabled (
+         settings, FORCE_HW_CURSOR_FEATURE))
+    return FALSE;
+
+  return TRUE;
 }
 
 static void
@@ -337,6 +359,7 @@ set_crtc_cursor (MetaCursorRendererNative *native,
                                                 cursor_hotspot_y);
 
   crtc->cursor_renderer_private = bo;
+  crtc->cursor_renderer_active = TRUE;
 
   if (cursor_gpu_state->pending_bo_state == META_CURSOR_GBM_BO_STATE_SET)
     {
@@ -357,7 +380,7 @@ unset_crtc_cursor (MetaCursorRendererNative *native,
   MetaKmsDevice *kms_device;
   MetaKmsPlane *cursor_plane;
 
-  if (!priv->hw_state_invalidated && !crtc->cursor_renderer_private)
+  if (!priv->hw_state_invalidated && !crtc->cursor_renderer_active)
     return;
 
   kms_crtc = meta_crtc_kms_get_kms_crtc (crtc);
@@ -368,6 +391,7 @@ unset_crtc_cursor (MetaCursorRendererNative *native,
     meta_kms_update_unassign_plane (kms_update, kms_crtc, cursor_plane);
 
   crtc->cursor_renderer_private = NULL;
+  crtc->cursor_renderer_active = FALSE;
 }
 
 static float
@@ -381,7 +405,7 @@ calculate_cursor_crtc_sprite_scale (MetaCursorSprite   *cursor_sprite,
     }
   else
     {
-      return 1.0;
+      return meta_cursor_sprite_get_texture_scale (cursor_sprite);
     }
 }
 
@@ -591,6 +615,7 @@ update_hw_cursor (MetaCursorRendererNative *native,
     }
 
   feedback = meta_kms_post_pending_update_sync (kms);
+
   if (meta_kms_feedback_get_result (feedback) != META_KMS_FEEDBACK_PASSED)
     {
       for (l = meta_kms_feedback_get_failed_planes (feedback); l; l = l->next)
@@ -894,10 +919,8 @@ should_have_hw_cursor (MetaCursorRenderer *renderer,
 
       cursor_renderer_gpu_data =
         meta_cursor_renderer_native_gpu_data_from_gpu (gpu_kms);
-      if (!cursor_renderer_gpu_data)
-        return FALSE;
-
-      if (cursor_renderer_gpu_data->hw_cursor_broken)
+      if (!cursor_renderer_gpu_data ||
+          !is_hw_cursor_usable (cursor_renderer_gpu_data))
         return FALSE;
 
       if (!has_valid_cursor_sprite_gbm_bo (cursor_sprite, gpu_kms))
@@ -1052,6 +1075,57 @@ meta_cursor_renderer_native_update_cursor (MetaCursorRenderer *renderer,
   return (priv->has_hw_cursor ||
           !cursor_sprite ||
           !meta_cursor_sprite_get_cogl_texture (cursor_sprite));
+}
+
+static gboolean
+cursor_sprite_has_pending_bo (MetaCursorRendererNative *native,
+                              MetaCursorSprite         *cursor_sprite)
+{
+  MetaCursorRendererNativePrivate *priv =
+    meta_cursor_renderer_native_get_instance_private (native);
+  MetaCursorNativePrivate *cursor_priv = get_cursor_priv (cursor_sprite);
+  GList *l;
+
+  if (!cursor_priv)
+    return FALSE;
+
+  for (l = meta_backend_get_gpus (priv->backend); l; l = l->next)
+    {
+      MetaCursorNativeGpuState *cursor_gpu_state =
+        get_cursor_gpu_state (cursor_priv, META_GPU_KMS (l->data));
+
+      if (cursor_gpu_state &&
+          cursor_gpu_state->pending_bo_state == META_CURSOR_GBM_BO_STATE_SET)
+        return TRUE;
+    }
+
+  return FALSE;
+}
+
+static gboolean
+meta_cursor_renderer_native_update_position (MetaCursorRenderer *renderer,
+                                             MetaCursorSprite   *cursor_sprite)
+{
+  MetaCursorRendererNative *native = META_CURSOR_RENDERER_NATIVE (renderer);
+  MetaCursorRendererNativePrivate *priv =
+    meta_cursor_renderer_native_get_instance_private (native);
+
+  if (!priv->has_hw_cursor)
+    return FALSE;
+
+  /*
+   * Only a move belongs on the input path. An upload needs drmModeSetCursor2,
+   * which blocks for a whole refresh cycle on some drivers, and consuming the
+   * pending buffer here would take it away from the frame that was going to
+   * post it. Leave both to the frame path.
+   */
+  if (priv->hw_state_invalidated ||
+      cursor_sprite_has_pending_bo (native, cursor_sprite))
+    return FALSE;
+
+  update_hw_cursor (native, cursor_sprite);
+
+  return priv->has_hw_cursor;
 }
 
 static void
@@ -1477,7 +1551,8 @@ realize_cursor_sprite_from_wl_buffer_for_gpu (MetaCursorRenderer      *renderer,
 
   cursor_renderer_gpu_data =
     meta_cursor_renderer_native_gpu_data_from_gpu (gpu_kms);
-  if (!cursor_renderer_gpu_data || cursor_renderer_gpu_data->hw_cursor_broken)
+  if (!cursor_renderer_gpu_data ||
+      !is_hw_cursor_usable (cursor_renderer_gpu_data))
     return;
 
   if (is_cursor_hw_state_valid (cursor_sprite, gpu_kms) &&
@@ -1614,7 +1689,8 @@ realize_cursor_sprite_from_xcursor_for_gpu (MetaCursorRenderer      *renderer,
 
   cursor_renderer_gpu_data =
     meta_cursor_renderer_native_gpu_data_from_gpu (gpu_kms);
-  if (!cursor_renderer_gpu_data || cursor_renderer_gpu_data->hw_cursor_broken)
+  if (!cursor_renderer_gpu_data ||
+      !is_hw_cursor_usable (cursor_renderer_gpu_data))
     return;
 
   if (is_cursor_hw_state_valid (cursor_sprite, gpu_kms) &&
@@ -1705,6 +1781,7 @@ meta_cursor_renderer_native_class_init (MetaCursorRendererNativeClass *klass)
 
   object_class->finalize = meta_cursor_renderer_native_finalize;
   renderer_class->update_cursor = meta_cursor_renderer_native_update_cursor;
+  renderer_class->update_position = meta_cursor_renderer_native_update_position;
 
   quark_cursor_sprite = g_quark_from_static_string ("-meta-cursor-native");
   quark_cursor_renderer_native_gpu_data =
@@ -1752,6 +1829,17 @@ init_hw_cursor_support_for_gpu (MetaGpuKms *gpu_kms)
 
   cursor_renderer_gpu_data->cursor_width = width;
   cursor_renderer_gpu_data->cursor_height = height;
+  cursor_renderer_gpu_data->has_slow_cursor_updates =
+    meta_kms_device_has_slow_cursor_updates (kms_device);
+
+  if (cursor_renderer_gpu_data->has_slow_cursor_updates)
+    {
+      g_message ("Hardware cursor disabled on %s: muffin's hw cursor doesn't currently behave well during "
+                 "image updates. Add '%s' to org.cinnamon.muffin "
+                 "experimental-features to override.",
+                 meta_kms_device_get_path (kms_device),
+                 FORCE_HW_CURSOR_FEATURE);
+    }
 }
 
 static void

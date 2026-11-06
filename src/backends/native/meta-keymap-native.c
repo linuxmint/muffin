@@ -121,6 +121,8 @@ void
 meta_keymap_native_set_keyboard_map (MetaKeymapNative  *keymap,
                                      struct xkb_keymap *xkb_keymap)
 {
+  g_return_if_fail (xkb_keymap != NULL);
+
   if (keymap->keymap)
     xkb_keymap_unref (keymap->keymap);
   keymap->keymap = xkb_keymap_ref (xkb_keymap);

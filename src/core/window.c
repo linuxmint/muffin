@@ -91,8 +91,10 @@
 #include "x11/xprops.h"
 
 #ifdef HAVE_WAYLAND
+#include "wayland/meta-wayland-layer-shell.h"
 #include "wayland/meta-wayland-private.h"
 #include "wayland/meta-wayland-surface.h"
+#include "wayland/meta-wayland-xdg-shell.h"
 #include "wayland/meta-window-wayland.h"
 #include "wayland/meta-window-xwayland.h"
 #endif
@@ -812,14 +814,35 @@ meta_window_init (MetaWindow *self)
 }
 
 static gboolean
+window_is_desktop_component (MetaWindow *window)
+{
+  if (window->type == META_WINDOW_DESKTOP ||
+      window->type == META_WINDOW_DOCK)
+    return TRUE;
+
+#ifdef HAVE_WAYLAND
+  /* Popups of a windowed layer surface need nothing here: they carry a
+   * transient_for, so the ancestor walk in our callers reaches a DESKTOP- or
+   * DOCK-typed parent and the type test above answers for them. This is for
+   * the BACKGROUND case, whose parent has no MetaWindow - the popup gets no
+   * transient_for and the walk finds nothing to test.
+   */
+  if (window->client_type == META_WINDOW_CLIENT_TYPE_WAYLAND &&
+      window->surface != NULL &&
+      meta_wayland_surface_is_layer_shell_popup (window->surface))
+    return TRUE;
+#endif
+
+  return FALSE;
+}
+
+static gboolean
 is_desktop_or_dock_foreach (MetaWindow *window,
                             void       *data)
 {
   gboolean *result = data;
 
-  *result =
-    window->type == META_WINDOW_DESKTOP ||
-    window->type == META_WINDOW_DOCK;
+  *result = window_is_desktop_component (window);
   if (*result)
     return FALSE; /* stop as soon as we find one */
   else
@@ -836,6 +859,9 @@ maybe_leave_show_desktop_mode (MetaWindow *window)
   gboolean is_desktop_or_dock;
 
   if (!workspace_manager->active_workspace->showing_desktop)
+    return;
+
+  if (window->override_redirect)
     return;
 
   /* If the window is a transient for the dock or desktop, don't
@@ -1125,16 +1151,20 @@ _meta_window_shared_new (MetaDisplay         *display,
   /* avoid tons of stack updates */
   meta_stack_freeze (window->display->stack);
 
-  window->rect.x = attrs->x;
-  window->rect.y = attrs->y;
-  window->rect.width = attrs->width;
-  window->rect.height = attrs->height;
+  meta_window_protocol_to_stage_point (window,
+                                       attrs->x, attrs->y,
+                                       &window->rect.x, &window->rect.y,
+                                       META_ROUNDING_STRATEGY_ROUND);
+  meta_window_protocol_to_stage_size (window,
+                                      attrs->width, attrs->height,
+                                      &window->rect.width,
+                                      &window->rect.height);
 
   /* size_hints are the "request" */
-  window->size_hints.x = attrs->x;
-  window->size_hints.y = attrs->y;
-  window->size_hints.width = attrs->width;
-  window->size_hints.height = attrs->height;
+  window->size_hints.x = window->rect.x;
+  window->size_hints.y = window->rect.y;
+  window->size_hints.width = window->rect.width;
+  window->size_hints.height = window->rect.height;
   /* initialize the remaining size_hints as if size_hints.flags were zero */
   meta_set_normal_hints (window, NULL);
 
@@ -1250,7 +1280,7 @@ _meta_window_shared_new (MetaDisplay         *display,
   window->is_remote = FALSE;
   window->startup_id = NULL;
 
-  window->net_wm_pid = -1;
+  window->client_pid = 0;
 
   window->xtransient_for = None;
   window->xclient_leader = None;
@@ -4339,6 +4369,29 @@ find_monitor_by_winsys_id (MetaWindow *window,
   return NULL;
 }
 
+MetaLogicalMonitor *
+meta_window_find_monitor_from_id (MetaWindow *window)
+{
+  MetaBackend *backend = meta_get_backend ();
+  MetaMonitorManager *monitor_manager =
+    meta_backend_get_monitor_manager (backend);
+  MetaLogicalMonitor *old = window->monitor;
+  MetaLogicalMonitor *new;
+
+  /* Try the preferred output first */
+  new = find_monitor_by_winsys_id (window, window->preferred_output_winsys_id);
+
+  /* Otherwise, try to find the old output on a new monitor */
+  if (old && !new)
+    new = find_monitor_by_winsys_id (window, old->winsys_id);
+
+  /* Fall back to primary if everything else failed */
+  if (!new)
+    new = meta_monitor_manager_get_primary_logical_monitor (monitor_manager);
+
+  return new;
+}
+
 /* This is called when the monitor setup has changed. The window->monitor
  * reference is still "valid", but refer to the previous monitor setup */
 void
@@ -4360,17 +4413,7 @@ meta_window_update_for_monitors_changed (MetaWindow *window)
     }
 
   old = window->monitor;
-
-  /* Try the preferred output first */
-  new = find_monitor_by_winsys_id (window, window->preferred_output_winsys_id);
-
-  /* Otherwise, try to find the old output on a new monitor */
-  if (old && !new)
-    new = find_monitor_by_winsys_id (window, old->winsys_id);
-
-  /* Fall back to primary if everything else failed */
-  if (!new)
-    new = meta_monitor_manager_get_primary_logical_monitor (monitor_manager);
+  new = meta_window_find_monitor_from_id (window);
 
   if (window->tile_mode != META_TILE_NONE)
     {
@@ -5119,6 +5162,98 @@ meta_window_frame_rect_to_client_rect (MetaWindow    *window,
     }
 }
 
+void
+meta_window_stage_to_protocol_point (MetaWindow           *window,
+                                     int                   stage_x,
+                                     int                   stage_y,
+                                     int                  *protocol_x,
+                                     int                  *protocol_y,
+                                     MetaRoundingStrategy  rounding_strategy)
+{
+  MetaWindowClass *klass = META_WINDOW_GET_CLASS (window);
+
+  if (klass->stage_to_protocol_point)
+    {
+      klass->stage_to_protocol_point (window, stage_x, stage_y,
+                                      protocol_x, protocol_y,
+                                      rounding_strategy);
+      return;
+    }
+
+  if (protocol_x)
+    *protocol_x = stage_x;
+  if (protocol_y)
+    *protocol_y = stage_y;
+}
+
+void
+meta_window_stage_to_protocol_size (MetaWindow *window,
+                                    int         stage_w,
+                                    int         stage_h,
+                                    int        *protocol_w,
+                                    int        *protocol_h)
+{
+  MetaWindowClass *klass = META_WINDOW_GET_CLASS (window);
+
+  if (klass->stage_to_protocol_size)
+    {
+      klass->stage_to_protocol_size (window, stage_w, stage_h,
+                                     protocol_w, protocol_h);
+      return;
+    }
+
+  if (protocol_w)
+    *protocol_w = stage_w;
+  if (protocol_h)
+    *protocol_h = stage_h;
+}
+
+void
+meta_window_protocol_to_stage_point (MetaWindow           *window,
+                                     int                   protocol_x,
+                                     int                   protocol_y,
+                                     int                  *stage_x,
+                                     int                  *stage_y,
+                                     MetaRoundingStrategy  rounding_strategy)
+{
+  MetaWindowClass *klass = META_WINDOW_GET_CLASS (window);
+
+  if (klass->protocol_to_stage_point)
+    {
+      klass->protocol_to_stage_point (window, protocol_x, protocol_y,
+                                      stage_x, stage_y,
+                                      rounding_strategy);
+      return;
+    }
+
+  if (stage_x)
+    *stage_x = protocol_x;
+  if (stage_y)
+    *stage_y = protocol_y;
+}
+
+void
+meta_window_protocol_to_stage_size (MetaWindow *window,
+                                    int         protocol_w,
+                                    int         protocol_h,
+                                    int        *stage_w,
+                                    int        *stage_h)
+{
+  MetaWindowClass *klass = META_WINDOW_GET_CLASS (window);
+
+  if (klass->protocol_to_stage_size)
+    {
+      klass->protocol_to_stage_size (window, protocol_w, protocol_h,
+                                     stage_w, stage_h);
+      return;
+    }
+
+  if (stage_w)
+    *stage_w = protocol_w;
+  if (stage_h)
+    *stage_h = protocol_h;
+}
+
 /**
  * meta_window_get_frame_rect:
  * @window: a #MetaWindow
@@ -5604,8 +5739,11 @@ meta_window_raise (MetaWindow  *window)
    * It is important that this runs before meta_stack_raise() because
    * showing a window may overwrite its stacking order based on the
    * stacking rules for newly shown windows.
+   * Skip X11: flushing here can prevent newly mapped windows from
+   * receiving focus.
    */
-  meta_window_flush_calc_showing (window);
+  if (window->client_type != META_WINDOW_CLIENT_TYPE_X11)
+    meta_window_flush_calc_showing (window);
 
   ancestor = meta_window_find_root_ancestor (window);
 
@@ -6581,6 +6719,66 @@ enum {
 #define EXTREME_CONSTANT 2
 #define COMMON_EDGE_PADDING 5
 
+/* How far past a shared monitor edge the pointer may travel before the tile
+ * zones switch to the neighbouring monitor.
+ */
+#define TILE_MONITOR_HOLD_DISTANCE 64
+
+static int
+distance_outside_rect (const MetaRectangle *rect,
+                       int                  x,
+                       int                  y)
+{
+  int dx = MAX (0, MAX (rect->x - x, x - (rect->x + rect->width - 1)));
+  int dy = MAX (0, MAX (rect->y - y, y - (rect->y + rect->height - 1)));
+
+  return MAX (dx, dy);
+}
+
+/*
+ * Hold the drag inside the monitor it is tiling against while the pointer is
+ * only just past a shared edge, and report the held position. Both the window
+ * and the tile zones are driven from this, so they stay together: the window
+ * sits still against the edge, the zones stay reachable, and once the pointer
+ * is far enough past, the two cross to the neighbour at the same moment.
+ */
+static void
+hold_drag_to_tile_monitor (MetaWindow *window,
+                           int        *x,
+                           int        *y)
+{
+  MetaBackend *backend = meta_get_backend ();
+  MetaMonitorManager *monitor_manager =
+    meta_backend_get_monitor_manager (backend);
+  MetaDisplay *display = window->display;
+  MetaLogicalMonitor *logical_monitor;
+
+  logical_monitor =
+    meta_monitor_manager_get_logical_monitor_at (monitor_manager, *x, *y);
+  if (!logical_monitor)
+    return;
+
+  if (display->grab_tile_target_monitor >= 0 &&
+      display->grab_tile_target_monitor != logical_monitor->number)
+    {
+      MetaLogicalMonitor *held;
+
+      held =
+        meta_monitor_manager_get_logical_monitor_from_number (monitor_manager,
+                                                              display->grab_tile_target_monitor);
+      if (held &&
+          distance_outside_rect (&held->rect, *x, *y) <= TILE_MONITOR_HOLD_DISTANCE)
+        logical_monitor = held;
+    }
+
+  display->grab_tile_target_monitor = logical_monitor->number;
+
+  *x = CLAMP (*x, logical_monitor->rect.x,
+              logical_monitor->rect.x + logical_monitor->rect.width - 1);
+  *y = CLAMP (*y, logical_monitor->rect.y,
+              logical_monitor->rect.y + logical_monitor->rect.height - 1);
+}
+
 static void
 get_extra_padding_for_common_monitor_edges (MetaWindow        *window,
                                                   gint         monitor_num,
@@ -6744,6 +6942,13 @@ update_move (MetaWindow  *window,
   MetaRectangle old;
   int shake_threshold;
   MetaDisplay *display = window->display;
+
+  if (!snap &&
+      meta_prefs_get_edge_tiling () &&
+      meta_window_can_tile_maximized (window) &&
+      !META_WINDOW_MAXIMIZED (window) &&
+      !META_WINDOW_TILED (window))
+    hold_drag_to_tile_monitor (window, &x, &y);
 
   display->grab_latest_motion_x = x;
   display->grab_latest_motion_y = y;
@@ -7189,16 +7394,19 @@ meta_window_handle_mouse_grab_op_event  (MetaWindow         *window,
       meta_display_check_threshold_reached (window->display, x, y);
       if (meta_grab_op_is_moving (window->display->grab_op))
         {
-          update_move (window,
-                       modifier_state & CLUTTER_SHIFT_MASK,
-                       x, y);
+          if (meta_grab_op_is_mouse (window->display->grab_op))
+            update_move (window,
+                         modifier_state & CLUTTER_SHIFT_MASK,
+                         x, y);
         }
       else if (meta_grab_op_is_resizing (window->display->grab_op))
         {
-          update_resize (window,
-                         modifier_state & CLUTTER_SHIFT_MASK || (window->htile_match != NULL || window->vtile_match != NULL),
-                         x, y,
-                         FALSE);
+          if (meta_grab_op_is_mouse (window->display->grab_op) ||
+              window->display->grab_op == META_GRAB_OP_KEYBOARD_RESIZING_UNKNOWN)
+            update_resize (window,
+                           modifier_state & CLUTTER_SHIFT_MASK || (window->htile_match != NULL || window->vtile_match != NULL),
+                           x, y,
+                           FALSE);
         }
       return TRUE;
 
@@ -7569,7 +7777,8 @@ warp_grab_pointer (MetaWindow          *window,
   *x = CLAMP (*x, 0, display_rect.width - 1);
   *y = CLAMP (*y, 0, display_rect.height - 1);
 
-  meta_x11_error_trap_push (display->x11_display);
+  if (display->x11_display)
+    meta_x11_error_trap_push (display->x11_display);
 
   meta_topic (META_DEBUG_WINDOW_OPS,
               "Warping pointer to %d,%d with window at %d,%d\n",
@@ -7593,7 +7802,8 @@ warp_grab_pointer (MetaWindow          *window,
     clutter_seat_warp_pointer (seat, *x, *y);
   }
 
-  if (meta_x11_error_trap_pop_with_return (display->x11_display) != Success)
+  if (display->x11_display &&
+      meta_x11_error_trap_pop_with_return (display->x11_display) != Success)
     {
       meta_verbose ("Failed to warp pointer for window %s\n",
                     window->desc);
@@ -8298,32 +8508,44 @@ meta_window_get_transient_for (MetaWindow *window)
  * meta_window_get_client_pid:
  * @window: a #MetaWindow
  *
- * Returns the pid of the process that created this window, if available
- * to the windowing system.
+ * Returns the pid of the process that created this window, as reported by
+ * the windowing system (X-Resource on X11, socket credentials on Wayland).
+ * The pid cannot change for the lifetime of the window, so it is cached
+ * once known.
  *
  * Return value: the pid, or 0 if not known.
  */
 uint32_t
 meta_window_get_client_pid (MetaWindow *window)
 {
-  return META_WINDOW_GET_CLASS (window)->get_client_pid (window);
+  g_return_val_if_fail (META_IS_WINDOW (window), 0);
+
+  if (window->client_pid == 0)
+    window->client_pid = META_WINDOW_GET_CLASS (window)->get_client_pid (window);
+
+  return window->client_pid;
 }
 
 /**
  * meta_window_get_pid:
  * @window: a #MetaWindow
  *
- * Returns pid of the process that created this window, if known (obtained from
- * the _NET_WM_PID property).
+ * Returns the pid of the process that created this window, if known.
+ * Same as meta_window_get_client_pid() but with the historical -1 sentinel
+ * for callers that predate it.
  *
  * Return value: the pid, or -1 if not known.
  */
 int
 meta_window_get_pid (MetaWindow *window)
 {
+  uint32_t pid;
+
   g_return_val_if_fail (META_IS_WINDOW (window), -1);
 
-  return window->net_wm_pid;
+  pid = meta_window_get_client_pid (window);
+
+  return pid > 0 ? (int) pid : -1;
 }
 
 /**
@@ -9467,6 +9689,35 @@ gboolean
 meta_window_is_stackable (MetaWindow *window)
 {
   return META_WINDOW_GET_CLASS (window)->is_stackable (window);
+}
+
+gboolean
+meta_window_is_layer_shell (MetaWindow *window)
+{
+#ifdef HAVE_WAYLAND
+  return meta_wayland_layer_surface_from_window (window) != NULL;
+#else
+  return FALSE;
+#endif
+}
+
+/* Whether it is one on the OVERLAY layer, the one that stays above everything.
+ *
+ * The NULL is not hypothetical even where the window's type says it has to be a
+ * layer surface: wl_surface_destructor () clears surface->role before the role's
+ * dispose runs, and that dispose unmanages the window, which resorts the stack
+ * and recalculates every layer while this one is still in it. */
+gboolean
+meta_window_is_overlay_layer_shell (MetaWindow *window)
+{
+#ifdef HAVE_WAYLAND
+  MetaWaylandLayerSurface *layer_surface =
+    meta_wayland_layer_surface_from_window (window);
+
+  return layer_surface && meta_wayland_layer_surface_is_overlay (layer_surface);
+#else
+  return FALSE;
+#endif
 }
 
 gboolean

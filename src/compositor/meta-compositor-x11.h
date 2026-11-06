@@ -35,4 +35,6 @@ void meta_compositor_x11_process_xevent (MetaCompositorX11 *compositor_x11,
 
 Window meta_compositor_x11_get_output_xwindow (MetaCompositorX11 *compositor_x11);
 
+void meta_compositor_x11_disable_sync_object (MetaCompositorX11 *compositor_x11);
+
 #endif /* META_COMPOSITOR_X11_H */

@@ -36,6 +36,9 @@ void meta_dnd_init_xdnd (MetaX11Display *x11_display);
 #ifdef HAVE_WAYLAND
 void meta_dnd_wayland_handle_begin_modal (MetaCompositor *compositor);
 void meta_dnd_wayland_handle_end_modal   (MetaCompositor *compositor);
+
+void meta_dnd_wayland_handle_drag_motion (const ClutterEvent *event);
+void meta_dnd_wayland_handle_drag_end    (void);
 #endif
 
 #endif /* META_DND_PRIVATE_H */

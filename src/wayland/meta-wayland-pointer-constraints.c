@@ -480,28 +480,19 @@ should_constraint_be_enabled (MetaWaylandPointerConstraint *constraint)
       MetaDisplay *display = meta_get_display ();
 
       /*
-       * We need to handle Xwayland surfaces differently in order to allow
-       * Xwayland to be able to lock the pointer. For example, we cannot require
-       * the locked window to "appear focused" because the surface Xwayland
-       * locks might not be able to appear focused (for example it may be a
-       * override redirect window).
-       *
-       * Since we don't have any way to know what focused window an override
-       * redirect is associated with, nor have a way to know if the override
-       * redirect window even shares the same connection as a focused window,
-       * we simply can only really restrict it to enable the lock if any
-       * Xwayland window appears focused.
+       * An Xwayland surface can be locked by a window that never appears
+       * focused itself, such as an override redirect one, and we have no way
+       * to tell which focused window it belongs to. So also keep the lock
+       * while any X11 window holds focus.
        */
 
       if (display->focus_window &&
           display->focus_window->client_type != META_WINDOW_CLIENT_TYPE_X11)
         return FALSE;
     }
-  else
-    {
-      if (!meta_window_appears_focused (window))
-        return FALSE;
-    }
+
+  if (!meta_window_appears_focused (window))
+    return FALSE;
 
   return TRUE;
 }
@@ -627,11 +618,23 @@ meta_wayland_pointer_constraint_calculate_effective_region (MetaWaylandPointerCo
                                                     frame->bottom_height);
       if (actual_width > 0 && actual_height > 0)
         {
+          int x, y, width, height;
+
+          /* The frame geometry is in stage coordinates, but the region is in
+           * X protocol pixels, like the points tested against it. */
+          meta_window_stage_to_protocol_point (window,
+                                               frame->child_x, frame->child_y,
+                                               &x, &y,
+                                               META_ROUNDING_STRATEGY_ROUND);
+          meta_window_stage_to_protocol_size (window,
+                                              actual_width, actual_height,
+                                              &width, &height);
+
           cairo_region_intersect_rectangle (region, &(cairo_rectangle_int_t) {
-                                              .x = frame->child_x,
-                                              .y = frame->child_y,
-                                              .width = actual_width,
-                                              .height = actual_height
+                                              .x = x,
+                                              .y = y,
+                                              .width = width,
+                                              .height = height
                                             });
         }
     }

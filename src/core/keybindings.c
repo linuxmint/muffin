@@ -1318,8 +1318,6 @@ meta_display_grab_window_buttons (MetaDisplay *display,
    * Grab Alt + button2 for resizing window.
    * Grab Alt + button3 for popping up window menu.
    * Grab Alt + Shift + button1 for snap-moving window.
-   * Grab Alt + button4 for scrolling in
-   * Grab Alt + button5 for scrolling out
    */
   meta_verbose ("Grabbing window buttons for 0x%lx\n", xwindow);
 
@@ -1344,18 +1342,6 @@ meta_display_grab_window_buttons (MetaDisplay *display,
                                FALSE,
                                1, keys->window_grab_modifiers | ShiftMask);
     }
-
-  if (meta_prefs_get_mouse_zoom_enabled () && keys->mouse_zoom_modifiers != 0)
-    {
-      int i;
-      for (i = 4; i < 6; i++)
-        {
-          meta_change_button_grab (keys, xwindow,
-                                   TRUE,
-                                   FALSE,
-                                   i, keys->mouse_zoom_modifiers);
-        }
-    }
 }
 
 void
@@ -1368,16 +1354,6 @@ meta_display_ungrab_window_buttons (MetaDisplay *display,
     {
       meta_change_buttons_grab (keys, xwindow, FALSE, FALSE,
                                 keys->window_grab_modifiers);
-    }
-
-  int i = 4;
-  while (i < 6)
-    {
-      meta_change_button_grab (keys, xwindow,
-                               FALSE, FALSE, i,
-                               keys->mouse_zoom_modifiers);
-
-      ++i;
     }
 }
 
@@ -1462,9 +1438,11 @@ prefs_changed_callback (MetaPreference pref,
       reload_combos (keys);
       grab_key_bindings (display);
       break;
-    case META_PREF_MOUSE_BUTTON_MODS:
     case META_PREF_MOUSE_BUTTON_ZOOM_MODS:
     case META_PREF_MOUSE_ZOOM_ENABLED:
+      update_mouse_zoom_modifiers (keys);
+      break;
+    case META_PREF_MOUSE_BUTTON_MODS:
       {
         GSList *windows, *l;
         windows = meta_display_list_windows (display, META_LIST_DEFAULT);
@@ -1476,7 +1454,6 @@ prefs_changed_callback (MetaPreference pref,
           }
 
         update_window_grab_modifiers (keys);
-        update_mouse_zoom_modifiers (keys);
 
         for (l = windows; l; l = l->next)
           {
@@ -2333,11 +2310,18 @@ process_iso_next_group (MetaDisplay *display,
 {
   MetaKeyBindingManager *keys = &display->key_binding_manager;
   gboolean activate;
-  xkb_keycode_t keycode = (xkb_keycode_t) event->hardware_keycode;
   xkb_mod_mask_t mask;
-  int i, j;
+  int i;
 
   if (event->type == CLUTTER_KEY_RELEASE)
+    return FALSE;
+
+  /* Match on the keysym the event actually carries rather than a precomputed
+   * list of keycodes. Under Wayland xkbcommon translates the combo (e.g.
+   * Alt+Shift) straight to the ISO_Next_Group keysym, which the keycode-list
+   * lookup misses - so the accelerator never fired and the shell was never
+   * notified of grp: layout switches. */
+  if (event->keyval != XKB_KEY_ISO_Next_Group)
     return FALSE;
 
   activate = FALSE;
@@ -2345,19 +2329,15 @@ process_iso_next_group (MetaDisplay *display,
 
   for (i = 0; i < keys->n_iso_next_group_combos; ++i)
     {
-      for (j = 0; j <  keys->iso_next_group_combo[i].len; ++j)
+      if (mask == keys->iso_next_group_combo[i].mask)
         {
-          if (keycode == keys->iso_next_group_combo[i].keycodes[j] &&
-              mask == keys->iso_next_group_combo[i].mask)
-            {
-              /* If the signal handler returns TRUE the keyboard will
-                 remain frozen. It's the signal handler's responsibility
-                 to unfreeze it. */
-              if (!meta_display_modifiers_accelerator_activate (display))
-                meta_display_unfreeze_keyboard (display, event->time);
-              activate = TRUE;
-              break;
-            }
+          /* If the signal handler returns TRUE the keyboard will
+             remain frozen. It's the signal handler's responsibility
+             to unfreeze it. */
+          if (!meta_display_modifiers_accelerator_activate (display))
+            meta_display_unfreeze_keyboard (display, event->time);
+          activate = TRUE;
+          break;
         }
     }
 
@@ -2471,6 +2451,7 @@ meta_keybindings_process_event (MetaDisplay        *display,
     case CLUTTER_BUTTON_RELEASE:
     case CLUTTER_TOUCH_BEGIN:
     case CLUTTER_TOUCH_END:
+    case CLUTTER_SCROLL:
       modifier_key_only_pressed = FALSE;
       return FALSE;
 
@@ -4092,14 +4073,8 @@ handle_switch_monitor (MetaDisplay    *display,
   MetaBackend *backend = meta_get_backend ();
   MetaMonitorManager *monitor_manager =
     meta_backend_get_monitor_manager (backend);
-  MetaMonitorSwitchConfigType config_type =
-    meta_monitor_manager_get_switch_config (monitor_manager);
 
-  if (!meta_monitor_manager_can_switch_config (monitor_manager))
-    return;
-
-  config_type = (config_type + 1) % (META_MONITOR_SWITCH_CONFIG_UNKNOWN);
-  meta_monitor_manager_switch_config (monitor_manager, config_type);
+  meta_monitor_manager_switch_to_next_config (monitor_manager);
 }
 
 static void
@@ -4202,6 +4177,48 @@ meta_keybindings_get_ignored_modifier_mask (MetaDisplay *display)
     MetaKeyBindingManager *keys = &display->key_binding_manager;
 
     return keys->ignored_modifier_mask;
+}
+
+void
+meta_keybindings_update_zoom_grab (MetaDisplay *display,
+                                   unsigned int modifier_state,
+                                   guint32      timestamp)
+{
+  MetaKeyBindingManager *keys = &display->key_binding_manager;
+  gboolean want_grab;
+
+  if (meta_is_wayland_compositor ())
+    return;
+
+  if (display->event_route != META_EVENT_ROUTE_NORMAL)
+    {
+      keys->zoom_grab_active = FALSE;
+      return;
+    }
+
+  want_grab = meta_prefs_get_mouse_zoom_enabled () &&
+              keys->mouse_zoom_modifiers != 0 &&
+              (modifier_state & ~keys->ignored_modifier_mask) == keys->mouse_zoom_modifiers;
+
+  if (want_grab == keys->zoom_grab_active)
+    return;
+
+  if (want_grab)
+    {
+      keys->zoom_grab_active =
+        meta_backend_grab_device (keys->backend, META_VIRTUAL_CORE_POINTER_ID, timestamp);
+    }
+  else
+    {
+      meta_backend_ungrab_device (keys->backend, META_VIRTUAL_CORE_POINTER_ID, timestamp);
+      keys->zoom_grab_active = FALSE;
+    }
+}
+
+void
+meta_keybindings_cancel_modifier_only (MetaDisplay *display)
+{
+  modifier_key_only_pressed = FALSE;
 }
 
 static void

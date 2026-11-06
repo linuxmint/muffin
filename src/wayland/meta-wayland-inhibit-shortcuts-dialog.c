@@ -99,7 +99,6 @@ inhibit_shortcuts_dialog_response_cb (MetaInhibitShortcutsDialog        *dialog,
   if (!data->request_canceled)
     inhibit_shortcuts_dialog_response_apply (data);
 
-  meta_inhibit_shortcuts_dialog_hide (data->dialog);
   surface_inhibit_shortcuts_data_destroy_dialog (data);
 }
 

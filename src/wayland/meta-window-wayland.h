@@ -83,5 +83,6 @@ void meta_window_wayland_set_custom_icon (MetaWindow      *window,
 
 void meta_window_wayland_maybe_send_configure (MetaWindow *window);
 void meta_window_wayland_schedule_maximize_transition (MetaWindow *window);
+gboolean meta_window_wayland_has_been_shown (MetaWindow *window);
 
 #endif

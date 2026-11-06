@@ -237,18 +237,13 @@ set_texture_on_actor (MetaX11BackgroundActor *self)
   if (background_transition == META_X11_BACKGROUND_TRANSITION_NONE ||
       !clutter_actor_is_mapped (priv->top_actor))
   {
-    // NO TRANSITION
-    clutter_actor_set_opacity (CLUTTER_ACTOR (priv->bottom_actor), 0);
     meta_x11_background_set_layer (META_X11_BACKGROUND (priv->top_actor), priv->background->texture);
     on_transition_complete (priv->top_actor, self);
   }
   else
   {
-    if (background_transition == META_X11_BACKGROUND_TRANSITION_FADEIN)
-    {
-      // FADE_IN TRANSITION
-      clutter_actor_set_opacity (CLUTTER_ACTOR (priv->bottom_actor), 0);
-    }
+    clutter_actor_set_opacity (CLUTTER_ACTOR (priv->bottom_actor),
+                               background_transition == META_X11_BACKGROUND_TRANSITION_FADEIN ? 0 : 255);
 
     // BLEND TRANSITION
     clutter_actor_set_opacity (CLUTTER_ACTOR (priv->top_actor), 0);

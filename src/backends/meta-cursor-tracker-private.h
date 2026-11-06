@@ -62,6 +62,10 @@ void     meta_cursor_tracker_update_position (MetaCursorTracker *tracker,
                                               float              new_x,
                                               float              new_y);
 
+void     meta_cursor_tracker_update_button (MetaCursorTracker *tracker,
+                                            guint              button,
+                                            gboolean           pressed);
+
 MetaCursorSprite * meta_cursor_tracker_get_displayed_cursor (MetaCursorTracker *tracker);
 
 #endif

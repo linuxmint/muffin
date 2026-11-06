@@ -34,6 +34,7 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "backends/meta-dnd-private.h"
 #include "compositor/meta-dnd-actor-private.h"
 #include "meta/meta-selection-source-memory.h"
 #include "wayland/meta-selection-source-wayland-private.h"
@@ -41,6 +42,7 @@
 #include "wayland/meta-wayland-pointer.h"
 #include "wayland/meta-wayland-private.h"
 #include "wayland/meta-wayland-seat.h"
+#include "wayland/meta-xwayland-dnd-private.h"
 
 #define ROOTWINDOW_DROP_MIME "application/x-rootwindow-drop"
 
@@ -193,20 +195,81 @@ on_drag_focus_destroyed (MetaWaylandSurface  *surface,
 }
 
 static void
+meta_wayland_drag_grab_set_cursor (MetaWaylandDragGrab *drag_grab,
+                                   MetaCursor           cursor)
+{
+  /* X11 DnD lets the drag source client drive pointer cursor updates. */
+  if (META_IS_WAYLAND_DATA_SOURCE_XWAYLAND (drag_grab->drag_data_source))
+    return;
+
+  meta_wayland_pointer_set_cursor_shape (drag_grab->seat->pointer, cursor);
+}
+
+static void
+meta_wayland_drag_grab_update_cursor (MetaWaylandDragGrab *drag_grab)
+{
+  enum wl_data_device_manager_dnd_action action;
+  MetaCursor cursor = META_CURSOR_DEFAULT;
+
+  if (!drag_grab->drag_data_source)
+    return;
+
+  action = meta_wayland_data_source_get_current_action (drag_grab->drag_data_source);
+
+  switch (action)
+    {
+    case WL_DATA_DEVICE_MANAGER_DND_ACTION_NONE:
+      cursor = META_CURSOR_NO_DROP;
+      break;
+    case WL_DATA_DEVICE_MANAGER_DND_ACTION_MOVE:
+      cursor = META_CURSOR_MOVE;
+      break;
+    case WL_DATA_DEVICE_MANAGER_DND_ACTION_COPY:
+      cursor = META_CURSOR_COPY;
+      break;
+    case WL_DATA_DEVICE_MANAGER_DND_ACTION_ASK:
+      cursor = META_CURSOR_DND_ASK;
+      break;
+    default:
+      break;
+    }
+
+  meta_wayland_drag_grab_set_cursor (drag_grab, cursor);
+}
+
+static void
+on_data_source_action_changed (MetaWaylandDataSource *source,
+                               guint                  action,
+                               MetaWaylandDragGrab   *drag_grab)
+{
+  meta_wayland_drag_grab_update_cursor (drag_grab);
+}
+
+static void
 meta_wayland_drag_grab_set_source (MetaWaylandDragGrab   *drag_grab,
                                    MetaWaylandDataSource *source)
 {
   if (drag_grab->drag_data_source)
-    g_object_weak_unref (G_OBJECT (drag_grab->drag_data_source),
-                         drag_grab_data_source_destroyed,
-                         drag_grab);
+    {
+      g_signal_handlers_disconnect_by_func (drag_grab->drag_data_source,
+                                            on_data_source_action_changed,
+                                            drag_grab);
+      g_object_weak_unref (G_OBJECT (drag_grab->drag_data_source),
+                           drag_grab_data_source_destroyed,
+                           drag_grab);
+    }
 
   drag_grab->drag_data_source = source;
 
   if (source)
-    g_object_weak_ref (G_OBJECT (source),
-                       drag_grab_data_source_destroyed,
-                       drag_grab);
+    {
+      g_object_weak_ref (G_OBJECT (source),
+                         drag_grab_data_source_destroyed,
+                         drag_grab);
+      g_signal_connect (source, "action-changed",
+                        G_CALLBACK (on_data_source_action_changed),
+                        drag_grab);
+    }
 }
 
 static void
@@ -347,11 +410,16 @@ drag_grab_motion (MetaWaylandPointerGrab *grab,
   if (drag_grab->drag_surface)
     meta_feedback_actor_update (META_FEEDBACK_ACTOR (drag_grab->feedback_actor),
                                 event);
+
+  meta_dnd_wayland_handle_drag_motion (event);
 }
 
 static void
 data_device_end_drag_grab (MetaWaylandDragGrab *drag_grab)
 {
+  /* Before clearing the source, so the XWayland check still applies. */
+  meta_wayland_drag_grab_set_cursor (drag_grab, META_CURSOR_DEFAULT);
+
   meta_wayland_drag_grab_set_source (drag_grab, NULL);
   meta_wayland_drag_grab_set_focus (drag_grab, NULL);
 
@@ -374,6 +442,8 @@ data_device_end_drag_grab (MetaWaylandDragGrab *drag_grab)
     }
 
   drag_grab->seat->data_device.current_grab = NULL;
+
+  meta_dnd_wayland_handle_drag_end ();
 
   /* There might be other grabs created in result to DnD actions like popups
    * on "ask" actions, we must not reset those, only our own.
@@ -429,6 +499,28 @@ meta_wayland_data_source_fake_read (MetaWaylandDataSource *source,
   g_io_add_watch (channel, G_IO_HUP, on_fake_read_hup, source);
 }
 
+static gboolean
+drag_source_accepted (MetaWaylandDataSource *source)
+{
+  return meta_wayland_data_source_has_target (source) &&
+         meta_wayland_data_source_get_current_action (source);
+}
+
+/* XDND treats a destination that refuses the drop (or has no data device)
+ * the same as the root window, and GTK relies on that to tell a drop onto
+ * "nothing" apart from a rejected one, e.g. to detach a tab into a new
+ * window. Match it when the focused surface never accepted anything.
+ */
+static gboolean
+rootwindow_drop_accepted (MetaWaylandDragGrab   *drag_grab,
+                          MetaWaylandDataSource *source)
+{
+  if (drag_grab->drag_focus && !drag_source_accepted (source))
+    meta_wayland_drag_source_fake_acceptance (source, ROOTWINDOW_DROP_MIME);
+
+  return drag_source_accepted (source);
+}
+
 static void
 drag_grab_button (MetaWaylandPointerGrab *grab,
                   const ClutterEvent     *event)
@@ -444,8 +536,7 @@ drag_grab_button (MetaWaylandPointerGrab *grab,
       gboolean success;
 
       if (drag_grab->drag_focus && source &&
-          meta_wayland_data_source_has_target (source) &&
-          meta_wayland_data_source_get_current_action (source))
+          drag_source_accepted (source))
         {
           meta_wayland_surface_drag_dest_drop (drag_grab->drag_focus);
           meta_wayland_data_source_notify_drop_performed (source);
@@ -453,10 +544,9 @@ drag_grab_button (MetaWaylandPointerGrab *grab,
           meta_wayland_data_source_update_in_ask (source);
           success = TRUE;
         }
-      else if (!drag_grab->drag_focus && source &&
-               meta_wayland_data_source_has_target (source) &&
-               meta_wayland_data_source_get_current_action (source) &&
-               meta_wayland_data_source_has_mime_type (source, ROOTWINDOW_DROP_MIME))
+      else if (source &&
+               meta_wayland_data_source_has_mime_type (source, ROOTWINDOW_DROP_MIME) &&
+               rootwindow_drop_accepted (drag_grab, source))
         {
           /* Perform a fake read, that will lead to notify_finish() being called */
           meta_wayland_data_source_fake_read (source, ROOTWINDOW_DROP_MIME);

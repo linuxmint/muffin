@@ -1069,6 +1069,11 @@ clutter_stage_view_dispose (GObject *object)
   g_clear_pointer (&priv->offscreen_pipeline, cogl_object_unref);
   g_clear_pointer (&priv->redraw_clip, cairo_region_destroy);
 
+  /* An assigned scanout is only consumed by a view that goes on to redraw, so
+   * one can still be pending here. It holds a buffer use count, and the client
+   * gets no wl_buffer.release until it is dropped. */
+  g_clear_object (&priv->next_scanout);
+
   G_OBJECT_CLASS (clutter_stage_view_parent_class)->dispose (object);
 }
 
