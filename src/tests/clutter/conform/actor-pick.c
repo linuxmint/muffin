@@ -82,7 +82,7 @@ on_timeout (gpointer data)
           /* Only allocated actors can be picked, so force an allocation
            * of the overlay actor here.
            */
-          clutter_actor_allocate (over_actor, &over_actor_box, 0);
+          clutter_actor_allocate (over_actor, &over_actor_box);
 
           if (g_test_verbose ())
             g_print ("Clipped covering actor:\n");

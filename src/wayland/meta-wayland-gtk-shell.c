@@ -26,6 +26,7 @@
 
 #include "core/bell.h"
 #include "core/window-private.h"
+#include "meta/prefs.h"
 #include "wayland/meta-wayland-private.h"
 #include "wayland/meta-wayland-surface.h"
 #include "wayland/meta-wayland-versions.h"
@@ -204,7 +205,22 @@ gtk_surface_request_focus (struct wl_client   *client,
     }
   else
     {
-      meta_window_set_demands_attention (window);
+      if (meta_prefs_get_prevent_focus_stealing ())
+        {
+          g_message ("Wayland activation refused: gtk_surface.request_focus for %s, "
+                     "startup_id=%s has no matching startup sequence",
+                     window->desc, startup_id ? startup_id : "(null)");
+
+          meta_window_set_demands_attention (window);
+        }
+      else
+        {
+          guint32 timestamp;
+
+          timestamp = meta_display_get_current_time (display);
+          meta_window_activate_full (window, timestamp,
+                                     META_CLIENT_TYPE_APPLICATION, NULL);
+        }
     }
 }
 

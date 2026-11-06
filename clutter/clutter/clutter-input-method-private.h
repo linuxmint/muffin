@@ -22,8 +22,6 @@
 #ifndef __CLUTTER_INPUT_METHOD_PRIVATE_H__
 #define __CLUTTER_INPUT_METHOD_PRIVATE_H__
 
-ClutterInputFocus * clutter_input_method_get_focus (ClutterInputMethod *method);
-
 void clutter_input_method_reset               (ClutterInputMethod *method);
 
 void clutter_input_method_set_cursor_location (ClutterInputMethod    *method,

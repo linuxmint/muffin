@@ -601,6 +601,8 @@ clutter_backend_init (ClutterBackend *self)
   self->units_serial = 1;
 
   self->dummy_onscreen = NULL;
+
+  self->fallback_resource_scale = 1.f;
 }
 
 void
@@ -1030,4 +1032,17 @@ clutter_backend_get_default_seat (ClutterBackend *backend)
   g_return_val_if_fail (CLUTTER_IS_BACKEND (backend), NULL);
 
   return CLUTTER_BACKEND_GET_CLASS (backend)->get_default_seat (backend);
+}
+
+void
+clutter_backend_set_fallback_resource_scale (ClutterBackend *backend,
+                                             float           fallback_resource_scale)
+{
+  backend->fallback_resource_scale = fallback_resource_scale;
+}
+
+float
+clutter_backend_get_fallback_resource_scale (ClutterBackend *backend)
+{
+  return backend->fallback_resource_scale;
 }

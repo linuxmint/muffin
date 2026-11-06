@@ -73,6 +73,9 @@ gboolean meta_wayland_touch_get_press_coords (MetaWaylandTouch     *touch,
                                               gfloat               *x,
                                               gfloat               *y);
 
+MetaWaylandSurface * meta_wayland_touch_get_surface (MetaWaylandTouch     *touch,
+                                                     ClutterEventSequence *sequence);
+
 gboolean meta_wayland_touch_can_popup        (MetaWaylandTouch *touch,
                                               uint32_t          serial);
 

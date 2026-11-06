@@ -415,7 +415,7 @@ check_send_frame_event (MetaWaylandTouch   *touch,
     {
       sequence = clutter_event_get_event_sequence (event);
       slot = meta_event_native_sequence_get_slot (sequence);
-      touch->frame_slots &= ~(1 << slot);
+      touch->frame_slots &= ~((guint64) 1 << slot);
 
       if (touch->frame_slots == 0)
         send_frame_event = TRUE;
@@ -532,7 +532,7 @@ evdev_filter_func (struct libinput_event *event,
       /* XXX: Could theoretically overflow, 64 slots should be
        * enough for most hw/usecases though.
        */
-      touch->frame_slots |= (1 << slot);
+      touch->frame_slots |= ((guint64) 1 << slot);
       break;
     }
     case LIBINPUT_EVENT_TOUCH_CANCEL:
@@ -660,6 +660,22 @@ meta_wayland_touch_find_grab_sequence (MetaWaylandTouch   *touch,
     }
 
   return NULL;
+}
+
+MetaWaylandSurface *
+meta_wayland_touch_get_surface (MetaWaylandTouch     *touch,
+                                ClutterEventSequence *sequence)
+{
+  MetaWaylandTouchInfo *touch_info;
+
+  if (!touch->touches)
+    return NULL;
+
+  touch_info = g_hash_table_lookup (touch->touches, sequence);
+  if (!touch_info || !touch_info->touch_surface)
+    return NULL;
+
+  return touch_info->touch_surface->surface;
 }
 
 gboolean

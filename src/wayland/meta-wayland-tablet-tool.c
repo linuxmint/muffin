@@ -102,9 +102,9 @@ meta_wayland_tablet_tool_update_cursor_surface (MetaWaylandTabletTool *tool)
         {
           MetaCursorSpriteXcursor *sprite;
 
-          sprite = meta_cursor_sprite_xcursor_new (tool->cursor_shape);
-          cursor_sprite = META_CURSOR_SPRITE (sprite);
-
+          sprite = meta_cursor_sprite_xcursor_ensure (&tool->cursor_shape_sprite,
+                                                      tool->cursor_shape);
+          cursor_sprite = g_object_ref (META_CURSOR_SPRITE (sprite));
         }
     }
   else if (tool->current_tablet)
@@ -501,6 +501,7 @@ meta_wayland_tablet_tool_free (MetaWaylandTabletTool *tool)
 
   g_clear_signal_handler (&tool->prepare_at_signal_id, tool->default_sprite);
   g_object_unref (tool->default_sprite);
+  g_clear_object (&tool->cursor_shape_sprite);
 
   g_slice_free (MetaWaylandTabletTool, tool);
 }

@@ -73,6 +73,7 @@ struct _MetaCrtc
 
   /* Used by cursor renderer backend */
   void *cursor_renderer_private;
+  gboolean cursor_renderer_active;
 
   gpointer driver_private;
   GDestroyNotify driver_notify;

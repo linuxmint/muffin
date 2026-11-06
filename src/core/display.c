@@ -64,6 +64,7 @@
 #include "core/keybindings-private.h"
 #include "core/main-private.h"
 #include "core/meta-clipboard-manager.h"
+#include "core/meta-window-debug-dbus.h"
 #include "core/meta-workspace-manager-private.h"
 #include "core/util-private.h"
 #include "core/window-private.h"
@@ -887,6 +888,7 @@ meta_display_open (void)
   display->grab_window = NULL;
   display->grab_tile_mode = META_TILE_NONE;
   display->grab_tile_monitor_number = -1;
+  display->grab_tile_target_monitor = -1;
 
   meta_display_cleanup_edges (display);
 
@@ -995,10 +997,13 @@ meta_display_open (void)
     }
 
   meta_idle_monitor_init_dbus ();
+  meta_window_debug_dbus_init (display);
 
   display->sound_player = g_object_new (META_TYPE_SOUND_PLAYER, NULL);
 
-  meta_input_settings_refresh (meta_backend_get_input_settings (backend));
+  // The nested backend has no input settings by design.
+  if (meta_backend_get_input_settings (backend))
+    meta_input_settings_refresh (meta_backend_get_input_settings (backend));
 
   /* Done opening new display */
   display->display_opening = FALSE;
@@ -1148,6 +1153,8 @@ meta_display_close (MetaDisplay *display,
 
   /* Stop caring about events */
   meta_display_free_events (display);
+
+  meta_window_debug_dbus_shutdown ();
 
   g_clear_pointer (&display->compositor, meta_compositor_destroy);
 
@@ -1950,6 +1957,7 @@ meta_display_begin_grab_op (MetaDisplay *display,
   display->grab_button = button;
   display->grab_tile_mode = grab_window->tile_mode;
   display->grab_tile_monitor_number = grab_window->tile_monitor_number;
+  display->grab_tile_target_monitor = -1;
   display->grab_anchor_root_x = root_x;
   display->grab_anchor_root_y = root_y;
   display->grab_latest_motion_x = root_x;
@@ -2041,6 +2049,7 @@ meta_display_end_grab_op (MetaDisplay *display,
   display->grab_window = NULL;
   display->grab_tile_mode = META_TILE_NONE;
   display->grab_tile_monitor_number = -1;
+  display->grab_tile_target_monitor = -1;
   memset(&display->grab_initial_window_pos, 0, sizeof(MetaRectangle));
 
   meta_display_update_cursor (display);
@@ -4002,6 +4011,18 @@ meta_display_get_desklets_above (MetaDisplay *display)
     return display->desklets_above;
 }
 
+/**
+ * meta_display_xinerama_index_to_logical_index:
+ * @display: a #MetaDisplay
+ * @x_index: a Xinerama monitor index
+ *
+ * Maps a Xinerama monitor index to a logical monitor index.
+ *
+ * Do not use in new code - the the xinerama and logical index
+ * are the same. (See 3eec6b63d6ba)
+ *
+ * Returns: the corresponding logical monitor index
+ */
 gint
 meta_display_xinerama_index_to_logical_index (MetaDisplay *display,
                                               gint         x_index)
@@ -4018,6 +4039,18 @@ meta_display_xinerama_index_to_logical_index (MetaDisplay *display,
     return monitor->number;
 }
 
+/**
+ * meta_display_logical_index_to_xinerama_index:
+ * @display: a #MetaDisplay
+ * @log_index: a logical monitor index
+ *
+ * Maps a logical monitor index to a Xinerama monitor index.
+ *
+ * Do not use in new code - the the xinerama and logical index
+ * are the same. (See 3eec6b63d6ba)
+ *
+ * Returns: the corresponding Xinerama monitor index
+ */
 gint
 meta_display_logical_index_to_xinerama_index (MetaDisplay *display,
                                               gint         log_index)

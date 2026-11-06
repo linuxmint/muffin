@@ -72,6 +72,7 @@
  * @META_PREF_BELL_SOUND: sound to use for audible event bell
  * @META_PREF_BRING_WINDOWS_TO_CURRENT_WORKSPACE: behavior when use activates an off-workspace window.
  * @META_PREF_INVERT_WORKSPACE_FLIP_DIRECTION: Flip arrow direction when changing workspaces during a window grab move.
+ * @META_PREF_PREVENT_FOCUS_STEALING: prevent applications from stealing focus
  */
 
 /* Keep in sync with GSettings schemas! */
@@ -106,6 +107,7 @@ typedef enum
   META_PREF_CURSOR_SIZE,
   META_PREF_RESIZE_WITH_RIGHT_BUTTON,
   META_PREF_EDGE_TILING,
+  META_PREF_EDGE_RESISTANCE_WINDOW,
   META_PREF_FORCE_FULLSCREEN,
   META_PREF_WORKSPACES_ONLY_ON_PRIMARY,
   META_PREF_DRAGGABLE_BORDER_WIDTH,
@@ -123,7 +125,9 @@ typedef enum
   META_PREF_GTK_THEME,
   META_PREF_BELL_SOUND,
   META_PREF_BRING_WINDOWS_TO_CURRENT_WORKSPACE,
-  META_PREF_INVERT_WORKSPACE_FLIP_DIRECTION
+  META_PREF_INVERT_WORKSPACE_FLIP_DIRECTION,
+  META_PREF_PREVENT_FOCUS_STEALING,
+  META_PREF_SCANOUT_FULLSCREEN_WINDOWS
 } MetaPreference;
 
 typedef void (* MetaPrefsChangedFunc) (MetaPreference pref,
@@ -196,6 +200,9 @@ META_EXPORT
 gboolean                    meta_prefs_get_focus_change_on_pointer_rest (void);
 
 META_EXPORT
+gboolean                    meta_prefs_get_prevent_focus_stealing (void);
+
+META_EXPORT
 gboolean                    meta_prefs_get_gnome_accessibility (void);
 
 META_EXPORT
@@ -203,6 +210,9 @@ gboolean                    meta_prefs_get_gnome_animations   (void);
 
 META_EXPORT
 gboolean                    meta_prefs_get_edge_tiling        (void);
+
+META_EXPORT
+gboolean                    meta_prefs_get_edge_resistance_window (void);
 
 META_EXPORT
 gboolean                    meta_prefs_get_tile_maximize      (void);
@@ -271,6 +281,8 @@ int      meta_prefs_get_drag_threshold (void);
 
 META_EXPORT
 gboolean    meta_prefs_get_unredirect_fullscreen_windows (void);
+
+gboolean    meta_prefs_get_scanout_fullscreen_windows (void);
 
 META_EXPORT
 gboolean    meta_prefs_get_workspace_cycle (void);

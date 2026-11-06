@@ -30,6 +30,9 @@ G_DECLARE_FINAL_TYPE (MetaCursorSpriteXcursor, meta_cursor_sprite_xcursor,
 
 MetaCursorSpriteXcursor * meta_cursor_sprite_xcursor_new (MetaCursor cursor);
 
+MetaCursorSpriteXcursor * meta_cursor_sprite_xcursor_ensure (MetaCursorSpriteXcursor **sprite_xcursor,
+                                                             MetaCursor                cursor);
+
 void meta_cursor_sprite_xcursor_set_theme_scale (MetaCursorSpriteXcursor *sprite_xcursor,
                                                  int                      scale);
 

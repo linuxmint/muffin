@@ -615,6 +615,32 @@ clutter_actor_box_scale (ClutterActorBox *box,
   box->y2 *= scale;
 }
 
+/**
+ * clutter_actor_box_is_initialized:
+ * @box: a #ClutterActorBox
+ *
+ * Checks if @box has been initialized, a #ClutterActorBox is uninitialized
+ * if it has a size of -1 at an origin of 0, 0.
+ *
+ * Returns: %TRUE if the box is uninitialized, %FALSE if it isn't
+ */
+gboolean
+clutter_actor_box_is_initialized (ClutterActorBox *box)
+{
+  gboolean x1_uninitialized, x2_uninitialized;
+  gboolean y1_uninitialized, y2_uninitialized;
+
+  g_return_val_if_fail (box != NULL, TRUE);
+
+  x1_uninitialized = isinf (box->x1);
+  x2_uninitialized = isinf (box->x2) && signbit (box->x2);
+  y1_uninitialized = isinf (box->y1);
+  y2_uninitialized = isinf (box->y2) && signbit (box->y2);
+
+  return !x1_uninitialized || !x2_uninitialized ||
+         !y1_uninitialized || !y2_uninitialized;
+}
+
 G_DEFINE_BOXED_TYPE_WITH_CODE (ClutterActorBox, clutter_actor_box,
                                clutter_actor_box_copy,
                                clutter_actor_box_free,

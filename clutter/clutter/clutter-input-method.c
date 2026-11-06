@@ -268,13 +268,41 @@ clutter_input_method_focus_out (ClutterInputMethod *im)
   klass->focus_out (im);
 }
 
+/**
+ * clutter_input_method_get_focus:
+ * @im: the #ClutterInputMethod
+ *
+ * Returns the focus that is currently attached to this input method,
+ * or %NULL if the input method has no focus (e.g. the focused client
+ * does not talk to the input method).
+ *
+ * Returns: (transfer none) (nullable): the current #ClutterInputFocus
+ **/
 ClutterInputFocus *
 clutter_input_method_get_focus (ClutterInputMethod *im)
 {
   ClutterInputMethodPrivate *priv;
 
+  g_return_val_if_fail (CLUTTER_IS_INPUT_METHOD (im), NULL);
+
   priv = clutter_input_method_get_instance_private (im);
   return priv->focus;
+}
+
+static ClutterStage *
+clutter_input_method_get_stage (void)
+{
+  ClutterStageManager *stage_manager;
+  const GSList *stages;
+
+  /* The compositor owns a single stage, but it is created on a backend
+   * that advertises CLUTTER_FEATURE_STAGE_MULTIPLE, so it never becomes
+   * the stage manager's default one.
+   */
+  stage_manager = clutter_stage_manager_get_default ();
+  stages = clutter_stage_manager_peek_stages (stage_manager);
+
+  return stages ? stages->data : NULL;
 }
 
 static void
@@ -291,7 +319,7 @@ clutter_input_method_put_im_event (ClutterInputMethod *im,
 
   seat = clutter_backend_get_default_seat (clutter_get_default_backend ());
   keyboard = clutter_seat_get_keyboard (seat);
-  stage = _clutter_input_device_get_stage (keyboard);
+  stage = clutter_input_method_get_stage ();
   if (stage == NULL)
     return;
 
@@ -485,7 +513,7 @@ clutter_input_method_forward_key (ClutterInputMethod *im,
 
   seat = clutter_backend_get_default_seat (clutter_get_default_backend ());
   keyboard = clutter_seat_get_keyboard (seat);
-  stage = _clutter_input_device_get_stage (keyboard);
+  stage = clutter_input_method_get_stage ();
   if (stage == NULL)
     return;
 

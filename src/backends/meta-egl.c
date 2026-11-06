@@ -28,6 +28,7 @@
 #include <EGL/egl.h>
 #include <EGL/eglext.h>
 #include <EGL/eglmesaext.h>
+#include <drm_fourcc.h>
 #include <gio/gio.h>
 #include <glib.h>
 #include <glib-object.h>
@@ -36,6 +37,10 @@
 #include "backends/meta-egl.h"
 #include "backends/meta-egl-ext.h"
 #include "meta/util.h"
+
+#ifndef DRM_FORMAT_MOD_INVALID
+#define DRM_FORMAT_MOD_INVALID ((1ULL << 56) - 1)
+#endif
 
 struct _MetaEgl
 {
@@ -615,7 +620,7 @@ meta_egl_create_dmabuf_image (MetaEgl         *egl,
       attribs[atti++] = offsets[0];
       attribs[atti++] = EGL_DMA_BUF_PLANE0_PITCH_EXT;
       attribs[atti++] = strides[0];
-      if (modifiers)
+      if (modifiers && modifiers[0] != DRM_FORMAT_MOD_INVALID)
         {
           attribs[atti++] = EGL_DMA_BUF_PLANE0_MODIFIER_LO_EXT;
           attribs[atti++] = modifiers[0] & 0xFFFFFFFF;
@@ -632,7 +637,7 @@ meta_egl_create_dmabuf_image (MetaEgl         *egl,
       attribs[atti++] = offsets[1];
       attribs[atti++] = EGL_DMA_BUF_PLANE1_PITCH_EXT;
       attribs[atti++] = strides[1];
-      if (modifiers)
+      if (modifiers && modifiers[1] != DRM_FORMAT_MOD_INVALID)
         {
           attribs[atti++] = EGL_DMA_BUF_PLANE1_MODIFIER_LO_EXT;
           attribs[atti++] = modifiers[1] & 0xFFFFFFFF;
@@ -649,7 +654,7 @@ meta_egl_create_dmabuf_image (MetaEgl         *egl,
       attribs[atti++] = offsets[2];
       attribs[atti++] = EGL_DMA_BUF_PLANE2_PITCH_EXT;
       attribs[atti++] = strides[2];
-      if (modifiers)
+      if (modifiers && modifiers[2] != DRM_FORMAT_MOD_INVALID)
         {
           attribs[atti++] = EGL_DMA_BUF_PLANE2_MODIFIER_LO_EXT;
           attribs[atti++] = modifiers[2] & 0xFFFFFFFF;

@@ -85,11 +85,11 @@ meta_feedback_actor_set_property (GObject      *object,
   switch (prop_id)
     {
     case PROP_ANCHOR_X:
-      priv->anchor_x = g_value_get_int (value);
+      priv->anchor_x = g_value_get_float (value);
       meta_feedback_actor_update_position (self);
       break;
     case PROP_ANCHOR_Y:
-      priv->anchor_y = g_value_get_int (value);
+      priv->anchor_y = g_value_get_float (value);
       meta_feedback_actor_update_position (self);
       break;
     default:

@@ -397,10 +397,25 @@ reload_gtk_frame_extents (MetaWindow    *window,
       else
         {
           GtkBorder extents;
-          extents.left   = (int)value->v.cardinal_list.cardinals[0];
-          extents.right  = (int)value->v.cardinal_list.cardinals[1];
-          extents.top    = (int)value->v.cardinal_list.cardinals[2];
-          extents.bottom = (int)value->v.cardinal_list.cardinals[3];
+          int left, right, top, bottom;
+
+          /* The extents arrive in X protocol pixels, but they are subtracted
+           * from stage-valued rects in meta_window_client_rect_to_frame_rect().
+           * Left and right are horizontal, top and bottom vertical, so they are
+           * paired that way across the width/height arguments. */
+          meta_window_protocol_to_stage_size (window,
+                                              (int)value->v.cardinal_list.cardinals[0],
+                                              (int)value->v.cardinal_list.cardinals[2],
+                                              &left, &top);
+          meta_window_protocol_to_stage_size (window,
+                                              (int)value->v.cardinal_list.cardinals[1],
+                                              (int)value->v.cardinal_list.cardinals[3],
+                                              &right, &bottom);
+
+          extents.left   = left;
+          extents.right  = right;
+          extents.top    = top;
+          extents.bottom = bottom;
           meta_window_set_custom_frame_extents (window, &extents, initial);
         }
     }
@@ -434,27 +449,6 @@ reload_wm_window_role (MetaWindow    *window,
   g_clear_pointer (&window->role, g_free);
   if (value->type != META_PROP_VALUE_INVALID)
     window->role = g_strdup (value->v.str);
-}
-
-static void
-reload_net_wm_pid (MetaWindow    *window,
-                   MetaPropValue *value,
-                   gboolean       initial)
-{
-  if (value->type != META_PROP_VALUE_INVALID)
-    {
-      uint32_t cardinal = (int) value->v.cardinal;
-
-      if (cardinal <= 0)
-        meta_warning ("Application set a bogus _NET_WM_PID %u\n",
-                      cardinal);
-      else
-        {
-          window->net_wm_pid = cardinal;
-          meta_verbose ("Window has _NET_WM_PID %d\n",
-                        window->net_wm_pid);
-        }
-    }
 }
 
 static void
@@ -723,11 +717,30 @@ reload_opaque_region (MetaWindow    *window,
       while (i < nitems)
         {
           cairo_rectangle_int_t *rect = &rects[rect_index];
+          int protocol_x, protocol_y, protocol_width, protocol_height;
+          int x2, y2;
 
-          rect->x = region[i++];
-          rect->y = region[i++];
-          rect->width = region[i++];
-          rect->height = region[i++];
+          protocol_x = region[i++];
+          protocol_y = region[i++];
+          protocol_width = region[i++];
+          protocol_height = region[i++];
+
+          /* The rects arrive in X protocol pixels but are consumed in stage
+           * coordinates by update_opaque_region(). Both edges are rounded
+           * inwards: claiming a pixel is opaque when it is not makes the
+           * compositor cull drawing behind translucent content. */
+          meta_window_protocol_to_stage_point (window,
+                                               protocol_x, protocol_y,
+                                               &rect->x, &rect->y,
+                                               META_ROUNDING_STRATEGY_GROW);
+          meta_window_protocol_to_stage_point (window,
+                                               protocol_x + protocol_width,
+                                               protocol_y + protocol_height,
+                                               &x2, &y2,
+                                               META_ROUNDING_STRATEGY_SHRINK);
+
+          rect->width = MAX (x2 - rect->x, 0);
+          rect->height = MAX (y2 - rect->y, 0);
 
           rect_index++;
         }
@@ -1402,6 +1415,30 @@ meta_set_normal_hints (MetaWindow *window,
       window->size_hints.flags |= PWinGravity;
     }
 
+  /* The hints arrive in X protocol pixels; everything downstream of here
+   * works in stage coordinates. Aspect ratios are ratios and so are already
+   * scale-invariant. */
+  meta_window_protocol_to_stage_size (window,
+                                      window->size_hints.base_width,
+                                      window->size_hints.base_height,
+                                      &window->size_hints.base_width,
+                                      &window->size_hints.base_height);
+  meta_window_protocol_to_stage_size (window,
+                                      window->size_hints.min_width,
+                                      window->size_hints.min_height,
+                                      &window->size_hints.min_width,
+                                      &window->size_hints.min_height);
+  meta_window_protocol_to_stage_size (window,
+                                      window->size_hints.max_width,
+                                      window->size_hints.max_height,
+                                      &window->size_hints.max_width,
+                                      &window->size_hints.max_height);
+  meta_window_protocol_to_stage_size (window,
+                                      window->size_hints.width_inc,
+                                      window->size_hints.height_inc,
+                                      &window->size_hints.width_inc,
+                                      &window->size_hints.height_inc);
+
   /*** Lots of sanity checking ***/
 
   /* Verify all min & max hints are at least 1 pixel */
@@ -2005,7 +2042,6 @@ meta_x11_display_init_window_prop_hooks (MetaX11Display *x11_display)
     { x11_display->atom_WM_CLIENT_MACHINE, META_PROP_VALUE_STRING,   reload_wm_client_machine, LOAD_INIT | INCLUDE_OR },
     { x11_display->atom__NET_WM_NAME,      META_PROP_VALUE_UTF8,     reload_net_wm_name,       LOAD_INIT | INCLUDE_OR },
     { XA_WM_CLASS,                         META_PROP_VALUE_CLASS_HINT, reload_wm_class,        LOAD_INIT | INCLUDE_OR },
-    { x11_display->atom__NET_WM_PID,       META_PROP_VALUE_CARDINAL, reload_net_wm_pid,        LOAD_INIT | INCLUDE_OR },
     { XA_WM_NAME,                          META_PROP_VALUE_TEXT_PROPERTY, reload_wm_name,      LOAD_INIT | INCLUDE_OR },
     { x11_display->atom__MUFFIN_HINTS,     META_PROP_VALUE_TEXT_PROPERTY, reload_muffin_hints, LOAD_INIT | INCLUDE_OR },
     { x11_display->atom__NET_WM_OPAQUE_REGION, META_PROP_VALUE_CARDINAL_LIST, reload_opaque_region, LOAD_INIT | INCLUDE_OR },

@@ -1,0 +1,149 @@
+#!/usr/bin/env python3
+
+import argparse
+import json
+import sys
+
+from gi.repository import Gio, GLib
+
+
+BUS_NAME = "org.cinnamon.Muffin.Debug"
+OBJECT_PATH = "/org/cinnamon/Muffin/Debug"
+INTERFACE = "org.cinnamon.Muffin.Debug"
+
+
+def unpack(value):
+    if hasattr(value, "unpack"):
+        return value.unpack()
+    return value
+
+
+def rect_to_string(rect):
+    if rect is None:
+        return ""
+
+    x, y, width, height = rect
+    return f"{x},{y} {width}x{height}"
+
+
+def scaled_rect(rect, scale):
+    if rect is None:
+        return None
+
+    x, y, width, height = rect
+    return (
+        round(x * scale),
+        round(y * scale),
+        round(width * scale),
+        round(height * scale),
+    )
+
+
+def normalize_window(window):
+    return {key: unpack(value) for key, value in window.items()}
+
+
+def list_windows():
+    connection = Gio.bus_get_sync(Gio.BusType.SESSION, None)
+    result = connection.call_sync(
+        BUS_NAME,
+        OBJECT_PATH,
+        INTERFACE,
+        "ListWindows",
+        None,
+        GLib.VariantType.new("(aa{sv})"),
+        Gio.DBusCallFlags.NONE,
+        -1,
+        None,
+    )
+
+    windows, = result.unpack()
+    return [normalize_window(window) for window in windows]
+
+
+def window_sort_key(window):
+    return (
+        window.get("workspace", -1),
+        window.get("monitor", -1),
+        window.get("stable-sequence", 0),
+    )
+
+
+def bool_string(value):
+    return "yes" if value else "no"
+
+
+def print_rect_pair(name, rect, monitor_scale):
+    print(f"  {name:<12} {rect_to_string(rect)}")
+    print(f"  {name + '@scale':<12} {rect_to_string(scaled_rect(rect, monitor_scale))}")
+
+
+def print_windows(windows):
+    for index, window in enumerate(sorted(windows, key=window_sort_key)):
+        monitor_scale = float(window.get("monitor-scale", 1.0))
+        scale = window.get("scale", 1)
+        title = window.get("title", "")
+        app = window.get("app-name", "") or window.get("wm-class", "")
+        ident = window.get("stable-sequence", window.get("id", ""))
+
+        if index > 0:
+            print()
+
+        print(f"[{ident}] {title}")
+        print(f"  app          {app}")
+        print(f"  pid          {window.get('pid', '')} (client: {window.get('client-pid', '')})")
+        print(f"  backend      {window.get('backend', '')} ({window.get('client-type', '')})")
+        print(f"  xwindow      {window.get('xwindow', '')}")
+        print(f"  workspace    {window.get('workspace', '')}")
+        print(f"  monitor      {window.get('monitor', '')}")
+        print(f"  scale        surface: {scale}, geometry: {window.get('geometry-scale', '')}, monitor: {monitor_scale:g}")
+
+        print_rect_pair("frame", window.get("frame-rect"), monitor_scale)
+        print_rect_pair("buffer", window.get("buffer-rect"), monitor_scale)
+        print_rect_pair("client-area", window.get("client-area-rect"), monitor_scale)
+        print_rect_pair("titlebar", window.get("titlebar-rect"), monitor_scale)
+
+        state = [
+            f"mapped={bool_string(window.get('mapped'))}",
+            f"hidden={bool_string(window.get('hidden'))}",
+            f"focused={bool_string(window.get('focused'))}",
+            f"attention={bool_string(window.get('demands-attention'))}",
+            f"decorated={bool_string(window.get('decorated'))}",
+            f"client-decorated={bool_string(window.get('client-decorated'))}",
+            f"override-redirect={bool_string(window.get('override-redirect'))}",
+            f"skip-taskbar={bool_string(window.get('skip-taskbar'))}",
+            f"all-workspaces={bool_string(window.get('on-all-workspaces'))}",
+        ]
+        print(f"  state        {', '.join(state)}")
+        print(f"  wm-class     {window.get('wm-class', '')} / {window.get('wm-class-instance', '')}")
+        print(f"  app-ids      gtk: {window.get('gtk-application-id', '')}, sandbox: {window.get('sandboxed-app-id', '')}")
+        print(f"  type         {window.get('window-type', '')}")
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="List windows known by Cinnamon/Muffin."
+    )
+    parser.add_argument(
+        "--json",
+        action="store_true",
+        help="print the raw window list as JSON",
+    )
+    args = parser.parse_args()
+
+    try:
+        windows = list_windows()
+    except GLib.Error as error:
+        print(f"cinnamon-list-windows: {error.message}", file=sys.stderr)
+        return 1
+
+    if args.json:
+        print(json.dumps(windows, indent=2, sort_keys=True))
+    else:
+        print_windows(windows)
+
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

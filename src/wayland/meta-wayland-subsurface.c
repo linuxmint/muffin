@@ -58,14 +58,12 @@ static void
 sync_actor_subsurface_state (MetaWaylandSurface *surface)
 {
   ClutterActor *actor = CLUTTER_ACTOR (meta_wayland_surface_get_actor (surface));
-  MetaWindow *toplevel_window;
   int x, y;
 
-  toplevel_window = meta_wayland_surface_get_toplevel_window (surface);
-  if (!toplevel_window)
-    return;
-
-  if (toplevel_window->client_type == META_WINDOW_CLIENT_TYPE_X11)
+  /* Covers X11-rooted trees too: the xwayland role manages no subsurface
+   * actors. */
+  if (!meta_wayland_surface_is_subsurface_host (
+        meta_wayland_surface_get_toplevel (surface)))
     return;
 
   x = y = 0;
@@ -250,7 +248,7 @@ meta_wayland_subsurface_sync_actor_state (MetaWaylandActorSurface *actor_surface
   MetaWaylandSurface *toplevel_surface;
 
   toplevel_surface = meta_wayland_surface_get_toplevel (surface);
-  if (toplevel_surface && meta_wayland_surface_get_window (toplevel_surface))
+  if (meta_wayland_surface_is_subsurface_host (toplevel_surface))
     actor_surface_class->sync_actor_state (actor_surface);
 
   sync_actor_subsurface_state (surface);
@@ -282,30 +280,15 @@ meta_wayland_subsurface_class_init (MetaWaylandSubsurfaceClass *klass)
 }
 
 static void
-unparent_actor (MetaWaylandSurface *surface)
-{
-  ClutterActor *actor;
-  ClutterActor *parent_actor;
-
-  actor = CLUTTER_ACTOR (meta_wayland_surface_get_actor (surface));
-  if (!actor)
-    return;
-
-  parent_actor = clutter_actor_get_parent (actor);
-  if (parent_actor)
-    clutter_actor_remove_child (parent_actor, actor);
-}
-
-static void
 wl_subsurface_destructor (struct wl_resource *resource)
 {
   MetaWaylandSurface *surface = wl_resource_get_user_data (resource);
 
   g_node_unlink (surface->subsurface_branch_node);
-  unparent_actor (surface);
 
   if (surface->sub.parent)
     {
+      meta_wayland_surface_notify_subsurface_state_changed (surface->sub.parent);
       wl_list_remove (&surface->sub.parent_destroy_listener.link);
       surface->sub.parent = NULL;
     }

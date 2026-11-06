@@ -29,6 +29,9 @@ struct _MetaWindowActorClass
   void (*set_frozen) (MetaWindowActor *actor,
                       gboolean         frozen);
   void (*update_regions) (MetaWindowActor *actor);
+
+  MetaSurfaceActor * (*get_scanout_candidate) (MetaWindowActor  *actor,
+                                               const char      **reason);
 };
 
 typedef enum
@@ -38,6 +41,9 @@ typedef enum
 } MetaWindowActorChanges;
 
 void meta_window_actor_queue_destroy   (MetaWindowActor *self);
+
+MetaSurfaceActor * meta_window_actor_get_scanout_candidate (MetaWindowActor  *self,
+                                                            const char      **reason);
 
 void meta_window_actor_show (MetaWindowActor *self,
                              MetaCompEffect   effect);

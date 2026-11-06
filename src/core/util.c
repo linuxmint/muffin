@@ -334,6 +334,12 @@ topic_name (MetaDebugTopic topic)
       return "DBUS";
     case META_DEBUG_INPUT:
       return "INPUT";
+    case META_DEBUG_SCANOUT:
+      return "SCANOUT";
+    case META_DEBUG_LAYER_SHELL:
+      return "LAYER_SHELL";
+    case META_DEBUG_KMS:
+      return "KMS";
     case META_DEBUG_VERBOSE:
       return "VERBOSE";
     }
@@ -619,7 +625,7 @@ meta_show_dialog (const char *type,
 
   args = g_ptr_array_new ();
 
-  append_argument (args, "zenity");
+  append_argument (args, "xenity");
   append_argument (args, type);
 
   if (display)

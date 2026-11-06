@@ -66,6 +66,7 @@ struct _MetaSettings
 
   MetaExperimentalFeature experimental_features;
   gboolean experimental_features_overridden;
+  GStrv experimental_feature_strings;
 
   gboolean xwayland_allow_grabs;
   GPtrArray *xwayland_grab_whitelist_patterns;
@@ -150,8 +151,6 @@ meta_settings_update_ui_scaling_factor (MetaSettings *settings)
 int
 meta_settings_get_ui_scaling_factor (MetaSettings *settings)
 {
-  g_assert (settings->ui_scaling_factor != 0);
-
   return settings->ui_scaling_factor;
 }
 
@@ -263,6 +262,17 @@ meta_settings_is_experimental_feature_enabled (MetaSettings           *settings,
   return !!(settings->experimental_features & feature);
 }
 
+gboolean
+meta_settings_is_experimental_feature_string_enabled (MetaSettings *settings,
+                                                      const char   *feature)
+{
+  if (!settings->experimental_feature_strings)
+    return FALSE;
+
+  return g_strv_contains ((const char * const *) settings->experimental_feature_strings,
+                          feature);
+}
+
 void
 meta_settings_override_experimental_features (MetaSettings *settings)
 {
@@ -368,13 +378,17 @@ experimental_features_handler (GVariant *features_variant,
       return TRUE;
     }
 
+  g_clear_pointer (&settings->experimental_feature_strings, g_strfreev);
+  settings->experimental_feature_strings = g_variant_dup_strv (features_variant,
+                                                               NULL);
+
   g_variant_iter_init (&features_iter, features_variant);
   while (g_variant_iter_loop (&features_iter, "s", &feature_str))
     {
       MetaExperimentalFeature feature = META_EXPERIMENTAL_FEATURE_NONE;
 
       if (g_str_equal (feature_str, "scale-monitor-framebuffer"))
-        feature = META_EXPERIMENTAL_FEATURE_SCALE_MONITOR_FRAMEBUFFER;
+        continue;
       else if (g_str_equal (feature_str, "kms-modifiers"))
         feature = META_EXPERIMENTAL_FEATURE_KMS_MODIFIERS;
       else if (g_str_equal (feature_str, "rt-scheduler"))
@@ -387,7 +401,7 @@ experimental_features_handler (GVariant *features_variant,
       if (feature)
         g_message ("Enabling experimental feature '%s'", feature_str);
       else
-        g_warning ("Unknown experimental feature '%s'", feature_str);
+        g_message ("Enabling experimental flag '%s'", feature_str);
 
       features |= feature;
     }
@@ -593,6 +607,7 @@ meta_settings_dispose (GObject *object)
                    g_ptr_array_unref);
   g_clear_pointer (&settings->xwayland_grab_blacklist_patterns,
                    g_ptr_array_unref);
+  g_clear_pointer (&settings->experimental_feature_strings, g_strfreev);
 
   G_OBJECT_CLASS (meta_settings_parent_class)->dispose (object);
 }
@@ -600,6 +615,8 @@ meta_settings_dispose (GObject *object)
 static void
 meta_settings_init (MetaSettings *settings)
 {
+  settings->ui_scaling_factor = 1;
+
   settings->interface_settings = g_settings_new ("org.cinnamon.desktop.interface");
   g_signal_connect (settings->interface_settings, "changed",
                     G_CALLBACK (interface_settings_changed),
@@ -642,7 +659,7 @@ meta_settings_post_init (MetaSettings *settings)
   MetaMonitorManager *monitor_manager =
     meta_backend_get_monitor_manager (settings->backend);
 
-  update_ui_scaling_factor (settings);
+  meta_settings_update_ui_scaling_factor (settings);
   update_font_dpi (settings);
 
   g_signal_connect_object (monitor_manager, "monitors-changed-internal",

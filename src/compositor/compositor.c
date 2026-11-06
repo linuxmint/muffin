@@ -39,15 +39,21 @@
  *
  * # Containers #
  *
- * There's two containers in the stage that are used to place window actors, here
- * are listed in the order in which they are painted:
+ * Three containers are children of the stage, here listed in the order in
+ * which they are painted:
  *
  * - window group, accessible with meta_get_window_group_for_display()
  * - top window group, accessible with meta_get_top_window_group_for_display()
+ * - feedback group, which holds MetaFeedbackActor rather than window actors
  *
- * Mutter will place actors representing windows in the window group, except for
- * override-redirect windows (ie. popups and menus) which will be placed in the
- * top window group.
+ * The window group nests two more, both kept sunk to its bottom by
+ * sync_actor_stacking(): the background window group for the wallpaper,
+ * lowest of all, and just above it the bottom window group for
+ * META_WINDOW_DESKTOP windows.
+ *
+ * Window actors go in the window group, except for override-redirect windows
+ * (ie. popups and menus) and wlr-layer-shell OVERLAY surfaces, both of which
+ * have to paint above everything else and go in the top window group.
  */
 
 #include "config.h"
@@ -88,6 +94,7 @@
 #include "wayland/meta-wayland-layer-shell.h"
 #include "wayland/meta-wayland-outputs.h"
 #include "wayland/meta-wayland-private.h"
+#include "wayland/meta-wayland-xdg-shell.h"
 #endif
 
 enum
@@ -128,6 +135,7 @@ typedef struct _MetaCompositorPrivate
   ClutterActor *top_window_group;
   ClutterActor *feedback_group;
   ClutterActor *bottom_window_group;
+  ClutterActor *background_window_group;
 
   GList *background_actors;
   ClutterActor *desklet_container;
@@ -136,8 +144,7 @@ typedef struct _MetaCompositorPrivate
 
   CoglContext *context;
 
-  MetaWindowActor *top_window_actor;
-  gulong top_window_actor_destroy_id;
+  gboolean needs_top_window_update;
 
   int disable_unredirect_count;
 
@@ -151,15 +158,22 @@ typedef struct _MetaCompositorPrivate
 G_DEFINE_ABSTRACT_TYPE_WITH_PRIVATE (MetaCompositor, meta_compositor,
                                      G_TYPE_OBJECT)
 
+static GQuark quark_top_window_actor = 0;
+
+static void
+top_window_actor_free (gpointer data)
+{
+  MetaWindowActor **cached = data;
+
+  g_clear_weak_pointer (cached);
+  g_free (cached);
+}
+
 static void
 on_presented (ClutterStage     *stage,
               CoglFrameEvent    event,
               ClutterFrameInfo *frame_info,
               MetaCompositor   *compositor);
-
-static void
-on_top_window_actor_destroyed (MetaWindowActor *window_actor,
-                               MetaCompositor  *compositor);
 
 static gboolean
 is_modal (MetaDisplay *display)
@@ -319,6 +333,28 @@ meta_get_bottom_window_group_for_display (MetaDisplay *display)
   priv = meta_compositor_get_instance_private (compositor);
 
   return priv->bottom_window_group;
+}
+
+/**
+ * meta_get_background_window_group_for_display:
+ * @display: a #MetaDisplay
+ *
+ * Returns: (transfer none): The background window group corresponding to
+ * @display - the bottom-most tier, holding wallpaper actors.
+ */
+ClutterActor *
+meta_get_background_window_group_for_display (MetaDisplay *display)
+{
+  MetaCompositor *compositor;
+  MetaCompositorPrivate *priv;
+
+  g_return_val_if_fail (display, NULL);
+
+  compositor = get_compositor_for_display (display);
+  g_return_val_if_fail (compositor, NULL);
+  priv = meta_compositor_get_instance_private (compositor);
+
+  return priv->background_window_group;
 }
 
 /**
@@ -606,13 +642,9 @@ rebuild_x11_background_actors (MetaCompositor *compositor)
       clutter_actor_set_position (actor, rect.x, rect.y);
       clutter_actor_set_size (actor, rect.width, rect.height);
 
-      clutter_actor_add_child (priv->window_group, actor);
-
-      /* add_child() stacks the actor at the top of the window group.  On a
-       * monitors-changed rebuild that leaves the new background above the
-       * desktop windows (bottom_window_group) until the next restack.
-       * Sink it to the bottom where backgrounds belong. */
-      clutter_actor_set_child_below_sibling (priv->window_group, actor, NULL);
+      /* The background tier is its own group kept at the bottom, so the
+       * actors just go in it - no per-actor sinking needed. */
+      clutter_actor_add_child (priv->background_window_group, actor);
 
       priv->background_actors = g_list_append (priv->background_actors, actor);
     }
@@ -693,10 +725,11 @@ on_layer_surface_unmapped (MetaWaylandLayerShell   *layer_shell,
     meta_compositor_get_instance_private (compositor);
   MetaSurfaceActor *surface_actor;
 
-  if (meta_wayland_layer_surface_get_layer (layer_surface) !=
-      META_LAYER_SHELL_LAYER_BACKGROUND)
-    return;
-
+  /* Removed unconditionally, without testing the current layer: a surface that
+   * mapped as BACKGROUND and later changed layer is still in the list, and
+   * keying the removal on its layer now would strand it there - visible to
+   * Cinnamon via meta_get_background_actors_for_display (). g_list_remove () is
+   * a no-op for anything that was never added. */
   surface_actor = meta_wayland_actor_surface_get_actor (
     META_WAYLAND_ACTOR_SURFACE (layer_surface));
 
@@ -738,12 +771,18 @@ meta_compositor_do_manage (MetaCompositor  *compositor,
   priv->window_group = meta_window_group_new (display);
   priv->top_window_group = meta_window_group_new (display);
   priv->bottom_window_group = meta_window_group_new (display);
+  priv->background_window_group = meta_window_group_new (display);
   priv->feedback_group = meta_window_group_new (display);
+
+  /* The wallpaper tier (X11 background actors and Wayland BACKGROUND layer
+   * surfaces) lives at the bottom of window_group as one group, below
+   * bottom_window_group where BOTTOM-layer desktop windows sit. Added first so
+   * it starts out lowest; sync_actor_stacking keeps both groups sunk. */
+  clutter_actor_add_child (priv->window_group, priv->background_window_group);
+  clutter_actor_add_child (priv->window_group, priv->bottom_window_group);
 
   if (!meta_is_wayland_compositor ())
     rebuild_x11_background_actors (compositor);
-
-  clutter_actor_add_child (priv->window_group, priv->bottom_window_group);
 
   // This needs to remain stacked just above the background actors in the window group.
   // So sync_actor_stacking() has to be able to reference it. The deskletManager
@@ -869,6 +908,131 @@ ensure_tooltip_visible (MetaWindow *window)
     }
 }
 
+/* Picks the stage group for META_WINDOW_DOCK windows: X11 panels/docks, plus
+ * TOP and OVERLAY layer surfaces (see apply_window_type_for_layer), which both
+ * arrive as DOCK and are separated by their layer - here for the stage group,
+ * and in meta_window_wayland_calculate_layer () for the stack layer.
+ *
+ * Everything but OVERLAY goes in window_group next to normal windows and is
+ * ordered against them by its stack layer alone. That is what lets a dock drop
+ * below a fullscreen window - get_standalone_layer () for X11,
+ * meta_window_wayland_calculate_layer () for layer surfaces - and it matches
+ * the layer-shell spec, which puts a fullscreen surface at the TOP layer.
+ *
+ * OVERLAY is the one layer that must stay above everything, so it goes in
+ * top_window_group alongside the override-redirect windows, which are there
+ * wanting the same elevation for the same reason. That an OVERLAY surface is
+ * managed and an override-redirect window is not makes no difference here - the
+ * group decides paint order, nothing else - and the stack still separates them,
+ * META_LAYER_DOCK sitting below META_LAYER_OVERRIDE_REDIRECT. Cinnamon reparents
+ * top_window_group to the stage above the uiGroup holding its own panels, so an
+ * OVERLAY surface still draws over them - see js/ui/main.js. */
+static ClutterActor *
+get_dock_window_group (MetaCompositor *compositor,
+                       MetaWindow     *window)
+{
+  MetaCompositorPrivate *priv =
+    meta_compositor_get_instance_private (compositor);
+
+#ifdef HAVE_WAYLAND
+  if (meta_window_is_overlay_layer_shell (window))
+    return priv->top_window_group;
+#endif
+
+  return priv->window_group;
+}
+
+/* Which stage group a window's actor belongs in. Both meta_compositor_add_window ()
+ * and meta_compositor_sync_window_group () go through here, so a window can never
+ * be classified one way when it is added and another way when it is re-evaluated. */
+static ClutterActor *
+get_window_group_for_window (MetaCompositor *compositor,
+                             MetaWindow     *window)
+{
+  MetaCompositorPrivate *priv =
+    meta_compositor_get_instance_private (compositor);
+
+  if (window->layer == META_LAYER_OVERRIDE_REDIRECT)
+    return priv->top_window_group;
+
+#ifdef HAVE_WAYLAND
+  /* A layer surface's popups go wherever its toplevel went, so they keep its
+   * elevation: sync_actor_stacking () reorders actors within their own parent
+   * and never across groups, so a popup left behind in window_group would draw
+   * under an OVERLAY parent. For every other layer that group is window_group
+   * anyway - a TOP parent is in there too, where the ordinary
+   * transient-above-parent constraint keeps its popup above it as for an
+   * xdg_toplevel, while a BOTTOM parent's tier and the window-less BACKGROUND
+   * one are both sunk to the bottom of window_group regardless. */
+  if (window->client_type == META_WINDOW_CLIENT_TYPE_WAYLAND &&
+      window->surface != NULL &&
+      meta_wayland_surface_is_layer_shell_popup (window->surface))
+    {
+      MetaWaylandSurface *toplevel =
+        meta_wayland_surface_get_toplevel (window->surface);
+
+      if (toplevel && META_IS_WAYLAND_LAYER_SURFACE (toplevel->role) &&
+          meta_wayland_layer_surface_is_overlay (
+            META_WAYLAND_LAYER_SURFACE (toplevel->role)))
+        return priv->top_window_group;
+
+      return priv->window_group;
+    }
+#endif
+
+  if (window->type == META_WINDOW_DESKTOP)
+    return priv->bottom_window_group;
+
+  if (window->type == META_WINDOW_DOCK)
+    return get_dock_window_group (compositor, window);
+
+  return priv->window_group;
+}
+
+/**
+ * meta_compositor_sync_window_group:
+ * @compositor: a #MetaCompositor
+ * @window: a #MetaWindow
+ *
+ * Re-evaluates which stage group @window's actor belongs in and moves it if it
+ * has changed. Needed when a window's classification changes after it was
+ * added - a layer surface switching between the TOP and OVERLAY layers, for
+ * one.
+ */
+void
+meta_compositor_sync_window_group (MetaCompositor *compositor,
+                                   MetaWindow     *window)
+{
+  MetaCompositorPrivate *priv =
+    meta_compositor_get_instance_private (compositor);
+  MetaWindowActor *window_actor;
+  ClutterActor *actor;
+  ClutterActor *target;
+  ClutterActor *parent;
+
+  window_actor = meta_window_actor_from_window (window);
+  if (!window_actor)
+    return;
+
+  actor = CLUTTER_ACTOR (window_actor);
+  parent = clutter_actor_get_parent (actor);
+  target = get_window_group_for_window (compositor, window);
+
+  if (parent == target)
+    return;
+
+  g_object_ref (actor);
+  if (parent)
+    clutter_actor_remove_child (parent, actor);
+  clutter_actor_add_child (target, actor);
+  g_object_unref (actor);
+
+  /* add_child () drops the actor at the top of its new group, so restack now
+   * rather than waiting for a change that happens to touch window_group. */
+  sync_actor_stacking (compositor);
+  meta_stack_tracker_queue_sync_stack (priv->display->stack_tracker);
+}
+
 void
 meta_compositor_add_window (MetaCompositor    *compositor,
                             MetaWindow        *window)
@@ -900,20 +1064,11 @@ meta_compositor_add_window (MetaCompositor    *compositor,
                                "show-on-set-parent", FALSE,
                                NULL);
 
-  if (window->layer == META_LAYER_OVERRIDE_REDIRECT)
-    {
-      if (window->type == META_WINDOW_TOOLTIP)
-        {
-          ensure_tooltip_visible (window);
-        }
+  if (window->layer == META_LAYER_OVERRIDE_REDIRECT &&
+      window->type == META_WINDOW_TOOLTIP)
+    ensure_tooltip_visible (window);
 
-      window_group = priv->top_window_group;
-    }
-
-  else if (window->type == META_WINDOW_DESKTOP)
-    window_group = priv->bottom_window_group;
-  else
-    window_group = priv->window_group;
+  window_group = get_window_group_for_window (compositor, window);
 
   clutter_actor_add_child (window_group, CLUTTER_ACTOR (window_actor));
 
@@ -993,6 +1148,7 @@ meta_compositor_window_opacity_changed (MetaCompositor *compositor,
     return;
 
   meta_window_actor_update_opacity (window_actor);
+  meta_compositor_invalidate_top_window (compositor);
 }
 
 gboolean
@@ -1013,6 +1169,7 @@ meta_compositor_show_window (MetaCompositor *compositor,
   MetaWindowActor *window_actor = meta_window_actor_from_window (window);
 
   meta_window_actor_show (window_actor, effect);
+  meta_compositor_invalidate_top_window (compositor);
 }
 
 void
@@ -1025,6 +1182,7 @@ meta_compositor_hide_window (MetaCompositor *compositor,
   MetaWindowActor *window_actor = meta_window_actor_from_window (window);
 
   meta_window_actor_hide (window_actor, effect);
+  meta_compositor_invalidate_top_window (compositor);
   meta_stack_tracker_queue_sync_stack (priv->display->stack_tracker);
 }
 
@@ -1035,7 +1193,12 @@ meta_compositor_size_change_window (MetaCompositor    *compositor,
                                     MetaRectangle     *old_frame_rect,
                                     MetaRectangle     *old_buffer_rect)
 {
-  MetaWindowActor *window_actor = meta_window_actor_from_window (window);
+  MetaWindowActor *window_actor;
+
+  if (window->compositor_skip_size_change)
+    return;
+
+  window_actor = meta_window_actor_from_window (window);
 
   meta_window_actor_size_change (window_actor, which_change, old_frame_rect, old_buffer_rect);
 }
@@ -1080,8 +1243,6 @@ sync_actor_stacking (MetaCompositor *compositor)
   GList *expected_window_node;
   GList *tmp;
   GList *old;
-  GList *backgrounds;
-  gboolean has_windows;
   gboolean reordered;
 
   /* NB: The first entries in the lists are stacked the lowest */
@@ -1091,33 +1252,15 @@ sync_actor_stacking (MetaCompositor *compositor)
    * we go ahead and do it */
 
   children = clutter_actor_get_children (priv->window_group);
-  has_windows = FALSE;
   reordered = FALSE;
 
-  /* We allow for actors in the window group other than the actors we
-   * know about, but it's up to a plugin to try and keep them stacked correctly
-   * (we really need extra API to make that reliable.)
-   */
-
-  /* First we collect a list of all backgrounds, and check if they're at the
-   * bottom. Then we check if the window actors are in the correct sequence */
-  backgrounds = NULL;
   expected_window_node = priv->windows;
   for (old = children; old != NULL; old = old->next)
     {
       ClutterActor *actor = old->data;
 
-      if (META_IS_X11_BACKGROUND_ACTOR (actor))
+      if (META_IS_WINDOW_ACTOR (actor) && !reordered)
         {
-          backgrounds = g_list_prepend (backgrounds, actor);
-
-          if (has_windows)
-            reordered = TRUE;
-        }
-      else if (META_IS_WINDOW_ACTOR (actor) && !reordered)
-        {
-          has_windows = TRUE;
-
           if (expected_window_node != NULL && actor == expected_window_node->data)
             expected_window_node = expected_window_node->next;
           else
@@ -1128,13 +1271,9 @@ sync_actor_stacking (MetaCompositor *compositor)
   g_clear_pointer (&children, g_list_free);
 
   if (!reordered)
-    {
-      g_list_free (backgrounds);
-      return;
-    }
+    return;
 
   /* reorder the actors by lowering them in turn to the bottom of the stack.
-   * windows first, then background.
    *
    * We reorder the actors even if they're not parented to the window group,
    * to allow stacking to work with intermediate actors (eg during effects)
@@ -1157,31 +1296,72 @@ sync_actor_stacking (MetaCompositor *compositor)
       clutter_actor_set_child_below_sibling (priv->window_group, priv->desklet_container, NULL);
     }
 
-  // Then the bottom window group (which META_WINDOW_DESKTOP windows like nemo-desktop's get placed in).
+  /* Sunk last, so the background tier ends up lowest of all. */
   clutter_actor_set_child_below_sibling (priv->window_group, priv->bottom_window_group, NULL);
-
-  // and finally backgrounds..
-
-  /* we prepended the backgrounds above so the last actor in the list
-   * should get lowered to the bottom last.
-   */
-  for (tmp = backgrounds; tmp != NULL; tmp = tmp->next)
-    {
-      ClutterActor *actor = tmp->data, *parent;
-
-      parent = clutter_actor_get_parent (actor);
-      clutter_actor_set_child_below_sibling (parent, actor, NULL);
-    }
-  g_list_free (backgrounds);
+  clutter_actor_set_child_below_sibling (priv->window_group, priv->background_window_group, NULL);
 }
 
 /*
- * Find the top most window that is visible on the screen. The intention of
- * this is to avoid offscreen windows that isn't actually part of the visible
- * desktop (such as the UI frames override redirect window).
+ * Marks every view's top window actor as needing recomputation. Cheap enough to
+ * call liberally - the work is deferred to the next reader.
+ */
+void
+meta_compositor_invalidate_top_window (MetaCompositor *compositor)
+{
+  MetaCompositorPrivate *priv =
+    meta_compositor_get_instance_private (compositor);
+
+  priv->needs_top_window_update = TRUE;
+}
+
+/*
+ * A window with zero opacity paints nothing, so it cannot occlude what is below
+ * it and must not be picked as the top window for unredirect or direct scanout.
+ * OpenGL games running through Wine/Proton, and native games running inside the
+ * Steam container, map exactly such a window - 1x1 at the origin - over their
+ * fullscreen window.
+ */
+gboolean
+meta_compositor_window_can_occlude (MetaWindow *window)
+{
+  if (!window || !window->visible_to_compositor)
+    return FALSE;
+
+  if (window->opacity == 0)
+    return FALSE;
+
+  /* Our own windows - panel and systray icons - are hidden by animating the
+   * actor rather than the window, so window->opacity says nothing about
+   * whether they are actually painting (ba50900d).
+   */
+  if (meta_window_get_client_pid (window) == getpid ())
+    {
+      MetaWindowActor *window_actor = meta_window_actor_from_window (window);
+
+      if (!window_actor)
+        return FALSE;
+
+      if (!clutter_actor_get_paint_visibility (CLUTTER_ACTOR (window_actor)))
+        return FALSE;
+
+      if (clutter_actor_get_paint_opacity (CLUTTER_ACTOR (window_actor)) == 0)
+        return FALSE;
+    }
+
+  return TRUE;
+}
+
+/*
+ * Find the top most window that is visible on a view. The intention of this is
+ * to avoid offscreen windows that aren't actually part of the visible desktop
+ * (such as the UI frames override redirect window).
+ *
+ * X11 has a single screen-sized view, so this answers the whole-display
+ * question there; Wayland has one view per monitor.
  */
 static MetaWindowActor *
-get_top_visible_window_actor (MetaCompositor *compositor)
+find_top_window_actor_on_view (MetaCompositor      *compositor,
+                               const MetaRectangle *view_layout)
 {
   MetaCompositorPrivate *priv =
     meta_compositor_get_instance_private (compositor);
@@ -1191,24 +1371,11 @@ get_top_visible_window_actor (MetaCompositor *compositor)
     {
       MetaWindowActor *window_actor = l->data;
       MetaWindow *window = meta_window_actor_get_meta_window (window_actor);
-      MetaRectangle buffer_rect;
-      MetaRectangle display_rect = { 0 };
 
-      if (!window->visible_to_compositor)
+      if (!meta_compositor_window_can_occlude (window))
         continue;
-      if (meta_window_get_client_pid (window) == getpid ())
-        {
-          if (!clutter_actor_get_paint_visibility (CLUTTER_ACTOR (window_actor)))
-            continue;
-          if (clutter_actor_get_paint_opacity (CLUTTER_ACTOR (window_actor)) == 0)
-            continue;
-        }
 
-      meta_window_get_buffer_rect (window, &buffer_rect);
-      meta_display_get_size (priv->display,
-                             &display_rect.width, &display_rect.height);
-
-      if (meta_rectangle_overlap (&display_rect, &buffer_rect))
+      if (meta_rectangle_overlap (&window->buffer_rect, view_layout))
         return window_actor;
     }
 
@@ -1216,17 +1383,58 @@ get_top_visible_window_actor (MetaCompositor *compositor)
 }
 
 static void
-on_top_window_actor_destroyed (MetaWindowActor *window_actor,
-                               MetaCompositor  *compositor)
+maybe_update_top_window_actors (MetaCompositor *compositor)
 {
   MetaCompositorPrivate *priv =
     meta_compositor_get_instance_private (compositor);
+  MetaBackend *backend = meta_get_backend ();
+  MetaRenderer *renderer = meta_backend_get_renderer (backend);
+  GList *l;
 
-  priv->top_window_actor = NULL;
-  priv->top_window_actor_destroy_id = 0;
-  priv->windows = g_list_remove (priv->windows, window_actor);
+  if (!priv->needs_top_window_update)
+    return;
 
-  meta_stack_tracker_queue_sync_stack (priv->display->stack_tracker);
+  priv->needs_top_window_update = FALSE;
+
+  for (l = meta_renderer_get_views (renderer); l; l = l->next)
+    {
+      ClutterStageView *stage_view = l->data;
+      MetaRectangle view_layout;
+      MetaWindowActor **cached;
+
+      clutter_stage_view_get_layout (stage_view, &view_layout);
+
+      cached = g_object_get_qdata (G_OBJECT (stage_view),
+                                   quark_top_window_actor);
+      if (!cached)
+        {
+          cached = g_new0 (MetaWindowActor *, 1);
+          g_object_set_qdata_full (G_OBJECT (stage_view),
+                                   quark_top_window_actor,
+                                   cached, top_window_actor_free);
+        }
+
+      g_set_weak_pointer (cached,
+                          find_top_window_actor_on_view (compositor,
+                                                         &view_layout));
+    }
+}
+
+/*
+ * The topmost window actor overlapping @stage_view, or NULL. Recomputed only
+ * when something that could change the answer has happened since the last call.
+ */
+MetaWindowActor *
+meta_compositor_get_top_window_actor_for_view (MetaCompositor   *compositor,
+                                               ClutterStageView *stage_view)
+{
+  MetaWindowActor **cached;
+
+  maybe_update_top_window_actors (compositor);
+
+  cached = g_object_get_qdata (G_OBJECT (stage_view), quark_top_window_actor);
+
+  return cached ? *cached : NULL;
 }
 
 void
@@ -1235,7 +1443,6 @@ meta_compositor_sync_stack (MetaCompositor  *compositor,
 {
   MetaCompositorPrivate *priv =
     meta_compositor_get_instance_private (compositor);
-  MetaWindowActor *top_window_actor;
   GList *old_stack;
 
   /* This is painful because hidden windows that we are in the process
@@ -1318,22 +1525,7 @@ meta_compositor_sync_stack (MetaCompositor  *compositor,
     }
 
   sync_actor_stacking (compositor);
-
-  top_window_actor = get_top_visible_window_actor (compositor);
-
-  if (priv->top_window_actor == top_window_actor)
-    return;
-
-  g_clear_signal_handler (&priv->top_window_actor_destroy_id,
-                          priv->top_window_actor);
-
-  priv->top_window_actor = top_window_actor;
-
-  if (priv->top_window_actor)
-    priv->top_window_actor_destroy_id =
-      g_signal_connect (priv->top_window_actor, "destroy",
-                        G_CALLBACK (on_top_window_actor_destroyed),
-                        compositor);
+  meta_compositor_invalidate_top_window (compositor);
 }
 
 void
@@ -1528,6 +1720,11 @@ meta_compositor_init (MetaCompositor *compositor)
 
   priv->context = clutter_backend->cogl_context;
 
+  if (quark_top_window_actor == 0)
+    quark_top_window_actor = g_quark_from_static_string ("-meta-top-window-actor");
+
+  meta_compositor_invalidate_top_window (compositor);
+
   priv->pre_paint_func_id =
     clutter_threads_add_repaint_func_full (CLUTTER_REPAINT_FLAGS_PRE_PAINT,
                                            meta_pre_paint_func,
@@ -1559,9 +1756,6 @@ meta_compositor_dispose (GObject *object)
   g_clear_handle_id (&priv->post_paint_func_id,
                      clutter_threads_remove_repaint_func);
 
-  g_clear_signal_handler (&priv->top_window_actor_destroy_id,
-                          priv->top_window_actor);
-
   if (!meta_is_wayland_compositor ())
     {
       for (GList *l = priv->background_actors; l; l = l->next)
@@ -1569,6 +1763,7 @@ meta_compositor_dispose (GObject *object)
     }
   g_clear_pointer (&priv->background_actors, g_list_free);
   g_clear_pointer (&priv->bottom_window_group, clutter_actor_destroy);
+  g_clear_pointer (&priv->background_window_group, clutter_actor_destroy);
   g_clear_pointer (&priv->desklet_container, clutter_actor_destroy);
   g_clear_pointer (&priv->window_group, clutter_actor_destroy);
   g_clear_pointer (&priv->top_window_group, clutter_actor_destroy);
@@ -1881,14 +2076,6 @@ meta_compositor_get_stage (MetaCompositor *compositor)
   return CLUTTER_STAGE (priv->stage);
 }
 
-MetaWindowActor *
-meta_compositor_get_top_window_actor (MetaCompositor *compositor)
-{
-  MetaCompositorPrivate *priv =
-    meta_compositor_get_instance_private (compositor);
-
-  return priv->top_window_actor;
-}
 
 gboolean
 meta_compositor_is_switching_workspace (MetaCompositor *compositor)

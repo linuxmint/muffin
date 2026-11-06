@@ -716,8 +716,8 @@ actor_pivot (void)
   clutter_actor_add_child (stage, actor_explicit);
 
   /* Fake allocation or pivot-point will not have any effect */
-  clutter_actor_allocate (actor_implicit, &allocation, CLUTTER_ALLOCATION_NONE);
-  clutter_actor_allocate (actor_explicit, &allocation, CLUTTER_ALLOCATION_NONE);
+  clutter_actor_allocate (actor_implicit, &allocation);
+  clutter_actor_allocate (actor_explicit, &allocation);
 
   clutter_actor_set_pivot_point (actor_implicit, 0.5, 0.5);
   clutter_actor_set_pivot_point (actor_explicit, 0.5, 0.5);

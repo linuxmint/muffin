@@ -39,6 +39,10 @@ typedef struct _MetaWaylandDataOffer MetaWaylandDataOffer;
 typedef struct _MetaWaylandDataDevice MetaWaylandDataDevice;
 typedef struct _MetaWaylandDataDevicePrimary MetaWaylandDataDevicePrimary;
 
+typedef struct _MetaWaylandInputMethod MetaWaylandInputMethod;
+typedef struct _MetaWaylandVirtualKeyboardManager MetaWaylandVirtualKeyboardManager;
+typedef struct _MetaWaylandImLauncher MetaWaylandImLauncher;
+
 typedef struct _MetaWaylandTabletManager MetaWaylandTabletManager;
 typedef struct _MetaWaylandTabletSeat MetaWaylandTabletSeat;
 typedef struct _MetaWaylandTabletTool MetaWaylandTabletTool;

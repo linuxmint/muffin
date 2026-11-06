@@ -64,6 +64,9 @@ CLUTTER_EXPORT
 void clutter_input_method_focus_out (ClutterInputMethod *im);
 
 CLUTTER_EXPORT
+ClutterInputFocus * clutter_input_method_get_focus (ClutterInputMethod *im);
+
+CLUTTER_EXPORT
 void clutter_input_method_commit (ClutterInputMethod *im,
                                   const gchar        *text);
 CLUTTER_EXPORT

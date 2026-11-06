@@ -26,6 +26,7 @@
 #include "clutter/clutter.h"
 #include "core/window-private.h"
 #include "meta/meta-cursor-tracker.h"
+#include "wayland/meta-wayland-dma-buf.h"
 #include "wayland/meta-wayland-pointer-gestures.h"
 #include "wayland/meta-wayland-seat.h"
 #include "wayland/meta-wayland-surface.h"
@@ -84,9 +85,11 @@ struct _MetaWaylandCompositor
   MetaXWaylandManager xwayland_manager;
 
   MetaWaylandSeat *seat;
+  MetaWaylandImLauncher *im_launcher;
   MetaWaylandTabletManager *tablet_manager;
   MetaWaylandActivation *activation;
   MetaWaylandXdgForeign *foreign;
+  MetaWaylandDmaBufManager *dma_buf_manager;
 
   GHashTable *scheduled_surface_associations;
 };

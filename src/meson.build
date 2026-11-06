@@ -355,6 +355,7 @@ muffin_sources = [
   'core/meta-fraction.h',
   'core/meta-gesture-tracker.c',
   'core/meta-gesture-tracker-private.h',
+  'core/meta-im-mode.c',
   'core/meta-inhibit-shortcuts-dialog.c',
   'core/meta-inhibit-shortcuts-dialog-default.c',
   'core/meta-inhibit-shortcuts-dialog-default-private.h',
@@ -365,6 +366,8 @@ muffin_sources = [
   'core/meta-sound-player.c',
   'core/meta-workspace-manager.c',
   'core/meta-workspace-manager-private.h',
+  'core/meta-window-debug-dbus.c',
+  'core/meta-window-debug-dbus.h',
   'core/place.c',
   'core/place.h',
   'core/prefs.c',
@@ -511,6 +514,8 @@ if have_wayland
     'wayland/meta-wayland-data-source-primary.h',
     'wayland/meta-wayland-dma-buf.c',
     'wayland/meta-wayland-dma-buf.h',
+    'wayland/meta-wayland-drm.c',
+    'wayland/meta-wayland-drm.h',
     'wayland/meta-wayland-dnd-surface.c',
     'wayland/meta-wayland-dnd-surface.h',
     'wayland/meta-wayland-fixes.c',
@@ -521,6 +526,8 @@ if have_wayland
     'wayland/meta-wayland-layer-shell.c',
     'wayland/meta-wayland-layer-shell.h',
     'wayland/meta-wayland.h',
+    'wayland/meta-wayland-idle-notify.h',
+    'wayland/meta-wayland-idle-notify.c',
     'wayland/meta-wayland-idle-inhibit.c',
     'wayland/meta-wayland-idle-inhibit.h',
     'wayland/meta-wayland-inhibit-shortcuts.c',
@@ -558,6 +565,8 @@ if have_wayland
     'wayland/meta-wayland-seat.h',
     'wayland/meta-wayland-shell-surface.c',
     'wayland/meta-wayland-shell-surface.h',
+    'wayland/meta-wayland-fractional-scale.c',
+    'wayland/meta-wayland-fractional-scale.h',
     'wayland/meta-wayland-single-pixel-buffer.c',
     'wayland/meta-wayland-single-pixel-buffer.h',
     'wayland/meta-wayland-subsurface.c',
@@ -584,8 +593,16 @@ if have_wayland
     'wayland/meta-wayland-tablet-seat.h',
     'wayland/meta-wayland-tablet-tool.c',
     'wayland/meta-wayland-tablet-tool.h',
+    'wayland/meta-wayland-im-launcher.c',
+    'wayland/meta-wayland-im-launcher.h',
+    'wayland/meta-wayland-input-method.c',
+    'wayland/meta-wayland-input-method.h',
+    'wayland/meta-wayland-input-popup-surface.c',
+    'wayland/meta-wayland-input-popup-surface.h',
     'wayland/meta-wayland-text-input.c',
     'wayland/meta-wayland-text-input.h',
+    'wayland/meta-wayland-virtual-keyboard.c',
+    'wayland/meta-wayland-virtual-keyboard.h',
     'wayland/meta-wayland-touch.c',
     'wayland/meta-wayland-touch.h',
     'wayland/meta-wayland-types.h',
@@ -821,9 +838,11 @@ if have_wayland
     ['cursor-shape-v1', 'private', ],
     ['gtk-shell', 'private', ],
     ['wlr-layer-shell-unstable-v1', 'private', ],
+    ['input-method-unstable-v2', 'private', ],
+    ['virtual-keyboard-unstable-v1', 'private', ],
     ['idle-inhibit', 'unstable', 'v1', ],
     ['keyboard-shortcuts-inhibit', 'unstable', 'v1', ],
-    ['linux-dmabuf', 'unstable', 'v1', ],
+    ['linux-dmabuf', 'stable', 'v1', ],
     ['pointer-constraints', 'unstable', 'v1', ],
     ['pointer-gestures', 'unstable', 'v1', ],
     ['pointer-warp-v1', 'private',],
@@ -833,6 +852,7 @@ if have_wayland
     ['xdg-system-bell', 'staging', 'v1', ],
     ['tablet', 'unstable', 'v2', ],
     ['text-input', 'unstable', 'v3', ],
+    ['fractional-scale', 'staging', 'v1', ],
     ['viewporter', 'stable', ],
     ['xdg-activation', 'staging', 'v1', ],
     ['xdg-dialog', 'staging', 'v1', ],
@@ -844,6 +864,8 @@ if have_wayland
     ['xdg-toplevel-icon-v1', 'private', ],
     ['xapp-shell', 'private', ],
     ['xwayland-keyboard-grab', 'unstable', 'v1', ],
+    ['wayland-drm', 'private', ],
+    ['ext-idle-notify', 'staging', 'v1', ],
   ]
   if have_wayland_eglstream
     wayland_eglstream_protocols_dir = wayland_eglstream_protocols_dep.get_variable(pkgconfig: 'pkgdatadir')
@@ -861,7 +883,12 @@ if have_wayland
     protocol_type = p.get(1)
 
     if protocol_type == 'stable'
-      output_base = protocol_name
+      if p.length() == 3
+        protocol_version = p.get(2)
+        output_base = '@0@-@1@'.format(protocol_name, protocol_version)
+      else
+        output_base = protocol_name
+      endif
       input = join_paths(protocols_dir,
                          '@0@/@1@/@2@.xml'.format(protocol_type,
                          protocol_name,
@@ -971,6 +998,11 @@ executable('muffin',
   dependencies: [libmuffin_dep],
   install_dir: bindir,
   install: true,
+)
+
+install_data('cinnamon-list-windows',
+  install_dir: bindir,
+  install_mode: 'rwxr-xr-x',
 )
 
 executable('muffin-restart-helper',

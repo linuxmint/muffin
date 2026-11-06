@@ -37,6 +37,9 @@ gboolean meta_compositor_do_manage (MetaCompositor  *compositor,
 void meta_compositor_remove_window_actor (MetaCompositor  *compositor,
                                           MetaWindowActor *window_actor);
 
+void meta_compositor_sync_window_group (MetaCompositor  *compositor,
+                                        MetaWindow      *window);
+
 void meta_switch_workspace_completed (MetaCompositor *compositor);
 
 gboolean meta_begin_modal_for_plugin (MetaCompositor   *compositor,
@@ -67,9 +70,15 @@ void meta_compositor_redirect_x11_windows (MetaCompositor *compositor);
 
 gboolean meta_compositor_is_unredirect_inhibited (MetaCompositor *compositor);
 
+gboolean meta_compositor_window_can_occlude (MetaWindow *window);
+
+void meta_compositor_invalidate_top_window (MetaCompositor *compositor);
+
+MetaWindowActor * meta_compositor_get_top_window_actor_for_view (MetaCompositor   *compositor,
+                                                                 ClutterStageView *stage_view);
+
 MetaDisplay * meta_compositor_get_display (MetaCompositor *compositor);
 
-MetaWindowActor * meta_compositor_get_top_window_actor (MetaCompositor *compositor);
 
 ClutterStage * meta_compositor_get_stage (MetaCompositor *compositor);
 
@@ -78,6 +87,8 @@ gboolean meta_compositor_is_switching_workspace (MetaCompositor *compositor);
 MetaLaters * meta_compositor_get_laters (MetaCompositor *compositor);
 
 void meta_update_desklet_stacking (MetaCompositor *compositor);
+
+ClutterActor * meta_get_background_window_group_for_display (MetaDisplay *display);
 
 static inline int64_t
 us (int64_t us)

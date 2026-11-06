@@ -49,14 +49,6 @@ G_DEFINE_ABSTRACT_TYPE_WITH_PRIVATE (MetaWaylandActorSurface,
                                      META_TYPE_WAYLAND_SURFACE_ROLE)
 
 static void
-meta_wayland_actor_surface_constructed (GObject *object)
-{
-  G_OBJECT_CLASS (meta_wayland_actor_surface_parent_class)->constructed (object);
-
-  meta_wayland_actor_surface_reset_actor (META_WAYLAND_ACTOR_SURFACE (object));
-}
-
-static void
 clear_surface_actor (MetaWaylandActorSurface *actor_surface)
 {
   MetaWaylandActorSurfacePrivate *priv =
@@ -103,6 +95,8 @@ meta_wayland_actor_surface_assigned (MetaWaylandSurfaceRole *surface_role)
     meta_wayland_actor_surface_get_instance_private (META_WAYLAND_ACTOR_SURFACE (surface_role));
   MetaWaylandSurface *surface =
     meta_wayland_surface_role_get_surface (surface_role);
+
+  meta_wayland_actor_surface_reset_actor (META_WAYLAND_ACTOR_SURFACE (surface_role));
 
   if (wl_list_empty (&surface->unassigned.pending_frame_callback_list))
     return;
@@ -320,12 +314,41 @@ meta_wayland_actor_surface_is_on_logical_monitor (MetaWaylandSurfaceRole *surfac
 {
   MetaWaylandActorSurfacePrivate *priv =
     meta_wayland_actor_surface_get_instance_private (META_WAYLAND_ACTOR_SURFACE (surface_role));
+  MetaWaylandSurface *surface =
+    meta_wayland_surface_role_get_surface (surface_role);
   ClutterActor *actor = CLUTTER_ACTOR (priv->actor);
+  MetaWindow *window;
   float x, y, width, height;
   cairo_rectangle_int_t actor_rect;
   cairo_region_t *region;
   MetaRectangle logical_monitor_layout;
   gboolean is_on_monitor;
+
+  /* Use the window rect rather than the actor geometry when there is a
+   * window, so that plugin effects, clone painting of hidden actors and
+   * minimized state can't leak into the client-visible output enter/leave
+   * state (and from there into GTK's scale choice on mixed-DPI setups).
+   *
+   * Only do this once the window has been shown: before the first show the
+   * frame rect is not meaningful yet, and sending output enter/leave during
+   * a pre-map maximize handshake makes Chromium clients re-scale mid-dance
+   * and fight the transition scheduled by xdg_toplevel_set_maximized.
+   */
+  window = meta_wayland_surface_get_window (surface);
+  if (!window)
+    window = meta_wayland_surface_get_toplevel_window (surface);
+
+  if (window &&
+      meta_window_get_client_type (window) == META_WINDOW_CLIENT_TYPE_WAYLAND &&
+      meta_window_wayland_has_been_shown (window))
+    {
+      MetaRectangle frame_rect;
+
+      meta_window_get_frame_rect (window, &frame_rect);
+      logical_monitor_layout = meta_logical_monitor_get_layout (logical_monitor);
+
+      return meta_rectangle_overlap (&frame_rect, &logical_monitor_layout);
+    }
 
   if (!clutter_actor_is_mapped (actor))
     return FALSE;
@@ -390,7 +413,6 @@ meta_wayland_actor_surface_class_init (MetaWaylandActorSurfaceClass *klass)
     META_WAYLAND_SURFACE_ROLE_CLASS (klass);
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
-  object_class->constructed = meta_wayland_actor_surface_constructed;
   object_class->dispose = meta_wayland_actor_surface_dispose;
 
   surface_role_class->assigned = meta_wayland_actor_surface_assigned;

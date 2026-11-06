@@ -334,7 +334,13 @@ meta_parse_accelerator (const char   *accel,
   if (!accel[0] || strcmp (accel, "disabled") == 0)
     return TRUE;
 
-  return accelerator_parse (accel, combo);
+  if (!accelerator_parse (accel, combo))
+    return FALSE;
+
+  if (combo->keysym == 0 && combo->keycode == 0)
+    return FALSE;
+
+  return TRUE;
 }
 
 gboolean

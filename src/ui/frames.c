@@ -431,6 +431,9 @@ meta_ui_frame_calc_geometry (MetaUIFrame       *frame,
   meta_prefs_get_button_layout (&button_layout);
 
   client_rect = meta_window_x11_get_client_rect (window_x11);
+  meta_window_stage_to_protocol_size (frame->meta_window,
+                                      client_rect.width, client_rect.height,
+                                      &client_rect.width, &client_rect.height);
 
   meta_theme_calc_geometry (meta_theme_get_default (),
                             frame->style_info,
@@ -1526,6 +1529,12 @@ get_visible_frame_border_region (MetaUIFrame *frame)
                                 type, frame->text_height, flags,
                                 &borders);
 
+  /* This region clips drawing into the frame's X window, so it is in protocol
+   * pixels like the borders above, while buffer_rect is in stage coordinates. */
+  meta_window_stage_to_protocol_size (frame->meta_window,
+                                      buffer_rect.width, buffer_rect.height,
+                                      &buffer_rect.width, &buffer_rect.height);
+
   /* Frame rect */
   area.x = 0;
   area.y = 0;
@@ -1579,10 +1588,18 @@ meta_ui_frame_get_mask (MetaUIFrame           *frame,
   flags = meta_frame_get_flags (frame->meta_window->frame);
 
   meta_style_info_set_flags (frame->style_info, flags);
-  meta_ui_frame_get_borders (frame, &borders);
+  meta_frame_calc_borders (frame->meta_window->frame, &borders);
 
-  /* See comment in meta_frame_layout_draw_with_style() for details on HiDPI handling */
+  /* The mask is built at the shaped texture's resolution, which is stage
+   * coordinates, while the theme sizes itself with the X server's scaling
+   * factor. Expressing that factor in stage terms keeps the mask's corner
+   * radius matching the one the frame paints: it cancels to 1 under Xwayland,
+   * where the two scales are the same, and stays put on X11, where the stage
+   * is already protocol-sized.
+   */
   scale = meta_theme_get_window_scaling_factor ();
+  meta_window_protocol_to_stage_size (frame->meta_window, scale, 0, &scale, NULL);
+
   surface = cairo_get_target (cr);
   cairo_surface_get_device_scale (surface, &xscale, &yscale);
   cairo_surface_set_device_scale (surface, scale, scale);
@@ -1698,6 +1715,9 @@ meta_ui_frame_paint (MetaUIFrame  *frame,
   meta_prefs_get_button_layout (&button_layout);
 
   client_rect = meta_window_x11_get_client_rect (window_x11);
+  meta_window_stage_to_protocol_size (frame->meta_window,
+                                      client_rect.width, client_rect.height,
+                                      &client_rect.width, &client_rect.height);
 
   meta_theme_draw_frame (meta_theme_get_default (),
                          frame->style_info,
@@ -1880,10 +1900,26 @@ get_control (MetaUIFrame *frame, int root_x, int root_y)
   int win_x, win_y;
 
   gdk_window_get_position (frame->window, &win_x, &win_y);
+
+  /* The frame geometry below is all in protocol pixels, but the event
+   * coordinates arrive in stage coordinates. */
+  meta_window_stage_to_protocol_point (frame->meta_window,
+                                       root_x, root_y,
+                                       &root_x, &root_y,
+                                       META_ROUNDING_STRATEGY_ROUND);
+
   x = root_x - win_x;
   y = root_y - win_y;
 
   meta_window_get_client_area_rect (frame->meta_window, &client);
+  meta_window_stage_to_protocol_point (frame->meta_window,
+                                       client.x, client.y,
+                                       &client.x, &client.y,
+                                       META_ROUNDING_STRATEGY_ROUND);
+  meta_window_stage_to_protocol_size (frame->meta_window,
+                                      client.width, client.height,
+                                      &client.width, &client.height);
+
   if (META_POINT_IN_RECT (x, y, client))
     return META_FRAME_CONTROL_CLIENT_AREA;
 

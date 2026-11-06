@@ -34,13 +34,17 @@
 #include "wayland/meta-wayland-buffer.h"
 #include "wayland/meta-wayland-activation.h"
 #include "wayland/meta-wayland-cursor-shape.h"
+#include "wayland/meta-wayland-fractional-scale.h"
 #include "wayland/meta-wayland-data-device.h"
 #include "wayland/meta-wayland-dma-buf.h"
+#include "wayland/meta-wayland-drm.h"
 #include "wayland/meta-wayland-egl-stream.h"
 #include "wayland/meta-wayland-idle-inhibit.h"
 #include "wayland/meta-wayland-fixes.h"
+#include "wayland/meta-wayland-idle-notify.h"
 #include "wayland/meta-wayland-inhibit-shortcuts-dialog.h"
 #include "wayland/meta-wayland-inhibit-shortcuts.h"
+#include "wayland/meta-wayland-layer-shell.h"
 #include "wayland/meta-wayland-legacy-xdg-foreign.h"
 #include "wayland/meta-wayland-outputs.h"
 #include "wayland/meta-wayland-private.h"
@@ -48,7 +52,13 @@
 #include "wayland/meta-wayland-seat.h"
 #include "wayland/meta-wayland-subsurface.h"
 #include "wayland/meta-wayland-system-bell.h"
+#include "meta/util.h"
+#include "wayland/meta-wayland-im-launcher.h"
+#include "wayland/meta-wayland-input-method.h"
 #include "wayland/meta-wayland-tablet-manager.h"
+#include "input-method-unstable-v2-server-protocol.h"
+#include "virtual-keyboard-unstable-v1-server-protocol.h"
+#include "wayland/meta-wayland-virtual-keyboard.h"
 #include "wayland/meta-wayland-xdg-dialog.h"
 #include "wayland/meta-wayland-xdg-foreign.h"
 #include "wayland/meta-wayland-xdg-toplevel-tag.h"
@@ -57,6 +67,10 @@
 #include "wayland/meta-xwayland-grab-keyboard.h"
 #include "wayland/meta-xwayland-private.h"
 #include "wayland/meta-xwayland.h"
+
+#ifdef HAVE_NATIVE_BACKEND
+#include "backends/native/meta-renderer-native.h"
+#endif
 
 static char *_display_name_override;
 
@@ -136,6 +150,14 @@ meta_wayland_compositor_set_input_focus (MetaWaylandCompositor *compositor,
                                          MetaWindow            *window)
 {
   MetaWaylandSurface *surface = window ? window->surface : NULL;
+  MetaWaylandSurface *exclusive;
+
+  /* Per layer-shell spec, a mapped top/overlay layer surface with exclusive
+   * keyboard interactivity always holds keyboard focus, even as the focus
+   * window changes underneath it. */
+  exclusive = meta_wayland_layer_shell_get_exclusive_focus_surface (compositor);
+  if (exclusive)
+    surface = exclusive;
 
   meta_wayland_seat_set_input_focus (compositor->seat, surface);
 }
@@ -367,17 +389,29 @@ meta_wayland_compositor_class_init (MetaWaylandCompositorClass *klass)
 }
 
 static bool
-meta_xwayland_global_filter (const struct wl_client *client,
-                             const struct wl_global *global,
-                             void                   *data)
+meta_wayland_global_filter (const struct wl_client *client,
+                            const struct wl_global *global,
+                            void                   *data)
 {
   MetaWaylandCompositor *compositor = (MetaWaylandCompositor *) data;
   MetaXWaylandManager *xwayland_manager = &compositor->xwayland_manager;
+  const struct wl_interface *iface = wl_global_get_interface (global);
+
+  /* The input-method and virtual-keyboard globals can see or inject every
+   * keystroke, so they are advertised only to the compositor-launched fcitx.
+   * No other client sees them in the registry, so none can bind them. */
+  if (iface == &zwp_input_method_manager_v2_interface ||
+      iface == &zwp_virtual_keyboard_manager_v1_interface)
+    {
+      struct wl_client *im =
+        meta_wayland_im_launcher_get_client (compositor->im_launcher);
+
+      return im != NULL && client == im;
+    }
 
   /* Keyboard grabbing protocol is for Xwayland only */
   if (client != xwayland_manager->client)
-    return (wl_global_get_interface (global) !=
-            &zwp_xwayland_keyboard_grab_manager_v1_interface);
+    return (iface != &zwp_xwayland_keyboard_grab_manager_v1_interface);
 
   /* All others are visible to all clients */
   return true;
@@ -444,12 +478,24 @@ meta_wayland_compositor_setup (MetaWaylandCompositor *wayland_compositor)
   meta_wayland_pointer_constraints_init (compositor);
   meta_wayland_xdg_foreign_init (compositor);
   meta_wayland_legacy_xdg_foreign_init (compositor);
-  meta_wayland_dma_buf_init (compositor);
+  {
+    g_autoptr (GError) error = NULL;
+
+    compositor->dma_buf_manager =
+      meta_wayland_dma_buf_manager_new (compositor, &error);
+    if (!compositor->dma_buf_manager)
+      g_warning ("Failed to init Wayland dma-buf support: %s", error->message);
+  }
+  meta_wayland_drm_init (compositor);
   meta_wayland_init_single_pixel_buffer_manager (compositor);
+  meta_wayland_init_fractional_scale (compositor);
   meta_wayland_keyboard_shortcuts_inhibit_init (compositor);
   meta_wayland_surface_inhibit_shortcuts_dialog_init ();
   meta_wayland_text_input_init (compositor);
+  meta_wayland_input_method_manager_init (compositor);
+  meta_wayland_virtual_keyboard_manager_init (compositor);
   meta_wayland_activation_init (compositor);
+  meta_wayland_idle_notify_init (compositor);
   meta_wayland_idle_inhibit_init (compositor);
   meta_wayland_init_xdg_wm_dialog (compositor);
   meta_wayland_xdg_toplevel_tag_init (compositor);
@@ -459,14 +505,36 @@ meta_wayland_compositor_setup (MetaWaylandCompositor *wayland_compositor)
   meta_wayland_init_fixes (compositor);
   meta_wayland_init_system_bell (compositor);
 
-  /* Xwayland specific protocol, needs to be filtered out for all other clients */
-  if (meta_xwayland_grab_keyboard_init (compositor))
-    wl_display_set_global_filter (compositor->wayland_display,
-                                  meta_xwayland_global_filter,
-                                  compositor);
+  /* The global filter restricts the Xwayland-grab protocol to Xwayland and the
+   * input-method / virtual-keyboard protocols to the launched fcitx, so it is
+   * installed unconditionally. */
+  meta_xwayland_grab_keyboard_init (compositor);
+  wl_display_set_global_filter (compositor->wayland_display,
+                                meta_wayland_global_filter,
+                                compositor);
 
 #ifdef HAVE_WAYLAND_EGLSTREAM
-  meta_wayland_eglstream_controller_init (compositor);
+  /* With gbm on the NVIDIA driver, EGL/Vulkan clients and Xwayland must take
+   * the dma-buf path too, so only expose the EGLStream controller when the
+   * renderer itself is EGLStream based. */
+    {
+      gboolean should_enable_eglstream_controller = TRUE;
+#if defined(HAVE_EGL_DEVICE) && defined(HAVE_NATIVE_BACKEND)
+      MetaRenderer *renderer = meta_backend_get_renderer (meta_get_backend ());
+
+      if (META_IS_RENDERER_NATIVE (renderer))
+        {
+          MetaRendererNative *renderer_native = META_RENDERER_NATIVE (renderer);
+
+          if (meta_renderer_native_get_mode (renderer_native) ==
+              META_RENDERER_NATIVE_MODE_GBM)
+            should_enable_eglstream_controller = FALSE;
+        }
+#endif
+
+      if (should_enable_eglstream_controller)
+        meta_wayland_eglstream_controller_init (compositor);
+    }
 #endif
 
   if (meta_get_x11_display_policy () != META_DISPLAY_POLICY_DISABLED)
@@ -502,6 +570,14 @@ meta_wayland_compositor_setup (MetaWaylandCompositor *wayland_compositor)
     }
 
   set_gnome_env ("WAYLAND_DISPLAY", meta_wayland_get_wayland_display_name (compositor));
+
+  /* In a fcitx Wayland session, launch fcitx as a compositor-owned client so
+   * we hold its exact wl_client for the input-method global filter. */
+  if (meta_im_mode_is_fcitx ())
+    {
+      compositor->im_launcher = meta_wayland_im_launcher_new (compositor);
+      meta_wayland_im_launcher_start (compositor->im_launcher);
+    }
 }
 
 const char *
@@ -524,6 +600,8 @@ meta_wayland_finalize (void)
   compositor = meta_wayland_compositor_get_default ();
 
   meta_xwayland_shutdown (&compositor->xwayland_manager);
+  meta_wayland_im_launcher_destroy (compositor->im_launcher);
+  compositor->im_launcher = NULL;
   g_clear_pointer (&compositor->display_name, g_free);
 }
 

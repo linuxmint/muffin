@@ -66,7 +66,7 @@ struct _MetaWaylandPopup
   struct wl_list link;
 };
 
-static void
+static gboolean
 meta_wayland_popup_grab_begin (MetaWaylandPopupGrab *grab,
                                MetaWaylandSurface   *surface);
 
@@ -163,13 +163,22 @@ meta_wayland_popup_grab_create (MetaWaylandPointer      *pointer,
   struct wl_client *client = wl_resource_get_client (surface->resource);
   MetaWaylandPopupGrab *grab;
 
+  /* A grab op already in effect (a compositor modal, a window op) would
+   * refuse ours below; don't leave a pointer grab behind in that case. */
+  if (meta_display_get_grab_op (meta_get_display ()) != META_GRAB_OP_NONE)
+    return NULL;
+
   grab = g_slice_new0 (MetaWaylandPopupGrab);
   grab->generic.interface = &popup_grab_interface;
   grab->generic.pointer = pointer;
   grab->grab_client = client;
   wl_list_init (&grab->all_popups);
 
-  meta_wayland_popup_grab_begin (grab, surface);
+  if (!meta_wayland_popup_grab_begin (grab, surface))
+    {
+      g_slice_free (MetaWaylandPopupGrab, grab);
+      return NULL;
+    }
 
   return grab;
 }
@@ -181,7 +190,7 @@ meta_wayland_popup_grab_destroy (MetaWaylandPopupGrab *grab)
   g_slice_free (MetaWaylandPopupGrab, grab);
 }
 
-static void
+static gboolean
 meta_wayland_popup_grab_begin (MetaWaylandPopupGrab *grab,
                                MetaWaylandSurface   *surface)
 {
@@ -189,17 +198,23 @@ meta_wayland_popup_grab_begin (MetaWaylandPopupGrab *grab,
   MetaWindow *window = meta_wayland_surface_get_window (surface);
 
   meta_wayland_pointer_start_grab (pointer, (MetaWaylandPointerGrab*)grab);
-  meta_display_begin_grab_op (window->display,
-                              window,
-                              META_GRAB_OP_WAYLAND_POPUP,
-                              FALSE, /* pointer_already_grabbed */
-                              FALSE, /* frame_action */
-                              1, /* button. XXX? */
-                              0, /* modmask */
-                              meta_display_get_current_time_roundtrip (
-                                window->display),
-                              pointer->grab_x,
-                              pointer->grab_y);
+  if (!meta_display_begin_grab_op (window->display,
+                                   window,
+                                   META_GRAB_OP_WAYLAND_POPUP,
+                                   FALSE, /* pointer_already_grabbed */
+                                   FALSE, /* frame_action */
+                                   1, /* button. XXX? */
+                                   0, /* modmask */
+                                   meta_display_get_current_time_roundtrip (
+                                     window->display),
+                                   pointer->grab_x,
+                                   pointer->grab_y))
+    {
+      meta_wayland_pointer_end_grab (pointer);
+      return FALSE;
+    }
+
+  return TRUE;
 }
 
 void

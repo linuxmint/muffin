@@ -200,6 +200,9 @@ META_EXPORT_TEST
 MetaMonitorMode * meta_monitor_get_mode_from_spec (MetaMonitor         *monitor,
                                                    MetaMonitorModeSpec *monitor_mode_spec);
 
+gboolean meta_monitor_mode_spec_equals (MetaMonitorModeSpec *monitor_mode_spec,
+                                        MetaMonitorModeSpec *other_monitor_mode_spec);
+
 META_EXPORT_TEST
 MetaMonitorMode * meta_monitor_get_preferred_mode (MetaMonitor *monitor);
 

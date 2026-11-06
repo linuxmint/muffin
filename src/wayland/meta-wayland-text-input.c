@@ -27,6 +27,7 @@
 
 #include "wayland/meta-wayland-private.h"
 #include "wayland/meta-wayland-seat.h"
+#include "wayland/meta-wayland-touch.h"
 #include "wayland/meta-wayland-versions.h"
 
 #include "text-input-unstable-v3-server-protocol.h"
@@ -66,6 +67,28 @@ struct _MetaWaylandTextInput
     uint32_t anchor;
   } surrounding;
 
+  /* Double-buffered: requests land here and move to `surrounding` on commit.
+   * The committed copy must survive across commit cycles - the input method's
+   * later delete_surrounding_text is converted against it. */
+  struct
+  {
+    char *text;
+    uint32_t cursor;
+    uint32_t anchor;
+  } pending_surrounding;
+
+  /* The current preedit, resent with every done(): clients apply ALL
+   * double-buffered state on done, so a done without a preedit_string would
+   * clear the preedit they display. `changed` lets a transition to NULL
+   * still be sent once without repeating NULL forever. */
+  struct
+  {
+    char *string;
+    uint32_t cursor;
+    uint32_t anchor;
+    gboolean changed;
+  } preedit;
+
   cairo_rectangle_int_t cursor_rect;
 
   uint32_t content_type_hint;
@@ -87,16 +110,30 @@ G_DECLARE_FINAL_TYPE (MetaWaylandTextInputFocus, meta_wayland_text_input_focus,
 G_DEFINE_TYPE (MetaWaylandTextInputFocus, meta_wayland_text_input_focus,
                CLUTTER_TYPE_INPUT_FOCUS)
 
+/* Relay the client's surrounding text into the Clutter funnel. Clutter uses
+ * char offsets but text-input-v3 uses byte offsets, so convert. */
+static void
+meta_wayland_text_input_relay_surrounding (MetaWaylandTextInput *text_input,
+                                           ClutterInputFocus    *focus)
+{
+  const char *text = text_input->surrounding.text;
+  long cursor, anchor;
+
+  if (!text)
+    return;
+
+  cursor = g_utf8_strlen (text, text_input->surrounding.cursor);
+  anchor = g_utf8_strlen (text, text_input->surrounding.anchor);
+  clutter_input_focus_set_surrounding (focus, text, cursor, anchor);
+}
+
 static void
 meta_wayland_text_input_focus_request_surrounding (ClutterInputFocus *focus)
 {
   MetaWaylandTextInput *text_input;
 
   text_input = META_WAYLAND_TEXT_INPUT_FOCUS (focus)->text_input;
-  clutter_input_focus_set_surrounding (focus,
-				       text_input->surrounding.text,
-				       text_input->surrounding.cursor,
-                                       text_input->surrounding.anchor);
+  meta_wayland_text_input_relay_surrounding (text_input, focus);
 }
 
 static uint32_t
@@ -128,6 +165,17 @@ clutter_input_focus_send_done (ClutterInputFocus *focus)
 
   wl_resource_for_each (resource, &text_input->focus_resource_list)
     {
+      /* done() applies all double-buffered state at once, so the current
+       * preedit must accompany every done or the client would clear it. */
+      if (text_input->preedit.string || text_input->preedit.changed)
+        {
+          zwp_text_input_v3_send_preedit_string (resource,
+                                                 text_input->preedit.string,
+                                                 text_input->preedit.cursor,
+                                                 text_input->preedit.anchor);
+          text_input->preedit.changed = FALSE;
+        }
+
       zwp_text_input_v3_send_done (resource,
                                    lookup_serial (text_input, resource));
     }
@@ -190,14 +238,35 @@ meta_wayland_text_input_focus_delete_surrounding (ClutterInputFocus *focus,
                                                   guint              len)
 {
   MetaWaylandTextInput *text_input;
+  const char *start, *end;
+  const char *before, *after;
+  const char *cursor;
   uint32_t before_length;
   uint32_t after_length;
   struct wl_resource *resource;
 
+  /* offset and len are counted in UTF-8 chars, but text-input-v3's lengths
+   * are bytes; convert against the client's surrounding text, which the
+   * offsets are relative to. */
   text_input = META_WAYLAND_TEXT_INPUT_FOCUS (focus)->text_input;
-  before_length = ABS (MIN (offset, 0));
-  after_length = MAX (0, offset + len);
-  g_warn_if_fail (ABS (offset) <= len);
+  if (!text_input->surrounding.text)
+    return;
+
+  offset = MIN (offset, 0);
+
+  start = text_input->surrounding.text;
+  end = start + strlen (start);
+  cursor = start + MIN (text_input->surrounding.cursor,
+                        (uint32_t) (end - start));
+
+  before = g_utf8_offset_to_pointer (cursor, offset);
+  g_return_if_fail (before >= start);
+
+  after = g_utf8_offset_to_pointer (cursor, offset + len);
+  g_return_if_fail (after <= end);
+
+  before_length = cursor - before;
+  after_length = after - cursor;
 
   wl_resource_for_each (resource, &text_input->focus_resource_list)
     {
@@ -224,6 +293,13 @@ meta_wayland_text_input_focus_commit_text (ClutterInputFocus *focus,
       zwp_text_input_v3_send_commit_string (resource, text);
     }
 
+  /* Keep the buffered preedit consistent with the NULL just sent, so a
+   * commit that arrives without an accompanying preedit update (e.g. the
+   * crashed-input-method rescue) doesn't resurrect the old preedit on the
+   * next done(). */
+  g_clear_pointer (&text_input->preedit.string, g_free);
+  text_input->preedit.changed = FALSE;
+
   meta_wayland_text_input_focus_defer_done (focus);
 }
 
@@ -233,7 +309,6 @@ meta_wayland_text_input_focus_set_preedit_text (ClutterInputFocus *focus,
                                                 guint              cursor)
 {
   MetaWaylandTextInput *text_input;
-  struct wl_resource *resource;
   gsize pos = 0;
 
   text_input = META_WAYLAND_TEXT_INPUT_FOCUS (focus)->text_input;
@@ -241,10 +316,13 @@ meta_wayland_text_input_focus_set_preedit_text (ClutterInputFocus *focus,
   if (text)
     pos = g_utf8_offset_to_pointer (text, cursor) - text;
 
-  wl_resource_for_each (resource, &text_input->focus_resource_list)
-    {
-      zwp_text_input_v3_send_preedit_string (resource, text, pos, pos);
-    }
+  g_clear_pointer (&text_input->preedit.string, g_free);
+  /* An empty preedit means "no preedit"; normalize to NULL so the changed
+   * flag can stop it being resent with every subsequent done(). */
+  text_input->preedit.string = text && *text ? g_strdup (text) : NULL;
+  text_input->preedit.cursor = pos;
+  text_input->preedit.anchor = pos;
+  text_input->preedit.changed = TRUE;
 
   meta_wayland_text_input_focus_defer_done (focus);
 }
@@ -317,6 +395,10 @@ meta_wayland_text_input_set_focus (MetaWaylandTextInput *text_input,
     return;
 
   text_input->pending_state = META_WAYLAND_PENDING_STATE_NONE;
+  g_clear_pointer (&text_input->surrounding.text, g_free);
+  g_clear_pointer (&text_input->pending_surrounding.text, g_free);
+  g_clear_pointer (&text_input->preedit.string, g_free);
+  text_input->preedit.changed = FALSE;
 
   if (text_input->surface)
     {
@@ -387,11 +469,28 @@ text_input_destroy (struct wl_client   *client,
   wl_resource_destroy (resource);
 }
 
+/* Per the protocol, requests from clients other than the one owning the
+ * focused surface must be ignored. This matters around focus changes: the
+ * loser's disable and the winner's enable can arrive in either order, and
+ * honoring the loser's requests would stomp the winner's state. */
+static gboolean
+client_matches_focus (MetaWaylandTextInput *text_input,
+                      struct wl_client     *client)
+{
+  if (!text_input->surface)
+    return FALSE;
+
+  return client == wl_resource_get_client (text_input->surface->resource);
+}
+
 static void
 text_input_enable (struct wl_client   *client,
                    struct wl_resource *resource)
 {
   MetaWaylandTextInput *text_input = wl_resource_get_user_data (resource);
+
+  if (!client_matches_focus (text_input, client))
+    return;
 
   text_input->enabled = TRUE;
   text_input->pending_state |= META_WAYLAND_PENDING_STATE_ENABLED;
@@ -402,6 +501,9 @@ text_input_disable (struct wl_client   *client,
                     struct wl_resource *resource)
 {
   MetaWaylandTextInput *text_input = wl_resource_get_user_data (resource);
+
+  if (!client_matches_focus (text_input, client))
+    return;
 
   text_input->enabled = FALSE;
   text_input->pending_state |= META_WAYLAND_PENDING_STATE_ENABLED;
@@ -415,11 +517,22 @@ text_input_set_surrounding_text (struct wl_client   *client,
                                  int32_t             anchor)
 {
   MetaWaylandTextInput *text_input = wl_resource_get_user_data (resource);
+  size_t text_len = strlen (text);
 
-  g_free (text_input->surrounding.text);
-  text_input->surrounding.text = g_strdup (text);
-  text_input->surrounding.cursor = cursor;
-  text_input->surrounding.anchor = anchor;
+  if (!client_matches_focus (text_input, client))
+    return;
+
+  if (cursor < 0 || anchor < 0 || cursor > text_len || anchor > text_len)
+    {
+      g_warning ("Client sent invalid surrounding text (text_len=%" G_GSIZE_FORMAT
+                 ", cursor=%d, anchor=%d), ignoring", text_len, cursor, anchor);
+      return;
+    }
+
+  g_free (text_input->pending_surrounding.text);
+  text_input->pending_surrounding.text = g_strdup (text);
+  text_input->pending_surrounding.cursor = cursor;
+  text_input->pending_surrounding.anchor = anchor;
   text_input->pending_state |= META_WAYLAND_PENDING_STATE_SURROUNDING_TEXT;
 }
 
@@ -429,6 +542,9 @@ text_input_set_text_change_cause (struct wl_client   *client,
 				  uint32_t            cause)
 {
   MetaWaylandTextInput *text_input = wl_resource_get_user_data (resource);
+
+  if (!client_matches_focus (text_input, client))
+    return;
 
   text_input->text_change_cause = cause;
   text_input->pending_state |= META_WAYLAND_PENDING_STATE_CHANGE_CAUSE;
@@ -508,7 +624,7 @@ text_input_set_content_type (struct wl_client   *client,
 {
   MetaWaylandTextInput *text_input = wl_resource_get_user_data (resource);
 
-  if (!text_input->surface)
+  if (!client_matches_focus (text_input, client))
     return;
 
   text_input->content_type_hint = hint;
@@ -526,7 +642,7 @@ text_input_set_cursor_rectangle (struct wl_client   *client,
 {
   MetaWaylandTextInput *text_input = wl_resource_get_user_data (resource);
 
-  if (!text_input->surface)
+  if (!client_matches_focus (text_input, client))
     return;
 
   text_input->cursor_rect = (cairo_rectangle_int_t) { x, y, width, height };
@@ -536,7 +652,7 @@ text_input_set_cursor_rectangle (struct wl_client   *client,
 static void
 meta_wayland_text_input_reset (MetaWaylandTextInput *text_input)
 {
-  g_clear_pointer (&text_input->surrounding.text, g_free);
+  g_clear_pointer (&text_input->pending_surrounding.text, g_free);
   text_input->content_type_hint = ZWP_TEXT_INPUT_V3_CONTENT_HINT_NONE;
   text_input->content_type_purpose = ZWP_TEXT_INPUT_V3_CONTENT_PURPOSE_NORMAL;
   text_input->text_change_cause = ZWP_TEXT_INPUT_V3_CHANGE_CAUSE_INPUT_METHOD;
@@ -553,9 +669,11 @@ text_input_commit_state (struct wl_client   *client,
   gboolean enable_panel = FALSE;
   ClutterInputMethod *input_method;
 
+  /* The serial is incremented even for ignored unfocused clients, so their
+   * own .done/.commit accounting doesn't break. */
   increment_serial (text_input, resource);
 
-  if (text_input->surface == NULL)
+  if (!client_matches_focus (text_input, client))
     return;
 
   input_method = clutter_backend_get_input_method (clutter_get_default_backend ());
@@ -596,10 +714,16 @@ text_input_commit_state (struct wl_client   *client,
 
   if (text_input->pending_state & META_WAYLAND_PENDING_STATE_SURROUNDING_TEXT)
     {
-      clutter_input_focus_set_surrounding (text_input->input_focus,
-                                           text_input->surrounding.text,
-                                           text_input->surrounding.cursor,
-                                           text_input->surrounding.anchor);
+      /* Save the surrounding text: the input method's later
+       * delete_surrounding_text is converted against it. */
+      g_free (text_input->surrounding.text);
+      text_input->surrounding.text =
+        g_steal_pointer (&text_input->pending_surrounding.text);
+      text_input->surrounding.cursor = text_input->pending_surrounding.cursor;
+      text_input->surrounding.anchor = text_input->pending_surrounding.anchor;
+
+      meta_wayland_text_input_relay_surrounding (text_input,
+                                                 text_input->input_focus);
     }
 
   if (text_input->pending_state & META_WAYLAND_PENDING_STATE_INPUT_RECT)
@@ -625,6 +749,11 @@ text_input_commit_state (struct wl_client   *client,
 
   if (enable_panel)
     clutter_input_focus_set_input_panel_state (focus, CLUTTER_INPUT_PANEL_STATE_ON);
+
+  /* Every state-changing .commit() must be acknowledged with .done(), even
+   * when nothing came back from the input method, so the client keeps
+   * feeding future state updates. */
+  meta_wayland_text_input_focus_defer_done (focus);
 }
 
 static struct zwp_text_input_v3_interface meta_text_input_interface = {
@@ -662,6 +791,9 @@ meta_wayland_text_input_destroy (MetaWaylandTextInput *text_input)
   meta_wayland_text_input_set_focus (text_input, NULL);
   g_object_unref (text_input->input_focus);
   g_hash_table_destroy (text_input->resource_serials);
+  g_free (text_input->surrounding.text);
+  g_free (text_input->pending_surrounding.text);
+  g_free (text_input->preedit.string);
   g_free (text_input);
 }
 
@@ -753,6 +885,8 @@ gboolean
 meta_wayland_text_input_handle_event (MetaWaylandTextInput *text_input,
                                       const ClutterEvent   *event)
 {
+  gboolean retval;
+
   if (!text_input->surface ||
       !clutter_input_focus_is_focused (text_input->input_focus))
     return FALSE;
@@ -762,5 +896,35 @@ meta_wayland_text_input_handle_event (MetaWaylandTextInput *text_input,
       clutter_event_get_flags (event) & CLUTTER_EVENT_FLAG_INPUT_METHOD)
     meta_wayland_text_input_focus_flush_done (text_input->input_focus);
 
-  return clutter_input_focus_filter_event (text_input->input_focus, event);
+  retval = clutter_input_focus_filter_event (text_input->input_focus, event);
+
+  if (event->type == CLUTTER_BUTTON_PRESS ||
+      event->type == CLUTTER_TOUCH_BEGIN)
+    {
+      MetaWaylandSurface *surface = NULL;
+
+      /* A click within the focused surface repositions the caret under the
+       * input method's feet; reset it so composition doesn't continue
+       * against the old position. Clicks elsewhere are covered by the
+       * focus-change paths, which already reset. */
+      if (event->type == CLUTTER_BUTTON_PRESS)
+        {
+          if (text_input->seat->pointer)
+            surface = text_input->seat->pointer->focus_surface;
+        }
+      else
+        {
+          if (text_input->seat->touch)
+            surface = meta_wayland_touch_get_surface (text_input->seat->touch,
+                                                      clutter_event_get_event_sequence (event));
+        }
+
+      if (surface == text_input->surface)
+        {
+          clutter_input_focus_reset (text_input->input_focus);
+          meta_wayland_text_input_focus_flush_done (text_input->input_focus);
+        }
+    }
+
+  return retval;
 }

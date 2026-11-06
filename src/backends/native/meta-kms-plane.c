@@ -30,6 +30,12 @@
 #include "backends/native/meta-kms-impl-device.h"
 #include "backends/native/meta-kms-update-private.h"
 
+typedef struct _MetaKmsPlaneCursorSizeHint
+{
+  int width;
+  int height;
+} MetaKmsPlaneCursorSizeHint;
+
 struct _MetaKmsPlane
 {
   GObject parent;
@@ -51,6 +57,9 @@ struct _MetaKmsPlane
    * value: owned GArray* (uint64_t modifier), or NULL
    */
   GHashTable *formats_modifiers;
+
+  /* cursor plane sizes advertised through the SIZE_HINTS property */
+  GArray *cursor_size_hints;
 
   MetaKmsDevice *device;
 };
@@ -160,6 +169,42 @@ meta_kms_plane_is_usable_with (MetaKmsPlane *plane,
                                MetaKmsCrtc  *crtc)
 {
   return !!(plane->possible_crtcs & (1 << meta_kms_crtc_get_idx (crtc)));
+}
+
+gboolean
+meta_kms_plane_get_optimal_cursor_size (MetaKmsPlane *plane,
+                                        int           required_width,
+                                        int           required_height,
+                                        int          *out_width,
+                                        int          *out_height)
+{
+  int best_width = 0;
+  int best_height = 0;
+  guint i;
+
+  for (i = 0; i < plane->cursor_size_hints->len; i++)
+    {
+      MetaKmsPlaneCursorSizeHint *hint =
+        &g_array_index (plane->cursor_size_hints,
+                        MetaKmsPlaneCursorSizeHint, i);
+
+      if (hint->width < required_width || hint->height < required_height)
+        continue;
+
+      if (best_width == 0 ||
+          hint->width * hint->height < best_width * best_height)
+        {
+          best_width = hint->width;
+          best_height = hint->height;
+        }
+    }
+
+  if (best_width == 0)
+    return FALSE;
+
+  *out_width = best_width;
+  *out_height = best_height;
+  return TRUE;
 }
 
 static void
@@ -363,6 +408,62 @@ init_formats (MetaKmsPlane            *plane,
     }
 }
 
+static void
+parse_size_hints (MetaKmsPlane      *plane,
+                  MetaKmsImplDevice *impl_device,
+                  uint32_t           blob_id)
+{
+  int fd;
+  drmModePropertyBlobPtr blob;
+  const uint16_t *hints;
+  size_t n_hints, i;
+
+  g_return_if_fail (plane->cursor_size_hints->len == 0);
+
+  if (blob_id == 0)
+    return;
+
+  fd = meta_kms_impl_device_get_fd (impl_device);
+  blob = drmModeGetPropertyBlob (fd, blob_id);
+  if (!blob)
+    return;
+
+  /* The SIZE_HINTS blob is an array of { uint16 width, uint16 height }. */
+  hints = blob->data;
+  n_hints = blob->length / (2 * sizeof (uint16_t));
+
+  for (i = 0; i < n_hints; i++)
+    {
+      MetaKmsPlaneCursorSizeHint hint;
+
+      hint.width = hints[i * 2];
+      hint.height = hints[i * 2 + 1];
+      g_array_append_val (plane->cursor_size_hints, hint);
+    }
+
+  drmModeFreePropertyBlob (blob);
+}
+
+static void
+init_size_hints (MetaKmsPlane            *plane,
+                 MetaKmsImplDevice       *impl_device,
+                 drmModeObjectProperties *drm_plane_props)
+{
+  drmModePropertyPtr prop;
+  int idx;
+
+  prop = meta_kms_impl_device_find_property (impl_device, drm_plane_props,
+                                             "SIZE_HINTS", &idx);
+  if (prop)
+    {
+      uint32_t blob_id;
+
+      blob_id = drm_plane_props->prop_values[idx];
+      parse_size_hints (plane, impl_device, blob_id);
+      drmModeFreeProperty (prop);
+    }
+}
+
 MetaKmsPlane *
 meta_kms_plane_new (MetaKmsPlaneType         type,
                     MetaKmsImplDevice       *impl_device,
@@ -379,6 +480,7 @@ meta_kms_plane_new (MetaKmsPlaneType         type,
 
   init_rotations (plane, impl_device, drm_plane_props);
   init_formats (plane, impl_device, drm_plane, drm_plane_props);
+  init_size_hints (plane, impl_device, drm_plane_props);
 
   return plane;
 }
@@ -419,6 +521,7 @@ meta_kms_plane_finalize (GObject *object)
   MetaKmsPlane *plane = META_KMS_PLANE (object);
 
   g_hash_table_destroy (plane->formats_modifiers);
+  g_array_free (plane->cursor_size_hints, TRUE);
 
   G_OBJECT_CLASS (meta_kms_plane_parent_class)->finalize (object);
 }
@@ -431,6 +534,8 @@ meta_kms_plane_init (MetaKmsPlane *plane)
                            g_direct_equal,
                            NULL,
                            (GDestroyNotify) free_modifier_array);
+  plane->cursor_size_hints =
+    g_array_new (FALSE, FALSE, sizeof (MetaKmsPlaneCursorSizeHint));
 }
 
 static void

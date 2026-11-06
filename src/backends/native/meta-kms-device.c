@@ -20,6 +20,9 @@
 
 #include "config.h"
 
+#include <xf86drm.h>
+#include <xf86drmMode.h>
+
 #include "backends/native/meta-kms-device-private.h"
 #include "backends/native/meta-kms-device.h"
 
@@ -39,6 +42,7 @@ struct _MetaKmsDevice
 
   MetaKmsDeviceFlag flags;
   char *path;
+  gboolean has_slow_cursor_updates;
 
   GList *crtcs;
   GList *connectors;
@@ -143,15 +147,43 @@ meta_kms_device_get_cursor_plane_for (MetaKmsDevice *device,
   return get_plane_with_type_for (device, crtc, META_KMS_PLANE_TYPE_CURSOR);
 }
 
-void
+gboolean
+meta_kms_device_get_optimal_cursor_size (MetaKmsDevice *device,
+                                         int            required_width,
+                                         int            required_height,
+                                         int           *out_width,
+                                         int           *out_height)
+{
+  GList *l;
+
+  for (l = meta_kms_device_get_planes (device); l; l = l->next)
+    {
+      MetaKmsPlane *plane = l->data;
+
+      if (meta_kms_plane_get_plane_type (plane) != META_KMS_PLANE_TYPE_CURSOR)
+        continue;
+
+      if (meta_kms_plane_get_optimal_cursor_size (plane,
+                                                  required_width,
+                                                  required_height,
+                                                  out_width,
+                                                  out_height))
+        return TRUE;
+    }
+
+  return FALSE;
+}
+
+MetaKmsResourceChanges
 meta_kms_device_update_states_in_impl (MetaKmsDevice *device)
 {
   MetaKmsImplDevice *impl_device = meta_kms_device_get_impl_device (device);
+  MetaKmsResourceChanges changes;
 
   meta_assert_in_kms_impl (device->kms);
   meta_assert_is_waiting_for_kms_impl_task (device->kms);
 
-  meta_kms_impl_device_update_states (impl_device);
+  changes = meta_kms_impl_device_update_states (impl_device);
 
   g_list_free (device->crtcs);
   device->crtcs = meta_kms_impl_device_copy_crtcs (impl_device);
@@ -161,6 +193,8 @@ meta_kms_device_update_states_in_impl (MetaKmsDevice *device)
 
   g_list_free (device->planes);
   device->planes = meta_kms_impl_device_copy_planes (impl_device);
+
+  return changes;
 }
 
 void
@@ -270,6 +304,51 @@ create_impl_device_in_impl (MetaKmsImpl  *impl,
   return GINT_TO_POINTER (TRUE);
 }
 
+gboolean
+meta_kms_device_has_slow_cursor_updates (MetaKmsDevice *device)
+{
+  return device->has_slow_cursor_updates;
+}
+
+static char *
+get_driver_name (int fd)
+{
+  drmVersionPtr version;
+  char *driver_name;
+
+  version = drmGetVersion (fd);
+  if (!version)
+    return NULL;
+
+  driver_name = g_strdup (version->name);
+  drmFreeVersion (version);
+
+  return driver_name;
+}
+
+/* Observed on my hardware from nvidia 590 on, nvidia-drm services the legacy
+ * cursor ioctls as a blocking commit - a full frame of main loop time per
+ * cursor image change, which stalls the compositor for as long as a cursor
+ * animates. drmGetVersion() reports 0.0.0 for nvidia-drm, so the series has
+ * to come from the module. */
+#define NVIDIA_SLOW_CURSOR_SERIES 590
+
+static gboolean
+driver_has_slow_cursor_updates (const char *driver_name)
+{
+  g_autofree char *module_version = NULL;
+
+  if (g_strcmp0 (driver_name, "nvidia-drm") != 0)
+    return FALSE;
+
+  if (!g_file_get_contents ("/sys/module/nvidia_drm/version",
+                            &module_version, NULL, NULL))
+    return FALSE;
+
+  return (g_ascii_strtoll (module_version, NULL, 10) >=
+          NVIDIA_SLOW_CURSOR_SERIES);
+}
+
 MetaKmsDevice *
 meta_kms_device_new (MetaKms            *kms,
                      const char         *path,
@@ -281,11 +360,52 @@ meta_kms_device_new (MetaKms            *kms,
   MetaLauncher *launcher = meta_backend_native_get_launcher (backend_native);
   MetaKmsDevice *device;
   CreateImplDeviceData data;
+  drmModeRes *resources;
+  g_autofree char *driver_name = NULL;
   int fd;
 
   fd = meta_launcher_open_restricted (launcher, path, error);
   if (fd == -1)
     return NULL;
+
+  driver_name = get_driver_name (fd);
+
+  /* Open-coded rather than drmIsKMS(), which folds "no modesetting" together
+   * with "modesetting but nothing to drive" - a distinction worth reporting,
+   * since the advice for the two differs. */
+  resources = drmModeGetResources (fd);
+
+  if (!resources || resources->count_crtcs == 0 || resources->count_encoders == 0)
+    {
+      const char *hint = "";
+
+      /* nvidia-drm only defaults to modeset=1 from driver series 560 on. */
+      if (g_strcmp0 (driver_name, "nvidia-drm") == 0)
+        hint = "; on driver series before 560, boot with "
+               "nvidia-drm.modeset=1";
+
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_NOT_SUPPORTED,
+                   "device does not support kernel modesetting "
+                   "(DRM driver '%s')%s",
+                   driver_name ? driver_name : "unknown",
+                   hint);
+
+      g_clear_pointer (&resources, drmModeFreeResources);
+      meta_launcher_close_restricted (launcher, fd);
+      return NULL;
+    }
+
+  if (resources->count_connectors == 0)
+    {
+      g_set_error (error, G_IO_ERROR, G_IO_ERROR_NOT_SUPPORTED,
+                   "device supports modesetting but has no connectors");
+
+      drmModeFreeResources (resources);
+      meta_launcher_close_restricted (launcher, fd);
+      return NULL;
+    }
+
+  drmModeFreeResources (resources);
 
   device = g_object_new (META_TYPE_KMS_DEVICE, NULL);
   device->kms = kms;
@@ -305,6 +425,8 @@ meta_kms_device_new (MetaKms            *kms,
   device->impl_device = data.out_impl_device;
   device->flags = flags;
   device->path = g_strdup (path);
+  device->has_slow_cursor_updates =
+    driver_has_slow_cursor_updates (driver_name);
   device->crtcs = data.out_crtcs;
   device->connectors = data.out_connectors;
   device->planes = data.out_planes;

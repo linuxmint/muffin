@@ -102,6 +102,15 @@ struct _MetaWaylandKeyboard
   xkb_mod_mask_t kbd_a11y_latched_mods;
   xkb_mod_mask_t kbd_a11y_locked_mods;
 
+  /* Set while a patched keysym-typing keymap is active: the layout keymap
+   * to return to, the deferred restore, and the symbol/keycode currently
+   * patched in (see meta_wayland_keyboard_maybe_type_keysym). */
+  struct xkb_keymap *saved_keymap;
+  guint temp_keymap_timeout_id;
+  gboolean typing_temp_keymap;
+  uint32_t temp_keysym;
+  uint32_t temp_evdev_code;
+
   MetaWaylandKeyboardGrab *grab;
   MetaWaylandKeyboardGrab default_grab;
 
@@ -142,5 +151,37 @@ gboolean meta_wayland_keyboard_can_popup (MetaWaylandKeyboard *keyboard,
 void meta_wayland_keyboard_start_grab (MetaWaylandKeyboard     *keyboard,
                                        MetaWaylandKeyboardGrab *grab);
 void meta_wayland_keyboard_end_grab   (MetaWaylandKeyboard     *keyboard);
+
+/* Like start_grab, but does not clear the focused surface's keyboard focus.
+ * The input-method grab redirects physical keys to the input method, yet the
+ * focused surface must keep focus to receive the keys the input method
+ * re-injects through virtual-keyboard. */
+void meta_wayland_keyboard_start_grab_no_focus_change (MetaWaylandKeyboard     *keyboard,
+                                                       MetaWaylandKeyboardGrab *grab);
+
+/* Deliver a re-injected key (from the input method's virtual-keyboard) directly
+ * to the focused surface, bypassing the seat. */
+void meta_wayland_keyboard_inject_key (MetaWaylandKeyboard *keyboard,
+                                       uint32_t             time,
+                                       uint32_t             key,
+                                       uint32_t             state);
+
+/* Type a keysym absent from the current layout by briefly swapping in a
+ * temporary keymap that contains it (KWin's approach). Returns FALSE when the
+ * keysym is reachable through the layout - the caller should use a virtual
+ * input device for those, which keeps normal key semantics. */
+gboolean meta_wayland_keyboard_maybe_type_keysym (MetaWaylandKeyboard *keyboard,
+                                                  uint32_t             keysym);
+
+/* Helpers shared with the input-method keyboard grab. */
+guint meta_wayland_keyboard_get_key_evdev_code (const ClutterEvent *event);
+void  meta_wayland_keyboard_get_modifiers (MetaWaylandKeyboard *keyboard,
+                                           uint32_t            *mods_depressed,
+                                           uint32_t            *mods_latched,
+                                           uint32_t            *mods_locked,
+                                           uint32_t            *group);
+void  meta_wayland_keyboard_get_repeat_info (MetaWaylandKeyboard *keyboard,
+                                             int32_t             *rate,
+                                             int32_t             *delay);
 
 #endif /* META_WAYLAND_KEYBOARD_H */

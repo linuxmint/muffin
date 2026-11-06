@@ -51,6 +51,7 @@
 #include "backends/meta-logical-monitor.h"
 #include "backends/meta-monitor.h"
 #include "backends/meta-monitor-config-manager.h"
+#include "backends/meta-monitor-config-store.h"
 #include "backends/meta-orientation-manager.h"
 #include "backends/meta-output.h"
 #include "backends/x11/meta-monitor-manager-xrandr.h"
@@ -59,6 +60,10 @@
 #include "core/util-private.h"
 #include "meta/main.h"
 #include "meta/meta-x11-errors.h"
+
+#ifdef HAVE_WAYLAND
+#include "wayland/meta-xwayland.h"
+#endif
 
 #define DEFAULT_DISPLAY_CONFIGURATION_TIMEOUT 20
 
@@ -176,6 +181,50 @@ logical_monitor_from_layout (MetaMonitorManager *manager,
   return NULL;
 }
 
+static const char *
+logical_monitor_get_connector (MetaLogicalMonitor *logical_monitor)
+{
+  GList *monitors = meta_logical_monitor_get_monitors (logical_monitor);
+
+  if (!monitors)
+    return NULL;
+
+  return meta_monitor_get_connector (monitors->data);
+}
+
+static int
+compare_logical_monitors_canonical (gconstpointer a,
+                                    gconstpointer b)
+{
+  MetaLogicalMonitor *la = (MetaLogicalMonitor *) a;
+  MetaLogicalMonitor *lb = (MetaLogicalMonitor *) b;
+
+  const char *connector_a = logical_monitor_get_connector (la);
+  const char *connector_b = logical_monitor_get_connector (lb);
+
+  if (meta_logical_monitor_is_primary (la) != meta_logical_monitor_is_primary (lb))
+    return meta_logical_monitor_is_primary (la) ? -1 : 1;
+
+  if (!connector_a || !connector_b)
+    return g_strcmp0 (connector_a, connector_b);
+
+  /* Natural order so DP-10 sorts after DP-9 */
+  return strverscmp (connector_a, connector_b);
+}
+
+static void
+sort_and_renumber_logical_monitors (GList **logical_monitors)
+{
+  GList *l;
+  int number = 0;
+
+  *logical_monitors = g_list_sort (*logical_monitors,
+                                   compare_logical_monitors_canonical);
+
+  for (l = *logical_monitors; l; l = l->next, number++)
+    ((MetaLogicalMonitor *) l->data)->number = number;
+}
+
 static void
 meta_monitor_manager_rebuild_logical_monitors (MetaMonitorManager *manager,
                                                MetaMonitorsConfig *config)
@@ -198,7 +247,10 @@ meta_monitor_manager_rebuild_logical_monitors (MetaMonitorManager *manager,
       monitor_number++;
 
       if (logical_monitor_config->is_primary)
-        primary_logical_monitor = logical_monitor;
+        {
+          primary_logical_monitor = logical_monitor;
+          meta_logical_monitor_make_primary (logical_monitor);
+        }
 
       logical_monitors = g_list_append (logical_monitors, logical_monitor);
     }
@@ -208,9 +260,15 @@ meta_monitor_manager_rebuild_logical_monitors (MetaMonitorManager *manager,
    * logical monitor the primary one.
    */
   if (!primary_logical_monitor && logical_monitors)
-    primary_logical_monitor = g_list_first (logical_monitors)->data;
+    {
+      primary_logical_monitor = g_list_first (logical_monitors)->data;
+      meta_logical_monitor_make_primary (primary_logical_monitor);
+    }
+
+  sort_and_renumber_logical_monitors (&logical_monitors);
 
   manager->logical_monitors = logical_monitors;
+
   meta_monitor_manager_set_primary_logical_monitor (manager,
                                                     primary_logical_monitor);
 }
@@ -259,6 +317,11 @@ calculate_monitor_scale (MetaMonitorManager *manager,
   MetaMonitorMode *monitor_mode;
 
   monitor_mode = meta_monitor_get_current_mode (monitor);
+  if (!monitor_mode)
+    {
+      g_warning ("Monitor has NULL mode in calculate_monitor_scale, using scale 1.0");
+      return 1.0f;
+    }
   return meta_monitor_manager_calculate_monitor_mode_scale (manager,
                                                             manager->layout_mode,
                                                             monitor,
@@ -281,6 +344,8 @@ meta_monitor_manager_is_scale_supported_by_other_monitors (MetaMonitorManager *m
         continue;
 
       mode = meta_monitor_get_current_mode (monitor);
+      if (!mode)
+        continue;
       if (!meta_monitor_manager_is_scale_supported (manager, manager->layout_mode,
                                                     monitor, mode, scale))
         return FALSE;
@@ -376,6 +441,8 @@ derive_scale_from_crtc (MetaMonitorManager *manager,
   threshold = 0.001f;
 
   monitor_mode = meta_monitor_get_current_mode (monitor);
+  if (!monitor_mode)
+    return FALSE;
   if (meta_monitor_manager_is_scale_supported_with_threshold (manager,
                                                               manager->layout_mode,
                                                               monitor,
@@ -459,17 +526,25 @@ meta_monitor_manager_rebuild_logical_monitors_derived (MetaMonitorManager *manag
         }
 
       if (meta_monitor_is_primary (monitor))
-        primary_logical_monitor = logical_monitor;
+        {
+          primary_logical_monitor = logical_monitor;
+          meta_logical_monitor_make_primary (logical_monitor);
+        }
     }
-
-  manager->logical_monitors = logical_monitors;
 
   /*
    * If no monitor was marked as primary, fall back on marking the first
    * logical monitor the primary one.
    */
-  if (!primary_logical_monitor && manager->logical_monitors)
-    primary_logical_monitor = g_list_first (manager->logical_monitors)->data;
+  if (!primary_logical_monitor && logical_monitors)
+    {
+      primary_logical_monitor = g_list_first (logical_monitors)->data;
+      meta_logical_monitor_make_primary (primary_logical_monitor);
+    }
+
+  sort_and_renumber_logical_monitors (&logical_monitors);
+
+  manager->logical_monitors = logical_monitors;
 
   meta_monitor_manager_set_primary_logical_monitor (manager,
                                                     primary_logical_monitor);
@@ -617,6 +692,15 @@ meta_monitor_manager_get_default_layout_mode (MetaMonitorManager *manager)
     META_MONITOR_MANAGER_GET_CLASS (manager);
 
   return manager_class->get_default_layout_mode (manager);
+}
+
+const char *
+meta_monitor_manager_get_config_file_basename (MetaMonitorManager *manager)
+{
+  MetaMonitorManagerClass *manager_class =
+    META_MONITOR_MANAGER_GET_CLASS (manager);
+
+  return manager_class->get_config_file_basename (manager);
 }
 
 static void
@@ -948,19 +1032,9 @@ experimental_features_changed (MetaSettings           *settings,
                                MetaExperimentalFeature old_experimental_features,
                                MetaMonitorManager     *manager)
 {
-  gboolean was_stage_views_scaled;
-  gboolean is_stage_views_scaled;
   gboolean was_x11_scaling;
   gboolean x11_scaling;
-  gboolean should_reconfigure = FALSE;
 
-  was_stage_views_scaled =
-    !!(old_experimental_features &
-       META_EXPERIMENTAL_FEATURE_SCALE_MONITOR_FRAMEBUFFER);
-  is_stage_views_scaled =
-    meta_settings_is_experimental_feature_enabled (
-      settings,
-      META_EXPERIMENTAL_FEATURE_SCALE_MONITOR_FRAMEBUFFER);
   was_x11_scaling =
     !!(old_experimental_features &
        META_EXPERIMENTAL_FEATURE_X11_RANDR_FRACTIONAL_SCALING);
@@ -969,16 +1043,8 @@ experimental_features_changed (MetaSettings           *settings,
       settings,
       META_EXPERIMENTAL_FEATURE_X11_RANDR_FRACTIONAL_SCALING);
 
-  if (is_stage_views_scaled != was_stage_views_scaled)
-    should_reconfigure = TRUE;
-
-  if (was_x11_scaling != x11_scaling)
-    {
-      if (!apply_x11_fractional_scaling_config (manager))
-        should_reconfigure = TRUE;
-    }
-
-  if (should_reconfigure)
+  if (was_x11_scaling != x11_scaling &&
+      !apply_x11_fractional_scaling_config (manager))
     meta_monitor_manager_on_hotplug (manager);
 
   meta_settings_update_ui_scaling_factor (settings);
@@ -1107,6 +1173,12 @@ meta_monitor_manager_get_property (GObject    *object,
     }
 }
 
+static const char *
+meta_monitor_manager_real_get_config_file_basename (MetaMonitorManager *manager)
+{
+  return "cinnamon-monitors.xml";
+}
+
 static void
 meta_monitor_manager_class_init (MetaMonitorManagerClass *klass)
 {
@@ -1120,6 +1192,7 @@ meta_monitor_manager_class_init (MetaMonitorManagerClass *klass)
 
   klass->read_edid = meta_monitor_manager_real_read_edid;
   klass->read_current_state = meta_monitor_manager_real_read_current_state;
+  klass->get_config_file_basename = meta_monitor_manager_real_get_config_file_basename;
 
   signals[MONITORS_CHANGED] =
     g_signal_new ("monitors-changed",
@@ -1750,7 +1823,15 @@ meta_monitor_manager_handle_get_current_state (MetaDBusDisplayConfig *skeleton,
                              g_variant_new_boolean (TRUE));
     }
 
-  ui_scaling_factor = meta_settings_get_ui_scaling_factor (settings);
+#ifdef HAVE_WAYLAND
+  /* X11 clients render into Xwayland's screen, which is sized in physical
+   * pixels; they must be told to draw at the same scale the compositor divides
+   * their buffers by. */
+  if (meta_is_wayland_compositor ())
+    ui_scaling_factor = meta_xwayland_get_x11_ui_scaling_factor ();
+  else
+#endif
+    ui_scaling_factor = meta_settings_get_ui_scaling_factor (settings);
   g_variant_builder_add (&properties_builder, "{sv}",
                          "legacy-ui-scaling-factor",
                          g_variant_new_int32 (ui_scaling_factor));
@@ -2658,6 +2739,36 @@ meta_monitor_manager_handle_set_crtc_gamma  (MetaDBusDisplayConfig *skeleton,
   return TRUE;
 }
 
+static gboolean
+meta_monitor_manager_handle_reset_monitors_config (MetaDBusDisplayConfig *skeleton,
+                                                   GDBusMethodInvocation *invocation,
+                                                   MetaMonitorManager    *manager)
+{
+  MetaMonitorConfigStore *config_store =
+    meta_monitor_config_manager_get_store (manager->config_manager);
+  g_autoptr (GError) error = NULL;
+
+  if (!meta_monitor_config_store_reset (config_store, &error))
+    {
+      g_dbus_method_invocation_return_error (invocation,
+                                             G_DBUS_ERROR,
+                                             G_DBUS_ERROR_FAILED,
+                                             "Failed to remove the monitor configuration: %s",
+                                             error->message);
+      return TRUE;
+    }
+
+  if (manager->persistent_timeout_id)
+    cancel_persistent_confirmation (manager);
+
+  meta_monitor_config_manager_clear_history (manager->config_manager);
+  meta_monitor_manager_ensure_configured (manager);
+
+  meta_dbus_display_config_complete_reset_monitors_config (skeleton, invocation);
+
+  return TRUE;
+}
+
 static void
 monitor_manager_setup_dbus_config_handlers (MetaMonitorManager *manager)
 {
@@ -2678,6 +2789,9 @@ monitor_manager_setup_dbus_config_handlers (MetaMonitorManager *manager)
                            manager, 0);
   g_signal_connect_object (manager->display_config, "handle-apply-monitors-config",
                            G_CALLBACK (meta_monitor_manager_handle_apply_monitors_config),
+                           manager, 0);
+  g_signal_connect_object (manager->display_config, "handle-reset-monitors-config",
+                           G_CALLBACK (meta_monitor_manager_handle_reset_monitors_config),
                            manager, 0);
 }
 
@@ -3330,6 +3444,29 @@ meta_output_is_laptop (MetaOutput *output)
 void
 meta_monitor_manager_on_hotplug (MetaMonitorManager *manager)
 {
+  MetaMonitorsConfig *current_config =
+    meta_monitor_config_manager_get_current (manager->config_manager);
+
+  /* Keep the current config across hotplugs that leave the set of connected
+   * monitors unchanged, instead of falling back to the stored or suggested
+   * configuration. This covers Super+P configs and a config applied from
+   * the display settings but not yet confirmed. */
+  if (current_config &&
+      !meta_monitor_manager_has_hotplug_mode_update (manager) &&
+      meta_monitor_manager_is_config_complete (manager, current_config))
+    {
+      g_autoptr (GError) error = NULL;
+
+      if (meta_monitor_manager_apply_monitors_config (manager,
+                                                      current_config,
+                                                      META_MONITORS_CONFIG_METHOD_TEMPORARY,
+                                                      &error))
+        return;
+
+      g_warning ("Failed to re-apply current configuration: %s",
+                 error->message);
+    }
+
   meta_monitor_manager_ensure_configured (manager);
 }
 
@@ -3456,12 +3593,31 @@ meta_monitor_manager_rotate_monitor (MetaMonitorManager *manager)
   g_object_unref (config);
 }
 
+static void
+apply_switch_config (MetaMonitorManager          *manager,
+                     MetaMonitorsConfig          *config,
+                     MetaMonitorSwitchConfigType  config_type)
+{
+  g_autoptr (GError) error = NULL;
+
+  if (!meta_monitor_manager_apply_monitors_config (manager,
+                                                   config,
+                                                   META_MONITORS_CONFIG_METHOD_TEMPORARY,
+                                                   &error))
+    {
+      g_warning ("Failed to use switch monitor configuration: %s",
+                 error->message);
+      return;
+    }
+
+  manager->current_switch_config = config_type;
+}
+
 void
 meta_monitor_manager_switch_config (MetaMonitorManager          *manager,
                                     MetaMonitorSwitchConfigType  config_type)
 {
-  GError *error = NULL;
-  MetaMonitorsConfig *config;
+  g_autoptr (MetaMonitorsConfig) config = NULL;
 
   g_return_if_fail (config_type != META_MONITOR_SWITCH_CONFIG_UNKNOWN);
 
@@ -3471,20 +3627,44 @@ meta_monitor_manager_switch_config (MetaMonitorManager          *manager,
   if (!config)
     return;
 
-  if (!meta_monitor_manager_apply_monitors_config (manager,
-                                                   config,
-                                                   META_MONITORS_CONFIG_METHOD_TEMPORARY,
-                                                   &error))
+  apply_switch_config (manager, config, config_type);
+}
+
+/*
+ * Cycles the configured layout -> external only -> built-in only -> mirror,
+ * skipping any that can't be created or wouldn't change anything. A layout
+ * that didn't come from switching counts as the configured one.
+ */
+void
+meta_monitor_manager_switch_to_next_config (MetaMonitorManager *manager)
+{
+  MetaMonitorsConfig *current_config =
+    meta_monitor_config_manager_get_current (manager->config_manager);
+  MetaMonitorSwitchConfigType config_type = manager->current_switch_config;
+  int i;
+
+  if (!meta_monitor_manager_can_switch_config (manager))
+    return;
+
+  if (config_type == META_MONITOR_SWITCH_CONFIG_UNKNOWN)
+    config_type = META_MONITOR_SWITCH_CONFIG_ALL_LINEAR;
+
+  for (i = 0; i < META_MONITOR_SWITCH_CONFIG_UNKNOWN; i++)
     {
-      g_warning ("Failed to use switch monitor configuration: %s",
-                 error->message);
-      g_error_free (error);
+      g_autoptr (MetaMonitorsConfig) config = NULL;
+
+      config_type = (config_type + 1) % META_MONITOR_SWITCH_CONFIG_UNKNOWN;
+      config =
+        meta_monitor_config_manager_create_for_switch_config (manager->config_manager,
+                                                              config_type);
+      if (!config ||
+          (current_config &&
+           meta_monitors_config_layouts_equal (config, current_config)))
+        continue;
+
+      apply_switch_config (manager, config, config_type);
+      return;
     }
-  else
-    {
-      manager->current_switch_config = config_type;
-    }
-  g_object_unref (config);
 }
 
 gboolean

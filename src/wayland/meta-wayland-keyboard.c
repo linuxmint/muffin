@@ -70,6 +70,7 @@ G_DEFINE_TYPE (MetaWaylandKeyboard, meta_wayland_keyboard,
 
 static void meta_wayland_keyboard_update_xkb_state (MetaWaylandKeyboard *keyboard);
 static void notify_modifiers (MetaWaylandKeyboard *keyboard);
+static void meta_wayland_keyboard_broadcast_modifiers (MetaWaylandKeyboard *keyboard);
 static guint evdev_code (const ClutterKeyEvent *event);
 
 static void
@@ -134,6 +135,15 @@ meta_wayland_keyboard_take_keymap (MetaWaylandKeyboard *keyboard,
       return;
     }
 
+  /* An externally driven keymap change (e.g. a layout switch) supersedes any
+   * pending temporary typing keymap: forget the saved layout so the deferred
+   * restore doesn't revert to it. */
+  if (!keyboard->typing_temp_keymap)
+    {
+      g_clear_pointer (&keyboard->saved_keymap, xkb_keymap_unref);
+      g_clear_handle_id (&keyboard->temp_keymap_timeout_id, g_source_remove);
+    }
+
   xkb_keymap_unref (xkb_info->keymap);
   xkb_info->keymap = xkb_keymap_ref (keymap);
 
@@ -148,6 +158,7 @@ meta_wayland_keyboard_take_keymap (MetaWaylandKeyboard *keyboard,
     }
   keymap_size = strlen (keymap_string) + 1;
 
+  g_clear_pointer (&xkb_info->keymap_rofile, meta_anonymous_file_free);
   xkb_info->keymap_rofile =
     meta_anonymous_file_new (keymap_size, (const uint8_t *) keymap_string);
 
@@ -267,6 +278,288 @@ meta_wayland_keyboard_broadcast_key (MetaWaylandKeyboard *keyboard,
   return (keyboard->focus_surface != NULL);
 }
 
+void
+meta_wayland_keyboard_inject_key (MetaWaylandKeyboard *keyboard,
+                                  uint32_t             time,
+                                  uint32_t             key,
+                                  uint32_t             state)
+{
+  /* Deliver a key the input method re-injected (via virtual-keyboard) straight
+   * to the focused surface. The physical key was already processed by the seat
+   * (repeat timer, pressed-key count, xkb) before the input-method grab ate it,
+   * so re-injecting through the seat would collide with that state; delivering
+   * at the wayland layer avoids the loop, the dedup, and the seat repeat timer.
+   * The client does its own key repeat from the single press/release pair.
+   *
+   * While the grab is active, physical modifier changes were forwarded to the
+   * input method rather than the surface, so the surface's modifier view is
+   * stale. keyboard->xkb_info.state does track them, so sync it first — without
+   * this, re-injected keys arrive unmodified (no Shift, etc.). */
+  meta_wayland_keyboard_broadcast_modifiers (keyboard);
+  meta_wayland_keyboard_broadcast_key (keyboard, time, key, state);
+}
+
+/* An X11 client can only address keycodes 8..255. */
+#define TYPE_KEYSYM_MAX_XKB_KEYCODE 255
+
+static gboolean
+keymap_has_keysym_in_current_layout (struct xkb_keymap *keymap,
+                                     struct xkb_state  *state,
+                                     xkb_keysym_t       keysym)
+{
+  xkb_layout_index_t layout;
+  xkb_keycode_t keycode, min_keycode, max_keycode;
+
+  layout = xkb_state_serialize_layout (state, XKB_STATE_LAYOUT_EFFECTIVE);
+  min_keycode = xkb_keymap_min_keycode (keymap);
+  max_keycode = xkb_keymap_max_keycode (keymap);
+  for (keycode = min_keycode; keycode < max_keycode; keycode++)
+    {
+      gint num_levels, level;
+
+      num_levels = xkb_keymap_num_levels_for_key (keymap, keycode, layout);
+      for (level = 0; level < num_levels; level++)
+        {
+          const xkb_keysym_t *syms;
+          int num_syms, sym;
+
+          num_syms = xkb_keymap_key_get_syms_by_level (keymap, keycode,
+                                                       layout, level, &syms);
+          for (sym = 0; sym < num_syms; sym++)
+            {
+              if (syms[sym] == keysym)
+                return TRUE;
+            }
+        }
+    }
+
+  return FALSE;
+}
+
+static gboolean
+keycode_has_any_syms (struct xkb_keymap *keymap,
+                      xkb_keycode_t      keycode)
+{
+  gint num_layouts, layout;
+
+  num_layouts = xkb_keymap_num_layouts_for_key (keymap, keycode);
+  for (layout = 0; layout < num_layouts; layout++)
+    {
+      gint num_levels, level;
+
+      num_levels = xkb_keymap_num_levels_for_key (keymap, keycode, layout);
+      for (level = 0; level < num_levels; level++)
+        {
+          const xkb_keysym_t *syms;
+
+          if (xkb_keymap_key_get_syms_by_level (keymap, keycode,
+                                                layout, level, &syms) > 0)
+            return TRUE;
+        }
+    }
+
+  return FALSE;
+}
+
+/* Patch a copy of @base so that some X11-addressable keycode produces
+ * @keysym, returning it and the keycode used. A KWin-style minimal one-key
+ * keymap does NOT work here: its keycode range collapses to [key,key],
+ * which XWayland cannot represent as an X keymap (the X keycode range is a
+ * fixed structural property), so X11 clients never saw the symbol. Editing
+ * the real keymap keeps the range, the layout, and every other key intact
+ * while the patch is active.
+ *
+ * The insertion targets an evdev keycode that has a name in the keymap but
+ * no symbols in any layout (standard evdev keymaps name every code up to
+ * 255 while leaving many unmapped), so a symbols-section entry for it is
+ * the first definition - no conflicts to resolve. */
+static struct xkb_keymap *
+create_patched_keymap (struct xkb_keymap *base,
+                       xkb_keysym_t       keysym,
+                       xkb_keycode_t     *keycode_out)
+{
+  struct xkb_context *context;
+  struct xkb_keymap *keymap = NULL;
+  char sym_name[64];
+  char *base_string;
+  const char *keycodes_section, *symbols_section, *symbols_end;
+  char key_name[64] = { 0 };
+  xkb_keycode_t keycode = 0, candidate;
+  gsize insert_offset;
+  g_autoptr (GString) patched = NULL;
+  g_autofree char *insert = NULL;
+
+  if (xkb_keysym_get_name (keysym, sym_name, sizeof (sym_name)) <= 0)
+    return NULL;
+
+  base_string = xkb_keymap_get_as_string (base, XKB_KEYMAP_FORMAT_TEXT_V1);
+  if (!base_string)
+    return NULL;
+
+  keycodes_section = strstr (base_string, "xkb_keycodes");
+  symbols_section = strstr (base_string, "xkb_symbols");
+  symbols_end = symbols_section ? strstr (symbols_section, "\n};") : NULL;
+  if (!keycodes_section || !symbols_end)
+    {
+      free (base_string);
+      return NULL;
+    }
+
+  for (candidate = TYPE_KEYSYM_MAX_XKB_KEYCODE;
+       candidate >= xkb_keymap_min_keycode (base);
+       candidate--)
+    {
+      char pattern[32];
+      const char *hit, *lt, *gt;
+
+      if (keycode_has_any_syms (base, candidate))
+        continue;
+
+      /* Addressable in the symbols section only if named. */
+      g_snprintf (pattern, sizeof (pattern), " = %d;", candidate);
+      hit = strstr (keycodes_section, pattern);
+      if (!hit)
+        continue;
+
+      for (lt = hit; lt > keycodes_section && *lt != '<'; lt--);
+      gt = strchr (lt, '>');
+      if (*lt != '<' || !gt || gt > hit ||
+          (gsize) (gt - lt + 2) > sizeof (key_name))
+        continue;
+
+      g_strlcpy (key_name, lt, gt - lt + 2);
+      keycode = candidate;
+      break;
+    }
+
+  if (keycode == 0)
+    {
+      g_warning ("No spare keycode found to type keysym %s", sym_name);
+      free (base_string);
+      return NULL;
+    }
+
+  insert_offset = symbols_end - base_string;
+  patched = g_string_new (base_string);
+  free (base_string);
+
+  insert = g_strdup_printf ("\n\tkey %s {\t[ %s ] };", key_name, sym_name);
+  g_string_insert (patched, insert_offset, insert);
+
+  context = xkb_context_new (XKB_CONTEXT_NO_FLAGS);
+  keymap = xkb_keymap_new_from_string (context, patched->str,
+                                       XKB_KEYMAP_FORMAT_TEXT_V1,
+                                       XKB_KEYMAP_COMPILE_NO_FLAGS);
+  xkb_context_unref (context);
+
+  if (keymap)
+    *keycode_out = keycode;
+
+  return keymap;
+}
+
+/* How long a temporary typing keymap may outlive its key event. Wayland
+ * clients resolve the keycode strictly in event order, but X11 clients
+ * re-fetch the keymap from the server with a round trip when translating
+ * the key - restoring immediately (as KWin does) makes them look up the
+ * keycode in the already-restored layout and drop the character. */
+#define TEMP_KEYMAP_RESTORE_TIMEOUT_MS 500
+
+static void
+restore_saved_keymap (MetaWaylandKeyboard *keyboard)
+{
+  struct xkb_keymap *saved;
+
+  if (!keyboard->saved_keymap)
+    return;
+
+  saved = g_steal_pointer (&keyboard->saved_keymap);
+  g_clear_handle_id (&keyboard->temp_keymap_timeout_id, g_source_remove);
+  keyboard->temp_keysym = 0;
+  keyboard->temp_evdev_code = 0;
+
+  meta_wayland_keyboard_take_keymap (keyboard, saved);
+  xkb_keymap_unref (saved);
+}
+
+static gboolean
+temp_keymap_timeout_cb (gpointer user_data)
+{
+  MetaWaylandKeyboard *keyboard = user_data;
+
+  keyboard->temp_keymap_timeout_id = 0;
+  restore_saved_keymap (keyboard);
+
+  return G_SOURCE_REMOVE;
+}
+
+gboolean
+meta_wayland_keyboard_maybe_type_keysym (MetaWaylandKeyboard *keyboard,
+                                         uint32_t             keysym)
+{
+  MetaWaylandXkbInfo *xkb_info = &keyboard->xkb_info;
+  struct xkb_keymap *pristine;
+  uint32_t time_ms;
+
+  if (!xkb_info->keymap || !xkb_info->state)
+    return FALSE;
+
+  /* While a patched keymap is active, the layout to reason about (and to
+   * patch again for a different symbol) is the saved one. */
+  pristine = keyboard->saved_keymap ? keyboard->saved_keymap
+                                    : xkb_info->keymap;
+
+  /* Typeable through the layout: let the caller use the virtual device,
+   * which keeps normal press/release semantics and modifier handling. */
+  if (keymap_has_keysym_in_current_layout (pristine, xkb_info->state, keysym))
+    return FALSE;
+
+  if (keysym != keyboard->temp_keysym || !keyboard->saved_keymap)
+    {
+      struct xkb_keymap *patched;
+      struct xkb_keymap *original = NULL;
+      xkb_keycode_t keycode;
+
+      patched = create_patched_keymap (pristine, keysym, &keycode);
+      if (!patched)
+        return FALSE;
+
+      /* The patched map is the real layout plus one key, so leaving it in
+       * place is harmless; the swap back is still deferred (see
+       * restore_saved_keymap) rather than immediate, because X11 clients
+       * re-fetch the keymap from the server with a round trip when
+       * translating the key and must find the mapping still present. */
+      if (!keyboard->saved_keymap)
+        original = xkb_keymap_ref (xkb_info->keymap);
+
+      keyboard->typing_temp_keymap = TRUE;
+      meta_wayland_keyboard_take_keymap (keyboard, patched);
+      keyboard->typing_temp_keymap = FALSE;
+
+      if (original)
+        keyboard->saved_keymap = g_steal_pointer (&original);
+
+      keyboard->temp_keysym = keysym;
+      keyboard->temp_evdev_code = keycode - 8;
+      xkb_keymap_unref (patched);
+    }
+
+  time_ms = (uint32_t) (g_get_monotonic_time () / 1000);
+  meta_wayland_keyboard_inject_key (keyboard, time_ms,
+                                    keyboard->temp_evdev_code,
+                                    WL_KEYBOARD_KEY_STATE_PRESSED);
+  meta_wayland_keyboard_inject_key (keyboard, time_ms,
+                                    keyboard->temp_evdev_code,
+                                    WL_KEYBOARD_KEY_STATE_RELEASED);
+
+  g_clear_handle_id (&keyboard->temp_keymap_timeout_id, g_source_remove);
+  keyboard->temp_keymap_timeout_id =
+    g_timeout_add (TEMP_KEYMAP_RESTORE_TIMEOUT_MS,
+                   temp_keymap_timeout_cb, keyboard);
+
+  return TRUE;
+}
+
 static gboolean
 notify_key (MetaWaylandKeyboard *keyboard,
             const ClutterEvent  *event)
@@ -317,15 +610,25 @@ keyboard_send_modifiers (MetaWaylandKeyboard *keyboard,
                          struct wl_resource  *resource,
                          uint32_t             serial)
 {
+  uint32_t depressed, latched, locked, group;
+
+  meta_wayland_keyboard_get_modifiers (keyboard, &depressed, &latched, &locked, &group);
+  wl_keyboard_send_modifiers (resource, serial, depressed, latched, locked, group);
+}
+
+void
+meta_wayland_keyboard_get_modifiers (MetaWaylandKeyboard *keyboard,
+                                     uint32_t            *mods_depressed,
+                                     uint32_t            *mods_latched,
+                                     uint32_t            *mods_locked,
+                                     uint32_t            *group)
+{
   struct xkb_state *state = keyboard->xkb_info.state;
-  xkb_mod_mask_t depressed, latched, locked;
 
-  depressed = add_virtual_mods (xkb_state_serialize_mods (state, XKB_STATE_MODS_DEPRESSED));
-  latched = add_virtual_mods (xkb_state_serialize_mods (state, XKB_STATE_MODS_LATCHED));
-  locked = add_virtual_mods (xkb_state_serialize_mods (state, XKB_STATE_MODS_LOCKED));
-
-  wl_keyboard_send_modifiers (resource, serial, depressed, latched, locked,
-                              xkb_state_serialize_layout (state, XKB_STATE_LAYOUT_EFFECTIVE));
+  *mods_depressed = add_virtual_mods (xkb_state_serialize_mods (state, XKB_STATE_MODS_DEPRESSED));
+  *mods_latched = add_virtual_mods (xkb_state_serialize_mods (state, XKB_STATE_MODS_LATCHED));
+  *mods_locked = add_virtual_mods (xkb_state_serialize_mods (state, XKB_STATE_MODS_LOCKED));
+  *group = xkb_state_serialize_layout (state, XKB_STATE_LAYOUT_EFFECTIVE);
 }
 
 static void
@@ -424,36 +727,37 @@ on_kbd_a11y_mask_changed (ClutterSeat         *seat,
   notify_modifiers (keyboard);
 }
 
+void
+meta_wayland_keyboard_get_repeat_info (MetaWaylandKeyboard *keyboard,
+                                       int32_t             *rate,
+                                       int32_t             *delay)
+{
+  if (g_settings_get_boolean (keyboard->settings, "repeat"))
+    {
+      unsigned int interval;
+
+      interval = g_settings_get_uint (keyboard->settings, "repeat-interval");
+      /* Our setting is in the milliseconds between keys. "rate" is the number
+       * of keys per second. */
+      *rate = interval > 0 ? (1000 / interval) : 0;
+      *delay = g_settings_get_uint (keyboard->settings, "delay");
+    }
+  else
+    {
+      *rate = 0;
+      *delay = 0;
+    }
+}
+
 static void
 notify_key_repeat_for_resource (MetaWaylandKeyboard *keyboard,
                                 struct wl_resource  *keyboard_resource)
 {
   if (wl_resource_get_version (keyboard_resource) >= WL_KEYBOARD_REPEAT_INFO_SINCE_VERSION)
     {
-      gboolean repeat;
-      unsigned int delay, rate;
+      int32_t rate, delay;
 
-      repeat = g_settings_get_boolean (keyboard->settings, "repeat");
-
-      if (repeat)
-        {
-          unsigned int interval;
-          interval = g_settings_get_uint (keyboard->settings, "repeat-interval");
-          /* Our setting is in the milliseconds between keys. "rate" is the number
-           * of keys per second. */
-          if (interval > 0)
-            rate = (1000 / interval);
-          else
-            rate = 0;
-
-          delay = g_settings_get_uint (keyboard->settings, "delay");
-        }
-      else
-        {
-          rate = 0;
-          delay = 0;
-        }
-
+      meta_wayland_keyboard_get_repeat_info (keyboard, &rate, &delay);
       wl_keyboard_send_repeat_info (keyboard_resource, rate, delay);
     }
 }
@@ -484,28 +788,36 @@ settings_changed (GSettings           *settings,
   notify_key_repeat (keyboard);
 }
 
+guint
+meta_wayland_keyboard_get_key_evdev_code (const ClutterEvent *event)
+{
+  guint32 code = 0;
+#ifdef HAVE_NATIVE_BACKEND
+  MetaBackend *backend = meta_get_backend ();
+
+  if (META_IS_BACKEND_NATIVE (backend))
+    code = meta_event_native_get_event_code (event);
+  if (code == 0)
+#endif
+    code = evdev_code (&event->key);
+
+  return code;
+}
+
 static gboolean
 default_grab_key (MetaWaylandKeyboardGrab *grab,
                   const ClutterEvent      *event)
 {
   MetaWaylandKeyboard *keyboard = grab->keyboard;
   gboolean is_press = event->type == CLUTTER_KEY_PRESS;
-  guint32 code = 0;
-#ifdef HAVE_NATIVE_BACKEND
-  MetaBackend *backend = meta_get_backend ();
-#endif
+  guint32 code;
 
   /* Ignore autorepeat events, as autorepeat in Wayland is done on the client
    * side. */
   if (event->key.flags & CLUTTER_EVENT_FLAG_REPEATED)
     return FALSE;
 
-#ifdef HAVE_NATIVE_BACKEND
-  if (META_IS_BACKEND_NATIVE (backend))
-    code = meta_event_native_get_event_code (event);
-  if (code == 0)
-#endif
-    code = evdev_code (&event->key);
+  code = meta_wayland_keyboard_get_key_evdev_code (event);
 
   return meta_wayland_keyboard_broadcast_key (keyboard, event->key.time,
                                               code, is_press);
@@ -562,6 +874,9 @@ meta_wayland_keyboard_disable (MetaWaylandKeyboard *keyboard)
 
   g_signal_handlers_disconnect_by_func (backend, on_keymap_changed, keyboard);
   g_signal_handlers_disconnect_by_func (backend, on_keymap_layout_group_changed, keyboard);
+
+  g_clear_pointer (&keyboard->saved_keymap, xkb_keymap_unref);
+  g_clear_handle_id (&keyboard->temp_keymap_timeout_id, g_source_remove);
 
   meta_wayland_keyboard_end_grab (keyboard);
   meta_wayland_keyboard_set_focus (keyboard, NULL);
@@ -636,6 +951,10 @@ meta_wayland_keyboard_update (MetaWaylandKeyboard *keyboard,
   if ((event->flags &
        (CLUTTER_EVENT_FLAG_SYNTHETIC | CLUTTER_EVENT_FLAG_INPUT_METHOD)) != 0)
     return;
+
+  /* Key events must not be translated against a lingering temporary
+   * typing keymap. */
+  restore_saved_keymap (keyboard);
 
   update_pressed_keys (keyboard, evdev_code (event), is_press);
 
@@ -757,6 +1076,9 @@ meta_wayland_keyboard_set_focus (MetaWaylandKeyboard *keyboard,
 
   if (keyboard->focus_surface == surface)
     return;
+
+  /* Don't hand a newly focused client a lingering temporary typing keymap. */
+  restore_saved_keymap (keyboard);
 
   if (keyboard->focus_surface != NULL)
     {
@@ -889,6 +1211,14 @@ meta_wayland_keyboard_start_grab (MetaWaylandKeyboard     *keyboard,
                                   MetaWaylandKeyboardGrab *grab)
 {
   meta_wayland_keyboard_set_focus (keyboard, NULL);
+  keyboard->grab = grab;
+  grab->keyboard = keyboard;
+}
+
+void
+meta_wayland_keyboard_start_grab_no_focus_change (MetaWaylandKeyboard     *keyboard,
+                                                  MetaWaylandKeyboardGrab *grab)
+{
   keyboard->grab = grab;
   grab->keyboard = keyboard;
 }

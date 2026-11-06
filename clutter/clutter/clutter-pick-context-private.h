@@ -19,7 +19,13 @@
 #define CLUTTER_PICK_CONTEXT_PRIVATE_H
 
 #include "clutter-pick-context.h"
+#include "clutter-stage.h"
 
-ClutterPickContext * clutter_pick_context_new_for_view (ClutterStageView *view);
+ClutterPickContext * clutter_pick_context_new_for_view (ClutterStage     *stage,
+                                                        ClutterStageView *view);
+
+gboolean clutter_pick_context_transform_box_to_stage (ClutterPickContext    *pick_context,
+                                                      const ClutterActorBox *box,
+                                                      graphene_point_t       vertices[4]);
 
 #endif /* CLUTTER_PICK_CONTEXT_PRIVATE_H */

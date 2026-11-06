@@ -75,6 +75,18 @@ meta_is_udev_device_boot_vga (GUdevDevice *device)
 }
 
 gboolean
+meta_is_udev_device_preferred_primary (GUdevDevice *device)
+{
+  const char * const * tags;
+
+  tags = g_udev_device_get_tags (device);
+  if (!tags)
+    return FALSE;
+
+  return g_strv_contains (tags, "muffin-device-preferred-primary");
+}
+
+gboolean
 meta_is_udev_device_requires_modifiers (GUdevDevice *device)
 {
   g_autoptr (GUdevDevice) platform_device = NULL;

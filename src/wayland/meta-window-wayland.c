@@ -39,10 +39,11 @@
 #include "core/window-private.h"
 #include "meta/meta-x11-errors.h"
 #include "wayland/meta-wayland-actor-surface.h"
+#include "wayland/meta-wayland-layer-shell.h"
 #include "wayland/meta-wayland-private.h"
+#include "wayland/meta-wayland-shell-surface.h"
 #include "wayland/meta-wayland-surface.h"
 #include "wayland/meta-wayland-window-configuration.h"
-#include "wayland/meta-wayland-xdg-shell.h"
 
 struct _MetaWindowWayland
 {
@@ -61,6 +62,15 @@ struct _MetaWindowWayland
   MetaGravity last_sent_gravity;
 
   gboolean has_been_shown;
+
+  /* Set when a client requests maximization before it has completed a
+   * configure-ack-commit cycle. Cleared and consumed in finish_move_resize to
+   * force a NOT_MAXIMIZED -> MAXIMIZED transition for clients that only update
+   * their maximize state after seeing an explicit state transition. */
+  gboolean needs_maximize_transition;
+
+  /* Becomes TRUE the first time the client acks a tracked configure. */
+  gboolean client_has_acked_configure;
 
   cairo_surface_t *icon;
   cairo_surface_t *mini_icon;
@@ -173,8 +183,16 @@ meta_window_wayland_configure (MetaWindowWayland              *wl_window,
                                MetaWaylandWindowConfiguration *configuration)
 {
   MetaWindow *window = META_WINDOW (wl_window);
+  MetaWaylandShellSurface *shell_surface =
+    META_WAYLAND_SHELL_SURFACE (window->surface->role);
 
   meta_wayland_surface_configure_notify (window->surface, configuration);
+
+  if (!meta_wayland_shell_surface_tracks_configurations (shell_surface))
+    {
+      meta_wayland_window_configuration_free (configuration);
+      return;
+    }
 
   wl_window->pending_configurations =
     g_list_prepend (wl_window->pending_configurations, configuration);
@@ -482,7 +500,24 @@ meta_window_wayland_update_main_monitor (MetaWindow                   *window,
   float scale;
   MetaRectangle rect;
 
-  from = window->monitor;
+  /* A layer surface belongs to a specific output. Pin it to that monitor
+   * rather than deriving it from the window rect. */
+  {
+    MetaWaylandLayerSurface *layer_surface =
+      meta_wayland_layer_surface_from_window (window);
+
+    if (layer_surface)
+      {
+        MetaLogicalMonitor *logical_monitor =
+          meta_wayland_layer_surface_get_logical_monitor (layer_surface);
+
+        if (logical_monitor)
+          {
+            window->monitor = logical_monitor;
+            return;
+          }
+      }
+  }
 
   /* If the window is not a toplevel window (i.e. it's a popup window) just use
    * the monitor of the toplevel. */
@@ -494,8 +529,37 @@ meta_window_wayland_update_main_monitor (MetaWindow                   *window,
       return;
     }
 
+  /* A popup whose chain ends at a BACKGROUND layer surface has no toplevel
+   * window to inherit from - that surface is the wallpaper and is not managed
+   * as a window. Take its monitor directly; the paths below would not resolve
+   * to the wallpaper's monitor. */
+  {
+    MetaWaylandSurface *toplevel_surface =
+      meta_wayland_surface_get_toplevel (window->surface);
+
+    if (toplevel_surface &&
+        toplevel_surface != window->surface &&
+        META_IS_WAYLAND_LAYER_SURFACE (toplevel_surface->role))
+      {
+        MetaLogicalMonitor *logical_monitor =
+          meta_wayland_layer_surface_get_logical_monitor (
+            META_WAYLAND_LAYER_SURFACE (toplevel_surface->role));
+
+        if (logical_monitor)
+          {
+            window->monitor = logical_monitor;
+            return;
+          }
+      }
+  }
+
   if (window->rect.width == 0 || window->rect.height == 0)
-    return;
+    {
+      window->monitor = meta_window_find_monitor_from_id (window);
+      return;
+    }
+
+  from = window->monitor;
 
   /* Require both the current and the new monitor would be the new main monitor,
    * even given the resulting scale the window would end up having. This is
@@ -586,6 +650,22 @@ meta_window_wayland_main_monitor_changed (MetaWindow               *window,
   scale_size (&window->size_hints.min_width, &window->size_hints.min_height, scale_factor);
   scale_size (&window->size_hints.max_width, &window->size_hints.max_height, scale_factor);
 
+  /* If the window is being drag-moved, scale the grab anchor around the grab
+   * point as well, so the pointer keeps the same relative position in the
+   * window instead of the window rescaling against its top-left corner. */
+  if (window->display->grab_window == window &&
+      meta_grab_op_is_moving (window->display->grab_op))
+    {
+      MetaDisplay *display = window->display;
+      MetaRectangle *anchor_pos = &display->grab_anchor_window_pos;
+
+      anchor_pos->x = display->grab_anchor_root_x -
+        (int) roundf (scale_factor * (display->grab_anchor_root_x - anchor_pos->x));
+      anchor_pos->y = display->grab_anchor_root_y -
+        (int) roundf (scale_factor * (display->grab_anchor_root_y - anchor_pos->y));
+      scale_rect_size (anchor_pos, scale_factor);
+    }
+
   /* Window geometry offset (XXX: Need a better place, see
    * meta_window_wayland_finish_move_resize). */
   window->custom_frame_extents.left =
@@ -621,10 +701,12 @@ static uint32_t
 meta_window_wayland_get_client_pid (MetaWindow *window)
 {
   MetaWaylandSurface *surface = window->surface;
-  struct wl_resource *resource = surface->resource;
   pid_t pid;
 
-  wl_client_get_credentials (wl_resource_get_client (resource), &pid, NULL, NULL);
+  if (!surface || !surface->resource)
+    return 0;
+
+  wl_client_get_credentials (wl_resource_get_client (surface->resource), &pid, NULL, NULL);
   return (uint32_t)pid;
 }
 
@@ -636,6 +718,10 @@ appears_focused_changed (GObject    *object,
   MetaWindow *window = META_WINDOW (object);
 
   if (window->placement.rule)
+    return;
+
+  /* wlr-layer-shell has no activated state, so there is nothing to report. */
+  if (meta_window_is_layer_shell (window))
     return;
 
   surface_state_changed (window);
@@ -688,6 +774,16 @@ meta_window_wayland_shortcuts_inhibited (MetaWindow         *window,
 static gboolean
 meta_window_wayland_is_focusable (MetaWindow *window)
 {
+  MetaWaylandLayerSurface *layer_surface;
+
+  /* Nothing sets window->input for a layer surface, so it carries no record of
+   * zwlr_layer_surface_v1.set_keyboard_interactivity - a layer surface that
+   * declined the keyboard would otherwise look focusable. Read it off the role
+   * rather than caching it: the client may change it on any commit. */
+  layer_surface = meta_wayland_layer_surface_from_window (window);
+  if (layer_surface)
+    return meta_wayland_layer_surface_wants_keyboard_focus (layer_surface);
+
   return window->input;
 }
 
@@ -720,7 +816,40 @@ meta_window_wayland_is_focus_async (MetaWindow *window)
 static MetaStackLayer
 meta_window_wayland_calculate_layer (MetaWindow *window)
 {
-  return meta_window_get_default_layer (window);
+  switch (window->type)
+    {
+    case META_WINDOW_DESKTOP:
+      return META_LAYER_DESKTOP;
+
+    case META_WINDOW_DOCK:
+      {
+        /* TOP docks drop below a fullscreen window on their monitor, the way
+         * X11 docks do (get_standalone_layer(), window-x11.c); OVERLAY ones
+         * return early and keep META_LAYER_DOCK.
+         *
+         * The demotion only bites because a TOP surface shares window_group
+         * with normal windows (get_dock_window_group ()), so sync_actor_stacking
+         * can order it against them. An OVERLAY surface is in top_window_group,
+         * which paints above window_group whatever its layer - but the layer
+         * still orders it against the override-redirect windows sharing that
+         * group, so demoting it would be wrong there too.
+         */
+        if (meta_window_is_overlay_layer_shell (window))
+          return META_LAYER_DOCK;
+
+        if (window->wm_state_below ||
+            (window->monitor && window->monitor->in_fullscreen))
+          return META_LAYER_BOTTOM;
+
+        return META_LAYER_DOCK;
+      }
+
+    default:
+      /* Layer-shell popups included: a popup is lifted to its parent's layer
+       * by the stack's transient constraint (ensure_above (), stack.c), the
+       * same as any other transient, so it needs no case of its own. */
+      return meta_window_get_default_layer (window);
+    }
 }
 
 static void
@@ -995,6 +1124,9 @@ meta_window_wayland_finish_move_resize (MetaWindow              *window,
   MetaMoveResizeFlags flags;
   MetaWaylandWindowConfiguration *acked_configuration;
   gboolean is_window_being_resized;
+  gboolean needs_reconfigure = FALSE;
+
+  g_return_if_fail (new_geom.width > 0 && new_geom.height > 0);
 
   /* new_geom is in the logical pixel coordinate space, but MetaWindow wants its
    * rects to represent what in turn will end up on the stage, i.e. we need to
@@ -1019,6 +1151,9 @@ meta_window_wayland_finish_move_resize (MetaWindow              *window,
   flags = META_MOVE_RESIZE_WAYLAND_FINISH_MOVE_RESIZE;
 
   acked_configuration = acquire_acked_configuration (wl_window, pending);
+
+  if (acked_configuration)
+    wl_window->client_has_acked_configure = TRUE;
 
   /* x/y are ignored when we're doing interactive resizing */
   is_window_being_resized = (meta_grab_op_is_resizing (display->grab_op) &&
@@ -1067,6 +1202,48 @@ meta_window_wayland_finish_move_resize (MetaWindow              *window,
     rect.x += dx;
     rect.y += dy;
 
+  /* For fixed-size states the compositor controls the size; the client must
+   * use what was configured. If it committed different dimensions (e.g. a
+   * stale saved size from a previous session), override with the expected
+   * size so we don't corrupt last_sent_rect and trigger a wrong configure. */
+  if (META_WINDOW_MAXIMIZED (window) ||
+      meta_window_is_fullscreen (window) ||
+      window->tile_mode != META_TILE_NONE)
+    {
+      int expected_w, expected_h;
+
+      if (acked_configuration && acked_configuration->has_size)
+        {
+          expected_w = acked_configuration->width;
+          expected_h = acked_configuration->height;
+        }
+      else if (wl_window->has_last_sent_configuration)
+        {
+          expected_w = wl_window->last_sent_rect.width;
+          expected_h = wl_window->last_sent_rect.height;
+        }
+      else
+        {
+          expected_w = new_geom.width;
+          expected_h = new_geom.height;
+        }
+
+      if (expected_w <= 1 || expected_h <= 1)
+        {
+          expected_w = new_geom.width;
+          expected_h = new_geom.height;
+        }
+
+      if (new_geom.width != expected_w || new_geom.height != expected_h)
+        {
+          rect.x = wl_window->last_sent_rect.x;
+          rect.y = wl_window->last_sent_rect.y;
+          rect.width = expected_w;
+          rect.height = expected_h;
+          needs_reconfigure = TRUE;
+        }
+    }
+
   if (rect.x != window->rect.x || rect.y != window->rect.y)
     flags |= META_MOVE_RESIZE_MOVE_ACTION;
 
@@ -1084,6 +1261,49 @@ meta_window_wayland_finish_move_resize (MetaWindow              *window,
   else
     gravity = META_GRAVITY_STATIC;
   meta_window_move_resize_internal (window, flags, gravity, rect);
+
+  if (is_window_being_resized &&
+      meta_grab_op_is_keyboard (window->display->grab_op))
+    {
+      meta_window_update_keyboard_resize (window, FALSE);
+    }
+
+  /* Force a NOT_MAXIMIZED -> MAXIMIZED configure transition for clients that
+   * need it to fire their 'maximize' event. Triggered when the client requested
+   * maximization before completing its first configure-ack-commit cycle. */
+  {
+    gboolean do_maximize_transition =
+      META_WINDOW_MAXIMIZED (window) && wl_window->needs_maximize_transition;
+
+    wl_window->needs_maximize_transition = FALSE;
+
+    if (do_maximize_transition &&
+        (window->saved_rect.width <= 1 || window->saved_rect.height <= 1) &&
+        new_geom.width > 1 && new_geom.height > 1)
+      {
+        window->saved_rect.x = window->rect.x;
+        window->saved_rect.y = window->rect.y;
+        window->saved_rect.width = new_geom.width;
+        window->saved_rect.height = new_geom.height;
+      }
+
+    if (do_maximize_transition)
+      {
+        /* This toggle exists only to emit a state transition; the window is
+         * already maximized and stays maximized, so there is nothing to
+         * animate. Suppress the compositor size-change effects, whose paired
+         * synchronous firing would otherwise corrupt the actor's size-change
+         * accounting before either effect gets a chance to run. */
+        window->compositor_skip_size_change = TRUE;
+        meta_window_unmaximize (window, META_MAXIMIZE_BOTH);
+        meta_window_maximize (window, META_MAXIMIZE_BOTH);
+        window->compositor_skip_size_change = FALSE;
+      }
+    else if (needs_reconfigure)
+      {
+        surface_state_changed (window);
+      }
+  }
 
   g_clear_pointer (&acked_configuration, meta_wayland_window_configuration_free);
 }
@@ -1278,4 +1498,32 @@ meta_window_wayland_get_max_size (MetaWindow *window,
 
   scale = 1.0 / (float) meta_window_wayland_get_geometry_scale (window);
   scale_size (width, height, scale);
+}
+
+void
+meta_window_wayland_maybe_send_configure (MetaWindow *window)
+{
+  MetaWindowWayland *wl_window = META_WINDOW_WAYLAND (window);
+
+  if (!wl_window->has_last_sent_configuration)
+    return;
+
+  surface_state_changed (window);
+}
+
+void
+meta_window_wayland_schedule_maximize_transition (MetaWindow *window)
+{
+  MetaWindowWayland *wl_window = META_WINDOW_WAYLAND (window);
+
+  if (!wl_window->client_has_acked_configure)
+    wl_window->needs_maximize_transition = TRUE;
+}
+
+gboolean
+meta_window_wayland_has_been_shown (MetaWindow *window)
+{
+  MetaWindowWayland *wl_window = META_WINDOW_WAYLAND (window);
+
+  return wl_window->has_been_shown;
 }

@@ -26,6 +26,7 @@
 #include <glib.h>
 #include <wayland-server.h>
 
+#include "meta/prefs.h"
 #include "wayland/meta-wayland-private.h"
 #include "wayland/meta-wayland-versions.h"
 
@@ -279,27 +280,51 @@ activation_get_activation_token (struct wl_client   *client,
 }
 
 static gboolean
-token_can_activate (MetaXdgActivationToken *token)
+token_can_activate_with_reason (MetaXdgActivationToken  *token,
+                                const char             **reason)
 {
     MetaWaylandSeat *seat;
 
     if (!token->seat)
+    {
+        *reason = "token has no seat";
         return FALSE;
-    if (!token->surface)
-        return FALSE;
+    }
 
     seat = token->seat;
+
+    if (!token->surface)
+    {
+        if (meta_wayland_seat_can_popup (seat, token->serial))
+        {
+            *reason = "seat serial matches recent user interaction";
+            return TRUE;
+        }
+
+        *reason = "token has no surface and serial does not match recent user interaction";
+        return FALSE;
+    }
 
     if (seat->keyboard &&
         meta_wayland_keyboard_can_grab_surface (seat->keyboard,
                                                 token->surface,
                                                 token->serial))
-      return TRUE;
+    {
+        *reason = "keyboard serial matches token surface";
+        return TRUE;
+    }
 
-    return meta_wayland_seat_get_grab_info (seat,
-                                            token->surface,
-                                            token->serial,
-                                            FALSE, NULL, NULL);
+    if (meta_wayland_seat_get_grab_info (seat,
+                                         token->surface,
+                                         token->serial,
+                                         FALSE, NULL, NULL))
+    {
+        *reason = "grab serial matches token surface";
+        return TRUE;
+    }
+
+    *reason = "serial does not match a recent user interaction on token surface";
+    return FALSE;
 }
 
 static gboolean
@@ -326,6 +351,8 @@ activation_activate (struct wl_client   *client,
     MetaXdgActivationToken *token;
     MetaStartupSequence *sequence;
     MetaWindow *window;
+    const char *activation_reason = NULL;
+    gboolean can_activate = FALSE;
 
     window = meta_wayland_surface_get_window (surface);
     if (!window)
@@ -345,8 +372,19 @@ activation_activate (struct wl_client   *client,
     if (!sequence)
         return;
 
-    if ((token && token_can_activate (token)) ||
-        (!token && startup_sequence_is_recent (display, sequence)))
+    if (token)
+    {
+        can_activate = token_can_activate_with_reason (token, &activation_reason);
+    }
+    else
+    {
+        can_activate = startup_sequence_is_recent (display, sequence);
+        activation_reason = can_activate ?
+            "startup sequence is recent" :
+            "startup sequence is older than last user interaction";
+    }
+
+    if (can_activate || !meta_prefs_get_prevent_focus_stealing ())
     {
         uint32_t timestamp;
         int32_t workspace_idx;
@@ -362,6 +400,14 @@ activation_activate (struct wl_client   *client,
     }
     else
     {
+        g_message ("Wayland activation refused: xdg_activation.activate for %s, "
+                   "token=%s, source=%s, reason=%s, serial=%u, app_id=%s",
+                   window->desc, token_str,
+                   token ? "activation token" : "startup sequence",
+                   activation_reason,
+                   token ? token->serial : 0,
+                   token && token->app_id ? token->app_id : "(none)");
+
         meta_window_set_demands_attention (window);
     }
 

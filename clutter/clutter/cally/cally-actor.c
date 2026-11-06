@@ -72,6 +72,8 @@
 #include <glib.h>
 #include <clutter/clutter.h>
 
+#include "clutter/clutter-actor-private.h"
+
 #ifdef CLUTTER_WINDOWING_X11
 #include <clutter/x11/clutter-x11.h>
 #endif
@@ -972,7 +974,7 @@ cally_actor_real_notify_clutter (GObject    *obj,
        * paint it; we don't want this to generate an ATK
        * state change
        */
-      if (clutter_actor_is_in_clone_paint (actor))
+      if (clutter_actor_is_painting_unmapped (actor))
         return;
 
       state = ATK_STATE_SHOWING;

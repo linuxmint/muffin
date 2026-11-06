@@ -58,6 +58,12 @@ gboolean meta_kms_plane_is_format_supported (MetaKmsPlane *plane,
 gboolean meta_kms_plane_is_usable_with (MetaKmsPlane *plane,
                                         MetaKmsCrtc  *crtc);
 
+gboolean meta_kms_plane_get_optimal_cursor_size (MetaKmsPlane *plane,
+                                                 int           required_width,
+                                                 int           required_height,
+                                                 int          *out_width,
+                                                 int          *out_height);
+
 void meta_kms_plane_update_set_rotation (MetaKmsPlane           *plane,
                                          MetaKmsPlaneAssignment *plane_assignment,
                                          MetaMonitorTransform    transform);

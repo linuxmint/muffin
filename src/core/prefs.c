@@ -107,6 +107,7 @@ static gboolean disable_workarounds = FALSE;
 static gboolean auto_raise = FALSE;
 static gboolean auto_raise_delay = 500;
 static gboolean focus_change_on_pointer_rest = FALSE;
+static gboolean prevent_focus_stealing = FALSE;
 static gboolean bell_is_visible = FALSE;
 static gboolean bell_is_audible = TRUE;
 static gboolean gnome_accessibility = FALSE;
@@ -123,6 +124,7 @@ static int   draggable_border_width = 10;
 static int   drag_threshold;
 static gboolean resize_with_right_button = FALSE;
 static gboolean edge_tiling = FALSE;
+static gboolean edge_resistance_window = TRUE;
 static gboolean force_fullscreen = TRUE;
 static gboolean auto_maximize = TRUE;
 static gboolean show_fallback_app_menu = TRUE;
@@ -139,6 +141,7 @@ static char *iso_next_group_option = NULL;
 
 static MetaX11BackgroundTransition background_transition = META_X11_BACKGROUND_TRANSITION_BLEND;
 static gboolean unredirect_fullscreen_windows = FALSE;
+static gboolean scanout_fullscreen_windows = FALSE;
 static gboolean tile_maximize = FALSE;
 static gboolean invert_workspace_flip = FALSE;
 static char *gtk_theme = NULL;
@@ -374,6 +377,13 @@ static MetaBoolPreference preferences_bool[] =
       &focus_change_on_pointer_rest
     },
     {
+      { "prevent-focus-stealing",
+        SCHEMA_GENERAL,
+        META_PREF_PREVENT_FOCUS_STEALING,
+      },
+      &prevent_focus_stealing
+    },
+    {
       { "visual-bell",
         SCHEMA_GENERAL,
         META_PREF_VISUAL_BELL,
@@ -416,6 +426,13 @@ static MetaBoolPreference preferences_bool[] =
       &edge_tiling,
     },
     {
+      { "edge-resistance-window",
+        SCHEMA_MUFFIN,
+        META_PREF_EDGE_RESISTANCE_WINDOW,
+      },
+      &edge_resistance_window,
+    },
+    {
       { "workspaces-only-on-primary",
         SCHEMA_MUFFIN,
         META_PREF_WORKSPACES_ONLY_ON_PRIMARY,
@@ -449,6 +466,13 @@ static MetaBoolPreference preferences_bool[] =
         META_PREF_UNREDIRECT_FULLSCREEN_WINDOWS,
       },
       &unredirect_fullscreen_windows,
+    },
+    {
+      { "scanout-fullscreen-windows",
+        SCHEMA_MUFFIN,
+        META_PREF_SCANOUT_FULLSCREEN_WINDOWS,
+      },
+      &scanout_fullscreen_windows,
     },
     {
       { "workspace-cycle",
@@ -1826,6 +1850,12 @@ meta_prefs_get_unredirect_fullscreen_windows (void)
 }
 
 gboolean
+meta_prefs_get_scanout_fullscreen_windows (void)
+{
+  return scanout_fullscreen_windows;
+}
+
+gboolean
 meta_prefs_get_workspace_cycle (void)
 {
   return workspace_cycle;
@@ -1925,6 +1955,9 @@ meta_preference_to_string (MetaPreference pref)
     case META_PREF_EDGE_TILING:
       return "EDGE_TILING";
 
+    case META_PREF_EDGE_RESISTANCE_WINDOW:
+      return "EDGE_RESISTANCE_WINDOW";
+
     case META_PREF_FORCE_FULLSCREEN:
       return "FORCE_FULLSCREEN";
 
@@ -1952,6 +1985,9 @@ meta_preference_to_string (MetaPreference pref)
     case META_PREF_UNREDIRECT_FULLSCREEN_WINDOWS:
       return "UNREDIRECT_FULLSCREEN_WINDOWS";
 
+    case META_PREF_SCANOUT_FULLSCREEN_WINDOWS:
+      return "SCANOUT_FULLSCREEN_WINDOWS";
+
     case META_PREF_WORKSPACE_CYCLE:
       return "WORKSPACE_CYCLE";
 
@@ -1972,6 +2008,9 @@ meta_preference_to_string (MetaPreference pref)
 
     case META_PREF_BRING_WINDOWS_TO_CURRENT_WORKSPACE:
       return "BRING_WINDOWS_TO_CURRENT_WORKSPACE";
+
+    case META_PREF_PREVENT_FOCUS_STEALING:
+      return "PREVENT_FOCUS_STEALING";
     }
 
   return "(unknown)";
@@ -2040,7 +2079,7 @@ update_binding (MetaKeyPref *binding,
         {
           meta_topic (META_DEBUG_KEYBINDINGS,
                       "Failed to parse new GSettings value\n");
-          meta_warning ("\"%s\" found in configuration database is not a valid value for keybinding \"%s\"\n",
+          meta_warning ("\"%s\" is not a valid value for keybinding \"%s\"\n",
                         strokes[i], binding->name);
 
           g_free (combo);
@@ -2260,12 +2299,22 @@ meta_prefs_add_keybinding (const char           *name,
         {
           strokes = g_strdupv((gchar **)bindings);
         }
-
-      queue_changed (META_PREF_KEYBINDINGS);
     }
 
   update_binding (pref, strokes);
   g_strfreev (strokes);
+
+  /* If this is a dynamic custom keybinding without GSettings and none of the
+   * provided bindings could be parsed, fail so the caller knows the binding
+   * was not added. */
+  if (pref->settings == NULL && bindings != NULL && bindings[0] != NULL && pref->combos == NULL)
+    {
+      meta_key_pref_free (pref);
+      return FALSE;
+    }
+
+  if (!pref->builtin)
+    queue_changed (META_PREF_KEYBINDINGS);
 
   g_hash_table_insert (key_bindings, g_strdup (name), pref);
 
@@ -2383,6 +2432,12 @@ meta_prefs_get_focus_change_on_pointer_rest (void)
 }
 
 gboolean
+meta_prefs_get_prevent_focus_stealing (void)
+{
+  return prevent_focus_stealing;
+}
+
+gboolean
 meta_prefs_get_gnome_accessibility (void)
 {
   return gnome_accessibility;
@@ -2398,6 +2453,12 @@ gboolean
 meta_prefs_get_edge_tiling (void)
 {
   return edge_tiling;
+}
+
+gboolean
+meta_prefs_get_edge_resistance_window (void)
+{
+  return edge_resistance_window;
 }
 
 gboolean

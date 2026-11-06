@@ -38,6 +38,7 @@
 
 #include "backends/meta-logical-monitor.h"
 #include "clutter/clutter.h"
+#include "core/boxes-private.h"
 #include "core/stack.h"
 #include "meta/compositor.h"
 #include "meta/meta-close-dialog.h"
@@ -138,6 +139,11 @@ typedef struct _MetaPlacementRule
 
   gboolean is_reactive;
 
+  /* Place within the whole monitor rather than its work area. Popups of a
+   * layer surface must be able to cover the zone that surface reserved -
+   * otherwise a panel's own menu gets pushed out of the panel. */
+  gboolean constrain_to_entire_monitor;
+
   MetaRectangle parent_rect;
 } MetaPlacementRule;
 
@@ -209,7 +215,7 @@ struct _MetaWindow
   char *gtk_app_menu_object_path;
   char *gtk_menubar_object_path;
 
-  int net_wm_pid;
+  pid_t client_pid;
 
   Window xtransient_for;
   Window xgroup_leader;
@@ -325,6 +331,12 @@ struct _MetaWindow
    * tell the compositor to perform.
    */
   guint pending_compositor_effect : 4; /* MetaCompEffect */
+
+  /* Suppress compositor size-change effects for a synthetic state
+   * transition (e.g. an immediate unmaximize/maximize toggle) where there
+   * is no visible resize to animate.
+   */
+  guint compositor_skip_size_change : 1;
 
   /* Iconic is the state in WM_STATE; happens for workspaces/shading
    * in addition to minimize
@@ -606,6 +618,31 @@ struct _MetaWindowClass
                                   const MetaLogicalMonitor *old);
   void (*adjust_fullscreen_monitor_rect) (MetaWindow    *window,
                                           MetaRectangle *monitor_rect);
+
+  /* Stage coordinates are logical; X protocol coordinates are not, once
+   * Xwayland is scaled. Identity for every window type but Xwayland. */
+  void (*stage_to_protocol_point) (MetaWindow           *window,
+                                   int                   stage_x,
+                                   int                   stage_y,
+                                   int                  *protocol_x,
+                                   int                  *protocol_y,
+                                   MetaRoundingStrategy  rounding_strategy);
+  void (*stage_to_protocol_size)  (MetaWindow *window,
+                                   int         stage_w,
+                                   int         stage_h,
+                                   int        *protocol_w,
+                                   int        *protocol_h);
+  void (*protocol_to_stage_point) (MetaWindow           *window,
+                                   int                   protocol_x,
+                                   int                   protocol_y,
+                                   int                  *stage_x,
+                                   int                  *stage_y,
+                                   MetaRoundingStrategy  rounding_strategy);
+  void (*protocol_to_stage_size)  (MetaWindow *window,
+                                   int         protocol_w,
+                                   int         protocol_h,
+                                   int        *stage_w,
+                                   int        *stage_h);
   void (*force_restore_shortcuts) (MetaWindow         *window,
                                    ClutterInputDevice *source);
   gboolean (*shortcuts_inhibited) (MetaWindow         *window,
@@ -862,6 +899,8 @@ void meta_window_activate_full (MetaWindow     *window,
 
 MetaLogicalMonitor * meta_window_calculate_main_logical_monitor (MetaWindow *window);
 
+MetaLogicalMonitor * meta_window_find_monitor_from_id (MetaWindow *window);
+
 MetaLogicalMonitor * meta_window_get_main_logical_monitor (MetaWindow *window);
 void meta_window_update_monitor (MetaWindow                   *window,
                                  MetaWindowUpdateMonitorFlags  flags);
@@ -899,6 +938,8 @@ void meta_window_force_restore_shortcuts (MetaWindow         *window,
 gboolean meta_window_shortcuts_inhibited (MetaWindow         *window,
                                           ClutterInputDevice *source);
 gboolean meta_window_is_stackable (MetaWindow *window);
+gboolean meta_window_is_layer_shell (MetaWindow *window);
+gboolean meta_window_is_overlay_layer_shell (MetaWindow *window);
 gboolean meta_window_is_focus_async (MetaWindow *window);
 
 gboolean meta_window_calculate_bounds (MetaWindow *window,
@@ -916,4 +957,30 @@ void meta_window_set_progress (MetaWindow *window,
 
 void meta_window_set_progress_pulse (MetaWindow *window,
                                      gboolean    pulse);
+
+void meta_window_stage_to_protocol_point (MetaWindow           *window,
+                                          int                   stage_x,
+                                          int                   stage_y,
+                                          int                  *protocol_x,
+                                          int                  *protocol_y,
+                                          MetaRoundingStrategy  rounding_strategy);
+
+void meta_window_stage_to_protocol_size (MetaWindow *window,
+                                         int         stage_w,
+                                         int         stage_h,
+                                         int        *protocol_w,
+                                         int        *protocol_h);
+
+void meta_window_protocol_to_stage_point (MetaWindow           *window,
+                                          int                   protocol_x,
+                                          int                   protocol_y,
+                                          int                  *stage_x,
+                                          int                  *stage_y,
+                                          MetaRoundingStrategy  rounding_strategy);
+
+void meta_window_protocol_to_stage_size (MetaWindow *window,
+                                         int         protocol_w,
+                                         int         protocol_h,
+                                         int        *stage_w,
+                                         int        *stage_h);
 #endif
