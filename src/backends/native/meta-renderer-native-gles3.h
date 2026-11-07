@@ -37,4 +37,7 @@ gboolean meta_renderer_native_gles3_blit_shared_bo (MetaEgl       *egl,
                                                     struct gbm_bo *shared_bo,
                                                     GError       **error);
 
+void meta_renderer_native_gles3_forget_context (MetaGles3  *gles3,
+                                                EGLContext  egl_context);
+
 #endif /* META_RENDERER_NATIVE_GLES3_H */
