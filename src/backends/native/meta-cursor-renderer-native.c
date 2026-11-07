@@ -896,21 +896,10 @@ get_common_crtc_sprite_transform_for_logical_monitors (MetaCursorRenderer   *ren
 }
 
 static gboolean
-should_have_hw_cursor (MetaCursorRenderer *renderer,
-                       MetaCursorSprite   *cursor_sprite,
-                       GList              *gpus)
+gpus_have_hw_cursor_sprite (MetaCursorSprite *cursor_sprite,
+                            GList            *gpus)
 {
-  CoglTexture *texture;
-  MetaMonitorTransform transform;
-  float scale;
   GList *l;
-
-  if (!cursor_sprite)
-    return FALSE;
-
-  if (meta_cursor_renderer_is_hw_cursors_inhibited (renderer,
-                                                    cursor_sprite))
-    return FALSE;
 
   for (l = gpus; l; l = l->next)
     {
@@ -926,6 +915,28 @@ should_have_hw_cursor (MetaCursorRenderer *renderer,
       if (!has_valid_cursor_sprite_gbm_bo (cursor_sprite, gpu_kms))
         return FALSE;
     }
+
+  return TRUE;
+}
+
+static gboolean
+should_have_hw_cursor (MetaCursorRenderer *renderer,
+                       MetaCursorSprite   *cursor_sprite,
+                       GList              *gpus)
+{
+  CoglTexture *texture;
+  MetaMonitorTransform transform;
+  float scale;
+
+  if (!cursor_sprite)
+    return FALSE;
+
+  if (meta_cursor_renderer_is_hw_cursors_inhibited (renderer,
+                                                    cursor_sprite))
+    return FALSE;
+
+  if (!gpus_have_hw_cursor_sprite (cursor_sprite, gpus))
+    return FALSE;
 
   if (!crtcs_has_cursor_planes (renderer, cursor_sprite))
     return FALSE;
@@ -1109,6 +1120,7 @@ meta_cursor_renderer_native_update_position (MetaCursorRenderer *renderer,
   MetaCursorRendererNative *native = META_CURSOR_RENDERER_NATIVE (renderer);
   MetaCursorRendererNativePrivate *priv =
     meta_cursor_renderer_native_get_instance_private (native);
+  g_autoptr (GList) gpus = NULL;
 
   if (!priv->has_hw_cursor)
     return FALSE;
@@ -1121,6 +1133,15 @@ meta_cursor_renderer_native_update_position (MetaCursorRenderer *renderer,
    */
   if (priv->hw_state_invalidated ||
       cursor_sprite_has_pending_bo (native, cursor_sprite))
+    return FALSE;
+
+  /*
+   * has_hw_cursor was decided for the GPUs the sprite covered at the last
+   * frame. A GPU it has since moved onto may not have it realized or usable
+   * yet, so leave the move to the frame path.
+   */
+  gpus = calculate_cursor_sprite_gpus (renderer, cursor_sprite);
+  if (!gpus_have_hw_cursor_sprite (cursor_sprite, gpus))
     return FALSE;
 
   update_hw_cursor (native, cursor_sprite);
