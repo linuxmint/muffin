@@ -40,6 +40,9 @@ void     meta_xwayland_init_dnd         (Display *xdisplay);
 void     meta_xwayland_shutdown_dnd     (Display *xdisplay);
 gboolean meta_xwayland_dnd_handle_event (XEvent *xevent);
 
+gboolean meta_xwayland_handle_xrandr_event (MetaX11Display *x11_display,
+                                            XEvent         *xevent);
+
 const MetaWaylandDragDestFuncs * meta_xwayland_selection_get_drag_dest_funcs (void);
 
 void meta_xwayland_start_xserver (MetaXWaylandManager *manager,

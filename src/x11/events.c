@@ -1791,7 +1791,8 @@ meta_x11_display_handle_xevent (MetaX11Display *x11_display,
 
 #ifdef HAVE_WAYLAND
   if (meta_is_wayland_compositor () &&
-      meta_xwayland_dnd_handle_event (event))
+      (meta_xwayland_dnd_handle_event (event) ||
+       meta_xwayland_handle_xrandr_event (x11_display, event)))
     {
       bypass_gtk = bypass_compositor = TRUE;
       goto out;

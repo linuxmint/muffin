@@ -69,6 +69,9 @@ typedef struct
   GList *x11_windows;
 
   MetaXWaylandDnd *dnd;
+
+  gboolean has_xrandr;
+  int rr_event_base;
 } MetaXWaylandManager;
 
 struct _MetaWaylandCompositor

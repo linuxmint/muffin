@@ -39,14 +39,17 @@
 #endif
 #include <unistd.h>
 #include <X11/Xauth.h>
+#include <X11/extensions/Xrandr.h>
 
 #include "backends/meta-backend-private.h"
 #include "backends/meta-logical-monitor.h"
 #include "backends/meta-monitor-manager-private.h"
+#include "backends/meta-monitor.h"
 #include "backends/meta-settings-private.h"
 #include "core/main-private.h"
 #include "meta/main.h"
 #include "meta/meta-monitor-manager.h"
+#include "meta/meta-x11-errors.h"
 #include "wayland/meta-xwayland-surface.h"
 #include "x11/meta-x11-display-private.h"
 
@@ -865,10 +868,168 @@ meta_xwayland_init (MetaXWaylandManager *manager,
   return TRUE;
 }
 
+static gboolean
+monitors_have_connector (GList      *monitors,
+                         const char *connector)
+{
+  GList *l;
+
+  for (l = monitors; l; l = l->next)
+    {
+      if (g_strcmp0 (meta_monitor_get_connector (l->data), connector) == 0)
+        return TRUE;
+    }
+
+  return FALSE;
+}
+
+/*
+ * Wayland has no notion of a primary output, so Xwayland has none either
+ * unless we set it, and X11 clients asking RandR for the primary get
+ * nothing. Xwayland names its outputs after the connectors (xdg_output.name),
+ * which, unlike geometry, doesn't depend on the Xwayland scale.
+ */
+static void
+meta_xwayland_set_primary_output (MetaX11Display *x11_display)
+{
+  MetaBackend *backend = meta_get_backend ();
+  MetaMonitorManager *monitor_manager =
+    meta_backend_get_monitor_manager (backend);
+  Display *xdisplay = meta_x11_display_get_xdisplay (x11_display);
+  Window xroot = meta_x11_display_get_xroot (x11_display);
+  MetaLogicalMonitor *primary_logical_monitor;
+  GList *monitors;
+  XRRScreenResources *resources;
+  int i;
+
+  primary_logical_monitor =
+    meta_monitor_manager_get_primary_logical_monitor (monitor_manager);
+  if (!primary_logical_monitor)
+    return;
+
+  monitors = meta_logical_monitor_get_monitors (primary_logical_monitor);
+
+  /* Outputs can disappear under us while Xwayland catches up with a
+   * reconfiguration. */
+  meta_x11_error_trap_push (x11_display);
+
+  resources = XRRGetScreenResourcesCurrent (xdisplay, xroot);
+  if (resources)
+    {
+      for (i = 0; i < resources->noutput; i++)
+        {
+          RROutput output = resources->outputs[i];
+          XRROutputInfo *output_info;
+          gboolean is_primary;
+
+          output_info = XRRGetOutputInfo (xdisplay, resources, output);
+          if (!output_info)
+            continue;
+
+          is_primary = monitors_have_connector (monitors, output_info->name);
+          XRRFreeOutputInfo (output_info);
+
+          if (is_primary)
+            {
+              /* The server ignores this when the output is already
+               * primary, so it can't notify us back into a loop. */
+              XRRSetOutputPrimary (xdisplay, xroot, output);
+              break;
+            }
+        }
+
+      XRRFreeScreenResources (resources);
+    }
+
+  meta_x11_error_trap_pop (x11_display);
+}
+
+static void
+on_monitors_changed (MetaMonitorManager *monitor_manager,
+                     MetaX11Display     *x11_display)
+{
+  meta_xwayland_set_primary_output (x11_display);
+}
+
+/*
+ * Xwayland applies output changes some time after monitors-changed, and
+ * re-announced wl_outputs come back as new RandR outputs without the primary
+ * flag. Its own RandR notifications are the point at which its outputs are
+ * current. A primary change also reorders the Xinerama screens (RandR lists
+ * the primary first), so the cached Xinerama indices go stale too.
+ */
+gboolean
+meta_xwayland_handle_xrandr_event (MetaX11Display *x11_display,
+                                   XEvent         *xevent)
+{
+  MetaWaylandCompositor *compositor = meta_wayland_compositor_get_default ();
+  MetaXWaylandManager *manager = &compositor->xwayland_manager;
+  int rr_event_type;
+
+  if (!manager->has_xrandr)
+    return FALSE;
+
+  rr_event_type = xevent->type - manager->rr_event_base;
+  if (rr_event_type != RRScreenChangeNotify && rr_event_type != RRNotify)
+    return FALSE;
+
+  /* GDK selects RandR events on the root window for itself; leave those
+   * to it and act only on the ones we asked for. */
+  if (xevent->xany.window != x11_display->leader_window)
+    return FALSE;
+
+  x11_display->has_xinerama_indices = FALSE;
+  meta_xwayland_set_primary_output (x11_display);
+
+  return TRUE;
+}
+
+static void
+on_x11_display_setup (MetaDisplay *display)
+{
+  MetaWaylandCompositor *compositor = meta_wayland_compositor_get_default ();
+  MetaXWaylandManager *manager = &compositor->xwayland_manager;
+  MetaX11Display *x11_display = display->x11_display;
+  Display *xdisplay = meta_x11_display_get_xdisplay (x11_display);
+  MetaMonitorManager *monitor_manager =
+    meta_backend_get_monitor_manager (meta_get_backend ());
+  int rr_error_base;
+
+  g_signal_handlers_disconnect_by_func (display, on_x11_display_setup, NULL);
+
+  manager->has_xrandr = XRRQueryExtension (xdisplay,
+                                           &manager->rr_event_base,
+                                           &rr_error_base);
+  if (!manager->has_xrandr)
+    return;
+
+  /* Not the root window: the selection is per client and window, and GDK
+   * owns this connection's selection on the root. */
+  XRRSelectInput (xdisplay, x11_display->leader_window,
+                  RRScreenChangeNotifyMask |
+                  RRCrtcChangeNotifyMask |
+                  RROutputChangeNotifyMask);
+
+  g_signal_connect (monitor_manager, "monitors-changed",
+                    G_CALLBACK (on_monitors_changed), x11_display);
+
+  meta_xwayland_set_primary_output (x11_display);
+}
+
 static void
 on_x11_display_closing (MetaDisplay *display)
 {
+  MetaWaylandCompositor *compositor = meta_wayland_compositor_get_default ();
+  MetaXWaylandManager *manager = &compositor->xwayland_manager;
   Display *xdisplay = meta_x11_display_get_xdisplay (display->x11_display);
+  MetaMonitorManager *monitor_manager =
+    meta_backend_get_monitor_manager (meta_get_backend ());
+
+  manager->has_xrandr = FALSE;
+  g_signal_handlers_disconnect_by_func (monitor_manager,
+                                        on_monitors_changed,
+                                        display->x11_display);
+  g_signal_handlers_disconnect_by_func (display, on_x11_display_setup, NULL);
 
   meta_xwayland_shutdown_dnd (xdisplay);
   g_signal_handlers_disconnect_by_func (display,
@@ -891,6 +1052,8 @@ meta_xwayland_complete_init (MetaDisplay *display,
   */
   XSetIOErrorHandler (x_io_error);
 
+  g_signal_connect (display, "x11-display-setup",
+                    G_CALLBACK (on_x11_display_setup), NULL);
   g_signal_connect (display, "x11-display-closing",
                     G_CALLBACK (on_x11_display_closing), NULL);
   meta_xwayland_init_dnd (xdisplay);
