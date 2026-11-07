@@ -96,6 +96,7 @@ Depends: adwaita-icon-theme,
          muffin-common (>= ${source:Version}),
          ${misc:Depends},
          ${shlibs:Depends}
+Recommends: libdecor-0-plugin-1-gtk
 Replaces: muffin-doc
 Description: window and compositing manager (shared library)
  Muffin is a window manager performing compositing as well based on
