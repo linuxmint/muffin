@@ -357,6 +357,19 @@ typedef enum _CoglGraphicsResetStatus
 COGL_EXPORT CoglGraphicsResetStatus
 cogl_get_graphics_reset_status (CoglContext *context);
 
+/**
+ * cogl_context_get_latest_sync_fd:
+ * @context: a #CoglContext pointer
+ *
+ * Creates a native fence fd covering all work submitted so far on the
+ * currently bound GL context, so another device can be made to wait on it.
+ * Cogl's context must be current. The caller owns the fd and must close it.
+ *
+ * Return value: a fence fd, or -1 if none could be exported.
+ */
+COGL_EXPORT int
+cogl_context_get_latest_sync_fd (CoglContext *context);
+
 G_END_DECLS
 
 #endif /* __COGL_CONTEXT_H__ */

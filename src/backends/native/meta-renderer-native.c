@@ -131,6 +131,10 @@ typedef struct _MetaRendererNativeGpuData
     gboolean is_hardware_rendering;
     gboolean has_EGL_EXT_image_dma_buf_import_modifiers;
 
+    /* Set when this GPU ignores implicit dma-buf fences, so the copy has to
+     * wait on a fence exported from the primary GPU explicitly. */
+    gboolean needs_explicit_sync;
+
     /* For GPU blit mode */
     EGLContext egl_context;
     EGLConfig egl_config;
@@ -1577,12 +1581,21 @@ copy_shared_framebuffer_gpu (CoglOnscreen                        *onscreen,
   GError *error = NULL;
   MetaDrmBufferGbm *buffer_gbm;
   struct gbm_bo *bo;
+  int sync_fd = -1;
 
   COGL_TRACE_BEGIN_SCOPED (CopySharedFramebufferSecondaryGpu,
                            "FB Copy (secondary GPU)");
 
   g_warn_if_fail (secondary_gpu_state->gbm.next_fb == NULL);
   g_clear_object (&secondary_gpu_state->gbm.next_fb);
+
+  /* Taken before switching contexts: it describes the primary GPU's work. */
+  if (renderer_gpu_data->secondary.needs_explicit_sync)
+    {
+      CoglFramebuffer *framebuffer = COGL_FRAMEBUFFER (onscreen);
+
+      sync_fd = cogl_context_get_latest_sync_fd (framebuffer->context);
+    }
 
   if (!meta_egl_make_current (egl,
                               renderer_gpu_data->egl_display,
@@ -1593,10 +1606,58 @@ copy_shared_framebuffer_gpu (CoglOnscreen                        *onscreen,
     {
       g_warning ("Failed to make current: %s", error->message);
       g_error_free (error);
+      if (sync_fd >= 0)
+        close (sync_fd);
       return;
     }
 
   *egl_context_changed = TRUE;
+
+  if (sync_fd >= 0)
+    {
+      EGLAttrib attribs[3];
+      EGLSync egl_sync = EGL_NO_SYNC;
+
+      attribs[0] = EGL_SYNC_NATIVE_FENCE_FD_ANDROID;
+      attribs[1] = g_steal_fd (&sync_fd);
+      attribs[2] = EGL_NONE;
+
+      /* Ownership of the fd passes to EGL on success; on failure it is
+       * still ours, and attribs[1] is the only remaining reference. */
+      if (!meta_egl_create_sync (egl,
+                                 renderer_gpu_data->egl_display,
+                                 EGL_SYNC_NATIVE_FENCE_ANDROID,
+                                 attribs,
+                                 &egl_sync,
+                                 &error))
+        {
+          g_warning_once ("Failed to create EGLSync on secondary GPU, output "
+                          "may tear: %s", error->message);
+          g_clear_error (&error);
+          close (attribs[1]);
+        }
+      else
+        {
+          if (!meta_egl_wait_sync (egl,
+                                   renderer_gpu_data->egl_display,
+                                   egl_sync,
+                                   0,
+                                   &error))
+            {
+              g_warning_once ("Failed to wait for EGLSync on secondary GPU, "
+                              "output may tear: %s", error->message);
+              g_clear_error (&error);
+            }
+
+          meta_egl_destroy_sync (egl, renderer_gpu_data->egl_display,
+                                 egl_sync, NULL);
+        }
+    }
+  else if (renderer_gpu_data->secondary.needs_explicit_sync)
+    {
+      g_warning_once ("No fence available from the primary GPU; output on "
+                      "this secondary GPU may tear");
+    }
 
   buffer_gbm = META_DRM_BUFFER_GBM (onscreen_native->gbm.next_fb);
   bo =  meta_drm_buffer_gbm_get_bo (buffer_gbm);
@@ -3617,6 +3678,13 @@ init_secondary_gpu_data_gpu (MetaRendererNativeGpuData *renderer_gpu_data,
     meta_egl_has_extensions (egl, egl_display, NULL,
                              "EGL_EXT_image_dma_buf_import_modifiers",
                              NULL);
+
+  /* NVIDIA does not honour the implicit fences carried on an imported
+   * dma-buf, so reading one without waiting first picks up half-drawn
+   * frames. There is no capability query for this; mutter keys off the
+   * vendor string too. */
+  renderer_gpu_data->secondary.needs_explicit_sync =
+    g_strcmp0 (eglQueryString (egl_display, EGL_VENDOR), "NVIDIA") == 0;
 
   /* The context only had to be current for the queries above; the blit path
    * makes it current again before each use. Leaving it bound would keep it

@@ -624,3 +624,14 @@ cogl_context_format_supports_upload (CoglContext *ctx,
 {
   return ctx->texture_driver->format_supports_upload (ctx, format);
 }
+
+int
+cogl_context_get_latest_sync_fd (CoglContext *context)
+{
+  const CoglWinsysVtable *winsys = _cogl_context_get_winsys (context);
+
+  if (!winsys->get_sync_fd)
+    return -1;
+
+  return winsys->get_sync_fd (context);
+}

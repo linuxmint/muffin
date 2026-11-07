@@ -172,6 +172,11 @@ typedef struct _CoglWinsysVtable
   void
   (*fence_destroy) (CoglContext *ctx, void *fence);
 
+  /* Export a fence covering all work submitted so far as a native fd, or
+   * -1 if unsupported. */
+  int
+  (*get_sync_fd) (CoglContext *ctx);
+
 } CoglWinsysVtable;
 
 typedef const CoglWinsysVtable *(*CoglWinsysVtableGetter) (void);

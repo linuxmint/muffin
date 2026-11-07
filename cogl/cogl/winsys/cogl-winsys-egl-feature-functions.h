@@ -140,6 +140,15 @@ COGL_WINSYS_FEATURE_FUNCTION (EGLBoolean, eglDestroySync,
                               (EGLDisplay dpy,
                                EGLSyncKHR sync))
 COGL_WINSYS_FEATURE_END ()
+
+COGL_WINSYS_FEATURE_BEGIN (native_fence_sync,
+                           "ANDROID\0",
+                           "native_fence_sync\0",
+                           COGL_EGL_WINSYS_FEATURE_NATIVE_FENCE_SYNC)
+COGL_WINSYS_FEATURE_FUNCTION (EGLint, eglDupNativeFenceFD,
+                              (EGLDisplay dpy,
+                               EGLSyncKHR sync))
+COGL_WINSYS_FEATURE_END ()
 #endif
 
 COGL_WINSYS_FEATURE_BEGIN (surfaceless_context,

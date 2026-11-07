@@ -840,6 +840,41 @@ _cogl_winsys_fence_destroy (CoglContext *context, void *fence)
 
   renderer->pf_eglDestroySync (renderer->edpy, fence);
 }
+
+/* Export a fence covering everything submitted so far on the current
+ * context, so another GPU can be told to wait for it before reading what we
+ * rendered. Returns -1 when no fence could be exported, which callers treat
+ * as "no synchronisation available" rather than an error. */
+static int
+_cogl_winsys_get_sync_fd (CoglContext *context)
+{
+  CoglRendererEGL *renderer = context->display->renderer->winsys;
+  EGLSyncKHR sync;
+  int fd;
+
+  if (!renderer->pf_eglDupNativeFenceFD ||
+      !renderer->pf_eglCreateSync ||
+      !renderer->pf_eglDestroySync)
+    return -1;
+
+  sync = renderer->pf_eglCreateSync (renderer->edpy,
+                                     EGL_SYNC_NATIVE_FENCE_ANDROID,
+                                     NULL);
+  if (sync == EGL_NO_SYNC_KHR)
+    return -1;
+
+  /* The fd only exists once the fence command has been flushed. Mesa does
+   * that inside eglCreateSync, but the extension doesn't promise it. */
+  context->glFlush ();
+
+  fd = renderer->pf_eglDupNativeFenceFD (renderer->edpy, sync);
+  renderer->pf_eglDestroySync (renderer->edpy, sync);
+
+  if (fd == EGL_NO_NATIVE_FENCE_FD_ANDROID)
+    return -1;
+
+  return fd;
+}
 #endif
 
 static CoglWinsysVtable _cogl_winsys_vtable =
@@ -868,6 +903,7 @@ static CoglWinsysVtable _cogl_winsys_vtable =
     .fence_add = _cogl_winsys_fence_add,
     .fence_is_complete = _cogl_winsys_fence_is_complete,
     .fence_destroy = _cogl_winsys_fence_destroy,
+    .get_sync_fd = _cogl_winsys_get_sync_fd,
 #endif
   };
 

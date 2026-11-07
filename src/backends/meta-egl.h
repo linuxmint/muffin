@@ -97,6 +97,24 @@ EGLImageKHR meta_egl_create_image (MetaEgl        *egl,
                                    const EGLint   *attrib_list,
                                    GError        **error);
 
+gboolean meta_egl_create_sync (MetaEgl         *egl,
+                               EGLDisplay       display,
+                               EGLenum          type,
+                               const EGLAttrib *attrib_list,
+                               EGLSync         *sync,
+                               GError         **error);
+
+gboolean meta_egl_destroy_sync (MetaEgl    *egl,
+                                EGLDisplay  display,
+                                EGLSync     sync,
+                                GError    **error);
+
+gboolean meta_egl_wait_sync (MetaEgl    *egl,
+                             EGLDisplay  display,
+                             EGLSync     sync,
+                             EGLint      flags,
+                             GError    **error);
+
 gboolean meta_egl_destroy_image (MetaEgl    *egl,
                                  EGLDisplay  display,
                                  EGLImageKHR image,
