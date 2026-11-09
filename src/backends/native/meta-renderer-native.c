@@ -119,6 +119,10 @@ typedef struct _MetaRendererNativeGpuData
    * that individual device turns out to need. */
   gboolean use_modifiers;
 
+  /* Register this GPU's framebuffers with the layout gbm reports for them,
+   * even when they were allocated without modifiers. */
+  gboolean register_modifiers;
+
   /* Set when neither gbm_surface_create() nor the modifier path can allocate
    * a scanout surface here. */
   gboolean no_scanout;
@@ -1687,7 +1691,7 @@ copy_shared_framebuffer_gpu (CoglOnscreen                        *onscreen,
   buffer_gbm =
     meta_drm_buffer_gbm_new_lock_front (secondary_gpu_state->gpu_kms,
                                         secondary_gpu_state->gbm.surface,
-                                        renderer_gpu_data->use_modifiers,
+                                        renderer_gpu_data->register_modifiers,
                                         &error);
   if (!buffer_gbm)
     {
@@ -2206,7 +2210,7 @@ meta_onscreen_native_swap_buffers_with_damage (CoglOnscreen *onscreen,
       buffer_gbm =
       meta_drm_buffer_gbm_new_lock_front (render_gpu,
                                             onscreen_native->gbm.surface,
-                                            renderer_gpu_data->use_modifiers,
+                                            renderer_gpu_data->register_modifiers,
                                             &error);
       if (!buffer_gbm)
         {
@@ -3850,6 +3854,19 @@ create_renderer_gpu_data_gbm (MetaRendererNative  *renderer_native,
   renderer_gpu_data->mode = META_RENDERER_NATIVE_MODE_GBM;
   renderer_gpu_data->use_modifiers = renderer_native->use_modifiers ||
                                      meta_gpu_kms_requires_modifiers (gpu_kms);
+
+  /* An implicit allocation's layout is the driver's choice: block-linear on
+   * NVIDIA. Registering it without a modifier leaves the kernel reporting
+   * modifier 0, which reads back as LINEAR, and anything that captures the
+   * output through GETFB2 then gets scrambled pixels. */
+  {
+    uint64_t addfb2_modifiers = 0;
+
+    renderer_gpu_data->register_modifiers =
+      renderer_gpu_data->use_modifiers ||
+      (drmGetCap (kms_fd, DRM_CAP_ADDFB2_MODIFIERS, &addfb2_modifiers) == 0 &&
+       addfb2_modifiers);
+  }
 
   renderer_gpu_data->egl_display = init_gbm_egl_display (renderer_native,
                                                          gbm_device,
