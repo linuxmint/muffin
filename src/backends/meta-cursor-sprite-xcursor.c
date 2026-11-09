@@ -49,77 +49,77 @@ meta_cursor_get_name (MetaCursor cursor)
   switch (cursor)
     {
     case META_CURSOR_DEFAULT:
-      return "left_ptr";
+      return "default";
     case META_CURSOR_CONTEXT_MENU:
-      return "left_ptr";
+      return "context-menu";
     case META_CURSOR_HELP:
-      return "question_arrow";
+      return "help";
     case META_CURSOR_POINTER:
       return "pointer";
     case META_CURSOR_PROGRESS:
-      return "left_ptr_watch";
+      return "progress";
     case META_CURSOR_WAIT:
-      return "watch";
+      return "wait";
     case META_CURSOR_CELL:
-      return "crosshair";
+      return "cell";
     case META_CURSOR_CROSSHAIR:
-      return "cross";
+      return "crosshair";
     case META_CURSOR_TEXT:
-      return "xterm";
+      return "text";
     case META_CURSOR_VERTICAL_TEXT:
-      return "xterm";
+      return "vertical-text";
     case META_CURSOR_ALIAS:
-      return "dnd-link";
+      return "alias";
     case META_CURSOR_COPY:
-      return "dnd-copy";
+      return "copy";
     case META_CURSOR_MOVE:
-      return "dnd-move";
+      return "move";
     case META_CURSOR_NO_DROP:
-      return "dnd-none";
+      return "no-drop";
     case META_CURSOR_NOT_ALLOWED:
-      return "crossed_circle";
+      return "not-allowed";
     case META_CURSOR_GRAB:
       return "grab";
     case META_CURSOR_GRABBING:
       return "grabbing";
     case META_CURSOR_E_RESIZE:
-      return "right_side";
+      return "e-resize";
     case META_CURSOR_N_RESIZE:
-      return "top_side";
+      return "n-resize";
     case META_CURSOR_NE_RESIZE:
-      return "top_right_corner";
+      return "ne-resize";
     case META_CURSOR_NW_RESIZE:
-      return "top_left_corner";
+      return "nw-resize";
     case META_CURSOR_S_RESIZE:
-      return "bottom_side";
+      return "s-resize";
     case META_CURSOR_SE_RESIZE:
-      return "bottom_right_corner";
+      return "se-resize";
     case META_CURSOR_SW_RESIZE:
-      return "bottom_left_corner";
+      return "sw-resize";
     case META_CURSOR_W_RESIZE:
-      return "left_side";
+      return "w-resize";
     case META_CURSOR_EW_RESIZE:
-      return "h_double_arrow";
+      return "ew-resize";
     case META_CURSOR_NS_RESIZE:
-      return "v_double_arrow";
+      return "ns-resize";
     case META_CURSOR_NESW_RESIZE:
-      return "fd_double_arrow";
+      return "nesw-resize";
     case META_CURSOR_NWSE_RESIZE:
-      return "bd_double_arrow";
+      return "nwse-resize";
     case META_CURSOR_COL_RESIZE:
-      return "h_double_arrow";
+      return "col-resize";
     case META_CURSOR_ROW_RESIZE:
-      return "v_double_arrow";
+      return "row-resize";
     case META_CURSOR_ALL_SCROLL:
       return "all-scroll";
     case META_CURSOR_ZOOM_IN:
-      return "left_ptr";
+      return "zoom-in";
     case META_CURSOR_ZOOM_OUT:
-      return "left_ptr";
+      return "zoom-out";
     case META_CURSOR_DND_ASK:
       return "dnd-ask";
     case META_CURSOR_ALL_RESIZE:
-      return "fleur";
+      return "all-resize";
     case META_CURSOR_INVALID:
     case META_CURSOR_NONE:
       break;
@@ -165,9 +165,9 @@ meta_cursor_get_legacy_name (MetaCursor cursor)
     case META_CURSOR_NOT_ALLOWED:
       return "crossed_circle";
     case META_CURSOR_GRAB:
-      return "grab";
+      return "hand2";
     case META_CURSOR_GRABBING:
-      return "grabbing";
+      return "hand2";
     case META_CURSOR_E_RESIZE:
       return "right_side";
     case META_CURSOR_N_RESIZE:
@@ -197,7 +197,7 @@ meta_cursor_get_legacy_name (MetaCursor cursor)
     case META_CURSOR_ROW_RESIZE:
       return "v_double_arrow";
     case META_CURSOR_ALL_SCROLL:
-      return "all-scroll";
+      return "left_ptr";
     case META_CURSOR_ZOOM_IN:
       return "left_ptr";
     case META_CURSOR_ZOOM_OUT:
@@ -275,6 +275,8 @@ meta_create_x_cursor (Display    *xdisplay,
   result = XcursorLibraryLoadCursor (xdisplay, meta_cursor_get_name (cursor));
   if (!result)
     result = XcursorLibraryLoadCursor (xdisplay, meta_cursor_get_legacy_name (cursor));
+  if (!result && cursor != META_CURSOR_DEFAULT)
+    result = meta_create_x_cursor (xdisplay, META_CURSOR_DEFAULT);
 
   return result;
 }
@@ -305,7 +307,16 @@ load_cursor_on_client (MetaCursor cursor,
   if (xcursor_images)
     return xcursor_images;
 
-  g_warning ("No cursor theme available, please install a cursor theme");
+  if (cursor != META_CURSOR_DEFAULT)
+    {
+      g_warning_once ("Cursor theme '%s' has no '%s' or '%s' cursor, using the default cursor",
+                      meta_prefs_get_cursor_theme (),
+                      meta_cursor_get_name (cursor),
+                      meta_cursor_get_legacy_name (cursor));
+      return load_cursor_on_client (META_CURSOR_DEFAULT, scale);
+    }
+
+  g_warning_once ("No cursor theme available, please install a cursor theme");
 
   fallback_size = 24 * scale;
   xcursor_images = XcursorImagesCreate (1);
