@@ -63,7 +63,7 @@ meta_cursor_get_name (MetaCursor cursor)
     case META_CURSOR_CELL:
       return "cell";
     case META_CURSOR_CROSSHAIR:
-      return "crosshair";
+      return "cross";
     case META_CURSOR_TEXT:
       return "text";
     case META_CURSOR_VERTICAL_TEXT:
@@ -71,9 +71,9 @@ meta_cursor_get_name (MetaCursor cursor)
     case META_CURSOR_ALIAS:
       return "alias";
     case META_CURSOR_COPY:
-      return "copy";
+      return "dnd-copy";
     case META_CURSOR_MOVE:
-      return "move";
+      return "dnd-move";
     case META_CURSOR_NO_DROP:
       return "no-drop";
     case META_CURSOR_NOT_ALLOWED:
@@ -149,7 +149,7 @@ meta_cursor_get_legacy_name (MetaCursor cursor)
     case META_CURSOR_CELL:
       return "crosshair";
     case META_CURSOR_CROSSHAIR:
-      return "cross";
+      return "crosshair";
     case META_CURSOR_TEXT:
       return "xterm";
     case META_CURSOR_VERTICAL_TEXT:
@@ -157,9 +157,9 @@ meta_cursor_get_legacy_name (MetaCursor cursor)
     case META_CURSOR_ALIAS:
       return "dnd-link";
     case META_CURSOR_COPY:
-      return "dnd-copy";
+      return "copy";
     case META_CURSOR_MOVE:
-      return "dnd-move";
+      return "move";
     case META_CURSOR_NO_DROP:
       return "dnd-none";
     case META_CURSOR_NOT_ALLOWED:
