@@ -192,6 +192,17 @@ check_mesa_vendor (const CoglGpuInfoStrings *strings)
     return TRUE;
   else if (strcmp (strings->vendor_string, "Mesa Project") == 0)
     return TRUE;
+  /* Mesa 20.3 and 22.3 report "Mesa/X.org" as GL_VENDOR, and Mesa 25.0
+   * and later report plain "Mesa". Without matching these, llvmpipe,
+   * softpipe and swrast are never recognized as software rendering
+   * (they fall through to COGL_GPU_INFO_ARCHITECTURE_UNKNOWN, which is
+   * treated as hardware-accelerated), so Cinnamon's software-rendering
+   * fallback (disabled animations, driver notification) never kicks
+   * in under these Mesa versions. */
+  else if (strcmp (strings->vendor_string, "Mesa/X.org") == 0)
+    return TRUE;
+  else if (strcmp (strings->vendor_string, "Mesa") == 0)
+    return TRUE;
 
   return FALSE;
 }
