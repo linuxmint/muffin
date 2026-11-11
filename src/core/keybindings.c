@@ -125,6 +125,22 @@ resolved_key_combo_intersect (MetaResolvedKeyCombo *a,
   return FALSE;
 }
 
+static gboolean
+resolved_key_combo_equal (MetaResolvedKeyCombo *a,
+                          MetaResolvedKeyCombo *b)
+{
+  int i;
+
+  if (a->len != b->len || a->mask != b->mask)
+    return FALSE;
+
+  for (i = 0; i < a->len; i++)
+    if (!resolved_key_combo_has_keycode (b, a->keycodes[i]))
+      return FALSE;
+
+  return TRUE;
+}
+
 static void
 meta_key_binding_free (MetaKeyBinding *binding)
 {
@@ -807,6 +823,63 @@ reload_combos (MetaKeyBindingManager *keys)
   g_hash_table_foreach (keys->key_bindings, binding_reload_combos_foreach, keys);
 }
 
+typedef struct
+{
+  MetaKeyBindingManager *keys;
+  gboolean changed;
+} PerWindowComboProbeData;
+
+static void
+per_window_combo_probe_foreach (gpointer key,
+                                gpointer value,
+                                gpointer data)
+{
+  PerWindowComboProbeData *probe = data;
+  MetaKeyBinding *binding = value;
+  MetaResolvedKeyCombo new_combo = { NULL, 0, 0 };
+
+  if (!(binding->flags & META_KEY_BINDING_PER_WINDOW))
+    return;
+
+  /* Read-only: compare what this binding's combo would resolve to
+   * against what it currently is, without touching the binding. */
+  resolve_key_combo (probe->keys, &binding->combo, &new_combo);
+
+  if (!resolved_key_combo_equal (&binding->resolved_combo, &new_combo))
+    probe->changed = TRUE;
+
+  resolved_key_combo_reset (&new_combo);
+}
+
+/* Returns TRUE if any META_KEY_BINDING_PER_WINDOW binding would resolve
+ * to a different combo under the keyboard layout that is about to become
+ * active. Regrabbing per-window bindings is O(windows), so callers use
+ * this to skip that regrab when nothing would actually change -- which,
+ * for bindings using layout-independent keys like arrows/F-keys/Space,
+ * is true on every layout switch.
+ *
+ * Must be called after reload_modmap() (modifiers affect the resolved
+ * mask) and before reload_combos() overwrites the bindings' resolved
+ * combos with the new values. */
+static gboolean
+per_window_combos_will_change (MetaKeyBindingManager *keys)
+{
+  PerWindowComboProbeData probe = { keys, FALSE };
+
+  /* reload_active_keyboard_layouts() is normally called from
+   * reload_combos(); call it here too, so get_keycodes_for_keysym()
+   * below resolves against the layout group that is about to become
+   * active rather than the current one. It is idempotent (it tears
+   * down and rebuilds keys->active_layouts from the backend's current
+   * keymap group) and cheap (no X requests), and reload_combos() will
+   * call it again right after we return. */
+  reload_active_keyboard_layouts (keys);
+
+  g_hash_table_foreach (keys->key_bindings, per_window_combo_probe_foreach, &probe);
+
+  return probe.changed;
+}
+
 static void
 rebuild_binding_table (MetaKeyBindingManager *keys,
                        GList                  *prefs,
@@ -901,10 +974,24 @@ rebuild_special_bindings (MetaKeyBindingManager *keys)
 static void
 ungrab_key_bindings (MetaDisplay *display)
 {
-  GSList *windows, *l;
-
   if (display->x11_display)
     meta_x11_display_ungrab_keys (display->x11_display);
+}
+
+static void
+grab_key_bindings (MetaDisplay *display)
+{
+  if (display->x11_display)
+    meta_x11_display_grab_keys (display->x11_display);
+}
+
+/* Regrabbing per-window key bindings is the expensive part of a
+ * keybinding reload: it does a synchronous X round trip per per-window
+ * combo, per window (see per_window_combos_will_change()'s callers). */
+static void
+ungrab_per_window_key_bindings (MetaDisplay *display)
+{
+  GSList *windows, *l;
 
   windows = meta_display_list_windows (display, META_LIST_DEFAULT);
   for (l = windows; l; l = l->next)
@@ -917,12 +1004,9 @@ ungrab_key_bindings (MetaDisplay *display)
 }
 
 static void
-grab_key_bindings (MetaDisplay *display)
+grab_per_window_key_bindings (MetaDisplay *display)
 {
   GSList *windows, *l;
-
-  if (display->x11_display)
-    meta_x11_display_grab_keys (display->x11_display);
 
   windows = meta_display_list_windows (display, META_LIST_DEFAULT);
   for (l = windows; l; l = l->next)
@@ -1199,17 +1283,28 @@ static void
 reload_keybindings (MetaDisplay *display)
 {
   MetaKeyBindingManager *keys = &display->key_binding_manager;
-
-  ungrab_key_bindings (display);
+  gboolean per_window_combo_changed;
 
   /* Deciphering the modmap depends on the loaded keysyms to find out
    * what modifiers is Super and so forth, so we need to reload it
    * even when only the keymap changes */
   reload_modmap (keys);
 
+  /* This is typically called on every keyboard layout group switch.
+   * Per-window combos (Alt+F4, Super+arrows, ...) usually resolve to
+   * the same keycodes in every layout, so probe for an actual change
+   * before paying for the O(windows) regrab below. */
+  per_window_combo_changed = per_window_combos_will_change (keys);
+
+  ungrab_key_bindings (display);
+  if (per_window_combo_changed)
+    ungrab_per_window_key_bindings (display);
+
   reload_combos (keys);
 
   grab_key_bindings (display);
+  if (per_window_combo_changed)
+    grab_per_window_key_bindings (display);
 }
 
 static GArray *
@@ -1432,11 +1527,16 @@ prefs_changed_callback (MetaPreference pref,
     case META_PREF_LOCATE_POINTER:
       break;
     case META_PREF_KEYBINDINGS:
+      /* Keybinding preference changes are rare (the user editing a
+       * shortcut), unlike layout switches, so unconditionally redoing
+       * the per-window regrab here isn't worth the added complexity. */
       ungrab_key_bindings (display);
+      ungrab_per_window_key_bindings (display);
       rebuild_key_binding_table (keys);
       rebuild_special_bindings (keys);
       reload_combos (keys);
       grab_key_bindings (display);
+      grab_per_window_key_bindings (display);
       break;
     case META_PREF_MOUSE_BUTTON_ZOOM_MODS:
     case META_PREF_MOUSE_ZOOM_ENABLED:
