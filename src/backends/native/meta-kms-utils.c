@@ -23,7 +23,9 @@
 #include "backends/native/meta-kms-utils.h"
 
 #include <drm_fourcc.h>
+#include <errno.h>
 #include <glib.h>
+#include <xf86drm.h>
 
 /* added in libdrm 2.4.95 */
 #ifndef DRM_FORMAT_INVALID
@@ -81,3 +83,32 @@ meta_drm_format_to_string (MetaDrmFormatBuf *tmp,
   return tmp->s;
 }
 
+/*
+ * Release a framebuffer that may still be on screen.  drmModeRmFB() turns
+ * off every plane showing it, and on amdgpu, which cannot disable a primary
+ * plane alone, the whole CRTC: destroying the views on a monitor change
+ * then blanked the monitors that stayed connected until their new views
+ * set the CRTC again.  drmModeCloseFB() (Linux 6.8) only drops the handle
+ * and leaves the picture up until it is replaced.
+ */
+void
+meta_kms_close_fb (int      fd,
+                   uint32_t fb_id)
+{
+#ifdef HAVE_DRM_MODE_CLOSE_FB
+  static gboolean close_fb_unsupported = FALSE;
+
+  if (!close_fb_unsupported)
+    {
+      int ret = drmModeCloseFB (fd, fb_id);
+
+      if (ret == 0)
+        return;
+      /* Kernels without DRM_IOCTL_MODE_CLOSEFB */
+      if (ret == -EINVAL || ret == -ENOTTY)
+        close_fb_unsupported = TRUE;
+    }
+#endif
+
+  drmModeRmFB (fd, fb_id);
+}

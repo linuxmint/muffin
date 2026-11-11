@@ -37,6 +37,9 @@
 /* Define if you want to enable the native (KMS) backend based on systemd */
 #mesondefine HAVE_NATIVE_BACKEND
 
+/* Defined if libdrm has drmModeCloseFB() */
+#mesondefine HAVE_DRM_MODE_CLOSE_FB
+
 /* Define if you want to enable Wayland support */
 #mesondefine HAVE_WAYLAND
 

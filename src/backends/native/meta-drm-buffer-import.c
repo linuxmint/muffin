@@ -172,7 +172,7 @@ meta_drm_buffer_import_finalize (GObject *object)
       int kms_fd;
 
       kms_fd = meta_gpu_kms_get_fd (buffer_import->gpu_kms);
-      drmModeRmFB (kms_fd, buffer_import->fb_id);
+      meta_kms_close_fb (kms_fd, buffer_import->fb_id);
     }
 
   g_clear_object (&buffer_import->importee);

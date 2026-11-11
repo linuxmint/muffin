@@ -31,6 +31,9 @@ typedef struct _MetaDrmFormatBuf
 
 float meta_calculate_drm_mode_refresh_rate (const drmModeModeInfo *drm_mode);
 
+void meta_kms_close_fb (int      fd,
+                        uint32_t fb_id);
+
 const char * meta_drm_format_to_string (MetaDrmFormatBuf *tmp,
                                         uint32_t          drm_format);
 

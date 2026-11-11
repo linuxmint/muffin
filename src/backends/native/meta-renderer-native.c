@@ -2921,7 +2921,7 @@ release_dumb_fb (MetaDumbBuffer *dumb_fb,
 
   kms_fd = meta_gpu_kms_get_fd (gpu_kms);
 
-  drmModeRmFB (kms_fd, dumb_fb->fb_id);
+  meta_kms_close_fb (kms_fd, dumb_fb->fb_id);
 
   destroy_arg = (struct drm_mode_destroy_dumb) {
     .handle = dumb_fb->handle

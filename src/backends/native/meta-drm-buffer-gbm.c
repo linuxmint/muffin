@@ -24,6 +24,7 @@
 #include "config.h"
 
 #include "backends/native/meta-drm-buffer-gbm.h"
+#include "backends/native/meta-kms-utils.h"
 
 #include <drm_fourcc.h>
 #include <errno.h>
@@ -180,7 +181,7 @@ meta_drm_buffer_gbm_finalize (GObject *object)
       int kms_fd;
 
       kms_fd = meta_gpu_kms_get_fd (buffer_gbm->gpu_kms);
-      drmModeRmFB (kms_fd, buffer_gbm->fb_id);
+      meta_kms_close_fb (kms_fd, buffer_gbm->fb_id);
     }
 
   if (buffer_gbm->bo)
