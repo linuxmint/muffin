@@ -45,6 +45,7 @@
 #include "backends/meta-renderer.h"
 
 #include <glib-object.h>
+#include <string.h>
 
 #include "backends/meta-backend-private.h"
 #include "backends/meta-logical-monitor.h"
@@ -199,6 +200,37 @@ meta_renderer_get_views (MetaRenderer *renderer)
   return priv->views;
 }
 
+/*
+ * Decide from GL_RENDERER alone whether this is a Mesa software rasterizer.
+ * The GL_VENDOR string reported by Mesa has changed several times
+ * ("Mesa Project", "Mesa/X.org", "Mesa"), so the vendor based detection in
+ * cogl-gpu-info.c can miss llvmpipe and friends. GL_RENDERER is stable.
+ */
+static gboolean
+renderer_string_is_software (const char *renderer_string)
+{
+  static const char * const software_renderers[] = {
+    "llvmpipe",
+    "softpipe",
+    "software rasterizer",
+  };
+  g_autofree char *lowered = NULL;
+  gsize i;
+
+  if (!renderer_string)
+    return FALSE;
+
+  lowered = g_ascii_strdown (renderer_string, -1);
+
+  for (i = 0; i < G_N_ELEMENTS (software_renderers); i++)
+    {
+      if (strstr (lowered, software_renderers[i]))
+        return TRUE;
+    }
+
+  return FALSE;
+}
+
 gboolean
 meta_renderer_is_hardware_accelerated (MetaRenderer *renderer)
 {
@@ -208,6 +240,11 @@ meta_renderer_is_hardware_accelerated (MetaRenderer *renderer)
   CoglContext *cogl_context =
     clutter_backend_get_cogl_context (clutter_backend);
   CoglGpuInfo *info = &cogl_context->gpu;
+
+  if (cogl_context->glGetString &&
+      renderer_string_is_software ((const char *)
+                                   cogl_context->glGetString (GL_RENDERER)))
+    return FALSE;
 
   switch (info->architecture)
     {
