@@ -192,6 +192,13 @@ check_mesa_vendor (const CoglGpuInfoStrings *strings)
     return TRUE;
   else if (strcmp (strings->vendor_string, "Mesa Project") == 0)
     return TRUE;
+  /* Mesa 20.3 and 22.3 report "Mesa/X.org", Mesa 25.0 and later report
+   * plain "Mesa". The vendor is only used to pick the architecture table,
+   * so hardware drivers reporting these strings are not affected. */
+  else if (strcmp (strings->vendor_string, "Mesa/X.org") == 0)
+    return TRUE;
+  else if (strcmp (strings->vendor_string, "Mesa") == 0)
+    return TRUE;
 
   return FALSE;
 }
