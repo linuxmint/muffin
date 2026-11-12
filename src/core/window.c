@@ -1837,6 +1837,7 @@ meta_window_showing_on_its_workspace (MetaWindow *window)
     workspace_of_window = NULL;
 
   if (showing &&
+      !window->override_redirect &&
       workspace_of_window && workspace_of_window->showing_desktop &&
       !is_desktop_or_dock)
     {
