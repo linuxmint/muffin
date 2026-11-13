@@ -230,6 +230,14 @@ meta_stage_paint_view (ClutterStage         *stage,
   notify_watchers_for_mode (meta_stage, view, NULL,
                             META_STAGE_WATCH_BEFORE_PAINT);
 
+  {
+    CoglFramebuffer *framebuffer = clutter_stage_view_get_framebuffer (view);
+
+    if (framebuffer && !cogl_is_onscreen (framebuffer))
+      cogl_framebuffer_clear4f (framebuffer, COGL_BUFFER_BIT_COLOR,
+                                0.0f, 0.0f, 0.0f, 1.0f);
+  }
+
   CLUTTER_STAGE_CLASS (meta_stage_parent_class)->paint_view (stage, view,
                                                              redraw_clip);
 
