@@ -63,11 +63,18 @@ _cogl_driver_nop_context_deinit (CoglContext *context)
 {
 }
 
+static gboolean
+_cogl_driver_nop_is_hardware_accelerated (CoglContext *context)
+{
+  return FALSE;
+}
+
 const CoglDriverVtable
 _cogl_driver_nop =
   {
     _cogl_driver_nop_context_init,
     _cogl_driver_nop_context_deinit,
+    _cogl_driver_nop_is_hardware_accelerated,
     NULL, /* pixel_format_from_gl_internal */
     NULL, /* pixel_format_to_gl */
     _cogl_driver_update_features,

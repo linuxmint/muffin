@@ -207,23 +207,8 @@ meta_renderer_is_hardware_accelerated (MetaRenderer *renderer)
   ClutterBackend *clutter_backend = meta_backend_get_clutter_backend (backend);
   CoglContext *cogl_context =
     clutter_backend_get_cogl_context (clutter_backend);
-  CoglGpuInfo *info = &cogl_context->gpu;
 
-  switch (info->architecture)
-    {
-    case COGL_GPU_INFO_ARCHITECTURE_UNKNOWN:
-    case COGL_GPU_INFO_ARCHITECTURE_SANDYBRIDGE:
-    case COGL_GPU_INFO_ARCHITECTURE_SGX:
-    case COGL_GPU_INFO_ARCHITECTURE_MALI:
-      return TRUE;
-    case COGL_GPU_INFO_ARCHITECTURE_LLVMPIPE:
-    case COGL_GPU_INFO_ARCHITECTURE_SOFTPIPE:
-    case COGL_GPU_INFO_ARCHITECTURE_SWRAST:
-      return FALSE;
-    }
-
-  g_assert_not_reached ();
-  return FALSE;
+  return cogl_context_is_hardware_accelerated (cogl_context);
 }
 
 static void

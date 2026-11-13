@@ -370,6 +370,16 @@ cogl_get_graphics_reset_status (CoglContext *context);
 COGL_EXPORT int
 cogl_context_get_latest_sync_fd (CoglContext *context);
 
+/**
+ * cogl_context_is_hardware_accelerated:
+ * @context: a #CoglContext pointer
+ *
+ * Returns: %TRUE if the @context is hardware accelerated, or %FALSE if
+ * not.
+ */
+COGL_EXPORT gboolean
+cogl_context_is_hardware_accelerated (CoglContext *context);
+
 G_END_DECLS
 
 #endif /* __COGL_CONTEXT_H__ */

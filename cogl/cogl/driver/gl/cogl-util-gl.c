@@ -179,3 +179,28 @@ _cogl_gl_util_parse_gl_version (const char *version_string,
 
   return TRUE;
 }
+
+/*
+ * This should arguably use something like GLX_MESA_query_renderer, but
+ * a) that's GLX-only, and you could add it to EGL too but
+ * b) that'd make this a winsys query when really it's not a property of
+ *    the winsys but the renderer, and
+ * c) only Mesa really supports it anyway, and
+ * d) Mesa is the only software renderer of interest.
+ *
+ * So instead just check a list of known software renderer strings.
+ */
+gboolean
+_cogl_driver_gl_is_hardware_accelerated (CoglContext *ctx)
+{
+  const char *renderer = (const char *) ctx->glGetString (GL_RENDERER);
+  gboolean software;
+
+  software = strstr (renderer, "llvmpipe") != NULL ||
+             strstr (renderer, "softpipe") != NULL ||
+             strstr (renderer, "software rasterizer") != NULL ||
+             strstr (renderer, "Software Rasterizer") != NULL ||
+             strstr (renderer, "SWR");
+
+  return !software;
+}
