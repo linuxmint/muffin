@@ -441,8 +441,6 @@ _cogl_driver_update_features (CoglContext *ctx,
 
   _cogl_get_gl_version (ctx, &gl_major, &gl_minor);
 
-  _cogl_gpu_info_init (ctx, &ctx->gpu);
-
   ctx->glsl_major = 1;
   ctx->glsl_minor = 2;
   ctx->glsl_version_to_use = 120;

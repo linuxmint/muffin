@@ -207,8 +207,6 @@ cogl_sources = [
   'cogl-debug.h',
   'cogl-debug-options.h',
   'cogl-dma-buf-handle.c',
-  'cogl-gpu-info.c',
-  'cogl-gpu-info-private.h',
   'cogl-context-private.h',
   'cogl-context.c',
   'cogl-renderer-private.h',

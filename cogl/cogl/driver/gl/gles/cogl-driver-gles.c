@@ -329,8 +329,6 @@ _cogl_driver_update_features (CoglContext *context,
   context->glsl_minor = 0;
   context->glsl_version_to_use = 100;
 
-  _cogl_gpu_info_init (context, &context->gpu);
-
   if (!_cogl_get_gl_version (context, &gl_major, &gl_minor))
     {
       gl_major = 1;

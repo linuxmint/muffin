@@ -46,7 +46,6 @@
 #include "cogl-onscreen-private.h"
 #include "cogl-attribute-private.h"
 #include "cogl1-context.h"
-#include "cogl-gpu-info-private.h"
 #include "cogl-gtype-private.h"
 #include "winsys/cogl-winsys-private.h"
 

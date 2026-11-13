@@ -46,7 +46,6 @@
 #include "cogl-pipeline-cache.h"
 #include "cogl-texture-2d.h"
 #include "cogl-sampler-cache-private.h"
-#include "cogl-gpu-info-private.h"
 #include "cogl-gl-header.h"
 #include "cogl-framebuffer-private.h"
 #include "cogl-onscreen-private.h"
@@ -70,10 +69,6 @@ struct _CoglContext
   CoglDisplay *display;
 
   CoglDriver driver;
-
-  /* Information about the GPU and driver which we can use to
-     determine certain workarounds */
-  CoglGpuInfo gpu;
 
   /* vtables for the driver functions */
   const CoglDriverVtable *driver_vtable;
