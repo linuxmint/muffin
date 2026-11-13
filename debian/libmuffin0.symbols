@@ -1551,6 +1551,7 @@ libmuffin-cogl-0.so.0 libmuffin0 #MINVER#
  cogl_context_get_gtype@Base 5.3.0
  cogl_context_get_latest_sync_fd@Base 6.8.2
  cogl_context_get_renderer@Base 5.3.0
+ cogl_context_is_hardware_accelerated@Base 6.8.2
  cogl_context_new@Base 5.3.0
  cogl_create_program@Base 5.3.0
  cogl_create_shader@Base 5.3.0

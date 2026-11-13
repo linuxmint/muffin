@@ -46,6 +46,9 @@ struct _CoglDriverVtable
   void
   (* context_deinit) (CoglContext *context);
 
+  gboolean
+  (* is_hardware_accelerated) (CoglContext *context);
+
   /* TODO: factor this out since this is OpenGL specific and
    * so can be ignored by non-OpenGL drivers. */
   gboolean

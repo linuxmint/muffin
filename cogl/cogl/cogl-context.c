@@ -635,3 +635,9 @@ cogl_context_get_latest_sync_fd (CoglContext *context)
 
   return winsys->get_sync_fd (context);
 }
+
+gboolean
+cogl_context_is_hardware_accelerated (CoglContext *context)
+{
+  return context->driver_vtable->is_hardware_accelerated (context);
+}
