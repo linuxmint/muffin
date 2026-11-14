@@ -1750,7 +1750,7 @@ clutter_script_construct_parameters (ClutterScript  *script,
           continue;
         }
 
-      if (!(pspec->flags & G_PARAM_CONSTRUCT_ONLY))
+      if (!(pspec->flags & (G_PARAM_CONSTRUCT | G_PARAM_CONSTRUCT_ONLY)))
         {
           unparsed = g_list_prepend (unparsed, pinfo);
           continue;

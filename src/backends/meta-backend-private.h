@@ -156,10 +156,6 @@ xkb_layout_index_t meta_backend_get_keymap_layout_group (MetaBackend *backend);
 
 gboolean meta_backend_is_lid_closed (MetaBackend *backend);
 
-void meta_backend_freeze_updates (MetaBackend *backend);
-
-void meta_backend_thaw_updates (MetaBackend *backend);
-
 void meta_backend_update_last_device (MetaBackend        *backend,
                                       ClutterInputDevice *device);
 

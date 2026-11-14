@@ -27,6 +27,7 @@
 G_DECLARE_FINAL_TYPE (MetaCompositorNative, meta_compositor_native,
                       META, COMPOSITOR_NATIVE, MetaCompositorServer)
 
-MetaCompositorNative * meta_compositor_native_new (MetaDisplay *display);
+MetaCompositorNative * meta_compositor_native_new (MetaDisplay *display,
+                                                   MetaBackend *backend);
 
 #endif /* META_COMPOSITOR_NATIVE_H */
