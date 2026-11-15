@@ -560,8 +560,6 @@ meta_wayland_touch_enable (MetaWaylandTouch *touch)
                                           (GDestroyNotify) touch_info_free);
 #endif /* HAVE_NATIVE_BACKEND */
 
-  wl_list_init (&touch->resource_list);
-
 #ifdef HAVE_NATIVE_BACKEND
   MetaBackend *backend = meta_get_backend ();
   if (META_IS_BACKEND_NATIVE (backend))
@@ -602,15 +600,7 @@ meta_wayland_touch_create_new_resource (MetaWaylandTouch   *touch,
                                         struct wl_resource *seat_resource,
                                         uint32_t            id)
 {
-  MetaWaylandSeat *seat = wl_resource_get_user_data (seat_resource);
   struct wl_resource *cr;
-
-  if (!meta_wayland_seat_has_touch (seat))
-    {
-      wl_resource_post_error (seat_resource, WL_DISPLAY_ERROR_INVALID_METHOD,
-                              "Cannot retrieve touch interface without touch capability");
-      return;
-    }
 
   cr = wl_resource_create (client, &wl_touch_interface, wl_resource_get_version (seat_resource), id);
   wl_resource_set_implementation (cr, &touch_interface, touch, unbind_resource);
@@ -705,6 +695,7 @@ meta_wayland_touch_get_press_coords (MetaWaylandTouch     *touch,
 static void
 meta_wayland_touch_init (MetaWaylandTouch *touch)
 {
+  wl_list_init (&touch->resource_list);
 }
 
 static void

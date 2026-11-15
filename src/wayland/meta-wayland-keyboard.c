@@ -857,6 +857,7 @@ meta_wayland_keyboard_enable (MetaWaylandKeyboard *keyboard)
                     G_CALLBACK (on_kbd_a11y_mask_changed), keyboard);
 
   meta_wayland_keyboard_take_keymap (keyboard, meta_backend_get_keymap (backend));
+  notify_key_repeat (keyboard);
 }
 
 static void
@@ -1167,9 +1168,12 @@ meta_wayland_keyboard_create_new_resource (MetaWaylandKeyboard *keyboard,
   wl_resource_set_implementation (resource, &keyboard_interface,
                                   keyboard, unbind_resource);
 
-  send_keymap (keyboard, resource);
-
-  notify_key_repeat_for_resource (keyboard, resource);
+  /* Resources requested while there is no keyboard get these on enable. */
+  if (keyboard->settings)
+    {
+      send_keymap (keyboard, resource);
+      notify_key_repeat_for_resource (keyboard, resource);
+    }
 
   if (keyboard->focus_surface &&
       wl_resource_get_client (keyboard->focus_surface->resource) == client)
