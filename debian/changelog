@@ -1,3 +1,12 @@
+muffin (6.8.3) adrien; urgency=medium
+
+  [ Michael Webster ]
+  * wayland: Avoid a race in wl_seat capabilities
+  * events.c: Always let crossing events through to Clutter.
+  * udev: Accept the DRM boot_display attribute as well as boot_vga
+
+ -- Clement Lefebvre <root@linuxmint.com>  Mon, 16 Nov 2026 20:42:32 +0000
+
 muffin (6.8.2) adrien; urgency=medium
 
   [ Michael Webster ]
