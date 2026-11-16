@@ -378,12 +378,6 @@ meta_display_handle_event (MetaDisplay        *display,
     }
 #endif
 
-  /* Crossing events only matter to actors (hover state, tooltips). Nothing
-   * below handles them, but the grab routes would still bypass Clutter.
-   */
-  if (event->type == CLUTTER_ENTER || event->type == CLUTTER_LEAVE)
-    return FALSE;
-
   window = get_window_for_event (display, event);
 
   display->current_time = event->any.time;
@@ -556,6 +550,12 @@ meta_display_handle_event (MetaDisplay        *display,
 #endif
 
   display->current_time = META_CURRENT_TIME;
+
+  /* Actors track hover state through crossing events, so they must see
+   * them whatever the route. */
+  if (event->type == CLUTTER_ENTER || event->type == CLUTTER_LEAVE)
+    return FALSE;
+
   return bypass_clutter;
 }
 
