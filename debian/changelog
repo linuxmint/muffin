@@ -1,3 +1,20 @@
+muffin (6.8.2) adrien; urgency=medium
+
+  [ Michael Webster ]
+  * debian/control: Recommend the libdecor GTK plugin.
+  * xwayland: Set Xwayland's primary RandR output.
+  * cursor-renderer/native: Don't move the HW cursor onto a GPU it isn't realized on.
+  * renderer/native: Use an external texture when the driver requires one.
+  * renderer/native: Wait for the primary GPU's fence before copying.
+  * cursor-sprite-xcursor: Look cursors up by their CSS names first.
+  * Revert "x11: Scale relative pointer motion by the UI scaling factor."
+  * meta-cursor-sprite-xcursor.c: Make a few tweaks to dnd icons
+  * window: Don't hide override-redirect windows in show-desktop mode
+  * cogl: Detect software rendering from GL_RENDERER
+  * cogl: Remove now-unused CoglGpuInfo
+
+ -- Clement Lefebvre <root@linuxmint.com>  Mon, 16 Nov 2026 15:22:57 +0000
+
 muffin (6.8.1) adrien; urgency=medium
 
   [ Michael Webster ]
