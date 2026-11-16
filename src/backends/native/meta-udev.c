@@ -68,10 +68,12 @@ meta_is_udev_device_boot_vga (GUdevDevice *device)
   g_autoptr (GUdevDevice) pci_device = NULL;
 
   pci_device = g_udev_device_get_parent_with_subsystem (device, "pci", NULL);
-  if (!pci_device)
-    return FALSE;
+  if (pci_device &&
+      g_udev_device_get_sysfs_attr_as_int (pci_device, "boot_vga") == 1)
+    return TRUE;
 
-  return g_udev_device_get_sysfs_attr_as_int (pci_device, "boot_vga") == 1;
+  /* Display controllers that aren't VGA class have no boot_vga attribute. */
+  return g_udev_device_get_sysfs_attr_as_int (device, "boot_display") == 1;
 }
 
 gboolean
