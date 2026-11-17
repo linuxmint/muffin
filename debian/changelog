@@ -1,3 +1,11 @@
+muffin (6.8.4) adrien; urgency=medium
+
+  [ Michael Webster ]
+  * events.c: Let window frames see crossing events again.
+  * wayland: Cancel selection sources that are set while unfocused
+
+ -- Clement Lefebvre <root@linuxmint.com>  Tue, 17 Nov 2026 17:54:44 +0000
+
 muffin (6.8.3) adrien; urgency=medium
 
   [ Michael Webster ]
