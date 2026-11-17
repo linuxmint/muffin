@@ -1026,7 +1026,11 @@ data_device_set_selection (struct wl_client *client,
 
   if (wl_resource_get_client (resource) !=
       meta_wayland_keyboard_get_focus_client (seat->keyboard))
-    return;
+    {
+      if (source)
+        meta_wayland_data_source_cancel (source);
+      return;
+    }
 
   /* FIXME: Store serial and check against incoming serial here. */
   meta_wayland_data_device_set_selection (data_device, source, serial);
