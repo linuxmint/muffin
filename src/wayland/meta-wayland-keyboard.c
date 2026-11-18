@@ -63,8 +63,6 @@
 #include "backends/native/meta-event-native.h"
 #endif
 
-#define GSD_KEYBOARD_SCHEMA "org.cinnamon.settings-daemon.peripherals.keyboard"
-
 G_DEFINE_TYPE (MetaWaylandKeyboard, meta_wayland_keyboard,
                META_TYPE_WAYLAND_INPUT_DEVICE)
 
@@ -843,7 +841,7 @@ meta_wayland_keyboard_enable (MetaWaylandKeyboard *keyboard)
 
   wl_array_init (&keyboard->pressed_keys);
 
-  keyboard->settings = g_settings_new ("org.gnome.desktop.peripherals.keyboard");
+  keyboard->settings = g_settings_new ("org.cinnamon.desktop.peripherals.keyboard");
   g_signal_connect (keyboard->settings, "changed",
                     G_CALLBACK (settings_changed), keyboard);
 
