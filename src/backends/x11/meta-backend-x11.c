@@ -370,6 +370,8 @@ handle_host_xevent (MetaBackend *backend,
 
   XGetEventData (priv->xdisplay, &event->xcookie);
 
+  priv->cached_current_logical_monitor = NULL;
+
   display = meta_get_display ();
   if (display)
     {
