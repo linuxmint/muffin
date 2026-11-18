@@ -2308,6 +2308,30 @@ intervening_user_event_occurred (MetaWindow *window)
     }
 }
 
+/* X11 WM_CLASS names and Wayland app ids. */
+static const char * const terminal_classes[] = {
+  "Gnome-terminal",
+  "XTerm",
+  "Konsole",
+  "URxvt",
+  "Eterm",
+  "KTerm",
+  "Multi-gnome-terminal",
+  "mlterm",
+  "Terminal",
+  "Tilix",
+  "qterminal",
+  "org.x.velocitty",
+  "Alacritty",
+  "com.mitchellh.ghostty",
+  "org.gnome.Terminal",
+  "ptyxis",
+  "org.gnome.Ptyxis",
+  "Terminator",
+  "terminator",
+  NULL
+};
+
 /* This function is an ugly hack.  It's experimental in nature and ought to be
  * replaced by a real hint from the app to the WM if we decide the experimental
  * behavior is worthwhile.  The basic idea is to get more feedback about how
@@ -2319,43 +2343,7 @@ window_is_terminal (MetaWindow *window)
   if (window == NULL || window->res_class == NULL)
     return FALSE;
 
-  /*
-   * Compare res_class, which is not user-settable, and thus theoretically
-   * a more-reliable indication of term-ness.
-   */
-
-  /* gnome-terminal -- if you couldn't guess */
-  if (strcmp (window->res_class, "Gnome-terminal") == 0)
-    return TRUE;
-  /* xterm, rxvt, aterm */
-  else if (strcmp (window->res_class, "XTerm") == 0)
-    return TRUE;
-  /* konsole, KDE's terminal program */
-  else if (strcmp (window->res_class, "Konsole") == 0)
-    return TRUE;
-  /* rxvt-unicode */
-  else if (strcmp (window->res_class, "URxvt") == 0)
-    return TRUE;
-  /* eterm */
-  else if (strcmp (window->res_class, "Eterm") == 0)
-    return TRUE;
-  /* KTerm -- some terminal not KDE based; so not like Konsole */
-  else if (strcmp (window->res_class, "KTerm") == 0)
-    return TRUE;
-  /* Multi-gnome-terminal */
-  else if (strcmp (window->res_class, "Multi-gnome-terminal") == 0)
-    return TRUE;
-  /* mlterm ("multi lingual terminal emulator on X") */
-  else if (strcmp (window->res_class, "mlterm") == 0)
-    return TRUE;
-  /* Terminal -- XFCE Terminal */
-  else if (strcmp (window->res_class, "Terminal") == 0)
-    return TRUE;
-  else if (strcmp (window->res_class, "Tilix") == 0)
-    return TRUE;
-  else if (strcmp (window->res_class, "qterminal") == 0)
-    return TRUE;
-  return FALSE;
+  return g_strv_contains (terminal_classes, window->res_class);
 }
 
 /* This function determines what state the window should have assuming that it
