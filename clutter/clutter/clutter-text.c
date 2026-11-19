@@ -1341,7 +1341,7 @@ update_cursor_location (ClutterText *self)
       !clutter_input_focus_is_focused (priv->input_focus))
     return;
 
-  rect = priv->cursor_rect;
+  clutter_text_get_cursor_rect (self, &rect);
   clutter_actor_get_transformed_position (CLUTTER_ACTOR (self), &x, &y);
   graphene_rect_offset (&rect, x, y);
   clutter_input_focus_set_cursor_location (priv->input_focus, &rect);
@@ -6875,10 +6875,17 @@ void
 clutter_text_get_cursor_rect (ClutterText     *self,
                               graphene_rect_t *rect)
 {
+  float inverse_scale;
+
   g_return_if_fail (CLUTTER_IS_TEXT (self));
   g_return_if_fail (rect != NULL);
 
-  *rect = self->priv->cursor_rect;
+  inverse_scale = 1.f / clutter_actor_get_resource_scale (CLUTTER_ACTOR (self));
+
+  graphene_rect_scale (&self->priv->cursor_rect,
+                       inverse_scale,
+                       inverse_scale,
+                       rect);
 }
 
 void
