@@ -1,3 +1,12 @@
+muffin (6.8.5) adrien; urgency=medium
+
+  [ Michael Webster ]
+  * meta-wayland-keyboard.c: Use the correct schema for repeat settings
+  * window.c: Add some more entries for terminal window matching.
+  * backends/x11: Invalidate the current monitor cache on backend events
+
+ -- Clement Lefebvre <root@linuxmint.com>  Thu, 19 Nov 2026 10:06:01 +0000
+
 muffin (6.8.4) adrien; urgency=medium
 
   [ Michael Webster ]
