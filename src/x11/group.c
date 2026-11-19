@@ -157,12 +157,14 @@ meta_window_compute_group (MetaWindow* window)
 
   if (x11_display->groups_by_leader)
     {
-      if (ancestor != window)
+      if (ancestor != window && ancestor->xgroup_leader != None)
         group = ancestor->group;
-      else if (window->xgroup_leader != None)
+
+      if (group == NULL && window->xgroup_leader != None)
         group = g_hash_table_lookup (x11_display->groups_by_leader,
                                      &window->xgroup_leader);
-      else
+
+      if (group == NULL)
         group = g_hash_table_lookup (x11_display->groups_by_leader,
                                      &window->xwindow);
     }
