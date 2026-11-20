@@ -45,7 +45,7 @@ configure_file(
 )
 
 if have_libgudev
-  install_data(['61-muffin.rules'],
+  install_data(['61-muffin.rules', '70-muffin-tablet-mode.rules'],
     install_dir: join_paths(udev_dir, 'rules.d'),
   )
 endif

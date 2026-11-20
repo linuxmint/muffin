@@ -922,12 +922,36 @@ done:
 }
 
 static void
-orientation_changed (MetaOrientationManager *orientation_manager,
-                     MetaMonitorManager     *manager)
+apply_orientation_transform (MetaMonitorManager   *manager,
+                             MetaMonitorTransform  transform)
 {
-  MetaMonitorTransform transform;
   GError *error = NULL;
   MetaMonitorsConfig *config;
+
+  config =
+    meta_monitor_config_manager_create_for_orientation (manager->config_manager,
+                                                        transform);
+  if (!config)
+    return;
+
+  if (!meta_monitor_manager_apply_monitors_config (manager,
+                                                   config,
+                                                   META_MONITORS_CONFIG_METHOD_TEMPORARY,
+                                                   &error))
+    {
+      g_warning ("Failed to use orientation monitor configuration: %s",
+                 error->message);
+      g_error_free (error);
+    }
+  g_object_unref (config);
+}
+
+static void
+apply_accelerometer_orientation (MetaMonitorManager *manager)
+{
+  MetaOrientationManager *orientation_manager =
+    meta_backend_get_orientation_manager (manager->backend);
+  MetaMonitorTransform transform;
 
   switch (meta_orientation_manager_get_orientation (orientation_manager))
     {
@@ -949,22 +973,97 @@ orientation_changed (MetaOrientationManager *orientation_manager,
       return;
     }
 
-  config =
-    meta_monitor_config_manager_create_for_orientation (manager->config_manager,
-                                                        transform);
-  if (!config)
+  apply_orientation_transform (manager, transform);
+}
+
+/* With auto-rotate set to "tablet-mode", the panel only follows the
+ * accelerometer while the seat is in touch mode. touch-mode is FALSE when a
+ * readable tablet-mode switch reports laptop posture (or there is no
+ * touchscreen); a switch that can't be read doesn't hold anything. */
+static gboolean
+should_hold_rotation (MetaMonitorManager *manager)
+{
+  MetaOrientationManager *orientation_manager =
+    meta_backend_get_orientation_manager (manager->backend);
+  ClutterSeat *seat;
+
+  if (meta_orientation_manager_get_auto_rotate (orientation_manager) !=
+      META_AUTO_ROTATE_TABLET_MODE)
+    return FALSE;
+
+  seat = clutter_backend_get_default_seat (clutter_get_default_backend ());
+  return !clutter_seat_get_touch_mode (seat);
+}
+
+/* Like mutter's update_panel_orientation_managed(): act only when the hold
+ * changes, and never without an accelerometer, so that touch-mode changing
+ * for some other reason (a USB touchscreen being unplugged, say) can't reset
+ * a panel the user rotated by hand. */
+static void
+update_rotation_hold (MetaMonitorManager *manager)
+{
+  MetaOrientationManager *orientation_manager =
+    meta_backend_get_orientation_manager (manager->backend);
+  gboolean hold = should_hold_rotation (manager);
+
+  if (manager->rotation_held == hold)
     return;
 
-  if (!meta_monitor_manager_apply_monitors_config (manager,
-                                                   config,
-                                                   META_MONITORS_CONFIG_METHOD_TEMPORARY,
-                                                   &error))
-    {
-      g_warning ("Failed to use orientation monitor configuration: %s",
-                 error->message);
-      g_error_free (error);
-    }
-  g_object_unref (config);
+  manager->rotation_held = hold;
+
+  if (meta_orientation_manager_get_auto_rotate (orientation_manager) ==
+      META_AUTO_ROTATE_DISABLED ||
+      !meta_orientation_manager_has_accelerometer (orientation_manager))
+    return;
+
+  if (hold)
+    apply_orientation_transform (manager, META_MONITOR_TRANSFORM_NORMAL);
+  else
+    apply_accelerometer_orientation (manager);
+}
+
+static void
+orientation_changed (MetaOrientationManager *orientation_manager,
+                     MetaMonitorManager     *manager)
+{
+  if (manager->rotation_held)
+    return;
+
+  apply_accelerometer_orientation (manager);
+}
+
+static void
+touch_mode_changed (ClutterSeat        *seat,
+                    GParamSpec         *pspec,
+                    MetaMonitorManager *manager)
+{
+  update_rotation_hold (manager);
+}
+
+static void
+auto_rotate_changed (MetaOrientationManager *orientation_manager,
+                     MetaMonitorManager     *manager)
+{
+  update_rotation_hold (manager);
+}
+
+/* Called from meta_monitor_manager_setup(), which runs after clutter_init(),
+ * so the ClutterSeat exists by now. */
+static void
+setup_rotation_hold (MetaMonitorManager *manager)
+{
+  ClutterSeat *seat =
+    clutter_backend_get_default_seat (clutter_get_default_backend ());
+
+  manager->rotation_held = should_hold_rotation (manager);
+
+  g_signal_connect_object (seat, "notify::touch-mode",
+                           G_CALLBACK (touch_mode_changed),
+                           manager, 0);
+  g_signal_connect_object (meta_backend_get_orientation_manager (manager->backend),
+                           "auto-rotate-changed",
+                           G_CALLBACK (auto_rotate_changed),
+                           manager, 0);
 }
 
 static gboolean
@@ -1056,6 +1155,8 @@ meta_monitor_manager_setup (MetaMonitorManager *manager)
   manager->in_init = TRUE;
 
   manager->config_manager = meta_monitor_config_manager_new (manager);
+
+  setup_rotation_hold (manager);
 
   meta_monitor_manager_read_current_state (manager);
 

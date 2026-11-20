@@ -28,6 +28,7 @@
 enum
 {
   ORIENTATION_CHANGED,
+  AUTO_ROTATE_CHANGED,
 
   N_SIGNALS
 };
@@ -42,6 +43,7 @@ struct _MetaOrientationManager
 
   guint iio_watch_id;
   GDBusProxy *iio_proxy;
+  gboolean has_accel;
   MetaOrientation prev_orientation;
   MetaOrientation curr_orientation;
 
@@ -50,8 +52,8 @@ struct _MetaOrientationManager
 
 G_DEFINE_TYPE (MetaOrientationManager, meta_orientation_manager, G_TYPE_OBJECT)
 
-#define CONF_SCHEMA "org.cinnamon.settings-daemon.peripherals.touchscreen"
-#define ORIENTATION_LOCK_KEY "orientation-lock"
+#define CONF_SCHEMA "org.cinnamon.muffin"
+#define AUTO_ROTATE_KEY "auto-rotate"
 
 static MetaOrientation
 orientation_from_string (const char *orientation)
@@ -69,12 +71,11 @@ orientation_from_string (const char *orientation)
 }
 
 static void
-read_iio_proxy (MetaOrientationManager *self)
+update_has_accel (MetaOrientationManager *self)
 {
-  gboolean has_accel = FALSE;
   GVariant *v;
 
-  self->curr_orientation = META_ORIENTATION_UNDEFINED;
+  self->has_accel = FALSE;
 
   if (!self->iio_proxy)
     return;
@@ -82,11 +83,19 @@ read_iio_proxy (MetaOrientationManager *self)
   v = g_dbus_proxy_get_cached_property (self->iio_proxy, "HasAccelerometer");
   if (v)
     {
-      has_accel = g_variant_get_boolean (v);
+      self->has_accel = g_variant_get_boolean (v);
       g_variant_unref (v);
     }
+}
 
-  if (has_accel)
+static void
+read_iio_proxy (MetaOrientationManager *self)
+{
+  GVariant *v;
+
+  self->curr_orientation = META_ORIENTATION_UNDEFINED;
+
+  if (self->has_accel)
     {
       v = g_dbus_proxy_get_cached_property (self->iio_proxy, "AccelerometerOrientation");
       if (v)
@@ -100,7 +109,9 @@ read_iio_proxy (MetaOrientationManager *self)
 static void
 sync_state (MetaOrientationManager *self)
 {
-  if (g_settings_get_boolean (self->settings, ORIENTATION_LOCK_KEY))
+  update_has_accel (self);
+
+  if (meta_orientation_manager_get_auto_rotate (self) == META_AUTO_ROTATE_DISABLED)
     return;
 
   read_iio_proxy (self);
@@ -117,11 +128,13 @@ sync_state (MetaOrientationManager *self)
 }
 
 static void
-orientation_lock_changed (GSettings *settings,
-                          gchar     *key,
-                          gpointer   user_data)
+auto_rotate_changed (GSettings *settings,
+                     gchar     *key,
+                     gpointer   user_data)
 {
   MetaOrientationManager *self = user_data;
+
+  g_signal_emit (self, signals[AUTO_ROTATE_CHANGED], 0);
   sync_state (self);
 }
 
@@ -236,8 +249,8 @@ meta_orientation_manager_init (MetaOrientationManager *self)
                                          NULL);
 
   self->settings = g_settings_new (CONF_SCHEMA);
-  g_signal_connect_object (self->settings, "changed::"ORIENTATION_LOCK_KEY,
-                           G_CALLBACK (orientation_lock_changed), self, 0);
+  g_signal_connect_object (self->settings, "changed::"AUTO_ROTATE_KEY,
+                           G_CALLBACK (auto_rotate_changed), self, 0);
   sync_state (self);
 }
 
@@ -271,10 +284,30 @@ meta_orientation_manager_class_init (MetaOrientationManagerClass *klass)
                   0,
                   NULL, NULL, NULL,
                   G_TYPE_NONE, 0);
+
+  signals[AUTO_ROTATE_CHANGED] =
+    g_signal_new ("auto-rotate-changed",
+                  G_TYPE_FROM_CLASS (gobject_class),
+                  G_SIGNAL_RUN_LAST,
+                  0,
+                  NULL, NULL, NULL,
+                  G_TYPE_NONE, 0);
 }
 
 MetaOrientation
 meta_orientation_manager_get_orientation (MetaOrientationManager *self)
 {
   return self->curr_orientation;
+}
+
+MetaAutoRotate
+meta_orientation_manager_get_auto_rotate (MetaOrientationManager *self)
+{
+  return g_settings_get_enum (self->settings, AUTO_ROTATE_KEY);
+}
+
+gboolean
+meta_orientation_manager_has_accelerometer (MetaOrientationManager *self)
+{
+  return self->has_accel;
 }
