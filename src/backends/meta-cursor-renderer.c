@@ -38,8 +38,21 @@
 G_DEFINE_INTERFACE (MetaHwCursorInhibitor, meta_hw_cursor_inhibitor,
                     G_TYPE_OBJECT)
 
+enum
+{
+  PROP_0,
+
+  PROP_BACKEND,
+
+  N_PROPS
+};
+
+static GParamSpec *obj_props[N_PROPS];
+
 struct _MetaCursorRendererPrivate
 {
+  MetaBackend *backend;
+
   float current_x;
   float current_y;
 
@@ -89,8 +102,7 @@ align_cursor_position (MetaCursorRenderer *renderer,
 {
   MetaCursorRendererPrivate *priv =
     meta_cursor_renderer_get_instance_private (renderer);
-  MetaBackend *backend = meta_get_backend ();
-  ClutterActor *stage = meta_backend_get_stage (backend);
+  ClutterActor *stage = meta_backend_get_stage (priv->backend);
   ClutterStageView *view;
   cairo_rectangle_int_t view_layout;
   float view_scale;
@@ -115,8 +127,7 @@ queue_redraw (MetaCursorRenderer *renderer,
               MetaCursorSprite   *cursor_sprite)
 {
   MetaCursorRendererPrivate *priv = meta_cursor_renderer_get_instance_private (renderer);
-  MetaBackend *backend = meta_get_backend ();
-  ClutterActor *stage = meta_backend_get_stage (backend);
+  ClutterActor *stage = meta_backend_get_stage (priv->backend);
   CoglTexture *texture;
   graphene_rect_t rect = GRAPHENE_RECT_INIT_ZERO;
 
@@ -166,12 +177,53 @@ meta_cursor_renderer_real_update_cursor (MetaCursorRenderer *renderer,
 }
 
 static void
+meta_cursor_renderer_get_property (GObject    *object,
+                                   guint       prop_id,
+                                   GValue     *value,
+                                   GParamSpec *pspec)
+{
+  MetaCursorRenderer *renderer = META_CURSOR_RENDERER (object);
+  MetaCursorRendererPrivate *priv =
+  meta_cursor_renderer_get_instance_private (renderer);
+
+  switch (prop_id)
+    {
+    case PROP_BACKEND:
+      g_value_set_object (value, priv->backend);
+      break;
+    default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+      break;
+    }
+}
+
+static void
+meta_cursor_renderer_set_property (GObject      *object,
+                                   guint         prop_id,
+                                   const GValue *value,
+                                   GParamSpec   *pspec)
+{
+  MetaCursorRenderer *renderer = META_CURSOR_RENDERER (object);
+  MetaCursorRendererPrivate *priv =
+  meta_cursor_renderer_get_instance_private (renderer);
+
+  switch (prop_id)
+    {
+    case PROP_BACKEND:
+      priv->backend = g_value_get_object (value);
+      break;
+    default:
+      G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+      break;
+    }
+}
+
+static void
 meta_cursor_renderer_finalize (GObject *object)
 {
   MetaCursorRenderer *renderer = META_CURSOR_RENDERER (object);
   MetaCursorRendererPrivate *priv = meta_cursor_renderer_get_instance_private (renderer);
-  MetaBackend *backend = meta_get_backend ();
-  ClutterActor *stage = meta_backend_get_stage (backend);
+  ClutterActor *stage = meta_backend_get_stage (priv->backend);
 
   if (priv->stage_overlay)
     meta_stage_remove_cursor_overlay (META_STAGE (stage), priv->stage_overlay);
@@ -186,8 +238,20 @@ meta_cursor_renderer_class_init (MetaCursorRendererClass *klass)
 {
   GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
+  object_class->get_property = meta_cursor_renderer_get_property;
+  object_class->set_property = meta_cursor_renderer_set_property;
   object_class->finalize = meta_cursor_renderer_finalize;
   klass->update_cursor = meta_cursor_renderer_real_update_cursor;
+
+  obj_props[PROP_BACKEND] =
+    g_param_spec_object ("backend",
+                         "backend",
+                         "MetaBackend",
+                         META_TYPE_BACKEND,
+                         G_PARAM_READWRITE |
+                         G_PARAM_CONSTRUCT_ONLY |
+                         G_PARAM_STATIC_STRINGS);
+  g_object_class_install_properties (object_class, N_PROPS, obj_props);
 
   signals[CURSOR_PAINTED] = g_signal_new ("cursor-painted",
                                           G_TYPE_FROM_CLASS (klass),
@@ -273,9 +337,11 @@ meta_cursor_renderer_update_cursor (MetaCursorRenderer *renderer,
 }
 
 MetaCursorRenderer *
-meta_cursor_renderer_new (void)
+meta_cursor_renderer_new (MetaBackend *backend)
 {
-  return g_object_new (META_TYPE_CURSOR_RENDERER, NULL);
+  return g_object_new (META_TYPE_CURSOR_RENDERER,
+                       "backend", backend,
+                       NULL);
 }
 
 void
