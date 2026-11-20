@@ -1,3 +1,10 @@
+muffin (6.8.6) adrien; urgency=medium
+
+  [ Michael Webster ]
+  * clutter-text.c: Report the cursor location in stage coordinates
+
+ -- Clement Lefebvre <root@linuxmint.com>  Fri, 20 Nov 2026 17:42:33 +0000
+
 muffin (6.8.5) adrien; urgency=medium
 
   [ Michael Webster ]
