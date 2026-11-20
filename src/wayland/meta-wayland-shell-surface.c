@@ -62,7 +62,8 @@ meta_wayland_shell_surface_calculate_geometry (MetaWaylandShellSurface *shell_su
     .height = meta_wayland_surface_get_height (surface),
   };
 
-  META_WAYLAND_SURFACE_FOREACH_SUBSURFACE (surface, subsurface_surface)
+  META_WAYLAND_SURFACE_FOREACH_SUBSURFACE (&surface->output_state,
+                                           subsurface_surface)
     {
       MetaWaylandSubsurface *subsurface;
 
@@ -265,7 +266,7 @@ meta_wayland_shell_surface_surface_pre_apply_state (MetaWaylandSurfaceRole  *sur
 
   /* Queue calc_showing when buffer is detached (unmap) */
   if (pending->newly_attached &&
-      !surface->buffer_ref->buffer &&
+      !surface->buffer &&
       priv->window)
     meta_window_queue (priv->window, META_QUEUE_CALC_SHOWING);
 }
@@ -291,7 +292,7 @@ meta_wayland_shell_surface_surface_apply_state (MetaWaylandSurfaceRole  *surface
     META_WAYLAND_SURFACE_ROLE_CLASS (meta_wayland_shell_surface_parent_class);
   surface_role_class->apply_state (surface_role, pending);
 
-  buffer = surface->buffer_ref->buffer;
+  buffer = surface->buffer;
   if (!buffer)
     return;
 
