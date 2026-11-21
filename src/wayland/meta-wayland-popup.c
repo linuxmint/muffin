@@ -42,6 +42,8 @@
 
 #include "config.h"
 
+#include <math.h>
+
 #include "wayland/meta-wayland-popup.h"
 
 #include "wayland/meta-wayland-pointer.h"
@@ -57,7 +59,22 @@ struct _MetaWaylandPopupGrab
 
   struct wl_client       *grab_client;
   struct wl_list          all_popups;
+
+  /* A popup opened by a button press (a context menu) can map under the
+   * pointer, as clients anchor it at the pointer: until the button is
+   * released, or held and dragged away from the press, it doesn't get
+   * pointer focus, so the release of the opening click isn't taken as a
+   * click on the menu */
+  gboolean                release_guard;
+  float                   guard_x, guard_y;
+  uint32_t                guard_time;
 };
+
+/* A press held this long and dragged this far is a press-drag-release onto
+ * an item, which the popup gets; shorter, with the hand's usual wobble, it's
+ * a click (GTK 3 menus tell them apart by time the same way) */
+#define POPUP_RELEASE_GUARD_DISTANCE 4.0
+#define POPUP_RELEASE_GUARD_MS 300
 
 struct _MetaWaylandPopup
 {
@@ -96,6 +113,21 @@ meta_wayland_popup_surface_get_surface (MetaWaylandPopupSurface *popup_surface)
   return META_WAYLAND_POPUP_SURFACE_GET_IFACE (popup_surface)->get_surface (popup_surface);
 }
 
+static gboolean
+is_grab_popup_surface (MetaWaylandPopupGrab *popup_grab,
+                       MetaWaylandSurface   *surface)
+{
+  MetaWaylandPopup *popup;
+
+  wl_list_for_each (popup, &popup_grab->all_popups, link)
+    {
+      if (meta_wayland_popup_surface_get_surface (popup->popup_surface) == surface)
+        return TRUE;
+    }
+
+  return FALSE;
+}
+
 static void
 popup_grab_focus (MetaWaylandPointerGrab *grab,
 		  MetaWaylandSurface     *surface)
@@ -112,6 +144,12 @@ popup_grab_focus (MetaWaylandPointerGrab *grab,
   if (!meta_wayland_seat_has_pointer (seat))
     return;
 
+  /* The popup mapped under the pointer during the opening press: keep the
+   * pointer focus where the press was */
+  if (popup_grab->release_guard && surface &&
+      is_grab_popup_surface (popup_grab, surface))
+    return;
+
   /* Popup grabs are in owner-events mode (ie, events for the same client
      are reported as normal) */
   if (surface &&
@@ -122,9 +160,35 @@ popup_grab_focus (MetaWaylandPointerGrab *grab,
 }
 
 static void
+end_release_guard (MetaWaylandPopupGrab *popup_grab)
+{
+  MetaWaylandPointer *pointer = popup_grab->generic.pointer;
+
+  if (!popup_grab->release_guard)
+    return;
+
+  popup_grab->release_guard = FALSE;
+  popup_grab_focus ((MetaWaylandPointerGrab *) popup_grab, pointer->current);
+}
+
+static void
 popup_grab_motion (MetaWaylandPointerGrab *grab,
 		   const ClutterEvent     *event)
 {
+  MetaWaylandPopupGrab *popup_grab = (MetaWaylandPopupGrab*)grab;
+
+  if (popup_grab->release_guard)
+    {
+      float x, y;
+
+      clutter_event_get_coords (event, &x, &y);
+      if ((fabsf (x - popup_grab->guard_x) > POPUP_RELEASE_GUARD_DISTANCE ||
+           fabsf (y - popup_grab->guard_y) > POPUP_RELEASE_GUARD_DISTANCE) &&
+          clutter_event_get_time (event) - popup_grab->guard_time >=
+          POPUP_RELEASE_GUARD_MS)
+        end_release_guard (popup_grab);
+    }
+
   meta_wayland_pointer_send_motion (grab->pointer, event);
 }
 
@@ -132,13 +196,22 @@ static void
 popup_grab_button (MetaWaylandPointerGrab *grab,
 		   const ClutterEvent     *event)
 {
+  MetaWaylandPopupGrab *popup_grab = (MetaWaylandPopupGrab*)grab;
   MetaWaylandPointer *pointer = grab->pointer;
 
   if (pointer->focus_surface)
     meta_wayland_pointer_send_button (grab->pointer, event);
   else if (clutter_event_type (event) == CLUTTER_BUTTON_RELEASE &&
 	   pointer->button_count == 0)
-    meta_wayland_pointer_end_popup_grab (grab->pointer);
+    {
+      meta_wayland_pointer_end_popup_grab (grab->pointer);
+      return;
+    }
+
+  /* The opening press is over: the popup under the pointer can have it */
+  if (clutter_event_type (event) == CLUTTER_BUTTON_RELEASE &&
+      pointer->button_count == 0)
+    end_release_guard (popup_grab);
 }
 
 static void
@@ -173,6 +246,14 @@ meta_wayland_popup_grab_create (MetaWaylandPointer      *pointer,
   grab->generic.pointer = pointer;
   grab->grab_client = client;
   wl_list_init (&grab->all_popups);
+
+  if (pointer->button_count > 0)
+    {
+      grab->release_guard = TRUE;
+      grab->guard_x = pointer->grab_x;
+      grab->guard_y = pointer->grab_y;
+      grab->guard_time = pointer->grab_time;
+    }
 
   if (!meta_wayland_popup_grab_begin (grab, surface))
     {
