@@ -446,6 +446,14 @@ meta_wayland_compositor_setup (MetaWaylandCompositor *wayland_compositor)
   MetaWaylandCompositor *compositor = meta_wayland_compositor_get_default ();
   GSource *wayland_event_source;
 
+#if WAYLAND_VERSION_MAJOR > 1 || WAYLAND_VERSION_MINOR >= 23
+  /* The default 4 KiB connection buffer is easily filled when a client is
+   * busy for a moment, and the client is then disconnected with
+   * "Data too big for buffer". */
+  wl_display_set_default_max_buffer_size (compositor->wayland_display,
+                                          1024 * 1024);
+#endif
+
   wayland_event_source = wayland_event_source_new (compositor->wayland_display);
 
   /* XXX: Here we are setting the wayland event source to have a
