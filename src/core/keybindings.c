@@ -2358,10 +2358,16 @@ process_key_event (MetaDisplay     *display,
     {
       if (process_modifier_only (display, event, window, &allow_key_up))
         return TRUE;
-
-      if (process_iso_next_group (display, event))
-        return TRUE;
     }
+
+  /* Under Wayland, xkbcommon has already switched the layout when the key
+   * was pressed, even during a grab such as a mouse window move. Tell the
+   * shell about it, or its idea of the current layout falls out of sync.
+   * Under X11 the handler may ungrab the keyboard, which would end the grab,
+   * so keep skipping it there. */
+  if ((!all_keys_grabbed || meta_is_wayland_compositor ()) &&
+      process_iso_next_group (display, event))
+    return TRUE;
 
   {
     MetaBackend *backend = meta_get_backend ();
