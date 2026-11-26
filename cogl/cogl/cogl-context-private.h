@@ -51,7 +51,6 @@
 #include "cogl-onscreen-private.h"
 #include "cogl-fence-private.h"
 #include "cogl-poll-private.h"
-#include "cogl-path/cogl-path-types.h"
 #include "cogl-private.h"
 #include "winsys/cogl-winsys-private.h"
 
@@ -191,7 +190,6 @@ struct _CoglContext
   gboolean was_bound_to_onscreen;
 
   /* Primitives */
-  CoglPath         *current_path;
   CoglPipeline     *stencil_pipeline;
 
   /* Pre-generated VBOs containing indices to generate GL_TRIANGLES
