@@ -21,6 +21,8 @@
 
 #include "config.h"
 
+#include <math.h>
+
 #include "wayland/meta-wayland-cursor-surface.h"
 
 #include "backends/meta-backend-private.h"
@@ -68,8 +70,8 @@ update_cursor_sprite_texture (MetaWaylandCursorSurface *cursor_surface)
     {
       meta_cursor_sprite_set_texture (cursor_sprite,
                                       texture,
-                                      priv->hot_x * surface->scale,
-                                      priv->hot_y * surface->scale);
+                                      (int) round (priv->hot_x * surface->scale),
+                                      (int) round (priv->hot_y * surface->scale));
     }
   else
     {

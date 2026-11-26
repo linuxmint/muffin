@@ -107,7 +107,7 @@ struct _MetaShapedTexture
   guint remipmap_timeout_id;
   gint64 earliest_remipmap;
 
-  int buffer_scale;
+  double buffer_scale;
 
   guint create_mipmaps : 1;
 };
@@ -142,7 +142,7 @@ meta_shaped_texture_init (MetaShapedTexture *stex)
 {
   stex->paint_tower = meta_texture_tower_new ();
 
-  stex->buffer_scale = 1;
+  stex->buffer_scale = 1.0;
   stex->texture = NULL;
   stex->mask_texture = NULL;
   stex->create_mipmaps = TRUE;
@@ -153,7 +153,7 @@ meta_shaped_texture_init (MetaShapedTexture *stex)
 static void
 update_size (MetaShapedTexture *stex)
 {
-  int buffer_scale = stex->buffer_scale;
+  double buffer_scale = stex->buffer_scale;
   int dst_width;
   int dst_height;
 
@@ -173,26 +173,26 @@ update_size (MetaShapedTexture *stex)
         {
           if (stex->texture)
             {
-              dst_width = stex->tex_height / buffer_scale;
-              dst_height = stex->tex_width / buffer_scale;
+              dst_width = (int) round (stex->tex_height / buffer_scale);
+              dst_height = (int) round (stex->tex_width / buffer_scale);
             }
           else
             {
-              dst_width = stex->fallback_height / buffer_scale;
-              dst_height = stex->fallback_width / buffer_scale;
+              dst_width = (int) round (stex->fallback_height / buffer_scale);
+              dst_height = (int) round (stex->fallback_width / buffer_scale);
             }
         }
       else
         {
           if (stex->texture)
             {
-              dst_width = stex->tex_width / buffer_scale;
-              dst_height = stex->tex_height / buffer_scale;
+              dst_width = (int) round (stex->tex_width / buffer_scale);
+              dst_height = (int) round (stex->tex_height / buffer_scale);
             }
           else
             {
-              dst_width = stex->fallback_width / buffer_scale;
-              dst_height = stex->fallback_height / buffer_scale;
+              dst_width = (int) round (stex->fallback_width / buffer_scale);
+              dst_height = (int) round (stex->fallback_height / buffer_scale);
             }
         }
     }
@@ -570,8 +570,10 @@ do_paint_content (MetaShapedTexture   *stex,
 
   if (stex->has_viewport_src_rect)
     {
-      sample_width = stex->viewport_src_rect.size.width * stex->buffer_scale;
-      sample_height = stex->viewport_src_rect.size.height * stex->buffer_scale;
+      sample_width = (int) round (stex->viewport_src_rect.size.width *
+                                  stex->buffer_scale);
+      sample_height = (int) round (stex->viewport_src_rect.size.height *
+                                   stex->buffer_scale);
     }
   else
     {
@@ -917,13 +919,17 @@ meta_shaped_texture_update_area (MetaShapedTexture     *stex,
 
   if (meta_monitor_transform_is_rotated (stex->transform))
     {
-      scaled_and_transformed_width = stex->tex_height / stex->buffer_scale;
-      scaled_and_transformed_height = stex->tex_width / stex->buffer_scale;
+      scaled_and_transformed_width =
+        (int) round (stex->tex_height / stex->buffer_scale);
+      scaled_and_transformed_height =
+        (int) round (stex->tex_width / stex->buffer_scale);
     }
   else
     {
-      scaled_and_transformed_width = stex->tex_width / stex->buffer_scale;
-      scaled_and_transformed_height = stex->tex_height / stex->buffer_scale;
+      scaled_and_transformed_width =
+        (int) round (stex->tex_width / stex->buffer_scale);
+      scaled_and_transformed_height =
+        (int) round (stex->tex_height / stex->buffer_scale);
     }
 
   inverted_transform = meta_monitor_transform_invert (stex->transform);
@@ -1436,10 +1442,10 @@ meta_shaped_texture_get_image (MetaShapedTexture     *stex,
         return NULL;
 
       *image_clip = (MetaRectangle) {
-        .x = image_clip->x * stex->buffer_scale,
-        .y = image_clip->y * stex->buffer_scale,
-        .width = image_clip->width * stex->buffer_scale,
-        .height = image_clip->height * stex->buffer_scale,
+        .x = (int) round (image_clip->x * stex->buffer_scale),
+        .y = (int) round (image_clip->y * stex->buffer_scale),
+        .width = (int) round (image_clip->width * stex->buffer_scale),
+        .height = (int) round (image_clip->height * stex->buffer_scale),
       };
     }
 
@@ -1448,8 +1454,8 @@ meta_shaped_texture_get_image (MetaShapedTexture     *stex,
       int image_width;
       int image_height;
 
-      image_width = stex->dst_width * stex->buffer_scale;
-      image_height = stex->dst_height * stex->buffer_scale;
+      image_width = (int) round (stex->dst_width * stex->buffer_scale);
+      image_height = (int) round (stex->dst_height * stex->buffer_scale);
       return get_image_via_offscreen (stex,
                                       image_clip,
                                       image_width,
@@ -1534,7 +1540,7 @@ meta_shaped_texture_new (void)
 
 void
 meta_shaped_texture_set_buffer_scale (MetaShapedTexture *stex,
-                                      int                buffer_scale)
+                                      double             buffer_scale)
 {
   g_return_if_fail (META_IS_SHAPED_TEXTURE (stex));
 
@@ -1546,7 +1552,7 @@ meta_shaped_texture_set_buffer_scale (MetaShapedTexture *stex,
   invalidate_size (stex);
 }
 
-int
+double
 meta_shaped_texture_get_buffer_scale (MetaShapedTexture *stex)
 {
   g_return_val_if_fail (META_IS_SHAPED_TEXTURE (stex), 1.0);

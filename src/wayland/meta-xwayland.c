@@ -132,13 +132,35 @@ meta_xwayland_is_xwayland_surface (MetaWaylandSurface *surface)
   return wl_resource_get_client (surface->resource) == manager->client;
 }
 
-int
+static double
+get_highest_monitor_scale (void)
+{
+  MetaMonitorManager *monitor_manager;
+  double highest = 1.0;
+  GList *l;
+
+  monitor_manager = meta_monitor_manager_get ();
+  if (!monitor_manager)
+    return highest;
+
+  for (l = meta_monitor_manager_get_logical_monitors (monitor_manager);
+       l;
+       l = l->next)
+    {
+      MetaLogicalMonitor *logical_monitor = l->data;
+
+      highest = MAX (highest, meta_logical_monitor_get_scale (logical_monitor));
+    }
+
+  return highest;
+}
+
+double
 meta_xwayland_get_effective_scale (void)
 {
   static int disabled = -1;
-  MetaMonitorManager *monitor_manager;
-  float highest = 1.0f;
-  GList *l;
+  MetaBackend *backend;
+  MetaSettings *settings;
 
   if (disabled == -1)
     {
@@ -150,22 +172,25 @@ meta_xwayland_get_effective_scale (void)
     }
 
   if (disabled || !meta_is_stage_views_scaled ())
-    return 1;
+    return 1.0;
 
-  monitor_manager = meta_monitor_manager_get ();
-  if (!monitor_manager)
-    return 1;
+  backend = meta_get_backend ();
+  if (!backend)
+    return 1.0;
 
-  for (l = meta_monitor_manager_get_logical_monitors (monitor_manager);
-       l;
-       l = l->next)
+  settings = meta_backend_get_settings (backend);
+  if (!settings)
+    return 1.0;
+
+  switch (meta_settings_get_xwayland_scaling_mode (settings))
     {
-      MetaLogicalMonitor *logical_monitor = l->data;
-
-      highest = MAX (highest, meta_logical_monitor_get_scale (logical_monitor));
+    case META_XWAYLAND_SCALING_MODE_AUTOMATIC:
+      return ceil (get_highest_monitor_scale ());
+    case META_XWAYLAND_SCALING_MODE_NATIVE:
+      return get_highest_monitor_scale ();
     }
 
-  return (int) ceilf (highest);
+  g_assert_not_reached ();
 }
 
 int
@@ -175,7 +200,17 @@ meta_xwayland_get_x11_ui_scaling_factor (void)
   MetaSettings *settings = meta_backend_get_settings (backend);
 
   if (meta_is_stage_views_scaled ())
-    return meta_xwayland_get_effective_scale ();
+    {
+      switch (meta_settings_get_xwayland_scaling_mode (settings))
+        {
+        case META_XWAYLAND_SCALING_MODE_AUTOMATIC:
+          return (int) ceil (get_highest_monitor_scale ());
+        case META_XWAYLAND_SCALING_MODE_NATIVE:
+          return MAX (1, (int) floor (get_highest_monitor_scale ()));
+        }
+
+      g_assert_not_reached ();
+    }
 
   return meta_settings_get_ui_scaling_factor (settings);
 }

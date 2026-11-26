@@ -1172,13 +1172,13 @@ meta_window_actor_get_buffer_bounds (MetaScreenCastWindow *screen_cast_window,
   MetaWindowActorPrivate *priv =
     meta_window_actor_get_instance_private (window_actor);
   MetaShapedTexture *stex;
-  int buffer_scale;
+  double buffer_scale;
 
   stex = meta_surface_actor_get_texture (priv->surface);
   buffer_scale = meta_shaped_texture_get_buffer_scale (stex);
   *bounds = (MetaRectangle) {
-    .width = meta_shaped_texture_get_width (stex) * buffer_scale,
-    .height = meta_shaped_texture_get_height (stex) * buffer_scale,
+    .width = (int) round (meta_shaped_texture_get_width (stex) * buffer_scale),
+    .height = (int) round (meta_shaped_texture_get_height (stex) * buffer_scale),
   };
 }
 

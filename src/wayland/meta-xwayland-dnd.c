@@ -25,6 +25,7 @@
 #include "config.h"
 
 #include <fcntl.h>
+#include <math.h>
 #include <unistd.h>
 #include <string.h>
 #include <glib-unix.h>
@@ -314,13 +315,13 @@ xdnd_send_position (MetaXWaylandDnd *dnd,
   Display *xdisplay = x11_display->xdisplay;
   uint32_t action = 0, user_action, actions;
   XEvent xev = { 0 };
-  int scale;
+  double scale;
 
   /* XdndPosition carries root-window X coordinates, but the callers hand us
    * stage coordinates. */
   scale = meta_xwayland_get_effective_scale ();
-  x *= scale;
-  y *= scale;
+  x = (int) round (x * scale);
+  y = (int) round (y * scale);
 
   user_action = meta_wayland_data_source_get_user_action (source);
   meta_wayland_data_source_get_actions (source, &actions);

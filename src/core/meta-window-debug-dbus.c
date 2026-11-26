@@ -14,6 +14,7 @@
 #include "core/meta-window-debug-dbus.h"
 
 #include <gio/gio.h>
+#include <math.h>
 
 #include "backends/meta-logical-monitor.h"
 #include "core/window-private.h"
@@ -97,7 +98,7 @@ get_surface_scale (MetaWindow *window)
 {
 #ifdef HAVE_WAYLAND
   if (window->surface)
-    return window->surface->scale;
+    return (int) round (window->surface->scale);
 #endif
 
   return 1;

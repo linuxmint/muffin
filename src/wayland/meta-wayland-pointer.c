@@ -44,6 +44,7 @@
 #include "config.h"
 
 #include <linux/input.h>
+#include <math.h>
 #include <string.h>
 
 #include "backends/meta-backend-private.h"
@@ -1330,10 +1331,10 @@ pointer_set_cursor (struct wl_client *client,
 
       if (meta_xwayland_is_xwayland_surface (surface))
         {
-          int scale = meta_xwayland_get_effective_scale ();
+          double scale = meta_xwayland_get_effective_scale ();
 
-          hot_x = (int32_t) roundf (hot_x / (float) scale);
-          hot_y = (int32_t) roundf (hot_y / (float) scale);
+          hot_x = (int32_t) round (hot_x / scale);
+          hot_y = (int32_t) round (hot_y / scale);
         }
 
       meta_wayland_cursor_surface_set_hotspot (cursor_surface,

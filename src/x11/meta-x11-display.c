@@ -34,6 +34,7 @@
 #include "x11/meta-x11-display-private.h"
 
 #include <gdk/gdk.h>
+#include <math.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -542,10 +543,10 @@ set_desktop_geometry_hint (MetaX11Display *x11_display)
 #ifdef HAVE_WAYLAND
   if (meta_is_wayland_compositor ())
     {
-      int scale = meta_xwayland_get_effective_scale ();
+      double scale = meta_xwayland_get_effective_scale ();
 
-      monitor_width *= scale;
-      monitor_height *= scale;
+      monitor_width = (int) round (monitor_width * scale);
+      monitor_height = (int) round (monitor_height * scale);
     }
 #endif
 
@@ -1883,10 +1884,10 @@ on_monitors_changed_internal (MetaMonitorManager *monitor_manager,
 #ifdef HAVE_WAYLAND
       if (meta_is_wayland_compositor ())
         {
-          int scale = meta_xwayland_get_effective_scale ();
+          double scale = meta_xwayland_get_effective_scale ();
 
-          changes.width *= scale;
-          changes.height *= scale;
+          changes.width = (int) round (changes.width * scale);
+          changes.height = (int) round (changes.height * scale);
         }
 #endif
 

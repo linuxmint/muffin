@@ -1,4 +1,9 @@
 <schemalist>
+  <enum id="org.cinnamon.muffin.MetaXwaylandScalingMode">
+    <value nick="automatic" value="0"/>
+    <value nick="native" value="1"/>
+  </enum>
+
   <schema id="org.cinnamon.muffin.wayland.keybindings" path="/org/cinnamon/muffin/wayland/keybindings/"
 	  gettext-domain="@GETTEXT_DOMAIN@">
     <key name="switch-to-session-1" type="as">
@@ -58,6 +63,28 @@
 
   <schema id="org.cinnamon.muffin.wayland" path="/org/cinnamon/muffin/wayland/"
           gettext-domain="@GETTEXT_DOMAIN@">
+
+    <key name="xwayland-scaling-mode"
+         enum="org.cinnamon.muffin.MetaXwaylandScalingMode">
+      <default>'automatic'</default>
+      <summary>Configure how the Xwayland coordinate space is scaled</summary>
+      <description>
+        Controls how the Xwayland coordinate space (and thus the root window
+        size visible to X11 clients) is derived from the monitor configuration.
+
+        “automatic” scales the Xwayland coordinate space by the ceiling of the
+        highest monitor scale. On a monitor using a fractional scale this means
+        Xwayland renders at a higher resolution than the monitor and the result
+        is downscaled by the compositor.
+
+        “native” makes the Xwayland coordinate space match the physical
+        resolution of the monitor. X11 content is then presented 1:1 and is not
+        rendered at a higher resolution than necessary, at the cost of X11 user
+        interfaces appearing smaller on fractional scales. This only has an
+        effect in the logical monitor layout mode; the physical layout mode
+        always behaves this way.
+      </description>
+    </key>
 
     <key name="xwayland-allow-grabs" type="b">
       <default>false</default>
