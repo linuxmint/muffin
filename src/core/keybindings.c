@@ -2345,6 +2345,62 @@ process_iso_next_group (MetaDisplay *display,
 }
 
 static gboolean
+is_super_only_binding (MetaDisplay     *display,
+                       ClutterKeyEvent *event)
+{
+  MetaKeyBindingManager *keys = &display->key_binding_manager;
+  xkb_keycode_t keycode = (xkb_keycode_t) event->hardware_keycode;
+  MetaResolvedKeyCombo resolved_combo = { &keycode, 1 };
+
+  if (event->keyval != CLUTTER_KEY_Super_L &&
+      event->keyval != CLUTTER_KEY_Super_R)
+    return FALSE;
+
+  resolved_combo.mask = mask_from_event_params (keys, event->modifier_state);
+  strip_self_mod (event->keyval, resolved_combo.mask, &resolved_combo.mask);
+
+  return get_keybinding (keys, &resolved_combo) != NULL;
+}
+
+/* While moving a window with the mouse all keys are grabbed, so the
+ * modifier-only bindings are never looked at. If Super is pressed and
+ * released on its own and has a binding (such as Cinnamon's menu key),
+ * end the move, leaving the window where it is, and let the binding run,
+ * as the grab would otherwise prevent the shell from taking its own grab
+ * to open the menu.
+ */
+static gboolean
+process_mouse_move_super_only (MetaDisplay     *display,
+                               MetaWindow      *window,
+                               ClutterKeyEvent *event)
+{
+  if (!modifier_only_keyval (event->keyval))
+    {
+      if (event->type == CLUTTER_KEY_PRESS)
+        modifier_key_only_pressed = FALSE;
+      return FALSE;
+    }
+
+  if (event->type == CLUTTER_KEY_PRESS)
+    {
+      modifier_key_only_pressed = TRUE;
+      return FALSE;
+    }
+
+  if (!modifier_key_only_pressed)
+    return FALSE;
+
+  modifier_key_only_pressed = FALSE;
+
+  if (!is_super_only_binding (display, event))
+    return FALSE;
+
+  meta_display_end_grab_op (display, event->time);
+
+  return process_event (display, window, event, TRUE, FALSE);
+}
+
+static gboolean
 process_key_event (MetaDisplay     *display,
                    MetaWindow      *window,
                    ClutterKeyEvent *event)
@@ -2386,6 +2442,11 @@ process_key_event (MetaDisplay     *display,
        * we're in some special keyboard mode such as window move
        * mode.
        */
+      if (window == display->grab_window &&
+          display->grab_op == META_GRAB_OP_MOVING &&
+          process_mouse_move_super_only (display, window, event))
+        return TRUE;
+
       if (window == display->grab_window)
         {
           if (display->grab_op & META_GRAB_OP_WINDOW_FLAG_KEYBOARD)
