@@ -12,6 +12,12 @@
     <value value="3" nick="center"/>
   </enum>
 
+  <enum id="auto_rotate">
+    <value value="0" nick="disabled"/>
+    <value value="1" nick="enabled"/>
+    <value value="2" nick="tablet-mode"/>
+  </enum>
+
   <schema id="org.cinnamon.muffin" path="/org/cinnamon/muffin/"
           gettext-domain="@GETTEXT_DOMAIN@">
 
@@ -227,6 +233,21 @@
       <summary>Brings windows requiring attention to the current workspace</summary>
       <description>
         When enabled, if a window requires attention, it is brought to the current workspace.
+      </description>
+    </key>
+
+    <key name="auto-rotate" enum="auto_rotate">
+      <default>'disabled'</default>
+      <summary>Automatic screen rotation</summary>
+      <description>
+        Whether the built-in panel follows the accelerometer.
+
+        "disabled" - never rotate automatically.
+        "enabled" - always follow the accelerometer.
+        "tablet-mode" - follow the accelerometer only in tablet mode, and keep
+        the panel in its normal orientation in laptop mode. Tablet mode comes
+        from the tablet-mode switch; when there is no switch Muffin can read,
+        a device with a touchscreen rotates as with "enabled".
       </description>
     </key>
 

@@ -33,10 +33,22 @@ typedef enum
   META_ORIENTATION_RIGHT_UP
 } MetaOrientation;
 
+/* Values of the org.cinnamon.muffin auto-rotate key. */
+typedef enum
+{
+  META_AUTO_ROTATE_DISABLED,
+  META_AUTO_ROTATE_ENABLED,
+  META_AUTO_ROTATE_TABLET_MODE
+} MetaAutoRotate;
+
 #define META_TYPE_ORIENTATION_MANAGER (meta_orientation_manager_get_type ())
 G_DECLARE_FINAL_TYPE (MetaOrientationManager, meta_orientation_manager,
                       META, ORIENTATION_MANAGER, GObject)
 
 MetaOrientation meta_orientation_manager_get_orientation (MetaOrientationManager *self);
+
+MetaAutoRotate meta_orientation_manager_get_auto_rotate (MetaOrientationManager *self);
+
+gboolean meta_orientation_manager_has_accelerometer (MetaOrientationManager *self);
 
 #endif  /* META_ORIENTATION_MANAGER_H */

@@ -1,0 +1,16 @@
+# Let the active-session user read the tablet-mode switch (SW_TABLET_MODE) so
+# that muffin can tell laptop mode from tablet mode on X11.
+#
+# Only input devices whose "sw" capability bitmap has SW_TABLET_MODE (bit 1) set
+# are tagged, and real keyboards (ID_INPUT_KEYBOARD) are never included. The
+# bitmap is printed in hex; bit 1 is set when its last hex digit is one of
+# 2, 3, 6, 7, a, b, e or f.
+#
+# Numbered 70- so that it sorts before 71-seat.rules / 73-seat-late.rules,
+# which apply the uaccess ACL.
+ACTION=="remove", GOTO="muffin_tablet_mode_end"
+SUBSYSTEM!="input", GOTO="muffin_tablet_mode_end"
+KERNEL!="event*", GOTO="muffin_tablet_mode_end"
+ENV{ID_INPUT_KEYBOARD}=="1", GOTO="muffin_tablet_mode_end"
+ATTRS{capabilities/sw}=="*[2367abefABEF]", TAG+="uaccess"
+LABEL="muffin_tablet_mode_end"
