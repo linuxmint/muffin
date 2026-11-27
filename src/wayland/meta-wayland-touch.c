@@ -232,7 +232,7 @@ meta_wayland_touch_update (MetaWaylandTouch   *touch,
       if (META_IS_SURFACE_ACTOR_WAYLAND (actor))
         surface = meta_surface_actor_wayland_get_surface (META_SURFACE_ACTOR_WAYLAND (actor));
 
-      if (!surface)
+      if (!surface || !surface->resource)
         return;
 
       touch_info = touch_get_info (touch, sequence, TRUE);

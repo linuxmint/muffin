@@ -157,7 +157,11 @@ static void
 meta_window_wayland_kill (MetaWindow *window)
 {
   MetaWaylandSurface *surface = window->surface;
-  struct wl_resource *resource = surface->resource;
+  struct wl_resource *resource;
+
+  resource = surface->resource;
+  if (!resource)
+    return;
 
   /* Send the client an unrecoverable error to kill the client. */
   wl_resource_post_error (resource,

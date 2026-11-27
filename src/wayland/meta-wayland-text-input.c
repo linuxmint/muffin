@@ -428,7 +428,7 @@ meta_wayland_text_input_set_focus (MetaWaylandTextInput *text_input,
       text_input->surface = NULL;
     }
 
-  if (surface)
+  if (surface && surface->resource)
     {
       struct wl_resource *focus_surface_resource;
 
