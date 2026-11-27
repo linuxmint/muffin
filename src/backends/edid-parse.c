@@ -256,7 +256,7 @@ static int
 decode_color_characteristics (const uchar *edid, MonitorInfo *info)
 {
   info->red_x = decode_fraction (edid[0x1b], get_bits (edid[0x19], 6, 7));
-  info->red_y = decode_fraction (edid[0x1c], get_bits (edid[0x19], 5, 4));
+  info->red_y = decode_fraction (edid[0x1c], get_bits (edid[0x19], 4, 5));
   info->green_x = decode_fraction (edid[0x1d], get_bits (edid[0x19], 2, 3));
   info->green_y = decode_fraction (edid[0x1e], get_bits (edid[0x19], 0, 1));
   info->blue_x = decode_fraction (edid[0x1f], get_bits (edid[0x1a], 6, 7));
