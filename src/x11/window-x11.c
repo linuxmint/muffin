@@ -25,6 +25,7 @@
 #include "x11/window-x11.h"
 #include "x11/window-x11-private.h"
 
+#include <math.h>
 #include <string.h>
 #include <X11/Xatom.h>
 #include <X11/Xlibint.h>
@@ -2327,9 +2328,9 @@ scale_region_to_stage (cairo_region_t *region)
 #ifdef HAVE_WAYLAND
   if (meta_is_wayland_compositor ())
     {
-      int scale = meta_xwayland_get_effective_scale ();
+      double scale = meta_xwayland_get_effective_scale ();
 
-      if (scale != 1)
+      if (scale != 1.0)
         {
           cairo_region_t *scaled;
 

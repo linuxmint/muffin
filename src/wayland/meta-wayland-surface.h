@@ -162,7 +162,7 @@ struct _MetaWaylandSurface
   MetaWaylandSurfaceRole *role;
   cairo_region_t *input_region;
   cairo_region_t *opaque_region;
-  int scale;
+  double scale;
   int32_t offset_x, offset_y;
   GNode *subsurface_branch_node;
   GNode *subsurface_leaf_node;

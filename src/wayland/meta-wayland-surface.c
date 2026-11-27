@@ -365,14 +365,15 @@ surface_process_damage (MetaWaylandSurface *surface,
 
   /* The damage region must be in the same coordinate space as the buffer,
    * i.e. scaled with surface->scale. */
-  scaled_region = meta_region_scale (surface_region, surface->scale);
+  scaled_region = meta_region_scale_double (surface_region, surface->scale,
+                                            META_ROUNDING_STRATEGY_GROW);
   if (surface->viewport.has_src_rect)
     {
       src_rect = (graphene_rect_t) {
-        .origin.x = surface->viewport.src_rect.origin.x * surface->scale,
-        .origin.y = surface->viewport.src_rect.origin.y * surface->scale,
-        .size.width = surface->viewport.src_rect.size.width * surface->scale,
-        .size.height = surface->viewport.src_rect.size.height * surface->scale
+        .origin.x = (float) (surface->viewport.src_rect.origin.x * surface->scale),
+        .origin.y = (float) (surface->viewport.src_rect.origin.y * surface->scale),
+        .size.width = (float) (surface->viewport.src_rect.size.width * surface->scale),
+        .size.height = (float) (surface->viewport.src_rect.size.height * surface->scale)
       };
     }
   else
@@ -393,17 +394,17 @@ surface_process_damage (MetaWaylandSurface *surface,
       else
         {
           src_rect = (graphene_rect_t) {
-            .size.width = surface_rect.width * surface->scale,
-            .size.height = surface_rect.height * surface->scale,
+            .size.width = (float) (surface_rect.width * surface->scale),
+            .size.height = (float) (surface_rect.height * surface->scale),
           };
         }
     }
   viewport_region = meta_region_crop_and_scale (scaled_region,
                                                 &src_rect,
-                                                surface_rect.width *
-                                                surface->scale,
-                                                surface_rect.height *
-                                                surface->scale);
+                                                (int) round (surface_rect.width *
+                                                             surface->scale),
+                                                (int) round (surface_rect.height *
+                                                             surface->scale));
   transformed_region = meta_region_transform (viewport_region,
                                               surface->buffer_transform,
                                               buffer_rect.width,
@@ -1644,7 +1645,7 @@ meta_wayland_surface_create (MetaWaylandCompositor *compositor,
   int surface_version;
 
   surface->compositor = compositor;
-  surface->scale = 1;
+  surface->scale = 1.0;
 
   surface_version = wl_resource_get_version (compositor_resource);
   surface->resource = wl_resource_create (client,
@@ -2219,10 +2220,10 @@ meta_wayland_surface_calculate_input_region (MetaWaylandSurface *surface)
    * protocol pixels, so the bounds have to match it rather than the stage. */
   if (meta_xwayland_is_xwayland_surface (surface))
     {
-      int scale = meta_xwayland_get_effective_scale ();
+      double scale = meta_xwayland_get_effective_scale ();
 
-      width *= scale;
-      height *= scale;
+      width = (int) round (width * scale);
+      height = (int) round (height * scale);
     }
 
   buffer_rect = (cairo_rectangle_int_t) {
@@ -2304,7 +2305,7 @@ meta_wayland_surface_get_width (MetaWaylandSurface *surface)
       else
         width = get_buffer_width (surface);
 
-      return width / surface->scale;
+      return (int) round (width / surface->scale);
     }
 }
 
@@ -2328,7 +2329,7 @@ meta_wayland_surface_get_height (MetaWaylandSurface *surface)
       else
         height = get_buffer_height (surface);
 
-      return height / surface->scale;
+      return (int) round (height / surface->scale);
     }
 }
 

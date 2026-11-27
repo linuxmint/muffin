@@ -21,6 +21,8 @@
 
 #include "config.h"
 
+#include <math.h>
+
 #include "wayland/meta-xwayland-surface.h"
 
 #include "compositor/meta-surface-actor-wayland.h"
@@ -197,15 +199,15 @@ meta_xwayland_surface_get_relative_coordinates (MetaWaylandSurfaceRole *surface_
 {
   MetaXwaylandSurface *xwayland_surface = META_XWAYLAND_SURFACE (surface_role);
   MetaRectangle window_rect = { 0 };
-  int scale = meta_xwayland_get_effective_scale ();
+  double scale = meta_xwayland_get_effective_scale ();
 
   if (xwayland_surface->window)
     meta_window_get_buffer_rect (xwayland_surface->window, &window_rect);
 
   /* Xwayland never set the buffer scale the compositor forces on it, so it
    * reads surface-local coordinates as X protocol pixels. */
-  *out_sx = (abs_x - window_rect.x) * scale;
-  *out_sy = (abs_y - window_rect.y) * scale;
+  *out_sx = (float) ((abs_x - window_rect.x) * scale);
+  *out_sy = (float) ((abs_y - window_rect.y) * scale);
 }
 
 static void
@@ -217,13 +219,13 @@ meta_xwayland_surface_get_absolute_coordinates (MetaWaylandSurfaceRole *surface_
 {
   MetaXwaylandSurface *xwayland_surface = META_XWAYLAND_SURFACE (surface_role);
   MetaRectangle window_rect = { 0 };
-  int scale = meta_xwayland_get_effective_scale ();
+  double scale = meta_xwayland_get_effective_scale ();
 
   if (xwayland_surface->window)
     meta_window_get_buffer_rect (xwayland_surface->window, &window_rect);
 
-  *out_x = window_rect.x + (sx / scale);
-  *out_y = window_rect.y + (sy / scale);
+  *out_x = (float) (window_rect.x + (sx / scale));
+  *out_y = (float) (window_rect.y + (sy / scale));
 }
 
 static MetaWaylandSurface *

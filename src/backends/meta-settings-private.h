@@ -44,6 +44,12 @@ typedef enum _MetaX11ScaleMode
   META_X11_SCALE_MODE_UI_DOWN = 2,
 } MetaX11ScaleMode;
 
+typedef enum _MetaXwaylandScalingMode
+{
+  META_XWAYLAND_SCALING_MODE_AUTOMATIC,
+  META_XWAYLAND_SCALING_MODE_NATIVE,
+} MetaXwaylandScalingMode;
+
 #define META_TYPE_SETTINGS (meta_settings_get_type ())
 G_DECLARE_FINAL_TYPE (MetaSettings, meta_settings,
                       META, SETTINGS, GObject)
@@ -82,6 +88,8 @@ void meta_settings_get_xwayland_grab_patterns (MetaSettings  *settings,
 gboolean meta_settings_are_xwayland_grabs_allowed (MetaSettings *settings);
 
 gboolean meta_settings_are_xwayland_byte_swapped_clients_allowed (MetaSettings *settings);
+
+MetaXwaylandScalingMode meta_settings_get_xwayland_scaling_mode (MetaSettings *settings);
 
 MetaX11ScaleMode meta_settings_get_x11_scale_mode (MetaSettings *settings);
 

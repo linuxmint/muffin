@@ -42,6 +42,7 @@ enum
   FONT_DPI_CHANGED,
   X11_SCALE_MODE_CHANGED,
   EXPERIMENTAL_FEATURES_CHANGED,
+  XWAYLAND_SCALING_MODE_CHANGED,
 
   N_SIGNALS
 };
@@ -73,6 +74,8 @@ struct _MetaSettings
   GPtrArray *xwayland_grab_blacklist_patterns;
 
   MetaX11ScaleMode x11_scale_mode;
+
+  MetaXwaylandScalingMode xwayland_scaling_mode;
 
   /* Whether Xwayland should allow X11 clients from different endianess */
   gboolean xwayland_allow_byte_swapped_clients;
@@ -527,6 +530,14 @@ update_xwayland_allow_byte_swapped_clients (MetaSettings *settings)
 }
 
 static void
+update_xwayland_scaling_mode (MetaSettings *settings)
+{
+  settings->xwayland_scaling_mode =
+    g_settings_get_enum (settings->wayland_settings,
+                         "xwayland-scaling-mode");
+}
+
+static void
 wayland_settings_changed (GSettings    *wayland_settings,
                           gchar        *key,
                           MetaSettings *settings)
@@ -543,6 +554,11 @@ wayland_settings_changed (GSettings    *wayland_settings,
   else if (g_str_equal (key, "xwayland-allow-byte-swapped-clients"))
     {
       update_xwayland_allow_byte_swapped_clients (settings);
+    }
+  else if (g_str_equal (key, "xwayland-scaling-mode"))
+    {
+      update_xwayland_scaling_mode (settings);
+      g_signal_emit (settings, signals[XWAYLAND_SCALING_MODE_CHANGED], 0);
     }
 }
 
@@ -577,6 +593,12 @@ gboolean
 meta_settings_are_xwayland_byte_swapped_clients_allowed (MetaSettings *settings)
 {
   return settings->xwayland_allow_byte_swapped_clients;
+}
+
+MetaXwaylandScalingMode
+meta_settings_get_xwayland_scaling_mode (MetaSettings *settings)
+{
+  return settings->xwayland_scaling_mode;
 }
 
 MetaX11ScaleMode
@@ -644,6 +666,7 @@ meta_settings_init (MetaSettings *settings)
   update_experimental_features (settings);
   update_xwayland_grab_access_rules (settings);
   update_xwayland_allow_grabs (settings);
+  update_xwayland_scaling_mode (settings);
 }
 
 static void
@@ -713,4 +736,12 @@ meta_settings_class_init (MetaSettingsClass *klass)
                   0,
                   NULL, NULL, NULL,
                   G_TYPE_NONE, 1, G_TYPE_UINT);
+
+  signals[XWAYLAND_SCALING_MODE_CHANGED] =
+    g_signal_new ("xwayland-scaling-mode-changed",
+                  G_TYPE_FROM_CLASS (object_class),
+                  G_SIGNAL_RUN_LAST,
+                  0,
+                  NULL, NULL, NULL,
+                  G_TYPE_NONE, 0);
 }

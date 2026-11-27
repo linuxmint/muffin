@@ -42,7 +42,7 @@ meta_xwayland_handle_wl_surface_id (MetaWindow *window,
 gboolean
 meta_xwayland_is_xwayland_surface (MetaWaylandSurface *surface);
 
-int
+double
 meta_xwayland_get_effective_scale (void);
 
 int

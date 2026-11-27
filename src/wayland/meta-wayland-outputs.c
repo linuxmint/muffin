@@ -26,6 +26,7 @@
 
 #include "wayland/meta-wayland-outputs.h"
 
+#include <math.h>
 #include <string.h>
 
 #include "backends/meta-logical-monitor.h"
@@ -91,14 +92,14 @@ maybe_scale_for_xwayland (struct wl_resource *resource,
                           int                *a,
                           int                *b)
 {
-  int scale;
+  double scale;
 
   if (!is_xwayland_resource (resource))
     return;
 
   scale = meta_xwayland_get_effective_scale ();
-  *a *= scale;
-  *b *= scale;
+  *a = (int) round (*a * scale);
+  *b = (int) round (*b * scale);
 }
 
 static void
@@ -343,13 +344,27 @@ send_output_events (struct wl_resource *resource,
 
   if (version >= WL_OUTPUT_SCALE_SINCE_VERSION)
     {
-      int scale;
+      int new_scale;
+      int prev_scale;
 
-      scale = calculate_wayland_output_scale (logical_monitor);
-      if (need_all_events ||
-          old_scale != scale)
+      if (is_xwayland_resource (resource))
         {
-          wl_output_send_scale (resource, scale);
+          /* Xwayland is only ever a 1x client: the coordinate space it uses is
+           * already scaled. This means we must never tell it a scale larger
+           * than 1, otherwise it would apply the scale twice. */
+          new_scale =
+            MAX (1, (int) floor (meta_xwayland_get_effective_scale ()));
+          prev_scale = wayland_output->xwayland_wl_scale;
+        }
+      else
+        {
+          new_scale = calculate_wayland_output_scale (logical_monitor);
+          prev_scale = old_scale;
+        }
+
+      if (need_all_events || prev_scale != new_scale)
+        {
+          wl_output_send_scale (resource, new_scale);
           need_done = TRUE;
         }
     }
@@ -452,6 +467,8 @@ meta_wayland_output_set_logical_monitor (MetaWaylandOutput  *wayland_output,
     wayland_output->mode_flags |= WL_OUTPUT_MODE_PREFERRED;
   wayland_output->scale = calculate_wayland_output_scale (logical_monitor);
   wayland_output->xwayland_scale = meta_xwayland_get_effective_scale ();
+  wayland_output->xwayland_wl_scale =
+    MAX (1, (int) floor (wayland_output->xwayland_scale));
   wayland_output->refresh_rate = meta_monitor_mode_get_refresh_rate (current_mode);
 
   wayland_output->winsys_id = logical_monitor->winsys_id;
@@ -652,7 +669,7 @@ static void
 on_monitors_changed (MetaMonitorManager    *monitors,
                      MetaWaylandCompositor *compositor)
 {
-  int xwayland_scale;
+  double xwayland_scale;
   GList *l;
 
   compositor->outputs = meta_wayland_compositor_update_outputs (compositor, monitors);

@@ -65,29 +65,29 @@ meta_window_xwayland_init (MetaWindowXwayland *window_xwayland)
 
 static int
 scale_and_handle_overflow (int                  input,
-                           float                scale,
+                           double               scale,
                            MetaRoundingStrategy rounding_strategy)
 {
-  float value;
+  double value;
 
   switch (rounding_strategy)
     {
     case META_ROUNDING_STRATEGY_SHRINK:
-      value = floorf (input * scale);
+      value = floor (input * scale);
       break;
     case META_ROUNDING_STRATEGY_GROW:
-      value = ceilf (input * scale);
+      value = ceil (input * scale);
       break;
     case META_ROUNDING_STRATEGY_ROUND:
-      value = roundf (input * scale);
+      value = round (input * scale);
       break;
     default:
       g_return_val_if_reached (0);
     }
 
-  if (value >= (float) INT_MAX)
+  if (value >= (double) INT_MAX)
     return INT_MAX;
-  else if (value <= (float) INT_MIN)
+  else if (value <= (double) INT_MIN)
     return INT_MIN;
 
   return (int) value;
@@ -98,7 +98,7 @@ scale_and_handle_overflow (int                  input,
  * viewport, so its buffer no longer maps to the window one-to-one and the
  * emulated ratio has to come back out of the scale.
  */
-static float
+static double
 get_viewport_scale_x (MetaWaylandSurface *surface)
 {
   int buffer_width, buffer_height;
@@ -106,12 +106,12 @@ get_viewport_scale_x (MetaWaylandSurface *surface)
   meta_wayland_surface_get_buffer_size (surface, &buffer_width, &buffer_height);
 
   if (buffer_width <= 0 || surface->viewport.dst_width <= 0)
-    return 1.0f;
+    return 1.0;
 
-  return (float) buffer_width / surface->viewport.dst_width;
+  return (double) buffer_width / surface->viewport.dst_width;
 }
 
-static float
+static double
 get_viewport_scale_y (MetaWaylandSurface *surface)
 {
   int buffer_width, buffer_height;
@@ -119,9 +119,9 @@ get_viewport_scale_y (MetaWaylandSurface *surface)
   meta_wayland_surface_get_buffer_size (surface, &buffer_width, &buffer_height);
 
   if (buffer_height <= 0 || surface->viewport.dst_height <= 0)
-    return 1.0f;
+    return 1.0;
 
-  return (float) buffer_height / surface->viewport.dst_height;
+  return (double) buffer_height / surface->viewport.dst_height;
 }
 
 static void
@@ -132,7 +132,7 @@ meta_window_xwayland_stage_to_protocol_point (MetaWindow           *window,
                                               int                  *protocol_y,
                                               MetaRoundingStrategy  rounding_strategy)
 {
-  float scale = meta_xwayland_get_effective_scale ();
+  double scale = meta_xwayland_get_effective_scale ();
 
   if (protocol_x)
     *protocol_x = scale_and_handle_overflow (stage_x, scale, rounding_strategy);
@@ -148,7 +148,7 @@ meta_window_xwayland_stage_to_protocol_size (MetaWindow *window,
                                              int        *protocol_h)
 {
   MetaWaylandSurface *surface = window->surface;
-  float scale_w, scale_h;
+  double scale_w, scale_h;
 
   scale_w = scale_h = meta_xwayland_get_effective_scale ();
 
@@ -174,7 +174,7 @@ meta_window_xwayland_protocol_to_stage_point (MetaWindow           *window,
                                               int                  *stage_y,
                                               MetaRoundingStrategy  rounding_strategy)
 {
-  float scale = 1.0f / meta_xwayland_get_effective_scale ();
+  double scale = 1.0 / meta_xwayland_get_effective_scale ();
 
   if (stage_x)
     *stage_x = scale_and_handle_overflow (protocol_x, scale, rounding_strategy);
@@ -190,9 +190,9 @@ meta_window_xwayland_protocol_to_stage_size (MetaWindow *window,
                                              int        *stage_h)
 {
   MetaWaylandSurface *surface = window->surface;
-  float scale_w, scale_h;
+  double scale_w, scale_h;
 
-  scale_w = scale_h = 1.0f / meta_xwayland_get_effective_scale ();
+  scale_w = scale_h = 1.0 / meta_xwayland_get_effective_scale ();
 
   if (surface && surface->viewport.has_dst_size)
     {

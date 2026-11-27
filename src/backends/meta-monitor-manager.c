@@ -1079,6 +1079,11 @@ meta_monitor_manager_constructed (GObject *object)
                       G_CALLBACK (experimental_features_changed),
                       manager);
 
+  g_signal_connect_object (settings,
+                           "xwayland-scaling-mode-changed",
+                           G_CALLBACK (meta_monitor_manager_on_hotplug),
+                           manager, G_CONNECT_SWAPPED);
+
   monitor_manager_setup_dbus_config_handlers (manager);
 
   g_signal_connect_object (manager->display_config, "notify::power-save-mode",
