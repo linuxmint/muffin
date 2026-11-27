@@ -183,8 +183,11 @@ endif
 
 have_native_backend = get_option('native_backend')
 
+have_drm_mode_close_fb = false
 if have_native_backend
   libdrm_dep = dependency('libdrm')
+  have_drm_mode_close_fb = cc.has_function('drmModeCloseFB',
+                                           dependencies: libdrm_dep)
   libgbm_dep = dependency('gbm', version: gbm_req)
   libinput_dep = dependency('libinput', version: libinput_req)
 
@@ -360,6 +363,7 @@ cdata.set_quoted('PACKAGE_VERSION', meson.project_version())
 cdata.set('HAVE_EGL', have_egl)
 cdata.set('HAVE_WAYLAND', have_wayland)
 cdata.set('HAVE_NATIVE_BACKEND', have_native_backend)
+cdata.set('HAVE_DRM_MODE_CLOSE_FB', have_drm_mode_close_fb)
 cdata.set('HAVE_REMOTE_DESKTOP', have_remote_desktop)
 cdata.set('HAVE_EGL_DEVICE', have_egl_device)
 cdata.set('HAVE_WAYLAND_EGLSTREAM', have_wayland_eglstream)
