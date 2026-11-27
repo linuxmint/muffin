@@ -380,7 +380,7 @@ meta_workspace_add_window (MetaWorkspace *workspace,
   COGL_TRACE_BEGIN_SCOPED (MetaWorkspaceAddWindow,
                            "Workspace (add window)");
 
-  g_assert (g_list_find (workspace->mru_list, window) == NULL);
+  g_return_if_fail (g_list_find (workspace->mru_list, window) == NULL);
   workspace->mru_list = g_list_prepend (workspace->mru_list, window);
 
   workspace->windows = g_list_prepend (workspace->windows, window);
