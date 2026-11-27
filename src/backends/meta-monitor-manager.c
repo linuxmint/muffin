@@ -3852,3 +3852,43 @@ meta_monitor_manager_get_current_rotation (MetaMonitorManager *manager,
 
   return FALSE;
 }
+
+/**
+ * meta_monitor_manager_get_monitor_rotation:
+ * @manager: A #MetaMonitorManager object
+ * @monitor: the monitor number
+ * @rotation: (out): The current #MetaXrandrRotation applied to @monitor.
+ *
+ * Gets the rotation of any monitor, where
+ * meta_monitor_manager_get_current_rotation() only looks at the laptop
+ * panel.
+ *
+ * Returns %TRUE if @monitor exists and its transform is a plain rotation,
+ * otherwise %FALSE
+ */
+gboolean
+meta_monitor_manager_get_monitor_rotation (MetaMonitorManager *manager,
+                                           int                 monitor,
+                                           MetaXrandrRotation *rotation)
+{
+  MetaLogicalMonitor *logical_monitor;
+  MetaMonitorTransform transform;
+
+  *rotation = META_XRANDR_ROTATION_NORMAL;
+
+  if (monitor < 0 ||
+      monitor >= meta_monitor_manager_get_num_logical_monitors (manager))
+    return FALSE;
+
+  logical_monitor =
+    meta_monitor_manager_get_logical_monitor_from_number (manager, monitor);
+  transform = meta_logical_monitor_get_transform (logical_monitor);
+
+  /* A mirrored transform has no MetaXrandrRotation. */
+  if (transform > META_MONITOR_TRANSFORM_270)
+    return FALSE;
+
+  *rotation = monitor_transform_to_xrandr_rotation (transform);
+
+  return TRUE;
+}

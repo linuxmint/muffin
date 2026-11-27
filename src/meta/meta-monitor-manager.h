@@ -78,4 +78,9 @@ gboolean meta_monitor_manager_apply_temporary_rotation (MetaMonitorManager *mana
 
 META_EXPORT
 gboolean meta_monitor_manager_get_current_rotation (MetaMonitorManager *manager, MetaXrandrRotation *rotation);
+
+META_EXPORT
+gboolean meta_monitor_manager_get_monitor_rotation (MetaMonitorManager *manager,
+                                                    int                 monitor,
+                                                    MetaXrandrRotation *rotation);
 #endif /* META_MONITOR_MANAGER_H */
