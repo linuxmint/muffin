@@ -31,6 +31,7 @@
 #include "core/keybindings-private.h"
 #include "meta/meta-x11-errors.h"
 #include "x11/meta-x11-display-private.h"
+#include "x11/window-x11.h"
 
 #define EVENT_MASK (SubstructureRedirectMask |                     \
                     StructureNotifyMask | SubstructureNotifyMask | \
@@ -164,7 +165,6 @@ void
 meta_window_destroy_frame (MetaWindow *window)
 {
   MetaFrame *frame;
-  MetaFrameBorders borders;
   MetaX11Display *x11_display;
 
   if (window->frame == NULL)
@@ -175,8 +175,6 @@ meta_window_destroy_frame (MetaWindow *window)
   meta_verbose ("Unframing window %s\n", window->desc);
 
   frame = window->frame;
-
-  meta_frame_calc_borders (frame, &borders);
 
   /* Unparent the client window; it may be destroyed,
    * thus the error trap.
@@ -195,9 +193,17 @@ meta_window_destroy_frame (MetaWindow *window)
 
   if (!x11_display->closing)
     {
+      int child_x, child_y;
+
       meta_stack_tracker_record_add (window->display->stack_tracker,
                                      window->xwindow,
                                      XNextRequest (x11_display->xdisplay));
+
+      meta_window_x11_get_unframed_position (window, &child_x, &child_y);
+      meta_window_stage_to_protocol_point (window,
+                                           child_x, child_y,
+                                           &child_x, &child_y,
+                                           META_ROUNDING_STRATEGY_ROUND);
 
       XReparentWindow (x11_display->xdisplay,
                        window->xwindow,
@@ -206,8 +212,7 @@ meta_window_destroy_frame (MetaWindow *window)
                         * coordinates here means we'll need to ensure a configure
                         * notify event is sent; see bug 399552.
                         */
-                       window->frame->rect.x + borders.invisible.left,
-                       window->frame->rect.y + borders.invisible.top);
+                       child_x, child_y);
       window->reparents_pending += 1;
     }
 

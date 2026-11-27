@@ -232,15 +232,9 @@ send_configure_notify (MetaWindow *window)
     {
       if (window->withdrawn)
         {
-          MetaFrameBorders borders;
-          /* We reparent the client window and put it to the position
-           * where the visible top-left of the frame window currently is.
-           */
-
-          meta_frame_calc_borders (window->frame, &borders);
-
-          event.xconfigure.x = window->frame->rect.x + borders.invisible.left;
-          event.xconfigure.y = window->frame->rect.y + borders.invisible.top;
+          meta_window_x11_get_unframed_position (window,
+                                                 &event.xconfigure.x,
+                                                 &event.xconfigure.y);
         }
       else
         {
@@ -396,6 +390,42 @@ adjust_for_gravity (MetaWindow        *window,
   /* Adjust to get the top-left corner of the inner window. */
   rect->x += child_x;
   rect->y += child_y;
+}
+
+/* Where the client window has to be left when its frame goes away, so that
+ * adjust_for_gravity() puts it back where it is now if it gets mapped again
+ * from there.
+ */
+void
+meta_window_x11_get_unframed_position (MetaWindow *window,
+                                       int        *x,
+                                       int        *y)
+{
+  MetaWindowX11 *window_x11 = META_WINDOW_X11 (window);
+  MetaWindowX11Private *priv = meta_window_x11_get_instance_private (window_x11);
+  MetaFrameBorders borders;
+  MetaRectangle current, remapped;
+
+  /* A window that stays managed keeps its frame rect, and is moved there. */
+  if (!window->unmanaging)
+    {
+      *x = window->rect.x;
+      *y = window->rect.y;
+      return;
+    }
+
+  meta_frame_calc_borders (window->frame, &borders);
+
+  current.x = window->rect.x + borders.visible.left;
+  current.y = window->rect.y + borders.visible.top;
+  current.width = priv->client_rect.width;
+  current.height = priv->client_rect.height;
+
+  remapped = current;
+  adjust_for_gravity (window, TRUE, window->size_hints.win_gravity, &remapped);
+
+  *x = current.x - (remapped.x - current.x);
+  *y = current.y - (remapped.y - current.y);
 }
 
 static void
