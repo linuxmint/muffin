@@ -435,6 +435,22 @@ wl_subsurface_set_sync (struct wl_client   *client,
   surface->sub.synchronous = TRUE;
 }
 
+/* Descendants that were only synchronized through @surface stop caching
+ * too, so their cached state has to be applied along with it. */
+static void
+apply_cached_state_recursively (MetaWaylandSurface *surface)
+{
+  MetaWaylandSurface *subsurface_surface;
+
+  meta_wayland_surface_apply_cached_state (surface);
+
+  META_WAYLAND_SURFACE_FOREACH_SUBSURFACE (surface, subsurface_surface)
+    {
+      if (!subsurface_surface->sub.synchronous)
+        apply_cached_state_recursively (subsurface_surface);
+    }
+}
+
 static void
 wl_subsurface_set_desync (struct wl_client   *client,
                           struct wl_resource *resource)
@@ -447,7 +463,7 @@ wl_subsurface_set_desync (struct wl_client   *client,
 
   if (was_effectively_synchronized &&
       !is_surface_effectively_synchronized (surface))
-    meta_wayland_surface_apply_cached_state (surface);
+    apply_cached_state_recursively (surface);
 }
 
 static const struct wl_subsurface_interface meta_wayland_wl_subsurface_interface = {
