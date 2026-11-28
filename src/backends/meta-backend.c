@@ -1305,9 +1305,18 @@ update_last_device (MetaBackend *backend)
   switch (device_type)
     {
     case CLUTTER_KEYBOARD_DEVICE:
+    case CLUTTER_PAD_DEVICE:
       break;
     case CLUTTER_TOUCHSCREEN_DEVICE:
       meta_cursor_tracker_set_pointer_visible (cursor_tracker, FALSE);
+      break;
+    case CLUTTER_TABLET_DEVICE:
+    case CLUTTER_PEN_DEVICE:
+    case CLUTTER_ERASER_DEVICE:
+    case CLUTTER_CURSOR_DEVICE:
+      /* Tablet tools draw their own cursor on Wayland */
+      if (meta_is_wayland_compositor ())
+        meta_cursor_tracker_set_pointer_visible (cursor_tracker, FALSE);
       break;
     default:
       meta_cursor_tracker_set_pointer_visible (cursor_tracker, TRUE);
